@@ -1,0 +1,30 @@
+#! /usr/bin/env python 
+'''
+control_processor.py: Parent class of control-rate processors 
+
+Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+'''
+
+class ControlProcessor (object): 
+	def __init__(self, inlets, outlets):
+		self.inlets = [None] * inlets
+		self.outlets = [None] * outlets 
+		self.connections = [[]] * outlets 
+
+	def connect(self, outlet, target, inlet):
+		existing = self.connections[outlet]
+		if (target,inlet) not in existing:
+			existing.append((target,inlet))
+	
+	def send(self, value, inlet):
+		self.inlets[inlet] = value
+		if inlet == 0:
+			self.trigger()
+
+	def propagate(self): 
+		for conns, val in zip(self.connections, self.outlets):
+			if val is not None:
+				for target, inlet in conns:
+					target.send(val, inlet)
+
+	
