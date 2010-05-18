@@ -8,12 +8,15 @@ jack_port_t * output_port;
 static int
 process (jack_nframes_t nframes, void *arg)
 {
-	/* pass through all audio */
-	jack_default_audio_sample_t *out = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port, nframes);
-	jack_default_audio_sample_t *in = (jack_default_audio_sample_t *) jack_port_get_buffer (input_port, nframes);
+	/* clear output buffer */ 
+	memset (out, 0, sizeof (jack_default_audio_sample_t) * nframes);
+	
+	/* run processing network */ 
+	mfp_dsp_run((mfp_sample *)jack_port_get_buffer (input_port, nframes),
+			    (mfp_sample *)jack_port_get_buffer (input_port, nframes),
+				(int)nframes);
 
-	memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
-	return 0;     
+	return 0;
 }
 
 
