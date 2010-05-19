@@ -1,17 +1,16 @@
 
-import time
+import mfpdsp
 
-from cp_metro import CPMetro
-from cp_print import CPPrint
+mfpdsp.dsp_startup()
 
-metro = CPMetro()
-pp = CPPrint()
+osc = mfpdsp.proc_create("osc~", freq=500)
+dac = mfpdsp.proc_create("dac~", channel=0)
 
-metro.connect(0, pp, 0)
+mfpdsp.proc_connect(osc, 0, dac, 0)
+mfpdsp.dsp_enable()
 
-metro.send(250, 1)
-metro.send(True, 0)
-
+import time 
 time.sleep(10)
 
-print "done"
+
+

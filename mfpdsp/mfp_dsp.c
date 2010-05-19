@@ -4,6 +4,9 @@
 
 #include "mfp_dsp.h"
 
+
+int mfp_dsp_enabled = 0;
+
 static int 
 depth_cmp_func(const void * a, const void *b) 
 {
@@ -16,7 +19,7 @@ depth_cmp_func(const void * a, const void *b)
 }
 
 
-void 
+int 
 mfp_dsp_schedule(void) 
 {
 	int pass = 0;
@@ -27,18 +30,18 @@ mfp_dsp_schedule(void)
 	mfp_processor ** p;
 
 	/* unschedule everything */
-	for (p = proclist; *p != NULL; p++) {
-		*p->depth = -1;
+	for (p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
+		(*p)->depth = -1;
 		proc_count ++;
 	}
 
 	/* calculate scheduling order */ 
 	while (another_pass == 1) {
-		for (p = proclist; *p != NULL; p++) {
-			if (*p->depth < 0  && mfp_proc_ready_to_schedule(*p)) {
-				*p->depth = pass;
+		for (p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
+			if ((*p)->depth < 0  && mfp_proc_ready_to_schedule(*p)) {
+				(*p)->depth = pass;
 			}
-			else if (*p->depth < 0) {
+			else if ((*p)->depth < 0) {
 				thispass_unsched++;
 			}
 		}
@@ -61,7 +64,7 @@ mfp_dsp_schedule(void)
 	}
 	else {
 		/* sort processors in place by depth */ 
-		qsort(proclist, proc_count, sizeof(mfp_processor **), depth_cmp_func);
+		g_array_sort(mfp_proc_list, depth_cmp_func);
 		return 1;
 	}
 }
@@ -73,13 +76,25 @@ mfp_dsp_schedule(void)
  */
 
 void
-mfp_dsp_run(mfp_sample * in, mfp_sample * out, int nsamples) 
+mfp_dsp_run(int nsamples) 
 {
 	mfp_processor ** p;
 
+	mfp_dsp_set_blocksize(nsamples);
+
 	/* the proclist is already scheduled, so iterating in order is OK */
-	for(p = proclist; *p != NULL; p++) {
+	for(p = mfp_proc_list->data; *p != NULL; p++) {
 		mfp_proc_process(*p);
 	}
 
 }
+
+void
+mfp_dsp_set_blocksize(int nsamples) 
+{
+	mfp_blocksize = nsamples;
+
+	/* FIXME need to inform all processors so to reallocate buffers */ 
+}
+
+
