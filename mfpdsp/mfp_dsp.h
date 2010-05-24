@@ -10,7 +10,6 @@ typedef struct {
 	/* type, settable parameters, and internal state */
 	struct mfp_procinfo_struct * typeinfo;
 	GHashTable * params; 
-	GHashTable * next_params;
 	void * data;
 	
 	/* inlet and outlet connections (g_array of g_array) */
@@ -34,7 +33,10 @@ typedef struct mfp_procinfo_struct {
 	int  (* process)(mfp_processor *);
 } mfp_procinfo;
 
-
+typedef struct {
+	mfp_processor * dest_proc;
+	int dest_port;
+} mfp_connection;
 
 /* global variables */ 
 extern int mfp_dsp_enabled;
@@ -53,6 +55,7 @@ extern mfp_sample * mfp_get_output_buffer(int);
 extern int mfp_dsp_schedule(void);
 extern void mfp_dsp_run(int nsamples);
 extern void mfp_dsp_set_blocksize(int nsamples);
+extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
 
 /* mfp_proc.c */
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);

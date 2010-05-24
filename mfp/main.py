@@ -32,6 +32,7 @@ class MFPApp (object):
 
 if __name__ == "__main__":
 	mfp = MFPApp()
+	
 
 	print "sleeping for 10 secs"
 	import time

@@ -16,6 +16,10 @@ mfp_proc_ready_to_schedule(mfp_processor * p)
 	GArray * infan;
 	mfp_processor ** ip;
 
+	if (p->typeinfo->is_generator == 1) {
+		return 1;
+	}
+
 	for (icount = 0; icount < p->inlet_conn->len; icount++) {
 		infan = g_array_index(p->inlet_conn, GArray *, icount);
 		for(ip = (mfp_processor **)(infan->data); *ip != NULL; ip++) {
@@ -54,7 +58,6 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
 	p->typeinfo = typeinfo; 
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, param_free, param_free);
-	p->next_params = g_hash_table_new_full(g_str_hash, g_str_equal, param_free, param_free);
 	p->depth = -1;
 
 	/* create inlet and outlet processor pointer arrays */
@@ -96,14 +99,44 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 void
 mfp_proc_process(mfp_processor * self) 
 {
+	GArray * inlet_conn;
+	mfp_connection ** curr_inlet; 
+	mfp_sample * inlet_buf;
+	
+	mfp_processor * upstream_proc;
+	mfp_sample    * upstream_outlet_buf;
+	int           upstream_outlet_num;
+
+	int inlet_num;
+
 	/* accumulate all the inlet fan-ins to a single input buffer */ 
-	return;
+	for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
+		inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
+		inlet_buf = self->inlet_buf[inlet_num];
+		for(curr_inlet = (mfp_connection **)inlet_conn->data; *curr_inlet != NULL; curr_inlet++) {
+			upstream_proc = (*curr_inlet)->dest_proc;
+			upstream_outlet_num = (*curr_inlet)->dest_port;	
+			upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];	
+			mfp_dsp_accum(inlet_buf, upstream_outlet_buf, mfp_blocksize);
+		}
+	}
+
+	/* perform processing */ 
+	self->typeinfo->process(self);	
 }
 
 
 void
 mfp_proc_destroy(mfp_processor * self) 
 {
+
+	self->typeinfo->destroy(self);
+	g_hash_table_destroy(self->params);
+	g_array_free(self->inlet_conn, TRUE);
+	g_array_free(self->outlet_conn, TRUE);
+	g_free(self->inlet_buf);
+	g_free(self->outlet_buf);
+	g_free(self);
 	return;
 }
 
@@ -112,6 +145,22 @@ int
 mfp_proc_connect(mfp_processor * self, mfp_processor * target, 
 				 int my_outlet, int targ_inlet)
 {
+	GArray * xlets;
+	
+	mfp_connection * my_conn = g_malloc(sizeof(mfp_connection));
+	mfp_connection * targ_conn = g_malloc(sizeof(mfp_connection));
+	
+	my_conn->dest_proc = target;
+	my_conn->dest_port = targ_inlet;
+	targ_conn->dest_proc = self;
+	targ_conn->dest_port = my_outlet; 
+
+	xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
+	g_array_append_val(xlets, my_conn);
+
+	xlets =  g_array_index(target->inlet_conn, GArray *, targ_inlet);
+	g_array_append_val(xlets, targ_conn);
+
 	return 0;
 }
 
@@ -126,14 +175,14 @@ int
 mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val)
 {
 	printf("mfp_proc_setparam: %s %f\n", param_name, param_val);
-	g_hash_table_insert(self->next_params, g_strdup(param_name), param_dup(param_val));
+	g_hash_table_insert(self->params, g_strdup(param_name), param_dup(param_val));
 	return 0;
 }
 
 double 
 mfp_proc_getparam(mfp_processor * self, char * param_name)
 {
-	gpointer * val = g_hash_table_lookup(self->next_params, param_name);
+	gpointer * val = g_hash_table_lookup(self->params, param_name);
 	if (val != NULL) {
 		return *((double *)val);
 	}

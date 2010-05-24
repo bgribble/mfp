@@ -83,7 +83,7 @@ mfp_dsp_run(int nsamples)
 	mfp_dsp_set_blocksize(nsamples);
 
 	/* the proclist is already scheduled, so iterating in order is OK */
-	for(p = mfp_proc_list->data; *p != NULL; p++) {
+	for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
 		mfp_proc_process(*p);
 	}
 
@@ -97,4 +97,12 @@ mfp_dsp_set_blocksize(int nsamples)
 	/* FIXME need to inform all processors so to reallocate buffers */ 
 }
 
+void
+mfp_dsp_accum(mfp_sample * accum, mfp_sample * addend, int blocksize)
+{
+	int i;
+	for (i=0; i < blocksize; i++) {
+		accum[i] += addend[i];
+	}
+}
 

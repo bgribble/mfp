@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python2.6 
 '''
 control_processor.py: Parent class of control-rate processors 
 
@@ -6,6 +6,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 class ControlProcessor (object): 
+	
 	def __init__(self, inlets, outlets):
 		self.inlets = [None] * inlets
 		self.outlets = [None] * outlets 

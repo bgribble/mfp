@@ -15,7 +15,6 @@ process (jack_nframes_t nframes, void *arg)
 {
 	/* run processing network */ 
 	if (mfp_dsp_enabled) {
-		printf("  .. process callback.. \n");
 		mfp_dsp_run((int)nframes);
 	}
 
@@ -48,8 +47,6 @@ mfp_get_output_buffer(int chan) {
 int
 mfp_jack_startup(int num_inputs, int num_outputs) 
 {
-	printf("mfp_jack_start called. %d inputs, %d outputs\n", num_inputs, num_outputs);
-
 	jack_client_t * client;
 	jack_status_t status;
 	jack_port_t * port;
