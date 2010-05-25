@@ -5,10 +5,10 @@ cp_metro.py: Metronome control processor
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from timer import MultiTimer 
-from control_processor import ControlProcessor
-
-from datetime import datetime, timedelta 
+from ..timer import MultiTimer 
+from ..control_processor import ControlProcessor
+from ..main import MFPApp 
+from ..datetime import datetime, timedelta 
 
 class CPMetro (ControlProcessor): 
 	_timer = None 
@@ -26,6 +26,8 @@ class CPMetro (ControlProcessor):
 			self.interval = int(initargs[0])
 
 		ControlProcessor.__init__(self, inlets=2, outlets=1)
+		MFPApp.register("metro", CPMetro)
+
 
 	def trigger(self):
 		if self.inlets[1] is not None:

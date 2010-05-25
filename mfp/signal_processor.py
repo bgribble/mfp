@@ -15,7 +15,20 @@ class SignalProcessor (object):
 		response = request.wait()
 		if response.get('status', False):
 			self.dsp_obj = response.get('obj_id')
-			
+		
+	def connect(self, outlet, target, inlet):
+		cmd = dict(cmd="connect",
+			       args=dict(obj_id=self.dsp_obj, target=target.dsp_obj, 
+					         outlet=outlet, inlet=inlet))
+		MFPApp.instance.dsp_message(cmd)
+
+	def disconnect(self, outlet, target, inlet):
+		cmd = dict(cmd="disconnect",
+			       args=dict(obj_id=self.dsp_obj, target=target.dsp_obj, 
+					         outlet=outlet, inlet=inlet))
+		MFPApp.instance.dsp_message(cmd)
+
+	
 	def set_param(self, name, value):
 		cmd = dict(cmd="set_param",
 				   args=dict(obj_id=self.dsp_obj, name=name, value=value))

@@ -1,10 +1,12 @@
+#include <stdlib.h>
+#include <string.h>
 #include "mfp_dsp.h"
 
-static void
+static int 
 adc_process(mfp_processor * proc) 
 {
 	gpointer chan_ptr = g_hash_table_lookup(proc->params, "chan");
-	int channel;
+	int channel = 0;
 	mfp_sample * inbuf;
 	mfp_sample * outbuf;
 
@@ -16,13 +18,15 @@ adc_process(mfp_processor * proc)
 	outbuf = proc->outlet_buf[0];
 
 	memcpy(outbuf, inbuf, mfp_blocksize * sizeof(mfp_sample));
+
+	return 1;
 }
 
-static void
+static int
 dac_process(mfp_processor * proc) 
 {
 	gpointer chan_ptr = g_hash_table_lookup(proc->params, "chan");
-	int channel;
+	int channel = 0;
 	mfp_sample * inbuf;
 	mfp_sample * outbuf;
 
@@ -35,6 +39,7 @@ dac_process(mfp_processor * proc)
 
 	memcpy(outbuf, inbuf, mfp_blocksize * sizeof(mfp_sample));
 
+	return 1;
 }
 
 static void 
