@@ -10,7 +10,6 @@ from mfp.control_processor import ControlProcessor
 from mfp.main import MFPApp
 
 class SPOsc(SignalProcessor, ControlProcessor):
-
 	def __init__(self, *initargs):
 		if len(initargs):
 			freq = initargs[0]
@@ -20,7 +19,6 @@ class SPOsc(SignalProcessor, ControlProcessor):
 		SignalProcessor.__init__(self, "osc~", 0, 1, freq=freq)
 		ControlProcessor.__init__(self, 1, 0)
 
-		MFPApp.register("osc~", SPOsc)
 
 	def connect(self, outlet, target, inlet):
 		return SignalProcessor.connect(self, outlet, target, inlet)
@@ -39,4 +37,6 @@ class SPOsc(SignalProcessor, ControlProcessor):
 				print "Can't convert %s to a frequency value" % self.inlet[0]
 				
 
+def register():
+	MFPApp.register("osc~", SPOsc)
 

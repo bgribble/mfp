@@ -26,7 +26,6 @@ class CPMetro (ControlProcessor):
 			self.interval = int(initargs[0])
 
 		ControlProcessor.__init__(self, inlets=2, outlets=1)
-		MFPApp.register("metro", CPMetro)
 
 
 	def trigger(self):
@@ -50,3 +49,5 @@ class CPMetro (ControlProcessor):
 			self._timer.schedule(self.started + self.count*self.interval, self.timer_cb)
 			self.propagate()
 
+def register():
+	MFPApp.register("metro", CPMetro)

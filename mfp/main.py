@@ -31,22 +31,42 @@ class MFPApp (object):
 
 	@classmethod
 	def register(klass, name, ctor):
+		if MFPApp._instance is None:
+			MFPApp._instance = MFPApp()
+		print "MFPApp registering %s" % name 
+
 		MFPApp._instance.registry[name] = ctor 
 
-	def dsp_message(self, obj):
-		self.dsp_write_queue.put(obj)
-	
-	def load(self, filename):
+	@classmethod
+	def dsp_message(klass, obj):
+		if MFPApp._instance is None:
+			MFPApp._instance = MFPApp()
+		req = QRequest(obj)
+		MFPApp._instance.dsp_write_queue.put(req)
+		return req 
+
+	@classmethod 	
+	def load(klass, filename):
+		if MFPApp._instance is None:
+			MFPApp._instance = MFPApp()
 		pass
 
+	@classmethod
+	def create(klass, name, *args, **params):
+		if MFPApp._instance is None:
+			MFPApp._instance = MFPApp()
+		ctor = MFPApp._instance.registry.get(name)
+		if ctor is None:
+			return False 
+		else:
+			return ctor(*args, **params)
 
 def main(): 
-	m = MFPApp()
+	import processors
+	processors.register() 
 
-	import mfp.processors
-	d = mfp.processors.SPDac(0)
-	o = mfp.processors.SPOsc(500)
-
+	d = MFPApp.create("dac~")
+	o = MFPApp.create("osc~", 500)
 	o.connect(0, d, 0)
 
 	import code
