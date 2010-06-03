@@ -9,7 +9,11 @@ import mfpdsp
 
 class MFPDSP (object):
 	def __init__(self, q):
+		self.objects = {} 
+		self.obj_id = 0 
 		self.cmd_queue = q
+		
+		q.init_responder()
 
 	def start (self):
 		# start JACK thread 
@@ -19,17 +23,49 @@ class MFPDSP (object):
 
 		while not time_to_quit:
 			qcmd = self.cmd_queue.get()
-			print "got queue data"
-			print qcmd
+			print "MFPDSP: got queue data"
+			print "MFPDSP:", qcmd
 
-			if qcmd == 'quit':
+			if not qcmd: 
+				continue
+			elif qcmd.payload == 'quit':
 				time_to_quit = True
+				continue
 
+			self.command(qcmd)
 		return True
 
-def main(dsp_queue):
-	dsp_queue.listen()
-	dspapp = MFPDSP(dsp_queue)
+	def remember(self, obj):
+		oi = self.obj_id
+		self.obj_id += 1
+		self.objects[oi] = obj
+		print "remembering obj", obj, oi
+		return oi 
 
+	def recall(self, obj_id):
+		return self.objects.get(obj_id)
+
+	def command(self, req):
+		cmd = req.payload.get('cmd')
+		args = req.payload.get('args')
+		if cmd == 'create':
+			print "MFPDSP: Create", req.payload 
+			obj = mfpdsp.proc_create(args.get('name'), args.get('inlets'), args.get('outlets'),
+			   					     args.get('params'))
+			req.response = self.remember(obj)
+			print "MFPDSP: created", req.response
+		elif cmd == "get_param":
+			obj_id = args.get('obj_id')
+			param = args.get('name')
+			obj = self.recall(obj_id)
+			if obj:
+				req.response = mfpdsp.proc_getparam(obj, param)
+
+		self.cmd_queue.put(req)
+
+	
+
+def main(dsp_queue):
+	dspapp = MFPDSP(dsp_queue)
 	dspapp.start()
 

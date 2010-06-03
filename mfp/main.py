@@ -9,22 +9,22 @@ import sys
 import multiprocessing 
 
 import mfp.dsp
-from mfp.duplex_queue import DuplexQueue
+from mfp.duplex_queue import DuplexQueue, QRequest
 
 class MFPApp (object):
 	
 	_instance = None 
 
 	def __init__(self):
-
-		# gtk gui thread 
+		# processor thread 
 		self.dsp_queue = DuplexQueue()
 		self.dsp_process = multiprocessing.Process(target=mfp.dsp.main,
 												   args=(self.dsp_queue,)) 
+		self.dsp_queue.init_requestor()
 
 		# processor class registry 
 		self.registry = {} 
-
+		
 		# start threads 
 		self.dsp_process.start()
 
@@ -39,11 +39,11 @@ class MFPApp (object):
 		MFPApp._instance.registry[name] = ctor 
 
 	@classmethod
-	def dsp_message(klass, obj):
+	def dsp_message(klass, obj, callback=None):
 		print "MFPApp.dsp_message:", obj
 		if MFPApp._instance is None:
 			MFPApp._instance = MFPApp()
-		req = QRequest(obj)
+		req = QRequest(obj, callback=callback)
 		MFPApp._instance.dsp_queue.put(req)
 		return req 
 
@@ -62,6 +62,18 @@ class MFPApp (object):
 			return False 
 		else:
 			return ctor(*args, **params)
+
+	@classmethod
+	def wait(klass, req):
+		print "MFPApp: waiting for", req
+		MFPApp._instance.dsp_queue.wait(req)
+		print "MFPApp: done with wait for", req
+		print "MFPApp: response =", req.response 
+
+	@classmethod
+	def finish(klass):
+		MFPApp.dsp_message("quit")
+		MFPApp._instance.dsp_queue.finish()
 
 def main(): 
 	import processors

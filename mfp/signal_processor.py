@@ -9,15 +9,23 @@ from main import MFPApp
 class SignalProcessor (object):
 	def __init__(self, proc_name, inlets, outlets, ** params):
 		self.dsp_obj = None 
-		self.message("create", name=proc_name, inlets=inlets, outlets=outlets, params=params)
+		req = self.message("create", name=proc_name, inlets=inlets, 
+					       outlets=outlets, params=params)
+		MFPApp.wait(req)
+		print "SignalProcessor: got response", req.response 
 
 	def response(self, request):
+		print "SignalProcessor: in callback"
 		if request.payload.get("cmd") == "create":
-			self.dsp_obj = request.response.get("obj_id")
+			self.dsp_obj = request.response
 
-	def message(self, cmd, callback=self.response, **args):
+	def message(self, cmd, callback=None, **args):
+		if callback is None:
+			callback = self.response 
 		payload = dict(cmd=cmd, args=args)
-		MFPApp.dsp_message(payload, callback=self.response)
+		print "SignalProcessor.message: sending"
+		print payload 
+		return MFPApp.dsp_message(payload, callback=callback)
 
 	def connect(self, outlet, target, inlet):
 		self.message("connect", obj_id=self.dsp_obj, target=target.dsp_obj, 
@@ -31,6 +39,7 @@ class SignalProcessor (object):
 		self.message("set_param", obj_id=self.dsp_obj, name=name, value=value)
 
 	def get_param(self, name, callback=None):
-		self.message("get_param", callback=callback, obj_id=self.dsp_obj, name=name) 
-
+		req = self.message("get_param", callback=callback, obj_id=self.dsp_obj, name=name) 
+		MFPApp.wait(req)
+		return req.response 
 
