@@ -9,17 +9,18 @@ import sys
 import multiprocessing 
 
 import mfp.dsp
+from mfp.duplex_queue import DuplexQueue
 
 class MFPApp (object):
+	
 	_instance = None 
+
 	def __init__(self):
 
 		# gtk gui thread 
-		self.dsp_read_queue = multiprocessing.Queue()
-		self.dsp_write_queue = multiprocessing.Queue()
+		self.dsp_queue = DuplexQueue()
 		self.dsp_process = multiprocessing.Process(target=mfp.dsp.main,
-												   args=(self.dsp_read_queue, 
-					                                     self.dsp_write_queue))
+												   args=(self.dsp_queue,)) 
 
 		# processor class registry 
 		self.registry = {} 
@@ -39,10 +40,11 @@ class MFPApp (object):
 
 	@classmethod
 	def dsp_message(klass, obj):
+		print "MFPApp.dsp_message:", obj
 		if MFPApp._instance is None:
 			MFPApp._instance = MFPApp()
 		req = QRequest(obj)
-		MFPApp._instance.dsp_write_queue.put(req)
+		MFPApp._instance.dsp_queue.put(req)
 		return req 
 
 	@classmethod 	
