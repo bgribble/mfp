@@ -88,7 +88,7 @@ def main():
 	code.interact(local=locals())
 	
 	print "sending quit message"
-	m.dsp_message('quit')
+	MFPApp.dsp_message('quit')
 
 
 

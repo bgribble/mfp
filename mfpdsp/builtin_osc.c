@@ -21,7 +21,7 @@ process(mfp_processor * proc)
 	mfp_sample * sample; 
 	int scount; 
 
-	
+	printf("osc~ process\n");	
 	/* get parameters */ 
 	if (freq_ptr != NULL) 
 		freq = *(double *)freq_ptr;

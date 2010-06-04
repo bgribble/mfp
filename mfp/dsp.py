@@ -18,6 +18,7 @@ class MFPDSP (object):
 	def start (self):
 		# start JACK thread 
 		mfpdsp.dsp_startup(1, 1)
+		mfpdsp.dsp_enable()
 
 		time_to_quit = False
 

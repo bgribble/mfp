@@ -30,6 +30,7 @@ dac_process(mfp_processor * proc)
 	mfp_sample * inbuf;
 	mfp_sample * outbuf;
 
+	printf("dac_process\n");
 	if (chan_ptr != NULL) {
 		channel = (int)(*(double *)chan_ptr);
 	}
