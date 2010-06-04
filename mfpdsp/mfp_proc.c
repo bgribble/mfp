@@ -142,8 +142,8 @@ mfp_proc_destroy(mfp_processor * self)
 
 
 int 
-mfp_proc_connect(mfp_processor * self, mfp_processor * target, 
-				 int my_outlet, int targ_inlet)
+mfp_proc_connect(mfp_processor * self, int my_outlet,  
+			     mfp_processor * target, int targ_inlet)
 {
 	GArray * xlets;
 	
@@ -165,8 +165,8 @@ mfp_proc_connect(mfp_processor * self, mfp_processor * target,
 }
 
 int
-mfp_proc_disconnect(mfp_processor * self, mfp_processor * target, 
-		            int my_outlet, int targ_inlet)
+mfp_proc_disconnect(mfp_processor * self, int my_outlet, 
+		            mfp_processor * target, int targ_inlet)
 {
 	return 0;
 }
@@ -174,7 +174,6 @@ mfp_proc_disconnect(mfp_processor * self, mfp_processor * target,
 int
 mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val)
 {
-	printf("mfp_proc_setparam: %s %f\n", param_name, param_val);
 	g_hash_table_insert(self->params, g_strdup(param_name), param_dup(param_val));
 	return 0;
 }

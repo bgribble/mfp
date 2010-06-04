@@ -44,6 +44,12 @@ mfp_get_output_buffer(int chan) {
 }
 
 
+static void
+info_callback(const char * msg)
+{
+	return;
+}
+
 int
 mfp_jack_startup(int num_inputs, int num_outputs) 
 {
@@ -59,6 +65,10 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 	}
 	
 	jack_set_process_callback(client, process, 0);
+
+	/* no info logging to console */ 
+	jack_set_info_function(info_callback);
+	jack_set_error_function(info_callback);
 
 	/* create application input and output ports */ 
 	if (num_inputs > 0) {

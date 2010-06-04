@@ -17,10 +17,16 @@ class ControlProcessor (object):
 		if (target,inlet) not in existing:
 			existing.append((target,inlet))
 	
-	def send(self, value, inlet):
+	def send(self, value, inlet=0):
 		self.inlets[inlet] = value
 		if inlet == 0:
-			self.trigger()
+			try:
+				self.trigger()
+			except: 
+				self.error()
+
+	def error(self):
+		print "Error:", self
 
 	def propagate(self): 
 		for conns, val in zip(self.connections, self.outlets):

@@ -1,0 +1,4 @@
+
+class Bang(object):
+	pass
+

@@ -65,13 +65,15 @@ class DuplexQueue(object):
 		self.read_queue = q
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
+		self.pending = None 
 
 	def put(self, req):
 		tosend = {} 
 		if isinstance(req, QRequest):
 			req.state = QRequest.SUBMITTED
 			req.queue = self
-			self.pending[req.request_id] = req
+			if self.pending is not None:
+				self.pending[req.request_id] = req
 			tosend['type'] = 'QRequest'
 			tosend['request_id'] = req.request_id
 			tosend['payload'] = req.payload 
@@ -96,11 +98,12 @@ class DuplexQueue(object):
 			qobj = self.read_queue.get(timeout=timeout)
 		except Queue.Empty, e:
 			raise
-
+		
+		req = None 
 		if qobj.get('type') == 'QRequest':
-			req = self.pending.get(qobj.get('request_id'))
-			print "DuplexQueue.get: looked up", qobj.get('request_id'), "found", req
-			print self.pending 
+			if self.pending is not None:
+				req = self.pending.get(qobj.get('request_id'))
+				
 			if req:
 				req.response = qobj.get('response')
 				req.state = QRequest.RESPONSE_RCVD

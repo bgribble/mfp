@@ -7,7 +7,6 @@ from mfp.main import MFPApp
 
 
 def setup():
-	print "================ test-dsp.py setup =================="
 	processors.register()
 
 
@@ -25,9 +24,16 @@ class DSPObjectTests (TestCase):
 		print f 
 		assert f == 500 
 
+	def test_connect_disconnect(self):
+		'''test_connect_disconnect: make/break connections'''
+		inp = MFPApp.create("adc~", 0)
+		outp = MFPApp.create("dac~", 0)
+
+		inp.connect(0, outp, 0)
+		inp.disconnect(0, outp, 0)
+
 
 def teardown():
-	print "================ test-dsp.py teardown =================="
 	MFPApp.finish()
 	
 

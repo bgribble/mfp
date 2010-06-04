@@ -61,6 +61,7 @@ class MFPApp (object):
 		if ctor is None:
 			return False 
 		else:
+			print "create: ctor is", ctor 
 			return ctor(*args, **params)
 
 	@classmethod

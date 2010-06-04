@@ -63,8 +63,8 @@ extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, int);
 
 extern void mfp_proc_process(mfp_processor *);
 extern void mfp_proc_destroy(mfp_processor *);
-extern int mfp_proc_connect(mfp_processor *, mfp_processor *, int, int);
-extern int mfp_proc_disconnect(mfp_processor *, mfp_processor *, int, int);
+extern int mfp_proc_connect(mfp_processor *, int, mfp_processor *, int);
+extern int mfp_proc_disconnect(mfp_processor *, int, mfp_processor *, int);
 extern int mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val);
 extern double mfp_proc_getparam(mfp_processor * self, char * param_name);
 

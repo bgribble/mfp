@@ -49,17 +49,24 @@ class MFPDSP (object):
 		cmd = req.payload.get('cmd')
 		args = req.payload.get('args')
 		if cmd == 'create':
-			print "MFPDSP: Create", req.payload 
 			obj = mfpdsp.proc_create(args.get('name'), args.get('inlets'), args.get('outlets'),
 			   					     args.get('params'))
 			req.response = self.remember(obj)
-			print "MFPDSP: created", req.response
 		elif cmd == "get_param":
 			obj_id = args.get('obj_id')
 			param = args.get('name')
 			obj = self.recall(obj_id)
 			if obj:
 				req.response = mfpdsp.proc_getparam(obj, param)
+		elif cmd == "connect":
+			src = self.recall(args.get('obj_id'))
+			dst = self.recall(args.get('target'))
+			mfpdsp.proc_connect(src, args.get('outlet'), dst, args.get('inlet'))
+		elif cmd == "disconnect":
+			src = self.recall(args.get('obj_id'))
+			dst = self.recall(args.get('target'))
+			mfpdsp.proc_disconnect(src, args.get('outlet'), dst, args.get('inlet'))
+
 
 		self.cmd_queue.put(req)
 

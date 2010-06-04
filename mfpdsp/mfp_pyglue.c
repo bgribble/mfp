@@ -85,11 +85,11 @@ proc_connect(PyObject * mod, PyObject * args)
 	int my_outlet, targ_inlet;
 	mfp_processor * self_proc = NULL, * targ_proc = NULL;
 	
-	PyArg_ParseTuple(args, "OOii", &self, &target, &my_outlet, &targ_inlet);
+	PyArg_ParseTuple(args, "OiOi", &self, &my_outlet, &target, &targ_inlet);
 
 	self_proc = PyCObject_AsVoidPtr(self);
 	targ_proc = PyCObject_AsVoidPtr(target);
-	mfp_proc_connect(self_proc, targ_proc, my_outlet, targ_inlet);
+	mfp_proc_connect(self_proc, my_outlet, targ_proc, targ_inlet);
 	return Py_True;
 }
 
@@ -101,11 +101,11 @@ proc_disconnect(PyObject * mod, PyObject * args)
 	int my_outlet, targ_inlet;
 	mfp_processor * self_proc = NULL, * targ_proc = NULL;
 	
-	PyArg_ParseTuple(args, "OOii", &self, &target, &my_outlet, &targ_inlet);
+	PyArg_ParseTuple(args, "OiOi", &self, &my_outlet, &target,  &targ_inlet);
 
 	self_proc = PyCObject_AsVoidPtr(self);
 	targ_proc = PyCObject_AsVoidPtr(target);
-	mfp_proc_disconnect(self_proc, targ_proc, my_outlet, targ_inlet);
+	mfp_proc_disconnect(self_proc, my_outlet, targ_proc, targ_inlet);
 	return Py_True;
 }
 
