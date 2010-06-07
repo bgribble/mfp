@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "mfp_dsp.h"
 
 static int 
@@ -30,7 +31,6 @@ dac_process(mfp_processor * proc)
 	mfp_sample * inbuf;
 	mfp_sample * outbuf;
 
-	printf("dac_process\n");
 	if (chan_ptr != NULL) {
 		channel = (int)(*(double *)chan_ptr);
 	}
@@ -38,6 +38,9 @@ dac_process(mfp_processor * proc)
 	outbuf = mfp_get_output_buffer(channel);
 	inbuf = proc->inlet_buf[0];
 
+	if ((outbuf == NULL) || (inbuf == NULL)) {
+		return 0;
+	}
 	memcpy(outbuf, inbuf, mfp_blocksize * sizeof(mfp_sample));
 
 	return 1;

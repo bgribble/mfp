@@ -19,7 +19,7 @@ def pkgconf_libs(pkg):
 
 mfp_c_sources = [
 	'mfp_pyglue.c', 'mfp_jack.c', 'mfp_dsp.c', 'mfp_proc.c',
-	'builtin_osc.c', 'builtin_adc_dac.c'
+	'builtin_osc.c', 'builtin_adc_dac.c', 'test_schedule.c'
 ]
 
 mfpdsp = Extension('mfpdsp',

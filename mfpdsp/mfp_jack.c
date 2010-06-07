@@ -14,8 +14,11 @@ static int
 process (jack_nframes_t nframes, void *arg)
 {
 	/* run processing network */ 
-	if (mfp_dsp_enabled) {
+	if (mfp_dsp_enabled == 1) {
 		mfp_dsp_run((int)nframes);
+	}
+	else {
+		printf("DSP DISABLED, process() not running network\n");
 	}
 
 	return 0;

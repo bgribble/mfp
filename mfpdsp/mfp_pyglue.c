@@ -2,7 +2,7 @@
 #include <Python.h>
 #include "mfp_dsp.h"
 #include "builtin.h"
-
+#include "tests.h"
 
 static PyObject * 
 dsp_startup(PyObject * mod, PyObject * args) 
@@ -17,6 +17,7 @@ dsp_startup(PyObject * mod, PyObject * args)
 static PyObject *
 dsp_enable(PyObject * mod, PyObject * args)
 {
+	printf("DSP ENABLED\n");
 	mfp_dsp_enabled = 1;
 	return Py_True;
 }
@@ -90,6 +91,7 @@ proc_connect(PyObject * mod, PyObject * args)
 	self_proc = PyCObject_AsVoidPtr(self);
 	targ_proc = PyCObject_AsVoidPtr(target);
 	mfp_proc_connect(self_proc, my_outlet, targ_proc, targ_inlet);
+	mfp_needs_reschedule = 1;
 	return Py_True;
 }
 
@@ -106,6 +108,7 @@ proc_disconnect(PyObject * mod, PyObject * args)
 	self_proc = PyCObject_AsVoidPtr(self);
 	targ_proc = PyCObject_AsVoidPtr(target);
 	mfp_proc_disconnect(self_proc, my_outlet, targ_proc, targ_inlet);
+	mfp_needs_reschedule = 1;
 	return Py_True;
 }
 
@@ -133,6 +136,17 @@ proc_getparam(PyObject * mod, PyObject * args)
 	return PyFloat_FromDouble(prmval);
 }
 
+static PyObject * 
+py_test_ctests(PyObject * mod, PyObject * args) {
+	if (! test_ctests()) {
+		return Py_False;
+	}
+	else {
+		return Py_True;
+	}
+
+}
+
 static PyMethodDef MfpDspMethods[] = {
 	{ "dsp_startup",  dsp_startup, METH_VARARGS, "Start processing thread" },
 	{ "dsp_enable",  dsp_enable, METH_VARARGS, "Enable dsp" },
@@ -143,6 +157,7 @@ static PyMethodDef MfpDspMethods[] = {
 	{ "proc_disconnect", proc_disconnect, METH_VARARGS, "Disconnect 2 DSP processors" },
 	{ "proc_setparam", proc_setparam, METH_VARARGS, "Set processor parameter" },
 	{ "proc_getparam", proc_getparam, METH_VARARGS, "Get processor parameter" },
+	{ "test_ctests", py_test_ctests, METH_VARARGS, "Wrapper for C unit tests" },
 	{ NULL, NULL, 0, NULL}
 };
 

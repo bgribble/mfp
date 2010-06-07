@@ -40,6 +40,7 @@ typedef struct {
 
 /* global variables */ 
 extern int mfp_dsp_enabled;
+extern int mfp_needs_reschedule;
 extern int mfp_samplerate;
 extern int mfp_blocksize; 
 
@@ -68,3 +69,4 @@ extern int mfp_proc_disconnect(mfp_processor *, int, mfp_processor *, int);
 extern int mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val);
 extern double mfp_proc_getparam(mfp_processor * self, char * param_name);
 
+extern int test_ctests(void);

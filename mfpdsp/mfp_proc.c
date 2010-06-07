@@ -8,33 +8,6 @@
 GArray     * mfp_proc_list = NULL;       /* all mfp_processors */ 
 GHashTable * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */ 
 
-int
-mfp_proc_ready_to_schedule(mfp_processor * p)
-{
-	int icount;
-	int ready = 1;
-	GArray * infan;
-	mfp_processor ** ip;
-
-	if (p->typeinfo->is_generator == 1) {
-		return 1;
-	}
-
-	for (icount = 0; icount < p->inlet_conn->len; icount++) {
-		infan = g_array_index(p->inlet_conn, GArray *, icount);
-		for(ip = (mfp_processor **)(infan->data); *ip != NULL; ip++) {
-			if ((*ip)->depth < 0) {
-				ready = 0;
-				break;
-			}
-		}
-		if (ready == 0) {
-			break;
-		}
-	}
-	return ready;
-}
-
 static void
 param_free(gpointer prm)
 {
@@ -93,6 +66,8 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 	/* call type-specific initializer */
 	typeinfo->init(p);
 
+	/* add proc to global list */
+	g_array_append_val(mfp_proc_list, p); 
 	return p;
 }
 
@@ -109,19 +84,29 @@ mfp_proc_process(mfp_processor * self)
 
 	int inlet_num;
 
+	printf("mfp_proc_process %p\n", self);
+	printf("processor has %d inlets\n", self->inlet_conn->len);
+
 	/* accumulate all the inlet fan-ins to a single input buffer */ 
 	for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
+		printf("mfp_proc_process %p 1 (%d) \n", self, inlet_num);
 		inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
+		printf("mfp_proc_process %p 2  \n", inlet_conn);
 		inlet_buf = self->inlet_buf[inlet_num];
+		printf("mfp_proc_process %p 3 \n", inlet_buf);
 		for(curr_inlet = (mfp_connection **)inlet_conn->data; *curr_inlet != NULL; curr_inlet++) {
+			printf("mfp_proc_process %p 4 \n", curr_inlet);
 			upstream_proc = (*curr_inlet)->dest_proc;
 			upstream_outlet_num = (*curr_inlet)->dest_port;	
 			upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];	
+			printf("mfp_proc_process 4 %p %p\n", inlet_buf, upstream_outlet_buf);
 			mfp_dsp_accum(inlet_buf, upstream_outlet_buf, mfp_blocksize);
 		}
 	}
 
 	/* perform processing */ 
+	printf("calling process method (%p) for type %s at %p\n", self->typeinfo->process,
+			self->typeinfo->name, self);
 	self->typeinfo->process(self);	
 }
 

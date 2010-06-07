@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 #include <glib.h>
 
@@ -21,7 +22,6 @@ process(mfp_processor * proc)
 	mfp_sample * sample; 
 	int scount; 
 
-	printf("osc~ process\n");	
 	/* get parameters */ 
 	if (freq_ptr != NULL) 
 		freq = *(double *)freq_ptr;
@@ -44,9 +44,12 @@ process(mfp_processor * proc)
 		cur_phase = ((builtin_osc_data *)(proc->data))->phase;
 	}
 	
-	/* iterate */ 
 	sample = proc->outlet_buf[0];
+	if (sample == NULL) {
+		return 0;
+	}
 
+	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {
 		*sample++ = sin(cur_phase);
 		cur_phase = fmod(cur_phase + phase_incr, 2 * M_PI);
