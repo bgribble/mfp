@@ -6,4 +6,5 @@ def register():
 	import cp_pyfunc; cp_pyfunc.register()
 	import sp_dac; sp_dac.register()
 	import sp_osc; sp_osc.register()
+	import sp_sig; sp_sig.register()
 

@@ -26,7 +26,7 @@ adc_process(mfp_processor * proc)
 static int
 dac_process(mfp_processor * proc) 
 {
-	gpointer chan_ptr = g_hash_table_lookup(proc->params, "chan");
+	gpointer chan_ptr = g_hash_table_lookup(proc->params, "channel");
 	int channel = 0;
 	mfp_sample * inbuf;
 	mfp_sample * outbuf;
@@ -34,7 +34,6 @@ dac_process(mfp_processor * proc)
 	if (chan_ptr != NULL) {
 		channel = (int)(*(double *)chan_ptr);
 	}
-
 	outbuf = mfp_get_output_buffer(channel);
 	inbuf = proc->inlet_buf[0];
 

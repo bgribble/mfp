@@ -36,31 +36,30 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 	/* create inlet and outlet processor pointer arrays */
 	p->inlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_inlets);
 	
+	/* these are arrays of mfp_connection * */	
 	for (incount = 0; incount < num_inlets; incount++) {
-		GArray * in = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
+		GArray * in = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
 		g_array_append_val(p->inlet_conn, in);
 	}
 
 	p->outlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_outlets);
 
 	for (outcount = 0; outcount < num_outlets; outcount++) {
-		GArray * out = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
+		GArray * out = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
 		g_array_append_val(p->outlet_conn, out);
 	}
 	
 	/* create input and output buffers (will be reallocated if blocksize changes */
-	p->inlet_buf = g_malloc(num_inlets * sizeof(mfp_sample *));
-	
+	p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_sample *));
+
 	for (outcount = 0; outcount < num_inlets; outcount ++) {
-		p->inlet_buf[outcount] = g_malloc(blocksize * sizeof(mfp_sample));
-		memset(p->inlet_buf[outcount], 0, blocksize * sizeof(mfp_sample));
+		p->inlet_buf[outcount] = g_malloc0(blocksize * sizeof(mfp_sample));
 	}	
 
 	p->outlet_buf = g_malloc(num_outlets * sizeof(mfp_sample *));
 	
 	for (outcount = 0; outcount < num_outlets; outcount ++) {
-		p->outlet_buf[outcount] = g_malloc(blocksize * sizeof(mfp_sample));
-		memset(p->outlet_buf[outcount], 0, blocksize * sizeof(mfp_sample));
+		p->outlet_buf[outcount] = g_malloc0(blocksize * sizeof(mfp_sample));
 	}	
 
 	/* call type-specific initializer */
@@ -68,6 +67,7 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
 	/* add proc to global list */
 	g_array_append_val(mfp_proc_list, p); 
+
 	return p;
 }
 
@@ -84,29 +84,19 @@ mfp_proc_process(mfp_processor * self)
 
 	int inlet_num;
 
-	printf("mfp_proc_process %p\n", self);
-	printf("processor has %d inlets\n", self->inlet_conn->len);
-
 	/* accumulate all the inlet fan-ins to a single input buffer */ 
 	for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
-		printf("mfp_proc_process %p 1 (%d) \n", self, inlet_num);
 		inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
-		printf("mfp_proc_process %p 2  \n", inlet_conn);
 		inlet_buf = self->inlet_buf[inlet_num];
-		printf("mfp_proc_process %p 3 \n", inlet_buf);
 		for(curr_inlet = (mfp_connection **)inlet_conn->data; *curr_inlet != NULL; curr_inlet++) {
-			printf("mfp_proc_process %p 4 \n", curr_inlet);
 			upstream_proc = (*curr_inlet)->dest_proc;
 			upstream_outlet_num = (*curr_inlet)->dest_port;	
 			upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];	
-			printf("mfp_proc_process 4 %p %p\n", inlet_buf, upstream_outlet_buf);
 			mfp_dsp_accum(inlet_buf, upstream_outlet_buf, mfp_blocksize);
 		}
 	}
 
 	/* perform processing */ 
-	printf("calling process method (%p) for type %s at %p\n", self->typeinfo->process,
-			self->typeinfo->name, self);
 	self->typeinfo->process(self);	
 }
 

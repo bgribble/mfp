@@ -2,7 +2,6 @@
 #include <Python.h>
 #include "mfp_dsp.h"
 #include "builtin.h"
-#include "tests.h"
 
 static PyObject * 
 dsp_startup(PyObject * mod, PyObject * args) 
@@ -181,6 +180,12 @@ init_builtins(void)
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 	
 	pi = init_builtin_dac();
+	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+	
+	pi = init_builtin_sig();
+	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+	
+	pi = init_builtin_plus();
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 }
 

@@ -12,11 +12,11 @@ static int
 depth_cmp_func(const void * a, const void *b) 
 {
 	if ((*(mfp_processor **) a)->depth < (*(mfp_processor **)b)->depth) 
-		return 1;
+		return -1;
 	else if ((*(mfp_processor **) a)->depth == (*(mfp_processor **)b)->depth)
 		return 0;
 	else 
-		return -1;
+		return 1;
 }
 
 
@@ -133,7 +133,6 @@ mfp_dsp_run(int nsamples)
 
 	/* the proclist is already scheduled, so iterating in order is OK */
 	for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
-		printf("calling process on %p depth=%d\n", *p, (*p)->depth);
 		mfp_proc_process(*p);
 	}
 

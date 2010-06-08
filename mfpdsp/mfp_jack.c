@@ -7,8 +7,8 @@
 GArray * mfp_input_ports;
 GArray * mfp_output_ports;
 
-int mfp_samplerate; 
-int mfp_blocksize; 
+int mfp_samplerate =44100; 
+int mfp_blocksize = 1024; 
 
 static int
 process (jack_nframes_t nframes, void *arg)
@@ -26,6 +26,10 @@ process (jack_nframes_t nframes, void *arg)
 
 mfp_sample * 
 mfp_get_input_buffer(int chan) {
+	if (mfp_input_ports == NULL) {
+		return NULL;
+	}
+
 	if (chan < mfp_input_ports->len) {
 		return jack_port_get_buffer(g_array_index(mfp_input_ports, jack_port_t *, chan),
 						            mfp_blocksize);
@@ -37,6 +41,10 @@ mfp_get_input_buffer(int chan) {
 
 mfp_sample * 
 mfp_get_output_buffer(int chan) {
+	if (mfp_output_ports == NULL) {
+		return NULL;
+	}
+
 	if (chan < mfp_output_ports->len) {
 		return jack_port_get_buffer(g_array_index(mfp_input_ports, jack_port_t *, chan),
 				                    mfp_blocksize);
@@ -97,6 +105,8 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 	
 	/* find out sample rate */ 
 	mfp_samplerate = jack_get_sample_rate(client);
+	mfp_blocksize = jack_get_buffer_size(client);
+	printf("jack_startup: samplerate=%d, blocksize=%d\n", mfp_samplerate, mfp_blocksize); 
 
 	/* tell the JACK server that we are ready to roll */
 	if (jack_activate (client)) {
