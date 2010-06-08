@@ -121,9 +121,21 @@ void
 mfp_dsp_run(int nsamples) 
 {
 	mfp_processor ** p;
+	mfp_sample * buf;
+	int chan;
 
 	mfp_dsp_set_blocksize(nsamples);
 
+	/* zero output buffers ... dac~ will accumulate into them */ 
+	if (mfp_output_ports != NULL) {
+		for(chan=0; chan < mfp_output_ports->len ; chan++) {
+			buf = mfp_get_output_buffer(chan);
+			if (buf != NULL) { 
+				memset(buf, 0, nsamples * sizeof(mfp_sample));
+			}
+		}
+	}
+	
 	if (mfp_needs_reschedule == 1) {
 		if (!mfp_dsp_schedule()) {
 			printf("DSP Error: Some processors could not be scheduled\n");

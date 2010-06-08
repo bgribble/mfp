@@ -33,7 +33,7 @@ process(mfp_processor * proc)
 	else
 		reset_phase = 0;
 
-	phase_incr = 2.0 * M_PI * freq / mfp_samplerate;
+	phase_incr = 2.0 * M_PI * freq / (double)mfp_samplerate;
 
 	/* sending "reset = 1" resets phase */ 
 	if (reset_phase > 0.1) {

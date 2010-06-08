@@ -46,7 +46,7 @@ mfp_get_output_buffer(int chan) {
 	}
 
 	if (chan < mfp_output_ports->len) {
-		return jack_port_get_buffer(g_array_index(mfp_input_ports, jack_port_t *, chan),
+		return jack_port_get_buffer(g_array_index(mfp_output_ports, jack_port_t *, chan),
 				                    mfp_blocksize);
 	}
 	else {

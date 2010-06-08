@@ -88,6 +88,7 @@ mfp_proc_process(mfp_processor * self)
 	for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
 		inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
 		inlet_buf = self->inlet_buf[inlet_num];
+		memset(inlet_buf, 0, mfp_blocksize * sizeof(mfp_sample));
 		for(curr_inlet = (mfp_connection **)inlet_conn->data; *curr_inlet != NULL; curr_inlet++) {
 			upstream_proc = (*curr_inlet)->dest_proc;
 			upstream_outlet_num = (*curr_inlet)->dest_port;	
