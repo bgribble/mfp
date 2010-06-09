@@ -1,4 +1,7 @@
+class BangType (object):
+	def __repr__ (self):
+		return "bang"
 
-class Bang(object):
-	pass
+Bang = BangType() 
+
 

@@ -24,8 +24,6 @@ class MFPDSP (object):
 
 		while not time_to_quit:
 			qcmd = self.cmd_queue.get()
-			print "MFPDSP: got queue data"
-			print "MFPDSP:", qcmd
 
 			if not qcmd: 
 				continue
@@ -40,7 +38,6 @@ class MFPDSP (object):
 		oi = self.obj_id
 		self.obj_id += 1
 		self.objects[oi] = obj
-		print "remembering obj", obj, oi
 		return oi 
 
 	def recall(self, obj_id):
@@ -59,6 +56,13 @@ class MFPDSP (object):
 			obj = self.recall(obj_id)
 			if obj:
 				req.response = mfpdsp.proc_getparam(obj, param)
+		elif cmd == "set_param":
+			obj_id = args.get('obj_id')
+			param = args.get('name')
+			value = args.get('value')
+			obj = self.recall(obj_id)
+			if obj:
+				req.response = mfpdsp.proc_setparam(obj, param, value)
 		elif cmd == "connect":
 			src = self.recall(args.get('obj_id'))
 			dst = self.recall(args.get('target'))

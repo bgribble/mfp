@@ -80,7 +80,7 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 	/* no info logging to console */ 
 	jack_set_info_function(info_callback);
 	jack_set_error_function(info_callback);
-
+	
 	/* create application input and output ports */ 
 	if (num_inputs > 0) {
 		mfp_input_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));

@@ -10,7 +10,20 @@ class ControlProcessor (object):
 	def __init__(self, inlets, outlets):
 		self.inlets = [None] * inlets
 		self.outlets = [None] * outlets 
-		self.connections = [[]] * outlets 
+		self.connections = [[] for r in range(outlets)]
+
+	def resize(self, inlets, outlets):
+		if inlets > len(self.inlets):
+			self.inlets += [None] * inlets-len(self.inlets)
+		else:
+			self.inlets[inlets:] = []
+
+		if outlets > len(self.outlets):
+			self.outlets += [None] * outlets-len(self.outlets)
+			self.connections += [[] for r in range(outlets-len(self.outlets)) ]
+		else:
+			self.outlets[outlets:] = []
+			self.connections[outlets:] = []
 
 	def connect(self, outlet, target, inlet):
 		existing = self.connections[outlet]
@@ -21,17 +34,21 @@ class ControlProcessor (object):
 		self.inlets[inlet] = value
 		if inlet == 0:
 			try:
+				self.outlets = [None] * len(self.outlets)
 				self.trigger()
 			except: 
-				self.error()
+				import traceback
+				tb = traceback.format_exc()
+				self.error(tb)
 
-	def error(self):
+	def error(self, tb=None):
 		print "Error:", self
+		if tb:
+			print tb
 
 	def propagate(self): 
 		for conns, val in zip(self.connections, self.outlets):
 			if val is not None:
 				for target, inlet in conns:
 					target.send(val, inlet)
-
 	

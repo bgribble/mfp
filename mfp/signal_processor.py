@@ -12,10 +12,8 @@ class SignalProcessor (object):
 		req = self.message("create", name=proc_name, inlets=inlets, 
 					       outlets=outlets, params=params)
 		MFPApp.wait(req)
-		print "SignalProcessor: got response", req.response 
 
 	def response(self, request):
-		print "SignalProcessor: in callback"
 		if request.payload.get("cmd") == "create":
 			self.dsp_obj = request.response
 
@@ -23,8 +21,6 @@ class SignalProcessor (object):
 		if callback is None:
 			callback = self.response 
 		payload = dict(cmd=cmd, args=args)
-		print "SignalProcessor.message: sending"
-		print payload 
 		return MFPApp.dsp_message(payload, callback=callback)
 
 	def connect(self, outlet, target, inlet):

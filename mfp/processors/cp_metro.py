@@ -9,6 +9,7 @@ from ..timer import MultiTimer
 from ..control_processor import ControlProcessor
 from ..main import MFPApp 
 from ..datetime import datetime, timedelta 
+from .. import Bang
 
 class CPMetro (ControlProcessor): 
 	_timer = None 
@@ -23,7 +24,7 @@ class CPMetro (ControlProcessor):
 			CPMetro._timer.start()
 
 		if len(initargs):
-			self.interval = int(initargs[0])
+			self.interval = timedelta(milliseconds=int(initargs[0]))
 
 		ControlProcessor.__init__(self, inlets=2, outlets=1)
 
@@ -31,20 +32,21 @@ class CPMetro (ControlProcessor):
 	def trigger(self):
 		if self.inlets[1] is not None:
 			self.interval = timedelta(milliseconds=int(self.inlets[1]))
+			self.inlets[1] = None 
 
-		if self.inlets[0]:
+		if self.inlets[0] is Bang or self.inlets[0]:
 			self.started = datetime.now()
 			self.count = 1
 			self._timer.schedule(self.started + self.interval, self.timer_cb)
-			self.outlets[0] = True 
+			self.outlets[0] = Bang
+			self.propagate()
 		else:
 			self.started = False 
 
-		self.propagate()
 
 	def timer_cb(self):
 		if self.started:
-			self.outlets[0] = True
+			self.outlets[0] = Bang 
 			self.count += 1 
 			self._timer.schedule(self.started + self.count*self.interval, self.timer_cb)
 			self.propagate()

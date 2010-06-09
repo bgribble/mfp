@@ -81,7 +81,6 @@ class DuplexQueue(object):
 		else:
 			tosend['type'] = 'payload'
 			tosend['payload'] = req
-		print "DuplexQueue.put:", tosend 
 		self.write_queue.put(tosend)
 		return req
 	

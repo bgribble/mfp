@@ -150,7 +150,8 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 int
 mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val)
 {
-	g_hash_table_insert(self->params, g_strdup(param_name), param_dup(param_val));
+	gpointer * oldval;
+	g_hash_table_replace(self->params, g_strdup(param_name), param_dup(param_val));
 	return 0;
 }
 

@@ -10,6 +10,7 @@ import multiprocessing
 
 import mfp.dsp
 from mfp.duplex_queue import DuplexQueue, QRequest
+from mfp import Bang 
 
 class MFPApp (object):
 	
@@ -40,7 +41,7 @@ class MFPApp (object):
 
 	@classmethod
 	def dsp_message(klass, obj, callback=None):
-		print "MFPApp.dsp_message:", obj
+		# print "MFPApp.dsp_message:", obj
 		if MFPApp._instance is None:
 			MFPApp._instance = MFPApp()
 		req = QRequest(obj, callback=callback)
@@ -66,10 +67,7 @@ class MFPApp (object):
 
 	@classmethod
 	def wait(klass, req):
-		print "MFPApp: waiting for", req
 		MFPApp._instance.dsp_queue.wait(req)
-		print "MFPApp: done with wait for", req
-		print "MFPApp: response =", req.response 
 
 	@classmethod
 	def finish(klass):
@@ -80,9 +78,42 @@ def main():
 	import processors
 	processors.register() 
 
-	d = MFPApp.create("dac~")
-	o = MFPApp.create("osc~", 500)
-	o.connect(0, d, 0)
+	m = MFPApp.create("metro", 250)
+
+	v = MFPApp.create("var", 0)
+	plus = MFPApp.create("+", 1)
+	mod = MFPApp.create("%", 4)
+
+	# build the counter 
+	m.connect(0, v, 0)
+	v.connect(0, plus, 0)
+	plus.connect(0, mod, 0)
+	mod.connect(0, v, 1)
+
+	# freq converter 
+	r = MFPApp.create("route", 0, 1, 2, 3)
+	f0 = MFPApp.create("var", 100)
+	f1 = MFPApp.create("var", 200)
+	f2 = MFPApp.create("var", 400)
+	f3 = MFPApp.create("var", 800)
+	
+	v.connect(0, r, 0)
+	r.connect(0, f0, 0)
+	r.connect(1, f1, 0)
+	r.connect(2, f2, 0)
+	r.connect(3, f3, 0)
+
+	# oscillator/dac 
+	osc = MFPApp.create("osc~", 500)
+	dac = MFPApp.create("dac~")
+	
+	f0.connect(0, osc, 0)
+	f1.connect(0, osc, 0)
+	f2.connect(0, osc, 0)
+	f3.connect(0, osc, 0)
+	
+	osc.connect(0, dac, 0)
+	m.send(True, 0)
 
 	import code
 	code.interact(local=locals())

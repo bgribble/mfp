@@ -3,8 +3,8 @@
 cp_var.py
 Variable holder 
 '''
-import mfp
 from ..control_processor import ControlProcessor 
+from .. import Bang 
 
 class CPVar (ControlProcessor):
 	def __init__(self, initval=None):
@@ -14,8 +14,9 @@ class CPVar (ControlProcessor):
 	def trigger(self):
 		if self.inlets[1] is not None:
 			self.value = self.inlets[1] 
+			self.inlets[1] = None 
 
-		if isinstance(self.inlets[0], mfp.Bang):
+		if self.inlets[0] is Bang:
 			self.outlets[0] = self.value
 		else:
 			self.value = self.inlets[0]
