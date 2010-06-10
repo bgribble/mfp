@@ -47,10 +47,12 @@ class DuplexQueue(object):
 					self.handler(self, incoming)
 			except Queue.Empty:
 				pass
+		print "DuplexQueue reader thread quitting"
 
 	def finish(self):
 		self.quit_flag = True
 		self.reader_thread.join()
+		print "DuplexQueue reader thread finished\n"
 
 	def init_requestor(self):
 		self.lock = threading.Lock()

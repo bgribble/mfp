@@ -10,6 +10,7 @@ typedef struct {
 	/* type, settable parameters, and internal state */
 	struct mfp_procinfo_struct * typeinfo;
 	GHashTable * params; 
+	GHashTable * params_nxt; 
 	void * data;
 	
 	/* inlet and outlet connections (g_array of g_array) */
@@ -51,6 +52,7 @@ extern GArray * mfp_proc_list;
 extern GArray * mfp_input_ports;
 extern GArray * mfp_output_ports;
 extern int mfp_jack_startup(int num_inputs, int num_outputs);
+extern void mfp_jack_shutdown(void);
 extern mfp_sample * mfp_get_input_buffer(int);
 extern mfp_sample * mfp_get_output_buffer(int);
 

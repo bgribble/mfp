@@ -10,14 +10,23 @@ dsp_startup(PyObject * mod, PyObject * args)
 	PyArg_ParseTuple(args, "ii", &num_inputs, &num_outputs);
 
 	mfp_jack_startup(num_inputs, num_outputs);
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+static PyObject *
+dsp_shutdown(PyObject * mod, PyObject * args) 
+{
+	mfp_jack_shutdown();
+	Py_INCREF(Py_None);
 	return Py_None;
 }
 
 static PyObject *
 dsp_enable(PyObject * mod, PyObject * args)
 {
-	printf("DSP ENABLED\n");
 	mfp_dsp_enabled = 1;
+	Py_INCREF(Py_True);
 	return Py_True;
 }
 
@@ -25,6 +34,7 @@ static PyObject *
 dsp_disable(PyObject * mod, PyObject * args)
 {
 	mfp_dsp_enabled = 0;
+	Py_INCREF(Py_True);
 	return Py_True;
 }
 
@@ -55,6 +65,7 @@ proc_create(PyObject * mod, PyObject *args)
 	mfp_procinfo * pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typestr);
 	mfp_processor * proc = NULL;	
 	if (pinfo == NULL) {
+		Py_INCREF(Py_None);
 		return Py_None;
 	}
 	else {
@@ -74,6 +85,7 @@ proc_delete(PyObject * mod, PyObject * args)
 
 	proc = PyCObject_AsVoidPtr(cobj);
 	mfp_proc_destroy(proc);
+	Py_INCREF(Py_True);
 	return Py_True;
 }
 
@@ -91,6 +103,7 @@ proc_connect(PyObject * mod, PyObject * args)
 	targ_proc = PyCObject_AsVoidPtr(target);
 	mfp_proc_connect(self_proc, my_outlet, targ_proc, targ_inlet);
 	mfp_needs_reschedule = 1;
+	Py_INCREF(Py_True);
 	return Py_True;
 }
 
@@ -108,8 +121,10 @@ proc_disconnect(PyObject * mod, PyObject * args)
 	targ_proc = PyCObject_AsVoidPtr(target);
 	mfp_proc_disconnect(self_proc, my_outlet, targ_proc, targ_inlet);
 	mfp_needs_reschedule = 1;
+	Py_INCREF(Py_True);
 	return Py_True;
 }
+
 
 static PyObject * 
 proc_setparam(PyObject * mod, PyObject * args) 
@@ -117,9 +132,9 @@ proc_setparam(PyObject * mod, PyObject * args)
 	PyObject * self=NULL;
 	char * param_name=NULL;
 	double param_value = 0.0;
-
 	PyArg_ParseTuple(args, "Osd", &self, &param_name, &param_value);
 	mfp_proc_setparam(PyCObject_AsVoidPtr(self), param_name, param_value);
+	Py_INCREF(Py_True);
 	return Py_True;
 }
 
@@ -138,9 +153,11 @@ proc_getparam(PyObject * mod, PyObject * args)
 static PyObject * 
 py_test_ctests(PyObject * mod, PyObject * args) {
 	if (! test_ctests()) {
+		Py_INCREF(Py_False);
 		return Py_False;
 	}
 	else {
+		Py_INCREF(Py_True);
 		return Py_True;
 	}
 
@@ -148,6 +165,7 @@ py_test_ctests(PyObject * mod, PyObject * args) {
 
 static PyMethodDef MfpDspMethods[] = {
 	{ "dsp_startup",  dsp_startup, METH_VARARGS, "Start processing thread" },
+	{ "dsp_shutdown",  dsp_shutdown, METH_VARARGS, "Stop processing thread" },
 	{ "dsp_enable",  dsp_enable, METH_VARARGS, "Enable dsp" },
 	{ "dsp_disable",  dsp_disable, METH_VARARGS, "Disable dsp" },
 	{ "proc_create", proc_create, METH_VARARGS, "Create DSP processor" },

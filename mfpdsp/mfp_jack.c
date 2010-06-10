@@ -10,6 +10,8 @@ GArray * mfp_output_ports;
 int mfp_samplerate =44100; 
 int mfp_blocksize = 1024; 
 
+static jack_client_t * client;
+
 static int
 process (jack_nframes_t nframes, void *arg)
 {
@@ -64,10 +66,8 @@ info_callback(const char * msg)
 int
 mfp_jack_startup(int num_inputs, int num_outputs) 
 {
-	jack_client_t * client;
 	jack_status_t status;
 	jack_port_t * port;
-	const char ** ports;
 	int i;
 
 	if ((client = jack_client_open("mfp_dsp", JackNullOption, &status, NULL)) == 0) {
@@ -116,6 +116,15 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 
 	return 1;
 
+}
+
+void
+mfp_jack_shutdown(void) 
+{
+	printf("jack_shutdown: closing client, good-bye!\n");
+	jack_deactivate(client);
+	jack_client_close(client);
+	client = NULL;
 }
 
 

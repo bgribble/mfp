@@ -12,6 +12,7 @@ class MFPDSP (object):
 		self.objects = {} 
 		self.obj_id = 0 
 		self.cmd_queue = q
+		self.spcount = 0
 		
 		q.init_responder()
 
@@ -29,9 +30,14 @@ class MFPDSP (object):
 				continue
 			elif qcmd.payload == 'quit':
 				time_to_quit = True
+				print "dsp process got quit"
 				continue
 
 			self.command(qcmd)
+		mfpdsp.dsp_shutdown()
+		import sys
+		sys.exit(0)
+		print "out of dsp thread\n"
 		return True
 
 	def remember(self, obj):
@@ -63,6 +69,7 @@ class MFPDSP (object):
 			obj = self.recall(obj_id)
 			if obj:
 				req.response = mfpdsp.proc_setparam(obj, param, value)
+			self.spcount += 1
 		elif cmd == "connect":
 			src = self.recall(args.get('obj_id'))
 			dst = self.recall(args.get('target'))
@@ -72,10 +79,7 @@ class MFPDSP (object):
 			dst = self.recall(args.get('target'))
 			mfpdsp.proc_disconnect(src, args.get('outlet'), dst, args.get('inlet'))
 
-
 		self.cmd_queue.put(req)
-
-	
 
 def main(dsp_queue):
 	dspapp = MFPDSP(dsp_queue)

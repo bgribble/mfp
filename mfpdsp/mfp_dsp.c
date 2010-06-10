@@ -7,6 +7,7 @@
 
 int mfp_dsp_enabled = 0;
 int mfp_needs_reschedule = 1;
+int proc_count = 0; 
 
 static int 
 depth_cmp_func(const void * a, const void *b) 
@@ -148,6 +149,7 @@ mfp_dsp_run(int nsamples)
 		mfp_proc_process(*p);
 	}
 
+	proc_count ++;
 }
 
 void

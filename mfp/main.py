@@ -72,13 +72,15 @@ class MFPApp (object):
 	@classmethod
 	def finish(klass):
 		MFPApp.dsp_message("quit")
+		MFPApp._instance.dsp_process.join()
+		print "main thread reaped DSP process"
 		MFPApp._instance.dsp_queue.finish()
 
 def main(): 
 	import processors
 	processors.register() 
 
-	m = MFPApp.create("metro", 250)
+	m = MFPApp.create("metro", 500)
 
 	v = MFPApp.create("var", 0)
 	plus = MFPApp.create("+", 1)
