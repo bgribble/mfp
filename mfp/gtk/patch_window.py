@@ -1,6 +1,9 @@
 
 import clutter 
 
+from text_element import TextElement
+from processor_element import ProcessorElement 
+
 MOD_SHIFT = 50
 MOD_RSHIFT = 62
 MOD_CTRL = 66
@@ -15,69 +18,12 @@ KEY_HOME = 65360
 KEY_END = 65367
 KEY_INS = 65379
 KEY_DEL = 65535
+KEY_UP = 65362
+KEY_DN = 65364
+KEY_LEFT = 65361
+KEY_RIGHT = 65363
+KEY_ENTER = 65293 
 
-class PatchElement (object):
-	def __init__(self, window, x, y):
-		self.actor = None 
-		self.stage = window
-		self.position_x = x
-		self.position_y = y
-		self.drag_x = None
-		self.drag_y = None
-	
-	def drag_start(self, x, y):
-		self.drag_x = x - self.position_x
-		self.drag_y = y - self.position_y
-
-	def drag(self, x, y):
-		self.move(x - self.drag_x, y - self.drag_y)
-
-class ProcessorElement (PatchElement):
-	def __init__(self, window, x, y):
-		PatchElement.__init__(self, window, x, y)
-		
-		# create elements 
-		self.actor = clutter.Rectangle()
-		self.label = clutter.Text()
-	
-		# configure rectangle box 
-		self.actor.set_size(50, 20)
-		self.actor.set_border_width(2)
-		self.actor.set_border_color(window.color_unselected)
-		self.actor.set_reactive(True)
-
-		# configure label
-		self.label.set_editable(True)
-		self.label.set_activatable(True)
-		self.label.set_reactive(True)
-		self.label.set_color(window.color_unselected) 
-		self.label.connect('activate', self.text_activate_cb)
-
-		self.move(x, y)
-
-		# add components to stage 
-		self.stage.stage.add(self.actor)
-		self.stage.stage.add(self.label)
-		self.stage.stage.set_key_focus(self.label)
-
-	def text_activate_cb(self, *args):
-		self.label.set_editable(False)
-		self.label.set_activatable(False)
-		self.stage.stage.set_key_focus(None)
-		print self.label.get_text()
-
-	def move(self, x, y):
-		self.position_x = x
-		self.position_y = y
-		self.actor.set_position(x, y)
-		self.label.set_position(x+4, y+1)
-
-	def select(self):
-		self.actor.set_border_color(self.stage.color_selected)
-
-	def unselect(self):
-		self.actor.set_border_color(self.stage.color_unselected)
-	
 
 class PatchWindow(object):
 
@@ -95,6 +41,13 @@ class PatchWindow(object):
 
 		self.objects = [] 
 		self.selected = None
+
+		# used while building a connection
+		self.conn_mode = None 
+		self.conn_start_obj = None
+		self.conn_start_port = None
+		self.conn_end_obj = None
+		self.conn_end_port = None
 
 		# configure clutter stage 
 		self.stage.set_size(320, 240)
@@ -114,30 +67,128 @@ class PatchWindow(object):
 		b = ProcessorElement(self, self.pointer_x, self.pointer_y)
 		self.objects.append(b)
 		self.select(b)
+		b.toggle_edit()
+
+	def add_text(self):
+		b = TextElement(self, self.pointer_x, self.pointer_y)
+		self.objects.append(b)
+		self.select(b)
+		b.toggle_edit()
 
 	def select(self, obj):
+		if self.conn_mode == 'c':
+			self.conn_end_obj = obj
+		elif self.conn_mode == 'C':
+			self.conn_start_obj = obj
+
 		if self.selected is not obj and self.selected is not None:
 			self.selected.unselect()
 		obj.select()
 		self.selected = obj
 	
 	def select_next(self):
+		if self.selected is None and len(self.objects) > 0:
+			self.select(self.objects[0])
 		cur_ind = self.objects.index(self.selected)
 		self.select(self.objects[(cur_ind+1) % len(self.objects)])
 
 	def select_prev(self):
+		if self.selected is None and len(self.objects) > 0:
+			self.select(self.objects[-1])
 		cur_ind = self.objects.index(self.selected)
 		self.select(self.objects[cur_ind-1])
 
 	def dispatch_key(self, key):
+		# global functions 
 		if key == 'C-q':
 			self.quit()
+		elif key == 'C-s':
+			self.save()
+
+		# creating elements 
 		elif key == 'C-a':
 			self.add_processor()
+		elif key == 'C-t':
+			self.add_text()
+
+		# selection/editing 
+		elif key == 'C-u':
+			if self.selected:
+				self.selected.unselect()
+				self.selected = None
+		elif key == 'S-C-u':
+			if self.selected:
+				self.selected.toggle_edit()
 		elif key == 'TAB':
 			self.select_next()
 		elif key == 'S-TAB':
 			self.select_prev()
+
+		# connections 
+		elif key == 'c':
+			if self.selected:
+				self.conn_mode = 'c'
+				self.conn_start_obj = self.selected 
+				self.conn_end_obj = None
+				self.conn_start_port = 0
+				self.conn_end_port = 0
+		elif key == 'S-c':
+			if self.selected:
+				self.conn_mode = 'C'
+				self.conn_start_obj = None
+				self.conn_end_obj = self.selected
+				self.conn_start_port = 0
+				self.conn_end_port = 0
+
+		elif key in ('1', '2', '3', '4', '5', '6', '7', '8', '9'):
+			if self.conn_mode == 'c':
+				if self.conn_end_obj is None:
+					self.conn_start_port = int(key) - 1
+				else:
+					self.conn_end_port = int(key) - 1
+			elif self.conn_mode == 'C':
+				if self.conn_start_obj is None:
+					self.conn_end_port = int(key) - 1
+				else:
+					self.conn_start_port = int(key) - 1
+		elif key == 'RET':
+			print self.conn_mode, self.conn_start_obj, self.conn_end_obj
+			if self.conn_mode is not None:
+				if self.conn_start_obj is not None and self.conn_end_obj is not None:
+					print "Making connection:"
+					print self.conn_start_obj, self.conn_start_port, '-->', self.conn_end_obj, self.conn_end_port
+					self.conn_mode = None 
+		# movement 
+		elif key == 'UP':
+			self.move_selected(0, -1)	
+		elif key == 'DOWN':
+			self.move_selected(0, 1)
+		elif key == 'LEFT':
+			self.move_selected(-1, 0)	
+		elif key == 'RIGHT':
+			self.move_selected(1, 0)
+		elif key == 'S-UP':
+			self.move_selected(0, -5)	
+		elif key == 'S-DOWN':
+			self.move_selected(0, 5)
+		elif key == 'S-LEFT':
+			self.move_selected(-5, 0)	
+		elif key == 'S-RIGHT':
+			self.move_selected(5, 0)
+		elif key == 'C-UP':
+			self.move_selected(0, -25)	
+		elif key == 'C-DOWN':
+			self.move_selected(0, 25)
+		elif key == 'C-LEFT':
+			self.move_selected(-25, 0)	
+		elif key == 'C-RIGHT':
+			self.move_selected(25, 0)
+
+	def move_selected(self, dx, dy):
+		if self.selected is None:
+			return
+		self.selected.move(max(0, self.selected.position_x + dx),
+					       max(0, self.selected.position_y + dy))
 
 	def mouse_motion_cb(self, stage, event):
 		self.pointer_x = event.x
@@ -152,11 +203,6 @@ class PatchWindow(object):
 
 	def mouse_up_cb(self, stage, event):
 		self.mouse_buttons.remove(1)
-
-	def leave_cb(self, *args): 
-		print "leave callback", args
-		self.mod_keys = set()
-		self.mod_esc = False 
 
 	def canonical_key(self, event):
 		key = ''
@@ -176,6 +222,16 @@ class PatchWindow(object):
 			key += chr(event.get_key_symbol())
 		elif ks == KEY_TAB:
 			key += 'TAB'
+		elif ks == KEY_UP:
+			key += 'UP'
+		elif ks == KEY_DN:
+			key += 'DOWN'
+		elif ks == KEY_LEFT:
+			key += 'LEFT'
+		elif ks == KEY_RIGHT:
+			key += 'RIGHT'
+		elif ks == KEY_ENTER:
+			key += 'RET'
 		else:
 			key += "%d" % ks
 		
@@ -188,7 +244,6 @@ class PatchWindow(object):
 			if code == MOD_ESC:
 				self.mod_esc = True
 		elif code == MOD_RSHIFT:
-			print "RSHIFT"
 			self.mod_keys.add(MOD_SHIFT)
 		else:
 			ckey = self.canonical_key(event)
@@ -196,15 +251,13 @@ class PatchWindow(object):
 			print ckey
 			self.mod_esc = False 
 
-		print code, type(code), MOD_RSHIFT
-
 	def key_up_cb(self, stage, event):
 		code = event.get_key_code()
 		if code in (MOD_SHIFT, MOD_CTRL, MOD_ALT, MOD_WIN, MOD_ESC):
 			try:
 				self.mod_keys.remove(code)
 			except KeyError:
-				print "up for key not active"
+				pass
 		elif code == MOD_RSHIFT:
 			self.mod_keys.remove(MOD_SHIFT)
 
