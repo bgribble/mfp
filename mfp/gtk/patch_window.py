@@ -2,7 +2,7 @@
 import clutter 
 
 from text_element import TextElement
-from processor_element import ProcessorElement 
+from processor_element import ProcessorElement, ConnectionElement 
 
 MOD_SHIFT = 50
 MOD_RSHIFT = 62
@@ -157,6 +157,10 @@ class PatchWindow(object):
 				if self.conn_start_obj is not None and self.conn_end_obj is not None:
 					print "Making connection:"
 					print self.conn_start_obj, self.conn_start_port, '-->', self.conn_end_obj, self.conn_end_port
+					c = ConnectionElement(self, self.conn_start_obj, self.conn_start_port,
+						                  self.conn_end_obj, self.conn_end_port)
+					self.conn_start_obj.connections_out.append(c)
+					self.conn_end_obj.connections_in.append(c)
 					self.conn_mode = None 
 		# movement 
 		elif key == 'UP':
