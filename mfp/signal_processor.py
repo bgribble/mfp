@@ -26,6 +26,7 @@ class SignalProcessor (object):
 	def connect(self, outlet, target, inlet):
 		self.message("connect", obj_id=self.dsp_obj, target=target.dsp_obj, 
 			         outlet=outlet, inlet=inlet) 
+		return True
 
 	def disconnect(self, outlet, target, inlet):
 		self.message("disconnect", obj_id=self.dsp_obj, target=target.dsp_obj, 

@@ -5,15 +5,14 @@ main.py: main routine for mfp
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-import sys
+import sys, os
 import multiprocessing 
 
-import mfp.dsp
+import mfp.dsp, mfp.gui
 from mfp.duplex_queue import DuplexQueue, QRequest
 from mfp import Bang 
 
 class MFPApp (object):
-	
 	_instance = None 
 
 	def __init__(self):
@@ -22,14 +21,76 @@ class MFPApp (object):
 		self.dsp_process = multiprocessing.Process(target=mfp.dsp.main,
 												   args=(self.dsp_queue,)) 
 		self.dsp_queue.init_requestor()
+		
+		# gui process connection
+		self.gui_queue = DuplexQueue()
+		self.gui_process = multiprocessing.Process(target=mfp.gui.main,
+											       args=(self.gui_queue,))
+		self.gui_queue.init_requestor(reader=self.gui_reader_thread)
 
 		# processor class registry 
 		self.registry = {} 
 		
+		# objects we give IDs to 
+		self.objects = {}
+		self.next_obj_id = 0 
+
+		MFPApp._instance = self
+
 		# start threads 
 		self.dsp_process.start()
+		self.gui_process.start()
+		print "MFPApp: self=%s, dsp child=%s, gui child=%s" % (os.getpid(), self.dsp_process.pid, self.gui_process.pid)
 
-		MFPApp._instance = self 
+
+	@classmethod
+	def remember(klass, obj):
+		oi = MFPApp._instance.next_obj_id
+		MFPApp._instance.next_obj_id += 1
+		MFPApp._instance.objects[oi] = obj
+		return oi
+
+	@classmethod 
+	def recall(klass, obj_id):
+		return MFPApp._instance.objects.get(obj_id)
+
+	def gui_reader_thread(self):
+		quit_req = False 
+		while not quit_req:
+			req = self.gui_queue.get()
+			if not req:
+				pass
+			elif req.payload == 'quit':
+				quit_req = True
+			else:
+				self.gui_command(req)
+		print "GUI reader: got 'quit', exiting"
+		MFPApp.finish()
+
+	def gui_command(self, req):
+		cmd = req.payload.get('cmd')
+		args = req.payload.get('args')
+
+		if cmd == 'create':
+			strargs = args.get('args')
+			if strargs is None:
+				arglist = ()
+			else:
+				arglist = eval(strargs)
+				if not isinstance(arglist, tuple):
+					arglist = (arglist,)
+			obj = MFPApp.create(args.get('type'), *arglist)
+			obj_id = MFPApp.remember(obj)
+			req.response = obj_id
+
+		elif cmd == 'connect':
+			obj_1 = MFPApp.recall(args.get('obj_1_id'))
+			obj_2 = MFPApp.recall(args.get('obj_2_id'))
+
+			r = obj_1.connect(args.get('obj_1_port'), obj_2, args.get('obj_2_port'))	
+			req.response = r 
+
+		self.gui_queue.put(req)
 
 	@classmethod
 	def register(klass, name, ctor):
@@ -76,7 +137,20 @@ class MFPApp (object):
 		print "main thread reaped DSP process"
 		MFPApp._instance.dsp_queue.finish()
 
-def main(): 
+import processors
+import code 
+
+def main():
+	print "MFPAPP: pid=", os.getpid()
+	m = MFPApp()
+	processors.register()
+
+	code.interact(local=locals())
+	MFPApp.finish()
+
+
+
+def testnetwork(): 
 	import processors
 	processors.register() 
 

@@ -47,17 +47,17 @@ class DuplexQueue(object):
 					self.handler(self, incoming)
 			except Queue.Empty:
 				pass
-		print "DuplexQueue reader thread quitting"
 
 	def finish(self):
 		self.quit_flag = True
 		self.reader_thread.join()
-		print "DuplexQueue reader thread finished\n"
 
-	def init_requestor(self):
+	def init_requestor(self, reader=None):
+		if reader is None:
+			reader = self._reader_func
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
-		self.reader_thread = threading.Thread(target=self._reader_func)
+		self.reader_thread = threading.Thread(target=reader)
 		self.reader_thread.start()
 
 	def init_responder(self):
@@ -67,15 +67,14 @@ class DuplexQueue(object):
 		self.read_queue = q
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
-		self.pending = None 
 
 	def put(self, req):
 		tosend = {} 
 		if isinstance(req, QRequest):
+			if req.state == QRequest.CREATED:
+				self.pending[req.request_id] = req
 			req.state = QRequest.SUBMITTED
 			req.queue = self
-			if self.pending is not None:
-				self.pending[req.request_id] = req
 			tosend['type'] = 'QRequest'
 			tosend['request_id'] = req.request_id
 			tosend['payload'] = req.payload 

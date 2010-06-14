@@ -29,6 +29,7 @@ class ControlProcessor (object):
 		existing = self.connections[outlet]
 		if (target,inlet) not in existing:
 			existing.append((target,inlet))
+		return True
 	
 	def send(self, value, inlet=0):
 		self.inlets[inlet] = value

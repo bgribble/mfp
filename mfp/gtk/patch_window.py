@@ -24,6 +24,7 @@ KEY_LEFT = 65361
 KEY_RIGHT = 65363
 KEY_ENTER = 65293 
 
+from mfp.gui import MFPGUI 
 
 class PatchWindow(object):
 
@@ -58,8 +59,11 @@ class PatchWindow(object):
 		self.stage.connect('key-press-event', self.key_down_cb)
 		self.stage.connect('key-release-event', self.key_up_cb)
 		self.stage.connect('motion-event', self.mouse_motion_cb)
-		#self.stage.connect('leave-event', self.leave_cb)
 		self.stage.connect('destroy', self.quit)
+
+		# leave event: handler should figure out what is being left and 
+		# clear modifier keys if the main window is being left 
+		#self.stage.connect('leave-event', self.leave_cb)
 
 		self.stage.show_all()
 
@@ -99,6 +103,9 @@ class PatchWindow(object):
 		self.select(self.objects[cur_ind-1])
 
 	def dispatch_key(self, key):
+		# should handle this with a dict of keysym to handler 
+		# with contexts (modes) 
+
 		# global functions 
 		if key == 'C-q':
 			self.quit()
@@ -157,10 +164,16 @@ class PatchWindow(object):
 				if self.conn_start_obj is not None and self.conn_end_obj is not None:
 					print "Making connection:"
 					print self.conn_start_obj, self.conn_start_port, '-->', self.conn_end_obj, self.conn_end_port
-					c = ConnectionElement(self, self.conn_start_obj, self.conn_start_port,
-						                  self.conn_end_obj, self.conn_end_port)
-					self.conn_start_obj.connections_out.append(c)
-					self.conn_end_obj.connections_in.append(c)
+		
+					if MFPGUI.connect(self.conn_start_obj.proc_id, self.conn_start_port,
+					                  self.conn_end_obj.proc_id, self.conn_end_port):
+						c = ConnectionElement(self, self.conn_start_obj, self.conn_start_port,
+											  self.conn_end_obj, self.conn_end_port)
+						self.conn_start_obj.connections_out.append(c)
+						self.conn_end_obj.connections_in.append(c)
+					else:
+						print "Cannot make connection"
+
 					self.conn_mode = None 
 		# movement 
 		elif key == 'UP':
@@ -268,7 +281,4 @@ class PatchWindow(object):
 	def quit(self, *rest):
 		clutter.main_quit()
 
-if __name__ == "__main__":
-	w = PatchWindow()
-	clutter.main()
 
