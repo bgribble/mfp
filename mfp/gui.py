@@ -55,6 +55,12 @@ class MFPGUI (object):
 		MFPGUI._instance.cmd_queue.wait(r)
 		return r.response
 
+	@classmethod
+	def send_bang(klass, obj_id, port):
+		r = MFPGUI.mfp_send(dict(cmd="send_bang", args=dict(obj_id=obj_id, port=port)))
+		MFPGUI._instance.cmd_queue.wait(r)
+		return r.response 
+
 	def start_main(self):
 		print "MFPGUI: starting clutter main loop"
 		import clutter 

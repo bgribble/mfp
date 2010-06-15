@@ -2,7 +2,9 @@
 import clutter 
 
 from text_element import TextElement
-from processor_element import ProcessorElement, ConnectionElement 
+from processor_element import ProcessorElement
+from connection_element import ConnectionElement 
+from message_element import MessageElement
 
 MOD_SHIFT = 50
 MOD_RSHIFT = 62
@@ -79,6 +81,12 @@ class PatchWindow(object):
 		self.select(b)
 		b.toggle_edit()
 
+	def add_message(self):
+		b = MessageElement(self, self.pointer_x, self.pointer_y)
+		self.objects.append(b)
+		self.select(b)
+		b.toggle_edit()
+
 	def select(self, obj):
 		if self.conn_mode == 'c':
 			self.conn_end_obj = obj
@@ -117,6 +125,8 @@ class PatchWindow(object):
 			self.add_processor()
 		elif key == 'C-t':
 			self.add_text()
+		elif key == 'C-m':
+			self.add_message()
 
 		# selection/editing 
 		elif key == 'C-u':

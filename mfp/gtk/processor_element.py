@@ -9,51 +9,6 @@ import math
 from patch_element import PatchElement
 from mfp.gui import MFPGUI
 
-class Point(object):
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
-
-class ConnectionElement(PatchElement):
-	def __init__(self, window, obj_1, port_1, obj_2, port_2):
-		PatchElement.__init__(self, window, obj_1.position_x, obj_1.position_y)
-
-		self.actor = clutter.Rectangle()
-		self.obj_1 = obj_1
-		self.port_1 = port_1
-		self.obj_2 = obj_2
-		self.port_2 = port_2
-		self.rotation = 0
-		self.width = None  
-		self.height = None 
-		
-		self.actor.set_color(window.color_unselected)
-		self.stage.stage.add(self.actor)
-		self.draw()
-
-	def output_pos(self, obj, port):
-		h = obj.actor.get_height()
-		dx = 5 + port*5
-		return Point(obj.position_x + dx, obj.position_y + h)
-
-	def input_pos(self, obj, port):
-		dx = 5 + port*5
-		return Point(obj.position_x + dx, obj.position_y)
-
-	def draw(self):
-		p1 = self.output_pos(self.obj_1, self.port_1)
-		p2 = self.input_pos(self.obj_2, self.port_2)
-		
-		self.position_x = p1.x
-		self.position_y = p1.y 
-		self.width = 1.5 
-		self.height = ((p2.x-p1.x)**2 + (p2.y - p1.y)**2)**0.5
-		self.rotation = math.atan2(p1.x - p2.x, p2.y-p1.y) * 180.0 / math.pi
-
-		self.actor.set_size(self.width, self.height)
-		self.actor.set_position(self.position_x, self.position_y)
-		self.actor.set_rotation(clutter.Z_AXIS, self.rotation, 0, 0, 0)
-
 class ProcessorElement (PatchElement):
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
@@ -66,27 +21,31 @@ class ProcessorElement (PatchElement):
 		self.editable = False 
 
 		# create elements 
-		self.actor = clutter.Rectangle()
+		self.actor = clutter.Group()
+		self.rect = clutter.Rectangle()
 		self.label = clutter.Text()
 
 		# configure rectangle box 
-		self.actor.set_size(50, 20)
-		self.actor.set_border_width(2)
-		self.actor.set_border_color(window.color_unselected)
-		self.actor.set_reactive(True)
+		self.rect.set_size(35, 20)
+		self.rect.set_border_width(2)
+		self.rect.set_border_color(window.color_unselected)
+		self.rect.set_reactive(True)
 
 		# configure label
+		self.label.set_position(4, 1)
 		self.label.set_activatable(True)
 		self.label.set_reactive(True)
 		self.label.set_color(window.color_unselected) 
 		self.label.connect('activate', self.text_activate_cb)
 		self.label.connect('text-changed', self.text_changed_cb)
 
+		self.actor.add(self.rect)
+		self.actor.add(self.label)
+
 		self.move(x, y)
 
 		# add components to stage 
 		self.stage.stage.add(self.actor)
-		self.stage.stage.add(self.label)
 		self.stage.stage.set_key_focus(self.label)
 
 	def text_activate_cb(self, *args):
@@ -108,16 +67,21 @@ class ProcessorElement (PatchElement):
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 
-		bwidth = self.actor.get_property('width')
+		bwidth = self.rect.get_property('width')
+			
+		new_w = None 
+		if (lwidth > (bwidth - 14)):
+			new_w = lwidth + 14
+		elif (bwidth > 35) and (lwidth < (bwidth - 14)):
+			new_w = max(35, lwidth + 14)
 
-		if (lwidth > (bwidth - 16)) or (bwidth >= 50 and (lwidth < (bwidth - 16))):
-			self.actor.set_size(lwidth + 16, self.actor.get_property('height'))
+		if new_w is not None:
+			self.rect.set_size(new_w, self.rect.get_property('height'))
 
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
 		self.actor.set_position(x, y)
-		self.label.set_position(x+4, y+1)
 
 		for c in self.connections_out:
 			c.draw()
@@ -126,10 +90,10 @@ class ProcessorElement (PatchElement):
 			c.draw()
 
 	def select(self):
-		self.actor.set_border_color(self.stage.color_selected)
+		self.rect.set_border_color(self.stage.color_selected)
 
 	def unselect(self):
-		self.actor.set_border_color(self.stage.color_unselected)
+		self.rect.set_border_color(self.stage.color_unselected)
 
 	def toggle_edit(self):
 		if self.editable:

@@ -73,15 +73,18 @@ class MFPApp (object):
 
 		if cmd == 'create':
 			strargs = args.get('args')
-			if strargs is None:
-				arglist = ()
-			else:
-				arglist = eval(strargs)
+			try:
+				if strargs is None:
+					arglist = ()
+				else:
+					arglist = eval(strargs)
 				if not isinstance(arglist, tuple):
 					arglist = (arglist,)
-			obj = MFPApp.create(args.get('type'), *arglist)
-			obj_id = MFPApp.remember(obj)
-			req.response = obj_id
+				obj = MFPApp.create(args.get('type'), *arglist)
+				obj_id = MFPApp.remember(obj)
+				req.response = obj_id
+			except:
+				req.response = False
 
 		elif cmd == 'connect':
 			obj_1 = MFPApp.recall(args.get('obj_1_id'))
@@ -89,6 +92,12 @@ class MFPApp (object):
 
 			r = obj_1.connect(args.get('obj_1_port'), obj_2, args.get('obj_2_port'))	
 			req.response = r 
+
+		elif cmd == 'send_bang':
+			obj = MFPApp.recall(args.get('obj_id'))
+			port = args.get('port')
+			obj.send(Bang, port)
+			req.response = True
 
 		self.gui_queue.put(req)
 
