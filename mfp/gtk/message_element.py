@@ -8,7 +8,7 @@ import clutter
 import cairo
 import math 
 from patch_element import PatchElement
-from mfp.gui import MFPGUI
+from mfp import MFPGUI
 
 class MessageElement (PatchElement):
 	def __init__(self, window, x, y):

@@ -11,10 +11,10 @@ class MFPDSP (object):
 	def __init__(self, q):
 		self.objects = {} 
 		self.obj_id = 0 
-		self.cmd_queue = q
+		self.cmd_pipe = q
 		self.spcount = 0
 		
-		q.init_responder()
+		q.init_slave(reader=False)
 
 	def start (self):
 		# start JACK thread 
@@ -24,7 +24,7 @@ class MFPDSP (object):
 		time_to_quit = False
 
 		while not time_to_quit:
-			qcmd = self.cmd_queue.get()
+			qcmd = self.cmd_pipe.get()
 
 			if not qcmd: 
 				continue
@@ -79,7 +79,7 @@ class MFPDSP (object):
 			dst = self.recall(args.get('target'))
 			mfpdsp.proc_disconnect(src, args.get('outlet'), dst, args.get('inlet'))
 
-		self.cmd_queue.put(req)
+		self.cmd_pipe.put(req)
 
 def main(dsp_queue):
 	dspapp = MFPDSP(dsp_queue)

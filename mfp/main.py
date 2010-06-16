@@ -8,8 +8,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 import sys, os
 import multiprocessing 
 
-import mfp.dsp, mfp.gui
-from mfp.duplex_queue import DuplexQueue, QRequest
+import mfp.dsp_slave, mfp.gui_slave
+from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang 
 
 class MFPApp (object):
@@ -17,16 +17,16 @@ class MFPApp (object):
 
 	def __init__(self):
 		# processor thread 
-		self.dsp_queue = DuplexQueue()
-		self.dsp_process = multiprocessing.Process(target=mfp.dsp.main,
-												   args=(self.dsp_queue,)) 
-		self.dsp_queue.init_requestor()
+		self.dsp_pipe = RequestPipe()
+		self.dsp_process = multiprocessing.Process(target=mfp.dsp_slave.main,
+												   args=(self.dsp_pipe,)) 
+		self.dsp_pipe.init_master()
 		
 		# gui process connection
-		self.gui_queue = DuplexQueue()
-		self.gui_process = multiprocessing.Process(target=mfp.gui.main,
-											       args=(self.gui_queue,))
-		self.gui_queue.init_requestor(reader=self.gui_reader_thread)
+		self.gui_pipe = RequestPipe()
+		self.gui_process = multiprocessing.Process(target=mfp.gui_slave.main,
+											       args=(self.gui_pipe,))
+		self.gui_pipe.init_master(reader=self.gui_reader_thread)
 
 		# processor class registry 
 		self.registry = {} 
@@ -40,7 +40,8 @@ class MFPApp (object):
 		# start threads 
 		self.dsp_process.start()
 		self.gui_process.start()
-		print "MFPApp: self=%s, dsp child=%s, gui child=%s" % (os.getpid(), self.dsp_process.pid, self.gui_process.pid)
+		print "MFPApp: self=%s, dsp child=%s, gui child=%s" % (os.getpid(), 
+			self.dsp_process.pid, self.gui_process.pid)
 
 
 	@classmethod
@@ -57,7 +58,7 @@ class MFPApp (object):
 	def gui_reader_thread(self):
 		quit_req = False 
 		while not quit_req:
-			req = self.gui_queue.get()
+			req = self.gui_pipe.get()
 			if not req:
 				pass
 			elif req.payload == 'quit':
@@ -99,7 +100,7 @@ class MFPApp (object):
 			obj.send(Bang, port)
 			req.response = True
 
-		self.gui_queue.put(req)
+		self.gui_pipe.put(req)
 
 	@classmethod
 	def register(klass, name, ctor):
@@ -114,8 +115,8 @@ class MFPApp (object):
 		# print "MFPApp.dsp_message:", obj
 		if MFPApp._instance is None:
 			MFPApp._instance = MFPApp()
-		req = QRequest(obj, callback=callback)
-		MFPApp._instance.dsp_queue.put(req)
+		req = Request(obj, callback=callback)
+		MFPApp._instance.dsp_pipe.put(req)
 		return req 
 
 	@classmethod 	
@@ -137,14 +138,14 @@ class MFPApp (object):
 
 	@classmethod
 	def wait(klass, req):
-		MFPApp._instance.dsp_queue.wait(req)
+		MFPApp._instance.dsp_pipe.wait(req)
 
 	@classmethod
 	def finish(klass):
 		MFPApp.dsp_message("quit")
 		MFPApp._instance.dsp_process.join()
 		print "main thread reaped DSP process"
-		MFPApp._instance.dsp_queue.finish()
+		MFPApp._instance.dsp_pipe.finish()
 
 import processors
 import code 
@@ -205,8 +206,6 @@ def testnetwork():
 	
 	print "sending quit message"
 	MFPApp.finish()
-
-
 
 if __name__ == "__main__":
 	main()

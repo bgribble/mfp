@@ -1,35 +1,21 @@
 #! /usr/bin/env python2.6
 '''
-duplex_queue.py
-Duplex multiprocessing queue implementation with request/response model
+request_pipe.pt
+Duplex multiprocessing pipe implementation with request/response model
 '''
 import multiprocessing 
 import threading 
 import Queue
 
-class QRequest(object):
-	_next_id = 0 
+from request import Request
 
-	CREATED = 0 
-	SUBMITTED = 1
-	RESPONSE_PEND = 2
-	RESPONSE_RCVD = 3 
-	
-	def __init__(self, payload, callback=None, multi_cb=False):
-		self.state = QRequest.CREATED 
-		self.payload = payload
-		self.response = None 
-		self.callback = callback
-		self.multi_cb = multi_cb
-		self.request_id = QRequest._next_id
-		QRequest._next_id += 1
-	
-
-
-class DuplexQueue(object): 
+class RequestPipe(object): 
 	def __init__(self):
-		self.read_queue = multiprocessing.Queue()
-		self.write_queue = multiprocessing.Queue()
+		master, slave = multiprocessing.Pipe()
+
+		# the slave will switch these 
+		self.this_end = master 
+		self.that_end = slave
 		self.handler = None
 		self.quit_flag = False 
 
@@ -50,70 +36,84 @@ class DuplexQueue(object):
 
 	def finish(self):
 		self.quit_flag = True
-		self.reader_thread.join()
+		if self.reader_thread:
+			self.reader_thread.join()
 
-	def init_requestor(self, reader=None):
+	def init_master(self, reader=None):
+		self.lock = threading.Lock()
+		self.condition = threading.Condition(self.lock)
+		
 		if reader is None:
 			reader = self._reader_func
-		self.lock = threading.Lock()
-		self.condition = threading.Condition(self.lock)
-		self.reader_thread = threading.Thread(target=reader)
-		self.reader_thread.start()
+		if reader:
+			self.reader_thread = threading.Thread(target=reader)
+			self.reader_thread.start()
 
-	def init_responder(self):
-		'''Reverse read/write queues; to be used by the slave process'''
-		q = self.write_queue
-		self.write_queue = self.read_queue
-		self.read_queue = q
+	def init_slave(self, reader=None):
+		'''Reverse ends of pipe; to be used by the slave process'''
+		q = self.this_end
+		self.this_end = self.that_end
+		self.that_end = q
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
+		
+		if reader is None:
+			reader = self._reader_func
+		if reader:
+			self.reader_thread = threading.Thread(target=reader)
+			self.reader_thread.start()
+
 
 	def put(self, req):
 		tosend = {} 
-		if isinstance(req, QRequest):
-			if req.state == QRequest.CREATED:
+		if isinstance(req, Request):
+			if req.state == Request.CREATED:
 				self.pending[req.request_id] = req
-			req.state = QRequest.SUBMITTED
+			req.state = Request.SUBMITTED
 			req.queue = self
-			tosend['type'] = 'QRequest'
+			tosend['type'] = 'Request'
 			tosend['request_id'] = req.request_id
 			tosend['payload'] = req.payload 
 			tosend['response'] = req.response 
 		else:
 			tosend['type'] = 'payload'
 			tosend['payload'] = req
-		self.write_queue.put(tosend)
+		self.this_end.send(tosend)
 		return req
 	
 	def wait(self, req):
-		if not isinstance(req, QRequest):
+		if not isinstance(req, Request):
 			return False 
 
 		with self.lock:
-			while req.state != QRequest.RESPONSE_RCVD:
+			while req.state != Request.RESPONSE_RCVD:
 				self.condition.wait()
 
 	def get(self, timeout=None):
+		if timeout is not None:
+			ready = self.this_end.poll(timeout)
+			if not ready:
+				raise Queue.Empty
 		try:
-			qobj = self.read_queue.get(timeout=timeout)
-		except Queue.Empty, e:
-			raise
-		
+			qobj = self.this_end.recv()
+		except EOFError, e:
+			raise Queue.Empty 
+
 		req = None 
-		if qobj.get('type') == 'QRequest':
+		if qobj.get('type') == 'Request':
 			if self.pending is not None:
 				req = self.pending.get(qobj.get('request_id'))
 				
 			if req:
 				req.response = qobj.get('response')
-				req.state = QRequest.RESPONSE_RCVD
+				req.state = Request.RESPONSE_RCVD
 				del self.pending[req.request_id]
 				if req.callback is not None:
 					req.callback(req)
 			else:
-				req = QRequest(qobj.get('payload'))
+				req = Request(qobj.get('payload'))
 				req.request_id = qobj.get('request_id')
-				req.state = QRequest.RESPONSE_PEND
+				req.state = Request.RESPONSE_PEND
 			qobj = req
 		else:
 			qobj = qobj.get('payload')

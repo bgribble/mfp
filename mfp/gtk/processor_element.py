@@ -7,7 +7,7 @@ A patch element corresponding to a signal or control processor
 import clutter 
 import math 
 from patch_element import PatchElement
-from mfp.gui import MFPGUI
+from mfp import MFPGUI
 
 class ProcessorElement (PatchElement):
 	def __init__(self, window, x, y):

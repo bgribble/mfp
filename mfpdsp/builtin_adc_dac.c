@@ -40,7 +40,6 @@ dac_process(mfp_processor * proc)
 	inbuf = proc->inlet_buf[0];
 
 	if ((outbuf == NULL) || (inbuf == NULL)) {
-		printf("dac~: outbuf=%p, inbuf=%p\n", outbuf, inbuf);
 		return 0;
 	}
 

@@ -1,18 +1,24 @@
 #! /usr/bin/env python2.6
 '''
 request.py 
-Request/response management for multiprocessing queue pairs 
+Request object for use with RequestPipe
 '''
 
-class QRequest (object):
-	_next_id = 1
-	def __init__(self, payload):
-		self.req_id = QRequest._next_id
-		self.payload = payload 
-		QRequest._next_id += 1
+class Request(object):
+	_next_id = 0 
 
-class QResponse (object):
-	def __init(self, req, payload):
-		self.req_id = req.req_id
-		self.payload = payload 
-		
+	CREATED = 0 
+	SUBMITTED = 1
+	RESPONSE_PEND = 2
+	RESPONSE_RCVD = 3 
+	
+	def __init__(self, payload, callback=None, multi_cb=False):
+		self.state = Request.CREATED 
+		self.payload = payload
+		self.response = None 
+		self.callback = callback
+		self.multi_cb = multi_cb
+		self.request_id = Request._next_id
+		Request._next_id += 1
+	
+

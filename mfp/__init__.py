@@ -1,7 +1,5 @@
-class BangType (object):
-	def __repr__ (self):
-		return "bang"
 
-Bang = BangType() 
-
+from bang import Bang
+from dsp_slave import MFPDSP
+from gui_slave import MFPGUI
 

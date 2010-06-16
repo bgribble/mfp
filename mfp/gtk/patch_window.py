@@ -26,7 +26,7 @@ KEY_LEFT = 65361
 KEY_RIGHT = 65363
 KEY_ENTER = 65293 
 
-from mfp.gui import MFPGUI 
+from mfp import MFPGUI 
 
 class PatchWindow(object):
 
