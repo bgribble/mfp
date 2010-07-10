@@ -1,0 +1,42 @@
+Control processors: trigger, spigot, if
+
+Signal processors: biquad~, hip~, lop~, noise~, phasor~, square~ 
+
+GUI elements: entry, slider, meter 
+
+External elements: OSC, LADSPA hosts, MIDI i/o
+
+Architectural issues: 
+ * Gateways between signal and control (snapshot~)
+ * Signal-processing domain issues (can't route fft~ to dac~)
+ * Structure of patches/abstractions 
+  * Snapshots of all parameters 
+  * "Macro" expansion of patches? 
+ * Continuation-passing rather than recursion for message propagation
+ * use SSE instructions where possible 
+
+Basics: 
+ * keybindings should use a mode-based inheritance, basically a 
+   dict of compound key symbol to function
+ * osc~ should use cubic estimator
+ * Selection management (multi select)
+ * cut and paste 
+ * Deleting objects and connections 
+ * Driving creation from mfp master 
+ * pd-style save and load 
+ * gtk accessorizing for gui window: menu, mode line, left click
+ * make edit vs playback mode more clear, change keybindings? 
+ * Add a perf testing script 
+ * error handling! 
+
+Bugs: 
+ * sending a string message to metro causes stack overflow... ah, it's unbound
+ * [route] allows changing number of outputs but nothing is propagated to the 
+   GUI
+
+Debug mode: 
+ * every processor has a debug port on the side 
+ * debug level gets set by message 
+ * full backtraces should get dumped on error
+
+

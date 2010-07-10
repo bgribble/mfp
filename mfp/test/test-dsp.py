@@ -2,12 +2,12 @@
 from unittest import TestCase
 
 import mfpdsp
-from mfp import processors
+import mfp 
 from mfp.main import MFPApp 
 
 
 def setup():
-	processors.register()
+	mfp.builtins.register()
 
 
 class DSPObjectTests (TestCase):
@@ -20,7 +20,7 @@ class DSPObjectTests (TestCase):
 	def test_read(self):
 		'''test_read: can read back a creation parameter'''
 		o = MFPApp.create("osc~", 500)
-		f = o.get_param("freq")
+		f = o.dsp_getparam("freq")
 		print f 
 		assert f == 500 
 

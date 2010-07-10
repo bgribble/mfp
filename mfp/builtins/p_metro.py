@@ -1,17 +1,17 @@
 #! /usr/bin/env python
 '''
-cp_metro.py: Metronome control processor
+p_metro.py: Metronome control processor
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..timer import MultiTimer 
-from ..control_processor import ControlProcessor
+from ..processor import Processor
 from ..main import MFPApp 
 from ..datetime import datetime, timedelta 
 from .. import Bang
 
-class CPMetro (ControlProcessor): 
+class Metro (Processor): 
 	_timer = None 
 
 	def __init__(self, *initargs):
@@ -19,15 +19,14 @@ class CPMetro (ControlProcessor):
 		self.interval = False 
 		self.count = 0
 		
-		if CPMetro._timer is None:
-			CPMetro._timer = MultiTimer()
-			CPMetro._timer.start()
+		if Metro._timer is None:
+			Metro._timer = MultiTimer()
+			Metro._timer.start()
 
 		if len(initargs):
 			self.interval = timedelta(milliseconds=int(initargs[0]))
 
-		ControlProcessor.__init__(self, inlets=2, outlets=1)
-
+		Processor.__init__(self, inlets=2, outlets=1)
 
 	def trigger(self):
 		if self.inlets[1] is not None:
@@ -43,7 +42,6 @@ class CPMetro (ControlProcessor):
 		else:
 			self.started = False 
 
-
 	def timer_cb(self):
 		if self.started:
 			self.outlets[0] = Bang 
@@ -52,4 +50,4 @@ class CPMetro (ControlProcessor):
 			self.propagate()
 
 def register():
-	MFPApp.register("metro", CPMetro)
+	MFPApp.register("metro", Metro)

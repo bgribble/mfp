@@ -1,0 +1,31 @@
+MFP -- music for programmers 
+
+Prerequisites: a bunch of dependencies need to be installed for this to 
+work.  I use debian so here are the debian/ubuntu package names: 
+
+	python2.6 
+	python2.6-dev (for Python.h)
+	python-gtk (pygtk)
+	python-clutter (pyclutter)
+	python-cairo
+	python-nose 
+	python-setuptools 
+	libjack0
+	libjack0-dev
+	libglib2.0
+	libglib2.0-dev
+	pkg-config 
+
+Building: I suggest using 'virtualenv' to build in a sandbox.  From
+the top level (where this file is located):
+	$ virtualenv --python=python2.6 virtual
+	$ . virtual/bin/activate 
+	$ python ./setup.py install 
+
+Then, run the unit tests:
+	$ python /usr/bin/nosetests -v mfp 
+
+If that works: 
+	$ mfp 
+
+Enjoy! 

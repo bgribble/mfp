@@ -1,20 +1,24 @@
 #! /usr/bin/env python2.6 
 '''
-cp_route.py
-Route inputs to an output based on "address" in first element 
+p_route.py: Route inputs to an output based on "address" in first element 
+
+Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from ..control_processor import ControlProcessor
+from ..processor import Processor
 from ..main import MFPApp
 from .. import Bang 
 
-class CPRoute (ControlProcessor):
+class Route (Processor):
 	'''
-	[route 1 2 3 4]
+	[route 1, 2, 3, 4]
 
 	[route] sends its input to one of its outputs, 
 	where the output is determined by which of the creation args
-	the input matches. 
+	the input matches.  
+
+	The route processor has n+1 outlets, where n is the number 
+	of creation args.  The last outlet is for unmatched inputs. 
 	'''
 	def __init__(self, *addresses):
 		self.addresses = {}  
@@ -23,7 +27,7 @@ class CPRoute (ControlProcessor):
 			self.addresses[addr] = outlet 
 
 		self.nomatch = len(addresses) 
-		ControlProcessor.__init__(self, inlets=2, outlets=(len(addresses) + 1))
+		Processor.__init__(self, inlets=2, outlets=(len(addresses) + 1))
 
 	def trigger(self):
 		# inlet 1 resets the list of addresses and may change the number of 
@@ -56,4 +60,4 @@ class CPRoute (ControlProcessor):
 		self.propagate()
 			
 def register():
-	MFPApp.register("route", CPRoute)
+	MFPApp.register("route", Route)

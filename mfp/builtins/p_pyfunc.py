@@ -1,11 +1,17 @@
+#! /usr/bin/env python2.6 
+'''
+p_pyfunc.py: Wrappers for common unary and binary Python functions 
 
-from ..control_processor import ControlProcessor 
+Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+'''
+
+from ..processor import Processor 
 from ..main import MFPApp
 
-class CPPyBinary(ControlProcessor):
+class PyBinary(Processor):
 	def __init__(self, pyfunc, *initargs):
 		self.function = pyfunc
-		ControlProcessor.__init__(self, inlets=2, outlets=1)
+		Processor.__init__(self, inlets=2, outlets=1)
 		if len(initargs) == 1:
 			self.inlets[1] = initargs[0]
 
@@ -13,10 +19,10 @@ class CPPyBinary(ControlProcessor):
 		self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
 		self.propagate()
 
-class CPPyUnary(ControlProcessor):
+class PyUnary(Processor):
 	def __init__(self, pyfunc):
 		self.function = pyfunc
-		ControlProcessor.__init__(self, inlets=1, outlets=1)
+		Processor.__init__(self, inlets=1, outlets=1)
 
 	def trigger(self):
 		self.outlets[0] = self.function(self.inlets[0])
@@ -24,13 +30,13 @@ class CPPyUnary(ControlProcessor):
 
 def mk_binary(pyfunc, name):
 	def factory(*args):
-		proc = CPPyBinary(pyfunc, *args)
+		proc = PyBinary(pyfunc, *args)
 		return proc 
 	MFPApp.register(name, factory)
 
 def mk_unary(pyfunc, name):
 	def factory(*args):
-		proc = CPPyUnary(pyfunc, *args)
+		proc = PyUnary(pyfunc, *args)
 		return proc
 	MFPApp.register(name, factory)
 

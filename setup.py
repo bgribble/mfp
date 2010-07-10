@@ -32,7 +32,7 @@ mfpdsp = Extension('mfpdsp',
 setup (name = 'mfp',
        version = '0.01',
        description = 'Music for programmers',
-	   packages = ['mfp', 'mfp.processors', 'mfp.gtk' ],
+	   packages = ['mfp', 'mfp.builtins', 'mfp.gtk' ],
 	   entry_points = { 'console_scripts': [ 'mfp=mfp.main:main'] },
        ext_modules = [ mfpdsp ])
 

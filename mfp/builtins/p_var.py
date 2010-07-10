@@ -1,15 +1,18 @@
 #! /usr/bin/env python2.6
 '''
-cp_var.py
-Variable holder 
+p_var.py: Variable holder 
+
+Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-from ..control_processor import ControlProcessor 
+
+from ..processor import Processor 
+from ..main import MFPApp
 from .. import Bang 
 
-class CPVar (ControlProcessor):
+class Var (Processor):
 	def __init__(self, initval=None):
 		self.value = initval
-		ControlProcessor.__init__(self, inlets=2, outlets=1)
+		Processor.__init__(self, inlets=2, outlets=1)
 
 	def trigger(self):
 		if self.inlets[1] is not None:
@@ -25,5 +28,4 @@ class CPVar (ControlProcessor):
 		self.propagate()
 
 def register():
-	from ..main import MFPApp
-	MFPApp.register("var", CPVar)
+	MFPApp.register("var", Var)

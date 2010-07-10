@@ -1,11 +1,17 @@
+#! /usr/bin/env python2.6
+'''
+p_print.py: Debugging print processor 
 
-from ..control_processor import ControlProcessor
+Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+'''
+
+from ..processor import Processor
 from ..main import MFPApp
 
-class CPPrint (ControlProcessor): 
+class Print (Processor): 
 	def __init__(self, fmt_string="%s"):
 		self.format_string = fmt_string 
-		ControlProcessor.__init__(self, inlets=2, outlets=1)
+		Processor.__init__(self, inlets=2, outlets=1)
 
 	def trigger(self):
 		if self.inlets[1] is not None:
@@ -19,4 +25,4 @@ class CPPrint (ControlProcessor):
 		self.propagate()
 			
 def register():
-	MFPApp.register("print", CPPrint)
+	MFPApp.register("print", Print)

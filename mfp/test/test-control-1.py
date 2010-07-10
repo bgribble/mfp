@@ -6,7 +6,7 @@ import mfp
 from mfp import Bang 
 
 def setup():
-	mfp.processors.register()
+	mfp.builtins.register()
 
 class PlusTest(TestCase):
 	def setUp(self):

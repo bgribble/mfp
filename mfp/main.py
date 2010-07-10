@@ -147,22 +147,21 @@ class MFPApp (object):
 		print "main thread reaped DSP process"
 		MFPApp._instance.dsp_pipe.finish()
 
-import processors
-import code 
 
 def main():
-	print "MFPAPP: pid=", os.getpid()
+	import builtins 
+	import code 
+
 	m = MFPApp()
-	processors.register()
+	builtins.register()
 
 	code.interact(local=locals())
 	MFPApp.finish()
 
 
-
 def testnetwork(): 
-	import processors
-	processors.register() 
+	import builtins 
+	builtins.register() 
 
 	m = MFPApp.create("metro", 500)
 
