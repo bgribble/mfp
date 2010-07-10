@@ -16,8 +16,8 @@ class PyBinary(Processor):
 			self.inlets[1] = initargs[0]
 
 	def trigger(self):
+		print self.inlets[0], type(self.inlets[0]), self.inlets[1], type(self.inlets[1])
 		self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
-		self.propagate()
 
 class PyUnary(Processor):
 	def __init__(self, pyfunc):
@@ -26,7 +26,6 @@ class PyUnary(Processor):
 
 	def trigger(self):
 		self.outlets[0] = self.function(self.inlets[0])
-		self.propagate()
 
 def mk_binary(pyfunc, name):
 	def factory(*args):

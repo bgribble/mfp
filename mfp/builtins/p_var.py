@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor 
 from ..main import MFPApp
-from .. import Bang 
+from .. import Bang, Uninit 
 
 class Var (Processor):
 	def __init__(self, initval=None):
@@ -15,17 +15,16 @@ class Var (Processor):
 		Processor.__init__(self, inlets=2, outlets=1)
 
 	def trigger(self):
-		if self.inlets[1] is not None:
+		print "var trigger:", self.inlets
+		if self.inlets[1] is not Uninit:
 			self.value = self.inlets[1] 
-			self.inlets[1] = None 
+			self.inlets[1] = Uninit
 
 		if self.inlets[0] is Bang:
 			self.outlets[0] = self.value
 		else:
 			self.value = self.inlets[0]
 			self.outlets[0] = self.value	
-
-		self.propagate()
 
 def register():
 	MFPApp.register("var", Var)

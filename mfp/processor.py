@@ -5,11 +5,16 @@ processor.py: Parent class of all processors
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from main import MFPApp 
+from bang import Bang, Uninit
 
 class Processor (object): 
+	OK = 0
+	ERROR = 1 
+
 	def __init__(self, inlets, outlets):
-		self.inlets = [None] * inlets
-		self.outlets = [None] * outlets
+		self.inlets = [ Uninit ] * inlets
+		self.outlets = [ Uninit ] * outlets
+		self.status = Processor.OK 
 
 		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 
 		# of the ordinal inlets/outlets of the DSP object. 
@@ -23,12 +28,12 @@ class Processor (object):
 	
 	def resize(self, inlets, outlets):
 		if inlets > len(self.inlets):
-			self.inlets += [None] * inlets-len(self.inlets)
+			self.inlets += [ Uninit ] * inlets-len(self.inlets)
 		else:
 			self.inlets[inlets:] = []
 
 		if outlets > len(self.outlets):
-			self.outlets += [None] * outlets-len(self.outlets)
+			self.outlets += [ Uninit ] * outlets-len(self.outlets)
 			self.connections += [[] for r in range(outlets-len(self.outlets)) ]
 		else:
 			self.outlets[outlets:] = []
@@ -56,26 +61,35 @@ class Processor (object):
 
 
 	def send(self, value, inlet=0):
+		try:
+			work = self._send(value, inlet)
+			while len(work):
+				w_target, w_val, w_inlet = work[0]
+				work[:1] = w_target._send(w_val, w_inlet)
+		except: 
+			import traceback
+			tb = traceback.format_exc()
+			self.error(tb)
+
+	def _send(self, value, inlet=0): 
+		work = [] 
 		self.inlets[inlet] = value
+
 		if inlet == 0:
-			try:
-				self.outlets = [None] * len(self.outlets)
-				self.trigger()
-			except: 
-				import traceback
-				tb = traceback.format_exc()
-				self.error(tb)
+			self.outlets = [ Uninit ] * len(self.outlets)
+			self.trigger()
+			for conns, val in zip(self.connections, self.outlets):
+				if val is not Uninit:
+					for target, inlet in conns:
+						work.append((target, val, inlet))
+		return work 
 
 	def error(self, tb=None):
+		self.status = Processor.ERROR
 		print "Error:", self
 		if tb:
 			print tb
 
-	def propagate(self): 
-		for conns, val in zip(self.connections, self.outlets):
-			if val is not None:
-				for target, inlet in conns:
-					target.send(val, inlet)
 	# 
 	# DSP methods 
 	# 

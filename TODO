@@ -12,8 +12,8 @@ Architectural issues:
  * Structure of patches/abstractions 
   * Snapshots of all parameters 
   * "Macro" expansion of patches? 
- * Continuation-passing rather than recursion for message propagation
  * use SSE instructions where possible 
+ * nonfloat parameters to DSP objects (line~) 
 
 Basics: 
  * keybindings should use a mode-based inheritance, basically a 

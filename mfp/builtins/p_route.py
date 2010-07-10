@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..main import MFPApp
-from .. import Bang 
+from .. import Bang, Uninit 
 
 class Route (Processor):
 	'''
@@ -30,34 +30,36 @@ class Route (Processor):
 		Processor.__init__(self, inlets=2, outlets=(len(addresses) + 1))
 
 	def trigger(self):
+		print "route trigger:", self.inlets
 		# inlet 1 resets the list of addresses and may change the number of 
 		# outputs 
-		if self.inlets[1] is not None:
+		if self.inlets[1] is not Uninit:
+			print "resizing addresses", self.inlets[1]
 			if len(self.inlets[1]) != self.nomatch:
 				self.resize(2, len(self.inlets[1]) + 1)
-
+			self.addresses = {} 
 			for addr, outlet in zip(self.inlets[1], range(len(self.inlets[1]))):
 				self.addresses[addr] = outlet 
 				self.nomatch = len(self.inlets[1])
 
-			self.inlets[1] = None
+			self.inlets[1] = Uninit 
 
 		# hot inlet 
-		if self.inlets[0] is not None:
+		if self.inlets[0] is not Uninit:
+			print "Got hot input:", self.inlets[0]
 			if isinstance(self.inlets[0], list) or isinstance(self.inlets[0], tuple):
 				k = self.inlets[0][0]
 				d = self.inlets[0][1:]
 			else: 
 				k = self.inlets[0]
 				d = Bang
-
+			print "key:", k, "data:", d
 			outlet = self.addresses.get(k)
+			print "Found outlet", outlet 
 			if outlet is None:
 				self.outlets[self.nomatch] = self.inlets[0]
 			else: 
 				self.outlets[outlet] = d
-
-		self.propagate()
 			
 def register():
 	MFPApp.register("route", Route)

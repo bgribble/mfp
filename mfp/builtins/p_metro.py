@@ -11,6 +11,9 @@ from ..main import MFPApp
 from ..datetime import datetime, timedelta 
 from .. import Bang
 
+class MetroTick (object):
+	pass
+
 class Metro (Processor): 
 	_timer = None 
 
@@ -33,21 +36,20 @@ class Metro (Processor):
 			self.interval = timedelta(milliseconds=int(self.inlets[1]))
 			self.inlets[1] = None 
 
+		if isinstance(self.inlets[0], MetroTick) and self.started:
+			self.outlets[0] = Bang 
+			self.count += 1 
+			self._timer.schedule(self.started + self.count*self.interval, self.timer_cb)
 		if self.inlets[0] is Bang or self.inlets[0]:
 			self.started = datetime.now()
 			self.count = 1
 			self._timer.schedule(self.started + self.interval, self.timer_cb)
 			self.outlets[0] = Bang
-			self.propagate()
 		else:
 			self.started = False 
 
 	def timer_cb(self):
-		if self.started:
-			self.outlets[0] = Bang 
-			self.count += 1 
-			self._timer.schedule(self.started + self.count*self.interval, self.timer_cb)
-			self.propagate()
+		self.send(MetroTick())
 
 def register():
 	MFPApp.register("metro", Metro)

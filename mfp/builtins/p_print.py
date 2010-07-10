@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..main import MFPApp
+from ..bang import Uninit 
 
 class Print (Processor): 
 	def __init__(self, fmt_string="%s"):
@@ -14,15 +15,13 @@ class Print (Processor):
 		Processor.__init__(self, inlets=2, outlets=1)
 
 	def trigger(self):
-		if self.inlets[1] is not None:
+		if self.inlets[1] is not Uninit:
 			self.format_string = self.inlets[1]
 
-		if self.inlets[0] is not None:
+		if self.inlets[0] is not Uninit:
 			out = self.format_string % self.inlets[0]
 			self.outlets[0] = out 
 			print out 
-
-		self.propagate()
 			
 def register():
 	MFPApp.register("print", Print)
