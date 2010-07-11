@@ -90,9 +90,11 @@ class ProcessorElement (PatchElement):
 			c.draw()
 
 	def select(self):
+		self.selected = True 
 		self.rect.set_border_color(self.stage.color_selected)
 
 	def unselect(self):
+		self.selected = False 
 		self.rect.set_border_color(self.stage.color_unselected)
 
 	def toggle_edit(self):

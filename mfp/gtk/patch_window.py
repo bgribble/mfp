@@ -6,44 +6,24 @@ from processor_element import ProcessorElement
 from connection_element import ConnectionElement 
 from message_element import MessageElement
 
-MOD_SHIFT = 50
-MOD_RSHIFT = 62
-MOD_CTRL = 66
-MOD_ALT = 64
-MOD_WIN = 133
-MOD_ESC = 9 
-KEY_TAB = 65289 
-KEY_BKSP = 65288
-KEY_PGUP = 65365
-KEY_PGDN = 65366
-KEY_HOME = 65360
-KEY_END = 65367
-KEY_INS = 65379
-KEY_DEL = 65535
-KEY_UP = 65362
-KEY_DN = 65364
-KEY_LEFT = 65361
-KEY_RIGHT = 65363
-KEY_ENTER = 65293 
-
 from mfp import MFPGUI 
+
+from input_manager import InputManager
+from modes.patch_edit import PatchEditMode
+from modes.patch_control import PatchControlMode 
+from modes.label_edit import LabelEditMode
 
 class PatchWindow(object):
 
 	def __init__(self):
 		self.stage = clutter.Stage()
-		
-		self.mouse_buttons = set()
-		self.mod_keys = set()
-		self.mod_esc = False 
-		self.pointer_x = None
-		self.pointer_y = None
-
-		self.color_unselected = clutter.color_from_string('Black')
-		self.color_selected = clutter.color_from_string('Red')
-
 		self.objects = [] 
 		self.selected = None
+		
+		self.input_mgr = InputManager()
+		
+		self.color_unselected = clutter.color_from_string('Black')
+		self.color_selected = clutter.color_from_string('Red')
 
 		# used while building a connection
 		self.conn_mode = None 
@@ -55,25 +35,44 @@ class PatchWindow(object):
 		# configure clutter stage 
 		self.stage.set_size(320, 240)
 		self.stage.set_title("MFP")
-		
-		self.stage.connect('button-press-event', self.mouse_down_cb)
-		self.stage.connect('button-release-event', self.mouse_up_cb)
-		self.stage.connect('key-press-event', self.key_down_cb)
-		self.stage.connect('key-release-event', self.key_up_cb)
-		self.stage.connect('motion-event', self.mouse_motion_cb)
-		self.stage.connect('destroy', self.quit)
-
-		# leave event: handler should figure out what is being left and 
-		# clear modifier keys if the main window is being left 
-		#self.stage.connect('leave-event', self.leave_cb)
 
 		self.stage.show_all()
+		
+		# set up key and mouse handling 
+		self.init_input()
+
+	def init_input(self):
+		def handler(stage, event):
+			self.input_mgr.handle_event(stage, event)
+
+		# hook up signals 
+		self.stage.connect('button-press-event', handler)
+		self.stage.connect('button-release-event', handler)
+		self.stage.connect('key-press-event', handler)
+		self.stage.connect('key-release-event', handler)
+		self.stage.connect('motion-event', handler)
+		self.stage.connect('enter-event', handler)
+		self.stage.connect('leave-event', handler) 
+		self.stage.connect('destroy', self.quit)
+
+		# global keybindings 
+		self.input_mgr.global_binding('C-e', self.toggle_major_mode, "toggle-major-mode")
+		self.input_mgr.global_binding('C-q', self.quit, "quit")
+
+		# set initial major mode 
+		self.input_mgr.major_mode = PatchEditMode(self)
+
+	def toggle_major_mode(self):
+		if isinstance(self.input_mgr.major_mode, PatchEditMode):
+			self.input_mgr.set_major_mode(PatchControlMode(self))
+		else:
+			self.input_mgr.set_major_mode(PatchEditMode(self))
 
 	def add_processor(self):
-		b = ProcessorElement(self, self.pointer_x, self.pointer_y)
+		b = ProcessorElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
 		self.objects.append(b)
 		self.select(b)
-		b.toggle_edit()
+		self.input_mgr.enable_minor_mode(LabelEditMode(self, b.label))
 
 	def add_text(self):
 		b = TextElement(self, self.pointer_x, self.pointer_y)
@@ -216,78 +215,6 @@ class PatchWindow(object):
 			return
 		self.selected.move(max(0, self.selected.position_x + dx),
 					       max(0, self.selected.position_y + dy))
-
-	def mouse_motion_cb(self, stage, event):
-		self.pointer_x = event.x
-		self.pointer_y = event.y
-		if self.selected and (1 in self.mouse_buttons):
-			self.selected.drag(event.x, event.y)
-
-	def mouse_down_cb(self, stage, event):
-		self.mouse_buttons.add(1)
-		if self.selected:
-			self.selected.drag_start(event.x, event.y)
-
-	def mouse_up_cb(self, stage, event):
-		self.mouse_buttons.remove(1)
-
-	def canonical_key(self, event):
-		key = ''
-		if self.mod_esc:
-			key += 'ESC '
-		if MOD_SHIFT in self.mod_keys:
-			key += 'S-'
-		if MOD_CTRL in self.mod_keys:
-			key += 'C-'
-		if MOD_ALT in self.mod_keys: 
-			key += 'A-'
-		if MOD_WIN in self.mod_keys:
-			key += 'W-'
-
-		ks = event.get_key_symbol()
-		if ks < 256:
-			key += chr(event.get_key_symbol())
-		elif ks == KEY_TAB:
-			key += 'TAB'
-		elif ks == KEY_UP:
-			key += 'UP'
-		elif ks == KEY_DN:
-			key += 'DOWN'
-		elif ks == KEY_LEFT:
-			key += 'LEFT'
-		elif ks == KEY_RIGHT:
-			key += 'RIGHT'
-		elif ks == KEY_ENTER:
-			key += 'RET'
-		else:
-			key += "%d" % ks
-		
-		return key 	
-
-	def key_down_cb(self, stage, event):
-		code = event.get_key_code()
-		if code in (MOD_SHIFT, MOD_CTRL, MOD_ALT, MOD_WIN, MOD_ESC):
-			self.mod_keys.add(code)
-			if code == MOD_ESC:
-				self.mod_esc = True
-		elif code == MOD_RSHIFT:
-			self.mod_keys.add(MOD_SHIFT)
-		else:
-			ckey = self.canonical_key(event)
-			self.dispatch_key(ckey)
-			print ckey
-			self.mod_esc = False 
-
-	def key_up_cb(self, stage, event):
-		code = event.get_key_code()
-		if code in (MOD_SHIFT, MOD_CTRL, MOD_ALT, MOD_WIN, MOD_ESC):
-			try:
-				self.mod_keys.remove(code)
-			except KeyError:
-				pass
-		elif code == MOD_RSHIFT:
-			self.mod_keys.remove(MOD_SHIFT)
-
 	def quit(self, *rest):
 		clutter.main_quit()
 

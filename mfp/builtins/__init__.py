@@ -8,5 +8,6 @@ def register():
 	import p_osc; p_osc.register()
 	import p_sig; p_sig.register()
 	import p_route; p_route.register()
+	import p_trigger; p_trigger.register()
 
 

@@ -15,6 +15,16 @@ class LimitedIncr (Processor):
 			self.outlets[0] = self.inlets[0] + 1
 			self.lastval = self.outlets[0]
 
+class FanOut (Processor):
+	trail = [] 
+	def __init__(self, tag):
+		self.tag = tag 
+		Processor.__init__(self, inlets=1, outlets=4)
+
+	def trigger(self):
+		self.outlets[0] = self.outlets[1] = self.outlets[2] = self.outlets[3] = Bang
+		FanOut.trail.append(self.tag)
+
 class StackDepthTest(TestCase):
 	def setUp(self):
 		self.var = MFPApp.create("var", 0)
@@ -54,3 +64,20 @@ class StackDepthTest(TestCase):
 		print "Last value:", self.inc.lastval
 		self.assertEqual(self.var.status, Processor.OK)
 		self.assertEqual(self.inc.lastval, 100000)
+
+class DepthFirstTest(TestCase):
+	def setUp(self):
+		FanOut.trail = [] 
+		self.procs = [ FanOut(i) for i in range(0, 10) ]
+		for i in range(1, 5):
+			self.procs[0].connect(i-1, self.procs[i], 0)
+		for i in range(5, 9):
+			self.procs[1].connect(i-5, self.procs[i], 0)
+		self.procs[3].connect(0, self.procs[9], 0)
+
+	def test_depthfirst(self):
+		'''test_depthfirst: depth-first execution order is preserved''' 
+		self.procs[0].send(Bang, 0)
+		print FanOut.trail
+		self.assertEqual(FanOut.trail, [0, 1, 5, 6, 7, 8, 2, 3, 9, 4])
+

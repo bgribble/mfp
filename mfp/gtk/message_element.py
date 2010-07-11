@@ -55,6 +55,10 @@ class MessageElement (PatchElement):
 		print "draw_border: w=%s, h=%s" % (w, h)
 		self.texture.clear()
 		ct = self.texture.cairo_create()
+		if self.selected: 
+			ct.set_source_color(self.stage.color_selected)
+		else:
+			ct.set_source_color(self.stage.color_unselected)
 		ct.translate(0.5, 0.5)
 		ct.move_to(1,1)
 		ct.line_to(1, h)
@@ -108,10 +112,14 @@ class MessageElement (PatchElement):
 
 	def select(self):
 		#self.actor.set_border_color(self.stage.color_selected)
-		pass
+		self.selected = True 
+		self.draw_border()
+
 	def unselect(self):
 		#self.actor.set_border_color(self.stage.color_unselected)
-		pass 
+		self.selected = False 
+		self.draw_border()
+
 	def toggle_edit(self):
 		if self.editable:
 			self.label.set_editable(False)

@@ -12,6 +12,7 @@ class PatchElement (object):
 		self.position_y = y
 		self.drag_x = None
 		self.drag_y = None
+		self.selected = False 
 	
 	def drag_start(self, x, y):
 		self.drag_x = x - self.position_x
