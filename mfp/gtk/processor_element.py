@@ -8,6 +8,7 @@ import clutter
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
+from input_mode import InputMode
 
 class ProcessorElement (PatchElement):
 	def __init__(self, window, x, y):
