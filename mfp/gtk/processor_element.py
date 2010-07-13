@@ -37,7 +37,6 @@ class ProcessorElement (PatchElement):
 		self.label.set_activatable(True)
 		self.label.set_reactive(True)
 		self.label.set_color(window.color_unselected) 
-		self.label.connect('activate', self.text_activate_cb)
 		self.label.connect('text-changed', self.text_changed_cb)
 
 		self.actor.add(self.rect)
@@ -49,10 +48,7 @@ class ProcessorElement (PatchElement):
 		self.stage.stage.add(self.actor)
 		self.stage.stage.set_key_focus(self.label)
 
-	def text_activate_cb(self, *args):
-		self.label.set_editable(False)
-		self.stage.stage.set_key_focus(None)
-
+	def update_label(self, *args):
 		t = self.label.get_text()
 		parts = t.split(' ', 1)
 		self.proc_type = parts[0]
@@ -64,7 +60,6 @@ class ProcessorElement (PatchElement):
 		self.proc_id = MFPGUI.create(self.proc_type, self.proc_args)
 		if self.proc_id is None:
 			print "ProcessorElement: could not create", self.proc_type, self.proc_args
-		self.editable = False 
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 

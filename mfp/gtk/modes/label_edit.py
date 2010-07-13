@@ -8,8 +8,9 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode 
 
 class LabelEditMode (InputMode):
-	def __init__(self, window, label, multiline=False):
+	def __init__(self, window, element, label, multiline=False):
 		self.manager = window.input_mgr 
+		self.element = element 
 		self.widget = label
 		self.multiline = multiline 
 		self.text = self.widget.get_text()
@@ -20,6 +21,7 @@ class LabelEditMode (InputMode):
 		InputMode.__init__(self, "Minor mode for editing text labels")
 	
 		self.default = self.insert_char
+
 		self.bind("RET", self.commit_edits, "label-commit-edits")
 		self.bind("ESC", self.rollback_edits, "label-rollback-edits")
 		self.bind("DEL", self.erase_forward, "label-erase-forward")
@@ -42,6 +44,7 @@ class LabelEditMode (InputMode):
 
 	def commit_edits(self):
 		self.widget.set_cursor_visible(False)
+		self.element.update_label(self.widget)
 		self.manager.disable_minor_mode(self)
 
 	def rollback_edits(self):
@@ -50,6 +53,9 @@ class LabelEditMode (InputMode):
 		self.manager.disable_minor_mode(self)
 
 	def erase_forward(self):
+		if self.editpos > (len(self.text) -1):
+			return 
+
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
 			self.undo_pos = -1
@@ -58,6 +64,9 @@ class LabelEditMode (InputMode):
 		self.update_label()
 
 	def erase_backward(self):
+		if self.editpos <= 0:
+			return 
+
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
 			self.undo_pos = -1

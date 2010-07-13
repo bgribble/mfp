@@ -16,8 +16,8 @@ Architectural issues:
  * nonfloat parameters to DSP objects (line~) 
 
 Basics: 
- * keybindings should use a mode-based inheritance, basically a 
-   dict of compound key symbol to function
+ * Use MRU-style algorithm for TAB switching 
+ * isearch mode for element selection 
  * osc~ should use cubic estimator
  * Selection management (multi select)
  * cut and paste 
@@ -25,12 +25,10 @@ Basics:
  * Driving creation from mfp master 
  * pd-style save and load 
  * gtk accessorizing for gui window: menu, mode line, left click
- * make edit vs playback mode more clear, change keybindings? 
  * Add a perf testing script 
  * error handling! 
 
 Bugs: 
- * sending a string message to metro causes stack overflow... ah, it's unbound
  * [route] allows changing number of outputs but nothing is propagated to the 
    GUI
  * Rebuilding [metro] to [metro 200] in gui doesn't set the time 

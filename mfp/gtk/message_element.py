@@ -37,7 +37,6 @@ class MessageElement (PatchElement):
 		self.label.set_activatable(True)
 		self.label.set_reactive(True)
 		self.label.set_color(window.color_unselected) 
-		self.label.connect('activate', self.text_activate_cb)
 		self.label.connect('text-changed', self.text_changed_cb)
 
 		# click handler 
@@ -72,17 +71,13 @@ class MessageElement (PatchElement):
 		print "button press", args
 		MFPGUI.send_bang(self.proc_id, 0) 
 
-	def text_activate_cb(self, *args):
-		self.label.set_editable(False)
-		self.stage.stage.set_key_focus(None)
-
+	def update_label(self, *args):
 		self.message_text = self.label.get_text()
 
 		print "MessageElement: obj=%s" % (self.message_text)
 		self.proc_id = MFPGUI.create("var", self.message_text)
 		if self.proc_id is None:
 			print "MessageElement: could not create message obj"
-		self.editable = False 
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 

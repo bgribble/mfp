@@ -64,19 +64,19 @@ class PatchWindow(object):
 		b = ProcessorElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
 		self.objects.append(b)
 		self.select(b)
-		self.input_mgr.enable_minor_mode(LabelEditMode(self, b.label))
+		self.input_mgr.enable_minor_mode(LabelEditMode(self, b, b.label))
 
 	def add_text(self):
 		b = TextElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
 		self.objects.append(b)
 		self.select(b)
-		self.input_mgr.enable_minor_mode(LabelEditMode(self, b.label, multiline=True))
+		self.input_mgr.enable_minor_mode(LabelEditMode(self, b, b.label, multiline=True))
 
 	def add_message(self):
 		b = MessageElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
 		self.objects.append(b)
 		self.select(b)
-		self.input_mgr.enable_minor_mode(LabelEditMode(self, b.label))
+		self.input_mgr.enable_minor_mode(LabelEditMode(self, b, b.label))
 
 	def select(self, obj):
 		if self.selected is not obj and self.selected is not None:

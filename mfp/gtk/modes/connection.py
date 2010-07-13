@@ -5,6 +5,8 @@ connection.py: ConnectionMode minor mode
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from ..input_mode import InputMode
+from ..connection_element import ConnectionElement 
+
 from mfp import MFPGUI 
 
 class ConnectionMode (InputMode):
@@ -45,7 +47,7 @@ class ConnectionMode (InputMode):
 
 			if MFPGUI.connect(self.source_obj.proc_id, self.source_port,
 							  self.dest_obj.proc_id, self.dest_port):
-				c = ConnectionElement(self, self.source_obj, self.source_port,
+				c = ConnectionElement(self.window, self.source_obj, self.source_port,
 									  self.dest_obj, self.dest_port)
 				self.source_obj.connections_out.append(c)
 				self.dest_obj.connections_in.append(c)
