@@ -13,10 +13,12 @@ class TextElement (PatchElement):
 		self.text = ''
 		self.editable = False
 		self.actor = clutter.Text()
+		self.label = self.actor 
 
 		# configure label
 		self.actor.set_reactive(True)
 		self.actor.set_color(window.color_unselected) 
+
 		#self.actor.connect('text-changed', self.text_changed_cb)
 		self.move(x, y)
 		
@@ -30,21 +32,12 @@ class TextElement (PatchElement):
 		self.text = self.actor.get_text()
 		self.editable = False 
 
+	def update_label(self, *args):
+		self.message_text = self.actor.get_text()
+
 	def select(self, *args):
 		self.actor.set_color(self.stage.color_selected) 
 
 	def text_changed_cb(self, *args):
 		print args
-
-	def toggle_edit(self):
-		if self.editable:
-			self.actor.set_editable(False)
-			self.editable = False 
-		else:
-			self.actor.set_editable(True)
-			self.stage.stage.set_key_focus(self.actor)
-			self.editable = True
-
-
-
 

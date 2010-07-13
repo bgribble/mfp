@@ -12,13 +12,14 @@ from input_manager import InputManager
 from modes.patch_edit import PatchEditMode
 from modes.patch_control import PatchControlMode 
 from modes.label_edit import LabelEditMode
+from modes.select_mru import SelectMRUMode 
 
 class PatchWindow(object):
 	def __init__(self):
 		self.stage = clutter.Stage()
 		self.objects = [] 
 		self.selected = None
-		
+
 		self.input_mgr = InputManager()
 		
 		self.color_unselected = clutter.color_from_string('Black')
@@ -80,10 +81,16 @@ class PatchWindow(object):
 
 	def select(self, obj):
 		if self.selected is not obj and self.selected is not None:
-			self.selected.unselect()
+			self.unselect(self.selected)
 		obj.select()
 		self.selected = obj
-	
+		SelectMRUMode.touch(obj) 
+
+	def unselect(self, obj):
+		if self.selected is obj and obj is not None:
+			obj.unselect()
+			self.selected = None
+
 	def unselect_all(self):
 		if self.selected:
 			self.selected.unselect()
@@ -100,6 +107,9 @@ class PatchWindow(object):
 			self.select(self.objects[-1])
 		cur_ind = self.objects.index(self.selected)
 		self.select(self.objects[cur_ind-1])
+
+	def select_mru(self):
+		self.input_mgr.enable_minor_mode(SelectMRUMode(self))
 
 	def move_selected(self, dx, dy):
 		if self.selected is None:

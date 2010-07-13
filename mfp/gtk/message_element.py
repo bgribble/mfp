@@ -46,7 +46,6 @@ class MessageElement (PatchElement):
 
 		# add components to stage 
 		self.stage.stage.add(self.actor)
-		self.stage.stage.set_key_focus(self.label)
 
 	def draw_border(self):
 		w = self.texture.get_property('surface_width')-2

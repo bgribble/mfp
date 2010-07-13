@@ -13,13 +13,14 @@ class PatchEditMode (InputMode):
 		self.manager = window.input_mgr 
 		self.window = window 
 
-		InputMode.__init__(self, "Patch editing major mode")
+		InputMode.__init__(self, "PatchEditMode")
 		
 		self.bind("C-a", self.window.add_processor, "patch-add-processor")
 		self.bind("C-t", self.window.add_text, "patch-add-text")
 		self.bind("C-m", self.window.add_message, "patch-add-message")
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
+		self.bind("C-TAB", self.window.select_mru, "patch-select-mru")
 	
 		self.bind("UP", lambda: self.window.move_selected(0, -1), "patch-move-up-1")
 		self.bind("DOWN", lambda: self.window.move_selected(0, 1), "patch-move-down-1")

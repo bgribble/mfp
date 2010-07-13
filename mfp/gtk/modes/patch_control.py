@@ -11,7 +11,7 @@ class PatchControlMode (InputMode):
 		self.manager = window.manager
 		self.window = window 
 
-		InputMode.__init__(self, "Patch control major mode")
+		InputMode.__init__(self, "PatchControlMode")
 
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")

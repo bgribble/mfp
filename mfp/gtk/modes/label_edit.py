@@ -18,11 +18,15 @@ class LabelEditMode (InputMode):
 		self.undo_pos = -1
 		self.editpos = 0
 
-		InputMode.__init__(self, "Minor mode for editing text labels")
+		InputMode.__init__(self, "LabelEditMode")
 	
 		self.default = self.insert_char
 
-		self.bind("RET", self.commit_edits, "label-commit-edits")
+		if not self.multiline:
+			self.bind("RET", self.commit_edits, "label-commit-edits")
+		else:
+			self.bind("C-RET", self.commit_edits, "label-commit-edits")
+
 		self.bind("ESC", self.rollback_edits, "label-rollback-edits")
 		self.bind("DEL", self.erase_forward, "label-erase-forward")
 		self.bind("BS", self.erase_backward, "label-erase-backward")

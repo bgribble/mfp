@@ -25,7 +25,7 @@ class ConnectionMode (InputMode):
 		else:
 			self.source_obj = endpoint 
 
-		InputMode.__init__(self, "Connection minor mode")
+		InputMode.__init__(self, "ConnectionMode")
 
 		self.bind("RET", self.make_connection, "connection-commit")
 		self.bind("ESC", self.abort_connection, "connection-rollback")
