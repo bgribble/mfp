@@ -23,12 +23,11 @@ class TextElement (PatchElement):
 		self.move(x, y)
 		
 		# add to stage 
-		self.stage.stage.add(self.actor)
-		
+		self.stage.register(self) 
+
 	def unselect(self, *args):
 		self.actor.set_editable(False)
 		self.actor.set_color(self.stage.color_unselected) 
-		self.stage.stage.set_key_focus(None)
 		self.text = self.actor.get_text()
 		self.editable = False 
 
@@ -38,6 +37,4 @@ class TextElement (PatchElement):
 	def select(self, *args):
 		self.actor.set_color(self.stage.color_selected) 
 
-	def text_changed_cb(self, *args):
-		print args
 

@@ -12,6 +12,8 @@ class PatchEditMode (InputMode):
 	def __init__(self, window):
 		self.manager = window.input_mgr 
 		self.window = window 
+		self.drag_start_x = None
+		self.drag_start_y = None 
 
 		InputMode.__init__(self, "PatchEditMode")
 		
@@ -38,16 +40,33 @@ class PatchEditMode (InputMode):
 		self.bind("C-RIGHT", lambda: self.window.move_selected(25, 0), "patch-move-right-25")
 
 		self.bind("c", self.connect_fwd, "patch-connect-fwd")
-		self.bind("S-c", self.connect_rev, "patch-connect-rev")
+		self.bind("C", self.connect_rev, "patch-connect-rev")
+
+		self.bind("M1DOWN", self.drag_start, "patch-drag-start")
+		self.bind("M1-MOTION", self.drag_selected, "patch-drag-selected")
+
+	def drag_start(self):
+		if self.window.selected:
+			self.drag_start_off_x = self.manager.pointer_x - self.window.selected.position_x
+			self.drag_start_off_y = self.manager.pointer_y - self.window.selected.position_y
+
+	def drag_selected(self):
+		if self.window.selected is None or self.manager.pointer_obj != self.window.selected:
+			return 
+		self.window.selected.move(self.manager.pointer_x-self.drag_start_off_x, 
+					              self.manager.pointer_y-self.drag_start_off_y)
+
 
 	def connect_fwd(self):
 		if self.window.selected:
 			self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected))
+		return True 
 	
 	def connect_rev(self):
 		if self.window.selected:
 			self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected, 
 												          connect_rev=True))
+		return True 
 	
 
 

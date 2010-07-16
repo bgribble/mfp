@@ -25,17 +25,15 @@ class MessageElement (PatchElement):
 		self.texture = clutter.CairoTexture(35, 20)
 		self.label = clutter.Text()
 
+		self.actor.set_reactive(True)
 		self.actor.add(self.texture)
 		self.actor.add(self.label)
 
 		# configure rectangle box 
-		self.actor.set_reactive(True)
 		self.draw_border()
 
 		# configure label
 		self.label.set_position(4, 1)
-		self.label.set_activatable(True)
-		self.label.set_reactive(True)
 		self.label.set_color(window.color_unselected) 
 		self.label.connect('text-changed', self.text_changed_cb)
 
@@ -45,7 +43,7 @@ class MessageElement (PatchElement):
 		self.move(x, y)
 
 		# add components to stage 
-		self.stage.stage.add(self.actor)
+		self.stage.register(self)
 
 	def draw_border(self):
 		w = self.texture.get_property('surface_width')-2

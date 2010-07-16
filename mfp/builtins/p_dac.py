@@ -17,7 +17,7 @@ class DAC(Processor):
 		else:
 			channel = 0
 
-		self.dsp_inputs = [0]
+		self.dsp_inlets = [0]
 		self.dsp_init("dac~")
 		self.dsp_setparam("channel", channel)
 		

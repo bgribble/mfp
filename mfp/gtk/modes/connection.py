@@ -55,10 +55,12 @@ class ConnectionMode (InputMode):
 				print "Cannot make connection"
 
 		self.manager.disable_minor_mode(self)	
+		return True 
 
 	def abort_connection(self):
 		print "Aborting connection"
 		self.manager.disable_minor_mode(self)	
+		return True 
 
 	def set_port_key(self, portnum):
 		if self.reverse:
@@ -79,5 +81,6 @@ class ConnectionMode (InputMode):
 				self.dest_port = portnum
 			else:
 				self.source_port = portnum
+		return True 
 
 		

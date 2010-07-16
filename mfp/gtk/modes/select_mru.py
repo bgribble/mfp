@@ -32,6 +32,7 @@ class SelectMRUMode (InputMode):
 		else:
 			newloc = 0
 		self.window.select(SelectMRUMode.mru_list[newloc])
+		return True 
 
 	def key_release(self, stage, event):
 		if event.get_key_code() == 66:

@@ -64,20 +64,14 @@ class KeySequencer (object):
 			elif code == MOD_RSHIFT:
 				self.mod_keys.remove(MOD_SHIFT)
 
-		# BUTTON PRESS 
-		elif event.type == clutter.BUTTON_PRESS:
+		# BUTTON PRESS, BUTTON RELEASE, MOUSE MOTION
+		elif event.type in (clutter.BUTTON_PRESS, clutter.BUTTON_RELEASE, clutter.MOTION):
 			self.sequences.append(self.canonicalize(event))	
 		
-		# BUTTON RELEASE 
-		elif event.type == clutter.BUTTON_RELEASE:
-			self.sequences.append(self.canonicalize(event))	
-
-	
 	def canonicalize(self, event):
 		import clutter 
 		key = ''
-		if MOD_SHIFT in self.mod_keys:
-			key += 'S-'
+		
 		if MOD_CTRL in self.mod_keys:
 			key += 'C-'
 		if MOD_ALT in self.mod_keys: 
@@ -87,9 +81,10 @@ class KeySequencer (object):
 
 		if event.type in (clutter.KEY_PRESS, clutter.KEY_RELEASE):
 			ks = event.get_key_symbol()
-			if ks < 256:
-				key += chr(event.get_key_symbol())
-			elif ks == KEY_TAB:
+			if ks >= 256 and MOD_SHIFT in self.mod_keys:
+				key = 'S-' + key 
+		    	
+			if ks == KEY_TAB:
 				key += 'TAB'
 			elif ks == KEY_UP:
 				key += 'UP'
@@ -107,12 +102,21 @@ class KeySequencer (object):
 				key += 'DEL'
 			elif ks == KEY_BKSP:
 				key += 'BS'
+			elif ks < 256:
+				kuni = event.get_key_unicode()
+				if kuni < 32:
+					ks = chr(event.get_key_symbol())
+					if MOD_SHIFT in self.mod_keys:
+						ks = ks.upper()
+					key += ks 
+				else:
+					key += chr(kuni)
 			else:
 				key += "%d" % ks
 		elif event.type in (clutter.BUTTON_PRESS, clutter.BUTTON_RELEASE):
 			button = event.get_button()
 			clicks = event.get_click_count()
-			key += "MOUSE%d" % button
+			key += "M%d" % button
 
 			if clicks == 2:
 				key += "DOUBLE"
@@ -121,9 +125,17 @@ class KeySequencer (object):
 		
 			if event.type == clutter.BUTTON_PRESS:
 				key += 'DOWN'
+				self.mouse_buttons.add(button)
 			else:
 				key += 'UP'
+				self.mouse_buttons.remove(button)
 
+		elif event.type == clutter.MOTION:
+			for b in (1,2,3):
+				if b in self.mouse_buttons:
+					key += 'M%d-' % b
+			key += 'MOTION'
+		
 		return key 	
 
 

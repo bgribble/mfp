@@ -26,6 +26,7 @@ class LabelEditMode (InputMode):
 			self.bind("RET", self.commit_edits, "label-commit-edits")
 		else:
 			self.bind("C-RET", self.commit_edits, "label-commit-edits")
+			self.bind("RET", lambda: self.insert_char("\n"), "insert-nl")
 
 		self.bind("ESC", self.rollback_edits, "label-rollback-edits")
 		self.bind("DEL", self.erase_forward, "label-erase-forward")
@@ -38,23 +39,30 @@ class LabelEditMode (InputMode):
 		self.update_label()
 
 	def insert_char(self, keysym):
+		if len(keysym) > 1:
+			return False 
+
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
 			self.undo_pos = -1
+
 		self.undo_stack.append(self.text)
 		self.text = self.text[:self.editpos] + keysym + self.text[self.editpos:]
 		self.editpos += 1
 		self.update_label()
+		return True 
 
 	def commit_edits(self):
 		self.widget.set_cursor_visible(False)
 		self.element.update_label(self.widget)
 		self.manager.disable_minor_mode(self)
+		return True 
 
 	def rollback_edits(self):
 		self.widget.set_text(self.undo_stack[0])
 		self.widget.set_cursor_visible(False)
 		self.manager.disable_minor_mode(self)
+		return True 
 
 	def erase_forward(self):
 		if self.editpos > (len(self.text) -1):
@@ -66,25 +74,32 @@ class LabelEditMode (InputMode):
 		self.undo_stack.append(self.text)
 		self.text = self.text[:self.editpos] + self.text[self.editpos+1:]
 		self.update_label()
+		return True 
 
 	def erase_backward(self):
 		if self.editpos <= 0:
+			self.editpos = 0
 			return 
 
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
 			self.undo_pos = -1
+
 		self.undo_stack.append(self.text)
 		self.text = self.text[:self.editpos-1] + self.text[self.editpos:]
+		self.editpos = max(self.editpos - 1, 0)
 		self.update_label()
+		return True 
 
 	def move_left(self):
 		self.editpos = max(self.editpos-1, 0)
 		self.update_label()
+		return True 
 
 	def move_right(self):
 		self.editpos = min(self.editpos+1, len(self.text))
 		self.update_label()
+		return True 
 
 	def undo_edit(self):
 		if self.undo_pos > (-len(self.undo_stack)):
@@ -92,17 +107,22 @@ class LabelEditMode (InputMode):
 			self.undo_pos = max(-len(self.undo_stack), self.undo_pos - 1)
 			self.update_label()
 
+		return True 
+
 	def redo_edit(self):
 		if self.undo_pos < -1:
 			self.undo_pos += 1
 			self.text = self.undo_stack[self.undo_pos] 
 			self.update_label()
+		return True 
 
 	def update_label(self):
 		self.widget.set_text(self.text)
 		self.widget.set_cursor_size(3)
 		self.widget.set_cursor_position(self.editpos)
 		self.widget.set_cursor_visible(True)
+		return True 
+
 
 
 					

@@ -14,6 +14,12 @@ class InputManager (object):
 		self.major_mode = None
 		self.minor_modes = [] 
 		self.keyseq = KeySequencer()
+		self.event_sources = {} 
+		self.root_source = None 
+		self.pointer_x = None
+		self.pointer_y = None 
+		self.pointer_obj = None 
+		self.pointer_lastobj = None 
 
 	def global_binding(self, key, action, helptext=''):
 		self.global_mode.bind(key, action, helptext)
@@ -41,6 +47,18 @@ class InputManager (object):
 		elif event.type == clutter.MOTION:
 			self.pointer_x = event.x
 			self.pointer_y = event.y
+			self.keyseq.process(event)
+			if len(self.keyseq.sequences):
+				keysym = self.keyseq.pop()
+		elif event.type == clutter.ENTER:
+			self.pointer_obj = self.event_sources.get(event.source)
+			if self.pointer_obj == self.pointer_lastobj:
+				print "CLEARING KEY MODIFIERS"
+				self.keyseq.mod_keys = set()
+		elif event.type == clutter.LEAVE:
+			self.pointer_lastobj = self.pointer_obj
+			self.pointer_obj = None
+
 		else:
 			return False 
 
@@ -50,27 +68,27 @@ class InputManager (object):
 				handler = minor.lookup(keysym)
 				if handler is not None:
 					print keysym, minor.description, ':', handler[1]
-					handler[0]()
-					return True
+					handled = handler[0]()
+					if handled: 
+						return True
 
 			# then major mode 
 			if self.major_mode is not None:
 				handler = self.major_mode.lookup(keysym)
 				if handler is not None: 
 					print keysym, self.major_mode.description, ':', handler[1]
-					handler[0]()
-					return True 
+					handled = handler[0]()
+					if handled: 
+						return True 
 
 			# then global 
 			handler = self.global_mode.lookup(keysym)
 			if handler is not None: 
 				print keysym, self.global_mode.description, ':', handler[1]
-				handler[0]()
-				return True 
+				handled = handler[0]()
+				if handled:
+					return True 
 
-			# nobody wanted to handle the event 
-			print "No handler for", keysym
-		
 		return False 
 
 

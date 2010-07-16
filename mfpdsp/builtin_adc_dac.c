@@ -19,7 +19,12 @@ adc_process(mfp_processor * proc)
 	inbuf = mfp_get_input_buffer(channel);
 	outbuf = proc->outlet_buf[0];
 
-	memcpy(outbuf, inbuf, mfp_blocksize * sizeof(mfp_sample));
+	if ((inbuf == NULL) || (outbuf == NULL)) {
+		return 0;
+	}
+	else {
+		memcpy(outbuf, inbuf, mfp_blocksize * sizeof(mfp_sample));
+	}
 
 	return 1;
 }
@@ -73,6 +78,7 @@ init_builtin_adc(void) {
 
 mfp_procinfo *  
 init_builtin_dac(void) {
+	printf("initializing dac~\n");
 	mfp_procinfo * p = malloc(sizeof(mfp_procinfo));
 	p->name = strdup("dac~");
 	p->is_generator = 0;

@@ -8,11 +8,11 @@ from message_element import MessageElement
 
 from mfp import MFPGUI 
 
-from input_manager import InputManager
-from modes.patch_edit import PatchEditMode
-from modes.patch_control import PatchControlMode 
-from modes.label_edit import LabelEditMode
-from modes.select_mru import SelectMRUMode 
+from .input_manager import InputManager
+from .modes.patch_edit import PatchEditMode
+from .modes.patch_control import PatchControlMode 
+from .modes.label_edit import LabelEditMode
+from .modes.select_mru import SelectMRUMode 
 
 class PatchWindow(object):
 	def __init__(self):
@@ -61,21 +61,23 @@ class PatchWindow(object):
 		else:
 			self.input_mgr.set_major_mode(PatchEditMode(self))
 
+	def register(self, element):
+		self.objects.append(element)
+		self.input_mgr.event_sources[element.actor] = element 
+		self.stage.add(element.actor)
+
 	def add_processor(self):
 		b = ProcessorElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
-		self.objects.append(b)
 		self.select(b)
 		self.input_mgr.enable_minor_mode(LabelEditMode(self, b, b.label))
 
 	def add_text(self):
 		b = TextElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
-		self.objects.append(b)
 		self.select(b)
 		self.input_mgr.enable_minor_mode(LabelEditMode(self, b, b.label, multiline=True))
 
 	def add_message(self):
 		b = MessageElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
-		self.objects.append(b)
 		self.select(b)
 		self.input_mgr.enable_minor_mode(LabelEditMode(self, b, b.label))
 
@@ -116,6 +118,7 @@ class PatchWindow(object):
 			return
 		self.selected.move(max(0, self.selected.position_x + dx),
 					       max(0, self.selected.position_y + dy))
+
 	def quit(self, *rest):
 		clutter.main_quit()
 

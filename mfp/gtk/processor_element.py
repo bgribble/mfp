@@ -30,23 +30,22 @@ class ProcessorElement (PatchElement):
 		self.rect.set_size(35, 20)
 		self.rect.set_border_width(2)
 		self.rect.set_border_color(window.color_unselected)
-		self.rect.set_reactive(True)
+		self.rect.set_reactive(False)
 
 		# configure label
 		self.label.set_position(4, 1)
-		self.label.set_activatable(True)
-		self.label.set_reactive(True)
 		self.label.set_color(window.color_unselected) 
 		self.label.connect('text-changed', self.text_changed_cb)
+		self.label.set_reactive(False)
 
 		self.actor.add(self.rect)
 		self.actor.add(self.label)
+		self.actor.set_reactive(True)
 
 		self.move(x, y)
 
 		# add components to stage 
-		self.stage.stage.add(self.actor)
-		self.stage.stage.set_key_focus(self.label)
+		self.stage.register(self)
 
 	def update_label(self, *args):
 		t = self.label.get_text()

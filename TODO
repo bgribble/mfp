@@ -16,7 +16,6 @@ Architectural issues:
  * nonfloat parameters to DSP objects (line~) 
 
 Basics: 
- * Use MRU-style algorithm for TAB switching 
  * isearch mode for element selection 
  * osc~ should use cubic estimator
  * Selection management (multi select)
