@@ -8,7 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..timer import MultiTimer 
 from ..processor import Processor
 from ..main import MFPApp 
-from ..datetime import datetime, timedelta 
+from datetime import datetime, timedelta 
 from .. import Bang
 
 class MetroTick (object):
