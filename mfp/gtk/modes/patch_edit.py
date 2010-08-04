@@ -17,9 +17,9 @@ class PatchEditMode (InputMode):
 
 		InputMode.__init__(self, "PatchEditMode")
 		
-		self.bind("C-a", self.window.add_processor, "patch-add-processor")
-		self.bind("C-t", self.window.add_text, "patch-add-text")
-		self.bind("C-m", self.window.add_message, "patch-add-message")
+		self.bind("a", self.window.add_processor, "patch-add-processor")
+		self.bind("t", self.window.add_text, "patch-add-text")
+		self.bind("m", self.window.add_message, "patch-add-message")
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
 		self.bind("C-TAB", self.window.select_mru, "patch-select-mru")
@@ -41,6 +41,9 @@ class PatchEditMode (InputMode):
 
 		self.bind("c", self.connect_fwd, "patch-connect-fwd")
 		self.bind("C", self.connect_rev, "patch-connect-rev")
+
+		self.bind("DEL", self.window.delete_selected, "patch-delete-selected")
+		self.bind("BS", self.window.delete_selected, "patch-delete-selected")
 
 		self.bind("M1DOWN", self.drag_start, "patch-drag-start")
 		self.bind("M1-MOTION", self.drag_selected, "patch-drag-selected")

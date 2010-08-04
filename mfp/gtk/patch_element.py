@@ -26,3 +26,8 @@ class PatchElement (object):
 	def drag(self, x, y):
 		self.move(x - self.drag_x, y - self.drag_y)
 
+	def delete(self):
+		self.stage.unregister(self.actor)
+		self.actor.delete()
+		self.actor = None
+

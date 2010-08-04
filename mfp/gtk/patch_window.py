@@ -119,6 +119,13 @@ class PatchWindow(object):
 		self.selected.move(max(0, self.selected.position_x + dx),
 					       max(0, self.selected.position_y + dy))
 
+	def delete_selected(self):
+		if self.selected is None:
+			return
+		o = self.selected
+		self.selected = None
+		o.delete()
+
 	def quit(self, *rest):
 		clutter.main_quit()
 
