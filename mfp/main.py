@@ -99,6 +99,9 @@ class MFPApp (object):
 			port = args.get('port')
 			obj.send(Bang, port)
 			req.response = True
+		elif cmd == 'delete':
+			obj = MFPApp.recall(args.get('obj_id'))
+			print "MFPApp: got delete req for", obj
 
 		self.gui_pipe.put(req)
 

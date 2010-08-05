@@ -14,7 +14,6 @@ class MessageElement (PatchElement):
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
-		self.proc_id = None 	
 		self.message_text = None 
 		self.connections_out = [] 
 		self.connections_in = [] 
@@ -66,14 +65,14 @@ class MessageElement (PatchElement):
 
 	def button_press_cb(self, *args):
 		print "button press", args
-		MFPGUI.send_bang(self.proc_id, 0) 
+		MFPGUI.send_bang(self.obj_id, 0) 
 
 	def update_label(self, *args):
 		self.message_text = self.label.get_text()
 
 		print "MessageElement: obj=%s" % (self.message_text)
-		self.proc_id = MFPGUI.create("var", self.message_text)
-		if self.proc_id is None:
+		self.obj_id = MFPGUI.create("var", self.message_text)
+		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 
 	def text_changed_cb(self, *args):

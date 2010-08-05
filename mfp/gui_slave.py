@@ -13,7 +13,6 @@ class MFPGUI (object):
 	_instance = None 
 
 	def __init__(self, q):
-		import os
 		from mfp.gtk.patch_window import PatchWindow
 		self.cmd_pipe = q
 		self.cmd_thread = threading.Thread(target=self.reader_thread)
@@ -53,6 +52,12 @@ class MFPGUI (object):
 						                   obj_2_id=obj_2_id, obj_2_port=obj_2_port)))
 		MFPGUI._instance.cmd_pipe.wait(r)
 		return r.response
+
+	@classmethod
+	def delete(klass, obj_id):
+		r = MFPGUI.mfp_send(dict(cmd="delete", args=dict(obj_id=obj_id)))
+		MFPGUI._instance.cmd_pipe.wait(r)
+		return r.response 
 
 	@classmethod
 	def send_bang(klass, obj_id, port):

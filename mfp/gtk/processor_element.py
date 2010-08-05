@@ -14,7 +14,6 @@ class ProcessorElement (PatchElement):
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
-		self.proc_id = None 	
 		self.proc_type = None
 		self.proc_args = None 
 		self.connections_out = [] 
@@ -56,8 +55,8 @@ class ProcessorElement (PatchElement):
 
 		print "ProcessorElement: processor=%s, args=%s" % (self.proc_type, self.proc_args)
 		print self.label.get_text()
-		self.proc_id = MFPGUI.create(self.proc_type, self.proc_args)
-		if self.proc_id is None:
+		self.obj_id = MFPGUI.create(self.proc_type, self.proc_args)
+		if self.obj_id is None:
 			print "ProcessorElement: could not create", self.proc_type, self.proc_args
 
 	def text_changed_cb(self, *args):

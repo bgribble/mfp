@@ -1,4 +1,5 @@
 
+from mfp import MFPGUI 
 
 class PatchElement (object):
 	'''
@@ -6,6 +7,7 @@ class PatchElement (object):
 	'''
 
 	def __init__(self, window, x, y):
+		self.obj_id = None
 		self.actor = None 
 		self.stage = window
 		self.position_x = x
@@ -27,7 +29,10 @@ class PatchElement (object):
 		self.move(x - self.drag_x, y - self.drag_y)
 
 	def delete(self):
-		self.stage.unregister(self.actor)
-		self.actor.delete()
+		self.stage.unregister(self)
 		self.actor = None
+		if self.obj_id is not None:
+			MFPGUI.delete(self.obj_id)
+			self.obj_id = None
+		
 

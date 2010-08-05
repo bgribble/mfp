@@ -66,6 +66,12 @@ class PatchWindow(object):
 		self.input_mgr.event_sources[element.actor] = element 
 		self.stage.add(element.actor)
 
+	def unregister(self, element):
+		print element, self.objects
+		self.objects.remove(element)
+		del self.input_mgr.event_sources[element.actor]
+		self.stage.remove(element.actor)
+
 	def add_processor(self):
 		b = ProcessorElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
 		self.select(b)
