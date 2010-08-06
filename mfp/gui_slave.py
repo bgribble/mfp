@@ -54,6 +54,14 @@ class MFPGUI (object):
 		return r.response
 
 	@classmethod
+	def disconnect(klass, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+		r = MFPGUI.mfp_send(dict(cmd="disconnect", 
+						         args=dict(obj_1_id=obj_1_id, obj_1_port=obj_1_port,
+						                   obj_2_id=obj_2_id, obj_2_port=obj_2_port)))
+		MFPGUI._instance.cmd_pipe.wait(r)
+		return r.response
+
+	@classmethod
 	def delete(klass, obj_id):
 		r = MFPGUI.mfp_send(dict(cmd="delete", args=dict(obj_id=obj_id)))
 		MFPGUI._instance.cmd_pipe.wait(r)

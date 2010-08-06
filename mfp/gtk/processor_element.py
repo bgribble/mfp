@@ -93,7 +93,6 @@ class ProcessorElement (PatchElement):
 
 	def delete(self):
 		print "processor delete:", self
-
 		for c in self.connections_out+self.connections_in:
 			c.delete()
 

@@ -94,6 +94,13 @@ class MFPApp (object):
 			r = obj_1.connect(args.get('obj_1_port'), obj_2, args.get('obj_2_port'))	
 			req.response = r 
 
+		elif cmd == 'disconnect':
+			obj_1 = MFPApp.recall(args.get('obj_1_id'))
+			obj_2 = MFPApp.recall(args.get('obj_2_id'))
+
+			r = obj_1.disconnect(args.get('obj_1_port'), obj_2, args.get('obj_2_port'))	
+			req.response = r 
+
 		elif cmd == 'send_bang':
 			obj = MFPApp.recall(args.get('obj_id'))
 			port = args.get('port')

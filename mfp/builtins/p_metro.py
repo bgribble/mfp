@@ -9,7 +9,7 @@ from ..timer import MultiTimer
 from ..processor import Processor
 from ..main import MFPApp 
 from datetime import datetime, timedelta 
-from .. import Bang
+from .. import Bang, Uninit
 
 class MetroTick (object):
 	pass
@@ -32,15 +32,16 @@ class Metro (Processor):
 		Processor.__init__(self, inlets=2, outlets=1)
 
 	def trigger(self):
-		if self.inlets[1] is not None:
+		if self.inlets[1] is not Uninit:
 			self.interval = timedelta(milliseconds=int(self.inlets[1]))
-			self.inlets[1] = None 
+			self.inlets[1] = Uninit
 
-		if isinstance(self.inlets[0], MetroTick) and self.started:
-			self.outlets[0] = Bang 
-			self.count += 1 
-			self._timer.schedule(self.started + self.count*self.interval, self.timer_cb)
-		if self.inlets[0] is Bang or self.inlets[0]:
+		if isinstance(self.inlets[0], MetroTick):
+			if self.started:
+				self.outlets[0] = Bang 
+				self.count += 1 
+				self._timer.schedule(self.started + self.count*self.interval, self.timer_cb)
+		elif self.inlets[0]:
 			self.started = datetime.now()
 			self.count = 1
 			self._timer.schedule(self.started + self.interval, self.timer_cb)

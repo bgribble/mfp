@@ -35,5 +35,6 @@ class PatchElement (object):
 		if self.obj_id is not None:
 			MFPGUI.delete(self.obj_id)
 			self.obj_id = None
+
 		
 

@@ -26,7 +26,11 @@ class SelectMRUMode (InputMode):
 		self.select_next()
 
 	def select_next(self):
-		curloc = SelectMRUMode.mru_list.index(self.window.selected)
+		try:
+			curloc = SelectMRUMode.mru_list.index(self.window.selected)
+		except:
+			curloc = len(SelectMRUMode.mru_list)
+
 		if curloc < len(SelectMRUMode.mru_list)-1:
 			newloc = curloc + 1
 		else:
@@ -47,3 +51,9 @@ class SelectMRUMode (InputMode):
 			if obj in SelectMRUMode.mru_list:
 				SelectMRUMode.mru_list.remove(obj)
 			SelectMRUMode.mru_list[:0] = [obj]
+	
+	@classmethod
+	def forget(self, obj):
+		if obj in SelectMRUMode.mru_list:
+			SelectMRUMode.mru_list.remove(obj)
+
