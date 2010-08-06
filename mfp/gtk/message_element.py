@@ -111,6 +111,13 @@ class MessageElement (PatchElement):
 		self.selected = False 
 		self.draw_border()
 
+	def delete(self):
+		print "message delete", self
+		for c in self.connections_out+self.connections_in:
+			print "deleting connection", c
+			c.delete()
+		PatchElement.delete(self)
+
 	def toggle_edit(self):
 		if self.editable:
 			self.label.set_editable(False)

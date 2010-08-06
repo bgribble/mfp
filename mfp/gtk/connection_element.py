@@ -22,7 +22,7 @@ class ConnectionElement(PatchElement):
 		self.height = None 
 		
 		self.actor.set_color(window.color_unselected)
-		self.stage.stage.add(self.actor)
+		self.stage.register(self)
 		self.draw()
 
 	def output_pos(self, obj, port):
@@ -33,6 +33,21 @@ class ConnectionElement(PatchElement):
 	def input_pos(self, obj, port):
 		dx = 5 + port*5
 		return Point(obj.position_x + dx, obj.position_y)
+
+	def select(self):
+		self.selected = True 
+		self.actor.set_color(self.stage.color_selected)
+
+	def unselect(self):
+		self.selected = False 
+		self.actor.set_color(self.stage.color_unselected)
+
+	def delete(self):
+		self.obj_1.connections_out.remove(self)
+		self.obj_2.connections_in.remove(self)
+		self.obj_1 = None
+		self.obj_2 = None
+		PatchElement.delete(self)
 
 	def draw(self):
 		p1 = self.output_pos(self.obj_1, self.port_1)

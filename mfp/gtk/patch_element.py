@@ -29,6 +29,7 @@ class PatchElement (object):
 		self.move(x - self.drag_x, y - self.drag_y)
 
 	def delete(self):
+		print "element delete:", self
 		self.stage.unregister(self)
 		self.actor = None
 		if self.obj_id is not None:

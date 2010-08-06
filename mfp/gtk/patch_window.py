@@ -67,7 +67,7 @@ class PatchWindow(object):
 		self.stage.add(element.actor)
 
 	def unregister(self, element):
-		print element, self.objects
+		print "unregister:", element, self.objects
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element.actor]
 		self.stage.remove(element.actor)

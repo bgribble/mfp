@@ -91,6 +91,14 @@ class ProcessorElement (PatchElement):
 		self.selected = False 
 		self.rect.set_border_color(self.stage.color_unselected)
 
+	def delete(self):
+		print "processor delete:", self
+
+		for c in self.connections_out+self.connections_in:
+			c.delete()
+
+		PatchElement.delete(self)
+
 	def toggle_edit(self):
 		if self.editable:
 			self.label.set_editable(False)
