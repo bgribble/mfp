@@ -10,9 +10,13 @@ from ..main import MFPApp
 from .. import Bang, Uninit 
 
 class Var (Processor):
-	def __init__(self, initval=None):
-		self.value = initval
-		Processor.__init__(self, inlets=2, outlets=1)
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 2, 1, init_type, init_args)
+		initargs = self.parse_args(init_args)
+		if len(initargs):
+			self.value = initargs[0]
+		else:
+			self.value = None
 
 	def trigger(self):
 		print "var trigger:", self.inlets

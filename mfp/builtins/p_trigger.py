@@ -17,12 +17,14 @@ class Trigger (Processor):
 	determined by the creation arg.  Used as a sequencing aid, 
 	since outputs will be activated in order of index 
 	'''
-	def __init__(self, *initargs):
+	def __init__(self, init_type, init_args):
+
+		initargs = self.parse_args(init_args)
 		if len(initargs) > 0:
 			numout = initargs[0]
 		else:
 			numout = 1
-		Processor.__init__(self, inlets=1, outlets=numout)
+		Processor.__init__(self, 1, numout, init_type, init_args)
 
 	def trigger(self):
 		for i in range(len(self.outlets)):

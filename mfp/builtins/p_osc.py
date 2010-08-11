@@ -9,9 +9,9 @@ from mfp.processor import Processor
 from mfp.main import MFPApp
 
 class Osc(Processor):
-	def __init__(self, *initargs):
-		Processor.__init__(self, inlets=1, outlets=1)
-
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 1, 1, init_type, init_args)
+		initargs = self.parse_args(init_args)
 		if len(initargs):
 			freq = initargs[0]
 		else:

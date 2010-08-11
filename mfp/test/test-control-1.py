@@ -16,7 +16,7 @@ class PlusTest(TestCase):
 
 	def test_default(self):
 		'''test with default creation args'''
-		self.plus = MFPApp.create("+", 12)
+		self.plus = MFPApp.create("+", "12")
 		self.plus.connect(0, self.out, 0)
 		self.plus.send(13, 0)
 		print "outlets:", self.out.outlets 
@@ -80,7 +80,7 @@ class PrintTest(TestCase):
 
 class RouteTest (TestCase):
 	def setUp(self):
-		self.r = MFPApp.create("route", False, 1, "hello")
+		self.r = MFPApp.create("route", 'False, 1, "hello"')
 
 	def test_basic_routing(self):
 		'''[route] works in simple cases'''

@@ -9,9 +9,10 @@ from ..processor import Processor
 from ..main import MFPApp
 
 class PyBinary(Processor):
-	def __init__(self, pyfunc, *initargs):
+	def __init__(self, pyfunc, init_type, init_args):
 		self.function = pyfunc
-		Processor.__init__(self, inlets=2, outlets=1)
+		Processor.__init__(self, 2, 1, init_type, init_args)
+		initargs = self.parse_args(init_args)
 		if len(initargs) == 1:
 			self.inlets[1] = initargs[0]
 
@@ -20,22 +21,22 @@ class PyBinary(Processor):
 		self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
 
 class PyUnary(Processor):
-	def __init__(self, pyfunc):
+	def __init__(self, pyfunc, init_type, init_args):
 		self.function = pyfunc
-		Processor.__init__(self, inlets=1, outlets=1)
+		Processor.__init__(self, 1, 1, init_type, init_args)
 
 	def trigger(self):
 		self.outlets[0] = self.function(self.inlets[0])
 
 def mk_binary(pyfunc, name):
-	def factory(*args):
-		proc = PyBinary(pyfunc, *args)
+	def factory(iname, args):
+		proc = PyBinary(pyfunc, iname, args)
 		return proc 
 	MFPApp.register(name, factory)
 
 def mk_unary(pyfunc, name):
-	def factory(*args):
-		proc = PyUnary(pyfunc, *args)
+	def factory(iname, args):
+		proc = PyUnary(pyfunc, iname, args)
 		return proc
 	MFPApp.register(name, factory)
 

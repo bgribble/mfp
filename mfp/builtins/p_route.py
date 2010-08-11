@@ -20,14 +20,15 @@ class Route (Processor):
 	The route processor has n+1 outlets, where n is the number 
 	of creation args.  The last outlet is for unmatched inputs. 
 	'''
-	def __init__(self, *addresses):
+	def __init__(self, init_type, init_args):
 		self.addresses = {}  
 
+		addresses = self.parse_args(init_args)
 		for addr, outlet in zip(addresses, range(len(addresses))):
 			self.addresses[addr] = outlet 
 
 		self.nomatch = len(addresses) 
-		Processor.__init__(self, inlets=2, outlets=(len(addresses) + 1))
+		Processor.__init__(self, 2, len(addresses) + 1, init_type, init_args)
 
 	def trigger(self):
 		print "route trigger:", self.inlets

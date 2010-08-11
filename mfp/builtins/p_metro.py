@@ -17,7 +17,9 @@ class MetroTick (object):
 class Metro (Processor): 
 	_timer = None 
 
-	def __init__(self, *initargs):
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 2, 1, init_type, init_args)
+
 		self.started = False 
 		self.interval = False 
 		self.count = 0
@@ -25,11 +27,11 @@ class Metro (Processor):
 		if Metro._timer is None:
 			Metro._timer = MultiTimer()
 			Metro._timer.start()
+		
+		parsed_args = self.parse_argstring(init_args)
 
-		if len(initargs):
-			self.interval = timedelta(milliseconds=int(initargs[0]))
-
-		Processor.__init__(self, inlets=2, outlets=1)
+		if len(parsed_args):
+			self.interval = timedelta(milliseconds=int(parsed_args[0]))
 
 	def trigger(self):
 		if self.inlets[1] is not Uninit:

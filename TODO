@@ -20,7 +20,6 @@ Basics:
  * osc~ should use cubic estimator
  * Selection management (multi select)
  * cut and paste 
- * Deleting objects and connections 
  * Driving creation from mfp master 
  * pd-style save and load 
  * gtk accessorizing for gui window: menu, mode line, left click

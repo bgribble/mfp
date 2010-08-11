@@ -10,9 +10,13 @@ from ..main import MFPApp
 from ..bang import Uninit 
 
 class Print (Processor): 
-	def __init__(self, fmt_string="%s"):
-		self.format_string = fmt_string 
-		Processor.__init__(self, inlets=2, outlets=1)
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 2, 1, init_type, init_args)
+		initargs = self.parse_args(init_args)
+		if len(initargs):
+			self.format_string = initargs[0] 
+		else:
+			self.format_string = "%s"
 
 	def trigger(self):
 		if self.inlets[1] is not Uninit:

@@ -9,8 +9,9 @@ from mfp.processor import Processor
 from mfp.main import MFPApp
 
 class DAC(Processor):
-	def __init__(self, *initargs):
-		Processor.__init__(self, 1, 0)
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 1, 0, init_type, init_args)
+		initargs = self.parse_args(init_args)
 
 		if len(initargs):
 			channel = initargs[0]
@@ -30,8 +31,9 @@ class DAC(Processor):
 			print "Can't convert %s to a channel number" % self.inlet[0]
 				
 class ADC(Processor):
-	def __init__(self, *initargs):
-		Processor.__init__(self, inlets=1, outlets=1)
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 1, 1, init_type, init_args)
+		initargs = self.parse_args(init_args)
 
 		if len(initargs):
 			channel = initargs[0]

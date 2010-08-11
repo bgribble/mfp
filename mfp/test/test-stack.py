@@ -27,7 +27,7 @@ class FanOut (Processor):
 
 class StackDepthTest(TestCase):
 	def setUp(self):
-		self.var = MFPApp.create("var", 0)
+		self.var = MFPApp.create("var", "0")
 		self.inc = LimitedIncr()
 		self.var.connect(0, self.inc, 0)
 		self.inc.connect(0, self.var, 0)

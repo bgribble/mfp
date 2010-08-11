@@ -11,7 +11,10 @@ class Processor (object):
 	OK = 0
 	ERROR = 1 
 
-	def __init__(self, inlets, outlets):
+	def __init__(self, inlets, outlets, init_type, init_args):
+		self.init_type = init_type
+		self.init_args = init_args
+
 		self.inlets = [ Uninit ] * inlets
 		self.outlets = [ Uninit ] * outlets
 		self.status = Processor.OK 
@@ -25,7 +28,16 @@ class Processor (object):
 		self.dsp_outlets = [] 
 
 		self.connections = [[] for r in range(outlets)]
-	
+
+	def parse_args(self, argstring):
+		if argstring == '':
+			return ()
+
+		obj = eval(argstring)
+		if not isinstance(obj, tuple):
+			obj = (obj,)
+		return obj
+
 	def resize(self, inlets, outlets):
 		if inlets > len(self.inlets):
 			self.inlets += [ Uninit ] * inlets-len(self.inlets)
@@ -90,6 +102,16 @@ class Processor (object):
 		if tb:
 			print tb
 
+	# save/restore helper
+	def save(self):
+		oinfo = {}
+		oinfo['type'] = self.init_type
+		oinfo['initargs'] = self.init_args
+		conn = []
+		for c in self.connections:
+			conn.append([ (t[0].obj_id, t[1]) for t in c])
+		oinfo['connections'] = conn
+		return oinfo
 	# 
 	# DSP methods 
 	# 

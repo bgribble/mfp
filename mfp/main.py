@@ -11,6 +11,7 @@ import multiprocessing
 import mfp.dsp_slave, mfp.gui_slave
 from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang 
+from patch import Patch
 
 class MFPApp (object):
 	_instance = None 
@@ -32,8 +33,11 @@ class MFPApp (object):
 		self.registry = {} 
 		
 		# objects we give IDs to 
-		self.objects = {}
+		self.objects_byobj = {}
+		self.objects_byid = {}
 		self.next_obj_id = 0 
+
+		self.patch = Patch()
 
 		MFPApp._instance = self
 
@@ -48,12 +52,14 @@ class MFPApp (object):
 	def remember(klass, obj):
 		oi = MFPApp._instance.next_obj_id
 		MFPApp._instance.next_obj_id += 1
-		MFPApp._instance.objects[oi] = obj
+		MFPApp._instance.objects_byid[oi] = obj
+		obj.obj_id = oi
+
 		return oi
 
 	@classmethod 
 	def recall(klass, obj_id):
-		return MFPApp._instance.objects.get(obj_id)
+		return MFPApp._instance.objects_byid.get(obj_id)
 
 	def gui_reader_thread(self):
 		quit_req = False 
@@ -73,17 +79,10 @@ class MFPApp (object):
 		args = req.payload.get('args')
 
 		if cmd == 'create':
-			strargs = args.get('args')
 			try:
-				if strargs is None:
-					arglist = ()
-				else:
-					arglist = eval(strargs)
-				if not isinstance(arglist, tuple):
-					arglist = (arglist,)
-				obj = MFPApp.create(args.get('type'), *arglist)
-				obj_id = MFPApp.remember(obj)
-				req.response = obj_id
+				obj = MFPApp.create(args.get('type'), args.get('args'))
+				self.patch.add(obj)
+				req.response = obj.obj_id
 			except:
 				req.response = False
 
@@ -106,9 +105,11 @@ class MFPApp (object):
 			port = args.get('port')
 			obj.send(Bang, port)
 			req.response = True
+
 		elif cmd == 'delete':
 			obj = MFPApp.recall(args.get('obj_id'))
 			print "MFPApp: got delete req for", obj
+			obj.delete()
 
 		self.gui_pipe.put(req)
 
@@ -136,7 +137,7 @@ class MFPApp (object):
 		pass
 
 	@classmethod
-	def create(klass, name, *args, **params):
+	def create(klass, name, args=''):
 		if MFPApp._instance is None:
 			MFPApp._instance = MFPApp()
 		ctor = MFPApp._instance.registry.get(name)
@@ -144,7 +145,8 @@ class MFPApp (object):
 			return False 
 		else:
 			print "create: ctor is", ctor 
-			return ctor(*args, **params)
+			obj = ctor(name, args)
+			return obj
 
 	@classmethod
 	def wait(klass, req):
@@ -164,6 +166,9 @@ def main():
 
 	m = MFPApp()
 	builtins.register()
+
+	def save(fn):
+		m.patch.save_file(fn)
 
 	code.interact(local=locals())
 	MFPApp.finish()

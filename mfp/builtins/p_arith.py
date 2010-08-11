@@ -10,9 +10,10 @@ from mfp.processor import Processor
 from mfp.main import MFPApp
 
 class Plus(Processor):
-	def __init__(self, *initargs):
-		Processor.__init__(self, inlets=2, outlets=1)
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 2, 1, init_type, init_args)
 
+		initargs = self.parse_args(init_args)
 		if len(initargs):
 			init_const = initargs[0]
 		else:
