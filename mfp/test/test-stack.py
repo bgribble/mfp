@@ -8,7 +8,7 @@ class LimitedIncr (Processor):
 	def __init__(self, limit=0):
 		self.limit = limit
 		self.lastval = None
-		Processor.__init__(self, inlets=1, outlets=1)
+		Processor.__init__(self, 1, 1, 'limitedincr', '')
 
 	def trigger(self):
 		if self.inlets[0] < self.limit:
@@ -19,7 +19,7 @@ class FanOut (Processor):
 	trail = [] 
 	def __init__(self, tag):
 		self.tag = tag 
-		Processor.__init__(self, inlets=1, outlets=4)
+		Processor.__init__(self, 1, 4, "fanout", '')
 
 	def trigger(self):
 		self.outlets[0] = self.outlets[1] = self.outlets[2] = self.outlets[3] = Bang

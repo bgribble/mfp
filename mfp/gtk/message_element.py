@@ -2,6 +2,8 @@
 '''
 message_element.py
 A patch element corresponding to a clickable message
+
+Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 import clutter 
@@ -11,6 +13,7 @@ from patch_element import PatchElement
 from mfp import MFPGUI
 
 class MessageElement (PatchElement):
+	element_type = "message"
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
@@ -74,6 +77,7 @@ class MessageElement (PatchElement):
 		self.obj_id = MFPGUI.create("var", self.message_text)
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
+		self.send_params()
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 

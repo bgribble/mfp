@@ -6,8 +6,11 @@ A text element (comment) in a patch
 
 import clutter 
 from patch_element import PatchElement 
+from mfp import MFPGUI
 
 class TextElement (PatchElement):
+	element_type = "text"
+
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 		self.text = ''
@@ -33,6 +36,12 @@ class TextElement (PatchElement):
 
 	def update_label(self, *args):
 		self.message_text = self.actor.get_text()
+		if self.obj_id is None:
+			self.obj_id = MFPGUI.create("var")
+		if self.obj_id is None:
+			print "MessageElement: could not create message obj"
+		else:
+			self.send_params(message_text=self.message_text)
 
 	def select(self, *args):
 		self.actor.set_color(self.stage.color_selected) 

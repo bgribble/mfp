@@ -15,7 +15,7 @@ class PatchElement (object):
 		self.drag_x = None
 		self.drag_y = None
 		self.selected = False 
-	
+
 	def drag_start(self, x, y):
 		self.drag_x = x - self.position_x
 		self.drag_y = y - self.position_y
@@ -36,5 +36,11 @@ class PatchElement (object):
 			MFPGUI.delete(self.obj_id)
 			self.obj_id = None
 
-		
+	def send_params(self, **extras):
+		prms = dict(position_x=self.position_x, position_y=self.position_y, 
+					element_type=self.element_type)
+		for k, v in extras.items():
+			prms[k] = v
+		if self.obj_id is not None:
+			MFPGUI.send_params(self.obj_id, prms)	
 

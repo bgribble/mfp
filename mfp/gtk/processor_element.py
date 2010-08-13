@@ -11,9 +11,11 @@ from mfp import MFPGUI
 from input_mode import InputMode
 
 class ProcessorElement (PatchElement):
+	element_type = "processor"
+
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
-
+	
 		self.proc_type = None
 		self.proc_args = None 
 		self.connections_out = [] 
@@ -58,6 +60,7 @@ class ProcessorElement (PatchElement):
 		self.obj_id = MFPGUI.create(self.proc_type, self.proc_args)
 		if self.obj_id is None:
 			print "ProcessorElement: could not create", self.proc_type, self.proc_args
+		self.send_params()
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 
@@ -107,6 +110,4 @@ class ProcessorElement (PatchElement):
 			self.label.set_editable(True)
 			self.stage.stage.set_key_focus(self.label)
 			self.editable = True
-
-
 

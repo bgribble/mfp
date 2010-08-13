@@ -12,6 +12,7 @@ class PatchEditMode (InputMode):
 	def __init__(self, window):
 		self.manager = window.input_mgr 
 		self.window = window 
+		self.drag_started = False
 		self.drag_start_x = None
 		self.drag_start_y = None 
 
@@ -47,18 +48,23 @@ class PatchEditMode (InputMode):
 
 		self.bind("M1DOWN", self.drag_start, "patch-drag-start")
 		self.bind("M1-MOTION", self.drag_selected, "patch-drag-selected")
+		self.bind("M1UP", self.drag_end, "patch-drag-end")
 
 	def drag_start(self):
-		if self.window.selected:
+		if self.window.selected and self.manager.pointer_obj is self.window.selected:
+			self.drag_started = True
 			self.drag_start_off_x = self.manager.pointer_x - self.window.selected.position_x
 			self.drag_start_off_y = self.manager.pointer_y - self.window.selected.position_y
 
 	def drag_selected(self):
-		if self.window.selected is None or self.manager.pointer_obj != self.window.selected:
+		if self.window.selected is None or self.drag_started is False:
 			return 
 		self.window.selected.move(self.manager.pointer_x-self.drag_start_off_x, 
 					              self.manager.pointer_y-self.drag_start_off_y)
 
+	def drag_end(self):
+		self.drag_started = False
+		self.window.selected.send_params()
 
 	def connect_fwd(self):
 		if self.window.selected:

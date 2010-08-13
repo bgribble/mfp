@@ -65,6 +65,8 @@ class PatchWindow(object):
 		self.objects.append(element)
 		self.input_mgr.event_sources[element.actor] = element 
 		self.stage.add(element.actor)
+		if element.obj_id is not None:
+			element.send_params()
 
 	def unregister(self, element):
 		print "unregister:", element, self.objects
@@ -125,6 +127,8 @@ class PatchWindow(object):
 			return
 		self.selected.move(max(0, self.selected.position_x + dx),
 					       max(0, self.selected.position_y + dy))
+		if self.selected.obj_id is not None:
+			self.selected.send_params()
 
 	def delete_selected(self):
 		if self.selected is None:

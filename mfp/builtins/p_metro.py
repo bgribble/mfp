@@ -28,7 +28,7 @@ class Metro (Processor):
 			Metro._timer = MultiTimer()
 			Metro._timer.start()
 		
-		parsed_args = self.parse_argstring(init_args)
+		parsed_args = self.parse_args(init_args)
 
 		if len(parsed_args):
 			self.interval = timedelta(milliseconds=int(parsed_args[0]))

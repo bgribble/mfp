@@ -40,9 +40,10 @@ class MFPGUI (object):
 		return req 
 
 	@classmethod 
-	def create(klass, name, args):
+	def create(klass, name, args=''):
 		r = MFPGUI.mfp_send(dict(cmd="create", args=dict(type=name, args=args)))
 		MFPGUI._instance.cmd_pipe.wait(r)
+		print "gui create got", r.response
 		return r.response
 
 	@classmethod
@@ -70,6 +71,12 @@ class MFPGUI (object):
 	@classmethod
 	def send_bang(klass, obj_id, port):
 		r = MFPGUI.mfp_send(dict(cmd="send_bang", args=dict(obj_id=obj_id, port=port)))
+		MFPGUI._instance.cmd_pipe.wait(r)
+		return r.response 
+
+	@classmethod
+	def send_params(klass, obj_id, params):
+		r = MFPGUI.mfp_send(dict(cmd="gui_params", args=dict(obj_id=obj_id, params=params)))
 		MFPGUI._instance.cmd_pipe.wait(r)
 		return r.response 
 

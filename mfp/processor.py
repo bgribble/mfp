@@ -18,6 +18,10 @@ class Processor (object):
 		self.inlets = [ Uninit ] * inlets
 		self.outlets = [ Uninit ] * outlets
 		self.status = Processor.OK 
+		self.obj_id = None
+
+		# gui params are updated by the gui slave
+		self.gui_params = {}
 
 		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 
 		# of the ordinal inlets/outlets of the DSP object. 
@@ -107,6 +111,7 @@ class Processor (object):
 		oinfo = {}
 		oinfo['type'] = self.init_type
 		oinfo['initargs'] = self.init_args
+		oinfo['gui_params'] = self.gui_params
 		conn = []
 		for c in self.connections:
 			conn.append([ (t[0].obj_id, t[1]) for t in c])

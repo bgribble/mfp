@@ -13,6 +13,9 @@ from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang 
 from patch import Patch
 
+def dprint(e):
+	print e
+
 class MFPApp (object):
 	_instance = None 
 
@@ -33,8 +36,7 @@ class MFPApp (object):
 		self.registry = {} 
 		
 		# objects we give IDs to 
-		self.objects_byobj = {}
-		self.objects_byid = {}
+		self.objects = {}
 		self.next_obj_id = 0 
 
 		self.patch = Patch()
@@ -52,14 +54,14 @@ class MFPApp (object):
 	def remember(klass, obj):
 		oi = MFPApp._instance.next_obj_id
 		MFPApp._instance.next_obj_id += 1
-		MFPApp._instance.objects_byid[oi] = obj
+		MFPApp._instance.objects[oi] = obj
 		obj.obj_id = oi
 
 		return oi
 
 	@classmethod 
 	def recall(klass, obj_id):
-		return MFPApp._instance.objects_byid.get(obj_id)
+		return MFPApp._instance.objects.get(obj_id)
 
 	def gui_reader_thread(self):
 		quit_req = False 
@@ -79,14 +81,13 @@ class MFPApp (object):
 		args = req.payload.get('args')
 
 		if cmd == 'create':
-			try:
-				obj = MFPApp.create(args.get('type'), args.get('args'))
-				self.patch.add(obj)
-				req.response = obj.obj_id
-			except:
-				req.response = False
+			obj = MFPApp.create(args.get('type'), args.get('args'))
+			MFPApp.remember(obj)
+			self.patch.add(obj)
+			req.response = obj.obj_id
 
 		elif cmd == 'connect':
+			print "connect:", args
 			obj_1 = MFPApp.recall(args.get('obj_1_id'))
 			obj_2 = MFPApp.recall(args.get('obj_2_id'))
 
@@ -110,6 +111,10 @@ class MFPApp (object):
 			obj = MFPApp.recall(args.get('obj_id'))
 			print "MFPApp: got delete req for", obj
 			obj.delete()
+
+		elif cmd == 'gui_params':
+			obj = MFPApp.recall(args.get('obj_id'))
+			obj.gui_params = args.get('params')
 
 		self.gui_pipe.put(req)
 
