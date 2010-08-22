@@ -8,9 +8,10 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 import threading 
 from request import Request
+from singleton import Singleton
 
 class MFPGUI (object):
-	_instance = None 
+	__metaclass__ = Singleton
 
 	def __init__(self, q):
 		from mfp.gtk.patch_window import PatchWindow
@@ -21,7 +22,6 @@ class MFPGUI (object):
 		self.appwin = PatchWindow()
 		self.quit_request = False
 
-		MFPGUI._instance = self 
 		
 	def reader_thread(self):
 		while not self.quit_request:
@@ -30,54 +30,74 @@ class MFPGUI (object):
 				pass 
 			elif qcmd.payload == 'quit':
 				self.quit_request = True
-		
+			else:
+				self.incoming_cmd(qcmd)
 		self.appwin.destroy()
 
-	@classmethod 
-	def mfp_send(klass, obj, callback=None):
+	def incoming_cmd(self, req):
+		from .gtk.processor_element import ProcessorElement
+		from .gtk.message_element import MessageElement
+		from .gtk.text_element import TextElement
+
+		cmd = req.payload.get('cmd')
+		args = req.payload.get('args')
+
+		if cmd == 'create':
+			ctors = {
+				'processor': ProcessorElement,
+				'message': MessageElement,
+				'text': TextElement
+			}
+			prms = args.get('gui_params', {})
+			etype = prms.get('element_type')
+			ctor = ctors.get(etype)
+			if ctor:
+				o = ctor(self.appwin, prms.get('position_x', 0), prms.get('position_y', 0))
+				o.obj_id = args.get('obj_id')
+				o.configure(prms)
+		elif cmd == 'connect':
+			pass
+		elif cmd == 'clear':
+			pass
+
+	def mfp_send(self, obj, callback=None):
 		req = Request(obj, callback=callback)
-		MFPGUI._instance.cmd_pipe.put(req)
+		self.cmd_pipe.put(req)
 		return req 
 
-	@classmethod 
-	def create(klass, name, args=''):
-		r = MFPGUI.mfp_send(dict(cmd="create", args=dict(type=name, args=args)))
-		MFPGUI._instance.cmd_pipe.wait(r)
+	def create(self, name, args=''):
+		r = self.mfp_send(dict(cmd="create", args=dict(type=name, args=args)))
+		self.cmd_pipe.wait(r)
 		print "gui create got", r.response
 		return r.response
 
-	@classmethod
-	def connect(klass, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		r = MFPGUI.mfp_send(dict(cmd="connect", 
+	def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+		r = self.mfp_send(dict(cmd="connect", 
 						         args=dict(obj_1_id=obj_1_id, obj_1_port=obj_1_port,
 						                   obj_2_id=obj_2_id, obj_2_port=obj_2_port)))
-		MFPGUI._instance.cmd_pipe.wait(r)
+		self.cmd_pipe.wait(r)
 		return r.response
 
-	@classmethod
-	def disconnect(klass, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		r = MFPGUI.mfp_send(dict(cmd="disconnect", 
+	def disconnect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+		r = self.mfp_send(dict(cmd="disconnect", 
 						         args=dict(obj_1_id=obj_1_id, obj_1_port=obj_1_port,
 						                   obj_2_id=obj_2_id, obj_2_port=obj_2_port)))
-		MFPGUI._instance.cmd_pipe.wait(r)
+		self.cmd_pipe.wait(r)
 		return r.response
 
-	@classmethod
-	def delete(klass, obj_id):
-		r = MFPGUI.mfp_send(dict(cmd="delete", args=dict(obj_id=obj_id)))
-		MFPGUI._instance.cmd_pipe.wait(r)
+	def delete(self, obj_id):
+		r = self.mfp_send(dict(cmd="delete", args=dict(obj_id=obj_id)))
+		self.cmd_pipe.wait(r)
 		return r.response 
 
-	@classmethod
-	def send_bang(klass, obj_id, port):
-		r = MFPGUI.mfp_send(dict(cmd="send_bang", args=dict(obj_id=obj_id, port=port)))
-		MFPGUI._instance.cmd_pipe.wait(r)
+	def send_bang(self, obj_id, port):
+		r = self.mfp_send(dict(cmd="send_bang", args=dict(obj_id=obj_id, port=port)))
+		self.cmd_pipe.wait(r)
 		return r.response 
 
-	@classmethod
-	def send_params(klass, obj_id, params):
-		r = MFPGUI.mfp_send(dict(cmd="gui_params", args=dict(obj_id=obj_id, params=params)))
-		MFPGUI._instance.cmd_pipe.wait(r)
+	def send_params(self, obj_id, params):
+		r = self.mfp_send(dict(cmd="gui_params", args=dict(obj_id=obj_id, params=params)))
+		self.cmd_pipe.wait(r)
 		return r.response 
 
 	def start_main(self):

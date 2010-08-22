@@ -55,4 +55,4 @@ class Metro (Processor):
 		self.send(MetroTick())
 
 def register():
-	MFPApp.register("metro", Metro)
+	MFPApp().register("metro", Metro)

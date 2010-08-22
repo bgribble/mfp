@@ -8,6 +8,11 @@ class PatchElement (object):
 
 	def __init__(self, window, x, y):
 		self.obj_id = None
+		self.num_inlets = 0
+		self.num_outlets = 0
+		self.dsp_inlets = []
+		self.dsp_outlets = []
+
 		self.actor = None 
 		self.stage = window
 		self.position_x = x
@@ -33,7 +38,7 @@ class PatchElement (object):
 		self.stage.unregister(self)
 		self.actor = None
 		if self.obj_id is not None:
-			MFPGUI.delete(self.obj_id)
+			MFPGUI().delete(self.obj_id)
 			self.obj_id = None
 
 	def send_params(self, **extras):
@@ -42,5 +47,12 @@ class PatchElement (object):
 		for k, v in extras.items():
 			prms[k] = v
 		if self.obj_id is not None:
-			MFPGUI.send_params(self.obj_id, prms)	
+			MFPGUI().send_params(self.obj_id, prms)
+
+	def configure(self, params):
+		self.num_inlets = params.get("num_inlets")
+		self.num_outlets = params.get("num_outlets")
+		self.dsp_inlets = params.get("dsp_inlets")
+		self.dsp_outlets = params.get("dsp_outlets")
+
 

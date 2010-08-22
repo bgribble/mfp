@@ -10,7 +10,8 @@ class Request(object):
 	CREATED = 0 
 	SUBMITTED = 1
 	RESPONSE_PEND = 2
-	RESPONSE_RCVD = 3 
+	RESPONSE_DONE = 3
+	RESPONSE_RCVD = 4 
 	
 	def __init__(self, payload, callback=None, multi_cb=False):
 		self.state = Request.CREATED 

@@ -32,13 +32,13 @@ def mk_binary(pyfunc, name):
 	def factory(iname, args):
 		proc = PyBinary(pyfunc, iname, args)
 		return proc 
-	MFPApp.register(name, factory)
+	MFPApp().register(name, factory)
 
 def mk_unary(pyfunc, name):
 	def factory(iname, args):
 		proc = PyUnary(pyfunc, iname, args)
 		return proc
-	MFPApp.register(name, factory)
+	MFPApp().register(name, factory)
 
 import operator, math
 

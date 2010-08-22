@@ -106,6 +106,7 @@ class RequestPipe(object):
 				
 			if req:
 				req.response = qobj.get('response')
+				req.payload = qobj.get('payload')
 				req.state = Request.RESPONSE_RCVD
 				del self.pending[req.request_id]
 				if req.callback is not None:

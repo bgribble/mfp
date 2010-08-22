@@ -68,13 +68,13 @@ class MessageElement (PatchElement):
 
 	def button_press_cb(self, *args):
 		print "button press", args
-		MFPGUI.send_bang(self.obj_id, 0) 
+		MFPGUI().send_bang(self.obj_id, 0) 
 
 	def update_label(self, *args):
 		self.message_text = self.label.get_text()
 
 		print "MessageElement: obj=%s" % (self.message_text)
-		self.obj_id = MFPGUI.create("var", self.message_text)
+		self.obj_id = MFPGUI().create("var", self.message_text)
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 		self.send_params()

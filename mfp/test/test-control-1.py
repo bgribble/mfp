@@ -5,18 +5,15 @@ from mfp.main import MFPApp
 import mfp 
 from mfp import Bang, Uninit
 
-def setup():
-	mfp.builtins.register()
-
 class PlusTest(TestCase):
 	def setUp(self):
-		self.plus = MFPApp.create("+")
-		self.out = MFPApp.create("var")
+		self.plus = MFPApp().create("+")
+		self.out = MFPApp().create("var")
 		self.plus.connect(0, self.out, 0)
 
 	def test_default(self):
 		'''test with default creation args'''
-		self.plus = MFPApp.create("+", "12")
+		self.plus = MFPApp().create("+", "12")
 		self.plus.connect(0, self.out, 0)
 		self.plus.send(13, 0)
 		print "outlets:", self.out.outlets 
@@ -46,8 +43,8 @@ class PlusTest(TestCase):
 
 class PrintTest(TestCase):
 	def setUp(self):
-		self.pr = MFPApp.create("print")
-		self.out = MFPApp.create("var")
+		self.pr = MFPApp().create("print")
+		self.out = MFPApp().create("var")
 		self.pr.connect(0, self.out, 0)
 
 	def test_default(self):
@@ -80,7 +77,7 @@ class PrintTest(TestCase):
 
 class RouteTest (TestCase):
 	def setUp(self):
-		self.r = MFPApp.create("route", 'False, 1, "hello"')
+		self.r = MFPApp().create("route", 'False, 1, "hello"')
 
 	def test_basic_routing(self):
 		'''[route] works in simple cases'''
@@ -142,7 +139,7 @@ class RouteTest (TestCase):
 
 	def test_connections_ok(self):
 		'''[route] --> [var] connection remains when addresses resized'''
-		v = MFPApp.create("var")
+		v = MFPApp().create("var")
 		self.r.connect(0, v, 0)
 		self.r.send([4], 1)
 		self.r.send([4, 'hello'], 0)

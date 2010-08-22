@@ -34,5 +34,5 @@ class Plus(Processor):
 				
 
 def register():
-	MFPApp.register("+~", Plus)
+	MFPApp().register("+~", Plus)
 

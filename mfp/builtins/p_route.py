@@ -63,4 +63,4 @@ class Route (Processor):
 				self.outlets[outlet] = d
 			
 def register():
-	MFPApp.register("route", Route)
+	MFPApp().register("route", Route)

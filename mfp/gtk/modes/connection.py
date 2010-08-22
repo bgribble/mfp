@@ -45,8 +45,8 @@ class ConnectionMode (InputMode):
 			print "Making connection:"
 			print self.source_obj, self.source_port, '-->', self.dest_obj, self.dest_port
 
-			if MFPGUI.connect(self.source_obj.obj_id, self.source_port,
-							  self.dest_obj.obj_id, self.dest_port):
+			if MFPGUI().connect(self.source_obj.obj_id, self.source_port,
+					  		    self.dest_obj.obj_id, self.dest_port):
 				c = ConnectionElement(self.window, self.source_obj, self.source_port,
 									  self.dest_obj, self.dest_port)
 				self.source_obj.connections_out.append(c)

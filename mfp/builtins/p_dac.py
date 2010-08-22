@@ -54,7 +54,7 @@ class ADC(Processor):
 				
 
 def register():
-	MFPApp.register("adc~", ADC)
-	MFPApp.register("dac~", DAC)
+	MFPApp().register("adc~", ADC)
+	MFPApp().register("dac~", DAC)
 
 

@@ -33,5 +33,5 @@ class Osc(Processor):
 				print "Can't convert %s to a frequency value" % self.inlet[0]
 				
 def register():
-	MFPApp.register("osc~", Osc)
+	MFPApp().register("osc~", Osc)
 

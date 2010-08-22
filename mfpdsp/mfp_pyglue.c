@@ -3,6 +3,19 @@
 #include "mfp_dsp.h"
 #include "builtin.h"
 
+PyObject * cmdqueue = NULL;
+
+static PyObject *
+dsp_get_cmdqueue(PyObject * mdo, PyObject * args)
+{
+	if (cmdqueue == NULL) {
+		cmdqueue = Py_List();
+	}
+	Py_INCREF(cmdqueue);
+	return cmdqueue;
+
+}
+
 static PyObject * 
 dsp_startup(PyObject * mod, PyObject * args) 
 {

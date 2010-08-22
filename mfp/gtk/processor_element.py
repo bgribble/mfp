@@ -13,11 +13,11 @@ from input_mode import InputMode
 class ProcessorElement (PatchElement):
 	element_type = "processor"
 
-	def __init__(self, window, x, y):
+	def __init__(self, window, x, y, params={}):
 		PatchElement.__init__(self, window, x, y)
 	
-		self.proc_type = None
-		self.proc_args = None 
+		self.proc_type = None 
+		self.proc_args = None
 		self.connections_out = [] 
 		self.connections_in = [] 
 		self.editable = False 
@@ -57,7 +57,7 @@ class ProcessorElement (PatchElement):
 
 		print "ProcessorElement: processor=%s, args=%s" % (self.proc_type, self.proc_args)
 		print self.label.get_text()
-		self.obj_id = MFPGUI.create(self.proc_type, self.proc_args)
+		self.obj_id = MFPGUI().create(self.proc_type, self.proc_args)
 		if self.obj_id is None:
 			print "ProcessorElement: could not create", self.proc_type, self.proc_args
 		self.send_params()
@@ -100,6 +100,15 @@ class ProcessorElement (PatchElement):
 			c.delete()
 
 		PatchElement.delete(self)
+
+	def send_params(self):
+		PatchElement.send_params(self)
+
+	def configure(self, params):
+		self.proc_name = params.get("type")
+		self.proc_args = params.get("initargs")
+		self.label.set_text("%s %s" % (self.proc_name, self.proc_args))
+		PatchElement.configure(params)	
 
 	def toggle_edit(self):
 		if self.editable:

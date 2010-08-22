@@ -37,7 +37,7 @@ class TextElement (PatchElement):
 	def update_label(self, *args):
 		self.message_text = self.actor.get_text()
 		if self.obj_id is None:
-			self.obj_id = MFPGUI.create("var")
+			self.obj_id = MFPGUI().create("var")
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 		else:

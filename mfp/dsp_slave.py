@@ -13,7 +13,6 @@ class MFPDSP (object):
 		self.obj_id = 0 
 		self.cmd_pipe = q
 		self.spcount = 0
-		
 		q.init_slave(reader=False)
 
 	def start (self):
@@ -24,8 +23,9 @@ class MFPDSP (object):
 		time_to_quit = False
 
 		while not time_to_quit:
+			print "dsp_reader: waiting...."
 			qcmd = self.cmd_pipe.get()
-
+			print "dsp_reader: got", qcmd
 			if not qcmd: 
 				continue
 			elif qcmd.payload == 'quit':
@@ -50,6 +50,7 @@ class MFPDSP (object):
 		return self.objects.get(obj_id)
 
 	def command(self, req):
+		print "dsp_slave.command:", req.payload
 		cmd = req.payload.get('cmd')
 		args = req.payload.get('args')
 		if cmd == 'create':
@@ -67,6 +68,7 @@ class MFPDSP (object):
 			param = args.get('name')
 			value = args.get('value')
 			obj = self.recall(obj_id)
+			print "setparam:", obj, param, value
 			if obj:
 				req.response = mfpdsp.proc_setparam(obj, param, value)
 			self.spcount += 1
@@ -78,7 +80,11 @@ class MFPDSP (object):
 			src = self.recall(args.get('obj_id'))
 			dst = self.recall(args.get('target'))
 			mfpdsp.proc_disconnect(src, args.get('outlet'), dst, args.get('inlet'))
+		else: 
+			print "dsp_slave: unhandled command", cmd
+			req.response = True
 
+		print "dsp_slave: finished processing", cmd
 		self.cmd_pipe.put(req)
 
 def main(dsp_queue):

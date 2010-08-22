@@ -31,10 +31,29 @@ class Processor (object):
 		self.dsp_inlets = []
 		self.dsp_outlets = [] 
 
-		self.connections = [[] for r in range(outlets)]
+		self.connections_out = [[] for r in range(outlets)]
+		self.connections_in = [[] for r in range(inlets)]
+
+	def delete(self):
+		print "delete", self
+		outport = 0
+		for c in self.connections_out:
+			for tobj, tport in c:
+				self.disconnect(outport, tobj, tport)
+			outport += 1
+
+		inport = 0
+		for c in self.connections_in:
+			for tobj, tport in c:
+				tobj.disconnect(tport, self, inport)
+			inport += 1
+
+		if self.dsp_obj is not None:
+			print "calling dsp_delete"
+			self.dsp_delete()
 
 	def parse_args(self, argstring):
-		if argstring == '':
+		if argstring == '' or argstring is None:
 			return ()
 
 		obj = eval(argstring)
@@ -45,24 +64,35 @@ class Processor (object):
 	def resize(self, inlets, outlets):
 		if inlets > len(self.inlets):
 			self.inlets += [ Uninit ] * inlets-len(self.inlets)
+			self.connections_in += [[] for r in range(inlets-len(self.inlets)) ]
 		else:
+			for inlet in range(inlets, len(self.inlets)):
+				for tobj, tport in self.connections_in[inlet]:
+					tobj.disconnect(tport, self, inlet)
 			self.inlets[inlets:] = []
 
 		if outlets > len(self.outlets):
 			self.outlets += [ Uninit ] * outlets-len(self.outlets)
-			self.connections += [[] for r in range(outlets-len(self.outlets)) ]
+			self.connections_out += [[] for r in range(outlets-len(self.outlets)) ]
 		else:
+			for outlet in range(outlets, len(self.outlets)):
+				for tobj, tport in self.connections_out[outlet]:
+					self.disconnect(outlet, tobj, tport)
 			self.outlets[outlets:] = []
-			self.connections[outlets:] = []
+			self.connections_out[outlets:] = []
 
 	def connect(self, outlet, target, inlet):
 		# is this a DSP connection? 
 		if outlet in self.dsp_outlets:
 			self.dsp_connect(outlet, target, inlet)
 
-		existing = self.connections[outlet]
+		existing = self.connections_out[outlet]
 		if (target,inlet) not in existing:
 			existing.append((target,inlet))
+
+		existing = target.connections_in[inlet]
+		if (self,outlet) not in existing:
+			existing.append((self,outlet))
 		return True
 	
 	def disconnect(self, outlet, target, inlet):
@@ -70,11 +100,14 @@ class Processor (object):
 		if outlet in self.dsp_outlets:
 			self.dsp_disconnect(outlet, target, inlet)
 
-		existing = self.connections[outlet]
+		existing = self.connections_out[outlet]
 		if (target,inlet) in existing:
 			existing.remove((target,inlet))
-		return True
 
+		existing = target.connections_in[inlet]
+		if (self,outlet) in existing:
+			existing.remove((self,outlet))
+		return True
 
 	def send(self, value, inlet=0):
 		try:
@@ -94,7 +127,7 @@ class Processor (object):
 		if inlet == 0:
 			self.outlets = [ Uninit ] * len(self.outlets)
 			self.trigger()
-			for conns, val in zip(self.connections, self.outlets):
+			for conns, val in zip(self.connections_out, self.outlets):
 				if val is not Uninit:
 					for target, inlet in conns:
 						work.append((target, val, inlet))
@@ -113,10 +146,11 @@ class Processor (object):
 		oinfo['initargs'] = self.init_args
 		oinfo['gui_params'] = self.gui_params
 		conn = []
-		for c in self.connections:
+		for c in self.connections_out:
 			conn.append([ (t[0].obj_id, t[1]) for t in c])
 		oinfo['connections'] = conn
 		return oinfo
+
 	# 
 	# DSP methods 
 	# 
@@ -125,7 +159,7 @@ class Processor (object):
 		self.dsp_obj = None 
 		req = self.dsp_message("create", name=proc_name, inlets=len(self.dsp_inlets), 
 					           outlets=len(self.dsp_outlets))
-		MFPApp.wait(req)
+		MFPApp().wait(req)
 
 	def dsp_response(self, request):
 		if request.payload.get("cmd") == "create":
@@ -135,7 +169,7 @@ class Processor (object):
 		if callback is None:
 			callback = self.dsp_response 
 		payload = dict(cmd=cmd, args=args)
-		return MFPApp.dsp_message(payload, callback=callback)
+		return MFPApp().dsp_message(payload, callback=callback)
 
 	def dsp_connect(self, outlet, target, inlet):
 		self.dsp_message("connect", obj_id=self.dsp_obj, target=target.dsp_obj, 
@@ -149,10 +183,17 @@ class Processor (object):
 				         inlet=target.dsp_inlets.index(inlet)) 
 		
 	def dsp_setparam(self, name, value):
-		self.dsp_message("set_param", obj_id=self.dsp_obj, name=name, value=value)
+		req = self.dsp_message("set_param", obj_id=self.dsp_obj, name=name, value=value)
+		MFPApp().wait(req)
+		return req.response
+
+	def dsp_delete(self):
+		req = self.dsp_message("delete", obj_id=self.dsp_obj)
+		MFPApp().wait(req)
+		return req.response
 
 	def dsp_getparam(self, name, callback=None):
 		req = self.dsp_message("get_param", callback=callback, obj_id=self.dsp_obj, name=name) 
-		MFPApp.wait(req)
+		MFPApp().wait(req)
 		return req.response 
 

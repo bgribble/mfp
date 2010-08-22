@@ -31,4 +31,4 @@ class Var (Processor):
 			self.outlets[0] = self.value	
 
 def register():
-	MFPApp.register("var", Var)
+	MFPApp().register("var", Var)

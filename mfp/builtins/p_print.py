@@ -28,4 +28,4 @@ class Print (Processor):
 			print out 
 			
 def register():
-	MFPApp.register("print", Print)
+	MFPApp().register("print", Print)

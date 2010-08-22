@@ -31,6 +31,6 @@ class Trigger (Processor):
 			self.outlets[i] = self.inlets[0]
 
 def register():
-	MFPApp.register("trigger", Trigger)
+	MFPApp().register("trigger", Trigger)
 
 

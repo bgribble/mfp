@@ -32,5 +32,5 @@ class Sig(Processor):
 				
 
 def register():
-	MFPApp.register("sig~", Sig)
+	MFPApp().register("sig~", Sig)
 
