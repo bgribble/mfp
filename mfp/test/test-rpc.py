@@ -2,7 +2,7 @@
 import multiprocessing
 from mfp.request_pipe import RequestPipe
 from mfp.request import Request
-from mfp.rpc_wrapper import RPCWrapper, wrap
+from mfp.rpc_wrapper import RPCWrapper, rpcwrap
 from mfp.rpc_worker import RPCWorker
 
 from unittest import TestCase
@@ -12,43 +12,35 @@ class WrappedClass(RPCWrapper):
 		self.arg = arg1
 		RPCWrapper.__init__(self, arg1, **kwargs) 
 
-	@wrap
+	@rpcwrap
 	def retarg(self):
 		return self.arg
 
-	@wrap
+	@rpcwrap
 	def setarg(self, value):
 		self.arg = value
 
-	@wrap
+	@rpcwrap
 	def error_method(self):
 		return 1/0
-
-class UnregClass(RPCWrapper):
-	pass
 
 reverse_value = None
 
 class ReverseClass(RPCWrapper):
-	@wrap
+	@rpcwrap
 	def reverse(self):
 		global reverse_value
 		return reverse_value
 
-	@wrap
+	@rpcwrap
 	def fail(self):
 		return 1/0
 
 class ReverseActivatorClass(RPCWrapper):
-	@wrap
+	@rpcwrap
 	def reverse(self):
 		o = ReverseClass()
 		return o.reverse() 
-
-
-RPCWrapper.register('WrappedClass', WrappedClass)
-RPCWrapper.register('ReverseClass', ReverseClass)
-RPCWrapper.register('ReverseActivatorClass', ReverseActivatorClass)
 
 def worker(reqpipe):
 	WrappedClass.local = True
@@ -91,16 +83,6 @@ class RPCTests(TestCase):
 			print e.traceback
 			print '-------------------------'
 			assert 0
-
-	def test_badclass(self):
-		'''test_badclass: unwrapped class should raise ClassNotFound'''
-		failed = 0
-		try:
-			o = UnregClass()
-		except RPCWrapper.ClassNotFound, e:
-			failed = 1
-	
-		self.assertEqual(failed, 1)
 
 	def test_badmethod(self):
 		'''test_badmethod: failed method should raise MethodFailed'''

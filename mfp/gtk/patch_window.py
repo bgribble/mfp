@@ -73,6 +73,7 @@ class PatchWindow(object):
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element.actor]
 		self.stage.remove(element.actor)
+		# FIXME hook
 		SelectMRUMode.forget(element)
 
 	def add_processor(self):
@@ -95,6 +96,8 @@ class PatchWindow(object):
 			self.unselect(self.selected)
 		obj.select()
 		self.selected = obj
+
+		# FIXME hook
 		SelectMRUMode.touch(obj) 
 
 	def unselect(self, obj):

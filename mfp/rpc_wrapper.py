@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from request import Request
 
-def wrap(worker_proc):
+def rpcwrap(worker_proc):
 	def inner(self, *args, **kwargs):
 		if self.local:
 			return worker_proc(self, *args, **kwargs)
@@ -16,7 +16,16 @@ def wrap(worker_proc):
 			return self.call_remotely(rpcdata)
 	return inner
 
+class RegisteredClass(type):
+	def __init__(klass, name, bases, xdict): 
+		print "RegisteredClass: registering", name
+		type.__init__(klass, name, bases, xdict)
+		klass.register(name)
+
+
 class RPCWrapper (object):
+	__metaclass__ = RegisteredClass
+
 	NO_CLASS = -1
 	NO_METHOD = -2
 	METHOD_FAILED = -3
@@ -80,8 +89,9 @@ class RPCWrapper (object):
 			raise RPCWrapper.MethodNotFound()
 
 	@classmethod
-	def register(klass, name, factory):
-		RPCWrapper.rpctype[name] = factory
+	def register(klass, name):
+		print "RPCWrapper: registering class", klass, name
+		klass.rpctype[name] = klass 
 
 	@classmethod
 	def handle(klass, req):

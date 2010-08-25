@@ -57,7 +57,7 @@ class ProcessorElement (PatchElement):
 
 		print "ProcessorElement: processor=%s, args=%s" % (self.proc_type, self.proc_args)
 		print self.label.get_text()
-		self.obj_id = MFPGUI().create(self.proc_type, self.proc_args)
+		self.obj_id = MFPGUI().mfp.create(self.proc_type, self.proc_args)
 		if self.obj_id is None:
 			print "ProcessorElement: could not create", self.proc_type, self.proc_args
 		self.send_params()

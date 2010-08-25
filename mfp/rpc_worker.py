@@ -55,6 +55,10 @@ class RPCWorker(object):
  
 		self.pipe.init_master(reader=self.reader_proc)
 
+	def serve(self, cls):
+		cls.pipe = self.pipe
+		cls.local = False
+
 	def monitor_proc(self):
 		self.worker.join()
 		if not self.quitreq:

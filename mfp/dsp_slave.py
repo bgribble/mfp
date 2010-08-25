@@ -6,88 +6,65 @@ Python main loop for DSP subprocess
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 import mfpdsp
+from rpc_wrapper import RPCWrapper, rpcwrap
 
-class MFPDSP (object):
-	def __init__(self, q):
-		self.objects = {} 
-		self.obj_id = 0 
-		self.cmd_pipe = q
-		self.spcount = 0
-		q.init_slave(reader=False)
-
-	def start (self):
-		# start JACK thread 
-		mfpdsp.dsp_startup(1, 1)
-		mfpdsp.dsp_enable()
-
-		time_to_quit = False
-
-		while not time_to_quit:
-			print "dsp_reader: waiting...."
-			qcmd = self.cmd_pipe.get()
-			print "dsp_reader: got", qcmd
-			if not qcmd: 
-				continue
-			elif qcmd.payload == 'quit':
-				time_to_quit = True
-				print "dsp process got quit"
-				continue
-
-			self.command(qcmd)
-		mfpdsp.dsp_shutdown()
-		import sys
-		sys.exit(0)
-		print "out of dsp thread\n"
-		return True
+class DSPCommand (RPCWrapper):
+	def __init__(self):
+		self.last_objid = 0
+		self.objects = {}
+		RPCWrapper.__init__(self)
 
 	def remember(self, obj):
-		oi = self.obj_id
-		self.obj_id += 1
-		self.objects[oi] = obj
-		return oi 
+		oid = self.next_objid
+		self.next_objid += 1
+		self.objects[oid] = obj
+		return oid
 
-	def recall(self, obj_id):
-		return self.objects.get(obj_id)
+	def recall(self, oid):
+		return self.objects.get(oid)
 
-	def command(self, req):
-		print "dsp_slave.command:", req.payload
-		cmd = req.payload.get('cmd')
-		args = req.payload.get('args')
-		if cmd == 'create':
-			obj = mfpdsp.proc_create(args.get('name'), args.get('inlets'), args.get('outlets'),
-			   					     args.get('params'))
-			req.response = self.remember(obj)
-		elif cmd == "get_param":
-			obj_id = args.get('obj_id')
-			param = args.get('name')
-			obj = self.recall(obj_id)
-			if obj:
-				req.response = mfpdsp.proc_getparam(obj, param)
-		elif cmd == "set_param":
-			obj_id = args.get('obj_id')
-			param = args.get('name')
-			value = args.get('value')
-			obj = self.recall(obj_id)
-			print "setparam:", obj, param, value
-			if obj:
-				req.response = mfpdsp.proc_setparam(obj, param, value)
-			self.spcount += 1
-		elif cmd == "connect":
-			src = self.recall(args.get('obj_id'))
-			dst = self.recall(args.get('target'))
-			mfpdsp.proc_connect(src, args.get('outlet'), dst, args.get('inlet'))
-		elif cmd == "disconnect":
-			src = self.recall(args.get('obj_id'))
-			dst = self.recall(args.get('target'))
-			mfpdsp.proc_disconnect(src, args.get('outlet'), dst, args.get('inlet'))
-		else: 
-			print "dsp_slave: unhandled command", cmd
-			req.response = True
+	@rpcwrap
+	def create(self, name, inlets, outlets, params):
+		obj = mfpdsp.proc_create(name, inlets, outlets, params)
+		oid = self.remember(obj)
+		return oid
 
-		print "dsp_slave: finished processing", cmd
-		self.cmd_pipe.put(req)
+	@rpcwrap
+	def get_param(self, obj_id, param):
+		obj = self.recall(obj_id)
+		if obj:
+			return mfpdsp.proc_getparam(obj, param)
+	
+	@rpcwrap
+	def set_param(self, obj_id, param, value):
+		obj = self.recall(obj_id)
+		print "setparam:", obj, param, value
+		if obj:
+			return mfpdsp.proc_setparam(obj, param, value)
+		else:
+			return None
 
-def main(dsp_queue):
-	dspapp = MFPDSP(dsp_queue)
-	dspapp.start()
+	@rpcwrap
+	def connect(self, obj_id, outlet, target, inlet):
+		src = self.recall(obj_id)
+		dst = self.recall(target)
+		return mfpdsp.proc_connect(src, outlet, dst, inlet)
 
+	@rpcwrap
+	def disconnect(self, obj_id, outlet, target, inlet):
+		src = self.recall(obj_id)
+		dst = self.recall(target)
+		return mfpdsp.proc_disconnect(src, outlet, dst, inlet)
+
+def dsp_init(pipe):
+	DSPCommand.pipe = pipe
+	DSPCommand.local = True
+
+	pipe.on_finish(dsp_finish)
+
+	# start JACK thread 
+	mfpdsp.dsp_startup(1, 1)
+	mfpdsp.dsp_enable()
+
+def dsp_finish():
+	mfpdsp.dsp_shutdown()

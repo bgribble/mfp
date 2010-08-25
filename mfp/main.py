@@ -9,57 +9,54 @@ import sys, os
 import multiprocessing 
 import threading
 
-import mfp.dsp_slave, mfp.gui_slave
+from mfp.dsp_slave import dsp_init, DSPCommand
+from mfp.gui_slave import gui_init, GUICommand
+
 from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang 
 from patch import Patch
 
 from singleton import Singleton
 
-from rpc_wrapper import RPCWrapper, wrap
+from rpc_wrapper import RPCWrapper, rpcwrap
 from rpc_worker import RPCWorker
 
-def proc_monitor(process, quit_requested):
-	process.join()
-	if not quit_requested():
-		print "PROCESS DIED UNEXPECTEDLY"
-
 class MFPCommand(RPCWrapper):
-	@wrap
+	@rpcwrap
 	def create(objtype, initargs):
 		obj = self.create(objtype, initargs)
 		self.remember(obj)
 		self.patch.add(obj)
 		return obj.obj_id
 
-	@wrap
+	@rpcwrap
 	def connect(obj_1_id, obj_1_port, obj_2_id, obj_2_port):
 		obj_1 = self.recall(obj_1_id)
 		obj_2 = self.recall(obj_2_id)
 		r = obj_1.connect(obj_1_port, obj_2, obj_2_port)	
 		return r
 
-	@wrap
-	def  disconnect(obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+	@rpcwrap
+	def disconnect(obj_1_id, obj_1_port, obj_2_id, obj_2_port):
 		obj_1 = self.recall(obj_1_id)
 		obj_2 = self.recall(obj_2_id)
 
 		r = obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
 		return r	
 
-	@wrap
+	@rpcwrap
 	def send_bang(obj_id, port):
 		obj = self.recall(obj_id)
 		obj.send(Bang, port)
 		return True
 
-	@wrap
+	@rpcwrap
 	def delete(obj_id):
 		obj = self.recall(obj_id)
 		print "MFPApp: got delete req for", obj
 		obj.delete()
 
-	@wrap
+	@rpcwrap
 	def gui_params(obj_id, params):
 		obj = self.recall(args.get('obj_id'))
 		obj.gui_params = params
@@ -71,22 +68,10 @@ class MFPApp (object):
 	no_dsp = False
 
 	def __init__(self):
-		# processor thread 
-		if not MFPApp.no_dsp:
-			self.dsp_pipe = RequestPipe()
-			self.dsp_process = multiprocessing.Process(target=mfp.dsp_slave.main,
-													   args=(self.dsp_pipe,)) 
-			self.dsp_quitreq = False
-			checker = lambda: self.dsp_quitreq
-			self.dsp_monitor = threading.Thread(target=proc_monitor, args=(self.dsp_process, checker))
-			self.dsp_pipe.init_master()
-		
-		# gui process connection
-		if not MFPApp.no_gui:
-			self.gui_pipe = RequestPipe()
-			self.gui_process = multiprocessing.Process(target=mfp.gui_slave.main,
-													   args=(self.gui_pipe,))
-			self.gui_pipe.init_master(reader=self.gui_reader_thread)
+		self.dsp_process = None
+		self.dsp_cmd = None
+		self.gui_process = None
+		self.gui_cmd = None
 
 		# processor class registry 
 		self.registry = {} 
@@ -94,16 +79,22 @@ class MFPApp (object):
 		# objects we have given IDs to 
 		self.objects = {}
 		self.next_obj_id = 0 
+	
+		self.patch = None	
+
+	def setup(self):
+		# dsp and gui processes
+		self.dsp_process = RPCWorker("mfp_dsp", dsp_init)
+		self.dsp_process.serve(DSPCommand)
+		self.dsp_cmd = DSPCommand()
+
+		if not MFPApp.no_gui:
+			self.gui_process = RPCWorker("mfp_gui", gui_init)
+			self.gui_process.serve(GUICommand)
+			self.gui_cmd = GUICommand()
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch()
-
-		# start threads 
-		if not MFPApp.no_dsp:
-			self.dsp_process.start()
-			self.dsp_monitor.start()
-		if not MFPApp.no_gui:
-			self.gui_process.start()
 
 	def remember(self, obj):
 		oi = self.next_obj_id
@@ -116,34 +107,8 @@ class MFPApp (object):
 	def recall(self, obj_id):
 		return self.objects.get(obj_id)
 
-	def gui_reader_thread(self):
-		quit_req = False 
-		while not quit_req:
-			req = self.gui_pipe.get()
-			if not req:
-				pass
-			elif req.payload == 'quit':
-				quit_req = True
-			else:
-				self.gui_command(req)
-		print "GUI reader: got 'quit', exiting"
-		self.finish()
-
 	def register(self, name, ctor):
-		print "MFPApp registering %s" % name 
 		self.registry[name] = ctor 
-
-	def dsp_message(self, obj, callback=None):
-		print "self.dsp_message:", obj
-		req = Request(obj, callback=callback)
-		self.dsp_pipe.put(req)
-		return req 
-
-	def gui_message(self, obj, callback=None):
-		# print "self.dsp_message:", obj
-		req = Request(obj, callback=callback)
-		self.gui_pipe.put(req)
-		return req 
 
 	def create(self, name, args=''):
 		ctor = self.registry.get(name)
@@ -159,16 +124,11 @@ class MFPApp (object):
 		args = params.get('gui_params')
 		# FIXME finish this
 
-	def wait(self, req):
-		self.dsp_pipe.wait(req)
-
 	def finish(self):
-		self.dsp_message("quit")
-		self.dsp_quitreq = True
-		self.dsp_monitor.join()
-		print "main thread reaped DSP process"
-		self.dsp_pipe.finish()
-
+		if self.dsp_process:
+			self.dsp_process.finish()
+		if self.gui_process:
+			self.gui_process.finish()
 
 def main():
 	import builtins 
@@ -176,6 +136,7 @@ def main():
 
 	m = MFPApp()
 	builtins.register()
+	m.setup()
 
 	def save(fn):
 		m.patch.save_file(fn)

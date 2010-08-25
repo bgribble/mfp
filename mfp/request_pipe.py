@@ -25,6 +25,8 @@ class RequestPipe(object):
 		self.pending = {} 
 		self.reader_thread = None
 
+		self.finish_callbacks = []
+
 	def _reader_func(self):
 		while not self.quit_flag:
 			try:
@@ -34,10 +36,15 @@ class RequestPipe(object):
 			except Queue.Empty:
 				pass
 
+	def on_finish(self, cbk):
+		self.finish_callbacks.append(cbk)
+
 	def finish(self):
 		self.quit_flag = True
 		if self.reader_thread:
 			self.reader_thread.join()
+		for cbk in self.finish_callbacks:
+			cbk()
 
 	def init_master(self, reader=None):
 		self.lock = threading.Lock()
