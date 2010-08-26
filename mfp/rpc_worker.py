@@ -63,6 +63,7 @@ class RPCWorker(object):
 		self.worker.join()
 		if not self.quitreq:
 			print 'RPCWorker thread EXITED UNEXPECTEDLY'
+			self.worker = None
 
 	def reader_proc(self):
 		while not self.quitreq:
@@ -79,7 +80,9 @@ class RPCWorker(object):
 
 	def finish(self):
 		self.quitreq = True
-		self.pipe.put(Request("quit"))
-		self.monitor.join()
+		if self.worker:
+			self.pipe.put(Request("quit"))
+		if self.monitor:
+			self.monitor.join()
 		self.pipe.finish()
 

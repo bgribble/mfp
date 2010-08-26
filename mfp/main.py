@@ -9,7 +9,7 @@ import sys, os
 import multiprocessing 
 import threading
 
-from mfp.dsp_slave import dsp_init, DSPCommand
+from mfp.dsp_slave import dsp_init, DSPObject
 from mfp.gui_slave import gui_init, GUICommand
 
 from mfp.request_pipe import RequestPipe, Request
@@ -24,41 +24,40 @@ from rpc_worker import RPCWorker
 class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def create(objtype, initargs):
-		obj = self.create(objtype, initargs)
-		self.remember(obj)
-		self.patch.add(obj)
+		obj = MFPAPP().create(objtype, initargs)
+		MFPAPP().patch.add(obj)
 		return obj.obj_id
 
 	@rpcwrap
 	def connect(obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		obj_1 = self.recall(obj_1_id)
-		obj_2 = self.recall(obj_2_id)
+		obj_1 = MFPAPP().recall(obj_1_id)
+		obj_2 = MFPAPP().recall(obj_2_id)
 		r = obj_1.connect(obj_1_port, obj_2, obj_2_port)	
 		return r
 
 	@rpcwrap
 	def disconnect(obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		obj_1 = self.recall(obj_1_id)
-		obj_2 = self.recall(obj_2_id)
+		obj_1 = MFPAPP().recall(obj_1_id)
+		obj_2 = MFPAPP().recall(obj_2_id)
 
 		r = obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
 		return r	
 
 	@rpcwrap
 	def send_bang(obj_id, port):
-		obj = self.recall(obj_id)
+		obj = MFPAPP().recall(obj_id)
 		obj.send(Bang, port)
 		return True
 
 	@rpcwrap
 	def delete(obj_id):
-		obj = self.recall(obj_id)
+		obj = MFPAPP().recall(obj_id)
 		print "MFPApp: got delete req for", obj
 		obj.delete()
 
 	@rpcwrap
 	def gui_params(obj_id, params):
-		obj = self.recall(args.get('obj_id'))
+		obj = MFPAPP().recall(args.get('obj_id'))
 		obj.gui_params = params
 
 
@@ -69,7 +68,6 @@ class MFPApp (object):
 
 	def __init__(self):
 		self.dsp_process = None
-		self.dsp_cmd = None
 		self.gui_process = None
 		self.gui_cmd = None
 
@@ -85,9 +83,8 @@ class MFPApp (object):
 	def setup(self):
 		# dsp and gui processes
 		self.dsp_process = RPCWorker("mfp_dsp", dsp_init)
-		self.dsp_process.serve(DSPCommand)
-		self.dsp_cmd = DSPCommand()
-
+		self.dsp_process.serve(DSPObject)
+		
 		if not MFPApp.no_gui:
 			self.gui_process = RPCWorker("mfp_gui", gui_init)
 			self.gui_process.serve(GUICommand)
@@ -115,7 +112,6 @@ class MFPApp (object):
 		if ctor is None:
 			return None
 		else:
-			print "create: ctor is", ctor 
 			obj = ctor(name, args)
 			return obj
 

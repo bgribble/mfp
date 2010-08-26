@@ -20,13 +20,13 @@ class DAC(Processor):
 
 		self.dsp_inlets = [0]
 		self.dsp_init("dac~")
-		self.dsp_setparam("channel", channel)
+		self.dsp_obj.setparam("channel", channel)
 		
 
 	def trigger(self):
 		try:
 			channel = int(self.inlets[0])
-			self.dsp_setparam("channel", channel)
+			self.dsp_obj.setparam("channel", channel)
 		except:
 			print "Can't convert %s to a channel number" % self.inlet[0]
 				
@@ -40,9 +40,9 @@ class ADC(Processor):
 		else:
 			channel = 0
 
-		self.dsp_outputs = [0]
+		self.dsp_outlets = [0]
 		self.dsp_init("adc~")
-		self.dsp_setparam("channel", channel)
+		self.dsp_obj.setparam("channel", channel)
 
 
 	def trigger(self):

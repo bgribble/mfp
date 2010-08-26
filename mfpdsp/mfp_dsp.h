@@ -10,7 +10,6 @@ typedef struct {
 	/* type, settable parameters, and internal state */
 	struct mfp_procinfo_struct * typeinfo;
 	GHashTable * params; 
-	GHashTable * params_nxt; 
 	void * data;
 	
 	/* inlet and outlet connections (g_array of g_array) */

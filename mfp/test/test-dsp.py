@@ -5,6 +5,9 @@ import mfpdsp
 import mfp 
 from mfp.main import MFPApp 
 
+def setup():
+	MFPApp().setup()
+
 class DSPObjectTests (TestCase):
 	def test_create(self):
 		'''test_create: [dsp] can make a DSP object'''
@@ -14,7 +17,7 @@ class DSPObjectTests (TestCase):
 		'''test_read: [dsp] can read back a creation parameter'''
 		o = MFPApp().create("osc~", "500")
 		print "test_read: objid = ", o, o.dsp_obj
-		f = o.dsp_getparam("freq")
+		f = o.dsp_obj.getparam("freq")
 		print f 
 		assert f == 500 
 

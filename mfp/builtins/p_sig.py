@@ -20,13 +20,13 @@ class Sig(Processor):
 
 		self.dsp_outlets=[0]
 		self.dsp_init("sig~")
-		self.dsp_setparam("value", value)
+		self.dsp_obj.setparam("value", value)
 
 
 	def trigger(self):
 		try:
 			val = float(self.inlets[0])
-			self.dsp_setparam("value", val)
+			self.dsp_obj.setparam("value", val)
 		except:
 			print "Can't convert %s to a value" % self.inlet[0]
 				

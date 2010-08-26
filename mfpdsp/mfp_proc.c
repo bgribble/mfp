@@ -32,7 +32,6 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
 	p->typeinfo = typeinfo; 
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, param_free, param_free);
-	p->params_nxt = g_hash_table_new_full(g_str_hash, g_str_equal, param_free, param_free);
 	p->depth = -1;
 
 	/* create inlet and outlet processor pointer arrays */
@@ -92,9 +91,6 @@ mfp_proc_process(mfp_processor * self)
 	int           upstream_outlet_num;
 
 	int inlet_num;
-
-	/* copy next params to live params */
-	g_hash_table_foreach(self->params_nxt, hashcopy, self->params);
 
 	/* accumulate all the inlet fan-ins to a single input buffer */ 
 	for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
@@ -161,14 +157,16 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 int
 mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val)
 {
-	g_hash_table_replace(self->params_nxt, g_strdup(param_name), param_dup(param_val));
+	g_hash_table_replace(self->params, g_strdup(param_name), param_dup(param_val));
 	return 0;
 }
 
 double 
 mfp_proc_getparam(mfp_processor * self, char * param_name)
 {
-	gpointer * val = g_hash_table_lookup(self->params_nxt, param_name);
+	gpointer * val = NULL;
+	printf("in getparam %p %s", self, param_name);
+	val = g_hash_table_lookup(self->params, param_name);
 	if (val != NULL) {
 		return *((double *)val);
 	}

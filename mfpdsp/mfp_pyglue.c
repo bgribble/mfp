@@ -4,12 +4,16 @@
 #include "builtin.h"
 
 PyObject * cmdqueue = NULL;
+PyObject * PROC_CONNECT = NULL;
+PyObject * PROC_DISCONNECT = NULL;
+PyObject * PROC_SETPARAM = NULL;
+PyObject * PROC_DELETE = NULL;
 
 static PyObject *
-dsp_get_cmdqueue(PyObject * mdo, PyObject * args)
+dsp_get_cmdqueue(PyObject * mod, PyObject * args)
 {
 	if (cmdqueue == NULL) {
-		cmdqueue = Py_List();
+		cmdqueue = PyList_New(0);
 	}
 	Py_INCREF(cmdqueue);
 	return cmdqueue;
@@ -73,18 +77,26 @@ proc_create(PyObject * mod, PyObject *args)
 	char     * typestr = NULL;
 	int num_inlets, num_outlets;
 	PyObject * paramdict;
+	PyObject * newobj;
 	PyArg_ParseTuple(args, "siiO", &typestr, &num_inlets, &num_outlets, &paramdict); 
-	
+
 	mfp_procinfo * pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typestr);
 	mfp_processor * proc = NULL;	
+
+	printf("proc_create: %d, %d, %s, %p\n", num_inlets, num_outlets, typestr, pinfo);
+
 	if (pinfo == NULL) {
 		Py_INCREF(Py_None);
 		return Py_None;
 	}
 	else {
+		printf("creating DSP object\n");
 		proc = mfp_proc_create(pinfo, num_inlets, num_outlets, mfp_blocksize);
 		proc_set_pyparams(proc, paramdict);
-		return PyCObject_FromVoidPtr(proc, NULL);
+		newobj = PyCObject_FromVoidPtr(proc, NULL);
+		Py_INCREF(newobj);
+		printf("Returning DSP object %p\n", proc);
+		return newobj;
 	}
 }
 
@@ -92,49 +104,77 @@ static PyObject *
 proc_delete(PyObject * mod, PyObject * args)
 {
 	/* arg is the processor as a CObject */ 
-	PyObject * cobj = NULL;
-	PyArg_ParseTuple(args, "O", &cobj);
-	mfp_processor * proc = NULL;
+	PyObject * cmdq = dsp_get_cmdqueue(NULL, NULL);
+	PyObject * cobj = PyTuple_GetItem(args, 0);
+	PyObject * reqtuple = PyTuple_New(2);
 
-	proc = PyCObject_AsVoidPtr(cobj);
-	mfp_proc_destroy(proc);
+	PyTuple_SET_ITEM(reqtuple, 0, PROC_DELETE);
+	PyTuple_SET_ITEM(reqtuple, 1, cobj);
+
+	PyList_Append(cmdq, reqtuple);
+
+	Py_INCREF(PROC_DELETE);
+	Py_INCREF(cobj);
+	Py_INCREF(reqtuple);
 	Py_INCREF(Py_True);
+
+	Py_DECREF(cmdq);	
 	return Py_True;
 }
 
 static PyObject * 
 proc_connect(PyObject * mod, PyObject * args)
 {
-	/* args: self, target, outlet, inlet is the processor as a CObject */ 
-	PyObject * self=NULL, * target=NULL;
-	int my_outlet, targ_inlet;
-	mfp_processor * self_proc = NULL, * targ_proc = NULL;
-	
-	PyArg_ParseTuple(args, "OiOi", &self, &my_outlet, &target, &targ_inlet);
+	PyObject * cmdq = dsp_get_cmdqueue(NULL, NULL);
+	PyObject * self = PyTuple_GetItem(args, 0);
+	PyObject * outlet = PyTuple_GetItem(args, 1);
+	PyObject * target = PyTuple_GetItem(args, 2);
+	PyObject * inlet = PyTuple_GetItem(args, 3);
+	PyObject * reqtuple = PyTuple_New(5);
 
-	self_proc = PyCObject_AsVoidPtr(self);
-	targ_proc = PyCObject_AsVoidPtr(target);
-	mfp_proc_connect(self_proc, my_outlet, targ_proc, targ_inlet);
-	mfp_needs_reschedule = 1;
+	PyTuple_SET_ITEM(reqtuple, 0, PROC_CONNECT);
+	PyTuple_SET_ITEM(reqtuple, 1, self);
+	PyTuple_SET_ITEM(reqtuple, 2, outlet);
+	PyTuple_SET_ITEM(reqtuple, 3, target);
+	PyTuple_SET_ITEM(reqtuple, 4, inlet);
+
+	PyList_Append(cmdq, reqtuple);
+
+	int i;
+	for(i=0; i < 5; i++) {
+		Py_INCREF(PyTuple_GetItem(reqtuple, i));
+	}
+	Py_INCREF(reqtuple);
 	Py_INCREF(Py_True);
+	Py_DECREF(cmdq);	
 	return Py_True;
 }
 
 static PyObject * 
 proc_disconnect(PyObject * mod, PyObject * args)
 {
-	/* args: self, target, outlet, inlet is the processor as a CObject */ 
-	PyObject * self=NULL, * target=NULL;
-	int my_outlet, targ_inlet;
-	mfp_processor * self_proc = NULL, * targ_proc = NULL;
-	
-	PyArg_ParseTuple(args, "OiOi", &self, &my_outlet, &target,  &targ_inlet);
+	PyObject * cmdq = dsp_get_cmdqueue(NULL, NULL);
+	PyObject * self = PyTuple_GetItem(args, 0);
+	PyObject * outlet = PyTuple_GetItem(args, 1);
+	PyObject * target = PyTuple_GetItem(args, 2);
+	PyObject * inlet = PyTuple_GetItem(args, 3);
+	PyObject * reqtuple = PyTuple_New(5);
 
-	self_proc = PyCObject_AsVoidPtr(self);
-	targ_proc = PyCObject_AsVoidPtr(target);
-	mfp_proc_disconnect(self_proc, my_outlet, targ_proc, targ_inlet);
-	mfp_needs_reschedule = 1;
+	PyTuple_SET_ITEM(reqtuple, 0, PROC_DISCONNECT);
+	PyTuple_SET_ITEM(reqtuple, 1, self);
+	PyTuple_SET_ITEM(reqtuple, 2, outlet);
+	PyTuple_SET_ITEM(reqtuple, 3, target);
+	PyTuple_SET_ITEM(reqtuple, 4, inlet);
+
+	PyList_Append(cmdq, reqtuple);
+
+	int i;
+	for(i=0; i < 5; i++) {
+		Py_INCREF(PyTuple_GetItem(reqtuple, i));
+	}
+	Py_INCREF(reqtuple);
 	Py_INCREF(Py_True);
+	Py_DECREF(cmdq);	
 	return Py_True;
 }
 
@@ -142,12 +182,26 @@ proc_disconnect(PyObject * mod, PyObject * args)
 static PyObject * 
 proc_setparam(PyObject * mod, PyObject * args) 
 {
-	PyObject * self=NULL;
-	char * param_name=NULL;
-	double param_value = 0.0;
-	PyArg_ParseTuple(args, "Osd", &self, &param_name, &param_value);
-	mfp_proc_setparam(PyCObject_AsVoidPtr(self), param_name, param_value);
+	PyObject * cmdq = dsp_get_cmdqueue(NULL, NULL);
+	PyObject * self = PyTuple_GetItem(args, 0);
+	PyObject * param= PyTuple_GetItem(args, 1);
+	PyObject * value = PyTuple_GetItem(args, 2);
+	PyObject * reqtuple = PyTuple_New(5);
+
+	PyTuple_SET_ITEM(reqtuple, 0, PROC_SETPARAM);
+	PyTuple_SET_ITEM(reqtuple, 1, self);
+	PyTuple_SET_ITEM(reqtuple, 2, param);
+	PyTuple_SET_ITEM(reqtuple, 3, value);
+
+	PyList_Append(cmdq, reqtuple);
+
+	int i;
+	for(i=0; i < 4; i++) {
+		Py_INCREF(PyTuple_GetItem(reqtuple, i));
+	}
+	Py_INCREF(reqtuple);
 	Py_INCREF(Py_True);
+	Py_DECREF(cmdq);	
 	return Py_True;
 }
 
@@ -155,12 +209,17 @@ static PyObject *
 proc_getparam(PyObject * mod, PyObject * args) 
 {
 	PyObject * self=NULL;
+	PyObject * retval = NULL;
 	char * param_name=NULL;
 	double prmval;
 
 	PyArg_ParseTuple(args, "Os", &self, &param_name);
+	printf("calling getparam %p %p %s\n", self, PyCObject_AsVoidPtr(self), param_name); 
 	prmval = mfp_proc_getparam(PyCObject_AsVoidPtr(self), param_name);
-	return PyFloat_FromDouble(prmval);
+	retval = PyFloat_FromDouble(prmval); 
+
+	Py_INCREF(retval);
+	return retval;
 }
 
 static PyObject * 
@@ -181,6 +240,7 @@ static PyMethodDef MfpDspMethods[] = {
 	{ "dsp_shutdown",  dsp_shutdown, METH_VARARGS, "Stop processing thread" },
 	{ "dsp_enable",  dsp_enable, METH_VARARGS, "Enable dsp" },
 	{ "dsp_disable",  dsp_disable, METH_VARARGS, "Disable dsp" },
+	{ "dsp_get_cmdqueue",  dsp_get_cmdqueue, METH_VARARGS, "Return command queue list" },
 	{ "proc_create", proc_create, METH_VARARGS, "Create DSP processor" },
 	{ "proc_delete", proc_delete, METH_VARARGS, "Delete DSP processor" },
 	{ "proc_connect", proc_connect, METH_VARARGS, "Connect 2 DSP processors" },
@@ -197,6 +257,18 @@ init_globals(void)
 {
 	mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
 	mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
+	
+	PROC_CONNECT = PyString_FromString("connect");
+	Py_INCREF(PROC_CONNECT);
+
+	PROC_DISCONNECT = PyString_FromString("disconnect");
+	Py_INCREF(PROC_DISCONNECT);
+
+	PROC_SETPARAM= PyString_FromString("setparam");
+	Py_INCREF(PROC_SETPARAM);
+	
+	PROC_DELETE = PyString_FromString("delete");
+	Py_INCREF(PROC_DELETE);
 }
 
 static void
@@ -227,5 +299,6 @@ initmfpdsp(void)
 	init_globals();
 	init_builtins();
 	Py_InitModule("mfpdsp", MfpDspMethods);
+	printf("mfpdsp module init\n");
 }
 

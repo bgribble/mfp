@@ -19,7 +19,7 @@ class Osc(Processor):
 
 		self.dsp_outlets = [0]
 		self.dsp_init("osc~")
-		self.dsp_setparam("freq", freq)
+		self.dsp_obj.setparam("freq", freq)
 
 
 	def trigger(self):

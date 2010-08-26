@@ -5,6 +5,7 @@ processor.py: Parent class of all processors
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from main import MFPApp 
+from dsp_slave import DSPObject
 from bang import Bang, Uninit
 
 class Processor (object): 
@@ -18,7 +19,7 @@ class Processor (object):
 		self.inlets = [ Uninit ] * inlets
 		self.outlets = [ Uninit ] * outlets
 		self.status = Processor.OK 
-		self.obj_id = None
+		self.obj_id = MFPApp().remember(self)
 
 		# gui params are updated by the gui slave
 		self.gui_params = {}
@@ -34,8 +35,10 @@ class Processor (object):
 		self.connections_out = [[] for r in range(outlets)]
 		self.connections_in = [[] for r in range(inlets)]
 
+	def dsp_init(self, proc_name):
+		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets), len(self.dsp_outlets))
+
 	def delete(self):
-		print "delete", self
 		outport = 0
 		for c in self.connections_out:
 			for tobj, tport in c:
@@ -49,8 +52,7 @@ class Processor (object):
 			inport += 1
 
 		if self.dsp_obj is not None:
-			print "calling dsp_delete"
-			self.dsp_delete()
+			self.dsp_obj.delete()
 
 	def parse_args(self, argstring):
 		if argstring == '' or argstring is None:
@@ -84,7 +86,8 @@ class Processor (object):
 	def connect(self, outlet, target, inlet):
 		# is this a DSP connection? 
 		if outlet in self.dsp_outlets:
-			self.dsp_connect(outlet, target, inlet)
+			self.dsp_obj.connect(self.dsp_outlets.index(outlet),
+						         target.obj_id, target.dsp_inlets.index(inlet))
 
 		existing = self.connections_out[outlet]
 		if (target,inlet) not in existing:
@@ -98,7 +101,8 @@ class Processor (object):
 	def disconnect(self, outlet, target, inlet):
 		# is this a DSP connection? 
 		if outlet in self.dsp_outlets:
-			self.dsp_disconnect(outlet, target, inlet)
+			self.dsp_obj.disconnect(self.dsp_outlets.index(outlet), 
+						            target.obj_id, target.dsp_inlets.index(inlet))
 
 		existing = self.connections_out[outlet]
 		if (target,inlet) in existing:
@@ -150,50 +154,4 @@ class Processor (object):
 			conn.append([ (t[0].obj_id, t[1]) for t in c])
 		oinfo['connections'] = conn
 		return oinfo
-
-	# 
-	# DSP methods 
-	# 
-
-	def dsp_init(self, proc_name):
-		self.dsp_obj = None 
-		req = self.dsp_message("create", name=proc_name, inlets=len(self.dsp_inlets), 
-					           outlets=len(self.dsp_outlets))
-		MFPApp().wait(req)
-
-	def dsp_response(self, request):
-		if request.payload.get("cmd") == "create":
-			self.dsp_obj = request.response
-
-	def dsp_message(self, cmd, callback=None, **args):
-		if callback is None:
-			callback = self.dsp_response 
-		payload = dict(cmd=cmd, args=args)
-		return MFPApp().dsp_message(payload, callback=callback)
-
-	def dsp_connect(self, outlet, target, inlet):
-		self.dsp_message("connect", obj_id=self.dsp_obj, target=target.dsp_obj, 
-			             outlet=self.dsp_outlets.index(outlet), 
-				         inlet=target.dsp_inlets.index(inlet)) 
-		return True
-
-	def dsp_disconnect(self, outlet, target, inlet):
-		self.dsp_message("disconnect", obj_id=self.dsp_obj, target=target.dsp_obj, 
-			             outlet=self.dsp_outlets.index(outlet), 
-				         inlet=target.dsp_inlets.index(inlet)) 
-		
-	def dsp_setparam(self, name, value):
-		req = self.dsp_message("set_param", obj_id=self.dsp_obj, name=name, value=value)
-		MFPApp().wait(req)
-		return req.response
-
-	def dsp_delete(self):
-		req = self.dsp_message("delete", obj_id=self.dsp_obj)
-		MFPApp().wait(req)
-		return req.response
-
-	def dsp_getparam(self, name, callback=None):
-		req = self.dsp_message("get_param", callback=callback, obj_id=self.dsp_obj, name=name) 
-		MFPApp().wait(req)
-		return req.response 
 

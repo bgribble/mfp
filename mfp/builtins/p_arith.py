@@ -22,13 +22,13 @@ class Plus(Processor):
 		self.dsp_inlets = [0, 1]
 		self.dsp_outlets = [0]
 		self.dsp_init("+~")
-		self.dsp_setparam("const", init_const)
+		self.dsp_obj.setparam("const", init_const)
 		
 
 	def trigger(self):
 		try:
 			val = float(self.inlets[0])
-			self.dsp_setparam("const", val)
+			self.dsp_obj.setparam("const", val)
 		except:
 			print "Can't convert %s to a value" % self.inlet[0]
 				

@@ -16,15 +16,14 @@ def rpcwrap(worker_proc):
 			return self.call_remotely(rpcdata)
 	return inner
 
-class RegisteredClass(type):
+class RPCMetaclass(type):
 	def __init__(klass, name, bases, xdict): 
-		print "RegisteredClass: registering", name
+		print "Registering", name
 		type.__init__(klass, name, bases, xdict)
 		klass.register(name)
-
-
+	
 class RPCWrapper (object):
-	__metaclass__ = RegisteredClass
+	__metaclass__ = RPCMetaclass
 
 	NO_CLASS = -1
 	NO_METHOD = -2
@@ -57,16 +56,16 @@ class RPCWrapper (object):
 			RPCWrapper.rpcobj[self.rpcid] = self
 		else:
 			r = Request(dict(func='__init__', type=type(self).__name__, args=args, kwargs=kwargs))
-			RPCWrapper.pipe.put(r)
-			RPCWrapper.pipe.wait(r)
+			type(self).pipe.put(r)
+			type(self).pipe.wait(r)
 			if r.response == RPCWrapper.NO_CLASS:
 				raise RPCWrapper.ClassNotFound()
 
 			self.rpcid = r.response
 
 	def call_remotely(self, rpcdata):
-		r = RPCWrapper.pipe.put(Request(rpcdata))
-		RPCWrapper.pipe.wait(r)
+		r = type(self).pipe.put(Request(rpcdata))
+		type(self).pipe.wait(r)
 		if r.response == RPCWrapper.METHOD_OK:
 			return r.payload
 		elif r.response == RPCWrapper.METHOD_FAILED:
