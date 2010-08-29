@@ -18,7 +18,7 @@ process(mfp_processor * proc)
 	int scount; 
 
 	if (const_ptr != NULL) {
-		const_sample = (mfp_sample)(*(double *)const_ptr);
+		const_sample = (mfp_sample)(*(float *)const_ptr);
 	}
 	else {
 		const_sample = (mfp_sample)(0.0);
@@ -57,6 +57,8 @@ init_builtin_plus(void) {
 	p->process = process;
 	p->init = init;
 	p->destroy = destroy;
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "const", (gpointer)1);
 	return p;
 }
 

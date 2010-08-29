@@ -13,7 +13,7 @@ adc_process(mfp_processor * proc)
 	mfp_sample * outbuf;
 
 	if (chan_ptr != NULL) {
-		channel = (int)(*(double *)chan_ptr);
+		channel = (int)(*(float *)chan_ptr);
 	}
 
 	inbuf = mfp_get_input_buffer(channel);
@@ -39,7 +39,7 @@ dac_process(mfp_processor * proc)
 	int count;
 
 	if (chan_ptr != NULL) {
-		channel = (int)(*(double *)chan_ptr);
+		channel = (int)(*(float *)chan_ptr);
 	}
 	outbuf = mfp_get_output_buffer(channel);
 	inbuf = proc->inlet_buf[0];
@@ -73,6 +73,9 @@ init_builtin_adc(void) {
 	p->process = adc_process;
 	p->init = init;
 	p->destroy = destroy;
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "channel", (gpointer)1);
+
 	return p;
 }
 
@@ -85,6 +88,8 @@ init_builtin_dac(void) {
 	p->process = dac_process;
 	p->init = init;
 	p->destroy = destroy;
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "channel", (gpointer)1);
 	return p;
 }
 

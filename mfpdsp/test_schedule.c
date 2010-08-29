@@ -1,4 +1,4 @@
-#include <Python.h>
+#include <stdio.h>
 
 #include "mfp_dsp.h"
 #include "builtin.h"
@@ -60,7 +60,7 @@ test_sig_1(void)
 	mfp_sample * outp; 
 
 	printf("   test_sig_1... ");
-	mfp_proc_setparam(sig, "value", 13.0);
+	mfp_proc_setparam_float(sig, "value", 13.0);
 	mfp_proc_process(sig);
 
 	outp = sig->outlet_buf[0];
@@ -92,8 +92,8 @@ test_sig_2(void)
 	mfp_proc_connect(sig_1, 0, dac, 0);
 	mfp_proc_connect(sig_2, 0, dac, 0);
 
-	mfp_proc_setparam(sig_1, "value", 13.0);
-	mfp_proc_setparam(sig_2, "value", 12.0);
+	mfp_proc_setparam_float(sig_1, "value", 13.0);
+	mfp_proc_setparam_float(sig_2, "value", 12.0);
 	mfp_dsp_schedule();
 	mfp_dsp_run(mfp_blocksize);
 
@@ -129,10 +129,10 @@ test_plus_multi(void)
 	mfp_proc_connect(sig_2, 0, dac, 0);
 	mfp_proc_connect(sig_3, 0, dac, 1);
 
-	mfp_proc_setparam(sig_1, "value", 13.0);
-	mfp_proc_setparam(sig_2, "value", 11.0);
-	mfp_proc_setparam(sig_3, "value", 51.0);
-	mfp_proc_setparam(dac, "const", 10.0);
+	mfp_proc_setparam_float(sig_1, "value", 13.0);
+	mfp_proc_setparam_float(sig_2, "value", 11.0);
+	mfp_proc_setparam_float(sig_3, "value", 51.0);
+	mfp_proc_setparam_float(dac, "const", 10.0);
 
 	mfp_dsp_schedule();
 	mfp_dsp_run(mfp_blocksize);

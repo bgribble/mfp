@@ -24,40 +24,40 @@ from rpc_worker import RPCWorker
 class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def create(objtype, initargs):
-		obj = MFPAPP().create(objtype, initargs)
-		MFPAPP().patch.add(obj)
+		obj = MFPApp().create(objtype, initargs)
+		MFPApp().patch.add(obj)
 		return obj.obj_id
 
 	@rpcwrap
 	def connect(obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		obj_1 = MFPAPP().recall(obj_1_id)
-		obj_2 = MFPAPP().recall(obj_2_id)
+		obj_1 = MFPApp().recall(obj_1_id)
+		obj_2 = MFPApp().recall(obj_2_id)
 		r = obj_1.connect(obj_1_port, obj_2, obj_2_port)	
 		return r
 
 	@rpcwrap
 	def disconnect(obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		obj_1 = MFPAPP().recall(obj_1_id)
-		obj_2 = MFPAPP().recall(obj_2_id)
+		obj_1 = MFPApp().recall(obj_1_id)
+		obj_2 = MFPApp().recall(obj_2_id)
 
 		r = obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
 		return r	
 
 	@rpcwrap
 	def send_bang(obj_id, port):
-		obj = MFPAPP().recall(obj_id)
+		obj = MFPApp().recall(obj_id)
 		obj.send(Bang, port)
 		return True
 
 	@rpcwrap
 	def delete(obj_id):
-		obj = MFPAPP().recall(obj_id)
+		obj = MFPApp().recall(obj_id)
 		print "MFPApp: got delete req for", obj
 		obj.delete()
 
 	@rpcwrap
 	def gui_params(obj_id, params):
-		obj = MFPAPP().recall(args.get('obj_id'))
+		obj = MFPApp().recall(args.get('obj_id'))
 		obj.gui_params = params
 
 

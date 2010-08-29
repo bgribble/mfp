@@ -18,7 +18,7 @@ process(mfp_processor * proc)
 
 	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {
-		*sample++ = *(double *)val_ptr;
+		*sample++ = *(float *)val_ptr;
 	}
 
 	return 0;
@@ -45,6 +45,8 @@ init_builtin_sig(void) {
 	p->process = process;
 	p->init = init;
 	p->destroy = destroy;
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "value", (gpointer)1);
 	return p;
 }
 

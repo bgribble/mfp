@@ -103,7 +103,6 @@ class RPCWrapper (object):
 		req.state = Request.RESPONSE_DONE
 
 		if func == '__init__':
-			print "__init__: ", rpcdata
 			factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
 			if factory:
 				obj = factory(*args, **kwargs)

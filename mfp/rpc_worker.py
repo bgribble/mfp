@@ -69,12 +69,9 @@ class RPCWorker(object):
 		while not self.quitreq:
 			try:
 				incoming = self.pipe.get(timeout=0.1)
-				print "RPCWorker reader got", incoming.payload
 				if incoming.state == Request.RESPONSE_PEND:
 					RPCWrapper.handle(incoming)
-					print "RPCWorker reader putting response", incoming.response, incoming.state, incoming.payload
 					self.pipe.put(incoming)
-					print "RPCWorker put returned"
 			except Queue.Empty:
 				pass
 

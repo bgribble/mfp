@@ -6,7 +6,7 @@
 #include "mfp_dsp.h"
 
 typedef struct {
-	double phase;
+	float phase;
 } builtin_osc_data;
 
 
@@ -15,29 +15,29 @@ process(mfp_processor * proc)
 {
 	gpointer freq_ptr = g_hash_table_lookup(proc->params, "freq");
 	gpointer reset_ptr = g_hash_table_lookup(proc->params, "reset");
-	double freq;
-	double reset_phase;
-	double cur_phase; 
-	double phase_incr;
+	float freq;
+	float reset_phase;
+	float cur_phase; 
+	float phase_incr;
 	mfp_sample * sample; 
 	int scount; 
 
 	/* get parameters */ 
 	if (freq_ptr != NULL) 
-		freq = *(double *)freq_ptr;
+		freq = *(float *)freq_ptr;
 	else
 		freq = 0;
 
 	if (reset_ptr != NULL)
-		reset_phase = *(double *)reset_ptr;
+		reset_phase = *(float *)reset_ptr;
 	else
 		reset_phase = 0;
 
-	phase_incr = 2.0 * M_PI * freq / (double)mfp_samplerate;
+	phase_incr = 2.0 * M_PI * freq / (float)mfp_samplerate;
 
 	/* sending "reset = 1" resets phase */ 
 	if (reset_phase > 0.1) {
-		*(double *)reset_ptr = 0.0;
+		*(float *)reset_ptr = 0.0;
 		cur_phase = 0.0;
 	}
 	else {
@@ -87,6 +87,9 @@ init_builtin_osc(void) {
 	p->process = process;
 	p->init = init;
 	p->destroy = destroy;
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "freq", (gpointer)1);
+	g_hash_table_insert(p->params, "reset", (gpointer)1);
 	return p;
 }
 

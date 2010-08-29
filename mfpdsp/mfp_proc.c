@@ -8,21 +8,6 @@
 GArray     * mfp_proc_list = NULL;       /* all mfp_processors */ 
 GHashTable * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */ 
 
-static void
-param_free(gpointer prm)
-{
-	return ;
-	/* g_free((void *)prm); */
-}
-
-static gpointer 
-param_dup(double prm)
-{
-	gpointer buf = g_malloc(sizeof(double));
-	*(double *)buf = prm;
-	return buf;
-}
-
 mfp_processor *
 mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 				int blocksize) 
@@ -31,7 +16,8 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 	int incount, outcount;
 
 	p->typeinfo = typeinfo; 
-	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, param_free, param_free);
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	p->pyparams = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	p->depth = -1;
 
 	/* create inlet and outlet processor pointer arrays */
@@ -70,13 +56,6 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 	g_array_append_val(mfp_proc_list, p); 
 
 	return p;
-}
-
-static void
-hashcopy(gpointer key, gpointer value, gpointer data) 
-{
-	g_hash_table_replace((GHashTable *)data, 
-					     g_strdup((char *)key), param_dup(*(double *)value));
 }
 
 void
@@ -155,23 +134,34 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 }
 
 int
-mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val)
+mfp_proc_setparam_float(mfp_processor * self, char * param_name, float param_val)
 {
-	g_hash_table_replace(self->params, g_strdup(param_name), param_dup(param_val));
+	gpointer newval = g_malloc(sizeof(float));
+	*(float *)newval = param_val;
+
+	printf("setparam_float:	%p %s %f\n", self, param_name, param_val);
+
+	g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)newval);
 	return 0;
 }
 
-double 
-mfp_proc_getparam(mfp_processor * self, char * param_name)
+int
+mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_val)
 {
-	gpointer * val = NULL;
-	printf("in getparam %p %s", self, param_name);
-	val = g_hash_table_lookup(self->params, param_name);
-	if (val != NULL) {
-		return *((double *)val);
-	}
-	else {
-		return 0;
-	}
+	gpointer newval = g_strdup(param_val);
+
+	printf("setparam_string: %p %s %s\n", self, param_name, param_val);
+
+	g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)newval);
+	return 0;
+}
+
+int
+mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_val)
+{
+	printf("setparam_array: %p %s %p\n", self, param_name, param_val);
+
+	g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)param_val);
+	return 0;
 }
 

@@ -35,8 +35,9 @@ class Processor (object):
 		self.connections_out = [[] for r in range(outlets)]
 		self.connections_in = [[] for r in range(inlets)]
 
-	def dsp_init(self, proc_name):
-		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets), len(self.dsp_outlets))
+	def dsp_init(self, proc_name, **params):
+		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
+						         len(self.dsp_outlets), params)
 
 	def delete(self):
 		outport = 0

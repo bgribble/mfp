@@ -10,6 +10,7 @@ typedef struct {
 	/* type, settable parameters, and internal state */
 	struct mfp_procinfo_struct * typeinfo;
 	GHashTable * params; 
+	GHashTable * pyparams; 
 	void * data;
 	
 	/* inlet and outlet connections (g_array of g_array) */
@@ -28,6 +29,7 @@ typedef struct {
 typedef struct mfp_procinfo_struct {
 	char * name;
 	int  is_generator;
+	GHashTable * params;
 	void (* init)(mfp_processor *);
 	void (* destroy)(mfp_processor *);
 	int  (* process)(mfp_processor *);
@@ -69,7 +71,8 @@ extern void mfp_proc_process(mfp_processor *);
 extern void mfp_proc_destroy(mfp_processor *);
 extern int mfp_proc_connect(mfp_processor *, int, mfp_processor *, int);
 extern int mfp_proc_disconnect(mfp_processor *, int, mfp_processor *, int);
-extern int mfp_proc_setparam(mfp_processor * self, char * param_name, double param_val);
-extern double mfp_proc_getparam(mfp_processor * self, char * param_name);
+extern int mfp_proc_setparam_float(mfp_processor * self, char * param_name, float param_val);
+extern int mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_val);
+extern int mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_val);
 
 extern int test_ctests(void);
