@@ -38,7 +38,7 @@ class PatchElement (object):
 		self.stage.unregister(self)
 		self.actor = None
 		if self.obj_id is not None:
-			MFPGUI().delete(self.obj_id)
+			MFPGUI().mfp.delete(self.obj_id)
 			self.obj_id = None
 
 	def send_params(self, **extras):
@@ -47,7 +47,7 @@ class PatchElement (object):
 		for k, v in extras.items():
 			prms[k] = v
 		if self.obj_id is not None:
-			MFPGUI().send_params(self.obj_id, prms)
+			MFPGUI().mfp.set_params(self.obj_id, prms)
 
 	def configure(self, params):
 		self.num_inlets = params.get("num_inlets")

@@ -31,6 +31,7 @@ def rpc_worker_slave(pipe, initproc=None):
 		threadlist = threadsalive
 
 		r = pipe.get()
+		
 		if r.state == Request.RESPONSE_RCVD:
 			continue
 		elif r.payload == 'quit':
@@ -69,9 +70,11 @@ class RPCWorker(object):
 		while not self.quitreq:
 			try:
 				incoming = self.pipe.get(timeout=0.1)
+				
 				if incoming.state == Request.RESPONSE_PEND:
 					RPCWrapper.handle(incoming)
 					self.pipe.put(incoming)
+			
 			except Queue.Empty:
 				pass
 

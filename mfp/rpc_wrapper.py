@@ -55,6 +55,7 @@ class RPCWrapper (object):
 			RPCWrapper._rpcid_seq += 1
 			RPCWrapper.rpcobj[self.rpcid] = self
 		else:
+			import os
 			r = Request(dict(func='__init__', type=type(self).__name__, args=args, kwargs=kwargs))
 			type(self).pipe.put(r)
 			type(self).pipe.wait(r)
@@ -69,6 +70,7 @@ class RPCWrapper (object):
 		if r.response == RPCWrapper.METHOD_OK:
 			return r.payload
 		elif r.response == RPCWrapper.METHOD_FAILED:
+			print r.payload
 			raise RPCWrapper.MethodFailed(r.payload)
 
 	def call_locally(self, rpcdata):
@@ -101,7 +103,7 @@ class RPCWrapper (object):
 		kwargs = rpcdata.get('kwargs')
 		
 		req.state = Request.RESPONSE_DONE
-
+		
 		if func == '__init__':
 			factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
 			if factory:

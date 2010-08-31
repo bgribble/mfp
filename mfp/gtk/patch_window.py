@@ -24,12 +24,15 @@ class PatchWindow(object):
 		
 		self.color_unselected = clutter.color_from_string('Black')
 		self.color_selected = clutter.color_from_string('Red')
+		self.color_bg = clutter.color_from_string("White")
 
 		# configure clutter stage 
 		self.stage.set_size(320, 240)
 		self.stage.set_title("MFP")
+		self.stage.set_color(self.color_bg)
 
-		self.stage.show_all()
+		print "PatchWindow: showing clutter stage"
+		self.stage.show()
 		
 		# set up key and mouse handling 
 		self.init_input()

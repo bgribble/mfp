@@ -13,6 +13,8 @@ class RequestPipe(object):
 	def __init__(self):
 		master, slave = multiprocessing.Pipe()
 
+		self.role = None
+
 		# the slave will switch these 
 		self.this_end = master 
 		self.that_end = slave
@@ -49,7 +51,8 @@ class RequestPipe(object):
 	def init_master(self, reader=None):
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
-		
+		self.role = 1
+
 		if reader is None:
 			reader = self._reader_func
 		if reader:
@@ -63,7 +66,8 @@ class RequestPipe(object):
 		self.that_end = q
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
-		
+		self.role = 0
+
 		if reader is None:
 			reader = self._reader_func
 		if reader:
@@ -76,16 +80,23 @@ class RequestPipe(object):
 		if isinstance(req, Request):
 			if req.state == Request.CREATED:
 				self.pending[req.request_id] = req
-			req.state = Request.SUBMITTED
+				origin = self.role
+				req.state = Request.SUBMITTED
+			else: 
+				origin = not self.role
+				req.state = Request.SUBMITTED
+
 			req.queue = self
 			tosend['type'] = 'Request'
 			tosend['request_id'] = req.request_id
 			tosend['payload'] = req.payload 
 			tosend['response'] = req.response 
+			tosend['origin'] = origin
 		else:
 			tosend['type'] = 'payload'
 			tosend['payload'] = req
 		self.this_end.send(tosend)
+
 		return req
 	
 	def wait(self, req):
@@ -108,8 +119,10 @@ class RequestPipe(object):
 
 		req = None 
 		if qobj.get('type') == 'Request':
-			if self.pending is not None:
+			if self.pending is not None and qobj.get('origin') == self.role: 
 				req = self.pending.get(qobj.get('request_id'))
+			else:
+				req = None
 				
 			if req:
 				req.response = qobj.get('response')

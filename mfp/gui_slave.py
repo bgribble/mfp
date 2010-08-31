@@ -10,16 +10,22 @@ import threading
 from request import Request
 from singleton import Singleton
 from rpc_wrapper import RPCWrapper, rpcwrap
+from main import MFPCommand
 
 def gui_init(pipe):
+	import os
+	print "gui_init: in worker, pid =", os.getpid()
 	pipe.on_finish(gui_finish)
 	RPCWrapper.pipe = pipe
 	GUICommand.local = True
+	MFPCommand.local = False
+	MFPGUI()
 
 def gui_finish():
 	MFPGUI().finish()
 
 class GUICommand (RPCWrapper):
+	
 	@rpcwrap
 	def finish(self):
 		MFPGUI().appwin.destroy()
@@ -52,11 +58,19 @@ class GUICommand (RPCWrapper):
 class MFPGUI (object):
 	__metaclass__ = Singleton
 
-	def __init__(self, q):
+	def __init__(self):
+		print "MFPGUI: creating patch window"
+		self.clutter_thread = threading.Thread(target=self.clutter_proc)
+		self.clutter_thread.start()
+		self.mfp = None 
+
+	def clutter_proc(self):
+		import clutter
 		from mfp.gtk.patch_window import PatchWindow
-		self.appwin = PatchWindow()	
 		self.mfp = MFPCommand()
+		self.appwin = PatchWindow()	
+		clutter.main()
 
 	def finish(self):
 		self.appwin.destroy()
-		
+
