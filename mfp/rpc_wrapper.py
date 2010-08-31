@@ -70,7 +70,6 @@ class RPCWrapper (object):
 		if r.response == RPCWrapper.METHOD_OK:
 			return r.payload
 		elif r.response == RPCWrapper.METHOD_FAILED:
-			print r.payload
 			raise RPCWrapper.MethodFailed(r.payload)
 
 	def call_locally(self, rpcdata):

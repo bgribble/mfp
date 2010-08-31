@@ -50,6 +50,10 @@ class PatchEditMode (InputMode):
 		self.bind("M1-MOTION", self.drag_selected, "patch-drag-selected")
 		self.bind("M1UP", self.drag_end, "patch-drag-end")
 
+		self.bind('+', self.window.zoom_in, "patch-zoom-in")
+		self.bind('=', self.window.zoom_in, "patch-zoom-in")
+		self.bind('-', self.window.zoom_out, "patch-zoom-out")
+
 	def drag_start(self):
 		if self.window.selected and self.manager.pointer_obj is self.window.selected:
 			self.drag_started = True

@@ -30,6 +30,8 @@ class PatchWindow(object):
 		self.stage.set_size(320, 240)
 		self.stage.set_title("MFP")
 		self.stage.set_color(self.color_bg)
+		self.stage.set_property('user-resizable', True)
+		self.zoom = 1.0
 
 		print "PatchWindow: showing clutter stage"
 		self.stage.show()
@@ -142,6 +144,16 @@ class PatchWindow(object):
 		o = self.selected
 		self.selected = None
 		o.delete()
+
+	def zoom_out(self):
+		if self.zoom >= 0.1:
+			self.zoom *= 0.8
+			self.stage.set_scale(self.zoom, self.zoom)
+
+	def zoom_in(self):
+		if self.zoom < 20:
+			self.zoom *= 1.25
+			self.stage.set_scale(self.zoom, self.zoom)
 
 	def quit(self, *rest):
 		clutter.main_quit()
