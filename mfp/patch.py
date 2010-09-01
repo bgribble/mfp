@@ -18,7 +18,7 @@ class Patch(object):
 		self.name = f.get('name')
 		
 		# clear old objects
-		for o in objects:
+		for o in self.objects:
 			o.delete()
 
 		# create new objects

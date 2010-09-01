@@ -67,7 +67,8 @@ class KeySequencer (object):
 					pass
 
 		# BUTTON PRESS, BUTTON RELEASE, MOUSE MOTION
-		elif event.type in (clutter.BUTTON_PRESS, clutter.BUTTON_RELEASE, clutter.MOTION):
+		elif event.type in (clutter.BUTTON_PRESS, clutter.BUTTON_RELEASE, clutter.MOTION,
+					        clutter.SCROLL):
 			self.sequences.append(self.canonicalize(event))	
 		
 	def canonicalize(self, event):
@@ -83,7 +84,7 @@ class KeySequencer (object):
 
 		if event.type in (clutter.KEY_PRESS, clutter.KEY_RELEASE):
 			ks = event.get_key_symbol()
-			if ks >= 256 and (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
+			if ks >= 256 and ((MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys)):
 				key = 'S-' + key 
 		    	
 			if ks == KEY_TAB:
@@ -139,8 +140,16 @@ class KeySequencer (object):
 				if b in self.mouse_buttons:
 					key += 'M%d-' % b
 			key += 'MOTION'
-		
-		print key
+
+		elif event.type == clutter.SCROLL:
+			for b in (1,2,3):
+				if b in self.mouse_buttons:
+					key += 'M%d-' % b
+			key += 'SCROLL'
+			if event.get_scroll_direction():
+				key += 'DOWN'
+			else:
+				key += 'UP'
 		return key 	
 
 

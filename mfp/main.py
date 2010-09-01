@@ -148,10 +148,5 @@ def main():
 	def load(fn):
 		m.patch.load_file(fn)
 	
-	import time
-
-	while(True):
-		time.sleep(1)
-
-#	code.interact(local=locals())
-
+	code.interact(local=locals())
+	m.finish()

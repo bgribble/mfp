@@ -44,7 +44,7 @@ class ConnectionElement(PatchElement):
 		self.actor.set_color(self.stage.color_unselected)
 
 	def delete(self):
-		MFPGUI.mfp.disconnect(self.obj_1.obj_id, self.port_1, self.obj_2.obj_id, self.port_2)
+		MFPGUI().mfp.disconnect(self.obj_1.obj_id, self.port_1, self.obj_2.obj_id, self.port_2)
 		self.obj_1.connections_out.remove(self)
 		self.obj_2.connections_in.remove(self)
 		self.obj_1 = None

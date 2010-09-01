@@ -17,6 +17,9 @@ from .modes.select_mru import SelectMRUMode
 class PatchWindow(object):
 	def __init__(self):
 		self.stage = clutter.Stage()
+		self.group = clutter.Group()
+		self.stage.add(self.group)
+
 		self.objects = [] 
 		self.selected = None
 
@@ -32,6 +35,8 @@ class PatchWindow(object):
 		self.stage.set_color(self.color_bg)
 		self.stage.set_property('user-resizable', True)
 		self.zoom = 1.0
+		self.view_x = 0
+		self.view_y = 0
 
 		print "PatchWindow: showing clutter stage"
 		self.stage.show()
@@ -51,6 +56,7 @@ class PatchWindow(object):
 		self.stage.connect('motion-event', handler)
 		self.stage.connect('enter-event', handler)
 		self.stage.connect('leave-event', handler) 
+		self.stage.connect('scroll-event', handler) 
 		self.stage.connect('destroy', self.quit)
 
 		# global keybindings 
@@ -69,7 +75,7 @@ class PatchWindow(object):
 	def register(self, element):
 		self.objects.append(element)
 		self.input_mgr.event_sources[element.actor] = element 
-		self.stage.add(element.actor)
+		self.group.add(element.actor)
 		if element.obj_id is not None:
 			element.send_params()
 
@@ -77,7 +83,7 @@ class PatchWindow(object):
 		print "unregister:", element, self.objects
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element.actor]
-		self.stage.remove(element.actor)
+		self.group.remove(element.actor)
 		# FIXME hook
 		SelectMRUMode.forget(element)
 
@@ -133,8 +139,8 @@ class PatchWindow(object):
 	def move_selected(self, dx, dy):
 		if self.selected is None:
 			return
-		self.selected.move(max(0, self.selected.position_x + dx),
-					       max(0, self.selected.position_y + dy))
+		self.selected.move(max(0, self.selected.position_x + dx*self.zoom),
+					       max(0, self.selected.position_y + dy*self.zoom))
 		if self.selected.obj_id is not None:
 			self.selected.send_params()
 
@@ -145,15 +151,32 @@ class PatchWindow(object):
 		self.selected = None
 		o.delete()
 
-	def zoom_out(self):
-		if self.zoom >= 0.1:
-			self.zoom *= 0.8
-			self.stage.set_scale(self.zoom, self.zoom)
+	def rezoom(self):
+		w, h = self.group.get_size()
+		self.group.set_scale_full(self.zoom, self.zoom, w/2.0, h/2.0)
+		self.group.set_position(self.view_x, self.view_y)
 
-	def zoom_in(self):
+	def reset_zoom(self):
+		self.zoom = 1.0
+		self.view_x = 0
+		self.view_y = 0
+		self.rezoom()
+
+	def zoom_out(self, ratio):
+		if self.zoom >= 0.1:
+			self.zoom *= ratio
+			self.rezoom()
+		
+	def zoom_in(self, ratio):
 		if self.zoom < 20:
-			self.zoom *= 1.25
-			self.stage.set_scale(self.zoom, self.zoom)
+			self.zoom *= ratio
+			self.rezoom()
+
+	def move_view(self, dx, dy):
+		print "move_view:", dx, dy, self.zoom
+		self.view_x += dx
+		self.view_y += dy
+		self.rezoom()
 
 	def quit(self, *rest):
 		clutter.main_quit()

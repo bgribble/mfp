@@ -40,7 +40,7 @@ class InputManager (object):
 		import clutter 
 		keysym = None 
 		if event.type in (clutter.KEY_PRESS, clutter.KEY_RELEASE, clutter.BUTTON_PRESS,
-					      clutter.BUTTON_RELEASE):
+					      clutter.BUTTON_RELEASE, clutter.SCROLL):
 			self.keyseq.process(event)
 			if len(self.keyseq.sequences):
 				keysym = self.keyseq.pop()
@@ -58,7 +58,6 @@ class InputManager (object):
 		elif event.type == clutter.LEAVE:
 			self.pointer_lastobj = self.pointer_obj
 			self.pointer_obj = None
-
 		else:
 			return False 
 
