@@ -39,6 +39,7 @@ class RPCWrapper (object):
 	class MethodFailed(Exception):
 		def __init__(self, tb):
 			self.traceback = tb
+			print tb
 			Exception.__init__(self)
 
 	_rpcid_seq = 0

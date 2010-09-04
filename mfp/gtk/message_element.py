@@ -105,6 +105,10 @@ class MessageElement (PatchElement):
 		for c in self.connections_in:
 			c.draw()
 
+	def configure(self, params):
+		self.label.set_text("%s" % self.obj_args)
+		PatchElement.configure(self, params)	
+
 	def select(self):
 		#self.actor.set_border_color(self.stage.color_selected)
 		self.selected = True 

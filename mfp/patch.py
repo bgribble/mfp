@@ -11,8 +11,10 @@ class Patch(object):
 	def __init__(self):
 		self.name = "Default"
 		self.objects = []
+		self.gui_objects = {}
 
 	def load_file(self, filename):
+		from main import MFPApp
 		jsdata = open(filename, 'r').read()
 		f = json.loads(jsdata)
 		self.name = f.get('name')
@@ -23,11 +25,21 @@ class Patch(object):
 
 		# create new objects
 		idmap = {}
-		for oid, prms in f.get('objects', {})().items():
-			newobj = MFPApp().create(prms.get('type'), prms.get('initargs'))
-			MFPApp().configure_gui(obj, prms)
-			idmap[oid] = newid
+		for oid, prms in f.get('objects', {}).items():
+			otype = prms.get('type')
+			oargs = prms.get('initargs')
+			newobj = MFPApp().create(otype, oargs)
+			if not MFPApp.no_gui:
+				guiobj = MFPApp().gui_cmd.create(otype, oargs, oid, prms.get('gui_params')) 
+			else:
+				guiobj = None
+			idmap[oid] = (newobj, guiobj)
 
+		for oid, objects in idmap.items():
+			mfpobj, guiobj = objects
+			self.objects.append(mfpobj)
+			self.gui_objects[oid] = guiobj
+			
 	def save_file(self, filename=None):
 		f = {}
 		f['name'] = self.name

@@ -16,8 +16,6 @@ class ProcessorElement (PatchElement):
 	def __init__(self, window, x, y, params={}):
 		PatchElement.__init__(self, window, x, y)
 	
-		self.proc_type = None 
-		self.proc_args = None
 		self.connections_out = [] 
 		self.connections_in = [] 
 		self.editable = False 
@@ -51,15 +49,15 @@ class ProcessorElement (PatchElement):
 	def update_label(self, *args):
 		t = self.label.get_text()
 		parts = t.split(' ', 1)
-		self.proc_type = parts[0]
+		self.obj_type = parts[0]
 		if len(parts) > 1:
-			self.proc_args = parts[1]
+			self.obj_args = parts[1]
 
-		print "ProcessorElement: processor=%s, args=%s" % (self.proc_type, self.proc_args)
+		print "ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args)
 		print self.label.get_text()
-		self.obj_id = MFPGUI().mfp.create(self.proc_type, self.proc_args)
+		self.obj_id = MFPGUI().mfp.create(self.obj_type, self.obj_args)
 		if self.obj_id is None:
-			print "ProcessorElement: could not create", self.proc_type, self.proc_args
+			print "ProcessorElement: could not create", self.obj_type, self.obj_args
 		self.send_params()
 
 	def text_changed_cb(self, *args):
@@ -101,14 +99,9 @@ class ProcessorElement (PatchElement):
 
 		PatchElement.delete(self)
 
-	def send_params(self):
-		PatchElement.send_params(self)
-
 	def configure(self, params):
-		self.proc_name = params.get("type")
-		self.proc_args = params.get("initargs")
-		self.label.set_text("%s %s" % (self.proc_name, self.proc_args))
-		PatchElement.configure(params)	
+		self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+		PatchElement.configure(self, params)	
 
 	def toggle_edit(self):
 		if self.editable:

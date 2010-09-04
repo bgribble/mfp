@@ -11,6 +11,7 @@ from bang import Bang, Uninit
 class Processor (object): 
 	OK = 0
 	ERROR = 1 
+	gui_type = 'processor'
 
 	def __init__(self, inlets, outlets, init_type, init_args):
 		self.init_type = init_type

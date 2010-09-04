@@ -8,7 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 import sys, os
 import multiprocessing 
 import threading
-
+import time
 
 from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang 
@@ -94,6 +94,10 @@ class MFPApp (object):
 			self.gui_process = RPCWorker("mfp_gui", gui_init)
 			self.gui_process.serve(GUICommand)
 			self.gui_cmd = GUICommand()
+			while not self.gui_cmd.ready():
+				print "MFPApp: GUI not reaady, waiting"
+				time.sleep(0.2)
+			print "MFPApp: GUI becomes ready"
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch()
@@ -120,11 +124,6 @@ class MFPApp (object):
 			obj = ctor(name, args)
 			return obj
 
-	def configure_gui(self, obj, params):
-		msg = dict(cmd='configure')
-		args = params.get('gui_params')
-		# FIXME finish this
-
 	def finish(self):
 		if self.dsp_process:
 			self.dsp_process.finish()
@@ -135,18 +134,25 @@ def main():
 	import os
 	import builtins 
 	import code 
+	import sys
 
 	print "MFP.main, pid =", os.getpid()
 
 	m = MFPApp()
+
+	print "MFPApp created"
+
 	m.setup()
+	
+	print "MFPApp configured"
+
 	builtins.register()
 
-	def save(fn):
-		m.patch.save_file(fn)
+	print "MFPApp builtins registered"
 
-	def load(fn):
-		m.patch.load_file(fn)
+	if len(sys.argv) > 1:
+		print "loading", sys.argv[1]
+		m.patch.load_file(sys.argv[1])
 	
 	code.interact(local=locals())
 	m.finish()

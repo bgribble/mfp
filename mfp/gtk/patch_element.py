@@ -8,6 +8,8 @@ class PatchElement (object):
 
 	def __init__(self, window, x, y):
 		self.obj_id = None
+		self.obj_type = None
+		self.obj_args = None
 		self.num_inlets = 0
 		self.num_outlets = 0
 		self.dsp_inlets = []
