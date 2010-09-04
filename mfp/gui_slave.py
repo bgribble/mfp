@@ -40,7 +40,7 @@ class GUICommand (RPCWrapper):
 
 	@rpcwrap
 	def create(self, obj_type, obj_args, obj_id, params): 
-		MFPGUI.clutter_do(lambda: self._create(obj_type, obj_args, obj_id, params))
+		MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, params))
 
 	def _create(self, obj_type, obj_args, obj_id, params): 
 		from .gtk.processor_element import ProcessorElement

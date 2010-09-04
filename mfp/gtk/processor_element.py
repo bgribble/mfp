@@ -100,7 +100,10 @@ class ProcessorElement (PatchElement):
 		PatchElement.delete(self)
 
 	def configure(self, params):
-		self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+		if self.obj_args is None:
+			self.label.set_text("%s" % (self.obj_type,))
+		else:
+			self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
 		PatchElement.configure(self, params)	
 
 	def toggle_edit(self):
