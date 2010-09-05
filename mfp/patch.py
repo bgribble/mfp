@@ -10,7 +10,7 @@ import simplejson as json
 class Patch(object):
 	def __init__(self):
 		self.name = "Default"
-		self.objects = []
+		self.objects = {}
 		self.gui_objects = {}
 
 	def load_file(self, filename):
@@ -20,8 +20,9 @@ class Patch(object):
 		self.name = f.get('name')
 		
 		# clear old objects
-		for o in self.objects:
+		for o in self.objects.values():
 			o.delete()
+		self.objects = {}
 
 		# create new objects
 		idmap = {}
@@ -30,16 +31,32 @@ class Patch(object):
 			oargs = prms.get('initargs')
 			newobj = MFPApp().create(otype, oargs)
 			if not MFPApp.no_gui:
-				guiobj = MFPApp().gui_cmd.create(otype, oargs, oid, prms.get('gui_params')) 
+				guiobj = MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, prms.get('gui_params')) 
 			else:
 				guiobj = None
-			idmap[oid] = (newobj, guiobj)
+
+			idmap[int(oid)] = (newobj, guiobj)
 
 		for oid, objects in idmap.items():
 			mfpobj, guiobj = objects
-			self.objects.append(mfpobj)
-			self.gui_objects[oid] = guiobj
-			
+			self.objects[mfpobj.obj_id] = mfpobj
+			self.gui_objects[mfpobj.obj_id] = guiobj
+
+		# make connections
+		for oid, prms in f.get('objects', {}).items():
+			oid = int(oid)
+			conn = prms.get("connections", [])
+			srcobj = idmap.get(oid)[0]
+			for outlet in range(0, len(conn)):
+				connlist = conn[outlet]
+				for c in connlist:
+					dstobj = idmap.get(c[0])[0]
+					inlet = c[1]
+					srcobj.connect(outlet, dstobj, inlet)
+					if not MFPApp.no_gui:
+						print "load_patch: connect", srcobj.obj_id, outlet, dstobj.obj_id, inlet
+						MFPApp().gui_cmd.connect(srcobj.obj_id, outlet, dstobj.obj_id, inlet)
+
 	def save_file(self, filename=None):
 		f = {}
 		f['name'] = self.name

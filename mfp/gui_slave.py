@@ -63,10 +63,22 @@ class GUICommand (RPCWrapper):
 			o.obj_type = obj_type
 			o.obj_args = obj_args
 			o.configure(params)
+			MFPGUI().remember(o)
 
 	@rpcwrap
 	def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		pass
+		MFPGUI().clutter_do(lambda: self._connect(obj_1_id, obj_1_port, obj_2_id, obj_2_port))
+
+	def _connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+		from .gtk.connection_element import ConnectionElement
+
+		obj_1 = MFPGUI().recall(obj_1_id)
+		obj_2 = MFPGUI().recall(obj_2_id)
+		print "MFPGUI._connect:", obj_1_id, obj_1, obj_2_id, obj_2
+		print MFPGUI().objects
+		c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
+		obj_1.connections_out.append(c)
+		obj_2.connections_in.append(c)
 
 	@rpcwrap
 	def clear(self):
@@ -81,8 +93,15 @@ class MFPGUI (object):
 		import time
 		self.clutter_thread = threading.Thread(target=self.clutter_proc)
 		self.clutter_thread.start()
+		self.objects = {}
 		self.mfp = None 
 		self.appwin = None
+
+	def remember(self, obj):
+		self.objects[obj.obj_id] = obj
+
+	def recall(self, obj_id):
+		return self.objects.get(obj_id)
 
 	def clutter_do(self, thunk):
 		import glib
