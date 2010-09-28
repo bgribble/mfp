@@ -21,10 +21,12 @@ class PatchEditMode (InputMode):
 		self.bind("a", self.window.add_processor, "patch-add-processor")
 		self.bind("t", self.window.add_text, "patch-add-text")
 		self.bind("m", self.window.add_message, "patch-add-message")
+		self.bind("n", self.window.add_enum, "patch-add-enum")
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
 		self.bind("C-TAB", self.window.select_mru, "patch-select-mru")
-	
+		self.bind("RET", self.window.edit_selected, "patch-edit-selected")	
+		
 		self.bind("UP", lambda: self.window.move_selected(0, -1), "patch-move-up-1")
 		self.bind("DOWN", lambda: self.window.move_selected(0, 1), "patch-move-down-1")
 		self.bind("LEFT", lambda: self.window.move_selected(-1, 0), "patch-move-left-1")

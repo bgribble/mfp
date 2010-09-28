@@ -35,6 +35,9 @@ class PatchElement (object):
 	def drag(self, x, y):
 		self.move(x - self.drag_x, y - self.drag_y)
 
+	def begin_edit(self):
+		pass
+
 	def delete(self):
 		print "element delete:", self
 		self.stage.unregister(self)

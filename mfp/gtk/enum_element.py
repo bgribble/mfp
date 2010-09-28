@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.6
 '''
-message_element.py
-A patch element corresponding to a clickable message
+enum_element.py
+A patch element corresponding to a number box or enum selector
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
@@ -11,15 +11,17 @@ import cairo
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
+from .modes.label_edit import LabelEditMode
 
-class MessageElement (PatchElement):
-	element_type = "message"
+class EnumElement (PatchElement):
+	element_type = "enum"
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
-		self.message_text = None 
+		self.value = 0
 		self.connections_out = [] 
 		self.connections_in = [] 
+		self.editable = False 
 
 		# create elements
 		self.actor = clutter.Group()
@@ -37,9 +39,10 @@ class MessageElement (PatchElement):
 		self.label.set_position(4, 1)
 		self.label.set_color(window.color_unselected) 
 		self.label.connect('text-changed', self.text_changed_cb)
+		self.label.set_text(str(self.value))
 
 		# click handler 
-		self.actor.connect('button-press-event', self.button_press_cb)
+		# self.actor.connect('button-press-event', self.button_press_cb)
 		
 		self.move(x, y)
 
@@ -49,7 +52,6 @@ class MessageElement (PatchElement):
 	def draw_border(self):
 		w = self.texture.get_property('surface_width')-2
 		h = self.texture.get_property('surface_height')-2
-		print "draw_border: w=%s, h=%s" % (w, h)
 		self.texture.clear()
 		ct = self.texture.cairo_create()
 		if self.selected: 
@@ -60,23 +62,11 @@ class MessageElement (PatchElement):
 		ct.move_to(1,1)
 		ct.line_to(1, h)
 		ct.line_to(w, h)
-		ct.curve_to(w-8, h-8, w-8, 8, w, 1)
+		ct.line_to(w, h/3.0)
+		ct.line_to(w-h/3.0, 1)
 		ct.line_to(1,1)
 		ct.close_path()
 		ct.stroke()
-
-	def button_press_cb(self, *args):
-		print "button press", args
-		MFPGUI().mfp.send_bang(self.obj_id, 0) 
-
-	def update_label(self, *args):
-		self.message_text = self.label.get_text()
-
-		print "MessageElement: obj=%s" % (self.message_text)
-		self.obj_id = MFPGUI().mfp.create("var", self.message_text)
-		if self.obj_id is None:
-			print "MessageElement: could not create message obj"
-		self.send_params()
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 
@@ -93,6 +83,18 @@ class MessageElement (PatchElement):
 			self.texture.set_surface_size(int(new_w), self.texture.get_property('surface_height'))
 			self.draw_border()
 
+	def create_obj(self, value=None):
+		if value is None:
+			self.value = int(self.label.get_text())
+		else:
+			self.value = value
+		if self.obj_id is None:
+			self.obj_id = MFPGUI().mfp.create("var", str(self.value))
+		if self.obj_id is None:
+			print "MessageElement: could not create message obj"
+
+		self.send_params()
+
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
@@ -104,28 +106,30 @@ class MessageElement (PatchElement):
 		for c in self.connections_in:
 			c.draw()
 
+	def update_label(self, *args):
+		t = self.label.get_text()
+		self.value = int(t)
+		self.label.set_text(str(self.value))
+		MFPGUI().mfp.send(self.obj_id, 0, self.value)
+
 	def configure(self, params):
 		self.label.set_text("%s" % self.obj_args)
+		self.update_label()
 		PatchElement.configure(self, params)	
 
 	def select(self):
-		#self.actor.set_border_color(self.stage.color_selected)
 		self.selected = True 
 		self.draw_border()
 
 	def unselect(self):
-		#self.actor.set_border_color(self.stage.color_unselected)
 		self.selected = False 
 		self.draw_border()
 
 	def delete(self):
-		print "message delete", self
 		for c in self.connections_out+self.connections_in:
-			print "deleting connection", c
 			c.delete()
 		PatchElement.delete(self)
 
 	def begin_edit(self):
-		self.stage.input_mgr.enable_minor_mode(LabelEditMode(self.stage, self, self.label))
-
+		self.stage.input_mgr.enable_minor_mode(LabelEditMode(self.stage, self, self.label, value=True))
 

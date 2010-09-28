@@ -5,6 +5,7 @@ from text_element import TextElement
 from processor_element import ProcessorElement
 from connection_element import ConnectionElement 
 from message_element import MessageElement
+from enum_element import EnumElement
 
 from mfp import MFPGUI 
 
@@ -102,6 +103,11 @@ class PatchWindow(object):
 		self.select(b)
 		self.input_mgr.enable_minor_mode(LabelEditMode(self, b, b.label))
 
+	def add_enum(self):
+		b = EnumElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
+		b.create_obj("0")
+		self.select(b)
+
 	def select(self, obj):
 		if self.selected is not obj and self.selected is not None:
 			self.unselect(self.selected)
@@ -150,6 +156,11 @@ class PatchWindow(object):
 		o = self.selected
 		self.selected = None
 		o.delete()
+
+	def edit_selected(self):
+		if self.selected is None:
+			return
+		self.selected.begin_edit()
 
 	def rezoom(self):
 		w, h = self.group.get_size()

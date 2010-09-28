@@ -9,6 +9,7 @@ import math
 from patch_element import PatchElement
 from mfp import MFPGUI
 from input_mode import InputMode
+from .modes.label_edit import LabelEditMode
 
 class ProcessorElement (PatchElement):
 	element_type = "processor"
@@ -18,7 +19,6 @@ class ProcessorElement (PatchElement):
 	
 		self.connections_out = [] 
 		self.connections_in = [] 
-		self.editable = False 
 
 		# create elements 
 		self.actor = clutter.Group()
@@ -61,6 +61,8 @@ class ProcessorElement (PatchElement):
 		self.send_params()
 
 	def text_changed_cb(self, *args):
+		'''called by clutter when label.set_text or editing occurs'''
+
 		lwidth = self.label.get_property('width') 
 		bwidth = self.rect.get_property('width')
 			
@@ -99,20 +101,13 @@ class ProcessorElement (PatchElement):
 
 		PatchElement.delete(self)
 
+	def begin_edit(self):
+		self.stage.input_mgr.enable_minor_mode(LabelEditMode(self.stage, self, self.label))
+
 	def configure(self, params):
 		if self.obj_args is None:
 			self.label.set_text("%s" % (self.obj_type,))
 		else:
 			self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
 		PatchElement.configure(self, params)	
-
-	def toggle_edit(self):
-		if self.editable:
-			self.label.set_editable(False)
-			self.stage.stage.set_key_focus(None)
-			self.editable = False 
-		else:
-			self.label.set_editable(True)
-			self.stage.stage.set_key_focus(self.label)
-			self.editable = True
 

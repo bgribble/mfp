@@ -8,7 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode 
 
 class LabelEditMode (InputMode):
-	def __init__(self, window, element, label, multiline=False):
+	def __init__(self, window, element, label, multiline=False, value=False):
 		self.manager = window.input_mgr 
 		self.element = element 
 		self.widget = label

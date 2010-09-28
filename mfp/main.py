@@ -21,7 +21,7 @@ from rpc_worker import RPCWorker
 
 class MFPCommand(RPCWrapper):
 	@rpcwrap
-	def create(self, objtype, initargs):
+	def create(self, objtype, initargs=''):
 		obj = MFPApp().create(objtype, initargs)
 		MFPApp().patch.add(obj)
 		return obj.obj_id
@@ -45,6 +45,12 @@ class MFPCommand(RPCWrapper):
 	def send_bang(self, obj_id, port):
 		obj = MFPApp().recall(obj_id)
 		obj.send(Bang, port)
+		return True
+
+	@rpcwrap
+	def send(self, obj_id, port, data):
+		obj = MFPApp().recall(obj_id)
+		obj.send(data, port)
 		return True
 
 	@rpcwrap

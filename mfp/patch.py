@@ -70,5 +70,7 @@ class Patch(object):
 		savefile.write(json.dumps(f))		
 
 	def add(self, obj):
-		self.objects.append(obj)
+		self.objects[obj.obj_id] = obj
+
+
 

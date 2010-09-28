@@ -108,8 +108,13 @@ class MFPGUI (object):
 		glib.idle_add(thunk)
 
 	def clutter_proc(self):
-		print "clutter main thread starting"
 		import clutter
+		
+		# explicit init seems to avoid strange thread sync/blocking issues 
+		clutter.threads_init()
+		clutter.init()
+
+		# create main window
 		from mfp.gtk.patch_window import PatchWindow
 		self.appwin = PatchWindow()	
 		print "created patchwindow", self.appwin
