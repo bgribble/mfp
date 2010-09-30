@@ -55,13 +55,13 @@ class LabelEditMode (InputMode):
 	def commit_edits(self):
 		self.widget.set_cursor_visible(False)
 		self.element.update_label(self.widget)
-		self.manager.disable_minor_mode(self)
+		self.element.end_edit()
 		return True 
 
 	def rollback_edits(self):
 		self.widget.set_text(self.undo_stack[0])
 		self.widget.set_cursor_visible(False)
-		self.manager.disable_minor_mode(self)
+		self.element.end_edit()
 		return True 
 
 	def erase_forward(self):

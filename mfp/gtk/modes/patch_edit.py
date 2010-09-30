@@ -83,7 +83,8 @@ class PatchEditMode (InputMode):
 
 	def drag_end(self):
 		self.drag_started = False
-		self.window.selected.send_params()
+		if self.window.selected:
+			self.window.selected.send_params()
 
 	def connect_fwd(self):
 		if self.window.selected:

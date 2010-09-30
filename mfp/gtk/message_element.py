@@ -14,12 +14,14 @@ from mfp import MFPGUI
 
 class MessageElement (PatchElement):
 	element_type = "message"
+
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
 		self.message_text = None 
 		self.connections_out = [] 
 		self.connections_in = [] 
+
 
 		# create elements
 		self.actor = clutter.Group()
@@ -109,23 +111,21 @@ class MessageElement (PatchElement):
 		PatchElement.configure(self, params)	
 
 	def select(self):
-		#self.actor.set_border_color(self.stage.color_selected)
 		self.selected = True 
 		self.draw_border()
 
 	def unselect(self):
-		#self.actor.set_border_color(self.stage.color_unselected)
 		self.selected = False 
 		self.draw_border()
 
 	def delete(self):
-		print "message delete", self
 		for c in self.connections_out+self.connections_in:
-			print "deleting connection", c
 			c.delete()
 		PatchElement.delete(self)
 
-	def begin_edit(self):
-		self.stage.input_mgr.enable_minor_mode(LabelEditMode(self.stage, self, self.label))
+	def make_edit_mode(self):
+		return LabelEditMode(self.stage, self, self.label)
+
+
 
 

@@ -101,8 +101,8 @@ class ProcessorElement (PatchElement):
 
 		PatchElement.delete(self)
 
-	def begin_edit(self):
-		self.stage.input_mgr.enable_minor_mode(LabelEditMode(self.stage, self, self.label))
+	def make_edit_mode(self):
+		return LabelEditMode(self.stage, self, self.label)
 
 	def configure(self, params):
 		if self.obj_args is None:

@@ -44,8 +44,8 @@ class TextElement (PatchElement):
 	def select(self, *args):
 		self.actor.set_color(self.stage.color_selected) 
 	
-	def begin_edit(self):
-		self.stage.input_mgr.enable_minor_mode(LabelEditMode(self.stage, self, self.label, True))
+	def make_edit_mode(self):
+		return LabelEditMode(self.stage, self, self.label, True)
 
 
 

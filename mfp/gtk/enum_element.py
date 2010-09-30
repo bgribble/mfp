@@ -12,6 +12,7 @@ import math
 from patch_element import PatchElement
 from mfp import MFPGUI
 from .modes.label_edit import LabelEditMode
+from .modes.enum_control import EnumControlMode
 
 class EnumElement (PatchElement):
 	element_type = "enum"
@@ -83,11 +84,7 @@ class EnumElement (PatchElement):
 			self.texture.set_surface_size(int(new_w), self.texture.get_property('surface_height'))
 			self.draw_border()
 
-	def create_obj(self, value=None):
-		if value is None:
-			self.value = int(self.label.get_text())
-		else:
-			self.value = value
+	def create_obj(self):
 		if self.obj_id is None:
 			self.obj_id = MFPGUI().mfp.create("var", str(self.value))
 		if self.obj_id is None:
@@ -106,11 +103,16 @@ class EnumElement (PatchElement):
 		for c in self.connections_in:
 			c.draw()
 
+	def update_value(self, value):
+		self.value = value
+		self.label.set_text(str(self.value))
+		if self.obj_id is None:
+			self.create_obj()
+		MFPGUI().mfp.send(self.obj_id, 0, self.value)
+
 	def update_label(self, *args):
 		t = self.label.get_text()
-		self.value = int(t)
-		self.label.set_text(str(self.value))
-		MFPGUI().mfp.send(self.obj_id, 0, self.value)
+		self.update_value(int(t))
 
 	def configure(self, params):
 		self.label.set_text("%s" % self.obj_args)
@@ -130,6 +132,9 @@ class EnumElement (PatchElement):
 			c.delete()
 		PatchElement.delete(self)
 
-	def begin_edit(self):
-		self.stage.input_mgr.enable_minor_mode(LabelEditMode(self.stage, self, self.label, value=True))
+	def make_edit_mode(self):
+		return LabelEditMode(self.stage, self, self.label, value=True)
+
+	def make_control_mode(self):
+		return EnumControlMode(self.stage, self)
 

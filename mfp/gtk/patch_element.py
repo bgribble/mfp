@@ -23,6 +23,9 @@ class PatchElement (object):
 		self.drag_y = None
 		self.selected = False 
 
+		self.edit_mode = None
+		self.control_mode = None
+
 	def drag_start(self, x, y):
 		self.drag_x = x - self.position_x
 		self.drag_y = y - self.position_y
@@ -39,7 +42,6 @@ class PatchElement (object):
 		pass
 
 	def delete(self):
-		print "element delete:", self
 		self.stage.unregister(self)
 		self.actor = None
 		if self.obj_id is not None:
@@ -60,4 +62,33 @@ class PatchElement (object):
 		self.dsp_inlets = params.get("dsp_inlets")
 		self.dsp_outlets = params.get("dsp_outlets")
 
+	def make_edit_mode(self):
+		return None
+
+	def make_control_mode(self):
+		return None
+
+	def begin_edit(self):
+		if not self.edit_mode:
+			self.edit_mode = self.make_edit_mode()
+
+		if self.edit_mode:
+			self.stage.input_mgr.enable_minor_mode(self.edit_mode)
+
+	def end_edit(self):
+		if self.edit_mode:
+			self.stage.input_mgr.disable_minor_mode(self.edit_mode)
+			self.edit_mode = None
+
+	def begin_control(self):
+		if not self.control_mode:
+			self.control_mode = self.make_control_mode()
+
+		if self.control_mode:
+			self.stage.input_mgr.enable_minor_mode(self.control_mode)
+		
+	def end_control(self):
+		if self.control_mode:
+			self.stage.input_mgr.disable_minor_mode(self.control_mode)
+			self.control_mode = None
 
