@@ -1,1 +1,14 @@
-{"objects": {"0": {"connections": [[]], "initargs": "", "type": "var", "gui_params": {"element_type": "text", "position_x": 413.0, "position_y": 131.0}}, "1": {"connections": [[]], "initargs": "0", "type": "var", "gui_params": {}}, "2": {"connections": [[]], "initargs": "True", "type": "var", "gui_params": {}}, "3": {"connections": [[]], "initargs": "", "type": "var", "gui_params": {"element_type": "text", "position_x": 415.0, "position_y": 325.0}}, "4": {"connections": [[]], "initargs": "False", "type": "var", "gui_params": {"element_type": "message", "position_x": 217.0, "position_y": 342.0}}}, "name": "Default"}
+{"objects": {
+"0": {"connections": [[]], "initargs": "True", "type": "var", 
+	"gui_params": {"element_type": "message", "position_x": 118.0, "position_y": 423.0}}, 
+"1": {"connections": [[]], "initargs": "False", "type": "var", 
+	"gui_params": {"element_type": "message", "position_x": 204.0, "position_y": 424.0}}, 
+"2": {"connections": [[]], "initargs": "0", "type": "var", 
+	"gui_params": {"element_type": "enum", "position_x": 327.0, "position_y": 263.0}}, 
+"3": {"connections": [[]], "initargs": "", "type": "var", 
+	"gui_params": {"message_text": "HIGH", "element_type": "text", "position_x": 386.0, "position_y": 162.0}}, 
+"4": {"connections": [[]], "initargs": "", "type": "var", 
+	"gui_params": {"message_text": "LOW", "element_type": "text", "position_x": 389.0, "position_y": 363.0}}, 
+"5": {"connections": [[]], "initargs": "", "type": "var", 
+	"gui_params": {"message_text": "test-enum-gui.mfp", "element_type": "text", "position_x": 22.0, "position_y": 28.0}}}, 
+"name": "Default"}

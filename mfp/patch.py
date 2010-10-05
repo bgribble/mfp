@@ -31,7 +31,9 @@ class Patch(object):
 			oargs = prms.get('initargs')
 			newobj = MFPApp().create(otype, oargs)
 			if not MFPApp.no_gui:
-				guiobj = MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, prms.get('gui_params')) 
+				gp = prms.get('gui_params')
+				newobj.gui_params = gp 
+				guiobj = MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, gp)
 			else:
 				guiobj = None
 
