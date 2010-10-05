@@ -11,6 +11,7 @@ import cairo
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
+from .modes.label_edit import LabelEditMode
 
 class MessageElement (PatchElement):
 	element_type = "message"

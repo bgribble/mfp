@@ -61,9 +61,9 @@ class Patch(object):
 		f = {}
 		f['name'] = self.name
 		allobj = {}
-		for o in self.objects:
+		for oid, o in self.objects.items():
 			oinfo = o.save()
-			allobj[o.obj_id] = oinfo
+			allobj[oid] = oinfo
 
 		f['objects'] = allobj
 		savefile = open(filename, "w")

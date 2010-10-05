@@ -47,5 +47,9 @@ class TextElement (PatchElement):
 	def make_edit_mode(self):
 		return LabelEditMode(self.stage, self, self.label, True)
 
+	def configure(self, params):
+		self.text = params.get('message_text')
+		self.label.set_text(self.text)
+		PatchElement.configure(self, params)	
 
 

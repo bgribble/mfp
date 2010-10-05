@@ -46,6 +46,7 @@ class GUICommand (RPCWrapper):
 		from .gtk.processor_element import ProcessorElement
 		from .gtk.message_element import MessageElement
 		from .gtk.text_element import TextElement
+		from .gtk.enum_element import EnumElement
 		
 		elementtype = params.get('element_type')
 		print "Create:", obj_id, elementtype, params
@@ -54,7 +55,8 @@ class GUICommand (RPCWrapper):
 		ctors = {
 			'processor': ProcessorElement,
 			'message': MessageElement,
-			'text': TextElement
+			'text': TextElement,
+			'enum': EnumElement
 		}
 		ctor = ctors.get(elementtype)
 		if ctor:
