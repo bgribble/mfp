@@ -45,7 +45,7 @@ class TextElement (PatchElement):
 		self.actor.set_color(self.stage.color_selected) 
 	
 	def make_edit_mode(self):
-		return LabelEditMode(self.stage, self, self.label, True)
+		return LabelEditMode(self.stage, self, self.label, multiline=True, markup=True)
 
 	def configure(self, params):
 		self.text = params.get('message_text')

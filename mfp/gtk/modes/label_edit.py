@@ -7,12 +7,14 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode 
 
+# FIXME: need to handle motion differently if markup is enabled
 class LabelEditMode (InputMode):
-	def __init__(self, window, element, label, multiline=False, value=False):
+	def __init__(self, window, element, label, multiline=False, value=False, markup=False):
 		self.manager = window.input_mgr 
 		self.element = element 
 		self.widget = label
 		self.multiline = multiline 
+		self.markup = markup
 		self.text = self.widget.get_text()
 		self.undo_stack  = [ self.text ] 
 		self.undo_pos = -1
@@ -38,6 +40,12 @@ class LabelEditMode (InputMode):
 
 		self.update_label()
 
+	def set_label_text(self, txt):
+		if self.markup:
+			self.widget.set_markup(txt)
+		else:
+			self.widget.set_text(txt)
+
 	def insert_char(self, keysym):
 		if len(keysym) > 1:
 			return False 
@@ -59,7 +67,7 @@ class LabelEditMode (InputMode):
 		return True 
 
 	def rollback_edits(self):
-		self.widget.set_text(self.undo_stack[0])
+		self.set_label_text(self.undo_stack[0])
 		self.widget.set_cursor_visible(False)
 		self.element.end_edit()
 		return True 
@@ -117,7 +125,7 @@ class LabelEditMode (InputMode):
 		return True 
 
 	def update_label(self):
-		self.widget.set_text(self.text)
+		self.set_label_text(self.text)
 		self.widget.set_cursor_size(3)
 		self.widget.set_cursor_position(self.editpos)
 		self.widget.set_cursor_visible(True)
