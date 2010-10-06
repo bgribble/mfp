@@ -14,9 +14,13 @@ class Patch(object):
 		self.gui_objects = {}
 
 	def load_file(self, filename):
-		from main import MFPApp
 		jsdata = open(filename, 'r').read()
-		f = json.loads(jsdata)
+		self.load_string(jsdata)
+
+	def load_string(self, json_data):
+		from main import MFPApp
+
+		f = json.loads(json_data)
 		self.name = f.get('name')
 		
 		# clear old objects
@@ -26,13 +30,17 @@ class Patch(object):
 
 		# create new objects
 		idmap = {}
-		for oid, prms in f.get('objects', {}).items():
+		idlist = f.get('objects').keys()
+		idlist.sort()
+		for oid in idlist:
+			prms = f.get('objects')[oid]
 			otype = prms.get('type')
 			oargs = prms.get('initargs')
 			newobj = MFPApp().create(otype, oargs)
+			gp = prms.get('gui_params')
+			newobj.gui_params = gp 
+
 			if not MFPApp.no_gui:
-				gp = prms.get('gui_params')
-				newobj.gui_params = gp 
 				guiobj = MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, gp)
 			else:
 				guiobj = None
@@ -59,7 +67,7 @@ class Patch(object):
 						print "load_patch: connect", srcobj.obj_id, outlet, dstobj.obj_id, inlet
 						MFPApp().gui_cmd.connect(srcobj.obj_id, outlet, dstobj.obj_id, inlet)
 
-	def save_file(self, filename=None):
+	def save_string(self):
 		f = {}
 		f['name'] = self.name
 		allobj = {}
@@ -68,8 +76,11 @@ class Patch(object):
 			allobj[oid] = oinfo
 
 		f['objects'] = allobj
+		return json.dumps(f)
+
+	def save_file(self, filename=None):
 		savefile = open(filename, "w")
-		savefile.write(json.dumps(f))		
+		savefile.write(self.save_string())		
 
 	def add(self, obj):
 		self.objects[obj.obj_id] = obj
