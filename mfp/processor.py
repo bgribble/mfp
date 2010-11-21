@@ -4,9 +4,8 @@ processor.py: Parent class of all processors
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-from main import MFPApp 
-from dsp_slave import DSPObject
-from bang import Bang, Uninit
+from .dsp_slave import DSPObject
+from .bang import Bang, Uninit
 
 class Processor (object): 
 	OK = 0
@@ -14,6 +13,7 @@ class Processor (object):
 	gui_type = 'processor'
 
 	def __init__(self, inlets, outlets, init_type, init_args):
+		from .main import MFPApp 
 		self.init_type = init_type
 		self.init_args = init_args
 
@@ -67,8 +67,9 @@ class Processor (object):
 
 	def resize(self, inlets, outlets):
 		if inlets > len(self.inlets):
-			self.inlets += [ Uninit ] * inlets-len(self.inlets)
-			self.connections_in += [[] for r in range(inlets-len(self.inlets)) ]
+			newin = inlets - len(self.inlets)
+			self.inlets += [ Uninit ] * newin
+			self.connections_in += [[] for r in range(newin)]
 		else:
 			for inlet in range(inlets, len(self.inlets)):
 				for tobj, tport in self.connections_in[inlet]:
@@ -76,8 +77,9 @@ class Processor (object):
 			self.inlets[inlets:] = []
 
 		if outlets > len(self.outlets):
-			self.outlets += [ Uninit ] * outlets-len(self.outlets)
-			self.connections_out += [[] for r in range(outlets-len(self.outlets)) ]
+			newout = outlets-len(self.outlets)
+			self.outlets += [ Uninit ] * newout
+			self.connections_out += [[] for r in range(newout) ]
 		else:
 			for outlet in range(outlets, len(self.outlets)):
 				for tobj, tport in self.connections_out[outlet]:

@@ -106,7 +106,7 @@ class MFPApp (object):
 			print "MFPApp: GUI becomes ready"
 
 		# while we only have 1 patch, this is it
-		self.patch = Patch()
+		self.patch = Patch('default', '')
 
 	def remember(self, obj):
 		oi = self.next_obj_id

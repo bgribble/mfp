@@ -19,7 +19,6 @@ class Var (Processor):
 			self.value = None
 
 	def trigger(self):
-		print "var trigger:", self.inlets
 		if self.inlets[1] is not Uninit:
 			self.value = self.inlets[1] 
 			self.inlets[1] = Uninit
@@ -28,6 +27,12 @@ class Var (Processor):
 			self.outlets[0] = self.value
 		else:
 			self.value = self.inlets[0]
+			if self.gui_params.get("update_required"):
+				print "p_var: configuring GUI"
+				# FIXME what if no gui obj?
+				self.gui_params['value'] = self.value
+				MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+
 			self.outlets[0] = self.value	
 
 def register():

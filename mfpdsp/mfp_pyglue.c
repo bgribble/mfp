@@ -110,6 +110,7 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val) {
 			Py_DECREF(oldval);
 		}
 		Py_INCREF(val);
+		printf("setting pyparam %s", paramname);
 		g_hash_table_replace(proc->pyparams, paramname, val);
 	}
 
@@ -161,9 +162,7 @@ proc_set_pyparams(mfp_processor * proc, PyObject * params)
 	PyObject *key, *value;
 	Py_ssize_t pos = 0;
 	char * param_name;
-	printf("setting init params\n");
 	while(PyDict_Next(params, &pos, &key, &value)) {
-		printf("     %p %p\n", key, value);
 		param_name = PyString_AsString(key);
 		set_c_param(proc, param_name, value);
 	}
@@ -182,8 +181,6 @@ proc_create(PyObject * mod, PyObject *args)
 
 	mfp_procinfo * pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typestr);
 	mfp_processor * proc = NULL;	
-
-	printf("proc_create: %d, %d, %s, %p\n", num_inlets, num_outlets, typestr, pinfo);
 
 	if (pinfo == NULL) {
 		Py_INCREF(Py_None);
@@ -277,6 +274,5 @@ initmfpdsp(void)
 	init_globals();
 	init_builtins();
 	Py_InitModule("mfpdsp", MfpDspMethods);
-	printf("mfpdsp module init\n");
 }
 

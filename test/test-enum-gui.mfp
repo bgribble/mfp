@@ -11,4 +11,4 @@
 	"gui_params": {"message_text": "LOW", "element_type": "text", "position_x": 389.0, "position_y": 363.0}}, 
 "5": {"connections": [[]], "initargs": "", "type": "var", 
 	"gui_params": {"message_text": "test-enum-gui.mfp", "element_type": "text", "position_x": 22.0, "position_y": 28.0}}}, 
-"name": "Default"}
+"init_type": "test_enum_gui"}

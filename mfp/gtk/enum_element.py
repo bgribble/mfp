@@ -23,6 +23,7 @@ class EnumElement (PatchElement):
 		self.connections_out = [] 
 		self.connections_in = [] 
 		self.editable = False 
+		self.update_required = True
 
 		# create elements
 		self.actor = clutter.Group()
@@ -104,6 +105,7 @@ class EnumElement (PatchElement):
 			c.draw()
 
 	def update_value(self, value):
+		# called by enumcontrolmode 
 		self.value = value
 		self.label.set_text(str(self.value))
 		if self.obj_id is None:
@@ -111,12 +113,17 @@ class EnumElement (PatchElement):
 		MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def update_label(self, *args):
+		# called by labeleditmode
 		t = self.label.get_text()
 		self.update_value(int(t))
+		if self.obj_id is None:
+			self.create_obj()
+		MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def configure(self, params):
-		self.label.set_text("%s" % self.obj_args)
-		self.update_label()
+		v = params.get("value", int(self.obj_args))
+		self.value = v
+		self.label.set_text(str(self.value))
 		PatchElement.configure(self, params)	
 
 	def select(self):

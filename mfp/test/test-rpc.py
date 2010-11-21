@@ -24,6 +24,36 @@ class WrappedClass(RPCWrapper):
 	def error_method(self):
 		return 1/0
 
+class Pinger(RPCWrapper):
+	def __init__(self, volleys):
+		self.volleys = volleys
+		self.ponger = None
+		if self.volleys > 0:
+			self.ponger = Ponger(volleys-1)
+		RPCWrapper.__init__(self)
+
+	@rpcwrap
+	def ping(self):
+		if self.ponger:
+			return self.ponger.pong()
+		else: 
+			return "PING"
+
+class Ponger(RPCWrapper):
+	def __init__(self, volleys):
+		self.volleys = volleys
+		self.pinger = None
+		if self.volleys > 0:
+			self.ponger = Pinger(volleys-1)
+		RPCWrapper.__init__(self)
+
+	@rpcwrap
+	def pong(self):
+		if self.pinger:
+			return self.pinger.ping()
+		else: 
+			return "PONG"
+
 reverse_value = None
 
 class ReverseClass(RPCWrapper):
@@ -106,6 +136,8 @@ def winit(*args):
 	WrappedClass.local = True
 	ReverseActivatorClass.local = True
 	ReverseClass.local = False
+	Ponger.local = True
+	Pinger.local = False
 
 class RPCWorkerTests(TestCase):
 	def setUp(self):
@@ -114,6 +146,9 @@ class RPCWorkerTests(TestCase):
 		ReverseClass.local = True
 		ReverseActivatorClass.local = False
 		WrappedClass.local = False
+		
+		Pinger.local = True
+		Ponger.local = False
 
 	def test_create_from_slave(self):
 		'''test_create_from_slave: slave creates a local object on master'''
@@ -136,6 +171,25 @@ class RPCWorkerTests(TestCase):
 			failed = 1
 		self.assertEqual(failed, 1)
 		self.assertEqual(o.retarg(), 'lalala')
+
+	
+	def test_ping_pong_0(self):
+		a = Pinger(0)
+		b = Ponger(0)
+		self.assertEqual(a.ping(), "PING")
+		self.assertEqual(b.pong(), "PONG")
+
+	def test_ping_pong_1(self):
+		a = Pinger(1)
+		self.assertEqual(a.ping(), "PONG")
+
+	def test_ping_pong_2(self):
+		a = Pinger(2)
+		self.assertEqual(a.ping(), "PING")
+
+	def test_ping_pong_20(self):
+		a = Pinger(20)
+		self.assertEqual(a.ping(), "PING")
 
 	def tearDown(self):
 		self.worker.finish()

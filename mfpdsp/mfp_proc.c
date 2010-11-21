@@ -130,6 +130,7 @@ int
 mfp_proc_disconnect(mfp_processor * self, int my_outlet, 
 		            mfp_processor * target, int targ_inlet)
 {
+	printf("mfp_proc_disconnect not implemented!\n");
 	return 0;
 }
 
@@ -138,8 +139,6 @@ mfp_proc_setparam_float(mfp_processor * self, char * param_name, float param_val
 {
 	gpointer newval = g_malloc(sizeof(float));
 	*(float *)newval = param_val;
-
-	printf("setparam_float:	%p %s %f\n", self, param_name, param_val);
 
 	g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)newval);
 	return 0;
@@ -150,8 +149,6 @@ mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_v
 {
 	gpointer newval = g_strdup(param_val);
 
-	printf("setparam_string: %p %s %s\n", self, param_name, param_val);
-
 	g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)newval);
 	return 0;
 }
@@ -159,8 +156,6 @@ mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_v
 int
 mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_val)
 {
-	printf("setparam_array: %p %s %p\n", self, param_name, param_val);
-
 	g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)param_val);
 	return 0;
 }

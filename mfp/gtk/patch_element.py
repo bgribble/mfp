@@ -22,7 +22,7 @@ class PatchElement (object):
 		self.drag_x = None
 		self.drag_y = None
 		self.selected = False 
-
+		self.update_required = False
 		self.edit_mode = None
 		self.control_mode = None
 
@@ -50,7 +50,7 @@ class PatchElement (object):
 
 	def send_params(self, **extras):
 		prms = dict(position_x=self.position_x, position_y=self.position_y, 
-					element_type=self.element_type)
+					update_required=self.update_required, element_type=self.element_type)
 		for k, v in extras.items():
 			prms[k] = v
 		if self.obj_id is not None:

@@ -26,7 +26,6 @@ def gui_finish():
 	MFPGUI().finish()
 
 class GUICommand (RPCWrapper):
-
 	@rpcwrap
 	def ready(self):
 		if MFPGUI().appwin is not None:
@@ -37,6 +36,21 @@ class GUICommand (RPCWrapper):
 	@rpcwrap
 	def finish(self):
 		MFPGUI().appwin.destroy()
+
+	@rpcwrap
+	def configure(self, obj_id, params):
+		print "GuiCommand:", obj_id, params
+		MFPGUI().clutter_do(lambda: self._configure(obj_id, params))
+		#MFPGUI().clutter_do(lambda: True)
+		print "Guicommand done"
+		return True
+
+	def _configure(self, obj_id, params):
+		print "_configure: enter"
+		obj = MFPGUI().recall(obj_id)
+		print "_configure:", obj_id, obj
+		obj.configure(params)
+		return True
 
 	@rpcwrap
 	def create(self, obj_type, obj_args, obj_id, params): 
@@ -90,9 +104,6 @@ class MFPGUI (object):
 	__metaclass__ = Singleton
 
 	def __init__(self):
-		print "MFPGUI: creating patch window in", os.getpid()
-		print "self:", self
-		import time
 		self.clutter_thread = threading.Thread(target=self.clutter_proc)
 		self.clutter_thread.start()
 		self.objects = {}
@@ -107,19 +118,21 @@ class MFPGUI (object):
 
 	def clutter_do(self, thunk):
 		import glib
+		print "clutter_do: adding", thunk
 		glib.idle_add(thunk)
 
 	def clutter_proc(self):
 		import clutter
+		import glib
 		
 		# explicit init seems to avoid strange thread sync/blocking issues 
+		glib.threads_init()
 		clutter.threads_init()
 		clutter.init()
 
 		# create main window
 		from mfp.gtk.patch_window import PatchWindow
 		self.appwin = PatchWindow()	
-		print "created patchwindow", self.appwin
 		self.mfp = MFPCommand()
 		clutter.main()
 
