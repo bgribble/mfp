@@ -22,6 +22,7 @@ from rpc_worker import RPCWorker
 class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def create(self, objtype, initargs=''):
+		print "MFPApp.create() local"
 		obj = MFPApp().create(objtype, initargs)
 		MFPApp().patch.add(obj)
 		return obj.obj_id

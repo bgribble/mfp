@@ -8,9 +8,36 @@ import threading
 import Queue
 
 from request import Request
+from shark_pool import SharkPool, PoolShark 
+
+class RequestShark (PoolShark):
+	def __init__(self, pool, pipe):
+		print "RequestShark.__init__"
+		self.pipe = pipe
+		PoolShark.__init__(self, pool)
+
+	def capture(self):
+		print "RequestShark,capture", self
+		try:
+			bite = self.pipe.get(timeout=0.1)
+			print  "RequestShark.capture got", bite
+			return bite
+		except Queue.Empty:
+			raise SharkPool.Empty()
+
+	def consume(self, bite):
+		req = self.pipe.process(bite)
+
+		if req.payload == 'quit':
+			# escape takes this thread out of the pool for finish()
+			self.escape()
+			self.pool.finish()
+			# returning False kills this thread 
+			return False
+		return True
 
 class RequestPipe(object): 
-	def __init__(self):
+	def __init__(self, factory=None):
 		master, slave = multiprocessing.Pipe()
 
 		self.role = None
@@ -18,48 +45,40 @@ class RequestPipe(object):
 		# the slave will switch these 
 		self.this_end = master 
 		self.that_end = slave
-		self.handler = None
-		self.quit_flag = False 
 
 		# management objects for those waiting for a response 
 		self.lock = None
 		self.condition = None 
 		self.pending = {} 
-		self.reader_thread = None
+
+		if factory is None:
+			factory = lambda pool: RequestShark(pool, self)
+		self.reader = SharkPool(factory)
+		
+		# not normally used
+		self.handler = None 
 
 		self.finish_callbacks = []
-
-	def _reader_func(self):
-		while not self.quit_flag:
-			try:
-				incoming = self.get(timeout=0.1)
-				if self.handler:
-					self.handler(self, incoming)
-			except Queue.Empty:
-				pass
 
 	def on_finish(self, cbk):
 		self.finish_callbacks.append(cbk)
 
 	def finish(self):
-		self.quit_flag = True
-		if self.reader_thread:
-			self.reader_thread.join()
+		print "RequestPipe finishing", self
+		if self.reader:
+			self.reader.finish()
+		print "RequestPipe calling callbacks",  self
 		for cbk in self.finish_callbacks:
 			cbk()
+		print "RequestPipe done", self
 
-	def init_master(self, reader=None):
+	def init_master(self):
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
 		self.role = 1
+		self.reader.start()
 
-		if reader is None:
-			reader = self._reader_func
-		if reader:
-			self.reader_thread = threading.Thread(target=reader)
-			self.reader_thread.start()
-
-	def init_slave(self, reader=None):
+	def init_slave(self):
 		'''Reverse ends of pipe; to be used by the slave process'''
 		q = self.this_end
 		self.this_end = self.that_end
@@ -68,12 +87,7 @@ class RequestPipe(object):
 		self.condition = threading.Condition(self.lock)
 		self.role = 0
 
-		if reader is None:
-			reader = self._reader_func
-		if reader:
-			self.reader_thread = threading.Thread(target=reader)
-			self.reader_thread.start()
-
+		self.reader.start()
 
 	def put(self, req):
 		tosend = {} 
@@ -114,9 +128,11 @@ class RequestPipe(object):
 				raise Queue.Empty
 		try:
 			qobj = self.this_end.recv()
+			return qobj
 		except EOFError, e:
 			raise Queue.Empty 
 
+	def process(self, qobj):
 		req = None 
 		if qobj.get('type') == 'Request':
 			if self.pending is not None and qobj.get('origin') == self.role: 
@@ -138,9 +154,10 @@ class RequestPipe(object):
 			qobj = req
 		else:
 			qobj = qobj.get('payload')
+			if self.handler is not None:
+				self.handler(self, qobj)
 
 		with self.lock:
 			self.condition.notify()
 		return qobj
 
-	

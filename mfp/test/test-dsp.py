@@ -7,6 +7,8 @@ from mfp.main import MFPApp
 
 def setup():
 	MFPApp().setup()
+	from mfp.dsp_slave import DSPObject
+	print "DSPObject pipe:", DSPObject.pipe
 
 class DSPObjectTests (TestCase):
 	def test_create(self):
@@ -23,10 +25,14 @@ class DSPObjectTests (TestCase):
 
 	def test_connect_disconnect(self):
 		'''test_connect_disconnect: [dsp] make/break connections'''
+		print "============= Creating adc~"
 		inp = MFPApp().create("adc~", "0")
+		print "============= Creating adc~ done"
 		outp = MFPApp().create("dac~", "0")
-
+		
+		print "============= Created objects"
 		inp.connect(0, outp, 0)
+		print "============= Called connect"
 		inp.disconnect(0, outp, 0)
 
 	def test_delete(self):
@@ -40,5 +46,5 @@ class DSPObjectTests (TestCase):
 		
 def teardown():
 	MFPApp().finish()
-	
+	print "test-dsp.py: MFPApp finish done"	
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6 
 '''
-dsp.py
+dsp_slave.py
 Python main loop for DSP subprocess 
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
@@ -19,6 +19,7 @@ def dsp_config(*args):
 class DSPObject(RPCWrapper):
 	objects = {}
 	def __init__(self, obj_id, name, inlets, outlets, params={}):
+		print "DSPObject.__init__", self.local
 		self.obj_id = obj_id 
 		RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params)
 		if self.local:

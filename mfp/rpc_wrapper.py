@@ -58,6 +58,7 @@ class RPCWrapper (object):
 		else:
 			import os
 			r = Request(dict(func='__init__', type=type(self).__name__, args=args, kwargs=kwargs))
+			print "RPCWrapper init", self, type(self)
 			type(self).pipe.put(r)
 			type(self).pipe.wait(r)
 			if r.response == RPCWrapper.NO_CLASS:

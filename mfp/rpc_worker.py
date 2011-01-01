@@ -7,54 +7,72 @@ multiprocessing-based slave with error handling and communication
 from rpc_wrapper import RPCWrapper
 from request_pipe import RequestPipe
 from request import Request
+from shark_pool import SharkPool, PoolShark
 import multiprocessing, threading
 import Queue
+import time
 
-def rpc_worker_slave(pipe, initproc=None):
-	def handle_proc(req):
-		RPCWrapper.handle(req)
-		pipe.put(req)
+class RPCShark (PoolShark):
+	def __init__(self, pool, pipe):
+		print "RPCShark.__init__", self
+		self.pipe = pipe
+		PoolShark.__init__(self, pool)
 
-	pipe.init_slave(reader=False)
+	def capture(self):
+		print "RPCShark.capture", self, self.pipe
+		try:
+			bite = self.pipe.get(timeout=0.1)
+			return bite
+		except Queue.Empty:
+			raise SharkPool.Empty()
+
+	def consume(self, bite):
+		print "RPCShark.consume", self
+		req = self.pipe.process(bite)
+
+		if req.payload == 'quit':
+			print "RPCShark.consume() got quit"
+			# escape takes this thread out of the pool for finish()
+			self.escape()
+			self.pool.finish()
+			print "RPCShark.consume() pool finished"			
+			# returning False kills this thread 
+			return False
+		# FIXME was == Request.RESPONSE_PEND in reader_proc
+		elif req.state != Request.RESPONSE_RCVD:
+			RPCWrapper.handle(req)
+			self.pipe.put(req)
+		return True
+
+def rpc_worker_slave(pipe, initproc, lck):
 	RPCWrapper.pipe = pipe
 	RPCWrapper.local = True
+	
+	pipe.init_slave()
+
 	if initproc:
 		initproc(pipe)
 
-	threadlist = []
-	while True:
-		threadsalive = []
-		for t in threadlist:
-			t.join(timeout=.0001)
-			if t.is_alive():
-				threadsalive.append(t)
-		threadlist = threadsalive
-
-		r = pipe.get()
-		
-		if r.state == Request.RESPONSE_RCVD:
-			continue
-		elif r.payload == 'quit':
-			break
-		else:
-			t = threading.Thread(target=handle_proc, args=(r,))
-			t.start()
-			threadlist.append(t)
+	# wait until time to quit
+	lck.acquire()
+	print "rpc_worker_slave exiting"
 
 class RPCWorker(object):
 	def __init__(self, name, initproc=None):
 		self.name = name
-		self.pipe = RequestPipe()
+		self.pipe = RequestPipe(factory=lambda pool: RPCShark(pool, self.pipe))
 		self.initproc = initproc
+		self.worker_lock = multiprocessing.Lock()
+		self.worker_lock.acquire()
 		self.worker = multiprocessing.Process(target=rpc_worker_slave,
-										      args=(self.pipe, self.initproc))
+										      args=(self.pipe, self.initproc, self.worker_lock))
 		self.monitor = threading.Thread(target=self.monitor_proc, args=())
 		self.quitreq = False
 
 		self.worker.start()
 		self.monitor.start()
  
-		self.pipe.init_master(reader=self.reader_proc)
+		self.pipe.init_master()
 
 	def serve(self, cls):
 		cls.pipe = self.pipe
@@ -66,23 +84,13 @@ class RPCWorker(object):
 			print 'RPCWorker thread EXITED UNEXPECTEDLY'
 			self.worker = None
 
-	def reader_proc(self):
-		while not self.quitreq:
-			try:
-				incoming = self.pipe.get(timeout=0.1)
-				
-				if incoming.state == Request.RESPONSE_PEND:
-					RPCWrapper.handle(incoming)
-					self.pipe.put(incoming)
-			
-			except Queue.Empty:
-				pass
-
 	def finish(self):
 		self.quitreq = True
 		if self.worker:
+			print "RPCWorker putting quit"
 			self.pipe.put(Request("quit"))
+			self.worker_lock.release()
+			self.pipe.finish()
 		if self.monitor:
 			self.monitor.join()
-		self.pipe.finish()
 

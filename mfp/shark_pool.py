@@ -7,6 +7,7 @@ Thread pool for processing bites of work
 import threading 
 import Queue
 
+
 class PoolShark (object):
 	def __init__(self, pool):
 		self.pool = pool
@@ -18,24 +19,40 @@ class PoolShark (object):
 	
 	def _thread_func(self):
 		while not self.quit_req:
+			print "PoolShark", self, "at top of loop"
+			# get in line
+			self.pool.shark_ready(self)
 
 			with self.lock:
-				# get in line
-				self.pool.shark_ready(self)
-				if self.pool.active_shark != self:
+				while not self.quit_req and self.pool.active_shark != self:
 					self.condition.wait()
 
 			if self.quit_req:
+				print "PoolShark", self, "quitreq"
 				break
-
+			print self, "capturing"
 			# capture a chunk of data
-			chum = self.capture()
+			try:
+				chum = self.capture()
+			except SharkPool.Empty, e:
+				print "PoolShark", self, "got no data in capture()"
+				continue
 
 			# consume data
 			self.pool.shark_consuming(self)
-			self.consume(chum)
-
+			keepalive = self.consume(chum)
+			if not keepalive:
+				print "PoolShark consume() indicates time to quit", self
+				break
+		print "PoolShark thread out of loop", self
 		self.pool.shark_done(self)
+		print "PoolShark thread done", self
+
+
+	def escape(self):
+		with self.pool.lock:
+			if self in self.pool.working_pool:
+				self.pool.working_pool.remove(self)
 
 	def capture(self):
 		'''(virtual) Grab next available chunk of data'''
@@ -49,12 +66,18 @@ class PoolShark (object):
 		with self.lock:
 			self.condition.notify()
 
+	def exit(self):
+		self.quit_req = True
+
 	def finish(self):
 		with self.lock:
 			self.quit_req = True
 			self.condition.notify()
 
 class SharkPool(object):
+	class Empty(Exception):
+		pass
+
 	def __init__(self, factory, count=5):
 		self.factory = factory
 		self.min_sharks = count
@@ -81,13 +104,19 @@ class SharkPool(object):
 		with self.lock:
 			if shark in self.working_pool:
 				self.working_pool.remove(shark)
+			if shark in self.waiting_pool:
+				self.waiting_pool.remove(shark)
 			
 			if self.active_shark is None:
 				self.active_shark = shark
+			elif self.active_shark == self:
+				return
 			else:
 				if len(self.waiting_pool) < self.min_sharks:
 					self.waiting_pool.append(shark)
 				else:
+					print "shark_ready: too many waiting, exiting", len(self.waiting_pool)
+					print shark, self.waiting_pool
 					shark.exit()
 					self.dead_pool.append(shark)
 			self.condition.notify()
@@ -99,7 +128,7 @@ class SharkPool(object):
 				if len(self.waiting_pool):
 					self.active_shark = self.waiting_pool.pop()
 				else:
-					self.active_shark = self.shark_factory()
+					self.active_shark = self.factory()
 				self.active_shark.go()
 			self.condition.notify()
 
@@ -131,7 +160,7 @@ class SharkPool(object):
 
 		print "Reaper thread exiting"
 
-	def finish(self):
+	def finish(self, wait=True):
 		with self.lock:
 			livesharks = self.waiting_pool + self.working_pool + [self.active_shark]
 
@@ -143,5 +172,5 @@ class SharkPool(object):
 			self.condition.notify()
 		print "Joining reaper thread"
 		self.reaper.join()
-		print "Done"
+		print "SharkPool finish() Done"
 	
