@@ -12,15 +12,12 @@ from shark_pool import SharkPool, PoolShark
 
 class RequestShark (PoolShark):
 	def __init__(self, pool, pipe):
-		print "RequestShark.__init__"
 		self.pipe = pipe
 		PoolShark.__init__(self, pool)
 
 	def capture(self):
-		print "RequestShark,capture", self
 		try:
 			bite = self.pipe.get(timeout=0.1)
-			print  "RequestShark.capture got", bite
 			return bite
 		except Queue.Empty:
 			raise SharkPool.Empty()
@@ -64,18 +61,16 @@ class RequestPipe(object):
 		self.finish_callbacks.append(cbk)
 
 	def finish(self):
-		print "RequestPipe finishing", self
 		if self.reader:
 			self.reader.finish()
-		print "RequestPipe calling callbacks",  self
 		for cbk in self.finish_callbacks:
 			cbk()
-		print "RequestPipe done", self
 
 	def init_master(self):
 		self.lock = threading.Lock()
 		self.condition = threading.Condition(self.lock)
 		self.role = 1
+
 		self.reader.start()
 
 	def init_slave(self):
@@ -97,7 +92,7 @@ class RequestPipe(object):
 				origin = self.role
 				req.state = Request.SUBMITTED
 			else: 
-				origin = not self.role
+				origin = 0 if self.role else 1
 				req.state = Request.SUBMITTED
 
 			req.queue = self
@@ -109,6 +104,7 @@ class RequestPipe(object):
 		else:
 			tosend['type'] = 'payload'
 			tosend['payload'] = req
+		print "putting", self.role, tosend
 		self.this_end.send(tosend)
 
 		return req
@@ -139,7 +135,6 @@ class RequestPipe(object):
 				req = self.pending.get(qobj.get('request_id'))
 			else:
 				req = None
-				
 			if req:
 				req.response = qobj.get('response')
 				req.payload = qobj.get('payload')
@@ -147,7 +142,7 @@ class RequestPipe(object):
 				del self.pending[req.request_id]
 				if req.callback is not None:
 					req.callback(req)
-			else:
+			elif qobj.get('origin') != self.role:
 				req = Request(qobj.get('payload'))
 				req.request_id = qobj.get('request_id')
 				req.state = Request.RESPONSE_PEND
@@ -158,6 +153,6 @@ class RequestPipe(object):
 				self.handler(self, qobj)
 
 		with self.lock:
-			self.condition.notify()
+			self.condition.notify_all()
 		return qobj
 

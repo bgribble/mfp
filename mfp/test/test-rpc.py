@@ -4,7 +4,7 @@ from mfp.request_pipe import RequestPipe
 from mfp.request import Request
 from mfp.rpc_wrapper import RPCWrapper, rpcwrap
 from mfp.rpc_worker import RPCWorker
-
+import time
 from unittest import TestCase
 
 class WrappedClass(RPCWrapper):
@@ -26,11 +26,11 @@ class WrappedClass(RPCWrapper):
 
 class Pinger(RPCWrapper):
 	def __init__(self, volleys):
+		RPCWrapper.__init__(self, volleys)
 		self.volleys = volleys
 		self.ponger = None
 		if self.volleys > 0:
 			self.ponger = Ponger(volleys-1)
-		RPCWrapper.__init__(self)
 
 	@rpcwrap
 	def ping(self):
@@ -41,11 +41,11 @@ class Pinger(RPCWrapper):
 
 class Ponger(RPCWrapper):
 	def __init__(self, volleys):
+		RPCWrapper.__init__(self, volleys)
 		self.volleys = volleys
 		self.pinger = None
 		if self.volleys > 0:
-			self.ponger = Pinger(volleys-1)
-		RPCWrapper.__init__(self)
+			self.pinger = Pinger(volleys-1)
 
 	@rpcwrap
 	def pong(self):
@@ -60,6 +60,7 @@ class ReverseClass(RPCWrapper):
 	@rpcwrap
 	def reverse(self):
 		global reverse_value
+		print "Reverse:", reverse_value
 		return reverse_value
 
 	@rpcwrap
@@ -69,32 +70,30 @@ class ReverseClass(RPCWrapper):
 class ReverseActivatorClass(RPCWrapper):
 	@rpcwrap
 	def reverse(self):
+		print "Activator: ", ReverseActivatorClass.local, ReverseClass.local
 		o = ReverseClass()
+		print "Activator:", o
 		return o.reverse() 
 
-def worker(reqpipe):
+def rpcinit(*_):
+	# RPCWorkerTests slave init
 	WrappedClass.local = True
-	reqpipe.init_slave(reader=False)
-	while True:
-		r = reqpipe.get()
-		if r.payload == 'quit':
-			break
-		else:
-			RPCWrapper.handle(r)
-			reqpipe.put(r)
 
 class RPCTests(TestCase):
 	def setUp(self):
-		WrappedClass.local = False
-		self.pipe = RequestPipe()
-		RPCWrapper.pipe = self.pipe
-		self.proc = multiprocessing.Process(target=worker, args=(self.pipe,))
-		self.proc.start()
-		self.pipe.init_master()
+		print "==================="
+		print "setup started"
+		self.worker = RPCWorker("test", rpcinit)
+		RPCWrapper.pipe = self.worker.pipe
+		self.worker.serve(WrappedClass)
+		print self.worker
+		print "-------------------"
+		time.sleep(0.2)
 
 	def test_local(self):
 		'''test_local: local calls on a RPCWrapper subclass work'''
 		o = WrappedClass("hello")
+		print "test_local: created", o
 		o.local = True
 		self.assertEqual(o.retarg(), "hello")
 		o.setarg("goodbye")
@@ -127,9 +126,7 @@ class RPCTests(TestCase):
 		self.assertEqual(failed, 1)
 
 	def tearDown(self):
-		self.pipe.put(Request('quit'))
-		self.pipe.finish()
-		self.proc.join()
+		self.worker.finish()
 
 def winit(*args):
 	# RPCWorkerTests slave init
@@ -141,19 +138,24 @@ def winit(*args):
 
 class RPCWorkerTests(TestCase):
 	def setUp(self):
+		print "==================="
+		print "setup started"
 		self.worker = RPCWorker("worker", winit)
 		RPCWrapper.pipe = self.worker.pipe
+		self.worker.serve(ReverseActivatorClass)
+		self.worker.serve(WrappedClass)
+		self.worker.serve(Ponger)
+
 		ReverseClass.local = True
-		ReverseActivatorClass.local = False
-		WrappedClass.local = False
-		
 		Pinger.local = True
 		Ponger.local = False
+		print self.worker, self.worker.pipe
+		print "--------------------"
+		time.sleep(0.2)
 
 	def test_create_from_slave(self):
 		'''test_create_from_slave: slave creates a local object on master'''
 		global reverse_value
-		import os
 		o1 = ReverseActivatorClass()
 		reverse_value = 'hello'
 		self.assertEqual(o1.reverse(), 'hello')
@@ -189,6 +191,7 @@ class RPCWorkerTests(TestCase):
 
 	def test_ping_pong_20(self):
 		a = Pinger(20)
+		print "================== Pinger constructed."
 		self.assertEqual(a.ping(), "PING")
 
 	def tearDown(self):

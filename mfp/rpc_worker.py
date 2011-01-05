@@ -14,12 +14,10 @@ import time
 
 class RPCShark (PoolShark):
 	def __init__(self, pool, pipe):
-		print "RPCShark.__init__", self
 		self.pipe = pipe
 		PoolShark.__init__(self, pool)
 
 	def capture(self):
-		print "RPCShark.capture", self, self.pipe
 		try:
 			bite = self.pipe.get(timeout=0.1)
 			return bite
@@ -27,21 +25,20 @@ class RPCShark (PoolShark):
 			raise SharkPool.Empty()
 
 	def consume(self, bite):
-		print "RPCShark.consume", self
 		req = self.pipe.process(bite)
-
 		if req.payload == 'quit':
-			print "RPCShark.consume() got quit"
 			# escape takes this thread out of the pool for finish()
 			self.escape()
 			self.pool.finish()
-			print "RPCShark.consume() pool finished"			
 			# returning False kills this thread 
 			return False
 		# FIXME was == Request.RESPONSE_PEND in reader_proc
 		elif req.state != Request.RESPONSE_RCVD:
 			RPCWrapper.handle(req)
+			print "RPCWorker.consume putting response", req.state, req.response, req.payload
 			self.pipe.put(req)
+		else:
+			print "RPCWorker.consume ignoring", req, req.state, req.response, req.payload
 		return True
 
 def rpc_worker_slave(pipe, initproc, lck):
@@ -55,7 +52,6 @@ def rpc_worker_slave(pipe, initproc, lck):
 
 	# wait until time to quit
 	lck.acquire()
-	print "rpc_worker_slave exiting"
 
 class RPCWorker(object):
 	def __init__(self, name, initproc=None):
@@ -87,7 +83,6 @@ class RPCWorker(object):
 	def finish(self):
 		self.quitreq = True
 		if self.worker:
-			print "RPCWorker putting quit"
 			self.pipe.put(Request("quit"))
 			self.worker_lock.release()
 			self.pipe.finish()

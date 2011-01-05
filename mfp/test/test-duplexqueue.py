@@ -16,7 +16,6 @@ def client_thread(pipe, lck):
 
 class TestShark(RequestShark):
 	def consume(self, bite):
-		print "client shark: got request", bite 
 		req = self.pipe.process(bite)
 
 		# tearDown 
@@ -53,9 +52,7 @@ class RequestPipeTests (TestCase):
 		'''test_echo: echo handler on other end returns same payload'''
 
 		req = self.pipe.put(Request("echo"))
-		print "testEcho: waiting"
 		self.pipe.wait(req)
-		print "testEcho:", req
 		assert req.response == "echo"
 		assert req.state == Request.RESPONSE_RCVD
 
@@ -65,13 +62,10 @@ class RequestPipeTests (TestCase):
 		print
 	
 		def cb(*args):
-			print "callback called", args
 			r[0] = True 
 		
 		req = self.pipe.put(Request("callback", callback=cb))
-		print "put request", req
 		self.pipe.wait(req)
-		print "wait returned"
 		assert r[0] == True 
 
 

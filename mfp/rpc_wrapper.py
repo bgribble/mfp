@@ -58,7 +58,6 @@ class RPCWrapper (object):
 		else:
 			import os
 			r = Request(dict(func='__init__', type=type(self).__name__, args=args, kwargs=kwargs))
-			print "RPCWrapper init", self, type(self)
 			type(self).pipe.put(r)
 			type(self).pipe.wait(r)
 			if r.response == RPCWrapper.NO_CLASS:
@@ -109,6 +108,7 @@ class RPCWrapper (object):
 			factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
 			if factory:
 				obj = factory(*args, **kwargs)
+				print "RPCWrapper constructed", obj, obj.rpcid
 				req.response = obj.rpcid
 			else:
 				req.response = RPCWrapper.NO_CLASS
@@ -116,6 +116,7 @@ class RPCWrapper (object):
 		elif func == '__del__':
 			del RPCWrapper.objects[rpcid]
 			req.response = True
+
 		else:
 			obj = RPCWrapper.rpcobj.get(rpcid)
 			try:

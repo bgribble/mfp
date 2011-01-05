@@ -19,7 +19,6 @@ class PoolShark (object):
 	
 	def _thread_func(self):
 		while not self.quit_req:
-			print "PoolShark", self, "at top of loop"
 			# get in line
 			self.pool.shark_ready(self)
 
@@ -28,25 +27,19 @@ class PoolShark (object):
 					self.condition.wait()
 
 			if self.quit_req:
-				print "PoolShark", self, "quitreq"
 				break
-			print self, "capturing"
 			# capture a chunk of data
 			try:
 				chum = self.capture()
 			except SharkPool.Empty, e:
-				print "PoolShark", self, "got no data in capture()"
 				continue
-
+			
 			# consume data
 			self.pool.shark_consuming(self)
 			keepalive = self.consume(chum)
 			if not keepalive:
-				print "PoolShark consume() indicates time to quit", self
 				break
-		print "PoolShark thread out of loop", self
 		self.pool.shark_done(self)
-		print "PoolShark thread done", self
 
 
 	def escape(self):
@@ -95,10 +88,9 @@ class SharkPool(object):
 
 
 	def start(self):
+		self.reaper.start()
 		for n in range(self.min_sharks):
 			self.factory(self)
-		
-		self.reaper.start()
 
 	def shark_ready(self, shark):
 		with self.lock:
@@ -109,28 +101,30 @@ class SharkPool(object):
 			
 			if self.active_shark is None:
 				self.active_shark = shark
-			elif self.active_shark == self:
+			elif self.active_shark == shark:
 				return
 			else:
 				if len(self.waiting_pool) < self.min_sharks:
 					self.waiting_pool.append(shark)
 				else:
-					print "shark_ready: too many waiting, exiting", len(self.waiting_pool)
-					print shark, self.waiting_pool
 					shark.exit()
 					self.dead_pool.append(shark)
 			self.condition.notify()
 
 	def shark_consuming(self, shark):
+		goshark = 0
 		with self.lock:
 			if shark == self.active_shark:
 				self.working_pool.append(shark)
 				if len(self.waiting_pool):
 					self.active_shark = self.waiting_pool.pop()
+					goshark = 1
 				else:
-					self.active_shark = self.factory()
-				self.active_shark.go()
+					self.active_shark = self.factory(self)
+					goshark = 1
 			self.condition.notify()
+		if goshark:
+			self.active_shark.go()
 
 	def shark_done(self, shark):
 		with self.lock:
@@ -153,12 +147,8 @@ class SharkPool(object):
 					self.dead_pool = []
 			if len(deadsharks):
 				for s in deadsharks:
-					print "Reaper joining", s
 					s.thread.join()
-					print "Reaper done", s	
 				deadsharks = []
-
-		print "Reaper thread exiting"
 
 	def finish(self, wait=True):
 		with self.lock:
@@ -170,7 +160,5 @@ class SharkPool(object):
 		with self.lock:
 			self.quit_req = True
 			self.condition.notify()
-		print "Joining reaper thread"
 		self.reaper.join()
-		print "SharkPool finish() Done"
 	
