@@ -104,7 +104,6 @@ class RequestPipe(object):
 		else:
 			tosend['type'] = 'payload'
 			tosend['payload'] = req
-		print "putting", self.role, tosend
 		self.this_end.send(tosend)
 
 		return req

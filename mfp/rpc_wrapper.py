@@ -56,7 +56,6 @@ class RPCWrapper (object):
 			RPCWrapper._rpcid_seq += 1
 			RPCWrapper.rpcobj[self.rpcid] = self
 		else:
-			import os
 			r = Request(dict(func='__init__', type=type(self).__name__, args=args, kwargs=kwargs))
 			type(self).pipe.put(r)
 			type(self).pipe.wait(r)
@@ -101,14 +100,13 @@ class RPCWrapper (object):
 		rpcid = rpcdata.get('rpcid')
 		args = rpcdata.get('args')
 		kwargs = rpcdata.get('kwargs')
-		
+	
 		req.state = Request.RESPONSE_DONE
 		
 		if func == '__init__':
 			factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
 			if factory:
 				obj = factory(*args, **kwargs)
-				print "RPCWrapper constructed", obj, obj.rpcid
 				req.response = obj.rpcid
 			else:
 				req.response = RPCWrapper.NO_CLASS

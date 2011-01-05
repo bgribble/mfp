@@ -11,6 +11,7 @@ class QueueShark(PoolShark):
 	sharks = []
 
 	def __init__(self, pool, q, results):
+		print self
 		self.queue = q
 		self.results = results
 		PoolShark.__init__(self, pool)
@@ -33,12 +34,13 @@ class SharkPoolTest(TestCase):
 	def tearDown(self):
 		self.pool.finish()
 		
-		for s in QueueShark.sharks:
-			assert s.quit_req
-
 		QueueShark.sharks = []
 
 	def test_start(self):
+		print self.pool.waiting_pool
+		print self.pool.working_pool
+		print self.pool.dead_pool
+		print self.pool.active_shark
 		self.assertEqual(len(QueueShark.sharks), 5)
 		self.assertEqual(len(self.pool.waiting_pool), 4)
 		

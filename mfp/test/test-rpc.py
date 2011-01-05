@@ -27,10 +27,11 @@ class WrappedClass(RPCWrapper):
 class Pinger(RPCWrapper):
 	def __init__(self, volleys):
 		RPCWrapper.__init__(self, volleys)
-		self.volleys = volleys
-		self.ponger = None
-		if self.volleys > 0:
-			self.ponger = Ponger(volleys-1)
+		if Pinger.local:
+			self.volleys = volleys
+			self.ponger = None
+			if self.volleys > 0:
+				self.ponger = Ponger(volleys-1)
 
 	@rpcwrap
 	def ping(self):
@@ -42,10 +43,11 @@ class Pinger(RPCWrapper):
 class Ponger(RPCWrapper):
 	def __init__(self, volleys):
 		RPCWrapper.__init__(self, volleys)
-		self.volleys = volleys
-		self.pinger = None
-		if self.volleys > 0:
-			self.pinger = Pinger(volleys-1)
+		if Ponger.local:
+			self.volleys = volleys
+			self.pinger = None
+			if self.volleys > 0:
+				self.pinger = Pinger(volleys-1)
 
 	@rpcwrap
 	def pong(self):

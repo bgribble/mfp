@@ -35,10 +35,8 @@ class RPCShark (PoolShark):
 		# FIXME was == Request.RESPONSE_PEND in reader_proc
 		elif req.state != Request.RESPONSE_RCVD:
 			RPCWrapper.handle(req)
-			print "RPCWorker.consume putting response", req.state, req.response, req.payload
 			self.pipe.put(req)
-		else:
-			print "RPCWorker.consume ignoring", req, req.state, req.response, req.payload
+		
 		return True
 
 def rpc_worker_slave(pipe, initproc, lck):
