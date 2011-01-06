@@ -37,22 +37,20 @@ class SharkPoolTest(TestCase):
 		QueueShark.sharks = []
 
 	def test_start(self):
-		print self.pool.waiting_pool
-		print self.pool.working_pool
-		print self.pool.dead_pool
-		print self.pool.active_shark
+		time.sleep(0.2)
 		self.assertEqual(len(QueueShark.sharks), 5)
 		self.assertEqual(len(self.pool.waiting_pool), 4)
 		
 
 	def test_1(self):
 		self.queue.put(1)
-		time.sleep(0.5)
+		time.sleep(0.2)
 		self.assertEqual(self.results, [1])
 
 	def test_20(self):
 		for n in xrange(20):
 			self.queue.put(n)
-		time.sleep(0.5)
+		time.sleep(0.2)
 		print self.results
+		self.results.sort()
 		self.assertEqual(self.results, range(20))
