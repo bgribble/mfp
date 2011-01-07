@@ -50,7 +50,6 @@ class GUICommand (RPCWrapper):
 		obj = MFPGUI().recall(obj_id)
 		print "_configure:", obj_id, obj
 		obj.configure(params)
-		return True
 
 	@rpcwrap
 	def create(self, obj_type, obj_args, obj_id, params): 
