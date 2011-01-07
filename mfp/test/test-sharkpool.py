@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 from ..shark_pool import SharkPool, PoolShark
-from Queue import Queue
+import Queue
 
 import time
 
@@ -18,7 +18,11 @@ class QueueShark(PoolShark):
 		QueueShark.sharks.append(self)
 		
 	def capture(self):
-		return self.queue.get()
+		try:
+			bite = self.queue.get(timeout=0.1)
+			return bite
+		except Queue.Empty:
+			raise SharkPool.Empty()
 
 	def consume(self, data):
 		self.results.append(data)
@@ -26,7 +30,7 @@ class QueueShark(PoolShark):
 class SharkPoolTest(TestCase):
 
 	def setUp(self):
-		self.queue = Queue()
+		self.queue = Queue.Queue()
 		self.results = []
 		self.pool = SharkPool(lambda p: QueueShark(p, self.queue, self.results))
 		self.pool.start()

@@ -93,7 +93,6 @@ class SharkPool(object):
 			self.factory(self)
 
 	def shark_ready(self, shark):
-		print shark, "ready"
 		with self.lock:
 			if shark in self.working_pool:
 				self.working_pool.remove(shark)
@@ -113,7 +112,6 @@ class SharkPool(object):
 			self.condition.notify()
 
 	def shark_consuming(self, shark):
-		print shark, "consuming"
 		goshark = 0
 		with self.lock:
 			if shark == self.active_shark:
@@ -129,7 +127,6 @@ class SharkPool(object):
 			self.active_shark.go()
 
 	def shark_done(self, shark):
-		print shark, "done"
 		with self.lock:
 			if shark in self.waiting_pool:
 				self.waiting_pool.remove(shark)
@@ -150,7 +147,6 @@ class SharkPool(object):
 					self.dead_pool = []
 			if len(deadsharks):
 				for s in deadsharks:
-					print s, "being reaped"
 					s.thread.join()
 				deadsharks = []
 
