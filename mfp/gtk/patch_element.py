@@ -35,8 +35,8 @@ class PatchElement (object):
 		self.position_y = y
 		self.actor.set_position(x, y)
 
-	def drag(self, x, y):
-		self.move(x - self.drag_x, y - self.drag_y)
+	def drag(self, dx, dy):
+		self.move(self.position_x + dx, self.position_y + dy)
 
 	def begin_edit(self):
 		pass

@@ -29,6 +29,9 @@ class EnumControlMode (InputMode):
 
 	def drag_start(self):
 		if self.manager.pointer_obj == self.enum:
+			if self.manager.pointer_obj != self.window.selected:
+				self.window.select(self.manager.pointer_obj)
+
 			self.drag_started = True
 			self.drag_start_x = self.manager.pointer_x
 			self.drag_start_y = self.manager.pointer_y

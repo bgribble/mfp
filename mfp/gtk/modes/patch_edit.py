@@ -60,6 +60,11 @@ class PatchEditMode (InputMode):
 		self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "patch-zoom-out-tiny")
 
 	def drag_start(self):
+		if self.manager.pointer_obj is None:
+			self.window.unselect_all()
+		elif self.manager.pointer_obj != self.window.selected:
+			self.window.select(self.manager.pointer_obj)
+
 		self.drag_started = True
 		self.drag_start_x = self.manager.pointer_x
 		self.drag_start_y = self.manager.pointer_y
@@ -79,7 +84,7 @@ class PatchEditMode (InputMode):
 		if self.manager.pointer_obj is None:
 			self.window.move_view(dx, dy)
 		elif self.window.selected and self.manager.pointer_obj == self.window.selected:
-			self.window.selected.move(dx, dy)
+			self.window.selected.drag(dx, dy)
 
 	def drag_end(self):
 		self.drag_started = False
