@@ -97,8 +97,8 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val) {
 		case 3:
 			llen = PyList_Size(val);
 			g = g_array_sized_new(FALSE, FALSE, sizeof(float), llen);
-			cflt = PyFloat_AsDouble(PyList_GetItem(val, lpos));
 			for(lpos=0; lpos < llen; lpos++) {
+				cflt = PyFloat_AsDouble(PyList_GetItem(val, lpos));
 				g_array_insert_val(g, lpos, cflt); 
 			}
 			mfp_proc_setparam_array(proc, paramname, g);

@@ -70,18 +70,21 @@ mfp_proc_process(mfp_processor * self)
 	int           upstream_outlet_num;
 
 	int inlet_num;
-
+	/* printf("process: %s\n", self->typeinfo->name); */
 	/* accumulate all the inlet fan-ins to a single input buffer */ 
 	for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
+		/* printf("  inlet %d (" ); */
 		inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
 		inlet_buf = self->inlet_buf[inlet_num];
 		memset(inlet_buf, 0, mfp_blocksize * sizeof(mfp_sample));
 		for(curr_inlet = (mfp_connection **)inlet_conn->data; *curr_inlet != NULL; curr_inlet++) {
 			upstream_proc = (*curr_inlet)->dest_proc;
+			/* printf("%s ", upstream_proc->typeinfo->name); */
 			upstream_outlet_num = (*curr_inlet)->dest_port;	
 			upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];	
 			mfp_dsp_accum(inlet_buf, upstream_outlet_buf, mfp_blocksize);
 		}
+		/* printf(")\n"); */
 	}
 
 	/* perform processing */ 
@@ -108,6 +111,8 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
 			     mfp_processor * target, int targ_inlet)
 {
 	GArray * xlets;
+	printf("connect: %s,%d --> %s, %d\n", self->typeinfo->name, my_outlet, 
+		   target->typeinfo->name, targ_inlet); 
 	
 	mfp_connection * my_conn = g_malloc(sizeof(mfp_connection));
 	mfp_connection * targ_conn = g_malloc(sizeof(mfp_connection));

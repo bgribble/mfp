@@ -88,8 +88,10 @@ class Processor (object):
 			self.connections_out[outlets:] = []
 
 	def connect(self, outlet, target, inlet):
+		print "py connect:", self, outlet, target, inlet 
 		# is this a DSP connection? 
 		if outlet in self.dsp_outlets:
+			print "(making dsp connect)"
 			self.dsp_obj.connect(self.dsp_outlets.index(outlet),
 						         target.obj_id, target.dsp_inlets.index(inlet))
 

@@ -28,7 +28,7 @@ class Osc(Processor):
 				freq = float(self.inlets[0])
 				self.set_param("freq", self.inlets[0])
 			except:
-				print "Can't convert %s to a frequency value" % self.inlet[0]
+				print "Can't convert %s to a frequency value" % self.inlets[0]
 				
 def register():
 	MFPApp().register("osc~", Osc)

@@ -75,4 +75,7 @@ extern int mfp_proc_setparam_float(mfp_processor * self, char * param_name, floa
 extern int mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_val);
 extern int mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_val);
 
+/* mfp_pyglue.c */
+extern void dsp_handle_queue(void);
+
 extern int test_ctests(void);
