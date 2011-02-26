@@ -48,17 +48,23 @@ destroy(mfp_processor * proc)
 	return;
 }
 
+static void
+config(mfp_processor * proc) 
+{
+	return;
+}
 
 mfp_procinfo *  
 init_builtin_plus(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("+~");
+	p->name = strdup("+");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init;
+	p->config = config;
 	p->destroy = destroy;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	g_hash_table_insert(p->params, "const", (gpointer)1);
+	g_hash_table_insert(p->params, "const", (gpointer)0);
 	return p;
 }
 

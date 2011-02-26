@@ -11,6 +11,10 @@ def setup():
 	print "DSPObject pipe:", DSPObject.pipe
 
 class DSPObjectTests (TestCase):
+	def tearDown(self):
+		import time
+		time.sleep(0.500)
+
 	def test_create(self):
 		'''test_create: [dsp] can make a DSP object'''
 		o = MFPApp().create("osc~", "500")
@@ -34,15 +38,19 @@ class DSPObjectTests (TestCase):
 		inp.connect(0, outp, 0)
 		print "============= Called connect"
 		inp.disconnect(0, outp, 0)
+		print "============== disconnected"
 
 	def test_delete(self):
 		'''test_destroy: [dsp] destroy dsp object'''
+		print "Creating"
 		inp = MFPApp().create("adc~", "0")
 		outp = MFPApp().create("dac~", "0")
-
+		print "connecting"
 		inp.connect(0, outp, 0)
+		print "deleting"
 		outp.delete()
 		inp.delete()
+		print "done"
 		
 def teardown():
 	MFPApp().finish()

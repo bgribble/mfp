@@ -21,7 +21,7 @@ class Plus(Processor):
 		
 		self.dsp_inlets = [0, 1]
 		self.dsp_outlets = [0]
-		self.dsp_init("+~")
+		self.dsp_init("+")
 		self.dsp_obj.setparam("const", init_const)
 		
 

@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
+#include <pthread.h>
 
 #include "mfp_dsp.h"
 
+
+GArray          * mfp_requests_pending = NULL;
+pthread_mutex_t mfp_globals_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int mfp_dsp_enabled = 0;
 int mfp_needs_reschedule = 1;
@@ -112,6 +117,41 @@ mfp_dsp_schedule(void)
 	}
 }
 
+void
+mfp_dsp_handle_requests(void)
+{
+	int count;
+
+	for(count=0; count < mfp_requests_pending->len; count++) {
+		mfp_reqdata cmd = g_array_index(mfp_requests_pending, mfp_reqdata, count);
+		int type = cmd.reqtype;
+
+		switch (type) {
+		case REQTYPE_CONNECT:
+			mfp_proc_connect(cmd.src_proc, cmd.src_port, cmd.dest_proc, cmd.dest_port);
+			break;
+
+		case REQTYPE_DISCONNECT:
+			mfp_proc_disconnect(cmd.src_proc, cmd.src_port, cmd.dest_proc, cmd.dest_port);
+			break;
+
+		case REQTYPE_DESTROY:
+			printf("calling mfp_proc_destroy %p\n", cmd.src_proc);
+			mfp_proc_destroy(cmd.src_proc);
+			printf("back from destroy\n");
+			break;
+
+		case REQTYPE_CREATE:
+			mfp_proc_init(cmd.src_proc);
+			break;
+		}
+	}
+	if (mfp_requests_pending->len) 
+		g_array_remove_range(mfp_requests_pending, 0, mfp_requests_pending->len);
+
+}
+
+
 /*
  * mfp_dsp_run is the bridge between JACK processing and the MFP DSP 
  * network.  It is called once per JACK block from the process() 
@@ -128,7 +168,9 @@ mfp_dsp_run(int nsamples)
 	mfp_dsp_set_blocksize(nsamples);
 
 	/* handle any DSP config requests */
-	dsp_handle_queue();
+	pthread_mutex_lock(&mfp_globals_lock);
+	mfp_dsp_handle_requests();
+	pthread_mutex_unlock(&mfp_globals_lock);
 
 	/* zero output buffers ... dac~ will accumulate into them */ 
 	if (mfp_output_ports != NULL) {

@@ -19,7 +19,7 @@ class DAC(Processor):
 			channel = 0
 
 		self.dsp_inlets = [0]
-		self.dsp_init("dac~")
+		self.dsp_init("dac")
 		self.dsp_obj.setparam("channel", channel)
 		
 
@@ -41,7 +41,7 @@ class ADC(Processor):
 			channel = 0
 
 		self.dsp_outlets = [0]
-		self.dsp_init("adc~")
+		self.dsp_init("adc")
 		self.dsp_obj.setparam("channel", channel)
 
 

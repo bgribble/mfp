@@ -6,8 +6,8 @@
 static int
 test_sched_prod_to_sink(void) 
 {
-	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac~");
-	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
+	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac");
+	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc");
 
 	mfp_processor * osc = mfp_proc_create(osctype, 2, 1, mfp_blocksize);
 	mfp_processor * dac = mfp_proc_create(dactype, 1, 0, mfp_blocksize);
@@ -29,8 +29,8 @@ test_sched_prod_to_sink(void)
 static int
 test_sched_y_conn(void)
 {
-	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac~");
-	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
+	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac");
+	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc");
 
 	mfp_processor * osc_1 = mfp_proc_create(osctype, 2, 1, mfp_blocksize);
 	mfp_processor * osc_2 = mfp_proc_create(osctype, 2, 1, mfp_blocksize);
@@ -55,7 +55,7 @@ test_sched_y_conn(void)
 static int
 test_sig_1(void) 
 {
-	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig~");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
 	mfp_processor * sig = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
 	mfp_sample * outp; 
 
@@ -79,8 +79,8 @@ test_sig_1(void)
 static int
 test_sig_2(void) 
 {
-	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig~");
-	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+~");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
+	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+");
 
 	mfp_processor * sig_1 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
 	mfp_processor * sig_2 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
@@ -114,8 +114,8 @@ test_sig_2(void)
 static int
 test_plus_multi(void) 
 {
-	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig~");
-	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+~");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
+	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+");
 
 	mfp_processor * sig_1 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
 	mfp_processor * sig_2 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
@@ -149,6 +149,153 @@ test_plus_multi(void)
 		return 0;
 	}
 }
+
+
+static int
+test_line_1(void) 
+{
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line");
+	mfp_processor * line = mfp_proc_create(proctype, 0, 1, mfp_blocksize);
+	mfp_sample * outp; 
+	int snum;
+	float tval[] = { 3.0, 
+		             0.0, 1.0, 1.0, 
+					 0.0, 0.0, 0.0, 
+					 1.0, 1.0, 1.0 };
+
+	GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(float), 6);
+
+	printf("   test_line_1... ");
+	for (snum=0; snum < 10; snum++) {
+		g_array_append_val(env_1, tval[snum]);
+	}
+
+	if(!proctype || !line) {
+		printf("FAIL: proctype=%p, proc=%p\n", proctype, line);
+		return 0;
+	}
+
+	mfp_proc_setparam_array(line, "segments", env_1);
+	line->needs_config = 1;
+
+	mfp_proc_process(line);
+
+	outp = line->outlet_buf[0];
+
+	if (outp[0] != 0) {
+		printf("FAIL: outp[0] was %f not 0\n", outp[0]);
+		return 0;
+	}
+
+	if (outp[22] != 0.5) {
+		printf("FAIL: outp[22] was %f not 0.5\n", outp[22]);
+		return 0;
+	}
+
+	if (outp[44] != 1.0) {
+		printf("FAIL: outp[44] was %f not 1.0\n", outp[44]);
+		return 0;
+	}
+
+	if (outp[45] != 0.0) {
+		printf("FAIL: outp[45] was %f not 0.0\n", outp[45]);
+		return 0;
+	}
+
+	if (outp[46] != 0.0) {
+		printf("FAIL: outp[46] was %f not 0.0\n", outp[46]);
+		return 0;
+	}
+
+	if (outp[89] != 0.0) {
+		printf("FAIL: outp[89] was %f not 0.0\n", outp[89]);
+		return 0;
+	}
+
+	if (outp[100] != 0.25) {
+		printf("FAIL: outp[100] was %f not 0.25\n", outp[100]);
+		return 0;
+	}
+
+	if (outp[134] != 1.0) {
+		printf("FAIL: outp[134] was %f not 1.0\n", outp[134]);
+		return 0;
+	}
+
+
+	/*
+	for(snum=0; snum < mfp_blocksize; snum++) {
+		printf("  %1.5f", outp[snum]);
+		if (snum % 5 == 4) {
+			printf("\n");
+		}
+	}
+	*/
+	printf("ok\n");
+	return 1;
+}
+
+static int
+test_line_2(void) 
+{
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line");
+	mfp_processor * line = mfp_proc_create(proctype, 0, 1, mfp_blocksize);
+	mfp_sample * outp; 
+	int snum;
+	float tval_1[] = { 1.0, 
+		               0.0, 1.0, 2.0*(mfp_blocksize-1)/mfp_samplerate*1000.0 } ;
+	float tval_2[] = { 1.0, 
+		               0.0, 0.0, 1.0*(mfp_blocksize-1)/mfp_samplerate*1000.0 } ;
+
+	GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
+	GArray * env_2 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
+
+	printf("   test_line_2... ");
+	for (snum=0; snum < 4; snum++) {
+		g_array_append_val(env_1, tval_1[snum]);
+	}
+	for (snum=0; snum < 4; snum++) {
+		g_array_append_val(env_2, tval_2[snum]);
+	}
+
+	if(!proctype || !line) {
+		printf("FAIL: proctype=%p, proc=%p\n", proctype, line);
+		return 0;
+	}
+
+	mfp_proc_setparam_array(line, "segments", env_1);
+	line->needs_config = 1;
+	mfp_proc_process(line);
+
+	outp = line->outlet_buf[0];
+	if (outp[0] != 0.0) {
+		printf("FAIL: outp[0] was %f not 0.0\n", outp[0]);
+		return 0;
+	}
+	if (outp[mfp_blocksize -1] != 0.5) {
+		printf("FAIL: outp[blocksize-1] was %f not 0.5\n", outp[mfp_blocksize-1]);
+		return 0;
+	}
+
+	mfp_proc_setparam_array(line, "segments", env_2);
+	line->needs_config = 1;
+	mfp_proc_process(line);
+
+	outp = line->outlet_buf[0];
+	if (outp[0] != 0.5) {
+		printf("FAIL: outp[0] was %f not 0.5\n", outp[0]);
+		return 0;
+	}
+	if (outp[mfp_blocksize -1] != 0.0) {
+		printf("FAIL: outp[blocksize-1] was %f not 0.0\n", outp[mfp_blocksize-1]);
+		return 0;
+	}
+	printf("ok\n");
+	return 1;
+}
+
+
+
 int 
 test_ctests(void) 
 {
@@ -169,6 +316,11 @@ test_ctests(void)
 	if (!test_plus_multi())
 		return 0;
 
+	if (!test_line_1())
+		return 0;
+
+	if (!test_line_2())
+		return 0;
+
 	return 1;
 }
-

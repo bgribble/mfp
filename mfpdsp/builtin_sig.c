@@ -36,15 +36,21 @@ destroy(mfp_processor * proc)
 	return;
 }
 
+static void
+config(mfp_processor * proc) 
+{
+	return;
+}
 
 mfp_procinfo *  
 init_builtin_sig(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("sig~");
+	p->name = strdup("sig");
 	p->is_generator = 1;
 	p->process = process;
 	p->init = init;
 	p->destroy = destroy;
+	p->config = config;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	g_hash_table_insert(p->params, "value", (gpointer)1);
 	return p;

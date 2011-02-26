@@ -65,14 +65,22 @@ destroy(mfp_processor * proc)
 	return;
 }
 
+static void
+config(mfp_processor * proc)
+{
+	return;
+}
+
+
 mfp_procinfo *  
 init_builtin_adc(void) {
 	mfp_procinfo * p = malloc(sizeof(mfp_procinfo));
-	p->name = strdup("adc~");
+	p->name = strdup("adc");
 	p->is_generator = 1;
 	p->process = adc_process;
 	p->init = init;
 	p->destroy = destroy;
+	p->config = config;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	g_hash_table_insert(p->params, "channel", (gpointer)1);
 
@@ -81,13 +89,14 @@ init_builtin_adc(void) {
 
 mfp_procinfo *  
 init_builtin_dac(void) {
-	printf("initializing dac~\n");
+	printf("initializing dac\n");
 	mfp_procinfo * p = malloc(sizeof(mfp_procinfo));
-	p->name = strdup("dac~");
+	p->name = strdup("dac");
 	p->is_generator = 0;
 	p->process = dac_process;
 	p->init = init;
 	p->destroy = destroy;
+	p->config = config;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	g_hash_table_insert(p->params, "channel", (gpointer)1);
 	return p;

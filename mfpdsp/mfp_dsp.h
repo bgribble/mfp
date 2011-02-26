@@ -1,6 +1,7 @@
 
 #include <glib.h>
 #include <jack/jack.h>
+#include <pthread.h>
 
 typedef jack_default_audio_sample_t mfp_sample;
 
@@ -12,6 +13,7 @@ typedef struct {
 	GHashTable * params; 
 	GHashTable * pyparams; 
 	void * data;
+	int needs_config;
 	
 	/* inlet and outlet connections (g_array of g_array) */
 	GArray * inlet_conn;
@@ -33,12 +35,31 @@ typedef struct mfp_procinfo_struct {
 	void (* init)(mfp_processor *);
 	void (* destroy)(mfp_processor *);
 	int  (* process)(mfp_processor *);
+	void (* config)(mfp_processor *);
 } mfp_procinfo;
 
 typedef struct {
 	mfp_processor * dest_proc;
 	int dest_port;
 } mfp_connection;
+
+typedef struct {
+	int reqtype;
+	mfp_processor * src_proc;
+	int src_port;
+	mfp_processor * dest_proc;
+	int dest_port;
+} mfp_reqdata;
+
+#define PARAMTYPE_UNDEF 0
+#define PARAMTYPE_FLT 1
+#define PARAMTYPE_STRING 2
+#define PARAMTYPE_FLTARRAY 3
+
+#define REQTYPE_CREATE 1
+#define REQTYPE_DESTROY 2
+#define REQTYPE_CONNECT 3
+#define REQTYPE_DISCONNECT 4
 
 /* global variables */ 
 extern int mfp_dsp_enabled;
@@ -48,6 +69,11 @@ extern int mfp_blocksize;
 
 extern GHashTable * mfp_proc_registry;
 extern GArray * mfp_proc_list; 
+extern GArray * mfp_requests_pending;
+
+extern pthread_mutex_t mfp_globals_lock;
+
+
 
 /* mfp_jack.c */
 extern GArray * mfp_input_ports;
@@ -66,6 +92,8 @@ extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
 /* mfp_proc.c */
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);
 extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, int);
+extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, int);
+extern mfp_processor * mfp_proc_init(mfp_processor *);
 
 extern void mfp_proc_process(mfp_processor *);
 extern void mfp_proc_destroy(mfp_processor *);
