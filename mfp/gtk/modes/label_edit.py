@@ -41,6 +41,7 @@ class LabelEditMode (InputMode):
 		self.update_label(raw=True)
 
 	def insert_char(self, keysym):
+		print "inserting", keysym
 		if len(keysym) > 1:
 			return False 
 
@@ -51,7 +52,9 @@ class LabelEditMode (InputMode):
 		self.undo_stack.append(self.text)
 		self.text = self.text[:self.editpos] + keysym + self.text[self.editpos:]
 		self.editpos += 1
+		print "calling update_label"
 		self.update_label(raw=True)
+		print "inserting done"
 		return True 
 
 	def commit_edits(self):
@@ -122,12 +125,13 @@ class LabelEditMode (InputMode):
 
 	def update_label(self, raw=True):
 		if raw or self.markup is False:
+			print "calling set_text, '%s'" %  self.text
 			self.widget.set_text(self.text)
 		else:
+			print "calling set_markup, '%s'" % self.text 
 			self.widget.set_markup(self.text)
-		self.widget.set_cursor_size(3)
-		self.widget.set_cursor_position(self.editpos)
-		self.widget.set_cursor_visible(True)
+
+		print "update_label done"
 		return True 
 
 

@@ -133,7 +133,12 @@ class MFPGUI (object):
 		from mfp.gtk.patch_window import PatchWindow
 		self.appwin = PatchWindow()	
 		self.mfp = MFPCommand()
-		clutter.main()
+		try:
+			clutter.main()
+		except Exception, e:
+			print "clutter thread died"
+			import traceback
+			traceback.print_exc()
 
 	def finish(self):
 		self.appwin.destroy()

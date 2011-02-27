@@ -47,6 +47,7 @@ class ProcessorElement (PatchElement):
 		self.stage.register(self)
 
 	def update_label(self, *args):
+		print "processor update label", args
 		t = self.label.get_text()
 		parts = t.split(' ', 1)
 		self.obj_type = parts[0]

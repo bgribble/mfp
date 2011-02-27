@@ -10,5 +10,6 @@ def register():
 	import p_route; p_route.register()
 	import p_trigger; p_trigger.register()
 	import p_inletoutlet; p_inletoutlet.register()
+	import p_line; p_line.register()
 
 
