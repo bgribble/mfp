@@ -126,4 +126,8 @@ class RPCWrapper (object):
 			except RPCWrapper.MethodFailed, e:
 				req.payload = e.traceback
 				req.response = RPCWrapper.METHOD_FAILED
+			except Exception, e:
+				import traceback
+				req.payload = traceback.format_exc()
+				req.response = RPCWrapper.METHOD_FAILED
 

@@ -292,7 +292,16 @@ init_builtins(void)
 	pi = init_builtin_sig();
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 	
-	pi = init_builtin_plus();
+	pi = init_builtin_add();
+	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+
+	pi = init_builtin_sub();
+	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+
+	pi = init_builtin_mul();
+	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+
+	pi = init_builtin_div();
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 
 	pi = init_builtin_line();

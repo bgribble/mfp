@@ -37,6 +37,7 @@ config(mfp_processor * proc)
 
 	/* populate new segment data if passed */
 	if (segments_raw != NULL) {
+		printf("line config: segments_raw=%p\n", segments_raw);
 		if(segments_raw->len == 0) {
 			numsegs = 0;
 		}

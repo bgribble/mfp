@@ -35,6 +35,15 @@ ready_to_schedule(mfp_processor * p)
 	mfp_connection ** ip;
 	int maxdepth = -1;
 
+	if (p == NULL) {
+		printf("p is NULL\n");
+		return -1;
+	}
+	if (p->typeinfo == NULL) {
+		printf("p->typeinfo is NULL\n");
+		return -1;
+	}
+
 	if (p->typeinfo->is_generator == 1) {
 		return 0;
 	}

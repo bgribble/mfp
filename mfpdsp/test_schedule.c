@@ -88,7 +88,7 @@ test_sig_2(void)
 
 	mfp_sample * outp; 
 
-	printf("   test_sig_2... ");
+	printf("   test_sig_2...\n ");
 	mfp_proc_connect(sig_1, 0, dac, 0);
 	mfp_proc_connect(sig_2, 0, dac, 0);
 
