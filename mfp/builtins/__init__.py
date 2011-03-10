@@ -11,5 +11,7 @@ def register():
 	import p_trigger; p_trigger.register()
 	import p_inletoutlet; p_inletoutlet.register()
 	import p_line; p_line.register()
+	import p_noise; p_noise.register()
+	import p_arith; p_arith.register()
 
 

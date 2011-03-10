@@ -5,7 +5,6 @@ p_arith.py:  Builtin arithmetic DSP ops
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from mfp.signal_processor import SignalProcessor 
 from mfp.processor import Processor
 from mfp.main import MFPApp
 
