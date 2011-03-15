@@ -14,16 +14,14 @@ class ArithProcessor(Processor):
 
 		Processor.__init__(self, 2, 1, init_type, init_args)
 
-		initargs = self.parse_args(init_args)
-		if len(initargs):
-			init_const = initargs[0]
-		else:
-			init_const = 0
 		
 		self.dsp_inlets = [0, 1]
 		self.dsp_outlets = [0]
 		self.dsp_init(self.arith_op)
-		self.dsp_obj.setparam("const", init_const)
+		
+		initargs = self.parse_args(init_args)
+		if len(initargs):
+			self.dsp_obj.setparam("const", initargs[0])
 		
 
 	def trigger(self):
