@@ -42,6 +42,7 @@ class DSPObject(RPCWrapper):
 								      inlet)
 
 def dsp_init(pipe):
+	RPCWrapper.node_id = "JACK DSP"
 	DSPObject.pipe = pipe
 	DSPObject.local = True
 

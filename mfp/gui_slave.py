@@ -18,6 +18,7 @@ def gui_init(pipe):
 	print "gui_init: in worker, pid =", os.getpid()
 	pipe.on_finish(gui_finish)
 	RPCWrapper.pipe = pipe
+	RPCWrapper.node_id = "Clutter GUI"
 	GUICommand.local = True
 	MFPCommand.local = False
 	MFPGUI()
@@ -103,6 +104,7 @@ class MFPGUI (object):
 	__metaclass__ = Singleton
 
 	def __init__(self):
+		print "MFPGUI constructor", self
 		self.clutter_thread = threading.Thread(target=self.clutter_proc)
 		self.clutter_thread.start()
 		self.objects = {}

@@ -47,6 +47,7 @@ class RPCWrapper (object):
 	rpctype = {}
 	local = False
 	pipe = None
+	node_id = None
 
 	def __init__(self, *args, **kwargs):
 		self.rpcid = None
@@ -128,6 +129,8 @@ class RPCWrapper (object):
 				req.response = RPCWrapper.METHOD_FAILED
 			except Exception, e:
 				import traceback
-				req.payload = traceback.format_exc()
+				einfo = "Method call failed for rpcid=%s node=%s\nobj=%s data=%s\n" % (rpcid,
+																		   RPCWrapper.node_id, obj, rpcdata)
+				req.payload = einfo + traceback.format_exc()
 				req.response = RPCWrapper.METHOD_FAILED
 

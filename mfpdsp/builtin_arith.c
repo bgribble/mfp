@@ -20,9 +20,18 @@ static void
 iterate_div(mfp_sample * in_0, mfp_sample * in_1, mfp_sample const_sample, mfp_sample * outbuf)
 {
 	int scount;
+	int in_1_present=0;
+
+	if (in_1 != NULL)
+		in_1_present = 1;
+
 	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {
-		*outbuf++ =  *in_0++ / *in_1++ / const_sample;
+		if (in_1_present)
+			*outbuf++ =  *in_0++ / *in_1++ / const_sample;
+		else
+			*outbuf++ =  *in_0++ / const_sample;
+
 	}
 }
 
@@ -30,9 +39,18 @@ static void
 iterate_mul(mfp_sample * in_0, mfp_sample * in_1, mfp_sample const_sample, mfp_sample * outbuf)
 {
 	int scount;
+	int in_1_present=0;
+
+	if (in_1 != NULL)
+		in_1_present = 1;
+
 	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {
-		*outbuf++ =  *in_0++ * *in_1++ * const_sample;
+		if (in_1_present)
+			*outbuf++ =  *in_0++ * *in_1++ * const_sample;
+		else
+			*outbuf++ =  *in_0++ * const_sample;
+
 	}
 }
 
@@ -40,9 +58,18 @@ static void
 iterate_sub(mfp_sample * in_0, mfp_sample * in_1, mfp_sample const_sample, mfp_sample * outbuf)
 {
 	int scount;
+	int in_1_present=0;
+
+	if (in_1 != NULL)
+		in_1_present = 1;
+
 	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {
-		*outbuf++ =  *in_0++ - *in_1++ - const_sample;
+		if (in_1_present)
+			*outbuf++ =  *in_0++ - *in_1++ - const_sample;
+		else
+			*outbuf++ =  *in_0++ - const_sample;
+
 	}
 }
 
@@ -50,9 +77,18 @@ static void
 iterate_add(mfp_sample * in_0, mfp_sample * in_1, mfp_sample const_sample, mfp_sample * outbuf)
 {
 	int scount;
+	int in_1_present=0;
+
+	if (in_1 != NULL)
+		in_1_present = 1;
+
 	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {
-		*outbuf++ = const_sample + *in_0++ + *in_1++;
+		if (in_1_present)
+			*outbuf++ = const_sample + *in_0++ + *in_1++;
+		else
+			*outbuf++ = const_sample + *in_0++ ;
+
 	}
 }
 
@@ -66,9 +102,13 @@ process(mfp_processor * proc)
 	mfp_sample * in_0 = proc->inlet_buf[0];
 	mfp_sample * in_1 = proc->inlet_buf[1];
 
-	if ((outbuf == NULL) || (in_0 == NULL))  {
+	if ((outbuf == NULL) || (in_0 == NULL) || (in_1 == NULL))  {
 		return 0;
 	}
+
+	/* pass NULL in_1 if there is nothing connected */
+	if (g_array_index(proc->inlet_conn, GArray *, 1)->len == 0)
+		in_1 = NULL;
 
 	switch (d->op_type) {
 		case ARITH_OP_ADD:

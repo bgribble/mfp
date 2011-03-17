@@ -91,8 +91,9 @@ class MFPApp (object):
 
 		from mfp.dsp_slave import dsp_init, DSPObject
 		from mfp.gui_slave import gui_init, GUICommand
+		RPCWrapper.node_id = "MFP Master"
 		MFPCommand.local = True
-		
+
 		# dsp and gui processes
 		self.dsp_process = RPCWorker("mfp_dsp", dsp_init)
 		self.dsp_process.serve(DSPObject)

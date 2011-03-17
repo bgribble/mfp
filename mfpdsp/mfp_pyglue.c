@@ -50,27 +50,51 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 	int llen, lpos;
 	GArray * g;
 	PyObject * oldval;
+	PyObject * listval;
 
 	switch ((int)vtype) {
 		case PARAMTYPE_UNDEF:
 			rval = 0;
 			break;
 		case PARAMTYPE_FLT:
-			cflt = PyFloat_AsDouble(val);
-			mfp_proc_setparam_float(proc, paramname, cflt);
-			break;
-		case PARAMTYPE_STRING:
-			cstr = PyString_AsString(val);
-			mfp_proc_setparam_string(proc, paramname, cstr);
-			break;
-		case PARAMTYPE_FLTARRAY:
-			llen = PyList_Size(val);
-			g = g_array_sized_new(FALSE, FALSE, sizeof(float), llen);
-			for(lpos=0; lpos < llen; lpos++) {
-				cflt = (float)PyFloat_AsDouble(PyList_GetItem(val, lpos));
-				g_array_insert_val(g, lpos, cflt); 
+			if (PyFloat_Check(val)) {
+				cflt = PyFloat_AsDouble(val);
+				mfp_proc_setparam_float(proc, paramname, cflt);
 			}
-			mfp_proc_setparam_array(proc, paramname, g);
+			else
+				rval = 0;
+
+			break;
+
+		case PARAMTYPE_STRING:
+			if (PyString_Check(val)) {
+				cstr = PyString_AsString(val);
+				mfp_proc_setparam_string(proc, paramname, cstr);
+			}
+			else
+				rval = 0;
+			break;
+
+		case PARAMTYPE_FLTARRAY:
+			if (PyList_Check(val)) {
+				llen = PyList_Size(val);
+				g = g_array_sized_new(FALSE, FALSE, sizeof(float), llen);
+				for(lpos=0; lpos < llen; lpos++) {
+					listval = PyList_GetItem(val, lpos);
+					if (PyFloat_Check(listval)) {
+						cflt = (float)PyFloat_AsDouble(listval);
+						g_array_insert_val(g, lpos, cflt); 
+					}
+					else
+						rval = 0;
+				}
+				if (rval == 1) 
+					mfp_proc_setparam_array(proc, paramname, g);
+				else
+					g_array_free(g);
+			}
+			else
+				rval = 0;
 			break;
 	}
 	if (rval != 0) {
