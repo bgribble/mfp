@@ -83,18 +83,23 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 					listval = PyList_GetItem(val, lpos);
 					if (PyFloat_Check(listval)) {
 						cflt = (float)PyFloat_AsDouble(listval);
-						g_array_insert_val(g, lpos, cflt); 
+						g_array_append_val(g, cflt); 
 					}
-					else
+					else {
+						printf("FloatCheck failed on %p", listval);
 						rval = 0;
+					}
 				}
 				if (rval == 1) 
 					mfp_proc_setparam_array(proc, paramname, g);
-				else
-					g_array_free(g);
+				else {
+					g_array_free(g, TRUE);
+				}
 			}
-			else
+			else {
+				printf("PyListCheck failed %p", val);
 				rval = 0;
+			}
 			break;
 	}
 	if (rval != 0) {
@@ -103,7 +108,7 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 			Py_DECREF(oldval);
 		}
 		Py_INCREF(val);
-		g_hash_table_replace(proc->pyparams, paramname, val);
+		g_hash_table_replace(proc->pyparams, g_strdup(paramname), val);
 		proc->needs_config = 1;
 	}
 

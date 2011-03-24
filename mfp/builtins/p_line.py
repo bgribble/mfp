@@ -23,28 +23,31 @@ class Line(Processor):
 	def trigger(self):
 		if self.inlets[0] is not None:
 			try:
-				segs = self.inlets(0)
+				segs = self.inlets[0]
 				tlen = len(segs)
 				segs = self.convert_segments(segs)
-				self.set_param("segments", segs)
+				print "setparam", segs
+				self.dsp_obj.setparam("segments", segs)
 			except:
-				print "Error processing segment list for line~"
+				import traceback
+				traceback.print_exc()
 
-		if self.inlets[1] is not None:
-			try:
-				ff = float(self.inlets[1])
-				self.set_param("position", ff)
-			except:
-				print "Error processing position for line~"
+				try:
+					pos = float(self.inlets[0])
+					self.dsp_obj.setparam("position", pos)
+				except:
+					print "Error processing arg for line~:", self.inlets[0]
 
 	def convert_segments(self, segments):
 		try:
 			unpacked = []
 			for s in segments:
 				if len(s) == 3:
-					unpacked.extend([s[0], s[1], s[2]])
+					unpacked.extend([float(s[0]), float(s[1]), float(s[2])])
 				elif len(s) == 2:
-					unpacked.extend([0, s[0], s[1]])
+					unpacked.extend([float(0.0), float(s[0]), float(s[1])])
+			print "line~:", unpacked
+
 			return unpacked
 		except Exception, e:
 			return []

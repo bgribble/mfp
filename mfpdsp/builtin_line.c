@@ -34,6 +34,7 @@ config(mfp_processor * proc)
 	int framebase = 0;
 	
 	frames_per_ms = mfp_samplerate / 1000.0; 
+	printf("line config enter\n");
 
 	/* populate new segment data if passed */
 	if (segments_raw != NULL) {
@@ -41,17 +42,18 @@ config(mfp_processor * proc)
 			numsegs = 0;
 		}
 		else {
-			numsegs = (int)g_array_index(segments_raw, float, 0);
+			numsegs = (segments_raw->len)/3; 
+			printf("%d segments\n", numsegs);
 			segments = g_malloc(numsegs * sizeof(segment));
 		}
 
-		rawpos = 1;
+		rawpos = 0;
 		framebase = 0;
 		for (scount=0; scount < numsegs; scount++) {
 			delay_ms = g_array_index(segments_raw, float, rawpos++);
 			end_val = g_array_index(segments_raw, float, rawpos++);
 			ramp_ms = g_array_index(segments_raw, float, rawpos++);
-
+			printf("  segment %d: %f %f %f\n", scount, delay_ms, end_val, ramp_ms);
 			segments[scount].start_frame = framebase + (int)(delay_ms*frames_per_ms + 0.5);
 			segments[scount].end_val = end_val;
 
