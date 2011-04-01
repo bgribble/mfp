@@ -57,8 +57,8 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 			rval = 0;
 			break;
 		case PARAMTYPE_FLT:
-			if (PyFloat_Check(val)) {
-				cflt = PyFloat_AsDouble(val);
+			if (PyNumber_Check(val)) {
+				cflt = PyFloat_AsDouble(PyNumber_Float(val));
 				mfp_proc_setparam_float(proc, paramname, cflt);
 			}
 			else
@@ -81,12 +81,12 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 				g = g_array_sized_new(FALSE, FALSE, sizeof(float), llen);
 				for(lpos=0; lpos < llen; lpos++) {
 					listval = PyList_GetItem(val, lpos);
-					if (PyFloat_Check(listval)) {
-						cflt = (float)PyFloat_AsDouble(listval);
+					if (PyNumber_Check(listval)) {
+						cflt = (float)PyFloat_AsDouble(PyNumber_Float(listval));
 						g_array_append_val(g, cflt); 
 					}
 					else {
-						printf("FloatCheck failed on %p", listval);
+						printf("NumberCheck failed on %p", listval);
 						rval = 0;
 					}
 				}
