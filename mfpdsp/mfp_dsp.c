@@ -176,6 +176,7 @@ mfp_dsp_run(int nsamples)
 
 	mfp_dsp_set_blocksize(nsamples);
 
+
 	/* handle any DSP config requests */
 	pthread_mutex_lock(&mfp_globals_lock);
 	mfp_dsp_handle_requests();
