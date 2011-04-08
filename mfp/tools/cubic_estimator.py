@@ -1,6 +1,11 @@
 
 import math 
 
+def frange(start, stop, steps):
+	dd = (stop-start)/steps
+	
+	return [ start + n*dd for n in range(steps) ]
+
 
 class CubicEstimator(object):
 	def __init__(self, domain, npieces, f):
@@ -9,7 +14,7 @@ class CubicEstimator(object):
 		self.f = f
 		self.piece_starts = None
 		self.cubic_coeffs = None
-
+		self.piece_starts = frange(domain[0], domain[1], npieces)
 		self.build()
 
 	def build(self):
@@ -33,16 +38,43 @@ class CubicEstimator(object):
 		# segment 
 		eqno = 0
 		segno = 0 
-		for pc in range(npieces):
-			x = piece_starts[pc]
-			y = self.f(x)
-			coeffs[eqno][segno*4] = 1
-			coeffs[eqno][segno*4+1] = x 
-			coeffs[eqno][segno*4+2] = x*x
-			coeffs[eqno][segno*4+3] = x*x*x
-			solns[eqno] = y 
+		for pc in range(self.npieces):
+			xvals = [self.piece_starts[pc], self.piece_starts[(pc+1)%len(self.piece_starts)]]
+			if pc !=  len(self.piece_starts)-1:
+				xvals.append((xvals[0] + xvals[1])/2.0)
+			else:
+				xvals.append((xvals[0] + self.domain[1])/2.0)
 
+			for x in xvals:
+				y = self.f(x)
+				coeffs[eqno][segno*4] = 1
+				coeffs[eqno][segno*4+1] = x 
+				coeffs[eqno][segno*4+2] = x*x
+				coeffs[eqno][segno*4+3] = x*x*x
+				solns[eqno] = y 
+				eqno += 1
 
+			if pc != len(self.piece_starts)-1:
+				nextseg = pc+1
+			else:
+				nextseg = 0
+
+			coeffs[eqno][segno*4+1] = 1.0
+			coeffs[eqno][nextseg*4+1] = -1.0
+			coeffs[eqno][segno*4+2] = 2.0*x
+			coeffs[eqno][nextseg*4+2] = -2.0*x
+			coeffs[eqno][segno*4+3] = 3.0*x*x
+			coeffs[eqno][nextseg*4+3] = -3.0*x*x
+			solns[eqno] = 0.0
+			eqno += 1
+			segno += 1
+
+		spline = np.linalg.solve(coeffs, solns)
+
+		cc = []
+		for piece in range(self.npieces):
+			cc.append(spline[4*piece:4*piece+4])
+		self.cubic_coeffs = cc
 
 	def _find_coeffs(self, x):
 		if (x < self.domain[0]) or (x > self.domain[1]):
@@ -64,13 +96,13 @@ class CubicEstimator(object):
 
 	def est(self, x):
 		coeffs = self._find_coeffs(x)
-		if not coeffs: 
-			return None
-		else:
-			return coeffs[0] + coeffs[1]*x + coeffs[2]*x*x + coeffs[3]*x**3
+		return coeffs[0] + coeffs[1]*x + coeffs[2]*x*x + coeffs[3]*x**3
 
 
-# e = CubicEstimator([0, math.pi*2], 8, math.sin, math.cos, lambda x: -1.0*math.sin(x))
-# print e.errlevel(10000)
+e = CubicEstimator([0, math.pi*2], 8, math.sin)
+
+for x in frange(0, math.pi * 2, 1000):
+	print x, math.sin(x), e.est(x)
+
 
 
