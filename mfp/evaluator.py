@@ -47,7 +47,8 @@ class Evaluator (object):
 		#   foo='bar', bax='baz'
 		# rewrites to 
 		#   dict(foo='bar', bax='baz')
-
+		if len(tokens) > 2 and tokens[1][1] == '=':
+			str2eval = ''.join(["dict("] + [t[1] for t in tokens] + [')']) 
 
 		return eval(str2eval, self.globals)
 

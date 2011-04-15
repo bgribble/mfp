@@ -5,7 +5,7 @@ processor.py: Parent class of all processors
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from .dsp_slave import DSPObject
-from .bang import Bang, Uninit
+from .evaluator import Evaluator
 
 class Processor (object): 
 	OK = 0
@@ -60,7 +60,9 @@ class Processor (object):
 		if argstring == '' or argstring is None:
 			return ()
 
-		obj = eval(argstring)
+		# FIXME: evaluator defines context, should be in patch
+		e = Evaluator()
+		obj = e.eval(argstring)
 		if not isinstance(obj, tuple):
 			obj = (obj,)
 		return obj

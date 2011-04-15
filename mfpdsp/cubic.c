@@ -1,28 +1,54 @@
 
 #include "cubic.h"
 
-
 typedef struct {
-	float x_min;
-	float x_max;
 	float c0;
 	float c1;
 	float c2;
 	float c3;
-} cubic_segment;
+} cspline_segment;
 
 typedef struct {
-	cubic_segment * segments;
+	cspline_segment * segments;
 	int num_segments;
-	int last_segment;
-} cubic_estimator;
+	float domain_start;
+	float domain_end;
+} cspline;
 
 
-cubic_estimator * 
-cubic_new(int segments) 
+cspline * 
+cspline_new(int segments) 
 {
-	cubic_data * d = (cubic_data *)g_malloc(sizeof(cubic_data));
+	cspline * c = g_malloc(sizeof(cspline));
+	cspline_segment * d = (cspline_segment *)g_malloc(segments*sizeof(cspline_segment));
+
+	c->num_segments = segments;
+	c->segments = d;
 }
+
+void
+cspline_init(cspline * self, float domain_start, float domain_end, float *segments)
+{
+	int seg;
+	float * cur_pos;
+	for(seg=0; seg < self->num_segments; seg++) {
+		cur_pos = segments + 4*seg;
+		self->segments[seg].c0 = *cur_pos++;
+		self->segments[seg].c1 = *cur_pos++;
+		self->segments[seg].c2 = *cur_pos++;
+		self->segments[seg].c3 = *cur_pos++;
+	}
+	self->domain_start = domain_start;
+	self->domain_end = domain_end;
+}
+
+int
+cspline_block_eval(cspline * self, mfp_sample * in, mfp_sample * out)
+{
+
+}
+
+
 
 float 
 cubic_eval(cubic_estimator * self, float x)
