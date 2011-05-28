@@ -13,5 +13,7 @@ def register():
 	import p_line; p_line.register()
 	import p_noise; p_noise.register()
 	import p_arith; p_arith.register()
+	import p_file; p_file.register()
+
 
 

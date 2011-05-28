@@ -13,9 +13,15 @@ class MethodCall(object):
 		self.kwargs = kwargs
 
 	def call(self, target):
-		m = target.__dict__.get(self.method)
-		if callable(m):
-			return m(target, *self.args, **self.kwargs)
-		else:
-			raise Exception("Method %s cannot be called" % self.method)
+		try:
+			m = getattr(target, self.method)
+			if callable(m):
+				print target, self.args, self.kwargs
+				return m(*self.args, **self.kwargs)
+			else:
+				print "MethodCall.call():", target, self.method, m, type(m)
+				raise Exception("Method %s cannot be called" % self.method)
+		except AttributeError, e:
+			raise Exception("Method %s not found for %s" % (self.method, target))
+
 
