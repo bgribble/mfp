@@ -14,6 +14,7 @@ def register():
 	import p_noise; p_noise.register()
 	import p_arith; p_arith.register()
 	import p_file; p_file.register()
+	import p_for; p_for.register()
 
 
 

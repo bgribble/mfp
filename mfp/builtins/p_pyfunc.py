@@ -7,6 +7,15 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor 
 from ..main import MFPApp
+from ..evaluator import Evaluator
+
+class PyEval(Processor):
+	def __init__(self, init_type, init_args):
+		self.evaluator = Evaluator()
+		Processor.__init__(self, 1, 1, init_type, init_args)
+
+	def trigger(self):
+		self.outlets[0] = self.evaluator.eval(self.inlets[0])
 
 class PyBinary(Processor):
 	def __init__(self, pyfunc, init_type, init_args):
@@ -17,7 +26,6 @@ class PyBinary(Processor):
 			self.inlets[1] = initargs[0]
 
 	def trigger(self):
-		print self.inlets[0], type(self.inlets[0]), self.inlets[1], type(self.inlets[1])
 		self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
 
 class PyUnary(Processor):
@@ -43,6 +51,8 @@ def mk_unary(pyfunc, name):
 import operator, math
 
 def register():
+	MFPApp().register(PyEval, "eval")
+
 	mk_binary(operator.add, "+")
 	mk_binary(operator.sub, "-")
 	mk_binary(operator.mul, "*")
