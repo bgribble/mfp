@@ -8,14 +8,31 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor 
 from ..main import MFPApp
 from ..evaluator import Evaluator
+from ..method import MethodCall
 
 class PyEval(Processor):
 	def __init__(self, init_type, init_args):
 		self.evaluator = Evaluator()
+		self.bindings = {}
+
 		Processor.__init__(self, 1, 1, init_type, init_args)
+		initargs = self.parse_args(init_args)
+		if len(initargs):
+			self.bindings = initargs[0]
 
 	def trigger(self):
-		self.outlets[0] = self.evaluator.eval(self.inlets[0])
+		print self.bindings
+		if isinstance(self.inlets[0], MethodCall):
+			self.inlets[0].call(self)
+		else:
+			self.outlets[0] = self.evaluator.eval(self.inlets[0], self.bindings)
+
+	def clear(self):
+		self.bindings = {}
+
+	def bind(self, **kwargs):
+		for name, value in kwargs.items():
+			self.bindings[name] = value
 
 class PyBinary(Processor):
 	def __init__(self, pyfunc, init_type, init_args):
@@ -51,7 +68,7 @@ def mk_unary(pyfunc, name):
 import operator, math
 
 def register():
-	MFPApp().register(PyEval, "eval")
+	MFPApp().register("eval", PyEval)
 
 	mk_binary(operator.add, "+")
 	mk_binary(operator.sub, "-")

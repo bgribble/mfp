@@ -22,6 +22,9 @@ class Evaluator (object):
 		}
 
 	def eval(self, evalstr, extra_bindings=None):
+		if extra_bindings is None:
+			extra_bindings = {}
+
 		str2eval = evalstr.strip()
 		sio = StringIO(str2eval)
 
@@ -50,5 +53,5 @@ class Evaluator (object):
 		if len(tokens) > 2 and tokens[1][1] == '=':
 			str2eval = ''.join(["dict("] + [t[1] for t in tokens] + [')']) 
 
-		return eval(str2eval, self.globals)
+		return eval(str2eval, self.globals, extra_bindings)
 

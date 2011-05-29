@@ -23,7 +23,11 @@ class Print (Processor):
 			self.format_string = self.inlets[1]
 
 		if self.inlets[0] is not Uninit:
-			out = self.format_string % self.inlets[0]
+			try:
+				out = self.format_string % self.inlets[0]
+			except TypeError, e:
+				out = str(self.inlets[0])
+
 			self.outlets[0] = out 
 			print out 
 			
