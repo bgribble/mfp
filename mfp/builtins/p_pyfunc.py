@@ -10,6 +10,23 @@ from ..main import MFPApp
 from ..evaluator import Evaluator
 from ..method import MethodCall
 
+
+class ApplyMethod(Processor):
+	def __init__(self, init_type, init_args):
+		self.method_name = None
+
+		Processor.__init__(self, 1, 1, init_type, init_args)
+		initargs = self.parse_args(init_args)
+		if len(initargs):
+			self.method_name = initargs[0]
+
+	def trigger(self):
+		if self.inlets[0] is Bang:
+			self.outlets[0] = MethodCall(self.method_name)
+		else:
+			self.outlets[0] = MethodCall(self.method_name, *(self.inlets[0]))
+
+
 class PyEval(Processor):
 	def __init__(self, init_type, init_args):
 		self.evaluator = Evaluator()
@@ -69,6 +86,7 @@ import operator, math
 
 def register():
 	MFPApp().register("eval", PyEval)
+	MFPApp().register("apply", ApplyMethod)
 
 	mk_binary(operator.add, "+")
 	mk_binary(operator.sub, "-")
