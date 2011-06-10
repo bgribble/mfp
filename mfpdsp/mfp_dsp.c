@@ -44,8 +44,22 @@ ready_to_schedule(mfp_processor * p)
 		return -1;
 	}
 
-	if (p->typeinfo->is_generator == 1) {
+	if (p->typeinfo->is_generator == GENERATOR_ALWAYS) {
 		return 0;
+	}
+
+	/* conditional generator is a generator if nothing connected to dsp inlets */
+	if (p->typeinfo->is_generator == GENERATOR_CONDITIONAL) {
+		ready = 0;
+		for (icount = 0; icount < p->inlet_conn->len; icount++) {
+			infan = g_array_index(p->inlet_conn, GArray *, icount);
+			if(infan && infan->len) {
+				ready = 1;
+				break;
+			}
+		}
+		if (ready == 0)
+			return 0;
 	}
 
 	for (icount = 0; icount < p->inlet_conn->len; icount++) {

@@ -39,6 +39,12 @@ cspline_init(cspline * self, float domain_start, float domain_end, float *segmen
 	self->domain_end = domain_end;
 }
 
+void 
+cspline_free(cspline * self) 
+{
+	/* FIXME */
+}
+
 static void 
 fetch_constants(cspline * self, mfp_block * offsets, int const_num, mfp_block * out)
 {
