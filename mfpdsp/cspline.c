@@ -7,15 +7,6 @@
 #include "cspline.h"
 #include "mfp_block.h"
 
-typedef struct {
-	mfp_block *x2, *block_segs, *coeff; /* intermediate buffers */ 
-	float * segments;
-	int num_segments;
-	float domain_start;
-	float domain_end;
-} cspline;
-
-
 cspline * 
 cspline_new(int segments, int blocksize) 
 {

@@ -9,7 +9,6 @@
 
 typedef struct {
 	cspline * spline;
-	int is_generator;
 	float const_freq;
 	float const_ampl;
 	float phase;
