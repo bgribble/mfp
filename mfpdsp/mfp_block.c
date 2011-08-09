@@ -5,9 +5,18 @@ mfp_block *
 mfp_block_new(int blocksize) 
 {
 	mfp_block * b = g_malloc(sizeof(mfp_block));
-	b->data = g_malloc(blocksize * sizeof(float));
-	b->blocksize = blocksize;
-	b->allocsize = blocksize;
+	gpointer buf = g_malloc(blocksize * sizeof(mfp_sample));
+	mfp_block_init(b, buf, blocksize);
+	return b;
+}
+
+void
+mfp_block_init(mfp_block * block, mfp_sample * data, int blocksize) 
+{
+	block->data = data 
+	block->blocksize = blocksize;
+	block->allocsize = blocksize;
+
 }
 
 void
@@ -131,4 +140,27 @@ mfp_block_copy(mfp_block * in, mfp_block * out)
 	}
 	g_memcpy(out->data, in->data, in->blocksize*sizeof(float));
 
+}
+
+mfp_sample 
+mfp_block_integrate(mfp_block * deltas, mfp_sample * scale, mfp_sample initval, mfp_block * out)
+{
+	int loc = 0;
+	int end = out->blocksize;
+	double accum = initval;
+
+	if(deltas == NULL) {
+		for(loc = 0; loc < end; loc++) {
+			out->data[loc] = (float)accum;
+			accum += (double)scale;
+		}
+		return accum;
+	}
+	else {
+		for(loc = 0; loc < end; loc++) {
+			out->data[loc] = (float)accum;
+			accum += deltas[loc]*(double)scale;
+		}
+		return accum;
+	}
 }

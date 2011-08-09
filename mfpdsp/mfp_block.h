@@ -18,3 +18,5 @@ extern int mfp_block_zero(mfp_block * b);
 extern int mfp_block_mac(mfp_block * in_1, mfp_block * in_2, mfp_block * in_3, mfp_block * out);
 extern int mfp_block_trunc(mfp_block * in, mfp_block * out); 
 extern int mfp_block_copy(mfp_block * in, mfp_block * out);
+extern mfp_sample mfp_block_integrate(mfp_block * deltas, mfp_sample * scale, 
+		                              mfp_sample initval, mfp_block * out);

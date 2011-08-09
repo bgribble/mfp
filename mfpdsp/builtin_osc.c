@@ -9,6 +9,7 @@
 
 typedef struct {
 	cspline * spline;
+	mfp_block * inblk;
 	float const_freq;
 	float const_ampl;
 	float phase;
@@ -22,24 +23,36 @@ static int
 process(mfp_processor * proc) 
 {
 	builtin_osc_data * d = (builtin_osc_data *)(proc->data);
-	float cur_phase; 
-	float phase_incr;
-	mfp_sample * sample; 
-	int scount; 
+	mfp_block outblk, amblk, fmblk;
+	int mode_am = 0, mode_fm = 0;
+	float phase_base;
 
-	phase_incr = 2.0 * M_PI * d->freq / (float)mfp_samplerate;
+	if (mfp_proc_has_input(proc, 0)) {
+		mode_fm = 1;
+		mfp_block_init(&fmblk, proc->inlet_buf[0], mfp_blocksize);
+	}
 
-	sample = proc->outlet_buf[0];
-	if (sample == NULL) {
+	if (mfp_proc_has_input(proc, 1)) {
+		mode_am = 1;
+		mfp_block_init(&amblk, proc->inlet_buf[1], mfp_blocksize);
+	}
+
+	phase_base = 2.0 * M_PI / (float)mfp_samplerate;
+
+	if (proc->outlet_buf[0] == NULL) {
+		mfp_proc_error(proc, "No output buffers allocated");
 		return 0;
 	}
-
-	/* iterate */ 
-	for(scount=0; scount < mfp_blocksize; scount++) {
-		*sample++ = sin(d->phase);
-		d->phase = fmod(d->phase + phase_incr, 2 * M_PI);
+	else {
+		mfp_block_init(&outblk, proc->outlet_buf[0], mfp_blocksize);
 	}
 
+	if(mode_fm == 1) {
+		newphase = mfp_block_integrate(&fmblk, phase_base, d->phase, &outblk);  	
+	}
+	else {
+		newphase = mfp_block_integrate(NULL, phase_base*d->const_freq, d->phase, &outblk);
+	}
 	return 0;
 }
 
