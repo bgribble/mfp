@@ -1,0 +1,16 @@
+testext, a Nose plugin for running tests in C extensions
+
+The plugin and test running helper:
+
+testext/
+	setup.py
+	testext/
+		# The main plugin. runner is a console program that runs a named test,
+		# plugin is the nose plugin
+		plugin.py
+		runner.py
+	_testext/
+		An extension needed by the test runner to dlopen and dlsym the test:
+		testext.c
+		test_testext.c
+
