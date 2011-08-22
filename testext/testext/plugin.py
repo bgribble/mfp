@@ -28,6 +28,7 @@ class TestInfo(object):
 
 class TestExt(Plugin):
 	name = 'testext'
+	regex = "testext_test"
 
 	def options(self, parser, env=os.environ):
 		parser.add_option(
@@ -44,7 +45,34 @@ class TestExt(Plugin):
 	def configure(self, options, conf):
 		if not self.can_configure:
 			return
-		self.enabled = options.gendocs_enabled
-		self.regex = options.gendocs_output or "testext_test"
+		self.enabled = options.testext_enabled
+		self.regex = options.testext_regex
 		self.conf = conf
 
+	def wantFile(self, filename):
+		libre = r".*\.so(\.[0-9]+)*$"
+		print "TestExt.wantFile: checking file", filename
+		if re.match(libre, filename):
+			return True
+		else:
+			return False
+
+	def wantDirectory(self, dirname):
+		print "TestExt.wantDirectory:", dirname
+		return True
+
+	def wantModule(self, module):
+		print "TestExt.wantModule:", module
+		return True
+
+	def loadTestsFromFile(self, filename):
+		print "TestExt.loadlTestsFromFile: loading from", filename
+		import subprocess
+		p = subprocess.Popen(['readelf', '-Ws', filename], stdout=subprocess.PIPE)
+		syms, stderr = p.communicate()
+		
+		for s in syms:
+			m = re.match(r'FUNC .* ([^ ]+)$', s)
+			if m:
+				print "found function", m.group(1)
+		return []

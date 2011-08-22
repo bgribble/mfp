@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <execinfo.h>
-
+#include <dlfcn.h>
 
 int error_happened = 0;
 
@@ -49,6 +49,7 @@ run_dl_test(PyObject * mod, PyObject * args)
 	int (* dlfunc)(void);
 	int testres;
 	struct sigaction sa;
+	PyObject * pyres;
 
 	error_happened = 0;
 
@@ -57,8 +58,8 @@ run_dl_test(PyObject * mod, PyObject * args)
 
 	if (libname == NULL || funcname == NULL) {
 		printf("testext ERROR: Library (%s) or function (%s) name could not be parsed", libname, funcname);
-		Py_IncRef(PyNone);
-		return PyNone;
+		Py_IncRef(Py_None);
+		return Py_None;
 	}
 
 	printf("Finding test function %s in library %s\n", libname, funcname);
@@ -69,24 +70,24 @@ run_dl_test(PyObject * mod, PyObject * args)
 	sa.sa_sigaction = sigsegv_handler;
 	if (sigaction(SIGSEGV, &sa, NULL) == -1) {
 		printf("testext ERROR: could not install SIGSEGV handler, exiting\n");
-		Py_IncRef(PyNone);
-		return PyNone;
+		Py_IncRef(Py_None);
+		return Py_None;
 	}
 	
 	/* look up test */
 	dlfile = dlopen(libname, RTLD_NOW);
 	if (dlfile == NULL) {
 		printf("testext ERROR: Could not dlopen library %s (error: %s)\n", libname, dlerror());
-		Py_IncRef(PyNone);
-		return PyNone;
+		Py_IncRef(Py_None);
+		return Py_None;
 	}
 
 	dlfunc = dlsym(dlfile, funcname);
 	if (dlfunc == NULL) {
 		printf("testext ERROR: Could not look up symbol %s (error: %s)\n", funcname, dlerror());
 		dlclose(dlfile);
-		Py_IncRef(PyNone);
-		return PyNone;
+		Py_IncRef(Py_None);
+		return Py_None;
 	}
 
 	/* run test */
@@ -96,10 +97,14 @@ run_dl_test(PyObject * mod, PyObject * args)
 	dlclose(dlfile);
 
 	if (error_happened || testres == NULL)
-		testres = PyNone;
+		pyres = Py_None;
+	else if (testres) 
+		pyres = Py_True;
+	else
+		pyres = Py_False;
 
-	Py_IncRef(testres);
-	return testres;
+	Py_IncRef(pyres);
+	return pyres;
 
 }
 
@@ -112,5 +117,5 @@ PyMODINIT_FUNC
 inittestext_ext(void) 
 {
 
-	Py_InitModule("_testext", TextExtExtMethods);
+	Py_InitModule("_testext", TestExtExtMethods);
 }
