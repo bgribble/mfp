@@ -13,22 +13,33 @@ from nose.plugins.base import Plugin
 from nose.util import tolist
 import re 
 from datetime import datetime
+from unittest import TestCase
+
+
 log = logging.getLogger('nose.plugins')
 
-class TestInfo(object): 
-	def __init__(self):
-		self.test_id = None
-		self.covers = None 
-		self.summary = None
-		self.preconditions = None
-		self.datasets = None
-		self.rationale = None
-		self.steps = [] 
-		self.passed = None
+class DynLibTestCase (TestCase):
+	def __init__(self, libname, funcname):
+		self.funcname = funcname
+		self.libname = libname
+		TestCase.__init__(self)
+		self._testMethodDoc = funcname
+
+	def runTest(self):
+		print "\nDynLibTestCase:", self.libname, self.funcname
+		import subprocess
+		p = subprocess.Popen(["testext_wrapper", self.libname, self.funcname])
+		p.wait()
+		if p.returncode == 0:
+			return True
+		elif p.returncode == 1:
+			return False
+		elif p.returncode == 2:
+			return None
 
 class TestExt(Plugin):
 	name = 'testext'
-	regex = "testext_test"
+	regex = None 
 
 	def options(self, parser, env=os.environ):
 		parser.add_option(
@@ -38,7 +49,7 @@ class TestExt(Plugin):
 		)
 		parser.add_option(
 			'--testext-regex', action='store', dest='testext_regex',
- 			default=env.get('NOSE_TESTEXT_REGEX'),
+ 			default=env.get('NOSE_TESTEXT_REGEX', "testext_.*"),
 			help='Regular expression to match test functions [NOSE_TESTEXT_REGEX]'
 		)
 
@@ -50,29 +61,28 @@ class TestExt(Plugin):
 		self.conf = conf
 
 	def wantFile(self, filename):
+		'''wantFile: we want all dynamic libraries (*.so.x.y.z)'''
 		libre = r".*\.so(\.[0-9]+)*$"
-		print "TestExt.wantFile: checking file", filename
 		if re.match(libre, filename):
 			return True
 		else:
 			return False
 
 	def wantDirectory(self, dirname):
-		print "TestExt.wantDirectory:", dirname
-		return True
-
-	def wantModule(self, module):
-		print "TestExt.wantModule:", module
+		'''wantDirectory: we want all directories'''
 		return True
 
 	def loadTestsFromFile(self, filename):
-		print "TestExt.loadlTestsFromFile: loading from", filename
 		import subprocess
-		p = subprocess.Popen(['readelf', '-Ws', filename], stdout=subprocess.PIPE)
+		p = subprocess.Popen(['readelf', '-W', '-s', filename], stdout=subprocess.PIPE)
 		syms, stderr = p.communicate()
-		
-		for s in syms:
-			m = re.match(r'FUNC .* ([^ ]+)$', s)
+	
+		cases = []
+		for s in syms.split('\n'):
+			m = re.search(r'FUNC .* ([^ ]+)$', s)
 			if m:
-				print "found function", m.group(1)
-		return []
+				if re.match(self.regex, m.group(1)):
+					cases.append(DynLibTestCase(filename, m.group(1)))
+		if cases == []:
+			return False
+		return cases

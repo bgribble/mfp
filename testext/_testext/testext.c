@@ -114,7 +114,7 @@ static PyMethodDef TestExtExtMethods[] = {
 };
 
 PyMODINIT_FUNC
-inittestext_ext(void) 
+init_testext(void) 
 {
 
 	Py_InitModule("_testext", TestExtExtMethods);

@@ -12,10 +12,12 @@ setup(
 			'testext = testext:TestExt'
 		],
 		'console_scripts': [
-			'testext_run=testext.runner:run_test'
+			'testext_wrapper=testext.wrapper:main'
 		]
 	},
 	ext_modules=[ Extension('_testext', libraries=['dl'], 
-							sources=['_testext/testext.c', '_testext/test_testext.c'])],
+							sources=['_testext/testext.c']),
+			      Extension('test', 
+							sources=['test/test_testext.c'])],
 	include_package_data=True
 )
