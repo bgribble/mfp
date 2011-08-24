@@ -28,7 +28,7 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
 
 	free(strings);
 
-	error_happened = 1;
+	exit(-11);
 }
 
 /*

@@ -26,16 +26,16 @@ class DynLibTestCase (TestCase):
 		self._testMethodDoc = funcname
 
 	def runTest(self):
-		print "\nDynLibTestCase:", self.libname, self.funcname
 		import subprocess
 		p = subprocess.Popen(["testext_wrapper", self.libname, self.funcname])
 		p.wait()
+		print "runTest:", p.returncode
 		if p.returncode == 0:
 			return True
 		elif p.returncode == 1:
-			return False
-		elif p.returncode == 2:
-			return None
+			raise AssertionError()
+		else:
+			raise Exception()
 
 class TestExt(Plugin):
 	name = 'testext'
