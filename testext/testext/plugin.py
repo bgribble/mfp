@@ -8,7 +8,7 @@ Uses the _testext extension to load and run the test, via the runner helper
 '''
 
 import logging 
-import os
+import sys, os
 from nose.plugins.base import Plugin
 from nose.util import tolist
 import re 
@@ -27,9 +27,17 @@ class DynLibTestCase (TestCase):
 
 	def runTest(self):
 		import subprocess
-		p = subprocess.Popen(["testext_wrapper", self.libname, self.funcname])
+		p = subprocess.Popen(["testext_wrapper", self.libname, self.funcname],
+					         stdout=subprocess.PIPE)
+		stdout, stderr = p.communicate()
 		p.wait()
-		print "runTest:", p.returncode
+		
+		print stdout
+		if stderr is not None:
+			print "---- stderr start ----"
+			print stderr
+			print "---- stderr end ----"
+
 		if p.returncode == 0:
 			return True
 		elif p.returncode == 1:

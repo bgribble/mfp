@@ -6,7 +6,7 @@ def main():
 	libname = sys.argv[1]
 	funcname = sys.argv[2]
 	rv = _testext.run_dl_test(libname, funcname)
-	print "wrapper:", funcname, rv
+
 	if rv is True:
 		sys.exit(0)
 	elif rv is False:

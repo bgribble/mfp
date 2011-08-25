@@ -62,7 +62,7 @@ run_dl_test(PyObject * mod, PyObject * args)
 		return Py_None;
 	}
 
-	printf("Finding test function %s in library %s\n", libname, funcname);
+	printf("testext: Finding test function %s in library %s\n", libname, funcname);
 
 	/* install signal handlers */
 	sa.sa_flags = SA_SIGINFO;
@@ -96,7 +96,7 @@ run_dl_test(PyObject * mod, PyObject * args)
 	/* clean up */
 	dlclose(dlfile);
 
-	if (error_happened || testres == NULL)
+	if (error_happened)
 		pyres = Py_None;
 	else if (testres) 
 		pyres = Py_True;
