@@ -26,6 +26,7 @@ process(mfp_processor * proc)
 	mfp_block outblk, amblk, fmblk;
 	int mode_am = 0, mode_fm = 0;
 	float phase_base;
+	float newphase = 0.0;
 
 	if (mfp_proc_has_input(proc, 0)) {
 		mode_fm = 1;
@@ -53,6 +54,8 @@ process(mfp_processor * proc)
 	else {
 		newphase = mfp_block_integrate(NULL, phase_base*d->const_freq, d->phase, &outblk);
 	}
+	d->phase = newphase;
+
 	return 0;
 }
 
@@ -60,7 +63,7 @@ static void
 init(mfp_processor * proc) 
 {
 	builtin_osc_data * d = g_malloc(sizeof(builtin_osc_data));
-	d->cspline = cspline_new(9, mfp_blocksize);	
+	d->spline = cspline_new(9, mfp_blocksize);	
 	d->const_ampl = 1.0;
 	d->const_freq = 0.0;
 	d->phase = 0;
@@ -72,11 +75,11 @@ init(mfp_processor * proc)
 static void
 destroy(mfp_processor * proc) 
 {
-	builtin_osc_data * d = (builtin_osc_data)(proc->data);
+	builtin_osc_data * d = (builtin_osc_data *)(proc->data);
 	
-	if (d->cspline != NULL) {
-		cspline_free(d->cspline);
-		d->cspline = NULL;
+	if (d->spline != NULL) {
+		cspline_free(d->spline);
+		d->spline = NULL;
 	}
 
 	if (proc->data != NULL) {

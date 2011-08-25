@@ -61,6 +61,10 @@ typedef struct {
 #define REQTYPE_CONNECT 3
 #define REQTYPE_DISCONNECT 4
 
+#define GENERATOR_NEVER 0
+#define GENERATOR_ALWAYS 1
+#define GENERATOR_CONDITIONAL 2
+
 /* global variables */ 
 extern int mfp_dsp_enabled;
 extern int mfp_needs_reschedule;
@@ -94,7 +98,7 @@ extern int mfp_proc_ready_to_schedule(mfp_processor * p);
 extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, int);
 extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, int);
 extern mfp_processor * mfp_proc_init(mfp_processor *);
-
+extern int mfp_proc_error(mfp_processor * self, const char * message);
 extern void mfp_proc_process(mfp_processor *);
 extern void mfp_proc_destroy(mfp_processor *);
 extern int mfp_proc_connect(mfp_processor *, int, mfp_processor *, int);
@@ -102,6 +106,8 @@ extern int mfp_proc_disconnect(mfp_processor *, int, mfp_processor *, int);
 extern int mfp_proc_setparam_float(mfp_processor * self, char * param_name, float param_val);
 extern int mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_val);
 extern int mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_val);
+
+extern int mfp_proc_has_input(mfp_processor * self, int inlet_num);
 
 /* mfp_pyglue.c */
 extern void dsp_handle_queue(void);

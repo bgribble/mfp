@@ -253,4 +253,26 @@ mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_
 	return 0;
 }
 
+int
+mfp_proc_has_input(mfp_processor * self, int inlet_num)
+{
+	GArray * xlets;
+
+	if (inlet_num >= self->inlet_conn->len)
+		return 0;
+
+	xlets = g_array_index(self->inlet_conn, GArray *, inlet_num);
+	if (xlets->len > 0)
+		return 1;
+	else
+		return 0;
+
+
+}
+
+int 
+mfp_proc_error(mfp_processor * self, const char * message)
+{
+	return 1;
+}
 

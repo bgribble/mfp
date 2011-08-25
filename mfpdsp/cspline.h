@@ -4,8 +4,8 @@
  * Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
  */
 
-#ifndef _MFP_CSPLINE_H
-#define _MFP_CSPLINE_H
+#ifndef MFP_CSPLINE_H
+#define MFP_CSPLINE_H
 
 #include "mfp_block.h"
 
@@ -22,4 +22,6 @@ extern cspline * cspline_new(int segments, int blocksize);
 extern void cspline_init(cspline * self, float domain_start, float domain_end, float *segments);
 extern void cspline_free(cspline * self);
 extern int cspline_block_eval(cspline * self, mfp_block * in, mfp_block * out);
+
+#endif
 
