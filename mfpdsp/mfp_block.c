@@ -1,4 +1,8 @@
-
+#include <stdlib.h>
+#include <x86intrin.h>
+#include <glib.h>
+#include <string.h>
+#include "mfp_dsp.h"
 #include "mfp_block.h"
 
 mfp_block * 
@@ -13,7 +17,7 @@ mfp_block_new(int blocksize)
 void
 mfp_block_init(mfp_block * block, mfp_sample * data, int blocksize) 
 {
-	block->data = data 
+	block->data = data; 
 	block->blocksize = blocksize;
 	block->allocsize = blocksize;
 
@@ -53,6 +57,7 @@ mfp_block_const_mul(mfp_block * in, float constant, mfp_block * out)
 		__builtin_ia32_storeups(out->data + loc, 
 								__builtin_ia32_mulss(cval, __builtin_ia32_loadups(in->data+loc)));
 	}
+	return 1;
 }
 
 
@@ -67,23 +72,26 @@ mfp_block_const_add(mfp_block * in, float constant, mfp_block * out)
 		__builtin_ia32_storeups(out->data + loc, 
 								__builtin_ia32_addss(cval, __builtin_ia32_loadups(in->data+loc)));
 	}
+	return 1;
 }
 
 int
 mfp_block_index_fetch(mfp_block * indexes, float * base, mfp_block * out) 
 {
 	int loc = 0;
-	int end = in->blocksize;
+	int end = out->blocksize;
 
 	for(; loc < end; loc++) {
 		out->data[loc] = base[(int)(indexes->data[loc])];
 	}
+	return 1;
 }
 
 int
 mfp_block_zero(mfp_block * b) 
 {
 	memset(b->data, 0, b->blocksize*sizeof(float));
+	return 1;
 }
 
 int
@@ -100,7 +108,7 @@ mfp_block_mac(mfp_block * in_1, mfp_block * in_2, mfp_block * in_3, mfp_block * 
 			v1 = __builtin_ia32_loadups(in_1->data + loc);
 			v2 = __builtin_ia32_loadups(in_2->data + loc);
 			v3 = __builtin_ia32_loadups(in_3->data + loc);
-			v4 = __builtin_ia32_mulss(v1, v2)
+			v4 = __builtin_ia32_mulss(v1, v2);
 
 			__builtin_ia32_storeups(out->data + loc, 
 									__builtin_ia32_addss(v0, __builtin_ia32_mulss(v3, v4))); 
@@ -111,12 +119,13 @@ mfp_block_mac(mfp_block * in_1, mfp_block * in_2, mfp_block * in_3, mfp_block * 
 			v0 = __builtin_ia32_loadups(out->data + loc);
 			v1 = __builtin_ia32_loadups(in_1->data + loc);
 			v2 = __builtin_ia32_loadups(in_2->data + loc);
-			v4 = __builtin_ia32_mulss(v1, v2)
+			v4 = __builtin_ia32_mulss(v1, v2);
 
-			__builtin_ia32_storeups(out->data + loc, __builtin_ia32_addss(v0, v4))
+			__builtin_ia32_storeups(out->data + loc, __builtin_ia32_addss(v0, v4));
 		}
 	}
 
+	return 1;
 }
 
 int
@@ -127,9 +136,10 @@ mfp_block_trunc(mfp_block * in, mfp_block * out)
 
 	for(; loc < end; loc+=4) {
 		__builtin_ia32_storeups(out->data + loc, 
-								__builtin_ia32_roundps(__builtin_ia32_loadups(in->data+loc),
-													   _MM_FROUND_FLOOR));	
+								__builtin_ia32_cvtdq2ps(
+									__builtin_ia32_cvtps2dq(__builtin_ia32_loadups(in->data+loc))));
 	}
+	return 1;
 }
 
 int
@@ -138,12 +148,12 @@ mfp_block_copy(mfp_block * in, mfp_block * out)
 	if (out->blocksize != in->blocksize) {
 		mfp_block_resize(out, in->blocksize);
 	}
-	g_memcpy(out->data, in->data, in->blocksize*sizeof(float));
-
+	memcpy(out->data, in->data, in->blocksize*sizeof(float));
+	return 1;
 }
 
 mfp_sample 
-mfp_block_integrate(mfp_block * deltas, mfp_sample * scale, mfp_sample initval, mfp_block * out)
+mfp_block_integrate(mfp_block * deltas, mfp_sample scale, mfp_sample initval, mfp_block * out)
 {
 	int loc = 0;
 	int end = out->blocksize;
@@ -159,7 +169,7 @@ mfp_block_integrate(mfp_block * deltas, mfp_sample * scale, mfp_sample initval, 
 	else {
 		for(loc = 0; loc < end; loc++) {
 			out->data[loc] = (float)accum;
-			accum += deltas[loc]*(double)scale;
+			accum += (deltas->data[loc]*(double)scale);
 		}
 		return accum;
 	}

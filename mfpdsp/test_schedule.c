@@ -3,7 +3,7 @@
 #include "mfp_dsp.h"
 #include "builtin.h"
 
-static int
+int
 test_sched_prod_to_sink(void) 
 {
 	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac");
@@ -26,7 +26,7 @@ test_sched_prod_to_sink(void)
 	}
 }
 
-static int
+int
 test_sched_y_conn(void)
 {
 	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac");
@@ -52,7 +52,7 @@ test_sched_y_conn(void)
 	}
 }
 
-static int
+int
 test_sig_1(void) 
 {
 	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
@@ -76,7 +76,7 @@ test_sig_1(void)
 	}
 }
 
-static int
+int
 test_sig_2(void) 
 {
 	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
@@ -111,7 +111,7 @@ test_sig_2(void)
 }
 
 
-static int
+int
 test_plus_multi(void) 
 {
 	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
@@ -151,7 +151,7 @@ test_plus_multi(void)
 }
 
 
-static int
+int
 test_line_1(void) 
 {
 	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line");
@@ -235,7 +235,7 @@ test_line_1(void)
 	return 1;
 }
 
-static int
+int
 test_line_2(void) 
 {
 	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line");
@@ -296,31 +296,3 @@ test_line_2(void)
 
 
 
-int 
-test_ctests(void) 
-{
-	printf ("\n");
-
-	if (!test_sched_prod_to_sink()) 
-		return 0;
-
-	if (!test_sched_y_conn())
-		return 0;
-
-	if (!test_sig_1())
-		return 0;
-
-	if (!test_sig_2())
-		return 0;
-
-	if (!test_plus_multi())
-		return 0;
-
-	if (!test_line_1())
-		return 0;
-
-	if (!test_line_2())
-		return 0;
-
-	return 1;
-}

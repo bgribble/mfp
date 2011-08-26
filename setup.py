@@ -18,14 +18,15 @@ def pkgconf_libs(pkg):
 	
 
 mfp_c_sources = [
-	'mfp_pyglue.c', 'mfp_jack.c', 'mfp_dsp.c', 'mfp_proc.c',
-	'builtin_osc.c', 'builtin_adc_dac.c', 'builtin_sig.c', 'builtin_arith.c',
+	'mfp_pyglue.c', 'mfp_jack.c', 'mfp_dsp.c', 'mfp_proc.c', 'mfp_block.c',
+	'cspline.c', 'builtin_osc.c', 'builtin_adc_dac.c', 'builtin_sig.c', 'builtin_arith.c',
 	'builtin_line.c', 'builtin_noise.c',
-	'test_schedule.c'
+	'test_block.c', 'test_schedule.c'
 ]
 
 mfpdsp = Extension('mfpdsp',
 					libraries = ['jack'] + pkgconf_libs("glib-2.0"),
+				    extra_compile_args = ['-march=atom', '-mfpmath=sse' ],
 				    include_dirs = pkgconf_cflags("glib-2.0"),
                     sources = [ 'mfpdsp/' + f for f in mfp_c_sources ]
 				  )

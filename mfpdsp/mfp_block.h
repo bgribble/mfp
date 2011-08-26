@@ -2,6 +2,8 @@
 #ifndef MFP_BLOCK_H
 #define MFP_BLOCK_H
 
+#include "mfp_dsp.h"
+
 typedef struct {
 	int blocksize;
 	int allocsize;
@@ -9,7 +11,7 @@ typedef struct {
 } mfp_block;
 
 extern mfp_block * mfp_block_new(int blocsize);
-extern mfp_block * mfp_block_init(mfp_block * block, mfp_sample * data, int blocsize);
+extern void mfp_block_init(mfp_block * block, mfp_sample * data, int blocsize);
 extern void mfp_block_free(mfp_block * in);
 
 extern void mfp_block_resize(mfp_block * in, int newsize); 

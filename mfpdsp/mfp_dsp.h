@@ -1,4 +1,7 @@
 
+#ifndef MFP_DSP_H
+#define MFP_DSP_H
+
 #include <glib.h>
 #include <jack/jack.h>
 #include <pthread.h>
@@ -112,4 +115,5 @@ extern int mfp_proc_has_input(mfp_processor * self, int inlet_num);
 /* mfp_pyglue.c */
 extern void dsp_handle_queue(void);
 
-extern int test_ctests(void);
+#endif
+

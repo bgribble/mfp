@@ -267,19 +267,6 @@ proc_setparam(PyObject * mod, PyObject * args)
 	return Py_False;
 }
 
-static PyObject * 
-py_test_ctests(PyObject * mod, PyObject * args) {
-	if (! test_ctests()) {
-		Py_INCREF(Py_False);
-		return Py_False;
-	}
-	else {
-		Py_INCREF(Py_True);
-		return Py_True;
-	}
-
-}
-
 static PyMethodDef MfpDspMethods[] = {
 	{ "dsp_startup",  dsp_startup, METH_VARARGS, "Start processing thread" },
 	{ "dsp_shutdown",  dsp_shutdown, METH_VARARGS, "Stop processing thread" },
@@ -291,7 +278,6 @@ static PyMethodDef MfpDspMethods[] = {
 	{ "proc_disconnect", proc_disconnect, METH_VARARGS, "Disconnect DSP processors" },
 	{ "proc_getparam", proc_getparam, METH_VARARGS, "Get processor parameter" },
 	{ "proc_setparam", proc_setparam, METH_VARARGS, "Set processor parameter" },
-	{ "test_ctests", py_test_ctests, METH_VARARGS, "Wrapper for C unit tests" },
 	{ NULL, NULL, 0, NULL}
 };
 
