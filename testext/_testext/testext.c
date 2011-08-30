@@ -45,6 +45,9 @@ run_dl_test(PyObject * mod, PyObject * args)
 {
 	char * libname = NULL;
 	char * funcname = NULL;
+	char * setup = NULL;
+	char * teardown = NULL;
+
 	void * dlfile;
 	int (* dlfunc)(void);
 	int testres;
@@ -54,15 +57,13 @@ run_dl_test(PyObject * mod, PyObject * args)
 	error_happened = 0;
 
 	/* grab lib and symbol name */
-	PyArg_ParseTuple(args, "ss", &libname, &funcname);
+	PyArg_ParseTuple(args, "ssss", &libname, &funcname, &setup, &teardown);
 
 	if (libname == NULL || funcname == NULL) {
 		printf("testext ERROR: Library (%s) or function (%s) name could not be parsed", libname, funcname);
 		Py_IncRef(Py_None);
 		return Py_None;
 	}
-
-	printf("testext: Finding test function %s in library %s\n", libname, funcname);
 
 	/* install signal handlers */
 	sa.sa_flags = SA_SIGINFO;
@@ -82,6 +83,21 @@ run_dl_test(PyObject * mod, PyObject * args)
 		return Py_None;
 	}
 
+	
+	if(strcmp(setup, "None")) {
+		dlfunc = dlsym(dlfile, setup);
+		if (dlfunc == NULL) {
+			printf("testext ERROR: Could not look up setup symbol %s (error: %s)\n", setup, dlerror());
+			dlclose(dlfile);
+			Py_IncRef(Py_None);
+			return Py_None;
+		}
+
+		/* run setup */
+		dlfunc();
+	}
+
+	/* now the real test */
 	dlfunc = dlsym(dlfile, funcname);
 	if (dlfunc == NULL) {
 		printf("testext ERROR: Could not look up symbol %s (error: %s)\n", funcname, dlerror());
@@ -92,6 +108,19 @@ run_dl_test(PyObject * mod, PyObject * args)
 
 	/* run test */
 	testres = dlfunc();
+
+	if(strcmp(teardown, "None")) {
+		dlfunc = dlsym(dlfile, teardown);
+		if (dlfunc == NULL) {
+			printf("testext ERROR: Could not look up teardown symbol %s (error: %s)\n", teardown, dlerror());
+			dlclose(dlfile);
+			Py_IncRef(Py_None);
+			return Py_None;
+		}
+
+		/* run setup */
+		dlfunc();
+	}
 
 	/* clean up */
 	dlclose(dlfile);

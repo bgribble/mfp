@@ -326,6 +326,21 @@ init_builtins(void)
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 }
 
+int
+test_SETUP() 
+{
+	printf ("mfpdsp: test_SETUP\n");
+	/* called before each test case, where each test case is run 
+	 * in a separate executable */
+	init_globals();
+	init_builtins();
+}
+
+int
+test_TEARDOWN()
+{
+	printf ("mfpdsp: test_TEARDOWN\n");
+}
 
 PyMODINIT_FUNC
 initmfpdsp(void) 

@@ -89,7 +89,6 @@ init_builtin_adc(void) {
 
 mfp_procinfo *  
 init_builtin_dac(void) {
-	printf("initializing dac\n");
 	mfp_procinfo * p = malloc(sizeof(mfp_procinfo));
 	p->name = strdup("dac");
 	p->is_generator = 0;

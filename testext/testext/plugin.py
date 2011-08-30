@@ -18,16 +18,27 @@ from unittest import TestCase
 
 log = logging.getLogger('nose.plugins')
 
+class NullTestCase (TestCase):
+	def __init__(self, libname):
+		TestCase.__init__(self)
+		self._testMethodDoc = libname + ' (null test)'
+
+	def runTest(self):
+		return True
+
 class DynLibTestCase (TestCase):
-	def __init__(self, libname, funcname):
+	def __init__(self, libname, funcname, setup, teardown):
 		self.funcname = funcname
 		self.libname = libname
+		self.setupname = setup
+		self.teardownname = teardown
 		TestCase.__init__(self)
 		self._testMethodDoc = funcname
 
 	def runTest(self):
 		import subprocess
-		p = subprocess.Popen(["testext_wrapper", self.libname, self.funcname],
+		p = subprocess.Popen(["testext_wrapper", self.libname, self.funcname, 
+					          self.setupname or 'None', self.teardownname or 'None'],
 					         stdout=subprocess.PIPE)
 		stdout, stderr = p.communicate()
 		p.wait()
@@ -57,7 +68,7 @@ class TestExt(Plugin):
 		)
 		parser.add_option(
 			'--testext-regex', action='store', dest='testext_regex',
- 			default=env.get('NOSE_TESTEXT_REGEX', "testext_.*"),
+ 			default=env.get('NOSE_TESTEXT_REGEX', "^test_.*"),
 			help='Regular expression to match test functions [NOSE_TESTEXT_REGEX]'
 		)
 
@@ -85,12 +96,24 @@ class TestExt(Plugin):
 		p = subprocess.Popen(['readelf', '-W', '-s', filename], stdout=subprocess.PIPE)
 		syms, stderr = p.communicate()
 	
-		cases = []
+		testnames = []
+		setup = None
+		teardown = None
+
 		for s in syms.split('\n'):
 			m = re.search(r'FUNC .* ([^ ]+)$', s)
 			if m:
 				if re.match(self.regex, m.group(1)):
-					cases.append(DynLibTestCase(filename, m.group(1)))
-		if cases == []:
-			return False
-		return cases
+					tname = m.group(1)
+					if tname.endswith("SETUP"):
+						setup = tname
+					elif tname.endswith("TEARDOWN"):
+						teardown = tname
+					else:
+						testnames.append(tname)
+		for s in testnames:
+			yield DynLibTestCase(filename, s, setup, teardown)
+
+		if testnames == []:
+			yield NullTestCase(filename) 
+

@@ -98,6 +98,8 @@ process(mfp_processor * proc)
 	int scount;
 	float * sample = proc->outlet_buf[0];
 
+	printf("line.process()\n");
+
 	if (sample == NULL) {
 		return 0;
 	}
@@ -112,6 +114,8 @@ process(mfp_processor * proc)
 
 	slope = ((double)(cseg->end_val - data->start_val))/(cseg->end_frame-cseg->start_frame);
 	offset = data->start_val;
+
+	printf("line.process really starting\n");
 
 	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {
@@ -181,7 +185,7 @@ mfp_procinfo *
 init_builtin_line(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
 	p->name = strdup("line");
-	p->is_generator = 1;
+	p->is_generator = GENERATOR_ALWAYS;
 	p->process = process;
 	p->init = init;
 	p->destroy = destroy;

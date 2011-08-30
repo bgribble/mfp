@@ -8,7 +8,7 @@
 int
 test_block_create(void) 
 {
-	mfp_block * b = mfp_block_create(512);
+	mfp_block * b = mfp_block_new(512);
 	if (b == NULL) {
 		printf("FAIL: mfp_block_create returned NULL\n");
 		return 0;
