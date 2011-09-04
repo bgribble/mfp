@@ -32,8 +32,14 @@ class DynLibTestCase (TestCase):
 		self.libname = libname
 		self.setupname = setup
 		self.teardownname = teardown
+		self.expected = 0
+		if funcname.endswith("expect_fail"):
+			self.expected = 1
+		elif funcname.endswith("expect_err"):
+			self.expected = 2
+
 		TestCase.__init__(self)
-		self._testMethodDoc = funcname
+		self._testMethodDoc = '%s:%s' % (libname.split('/')[-1], funcname)
 
 	def runTest(self):
 		import subprocess
@@ -48,10 +54,13 @@ class DynLibTestCase (TestCase):
 			print "---- stderr start ----"
 			print stderr
 			print "---- stderr end ----"
+		if p.returncode > 2:
+			p.returncode = 2
 
-		if p.returncode == 0:
+		if p.returncode == self.expected:
 			return True
-		elif p.returncode == 1:
+		elif (p.returncode == 1 or self.expected == 2
+		      or (p.returncode == 0 and self.expected == 1)):
 			raise AssertionError()
 		else:
 			raise Exception()
@@ -59,6 +68,7 @@ class DynLibTestCase (TestCase):
 class TestExt(Plugin):
 	name = 'testext'
 	regex = None 
+	fileinfo = {}
 
 	def options(self, parser, env=os.environ):
 		parser.add_option(
@@ -83,23 +93,25 @@ class TestExt(Plugin):
 		'''wantFile: we want all dynamic libraries (*.so.x.y.z)'''
 		libre = r".*\.so(\.[0-9]+)*$"
 		if re.match(libre, filename):
-			return True
-		else:
-			return False
+			info = self.find_fileinfo(filename)
+			if info:
+				self.fileinfo[filename] = info
+				return True
+		return False
 
 	def wantDirectory(self, dirname):
 		'''wantDirectory: we want all directories'''
 		return True
 
-	def loadTestsFromFile(self, filename):
+	def find_fileinfo(self, filename):
 		import subprocess
 		p = subprocess.Popen(['readelf', '-W', '-s', filename], stdout=subprocess.PIPE)
 		syms, stderr = p.communicate()
 	
-		testnames = []
+		testnames = {}
 		setup = None
 		teardown = None
-
+	
 		for s in syms.split('\n'):
 			m = re.search(r'FUNC .* ([^ ]+)$', s)
 			if m:
@@ -109,11 +121,20 @@ class TestExt(Plugin):
 						setup = tname
 					elif tname.endswith("TEARDOWN"):
 						teardown = tname
-					else:
-						testnames.append(tname)
-		for s in testnames:
-			yield DynLibTestCase(filename, s, setup, teardown)
+					elif not tname.endswith("skip"):
+						testnames[tname] = True
+		tt = testnames.keys()
+		tt.sort()
+		if len(tt) > 0:
+			return { 'tests': tt, 'setup': setup, 'teardown': teardown }
+			
+	def loadTestsFromFile(self, filename):
+		info = self.fileinfo.get(filename)
+		if info:
+			setup = info['setup']
+			teardown = info['teardown']
 
-		if testnames == []:
-			yield NullTestCase(filename) 
+			for s in info['tests']:
+				yield DynLibTestCase(filename, s, setup, teardown)
+
 

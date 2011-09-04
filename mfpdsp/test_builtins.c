@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include "mfp_dsp.h"
 #include "builtin.h"
 
@@ -110,15 +111,14 @@ test_line_1(void)
 	mfp_sample * outp; 
 	int snum;
 
-	float tval[] = { 3.0, 
-		             0.0, 1.0, 1.0, 
+	float tval[] = { 0.0, 1.0, 1.0, 
 					 0.0, 0.0, 0.0, 
 					 1.0, 1.0, 1.0 };
 
 	GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(float), 6);
 
 	printf("   test_line_1 \n ");
-	for (snum=0; snum < 10; snum++) {
+	for (snum=0; snum < 9; snum++) {
 		g_array_append_val(env_1, tval[snum]);
 	}
 
@@ -194,19 +194,17 @@ test_line_2(void)
 	mfp_processor * line = mfp_proc_create(proctype, 0, 1, mfp_blocksize);
 	mfp_sample * outp; 
 	int snum;
-	float tval_1[] = { 1.0, 
-		               0.0, 1.0, 2.0*(mfp_blocksize-1)/mfp_samplerate*1000.0 } ;
-	float tval_2[] = { 1.0, 
-		               0.0, 0.0, 1.0*(mfp_blocksize-1)/mfp_samplerate*1000.0 } ;
+	float tval_1[] = { 0.0, 1.0, 2.0*(mfp_blocksize-1)/mfp_samplerate*1000.0 } ;
+	float tval_2[] = { 0.0, 0.0, 1.0*(mfp_blocksize-1)/mfp_samplerate*1000.0 } ;
 
 	GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
 	GArray * env_2 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
 
 	printf("   test_line_2... ");
-	for (snum=0; snum < 4; snum++) {
+	for (snum=0; snum < 3; snum++) {
 		g_array_append_val(env_1, tval_1[snum]);
 	}
-	for (snum=0; snum < 4; snum++) {
+	for (snum=0; snum < 3; snum++) {
 		g_array_append_val(env_2, tval_2[snum]);
 	}
 

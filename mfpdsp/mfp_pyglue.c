@@ -327,19 +327,19 @@ init_builtins(void)
 }
 
 int
-test_SETUP() 
+test_SETUP(void) 
 {
-	printf ("mfpdsp: test_SETUP\n");
 	/* called before each test case, where each test case is run 
 	 * in a separate executable */
 	init_globals();
 	init_builtins();
+	return 0;
 }
 
 int
-test_TEARDOWN()
+test_TEARDOWN(void)
 {
-	printf ("mfpdsp: test_TEARDOWN\n");
+	return 0;
 }
 
 PyMODINIT_FUNC

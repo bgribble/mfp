@@ -26,7 +26,8 @@ mfp_c_sources = [
 
 mfpdsp = Extension('mfpdsp',
 					libraries = ['jack'] + pkgconf_libs("glib-2.0"),
-				    extra_compile_args = ['-march=atom', '-mfpmath=sse' ],
+				    extra_compile_args = ['-march=atom', '-mstackrealign',
+							  '-mpreferred-stack-boundary=4', '-g' ],
 				    include_dirs = pkgconf_cflags("glib-2.0"),
                     sources = [ 'mfpdsp/' + f for f in mfp_c_sources ]
 				  )
