@@ -7,6 +7,7 @@
 typedef struct {
 	int blocksize;
 	int allocsize;
+	int aligned;
 	float * data;
 } mfp_block;
 
