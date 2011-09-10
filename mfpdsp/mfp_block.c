@@ -59,7 +59,7 @@ mfp_block_resize(mfp_block * in, int newsize)
 int
 mfp_block_const_mul(mfp_block * in, mfp_sample constant, mfp_block * out) 
 {
-	__v4sf cval, ival, oval;
+	__v4sf cval, ival;
 	__v4sf * iptr, * optr, * iend;
 	mfp_sample * uiptr, *uoptr, *uiend;
 
@@ -211,25 +211,72 @@ mfp_block_copy(mfp_block * in, mfp_block * out)
 	return 1;
 }
 
-mfp_sample 
-mfp_block_integrate(mfp_block * deltas, mfp_sample scale, mfp_sample initval, mfp_block * out)
+typedef float fv4[4] __attribute__ ((aligned(16)));
+typedef union {
+	__v4sf v;
+	float f[4];
+} fvu;
+
+static void
+print_v4(char * msg, __v4sf val)
 {
-	int loc = 0;
-	int end = out->blocksize;
-	double accum = initval;
+	fvu tt;
+	tt.v = val;
+	
+	printf("%s: %f %f %f %f\n", msg, tt.f[0], tt.f[1], tt.f[2], tt.f[3]);
+}
+
+mfp_sample 
+mfp_block_prefix_sum(mfp_block * deltas, mfp_sample scale, mfp_sample initval, mfp_block * out)
+{
+	float * inptr, * outptr, * endptr;
+	double accum;
+	int loc, end=out->blocksize;
+	fv4 scratch = { 0.0, 0.0, 0.0, 0.0 };
+	__v4sf xmm0, xmm1, xmm2, xmm3;
+	__v4sf zeros = (__v4sf) { 0.0, 0.0, 0.0, 0.0 };
+	__v4si mask = (__v4si) { 0x00, 0xffffffff, 0xffffffff, 0xffffffff }; 
+	__v4sf scaler = { scale, scale, scale, scale };
 
 	if(deltas == NULL) {
+		accum = initval;
 		for(loc = 0; loc < end; loc++) {
 			out->data[loc] = (mfp_sample)accum;
 			accum += (double)scale;
 		}
-		return accum;
 	}
 	else {
-		for(loc = 0; loc < end; loc++) {
-			out->data[loc] = (mfp_sample)accum;
-			accum += (deltas->data[loc]*(double)scale);
+		endptr = deltas->data + deltas->blocksize;
+		outptr = out->data;
+		scratch[0] = initval;
+		xmm1 = *(__v4sf *)scratch;
+		for(inptr = deltas->data; inptr < endptr; inptr += 4) {
+			/* A+I, B, C, D */
+			xmm0 = *(__v4sf *)inptr;
+			xmm0 = __builtin_ia32_mulps(xmm0, scaler);
+			xmm0 = __builtin_ia32_addss(xmm0, xmm1);
+
+			/* 0, A+I, B, C */
+			xmm2 = xmm0;
+			xmm2 = __builtin_ia32_shufps(xmm2, xmm2, 0x60);
+			xmm2 = __builtin_ia32_andps(xmm2, (__v4sf)mask);
+
+			/* A+I, A+B+I, B+C, C+D */
+			xmm2 = __builtin_ia32_addps(xmm2, xmm0);
+
+			/* 0, 0, A+I, A+B+I */
+			xmm0 = zeros;
+			xmm0 = __builtin_ia32_shufps(xmm0, xmm2, 0x40);
+
+			/* A+I, A+B+I, A+B+C+I, A+B+C+D+I */
+			xmm0 = __builtin_ia32_addps(xmm0, xmm2);
+			xmm1 = xmm0;
+			xmm1 = __builtin_ia32_shufps(xmm1, xmm1, 0xff);
+
+			*(__v4sf *)outptr = xmm0;
+
+			outptr += 4;
 		}
-		return accum;
 	}
+	return accum;
 }

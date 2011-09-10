@@ -49,10 +49,10 @@ process(mfp_processor * proc)
 	}
 
 	if(mode_fm == 1) {
-		newphase = mfp_block_integrate(&fmblk, phase_base, d->phase, &outblk);  	
+		newphase = mfp_block_prefix_sum(&fmblk, phase_base, d->phase, &outblk);  	
 	}
 	else {
-		newphase = mfp_block_integrate(NULL, phase_base*d->const_freq, d->phase, &outblk);
+		newphase = mfp_block_prefix_sum(NULL, phase_base*d->const_freq, d->phase, &outblk);
 	}
 	d->phase = newphase;
 
