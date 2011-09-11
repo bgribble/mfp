@@ -267,8 +267,8 @@ benchmark_block_prefix_sum(void)
 	gettimeofday(&end, NULL);
 
 	fast = (end.tv_sec + end.tv_usec/1000000.0)-(start.tv_sec+start.tv_usec/1000000.0);
-	printf("\nNaive: %f, fast: %f\n", naive, fast);
-	return 0;
+	printf("\n     Naive: %f, fast: %f\n", naive, fast);
+	return 1;
 }
 
 

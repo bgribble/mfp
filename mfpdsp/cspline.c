@@ -75,19 +75,11 @@ cspline_block_eval(cspline * self, mfp_block * in, mfp_block * out)
 	/* init output y = c0 */
 	fetch_constants(self, self->block_segs, 0, out);
 
-	printf("==\n");
-	print_block(in);
-	print_block(self->block_segs);
-	print_block(out);
-
 	/* get c1 coefficients for x */
 	fetch_constants(self, self->block_segs, 1,  self->coeff);
 
 	/* mac y += c1 * x */
 	mfp_block_mac(in, self->coeff, NULL, out);
-
-	print_block(self->coeff);
-	print_block(out);
 
 	/* get c2 coefficients for x**2 */
 	fetch_constants(self, self->block_segs, 2,  self->coeff);
@@ -95,15 +87,10 @@ cspline_block_eval(cspline * self, mfp_block * in, mfp_block * out)
 	/* mac y += c2 * x**2 */
 	mfp_block_mac(self->x2, self->coeff, NULL, out);
 
-	print_block(self->coeff);
-	print_block(out);
 	/* get c3 coefficients for x**3 */
 	fetch_constants(self, self->block_segs, 3,  self->coeff);
 
 	/* mac y += c3 * x**2 * x */
 	mfp_block_mac(self->x2, self->coeff, in, out);
-
-	print_block(self->coeff);
-	print_block(out);
 }
 
