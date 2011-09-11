@@ -227,18 +227,18 @@ print_v4(char * msg, __v4sf val)
 }
 
 mfp_sample 
-mfp_block_prefix_sum(mfp_block * deltas, mfp_sample scale, mfp_sample initval, mfp_block * out)
+mfp_block_prefix_sum(mfp_block * in, mfp_sample scale, mfp_sample initval, mfp_block * out)
 {
 	float * inptr, * outptr, * endptr;
 	double accum;
 	int loc, end=out->blocksize;
 	fv4 scratch = { 0.0, 0.0, 0.0, 0.0 };
-	__v4sf xmm0, xmm1, xmm2, xmm3;
+	__v4sf xmm0, xmm1, xmm2;
 	__v4sf zeros = (__v4sf) { 0.0, 0.0, 0.0, 0.0 };
 	__v4si mask = (__v4si) { 0x00, 0xffffffff, 0xffffffff, 0xffffffff }; 
 	__v4sf scaler = { scale, scale, scale, scale };
 
-	if(deltas == NULL) {
+	if(in == NULL) {
 		accum = initval;
 		for(loc = 0; loc < end; loc++) {
 			out->data[loc] = (mfp_sample)accum;
@@ -246,30 +246,35 @@ mfp_block_prefix_sum(mfp_block * deltas, mfp_sample scale, mfp_sample initval, m
 		}
 	}
 	else {
-		endptr = deltas->data + deltas->blocksize;
+		endptr = in->data + in->blocksize;
 		outptr = out->data;
 		scratch[0] = initval;
+
+		/* xmm1 gets carry in */
 		xmm1 = *(__v4sf *)scratch;
-		for(inptr = deltas->data; inptr < endptr; inptr += 4) {
-			/* A+I, B, C, D */
+
+		for(inptr = in->data; inptr < endptr; inptr += 4) {
+			/* xmm0 gets A+I, B, C, D */
 			xmm0 = *(__v4sf *)inptr;
 			xmm0 = __builtin_ia32_mulps(xmm0, scaler);
 			xmm0 = __builtin_ia32_addss(xmm0, xmm1);
 
-			/* 0, A+I, B, C */
+			/* xmm2 gets 0, A+I, B, C */
 			xmm2 = xmm0;
 			xmm2 = __builtin_ia32_shufps(xmm2, xmm2, 0x60);
 			xmm2 = __builtin_ia32_andps(xmm2, (__v4sf)mask);
 
-			/* A+I, A+B+I, B+C, C+D */
+			/* xmm2 gets A+I, A+B+I, B+C, C+D */
 			xmm2 = __builtin_ia32_addps(xmm2, xmm0);
 
-			/* 0, 0, A+I, A+B+I */
+			/* xmm0 gets 0, 0, A+I, A+B+I */
 			xmm0 = zeros;
 			xmm0 = __builtin_ia32_shufps(xmm0, xmm2, 0x40);
 
-			/* A+I, A+B+I, A+B+C+I, A+B+C+D+I */
+			/* xmm0 gets A+I, A+B+I, A+B+C+I, A+B+C+D+I */
 			xmm0 = __builtin_ia32_addps(xmm0, xmm2);
+
+			/* preparing for next iteration, xmm1 gets carry */
 			xmm1 = xmm0;
 			xmm1 = __builtin_ia32_shufps(xmm1, xmm1, 0xff);
 
