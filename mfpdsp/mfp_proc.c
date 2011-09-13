@@ -14,6 +14,8 @@ mfp_processor *
 mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
 		        int blocksize)
 {
+	printf("mfp_proc_create: %p\n", typeinfo);
+
 	if (typeinfo == NULL) 
 		return NULL;
 

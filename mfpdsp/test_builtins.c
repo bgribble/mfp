@@ -1,4 +1,5 @@
 
+#include <math.h>
 #include <stdio.h>
 #include "mfp_dsp.h"
 #include "builtin.h"
@@ -242,5 +243,35 @@ test_line_2(void)
 	}
 	printf("ok\n");
 	return 1;
+}
+
+int
+test_osc_1(void)
+{
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc");
+	mfp_processor * osc = mfp_proc_create(proctype, 2, 1, mfp_blocksize);
+	double phase;
+	int i;
+	int fail = 0;
+
+	printf("test_osc_1... \n");
+	mfp_proc_setparam_float(osc, "freq", 1000.0);
+	mfp_proc_setparam_float(osc, "ampl", 100.0);
+
+	printf("calling process()");
+	mfp_proc_process(osc);
+
+	for(i=0;i<mfp_blocksize;i++) {
+		phase = (double)i*1000.0*M_2_PI/mfp_samplerate;
+		if (fabs(100.0*sin(phase) - osc->outlet_buf[0][i]) > .001) {
+			fail = 1;
+			printf("i=%d, phase=%f, expected %f, got %f\n", i, phase, 
+				   100.0*sin(phase), osc->outlet_buf[0][i]);
+		}
+	}
+	if(fail)
+		return 0;
+	return 1;
+
 }
 

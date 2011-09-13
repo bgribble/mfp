@@ -16,8 +16,7 @@ extern void mfp_block_init(mfp_block * block, mfp_sample * data, int blocsize);
 extern void mfp_block_free(mfp_block * in);
 
 extern void mfp_block_resize(mfp_block * in, int newsize); 
-
-
+extern int mfp_block_mul(mfp_block * in_1, mfp_block * in_2, mfp_block * out);
 extern int mfp_block_const_mul(mfp_block * in, mfp_sample constant, mfp_block * out);
 extern int mfp_block_const_add(mfp_block * in, mfp_sample constant, mfp_block * out);
 extern int mfp_block_index_fetch(mfp_block * indexes, mfp_sample * base, mfp_block * out); 

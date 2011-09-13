@@ -3,6 +3,7 @@
 #include <x86intrin.h>
 #include <glib.h>
 #include <string.h>
+
 #include "mfp_dsp.h"
 #include "mfp_block.h"
 
@@ -23,10 +24,18 @@ mfp_block_init(mfp_block * block, mfp_sample * data, int blocksize)
 	block->data = data; 
 	block->blocksize = blocksize;
 	block->allocsize = blocksize;
+
+	if(data == NULL) {
+		printf("mfp_block_init: WARNING: data pointer NULL\n");
+		block->blocksize = 0;
+		block->allocsize = 0;
+	}
+
 	if (((long)data & (long)0xf) == 0) {
 		block->aligned = 1;
 	}
 	else {
+		printf("mfp_block_init: WARNING: data pointer unaligned, %p\n", data);
 		block->aligned = 0;
 	}
 }
@@ -284,4 +293,21 @@ mfp_block_prefix_sum(mfp_block * in, mfp_sample scale, mfp_sample initval, mfp_b
 		}
 	}
 	return accum;
+}
+
+int
+mfp_block_mul(mfp_block * in_1, mfp_block * in_2, mfp_block * out)
+{
+	int loc = 0;
+	int end = in_1->blocksize;	
+	__v4sf xmm0, xmm1;
+
+	for(; loc < end; loc+=4) {
+		xmm0 = *(__v4sf *)(in_1->data + loc);
+		xmm1 = *(__v4sf *)(in_2->data + loc);
+		xmm0 = xmm0 * xmm1;
+		*(__v4sf *)(out->data + loc) = xmm0;
+	}
+	return 1;
+
 }
