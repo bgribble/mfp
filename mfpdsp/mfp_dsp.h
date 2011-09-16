@@ -8,6 +8,8 @@
 
 typedef jack_default_audio_sample_t mfp_sample;
 
+#include "mfp_block.h"
+
 struct mfp_procinfo_struct;
 
 typedef struct {
@@ -23,8 +25,8 @@ typedef struct {
 	GArray * outlet_conn; 
 
 	/* input/output buffers */ 
-	mfp_sample ** inlet_buf;
-	mfp_sample ** outlet_buf;
+	mfp_block ** inlet_buf;
+	mfp_block ** outlet_buf;
 
 	/* scheduling information */ 
 	int depth;

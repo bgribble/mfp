@@ -6,7 +6,7 @@
 
 #ifndef MFP_CSPLINE_H
 #define MFP_CSPLINE_H
-
+#include "mfp_dsp.h"
 #include "mfp_block.h"
 
 typedef struct {

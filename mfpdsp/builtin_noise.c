@@ -10,7 +10,7 @@
 static int 
 process(mfp_processor * proc) 
 {
-	mfp_sample * sample = proc->outlet_buf[0];
+	mfp_sample * sample = proc->outlet_buf[0]->data;
 	int scount; 
 
 	if (sample == NULL) {

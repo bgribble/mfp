@@ -5,6 +5,7 @@
 #include <pthread.h>
 
 #include "mfp_dsp.h"
+#include "mfp_block.h"
 
 GArray          * mfp_proc_list = NULL;       /* all mfp_processors */ 
 GHashTable      * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */ 
@@ -55,16 +56,16 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 	}
 	
 	/* create input and output buffers (will be reallocated if blocksize changes */
-	p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_sample *));
+	p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));
 
 	for (outcount = 0; outcount < num_inlets; outcount ++) {
-		p->inlet_buf[outcount] = g_malloc0(blocksize * sizeof(mfp_sample));
+		p->inlet_buf[outcount] = mfp_block_new(blocksize); 
 	}	
 
 	p->outlet_buf = g_malloc(num_outlets * sizeof(mfp_sample *));
 	
 	for (outcount = 0; outcount < num_outlets; outcount ++) {
-		p->outlet_buf[outcount] = g_malloc0(blocksize * sizeof(mfp_sample));
+		p->outlet_buf[outcount] = mfp_block_new(blocksize);
 	}	
 	return p;
 }
@@ -88,10 +89,10 @@ mfp_proc_process(mfp_processor * self)
 {
 	GArray * inlet_conn;
 	mfp_connection ** curr_inlet; 
-	mfp_sample * inlet_buf;
+	mfp_block * inlet_buf;
 	
 	mfp_processor * upstream_proc;
-	mfp_sample    * upstream_outlet_buf;
+	mfp_block     * upstream_outlet_buf;
 	int           upstream_outlet_num;
 
 	int inlet_num;
@@ -106,12 +107,12 @@ mfp_proc_process(mfp_processor * self)
 	for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
 		inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
 		inlet_buf = self->inlet_buf[inlet_num];
-		memset(inlet_buf, 0, mfp_blocksize * sizeof(mfp_sample));
+		mfp_block_fill(inlet_buf, 0);
 		for(curr_inlet = (mfp_connection **)inlet_conn->data; *curr_inlet != NULL; curr_inlet++) {
 			upstream_proc = (*curr_inlet)->dest_proc;
 			upstream_outlet_num = (*curr_inlet)->dest_port;	
 			upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];	
-			mfp_dsp_accum(inlet_buf, upstream_outlet_buf, mfp_blocksize);
+			mfp_block_add(inlet_buf, upstream_outlet_buf, inlet_buf);
 		}
 	}
 
@@ -138,6 +139,9 @@ mfp_proc_destroy(mfp_processor * self)
 	g_hash_table_destroy(self->params);
 	g_array_free(self->inlet_conn, TRUE);
 	g_array_free(self->outlet_conn, TRUE);
+
+	/* FIXME: mem leak, free blocks */
+
 	g_free(self->inlet_buf);
 	g_free(self->outlet_buf);
 	g_free(self);

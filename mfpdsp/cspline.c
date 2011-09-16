@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <glib.h>
 #include <string.h>
+#include "mfp_dsp.h"
 #include "cspline.h"
 #include "mfp_block.h"
 
@@ -68,7 +69,7 @@ cspline_block_eval(cspline * self, mfp_block * in, mfp_block * out)
 	mfp_block_copy(in, self->block_segs);
 	mfp_block_const_add(self->block_segs, self->domain_start, self->block_segs);
 	mfp_block_const_mul(self->block_segs, 
-			            (self->domain_end - self->domain_start)/(float)(self->num_segments),
+			            (float)(self->num_segments)/(self->domain_end - self->domain_start),
 						self->block_segs);
 	mfp_block_trunc(self->block_segs, self->block_segs);
 

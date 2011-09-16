@@ -9,7 +9,7 @@ static int
 process(mfp_processor * proc) 
 {
 	gpointer val_ptr = g_hash_table_lookup(proc->params, "value");
-	mfp_sample * sample = proc->outlet_buf[0];
+	mfp_sample * sample = proc->outlet_buf[0]->data;
 	int scount; 
 
 	if (sample == NULL) {

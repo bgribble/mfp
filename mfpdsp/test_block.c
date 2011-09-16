@@ -2,10 +2,12 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "mfp_dsp.h"
 #include "mfp_block.h"
 #include "builtin.h"
+
 int
 test_block_create(void) 
 {
@@ -288,17 +290,43 @@ test_block_prefix_sum()
 			return 0;
 		}
 	}
-	printf("test 1 success!\n");
 
-	mfp_block_prefix_sum(NULL, 1.0, 1.0, b);
+	return 1;
+
+}
+
+int
+test_block_ramp(void)
+{
+	int i;
+	mfp_block *b = mfp_block_new(8);
+
+	mfp_block_ramp(b, 1.0, 1.0);
 
 	for(i=0; i< 8; i++) {
 		if (b->data[i] != i + 1.0) {
-			printf("FAIL: block_prefix_sum (NULL input) %d %f\n", i, b->data[i]);
+			printf("FAIL: block_ramp %d %f\n", i, b->data[i]);
+			return 0;
+		}
+	}
+}
+
+
+int
+test_block_fmod(void)
+{
+	int i;
+	mfp_block *b = mfp_block_new(1024);
+
+	mfp_block_ramp(b, 0.0, 2.0*M_PI/44.10);
+	mfp_block_fmod(b, 2.0*M_PI, b);
+
+	for(i=0; i< 8; i++) {
+		if (fabs(b->data[i] - fmod(i*2.0*M_PI/44.1, 2.0*M_PI)) > 0.001) {
+			printf("FAIL: block_fmod %d %f %f\n", i, fmod(i*2.0*M_PI/44.1, 2.0*M_PI), b->data[i]);
 			return 0;
 		}
 	}
 	return 1;
-
 }
 

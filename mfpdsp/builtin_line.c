@@ -96,7 +96,7 @@ process(mfp_processor * proc)
 	int cframe = data->cur_frame;
 	double slope, offset;
 	int scount;
-	float * sample = proc->outlet_buf[0];
+	float * sample = proc->outlet_buf[0]->data;
 
 	printf("line.process()\n");
 

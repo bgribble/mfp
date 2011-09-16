@@ -98,9 +98,9 @@ process(mfp_processor * proc)
 	builtin_arith_data * d = (builtin_arith_data *)(proc->data);
 	mfp_sample const_sample = d->const_sample;
 
-	mfp_sample * outbuf = proc->outlet_buf[0];
-	mfp_sample * in_0 = proc->inlet_buf[0];
-	mfp_sample * in_1 = proc->inlet_buf[1];
+	mfp_sample * outbuf = proc->outlet_buf[0]->data;
+	mfp_sample * in_0 = proc->inlet_buf[0]->data;
+	mfp_sample * in_1 = proc->inlet_buf[1]->data;
 
 	if ((outbuf == NULL) || (in_0 == NULL) || (in_1 == NULL))  {
 		return 0;

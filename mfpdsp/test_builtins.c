@@ -16,7 +16,7 @@ test_sig_1(void)
 	mfp_proc_setparam_float(sig, "value", 13.0);
 	mfp_proc_process(sig);
 
-	outp = sig->outlet_buf[0];
+	outp = sig->outlet_buf[0]->data;
 
 	if(outp[0] == 13.0) {
 		printf("ok\n");
@@ -50,7 +50,7 @@ test_sig_2(void)
 	mfp_dsp_schedule();
 	mfp_dsp_run(mfp_blocksize);
 
-	outp = dac->inlet_buf[0];
+	outp = dac->inlet_buf[0]->data;
 
 	if(outp[0] == 25.0) {
 		printf("ok\n");
@@ -90,7 +90,7 @@ test_plus_multi(void)
 	mfp_dsp_schedule();
 	mfp_dsp_run(mfp_blocksize);
 
-	outp = dac->outlet_buf[0];
+	outp = dac->outlet_buf[0]->data;
 
 	if(outp[0] == 85.0) {
 		printf("ok\n");
@@ -133,7 +133,7 @@ test_line_1(void)
 
 	mfp_proc_process(line);
 
-	outp = line->outlet_buf[0];
+	outp = line->outlet_buf[0]->data;
 
 	if (outp[0] != 0) {
 		printf("FAIL: outp[0] was %f not 0\n", outp[0]);
@@ -218,7 +218,7 @@ test_line_2(void)
 	line->needs_config = 1;
 	mfp_proc_process(line);
 
-	outp = line->outlet_buf[0];
+	outp = line->outlet_buf[0]->data;
 	if (outp[0] != 0.0) {
 		printf("FAIL: outp[0] was %f not 0.0\n", outp[0]);
 		return 0;
@@ -232,7 +232,7 @@ test_line_2(void)
 	line->needs_config = 1;
 	mfp_proc_process(line);
 
-	outp = line->outlet_buf[0];
+	outp = line->outlet_buf[0]->data;
 	if (outp[0] != 0.5) {
 		printf("FAIL: outp[0] was %f not 0.5\n", outp[0]);
 		return 0;
@@ -262,11 +262,11 @@ test_osc_1(void)
 	mfp_proc_process(osc);
 
 	for(i=0;i<mfp_blocksize;i++) {
-		phase = (double)i*1000.0*M_2_PI/mfp_samplerate;
-		if (fabs(100.0*sin(phase) - osc->outlet_buf[0][i]) > .001) {
+		phase = (double)i*1000.0*2.0*M_PI/(double)mfp_samplerate;
+		if (fabs(100.0*sin(phase) - osc->outlet_buf[0]->data[i]) > 0.2) {
 			fail = 1;
 			printf("i=%d, phase=%f, expected %f, got %f\n", i, phase, 
-				   100.0*sin(phase), osc->outlet_buf[0][i]);
+				   100.0*sin(phase), osc->outlet_buf[0]->data[i]);
 		}
 	}
 	if(fail)

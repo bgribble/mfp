@@ -6,18 +6,27 @@
 int
 test_cspline_create(void)
 {
-	cspline * c = cspline_new(2, 8);
+	cspline * c = cspline_new(4, 8);
 	mfp_block * in = mfp_block_new(8);
 	mfp_block * out = mfp_block_new(8);
 	int i;
 	int fail = 0;
-	float coeff[] = { 1.0, 0.0, 0.0, 0.0, 2.0, 1.0, 0.0, 0.0 };
-	float answers_1[] = { 1.0, 1.0, 1.0, 1.0, 3.0, 3.25, 3.50, 3.75 };
+	float coeff_1[] = { 1.0, 0.0, 0.0, 0.0, 
+		                2.0, 0.0, 0.0, 0.0,
+		                3.0, 0.0, 0.0, 0.0,
+		                4.0, 0.0, 0.0, 0.0 };
+	float answers_1[] = { 1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0 };
 
-	if((c == NULL) || (c->num_segments != 2))
+	float coeff_2[] = { 0.0, 1.0, 0.0, 0.0, 
+		                0.0, 2.0, 0.0, 0.0,
+		                0.0, 3.0, 0.0, 0.0,
+		                0.0, 4.0, 0.0, 0.0 };
+	float answers_2[] = { 0.0, 0.25, 1.0, 1.50, 3.0, 3.75, 6.0, 7.0 };
+
+	if((c == NULL) || (c->num_segments != 4))
 		return 0;
 
-	cspline_init(c, 0.0, 2.0, coeff);
+	cspline_init(c, 0.0, 2.0, coeff_1);
 	for (i=0; i<8; i++) {
 		in->data[i] = (float)i / 4.0;
 	}
@@ -30,13 +39,27 @@ test_cspline_create(void)
 			fail = 1;
 		}
 	}
+
+	cspline_init(c, 0.0, 2.0, coeff_2);
+	for (i=0; i<8; i++) {
+		in->data[i] = (float)i / 4.0;
+	}
+
+	cspline_block_eval(c, in, out);
+
+	for (i=0; i<8; i++) {
+		if (out->data[i] != answers_2[i]) {
+			printf("err (2) %d %f %f\n", i, out->data[i], answers_1[i]);
+			fail = 1;
+		}
+	}
 	if (fail)
 		return 0;
 	return 1;
 
 }
 
-float sin_coeffs[] = {
+static float sin_coeffs[] = {
 0.        ,  1.02723878, -0.11914602, -0.04787508,
 -0.12429159,  1.41009724, -0.45090743,  0.00708993,
 -0.66900927,  2.35452208, -0.96547636,  0.09130121,
@@ -56,9 +79,9 @@ test_cspline_sin(void)
 	int x;
 	int fail = 0;
 
-	cspline_init(c, 0.0, M_2_PI, sin_coeffs);
+	cspline_init(c, 0.0, 2.0*M_PI, sin_coeffs);
 	for(x = 0; x < 1024; x++) {
-		in->data[x] = (float)x * M_2_PI/1024.0;
+		in->data[x] = (float)x * 2.0*M_PI/1024.0;
 	}
 
 	cspline_block_eval(c, in, out);
@@ -94,9 +117,9 @@ benchmark_cspline_sin(void)
 	int x;
 	int fail = 0;
 
-	cspline_init(c, 0.0, M_2_PI, sin_coeffs);
+	cspline_init(c, 0.0, 2.0*M_PI, sin_coeffs);
 	for(x = 0; x < 1024; x++) {
-		in->data[x] = (float)x * M_2_PI/1024.0;
+		in->data[x] = (float)x * 2.0*M_PI/1024.0;
 	}
 
 	gettimeofday(&start, NULL);

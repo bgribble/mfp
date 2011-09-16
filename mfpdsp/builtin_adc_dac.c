@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "mfp_dsp.h"
+#include "mfp_block.h"
 
 static int 
 adc_process(mfp_processor * proc) 
@@ -10,14 +11,14 @@ adc_process(mfp_processor * proc)
 	gpointer chan_ptr = g_hash_table_lookup(proc->params, "chan");
 	int channel = 0;
 	mfp_sample * inbuf;
-	mfp_sample * outbuf;
+	mfp_block * outbuf;
 
 	if (chan_ptr != NULL) {
 		channel = (int)(*(float *)chan_ptr);
 	}
 
 	inbuf = mfp_get_input_buffer(channel);
-	outbuf = proc->outlet_buf[0];
+	outbuf = proc->outlet_buf[0]->data;
 
 	if ((inbuf == NULL) || (outbuf == NULL)) {
 		return 0;
@@ -42,7 +43,7 @@ dac_process(mfp_processor * proc)
 		channel = (int)(*(float *)chan_ptr);
 	}
 	outbuf = mfp_get_output_buffer(channel);
-	inbuf = proc->inlet_buf[0];
+	inbuf = proc->inlet_buf[0]->data;
 
 	if ((outbuf == NULL) || (inbuf == NULL)) {
 		return 0;
