@@ -41,7 +41,7 @@ process(mfp_processor * proc)
 	}
 
 	if(mode_fm == 1) {
-		newphase = mfp_block_prefix_sum(proc->inlet_buf[1], phase_base, d->phase, d->int_0); 
+		newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0); 
 	}
 	else {
 		newphase = mfp_block_ramp(d->int_0, d->phase, phase_base*d->const_freq);
@@ -57,7 +57,7 @@ process(mfp_processor * proc)
 
 	/* apply gain or amplitude modulation */
 	if(mode_am == 1) {
-		mfp_block_mul(proc->inlet_buf[0], proc->outlet_buf[0], proc->outlet_buf[0]);
+		mfp_block_mul(proc->inlet_buf[1], proc->outlet_buf[0], proc->outlet_buf[0]);
 	}
 	else {
 		mfp_block_const_mul(proc->outlet_buf[0], d->const_ampl, proc->outlet_buf[0]);
@@ -85,7 +85,6 @@ init(mfp_processor * proc)
 {
 	builtin_osc_data * d = g_malloc(sizeof(builtin_osc_data));
 
-	printf("osc init\n");
 	d->spline = cspline_new(9, mfp_blocksize);	
 	d->const_ampl = 1.0;
 	d->const_freq = 0.0;
@@ -103,7 +102,6 @@ destroy(mfp_processor * proc)
 {
 	builtin_osc_data * d = (builtin_osc_data *)(proc->data);
 
-	printf("osc destroy\n");
 	if (d->spline != NULL) {
 		cspline_free(d->spline);
 		d->spline = NULL;

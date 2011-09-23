@@ -246,6 +246,40 @@ test_line_2(void)
 }
 
 int
+test_osc_2(void)
+{
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
+	mfp_processor * osc = mfp_proc_create(proctype, 2, 1, mfp_blocksize);
+	mfp_processor * sig = mfp_proc_create(sigtype, 0, 1, mfp_blocksize);
+	double phase;
+	int i;
+	int fail = 0;
+
+	printf("test_osc_2... \n");
+	mfp_proc_setparam_float(osc, "freq", 1000.0);
+	mfp_proc_setparam_float(sig, "value", 100.0);
+
+	mfp_proc_connect(sig, 0, osc, 1);
+
+	mfp_dsp_schedule();
+	mfp_dsp_run(mfp_blocksize);
+
+	for(i=0;i<mfp_blocksize;i++) {
+		phase = fmod((double)i*1000.0*2.0*M_PI/(double)mfp_samplerate, 2*M_PI);
+		if (fabs(100.0*sin(phase) - osc->outlet_buf[0]->data[i]) > 0.25) {
+			fail = 1;
+			printf("i=%d, phase=%f, expected %f, got %f\n", i, phase, 
+				   100.0*sin(phase), osc->outlet_buf[0]->data[i]);
+		}
+	}
+	if(fail)
+		return 0;
+	return 1;
+
+}
+
+int
 test_osc_1(void)
 {
 	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc");
@@ -307,22 +341,34 @@ typedef struct {
 int
 test_buffer_2(void)
 {
+	mfp_procinfo * line_t = g_hash_table_lookup(mfp_proc_registry, "line");
 	mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer");
+	mfp_processor * line = mfp_proc_create(line_t, 0, 1, mfp_blocksize);
 	mfp_processor * b = mfp_proc_create(buf_t, 2, 0, mfp_blocksize);
+	GArray * lparm = g_array_sized_new(TRUE, TRUE, sizeof(float), 3);
 	buf_info * info = (buf_info *) b->data;
 	int i;
 	int fail=0;
+	float ft;
+
+	ft = (float)(1000.0*(mfp_blocksize/2 -1)/mfp_samplerate);
+	g_array_append_val(lparm, ft); 
+	ft = 5.0;
+	g_array_append_val(lparm, ft);
+	ft = 0.0;
+	g_array_append_val(lparm, ft);
+
+	mfp_proc_setparam_array(line, "segments", lparm);
 
 	mfp_proc_setparam_float(b, "trig_mode", 1.0);
 	mfp_proc_setparam_float(b, "trig_thresh", 2.0);
 	mfp_proc_setparam_float(b, "channels", 1.0);
 	mfp_proc_setparam_float(b, "size", mfp_blocksize);
 
-	mfp_proc_process(b);
+	mfp_proc_connect(line, 0, b, 0);
 
-	for(i=mfp_blocksize/2;i<mfp_blocksize;i++) {
-		b->inlet_buf[0]->data[i] = 5.0;
-	}
+	mfp_dsp_schedule();
+	mfp_dsp_run(mfp_blocksize);
 
 	if((info->shm_fd == -1) || (info->shm_size != mfp_blocksize*sizeof(float))
 		|| (info->chan_count != 1) || (info->chan_size != mfp_blocksize)) {
@@ -330,9 +376,6 @@ test_buffer_2(void)
 				info->chan_count, info->chan_size);
 		return 0;
 	}
-
-
-	mfp_proc_process(b);
 
 	for(i=0; i < mfp_blocksize; i++) {
 		if (i < mfp_blocksize/2.0) {
