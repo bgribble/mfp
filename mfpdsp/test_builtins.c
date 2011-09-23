@@ -262,8 +262,8 @@ test_osc_1(void)
 	mfp_proc_process(osc);
 
 	for(i=0;i<mfp_blocksize;i++) {
-		phase = (double)i*1000.0*2.0*M_PI/(double)mfp_samplerate;
-		if (fabs(100.0*sin(phase) - osc->outlet_buf[0]->data[i]) > 0.2) {
+		phase = fmod((double)i*1000.0*2.0*M_PI/(double)mfp_samplerate, 2*M_PI);
+		if (fabs(100.0*sin(phase) - osc->outlet_buf[0]->data[i]) > 0.25) {
 			fail = 1;
 			printf("i=%d, phase=%f, expected %f, got %f\n", i, phase, 
 				   100.0*sin(phase), osc->outlet_buf[0]->data[i]);
@@ -273,5 +273,83 @@ test_osc_1(void)
 		return 0;
 	return 1;
 
+}
+
+int
+test_buffer_1(void)
+{
+	mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer");
+	mfp_processor * b = mfp_proc_create(buf_t, 2, 0, mfp_blocksize);
+
+	mfp_proc_setparam_float(b, "trig_triggered", 1.0);
+
+	mfp_proc_process(b);
+	return 1;
+}
+
+
+typedef struct {
+	char shm_id[64];
+	int shm_fd;
+	int shm_size;
+	void * shm_ptr;
+	int chan_count;
+	int chan_size;
+	int chan_pos;
+	int trig_triggered;
+	int trig_channel;
+	int trig_op;
+	int trig_mode;
+	mfp_sample trig_thresh;
+} buf_info;
+
+
+int
+test_buffer_2(void)
+{
+	mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer");
+	mfp_processor * b = mfp_proc_create(buf_t, 2, 0, mfp_blocksize);
+	buf_info * info = (buf_info *) b->data;
+	int i;
+	int fail=0;
+
+	mfp_proc_setparam_float(b, "trig_mode", 1.0);
+	mfp_proc_setparam_float(b, "trig_thresh", 2.0);
+	mfp_proc_setparam_float(b, "channels", 1.0);
+	mfp_proc_setparam_float(b, "size", mfp_blocksize);
+
+	mfp_proc_process(b);
+
+	for(i=mfp_blocksize/2;i<mfp_blocksize;i++) {
+		b->inlet_buf[0]->data[i] = 5.0;
+	}
+
+	if((info->shm_fd == -1) || (info->shm_size != mfp_blocksize*sizeof(float))
+		|| (info->chan_count != 1) || (info->chan_size != mfp_blocksize)) {
+		printf("config fail %d %d %d %d\n", info->shm_fd, info->shm_size, 
+				info->chan_count, info->chan_size);
+		return 0;
+	}
+
+
+	mfp_proc_process(b);
+
+	for(i=0; i < mfp_blocksize; i++) {
+		if (i < mfp_blocksize/2.0) {
+			if (info->shm_ptr == NULL || ((float *)(info->shm_ptr))[i] != 5.0) {
+				printf("  triggered %d %f\n", i, ((float *)(info->shm_ptr))[i]);
+				fail = 1;
+			}
+		}
+		else {
+			if (info->shm_ptr == NULL || ((float *)(info->shm_ptr))[i] != 0.0) {
+				printf("  zero %d %f", i, ((float *)(info->shm_ptr))[i]);
+				fail = 1;
+			}
+		}
+	}
+	if (fail)
+		return 0;
+	return 1;
 }
 

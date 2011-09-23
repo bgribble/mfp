@@ -318,12 +318,12 @@ test_block_fmod(void)
 	int i;
 	mfp_block *b = mfp_block_new(1024);
 
-	mfp_block_ramp(b, 0.0, 2.0*M_PI/44.10);
+	mfp_block_ramp(b, 0.0, 1);
 	mfp_block_fmod(b, 2.0*M_PI, b);
 
 	for(i=0; i< 8; i++) {
-		if (fabs(b->data[i] - fmod(i*2.0*M_PI/44.1, 2.0*M_PI)) > 0.001) {
-			printf("FAIL: block_fmod %d %f %f\n", i, fmod(i*2.0*M_PI/44.1, 2.0*M_PI), b->data[i]);
+		if (fabs(b->data[i] - fmod(i, 2.0*M_PI)) > 0.001) {
+			printf("FAIL: block_fmod %d %f %f\n", i, fmod(i, 2.0*M_PI), b->data[i]);
 			return 0;
 		}
 	}
