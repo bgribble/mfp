@@ -14,6 +14,8 @@ class PatchElement (object):
 		self.num_outlets = 0
 		self.dsp_inlets = []
 		self.dsp_outlets = []
+		self.connections_out = [] 
+		self.connections_in = [] 
 
 		self.actor = None 
 		self.stage = window
@@ -40,6 +42,7 @@ class PatchElement (object):
 
 	def begin_edit(self):
 		pass
+
 
 	def delete(self):
 		self.stage.unregister(self)
