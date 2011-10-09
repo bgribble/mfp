@@ -212,7 +212,7 @@ init_builtin_buffer(void) {
 	p->destroy = destroy;
 	p->config = config;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	g_hash_table_insert(p->params, "buf_id", (gpointer)PARAMTYPE_STR);
+	g_hash_table_insert(p->params, "buf_id", (gpointer)PARAMTYPE_STRING);
 	g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "trig_thresh", (gpointer)PARAMTYPE_FLT);

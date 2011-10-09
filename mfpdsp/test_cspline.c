@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include "cspline.h"
 #include "mfp_block.h"
 

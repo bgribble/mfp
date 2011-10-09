@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 processor_element.py
 A patch element corresponding to a signal or control processor 
@@ -15,8 +15,8 @@ class ProcessorElement (PatchElement):
 	element_type = "processor"
 
 	# constants 
-	port_border = 5
-	port_minspace = 10
+	label_off_x = 3
+	label_off_y = 4
 
 	def __init__(self, window, x, y, params={}):
 		PatchElement.__init__(self, window, x, y)
@@ -25,8 +25,7 @@ class ProcessorElement (PatchElement):
 		self.actor = None
 		self.rect = None
 		self.label = None
-		self.ports_in = [] 
-		self.ports_out = []
+		self.label_text = None 
 
 		# create display 
 		self.create()
@@ -44,13 +43,13 @@ class ProcessorElement (PatchElement):
 
 		# rectangle box 
 		self.rect.set_border_width(2)
-		self.rect.set_border_color(window.color_unselected)
+		self.rect.set_border_color(self.stage.color_unselected)
 		self.rect.set_reactive(False)
 		# FIXME not-created style (dashed lines?)
 
 		# label
-		self.label.set_position(4, 3)
-		self.label.set_color(window.color_unselected) 
+		self.label.set_position(self.label_off_x, self.label_off_y)
+		self.label.set_color(self.stage.color_unselected) 
 		self.label.connect('text-changed', self.label_changed_cb)
 		self.label.set_reactive(False)
 
@@ -61,51 +60,33 @@ class ProcessorElement (PatchElement):
 	def update(self):
 		# FIXME not-created style (dashed lines?)
 
-		self.update_ports()
+		self.draw_ports()
 
 	def get_label(self):
 		return self.label
 
-	def draw_ports(self): 
-		for i in 
-
-	def port_position(self, port_dir, port_num):
-		w = self.rect.get_width()
-		h = self.rect.get_height()
-
-		if port_dir == PatchElement.PORT_IN:
-			if self.num_inlets < 2:
-				spc = 0
-			else:
-				spc = min(self.port_minspace, 
-						  (w-2.0*self.port_border) / (self.num_inlets-1))
-			return (self.port_border + spc*port_num, h)
-
-		elif port_dir == PatchElement.PORT_OUT:
-			if self.num_outlets < 2:
-				spc = 0
-			else:
-				spc = min(self.port_minspace, 
-						  (w-2.0*self.port_border) / (self.num_outlets-1))
-			return (self.port_border + spc*port_num, h)
-
 	def label_edit_start(self):
+		# FIXME set label to editing style 
 		pass
 
 	def label_edit_finish(self, *args):
 		t = self.label.get_text()
-		parts = t.split(' ', 1)
-		self.obj_type = parts[0]
-		if len(parts) > 1:
-			self.obj_args = parts[1]
 
-		print "ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args)
-		print self.label.get_text()
-		self.obj_id = MFPGUI().mfp.create(self.obj_type, self.obj_args)
-		if self.obj_id is None:
-			print "ProcessorElement: could not create", self.obj_type, self.obj_args
-		else:
-			self.send_params()
+		if t != self.label_text:
+			parts = t.split(' ', 1)
+			self.obj_type = parts[0]
+			if len(parts) > 1:
+				self.obj_args = parts[1]
+
+			print "ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args)
+			print self.label.get_text()
+			self.obj_id = MFPGUI().mfp.create(self.obj_type, self.obj_args)
+			if self.obj_id is None:
+				print "ProcessorElement: could not create", self.obj_type, self.obj_args
+			else:
+				self.send_params()
+		# FIXME set label to non-editing style 
+
 		self.update()
 
 	def label_changed_cb(self, *args):

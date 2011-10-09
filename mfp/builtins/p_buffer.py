@@ -4,6 +4,7 @@ p_buffer.py:  Builtin POSIX shared memory buffer
 
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
+import numpy 
 
 from mfp.processor import Processor
 from mfp.main import MFPApp
@@ -51,7 +52,9 @@ class Buffer(Processor):
 		try:
 			os.lseek(self.shm_obj.fd, self.offset(channel, start), os.SEEK_SET)
 			slc = os.read(self.shm_obj.fd, (end-start)*self.FLOAT_SIZE)
+			return numpy.fromstring(slc, dtype=float)
 		except Exception, e:
+			print e
 			return None
 
 

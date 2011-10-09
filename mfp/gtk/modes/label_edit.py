@@ -39,6 +39,7 @@ class LabelEditMode (InputMode):
 		self.bind("C-r", self.redo_edit, "label-redo-typing")
 
 		self.update_label(raw=True)
+		self.element.label_edit_start()
 
 	def insert_char(self, keysym):
 		if len(keysym) > 1:
@@ -57,7 +58,7 @@ class LabelEditMode (InputMode):
 	def commit_edits(self):
 		self.widget.set_cursor_visible(False)
 		self.update_label(raw=False)
-		self.element.update_label(self.widget)
+		self.element.label_edit_finish(self.widget)
 		self.element.end_edit()
 		return True 
 
@@ -65,6 +66,7 @@ class LabelEditMode (InputMode):
 		self.text=self.undo_stack[0]
 		self.update_label(raw=False)
 		self.widget.set_cursor_visible(False)
+		self.element.label_edit_finish(self.widget)
 		self.element.end_edit()
 		return True 
 

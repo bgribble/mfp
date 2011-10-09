@@ -1,3 +1,10 @@
+#! /usr/bin/env python
+'''
+patch_element.py
+A patch element is the parent of all GUI entities backed by MFP objects 
+
+Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
+'''
 
 from mfp import MFPGUI 
 
@@ -5,8 +12,15 @@ class PatchElement (object):
 	'''
 	Parent class of elements represented in the patch window 
 	'''
+	PORT_IN = 0
+	PORT_OUT = 1
+	porthole_width = 3
+	porthole_height = 3
+	porthole_border = 5
+	porthole_minspace = 10
 
 	def __init__(self, window, x, y):
+		# MFP object and UI descriptors 
 		self.obj_id = None
 		self.obj_type = None
 		self.obj_args = None
@@ -17,8 +31,12 @@ class PatchElement (object):
 		self.connections_out = [] 
 		self.connections_in = [] 
 
-		self.actor = None 
+		# Clutter objects 
 		self.stage = window
+		self.actor = None 
+		self.port_elements = {}
+
+		# UI state 
 		self.position_x = x
 		self.position_y = y
 		self.drag_x = None
@@ -40,10 +58,6 @@ class PatchElement (object):
 	def drag(self, dx, dy):
 		self.move(self.position_x + dx, self.position_y + dy)
 
-	def begin_edit(self):
-		pass
-
-
 	def delete(self):
 		self.stage.unregister(self)
 		self.actor = None
@@ -59,11 +73,54 @@ class PatchElement (object):
 		if self.obj_id is not None:
 			MFPGUI().mfp.set_params(self.obj_id, prms)
 
+	def port_position(self, port_dir, port_num):
+		w = self.actor.get_width()
+		h = self.actor.get_height()
+
+		if port_dir == PatchElement.PORT_IN:
+			if self.num_inlets < 2:
+				spc = 0
+			else:
+				spc = min(self.porthole_minspace, 
+						  (w-2.0*self.porthole_border) / (self.num_inlets-1))
+			return (self.porthole_border + spc*porthole_num, h)
+
+		elif port_dir == PatchElement.PORT_OUT:
+			if self.num_outlets < 2:
+				spc = 0
+			else:
+				spc = min(self.porthole_minspace, 
+						  (w-2.0*self.porthole_border) / (self.num_outlets-1))
+			return (self.porthole_border + spc*port_num, 0)
+
+	def draw_ports(self):
+		def confport(pid, px, py):
+			pobj = self.port_elements.get(pid)
+			if pobj is None:
+				pobj = clutter.Rectangle()
+				pobj.set_color(self.stage.color_unselected)
+				pobj.set_size(self.porthole_width, self.porthole_height)
+				pobj.set_reactive(False)
+				self.port_elements[(PatchElement.PORT_IN, i)] = pobj
+			pobj.set_position(px, py)
+
+		for i in range(self.num_inlets):
+			x, y = self.port_position(PatchElement.PORT_IN, i)
+			pid = (PatchElement.PORT_IN, i)
+			confport(pid, x, y)
+
+		for i in range(self.num_outlets):
+			x, y = self.port_position(PatchElement.PORT_OUT, i)
+			pid = (PatchElement.PORT_OUT, i)
+			confport(pid, x, y)
+
+
 	def configure(self, params):
 		self.num_inlets = params.get("num_inlets")
 		self.num_outlets = params.get("num_outlets")
 		self.dsp_inlets = params.get("dsp_inlets")
 		self.dsp_outlets = params.get("dsp_outlets")
+		self.draw_ports()
 
 	def make_edit_mode(self):
 		return None
