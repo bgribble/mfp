@@ -21,16 +21,21 @@ typedef struct {
 	int chan_count;
 	int chan_size;
 	int chan_pos;
+	int trig_enabled;
 	int trig_triggered;
 	int trig_channel;
 	int trig_op;
 	int trig_mode;
+	int trig_repeat;
 	mfp_sample trig_thresh;
 } buf_info;
 
 #define TRIG_BANG 0
 #define TRIG_THRESH 1
 #define TRIG_EXT 2
+
+#define TRIG_ONESHOT 0 
+#define TRIG_CONTIN  1
 
 #define TRIG_GT 0
 #define TRIG_LT 1
@@ -67,7 +72,7 @@ process(mfp_processor * proc)
 	buf_info * d = (buf_info *)(proc->data);
 	mfp_block * trig_block;
 
-	if(d->trig_triggered == 0) {
+	if(d->trig_triggered == 0 && d->trig_enabled) {
 		if(d->trig_mode == TRIG_EXT) {
 			trig_block = proc->inlet_buf[proc->inlet_conn->len - 1];
 		}
@@ -77,7 +82,7 @@ process(mfp_processor * proc)
 			}
 			trig_block = proc->inlet_buf[d->trig_channel];
 		}
-		if(d->trig_mode != TRIG_BANG) {
+		if(!(d->trig_mode == TRIG_BANG)) {
 			while(d->trig_triggered == 0) {
 				if((d->trig_op == TRIG_GT) && (trig_block->data[dstart] > d->trig_thresh)) {
 					d->trig_triggered = 1;
@@ -93,7 +98,6 @@ process(mfp_processor * proc)
 			}
 		}
 	}
-
 
 	if(d->trig_triggered) {
 		/* copy rest of the block or available space */
@@ -111,6 +115,9 @@ process(mfp_processor * proc)
 		if(d->chan_pos >= d->chan_size) {
 			d->trig_triggered = 0;
 			d->chan_pos = 0;
+			if (d->trig_repeat == TRIG_ONESHOT) {
+				d->trig_enabled = 0;
+			}
 		}
 
 	}
@@ -163,6 +170,8 @@ config(mfp_processor * proc)
 	gpointer trigchan_ptr = g_hash_table_lookup(proc->params, "trig_chan");
 	gpointer trigthresh_ptr = g_hash_table_lookup(proc->params, "trig_thresh");
 	gpointer trigbang_ptr = g_hash_table_lookup(proc->params, "trig_triggered");
+	gpointer trigrept_ptr = g_hash_table_lookup(proc->params, "trig_repeat");
+	gpointer trigenable_ptr = g_hash_table_lookup(proc->params, "trig_enabled");
 
 	buf_info * d = (buf_info *)(proc->data);
 	printf("config 1 %p %p %p %p %p %p\n", size_ptr, channels_ptr, trigmode_ptr, trigchan_ptr, trigthresh_ptr, trigbang_ptr);
@@ -203,6 +212,7 @@ init_builtin_buffer(void) {
 	p->destroy = destroy;
 	p->config = config;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "buf_id", (gpointer)PARAMTYPE_STR);
 	g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "trig_thresh", (gpointer)PARAMTYPE_FLT);
@@ -210,6 +220,8 @@ init_builtin_buffer(void) {
 	g_hash_table_insert(p->params, "trig_chan", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "trig_op", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "trig_triggered", (gpointer)PARAMTYPE_FLT);
+	g_hash_table_insert(p->params, "trig_repeat", (gpointer)PARAMTYPE_FLT);
+	g_hash_table_insert(p->params, "trig_enabled", (gpointer)PARAMTYPE_FLT);
 	return p;
 }
 

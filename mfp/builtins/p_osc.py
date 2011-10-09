@@ -22,7 +22,7 @@ class Osc(Processor):
 		self.dsp_init("osc", freq=float(freq))
 
 	def trigger(self):
-
+		
 		if self.inlets[0] is None:
 			self.set_param("phase", float(0))
 		else:

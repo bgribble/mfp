@@ -12,6 +12,7 @@ class Processor (object):
 	OK = 0
 	ERROR = 1 
 	gui_type = 'processor'
+	hot_inlets = [0]
 
 	def __init__(self, inlets, outlets, init_type, init_args):
 		from .main import MFPApp 
@@ -135,13 +136,19 @@ class Processor (object):
 		work = [] 
 		self.inlets[inlet] = value
 
-		if inlet == 0:
+		if inlet in self._hot_inlets:
 			self.outlets = [ Uninit ] * len(self.outlets)
-			self.trigger()
+			if isinstance(value, MethodCall):
+				self.method(value, inlet)
+			else:
+				self.trigger()
 			for conns, val in zip(self.connections_out, self.outlets):
 				if val is not Uninit:
 					for target, inlet in conns:
 						work.append((target, val, inlet))
+		elif inlet in self.dsp_inlets:
+			self.dsp_object.setparam("_sig_" + str(inlet), float(value))
+
 		return work 
 
 	def error(self, tb=None):
