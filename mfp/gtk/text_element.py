@@ -32,7 +32,10 @@ class TextElement (PatchElement):
 		self.actor.set_color(self.stage.color_unselected) 
 		self.text = self.actor.get_text()
 
-	def update_label(self, *args):
+	def label_edit_start(self):
+		pass
+
+	def label_edit_finish(self, *args):
 		self.message_text = self.actor.get_text()
 		if self.obj_id is None:
 			self.obj_id = MFPGUI().mfp.create("var")

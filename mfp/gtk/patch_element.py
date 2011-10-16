@@ -112,7 +112,6 @@ class PatchElement (object):
 			return (self.porthole_border + spc*port_num, h-2.0-self.porthole_height)
 
 	def draw_ports(self):
-		print "draw_ports", self, self.port_elements
 		def confport(pid, px, py):
 			pobj = self.port_elements.get(pid)
 			if pobj is None:

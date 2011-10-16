@@ -6,6 +6,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from .dsp_slave import DSPObject
 from .evaluator import Evaluator
+from .method import MethodCall
 from .bang import Uninit 
 
 class Processor (object): 
@@ -136,7 +137,7 @@ class Processor (object):
 		work = [] 
 		self.inlets[inlet] = value
 
-		if inlet in self._hot_inlets:
+		if inlet in self.hot_inlets:
 			self.outlets = [ Uninit ] * len(self.outlets)
 			if isinstance(value, MethodCall):
 				self.method(value, inlet)

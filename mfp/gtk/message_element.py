@@ -23,10 +23,9 @@ class MessageElement (PatchElement):
 		self.connections_out = [] 
 		self.connections_in = [] 
 
-
 		# create elements
 		self.actor = clutter.Group()
-		self.texture = clutter.CairoTexture(35, 20)
+		self.texture = clutter.CairoTexture(35, 25)
 		self.label = clutter.Text()
 
 		self.actor.set_reactive(True)
@@ -72,14 +71,20 @@ class MessageElement (PatchElement):
 		print "button press", args
 		MFPGUI().mfp.send_bang(self.obj_id, 0) 
 
-	def update_label(self, *args):
+	def label_edit_start(self):
+		pass
+
+	def label_edit_finish(self, *args):
 		self.message_text = self.label.get_text()
 
 		print "MessageElement: obj=%s" % (self.message_text)
 		self.obj_id = MFPGUI().mfp.create("var", self.message_text)
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
-		self.send_params()
+		else:
+			self.get_objinfo()
+			self.send_params()
+			self.draw_ports()
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 
