@@ -65,6 +65,13 @@ class MFPCommand(RPCWrapper):
 		obj = MFPApp().recall(obj_id)
 		obj.gui_params = params
 
+	@rpcwrap
+	def get_info(self, obj_id):
+		obj = MFPApp().recall(obj_id)
+		return dict(num_inlets=len(obj.inlets), 
+			        num_outlets=len(obj.outlets),
+			        dsp_inlets=obj.dsp_inlets,
+			        dsp_outlets=obj.dsp_outlets)
 
 class MFPApp (object):
 	__metaclass__ = Singleton

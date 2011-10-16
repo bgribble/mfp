@@ -16,7 +16,7 @@ class ProcessorElement (PatchElement):
 
 	# constants 
 	label_off_x = 3
-	label_off_y = 4
+	label_off_y = 0 
 
 	def __init__(self, window, x, y, params={}):
 		PatchElement.__init__(self, window, x, y)
@@ -29,7 +29,7 @@ class ProcessorElement (PatchElement):
 
 		# create display 
 		self.create()
-		self.set_size(35, 20)
+		self.set_size(35, 25)
 		self.move(x, y)
 		self.update()
 
@@ -84,6 +84,7 @@ class ProcessorElement (PatchElement):
 			if self.obj_id is None:
 				print "ProcessorElement: could not create", self.obj_type, self.obj_args
 			else:
+				self.get_objinfo()
 				self.send_params()
 		# FIXME set label to non-editing style 
 
@@ -120,6 +121,7 @@ class ProcessorElement (PatchElement):
 		self.size_h = h 
 
 		self.rect.set_size(w, h)
+		self.rect.set_position(0, 0)
 
 		self.draw_ports()
 

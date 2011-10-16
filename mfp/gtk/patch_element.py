@@ -6,6 +6,7 @@ A patch element is the parent of all GUI entities backed by MFP objects
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
+import clutter
 from mfp import MFPGUI 
 
 class PatchElement (object):
@@ -14,8 +15,8 @@ class PatchElement (object):
 	'''
 	PORT_IN = 0
 	PORT_OUT = 1
-	porthole_width = 3
-	porthole_height = 3
+	porthole_width = 8
+	porthole_height = 4
 	porthole_border = 5
 	porthole_minspace = 10
 
@@ -73,7 +74,24 @@ class PatchElement (object):
 		if self.obj_id is not None:
 			MFPGUI().mfp.set_params(self.obj_id, prms)
 
+	def get_objinfo(self):
+		info = MFPGUI().mfp.get_info(self.obj_id)
+		if info:
+			self.num_inlets = info.get("num_inlets")
+			self.num_outlets= info.get("num_outlets")
+			self.dsp_inlets= info.get("dsp_inlets")
+			self.dsp_outlets= info.get("dsp_outlets")
+
+	def port_center(self, port_dir, port_num):
+		ppos = self.port_position(port_dir, port_num)
+		return (self.position_x + ppos[0] + 0.5*self.porthole_width, 
+		        self.position_y + ppos[1] + 0.5*self.porthole_height)
+
 	def port_position(self, port_dir, port_num):
+		pobj = self.port_elements.get((port_dir, port_num))
+		if pobj:
+			return pobj.get_position()
+
 		w = self.actor.get_width()
 		h = self.actor.get_height()
 
@@ -81,19 +99,20 @@ class PatchElement (object):
 			if self.num_inlets < 2:
 				spc = 0
 			else:
-				spc = min(self.porthole_minspace, 
-						  (w-2.0*self.porthole_border) / (self.num_inlets-1))
-			return (self.porthole_border + spc*porthole_num, h)
+				spc = max(self.porthole_minspace, 
+						  (w-self.porthole_width-2.0*self.porthole_border) / (self.num_inlets-1.0))
+			return (self.porthole_border + spc*port_num, 0)
 
 		elif port_dir == PatchElement.PORT_OUT:
 			if self.num_outlets < 2:
 				spc = 0
 			else:
-				spc = min(self.porthole_minspace, 
-						  (w-2.0*self.porthole_border) / (self.num_outlets-1))
-			return (self.porthole_border + spc*port_num, 0)
+				spc = max(self.porthole_minspace, 
+						  (w-self.porthole_width-2.0*self.porthole_border) / (self.num_outlets-1.0))
+			return (self.porthole_border + spc*port_num, h-2.0-self.porthole_height)
 
 	def draw_ports(self):
+		print "draw_ports", self, self.port_elements
 		def confport(pid, px, py):
 			pobj = self.port_elements.get(pid)
 			if pobj is None:
@@ -101,7 +120,9 @@ class PatchElement (object):
 				pobj.set_color(self.stage.color_unselected)
 				pobj.set_size(self.porthole_width, self.porthole_height)
 				pobj.set_reactive(False)
-				self.port_elements[(PatchElement.PORT_IN, i)] = pobj
+				self.actor.add(pobj)
+				self.port_elements[pid] = pobj
+				print "   creating", pid, pobj
 			pobj.set_position(px, py)
 
 		for i in range(self.num_inlets):
