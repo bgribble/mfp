@@ -117,20 +117,20 @@ static void
 config(mfp_processor * proc) 
 {
 	builtin_osc_data * d = (builtin_osc_data *)(proc->data);
-	gpointer freq_ptr = g_hash_table_lookup(proc->params, "freq");
-	gpointer ampl_ptr = g_hash_table_lookup(proc->params, "ampl");
+	gpointer freq_ptr = g_hash_table_lookup(proc->params, "_sig_1");
+	gpointer ampl_ptr = g_hash_table_lookup(proc->params, "_sig_2");
 	gpointer phase_ptr = g_hash_table_lookup(proc->params, "phase");
 
 	/* get parameters */ 
 	if (freq_ptr != NULL) {
 		d->const_freq = *(float *)freq_ptr;
-		g_hash_table_remove(proc->params, "freq");
+		g_hash_table_remove(proc->params, "_sig_1");
 		g_free(freq_ptr);
 	}
 
 	if (ampl_ptr != NULL) {
 		d->const_ampl = *(float *)ampl_ptr;
-		g_hash_table_remove(proc->params, "ampl");
+		g_hash_table_remove(proc->params, "_sig_2");
 		g_free(ampl_ptr);
 	}
 
@@ -155,8 +155,8 @@ init_builtin_osc(void) {
 	p->destroy = destroy;
 	p->config = config;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	g_hash_table_insert(p->params, "freq", (gpointer)PARAMTYPE_FLT);
-	g_hash_table_insert(p->params, "ampl", (gpointer)PARAMTYPE_FLT);
+	g_hash_table_insert(p->params, "_sig_1", (gpointer)PARAMTYPE_FLT);
+	g_hash_table_insert(p->params, "_sig_2", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "phase", (gpointer)PARAMTYPE_FLT);
 	return p;
 }

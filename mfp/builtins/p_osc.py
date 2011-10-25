@@ -19,16 +19,17 @@ class Osc(Processor):
 
 		self.dsp_inlets = [1, 2]
 		self.dsp_outlets = [0]
-		self.dsp_init("osc", freq=float(freq))
+		self.dsp_init("osc", _sig_1=float(freq))
 
 	def trigger(self):
-		
-		if self.inlets[0] is None:
+		# number inputs to the DSP ins (freq, amp) are
+		# handled automatically
+		if self.inlets[0] is Bang:
 			self.set_param("phase", float(0))
 		else:
 			try:
-				freq = float(self.inlets[0])
-				self.set_param("freq", freq)
+				phase = float(self.inlets[0])
+				self.set_param("phase", phase)
 			except:
 				print "Can't convert %s to a frequency value" % self.inlets[0]
 				

@@ -148,7 +148,7 @@ class Processor (object):
 					for target, inlet in conns:
 						work.append((target, val, inlet))
 		elif inlet in self.dsp_inlets:
-			self.dsp_object.setparam("_sig_" + str(inlet), float(value))
+			self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
 
 		return work 
 
