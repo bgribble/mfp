@@ -2,6 +2,10 @@
 #include <jack/jack.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <semaphore.h>
+
 #include "mfp_dsp.h"
 
 GArray * mfp_input_ports;

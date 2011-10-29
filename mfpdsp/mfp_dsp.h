@@ -56,6 +56,12 @@ typedef struct {
 	int dest_port;
 } mfp_reqdata;
 
+
+typedef struct {
+	int   proc_id;
+	float response;
+} mfp_respdata;
+
 #define PARAMTYPE_UNDEF 0
 #define PARAMTYPE_FLT 1
 #define PARAMTYPE_STRING 2
@@ -79,8 +85,11 @@ extern int mfp_blocksize;
 extern GHashTable * mfp_proc_registry;
 extern GArray * mfp_proc_list; 
 extern GArray * mfp_requests_pending;
+extern GArray * mfp_responses_pending;
 
 extern pthread_mutex_t mfp_globals_lock;
+extern pthread_mutex_t mfp_response_lock;
+extern pthread_cond_t mfp_response_cond;
 
 
 
@@ -97,6 +106,7 @@ extern int mfp_dsp_schedule(void);
 extern void mfp_dsp_run(int nsamples);
 extern void mfp_dsp_set_blocksize(int nsamples);
 extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
+extern void mfp_dsp_send_response_float(int proc_id, float response);
 
 /* mfp_proc.c */
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);

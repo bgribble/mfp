@@ -287,8 +287,6 @@ mfp_block_prefix_sum(mfp_block * in, mfp_sample scale, mfp_sample initval, mfp_b
 	__v4si mask = (__v4si) { 0x00, 0xffffffff, 0xffffffff, 0xffffffff }; 
 	__v4sf scaler = { scale, scale, scale, scale };
 
-	printf("%p %p %d %p %p %d\n", in, in->data, in->blocksize, out, out->data, out->blocksize);
-
 	endptr = in->data + in->blocksize;
 	outptr = out->data;
 	scratch[0] = initval;

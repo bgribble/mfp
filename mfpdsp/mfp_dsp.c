@@ -8,7 +8,10 @@
 
 
 GArray          * mfp_requests_pending = NULL;
+GArray          * mfp_responses_pending = NULL;
 pthread_mutex_t mfp_globals_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mfp_response_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t	mfp_response_cond = PTHREAD_COND_INITIALIZER;
 
 int mfp_dsp_enabled = 0;
 int mfp_needs_reschedule = 1;
@@ -190,7 +193,6 @@ mfp_dsp_run(int nsamples)
 
 	mfp_dsp_set_blocksize(nsamples);
 
-
 	/* handle any DSP config requests */
 	pthread_mutex_lock(&mfp_globals_lock);
 	mfp_dsp_handle_requests();
@@ -219,6 +221,7 @@ mfp_dsp_run(int nsamples)
 	}
 
 	proc_count ++;
+	mfp_dsp_send_response_float(-1, proc_count);
 }
 
 void
@@ -240,5 +243,20 @@ mfp_dsp_accum(mfp_sample * accum, mfp_sample * addend, int blocksize)
 	for (i=0; i < blocksize; i++) {
 		accum[i] += addend[i];
 	}
+}
+
+void
+mfp_dsp_send_response_float(int proc_id, float response)
+{
+	mfp_respdata rd;
+	
+	rd.proc_id = proc_id;
+	rd.response = response;
+	
+	pthread_mutex_lock(&mfp_response_lock);
+	g_array_append_val(mfp_responses_pending, rd);
+	pthread_mutex_unlock(&mfp_response_lock);
+	
+	pthread_cond_signal(&mfp_response_cond);
 }
 

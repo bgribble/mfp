@@ -11,7 +11,6 @@ from rpc_wrapper import RPCWrapper, rpcwrap
 class DSPObject(RPCWrapper):
 	objects = {}
 	def __init__(self, obj_id, name, inlets, outlets, params={}):
-		print "DSPObject.__init__", self.local
 		self.obj_id = obj_id 
 		RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params)
 		if self.local:
@@ -32,7 +31,6 @@ class DSPObject(RPCWrapper):
 
 	@rpcwrap
 	def connect(self, outlet, target, inlet):
-		print "\ndsp_slave connect:", self.c_obj, outlet, type(outlet), DSPObject.objects.get(target), type(inlet)
 		return mfpdsp.proc_connect(self.c_obj, outlet, DSPObject.objects.get(target), 
 							       inlet)
 
@@ -42,9 +40,13 @@ class DSPObject(RPCWrapper):
 								      inlet)
 
 def dsp_init(pipe):
+	from main import MFPCommand
+	import threading 
+
 	RPCWrapper.node_id = "JACK DSP"
 	DSPObject.pipe = pipe
 	DSPObject.local = True
+	MFPCommand.local = False
 
 	pipe.on_finish(dsp_finish)
 
@@ -52,6 +54,27 @@ def dsp_init(pipe):
 	mfpdsp.dsp_startup(1, 1)
 	mfpdsp.dsp_enable()
 
+	# start response thread 
+	rt = threading.Thread(target=dsp_response)
+	rt.start()
+
+ttq = False
+def dsp_response():
+	from main import MFPCommand
+	global ttq
+	mfp = MFPCommand()
+	while not ttq:
+		messages = mfpdsp.dsp_response_wait()
+		if messages is None:
+			print "(no messages)"
+			continue
+		for m in messages:
+			print "Received dsp message", m
+			# mfp.send_dsp_message(m)
+
 def dsp_finish():
+	global ttq
+	ttq = True
 	mfpdsp.dsp_shutdown()
+
 

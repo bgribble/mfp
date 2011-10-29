@@ -40,6 +40,45 @@ dsp_disable(PyObject * mod, PyObject * args)
 	return Py_True;
 }
 
+static PyObject *
+dsp_response_wait(PyObject * mod, PyObject * args)
+{
+	int responses = 0;
+	PyObject * l = NULL;
+	PyObject * t;
+	mfp_respdata r;
+	int rcount;
+
+	pthread_mutex_lock(&mfp_response_lock);
+	pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
+
+	/* copy/clear C response objects */
+	if(mfp_responses_pending && (mfp_responses_pending->len > 0)) {
+		l = PyList_New(mfp_responses_pending->len);
+		for(rcount=0; rcount < mfp_responses_pending->len; rcount++) {
+			t = PyTuple_New(2);
+			r = g_array_index(mfp_responses_pending, mfp_respdata, rcount);
+			PyTuple_SetItem(t, 0, PyInt_FromLong(r.proc_id));
+			PyTuple_SetItem(t, 1, PyFloat_FromDouble(r.response));
+			PyList_SetItem(l, rcount, t);
+		}
+		responses += 1;
+	}
+	pthread_mutex_unlock(&mfp_response_lock);
+
+	/* build python response */
+
+	if (responses == 0) {
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+	else {
+		g_array_remove_range(mfp_responses_pending, 0, mfp_responses_pending->len);
+		Py_INCREF(l);
+		return l;
+	}
+}
+
 static int
 set_c_param(mfp_processor * proc, char * paramname, PyObject * val) 
 {
@@ -272,6 +311,7 @@ static PyMethodDef MfpDspMethods[] = {
 	{ "dsp_shutdown",  dsp_shutdown, METH_VARARGS, "Stop processing thread" },
 	{ "dsp_enable",  dsp_enable, METH_VARARGS, "Enable dsp" },
 	{ "dsp_disable",  dsp_disable, METH_VARARGS, "Disable dsp" },
+	{ "dsp_response_wait",  dsp_response_wait, METH_VARARGS, "Return next DSP responses" },
 	{ "proc_create", proc_create, METH_VARARGS, "Create DSP processor" },
 	{ "proc_destroy", proc_destroy, METH_VARARGS, "Destroy DSP processor" },
 	{ "proc_connect", proc_connect, METH_VARARGS, "Connect DSP processors" },
@@ -288,6 +328,7 @@ init_globals(void)
 	mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
 	mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
     mfp_requests_pending = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
+    mfp_responses_pending = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
 }
 
 static void
