@@ -24,6 +24,9 @@ class MFPCommand(RPCWrapper):
 	def create(self, objtype, initargs=''):
 		print "MFPApp.create() local"
 		obj = MFPApp().create(objtype, initargs)
+		if obj is None:
+			print "MFPApp.create() failed"
+			return None
 		MFPApp().patch.add(obj)
 		return obj.obj_id
 

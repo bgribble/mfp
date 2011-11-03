@@ -6,16 +6,19 @@ Python main loop for DSP subprocess
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 import mfpdsp
-from rpc_wrapper import RPCWrapper, rpcwrap
+from mfp.rpc_wrapper import RPCWrapper, rpcwrap
 
 class DSPObject(RPCWrapper):
 	objects = {}
+	c_objects = {}
+
 	def __init__(self, obj_id, name, inlets, outlets, params={}):
 		self.obj_id = obj_id 
 		RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params)
 		if self.local:
 			self.c_obj = mfpdsp.proc_create(name, inlets, outlets, params)
 			DSPObject.objects[self.obj_id] = self.c_obj
+			DSPObject.c_objects[self.c_obj] = self.obj_id
 
 	@rpcwrap
 	def delete(self):
@@ -38,7 +41,6 @@ class DSPObject(RPCWrapper):
 	def disconnect(self, outlet, target, inlet):
 		return mfpdsp.proc_disconnect(self.c_obj, outlet, DSPObject.objects.get(target), 
 								      inlet)
-
 def dsp_init(pipe):
 	from main import MFPCommand
 	import threading 
@@ -59,17 +61,26 @@ def dsp_init(pipe):
 	rt.start()
 
 ttq = False
-def dsp_response():
-	from main import MFPCommand
+def dsp_response(*args):
+	print "response thread started"
+
+	#from mfp.main import MFPCommand
+	# FIXME there is a thread mess waiting just offstage
+	# with multiple threads invoking send() in main process
 	global ttq
-	mfp = MFPCommand()
+	# mfp = MFPCommand()
 	while not ttq:
+		print "top of response loop"
 		messages = mfpdsp.dsp_response_wait()
+		#import time
+		#messages = None
+		#time.sleep(0.1)
 		if messages is None:
-			print "(no messages)"
 			continue
 		for m in messages:
 			print "Received dsp message", m
+			#recip = DSPObject.c_objects.get(m[0], -1) 
+			#mfp.send(recip, -1, tuple(m[1], m[2]))	
 			# mfp.send_dsp_message(m)
 
 def dsp_finish():

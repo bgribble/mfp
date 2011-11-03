@@ -135,11 +135,14 @@ class Processor (object):
 
 	def _send(self, value, inlet=0): 
 		work = [] 
-		self.inlets[inlet] = value
+		if inlet >= 0:
+			self.inlets[inlet] = value
 
-		if inlet in self.hot_inlets:
+		if inlet in self.hot_inlets or inlet == -1:
 			self.outlets = [ Uninit ] * len(self.outlets)
-			if isinstance(value, MethodCall):
+			if inlet == -1:
+				self.dsp_response(value)
+			elif isinstance(value, MethodCall):
 				self.method(value, inlet)
 			else:
 				self.trigger()

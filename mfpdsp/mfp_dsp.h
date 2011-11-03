@@ -58,14 +58,22 @@ typedef struct {
 
 
 typedef struct {
-	int   proc_id;
-	float response;
+	mfp_processor * dst_proc;
+	int   msg_type;
+	int   response_type;
+	union {
+		double f;
+		int    i;
+		char   * c;
+	} response;
 } mfp_respdata;
 
 #define PARAMTYPE_UNDEF 0
 #define PARAMTYPE_FLT 1
 #define PARAMTYPE_STRING 2
 #define PARAMTYPE_FLTARRAY 3
+#define PARAMTYPE_BOOL 4
+#define PARAMTYPE_INT 5
 
 #define REQTYPE_CREATE 1
 #define REQTYPE_DESTROY 2
@@ -106,7 +114,10 @@ extern int mfp_dsp_schedule(void);
 extern void mfp_dsp_run(int nsamples);
 extern void mfp_dsp_set_blocksize(int nsamples);
 extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
-extern void mfp_dsp_send_response_float(int proc_id, float response);
+extern void mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response);
+extern void mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int response);
+extern void mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response);
+extern void mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response);
 
 /* mfp_proc.c */
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);

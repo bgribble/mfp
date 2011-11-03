@@ -221,7 +221,6 @@ mfp_dsp_run(int nsamples)
 	}
 
 	proc_count ++;
-	mfp_dsp_send_response_float(-1, proc_count);
 }
 
 void
@@ -246,17 +245,70 @@ mfp_dsp_accum(mfp_sample * accum, mfp_sample * addend, int blocksize)
 }
 
 void
-mfp_dsp_send_response_float(int proc_id, float response)
+mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response)
 {
 	mfp_respdata rd;
 	
-	rd.proc_id = proc_id;
-	rd.response = response;
+	rd.dst_proc = proc;
+	rd.msg_type = msg_type;
+	rd.response_type = PARAMTYPE_STRING;
+	rd.response.c = g_strdup(response);
 	
 	pthread_mutex_lock(&mfp_response_lock);
 	g_array_append_val(mfp_responses_pending, rd);
+	pthread_cond_broadcast(&mfp_response_cond);
 	pthread_mutex_unlock(&mfp_response_lock);
 	
-	pthread_cond_signal(&mfp_response_cond);
+}
+
+void
+mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int response)
+{
+	mfp_respdata rd;
+	
+	rd.dst_proc = proc;
+	rd.msg_type = msg_type;
+	rd.response_type = PARAMTYPE_BOOL;
+	rd.response.i = response;
+	
+	pthread_mutex_lock(&mfp_response_lock);
+	g_array_append_val(mfp_responses_pending, rd);
+	pthread_cond_broadcast(&mfp_response_cond);
+	pthread_mutex_unlock(&mfp_response_lock);
+	
+}
+
+void
+mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response)
+{
+	mfp_respdata rd;
+	
+	rd.dst_proc = proc;
+	rd.msg_type = msg_type;
+	rd.response_type = PARAMTYPE_INT;
+	rd.response.i = response;
+	
+	pthread_mutex_lock(&mfp_response_lock);
+	g_array_append_val(mfp_responses_pending, rd);
+	pthread_cond_broadcast(&mfp_response_cond);
+	pthread_mutex_unlock(&mfp_response_lock);
+	
+}
+
+void
+mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response)
+{
+	mfp_respdata rd;
+	
+	rd.dst_proc = proc;
+	rd.msg_type = msg_type;
+	rd.response_type = PARAMTYPE_FLT;
+	rd.response.f = response;
+	
+	pthread_mutex_lock(&mfp_response_lock);
+	g_array_append_val(mfp_responses_pending, rd);
+	pthread_cond_broadcast(&mfp_response_cond);
+	pthread_mutex_unlock(&mfp_response_lock);
+	
 }
 

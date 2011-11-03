@@ -40,17 +40,16 @@ typedef struct {
 #define TRIG_GT 0
 #define TRIG_LT 1
 
+#define RESP_TRIGGERED 0
+#define RESP_BUFID 1
+
 static void 
 init(mfp_processor * proc) 
 {
 	buf_info * d = g_malloc(sizeof(buf_info));
-	int pid = getpid();
-	struct timeval tv;
 
-	gettimeofday(&tv, NULL);
-	snprintf(d->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d", pid, (int)tv.tv_sec, (int)tv.tv_usec); 
-	printf("buffer.init() opening %s\n", d->shm_id);
-	d->shm_fd = shm_open(d->shm_id, O_RDWR|O_CREAT, S_IRWXU); 
+	d->shm_id[0] =0;
+	d->shm_fd = -1;
 	d->shm_ptr = NULL;
 	d->chan_count=0;
 	d->chan_size = 0;
@@ -60,7 +59,12 @@ init(mfp_processor * proc)
 	d->trig_op = 0;
 	d->trig_thresh = 0;
 	d->trig_triggered = 0;
+	d->trig_enabled = 1;
+	d->trig_repeat = 1;
 	proc->data = d;
+
+	printf("dsp:buffer init complete\n");
+
 	return;
 }
 
@@ -96,6 +100,9 @@ process(mfp_processor * proc)
 				if (dstart >= trig_block->blocksize)
 					break;
 			}
+			if (d->trig_triggered) {
+				mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 1);
+			}
 		}
 	}
 
@@ -118,6 +125,7 @@ process(mfp_processor * proc)
 			if (d->trig_repeat == TRIG_ONESHOT) {
 				d->trig_enabled = 0;
 			}
+			mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
 		}
 
 	}
@@ -145,9 +153,18 @@ destroy(mfp_processor * proc)
 }
 
 static void
-buffer_resize(buf_info * d, int size)
+buffer_alloc(buf_info * d)
 {
-	printf("buffer_resize %d\n", size);
+	int size = d->chan_count*d->chan_size*sizeof(mfp_sample);
+	int pid = getpid();
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	printf("buffer_alloc %d\n", size);
+
+	snprintf(d->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d", pid, (int)tv.tv_sec, (int)tv.tv_usec); 
+	d->shm_fd = shm_open(d->shm_id, O_RDWR|O_CREAT, S_IRWXU); 
+	
 	if(d->shm_ptr != NULL) {
 		munmap(d->shm_ptr, d->shm_size);
 		d->shm_ptr = NULL;
@@ -174,9 +191,8 @@ config(mfp_processor * proc)
 	gpointer trigenable_ptr = g_hash_table_lookup(proc->params, "trig_enabled");
 
 	buf_info * d = (buf_info *)(proc->data);
-	printf("config 1 %p %p %p %p %p %p\n", size_ptr, channels_ptr, trigmode_ptr, trigchan_ptr, trigthresh_ptr, trigbang_ptr);
+
 	if ((size_ptr != NULL) || (channels_ptr != NULL)) {
-		printf("resize needed %p %p\n", size_ptr, channels_ptr);
 		if(size_ptr != NULL) {
 			d->chan_size = *(float *)size_ptr;
 		}
@@ -184,7 +200,9 @@ config(mfp_processor * proc)
 			d->chan_count = *(float *)channels_ptr;
 		}
 		
-		buffer_resize(d, d->chan_count*d->chan_size*sizeof(mfp_sample));
+		buffer_alloc(d);
+
+		mfp_dsp_send_response_str(proc, RESP_BUFID, d->shm_id);
 	}
 
 	if (trigmode_ptr != NULL) {

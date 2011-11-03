@@ -49,22 +49,42 @@ dsp_response_wait(PyObject * mod, PyObject * args)
 	mfp_respdata r;
 	int rcount;
 
+	Py_BEGIN_ALLOW_THREADS
 	pthread_mutex_lock(&mfp_response_lock);
 	pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
+
+	printf("py: woke up, %d waiting\n", mfp_responses_pending->len);
 
 	/* copy/clear C response objects */
 	if(mfp_responses_pending && (mfp_responses_pending->len > 0)) {
 		l = PyList_New(mfp_responses_pending->len);
 		for(rcount=0; rcount < mfp_responses_pending->len; rcount++) {
-			t = PyTuple_New(2);
+			t = PyTuple_New(3);
 			r = g_array_index(mfp_responses_pending, mfp_respdata, rcount);
-			PyTuple_SetItem(t, 0, PyInt_FromLong(r.proc_id));
-			PyTuple_SetItem(t, 1, PyFloat_FromDouble(r.response));
+			PyTuple_SetItem(t, 0, PyCObject_FromVoidPtr(r.dst_proc, NULL));
+			PyTuple_SetItem(t, 1, PyInt_FromLong(r.msg_type));
+			switch(r.response_type) {
+				case PARAMTYPE_FLT:
+					PyTuple_SetItem(t, 2, PyFloat_FromDouble(r.response.f));
+					break;
+				case PARAMTYPE_BOOL:
+					PyTuple_SetItem(t, 2, PyBool_FromLong(r.response.i));
+					break;
+				case PARAMTYPE_INT:
+					PyTuple_SetItem(t, 2, PyInt_FromLong(r.response.i));
+					break;
+				case PARAMTYPE_STRING:
+					PyTuple_SetItem(t, 2, PyString_FromString(r.response.c));
+					g_free(r.response.c);
+					break;
+			}
 			PyList_SetItem(l, rcount, t);
 		}
 		responses += 1;
 	}
 	pthread_mutex_unlock(&mfp_response_lock);
+
+	Py_END_ALLOW_THREADS
 
 	/* build python response */
 
@@ -187,6 +207,7 @@ proc_create(PyObject * mod, PyObject *args)
 	mfp_procinfo * pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typestr);
 	mfp_reqdata rd;
 
+	printf("c: proc_create enter\n");
 	if (pinfo == NULL) {
 		Py_INCREF(Py_None);
 		return Py_None;
@@ -197,6 +218,7 @@ proc_create(PyObject * mod, PyObject *args)
 		extract_c_params(rd.src_proc, paramdict);
 
 	    pthread_mutex_lock(&mfp_globals_lock);
+		printf("c: proc_create in crit sec\n");
 		g_array_append_val(mfp_requests_pending, rd);
 		pthread_mutex_unlock(&mfp_globals_lock);
 
@@ -329,6 +351,11 @@ init_globals(void)
 	mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
     mfp_requests_pending = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
     mfp_responses_pending = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
+
+	pthread_cond_init(&mfp_response_cond, NULL);
+	pthread_mutex_init(&mfp_response_lock, NULL);
+	pthread_mutex_init(&mfp_globals_lock, NULL);
+
 }
 
 static void

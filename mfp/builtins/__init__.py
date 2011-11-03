@@ -15,6 +15,7 @@ def register():
 	import p_arith; p_arith.register()
 	import p_file; p_file.register()
 	import p_for; p_for.register()
+	import p_buffer; p_buffer.register()
 
 
 
