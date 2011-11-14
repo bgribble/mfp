@@ -141,7 +141,7 @@ class Processor (object):
 		if inlet in self.hot_inlets or inlet == -1:
 			self.outlets = [ Uninit ] * len(self.outlets)
 			if inlet == -1:
-				self.dsp_response(value)
+				self.dsp_response(value[0], value[1])
 			elif isinstance(value, MethodCall):
 				self.method(value, inlet)
 			else:
@@ -154,6 +154,10 @@ class Processor (object):
 			self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
 
 		return work 
+
+	def method(self, message, inlet):
+		'''Default method handler ignores which inlet the message was received on'''
+		message.call(self)
 
 	def error(self, tb=None):
 		self.status = Processor.ERROR

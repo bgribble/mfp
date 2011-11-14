@@ -46,6 +46,7 @@ dsp_response_wait(PyObject * mod, PyObject * args)
 	int responses = 0;
 	PyObject * l = NULL;
 	PyObject * t;
+	PyObject * proc;
 	mfp_respdata r;
 	int rcount;
 
@@ -59,9 +60,19 @@ dsp_response_wait(PyObject * mod, PyObject * args)
 	if(mfp_responses_pending && (mfp_responses_pending->len > 0)) {
 		l = PyList_New(mfp_responses_pending->len);
 		for(rcount=0; rcount < mfp_responses_pending->len; rcount++) {
+
 			t = PyTuple_New(3);
 			r = g_array_index(mfp_responses_pending, mfp_respdata, rcount);
-			PyTuple_SetItem(t, 0, PyCObject_FromVoidPtr(r.dst_proc, NULL));
+
+			printf("looking up %p\n", r.dst_proc);
+			proc = g_hash_table_lookup(mfp_proc_objects, r.dst_proc);
+			printf("    found %p\n", proc);
+			if (proc == NULL)
+				continue;
+
+			Py_INCREF(proc);
+
+			PyTuple_SetItem(t, 0, proc);
 			PyTuple_SetItem(t, 1, PyInt_FromLong(r.msg_type));
 			switch(r.response_type) {
 				case PARAMTYPE_FLT:
@@ -218,11 +229,15 @@ proc_create(PyObject * mod, PyObject *args)
 		extract_c_params(rd.src_proc, paramdict);
 
 	    pthread_mutex_lock(&mfp_globals_lock);
-		printf("c: proc_create in crit sec\n");
+		printf("c: proc_create in crit sec %p\n", rd.src_proc);
 		g_array_append_val(mfp_requests_pending, rd);
 		pthread_mutex_unlock(&mfp_globals_lock);
 
 		newobj = PyCObject_FromVoidPtr(rd.src_proc, NULL);
+
+		Py_INCREF(newobj);
+		g_hash_table_insert(mfp_proc_objects, rd.src_proc, newobj);
+
 		Py_INCREF(newobj);
 		return newobj;
 	}
@@ -232,6 +247,7 @@ static PyObject *
 proc_destroy(PyObject * mod, PyObject * args)
 {
 	PyObject * self=NULL;
+	PyObject * objref;
 	mfp_reqdata rd;
 
 	PyArg_ParseTuple(args, "O", &self);
@@ -241,6 +257,10 @@ proc_destroy(PyObject * mod, PyObject * args)
 	pthread_mutex_lock(&mfp_globals_lock);
 	g_array_append_val(mfp_requests_pending, rd);
 	pthread_mutex_unlock(&mfp_globals_lock);
+
+	objref = (PyObject *)g_hash_table_lookup(mfp_proc_objects, rd.src_proc);
+	Py_DECREF(objref);
+	g_hash_table_remove(mfp_proc_objects, rd.src_proc);
 
 	Py_INCREF(Py_False);
 	return Py_False; 
@@ -349,6 +369,7 @@ init_globals(void)
 {
 	mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
 	mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
+	mfp_proc_objects = g_hash_table_new(NULL, NULL);
     mfp_requests_pending = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
     mfp_responses_pending = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
 

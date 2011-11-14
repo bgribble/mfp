@@ -9,6 +9,7 @@
 
 GArray          * mfp_proc_list = NULL;       /* all mfp_processors */ 
 GHashTable      * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */ 
+GHashTable      * mfp_proc_objects = NULL;    /* hash of pointers to PyObject * */ 
 
 
 mfp_processor *

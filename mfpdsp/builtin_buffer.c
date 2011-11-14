@@ -63,8 +63,6 @@ init(mfp_processor * proc)
 	d->trig_repeat = 1;
 	proc->data = d;
 
-	printf("dsp:buffer init complete\n");
-
 	return;
 }
 
@@ -186,7 +184,7 @@ config(mfp_processor * proc)
 	gpointer trigmode_ptr = g_hash_table_lookup(proc->params, "trig_mode");
 	gpointer trigchan_ptr = g_hash_table_lookup(proc->params, "trig_chan");
 	gpointer trigthresh_ptr = g_hash_table_lookup(proc->params, "trig_thresh");
-	gpointer trigbang_ptr = g_hash_table_lookup(proc->params, "trig_triggered");
+	gpointer trigtrig_ptr = g_hash_table_lookup(proc->params, "trig_triggered");
 	gpointer trigrept_ptr = g_hash_table_lookup(proc->params, "trig_repeat");
 	gpointer trigenable_ptr = g_hash_table_lookup(proc->params, "trig_enabled");
 
@@ -215,6 +213,25 @@ config(mfp_processor * proc)
 
 	if (trigthresh_ptr != NULL) {
 		d->trig_thresh = *(float *)trigthresh_ptr;
+	}
+
+	if (trigrept_ptr != NULL) {
+		d->trig_repeat = (int)(*(float *)trigrept_ptr);
+	}
+
+	if (trigtrig_ptr != NULL) {
+		if ((*(float *)trigtrig_ptr) > 0.5) {
+			d->trig_triggered = 1;
+		}
+		else {
+			d->trig_triggered = 0;
+		}
+
+		mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, d->trig_triggered);
+	}
+
+	if (trigenable_ptr != NULL) {
+		d->trig_enabled = (int)(*(float *)trigenable_ptr);
 	}
 	return;
 }

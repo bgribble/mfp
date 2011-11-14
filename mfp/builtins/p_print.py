@@ -26,7 +26,12 @@ class Print (Processor):
 			try:
 				out = self.format_string % self.inlets[0]
 			except TypeError, e:
-				out = str(self.inlets[0])
+				if not self.format_string:
+					leader = ''
+				else:
+					leader = self.format_string + ' '
+
+				out = leader + str(self.inlets[0])
 
 			self.outlets[0] = out 
 			print out 

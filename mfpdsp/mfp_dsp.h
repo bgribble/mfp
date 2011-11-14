@@ -91,6 +91,7 @@ extern int mfp_samplerate;
 extern int mfp_blocksize; 
 
 extern GHashTable * mfp_proc_registry;
+extern GHashTable * mfp_proc_objects;
 extern GArray * mfp_proc_list; 
 extern GArray * mfp_requests_pending;
 extern GArray * mfp_responses_pending;
