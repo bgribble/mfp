@@ -129,6 +129,12 @@ class ScopeActor(object):
 			ctx.move_to(2*self.MARGIN_LEFT-self.AXIS_PAD, p[1])
 			ctx.line_to(2*self.MARGIN_LEFT-3*self.AXIS_PAD, p[1])
 			ctx.stroke()
+			ctx.save()
+			ctx.move_to(self.AXIS_PAD, p[1])
+			ctx.rotate(math.pi/2)
+			ctx.show_text("%.3g" % tick)
+			ctx.restore()
+
 
 		
 
