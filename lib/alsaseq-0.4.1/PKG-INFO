@@ -1,0 +1,18 @@
+Metadata-Version: 1.0
+Name: alsaseq
+Version: 0.4.1
+Summary: ALSA sequencer bindings for Python
+Home-page: http://pp.com.mx/python/alsaseq/
+Author: Patricio Paez
+Author-email: pp@pp.com.mx
+License: GNU GPL v2 or later
+Description: alsaseq is a Python 3 and Python 2 module that allows to interact with ALSA
+        sequencer clients. It can create an ALSA client, connect to other
+        clients, send and receive ALSA events immediately or at a scheduled
+        time using a sequencer queue. It provides a subset of the ALSA
+        sequencer capabilities in a simplified model. It is implemented in
+        C language and licensed under the Gnu GPL license version 2 or
+        later.
+Platform: linux
+Classifier: Development Status :: 3 - Alpha
+Classifier: Topic :: Multimedia :: Sound/Audio :: MIDI

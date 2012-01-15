@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python2.7
 '''
 main.py: main routine for mfp
 
@@ -84,6 +84,11 @@ class MFPApp (object):
 	def __init__(self):
 		self.dsp_process = None
 		self.gui_process = None
+
+		# threads in this process 
+		self.midi_mgr = None 
+		#self.osc_mgr = None 
+
 		self.gui_cmd = None
 
 		# processor class registry 
@@ -101,6 +106,7 @@ class MFPApp (object):
 
 		from mfp.dsp_slave import dsp_init, DSPObject
 		from mfp.gui_slave import gui_init, GUICommand
+
 		RPCWrapper.node_id = "MFP Master"
 		MFPCommand.local = True
 
@@ -116,6 +122,16 @@ class MFPApp (object):
 				print "MFPApp: GUI not reaady, waiting"
 				time.sleep(0.2)
 			print "MFPApp: GUI becomes ready"
+
+		# midi manager 
+		from . import midi
+		self.midi_mgr = midi.MFPMidiManager(1, 1)
+		self.midi_mgr.start()	
+
+		# OSC manager 
+		#import .osc 
+		#self.osc_manager = osc.MFPOscManager()
+		#self.osc_manager.start()
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch('default', '')

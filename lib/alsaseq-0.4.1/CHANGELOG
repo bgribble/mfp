@@ -1,0 +1,29 @@
+0.4.1 26 January 2011
+      setup.py: Added missing comma
+
+0.4   14 January 2011
+      alsaseq.c: Support Python 3 and 2, removed unused variables
+      alsamidi.py: Support Python 3 and 2.
+      doc/project.rst: Update for Python 3.
+      setup.py: new file
+      Makefile: removed
+
+0.3   05 January 2009
+      constants.c: Updated to alsa-lib-1.0.17a
+      doc/project.html: generated with .rst
+      doc/project.rst: new file
+      doc/project.pdf: removed
+      Makefile: new file
+
+0.2.1 05 December 2007
+      alsaseq.c: Fix source port handling in output(), improved doc strings.
+      alsamidi.py: Fix time2tuple(), tuple2time().
+
+0.2   28 November 2007
+      alsaseq.c: added id(); modified status(), input()
+      alsamidi.py: added Seq() class and ALSACSV file format,
+      other helper functions.
+      constants.py: added, forgot to include it in 0.1
+
+0.1   09 September 2007 
+      Initial release
