@@ -87,7 +87,7 @@ class MFPApp (object):
 
 		# threads in this process 
 		self.midi_mgr = None 
-		#self.osc_mgr = None 
+		self.osc_mgr = None 
 
 		self.gui_cmd = None
 
@@ -129,9 +129,9 @@ class MFPApp (object):
 		self.midi_mgr.start()	
 
 		# OSC manager 
-		#import .osc 
-		#self.osc_manager = osc.MFPOscManager()
-		#self.osc_manager.start()
+		from . import osc 
+		self.osc_manager = osc.MFPOscManager(5555)
+		self.osc_manager.start()
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch('default', '')
