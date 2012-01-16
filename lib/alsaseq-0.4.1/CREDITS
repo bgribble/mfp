@@ -1,0 +1,12 @@
+Thanks to:
+
+* Matthias Nagorni
+For his Tutorial about the ALSA sequencer and the examples
+ -midiroute.c teached how to open the ALSA sequencer, how to create a variable number of ports up to a maximum.
+ -iniArp.c get_tick() teached how to queue_status structure to get the status information from a queue.
+
+* Clemens Ladisch
+For arecordmidi.c and aplaymidi.c.  arecordmidi.c teached how to set up a timestamping input port using a port_info structure.
+
+* Torsten Kurbad
+For providing an initial setup.py for this project, which led me to learn about distutils. 

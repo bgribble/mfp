@@ -1,0 +1,106 @@
+2011-01-29: pyliblo 0.9.1
+
+  * Changed send functions to raise an IOError if sending failed (probaby
+    most useful with TCP connections).
+  * Lots of code cleanup and deobfuscation.
+  * Included unit tests in release tarball.
+
+2010-10-22: pyliblo 0.9.0
+
+  * Support Python 3.x. As a result, pyliblo can no longer be built with
+    Pyrex, and requires Cython >= 0.12 instead.
+  * Added free() method to Server and ServerThread classes.
+  * Added fileno() method to Server and ServerThread classes (thanks to
+    Edward George).
+  * Prefer read-only properties over getter methods (which still exist, but
+    are now deprecated).
+  * Added proper docstrings (copied from the HTML docs).
+  * The minimum version of liblo required by pyliblo is now 0.26.
+
+2009-11-30: pyliblo 0.8.1
+
+  * Release the Python GIL inside Server.recv().
+  * Fixed a possible segfault when the error handler was called from the
+  * liblo server thread.
+
+2009-09-13: pyliblo 0.8.0
+
+  * Changed license from GPL 2 to LGPL 2.1 (as did liblo in version 0.26).
+  * Added protocol parameter to the Server class. Among other things, this
+    allows TCP connections.
+  * The minumum version of liblo required by pyliblo is now 0.24.
+  * pyliblo can now be built with either Pyrex or Cython.
+
+2009-01-19: pyliblo 0.7.2
+
+  * Fixed all compiler warnings properly in Pyrex, without patching the
+    generated C code.
+  * Return values of callback functions are no longer ignored, but handled
+    as in liblo.
+  * The send_osc script can now be run with an explicit type string,
+    instead of trying to determine the argument types automatically.
+
+2008-08-03: pyliblo 0.7.1
+
+  * Added manpages for send_osc and dump_osc.
+
+2008-03-03: pyliblo 0.7.0
+
+  * Fixed memory leaks, caused by failure to free() the result of
+    lo_server_get_url() and lo_address_get_url().
+  * Added parameter to Server.register_methods() to allow registering
+    functions of an object other than the server itself.
+  * Allow callback functions to have a variable number of arguments (*args).
+
+2007-12-14: pyliblo 0.6.4
+
+  * Avoid creating circular references when using methods as callback
+    functions, which in some cases prevented the server object from being
+    deleted properly.
+
+2007-08-10: pyliblo 0.6.3
+
+  * Patched the Pyrex-generated code to make it compile without warnings.
+  * Always build from the existing C source by default.
+
+2007-07-29: pyliblo 0.6.2
+
+  * Minor code cleanup, hopefully not breaking anything.
+  * Somewhat faster conversion of blob data from and to Python lists.
+
+2007-07-07: pyliblo 0.6.1
+
+  * Fixed a bug that caused the floats 0.0 and 1.0 to be sent as boolean.
+    Thanks to Jesse Chappell for the patch.
+
+2007-05-20: pyliblo 0.6
+
+  * Added support for sending bundles, optionally with timestamps.
+  * Added previously unsupported OSC data types (timetag, midi, symbol,
+    true/false/nil/infinitum).
+  * New @make_method decorator.
+  * Various bugfixes.
+
+2007-04-28: pyliblo 0.5.1
+
+  * Fixed a stupid typo in Server.send().
+
+2007-04-26: pyliblo 0.5
+
+  * Simplified the way arguments are passed to callback functions. For the
+    server side, this release is therefore incompatible with previous
+    versions!
+  * Some more cleanup.
+
+2007-04-02: pyliblo 0.3
+
+  * Added class ServerThread for asynchronous dispatching of incoming
+    messages.
+
+2007-04-01: pyliblo 0.2
+
+  * Minor improvements.
+
+2007-02-20: pyliblo 0.1
+
+  * Initial release.

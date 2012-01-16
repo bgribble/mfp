@@ -1,0 +1,10 @@
+Alsaseq - ALSA sequencer bindings for Python
+
+Documentation is in folder doc/ in HTML format.
+
+The module and its documentation can be found
+at http://pp.com.mx/python/alsaseq
+
+Please provide suggestions and comments to improve!
+
+Patricio Paez <pp@pp.com.mx>
