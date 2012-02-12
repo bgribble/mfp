@@ -10,13 +10,65 @@ from threading import Thread
 from datetime import datetime 
 from . import appinfo 
 
+class SeqEvent(object):
+	def __init__(self, etype, flags, tag, queue, timestamp, src, dst, data):
+		self.etype = etype
+		self.flags = flags
+		self.tag = tag
+		self.queue = queue
+		self.timestamp = timestamp
+		self.src = src
+		self.dst = dst
+		self.data = data
+
+
+class MidiUndef (object):
+	def __init__(self, seqevent=None):
+		self.seqevent = seqevent
+
+class MidiNoteOn (object):
+	def __init__(self, seqevent=None):
+		self.seqevent = seqevent
+		self.channel = None
+		self.key = None
+		self.velocity = None
+
+		if self.seqevent is not None:
+			self.channel = seqevent.data[0]
+			self.key = seqevent.data[1]
+			self.velocity = seqevent.data[2]
+
+class MidiNoteOff (object):
+	def __init__(self, seqevent=None):
+		self.seqevent = seqevent
+		self.channel = None
+		self.key = None
+		self.velocity = None
+
+		if self.seqevent is not None:
+			self.channel = seqevent.data[0]
+			self.key = seqevent.data[1]
+			self.velocity = seqevent.data[2]
+
+class MidiControl (object):
+	def __init__(self, seqevent=None):
+		self.seqevent = seqevent
+		self.channel = None
+		self.controller = None
+		self.value = None 
+
+		if self.seqevent is not None:
+			self.channel = seqevent.data[0]
+			self.controller = seqevent.data[1]
+			self.value = seqevent.data[2]
+
 class MFPMidiManager(Thread): 
 	eventmap = {
 		alsaseq.SND_SEQ_EVENT_SYSTEM: MidiUndef,
 		alsaseq.SND_SEQ_EVENT_RESULT: MidiUndef,
-		alsaseq.SND_SEQ_EVENT_NOTE: MidiNote,
-		alsaseq.SND_SEQ_EVENT_NOTEON: MidiNote,
-		alsaseq.SND_SEQ_EVENT_NOTEOFF: MidiNote,
+		alsaseq.SND_SEQ_EVENT_NOTE: MidiUndef,
+		alsaseq.SND_SEQ_EVENT_NOTEON: MidiNoteOn,
+		alsaseq.SND_SEQ_EVENT_NOTEOFF: MidiNoteOff,
 		alsaseq.SND_SEQ_EVENT_KEYPRESS: MidiControl,
 		alsaseq.SND_SEQ_EVENT_CONTROLLER: MidiControl,
 		alsaseq.SND_SEQ_EVENT_PGMCHANGE: MidiControl,
@@ -98,9 +150,8 @@ class MFPMidiManager(Thread):
 				self.dispatch_event(new_event)
 
 	def create_event(self, raw_event):
-		etype, eflags, tag, queue, timestamp, src, dst, data = raw_event
-		ctor = self.etypemap.get(etype)
-		return ctor(*raw_event)
+		ctor = self.etypemap.get(raw_event[0])
+		return ctor(raw_event)
 
 	def dispatch_event(self, event):
 		handlers = self.handlers.get(event.src, [])
@@ -109,11 +160,4 @@ class MFPMidiManager(Thread):
 
 	def send(self, port, data):
 		pass
-
-
-class MidiUndef (object):
-	def __init__(self, *values):
-		self.etype = values[0]
-		self.args = values[1:]
-
 

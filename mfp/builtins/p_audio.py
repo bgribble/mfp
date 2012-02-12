@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 '''
-p_dac.py:  Builtin DAC/ADC DSP objects
+p_audio.py:  Builtin AudioOut/AudioIn DSP objects
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
@@ -8,7 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from mfp.processor import Processor
 from mfp.main import MFPApp
 
-class DAC(Processor):
+class AudioOut(Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 1, 0, init_type, init_args)
 		initargs = self.parse_args(init_args)
@@ -30,7 +30,7 @@ class DAC(Processor):
 		except:
 			print "Can't convert %s to a channel number" % self.inlet[0]
 				
-class ADC(Processor):
+class AudioIn(Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 1, 1, init_type, init_args)
 		initargs = self.parse_args(init_args)
@@ -54,7 +54,7 @@ class ADC(Processor):
 				
 
 def register():
-	MFPApp().register("adc~", ADC)
-	MFPApp().register("dac~", DAC)
+	MFPApp().register("audio_in~", AudioIn)
+	MFPApp().register("audio_out~", AudioOut)
 
 

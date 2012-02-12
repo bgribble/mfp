@@ -43,3 +43,6 @@ class MidiOut (Processor):
 			event.port = self.port
 			midi.send(event)
 
+def register():
+	MFPApp().register("midi_in~", MidiIn)
+	MFPApp().register("midi_out~", MidiOut)
