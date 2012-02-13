@@ -127,11 +127,12 @@ class MFPApp (object):
 		from . import midi
 		self.midi_mgr = midi.MFPMidiManager(1, 1)
 		self.midi_mgr.start()	
+		print "MFPMidiManager started"
 
 		# OSC manager 
-		from . import osc 
-		self.osc_manager = osc.MFPOscManager(5555)
-		self.osc_manager.start()
+		# from . import osc 
+		# self.osc_manager = osc.MFPOscManager(5555)
+		# self.osc_manager.start()
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch('default', '')

@@ -131,16 +131,20 @@ class MFPMidiManager(Thread):
 		self.handlers = {} 
 
 		self.quitreq = False 	
+		Thread.__init__(self)
 
 	def register(self, callback, ports):
 		for p in ports: 
 			hh = self.handlers.setdefault(p, [])
 			hh.append(callback)
 
-	def start(self):
+	def run(self):
+		print "MFPMidiManager: In run()"
 		alsaseq.client(appinfo.name, self.num_inports, self.num_outports, True)
 		self.start_time = datetime.now()
+		print "MFPMidiManager: calling start()"
 		alsaseq.start()
+		print "MFPMidiManager: start() done"
 
 		while not self.quitreq:
 			events = alsaseq.input()

@@ -6,6 +6,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from .. import midi
+from ..processor import Processor
+from ..main import MFPApp 
 
 class MidiIn (Processor):
 	def __init__(self, init_type, init_args):
