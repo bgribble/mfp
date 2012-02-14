@@ -313,26 +313,29 @@ alsaseq_input(PyObject *self, PyObject *args)
         
 	if (!PyArg_ParseTuple(args, "" ))
 		return NULL;
-        snd_seq_event_input( seq_handle, &ev );
 
-        switch( ev->type ) {
-        case SND_SEQ_EVENT_NOTE:
-        case SND_SEQ_EVENT_NOTEON:
-        case SND_SEQ_EVENT_NOTEOFF:
-        case SND_SEQ_EVENT_KEYPRESS:
-            return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbi))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.note.channel, ev->data.note.note, ev->data.note.velocity, ev->data.note.off_velocity, ev->data.note.duration );
-            break;
+	Py_BEGIN_ALLOW_THREADS
+	snd_seq_event_input( seq_handle, &ev );
+	Py_END_ALLOW_THREADS
 
-        case SND_SEQ_EVENT_CONTROLLER:
-        case SND_SEQ_EVENT_PGMCHANGE:
-        case SND_SEQ_EVENT_CHANPRESS:
-        case SND_SEQ_EVENT_PITCHBEND:
-            return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbii))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.control.channel, ev->data.control.unused[0], ev->data.control.unused[1], ev->data.control.unused[2], ev->data.control.param, ev->data.control.value );
-            break;
+	switch( ev->type ) {
+		case SND_SEQ_EVENT_NOTE:
+		case SND_SEQ_EVENT_NOTEON:
+		case SND_SEQ_EVENT_NOTEOFF:
+		case SND_SEQ_EVENT_KEYPRESS:
+			return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbi))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.note.channel, ev->data.note.note, ev->data.note.velocity, ev->data.note.off_velocity, ev->data.note.duration );
+			break;
 
-        default:
-            return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbi))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.note.channel, ev->data.note.note, ev->data.note.velocity, ev->data.note.off_velocity, ev->data.note.duration );
-        }
+		case SND_SEQ_EVENT_CONTROLLER:
+		case SND_SEQ_EVENT_PGMCHANGE:
+		case SND_SEQ_EVENT_CHANPRESS:
+		case SND_SEQ_EVENT_PITCHBEND:
+			return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbii))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.control.channel, ev->data.control.unused[0], ev->data.control.unused[1], ev->data.control.unused[2], ev->data.control.param, ev->data.control.value );
+			break;
+
+		default:
+			return Py_BuildValue( "(bbbb(ii)(bb)(bb)(bbbbi))", ev->type, ev->flags, ev->tag, ev->queue, ev->time.time.tv_sec, ev->time.time.tv_nsec, ev->source.client, ev->source.port, ev->dest.client, ev->dest.port, ev->data.note.channel, ev->data.note.note, ev->data.note.velocity, ev->data.note.off_velocity, ev->data.note.duration );
+	}
 
 }
 

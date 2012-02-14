@@ -74,7 +74,7 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 	jack_port_t * port;
 	int i;
 
-	if ((client = jack_client_open("mfp_dsp", JackNullOption, &status, NULL)) == 0) {
+	if ((client = jack_client_open("mfp", JackNullOption, &status, NULL)) == 0) {
 		fprintf (stderr, "jack_client_open() failed.");
 		return 0;
 	}
