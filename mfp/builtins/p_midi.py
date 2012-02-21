@@ -16,16 +16,17 @@ class MidiIn (Processor):
 		self.port = 0
 		self.channels = []
 
-		midi.register(self.send)
+		MFPApp().midi_mgr.register(self.send)
 
 	def trigger(self):
+		print "MidiIn trigger:", self.inlets[0]
 		event = self.inlets[0]
 		if isinstance(event, dict):
 			for attr, val in event.items():
 				setattr(self, attr, val)
 		elif isinstance(event, MethodCall):
 			self.method(event, 0)
-		elif isinstance(event, [ NoteEvent, MidiCCEvent, MidiMiscEvent ]):
+		elif isinstance(event, [ MidiNoteOn, MidiNoteOff, MidiControl, MidiUndef]):
 			if event.port == self.port and (self.channels == [] or event.channel in self.channels):
 				self.outlets[0] = event
 
@@ -46,5 +47,5 @@ class MidiOut (Processor):
 			midi.send(event)
 
 def register():
-	MFPApp().register("midi_in~", MidiIn)
-	MFPApp().register("midi_out~", MidiOut)
+	MFPApp().register("midi_in", MidiIn)
+	MFPApp().register("midi_out", MidiOut)

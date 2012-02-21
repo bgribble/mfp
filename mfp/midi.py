@@ -26,6 +26,9 @@ class MidiUndef (object):
 	def __init__(self, seqevent=None):
 		self.seqevent = seqevent
 
+	def __repr__(self):
+		return "<MidiUndef %s>" % self.seqevent
+
 class MidiNoteOn (object):
 	def __init__(self, seqevent=None):
 		self.seqevent = seqevent
@@ -38,6 +41,9 @@ class MidiNoteOn (object):
 			self.key = seqevent.data[1]
 			self.velocity = seqevent.data[2]
 
+	def __repr__(self):
+		return "<NoteOn %f %f %f>" % (self.key, self.velocity, self.channel)
+
 class MidiNoteOff (object):
 	def __init__(self, seqevent=None):
 		self.seqevent = seqevent
@@ -49,6 +55,9 @@ class MidiNoteOff (object):
 			self.channel = seqevent.data[0]
 			self.key = seqevent.data[1]
 			self.velocity = seqevent.data[2]
+
+	def __repr__(self):
+		return "<NoteOff %f %f %f>" % (self.key, self.velocity, self.channel)
 
 class MidiControl (object):
 	def __init__(self, seqevent=None):
@@ -63,7 +72,7 @@ class MidiControl (object):
 			self.value = seqevent.data[2]
 
 class MFPMidiManager(Thread): 
-	eventmap = {
+	etypemap = {
 		alsaseq.SND_SEQ_EVENT_SYSTEM: MidiUndef,
 		alsaseq.SND_SEQ_EVENT_RESULT: MidiUndef,
 		alsaseq.SND_SEQ_EVENT_NOTE: MidiUndef,
@@ -133,7 +142,10 @@ class MFPMidiManager(Thread):
 		self.quitreq = False 	
 		Thread.__init__(self)
 
-	def register(self, callback, ports):
+	def register(self, callback, ports=None):
+		if ports is None:
+			ports = [0]
+
 		for p in ports: 
 			hh = self.handlers.setdefault(p, [])
 			hh.append(callback)
@@ -147,18 +159,21 @@ class MFPMidiManager(Thread):
 		print "MFPMidiManager: start() done"
 
 		while not self.quitreq:
-			events = alsaseq.input()
-			for e in events:
-				new_event = self.create_event(e)
-				print new_event
-				self.dispatch_event(new_event)
+			raw_event = alsaseq.input()
+			new_event = self.create_event(raw_event)
+			print new_event
+			self.dispatch_event(new_event)
 
 	def create_event(self, raw_event):
 		ctor = self.etypemap.get(raw_event[0])
-		return ctor(raw_event)
+		if ctor is None:
+			print "midi.py: no handler for", raw_event
+			ctor = MidiUndef
+		return ctor(SeqEvent(*raw_event))
 
 	def dispatch_event(self, event):
-		handlers = self.handlers.get(event.src, [])
+		print "looking for handler for", event, event.seqevent.dst
+		handlers = self.handlers.get(event.seqevent.dst[0], [])
 		for h in handlers:
 			h(event)
 
