@@ -42,7 +42,7 @@ class MidiNoteOn (object):
 			self.velocity = seqevent.data[2]
 
 	def __repr__(self):
-		return "<NoteOn %f %f %f>" % (self.key, self.velocity, self.channel)
+		return "<NoteOn %d %d %d>" % (self.key, self.velocity, self.channel)
 
 class MidiNoteOff (object):
 	def __init__(self, seqevent=None):
@@ -57,7 +57,7 @@ class MidiNoteOff (object):
 			self.velocity = seqevent.data[2]
 
 	def __repr__(self):
-		return "<NoteOff %f %f %f>" % (self.key, self.velocity, self.channel)
+		return "<NoteOff %d %d %d>" % (self.key, self.velocity, self.channel)
 
 class MidiControl (object):
 	def __init__(self, seqevent=None):
@@ -151,29 +151,27 @@ class MFPMidiManager(Thread):
 			hh.append(callback)
 
 	def run(self):
-		print "MFPMidiManager: In run()"
 		alsaseq.client(appinfo.name, self.num_inports, self.num_outports, True)
 		self.start_time = datetime.now()
-		print "MFPMidiManager: calling start()"
 		alsaseq.start()
-		print "MFPMidiManager: start() done"
 
 		while not self.quitreq:
 			raw_event = alsaseq.input()
 			new_event = self.create_event(raw_event)
-			print new_event
 			self.dispatch_event(new_event)
 
 	def create_event(self, raw_event):
 		ctor = self.etypemap.get(raw_event[0])
 		if ctor is None:
-			print "midi.py: no handler for", raw_event
+			print "midi.py: no constructor for", raw_event
 			ctor = MidiUndef
 		return ctor(SeqEvent(*raw_event))
 
 	def dispatch_event(self, event):
-		print "looking for handler for", event, event.seqevent.dst
-		handlers = self.handlers.get(event.seqevent.dst[0], [])
+		handlers = self.handlers.get(event.seqevent.dst[1], None)
+		if handlers is None:
+			return
+
 		for h in handlers:
 			h(event)
 

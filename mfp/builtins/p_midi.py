@@ -8,6 +8,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from .. import midi
 from ..processor import Processor
 from ..main import MFPApp 
+from ..method import MethodCall 
+from ..midi import MidiNoteOn, MidiNoteOff, MidiControl, MidiUndef
 
 class MidiIn (Processor):
 	def __init__(self, init_type, init_args):
@@ -19,15 +21,16 @@ class MidiIn (Processor):
 		MFPApp().midi_mgr.register(self.send)
 
 	def trigger(self):
-		print "MidiIn trigger:", self.inlets[0]
 		event = self.inlets[0]
 		if isinstance(event, dict):
 			for attr, val in event.items():
 				setattr(self, attr, val)
 		elif isinstance(event, MethodCall):
 			self.method(event, 0)
-		elif isinstance(event, [ MidiNoteOn, MidiNoteOff, MidiControl, MidiUndef]):
-			if event.port == self.port and (self.channels == [] or event.channel in self.channels):
+		elif isinstance(event, (MidiNoteOn, MidiNoteOff, MidiControl, MidiUndef)):
+			if event.seqevent and event.seqevent.dst and event.seqevent.dst[1] != self.port:
+				pass
+			elif (self.channels == []) or (event.channel in self.channels) or event.channel == -1:
 				self.outlets[0] = event
 
 class MidiOut (Processor):
