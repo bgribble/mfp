@@ -9,7 +9,7 @@ from ..processor import Processor
 from ..main import MFPApp
 from ..evaluator import Evaluator
 from ..method import MethodCall
-
+from ..bang import Bang, Uninit
 
 class ApplyMethod(Processor):
 	def __init__(self, init_type, init_args):
@@ -26,6 +26,28 @@ class ApplyMethod(Processor):
 		else:
 			self.outlets[0] = MethodCall(self.method_name, *(self.inlets[0]))
 
+class GetElement(Processor):
+	def __init__(self, init_type, init_args):
+		Processor.__init__(self, 2, 2, init_type, init_args)
+		initargs = self.parse_args(init_args)
+		if len(initargs):
+			self.element = initargs[0]
+
+	def trigger(self):
+		if self.inlets[1] is not Uninit:
+			self.element = self.inlets[1]
+
+		if self.element is None:
+			return
+		
+		if isinstance(self.element, (int, float)):
+			self.outlets[0] = self.inlets[0][int(self.element)]
+		elif isinstance(self.inlets[0], dict):
+			self.outlets[0] = self.inlets[0].get(self.element)
+		else:
+			self.outlets[0] = getattr(self.inlets[0], self.element)
+
+		self.outlets[1] = self.inlets[0]
 
 class PyEval(Processor):
 	def __init__(self, init_type, init_args):
@@ -85,6 +107,7 @@ def mk_unary(pyfunc, name):
 import operator, math
 
 def register():
+	MFPApp().register("get", GetElement)
 	MFPApp().register("eval", PyEval)
 	MFPApp().register("apply", ApplyMethod)
 

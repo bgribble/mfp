@@ -129,6 +129,7 @@ class Processor (object):
 				w_target, w_val, w_inlet = work[0]
 				work[:1] = w_target._send(w_val, w_inlet)
 		except: 
+			print "send failed:", self, value, inlet
 			import traceback
 			tb = traceback.format_exc()
 			self.error(tb)
