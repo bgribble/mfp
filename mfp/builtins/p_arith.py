@@ -19,7 +19,7 @@ class ArithProcessor(Processor):
 		self.dsp_outlets = [0]
 		self.dsp_init(self.arith_op)
 		
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.dsp_obj.setparam("const", initargs[0])
 		

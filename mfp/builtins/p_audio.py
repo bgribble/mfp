@@ -11,7 +11,7 @@ from mfp.main import MFPApp
 class AudioOut(Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 1, 0, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 
 		if len(initargs):
 			channel = initargs[0]
@@ -33,7 +33,7 @@ class AudioOut(Processor):
 class AudioIn(Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 1, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 
 		if len(initargs):
 			channel = initargs[0]

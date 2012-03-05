@@ -19,7 +19,7 @@ class Trigger (Processor):
 	'''
 	def __init__(self, init_type, init_args):
 
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs) > 0:
 			numout = initargs[0]
 		else:

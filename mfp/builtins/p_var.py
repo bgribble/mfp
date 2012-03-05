@@ -12,7 +12,7 @@ from .. import Bang, Uninit
 class Var (Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 2, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.value = initargs[0]
 		else:
@@ -37,3 +37,4 @@ class Var (Processor):
 
 def register():
 	MFPApp().register("var", Var)
+	MFPApp().register("message", Var)

@@ -10,16 +10,27 @@ from StringIO import StringIO
 from .method import MethodCall
 from .bang import Bang
 
+def _eval_collect_args(*args, **kwargs):
+	return (args, kwargs)
+
 class Evaluator (object):
 	def __init__(self):
 		self._init_globals()
 
 	def _init_globals(self):
+		from midi import MidiNoteOn, MidiNoteOff
 		gg = globals()
 		self.globals = { 
 			'MethodCall': gg.get('MethodCall'),
-			'Bang': gg.get('Bang')
+			'Bang': gg.get('Bang'), 
+			'MidiNoteOn': MidiNoteOn, 
+			'MidiNoteOff': MidiNoteOff 
 		}
+
+
+	def eval_arglist(self, evalstr, extra_bindings=None):
+		estr = "_eval_collect_args(%s)" % evalstr
+		return self.eval(estr)
 
 	def eval(self, evalstr, extra_bindings=None):
 		if extra_bindings is None:

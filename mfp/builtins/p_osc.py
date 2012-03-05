@@ -11,7 +11,7 @@ from mfp.main import MFPApp
 class Osc(Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 3, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			freq = initargs[0]
 		else:

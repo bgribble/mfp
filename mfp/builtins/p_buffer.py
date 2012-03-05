@@ -27,7 +27,7 @@ class Buffer(Processor):
 
 	def __init__(self, init_type, init_args):
 
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			size = initargs[0]
 		if len(initargs) > 1:

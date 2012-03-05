@@ -59,16 +59,21 @@ class Processor (object):
 		if self.dsp_obj is not None:
 			self.dsp_obj.delete()
 
+	def parse_obj(self, argstring):
+		if argstring == '' or argstring is None:
+			return ()
+
+		# FIXME: evaluator defines context, should be in patch
+		e = Evaluator()
+		return e.eval(argstring)
+
 	def parse_args(self, argstring):
 		if argstring == '' or argstring is None:
 			return ()
 
 		# FIXME: evaluator defines context, should be in patch
 		e = Evaluator()
-		obj = e.eval(argstring)
-		if not isinstance(obj, tuple):
-			obj = (obj,)
-		return obj
+		return e.eval_arglist(argstring)
 
 	def resize(self, inlets, outlets):
 		if inlets > len(self.inlets):

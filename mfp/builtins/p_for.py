@@ -22,7 +22,7 @@ class For(Processor):
 		self.startval = False
 		Processor.__init__(self, 2, 1, init_type, init_args)
 		
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.inlets[1] = initargs[0]
 			self.startval = initargs[0]

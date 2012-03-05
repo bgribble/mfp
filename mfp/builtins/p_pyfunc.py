@@ -16,7 +16,7 @@ class ApplyMethod(Processor):
 		self.method_name = None
 
 		Processor.__init__(self, 1, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.method_name = initargs[0]
 
@@ -29,7 +29,7 @@ class ApplyMethod(Processor):
 class GetElement(Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 2, 2, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.element = initargs[0]
 
@@ -55,7 +55,7 @@ class PyEval(Processor):
 		self.bindings = {}
 
 		Processor.__init__(self, 1, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.bindings = initargs[0]
 
@@ -77,7 +77,7 @@ class PyBinary(Processor):
 	def __init__(self, pyfunc, init_type, init_args):
 		self.function = pyfunc
 		Processor.__init__(self, 2, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs) == 1:
 			self.inlets[1] = initargs[0]
 

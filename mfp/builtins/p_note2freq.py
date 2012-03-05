@@ -48,3 +48,5 @@ class Note2Freq(Processor):
 		if note is not None:
 			self.outlets[0] = self.tuning.freq(self.scale.midinote(note))
 
+def register():
+	MFPApp.register("note2freq", Note2Freq)

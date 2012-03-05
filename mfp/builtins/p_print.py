@@ -12,7 +12,7 @@ from ..bang import Uninit
 class Print (Processor): 
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 2, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.format_string = initargs[0] 
 		else:

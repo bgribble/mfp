@@ -10,7 +10,7 @@ class FileIO(Processor):
 		self.mode = "r"
 
 		Processor.__init__(self, 1, 1, init_type, init_args)
-		initargs = self.parse_args(init_args)
+		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs) > 0:
 			self.filename = initargs[0]
 		if len(initargs) > 1:
