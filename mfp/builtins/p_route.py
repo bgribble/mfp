@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6 
+#! /usr/bin/env python
 '''
 p_route.py: Route inputs to an output based on "address" in first element 
 
@@ -55,7 +55,10 @@ class Route (Processor):
 				self.type_addresses[addr] = outlet
 			elif not self.strict and isinstance(addr, (list, tuple)):
 				for a in addr:
-					self.addresses[a] = outlet 
+					if isinstance(a, type):
+						self.type_addresses[a] = outlet
+					else:
+						self.addresses[a] = outlet 
 			else:
 				self.addresses[addr] = outlet 
 		self.nomatch = len(values)
