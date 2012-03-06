@@ -69,7 +69,7 @@ class Processor (object):
 
 	def parse_args(self, argstring):
 		if argstring == '' or argstring is None:
-			return ()
+			return ((), {})
 
 		# FIXME: evaluator defines context, should be in patch
 		e = Evaluator()

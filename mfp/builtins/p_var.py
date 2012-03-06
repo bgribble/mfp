@@ -15,8 +15,8 @@ class Var (Processor):
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.value = initargs[0]
-		else:
-			self.value = None
+		elif len(kwargs):
+			self.value = kwargs 
 
 	def trigger(self):
 		if self.inlets[1] is not Uninit:

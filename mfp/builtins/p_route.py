@@ -43,8 +43,9 @@ class Route (Processor):
 
 		self.addresses = {}  
 		self.type_addresses = {}
-
-		self._update_addresses(self.parse_args(init_args))
+		
+		initargs, kwargs = self.parse_args(init_args)
+		self._update_addresses(initargs)
 
 		Processor.__init__(self, 2, self.nomatch+1, init_type, init_args)
 

@@ -17,14 +17,14 @@ class Note2Freq(Processor):
 		tuning: an instance of Tuning (defaults to EqualTemper)
 	'''
 	def __init__(self, init_type, init_args):
-		(pos, kwd) = self.parse_args(init_args)
-		if kwd.get('scale'):
-			self.scale = kwd.get('scale')
+		initargs, kwargs = self.parse_args(init_args)
+		if kwargs.get('scale'):
+			self.scale = kwargs.get('scale')
 		else:
 			self.scale = scale.Chromatic()
 
-		if kwd.get('tuning'):
-			self.tuning = kwd.get('tuning')
+		if kwargs.get('tuning'):
+			self.tuning = kwargs.get('tuning')
 		else:
 			self.tuning = scale.EqualTemper()
 

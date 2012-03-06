@@ -10,8 +10,6 @@ from StringIO import StringIO
 from .method import MethodCall
 from .bang import Bang
 
-def _eval_collect_args(*args, **kwargs):
-	return (args, kwargs)
 
 class Evaluator (object):
 	def __init__(self):
@@ -29,8 +27,14 @@ class Evaluator (object):
 
 
 	def eval_arglist(self, evalstr, extra_bindings=None):
+		def _eval_collect_args(*args, **kwargs):
+			return (args, kwargs)
+
 		estr = "_eval_collect_args(%s)" % evalstr
-		return self.eval(estr)
+		if extra_bindings is None:
+			extra_bindings = {}
+		extra_bindings[ '_eval_collect_args' ] = _eval_collect_args 
+		return self.eval(estr, extra_bindings)
 
 	def eval(self, evalstr, extra_bindings=None):
 		if extra_bindings is None:

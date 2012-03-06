@@ -34,7 +34,7 @@ class Print (Processor):
 				out = leader + str(self.inlets[0])
 
 			self.outlets[0] = out 
-			print out 
+			print repr(out) 
 			
 def register():
 	MFPApp().register("print", Print)
