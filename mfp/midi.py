@@ -29,7 +29,10 @@ class MidiUndef (object):
 	def __repr__(self):
 		return "<MidiUndef %s>" % self.seqevent
 
-class MidiNoteOn (object):
+class Note (object):
+	pass
+
+class NoteOn (Note):
 	def __init__(self, seqevent=None):
 		self.seqevent = seqevent
 		self.channel = None
@@ -44,7 +47,7 @@ class MidiNoteOn (object):
 	def __repr__(self):
 		return "<NoteOn %d %d %d>" % (self.key, self.velocity, self.channel)
 
-class MidiNoteOff (object):
+class NoteOff (Note):
 	def __init__(self, seqevent=None):
 		self.seqevent = seqevent
 		self.channel = None
@@ -76,8 +79,8 @@ class MFPMidiManager(Thread):
 		alsaseq.SND_SEQ_EVENT_SYSTEM: MidiUndef,
 		alsaseq.SND_SEQ_EVENT_RESULT: MidiUndef,
 		alsaseq.SND_SEQ_EVENT_NOTE: MidiUndef,
-		alsaseq.SND_SEQ_EVENT_NOTEON: MidiNoteOn,
-		alsaseq.SND_SEQ_EVENT_NOTEOFF: MidiNoteOff,
+		alsaseq.SND_SEQ_EVENT_NOTEON: NoteOn,
+		alsaseq.SND_SEQ_EVENT_NOTEOFF: NoteOff,
 		alsaseq.SND_SEQ_EVENT_KEYPRESS: MidiControl,
 		alsaseq.SND_SEQ_EVENT_CONTROLLER: MidiControl,
 		alsaseq.SND_SEQ_EVENT_PGMCHANGE: MidiControl,

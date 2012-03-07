@@ -8,6 +8,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor
 from ..main import MFPApp
 from .. import Bang, Uninit 
+from .. import scale
+from .. import midi
 
 class Note2Freq(Processor):
 	'''
@@ -27,6 +29,7 @@ class Note2Freq(Processor):
 			self.tuning = kwargs.get('tuning')
 		else:
 			self.tuning = scale.EqualTemper()
+		Processor.__init__(self, 1, 1, init_type, init_args)
 
 	def trigger(self):
 		inval = self.inlets[0]
@@ -35,9 +38,9 @@ class Note2Freq(Processor):
 			note = inval.key
 		elif isinstance(inval, (float, int)):
 			note = int(inval)
-		elif isinstance(inval, Scale):
+		elif isinstance(inval, scale.Scale):
 			self.scale = inval
-		elif isinstance(inval, Tuning):
+		elif isinstance(inval, scale.Tuning):
 			self.tuning = inval
 		elif isinstance(inval, dict):
 			if inval.has_key('scale'):
@@ -46,7 +49,7 @@ class Note2Freq(Processor):
 				self.tuning = inval.get('tuning')
 
 		if note is not None:
-			self.outlets[0] = self.tuning.freq(self.scale.midinote(note))
+			self.outlets[0] = self.tuning.freq(*self.scale.midinote(note))
 
 def register():
-	MFPApp.register("note2freq", Note2Freq)
+	MFPApp().register("note2freq", Note2Freq)

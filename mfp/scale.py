@@ -7,7 +7,7 @@ class Tuning (object):
 	def __init__(self):
 		pass
 
-class EqualTemperament (Tuning):
+class EqualTemper (Tuning):
 	def __init__(self, a4=440.0):
 		Tuning.__init__(self)
 		self.base_frequencies = [ 261.63, 277.18, 293.66, 311.13, 329.63,

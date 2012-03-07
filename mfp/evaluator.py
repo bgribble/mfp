@@ -16,13 +16,13 @@ class Evaluator (object):
 		self._init_globals()
 
 	def _init_globals(self):
-		from midi import MidiNoteOn, MidiNoteOff
+		from midi import NoteOn, NoteOff
 		gg = globals()
 		self.globals = { 
 			'MethodCall': gg.get('MethodCall'),
 			'Bang': gg.get('Bang'), 
-			'MidiNoteOn': MidiNoteOn, 
-			'MidiNoteOff': MidiNoteOff 
+			'NoteOn': NoteOn, 
+			'NoteOff': NoteOff 
 		}
 
 

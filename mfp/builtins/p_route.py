@@ -36,7 +36,7 @@ class Route (Processor):
 		else:
 			self.strict = False
 
-		if init_type[:4] == 'cond':
+		if init_type[:4] == 'case':
 			self.addressed_data = False
 		else:
 			self.addressed_data = True
@@ -81,7 +81,7 @@ class Route (Processor):
 		if self.inlets[0] is not Uninit:
 			print "Got hot input:", self.inlets[0]
 			if self.addressed_data is False:
-				k = self.inlet[0]
+				k = self.inlets[0]
 				d = k
 			elif isinstance(self.inlets[0], list) or isinstance(self.inlets[0], tuple):
 				k = self.inlets[0][0]
