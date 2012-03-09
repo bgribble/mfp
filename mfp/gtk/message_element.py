@@ -45,6 +45,9 @@ class MessageElement (PatchElement):
 		
 		self.move(x, y)
 
+		# request update when value changes
+		self.update_required = True
+
 		# add components to stage 
 		self.stage.register(self)
 
@@ -78,7 +81,7 @@ class MessageElement (PatchElement):
 		self.message_text = self.label.get_text()
 
 		print "MessageElement: obj=%s" % (self.message_text)
-		self.obj_id = MFPGUI().mfp.create("var", self.message_text)
+		self.create("message", self.message_text)
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 		else:
@@ -113,7 +116,7 @@ class MessageElement (PatchElement):
 			c.draw()
 
 	def configure(self, params):
-		self.label.set_text("%s" % self.obj_args)
+		self.label.set_text(repr(params.get('value')))
 		PatchElement.configure(self, params)	
 
 	def select(self):

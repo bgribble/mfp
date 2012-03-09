@@ -66,6 +66,12 @@ class PatchElement (object):
 			MFPGUI().mfp.delete(self.obj_id)
 			self.obj_id = None
 
+	def create(self, obj_type, init_args):
+		self.obj_id = MFPGUI().mfp.create(obj_type, init_args)
+		if self.obj_id is not None:
+			MFPGUI().remember(self)
+		return self.obj_id
+			
 	def send_params(self, **extras):
 		prms = dict(position_x=self.position_x, position_y=self.position_y, 
 					update_required=self.update_required, element_type=self.element_type)
@@ -136,10 +142,11 @@ class PatchElement (object):
 
 
 	def configure(self, params):
-		self.num_inlets = params.get("num_inlets")
-		self.num_outlets = params.get("num_outlets")
-		self.dsp_inlets = params.get("dsp_inlets")
-		self.dsp_outlets = params.get("dsp_outlets")
+		print "configure:", self, params
+		#self.num_inlets = params.get("num_inlets")
+		#self.num_outlets = params.get("num_outlets")
+		#self.dsp_inlets = params.get("dsp_inlets")
+		#self.dsp_outlets = params.get("dsp_outlets")
 		self.draw_ports()
 
 	def make_edit_mode(self):

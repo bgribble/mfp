@@ -34,7 +34,6 @@ config(mfp_processor * proc)
 	int framebase = 0;
 	
 	frames_per_ms = mfp_samplerate / 1000.0; 
-	printf("line config enter\n");
 
 	/* populate new segment data if passed */
 	if (segments_raw != NULL) {
@@ -43,7 +42,6 @@ config(mfp_processor * proc)
 		}
 		else {
 			numsegs = (segments_raw->len)/3; 
-			printf("%d segments\n", numsegs);
 			segments = g_malloc(numsegs * sizeof(segment));
 		}
 
@@ -53,7 +51,6 @@ config(mfp_processor * proc)
 			delay_ms = g_array_index(segments_raw, float, rawpos++);
 			end_val = g_array_index(segments_raw, float, rawpos++);
 			ramp_ms = g_array_index(segments_raw, float, rawpos++);
-			printf("  segment %d: %f %f %f\n", scount, delay_ms, end_val, ramp_ms);
 			segments[scount].start_frame = framebase + (int)(delay_ms*frames_per_ms + 0.5);
 			segments[scount].end_val = end_val;
 
@@ -98,8 +95,6 @@ process(mfp_processor * proc)
 	int scount;
 	float * sample = proc->outlet_buf[0]->data;
 
-	printf("line.process()\n");
-
 	if (sample == NULL) {
 		return 0;
 	}
@@ -114,8 +109,6 @@ process(mfp_processor * proc)
 
 	slope = ((double)(cseg->end_val - data->start_val))/(cseg->end_frame-cseg->start_frame);
 	offset = data->start_val;
-
-	printf("line.process really starting\n");
 
 	/* iterate */ 
 	for(scount=0; scount < mfp_blocksize; scount++) {

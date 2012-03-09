@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from mfp.processor import Processor
 from mfp.main import MFPApp
+from .. import Bang, Uninit
 
 class Osc(Processor):
 	def __init__(self, init_type, init_args):
