@@ -85,7 +85,6 @@ class MessageElement (PatchElement):
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 		else:
-			self.get_objinfo()
 			self.send_params()
 			self.draw_ports()
 

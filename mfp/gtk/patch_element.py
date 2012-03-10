@@ -67,26 +67,29 @@ class PatchElement (object):
 			self.obj_id = None
 
 	def create(self, obj_type, init_args):
-		self.obj_id = MFPGUI().mfp.create(obj_type, init_args)
+		objinfo = MFPGUI().mfp.create(obj_type, init_args)
+		self.obj_id = objinfo.get('obj_id')
+		self.num_inlets = objinfo.get("num_inlets")
+		self.num_outlets = objinfo.get("num_outlets")
+		self.dsp_inlets = objinfo.get("dsp_inlets")
+		self.dsp_outlets = objinfo.get("dsp_outlets")
+
 		if self.obj_id is not None:
 			MFPGUI().remember(self)
 		return self.obj_id
 			
 	def send_params(self, **extras):
 		prms = dict(position_x=self.position_x, position_y=self.position_y, 
-					update_required=self.update_required, element_type=self.element_type)
+					update_required=self.update_required, element_type=self.element_type,
+					num_inlets=self.num_inlets, num_outlets=self.num_outlets, 
+					dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 		for k, v in extras.items():
 			prms[k] = v
 		if self.obj_id is not None:
 			MFPGUI().mfp.set_params(self.obj_id, prms)
 
-	def get_objinfo(self):
-		info = MFPGUI().mfp.get_info(self.obj_id)
-		if info:
-			self.num_inlets = info.get("num_inlets")
-			self.num_outlets= info.get("num_outlets")
-			self.dsp_inlets= info.get("dsp_inlets")
-			self.dsp_outlets= info.get("dsp_outlets")
+	def get_params(self):
+		return MFPGUI().mfp.get_params(self.obj_id)
 
 	def port_center(self, port_dir, port_num):
 		ppos = self.port_position(port_dir, port_num)

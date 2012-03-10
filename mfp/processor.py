@@ -26,7 +26,7 @@ class Processor (object):
 		self.obj_id = MFPApp().remember(self)
 
 		# gui params are updated by the gui slave
-		self.gui_params = {}
+		self.gui_params = dict(obj_id=self.obj_id, num_inlets=inlets, num_outlets=outlets)
 
 		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 
 		# of the ordinal inlets/outlets of the DSP object. 
@@ -42,6 +42,8 @@ class Processor (object):
 	def dsp_init(self, proc_name, **params):
 		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
 						         len(self.dsp_outlets), params)
+		self.gui_params['dsp_inlets'] = self.dsp_inlets
+		self.gui_params['dsp_outlets'] = self.dsp_outlets
 
 	def delete(self):
 		outport = 0

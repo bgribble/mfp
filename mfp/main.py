@@ -28,7 +28,7 @@ class MFPCommand(RPCWrapper):
 			print "MFPApp.create() failed"
 			return None
 		MFPApp().patch.add(obj)
-		return obj.obj_id
+		return obj.gui_params
 
 	@rpcwrap
 	def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
