@@ -38,11 +38,12 @@ class TextElement (PatchElement):
 	def label_edit_finish(self, *args):
 		self.message_text = self.actor.get_text()
 		if self.obj_id is None:
-			self.obj_id = MFPGUI().mfp.create("var")
+			self.create("var", self.message_text)
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 		else:
 			self.send_params(message_text=self.message_text)
+			self.draw_ports()
 
 	def select(self, *args):
 		self.actor.set_color(self.stage.color_selected) 

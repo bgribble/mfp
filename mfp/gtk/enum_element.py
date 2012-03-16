@@ -87,11 +87,12 @@ class EnumElement (PatchElement):
 
 	def create_obj(self):
 		if self.obj_id is None:
-			self.obj_id = MFPGUI().mfp.create("var", str(self.value))
+			self.create("var", str(self.value))
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 
 		self.send_params()
+		self.draw_ports()
 
 	def move(self, x, y):
 		self.position_x = x

@@ -28,7 +28,7 @@ class ProcessorElement (PatchElement):
 		self.label_text = None 
 
 		# create display 
-		self.create()
+		self.create_display()
 		self.set_size(35, 25)
 		self.move(x, y)
 		self.update()
@@ -36,7 +36,7 @@ class ProcessorElement (PatchElement):
 		# add components to stage 
 		self.stage.register(self)
 
-	def create(self):
+	def create_display(self):
 		self.actor = clutter.Group()
 		self.rect = clutter.Rectangle()
 		self.label = clutter.Text()
@@ -80,12 +80,13 @@ class ProcessorElement (PatchElement):
 
 			print "ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args)
 			print self.label.get_text()
-			self.obj_id = MFPGUI().mfp.create(self.obj_type, self.obj_args)
+			self.create(self.obj_type, self.obj_args)
 			if self.obj_id is None:
 				print "ProcessorElement: could not create", self.obj_type, self.obj_args
 			else:
-				self.get_objinfo()
 				self.send_params()
+				self.draw_ports()
+
 		# FIXME set label to non-editing style 
 
 		self.update()
