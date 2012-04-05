@@ -26,6 +26,7 @@ class ChartElement (PatchElement):
 		self.rect = None
 		self.label = None
 		self.label_text = None 
+		self.xyplot = None
 
 		# create display 
 		self.create_display()
@@ -51,6 +52,8 @@ class ChartElement (PatchElement):
 		self.label.set_color(self.stage.color_unselected) 
 		self.label.connect('text-changed', self.label_changed_cb)
 		self.label.set_reactive(False)
+
+		self.xyplot = xyplot.XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT, "")
 
 		self.actor.add(self.rect)
 		self.actor.add(self.label)
@@ -152,5 +155,14 @@ class ChartElement (PatchElement):
 			self.label.set_text("%s" % (self.obj_type,))
 		else:
 			self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+
+		action = params.get("_chart_action")
+		if action == "clear":
+			self.xyplot.clear()
+		elif action == "add":
+			newpt = params.get("_chart_data")
+			self.xyplot.append(newpt)
+			print "CHART: data = ", self.xyplot.points
+
 		PatchElement.configure(self, params)	
 

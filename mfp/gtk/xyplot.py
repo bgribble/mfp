@@ -34,6 +34,7 @@ class XYPlot (object):
 		self.width = width
 		self.height = height
 		self.title = title
+		self.points = []
 
 		# scaling params
 		self.x_min = 0
@@ -144,10 +145,11 @@ class XYPlot (object):
 			ctx.show_text("%.3g" % tick)
 			ctx.restore()
 
-
-		
-
 		del ctx
+
+	def append(self, point):
+		self.points.append(point)
+
 
 	def draw_curve(self, points):
 		self.cl_curve.clear()
