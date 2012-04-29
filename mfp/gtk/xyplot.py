@@ -29,12 +29,19 @@ class XYPlot (object):
 	AXIS_PAD = 5
 	TICK_SIZE = 50
 
+	SCATTER = 0
+	CURVE = 1
+
 	def __init__(self, stage, width, height, title):
 		self.stage = stage
 		self.width = width
 		self.height = height
 		self.title = title
 		self.points = []
+		self.mode = XYPlot.SCATTER
+
+		# state
+		self.drawn = {}
 
 		# scaling params
 		self.x_min = 0
@@ -150,9 +157,37 @@ class XYPlot (object):
 	def append(self, point):
 		self.points.append(point)
 
+	def clear():
+		self.cl_curve.clear()
+		self.drawn = {}
+
+	def update(self):
+		pts = [ p for p in self.points if not self.drawn.has_key(p) ]
+		if self.mode == XYPlot.SCATTER:
+			self.draw_scatter(pts)
+		elif self.mode == XYPlot.CURVE:
+			self.draw_curve(pts)
+
+	def draw_scatter(self, points):
+		if not len(points):
+			return
+
+		ctxt = self.cl_curve.cairo_create()
+		ctxt.scale(1.0, 1.0)
+		ctxt.set_source_color(black)
+
+		for p in points:
+			pc = self.pt_pos(p)
+			ctxt.move_to(pc[0], pc[1])
+			ctxt.arc(0, 0, 1.0, 0, pi * 2)
+			self.drawn[p] = True
+		ctxt.stroke()
+		del ctxt
 
 	def draw_curve(self, points):
-		self.cl_curve.clear()
+		if not len(points):
+			return
+
 		ctxt = self.cl_curve.cairo_create()
 		ctxt.scale(1.0, 1.0)
 		ctxt.set_source_color(black)
@@ -163,9 +198,10 @@ class XYPlot (object):
 		for p in points[1:]:
 			pc = self.pt_pos(p)
 			ctxt.line_to(pc[0], pc[1])
+			self.drawn[p] = True
+		del self.drawn[points[-1]]
 		ctxt.stroke()
 		del ctxt
-
 
 if __name__ == "__main__":
 	import math

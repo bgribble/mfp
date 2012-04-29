@@ -10,6 +10,7 @@ from patch_element import PatchElement
 from mfp import MFPGUI
 from input_mode import InputMode
 from .modes.label_edit import LabelEditMode
+from .xyplot import XYPlot
 
 class ChartElement (PatchElement):
 	element_type = "chart"
@@ -17,6 +18,9 @@ class ChartElement (PatchElement):
 	# constants 
 	label_off_x = 3
 	label_off_y = 0 
+
+	INIT_WIDTH = 320
+	INIT_HEIGHT = 240
 
 	def __init__(self, window, x, y, params={}):
 		PatchElement.__init__(self, window, x, y)
@@ -53,7 +57,7 @@ class ChartElement (PatchElement):
 		self.label.connect('text-changed', self.label_changed_cb)
 		self.label.set_reactive(False)
 
-		self.xyplot = xyplot.XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT, "")
+		self.xyplot = XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT, "")
 
 		self.actor.add(self.rect)
 		self.actor.add(self.label)
@@ -163,6 +167,6 @@ class ChartElement (PatchElement):
 			newpt = params.get("_chart_data")
 			self.xyplot.append(newpt)
 			print "CHART: data = ", self.xyplot.points
-
+			self.xyplot.update()
 		PatchElement.configure(self, params)	
 

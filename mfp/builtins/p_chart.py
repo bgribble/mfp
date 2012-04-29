@@ -18,9 +18,10 @@ class Chart (Processor):
 			self.points.append(self.inlets[0])
 			self.gui_params['_chart_action'] = 'add'
 			self.gui_params['_chart_data'] = self.inlets[0]
-			self.inlets[0] = Uninit
 			MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 		else:
+			pass
+		self.inlets[0] = Uninit
 
 	def clear(self):
 		self.points = []

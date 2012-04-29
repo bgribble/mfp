@@ -6,6 +6,7 @@ from processor_element import ProcessorElement
 from connection_element import ConnectionElement 
 from message_element import MessageElement
 from enum_element import EnumElement
+from chart_element import ChartElement
 
 from mfp import MFPGUI 
 
@@ -88,25 +89,10 @@ class PatchWindow(object):
 		# FIXME hook
 		SelectMRUMode.forget(element)
 
-	def add_processor(self):
-		b = ProcessorElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
+	def add_element(self, factory):
+		b = factory(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
 		self.select(b)
 		b.begin_edit()	
-
-	def add_text(self):
-		b = TextElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
-		self.select(b)
-		b.begin_edit()
-
-	def add_message(self):
-		b = MessageElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
-		self.select(b)
-		b.begin_edit()
-
-	def add_enum(self):
-		b = EnumElement(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
-		self.select(b)
-		b.begin_edit()
 
 	def select(self, obj):
 		if self.selected is not obj and self.selected is not None:

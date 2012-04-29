@@ -8,6 +8,13 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode 
 from .connection import ConnectionMode
 
+from ..text_element import TextElement
+from ..processor_element import ProcessorElement
+from ..connection_element import ConnectionElement 
+from ..message_element import MessageElement
+from ..enum_element import EnumElement
+from ..chart_element import ChartElement
+
 class PatchEditMode (InputMode):
 	def __init__(self, window):
 		self.manager = window.input_mgr 
@@ -18,10 +25,11 @@ class PatchEditMode (InputMode):
 
 		InputMode.__init__(self, "PatchEditMode")
 		
-		self.bind("a", self.window.add_processor, "patch-add-processor")
-		self.bind("t", self.window.add_text, "patch-add-text")
-		self.bind("m", self.window.add_message, "patch-add-message")
-		self.bind("n", self.window.add_enum, "patch-add-enum")
+		self.bind("a", lambda: self.window.add_element(ProcessorElement), "patch-add-processor")
+		self.bind("t", lambda: self.window.add_element(TextElement), "patch-add-text")
+		self.bind("m", lambda: self.window.add_element(MessageElement), "patch-add-message")
+		self.bind("n", lambda: self.window.add_element(EnumElement), "patch-add-enum")
+		self.bind("s", lambda: self.window.add_element(ChartElement), "patch-add-scatter")
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
 		self.bind("C-TAB", self.window.select_mru, "patch-select-mru")
