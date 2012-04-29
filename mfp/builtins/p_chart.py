@@ -11,6 +11,7 @@ from .. import Bang, Uninit
 
 class Chart (Processor):
 	def __init__(self, init_type, init_args):
+		self.points = []
 		Processor.__init__(self, 1, 1, init_type, init_args)
 
 	def trigger(self):
@@ -32,5 +33,4 @@ class Chart (Processor):
 		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 
 def register():
-	MFPApp().register("var", Var)
-	MFPApp().register("message", Var)
+	MFPApp().register("chart", Chart)

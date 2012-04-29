@@ -7,6 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import clutter
+import math
 
 black = clutter.color_from_string("Black")
 white = clutter.color_from_string("White")
@@ -179,7 +180,7 @@ class XYPlot (object):
 		for p in points:
 			pc = self.pt_pos(p)
 			ctxt.move_to(pc[0], pc[1])
-			ctxt.arc(0, 0, 1.0, 0, pi * 2)
+			ctxt.arc(pc[0], pc[1], 1.0, 0, math.pi * 2)
 			self.drawn[p] = True
 		ctxt.stroke()
 		del ctxt
