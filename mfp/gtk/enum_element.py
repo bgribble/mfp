@@ -113,7 +113,10 @@ class EnumElement (PatchElement):
 			self.create_obj()
 		MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
-	def update_label(self, *args):
+	def label_edit_start(self):
+		pass
+
+	def label_edit_finish(self, *args):
 		# called by labeleditmode
 		t = self.label.get_text()
 		self.update_value(int(t))
