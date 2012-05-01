@@ -27,16 +27,12 @@ class Evaluator (object):
 
 
 	def eval_arglist(self, evalstr, extra_bindings=None):
+		return self.eval(evalstr, extra_bindings, True)
+
+	def eval(self, evalstr, extra_bindings=None, collect=False):
 		def _eval_collect_args(*args, **kwargs):
 			return (args, kwargs)
 
-		estr = "_eval_collect_args(%s)" % evalstr
-		if extra_bindings is None:
-			extra_bindings = {}
-		extra_bindings[ '_eval_collect_args' ] = _eval_collect_args 
-		return self.eval(estr, extra_bindings)
-
-	def eval(self, evalstr, extra_bindings=None):
 		if extra_bindings is None:
 			extra_bindings = {}
 
@@ -67,6 +63,10 @@ class Evaluator (object):
 		#   dict(foo='bar', bax='baz')
 		if len(tokens) > 2 and tokens[1][1] == '=':
 			str2eval = ''.join(["dict("] + [t[1] for t in tokens] + [')']) 
+
+		if collect:
+			str2eval = "_eval_collect_args(%s)" % str2eval
+			extra_bindings[ '_eval_collect_args' ] = _eval_collect_args 
 
 		return eval(str2eval, self.globals, extra_bindings)
 

@@ -101,6 +101,7 @@ class XYPlot (object):
 		self.cl_group.add(self.cl_curve)
 
 		self.stage.add(self.cl_group)
+		self.draw_axes()
 
 	def pt_pos(self, p):
 		np = [(p[0] - self.x_min)*float(self.cl_field_w)/(self.x_max - self.x_min),
@@ -158,8 +159,11 @@ class XYPlot (object):
 	def append(self, point):
 		self.points.append(point)
 
-	def clear():
+	def clear(self):
 		self.cl_curve.clear()
+		ctxt = self.cl_curve.cairo_create()
+		del ctxt
+		self.points = []
 		self.drawn = {}
 
 	def update(self):
