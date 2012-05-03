@@ -16,7 +16,7 @@ class Chart (Processor):
 
 	def trigger(self):
 		if isinstance(self.inlets[0], (tuple, list)):
-			self.points.append(self.inlets[0])
+			self.points.append(tuple(self.inlets[0]))
 			self.gui_params['_chart_action'] = 'add'
 			self.gui_params['_chart_data'] = self.inlets[0]
 			MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
