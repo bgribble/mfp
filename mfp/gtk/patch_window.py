@@ -1,5 +1,5 @@
 
-import clutter 
+from gi.repository import Clutter as clutter 
 
 from text_element import TextElement
 from processor_element import ProcessorElement
@@ -27,9 +27,9 @@ class PatchWindow(object):
 
 		self.input_mgr = InputManager()
 		
-		self.color_unselected = clutter.color_from_string('Black')
-		self.color_selected = clutter.color_from_string('Red')
-		self.color_bg = clutter.color_from_string("White")
+		self.color_unselected = clutter.Color.from_string('Black')
+		self.color_selected = clutter.Color.from_string('Red')
+		self.color_bg = clutter.Color.from_string("White")
 
 		# configure clutter stage 
 		self.stage.set_size(320, 240)

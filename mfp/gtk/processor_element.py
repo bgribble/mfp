@@ -4,7 +4,7 @@ processor_element.py
 A patch element corresponding to a signal or control processor 
 '''
 
-import clutter 
+from gi.repository import Clutter as clutter 
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI

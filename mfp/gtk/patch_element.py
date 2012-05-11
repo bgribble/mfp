@@ -6,7 +6,7 @@ A patch element is the parent of all GUI entities backed by MFP objects
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
-import clutter
+from gi.repository import Clutter as clutter
 from mfp import MFPGUI 
 
 class PatchElement (object):

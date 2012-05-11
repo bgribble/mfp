@@ -1,6 +1,6 @@
 
 from patch_element import PatchElement
-import clutter 
+from gi.repository import Clutter as clutter 
 import math 
 from mfp import MFPGUI
 

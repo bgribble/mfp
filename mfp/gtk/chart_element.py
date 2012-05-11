@@ -4,7 +4,7 @@ chart_element.py
 A patch element corresponding to a chart
 '''
 
-import clutter 
+from gi.repository import Clutter as clutter 
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
@@ -21,6 +21,7 @@ class ChartElement (PatchElement):
 
 	INIT_WIDTH = 320
 	INIT_HEIGHT = 240
+	LABEL_SPACE = 15
 
 	def __init__(self, window, x, y, params={}):
 		PatchElement.__init__(self, window, x, y)
@@ -34,7 +35,7 @@ class ChartElement (PatchElement):
 
 		# create display 
 		self.create_display()
-		self.set_size(320, 240)
+		self.set_size(INIT_WIDTH, INIT_HEIGHT+LABEL_SPACE)
 		self.move(x, y)
 		self.update()
 
@@ -58,6 +59,7 @@ class ChartElement (PatchElement):
 		self.label.set_reactive(False)
 
 		self.xyplot = XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT, "")
+		self.xyplot.set_position(0, self.LABEL_SPACE)
 
 		self.actor.add(self.rect)
 		self.actor.add(self.label)
@@ -128,6 +130,7 @@ class ChartElement (PatchElement):
 
 		self.rect.set_size(w, h)
 		self.rect.set_position(0, 0)
+		self.xyplot.set_size(w, h-self.LABEL_SPACE)
 
 		self.draw_ports()
 

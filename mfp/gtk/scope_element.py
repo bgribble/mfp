@@ -4,7 +4,7 @@ scope_element.py
 Oscilloscope waveform display element
 '''
 
-import clutter 
+from gi.repository import Clutter as clutter 
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI

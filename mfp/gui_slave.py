@@ -123,7 +123,7 @@ class MFPGUI (object):
 		glib.idle_add(thunk)
 
 	def clutter_proc(self):
-		import clutter
+		from gi.repository import Clutter as clutter
 		import glib
 		
 		# explicit init seems to avoid strange thread sync/blocking issues 

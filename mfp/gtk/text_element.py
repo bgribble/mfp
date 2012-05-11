@@ -4,7 +4,7 @@ text_element.py
 A text element (comment) in a patch
 '''
 
-import clutter 
+from gi.repository import Clutter as clutter 
 from patch_element import PatchElement 
 from mfp import MFPGUI
 from .modes.label_edit import LabelEditMode

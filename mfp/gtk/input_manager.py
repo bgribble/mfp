@@ -37,25 +37,25 @@ class InputManager (object):
 		self.minor_modes.remove(mode)
 
 	def handle_event(self, stage, event):
-		import clutter 
+		from gi.repository import Clutter as clutter 
 		keysym = None 
-		if event.type in (clutter.KEY_PRESS, clutter.KEY_RELEASE, clutter.BUTTON_PRESS,
-					      clutter.BUTTON_RELEASE, clutter.SCROLL):
+		if event.type in (clutter.EventType.KEY_PRESS, clutter.EventType.KEY_RELEASE, clutter.EventType.BUTTON_PRESS,
+					      clutter.EventType.BUTTON_RELEASE, clutter.EventType.SCROLL):
 			self.keyseq.process(event)
 			if len(self.keyseq.sequences):
 				keysym = self.keyseq.pop()
-		elif event.type == clutter.MOTION:
+		elif event.type == clutter.EventType.MOTION:
 			self.pointer_x = event.x
 			self.pointer_y = event.y
 			self.keyseq.process(event)
 			if len(self.keyseq.sequences):
 				keysym = self.keyseq.pop()
-		elif event.type == clutter.ENTER:
+		elif event.type == clutter.EventType.ENTER:
 			self.pointer_obj = self.event_sources.get(event.source)
 			if self.pointer_obj == self.pointer_lastobj:
 				print "CLEARING KEY MODIFIERS"
 				self.keyseq.mod_keys = set()
-		elif event.type == clutter.LEAVE:
+		elif event.type == clutter.EventType.LEAVE:
 			self.pointer_lastobj = self.pointer_obj
 			self.pointer_obj = None
 		else:

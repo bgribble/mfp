@@ -6,11 +6,11 @@ clutter widget supporting scatter, line, and roll plots
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com> 
 '''
 
-import clutter
+from gi.repository import Clutter as clutter
 import math
 
-black = clutter.color_from_string("Black")
-white = clutter.color_from_string("White")
+black = clutter.Color.from_string("Black")
+white = clutter.Color.from_string("White")
 
 def mkticks(vmin, vmax, numticks):
 	interv = float(vmax-vmin)/numticks
@@ -102,6 +102,23 @@ class XYPlot (object):
 
 		self.stage.add(self.cl_group)
 		self.draw_axes()
+
+	def set_size(self, width, height):
+		self.width = width
+		self.height = height
+
+		self.cl_bg.set_size(self.width, self.height)
+		self.cl_field_w = self.width - 3*self.MARGIN_LEFT
+		self.cl_field_h = self.height - 3*self.MARGIN_BOT
+		self.cl_xaxis_bg.set_size(self.cl_field_w, 2*self.MARGIN_BOT)
+		self.cl_xaxis_bg.set_position(2*self.MARGIN_LEFT, self.height-2*self.MARGIN_BOT)
+		self.cl_yaxis_bg.set_size(2*self.MARGIN_LEFT, self.cl_field_h)
+		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
+		self.cl_curve.set_size(self.cl_field_w, self.cl_field_h)
+		self.draw_axes()
+
+	def set_position(self, x, y):
+		self.cl_group.set_position(x, y)
 
 	def pt_pos(self, p):
 		np = [(p[0] - self.x_min)*float(self.cl_field_w)/(self.x_max - self.x_min),

@@ -6,7 +6,7 @@ A patch element corresponding to a clickable message
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-import clutter 
+from gi.repository import Clutter as clutter 
 import cairo
 import math 
 from patch_element import PatchElement
