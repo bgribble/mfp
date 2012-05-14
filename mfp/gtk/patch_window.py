@@ -20,16 +20,21 @@ class PatchWindow(object):
 	def __init__(self):
 		self.stage = clutter.Stage()
 		self.group = clutter.Group()
-		self.stage.add(self.group)
+		self.stage.add_actor(self.group)
 
 		self.objects = [] 
 		self.selected = None
 
 		self.input_mgr = InputManager()
 		
-		self.color_unselected = clutter.Color.from_string('Black')
-		self.color_selected = clutter.Color.from_string('Red')
-		self.color_bg = clutter.Color.from_string("White")
+		self.color_unselected = clutter.Color()
+		self.color_unselected.from_string('Black')
+
+		self.color_selected = clutter.Color()
+		self.color_selected.from_string('Red')
+
+		self.color_bg = clutter.Color()
+		self.color_bg.from_string("White")
 
 		# configure clutter stage 
 		self.stage.set_size(320, 240)
@@ -77,7 +82,7 @@ class PatchWindow(object):
 	def register(self, element):
 		self.objects.append(element)
 		self.input_mgr.event_sources[element.actor] = element 
-		self.group.add(element.actor)
+		self.group.add_actor(element.actor)
 		if element.obj_id is not None:
 			element.send_params()
 
@@ -85,7 +90,7 @@ class PatchWindow(object):
 		print "unregister:", element, self.objects
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element.actor]
-		self.group.remove(element.actor)
+		self.group.remove_actor(element.actor)
 		# FIXME hook
 		SelectMRUMode.forget(element)
 

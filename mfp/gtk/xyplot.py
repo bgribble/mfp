@@ -9,8 +9,11 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter as clutter
 import math
 
-black = clutter.Color.from_string("Black")
-white = clutter.Color.from_string("White")
+black = clutter.Color()
+black.from_string("Black")
+
+white = clutter.Color()
+white.from_string("White")
 
 def mkticks(vmin, vmax, numticks):
 	interv = float(vmax-vmin)/numticks
@@ -70,23 +73,23 @@ class XYPlot (object):
 		self.cl_bg.set_border_color(black)
 		self.cl_bg.set_color(white)
 		self.cl_bg.set_size(self.width, self.height)
-		self.cl_group.add(self.cl_bg)
+		self.cl_group.add_actor(self.cl_bg)
 		
 		self.cl_title = clutter.Text()
 		self.cl_title.set_text(self.title)
 		self.cl_title.set_position(0, 0)
-		self.cl_group.add(self.cl_title)
+		self.cl_group.add_actor(self.cl_title)
 
 		self.cl_field_w = self.width - 3*self.MARGIN_LEFT
 		self.cl_field_h = self.height - 3*self.MARGIN_BOT
 
 		self.cl_xaxis_bg = clutter.CairoTexture(self.cl_field_w, 2*self.MARGIN_BOT)
 		self.cl_xaxis_bg.set_position(2*self.MARGIN_LEFT, self.height-2*self.MARGIN_BOT)
-		self.cl_group.add(self.cl_xaxis_bg)
+		self.cl_group.add_actor(self.cl_xaxis_bg)
 
 		self.cl_yaxis_bg = clutter.CairoTexture(2*self.MARGIN_LEFT, self.cl_field_h)
 		self.cl_yaxis_bg.set_position(0, self.MARGIN_BOT)
-		self.cl_group.add(self.cl_yaxis_bg)
+		self.cl_group.add_actor(self.cl_yaxis_bg)
 
 		self.cl_field = clutter.Rectangle()
 		self.cl_field.set_border_width(1)
@@ -94,13 +97,13 @@ class XYPlot (object):
 		self.cl_field.set_color(white)
 		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
 		self.cl_field.set_position(2*self.MARGIN_LEFT, self.MARGIN_BOT)
-		self.cl_group.add(self.cl_field)
+		self.cl_group.add_actor(self.cl_field)
 
 		self.cl_curve = clutter.CairoTexture(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_position(2*self.MARGIN_LEFT, self.MARGIN_BOT)
-		self.cl_group.add(self.cl_curve)
+		self.cl_group.add_actor(self.cl_curve)
 
-		self.stage.add(self.cl_group)
+		self.stage.add_actor(self.cl_group)
 		self.draw_axes()
 
 	def set_size(self, width, height):

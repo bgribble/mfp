@@ -53,8 +53,8 @@ class ProcessorElement (PatchElement):
 		self.label.connect('text-changed', self.label_changed_cb)
 		self.label.set_reactive(False)
 
-		self.actor.add(self.rect)
-		self.actor.add(self.label)
+		self.actor.add_actor(self.rect)
+		self.actor.add_actor(self.label)
 		self.actor.set_reactive(True)
 
 	def update(self):

@@ -128,7 +128,7 @@ class PatchElement (object):
 				pobj.set_color(self.stage.color_unselected)
 				pobj.set_size(self.porthole_width, self.porthole_height)
 				pobj.set_reactive(False)
-				self.actor.add(pobj)
+				self.actor.add_actor(pobj)
 				self.port_elements[pid] = pobj
 				print "   creating", pid, pobj
 			pobj.set_position(px, py)

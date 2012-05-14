@@ -129,7 +129,7 @@ class MFPGUI (object):
 		# explicit init seems to avoid strange thread sync/blocking issues 
 		glib.threads_init()
 		clutter.threads_init()
-		clutter.init()
+		clutter.init([])
 
 		# create main window
 		from mfp.gtk.patch_window import PatchWindow

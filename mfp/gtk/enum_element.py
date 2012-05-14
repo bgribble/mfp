@@ -31,8 +31,8 @@ class EnumElement (PatchElement):
 		self.label = clutter.Text()
 
 		self.actor.set_reactive(True)
-		self.actor.add(self.texture)
-		self.actor.add(self.label)
+		self.actor.add_actor(self.texture)
+		self.actor.add_actor(self.label)
 
 		# configure rectangle box 
 		self.draw_border()

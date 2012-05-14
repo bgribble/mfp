@@ -25,12 +25,14 @@ class MessageElement (PatchElement):
 
 		# create elements
 		self.actor = clutter.Group()
-		self.texture = clutter.CairoTexture(35, 25)
+		self.texture = clutter.CairoTexture()
 		self.label = clutter.Text()
 
+		self.texture.set_size(35, 25)
+
 		self.actor.set_reactive(True)
-		self.actor.add(self.texture)
-		self.actor.add(self.label)
+		self.actor.add_actor(self.texture)
+		self.actor.add_actor(self.label)
 
 		# configure rectangle box 
 		self.draw_border()

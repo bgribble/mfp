@@ -31,6 +31,15 @@ KEY_LEFT = 65361
 KEY_RIGHT = 65363
 KEY_ENTER = 65293 
 
+def get_key_unicode(ev):
+	if ev.unicode_value:
+		print "unicode:", ev.unicode_value, type(ev.unicode_value)
+		return ord(ev.unicode_value)
+	else:
+		v = clutter.keysym_to_unicode(ev.keyval)
+		print "converted:", v, type(v)
+		return v 
+
 class KeySequencer (object):
 	def __init__(self):
 		self.mouse_buttons = set()
@@ -51,7 +60,7 @@ class KeySequencer (object):
 	
 		# KEY PRESS 
 		if event.type == clutter.EventType.KEY_PRESS: 
-			code = event.get_key_symbol()
+			code = event.keyval
 			if code in MOD_ALL:
 				self.mod_keys.add(code)
 			else:
@@ -59,7 +68,7 @@ class KeySequencer (object):
 
 		# KEY RELEASE 
 		elif event.type == clutter.EventType.KEY_RELEASE:
-			code = event.get_key_symbol()
+			code = event.keyval
 			if code in MOD_ALL:
 				try:
 					self.mod_keys.remove(code)
@@ -83,7 +92,7 @@ class KeySequencer (object):
 			key += 'W-'
 
 		if event.type in (clutter.EventType.KEY_PRESS, clutter.EventType.KEY_RELEASE):
-			ks = event.get_key_symbol()
+			ks = event.keyval
 			if ks >= 256 and ((MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys)):
 				key = 'S-' + key 
 		    	
@@ -108,9 +117,9 @@ class KeySequencer (object):
 			elif ks == KEY_INS:
 				key += 'INS'
 			elif ks < 256:
-				kuni = event.get_key_unicode()
+				kuni = get_key_unicode(event)
 				if kuni < 32:
-					ks = chr(event.get_key_symbol())
+					ks = chr(event.keyval)
 					if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
 						ks = ks.upper()
 					key += ks 
@@ -119,8 +128,8 @@ class KeySequencer (object):
 			else:
 				key += "%d" % ks
 		elif event.type in (clutter.EventType.BUTTON_PRESS, clutter.EventType.BUTTON_RELEASE):
-			button = event.get_button()
-			clicks = event.get_click_count()
+			button = event.button
+			clicks = event.click_count
 			key += "M%d" % button
 
 			if clicks == 2:
@@ -128,7 +137,7 @@ class KeySequencer (object):
 			elif clicks == 3:
 				key += "TRIPLE"
 		
-			if event.type == clutter.BUTTON_PRESS:
+			if event.type == clutter.EventType.BUTTON_PRESS:
 				key += 'DOWN'
 				self.mouse_buttons.add(button)
 			else:
@@ -146,7 +155,7 @@ class KeySequencer (object):
 				if b in self.mouse_buttons:
 					key += 'M%d-' % b
 			key += 'SCROLL'
-			if event.get_scroll_direction():
+			if event.scroll_direction:
 				key += 'DOWN'
 			else:
 				key += 'UP'
