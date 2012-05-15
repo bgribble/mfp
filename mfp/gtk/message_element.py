@@ -25,17 +25,17 @@ class MessageElement (PatchElement):
 
 		# create elements
 		self.actor = clutter.Group()
-		self.texture = clutter.CairoTexture()
+		self.texture = clutter.CairoTexture.new(35,25)
 		self.label = clutter.Text()
 
 		self.texture.set_size(35, 25)
+		self.texture.connect("draw", self.draw_cb)
 
 		self.actor.set_reactive(True)
 		self.actor.add_actor(self.texture)
 		self.actor.add_actor(self.label)
 
-		# configure rectangle box 
-		self.draw_border()
+		self.texture.invalidate()
 
 		# configure label
 		self.label.set_position(4, 1)
@@ -53,16 +53,17 @@ class MessageElement (PatchElement):
 		# add components to stage 
 		self.stage.register(self)
 
-	def draw_border(self):
+	def draw_cb(self, texture, ct):
 		w = self.texture.get_property('surface_width')-2
 		h = self.texture.get_property('surface_height')-2
 		print "draw_border: w=%s, h=%s" % (w, h)
-		self.texture.clear()
-		ct = self.texture.cairo_create()
+		c = None
 		if self.selected: 
-			ct.set_source_color(self.stage.color_selected)
+			c = self.stage.color_selected
 		else:
-			ct.set_source_color(self.stage.color_unselected)
+			c = self.stage.color_unselected
+		ct.set_source_rgb(c.red, c.green, c.blue)
+
 		ct.translate(0.5, 0.5)
 		ct.move_to(1,1)
 		ct.line_to(1, h)
@@ -103,7 +104,7 @@ class MessageElement (PatchElement):
 		if new_w is not None:
 			self.texture.set_size(new_w, self.texture.get_height())
 			self.texture.set_surface_size(int(new_w), self.texture.get_property('surface_height'))
-			self.draw_border()
+			self.texture.invalidate()	
 
 	def move(self, x, y):
 		self.position_x = x
@@ -122,11 +123,11 @@ class MessageElement (PatchElement):
 
 	def select(self):
 		self.selected = True 
-		self.draw_border()
+		self.texture.invalidate()
 
 	def unselect(self):
 		self.selected = False 
-		self.draw_border()
+		self.texture.invalidate()
 
 	def delete(self):
 		for c in self.connections_out+self.connections_in:
