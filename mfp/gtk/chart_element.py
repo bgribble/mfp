@@ -35,7 +35,7 @@ class ChartElement (PatchElement):
 
 		# create display 
 		self.create_display()
-		self.set_size(INIT_WIDTH, INIT_HEIGHT+LABEL_SPACE)
+		self.set_size(self.INIT_WIDTH, self.INIT_HEIGHT+self.LABEL_SPACE)
 		self.move(x, y)
 		self.update()
 
@@ -61,8 +61,8 @@ class ChartElement (PatchElement):
 		self.xyplot = XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT, "")
 		self.xyplot.set_position(0, self.LABEL_SPACE)
 
-		self.actor.add(self.rect)
-		self.actor.add(self.label)
+		self.actor.add_actor(self.rect)
+		self.actor.add_actor(self.label)
 		self.actor.set_reactive(True)
 
 	def update(self):

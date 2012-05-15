@@ -83,13 +83,16 @@ class XYPlot (object):
 		self.cl_field_w = self.width - 3*self.MARGIN_LEFT
 		self.cl_field_h = self.height - 3*self.MARGIN_BOT
 
-		self.cl_xaxis_bg = clutter.CairoTexture(self.cl_field_w, 2*self.MARGIN_BOT)
+		self.cl_xaxis_bg = clutter.CairoTexture.new(self.cl_field_w, 2*self.MARGIN_BOT)
 		self.cl_xaxis_bg.set_position(2*self.MARGIN_LEFT, self.height-2*self.MARGIN_BOT)
 		self.cl_group.add_actor(self.cl_xaxis_bg)
 
-		self.cl_yaxis_bg = clutter.CairoTexture(2*self.MARGIN_LEFT, self.cl_field_h)
+		self.cl_yaxis_bg = clutter.CairoTexture.new(2*self.MARGIN_LEFT, self.cl_field_h)
 		self.cl_yaxis_bg.set_position(0, self.MARGIN_BOT)
 		self.cl_group.add_actor(self.cl_yaxis_bg)
+
+		self.cl_xaxis_bg.connect("draw", self.draw_xaxis_cb)
+		self.cl_yaxis_bg.connect("draw", self.draw_yaxis_cb)
 
 		self.cl_field = clutter.Rectangle()
 		self.cl_field.set_border_width(1)
@@ -99,12 +102,17 @@ class XYPlot (object):
 		self.cl_field.set_position(2*self.MARGIN_LEFT, self.MARGIN_BOT)
 		self.cl_group.add_actor(self.cl_field)
 
-		self.cl_curve = clutter.CairoTexture(self.cl_field_w, self.cl_field_h)
+		self.cl_curve = clutter.CairoTexture.new(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_position(2*self.MARGIN_LEFT, self.MARGIN_BOT)
 		self.cl_group.add_actor(self.cl_curve)
 
 		self.stage.add_actor(self.cl_group)
-		self.draw_axes()
+		
+		self.redraw_axes()
+
+	def redraw_axes(self):
+		self.cl_xaxis_bg.invalidate()
+		self.cl_yaxis_bg.invalidate()
 
 	def set_size(self, width, height):
 		self.width = width
@@ -118,7 +126,7 @@ class XYPlot (object):
 		self.cl_yaxis_bg.set_size(2*self.MARGIN_LEFT, self.cl_field_h)
 		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_size(self.cl_field_w, self.cl_field_h)
-		self.draw_axes()
+		self.redraw_axes()
 
 	def set_position(self, x, y):
 		self.cl_group.set_position(x, y)
@@ -128,12 +136,10 @@ class XYPlot (object):
 		      self.cl_field_h - (p[1] - self.y_min)*float(self.cl_field_h)/(self.y_max - self.y_min)]
 		return np
 
-	def draw_axes(self):
+	def draw_xaxis_cb(self, texture, ctx):
 		# X axis
 		ticks = mkticks(self.x_min, self.x_max, self.cl_field_w/self.TICK_SIZE)
-		self.cl_xaxis_bg.clear()
-		ctx = self.cl_xaxis_bg.cairo_create()
-		ctx.set_source_color(black)
+		ctx.set_source_rgb(black.red, black.green, black.blue)
 		ctx.set_font_size(8)
 
 		# the axis line
@@ -149,13 +155,11 @@ class XYPlot (object):
 			ctx.stroke()
 			ctx.move_to(p[0], self.AXIS_PAD+self.MARGIN_BOT)
 			ctx.show_text("%.3g" % tick)
-		del ctx
 
+	def draw_yaxis_cb(self, texture, ctx):
 		# Y axis
 		ticks = mkticks(self.y_min, self.y_max, float(self.cl_field_h)/self.TICK_SIZE)
-		self.cl_yaxis_bg.clear()
-		ctx = self.cl_yaxis_bg.cairo_create()
-		ctx.set_source_color(black)
+		ctx.set_source_rgb(black.red, black.green, black.blue)
 		
 		# the axis line
 		ctx.move_to(2*self.MARGIN_LEFT-self.AXIS_PAD, 0)
@@ -173,8 +177,6 @@ class XYPlot (object):
 			ctx.rotate(math.pi/2)
 			ctx.show_text("%.3g" % tick)
 			ctx.restore()
-
-		del ctx
 
 	def append(self, point):
 		self.points.append(point)
@@ -199,7 +201,7 @@ class XYPlot (object):
 
 		ctxt = self.cl_curve.cairo_create()
 		ctxt.scale(1.0, 1.0)
-		ctxt.set_source_color(black)
+		ctxt.set_source_rgb(black.red, black.green, black.blue)
 
 		for p in points:
 			pc = self.pt_pos(p)
@@ -215,7 +217,7 @@ class XYPlot (object):
 
 		ctxt = self.cl_curve.cairo_create()
 		ctxt.scale(1.0, 1.0)
-		ctxt.set_source_color(black)
+		ctxt.set_source_rgb(black.red, black.green, black.blue)
 
 		p = self.pt_pos(points[0])
 		ctxt.move_to(p[0], p[1])
