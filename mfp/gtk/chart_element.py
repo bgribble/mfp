@@ -34,15 +34,14 @@ class ChartElement (PatchElement):
 		self.xyplot = None
 
 		# create display 
-		self.create_display()
-		self.set_size(self.INIT_WIDTH+4, self.INIT_HEIGHT+self.LABEL_SPACE+4)
+		self.create_display(self.INIT_WIDTH+4, self.INIT_HEIGHT+self.LABEL_SPACE+4)
 		self.move(x, y)
 		self.update()
 
 		# add components to stage 
 		self.stage.register(self)
 
-	def create_display(self):
+	def create_display(self, width, height):
 		self.actor = clutter.Group()
 		self.rect = clutter.Rectangle()
 		self.label = clutter.Text()
@@ -51,7 +50,7 @@ class ChartElement (PatchElement):
 		self.rect.set_border_width(2)
 		self.rect.set_border_color(self.stage.color_unselected)
 		self.rect.set_position(0,0)
-		self.rect.set_size(self.INIT_WIDTH+6, self.INIT_HEIGHT+self.LABEL_SPACE+6)
+		self.rect.set_size(width, height)
 		self.rect.set_depth(-1)
 		self.rect.set_reactive(False)
 

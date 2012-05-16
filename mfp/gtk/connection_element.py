@@ -49,5 +49,5 @@ class ConnectionElement(PatchElement):
 
 		self.actor.set_size(self.width, self.height)
 		self.actor.set_position(self.position_x, self.position_y)
-		self.actor.set_rotation(clutter.Z_AXIS, self.rotation, 0, 0, 0)
+		self.actor.set_rotation(clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
 

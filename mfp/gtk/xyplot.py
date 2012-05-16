@@ -99,6 +99,7 @@ class XYPlot (object):
 
 		self.cl_curve = clutter.CairoTexture.new(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_position(self.MARGIN_LEFT, 0)
+		self.cl_curve.connect("draw", self.draw_cb)
 		self.cl_group.add_actor(self.cl_curve)
 
 		self.stage.add_actor(self.cl_group)
@@ -177,53 +178,44 @@ class XYPlot (object):
 		self.points.append(point)
 
 	def clear(self):
-		self.cl_curve.clear()
-		ctxt = self.cl_curve.cairo_create()
-		del ctxt
 		self.points = []
-		self.drawn = {}
+		self.cl_curve.invalidate()
 
 	def update(self):
-		pts = [ p for p in self.points if not self.drawn.has_key(p) ]
-		if self.mode == XYPlot.SCATTER:
-			self.draw_scatter(pts)
-		elif self.mode == XYPlot.CURVE:
-			self.draw_curve(pts)
+		self.cl_curve.invalidate()
 
-	def draw_scatter(self, points):
-		if not len(points):
+	def draw_cb(self, texture, ctx):
+		if self.mode == XYPlot.SCATTER:
+			self.draw_scatter_cb(texture, ctx)
+		elif self.mode == XYPlot.CURVE:
+			self.draw_curve_cb(texture, ctx)
+
+	def draw_scatter_cb(self, texture, ctxt):
+		if not len(self.points):
 			return
 
-		ctxt = self.cl_curve.cairo_create()
-		ctxt.scale(1.0, 1.0)
 		ctxt.set_source_rgb(black.red, black.green, black.blue)
 
-		for p in points:
+		for p in self.points:
 			pc = self.pt_pos(p)
 			ctxt.move_to(pc[0], pc[1])
 			ctxt.arc(pc[0], pc[1], 1.0, 0, math.pi * 2)
-			self.drawn[p] = True
 		ctxt.stroke()
-		del ctxt
 
-	def draw_curve(self, points):
-		if not len(points):
+	def draw_curve_cb(self, texture, ctxt):
+		if not len(self.points):
 			return
 
-		ctxt = self.cl_curve.cairo_create()
 		ctxt.scale(1.0, 1.0)
 		ctxt.set_source_rgb(black.red, black.green, black.blue)
 
-		p = self.pt_pos(points[0])
+		p = self.pt_pos(self.points[0])
 		ctxt.move_to(p[0], p[1])
 
-		for p in points[1:]:
+		for p in self.points[1:]:
 			pc = self.pt_pos(p)
 			ctxt.line_to(pc[0], pc[1])
-			self.drawn[p] = True
-		del self.drawn[points[-1]]
 		ctxt.stroke()
-		del ctxt
 
 if __name__ == "__main__":
 	import math
