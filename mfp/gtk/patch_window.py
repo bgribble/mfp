@@ -37,7 +37,7 @@ class PatchWindow(object):
 		self.color_bg.from_string("White")
 
 		# configure clutter stage 
-		self.stage.set_size(320, 240)
+		self.stage.set_size(600, 400)
 		self.stage.set_title("MFP")
 		self.stage.set_color(self.color_bg)
 		self.stage.set_property('user-resizable', True)

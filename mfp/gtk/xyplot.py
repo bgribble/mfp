@@ -28,19 +28,18 @@ def mkticks(vmin, vmax, numticks):
 
 class XYPlot (object):
 
-	MARGIN_LEFT = 25
-	MARGIN_BOT = 25
+	MARGIN_LEFT = 30 
+	MARGIN_BOT = 30
 	AXIS_PAD = 5
 	TICK_SIZE = 50
 
 	SCATTER = 0
 	CURVE = 1
 
-	def __init__(self, stage, width, height, title):
+	def __init__(self, stage, width, height):
 		self.stage = stage
 		self.width = width
 		self.height = height
-		self.title = title
 		self.points = []
 		self.mode = XYPlot.SCATTER
 
@@ -55,7 +54,6 @@ class XYPlot (object):
 
 		# initialized by create() call
 		self.cl_bg = None
-		self.cl_title = None
 		self.cl_xaxis_bg = None
 		self.cl_yaxis_bg = None
 		self.cl_field = None
@@ -69,41 +67,38 @@ class XYPlot (object):
 		self.cl_group = clutter.Group()
 
 		self.cl_bg = clutter.Rectangle()
-		self.cl_bg.set_border_width(2)
+		self.cl_bg.set_border_width(0)
 		self.cl_bg.set_border_color(black)
 		self.cl_bg.set_color(white)
 		self.cl_bg.set_size(self.width, self.height)
+		self.cl_bg.set_position(0,0)
 		self.cl_group.add_actor(self.cl_bg)
 		
-		self.cl_title = clutter.Text()
-		self.cl_title.set_text(self.title)
-		self.cl_title.set_position(0, 0)
-		self.cl_group.add_actor(self.cl_title)
+		self.cl_field_w = self.width - self.MARGIN_LEFT
+		self.cl_field_h = self.height - self.MARGIN_BOT
 
-		self.cl_field_w = self.width - 3*self.MARGIN_LEFT
-		self.cl_field_h = self.height - 3*self.MARGIN_BOT
-
-		self.cl_xaxis_bg = clutter.CairoTexture.new(self.cl_field_w, 2*self.MARGIN_BOT)
-		self.cl_xaxis_bg.set_position(2*self.MARGIN_LEFT, self.height-2*self.MARGIN_BOT)
+		self.cl_xaxis_bg = clutter.CairoTexture.new(self.cl_field_w, self.MARGIN_BOT)
+		self.cl_xaxis_bg.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
 		self.cl_group.add_actor(self.cl_xaxis_bg)
 
-		self.cl_yaxis_bg = clutter.CairoTexture.new(2*self.MARGIN_LEFT, self.cl_field_h)
-		self.cl_yaxis_bg.set_position(0, self.MARGIN_BOT)
+		self.cl_yaxis_bg = clutter.CairoTexture.new(self.MARGIN_LEFT, self.cl_field_h)
+		self.cl_yaxis_bg.set_position(0, 0)
 		self.cl_group.add_actor(self.cl_yaxis_bg)
 
 		self.cl_xaxis_bg.connect("draw", self.draw_xaxis_cb)
 		self.cl_yaxis_bg.connect("draw", self.draw_yaxis_cb)
 
 		self.cl_field = clutter.Rectangle()
-		self.cl_field.set_border_width(1)
+		self.cl_field.set_border_width(0)
 		self.cl_field.set_border_color(black)
 		self.cl_field.set_color(white)
 		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
-		self.cl_field.set_position(2*self.MARGIN_LEFT, self.MARGIN_BOT)
+		self.cl_field.set_position(self.MARGIN_LEFT, 0)
+
 		self.cl_group.add_actor(self.cl_field)
 
 		self.cl_curve = clutter.CairoTexture.new(self.cl_field_w, self.cl_field_h)
-		self.cl_curve.set_position(2*self.MARGIN_LEFT, self.MARGIN_BOT)
+		self.cl_curve.set_position(self.MARGIN_LEFT, 0)
 		self.cl_group.add_actor(self.cl_curve)
 
 		self.stage.add_actor(self.cl_group)
@@ -119,11 +114,11 @@ class XYPlot (object):
 		self.height = height
 
 		self.cl_bg.set_size(self.width, self.height)
-		self.cl_field_w = self.width - 3*self.MARGIN_LEFT
-		self.cl_field_h = self.height - 3*self.MARGIN_BOT
-		self.cl_xaxis_bg.set_size(self.cl_field_w, 2*self.MARGIN_BOT)
-		self.cl_xaxis_bg.set_position(2*self.MARGIN_LEFT, self.height-2*self.MARGIN_BOT)
-		self.cl_yaxis_bg.set_size(2*self.MARGIN_LEFT, self.cl_field_h)
+		self.cl_field_w = self.width - self.MARGIN_LEFT
+		self.cl_field_h = self.height - self.MARGIN_BOT
+		self.cl_xaxis_bg.set_size(self.cl_field_w, self.MARGIN_BOT)
+		self.cl_xaxis_bg.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
+		self.cl_yaxis_bg.set_size(self.MARGIN_LEFT, self.cl_field_h)
 		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_size(self.cl_field_w, self.cl_field_h)
 		self.redraw_axes()
@@ -153,7 +148,7 @@ class XYPlot (object):
 			ctx.move_to(p[0], self.AXIS_PAD)
 			ctx.line_to(p[0], 3*self.AXIS_PAD)
 			ctx.stroke()
-			ctx.move_to(p[0], self.AXIS_PAD+self.MARGIN_BOT)
+			ctx.move_to(p[0], self.MARGIN_BOT-self.AXIS_PAD)
 			ctx.show_text("%.3g" % tick)
 
 	def draw_yaxis_cb(self, texture, ctx):
@@ -162,15 +157,15 @@ class XYPlot (object):
 		ctx.set_source_rgb(black.red, black.green, black.blue)
 		
 		# the axis line
-		ctx.move_to(2*self.MARGIN_LEFT-self.AXIS_PAD, 0)
-		ctx.line_to(2*self.MARGIN_LEFT-self.AXIS_PAD, self.cl_field_h)
+		ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, 0)
+		ctx.line_to(self.MARGIN_LEFT-self.AXIS_PAD, self.cl_field_h)
 		ctx.stroke()
 
 		# ticks
 		for tick in ticks:
 			p = self.pt_pos([0, tick])
-			ctx.move_to(2*self.MARGIN_LEFT-self.AXIS_PAD, p[1])
-			ctx.line_to(2*self.MARGIN_LEFT-3*self.AXIS_PAD, p[1])
+			ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, p[1])
+			ctx.line_to(self.MARGIN_LEFT-3*self.AXIS_PAD, p[1])
 			ctx.stroke()
 			ctx.save()
 			ctx.move_to(self.AXIS_PAD, p[1])

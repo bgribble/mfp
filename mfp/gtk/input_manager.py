@@ -53,7 +53,6 @@ class InputManager (object):
 		elif event.type == clutter.EventType.ENTER:
 			self.pointer_obj = self.event_sources.get(event.source)
 			if self.pointer_obj == self.pointer_lastobj:
-				print "CLEARING KEY MODIFIERS"
 				self.keyseq.mod_keys = set()
 		elif event.type == clutter.EventType.LEAVE:
 			self.pointer_lastobj = self.pointer_obj

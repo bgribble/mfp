@@ -16,12 +16,12 @@ class ChartElement (PatchElement):
 	element_type = "chart"
 
 	# constants 
-	label_off_x = 3
-	label_off_y = 0 
-
 	INIT_WIDTH = 320
 	INIT_HEIGHT = 240
-	LABEL_SPACE = 15
+	LABEL_SPACE = 25
+
+	label_off_x = 6 
+	label_off_y = 0
 
 	def __init__(self, window, x, y, params={}):
 		PatchElement.__init__(self, window, x, y)
@@ -35,7 +35,7 @@ class ChartElement (PatchElement):
 
 		# create display 
 		self.create_display()
-		self.set_size(self.INIT_WIDTH, self.INIT_HEIGHT+self.LABEL_SPACE)
+		self.set_size(self.INIT_WIDTH+4, self.INIT_HEIGHT+self.LABEL_SPACE+4)
 		self.move(x, y)
 		self.update()
 
@@ -50,6 +50,9 @@ class ChartElement (PatchElement):
 		# rectangle box 
 		self.rect.set_border_width(2)
 		self.rect.set_border_color(self.stage.color_unselected)
+		self.rect.set_position(0,0)
+		self.rect.set_size(self.INIT_WIDTH+6, self.INIT_HEIGHT+self.LABEL_SPACE+6)
+		self.rect.set_depth(-1)
 		self.rect.set_reactive(False)
 
 		# label
@@ -58,16 +61,16 @@ class ChartElement (PatchElement):
 		self.label.connect('text-changed', self.label_changed_cb)
 		self.label.set_reactive(False)
 
-		self.xyplot = XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT, "")
-		self.xyplot.set_position(0, self.LABEL_SPACE)
+		# chart
+		self.xyplot = XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT)
+		self.xyplot.set_position(3, self.LABEL_SPACE)
 
-		self.actor.add_actor(self.rect)
 		self.actor.add_actor(self.label)
+		self.actor.add_actor(self.rect)
 		self.actor.set_reactive(True)
 
 	def update(self):
 		# FIXME not-created style (dashed lines?)
-
 		self.draw_ports()
 
 	def get_label(self):
@@ -99,19 +102,7 @@ class ChartElement (PatchElement):
 		self.update()
 
 	def label_changed_cb(self, *args):
-		'''called by clutter when label.set_text or editing occurs'''
-
-		lwidth = self.label.get_property('width') 
-		bwidth = self.rect.get_property('width')
-			
-		new_w = None 
-		if (lwidth > (bwidth - 14)):
-			new_w = lwidth + 14
-		elif (bwidth > 35) and (lwidth < (bwidth - 14)):
-			new_w = max(35, lwidth + 14)
-
-		if new_w is not None:
-			self.set_size(new_w, self.rect.get_property('height'))
+		pass
 
 	def move(self, x, y):
 		self.position_x = x
@@ -130,7 +121,7 @@ class ChartElement (PatchElement):
 
 		self.rect.set_size(w, h)
 		self.rect.set_position(0, 0)
-		self.xyplot.set_size(w, h-self.LABEL_SPACE)
+		self.xyplot.set_size(w-4, h-self.LABEL_SPACE-4)
 
 		self.draw_ports()
 

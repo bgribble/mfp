@@ -56,7 +56,6 @@ class MessageElement (PatchElement):
 	def draw_cb(self, texture, ct):
 		w = self.texture.get_property('surface_width')-2
 		h = self.texture.get_property('surface_height')-2
-		print "draw_border: w=%s, h=%s" % (w, h)
 		c = None
 		if self.selected: 
 			c = self.stage.color_selected

@@ -119,7 +119,6 @@ class MFPGUI (object):
 
 	def clutter_do(self, thunk):
 		import glib
-		print "clutter_do: adding", thunk
 		glib.idle_add(thunk)
 
 	def clutter_proc(self):
@@ -138,7 +137,6 @@ class MFPGUI (object):
 		try:
 			clutter.main()
 		except Exception, e:
-			print "clutter thread died"
 			import traceback
 			traceback.print_exc()
 
