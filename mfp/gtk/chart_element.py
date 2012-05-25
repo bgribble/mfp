@@ -69,7 +69,6 @@ class ChartElement (PatchElement):
 		self.actor.set_reactive(True)
 
 	def update(self):
-		# FIXME not-created style (dashed lines?)
 		self.draw_ports()
 
 	def get_label(self):
@@ -89,7 +88,17 @@ class ChartElement (PatchElement):
 				self.obj_args = parts[1]
 
 			print "ChartElement: type=%s, args=%s" % (self.obj_type, self.obj_args)
-			self.create(self.element_type, None)
+			self.create(self.element_type, self.obj_args)
+			
+			if self.obj_type == "scatter":
+				self.xyplot.mode = XYPlot.SCATTER
+			elif self.obj_type == "line":
+				self.xyplot.mode = XyPlot.LINE
+			elif self.obj_type == "roll":
+				self.xyplot.mode = XyPlot.ROLL
+			elif self.obj_type == "scope":
+				self.xyplot.mode = XyPlot.SCOPE
+
 			if self.obj_id is None:
 				print "ChartElement: could not create", self.obj_type, self.obj_args
 			else:

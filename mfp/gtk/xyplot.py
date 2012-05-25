@@ -26,6 +26,29 @@ def mkticks(vmin, vmax, numticks):
 	ticks = [ tickbase + n*tickint for n in range(numticks) ]
 	return [ t for t in ticks if t >= vmin and t <= vmax ]
 
+class StyledMark (object):
+	def __init__(self):
+		self.col_r = 0
+		self.col_g = 0
+		self.col_b = 0
+		self.shape = "dot"
+		self.fill = True
+		self.size_elt = None
+		self.alpha_elt = None
+
+	def set_color(self, r, g, b):
+		self.col_r = r
+		self.col_g = g
+		self.col_b = b
+
+	def set_shape(self, shape):
+		self.shape = shape
+
+	def mark(self, ctx, point):
+		pass
+
+
+
 class XYPlot (object):
 
 	MARGIN_LEFT = 30 
@@ -40,9 +63,10 @@ class XYPlot (object):
 		self.stage = stage
 		self.width = width
 		self.height = height
+
 		self.points = []
 		self.mode = XYPlot.SCATTER
-
+		self.style = {}
 		# state
 		self.drawn = {}
 

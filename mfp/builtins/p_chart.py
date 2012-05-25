@@ -12,7 +12,12 @@ from .. import Bang, Uninit
 class Chart (Processor):
 	def __init__(self, init_type, init_args):
 		self.points = []
-		Processor.__init__(self, 1, 1, init_type, init_args)
+		initargs, kwargs = self.parse_args(init_args)
+		if len(initargs) > 0:
+			chsannels = initargs[0]
+		else: 
+			channels = 1
+		Processor.__init__(self, channels, 1, init_type, init_args)
 
 	def trigger(self):
 		if isinstance(self.inlets[0], (tuple, list)):
