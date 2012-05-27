@@ -164,10 +164,13 @@ class ChartElement (PatchElement):
 
 		action = params.get("_chart_action")
 		if action == "clear":
-			self.xyplot.clear()
+			curve = params.get("_chart_data")
+			self.xyplot.clear(curve)
 		elif action == "add":
-			newpt = params.get("_chart_data")
-			self.xyplot.append(newpt)
+			newpts = params.get("_chart_data")
+			for c in newpts:
+				for p in newpts[c]:
+					self.xyplot.append(p, c)
 			print "CHART: data = ", self.xyplot.points
 			self.xyplot.update()
 		PatchElement.configure(self, params)	

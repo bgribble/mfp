@@ -26,12 +26,13 @@ def mkticks(vmin, vmax, numticks):
 	ticks = [ tickbase + n*tickint for n in range(numticks) ]
 	return [ t for t in ticks if t >= vmin and t <= vmax ]
 
-class StyledMark (object):
+class MarkStyler (object):
 	def __init__(self):
 		self.col_r = 0
 		self.col_g = 0
 		self.col_b = 0
 		self.shape = "dot"
+		self.size = 1.0
 		self.fill = True
 		self.size_elt = None
 		self.alpha_elt = None
@@ -44,9 +45,13 @@ class StyledMark (object):
 	def set_shape(self, shape):
 		self.shape = shape
 
-	def mark(self, ctx, point):
-		pass
+	def mark_dot(self, ctx, point):
+		ctx.move_to(point[0], point[1])
+		ctx.arc(point[0], point[1], self.size, 0, math.pi * 2)
 
+	def mark(self, ctx, point):
+		if self.shape == "dot":
+			self.mark_dot(ctx, point)
 
 
 class XYPlot (object):
@@ -64,11 +69,9 @@ class XYPlot (object):
 		self.width = width
 		self.height = height
 
-		self.points = []
 		self.mode = XYPlot.SCATTER
+		self.points = {} 
 		self.style = {}
-		# state
-		self.drawn = {}
 
 		# scaling params
 		self.x_min = 0
@@ -198,12 +201,19 @@ class XYPlot (object):
 			ctx.show_text("%.3g" % tick)
 			ctx.restore()
 
-	def append(self, point):
-		self.points.append(point)
+	def append(self, point, curve=0):
+		pre = self.points.setdefault(curve, [])
+		pre.append(point)
 
-	def clear(self):
-		self.points = []
+	def clear(self, curve=None):
+		print "XYPlot.clear", curve
+		if curve is None:
+			self.points = {}
+		elif curve is not None and self.points.has_key(curve):
+			del self.points[curve]
+		self.cl_curve.clear()
 		self.cl_curve.invalidate()
+
 
 	def update(self):
 		self.cl_curve.invalidate()
@@ -217,13 +227,15 @@ class XYPlot (object):
 	def draw_scatter_cb(self, texture, ctxt):
 		if not len(self.points):
 			return
-
-		ctxt.set_source_rgb(black.red, black.green, black.blue)
-
-		for p in self.points:
-			pc = self.pt_pos(p)
-			ctxt.move_to(pc[0], pc[1])
-			ctxt.arc(pc[0], pc[1], 1.0, 0, math.pi * 2)
+		print "in scatter draw cb"
+		print self.points
+		for curve in self.points:
+			styler = self.style.get(curve)
+			if styler is None:
+				styler = self.style[curve] = MarkStyler()
+			for p in self.points[curve]:
+				pc = self.pt_pos(p)
+				styler.mark(ctxt, pc)
 		ctxt.stroke()
 
 	def draw_curve_cb(self, texture, ctxt):
