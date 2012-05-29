@@ -172,5 +172,10 @@ class ChartElement (PatchElement):
 				for p in newpts[c]:
 					self.xyplot.append(p, c)
 			self.xyplot.update()
+
+		s = params.get("style")
+		if s:
+			self.xyplot.set_style(s)
+			
 		PatchElement.configure(self, params)	
 
