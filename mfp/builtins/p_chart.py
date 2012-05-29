@@ -20,6 +20,12 @@ class Chart (Processor):
 		self.hot_inlets = range(channels)
 		Processor.__init__(self, channels, 1, init_type, init_args)
 
+	def method(self, message, inlet):
+		# magic inlet argument makes messages simpler
+		if inlet != 0:
+			message.kwargs['inlet'] = inlet
+		message.call(self)
+
 	def trigger(self):
 		points = {}
 		for i, val in zip(range(len(self.inlets)), self.inlets):
@@ -36,18 +42,45 @@ class Chart (Processor):
 		if points != {}:
 			self.gui_params['_chart_action'] = 'add'
 			self.gui_params['_chart_data'] = points
-			MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 
-	def clear(self, curve=None):
-		if curve is None:
-			self.points = {}
-		elif curve is not None and self.points.has_key(curve):
-			del self.points[curve]
+			MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+			self.finish_action()
+
+	def clearall(self, **kwargs):
+		self.points = {}
 
 		self.gui_params['_chart_action'] = 'clear'
-		self.gui_params['_chart_data'] = curve
+		self.gui_params['_chart_data'] = None
 
 		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+		self.finish_action()
+
+	def clear(self, inlet=0):
+		if inlet is not None and self.points.has_key(inlet):
+			del self.points[inlet]
+
+		self.gui_params['_chart_action'] = 'clear'
+		self.gui_params['_chart_data'] = inlet
+
+		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+		self.finish_action()
+
+	def style(self, **kwargs):
+		inlet = kwargs.get('inlet', 0)
+		style = self.gui_params.setdefault('style', {})
+		for k, v in kwargs.items():
+			if k = 'inlet':
+				instyle = style.setdefault(inlet, {})
+				instyle[k] = v
+
+		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+	
+	def finish_action(self):
+		del self.gui_params['_chart_action']
+		del self.gui_params['_chart_data']
+
+
+
 
 def register():
 	MFPApp().register("chart", Chart)

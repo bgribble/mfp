@@ -27,32 +27,57 @@ def mkticks(vmin, vmax, numticks):
 	return [ t for t in ticks if t >= vmin and t <= vmax ]
 
 class MarkStyler (object):
+	SQRT_3 = 3.0**0.5
+
 	def __init__(self):
 		self.col_r = 0
 		self.col_g = 0
 		self.col_b = 0
+		self.col_a = 0
 		self.shape = "dot"
 		self.size = 1.0
 		self.fill = True
 		self.size_elt = None
 		self.alpha_elt = None
 
-	def set_color(self, r, g, b):
+	def set_color(self, r, g, b, a=0):
 		self.col_r = r
 		self.col_g = g
 		self.col_b = b
-
-	def set_shape(self, shape):
-		self.shape = shape
+		self.col_a = a
 
 	def mark_dot(self, ctx, point):
 		ctx.move_to(point[0], point[1])
 		ctx.arc(point[0], point[1], self.size, 0, math.pi * 2)
 
+	def mark_square(self, ctx, point):
+		dx = self.size/2.0
+		x0 = point[0] - dx
+		y0 = point[1] - dx
+		x1 = point[0] + dx
+		y1 = point[1] + dx
+		ctx.move_to(x0, y0)
+		ctx.line_to(x0, y1)
+		ctx.line_to(x1, y1)
+		ctx.line_to(x1, y0)
+		ctx.line_to(x0, y0)
+
+	def mark_triangle(self, ctx, point):
+		d1 = self.size / 2.0
+		d2 = self.SQRT_3 * self.size / 2.0
+		ctx.move_to(point[0], point[1] - self.size)
+		ctx.line_to(point[0] - d2, point[1] + d1)
+		ctx.line_to(point[0] + d2, point[1] + d1)
+		ctx.line_to(point[0], point[1] - self.size)
+
 	def mark(self, ctx, point):
+		ctx.set_source_rgba(self.col_r, self.col_g, self.col_b, self.col_a)
 		if self.shape == "dot":
 			self.mark_dot(ctx, point)
-
+		elif self.shape == "square":
+			self.mark_dot(ctx, point)
+		if self.shape == "triangle":
+			self.mark_dot(ctx, point)
 
 class XYPlot (object):
 
@@ -154,6 +179,10 @@ class XYPlot (object):
 	def set_position(self, x, y):
 		self.cl_group.set_position(x, y)
 
+
+	def set_style(self, style):
+		pass
+
 	def pt_pos(self, p):
 		np = [(p[0] - self.x_min)*float(self.cl_field_w)/(self.x_max - self.x_min),
 		      self.cl_field_h - (p[1] - self.y_min)*float(self.cl_field_h)/(self.y_max - self.y_min)]
@@ -206,7 +235,6 @@ class XYPlot (object):
 		pre.append(point)
 
 	def clear(self, curve=None):
-		print "XYPlot.clear", curve
 		if curve is None:
 			self.points = {}
 		elif curve is not None and self.points.has_key(curve):

@@ -171,7 +171,6 @@ class ChartElement (PatchElement):
 			for c in newpts:
 				for p in newpts[c]:
 					self.xyplot.append(p, c)
-			print "CHART: data = ", self.xyplot.points
 			self.xyplot.update()
 		PatchElement.configure(self, params)	
 
