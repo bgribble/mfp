@@ -33,22 +33,39 @@ class MarkStyler (object):
 		self.col_r = 0
 		self.col_g = 0
 		self.col_b = 0
-		self.col_a = 0
+		self.col_a = 255
 		self.shape = "dot"
 		self.size = 1.0
 		self.fill = True
 		self.size_elt = None
 		self.alpha_elt = None
 
-	def set_color(self, r, g, b, a=0):
+	def set_color(self, newcolor):
+		r = g = b = 0
+		a = 255
+
+		if isinstance(newcolor, str):
+			c = clutter.Color()
+			c.from_string(newcolor)
+			r = c.red
+			g = c.green
+			b = c.blue
+			a = c.alpha
+		elif isinstance(newcolor, (list, tuple)) and len(newcolor) > 2:
+			r = newcolor[0]
+			g = newcolor[1]
+			b = newcolor[2]
+			if len(newcolor) > 3:
+				a = newcolor[3]
+
 		self.col_r = r
 		self.col_g = g
 		self.col_b = b
 		self.col_a = a
 
 	def mark_dot(self, ctx, point):
-		ctx.move_to(point[0], point[1])
-		ctx.arc(point[0], point[1], self.size, 0, math.pi * 2)
+		#ctx.move_to(point[0], point[1])
+		ctx.arc(point[0], point[1], self.size, 0.0, math.pi * 2.0)
 
 	def mark_square(self, ctx, point):
 		dx = self.size/2.0
@@ -75,9 +92,9 @@ class MarkStyler (object):
 		if self.shape == "dot":
 			self.mark_dot(ctx, point)
 		elif self.shape == "square":
-			self.mark_dot(ctx, point)
-		if self.shape == "triangle":
-			self.mark_dot(ctx, point)
+			self.mark_square(ctx, point)
+		elif self.shape == "triangle":
+			self.mark_triangle(ctx, point)
 
 class XYPlot (object):
 
@@ -179,9 +196,17 @@ class XYPlot (object):
 	def set_position(self, x, y):
 		self.cl_group.set_position(x, y)
 
-
 	def set_style(self, style):
-		pass
+		for inlet, istyle in style.items():
+			marker = self.style.setdefault(inlet, MarkStyler()) 
+			for k, v in istyle.items():
+				if k == "size":
+					marker.size = float(v)
+				elif k == "color":
+					marker.set_color(v)
+				elif k == "shape":
+					print "Assigning shape", marker, v
+					marker.shape = str(v)
 
 	def pt_pos(self, p):
 		np = [(p[0] - self.x_min)*float(self.cl_field_w)/(self.x_max - self.x_min),

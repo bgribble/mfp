@@ -68,9 +68,9 @@ class Chart (Processor):
 	def style(self, **kwargs):
 		inlet = kwargs.get('inlet', 0)
 		style = self.gui_params.setdefault('style', {})
+		instyle = style.setdefault(inlet, {})
 		for k, v in kwargs.items():
-			if k = 'inlet':
-				instyle = style.setdefault(inlet, {})
+			if k != 'inlet':
 				instyle[k] = v
 
 		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
