@@ -26,6 +26,75 @@ def mkticks(vmin, vmax, numticks):
 	ticks = [ tickbase + n*tickint for n in range(numticks) ]
 	return [ t for t in ticks if t >= vmin and t <= vmax ]
 
+
+class Quilt (clutter.Group):
+	def __init__(self, w, h):
+		clutter.Group.__init__(self)
+
+		self.width = w
+		self.height = h
+		self.rectangle = clutter.Rectangle()
+		self.textures = [ clutter.CairoTexture.new(1.5*w, 1.5*h) for n in [0,1]]
+		self.vport_x = 0 
+		self.vport_y = 0 
+
+		self.timescale = 0.03   # 0.1 px/ms = 100 px/
+		self.scrolling_x = False
+
+		self.rectangle.set_size(w, h)
+		self.rectangle.set_border_width(1)
+		self.rectangle.set_border_color(black)
+		self.rectangle.set_position(0,0)
+		self.rectangle.set_depth(-1)
+		self.add_actor(self.rectangle)
+
+		self.add_actor(self.textures[0])
+		self.textures[0].set_position(-0.25 * w, 0.25*h)
+		self.textures[0].connect("draw", self.draw_cb)
+		self.textures[0].invalidate()
+		
+		self.add_actor(self.textures[1])
+		self.textures[1].set_position(1.25 * w, 0.25*h)
+		self.textures[1].connect("draw", self.draw_cb)
+		self.textures[1].invalidate()
+
+	def draw_cb(self, tex, ctx):
+		ctx.set_source_rgb(0,0,0)
+		if tex == self.textures[0]:
+			ctx.move_to(self.width/2.0, self.height/2.0)
+			ctx.show_text("0")
+		elif tex == self.textures[1]:
+			ctx.move_to(self.width/2.0, self.height/2.0)
+			ctx.show_text("1")
+		else:
+			ctx.move_to(self.width/2.0, self.height/2.0)
+			ctx.show_text("?")
+	
+	def tile_0_cb(self, *args):
+		anim_time_1 = 3.0*self.width/self.timescale
+		self.textures[0].set_position(1.25 * self.width, 0.25*self.height)
+		a2 = self.textures[0].animatev(clutter.AnimationMode.LINEAR, anim_time_1, ["x"], [anim_x])
+		print "tile_0_cb"
+		
+	def tile_1_cb(self, *args):
+		anim_time_1 = 3.0*self.width/self.timescale
+		self.textures[1].set_position(1.25 * self.width, 0.25*self.height)
+		a2 = self.textures[1].animatev(clutter.AnimationMode.LINEAR, anim_time_1, ["x"], [anim_x])
+		print "tile_1_cb"
+
+	def start_scroll(self):
+		self.scrolling_x = True
+
+		anim_time_0 = 1.5*self.width/self.timescale
+		anim_x = -1.75 * self.width
+		a1 = self.textures[0].animatev(clutter.AnimationMode.LINEAR, anim_time_0, ["x"], [anim_x])
+		a1.connect("completed", self.tile_0_cb)
+
+		anim_time_1 = 3.0*self.width/self.timescale
+		a2 = self.textures[1].animatev(clutter.AnimationMode.LINEAR, anim_time_1, ["x"], [anim_x])
+		a2.connect("completed", self.tile_1_cb)
+
+
 class MarkStyler (object):
 	SQRT_3 = 3.0**0.5
 
@@ -267,7 +336,6 @@ class XYPlot (object):
 		self.cl_curve.clear()
 		self.cl_curve.invalidate()
 
-
 	def update(self):
 		self.cl_curve.invalidate()
 
@@ -314,21 +382,17 @@ if __name__ == "__main__":
 
 	glib.threads_init()
 	clutter.threads_init()
-	clutter.init()
+	clutter.init([])
 
 	stg = clutter.Stage()
 	stg.set_size(320, 240)
-	sco = ScopeActor(stg, 320, 240, "Scope test")
-	stg.show()
 	
-	def movecurve():
-		sco.x_min += 0.1
-		sco.x_max += 0.1
-		sco.draw_axes()
-		sco.draw_curve(pts)
-		return True
+	q = Quilt(300,220)
+	q.show()
+	stg.add_actor(q)
+	stg.show()	
 
-	glib.idle_add(movecurve)
-	sco.draw_curve(pts)
+	q.start_scroll()
+
 	clutter.main()	
 
