@@ -34,12 +34,14 @@ class Quilt (clutter.Group):
 		self.width = w
 		self.height = h
 		self.rectangle = clutter.Rectangle()
-		self.textures = [ clutter.CairoTexture.new(1.5*w, 1.5*h) for n in [0,1]]
+		self.textures = [ clutter.CairoTexture.new(1.5*w, 1.5*h) for n in [0,1,2,3]]
 		self.vport_x = 0 
 		self.vport_y = 0 
 
-		self.timescale = 0.03   # 0.1 px/ms = 100 px/
+		self.timescale = 0.03
 		self.scrolling_x = False
+		self.scrolling_y = False
+		self.set_clip(0,0,w,h)
 
 		self.rectangle.set_size(w, h)
 		self.rectangle.set_border_width(1)
@@ -49,14 +51,24 @@ class Quilt (clutter.Group):
 		self.add_actor(self.rectangle)
 
 		self.add_actor(self.textures[0])
-		self.textures[0].set_position(-0.25 * w, 0.25*h)
+		self.textures[0].set_position(-0.25 * w, -0.25*h)
 		self.textures[0].connect("draw", self.draw_cb)
 		self.textures[0].invalidate()
 		
 		self.add_actor(self.textures[1])
-		self.textures[1].set_position(1.25 * w, 0.25*h)
+		self.textures[1].set_position(1.25 * w, -0.25*h)
 		self.textures[1].connect("draw", self.draw_cb)
 		self.textures[1].invalidate()
+
+		self.add_actor(self.textures[2])
+		self.textures[2].set_position(-0.25 * w, 1.25*h)
+		self.textures[2].connect("draw", self.draw_cb)
+		self.textures[2].invalidate()
+
+		self.add_actor(self.textures[3])
+		self.textures[3].set_position(1.25 * w, 1.25*h)
+		self.textures[3].connect("draw", self.draw_cb)
+		self.textures[3].invalidate()
 
 	def draw_cb(self, tex, ctx):
 		ctx.set_source_rgb(0,0,0)
@@ -71,28 +83,123 @@ class Quilt (clutter.Group):
 			ctx.show_text("?")
 	
 	def tile_0_cb(self, *args):
+		anim_x = -1.75 * self.width
 		anim_time_1 = 3.0*self.width/self.timescale
-		self.textures[0].set_position(1.25 * self.width, 0.25*self.height)
+		self.textures[0].set_position(1.25 * self.width, -0.25*self.height)
 		a2 = self.textures[0].animatev(clutter.AnimationMode.LINEAR, anim_time_1, ["x"], [anim_x])
+		a2.connect_after("completed", self.tile_0_cb)
 		print "tile_0_cb"
 		
-	def tile_1_cb(self, *args):
+
+	def constrain_tiles(self, configuration, key_tile):
+		for t in self.textures:
+			t.clear_constraints()
+
+		w = self.tex_w
+		h = self.tex_h
+
+		if configuration == Quilt.CONF_01_23:
+			self.constrain_tiles_offsets([w, 0, 0, h, 0, -w, -h, 0], key_tile)
+		elif configuration == Quilt.CONF_10_32:
+			self.constrain_tiles_offsets([-w, 0, 0, h, 0, w, -h, 0], key_tile)
+		elif configuration == Quilt.CONF_23_01:
+			self.constrain_tiles_offsets([w, 0, 0, -h, 0, -w, h, 0], key_tile)
+		elif configuration == Quilt.CONF_32_10:
+			self.constrain_tiles_offsets([-w, 0, 0, -h, 0, w, h, 0], key_tile)
+		else:
+			# error
+			pass
+
+	def constrain_tiles_offsets(self, offsets, key_tile):
+		if key_tile == 0:
+			cx1 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.X,
+											  offsets[0])
+			cx2 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.X,
+									          offsets[1])
+			cy1 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.Y, 
+									          offsets[2])
+			cy2 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.Y,
+											  offsets[3])
+
+			self.textures[3].add_constraint(cx1)
+			self.textures[3].add_constraint(cy2)
+		else:
+			cx1 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.X,
+									          offsets[4])
+			cx2 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.X,
+											  offsets[5])
+			cy1 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.Y,
+											  offsets[6])
+			cy2 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.Y, 
+									          offsets[7])
+
+			self.textures[0].add_constraint(cx1)
+			self.textures[0].add_constraint(cy1)
+			
+		self.textures[1].add_constraint(cx1)
+		self.textures[1].add_constraint(cy1)
+		self.textures[2].add_constraint(cx2)
+		self.textures[2].add_constraint(cy2)
+
+	def constrain_tiles_1032(self, key_tile):
+		if key_tile == 0:
+			cx1 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.X,
+											  -1.0*self.tex_w)
+			cx2 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.X, 0)
+			cy1 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.Y, 0)
+			cy2 = clutter.bind_constraint_new(self.textures[0], clutter.BindCoordinate.Y,
+											  self.tex_h)
+
+			self.textures[3].add_constraint(cx1)
+			self.textures[3].add_constraint(cy2)
+		else:
+			cx1 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.X, 0)
+			cx2 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.X,
+											  self.tex_w)
+			cy1 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.Y,
+											  -1.0*self.tex_h)
+			cy2 = clutter.bind_constraint_new(self.textures[3], clutter.BindCoordinate.Y, 0)
+
+			self.textures[0].add_constraint(cx1)
+			self.textures[0].add_constraint(cy1)
+			
+		self.textures[1].add_constraint(cx1)
+		self.textures[1].add_constraint(cy1)
+		self.textures[2].add_constraint(cx2)
+		self.textures[2].add_constraint(cy2)
+
+
+	def anim_complete_cb(self, *args):
+		tnum = args[-1]
+		anim_x = -1.75 * self.width
 		anim_time_1 = 3.0*self.width/self.timescale
 		self.textures[1].set_position(1.25 * self.width, 0.25*self.height)
 		a2 = self.textures[1].animatev(clutter.AnimationMode.LINEAR, anim_time_1, ["x"], [anim_x])
+		a2.connect_after("completed", self.tile_1_cb)
 		print "tile_1_cb"
 
-	def start_scroll(self):
-		self.scrolling_x = True
 
-		anim_time_0 = 1.5*self.width/self.timescale
-		anim_x = -1.75 * self.width
-		a1 = self.textures[0].animatev(clutter.AnimationMode.LINEAR, anim_time_0, ["x"], [anim_x])
-		a1.connect("completed", self.tile_0_cb)
+
+	def set_autoscroll(self, rate_x, rate_y=False):
+		if self.scrolling_x is not None or self.scrolling_y is not None:
+			need_reset = True
+		else:
+			need_reset = False
+
+		self.scrolling_x = rate_x
+		self.scrolling_y = rate_y
+
+		for tnum in [0,1,2,3]:
+			anim = self.textures[tnum].get_animation()
+			if anim is not None:
+				anim.set_completed()
+			else:
+				self.anim_complete_cb(tnum)
+
 
 		anim_time_1 = 3.0*self.width/self.timescale
 		a2 = self.textures[1].animatev(clutter.AnimationMode.LINEAR, anim_time_1, ["x"], [anim_x])
-		a2.connect("completed", self.tile_1_cb)
+		a2.connect_after("completed", self.tile_1_cb)
 
 
 class MarkStyler (object):
@@ -166,7 +273,6 @@ class MarkStyler (object):
 			self.mark_triangle(ctx, point)
 
 class XYPlot (object):
-
 	MARGIN_LEFT = 30 
 	MARGIN_BOT = 30
 	AXIS_PAD = 5
