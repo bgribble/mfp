@@ -30,7 +30,7 @@ class Throttle (Processor):
 			Throttle._timer = MultiTimer()
 			Throttle._timer.start()
 		
-		parsed_args = self.parse_args(init_args)
+		parsed_args, kwargs = self.parse_args(init_args)
 
 		if len(parsed_args):
 			self.interval = timedelta(milliseconds=int(parsed_args[0]))
@@ -72,7 +72,7 @@ class Delay (Processor):
 			Delay._timer = MultiTimer()
 			Delay._timer.start()
 		
-		parsed_args = self.parse_args(init_args)
+		parsed_args, kwargs = self.parse_args(init_args)
 
 		if len(parsed_args):
 			self.delay = timedelta(milliseconds=int(parsed_args[0]))
@@ -106,7 +106,7 @@ class Metro (Processor):
 			Metro._timer = MultiTimer()
 			Metro._timer.start()
 		
-		parsed_args = self.parse_args(init_args)
+		parsed_args, kwargs = self.parse_args(init_args)
 
 		if len(parsed_args):
 			self.interval = timedelta(milliseconds=int(parsed_args[0]))
