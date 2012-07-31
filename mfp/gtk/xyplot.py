@@ -535,40 +535,17 @@ class XYPlot (object):
 	def update(self):
 		self.cl_curve.invalidate()
 
-	def draw_cb(self, texture, ctx):
-		if self.mode == XYPlot.SCATTER:
-			self.draw_scatter_cb(texture, ctx)
-		elif self.mode == XYPlot.CURVE:
-			self.draw_curve_cb(texture, ctx)
-
-	def draw_scatter_cb(self, texture, ctxt):
-		if not len(self.points):
-			return
-		print "in scatter draw cb"
-		print self.points
+	def draw_cb(self, texture, ctx, min_x, min_y, max_x, max_y):
 		for curve in self.points:
 			styler = self.style.get(curve)
 			if styler is None:
 				styler = self.style[curve] = MarkStyler()
 			for p in self.points[curve]:
 				pc = self.pt_pos(p)
-				styler.mark(ctxt, pc)
+				if pc[0] >= min_x and pc[0] <= max_x and pc[1] >= min_y and pc[1] <= max_y:
+					styler.mark(ctxt, pc)
 		ctxt.stroke()
 
-	def draw_curve_cb(self, texture, ctxt):
-		if not len(self.points):
-			return
-
-		ctxt.scale(1.0, 1.0)
-		ctxt.set_source_rgb(black.red, black.green, black.blue)
-
-		p = self.pt_pos(self.points[0])
-		ctxt.move_to(p[0], p[1])
-
-		for p in self.points[1:]:
-			pc = self.pt_pos(p)
-			ctxt.line_to(pc[0], pc[1])
-		ctxt.stroke()
 
 if __name__ == "__main__":
 	import math
