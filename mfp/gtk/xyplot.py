@@ -7,6 +7,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter as clutter
+import gobject
+import cairo
 import math
 
 black = clutter.Color()
@@ -26,271 +28,139 @@ def mkticks(vmin, vmax, numticks):
 	ticks = [ tickbase + n*tickint for n in range(numticks) ]
 	return [ t for t in ticks if t >= vmin and t <= vmax ]
 
-
 class Quilt (clutter.Group):
-	# possible arrangements of 4 tiles
-	# 01_23 means [[0, 1], [2, 3]] 
-	CONF_01_23 = 0
-	CONF_10_32 = 1
-	CONF_23_01 = 2
-	CONF_32_10 = 3
+	IDLE_INTERVAL = 2000
 
-	# map (config, tile) to offsets from upper left as multiples
-	# of (w,h)
-	_deltamap = {
-		(CONF_01_23, 0): (0, 0), (CONF_01_23, 1): (1, 0), 
-		(CONF_01_23, 2): (0, 1), (CONF_01_23, 3): (1, 1), 
-		(CONF_10_32, 0): (1, 0), (CONF_10_32, 1): (0, 0), 
-		(CONF_10_32, 2): (1, 1), (CONF_10_32, 3): (0, 1), 
-		(CONF_23_01, 0): (0, 1), (CONF_23_01, 1): (1, 1), 
-		(CONF_23_01, 2): (0, 0), (CONF_23_01, 3): (1, 0), 
-		(CONF_32_10, 0): (1, 1), (CONF_32_10, 1): (0, 1), 
-		(CONF_32_10, 2): (1, 0), (CONF_32_10, 3): (0, 0)
-	}
-
-	# map (config, key, tile) to offsets from upper-left of key tile
-	# as multiples of (w,h)
-	_from_key = {
-		(0,0,1): (1,0), (0,0,2): (0,1), (0,0,3): (1,1), (0,3,0): (-1,-1),
-		(0,3,1): (0,-1), (0,3,2): (-1,0), (1,0,1): (-1,0), (1,0,2): (0,1),
-		(1,0,3): (-1,1), (1,3,0): (1,-1), (1,3,1): (0,-1), (1,3,2): (-1,0),
-		(2,0,1): (1,0), (2,0,2): (0,-1), (2,0,3): (1,-1), (2,3,0): (-1,1),
-		(2,3,1): (0,1), (2,3,2): (-1,0), (3,0,1): (-1,0), (3,0,2): (0,-1),
-		(3,0,3): (-1,-1), (3,3,0): (1,1), (3,3,1): (0,1), (3,3,2): (1,0)
-	}
-
-	# map (config, key) to bounding points of quilt, as displacements
-	# from origin of key tile
-	_boundsmap = {
-		(CONF_01_23, 0): (0, 0, 2, 2), (CONF_01_23, 3): (-1, -1, 1, 1),
-		(CONF_10_32, 0): (-1, 0, 1, 2), (CONF_10_32, 3): (0, -1, 1, 1),
-		(CONF_23_01, 0): (0, -1, 2, 1), (CONF_23_01, 3): (-1, 0, 1, 2),
-		(CONF_32_10, 0): (-1, -1, 1, 1), (CONF_32_10, 3): (0, 0, 2, 2)
-	}
-
-	def __init__(self, w, h):
+	def __init__(self, width, height, tilesize=100):
 		clutter.Group.__init__(self)
-		self.set_clip(0, 0, w, h)
+		self.set_clip(0, 0, width, height)
 
-		self.width = w
-		self.height = h
-		self.origin_x = 0
-		self.origin_y = 0
+		self.viewport_width = width
+		self.viewport_height = height
 
-		self.tile_configuration = self.CONF_01_23
-		self.tile_key = 0
-		self.tile_w = 1.5 * w
-		self.tile_h = 1.5 * h
+		self.viewport_x = 0
+		self.viewport_y = 0
+		self.viewport_vx = False
+		self.viewport_vy = False
 
-		self.rectangle = clutter.Rectangle()
+		self.tile_group = clutter.Group()
+		self.tile_group.show()
+		self.add_actor(self.tile_group)
+
+		self.tile_animation = None
+		self.tile_size = tilesize
+		self.tile_by_pos = {}
+		self.tile_reverse = {}
+
+		self.render_cb = None
+
+		self.rebuild_quilt()
+
+	def set_viewport_scroll(self, vx, vy):
+		'''
+		start scrolling viewport in the specified dir (pixels/sec)
+		note tile group moves in opposite direction, vp stationary
+		'''
+		print "starting scroll", vx, vy
+
+		def idle(*args):
+			print "=========== IDLE ============="
+			pos = self.tile_group.get_position()
+			self.viewport_x = -pos[0]
+			self.viewport_y = -pos[1]
+			self.rebuild_quilt()
+			return True
+
+		def complete(*args):
+			print "animation complete"
+
+		if (vx != self.viewport_vx) or (vy != self.viewport_vy):
+			self.viewport_vx = vx
+			self.viewport_vy = vy
+
+			target_x, target_y = self.tile_group.get_position()
+			print "ANIMATE starting at", target_x, target_y
+
+			target_x -= vx
+			target_y -= vy 
+
+			self.tile_animation = self.tile_group.animatev(clutter.AnimationMode.LINEAR, 50000,
+														  ['x', 'y'],
+														  [ target_x, target_y ])
+			self.tile_animation.connect("completed", complete)
+
+			glib.timeout_add(1000, idle)
+
+	def rebuild_quilt(self):
+		def lbound(val):
+			return int(math.floor(val / float(self.tile_size)) * self.tile_size)
+
+		def ubound(val):
+			return lbound(val) + self.tile_size
+
+		min_x = lbound(self.viewport_x)
+		max_x = ubound(self.viewport_x + self.viewport_width)
+
+		min_y = lbound(self.viewport_y)
+		max_y = ubound(self.viewport_y + self.viewport_height)
+	
+		needed = {}
+		for x in range(min_x, max_x, self.tile_size):
+			for y in range(min_y, max_y, self.tile_size):
+				needed[(x, y)] = True
+
+		# alloc_tiles will kick off the redraw process
+		self.alloc_tiles(needed)
+
+	def alloc_tiles(self, needed):
+		print "alloc_tiles:", needed
+
+		garbage = self.gc_tiles(needed)
+		for pos in needed:
+			tile = self.tile_by_pos.get(pos)
+			if tile is None:
+				if garbage:
+					self.move_tile(garbage[0], pos)
+					garbage = garbage[1:]
+				else:
+					self.new_tile(pos)
 		
-		self.tiles = [ clutter.CairoTexture.new(self.tile_w, self.tile_h) for n in [0,1,2,3]]
-		self.tiles_reverse = { self.tiles[0]: 0, self.tiles[1]: 1, self.tiles[2]: 2, self.tiles[3]: 3}
+	def gc_tiles(self, marked):
+		garbage = []
+		for pos, tile in self.tile_by_pos.items():
+			if marked.get(pos) is None:
+				garbage.append(tile)
+				del self.tile_by_pos[pos]
+				del self.tile_reverse[tile]
+		return garbage
 
-		self.scroll_vx = False
-		self.scroll_vy = False
+	def new_tile(self, pos):
+		print "new_tile", pos
+		tile = clutter.CairoTexture.new(self.tile_size, self.tile_size)
+		self.tile_group.add_actor(tile)
+		tile.connect("draw", self.draw_cb)
+		self.move_tile(tile, pos)
+		tile.show()
+		tile.invalidate()
 
-		self.rectangle.set_size(w, h)
-		self.rectangle.set_border_width(1)
-		self.rectangle.set_border_color(black)
-		self.rectangle.set_position(0,0)
-		self.rectangle.set_depth(-1)
-		self.add_actor(self.rectangle)
-
-		for tnum in [0,1,2,3]:
-			self.add_actor(self.tiles[tnum])
-			self.tiles[tnum].connect("draw", self.draw_cb)
-
-		self.tiles[0].set_position(-0.25 * w, -0.25*h)
-		self.constrain_tiles(self.tile_configuration, self.tile_key)
-
-		for tnum in [0,1,2,3]:
-			self.tiles[tnum].invalidate()
+	def move_tile(self, tile, pos):
+		tile.set_position(pos[0], pos[1])
+		self.tile_by_pos[pos] = tile
+		self.tile_reverse[tile] = pos
+		tile.invalidate()
 			
-	def draw_cb(self, tex, ctx):
-		tilenum = self.tiles_reverse.get(tex)
-		tile_x, tile_y = self.get_tile_position(tilenum)
-
-		# is it ok to emit "draw" on parent?
+	def draw_cb(self, tex, ctx, *rest):
+		print "draw_cb", tex, ctx, rest
+		tileid = self.tile_reverse.get(tex)
+		pt_min = (tileid[0], tileid[1])
+		pt_max = (pt_min[0] + self.tile_size, pt_min[1] + self.tile_size)
 		if self.render_cb:
-			self.render_cb(tex, ctx, tile_x, tile_y, tile_x+self.tile_w, tile_y + self.tile_h)
+			self.render_cb(tex, ctx, pt_min, pt_max)
 
-	def constrain_tiles(self, configuration, key_tile):
-		for t in self.tiles:
-			t.clear_constraints()
-
-		w = self.tile_w
-		h = self.tile_h
-
-		if configuration == Quilt.CONF_01_23:
-			self.constrain_tiles_with_offsets([w, 0, 0, h, 0, -w, -h, 0], key_tile)
-		elif configuration == Quilt.CONF_10_32:
-			self.constrain_tiles_with_offsets([-w, 0, 0, h, 0, w, -h, 0], key_tile)
-		elif configuration == Quilt.CONF_23_01:
-			self.constrain_tiles_with_offsets([w, 0, 0, -h, 0, -w, h, 0], key_tile)
-		elif configuration == Quilt.CONF_32_10:
-			self.constrain_tiles_with_offsets([-w, 0, 0, -h, 0, w, h, 0], key_tile)
-		else:
-			print "constrain_tiles: configuration ", configuration, "does not exist"
-			# error
-			pass
-		self.tile_configuration = configuration
-		self.tile_key = key_tile
-
-	def constrain_tiles_with_offsets(self, offsets, key_tile):
-		if key_tile == 0:
-			cx1 = clutter.bind_constraint_new(self.tiles[0], clutter.BindCoordinate.X,
-											  offsets[0])
-			cx2 = clutter.bind_constraint_new(self.tiles[0], clutter.BindCoordinate.X,
-									          offsets[1])
-			cy1 = clutter.bind_constraint_new(self.tiles[0], clutter.BindCoordinate.Y, 
-									          offsets[2])
-			cy2 = clutter.bind_constraint_new(self.tiles[0], clutter.BindCoordinate.Y,
-											  offsets[3])
-
-			self.tiles[3].add_constraint(cx1)
-			self.tiles[3].add_constraint(cy2)
-		else:
-			cx1 = clutter.bind_constraint_new(self.tiles[3], clutter.BindCoordinate.X,
-									          offsets[4])
-			cx2 = clutter.bind_constraint_new(self.tiles[3], clutter.BindCoordinate.X,
-											  offsets[5])
-			cy1 = clutter.bind_constraint_new(self.tiles[3], clutter.BindCoordinate.Y,
-											  offsets[6])
-			cy2 = clutter.bind_constraint_new(self.tiles[3], clutter.BindCoordinate.Y, 
-									          offsets[7])
-
-			self.tiles[0].add_constraint(cx1)
-			self.tiles[0].add_constraint(cy1)
-			
-		self.tiles[1].add_constraint(cx1)
-		self.tiles[1].add_constraint(cy1)
-		self.tiles[2].add_constraint(cx2)
-		self.tiles[2].add_constraint(cy2)
-
-	def get_tile_offset(self, tile):
-		'''
-		Return (x,y) delta from origin of key tile to origin 
-		of target tile in current configuration
-		'''
-
-		key = (self.tile_configuration, tile)
-		signs = self._deltamap.get(key)
-		return (signs[0]*self.tile_width, signs[1]*self.tile_height)
-
-	def get_tile_position(self, tile):
-		origin_off = self.get_tile_offset(tile)
-		return (origin_off[0] + self.origin_x, origin_off[1]+self.origin_y)
-
-	def get_bounds(self):
-		''' 
-		Return min and max points of quilt if frame of ref of
-		viewport
-		'''
-
-		key_x, key_y = self.tiles[self.tile_key].get_position()
-		off_min_x, off_min_y, off_max_x, off_max_y = self._boundsmap.get((self.tile_configuration,
-																	      self.tile_key))
-		w = self.tile_width
-		h = self.tile_height
-		return (key_x + off_min_x * w, key_x + off_min_y * h, 
-		        key_x + off_max_x * w, key_x + off_max_y * h)
-
-	def next_tile_configuration(self):
-		OK=0 ; BAD=1
-		
-		# min/max points of quilt canvas area
-		min_x, min_y, max_x, max_y = self.get_bounds()
-
-		edge_left = edge_right = edge_top = edge_bottom = overlap = OK
-		next_configuration = self.tile_configuration
-		next_key = self.tile_key
-
-		if ((self.scroll_vx < 0 and min_x >= (-0.25 * self.width))
-		    or (min_x >= 0)):
-			edge_left = BAD
-
-		if ((self.scroll_vx > 0 and max_x <= (1.25 * self.width))
-	        or (max_x <= self.width)):
-			edge_right = BAD
-
-		if ((self.scroll_vy < 0 and min_y >= (-0.25 * self.height))
-	        or (min_y >= 0)):
-			edge_top = BAD
-
-		if ((self.scroll_vy > 0 and max_y <= (1.25 * self.height))
-	        or (max_y <= self.height)):
-			edge_bottom = BAD
-
-		if ((min_x >= self.width) or (max_x <= 0) 
-	        or (min_y >= self.height) or (max_y <= 0)):
-			overlap = BAD
-		
-		bad_edges = edge_top + edge_bottom + edge_left + edge_right
-
-		if overlap == BAD:
-			pass
-		elif bad_edges == 0:
-			pass
-		elif bad_edges == 1:
-			pass
-
-		elif bad_edges == 2:
-			pass
-		else:
-			# error -- should never happen
-			pass 
-
-		return (next_configuration, next_key)
-
-	def anim_complete_cb(self, animation, tex):
-		# are we still animating?  if not, bail
-		if self.scroll_vx is None and self.scroll_vy is None:
-			return
-
-		# do we need to reconfigure?
-		newconf, newkey = self.next_tile_configuration()
-		if newconf != self.tile_configuration or newkey != self.tile_key:
-			# configure tiles
-			self.configure_tiles(newconf, newkey)
-
-		# use scrolling speeds to compute new animation target
-		anim_time, anim_x, anim_y = self.next_animation_target()
-
-		# call the implicit animation
-		a2 = self.tiles[self.tile_key].animatev(clutter.AnimationMode.LINEAR, 
-											       anim_time, ["x", "y"], [anim_x, anim_y])
-
-		# add the callback 
-		a2.connect_after("completed", self.anim_complete_cb)
-
-
-		#### junk #########################
-		tnum = args[-1]
-		anim_x = -1.75 * self.width
-		anim_time_1 = 3.0*self.width/self.timescale
-		self.tiles[1].set_position(1.25 * self.width, 0.25*self.height)
-		a2 = self.tiles[1].animatev(clutter.AnimationMode.LINEAR, anim_time_1, ["x"], [anim_x])
-		a2.connect_after("completed", self.tile_1_cb)
-		print "tile_1_cb"
-
-	def set_autoscroll(self, rate_x, rate_y=False):
-		if self.scroll_vx is not None or self.scroll_vy is not None:
-			need_reset = True
-		else:
-			need_reset = False
-
-		self.scroll_vx = rate_x
-		self.scroll_vy = rate_y
-
-		anim = self.tiles[self.tile_key].get_animation()
-
-		# calling set_completed() will cause CB to be called
-		if anim is not None:
-			anim.set_completed()
-		else:
-			self.anim_complete_cb(tnum)
-
+	def set_render_cb(self, cb):
+		self.render_cb = cb
+		for t in self.tile_reverse:
+			t.invalidate()
 
 class MarkStyler (object):
 	SQRT_3 = 3.0**0.5
@@ -548,10 +418,14 @@ class XYPlot (object):
 
 
 if __name__ == "__main__":
+	def render_cb(tex, ctx, pt_min, pt_max):
+		ctx.set_source_rgb(0,0,0)
+		ctx.move_to(0,25)
+		ctx.show_text(str(pt_min))
+		#print "DRAW:", tex, ctx, pt_min, pt_max
+	
 	import math
 	import glib
-
-	pts = [[x/100.0, math.sin(x/100.0)] for x in range(0, 6280) ]
 
 	glib.threads_init()
 	clutter.threads_init()
@@ -560,12 +434,14 @@ if __name__ == "__main__":
 	stg = clutter.Stage()
 	stg.set_size(320, 240)
 	
-	q = Quilt(300,220)
+	q = Quilt(300, 220)
+	q.set_render_cb(render_cb)
 	q.show()
+
 	stg.add_actor(q)
 	stg.show()	
 
-	q.start_scroll()
+	q.set_viewport_scroll(200, 200)
 
 	clutter.main()	
 
