@@ -29,7 +29,8 @@ def mkticks(vmin, vmax, numticks):
 	return [ t for t in ticks if t >= vmin and t <= vmax ]
 
 class Quilt (clutter.Group):
-	IDLE_INTERVAL = 2000
+	IDLE_INTERVAL = 500 
+	VELOCITY_FUDGE = 1.25
 
 	def __init__(self, width, height, tilesize=100):
 		clutter.Group.__init__(self)
@@ -55,41 +56,41 @@ class Quilt (clutter.Group):
 		self.render_cb = None
 
 		self.rebuild_quilt()
+		glib.timeout_add(self.IDLE_INTERVAL, self.idle_cb)
 
 	def set_viewport_scroll(self, vx, vy):
-		'''
-		start scrolling viewport in the specified dir (pixels/sec)
-		note tile group moves in opposite direction, vp stationary
-		'''
-		print "starting scroll", vx, vy
-
-		def idle(*args):
-			print "=========== IDLE ============="
-			pos = self.tile_group.get_position()
-			self.viewport_x = -pos[0]
-			self.viewport_y = -pos[1]
-			self.rebuild_quilt()
-			return True
-
-		def complete(*args):
-			print "animation complete"
-
 		if (vx != self.viewport_vx) or (vy != self.viewport_vy):
 			self.viewport_vx = vx
 			self.viewport_vy = vy
 
-			target_x, target_y = self.tile_group.get_position()
-			print "ANIMATE starting at", target_x, target_y
+			self.reanimate()
 
-			target_x -= vx
-			target_y -= vy 
+	def set_size(self, width, height):
+		self.viewport_width = width
+		self.viewport_height = height
+		Group.set_size(self, width, height)
+		self.rebuild_quilt()
 
-			self.tile_animation = self.tile_group.animatev(clutter.AnimationMode.LINEAR, 50000,
-														  ['x', 'y'],
-														  [ target_x, target_y ])
-			self.tile_animation.connect("completed", complete)
+	def idle_cb(self, *args):
+		pos = self.tile_group.get_position()
+		self.viewport_x = -pos[0]
+		self.viewport_y = -pos[1]
+		self.rebuild_quilt()
+		if self.viewport_vx is None and self.viewport_vy is None:
+			return False
+		else:
+			return True
 
-			glib.timeout_add(1000, idle)
+	def reanimate(self, *args):
+		target_x, target_y = self.tile_group.get_position()
+
+		target_x -= 5*self.viewport_vx
+		target_y -= 5*self.viewport_vy
+
+		self.tile_animation = self.tile_group.animatev(clutter.AnimationMode.LINEAR, 5000,
+													  ['x', 'y'],
+													  [ target_x, target_y ])
+		self.tile_animation.connect_after("completed", self.reanimate)
 
 	def rebuild_quilt(self):
 		def lbound(val):
@@ -101,9 +102,20 @@ class Quilt (clutter.Group):
 		min_x = lbound(self.viewport_x)
 		max_x = ubound(self.viewport_x + self.viewport_width)
 
+		if self.viewport_vx < 0:
+			min_x -= int(self.viewport_vx * self.VELOCITY_FUDGE)
+		elif self.viewport_vx > 0:
+			max_x += int(self.viewport_vx * self.VELOCITY_FUDGE)
+
+
 		min_y = lbound(self.viewport_y)
 		max_y = ubound(self.viewport_y + self.viewport_height)
 	
+		if self.viewport_vy < 0:
+			min_y -= int(self.viewport_vy * self.VELOCITY_FUDGE)
+		elif self.viewport_vy > 0:
+			max_y += int(self.viewport_vy * self.VELOCITY_FUDGE)
+
 		needed = {}
 		for x in range(min_x, max_x, self.tile_size):
 			for y in range(min_y, max_y, self.tile_size):
@@ -113,8 +125,6 @@ class Quilt (clutter.Group):
 		self.alloc_tiles(needed)
 
 	def alloc_tiles(self, needed):
-		print "alloc_tiles:", needed
-
 		garbage = self.gc_tiles(needed)
 		for pos in needed:
 			tile = self.tile_by_pos.get(pos)
@@ -135,7 +145,6 @@ class Quilt (clutter.Group):
 		return garbage
 
 	def new_tile(self, pos):
-		print "new_tile", pos
 		tile = clutter.CairoTexture.new(self.tile_size, self.tile_size)
 		self.tile_group.add_actor(tile)
 		tile.connect("draw", self.draw_cb)
@@ -147,10 +156,10 @@ class Quilt (clutter.Group):
 		tile.set_position(pos[0], pos[1])
 		self.tile_by_pos[pos] = tile
 		self.tile_reverse[tile] = pos
+		tile.clear()
 		tile.invalidate()
 			
 	def draw_cb(self, tex, ctx, *rest):
-		print "draw_cb", tex, ctx, rest
 		tileid = self.tile_reverse.get(tex)
 		pt_min = (tileid[0], tileid[1])
 		pt_max = (pt_min[0] + self.tile_size, pt_min[1] + self.tile_size)
@@ -160,6 +169,7 @@ class Quilt (clutter.Group):
 	def set_render_cb(self, cb):
 		self.render_cb = cb
 		for t in self.tile_reverse:
+			t.clear()
 			t.invalidate()
 
 class MarkStyler (object):
@@ -232,7 +242,7 @@ class MarkStyler (object):
 		elif self.shape == "triangle":
 			self.mark_triangle(ctx, point)
 
-class XYPlot (object):
+class XYPlot (clutter.Group):
 	MARGIN_LEFT = 30 
 	MARGIN_BOT = 30
 	AXIS_PAD = 5
@@ -241,12 +251,12 @@ class XYPlot (object):
 	SCATTER = 0
 	CURVE = 1
 
-	def __init__(self, stage, width, height):
-		self.stage = stage
+	def __init__(self, width, height):
+		clutter.Group.__init__(self)
+
 		self.width = width
 		self.height = height
 
-		self.mode = XYPlot.SCATTER
 		self.points = {} 
 		self.style = {}
 
@@ -268,29 +278,27 @@ class XYPlot (object):
 		self.create()
 
 	def create(self):
-		self.cl_group = clutter.Group()
-
 		self.cl_bg = clutter.Rectangle()
 		self.cl_bg.set_border_width(0)
 		self.cl_bg.set_border_color(black)
 		self.cl_bg.set_color(white)
 		self.cl_bg.set_size(self.width, self.height)
 		self.cl_bg.set_position(0,0)
-		self.cl_group.add_actor(self.cl_bg)
+		self.add_actor(self.cl_bg)
 		
 		self.cl_field_w = self.width - self.MARGIN_LEFT
 		self.cl_field_h = self.height - self.MARGIN_BOT
 
-		self.cl_xaxis_bg = clutter.CairoTexture.new(self.cl_field_w, self.MARGIN_BOT)
+		self.cl_xaxis_bg = Quilt(self.cl_field_w, self.MARGIN_BOT)
 		self.cl_xaxis_bg.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
-		self.cl_group.add_actor(self.cl_xaxis_bg)
+		self.add_actor(self.cl_xaxis_bg)
 
-		self.cl_yaxis_bg = clutter.CairoTexture.new(self.MARGIN_LEFT, self.cl_field_h)
+		self.cl_yaxis_bg = Quilt(self.MARGIN_LEFT, self.cl_field_h)
 		self.cl_yaxis_bg.set_position(0, 0)
-		self.cl_group.add_actor(self.cl_yaxis_bg)
+		self.add_actor(self.cl_yaxis_bg)
 
-		self.cl_xaxis_bg.connect("draw", self.draw_xaxis_cb)
-		self.cl_yaxis_bg.connect("draw", self.draw_yaxis_cb)
+		self.cl_xaxis_bg.set_render_cb(self.draw_xaxis_cb)
+		self.cl_yaxis_bg.set_render_cb(self.draw_yaxis_cb)
 
 		self.cl_field = clutter.Rectangle()
 		self.cl_field.set_border_width(0)
@@ -299,21 +307,13 @@ class XYPlot (object):
 		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
 		self.cl_field.set_position(self.MARGIN_LEFT, 0)
 
-		self.cl_group.add_actor(self.cl_field)
+		self.add_actor(self.cl_field)
 
-		self.cl_curve = clutter.CairoTexture.new(self.cl_field_w, self.cl_field_h)
+		self.cl_curve = Quilt(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_position(self.MARGIN_LEFT, 0)
-		self.cl_curve.connect("draw", self.draw_cb)
-		self.cl_group.add_actor(self.cl_curve)
-
-		self.stage.add_actor(self.cl_group)
+		self.cl_curve.set_render_cb(self.draw_cb)
+		self.add_actor(self.cl_curve)
 		
-		self.redraw_axes()
-
-	def redraw_axes(self):
-		self.cl_xaxis_bg.invalidate()
-		self.cl_yaxis_bg.invalidate()
-
 	def set_size(self, width, height):
 		self.width = width
 		self.height = height
@@ -326,10 +326,8 @@ class XYPlot (object):
 		self.cl_yaxis_bg.set_size(self.MARGIN_LEFT, self.cl_field_h)
 		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_size(self.cl_field_w, self.cl_field_h)
-		self.redraw_axes()
 
-	def set_position(self, x, y):
-		self.cl_group.set_position(x, y)
+		self.redraw_axes()
 
 	def set_style(self, style):
 		for inlet, istyle in style.items():
@@ -348,7 +346,7 @@ class XYPlot (object):
 		      self.cl_field_h - (p[1] - self.y_min)*float(self.cl_field_h)/(self.y_max - self.y_min)]
 		return np
 
-	def draw_xaxis_cb(self, texture, ctx):
+	def draw_xaxis_cb(self, texture, ctx, pt_min, pt_max):
 		# X axis
 		ticks = mkticks(self.x_min, self.x_max, self.cl_field_w/self.TICK_SIZE)
 		ctx.set_source_rgb(black.red, black.green, black.blue)
@@ -368,14 +366,12 @@ class XYPlot (object):
 			ctx.move_to(p[0], self.MARGIN_BOT-self.AXIS_PAD)
 			ctx.show_text("%.3g" % tick)
 
-	def draw_yaxis_cb(self, texture, ctx):
+	def draw_yaxis_cb(self, texture, ctx, pt_min, pt_max):
 		# Y axis
 		ticks = mkticks(self.y_min, self.y_max, float(self.cl_field_h)/self.TICK_SIZE)
 		ctx.set_source_rgb(black.red, black.green, black.blue)
 		
 		# the axis line
-		ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, 0)
-		ctx.line_to(self.MARGIN_LEFT-self.AXIS_PAD, self.cl_field_h)
 		ctx.stroke()
 
 		# ticks
@@ -390,22 +386,9 @@ class XYPlot (object):
 			ctx.show_text("%.3g" % tick)
 			ctx.restore()
 
-	def append(self, point, curve=0):
-		pre = self.points.setdefault(curve, [])
-		pre.append(point)
-
-	def clear(self, curve=None):
-		if curve is None:
-			self.points = {}
-		elif curve is not None and self.points.has_key(curve):
-			del self.points[curve]
-		self.cl_curve.clear()
-		self.cl_curve.invalidate()
-
-	def update(self):
-		self.cl_curve.invalidate()
-
-	def draw_cb(self, texture, ctx, min_x, min_y, max_x, max_y):
+	def draw_cb(self, texture, ctxt, pt_min, pt_max):
+		min_x, min_y = pt_min
+		max_x, max_y = pt_max 
 		for curve in self.points:
 			styler = self.style.get(curve)
 			if styler is None:
@@ -416,14 +399,22 @@ class XYPlot (object):
 					styler.mark(ctxt, pc)
 		ctxt.stroke()
 
+	def append(self, point, curve=0):
+		pre = self.points.setdefault(curve, [])
+		pre.append(point)
+
+	def clear(self, curve=None):
+		if curve is None:
+			self.points = {}
+		elif curve is not None and self.points.has_key(curve):
+			del self.points[curve]
+		self.cl_curve.clear()
+
+	def update(self):
+		self.cl_curve.invalidate()
+
 
 if __name__ == "__main__":
-	def render_cb(tex, ctx, pt_min, pt_max):
-		ctx.set_source_rgb(0,0,0)
-		ctx.move_to(0,25)
-		ctx.show_text(str(pt_min))
-		#print "DRAW:", tex, ctx, pt_min, pt_max
-	
 	import math
 	import glib
 
@@ -432,16 +423,12 @@ if __name__ == "__main__":
 	clutter.init([])
 
 	stg = clutter.Stage()
-	stg.set_size(320, 240)
-	
-	q = Quilt(300, 220)
-	q.set_render_cb(render_cb)
-	q.show()
+	stg.set_size(600, 400)
 
-	stg.add_actor(q)
+	x = XYPlot(600, 400)
+	x.show()
+	stg.add_actor(x)
+
 	stg.show()	
-
-	q.set_viewport_scroll(200, 200)
-
 	clutter.main()	
 
