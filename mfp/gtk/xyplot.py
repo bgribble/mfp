@@ -65,6 +65,13 @@ class Quilt (clutter.Group):
 
 			self.reanimate()
 
+	def set_viewport_origin(self, pos_x, pos_y):
+		print "setting viewport origin to", pos_x, pos_y
+		self.tile_group.set_position(-pos_x, -pos_y)
+		self.viewport_x = pos_x
+		self.viewport_y = pos_y
+		self.rebuild_quilt()
+
 	def set_size(self, width, height):
 		self.viewport_width = width
 		self.viewport_height = height
@@ -265,6 +272,7 @@ class XYPlot (clutter.Group):
 		self.x_max = 6.28 
 		self.y_min = -1
 		self.y_max = 1
+		self.axis_font_size = 8
 
 		# initialized by create() call
 		self.cl_bg = None
@@ -291,10 +299,12 @@ class XYPlot (clutter.Group):
 
 		self.cl_xaxis_bg = Quilt(self.cl_field_w, self.MARGIN_BOT)
 		self.cl_xaxis_bg.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
+		self.cl_xaxis_bg.set_viewport_origin(0, 0)
 		self.add_actor(self.cl_xaxis_bg)
 
 		self.cl_yaxis_bg = Quilt(self.MARGIN_LEFT, self.cl_field_h)
 		self.cl_yaxis_bg.set_position(0, 0)
+		self.cl_yaxis_bg.set_viewport_origin(0, -self.cl_field_h/2.0)
 		self.add_actor(self.cl_yaxis_bg)
 
 		self.cl_xaxis_bg.set_render_cb(self.draw_xaxis_cb)
@@ -312,6 +322,7 @@ class XYPlot (clutter.Group):
 		self.cl_curve = Quilt(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_position(self.MARGIN_LEFT, 0)
 		self.cl_curve.set_render_cb(self.draw_cb)
+		self.cl_curve.set_viewport_origin(0, -self.cl_field_h)
 		self.add_actor(self.cl_curve)
 		
 	def set_size(self, width, height):
@@ -346,42 +357,68 @@ class XYPlot (clutter.Group):
 		      self.cl_field_h - (p[1] - self.y_min)*float(self.cl_field_h)/(self.y_max - self.y_min)]
 		return np
 
-	def draw_xaxis_cb(self, texture, ctx, pt_min, pt_max):
+	def pt2px(self, p):
+		np = [p[0]*float(self.cl_field_w)/(self.x_max - self.x_min),
+		      -1.0*p[1]*float(self.cl_field_h)/(self.y_max - self.y_min)]
+		return np
+
+	def px2pt(self, p):
+		np = [p[0]/(float(self.cl_field_w)/(self.x_max - self.x_min)),
+		      -1.0*p[1]/(float(self.cl_field_h)/(self.y_max - self.y_min))]
+		return np
+
+	def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
+		pt_min = self.px2pt(px_min)
+		pt_max = self.px2pt(px_max)
+
 		# X axis
 		ticks = mkticks(self.x_min, self.x_max, self.cl_field_w/self.TICK_SIZE)
 		ctx.set_source_rgb(black.red, black.green, black.blue)
-		ctx.set_font_size(8)
+		ctx.set_font_size(self.axis_font_size)
 
 		# the axis line
 		ctx.move_to(0, self.AXIS_PAD)
-		ctx.line_to(self.cl_field_w, self.AXIS_PAD)
+		ctx.line_to(texture.get_width(), self.AXIS_PAD)
 		ctx.stroke()
 
 		# ticks
 		for tick in ticks:
+			tick_px = self.pt2px((tick, 0))
+			if (tick_px[0] < (px_min[0] - self.MARGIN_LEFT) or tick_px[0] > (px_max[0]+self.MARGIN_LEFT)):
+				continue
+
 			p = self.pt_pos([tick, 0])
-			ctx.move_to(p[0], self.AXIS_PAD)
-			ctx.line_to(p[0], 3*self.AXIS_PAD)
+			ctx.move_to(tick_px[0]-px_min[0], self.AXIS_PAD)
+			ctx.line_to(tick_px[0]-px_min[0], 3*self.AXIS_PAD)
 			ctx.stroke()
-			ctx.move_to(p[0], self.MARGIN_BOT-self.AXIS_PAD)
+			ctx.move_to(tick_px[0]-px_min[0], self.MARGIN_BOT-self.AXIS_PAD)
 			ctx.show_text("%.3g" % tick)
 
-	def draw_yaxis_cb(self, texture, ctx, pt_min, pt_max):
-		# Y axis
+	def draw_yaxis_cb(self, texture, ctx, px_min, px_max):
+		pt_min = self.px2pt(px_min)
+		pt_max = self.px2pt(px_max)
+
+		# Y axis ticks
 		ticks = mkticks(self.y_min, self.y_max, float(self.cl_field_h)/self.TICK_SIZE)
 		ctx.set_source_rgb(black.red, black.green, black.blue)
+		ctx.set_font_size(self.axis_font_size)
 		
 		# the axis line
+		ctx.move_to(self.MARGIN_LEFT - self.AXIS_PAD, 0)
+		ctx.line_to(self.MARGIN_LEFT - self.AXIS_PAD, texture.get_height())
 		ctx.stroke()
 
 		# ticks
 		for tick in ticks:
-			p = self.pt_pos([0, tick])
-			ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, p[1])
-			ctx.line_to(self.MARGIN_LEFT-3*self.AXIS_PAD, p[1])
+			tick_px = self.pt2px((0,tick))
+			if (tick_px[1] < (px_min[1] - self.MARGIN_BOT) or tick_px[1] > (px_max[1]+self.MARGIN_BOT)):
+				continue
+
+			ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, tick_px[1]-px_min[1])
+			ctx.line_to(self.MARGIN_LEFT-3*self.AXIS_PAD, tick_px[1]-px_min[1])
 			ctx.stroke()
 			ctx.save()
-			ctx.move_to(self.AXIS_PAD, p[1])
+			ctx.move_to(self.AXIS_PAD, tick_px[1]-px_min[1])
 			ctx.rotate(math.pi/2)
 			ctx.show_text("%.3g" % tick)
 			ctx.restore()
