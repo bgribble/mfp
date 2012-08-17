@@ -265,6 +265,7 @@ class XYPlot (clutter.Group):
 		self.height = height
 
 		self.points = {} 
+		self.points_by_tile = {}
 		self.style = {}
 
 		# scaling params
@@ -321,8 +322,8 @@ class XYPlot (clutter.Group):
 
 		self.cl_curve = Quilt(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_position(self.MARGIN_LEFT, 0)
-		self.cl_curve.set_render_cb(self.draw_cb)
-		self.cl_curve.set_viewport_origin(0, -self.cl_field_h)
+		self.cl_curve.set_render_cb(self.draw_field_cb)
+		self.cl_curve.set_viewport_origin(0, -self.cl_field_h/2.0)
 		self.add_actor(self.cl_curve)
 		
 	def set_size(self, width, height):
@@ -423,22 +424,56 @@ class XYPlot (clutter.Group):
 			ctx.show_text("%.3g" % tick)
 			ctx.restore()
 
-	def draw_cb(self, texture, ctxt, pt_min, pt_max):
-		min_x, min_y = pt_min
-		max_x, max_y = pt_max 
+	def draw_field_cb(self, texture, ctxt, px_min, px_max):
 		for curve in self.points:
 			styler = self.style.get(curve)
 			if styler is None:
 				styler = self.style[curve] = MarkStyler()
-			for p in self.points[curve]:
-				pc = self.pt_pos(p)
-				if pc[0] >= min_x and pc[0] <= max_x and pc[1] >= min_y and pc[1] <= max_y:
-					styler.mark(ctxt, pc)
+
+			tile_id = self.cl_curve.tile_reverse.get(texture)
+			if tile_id is None:
+				return
+
+			points = self.points_by_tile[curve].get(tile_id)	
+		
+			for p in points:
+				pc = self.pt2px(p)
+				pc[0] -= px_min[0]
+				pc[1] -= px_min[1]
+				styler.mark(ctxt, pc)
 		ctxt.stroke()
 
 	def append(self, point, curve=0):
-		pre = self.points.setdefault(curve, [])
-		pre.append(point)
+		px = self.pt2px(point)
+
+		pts = self.points.setdefault(curve, [])
+		pts.append(point)
+		tiles = []
+
+		bytile = self.points_by_tile.setdefault(curve, {})
+		style = self.style.get(curve)
+		if style is None:
+			style = self.style[curve] = MarkStyler()
+		
+		markradius = style.size
+		tile_size = self.cl_curve.tile_size
+
+		for dx in [markradius, markradius ]:
+			for dy in [-markradius, markradius]:
+				x = px[0] + dx
+				y = px[1] + dy
+				tile_id = (int(math.floor(x / tile_size)*tile_size), 
+						   int(math.floor(y / tile_size)*tile_size)) 
+				if tile_id not in tiles:
+					tiles.append(tile_id)
+
+		print "append: point", point, tiles	
+		for tile_id in tiles:
+			pts = bytile.setdefault(tile_id, [])
+			pts.append(point)
+			tex = self.cl_curve.tile_by_pos.get(tile_id)
+			if tex is not None:
+				tex.invalidate()
 
 	def clear(self, curve=None):
 		if curve is None:
@@ -465,7 +500,10 @@ if __name__ == "__main__":
 	x = XYPlot(600, 400)
 	x.show()
 	stg.add_actor(x)
-
 	stg.show()	
+
+	for p in range(0, 70):
+		x.append((p/10.0, math.sin(p/10.0)))
+
 	clutter.main()	
 
