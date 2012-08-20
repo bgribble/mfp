@@ -66,7 +66,6 @@ class Quilt (clutter.Group):
 			self.reanimate()
 
 	def set_viewport_origin(self, pos_x, pos_y):
-		print "setting viewport origin to", pos_x, pos_y
 		self.tile_group.set_position(-pos_x, -pos_y)
 		self.viewport_x = pos_x
 		self.viewport_y = pos_y
@@ -217,7 +216,7 @@ class MarkStyler (object):
 		self.col_a = a
 
 	def mark_dot(self, ctx, point):
-		#ctx.move_to(point[0], point[1])
+		ctx.move_to(point[0]+self.size, point[1])
 		ctx.arc(point[0], point[1], self.size, 0.0, math.pi * 2.0)
 
 	def mark_square(self, ctx, point):
@@ -239,6 +238,10 @@ class MarkStyler (object):
 		ctx.line_to(point[0] - d2, point[1] + d1)
 		ctx.line_to(point[0] + d2, point[1] + d1)
 		ctx.line_to(point[0], point[1] - self.size)
+
+	def stroke(self, ctx, pt_1, pt_2):
+		if self.stroke == "solid":
+			pass
 
 	def mark(self, ctx, point):
 		ctx.set_source_rgba(self.col_r, self.col_g, self.col_b, self.col_a)
@@ -436,7 +439,7 @@ class XYPlot (clutter.Group):
 
 			points = self.points_by_tile[curve].get(tile_id)	
 		
-			for p in points:
+			for ptnum, p in points:
 				pc = self.pt2px(p)
 				pc[0] -= px_min[0]
 				pc[1] -= px_min[1]
@@ -447,7 +450,8 @@ class XYPlot (clutter.Group):
 		px = self.pt2px(point)
 
 		pts = self.points.setdefault(curve, [])
-		pts.append(point)
+		ptnum = len(pts)
+		pts.append([ptnum, point])
 		tiles = []
 
 		bytile = self.points_by_tile.setdefault(curve, {})
@@ -458,7 +462,7 @@ class XYPlot (clutter.Group):
 		markradius = style.size
 		tile_size = self.cl_curve.tile_size
 
-		for dx in [markradius, markradius ]:
+		for dx in [-markradius, markradius ]:
 			for dy in [-markradius, markradius]:
 				x = px[0] + dx
 				y = px[1] + dy
@@ -467,10 +471,9 @@ class XYPlot (clutter.Group):
 				if tile_id not in tiles:
 					tiles.append(tile_id)
 
-		print "append: point", point, tiles	
 		for tile_id in tiles:
 			pts = bytile.setdefault(tile_id, [])
-			pts.append(point)
+			pts.append([ptnum, point])
 			tex = self.cl_curve.tile_by_pos.get(tile_id)
 			if tex is not None:
 				tex.invalidate()
