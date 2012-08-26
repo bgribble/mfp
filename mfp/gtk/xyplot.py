@@ -188,6 +188,7 @@ class MarkStyler (object):
 		self.col_a = 255
 		self.shape = "dot"
 		self.size = 1.0
+		self.stroke_style = None
 		self.fill = True
 		self.size_elt = None
 		self.alpha_elt = None
@@ -240,8 +241,10 @@ class MarkStyler (object):
 		ctx.line_to(point[0], point[1] - self.size)
 
 	def stroke(self, ctx, pt_1, pt_2):
-		if self.stroke == "solid":
-			pass
+		if self.stroke_style == "solid":
+			ctx.move_to(pt_1[0], pt_1[1])
+			ctx.line_to(pt_2[0], pt_2[1])
+			ctx.stroke()
 
 	def mark(self, ctx, point):
 		ctx.set_source_rgba(self.col_r, self.col_g, self.col_b, self.col_a)
@@ -353,8 +356,9 @@ class XYPlot (clutter.Group):
 				elif k == "color":
 					marker.set_color(v)
 				elif k == "shape":
-					print "Assigning shape", marker, v
 					marker.shape = str(v)
+				elif k == "stroke_style":
+					marker.stroke_style = str(v)
 
 	def pt_pos(self, p):
 		np = [(p[0] - self.x_min)*float(self.cl_field_w)/(self.x_max - self.x_min),
@@ -428,6 +432,17 @@ class XYPlot (clutter.Group):
 			ctx.restore()
 
 	def draw_field_cb(self, texture, ctxt, px_min, px_max):
+		def stroke_to(styler, curve, px, ptnum, delta):
+			points = self.points.get(curve)
+			dst_ptnum = ptnum + delta
+			if dst_ptnum < 0 or dst_ptnum > points[-1][0]:
+				return
+			dst_num, dst_pt = points[dst_ptnum]
+			dst_px = self.pt2px(dst_pt)
+			dst_px[0] -= px_min[0]
+			dst_px[1] -= px_min[1]
+			styler.stroke(ctxt, dst_px, px)
+
 		for curve in self.points:
 			styler = self.style.get(curve)
 			if styler is None:
@@ -444,9 +459,23 @@ class XYPlot (clutter.Group):
 				pc[0] -= px_min[0]
 				pc[1] -= px_min[1]
 				styler.mark(ctxt, pc)
+				if styler.stroke_style:
+					stroke_to(styler, curve, pc, ptnum, -1)
+			if styler.stroke_style:
+				ptnum, p = points[-1]
+				pc = self.pt2px(p)
+				pc[0] -= px_min[0]
+				pc[1] -= px_min[1]	
+				stroke_to(styler, curve, pc, ptnum, 1)
 		ctxt.stroke()
 
 	def append(self, point, curve=0):
+		tile_size = self.cl_curve.tile_size
+
+		def tile_id(point):
+			return (int(math.floor(point[0] / tile_size)*tile_size),
+				int(math.floor(point[1] / tile_size)*tile_size))
+
 		px = self.pt2px(point)
 
 		pts = self.points.setdefault(curve, [])
@@ -460,16 +489,19 @@ class XYPlot (clutter.Group):
 			style = self.style[curve] = MarkStyler()
 		
 		markradius = style.size
-		tile_size = self.cl_curve.tile_size
 
 		for dx in [-markradius, markradius ]:
 			for dy in [-markradius, markradius]:
 				x = px[0] + dx
 				y = px[1] + dy
-				tile_id = (int(math.floor(x / tile_size)*tile_size), 
-						   int(math.floor(y / tile_size)*tile_size)) 
-				if tile_id not in tiles:
-					tiles.append(tile_id)
+				tid = tile_id((x,y))
+				if tid not in tiles:
+					tiles.append(tid)
+		if style.stroke_style and ptnum > 0:
+			prev_pt = pts[ptnum-1][1]
+			tid = tile_id(self.pt2px(prev_pt))
+			if tid not in tiles:
+				tiles.append(tid)
 
 		for tile_id in tiles:
 			pts = bytile.setdefault(tile_id, [])
@@ -501,6 +533,7 @@ if __name__ == "__main__":
 	stg.set_size(600, 400)
 
 	x = XYPlot(600, 400)
+	x.set_style({0: dict(stroke_style="solid")})
 	x.show()
 	stg.add_actor(x)
 	stg.show()	
