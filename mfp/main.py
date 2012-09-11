@@ -111,8 +111,9 @@ class MFPApp (object):
 		MFPCommand.local = True
 
 		# dsp and gui processes
-		self.dsp_process = RPCWorker("mfp_dsp", dsp_init)
-		self.dsp_process.serve(DSPObject)
+		if not MFPApp.no_dsp:
+			self.dsp_process = RPCWorker("mfp_dsp", dsp_init)
+			self.dsp_process.serve(DSPObject)
 		
 		if not MFPApp.no_gui:
 			self.gui_process = RPCWorker("mfp_gui", gui_init)
