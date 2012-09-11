@@ -1,6 +1,9 @@
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef MFP_USE_SSE
 #include <x86intrin.h>
+#endif
 #include <glib.h>
 #include <string.h>
 
@@ -13,7 +16,11 @@ mfp_block_new(int blocksize)
 {
 	mfp_block * b = g_malloc(sizeof(mfp_block));
 	gpointer buf;
+
+#ifdef MFP_USE_SSE
 	posix_memalign(&buf, 16, (blocksize/4 * sizeof(__v4sf)));
+#endif
+
 	mfp_block_init(b, buf, blocksize);
 	return b;
 }
@@ -68,6 +75,7 @@ mfp_block_resize(mfp_block * in, int newsize)
 int
 mfp_block_const_mul(mfp_block * in, mfp_sample constant, mfp_block * out) 
 {
+#ifdef MFP_USE_SSE 
 	__v4sf cval, ival;
 	__v4sf * iptr, * optr, * iend;
 	mfp_sample * uiptr, *uoptr, *uiend;
@@ -94,6 +102,17 @@ mfp_block_const_mul(mfp_block * in, mfp_sample constant, mfp_block * out)
 			uoptr += 4;
 		}
 	}
+#else
+	mfp_sample * iptr, * optr, *iend;
+	iptr = in->data;
+	iend = in->data + in->blocksize;
+	optr = out->data;
+	for(; iptr < iend; iptr++) {
+		*optr = *iptr * constant;
+		optr++;
+	}
+#endif
+
 	return 1;
 }
 
@@ -101,6 +120,7 @@ mfp_block_const_mul(mfp_block * in, mfp_sample constant, mfp_block * out)
 int
 mfp_block_const_add(mfp_block * in, mfp_sample constant, mfp_block * out) 
 {
+#ifdef MFP_USE_SSE
 	__v4sf cval, ival, oval;
 	__v4sf * iptr, * optr, * iend;
 	mfp_sample * uiptr, *uoptr, *uiend;
@@ -128,6 +148,18 @@ mfp_block_const_add(mfp_block * in, mfp_sample constant, mfp_block * out)
 			uoptr += 4;
 		}
 	}
+
+#else
+	mfp_sample * iptr, * optr, * iend;
+	iptr = in->data;
+	iend = in->data + in->blocksize;
+	optr = out->data;
+	for(; iptr < iend; iptr++) {
+		*optr = *iptr + constant;
+		optr++;
+	}
+#endif
+
 	return 1;
 }
 
@@ -153,6 +185,7 @@ mfp_block_zero(mfp_block * b)
 int
 mfp_block_fill(mfp_block * in, mfp_sample constant) 
 {
+#ifdef MFP_USE_SSE
 	int loc = 0;
 	int end = in->blocksize;
 	__v4sf cval = (__v4sf) { constant, constant, constant, constant }; 
@@ -160,12 +193,21 @@ mfp_block_fill(mfp_block * in, mfp_sample constant)
 	for(; loc < end; loc+=4) {
 		__builtin_ia32_storeups(in->data + loc, cval);
 	}
+#else
+	mfp_sample * iptr, * iend;
+	iptr = in->data;
+	iend = in->data + in->blocksize;
+	for(; iptr < iend; iptr++) {
+		*iptr = constant;
+	}
+#endif
 	return 1;
 }
 
 int
 mfp_block_fmod(mfp_block * in, mfp_sample modulus, mfp_block * out) 
 {
+#ifdef MFP_USE_SSE
 	int loc = 0;
 	int end = in->blocksize;
 	__v4sf cval = (__v4sf) { modulus, modulus, modulus, modulus }; 
@@ -181,12 +223,23 @@ mfp_block_fmod(mfp_block * in, mfp_sample modulus, mfp_block * out)
 		xmm0 = xmm0 - xmm1;
 		*(__v4sf *)(out->data + loc) = xmm0;
 	}
+#else
+	mfp_sample * iptr, * optr, * iend;
+	iptr = in->data;
+	iend = in->data + in->blocksize;
+	optr = out->data;
+	for(; iptr < iend; iptr++) {
+		*optr = fmodf(*iptr, modulus);
+		optr++;
+	}
+#endif
 	return 1;
 }
 
 int
 mfp_block_mac(mfp_block * in_1, mfp_block * in_2, mfp_block * in_3, mfp_block * out)
 {
+#ifdef MFP_USE_SSE
 	int loc = 0;
 	int end = in_1->blocksize;
 	__v4sf v0, v1, v2, v3;
@@ -211,23 +264,28 @@ mfp_block_mac(mfp_block * in_1, mfp_block * in_2, mfp_block * in_3, mfp_block * 
 			__builtin_ia32_storeups(out->data + loc, v0 + v1*v2);
 		}
 	}
-
-	return 1;
-}
-
-int
-mfp_block_trunc(mfp_block * in, mfp_block * out) 
-{
-	int loc = 0;
-	int end = in->blocksize;
-	__v4sf ftmp;
-	__v4si itmp;
-	for(; loc < end; loc+=4) {
-		ftmp = __builtin_ia32_loadups(in->data+loc);
-		itmp = __builtin_ia32_cvttps2dq(ftmp);
-		ftmp = __builtin_ia32_cvtdq2ps(itmp);
-		__builtin_ia32_storeups(out->data + loc, ftmp); 
+#else
+	mfp_sample * i1, * i2, * i3, *optr, * iend;
+	i1 = in_1->data;
+	i2 = in_2->data;
+	i3 = in_3->data;
+	iend = in_1->data + in_1->blocksize;
+	optr = out->data;
+	if (in_3 != NULL) {
+		for(; i1 < iend; i1++) {
+			*optr = *optr + *i1 * *i2 * *i3;
+			i2++;
+			i3++;			
+		}
 	}
+	else {
+		for(; i1 < iend; i1++) {
+			*optr = *optr + *i1 * *i2 ;
+			i2++;
+		}
+
+	}
+#endif
 	return 1;
 }
 
@@ -241,6 +299,7 @@ mfp_block_copy(mfp_block * in, mfp_block * out)
 	return 1;
 }
 
+#ifdef MFP_USE_SSE
 typedef float fv4[4] __attribute__ ((aligned(16)));
 typedef union {
 	__v4sf v;
@@ -255,10 +314,12 @@ print_v4(char * msg, __v4sf val)
 	
 	printf("%s: %f %f %f %f\n", msg, tt.f[0], tt.f[1], tt.f[2], tt.f[3]);
 }
+#endif
 
 mfp_sample
 mfp_block_ramp(mfp_block * out, mfp_sample initval, mfp_sample incr)
 {
+#ifdef MFP_USE_SSE
 	float * outptr, * endptr;
 	__v4sf xmm0, xmm1;
 
@@ -275,11 +336,23 @@ mfp_block_ramp(mfp_block * out, mfp_sample initval, mfp_sample incr)
 		xmm1 = __builtin_ia32_shufps(xmm1, xmm1, 0xff);
 	}
 	return ((float *)&xmm1)[0];
+#else
+	mfp_sample * optr = out->data, * iend;
+	mfp_sample scratch = initval;
+	optr = out->data;
+	iend = out->data + out->blocksize;
+	for(; optr < iend; optr++) {
+		*optr = scratch;
+		scratch += incr;
+	}
+	return scratch;
+#endif
 }
 
-mfp_sample 
+mfp_sample
 mfp_block_prefix_sum(mfp_block * in, mfp_sample scale, mfp_sample initval, mfp_block * out)
 {
+#ifdef MFP_USE_SSE
 	float * inptr, * outptr, * endptr;
 	fv4 scratch = { 0.0, 0.0, 0.0, 0.0 };
 	__v4sf xmm0, xmm1, xmm2;
@@ -326,11 +399,24 @@ mfp_block_prefix_sum(mfp_block * in, mfp_sample scale, mfp_sample initval, mfp_b
 	}
 	*(__v4sf *)&scratch = xmm1;
 	return scratch[0];
+#else
+	mfp_sample * iptr, * optr, * iend, accum=initval;
+	iptr = in->data;
+	iend = in->data + in->blocksize;
+	optr = out->data;
+	for(; iptr < iend; iptr++) {
+		accum += *iptr * scale;
+		*optr = accum; 
+		optr++;
+	}
+	return accum;
+#endif
 }
 
 int
 mfp_block_mul(mfp_block * in_1, mfp_block * in_2, mfp_block * out)
 {
+#ifdef MFP_USE_SSE
 	int loc = 0;
 	int end = in_1->blocksize;	
 	__v4sf xmm0, xmm1;
@@ -341,13 +427,24 @@ mfp_block_mul(mfp_block * in_1, mfp_block * in_2, mfp_block * out)
 		xmm0 = xmm0 * xmm1;
 		*(__v4sf *)(out->data + loc) = xmm0;
 	}
+#else
+	mfp_sample * i1, * i2, *optr, * iend;
+	i1 = in_1->data;
+	i2 = in_2->data;
+	iend = in_1->data + in_1->blocksize;
+	optr = out->data;
+	for(; i1 < iend; i1++) {
+		*optr =  *i1 * *i2;
+		i2++;
+	}
+#endif
 	return 1;
-
 }
 
 int
 mfp_block_add(mfp_block * in_1, mfp_block * in_2, mfp_block * out)
 {
+#ifdef MFP_USE_SSE
 	int loc = 0;
 	int end = in_1->blocksize;	
 	__v4sf xmm0, xmm1;
@@ -358,6 +455,17 @@ mfp_block_add(mfp_block * in_1, mfp_block * in_2, mfp_block * out)
 		xmm0 = xmm0 + xmm1;
 		*(__v4sf *)(out->data + loc) = xmm0;
 	}
+#else
+	mfp_sample * i1, * i2, *optr, * iend;
+	i1 = in_1->data;
+	i2 = in_2->data;
+	iend = in_1->data + in_1->blocksize;
+	optr = out->data;
+	for(; i1 < iend; i1++) {
+		*optr =  *i1 + *i2;
+		i2++;
+	}
+#endif
 	return 1;
 
 }

@@ -16,6 +16,8 @@ def pkgconf_libs(pkg):
 	return [ f.strip() for f in shcall("pkg-config --libs %s" % pkg).split('-l')
              if f ]
 	
+x86_args = ['-march=atom', '-mstackrealign', '-mpreferred-stack-boundary=4']
+platform_args = []
 
 mfp_c_sources = [
 	'mfp_pyglue.c', 'mfp_jack.c', 'mfp_dsp.c', 'mfp_proc.c', 'mfp_block.c',
@@ -25,12 +27,11 @@ mfp_c_sources = [
 ]
 
 mfpdsp = Extension('mfpdsp',
-					libraries = ['jack', 'rt'] + pkgconf_libs("glib-2.0"),
-				    extra_compile_args = ['-march=atom', '-mstackrealign',
-							  '-mpreferred-stack-boundary=4', '-g' ],
-				    include_dirs = pkgconf_cflags("glib-2.0"),
-                    sources = [ 'mfpdsp/' + f for f in mfp_c_sources ]
-				  )
+		libraries = ['jack', 'rt'] + pkgconf_libs("glib-2.0"),
+		extra_compile_args = platform_args + [ '-g' ],
+		include_dirs = pkgconf_cflags("glib-2.0"),
+		sources = [ 'mfpdsp/' + f for f in mfp_c_sources ]
+		)
 
 setup (name = 'mfp',
        version = '0.01',
