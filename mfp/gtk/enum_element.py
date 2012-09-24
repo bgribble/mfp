@@ -26,16 +26,13 @@ class EnumElement (PatchElement):
 		self.update_required = True
 
 		# create elements
-		self.actor = clutter.Group()
-		self.texture = clutter.CairoTexture(35, 20)
+		self.texture = clutter.CairoTexture.new(35, 20)
+		self.texture.connect("draw", self.draw_cb)
 		self.label = clutter.Text()
 
-		self.actor.set_reactive(True)
-		self.actor.add_actor(self.texture)
-		self.actor.add_actor(self.label)
-
-		# configure rectangle box 
-		self.draw_border()
+		self.set_reactive(True)
+		self.add_actor(self.texture)
+		self.add_actor(self.label)
 
 		# configure label
 		self.label.set_position(4, 1)
@@ -50,16 +47,18 @@ class EnumElement (PatchElement):
 
 		# add components to stage 
 		self.stage.register(self)
+		self.texture.invalidate()
 
-	def draw_border(self):
+	def draw_cb(self, texture, ct):
 		w = self.texture.get_property('surface_width')-2
 		h = self.texture.get_property('surface_height')-2
 		self.texture.clear()
-		ct = self.texture.cairo_create()
 		if self.selected: 
-			ct.set_source_color(self.stage.color_selected)
+			color = self.stage.color_selected
 		else:
-			ct.set_source_color(self.stage.color_unselected)
+			color = self.stage.color_unselected
+
+		ct.set_source_rgba(color.r, color.g, color.b, color.a)
 		ct.translate(0.5, 0.5)
 		ct.move_to(1,1)
 		ct.line_to(1, h)
@@ -81,9 +80,10 @@ class EnumElement (PatchElement):
 			new_w = max(35, lwidth + 20)
 
 		if new_w is not None:
+			self.set_size(new_w, self.texture.get_height())
 			self.texture.set_size(new_w, self.texture.get_height())
 			self.texture.set_surface_size(int(new_w), self.texture.get_property('surface_height'))
-			self.draw_border()
+			self.texture.invalidate()
 
 	def create_obj(self):
 		if self.obj_id is None:
@@ -97,7 +97,7 @@ class EnumElement (PatchElement):
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
-		self.actor.set_position(x, y)
+		self.set_position(x, y)
 
 		for c in self.connections_out:
 			c.draw()
@@ -132,11 +132,11 @@ class EnumElement (PatchElement):
 
 	def select(self):
 		self.selected = True 
-		self.draw_border()
+		self.texture.invalidate()
 
 	def unselect(self):
 		self.selected = False 
-		self.draw_border()
+		self.texture.invalidate()
 
 	def delete(self):
 		for c in self.connections_out+self.connections_in:

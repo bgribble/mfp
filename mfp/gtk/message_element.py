@@ -24,16 +24,15 @@ class MessageElement (PatchElement):
 		self.connections_in = [] 
 
 		# create elements
-		self.actor = clutter.Group()
 		self.texture = clutter.CairoTexture.new(35,25)
 		self.label = clutter.Text()
 
 		self.texture.set_size(35, 25)
 		self.texture.connect("draw", self.draw_cb)
 
-		self.actor.set_reactive(True)
-		self.actor.add_actor(self.texture)
-		self.actor.add_actor(self.label)
+		self.set_reactive(True)
+		self.add_actor(self.texture)
+		self.add_actor(self.label)
 
 		self.texture.invalidate()
 
@@ -43,15 +42,12 @@ class MessageElement (PatchElement):
 		self.label.connect('text-changed', self.text_changed_cb)
 
 		# click handler 
-		self.actor.connect('button-press-event', self.button_press_cb)
+		self.connect('button-press-event', self.button_press_cb)
 		
 		self.move(x, y)
 
 		# request update when value changes
 		self.update_required = True
-
-		# add components to stage 
-		self.stage.register(self)
 
 	def draw_cb(self, texture, ct):
 		w = self.texture.get_property('surface_width')-2
@@ -101,6 +97,7 @@ class MessageElement (PatchElement):
 			new_w = max(35, lwidth + 20)
 
 		if new_w is not None:
+			self.set_size(new_w, self.texture.get_height())
 			self.texture.set_size(new_w, self.texture.get_height())
 			self.texture.set_surface_size(int(new_w), self.texture.get_property('surface_height'))
 			self.texture.invalidate()	
@@ -108,7 +105,7 @@ class MessageElement (PatchElement):
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
-		self.actor.set_position(x, y)
+		self.set_position(x, y)
 
 		for c in self.connections_out:
 			c.draw()

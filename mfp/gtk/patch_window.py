@@ -81,16 +81,16 @@ class PatchWindow(object):
 
 	def register(self, element):
 		self.objects.append(element)
-		self.input_mgr.event_sources[element.actor] = element 
-		self.group.add_actor(element.actor)
+		self.input_mgr.event_sources[element] = element 
+		self.group.add_actor(element)
 		if element.obj_id is not None:
 			element.send_params()
 
 	def unregister(self, element):
 		print "unregister:", element, self.objects
 		self.objects.remove(element)
-		del self.input_mgr.event_sources[element.actor]
-		self.group.remove_actor(element.actor)
+		del self.input_mgr.event_sources[element]
+		self.group.remove_actor(element)
 		# FIXME hook
 		SelectMRUMode.forget(element)
 

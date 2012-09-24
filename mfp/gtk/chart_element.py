@@ -27,22 +27,20 @@ class ChartElement (PatchElement):
 		PatchElement.__init__(self, window, x, y)
 		
 		# display elements 
-		self.actor = None
 		self.rect = None
 		self.label = None
 		self.label_text = None 
 		self.xyplot = None
+
+		# grab params for creation
 
 		# create display 
 		self.create_display(self.INIT_WIDTH+4, self.INIT_HEIGHT+self.LABEL_SPACE+4)
 		self.move(x, y)
 		self.update()
 
-		# add components to stage 
-		self.stage.register(self)
-
 	def create_display(self, width, height):
-		self.actor = clutter.Group()
+		print "chart_element: create_display", width, height
 		self.rect = clutter.Rectangle()
 		self.label = clutter.Text()
 
@@ -61,12 +59,13 @@ class ChartElement (PatchElement):
 		self.label.set_reactive(False)
 
 		# chart
-		self.xyplot = XYPlot(self.actor, self.INIT_WIDTH, self.INIT_HEIGHT)
+		self.xyplot = XYPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
 		self.xyplot.set_position(3, self.LABEL_SPACE)
 
-		self.actor.add_actor(self.label)
-		self.actor.add_actor(self.rect)
-		self.actor.set_reactive(True)
+		self.add_actor(self.xyplot)
+		self.add_actor(self.label)
+		self.add_actor(self.rect)
+		self.set_reactive(True)
 
 	def update(self):
 		self.draw_ports()
@@ -115,7 +114,7 @@ class ChartElement (PatchElement):
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
-		self.actor.set_position(x, y)
+		clutter.Group.set_position(self, x, y)
 
 		for c in self.connections_out:
 			c.draw()
@@ -124,12 +123,15 @@ class ChartElement (PatchElement):
 			c.draw()
 
 	def set_size(self, w, h):
+		print "chart_element: set_size", w, h
 		self.size_w = w
 		self.size_h = h 
 
 		self.rect.set_size(w, h)
 		self.rect.set_position(0, 0)
 		self.xyplot.set_size(w-4, h-self.LABEL_SPACE-4)
+
+		clutter.Group.set_size(self, w, h)
 
 		self.draw_ports()
 
@@ -171,7 +173,6 @@ class ChartElement (PatchElement):
 			for c in newpts:
 				for p in newpts[c]:
 					self.xyplot.append(p, c)
-			self.xyplot.update()
 
 		s = params.get("style")
 		if s:

@@ -15,28 +15,25 @@ class TextElement (PatchElement):
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 		self.text = ''
-		self.actor = clutter.Text()
-		self.label = self.actor 
+		self.label = clutter.Text()
 
 		# configure label
-		self.actor.set_reactive(True)
-		self.actor.set_color(window.color_unselected) 
+		self.label.set_reactive(True)
+		self.label.set_color(window.color_unselected) 
+		self.add_actor(self.label)
 
-		#self.actor.connect('text-changed', self.text_changed_cb)
+		#self.label.connect('text-changed', self.text_changed_cb)
 		self.move(x, y)
-		
-		# add to stage 
-		self.stage.register(self) 
 
 	def unselect(self, *args):
-		self.actor.set_color(self.stage.color_unselected) 
-		self.text = self.actor.get_text()
+		self.label.set_color(self.stage.color_unselected) 
+		self.text = self.label.get_text()
 
 	def label_edit_start(self):
 		pass
 
 	def label_edit_finish(self, *args):
-		self.message_text = self.actor.get_text()
+		self.message_text = self.label.get_text()
 		if self.obj_id is None:
 			self.create("var", self.message_text)
 		if self.obj_id is None:
@@ -46,7 +43,7 @@ class TextElement (PatchElement):
 			self.draw_ports()
 
 	def select(self, *args):
-		self.actor.set_color(self.stage.color_selected) 
+		self.label.set_color(self.stage.color_selected) 
 	
 	def make_edit_mode(self):
 		return LabelEditMode(self.stage, self, self.label, multiline=True, markup=True)

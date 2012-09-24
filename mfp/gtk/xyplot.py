@@ -7,6 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter as clutter
+import glib
 import gobject
 import cairo
 import math
@@ -74,7 +75,7 @@ class Quilt (clutter.Group):
 	def set_size(self, width, height):
 		self.viewport_width = width
 		self.viewport_height = height
-		Group.set_size(self, width, height)
+		clutter.Group.set_size(self, width, height)
 		self.rebuild_quilt()
 
 	def idle_cb(self, *args):
@@ -195,7 +196,7 @@ class MarkStyler (object):
 
 	def set_color(self, newcolor):
 		r = g = b = 0
-		a = 255
+		a = 1.0
 
 		if isinstance(newcolor, str):
 			c = clutter.Color()
@@ -241,19 +242,27 @@ class MarkStyler (object):
 		ctx.line_to(point[0], point[1] - self.size)
 
 	def stroke(self, ctx, pt_1, pt_2):
+		def halfbrite(c):
+			return c + (1.0-c)/2.0
+
 		if self.stroke_style == "solid":
+			ctx.set_source_rgba(halfbrite(self.col_r), halfbrite(self.col_g), 
+								halfbrite(self.col_b), self.col_a)
+			ctx.set_line_width(0.3)
 			ctx.move_to(pt_1[0], pt_1[1])
 			ctx.line_to(pt_2[0], pt_2[1])
 			ctx.stroke()
 
 	def mark(self, ctx, point):
 		ctx.set_source_rgba(self.col_r, self.col_g, self.col_b, self.col_a)
+		ctx.set_line_width(0.6)
 		if self.shape == "dot":
 			self.mark_dot(ctx, point)
 		elif self.shape == "square":
 			self.mark_square(ctx, point)
 		elif self.shape == "triangle":
 			self.mark_triangle(ctx, point)
+		ctx.stroke()
 
 class XYPlot (clutter.Group):
 	MARGIN_LEFT = 30 
@@ -453,21 +462,20 @@ class XYPlot (clutter.Group):
 				return
 
 			points = self.points_by_tile[curve].get(tile_id)	
-		
-			for ptnum, p in points:
-				pc = self.pt2px(p)
-				pc[0] -= px_min[0]
-				pc[1] -= px_min[1]
-				styler.mark(ctxt, pc)
+			if points is not None:	
+				for ptnum, p in points:
+					pc = self.pt2px(p)
+					pc[0] -= px_min[0]
+					pc[1] -= px_min[1]
+					styler.mark(ctxt, pc)
+					if styler.stroke_style:
+						stroke_to(styler, curve, pc, ptnum, -1)
 				if styler.stroke_style:
-					stroke_to(styler, curve, pc, ptnum, -1)
-			if styler.stroke_style:
-				ptnum, p = points[-1]
-				pc = self.pt2px(p)
-				pc[0] -= px_min[0]
-				pc[1] -= px_min[1]	
-				stroke_to(styler, curve, pc, ptnum, 1)
-		ctxt.stroke()
+					ptnum, p = points[-1]
+					pc = self.pt2px(p)
+					pc[0] -= px_min[0]
+					pc[1] -= px_min[1]	
+					stroke_to(styler, curve, pc, ptnum, 1)
 
 	def append(self, point, curve=0):
 		tile_size = self.cl_curve.tile_size
@@ -516,9 +524,6 @@ class XYPlot (clutter.Group):
 		elif curve is not None and self.points.has_key(curve):
 			del self.points[curve]
 		self.cl_curve.clear()
-
-	def update(self):
-		self.cl_curve.invalidate()
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter as clutter
 from mfp import MFPGUI 
 
-class PatchElement (object):
+class PatchElement (clutter.Group):
 	'''
 	Parent class of elements represented in the patch window 
 	'''
@@ -34,7 +34,6 @@ class PatchElement (object):
 
 		# Clutter objects 
 		self.stage = window
-		self.actor = None 
 		self.port_elements = {}
 
 		# UI state 
@@ -47,6 +46,10 @@ class PatchElement (object):
 		self.edit_mode = None
 		self.control_mode = None
 
+		# create placeholder group and add to stage 
+		clutter.Group.__init__(self)
+		self.stage.register(self)
+
 	def drag_start(self, x, y):
 		self.drag_x = x - self.position_x
 		self.drag_y = y - self.position_y
@@ -54,14 +57,13 @@ class PatchElement (object):
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
-		self.actor.set_position(x, y)
+		self.set_position(x, y)
 
 	def drag(self, dx, dy):
 		self.move(self.position_x + dx, self.position_y + dy)
 
 	def delete(self):
 		self.stage.unregister(self)
-		self.actor = None
 		if self.obj_id is not None:
 			MFPGUI().mfp.delete(self.obj_id)
 			self.obj_id = None
@@ -101,8 +103,8 @@ class PatchElement (object):
 		if pobj:
 			return pobj.get_position()
 
-		w = self.actor.get_width()
-		h = self.actor.get_height()
+		w = self.get_width()
+		h = self.get_height()
 
 		if port_dir == PatchElement.PORT_IN:
 			if self.num_inlets < 2:
@@ -128,7 +130,7 @@ class PatchElement (object):
 				pobj.set_color(self.stage.color_unselected)
 				pobj.set_size(self.porthole_width, self.porthole_height)
 				pobj.set_reactive(False)
-				self.actor.add_actor(pobj)
+				self.add_actor(pobj)
 				self.port_elements[pid] = pobj
 				print "   creating", pid, pobj
 			pobj.set_position(px, py)

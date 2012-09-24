@@ -22,7 +22,6 @@ class ProcessorElement (PatchElement):
 		PatchElement.__init__(self, window, x, y)
 		
 		# display elements 
-		self.actor = None
 		self.rect = None
 		self.label = None
 		self.label_text = None 
@@ -33,11 +32,7 @@ class ProcessorElement (PatchElement):
 		self.move(x, y)
 		self.update()
 
-		# add components to stage 
-		self.stage.register(self)
-
 	def create_display(self):
-		self.actor = clutter.Group()
 		self.rect = clutter.Rectangle()
 		self.label = clutter.Text()
 
@@ -53,13 +48,12 @@ class ProcessorElement (PatchElement):
 		self.label.connect('text-changed', self.label_changed_cb)
 		self.label.set_reactive(False)
 
-		self.actor.add_actor(self.rect)
-		self.actor.add_actor(self.label)
-		self.actor.set_reactive(True)
+		self.add_actor(self.rect)
+		self.add_actor(self.label)
+		self.set_reactive(True)
 
 	def update(self):
 		# FIXME not-created style (dashed lines?)
-
 		self.draw_ports()
 
 	def get_label(self):
@@ -109,7 +103,7 @@ class ProcessorElement (PatchElement):
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
-		self.actor.set_position(x, y)
+		self.set_position(x, y)
 
 		for c in self.connections_out:
 			c.draw()
@@ -120,7 +114,8 @@ class ProcessorElement (PatchElement):
 	def set_size(self, w, h):
 		self.size_w = w
 		self.size_h = h 
-
+	
+		clutter.Group.set_size(self, w, h)	
 		self.rect.set_size(w, h)
 		self.rect.set_position(0, 0)
 

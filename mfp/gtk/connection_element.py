@@ -8,7 +8,7 @@ class ConnectionElement(PatchElement):
 	def __init__(self, window, obj_1, port_1, obj_2, port_2):
 		PatchElement.__init__(self, window, obj_1.position_x, obj_1.position_y)
 		
-		self.actor = clutter.Rectangle()
+		self.rect = clutter.Rectangle()
 		self.obj_1 = obj_1
 		self.port_1 = port_1
 		self.obj_2 = obj_2
@@ -17,17 +17,17 @@ class ConnectionElement(PatchElement):
 		self.width = None  
 		self.height = None 
 		
-		self.actor.set_color(window.color_unselected)
-		self.stage.register(self)
+		self.rect.set_color(window.color_unselected)
+		self.add_actor(self.rect)
 		self.draw()
 
 	def select(self):
 		self.selected = True 
-		self.actor.set_color(self.stage.color_selected)
+		self.rect.set_color(self.stage.color_selected)
 
 	def unselect(self):
 		self.selected = False 
-		self.actor.set_color(self.stage.color_unselected)
+		self.rect.set_color(self.stage.color_unselected)
 
 	def delete(self):
 		MFPGUI().mfp.disconnect(self.obj_1.obj_id, self.port_1, self.obj_2.obj_id, self.port_2)
@@ -47,7 +47,9 @@ class ConnectionElement(PatchElement):
 		self.height = ((p2[0]-p1[0])**2 + (p2[1] - p1[1])**2)**0.5
 		self.rotation = math.atan2(p1[0] - p2[0], p2[1]-p1[1]) * 180.0 / math.pi
 
-		self.actor.set_size(self.width, self.height)
-		self.actor.set_position(self.position_x, self.position_y)
-		self.actor.set_rotation(clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
+		self.set_size(self.width, self.height)
+		self.set_position(self.position_x, self.position_y)
+		self.set_rotation(clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
+
+		self.rect.set_size(self.width, self.height)
 
