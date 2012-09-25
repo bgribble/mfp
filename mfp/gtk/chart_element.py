@@ -35,7 +35,7 @@ class ChartElement (PatchElement):
 		# grab params for creation
 
 		# create display 
-		self.create_display(self.INIT_WIDTH+4, self.INIT_HEIGHT+self.LABEL_SPACE+4)
+		self.create_display(self.INIT_WIDTH+6, self.INIT_HEIGHT+self.LABEL_SPACE+4)
 		self.move(x, y)
 		self.update()
 
@@ -43,6 +43,9 @@ class ChartElement (PatchElement):
 		print "chart_element: create_display", width, height
 		self.rect = clutter.Rectangle()
 		self.label = clutter.Text()
+
+		# group
+		clutter.Group.set_size(self, width, height)
 
 		# rectangle box 
 		self.rect.set_border_width(2)

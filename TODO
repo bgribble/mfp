@@ -7,17 +7,14 @@ GUI elements: entry, slider, meter
 External elements: OSC, LADSPA hosts, MIDI i/o
 
 Architectural issues: 
- * Gateways between signal and control (snapshot~)
  * Signal-processing domain issues (can't route fft~ to dac~)
  * Structure of patches/abstractions 
   * Snapshots of all parameters 
   * "Macro" expansion of patches? 
- * use SSE instructions where possible 
- * nonfloat parameters to DSP objects (line~) 
 
 Basics: 
  * isearch mode for element selection 
- * osc~ should use cubic estimator
+ * undo 
  * Selection management (multi select)
  * cut and paste 
  * Driving creation from mfp master 
@@ -30,6 +27,10 @@ Bugs:
  * [route] allows changing number of outputs but nothing is propagated to the 
    GUI
  * Rebuilding [metro] to [metro 200] in gui doesn't set the time 
+ * Numeric entry doesn't update GUI on message 
+ * Numeric entry doesn't go to next object with TAB 
+ * Numeric entry can't be grabbed to drag in either major mode 
+ * ScrollEvent does not have scroll_direction (scrollwheel) 
 
 Debug mode: 
  * every processor has a debug port on the side 

@@ -58,7 +58,7 @@ class EnumElement (PatchElement):
 		else:
 			color = self.stage.color_unselected
 
-		ct.set_source_rgba(color.r, color.g, color.b, color.a)
+		ct.set_source_rgba(color.red, color.green, color.blue)
 		ct.translate(0.5, 0.5)
 		ct.move_to(1,1)
 		ct.line_to(1, h)
