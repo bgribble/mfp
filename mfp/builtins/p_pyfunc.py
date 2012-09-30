@@ -117,9 +117,17 @@ def register():
 	mk_binary(operator.div, "/")
 	mk_binary(operator.mod, "%")
 
-	mk_unary(math.exp, "exp")
 	mk_unary(math.log, "log")
+	mk_unary(math.exp, "exp")
+	mk_unary(math.log10, "log10")
 	mk_binary(math.pow, "pow")
+
+	mk_unary(math.sin, "sin")
+	mk_unary(math.cos, "cos")
+	mk_unary(math.tan, "tan")
+	mk_unary(math.acos, "acos")
+	mk_unary(math.asin, "asin")
+	mk_binary(math.atan2, "atan2")
 
 	mk_binary(operator.gt, ">")
 	mk_binary(operator.lt, "<")

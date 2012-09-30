@@ -100,6 +100,7 @@ class Quilt (clutter.Group):
 		self.tile_animation.connect_after("completed", self.reanimate)
 
 	def rebuild_quilt(self, flush=False):
+
 		def lbound(val):
 			return int(math.floor(val / float(self.tile_size)) * self.tile_size)
 
@@ -113,7 +114,6 @@ class Quilt (clutter.Group):
 			min_x -= int(self.viewport_vx * self.VELOCITY_FUDGE)
 		elif self.viewport_vx > 0:
 			max_x += int(self.viewport_vx * self.VELOCITY_FUDGE)
-
 
 		min_y = lbound(self.viewport_y)
 		max_y = ubound(self.viewport_y + self.viewport_height)
@@ -173,7 +173,8 @@ class Quilt (clutter.Group):
 		# make sure tile allocation is correct
 		self.rebuild_quilt()
 
-		# invalidate all tiles 
+	def clear(self):
+		self.rebuild_quilt(flush=True)
 
 	def draw_cb(self, tex, ctx, *rest):
 		tileid = self.tile_reverse.get(tex)
@@ -396,6 +397,9 @@ class XYPlot (clutter.Group):
 			self.cl_yaxis_bg.set_viewport_origin(origin[0], origin[1], need_y_flush)
 
 		origin = self.pt2px((x_min, y_max))
+		if need_x_flush or need_y_flush:
+			self.reindex()
+
 		self.cl_curve.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
 
 	def set_style(self, style):
@@ -520,6 +524,18 @@ class XYPlot (clutter.Group):
 					stroke_to(styler, curve, pc, ptnum, 1)
 
 	def append(self, point, curve=0):
+		pts = self.points.setdefault(curve, [])
+		ptnum = len(pts)
+		pts.append([ptnum, point])
+
+		tiles = self.index_point(point, curve, ptnum)
+		for tile_id in tiles:
+			tex = self.cl_curve.tile_by_pos.get(tile_id)
+			if tex is not None:
+				tex.invalidate()
+
+
+	def index_point(self, point, curve, ptnum):
 		tile_size = self.cl_curve.tile_size
 
 		def tile_id(point):
@@ -528,16 +544,13 @@ class XYPlot (clutter.Group):
 
 		px = self.pt2px(point)
 
-		pts = self.points.setdefault(curve, [])
-		ptnum = len(pts)
-		pts.append([ptnum, point])
 		tiles = []
 
 		bytile = self.points_by_tile.setdefault(curve, {})
+		
 		style = self.style.get(curve)
 		if style is None:
 			style = self.style[curve] = MarkStyler()
-		
 		markradius = style.size
 
 		for dx in [-markradius, markradius ]:
@@ -547,6 +560,7 @@ class XYPlot (clutter.Group):
 				tid = tile_id((x,y))
 				if tid not in tiles:
 					tiles.append(tid)
+
 		if style.stroke_style and ptnum > 0:
 			prev_pt = pts[ptnum-1][1]
 			tid = tile_id(self.pt2px(prev_pt))
@@ -556,15 +570,24 @@ class XYPlot (clutter.Group):
 		for tile_id in tiles:
 			pts = bytile.setdefault(tile_id, [])
 			pts.append([ptnum, point])
-			tex = self.cl_curve.tile_by_pos.get(tile_id)
-			if tex is not None:
-				tex.invalidate()
 
+		return tiles 
+
+
+	def reindex(self):
+		self.points_by_tile = {} 
+		for curve, curvepoints in self.points.items():
+			for ptnum, point in curvepoints:
+				self.index_point(point, curve, ptnum)
+		
 	def clear(self, curve=None):
 		if curve is None:
 			self.points = {}
-		elif curve is not None and self.points.has_key(curve):
-			del self.points[curve]
+			self.points_by_tile = {} 
+		elif curve is not None:
+			if self.points.has_key(curve):
+				del self.points[curve]
+			self.reindex()	
 		self.cl_curve.clear()
 
 
