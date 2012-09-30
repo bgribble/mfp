@@ -74,7 +74,13 @@ class Chart (Processor):
 				instyle[k] = v
 
 		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
-	
+
+	def bounds(self, x_min, y_min, x_max, y_max):
+		self.gui_params['_chart_action'] = 'bounds'
+		self.gui_params['_chart_data'] = (x_min, y_min, x_max, y_max)
+		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+		self.finish_action()
+
 	def finish_action(self):
 		del self.gui_params['_chart_action']
 		del self.gui_params['_chart_data']

@@ -32,6 +32,12 @@ class ChartElement (PatchElement):
 		self.label_text = None 
 		self.xyplot = None
 
+		# display bounds 
+		self.x_min = 0.0
+		self.x_max = 6.28
+		self.y_min = -1.0
+		self.y_max = 1.0
+
 		# grab params for creation
 
 		# create display 
@@ -69,6 +75,17 @@ class ChartElement (PatchElement):
 		self.add_actor(self.label)
 		self.add_actor(self.rect)
 		self.set_reactive(True)
+
+	# methods useful for interaction
+	def set_bounds(self, x_min, y_min, x_max, y_max):
+		print "bounds:",  x_min, y_min, x_max, y_max
+		self.x_min = x_min
+		self.x_max = x_max
+		self.y_min = y_min
+		self.y_max = y_max
+
+		self.xyplot.set_bounds(x_min, y_min, x_max, y_max)
+	
 
 	def update(self):
 		self.draw_ports()
@@ -176,6 +193,9 @@ class ChartElement (PatchElement):
 			for c in newpts:
 				for p in newpts[c]:
 					self.xyplot.append(p, c)
+		elif action == "bounds":
+			bounds = params.get("_chart_data")
+			self.set_bounds(*bounds)
 
 		s = params.get("style")
 		if s:

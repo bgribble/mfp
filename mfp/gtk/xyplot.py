@@ -66,11 +66,11 @@ class Quilt (clutter.Group):
 
 			self.reanimate()
 
-	def set_viewport_origin(self, pos_x, pos_y):
+	def set_viewport_origin(self, pos_x, pos_y, flush=False):
 		self.tile_group.set_position(-pos_x, -pos_y)
 		self.viewport_x = pos_x
 		self.viewport_y = pos_y
-		self.rebuild_quilt()
+		self.rebuild_quilt(flush)
 
 	def set_size(self, width, height):
 		self.viewport_width = width
@@ -99,7 +99,7 @@ class Quilt (clutter.Group):
 													  [ target_x, target_y ])
 		self.tile_animation.connect_after("completed", self.reanimate)
 
-	def rebuild_quilt(self):
+	def rebuild_quilt(self, flush=False):
 		def lbound(val):
 			return int(math.floor(val / float(self.tile_size)) * self.tile_size)
 
@@ -129,9 +129,9 @@ class Quilt (clutter.Group):
 				needed[(x, y)] = True
 
 		# alloc_tiles will kick off the redraw process
-		self.alloc_tiles(needed)
+		self.alloc_tiles(needed, flush)
 
-	def alloc_tiles(self, needed):
+	def alloc_tiles(self, needed, flush=False):
 		garbage = self.gc_tiles(needed)
 		for pos in needed:
 			tile = self.tile_by_pos.get(pos)
@@ -141,6 +141,9 @@ class Quilt (clutter.Group):
 					garbage = garbage[1:]
 				else:
 					self.new_tile(pos)
+			elif flush:
+				tile.clear()
+				tile.invalidate()
 		
 	def gc_tiles(self, marked):
 		garbage = []
@@ -166,6 +169,12 @@ class Quilt (clutter.Group):
 		tile.clear()
 		tile.invalidate()
 			
+	def redraw(self):
+		# make sure tile allocation is correct
+		self.rebuild_quilt()
+
+		# invalidate all tiles 
+
 	def draw_cb(self, tex, ctx, *rest):
 		tileid = self.tile_reverse.get(tex)
 		pt_min = (tileid[0], tileid[1])
@@ -354,7 +363,40 @@ class XYPlot (clutter.Group):
 		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
 		self.cl_curve.set_size(self.cl_field_w, self.cl_field_h)
 
-		self.redraw_axes()
+		self.cl_xaxis_bg.redraw()
+		self.cl_yaxis_bg.redraw()
+		self.cl_curve.redraw()
+
+	def set_bounds(self, x_min, y_min, x_max, y_max):
+		if ((x_min == self.x_min) and (x_max == self.x_max) 
+			  and (y_min == self.y_min) and (y_max == self.y_max)):
+			return
+		
+		# something has changed, need to redraw mostly everything 
+
+		# if scale is changing, really need to redraw all
+		need_x_flush = need_y_flush = False 
+
+		if (x_max - x_min != self.x_max-self.x_min):
+			need_x_flush = True 
+
+		if (y_max - y_min != self.y_max-self.y_min):
+			need_y_flush = True
+
+		if ((x_min != self.x_min) or (x_max != self.x_max)):
+			self.x_min = x_min
+			self.x_max = x_max
+			origin = self.pt2px((x_min, 0))
+			self.cl_xaxis_bg.set_viewport_origin(origin[0], origin[1], need_x_flush)
+
+		if ((y_min != self.y_min) or (y_max != self.y_max)):
+			self.y_min = y_min
+			self.y_max = y_max
+			origin = self.pt2px((0, y_max))
+			self.cl_yaxis_bg.set_viewport_origin(origin[0], origin[1], need_y_flush)
+
+		origin = self.pt2px((x_min, y_max))
+		self.cl_curve.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
 
 	def set_style(self, style):
 		for inlet, istyle in style.items():
