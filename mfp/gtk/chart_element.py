@@ -196,6 +196,15 @@ class ChartElement (PatchElement):
 		elif action == "bounds":
 			bounds = params.get("_chart_data")
 			self.set_bounds(*bounds)
+		elif action == "roll":
+			start_x = params.get("_chart_data")
+			self.roll_set_position(start_x)
+			self.roll_start()
+		elif action == "stop":
+			self.roll_stop()
+		elif action == "reset":
+			start_x = params.get("_chart_data")
+			self.roll_set_position(start_x)
 
 		s = params.get("style")
 		if s:
