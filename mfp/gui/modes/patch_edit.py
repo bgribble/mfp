@@ -13,7 +13,7 @@ from ..processor_element import ProcessorElement
 from ..connection_element import ConnectionElement 
 from ..message_element import MessageElement
 from ..enum_element import EnumElement
-from ..chart_element import ChartElement
+from ..plot_element import PlotElement
 
 class PatchEditMode (InputMode):
 	def __init__(self, window):
@@ -29,7 +29,8 @@ class PatchEditMode (InputMode):
 		self.bind("t", lambda: self.window.add_element(TextElement), "patch-add-text")
 		self.bind("m", lambda: self.window.add_element(MessageElement), "patch-add-message")
 		self.bind("n", lambda: self.window.add_element(EnumElement), "patch-add-enum")
-		self.bind("s", lambda: self.window.add_element(ChartElement), "patch-add-scatter")
+		self.bind("p", lambda: self.window.add_element(PlotElement), "patch-add-plot")
+
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
 		self.bind("C-TAB", self.window.select_mru, "patch-select-mru")

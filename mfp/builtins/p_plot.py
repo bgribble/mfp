@@ -1,17 +1,19 @@
 #! /usr/bin/env python2.6
 '''
-p_chart.py: Stub for graphical chart I/O
+p_plot.py: Stub for graphical plot I/O
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-
+from datetime import datetime 
 from ..processor import Processor 
 from ..main import MFPApp
 from .. import Bang, Uninit 
 
-class Chart (Processor):
+class Plot (Processor):
 	def __init__(self, init_type, init_args):
 		self.points = {}
+		self.time_base = None
+
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs) > 0:
 			channels = initargs[0]
@@ -27,6 +29,9 @@ class Chart (Processor):
 		message.call(self)
 
 	def _time(self):
+		from datetime import datetime
+		if self.time_base is None:
+			return 0
 		return (datetime.now() - self.time_base).total_seconds()
 
 	def _chartconf(self, action, data=None):
@@ -36,6 +41,7 @@ class Chart (Processor):
 		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 		del self.gui_params['_chart_action']
 		del self.gui_params['_chart_data']
+		return True 
 	
 	def trigger(self):
 		points = {}
@@ -57,29 +63,31 @@ class Chart (Processor):
 			self._chartconf('add', points)
 
 	# methods that the object responds to 
-	def roll(self, **kwargs):
-		'''Start the chart roll function.'''
-		self._chartconf('roll', self._time())
+	def roll(self, *args, **kwargs):
+		'''Start the plot roll function.'''
+		if self.time_base is None:
+			self.time_base = datetime.now()
+		return self._chartconf('roll', self._time())
 
-	def stop(self, **kwargs):
-		'''Stop the chart roll'''
-		self._chartconf('stop', self._time())
+	def stop(self, *args, **kwargs):
+		'''Stop the plot roll'''
+		return self._chartconf('stop', self._time())
 
-	def reset(self, **kwargs):
+	def reset(self, *args, **kwargs):
 		'''Reset time base for items with no X'''
 		self.time_base = datetime.now()
-		self._chartconf('reset', self.time_base)
+		return self._chartconf('reset', self.time_base)
 
-	def clearall(self, **kwargs):
+	def clearall(self, *args, **kwargs):
 		'''Clear all data points'''
 		self.points = {}
-		self._chartconf('clear')
+		return self._chartconf('clear')
 
 	def clear(self, inlet=0):
 		'''Clear a single curve's points'''
 		if inlet is not None and self.points.has_key(inlet):
 			del self.points[inlet]
-		self._chartconf('clear', inlet)
+		return self._chartconf('clear', inlet)
 
 	def style(self, **kwargs):
 		'''Set style parameters for a curve'''
@@ -91,14 +99,12 @@ class Chart (Processor):
 				instyle[k] = v
 
 		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+		return True 
 
 	def bounds(self, x_min, y_min, x_max, y_max):
-		'''Set viewport boundaries in chart coordinates'''
-		self._chartconf('bounds', (x_min, y_min, x_max, y_max))
-
-
-
+		'''Set viewport boundaries in plot coordinates'''
+		return self._chartconf('bounds', (x_min, y_min, x_max, y_max))
 
 
 def register():
-	MFPApp().register("chart", Chart)
+	MFPApp().register("plot", Plot)

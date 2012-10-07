@@ -12,6 +12,9 @@ import gobject
 import cairo
 import math
 
+from .mark_style import MarkStyle
+from .quilt import Quilt 
+
 black = clutter.Color()
 black.from_string("Black")
 
@@ -28,251 +31,6 @@ def mkticks(vmin, vmax, numticks):
 	numticks = int(float(vmax-vmin) / tickint) + 2
 	ticks = [ tickbase + n*tickint for n in range(numticks) ]
 	return [ t for t in ticks if t >= vmin and t <= vmax ]
-
-class Quilt (clutter.Group):
-	IDLE_INTERVAL = 500 
-	VELOCITY_FUDGE = 1.25
-
-	def __init__(self, width, height, tilesize=100):
-		clutter.Group.__init__(self)
-		self.set_clip(0, 0, width, height)
-
-		self.viewport_width = width
-		self.viewport_height = height
-
-		self.viewport_x = 0
-		self.viewport_y = 0
-		self.viewport_vx = False
-		self.viewport_vy = False
-
-		self.tile_group = clutter.Group()
-		self.tile_group.show()
-		self.add_actor(self.tile_group)
-
-		self.tile_animation = None
-		self.tile_size = tilesize
-		self.tile_by_pos = {}
-		self.tile_reverse = {}
-
-		self.render_cb = None
-
-		self.rebuild_quilt()
-		glib.timeout_add(self.IDLE_INTERVAL, self.idle_cb)
-
-	def set_viewport_scroll(self, vx, vy):
-		if (vx != self.viewport_vx) or (vy != self.viewport_vy):
-			self.viewport_vx = vx
-			self.viewport_vy = vy
-
-			self.reanimate()
-
-	def set_viewport_origin(self, pos_x, pos_y, flush=False):
-		self.tile_group.set_position(-pos_x, -pos_y)
-		self.viewport_x = pos_x
-		self.viewport_y = pos_y
-		self.rebuild_quilt(flush)
-
-	def set_size(self, width, height):
-		self.viewport_width = width
-		self.viewport_height = height
-		clutter.Group.set_size(self, width, height)
-		self.rebuild_quilt()
-
-	def idle_cb(self, *args):
-		pos = self.tile_group.get_position()
-		self.viewport_x = -pos[0]
-		self.viewport_y = -pos[1]
-		self.rebuild_quilt()
-		if self.viewport_vx is None and self.viewport_vy is None:
-			return False
-		else:
-			return True
-
-	def reanimate(self, *args):
-		target_x, target_y = self.tile_group.get_position()
-
-		target_x -= 5*self.viewport_vx
-		target_y -= 5*self.viewport_vy
-
-		self.tile_animation = self.tile_group.animatev(clutter.AnimationMode.LINEAR, 5000,
-													  ['x', 'y'],
-													  [ target_x, target_y ])
-		self.tile_animation.connect_after("completed", self.reanimate)
-
-	def rebuild_quilt(self, flush=False):
-
-		def lbound(val):
-			return int(math.floor(val / float(self.tile_size)) * self.tile_size)
-
-		def ubound(val):
-			return lbound(val) + self.tile_size
-
-		min_x = lbound(self.viewport_x)
-		max_x = ubound(self.viewport_x + self.viewport_width)
-
-		if self.viewport_vx < 0:
-			min_x -= int(self.viewport_vx * self.VELOCITY_FUDGE)
-		elif self.viewport_vx > 0:
-			max_x += int(self.viewport_vx * self.VELOCITY_FUDGE)
-
-		min_y = lbound(self.viewport_y)
-		max_y = ubound(self.viewport_y + self.viewport_height)
-	
-		if self.viewport_vy < 0:
-			min_y -= int(self.viewport_vy * self.VELOCITY_FUDGE)
-		elif self.viewport_vy > 0:
-			max_y += int(self.viewport_vy * self.VELOCITY_FUDGE)
-
-		needed = {}
-		for x in range(min_x, max_x, self.tile_size):
-			for y in range(min_y, max_y, self.tile_size):
-				needed[(x, y)] = True
-
-		# alloc_tiles will kick off the redraw process
-		self.alloc_tiles(needed, flush)
-
-	def alloc_tiles(self, needed, flush=False):
-		garbage = self.gc_tiles(needed)
-		for pos in needed:
-			tile = self.tile_by_pos.get(pos)
-			if tile is None:
-				if garbage:
-					self.move_tile(garbage[0], pos)
-					garbage = garbage[1:]
-				else:
-					self.new_tile(pos)
-			elif flush:
-				tile.clear()
-				tile.invalidate()
-		
-	def gc_tiles(self, marked):
-		garbage = []
-		for pos, tile in self.tile_by_pos.items():
-			if marked.get(pos) is None:
-				garbage.append(tile)
-				del self.tile_by_pos[pos]
-				del self.tile_reverse[tile]
-		return garbage
-
-	def new_tile(self, pos):
-		tile = clutter.CairoTexture.new(self.tile_size, self.tile_size)
-		self.tile_group.add_actor(tile)
-		tile.connect("draw", self.draw_cb)
-		self.move_tile(tile, pos)
-		tile.show()
-		tile.invalidate()
-
-	def move_tile(self, tile, pos):
-		tile.set_position(pos[0], pos[1])
-		self.tile_by_pos[pos] = tile
-		self.tile_reverse[tile] = pos
-		tile.clear()
-		tile.invalidate()
-			
-	def redraw(self):
-		# make sure tile allocation is correct
-		self.rebuild_quilt()
-
-	def clear(self):
-		self.rebuild_quilt(flush=True)
-
-	def draw_cb(self, tex, ctx, *rest):
-		tileid = self.tile_reverse.get(tex)
-		pt_min = (tileid[0], tileid[1])
-		pt_max = (pt_min[0] + self.tile_size, pt_min[1] + self.tile_size)
-		if self.render_cb:
-			self.render_cb(tex, ctx, pt_min, pt_max)
-
-	def set_render_cb(self, cb):
-		self.render_cb = cb
-		for t in self.tile_reverse:
-			t.clear()
-			t.invalidate()
-
-class MarkStyler (object):
-	SQRT_3 = 3.0**0.5
-
-	def __init__(self):
-		self.col_r = 0
-		self.col_g = 0
-		self.col_b = 0
-		self.col_a = 255
-		self.shape = "dot"
-		self.size = 1.0
-		self.stroke_style = None
-		self.fill = True
-		self.size_elt = None
-		self.alpha_elt = None
-
-	def set_color(self, newcolor):
-		r = g = b = 0
-		a = 1.0
-
-		if isinstance(newcolor, str):
-			c = clutter.Color()
-			c.from_string(newcolor)
-			r = c.red
-			g = c.green
-			b = c.blue
-			a = c.alpha
-		elif isinstance(newcolor, (list, tuple)) and len(newcolor) > 2:
-			r = newcolor[0]
-			g = newcolor[1]
-			b = newcolor[2]
-			if len(newcolor) > 3:
-				a = newcolor[3]
-
-		self.col_r = r
-		self.col_g = g
-		self.col_b = b
-		self.col_a = a
-
-	def mark_dot(self, ctx, point):
-		ctx.move_to(point[0]+self.size, point[1])
-		ctx.arc(point[0], point[1], self.size, 0.0, math.pi * 2.0)
-
-	def mark_square(self, ctx, point):
-		dx = self.size/2.0
-		x0 = point[0] - dx
-		y0 = point[1] - dx
-		x1 = point[0] + dx
-		y1 = point[1] + dx
-		ctx.move_to(x0, y0)
-		ctx.line_to(x0, y1)
-		ctx.line_to(x1, y1)
-		ctx.line_to(x1, y0)
-		ctx.line_to(x0, y0)
-
-	def mark_triangle(self, ctx, point):
-		d1 = self.size / 2.0
-		d2 = self.SQRT_3 * self.size / 2.0
-		ctx.move_to(point[0], point[1] - self.size)
-		ctx.line_to(point[0] - d2, point[1] + d1)
-		ctx.line_to(point[0] + d2, point[1] + d1)
-		ctx.line_to(point[0], point[1] - self.size)
-
-	def stroke(self, ctx, pt_1, pt_2):
-		def halfbrite(c):
-			return c + (1.0-c)/2.0
-
-		if self.stroke_style == "solid":
-			ctx.set_source_rgba(halfbrite(self.col_r), halfbrite(self.col_g), 
-								halfbrite(self.col_b), self.col_a)
-			ctx.set_line_width(0.3)
-			ctx.move_to(pt_1[0], pt_1[1])
-			ctx.line_to(pt_2[0], pt_2[1])
-			ctx.stroke()
-
-	def mark(self, ctx, point):
-		ctx.set_source_rgba(self.col_r, self.col_g, self.col_b, self.col_a)
-		ctx.set_line_width(0.6)
-		if self.shape == "dot":
-			self.mark_dot(ctx, point)
-		elif self.shape == "square":
-			self.mark_square(ctx, point)
-		elif self.shape == "triangle":
-			self.mark_triangle(ctx, point)
-		ctx.stroke()
 
 class XYPlot (clutter.Group):
 	MARGIN_LEFT = 30 
@@ -368,12 +126,40 @@ class XYPlot (clutter.Group):
 		self.cl_yaxis_bg.redraw()
 		self.cl_curve.redraw()
 
+	def set_scroll_rate(self, vx, vy):
+		px = self.pt2px((vx, vy))
+		self.cl_xaxis_bg.set_viewport_scroll(px[0], 0)
+		self.cl_yaxis_bg.set_viewport_scroll(0, px[1])
+		self.cl_curve.set_viewport_scroll(px[0], px[1])
+
+
 	def set_bounds(self, x_min, y_min, x_max, y_max):
-		if ((x_min == self.x_min) and (x_max == self.x_max) 
-			  and (y_min == self.y_min) and (y_max == self.y_max)):
+
+		if ((x_min is None or x_min == self.x_min) 
+	         and (x_max is None or x_max == self.x_max) 
+			 and (y_min is None or y_min == self.y_min) 
+	         and (y_max is None or y_max == self.y_max)):
 			return
-		
-		# something has changed, need to redraw mostly everything 
+
+		if x_min is None:
+			if x_max is not None:
+				x_min = self.x_min + (x_max - self.x_max)
+			else: 
+				x_min = self.x_min
+				x_max = self.x_max
+		elif x_max is None:
+			x_max = self.x_max + (x_min - self.x_min)
+
+		if y_min is None:
+			if y_max is not None:
+				y_min = self.y_min + (y_max - self.y_max)
+			else: 
+				y_min = self.y_min
+				y_max = self.y_max
+		elif y_max is None:
+			y_max = self.y_max + (y_min - self.y_min)
+
+		print "XYPlot.set_bounds:", x_min, y_min, x_max, y_max
 
 		# if scale is changing, really need to redraw all
 		need_x_flush = need_y_flush = False 
@@ -404,7 +190,7 @@ class XYPlot (clutter.Group):
 
 	def set_style(self, style):
 		for inlet, istyle in style.items():
-			marker = self.style.setdefault(inlet, MarkStyler()) 
+			marker = self.style.setdefault(inlet, MarkStyle()) 
 			for k, v in istyle.items():
 				if k == "size":
 					marker.size = float(v)
@@ -501,7 +287,7 @@ class XYPlot (clutter.Group):
 		for curve in self.points:
 			styler = self.style.get(curve)
 			if styler is None:
-				styler = self.style[curve] = MarkStyler()
+				styler = self.style[curve] = MarkStyle()
 
 			tile_id = self.cl_curve.tile_reverse.get(texture)
 			if tile_id is None:
@@ -550,7 +336,7 @@ class XYPlot (clutter.Group):
 		
 		style = self.style.get(curve)
 		if style is None:
-			style = self.style[curve] = MarkStyler()
+			style = self.style[curve] = MarkStyle()
 		markradius = style.size
 
 		for dx in [-markradius, markradius ]:

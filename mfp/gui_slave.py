@@ -40,28 +40,33 @@ class GUICommand (RPCWrapper):
 
 	@rpcwrap
 	def configure(self, obj_id, params):
-		print "GuiCommand:", obj_id, params
 		MFPGUI().clutter_do(lambda: self._configure(obj_id, params))
-		#MFPGUI().clutter_do(lambda: True)
-		print "Guicommand done"
 		return True
 
 	def _configure(self, obj_id, params):
-		print "_configure: enter"
 		obj = MFPGUI().recall(obj_id)
-		print "_configure:", obj_id, obj
 		obj.configure(params)
+
+	@rpcwrap
+	def command(self, obj_id, cmd, cmd_params):
+		MFPGUI().clutter_do(lambda: self._command(obj_id, cmd, cmd_params))
+		return True 
+
+	def _command(self, obj_id, cmd, cmd_params):
+		obj = MFPGUI().recall(obj_id)
+		obj.command(cmd, cmd_params)
 
 	@rpcwrap
 	def create(self, obj_type, obj_args, obj_id, params): 
 		MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, params))
 
 	def _create(self, obj_type, obj_args, obj_id, params): 
-		from .gtk.processor_element import ProcessorElement
-		from .gtk.message_element import MessageElement
-		from .gtk.text_element import TextElement
-		from .gtk.enum_element import EnumElement
-		
+		from .gui.processor_element import ProcessorElement
+		from .gui.message_element import MessageElement
+		from .gui.text_element import TextElement
+		from .gui.enum_element import EnumElement
+		from .gui.plot_element import PlotElement 
+
 		elementtype = params.get('element_type')
 		print "Create:", obj_id, elementtype, params
 		print "mfpgui:", MFPGUI(), MFPGUI().appwin
@@ -70,7 +75,8 @@ class GUICommand (RPCWrapper):
 			'processor': ProcessorElement,
 			'message': MessageElement,
 			'text': TextElement,
-			'enum': EnumElement
+			'enum': EnumElement,
+			'plot': PlotElement
 		}
 		ctor = ctors.get(elementtype)
 		if ctor:
@@ -86,7 +92,7 @@ class GUICommand (RPCWrapper):
 		MFPGUI().clutter_do(lambda: self._connect(obj_1_id, obj_1_port, obj_2_id, obj_2_port))
 
 	def _connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-		from .gtk.connection_element import ConnectionElement
+		from .gui.connection_element import ConnectionElement
 
 		obj_1 = MFPGUI().recall(obj_1_id)
 		obj_2 = MFPGUI().recall(obj_2_id)
@@ -104,7 +110,6 @@ class MFPGUI (object):
 	__metaclass__ = Singleton
 
 	def __init__(self):
-		print "MFPGUI constructor", self
 		self.clutter_thread = threading.Thread(target=self.clutter_proc)
 		self.clutter_thread.start()
 		self.objects = {}
@@ -131,7 +136,7 @@ class MFPGUI (object):
 		clutter.init([])
 
 		# create main window
-		from mfp.gtk.patch_window import PatchWindow
+		from mfp.gui.patch_window import PatchWindow
 		self.appwin = PatchWindow()	
 		self.mfp = MFPCommand()
 		try:

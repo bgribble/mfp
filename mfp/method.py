@@ -25,14 +25,23 @@ class MethodCall(object):
 	def call(self, target):
 		try:
 			m = getattr(target, self.method)
-			if callable(m):
-				return m(*self.args, **self.kwargs)
-			elif self.fallback:
-				return self.fallback([self] + self.args, **self.kwargs)
-			else:
-				print "MethodCall.call():", target, self.method, m, type(m)
-				raise Exception("Method %s cannot be called" % self.method)
 		except AttributeError, e:
 			raise Exception("Method %s not found for %s" % (self.method, target))
+
+		if callable(m):
+			try: 
+				return m(*self.args, **self.kwargs)
+			except Exception, e:
+				raise Exception("Method %s for %s raised exception %s" 
+					            % (self.method, target, e))
+		elif self.fallback:
+			try: 
+				return self.fallback([self] + self.args, **self.kwargs)
+			except Exception, e:
+				raise Exception("Method %s for %s raised exception %s" 
+					            % (self.method, target, e))
+		else:
+			print "MethodCall.call():", target, self.method, m, type(m)
+			raise Exception("Method %s cannot be called" % self.method)
 
 

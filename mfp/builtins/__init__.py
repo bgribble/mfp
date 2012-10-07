@@ -18,7 +18,7 @@ def register():
 	import p_buffer; p_buffer.register()
 	import p_midi; p_midi.register()
 	import p_note2freq; p_note2freq.register()
-	import p_chart; p_chart.register()
+	import p_plot; p_plot.register()
 	import p_listops; p_listops.register()
 
 

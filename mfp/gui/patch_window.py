@@ -6,7 +6,7 @@ from processor_element import ProcessorElement
 from connection_element import ConnectionElement 
 from message_element import MessageElement
 from enum_element import EnumElement
-from chart_element import ChartElement
+from plot_element import PlotElement
 
 from mfp import MFPGUI 
 

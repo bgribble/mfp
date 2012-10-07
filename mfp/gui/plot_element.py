@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 '''
-chart_element.py
-A patch element corresponding to a chart
+plot_element.py
+A patch element corresponding to an XY scatter or line plot 
 '''
 
 from gi.repository import Clutter as clutter 
@@ -12,14 +12,13 @@ from input_mode import InputMode
 from .modes.label_edit import LabelEditMode
 from .xyplot import XYPlot
 
-class ChartElement (PatchElement):
-	element_type = "chart"
+class PlotElement (PatchElement):
+	element_type = "plot"
 
 	# constants 
 	INIT_WIDTH = 320
 	INIT_HEIGHT = 240
 	LABEL_SPACE = 25
-
 	label_off_x = 6 
 	label_off_y = 0
 
@@ -106,7 +105,7 @@ class ChartElement (PatchElement):
 			if len(parts) > 1:
 				self.obj_args = parts[1]
 
-			print "ChartElement: type=%s, args=%s" % (self.obj_type, self.obj_args)
+			print "PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args)
 			self.create(self.element_type, self.obj_args)
 			
 			if self.obj_type == "scatter":
@@ -119,7 +118,7 @@ class ChartElement (PatchElement):
 				self.xyplot.mode = XyPlot.SCOPE
 
 			if self.obj_id is None:
-				print "ChartElement: could not create", self.obj_type, self.obj_args
+				print "PlotElement: could not create", self.obj_type, self.obj_args
 			else:
 				self.send_params()
 				self.draw_ports()
@@ -198,13 +197,13 @@ class ChartElement (PatchElement):
 			self.set_bounds(*bounds)
 		elif action == "roll":
 			start_x = params.get("_chart_data")
-			self.xyplot.set_bounds(None, None, start_x + self.ROLL_X_FUDGE, None)
+			self.xyplot.set_bounds(None, None, start_x, None)
 			self.xyplot.set_scroll_rate(1.0, 0)
 		elif action == "stop":
 			self.xyplot.set_scroll_rate(0.0, 0.0)
 		elif action == "reset":
 			start_x = params.get("_chart_data")
-			self.xyplot.set_bounds(None, None, start_x + self.ROLL_X_FUDGE, None)
+			self.xyplot.set_bounds(None, None, start_x, None)
 
 		s = params.get("style")
 		if s:
