@@ -198,13 +198,13 @@ class ChartElement (PatchElement):
 			self.set_bounds(*bounds)
 		elif action == "roll":
 			start_x = params.get("_chart_data")
-			self.roll_set_position(start_x)
-			self.roll_start()
+			self.xyplot.set_bounds(None, None, start_x + self.ROLL_X_FUDGE, None)
+			self.xyplot.set_scroll_rate(1.0, 0)
 		elif action == "stop":
-			self.roll_stop()
+			self.xyplot.set_scroll_rate(0.0, 0.0)
 		elif action == "reset":
 			start_x = params.get("_chart_data")
-			self.roll_set_position(start_x)
+			self.xyplot.set_bounds(None, None, start_x + self.ROLL_X_FUDGE, None)
 
 		s = params.get("style")
 		if s:
