@@ -56,6 +56,8 @@ class XYPlot (clutter.Group):
 		self.x_max = 6.28 
 		self.y_min = -1
 		self.y_max = 1
+		self.x_scroll = 0
+		self.y_scroll = 0
 		self.axis_font_size = 8
 
 		# initialized by create() call
@@ -131,7 +133,6 @@ class XYPlot (clutter.Group):
 		self.cl_xaxis_bg.set_viewport_scroll(px[0], 0)
 		self.cl_yaxis_bg.set_viewport_scroll(0, px[1])
 		self.cl_curve.set_viewport_scroll(px[0], px[1])
-
 
 	def set_bounds(self, x_min, y_min, x_max, y_max):
 
@@ -217,6 +218,7 @@ class XYPlot (clutter.Group):
 		return np
 
 	def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
+		print "XYPlot.draw_xaxis_cb:", px_min, px_max
 		pt_min = self.px2pt(px_min)
 		pt_max = self.px2pt(px_max)
 
@@ -230,10 +232,13 @@ class XYPlot (clutter.Group):
 		ctx.line_to(texture.get_width(), self.AXIS_PAD)
 		ctx.stroke()
 
+		print "xaxis: drawing ticks", ticks
 		# ticks
 		for tick in ticks:
+			print "tick:", tick
 			tick_px = self.pt2px((tick, 0))
 			if (tick_px[0] < (px_min[0] - self.MARGIN_LEFT) or tick_px[0] > (px_max[0]+self.MARGIN_LEFT)):
+				print "skipping", tick_px, px_min, px_max, self.MARGIN_LEFT
 				continue
 
 			p = self.pt_pos([tick, 0])
@@ -283,6 +288,20 @@ class XYPlot (clutter.Group):
 			dst_px[0] -= px_min[0]
 			dst_px[1] -= px_min[1]
 			styler.stroke(ctxt, dst_px, px)
+
+		field_vp = self.cl_curve.get_viewport_origin()
+		field_vp_pos = self.px2pt(field_vp)
+		field_w = self.x_max - self.x_min 
+		field_h = self.y_max - self.y_min 
+
+		self.x_min = field_vp_pos[0]
+		self.x_max = self.x_min + field_w
+		self.y_max = field_vp_pos[1]
+		self.y_min = self.y_max - field_h
+
+		print "draw_field_cb: set min, max to (%s, %s), (%s, %s)" % (self.x_min, self.y_min,
+															   self.x_max, self.y_max)
+
 
 		for curve in self.points:
 			styler = self.style.get(curve)

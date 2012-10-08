@@ -76,7 +76,7 @@ class Plot (Processor):
 	def reset(self, *args, **kwargs):
 		'''Reset time base for items with no X'''
 		self.time_base = datetime.now()
-		return self._chartconf('reset', self.time_base)
+		return self._chartconf('reset', self._time())
 
 	def clearall(self, *args, **kwargs):
 		'''Clear all data points'''
