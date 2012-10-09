@@ -1,10 +1,10 @@
-Control processors: trigger, spigot, if
+Control processors: spigot, if
 
-Signal processors: biquad~, hip~, lop~, noise~, phasor~, square~ 
+Signal processors: biquad~, hip~, lop~, phasor~, square~ 
 
-GUI elements: entry, slider, meter 
+GUI elements: slider, meter 
 
-External elements: OSC, LADSPA hosts, MIDI i/o
+External elements: LADSPA hosts
 
 Architectural issues: 
  * Signal-processing domain issues (can't route fft~ to dac~)
