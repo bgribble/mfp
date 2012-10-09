@@ -202,7 +202,7 @@ class XYPlot (clutter.Group):
 				elif k == "stroke_style":
 					marker.stroke_style = str(v)
 
-	def pt_pos(self, p):
+	def pt2screen(self, p):
 		np = [(p[0] - self.x_min)*float(self.cl_field_w)/(self.x_max - self.x_min),
 		      self.cl_field_h - (p[1] - self.y_min)*float(self.cl_field_h)/(self.y_max - self.y_min)]
 		return np
@@ -232,16 +232,9 @@ class XYPlot (clutter.Group):
 		ctx.line_to(texture.get_width(), self.AXIS_PAD)
 		ctx.stroke()
 
-		print "xaxis: drawing ticks", ticks
 		# ticks
 		for tick in ticks:
-			print "tick:", tick
 			tick_px = self.pt2px((tick, 0))
-			if (tick_px[0] < (px_min[0] - self.MARGIN_LEFT) or tick_px[0] > (px_max[0]+self.MARGIN_LEFT)):
-				print "skipping", tick_px, px_min, px_max, self.MARGIN_LEFT
-				continue
-
-			p = self.pt_pos([tick, 0])
 			ctx.move_to(tick_px[0]-px_min[0], self.AXIS_PAD)
 			ctx.line_to(tick_px[0]-px_min[0], 3*self.AXIS_PAD)
 			ctx.stroke()
@@ -265,9 +258,6 @@ class XYPlot (clutter.Group):
 		# ticks
 		for tick in ticks:
 			tick_px = self.pt2px((0,tick))
-			if (tick_px[1] < (px_min[1] - self.MARGIN_BOT) or tick_px[1] > (px_max[1]+self.MARGIN_BOT)):
-				continue
-
 			ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, tick_px[1]-px_min[1])
 			ctx.line_to(self.MARGIN_LEFT-3*self.AXIS_PAD, tick_px[1]-px_min[1])
 			ctx.stroke()
