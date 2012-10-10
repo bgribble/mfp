@@ -59,12 +59,6 @@ class BarMeterElement (PatchElement):
 			c = self.stage.color_unselected
 		ct.set_source_rgb(c.red, c.green, c.blue)
 
-		ct.translate(0.5, 0.5)
-		ct.move_to(1,1)
-		ct.line_to(1, h)
-		ct.line_to(w, h)
-		ct.curve_to(w-8, h-8, w-8, 8, w, 1)
-		ct.line_to(1,1)
 		ct.close_path()
 		ct.stroke()
 
