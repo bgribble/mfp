@@ -21,16 +21,26 @@ black.from_string("Black")
 white = clutter.Color()
 white.from_string("White")
 
-def mkticks(vmin, vmax, numticks):
+def mkticks(vmin, vmax, numticks, tick_min, tick_max):
+	# generate ticks in the range [tick_min, tick_max]
+	# for a chart showing a total of numticks ticks (approximately)
+	# on the total range of [vmin, vmax]
+
+	# interv is the target interval between ticks.  We want the 
+	# nearest .1, .25, .5, or 1 to that.  This calculation is based on
+	# the chart as a whole, not the target range
 	interv = float(vmax-vmin)/numticks
 	logbase = pow(10, math.floor(math.log10(interv)))
 	choices = [ logbase, logbase*2.5, logbase*5.0, logbase * 10]
 	diffs = [ abs(interv-c) for c in choices ]
 	tickint = choices[diffs.index(min(*diffs))]
-	tickbase = tickint * math.floor(vmin / tickint)
-	numticks = int(float(vmax-vmin) / tickint) + 2
-	ticks = [ tickbase + n*tickint for n in range(numticks) ]
-	return [ t for t in ticks if t >= vmin and t <= vmax ]
+
+	# tickint now has the interval between ticks.  Use the target range 
+	# to generate the ticks 
+	first_tick = tickint * math.floor(tick_min / tickint)
+	numticks = int(float(tick_max-tick_min) / tickint) + 2
+	ticks = [ first_tick + n*tickint for n in range(numticks) ]
+	return [ t for t in ticks if t >= tick_min and t <= tick_max ]
 
 class XYPlot (clutter.Group):
 	MARGIN_LEFT = 30 
@@ -61,78 +71,77 @@ class XYPlot (clutter.Group):
 		self.axis_font_size = 8
 
 		# initialized by create() call
-		self.cl_bg = None
-		self.cl_xaxis_bg = None
-		self.cl_yaxis_bg = None
-		self.cl_field = None
-		self.cl_curve = None
-		self.cl_field_w = 0
-		self.cl_field_h = 0
+		self.border = None
+		self.plot_border = None
+		self.x_axis = None
+		self.y_axis = None
+		self.plot = None
+		self.plot_w = 0
+		self.plot_h = 0
 
 		self.create()
 
 	def create(self):
-		self.cl_bg = clutter.Rectangle()
-		self.cl_bg.set_border_width(0)
-		self.cl_bg.set_border_color(black)
-		self.cl_bg.set_color(white)
-		self.cl_bg.set_size(self.width, self.height)
-		self.cl_bg.set_position(0,0)
-		self.add_actor(self.cl_bg)
+		self.border = clutter.Rectangle()
+		self.border.set_border_width(0)
+		self.border.set_border_color(black)
+		self.border.set_color(white)
+		self.border.set_size(self.width, self.height)
+		self.border.set_position(0,0)
+		self.add_actor(self.border)
 		
-		self.cl_field_w = self.width - self.MARGIN_LEFT
-		self.cl_field_h = self.height - self.MARGIN_BOT
+		self.plot_w = self.width - self.MARGIN_LEFT
+		self.plot_h = self.height - self.MARGIN_BOT
 
-		self.cl_xaxis_bg = Quilt(self.cl_field_w, self.MARGIN_BOT)
-		self.cl_xaxis_bg.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
-		self.cl_xaxis_bg.set_viewport_origin(0, 0)
-		self.add_actor(self.cl_xaxis_bg)
+		self.x_axis = Quilt(self.plot_w, self.MARGIN_BOT)
+		self.x_axis.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
+		self.x_axis.set_viewport_origin(0, 0)
+		self.add_actor(self.x_axis)
 
-		self.cl_yaxis_bg = Quilt(self.MARGIN_LEFT, self.cl_field_h)
-		self.cl_yaxis_bg.set_position(0, 0)
-		self.cl_yaxis_bg.set_viewport_origin(0, -self.cl_field_h/2.0)
-		self.add_actor(self.cl_yaxis_bg)
+		self.y_axis = Quilt(self.MARGIN_LEFT, self.plot_h)
+		self.y_axis.set_position(0, 0)
+		self.y_axis.set_viewport_origin(0, -self.plot_h/2.0)
+		self.add_actor(self.y_axis)
 
-		self.cl_xaxis_bg.set_render_cb(self.draw_xaxis_cb)
-		self.cl_yaxis_bg.set_render_cb(self.draw_yaxis_cb)
+		self.x_axis.set_render_cb(self.draw_xaxis_cb)
+		self.y_axis.set_render_cb(self.draw_yaxis_cb)
 
-		self.cl_field = clutter.Rectangle()
-		self.cl_field.set_border_width(0)
-		self.cl_field.set_border_color(black)
-		self.cl_field.set_color(white)
-		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
-		self.cl_field.set_position(self.MARGIN_LEFT, 0)
+		self.plot_border = clutter.Rectangle()
+		self.plot_border.set_border_width(0)
+		self.plot_border.set_border_color(black)
+		self.plot_border.set_color(white)
+		self.plot_border.set_size(self.plot_w, self.plot_h)
+		self.plot_border.set_position(self.MARGIN_LEFT, 0)
+		self.add_actor(self.plot_border)
 
-		self.add_actor(self.cl_field)
-
-		self.cl_curve = Quilt(self.cl_field_w, self.cl_field_h)
-		self.cl_curve.set_position(self.MARGIN_LEFT, 0)
-		self.cl_curve.set_render_cb(self.draw_field_cb)
-		self.cl_curve.set_viewport_origin(0, -self.cl_field_h/2.0)
-		self.add_actor(self.cl_curve)
+		self.plot = Quilt(self.plot_w, self.plot_h)
+		self.plot.set_position(self.MARGIN_LEFT, 0)
+		self.plot.set_render_cb(self.draw_field_cb)
+		self.plot.set_viewport_origin(0, -self.plot_h/2.0)
+		self.add_actor(self.plot)
 		
 	def set_size(self, width, height):
 		self.width = width
 		self.height = height
 
-		self.cl_bg.set_size(self.width, self.height)
-		self.cl_field_w = self.width - self.MARGIN_LEFT
-		self.cl_field_h = self.height - self.MARGIN_BOT
-		self.cl_xaxis_bg.set_size(self.cl_field_w, self.MARGIN_BOT)
-		self.cl_xaxis_bg.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
-		self.cl_yaxis_bg.set_size(self.MARGIN_LEFT, self.cl_field_h)
-		self.cl_field.set_size(self.cl_field_w, self.cl_field_h)
-		self.cl_curve.set_size(self.cl_field_w, self.cl_field_h)
+		self.border.set_size(self.width, self.height)
+		self.plot_w = self.width - self.MARGIN_LEFT
+		self.plot_h = self.height - self.MARGIN_BOT
+		self.x_axis.set_size(self.plot_w, self.MARGIN_BOT)
+		self.x_axis.set_position(self.MARGIN_LEFT, self.height-self.MARGIN_BOT)
+		self.y_axis.set_size(self.MARGIN_LEFT, self.plot_h)
+		self.plot_border.set_size(self.plot_w, self.plot_h)
+		self.plot.set_size(self.plot_w, self.plot_h)
 
-		self.cl_xaxis_bg.redraw()
-		self.cl_yaxis_bg.redraw()
-		self.cl_curve.redraw()
+		self.x_axis.redraw()
+		self.y_axis.redraw()
+		self.plot.redraw()
 
 	def set_scroll_rate(self, vx, vy):
 		px = self.pt2px((vx, vy))
-		self.cl_xaxis_bg.set_viewport_scroll(px[0], 0)
-		self.cl_yaxis_bg.set_viewport_scroll(0, px[1])
-		self.cl_curve.set_viewport_scroll(px[0], px[1])
+		self.x_axis.set_viewport_scroll(px[0], 0)
+		self.y_axis.set_viewport_scroll(0, px[1])
+		self.plot.set_viewport_scroll(px[0], px[1])
 
 	def set_bounds(self, x_min, y_min, x_max, y_max):
 
@@ -175,19 +184,19 @@ class XYPlot (clutter.Group):
 			self.x_min = x_min
 			self.x_max = x_max
 			origin = self.pt2px((x_min, 0))
-			self.cl_xaxis_bg.set_viewport_origin(origin[0], origin[1], need_x_flush)
+			self.x_axis.set_viewport_origin(origin[0], origin[1], need_x_flush)
 
 		if ((y_min != self.y_min) or (y_max != self.y_max)):
 			self.y_min = y_min
 			self.y_max = y_max
 			origin = self.pt2px((0, y_max))
-			self.cl_yaxis_bg.set_viewport_origin(origin[0], origin[1], need_y_flush)
+			self.y_axis.set_viewport_origin(origin[0], origin[1], need_y_flush)
 
 		origin = self.pt2px((x_min, y_max))
 		if need_x_flush or need_y_flush:
 			self.reindex()
 
-		self.cl_curve.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
+		self.plot.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
 
 	def set_style(self, style):
 		for inlet, istyle in style.items():
@@ -203,27 +212,32 @@ class XYPlot (clutter.Group):
 					marker.stroke_style = str(v)
 
 	def pt2screen(self, p):
-		np = [(p[0] - self.x_min)*float(self.cl_field_w)/(self.x_max - self.x_min),
-		      self.cl_field_h - (p[1] - self.y_min)*float(self.cl_field_h)/(self.y_max - self.y_min)]
+		np = [(p[0] - self.x_min)*float(self.plot_w)/(self.x_max - self.x_min),
+		      self.plot_h - (p[1] - self.y_min)*float(self.plot_h)/(self.y_max - self.y_min)]
 		return np
 
 	def pt2px(self, p):
-		np = [p[0]*float(self.cl_field_w)/(self.x_max - self.x_min),
-		      -1.0*p[1]*float(self.cl_field_h)/(self.y_max - self.y_min)]
+		np = [p[0]*float(self.plot_w)/(self.x_max - self.x_min),
+		      -1.0*p[1]*float(self.plot_h)/(self.y_max - self.y_min)]
 		return np
 
 	def px2pt(self, p):
-		np = [p[0]/(float(self.cl_field_w)/(self.x_max - self.x_min)),
-		      -1.0*p[1]/(float(self.cl_field_h)/(self.y_max - self.y_min))]
+		np = [p[0]/(float(self.plot_w)/(self.x_max - self.x_min)),
+		      -1.0*p[1]/(float(self.plot_h)/(self.y_max - self.y_min))]
 		return np
 
 	def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
-		print "XYPlot.draw_xaxis_cb:", px_min, px_max
+		print "XYPlot.draw_xaxis_cb:", px_min, px_max, self.x_min, self.x_max
 		pt_min = self.px2pt(px_min)
 		pt_max = self.px2pt(px_max)
 
+		tick_pad = self.px2pt((self.TICK_SIZE, 0))[0]
+		tick_min = pt_min[0] - 2*tick_pad 
+		tick_max = pt_max[0] + tick_pad  
+
 		# X axis
-		ticks = mkticks(self.x_min, self.x_max, self.cl_field_w/self.TICK_SIZE)
+		ticks = mkticks(self.x_min, self.x_max, self.plot_w/self.TICK_SIZE,
+						tick_min, tick_max)
 		ctx.set_source_rgb(black.red, black.green, black.blue)
 		ctx.set_font_size(self.axis_font_size)
 
@@ -235,6 +249,7 @@ class XYPlot (clutter.Group):
 		# ticks
 		for tick in ticks:
 			tick_px = self.pt2px((tick, 0))
+			print " x tick:", tick, tick_px, px_min
 			ctx.move_to(tick_px[0]-px_min[0], self.AXIS_PAD)
 			ctx.line_to(tick_px[0]-px_min[0], 3*self.AXIS_PAD)
 			ctx.stroke()
@@ -245,8 +260,15 @@ class XYPlot (clutter.Group):
 		pt_min = self.px2pt(px_min)
 		pt_max = self.px2pt(px_max)
 
+		tick_pad = abs(self.px2pt((0, self.TICK_SIZE))[1])
+		tick_min = pt_max[1] - 2*tick_pad 
+		tick_max = pt_min[1] + tick_pad  
+		print "y ticks:", tick_pad, tick_min, tick_max 
+
 		# Y axis ticks
-		ticks = mkticks(self.y_min, self.y_max, float(self.cl_field_h)/self.TICK_SIZE)
+		ticks = mkticks(self.y_min, self.y_max, float(self.plot_h)/self.TICK_SIZE, 
+					    tick_min, tick_max)
+		print tick_min, tick_max, ticks 
 		ctx.set_source_rgb(black.red, black.green, black.blue)
 		ctx.set_font_size(self.axis_font_size)
 		
@@ -259,6 +281,7 @@ class XYPlot (clutter.Group):
 		for tick in ticks:
 			tick_px = self.pt2px((0,tick))
 			ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, tick_px[1]-px_min[1])
+			print " y tick:", tick, tick_px, px_min
 			ctx.line_to(self.MARGIN_LEFT-3*self.AXIS_PAD, tick_px[1]-px_min[1])
 			ctx.stroke()
 			ctx.save()
@@ -279,7 +302,7 @@ class XYPlot (clutter.Group):
 			dst_px[1] -= px_min[1]
 			styler.stroke(ctxt, dst_px, px)
 
-		field_vp = self.cl_curve.get_viewport_origin()
+		field_vp = self.plot.get_viewport_origin()
 		field_vp_pos = self.px2pt(field_vp)
 		field_w = self.x_max - self.x_min 
 		field_h = self.y_max - self.y_min 
@@ -289,16 +312,12 @@ class XYPlot (clutter.Group):
 		self.y_max = field_vp_pos[1]
 		self.y_min = self.y_max - field_h
 
-		print "draw_field_cb: set min, max to (%s, %s), (%s, %s)" % (self.x_min, self.y_min,
-															   self.x_max, self.y_max)
-
-
 		for curve in self.points:
 			styler = self.style.get(curve)
 			if styler is None:
 				styler = self.style[curve] = MarkStyle()
 
-			tile_id = self.cl_curve.tile_reverse.get(texture)
+			tile_id = self.plot.tile_reverse.get(texture)
 			if tile_id is None:
 				return
 
@@ -325,13 +344,13 @@ class XYPlot (clutter.Group):
 
 		tiles = self.index_point(point, curve, ptnum)
 		for tile_id in tiles:
-			tex = self.cl_curve.tile_by_pos.get(tile_id)
+			tex = self.plot.tile_by_pos.get(tile_id)
 			if tex is not None:
 				tex.invalidate()
 
 
 	def index_point(self, point, curve, ptnum):
-		tile_size = self.cl_curve.tile_size
+		tile_size = self.plot.tile_size
 
 		def tile_id(point):
 			return (int(math.floor(point[0] / tile_size)*tile_size),
@@ -383,7 +402,7 @@ class XYPlot (clutter.Group):
 			if self.points.has_key(curve):
 				del self.points[curve]
 			self.reindex()	
-		self.cl_curve.clear()
+		self.plot.clear()
 
 
 if __name__ == "__main__":
