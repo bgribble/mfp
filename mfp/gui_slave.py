@@ -12,10 +12,12 @@ from request import Request
 from singleton import Singleton
 from rpc_wrapper import RPCWrapper, rpcwrap
 from main import MFPCommand
+from . import log 
 
 def gui_init(pipe):
 	import os
-	print "gui_init: in worker, pid =", os.getpid()
+	log.log_module = "gui"
+	log.debug("gui_init: in worker, pid =", os.getpid())
 	pipe.on_finish(gui_finish)
 	RPCWrapper.pipe = pipe
 	RPCWrapper.node_id = "Clutter GUI"
@@ -68,8 +70,8 @@ class GUICommand (RPCWrapper):
 		from .gui.plot_element import PlotElement 
 
 		elementtype = params.get('element_type')
-		print "Create:", obj_id, elementtype, params
-		print "mfpgui:", MFPGUI(), MFPGUI().appwin
+		log.debug("Create:", obj_id, elementtype, params)
+		log.debug("mfpgui:", MFPGUI(), MFPGUI().appwin)
 
 		ctors = {
 			'processor': ProcessorElement,
@@ -96,8 +98,8 @@ class GUICommand (RPCWrapper):
 
 		obj_1 = MFPGUI().recall(obj_1_id)
 		obj_2 = MFPGUI().recall(obj_2_id)
-		print "MFPGUI._connect:", obj_1_id, obj_1, obj_2_id, obj_2
-		print MFPGUI().objects
+		log.debug("MFPGUI._connect:", obj_1_id, obj_1, obj_2_id, obj_2)
+		log.debug(MFPGUI().objects)
 		c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
 		obj_1.connections_out.append(c)
 		obj_2.connections_in.append(c)
@@ -123,8 +125,11 @@ class MFPGUI (object):
 		return self.objects.get(obj_id)
 
 	def clutter_do(self, thunk):
+		log.debug("clutter_do: enter", thunk)
 		import glib
 		glib.idle_add(thunk)
+		log.debug("clutter_do: done", thunk)
+
 
 	def clutter_proc(self):
 		from gi.repository import Clutter as clutter

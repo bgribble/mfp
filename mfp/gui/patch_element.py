@@ -8,6 +8,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter as clutter
 from mfp import MFPGUI 
+from mfp import log 
 
 class PatchElement (clutter.Group):
 	'''
@@ -132,7 +133,7 @@ class PatchElement (clutter.Group):
 				pobj.set_reactive(False)
 				self.add_actor(pobj)
 				self.port_elements[pid] = pobj
-				print "   creating", pid, pobj
+				log.debug("   creating", pid, pobj)
 			pobj.set_position(px, py)
 
 		for i in range(self.num_inlets):
@@ -147,7 +148,7 @@ class PatchElement (clutter.Group):
 
 
 	def configure(self, params):
-		print "configure:", self, params
+		log.debug("configure:", self, params)
 		#self.num_inlets = params.get("num_inlets")
 		#self.num_outlets = params.get("num_outlets")
 		#self.dsp_inlets = params.get("dsp_inlets")

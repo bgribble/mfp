@@ -19,13 +19,15 @@ from singleton import Singleton
 from rpc_wrapper import RPCWrapper, rpcwrap
 from rpc_worker import RPCWorker
 
+from . import log 
+
 class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def create(self, objtype, initargs=''):
-		print "MFPApp.create() local"
+		log.debug("MFPApp.create() local")
 		obj = MFPApp().create(objtype, initargs)
 		if obj is None:
-			print "MFPApp.create() failed"
+			log.debug("MFPApp.create() failed")
 			return None
 		MFPApp().patch.add(obj)
 		return obj.gui_params
@@ -60,7 +62,7 @@ class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def delete(self, obj_id):
 		obj = MFPApp().recall(obj_id)
-		print "MFPApp: got delete req for", obj
+		log.debug("MFPApp: got delete req for", obj)
 		obj.delete()
 
 	@rpcwrap
@@ -102,7 +104,7 @@ class MFPApp (object):
 
 	def setup(self):
 		import os
-		print "MFPApp: setup, pid =", os.getpid()
+		log.debug("MFPApp: setup, pid =", os.getpid())
 
 		from mfp.dsp_slave import dsp_init, DSPObject
 		from mfp.gui_slave import gui_init, GUICommand
@@ -120,15 +122,14 @@ class MFPApp (object):
 			self.gui_process.serve(GUICommand)
 			self.gui_cmd = GUICommand()
 			while not self.gui_cmd.ready():
-				print "MFPApp: GUI not reaady, waiting"
 				time.sleep(0.2)
-			print "MFPApp: GUI becomes ready"
+			log.debug("MFPApp: GUI is ready")
 
 		# midi manager 
 		from . import midi
 		self.midi_mgr = midi.MFPMidiManager(1, 1)
 		self.midi_mgr.start()	
-		print "MFPMidiManager started"
+		log.debug("MFPMidiManager started")
 
 		# OSC manager 
 		# from . import osc 
@@ -172,22 +173,22 @@ def main():
 	import code 
 	import sys
 
-	print "MFP.main, pid =", os.getpid()
+	log.debug("MFP.main, pid =", os.getpid())
 
 	m = MFPApp()
 
-	print "MFPApp created"
+	log.debug("MFPApp created")
 
 	m.setup()
 	
-	print "MFPApp configured"
+	log.debug("MFPApp configured")
 
 	builtins.register()
 
-	print "MFPApp builtins registered"
+	log.debug("MFPApp builtins registered")
 
 	if len(sys.argv) > 1:
-		print "loading", sys.argv[1]
+		log.debug("loading", sys.argv[1])
 		m.patch.load_file(sys.argv[1])
 	
 	code.interact(local=locals())

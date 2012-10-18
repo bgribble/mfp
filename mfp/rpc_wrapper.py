@@ -5,7 +5,9 @@ Simple RPC manager working with Request/RequestPipe classes
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
+
 from request import Request
+from . import log 
 
 def rpcwrap(worker_proc):
 	def inner(self, *args, **kwargs):
@@ -18,7 +20,7 @@ def rpcwrap(worker_proc):
 
 class RPCMetaclass(type):
 	def __init__(klass, name, bases, xdict): 
-		print "Registering", name
+		log.debug("Registering", name)
 		type.__init__(klass, name, bases, xdict)
 		klass.register(name)
 	
@@ -39,7 +41,7 @@ class RPCWrapper (object):
 	class MethodFailed(Exception):
 		def __init__(self, tb):
 			self.traceback = tb
-			print tb
+			log.debug(tb)
 			Exception.__init__(self)
 
 	_rpcid_seq = 0
@@ -66,8 +68,12 @@ class RPCWrapper (object):
 			self.rpcid = r.response
 
 	def call_remotely(self, rpcdata):
+		from datetime import datetime
+		calltime = datetime.now()
 		r = type(self).pipe.put(Request(rpcdata))
 		type(self).pipe.wait(r)
+		calltime = datetime.now() - calltime 
+		log.debug(type(self), "call_remotely: time=", calltime, "data =", rpcdata)
 		if r.response == RPCWrapper.METHOD_OK:
 			return r.payload
 		elif r.response == RPCWrapper.METHOD_FAILED:
@@ -91,7 +97,7 @@ class RPCWrapper (object):
 
 	@classmethod
 	def register(klass, name):
-		print "RPCWrapper: registering class", klass, name
+		log.debug("RPCWrapper: registering class", klass, name)
 		klass.rpctype[name] = klass 
 
 	@classmethod

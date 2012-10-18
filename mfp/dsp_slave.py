@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 import mfpdsp
 from mfp.rpc_wrapper import RPCWrapper, rpcwrap
+from . import log 
 
 class DSPObject(RPCWrapper):
 	objects = {}
@@ -17,7 +18,7 @@ class DSPObject(RPCWrapper):
 		RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params)
 		if self.local:
 			self.c_obj = mfpdsp.proc_create(name, inlets, outlets, params)
-			print "Creating DSP obj %s with %s" % (self, self.c_obj)
+			log.debug("Creating DSP obj %s with %s" % (self, self.c_obj))
 			DSPObject.objects[self.obj_id] = self.c_obj
 			DSPObject.c_objects[self.c_obj] = self.obj_id
 
@@ -45,6 +46,8 @@ class DSPObject(RPCWrapper):
 def dsp_init(pipe):
 	from main import MFPCommand
 	import threading 
+	log.log_module = "dsp"
+	log.debug("DSP thread starting") 
 
 	RPCWrapper.node_id = "JACK DSP"
 	DSPObject.pipe = pipe
@@ -64,7 +67,7 @@ def dsp_init(pipe):
 ttq = False
 def dsp_response(*args):
 	from .main import MFPCommand
-	print "response thread started"
+	log.debug("response thread started")
 
 	#from mfp.main import MFPCommand
 	# FIXME there is a thread mess waiting just offstage
@@ -72,13 +75,13 @@ def dsp_response(*args):
 	global ttq
 	mfp = MFPCommand()
 	while not ttq:
-		print "top of response loop"
+		log.debug("top of response loop")
 		messages = mfpdsp.dsp_response_wait()
 		if messages is None:
 			continue
 		for m in messages:
-			print "Received dsp message", m
-			print m[0], DSPObject.c_objects
+			log.debug("Received dsp message", m)
+			log.debug(m[0], DSPObject.c_objects)
 			recip = DSPObject.c_objects.get(m[0], -1) 
 			mfp.send(recip, -1, (m[1], m[2]))	
 
