@@ -124,7 +124,7 @@ class MFPGUI (object):
 
 	def clutter_do(self, thunk):
 		from gi.repository import GObject
-		GObject.idle_add(thunk)
+		GObject.idle_add(thunk, priority=GObject.PRIORITY_DEFAULT)
 
 	def clutter_proc(self):
 		from gi.repository import Clutter as clutter
