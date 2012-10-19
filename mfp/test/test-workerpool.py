@@ -1,48 +1,48 @@
 
 
 from unittest import TestCase
-from ..shark_pool import SharkPool, PoolShark
+from ..worker_pool import WorkerPool, BaseWorker
 import Queue
 
 import time
 
-class QueueShark(PoolShark):
+class QueueWorker(BaseWorker):
 
-	sharks = []
+	workers = []
 
 	def __init__(self, pool, q, results):
 		print self
 		self.queue = q
 		self.results = results
-		PoolShark.__init__(self, pool)
-		QueueShark.sharks.append(self)
+		BaseWorker.__init__(self, pool)
+		QueueWorker.workers.append(self)
 		
 	def capture(self):
 		try:
 			bite = self.queue.get(timeout=0.1)
 			return bite
 		except Queue.Empty:
-			raise SharkPool.Empty()
+			raise WorkerPool.Empty()
 
 	def consume(self, data):
 		self.results.append(data)
 
-class SharkPoolTest(TestCase):
+class WorkerPoolTest(TestCase):
 
 	def setUp(self):
 		self.queue = Queue.Queue()
 		self.results = []
-		self.pool = SharkPool(lambda p: QueueShark(p, self.queue, self.results))
+		self.pool = WorkerPool(lambda p: QueueWorker(p, self.queue, self.results))
 		self.pool.start()
 
 	def tearDown(self):
 		self.pool.finish()
 		
-		QueueShark.sharks = []
+		QueueWorker.workers = []
 
 	def test_start(self):
 		time.sleep(0.2)
-		self.assertEqual(len(QueueShark.sharks), 5)
+		self.assertEqual(len(QueueWorker.workers), 5)
 		self.assertEqual(len(self.pool.waiting_pool), 4)
 		
 

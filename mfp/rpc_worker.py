@@ -7,24 +7,31 @@ multiprocessing-based slave with error handling and communication
 from rpc_wrapper import RPCWrapper
 from request_pipe import RequestPipe
 from request import Request
-from shark_pool import SharkPool, PoolShark
+from worker_pool import WorkerPool, BaseWorker
 import multiprocessing, threading
 import Queue
 import time
+from . import log 
 
-class RPCShark (PoolShark):
+class RPCWorker (BaseWorker):
 	def __init__(self, pool, pipe):
 		self.pipe = pipe
-		PoolShark.__init__(self, pool)
+		BaseWorker.__init__(self, pool)
 
-	def capture(self):
+	def take_work(self):
 		try:
+			if log.log_module == "gui":
+				log.debug("take_work: waiting for data")
 			bite = self.pipe.get(timeout=0.1)
+			if log.log_module == "gui":
+				log.debug("take_work: got data")
 			return bite
 		except Queue.Empty:
-			raise SharkPool.Empty()
+			if log.log_module == "gui":
+				log.debug("take_work: nothing received")
+			raise WorkerPool.Empty()
 
-	def consume(self, bite):
+	def perform_work(self, bite):
 		req = self.pipe.process(bite)
 		if req.payload == 'quit':
 			# escape takes this thread out of the pool for finish()
@@ -39,7 +46,7 @@ class RPCShark (PoolShark):
 		
 		return True
 
-def rpc_worker_slave(pipe, initproc, lck):
+def rpc_server_slave(pipe, initproc, lck):
 	RPCWrapper.pipe = pipe
 	RPCWrapper.local = True
 	
@@ -51,14 +58,14 @@ def rpc_worker_slave(pipe, initproc, lck):
 	# wait until time to quit
 	lck.acquire()
 
-class RPCWorker(object):
+class RPCServer(object):
 	def __init__(self, name, initproc=None):
 		self.name = name
-		self.pipe = RequestPipe(factory=lambda pool: RPCShark(pool, self.pipe))
+		self.pipe = RequestPipe(factory=lambda pool: RPCWorker(pool, self.pipe))
 		self.initproc = initproc
 		self.worker_lock = multiprocessing.Lock()
 		self.worker_lock.acquire()
-		self.worker = multiprocessing.Process(target=rpc_worker_slave,
+		self.worker = multiprocessing.Process(target=rpc_server_slave,
 										      args=(self.pipe, self.initproc, self.worker_lock))
 		self.monitor = threading.Thread(target=self.monitor_proc, args=())
 		self.quitreq = False
@@ -75,7 +82,7 @@ class RPCWorker(object):
 	def monitor_proc(self):
 		self.worker.join()
 		if not self.quitreq:
-			print 'RPCWorker thread EXITED UNEXPECTEDLY'
+			print 'RPCServer thread EXITED UNEXPECTEDLY'
 			self.worker = None
 
 	def finish(self):

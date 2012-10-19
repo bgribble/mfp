@@ -8,21 +8,22 @@ import threading
 import Queue
 
 from request import Request
-from shark_pool import SharkPool, PoolShark 
+from worker_pool import WorkerPool, BaseWorker 
+from . import log 
 
-class RequestShark (PoolShark):
+class RequestWorker (BaseWorker):
 	def __init__(self, pool, pipe):
 		self.pipe = pipe
-		PoolShark.__init__(self, pool)
+		BaseWorker.__init__(self, pool)
 
-	def capture(self):
+	def take_work(self):
 		try:
 			bite = self.pipe.get(timeout=0.1)
 			return bite
 		except Queue.Empty:
-			raise SharkPool.Empty()
+			raise WorkerPool.Empty()
 
-	def consume(self, bite):
+	def perform_work(self, bite):
 		req = self.pipe.process(bite)
 
 		if req.payload == 'quit':
@@ -49,8 +50,8 @@ class RequestPipe(object):
 		self.pending = {} 
 
 		if factory is None:
-			factory = lambda pool: RequestShark(pool, self)
-		self.reader = SharkPool(factory)
+			factory = lambda pool: RequestWorker(pool, self)
+		self.reader = WorkerPool(factory)
 		
 		# not normally used
 		self.handler = None 
@@ -118,11 +119,19 @@ class RequestPipe(object):
 
 	def get(self, timeout=None):
 		if timeout is not None:
+			if log.log_module == "gui":
+				log.debug("pipe.get: polling start, timeout=", timeout)
 			ready = self.this_end.poll(timeout)
+			if log.log_module == "gui":
+				log.debug("pipe.get: polling returned, ready=", ready)
 			if not ready:
 				raise Queue.Empty
 		try:
+			if log.log_module == "gui":
+				log.debug("pipe.get: blocking receive starts")
 			qobj = self.this_end.recv()
+			if log.log_module == "gui":
+				log.debug("pipe.get: blocking receive returned")
 			return qobj
 		except EOFError, e:
 			raise Queue.Empty 

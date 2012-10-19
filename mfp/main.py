@@ -17,7 +17,7 @@ from patch import Patch
 from singleton import Singleton
 
 from rpc_wrapper import RPCWrapper, rpcwrap
-from rpc_worker import RPCWorker
+from rpc_worker import RPCServer
 
 from . import log 
 
@@ -114,11 +114,11 @@ class MFPApp (object):
 
 		# dsp and gui processes
 		if not MFPApp.no_dsp:
-			self.dsp_process = RPCWorker("mfp_dsp", dsp_init)
+			self.dsp_process = RPCServer("mfp_dsp", dsp_init)
 			self.dsp_process.serve(DSPObject)
 		
 		if not MFPApp.no_gui:
-			self.gui_process = RPCWorker("mfp_gui", gui_init)
+			self.gui_process = RPCServer("mfp_gui", gui_init)
 			self.gui_process.serve(GUICommand)
 			self.gui_cmd = GUICommand()
 			while not self.gui_cmd.ready():
