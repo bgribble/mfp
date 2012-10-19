@@ -7,7 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter as clutter
-import glib
+from gi.repository import GObject
 import gobject
 import cairo
 import math
@@ -43,7 +43,7 @@ class Quilt (clutter.Group):
 		self.render_cb = None
 
 		self.rebuild_quilt()
-		glib.timeout_add(self.IDLE_INTERVAL, self.idle_cb)
+		GObject.timeout_add(self.IDLE_INTERVAL, self.idle_cb)
 
 	def set_viewport_scroll(self, vx, vy):
 		if (vx != self.viewport_vx) or (vy != self.viewport_vy):

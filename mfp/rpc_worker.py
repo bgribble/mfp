@@ -20,15 +20,9 @@ class RPCWorker (BaseWorker):
 
 	def take_work(self):
 		try:
-			if log.log_module == "gui":
-				log.debug("take_work: waiting for data")
 			bite = self.pipe.get(timeout=0.1)
-			if log.log_module == "gui":
-				log.debug("take_work: got data")
 			return bite
 		except Queue.Empty:
-			if log.log_module == "gui":
-				log.debug("take_work: nothing received")
 			raise WorkerPool.Empty()
 
 	def perform_work(self, bite):
@@ -82,7 +76,7 @@ class RPCServer(object):
 	def monitor_proc(self):
 		self.worker.join()
 		if not self.quitreq:
-			print 'RPCServer thread EXITED UNEXPECTEDLY'
+			log.debug(self.name, 'RPCServer thread EXITED UNEXPECTEDLY')
 			self.worker = None
 
 	def finish(self):

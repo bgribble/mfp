@@ -98,8 +98,6 @@ class GUICommand (RPCWrapper):
 
 		obj_1 = MFPGUI().recall(obj_1_id)
 		obj_2 = MFPGUI().recall(obj_2_id)
-		log.debug("MFPGUI._connect:", obj_1_id, obj_1, obj_2_id, obj_2)
-		log.debug(MFPGUI().objects)
 		c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
 		obj_1.connections_out.append(c)
 		obj_2.connections_in.append(c)
@@ -112,11 +110,11 @@ class MFPGUI (object):
 	__metaclass__ = Singleton
 
 	def __init__(self):
-		self.clutter_thread = threading.Thread(target=self.clutter_proc)
-		self.clutter_thread.start()
 		self.objects = {}
 		self.mfp = None 
 		self.appwin = None
+		self.clutter_thread = threading.Thread(target=self.clutter_proc)
+		self.clutter_thread.start()
 
 	def remember(self, obj):
 		self.objects[obj.obj_id] = obj
@@ -125,18 +123,15 @@ class MFPGUI (object):
 		return self.objects.get(obj_id)
 
 	def clutter_do(self, thunk):
-		log.debug("clutter_do: enter", thunk)
-		import glib
-		glib.idle_add(thunk)
-		log.debug("clutter_do: done", thunk)
-
+		from gi.repository import GObject
+		GObject.idle_add(thunk)
 
 	def clutter_proc(self):
 		from gi.repository import Clutter as clutter
-		import glib
+		from gi.repository import GObject
 		
 		# explicit init seems to avoid strange thread sync/blocking issues 
-		glib.threads_init()
+		GObject.threads_init()
 		clutter.threads_init()
 		clutter.init([])
 

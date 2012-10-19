@@ -119,19 +119,11 @@ class RequestPipe(object):
 
 	def get(self, timeout=None):
 		if timeout is not None:
-			if log.log_module == "gui":
-				log.debug("pipe.get: polling start, timeout=", timeout)
 			ready = self.this_end.poll(timeout)
-			if log.log_module == "gui":
-				log.debug("pipe.get: polling returned, ready=", ready)
 			if not ready:
 				raise Queue.Empty
 		try:
-			if log.log_module == "gui":
-				log.debug("pipe.get: blocking receive starts")
 			qobj = self.this_end.recv()
-			if log.log_module == "gui":
-				log.debug("pipe.get: blocking receive returned")
 			return qobj
 		except EOFError, e:
 			raise Queue.Empty 

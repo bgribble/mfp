@@ -27,34 +27,25 @@ class BaseWorker (object):
 	
 	def _thread_func(self):
 		while not self.quit_req:
-			if log.log_module == "gui":
-				log.debug("worker", self, "lining up")
 			# get in line
 			self.pool.worker_ready(self)
 
 			with self.lock:
-				if log.log_module == "gui":
-					log.debug("worker", self, "sleeping on condition")
 				while not self.quit_req and self.pool.active_worker != self:
 					self.condition.wait()
-					if log.log_module == "gui":
-						log.debug("worker", self, "woke from condition",
-								  self.pool.active_worker)
 
 			if self.quit_req:
 				break
 
 			# take_work a chunk of data
-			if log.log_module == "gui":
-				log.debug("worker", self, "awake, calling take_work")
 			try:
-				chum = self.take_work()
+				workunit = self.take_work()
 			except WorkerPool.Empty, e:
 				continue
 			
 			# perform_work data
 			self.pool.worker_consuming(self)
-			keepalive = self.perform_work(chum)
+			keepalive = self.perform_work(workunit)
 			if not keepalive:
 				break
 		self.pool.worker_done(self)
@@ -74,11 +65,7 @@ class BaseWorker (object):
 		pass
 
 	def go(self):
-		if log.log_module == "gui":
-			log.debug("worker", self, "got go")
 		with self.lock:
-			if log.log_module == "gui":
-				log.debug("worker", self, "got lock, notifying condition")
 			self.condition.notify()
 
 	def exit(self):
