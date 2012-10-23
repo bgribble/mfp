@@ -24,6 +24,8 @@ Basics:
  * error handling! 
 
 Bugs: 
+ * Roll mode of xyplot uses increasing CPU and RAM over 10 minutes or 
+   so 
  * [route] allows changing number of outputs but nothing is propagated to the 
    GUI
  * Rebuilding [metro] to [metro 200] in gui doesn't set the time 

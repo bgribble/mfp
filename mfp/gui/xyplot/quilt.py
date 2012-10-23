@@ -8,6 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter as clutter
 from gi.repository import GObject
+from mfp import log 
 import gobject
 import cairo
 import math
@@ -92,6 +93,7 @@ class Quilt (clutter.Group):
 		def ubound(val):
 			return lbound(val) + self.tile_size
 
+
 		min_x = lbound(self.viewport_x)
 		max_x = ubound(self.viewport_x + self.viewport_width)
 
@@ -129,6 +131,8 @@ class Quilt (clutter.Group):
 			elif flush:
 				tile.clear()
 				tile.invalidate()
+		for tile in garbage: 
+			tile.destroy()
 		
 	def gc_tiles(self, marked):
 		garbage = []
