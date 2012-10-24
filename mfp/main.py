@@ -114,7 +114,9 @@ class MFPApp (object):
 
 		# dsp and gui processes
 		if not MFPApp.no_dsp:
-			self.dsp_process = RPCServer("mfp_dsp", dsp_init)
+			num_inputs = 2
+			num_outputs = 2
+			self.dsp_process = RPCServer("mfp_dsp", dsp_init, num_inputs, num_outputs)
 			self.dsp_process.serve(DSPObject)
 		
 		if not MFPApp.no_gui:

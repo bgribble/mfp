@@ -74,6 +74,8 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 	jack_port_t * port;
 	int i;
 
+	char namebuf[16];
+
 	if ((client = jack_client_open("mfp", JackNullOption, &status, NULL)) == 0) {
 		fprintf (stderr, "jack_client_open() failed.");
 		return 0;
@@ -90,7 +92,8 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 		mfp_input_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
 
 		for(i=0; i<num_inputs; i++) {
-			port = jack_port_register (client, "input", JACK_DEFAULT_AUDIO_TYPE, 
+			snprintf(namebuf, 16, "input_%d", i);
+			port = jack_port_register (client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
 									   JackPortIsInput, i);
 			g_array_append_val(mfp_input_ports, port);
 		}
@@ -100,7 +103,8 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 		mfp_output_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
 
 		for(i=0; i<num_outputs; i++) {
-			port = jack_port_register (client, "output", JACK_DEFAULT_AUDIO_TYPE, 
+			snprintf(namebuf, 16, "output_%d", i);
+			port = jack_port_register (client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
 							           JackPortIsOutput, i);
 			g_array_append_val(mfp_output_ports, port);
 		}

@@ -10,4 +10,5 @@ extern mfp_procinfo * init_builtin_mul(void);
 extern mfp_procinfo * init_builtin_div(void);
 extern mfp_procinfo * init_builtin_line(void);
 extern mfp_procinfo * init_builtin_noise(void);
+extern mfp_procinfo * init_builtin_ampl(void);
 

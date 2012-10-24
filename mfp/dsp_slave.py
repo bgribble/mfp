@@ -43,7 +43,7 @@ class DSPObject(RPCWrapper):
 	def disconnect(self, outlet, target, inlet):
 		return mfpdsp.proc_disconnect(self.c_obj, outlet, DSPObject.objects.get(target), 
 								      inlet)
-def dsp_init(pipe):
+def dsp_init(pipe, num_inputs, num_outputs):
 	from main import MFPCommand
 	import threading 
 	log.log_module = "dsp"
@@ -57,7 +57,7 @@ def dsp_init(pipe):
 	pipe.on_finish(dsp_finish)
 
 	# start JACK thread 
-	mfpdsp.dsp_startup(1, 1)
+	mfpdsp.dsp_startup(num_inputs, num_outputs)
 	mfpdsp.dsp_enable()
 
 	# start response thread 

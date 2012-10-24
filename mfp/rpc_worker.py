@@ -40,27 +40,29 @@ class RPCWorker (BaseWorker):
 		
 		return True
 
-def rpc_server_slave(pipe, initproc, lck):
+def rpc_server_slave(pipe, initproc, initproc_args, lck):
 	RPCWrapper.pipe = pipe
 	RPCWrapper.local = True
 	
 	pipe.init_slave()
 
 	if initproc:
-		initproc(pipe)
+		initproc(pipe, *initproc_args)
 
 	# wait until time to quit
 	lck.acquire()
 
 class RPCServer(object):
-	def __init__(self, name, initproc=None):
+	def __init__(self, name, initproc=None, *initproc_args):
 		self.name = name
 		self.pipe = RequestPipe(factory=lambda pool: RPCWorker(pool, self.pipe))
 		self.initproc = initproc
+		self.initproc_args = initproc_args
 		self.worker_lock = multiprocessing.Lock()
 		self.worker_lock.acquire()
 		self.worker = multiprocessing.Process(target=rpc_server_slave,
-										      args=(self.pipe, self.initproc, self.worker_lock))
+										      args=(self.pipe, self.initproc, 
+													self.initproc_args, self.worker_lock))
 		self.monitor = threading.Thread(target=self.monitor_proc, args=())
 		self.quitreq = False
 

@@ -416,6 +416,9 @@ init_builtins(void)
 
 	pi = init_builtin_buffer();
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+
+	pi = init_builtin_ampl();
+	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 }
 
 int
