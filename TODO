@@ -24,8 +24,6 @@ Basics:
  * error handling! 
 
 Bugs: 
- * Roll mode of xyplot uses increasing CPU and RAM over 10 minutes or 
-   so 
  * [route] allows changing number of outputs but nothing is propagated to the 
    GUI
  * Rebuilding [metro] to [metro 200] in gui doesn't set the time 
@@ -33,10 +31,3 @@ Bugs:
  * Numeric entry doesn't go to next object with TAB 
  * Numeric entry can't be grabbed to drag in either major mode 
  * ScrollEvent does not have scroll_direction (scrollwheel) 
-
-Debug mode: 
- * every processor has a debug port on the side 
- * debug level gets set by message 
- * full backtraces should get dumped on error
-
-

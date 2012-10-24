@@ -138,7 +138,6 @@ class MFPGUI (object):
 		from gi.repository import GObject
 		GObject.idle_add(thunk, priority=GObject.PRIORITY_DEFAULT)
 
-	@profile
 	def clutter_proc(self):
 		from gi.repository import Clutter as clutter
 		from gi.repository import GObject
