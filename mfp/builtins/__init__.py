@@ -20,7 +20,7 @@ def register():
 	import p_note2freq; p_note2freq.register()
 	import p_plot; p_plot.register()
 	import p_listops; p_listops.register()
-
+	import p_ampl; p_ampl.register()
 
 
 

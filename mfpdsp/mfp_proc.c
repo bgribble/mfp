@@ -31,9 +31,14 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 	mfp_processor * p;
 	int incount, outcount;
 
-	if (typeinfo == NULL)
+	if (typeinfo == NULL) {
+		printf ("mfp_proc_alloc: typeinfo is NULL!\n");
 		return NULL;
-
+	}
+	else {
+		printf("mfp_proc_alloc: %s %d %d %d", typeinfo->name, num_inlets, 
+				num_outlets, blocksize);
+	}
     p = g_malloc(sizeof(mfp_processor));
 	p->typeinfo = typeinfo; 
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);

@@ -92,7 +92,7 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 		mfp_input_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
 
 		for(i=0; i<num_inputs; i++) {
-			snprintf(namebuf, 16, "input_%d", i);
+			snprintf(namebuf, 16, "in_%d", i);
 			port = jack_port_register (client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
 									   JackPortIsInput, i);
 			g_array_append_val(mfp_input_ports, port);
@@ -103,7 +103,7 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 		mfp_output_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
 
 		for(i=0; i<num_outputs; i++) {
-			snprintf(namebuf, 16, "output_%d", i);
+			snprintf(namebuf, 16, "out_%d", i);
 			port = jack_port_register (client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
 							           JackPortIsOutput, i);
 			g_array_append_val(mfp_output_ports, port);

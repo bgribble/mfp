@@ -16,8 +16,8 @@ def pkgconf_libs(pkg):
 	return [ f.strip() for f in shcall("pkg-config --libs %s" % pkg).split('-l')
              if f ]
 	
-x86_args = ['-march=atom', '-mstackrealign', '-mpreferred-stack-boundary=4']
-platform_args = []
+x86_args = ['-march=686', '-mstackrealign', '-mpreferred-stack-boundary=4']
+platform_args = [ "-DMFP_USE_SSE"]
 
 mfp_c_sources = [
 	'mfp_pyglue.c', 'mfp_jack.c', 'mfp_dsp.c', 'mfp_proc.c', 'mfp_block.c',

@@ -23,22 +23,23 @@ process(mfp_processor * proc)
 	mfp_sample * rms_sample = proc->outlet_buf[0]->data;
 	mfp_sample * peak_sample = proc->outlet_buf[1]->data;
 	mfp_sample sample;
-	double peak_slope = (double)(pdata->peak_decay_ms)/((double)mfp_samplerate / 1000);
+	double peak_slope = 1000.0/((double)pdata->peak_decay_ms*(double)mfp_samplerate);
 	double peak = pdata->last_peak;
 	double rms_scaler = 1.0/(pdata->rms_window_ms*mfp_samplerate/1000.0);
 	double rms_accum = pdata->rms_accum;
 	int scount; 
 
-	if (in_sample == NULL || rms_sample == NULL || peak_sample == NULL) {
+	// printf("ampl.process: starting work %d\n", mfp_blocksize);
+	if ((in_sample == NULL) || (rms_sample == NULL) || (peak_sample == NULL)) {
 		return 0;
 	}
-	
+
 	for(scount = 0; scount < mfp_blocksize; scount++) {
-		sample = *in_sample;
+		sample = *in_sample++;
 
 		/* peak */
-		if (fabs(sample) > peak) {
-			peak = sample;
+		if (fabs(sample) > (peak - peak_slope)) {
+			peak = fabs(sample);
 		}
 		else {
 			peak -= peak_slope;
@@ -48,9 +49,8 @@ process(mfp_processor * proc)
 		/* rms (not really, this is super ghetto) */
 		rms_accum += rms_scaler*sample*sample;
 		*rms_sample++ = (float)sqrt(rms_accum); 
-
-		in_sample++;
 	}
+	//printf("ampl.process: finished work\n");
 
 	return 0;
 }
@@ -88,7 +88,6 @@ config(mfp_processor * proc)
 		pdata->peak_decay_ms = *(float *)peak_decay_ptr;
 	}
 
-
 	return;
 }
 
@@ -97,7 +96,7 @@ init_builtin_ampl(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
 
 	p->name = strdup("ampl");
-	p->is_generator = 1;
+	p->is_generator = 0;
 	p->process = process;
 	p->init = init;
 	p->destroy = destroy;

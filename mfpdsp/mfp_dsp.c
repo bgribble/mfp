@@ -168,7 +168,9 @@ mfp_dsp_handle_requests(void)
 			break;
 
 		case REQTYPE_CREATE:
+			printf("handle_requests: calling proc_init\n");
 			mfp_proc_init(cmd.src_proc);
+			printf("handle_requests: back from proc_init\n");
 			break;
 		}
 	}

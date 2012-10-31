@@ -54,7 +54,7 @@ class AudioIn(Processor):
 				
 
 def register():
-	MFPApp().register("audio_in~", AudioIn)
-	MFPApp().register("audio_out~", AudioOut)
+	MFPApp().register("in~", AudioIn)
+	MFPApp().register("out~", AudioOut)
 
 

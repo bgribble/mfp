@@ -19,6 +19,8 @@ mfp_block_new(int blocksize)
 
 #ifdef MFP_USE_SSE
 	posix_memalign(&buf, 16, (blocksize/4 * sizeof(__v4sf)));
+#else 
+	buf = g_malloc(blocksize);
 #endif
 
 	mfp_block_init(b, buf, blocksize);
@@ -33,7 +35,7 @@ mfp_block_init(mfp_block * block, mfp_sample * data, int blocksize)
 	block->allocsize = blocksize;
 
 	if(data == NULL) {
-		printf("mfp_block_init: WARNING: data pointer NULL\n");
+		printf("mfp_block_init: WARNING: data pointer NULL, blocksize=%d\n", blocksize);
 		block->blocksize = 0;
 		block->allocsize = 0;
 	}
