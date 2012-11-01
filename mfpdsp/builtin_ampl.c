@@ -9,9 +9,12 @@
 #include "mfp_dsp.h"
 
 typedef struct {
+	/* configurable params */
 	float peak_decay_ms;
-	float last_peak;
 	float rms_window_ms;
+
+	/* runtime state */ 
+	double last_peak;
 	double rms_accum;
 } builtin_ampl_data;
 
@@ -25,12 +28,11 @@ process(mfp_processor * proc)
 	mfp_sample sample;
 	double peak_slope = 1000.0/((double)pdata->peak_decay_ms*(double)mfp_samplerate);
 	double peak = pdata->last_peak;
+	double rms_accum = pdata->rms_accum;
 	double rms_scaler = 1000.0/((double)pdata->rms_window_ms*(double)mfp_samplerate);
 	double rms_downsize = 1.0 - rms_scaler;
-	double rms_accum = pdata->rms_accum;
 	int scount; 
 
-	// printf("ampl.process: starting work %d\n", mfp_blocksize);
 	if ((in_sample == NULL) || (rms_sample == NULL) || (peak_sample == NULL)) {
 		return 0;
 	}
@@ -51,7 +53,10 @@ process(mfp_processor * proc)
 		rms_accum = rms_accum*rms_downsize + rms_scaler*sample*sample;
 		*rms_sample++ = (mfp_sample)sqrt(rms_accum); 
 	}
-	//printf("ampl.process: finished work\n");
+
+	/* save state */
+	pdata->last_peak = peak;
+	pdata->rms_accum = rms_accum;
 
 	return 0;
 }

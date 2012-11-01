@@ -54,8 +54,6 @@ dsp_response_wait(PyObject * mod, PyObject * args)
 	pthread_mutex_lock(&mfp_response_lock);
 	pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
 
-	printf("py: woke up, %d waiting\n", mfp_responses_pending->len);
-
 	/* copy/clear C response objects */
 	if(mfp_responses_pending && (mfp_responses_pending->len > 0)) {
 		l = PyList_New(mfp_responses_pending->len);
@@ -64,9 +62,7 @@ dsp_response_wait(PyObject * mod, PyObject * args)
 			t = PyTuple_New(3);
 			r = g_array_index(mfp_responses_pending, mfp_respdata, rcount);
 
-			printf("looking up %p\n", r.dst_proc);
 			proc = g_hash_table_lookup(mfp_proc_objects, r.dst_proc);
-			printf("    found %p\n", proc);
 			if (proc == NULL)
 				continue;
 
@@ -129,12 +125,10 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 		case PARAMTYPE_FLT:
 			if (PyNumber_Check(val)) {
 				cflt = PyFloat_AsDouble(PyNumber_Float(val));
-				printf("c:set_c_param got float %f for %s\n", cflt, paramname);
 				mfp_proc_setparam_float(proc, paramname, cflt);
 			}
 			else {
 				rval = 0;
-				printf("c:set_c_param failed number check for %s\n", paramname);
 			}
 			break;
 
@@ -158,7 +152,6 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 						g_array_append_val(g, cflt); 
 					}
 					else {
-						printf("NumberCheck failed on %p", listval);
 						rval = 0;
 					}
 				}
@@ -169,7 +162,6 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 				}
 			}
 			else {
-				printf("PyListCheck failed %p", val);
 				rval = 0;
 			}
 			break;
@@ -220,7 +212,6 @@ proc_create(PyObject * mod, PyObject *args)
 	mfp_procinfo * pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typestr);
 	mfp_reqdata rd;
 
-	printf("c: proc_create enter\n");
 	if (pinfo == NULL) {
 		Py_INCREF(Py_None);
 		return Py_None;
@@ -231,7 +222,6 @@ proc_create(PyObject * mod, PyObject *args)
 		extract_c_params(rd.src_proc, paramdict);
 
 	    pthread_mutex_lock(&mfp_globals_lock);
-		printf("c: proc_create in crit sec %p\n", rd.src_proc);
 		g_array_append_val(mfp_requests_pending, rd);
 		pthread_mutex_unlock(&mfp_globals_lock);
 

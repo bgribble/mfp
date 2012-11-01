@@ -25,7 +25,6 @@ class Snap(Processor):
 		self.dsp_setparam("retrigger", value)
 
 	def trigger(self):
-		log.debug("snap.trigger:", self.inlets)
 		if self.inlets[0] is Bang:
 			self.dsp_setparam("trigger", 1.0)
 		elif self.inlets[0] is True: 

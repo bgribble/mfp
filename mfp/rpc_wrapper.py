@@ -69,11 +69,8 @@ class RPCWrapper (object):
 
 	def call_remotely(self, rpcdata):
 		from datetime import datetime
-		log.debug("call_remotely:", rpcdata.get("func"), "starting")
 		r = type(self).pipe.put(Request(rpcdata))
-		log.debug("call_remotely:", rpcdata.get("func"), "sent, waiting for response")
 		type(self).pipe.wait(r)
-		log.debug("call_remotely:", rpcdata.get("func"), "got response")
 		if r.response == RPCWrapper.METHOD_OK:
 			return r.payload
 		elif r.response == RPCWrapper.METHOD_FAILED:
@@ -108,8 +105,6 @@ class RPCWrapper (object):
 		args = rpcdata.get('args')
 		kwargs = rpcdata.get('kwargs')
 	
-		log.debug("handle:", func, "starting")
-
 		req.state = Request.RESPONSE_DONE
 		
 		if func == '__init__':
@@ -141,5 +136,4 @@ class RPCWrapper (object):
 																		   RPCWrapper.node_id, obj, rpcdata)
 				req.payload = einfo + traceback.format_exc()
 				req.response = RPCWrapper.METHOD_FAILED
-		log.debug("handle:", func, "complete")
 

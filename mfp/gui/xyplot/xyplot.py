@@ -169,8 +169,6 @@ class XYPlot (clutter.Group):
 		elif y_max is None:
 			y_max = self.y_max + (y_min - self.y_min)
 
-		print "XYPlot.set_bounds:", x_min, y_min, x_max, y_max
-
 		# if scale is changing, really need to redraw all
 		need_x_flush = need_y_flush = False 
 
@@ -227,7 +225,6 @@ class XYPlot (clutter.Group):
 		return np
 
 	def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
-		print "XYPlot.draw_xaxis_cb:", px_min, px_max, self.x_min, self.x_max
 		pt_min = self.px2pt(px_min)
 		pt_max = self.px2pt(px_max)
 
@@ -249,7 +246,6 @@ class XYPlot (clutter.Group):
 		# ticks
 		for tick in ticks:
 			tick_px = self.pt2px((tick, 0))
-			print " x tick:", tick, tick_px, px_min
 			ctx.move_to(tick_px[0]-px_min[0], self.AXIS_PAD)
 			ctx.line_to(tick_px[0]-px_min[0], 3*self.AXIS_PAD)
 			ctx.stroke()
@@ -263,12 +259,10 @@ class XYPlot (clutter.Group):
 		tick_pad = abs(self.px2pt((0, self.TICK_SIZE))[1])
 		tick_min = pt_max[1] - 2*tick_pad 
 		tick_max = pt_min[1] + tick_pad  
-		print "y ticks:", tick_pad, tick_min, tick_max 
 
 		# Y axis ticks
 		ticks = mkticks(self.y_min, self.y_max, float(self.plot_h)/self.TICK_SIZE, 
 					    tick_min, tick_max)
-		print tick_min, tick_max, ticks 
 		ctx.set_source_rgb(black.red, black.green, black.blue)
 		ctx.set_font_size(self.axis_font_size)
 		
@@ -281,7 +275,6 @@ class XYPlot (clutter.Group):
 		for tick in ticks:
 			tick_px = self.pt2px((0,tick))
 			ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, tick_px[1]-px_min[1])
-			print " y tick:", tick, tick_px, px_min
 			ctx.line_to(self.MARGIN_LEFT-3*self.AXIS_PAD, tick_px[1]-px_min[1])
 			ctx.stroke()
 			ctx.save()
