@@ -8,6 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from mfp.processor import Processor
 from mfp.main import MFPApp
 from .. import Bang, Uninit
+from mfp import log 
 
 class Osc(Processor):
 	def __init__(self, init_type, init_args):
@@ -26,13 +27,15 @@ class Osc(Processor):
 		# number inputs to the DSP ins (freq, amp) are
 		# handled automatically
 		if self.inlets[0] is Bang:
-			self.set_param("phase", float(0))
+			self.dsp_setparam("phase", float(0))
 		else:
 			try:
 				phase = float(self.inlets[0])
-				self.set_param("phase", phase)
-			except:
-				print "Can't convert %s to a frequency value" % self.inlets[0]
+				self.dsp_setparam("phase", phase)
+			except Exception, e:
+				log.debug("osc~: Can't convert %s to a frequency value" % self.inlets[0])
+				log.debug("osc~: Exception:", e)
+
 				
 def register():
 	MFPApp().register("osc~", Osc)

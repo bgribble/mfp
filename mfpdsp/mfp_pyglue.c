@@ -129,11 +129,13 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 		case PARAMTYPE_FLT:
 			if (PyNumber_Check(val)) {
 				cflt = PyFloat_AsDouble(PyNumber_Float(val));
+				printf("c:set_c_param got float %f for %s\n", cflt, paramname);
 				mfp_proc_setparam_float(proc, paramname, cflt);
 			}
-			else
+			else {
 				rval = 0;
-
+				printf("c:set_c_param failed number check for %s\n", paramname);
+			}
 			break;
 
 		case PARAMTYPE_STRING:
@@ -418,6 +420,9 @@ init_builtins(void)
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 
 	pi = init_builtin_ampl();
+	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+
+	pi = init_builtin_snap();
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 }
 

@@ -24,7 +24,6 @@ from . import log
 class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def create(self, objtype, initargs=''):
-		log.debug("MFPApp.create() local")
 		obj = MFPApp().create(objtype, initargs)
 		if obj is None:
 			log.debug("MFPApp.create() failed")
@@ -62,7 +61,6 @@ class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def delete(self, obj_id):
 		obj = MFPApp().recall(obj_id)
-		log.debug("MFPApp: got delete req for", obj)
 		obj.delete()
 
 	@rpcwrap

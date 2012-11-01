@@ -9,6 +9,8 @@ from .evaluator import Evaluator
 from .method import MethodCall
 from .bang import Uninit 
 
+from mfp import log 
+
 class Processor (object): 
 	OK = 0
 	ERROR = 1 
@@ -44,6 +46,12 @@ class Processor (object):
 						         len(self.dsp_outlets), params)
 		self.gui_params['dsp_inlets'] = self.dsp_inlets
 		self.gui_params['dsp_outlets'] = self.dsp_outlets
+
+	def dsp_setparam(self, param, value):
+		self.dsp_obj.setparam(param, value)
+
+	def dsp_getparam(self, param, value):
+		return self.dsp_obj.getparam(param, value)
 
 	def delete(self):
 		outport = 0
@@ -136,7 +144,7 @@ class Processor (object):
 				w_target, w_val, w_inlet = work[0]
 				work[:1] = w_target._send(w_val, w_inlet)
 		except: 
-			print "send failed:", self, value, inlet
+			log.debug("send failed:", self, value, inlet)
 			import traceback
 			tb = traceback.format_exc()
 			self.error(tb)

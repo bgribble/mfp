@@ -19,7 +19,7 @@ class Sig(Processor):
 			value = 0
 
 		self.dsp_outlets=[0]
-		self.dsp_init("sig~")
+		self.dsp_init("sig")
 		self.dsp_obj.setparam("value", value)
 
 

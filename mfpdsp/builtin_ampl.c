@@ -25,7 +25,8 @@ process(mfp_processor * proc)
 	mfp_sample sample;
 	double peak_slope = 1000.0/((double)pdata->peak_decay_ms*(double)mfp_samplerate);
 	double peak = pdata->last_peak;
-	double rms_scaler = 1.0/(pdata->rms_window_ms*mfp_samplerate/1000.0);
+	double rms_scaler = 1000.0/((double)pdata->rms_window_ms*(double)mfp_samplerate);
+	double rms_downsize = 1.0 - rms_scaler;
 	double rms_accum = pdata->rms_accum;
 	int scount; 
 
@@ -47,8 +48,8 @@ process(mfp_processor * proc)
 		*peak_sample++ = (float)peak;
 
 		/* rms (not really, this is super ghetto) */
-		rms_accum += rms_scaler*sample*sample;
-		*rms_sample++ = (float)sqrt(rms_accum); 
+		rms_accum = rms_accum*rms_downsize + rms_scaler*sample*sample;
+		*rms_sample++ = (mfp_sample)sqrt(rms_accum); 
 	}
 	//printf("ampl.process: finished work\n");
 
@@ -62,7 +63,7 @@ init(mfp_processor * proc)
 	proc->data = p;
 	p->peak_decay_ms = 200;
 	p->last_peak = 0.0;
-	p->rms_window_ms = 200;
+	p->rms_window_ms = 20;
 	p->rms_accum = 0.0;
 
 	return;
@@ -83,9 +84,15 @@ config(mfp_processor * proc)
 {
 	builtin_ampl_data * pdata = (builtin_ampl_data *)proc->data;
 	gpointer peak_decay_ptr = g_hash_table_lookup(proc->params, "peak_decay");
+	gpointer rms_window_ptr = g_hash_table_lookup(proc->params, "rms_window");
 
 	if(peak_decay_ptr != NULL) {
 		pdata->peak_decay_ms = *(float *)peak_decay_ptr;
+	}
+
+
+	if(rms_window_ptr != NULL) {
+		pdata->rms_window_ms = *(float *)rms_window_ptr;
 	}
 
 	return;
