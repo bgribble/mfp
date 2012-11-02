@@ -20,8 +20,6 @@ class MessageElement (PatchElement):
 		PatchElement.__init__(self, window, x, y)
 
 		self.message_text = None 
-		self.connections_out = [] 
-		self.connections_in = [] 
 
 		# create elements
 		self.texture = clutter.CairoTexture.new(35,25)
@@ -79,7 +77,7 @@ class MessageElement (PatchElement):
 		self.message_text = self.label.get_text()
 
 		print "MessageElement: obj=%s" % (self.message_text)
-		self.create("message", self.message_text)
+		self.create(self.element_type, self.message_text)
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 		else:

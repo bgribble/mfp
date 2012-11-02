@@ -8,6 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor 
 from ..main import MFPApp
 from .. import Bang, Uninit 
+from mfp import log 
 
 class Var (Processor):
 	def __init__(self, init_type, init_args):
@@ -23,6 +24,7 @@ class Var (Processor):
 			self.value = kwargs 
 
 	def trigger(self):
+
 		do_update = False
 		if self.inlets[1] is not Uninit:
 			self.value = self.inlets[1] 
@@ -30,8 +32,9 @@ class Var (Processor):
 			do_update = True
 
 		if self.inlets[0] is not Uninit:
-			if self.inlets[0] is not Bang and self.init_type != "message":
+			if (self.init_type != "message") or (self.inlets[0] is not Bang):
 				self.value = self.inlets[0]
+				do_update = True 
 			self.outlets[0] = self.value
 			self.inlets[0] = Uninit
 

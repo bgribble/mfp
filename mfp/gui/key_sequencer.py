@@ -33,11 +33,11 @@ KEY_ENTER = 65293
 
 def get_key_unicode(ev):
 	if ev.unicode_value:
-		print "unicode:", ev.unicode_value, type(ev.unicode_value)
+		#print "unicode:", ev.unicode_value, type(ev.unicode_value)
 		return ord(ev.unicode_value)
 	else:
 		v = clutter.keysym_to_unicode(ev.keyval)
-		print "converted:", v, type(v)
+		#print "converted:", v, type(v)
 		return v 
 
 class KeySequencer (object):

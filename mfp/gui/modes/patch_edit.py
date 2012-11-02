@@ -14,6 +14,7 @@ from ..connection_element import ConnectionElement
 from ..message_element import MessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
+from ..barmeter_element import BarMeterElement 
 
 class PatchEditMode (InputMode):
 	def __init__(self, window):
@@ -30,6 +31,8 @@ class PatchEditMode (InputMode):
 		self.bind("m", lambda: self.window.add_element(MessageElement), "patch-add-message")
 		self.bind("n", lambda: self.window.add_element(EnumElement), "patch-add-enum")
 		self.bind("p", lambda: self.window.add_element(PlotElement), "patch-add-plot")
+		self.bind("b", lambda: self.window.add_element(BarMeterElement), "patch-add-barmeter")
+
 
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
