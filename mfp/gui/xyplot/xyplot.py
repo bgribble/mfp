@@ -14,33 +14,13 @@ import math
 
 from .mark_style import MarkStyle
 from .quilt import Quilt 
+from .. import ticks 
 
 black = clutter.Color()
 black.from_string("Black")
 
 white = clutter.Color()
 white.from_string("White")
-
-def mkticks(vmin, vmax, numticks, tick_min, tick_max):
-	# generate ticks in the range [tick_min, tick_max]
-	# for a chart showing a total of numticks ticks (approximately)
-	# on the total range of [vmin, vmax]
-
-	# interv is the target interval between ticks.  We want the 
-	# nearest .1, .25, .5, or 1 to that.  This calculation is based on
-	# the chart as a whole, not the target range
-	interv = float(vmax-vmin)/numticks
-	logbase = pow(10, math.floor(math.log10(interv)))
-	choices = [ logbase, logbase*2.5, logbase*5.0, logbase * 10]
-	diffs = [ abs(interv-c) for c in choices ]
-	tickint = choices[diffs.index(min(*diffs))]
-
-	# tickint now has the interval between ticks.  Use the target range 
-	# to generate the ticks 
-	first_tick = tickint * math.floor(tick_min / tickint)
-	numticks = int(float(tick_max-tick_min) / tickint) + 2
-	ticks = [ first_tick + n*tickint for n in range(numticks) ]
-	return [ t for t in ticks if t >= tick_min and t <= tick_max ]
 
 class XYPlot (clutter.Group):
 	MARGIN_LEFT = 30 
@@ -233,8 +213,8 @@ class XYPlot (clutter.Group):
 		tick_max = pt_max[0] + tick_pad  
 
 		# X axis
-		ticks = mkticks(self.x_min, self.x_max, self.plot_w/self.TICK_SIZE,
-						tick_min, tick_max)
+		xticks = ticks.linear(self.x_min, self.x_max, self.plot_w/self.TICK_SIZE,
+								   tick_min, tick_max)
 		ctx.set_source_rgb(black.red, black.green, black.blue)
 		ctx.set_font_size(self.axis_font_size)
 
@@ -244,7 +224,7 @@ class XYPlot (clutter.Group):
 		ctx.stroke()
 
 		# ticks
-		for tick in ticks:
+		for tick in xticks:
 			tick_px = self.pt2px((tick, 0))
 			ctx.move_to(tick_px[0]-px_min[0], self.AXIS_PAD)
 			ctx.line_to(tick_px[0]-px_min[0], 3*self.AXIS_PAD)
@@ -261,8 +241,8 @@ class XYPlot (clutter.Group):
 		tick_max = pt_min[1] + tick_pad  
 
 		# Y axis ticks
-		ticks = mkticks(self.y_min, self.y_max, float(self.plot_h)/self.TICK_SIZE, 
-					    tick_min, tick_max)
+		yticks = ticks.linear(self.y_min, self.y_max, float(self.plot_h)/self.TICK_SIZE, 
+							   tick_min, tick_max)
 		ctx.set_source_rgb(black.red, black.green, black.blue)
 		ctx.set_font_size(self.axis_font_size)
 		
@@ -272,7 +252,7 @@ class XYPlot (clutter.Group):
 		ctx.stroke()
 
 		# ticks
-		for tick in ticks:
+		for tick in yticks:
 			tick_px = self.pt2px((0,tick))
 			ctx.move_to(self.MARGIN_LEFT-self.AXIS_PAD, tick_px[1]-px_min[1])
 			ctx.line_to(self.MARGIN_LEFT-3*self.AXIS_PAD, tick_px[1]-px_min[1])

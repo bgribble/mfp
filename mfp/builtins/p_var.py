@@ -14,6 +14,8 @@ class Var (Processor):
 	def __init__(self, init_type, init_args):
 		Processor.__init__(self, 2, 1, init_type, init_args)
 		initargs, kwargs = self.parse_args(init_args)
+		
+		self.value = None 
 
 		if self.init_type == "message":
 			self.hot_inlets = (0,1)
@@ -24,7 +26,6 @@ class Var (Processor):
 			self.value = kwargs 
 
 	def trigger(self):
-
 		do_update = False
 		if self.inlets[1] is not Uninit:
 			self.value = self.inlets[1] 
@@ -32,7 +33,7 @@ class Var (Processor):
 			do_update = True
 
 		if self.inlets[0] is not Uninit:
-			if (self.init_type != "message") or (self.inlets[0] is not Bang):
+			if (self.init_type != "message") and (self.inlets[0] is not Bang):
 				self.value = self.inlets[0]
 				do_update = True 
 			self.outlets[0] = self.value
