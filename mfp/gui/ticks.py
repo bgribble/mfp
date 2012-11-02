@@ -36,8 +36,9 @@ def linear(vmin, vmax, numticks, tick_min=None, tick_max=None):
 	return [ t for t in ticks if t >= tick_min and t <= tick_max ]
 
 def decade(vmin, vmax, numticks, tick_min, tick_max):
-	# generate ticks for a log-scaled db axis 
+	# generate ticks for a decade log-scaled axis 
 	pass
 
 def octave(vmin, vmax, numticks, tick_min, tick_max):
+	# generate ticks for an octave log-scaled axis 
 	pass 

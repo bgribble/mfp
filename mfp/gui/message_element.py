@@ -12,6 +12,7 @@ import math
 from patch_element import PatchElement
 from mfp import MFPGUI
 from .modes.label_edit import LabelEditMode
+from mfp import log 
 
 class MessageElement (PatchElement):
 	element_type = "message"
@@ -67,7 +68,6 @@ class MessageElement (PatchElement):
 		ct.stroke()
 
 	def button_press_cb(self, *args):
-		print "button press", args
 		MFPGUI().mfp.send_bang(self.obj_id, 0) 
 
 	def label_edit_start(self):
@@ -76,10 +76,10 @@ class MessageElement (PatchElement):
 	def label_edit_finish(self, *args):
 		self.message_text = self.label.get_text()
 
-		print "MessageElement: obj=%s" % (self.message_text)
 		self.create(self.element_type, self.message_text)
 		if self.obj_id is None:
-			print "MessageElement: could not create message obj"
+			log.debug("MessageElement: could not create message obj for '%s'" 
+						% self.message_text)
 		else:
 			self.send_params()
 			self.draw_ports()
