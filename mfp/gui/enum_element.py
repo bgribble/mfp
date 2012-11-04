@@ -125,7 +125,7 @@ class EnumElement (PatchElement):
 		MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def configure(self, params):
-		v = params.get("value", int(self.obj_args))
+		v = params.get("value", float(self.obj_args or 0.0))
 		self.value = v
 		self.label.set_text(str(self.value))
 		PatchElement.configure(self, params)	

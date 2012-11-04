@@ -39,7 +39,7 @@ class SelectMRUMode (InputMode):
 		return True 
 
 	def key_release(self, stage, event):
-		if event.get_key_code() == 66:
+		if event.keyval == 66:
 			SelectMRUMode.touch_enabled = True
 			SelectMRUMode.touch(self.window.selected)
 			self.window.stage.disconnect(self.keyhandler)

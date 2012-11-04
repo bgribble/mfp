@@ -1,7 +1,7 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
-barmeter_element.py
-A patch element corresponding to a vertical or horizontal bar gauge or slider 
+slidemeter_element.py
+A patch element corresponding to a vertical or horizontal slider/meter
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
@@ -10,14 +10,14 @@ from gi.repository import Clutter as clutter
 import cairo
 import math 
 from patch_element import PatchElement
-from .modes.label_edit import LabelEditMode
+from .modes.slider import SliderEditMode, SliderControlMode
 from mfp import MFPGUI
 from mfp import log 
 from . import ticks 
 
-class BarMeterElement (PatchElement):
+class SlideMeterElement (PatchElement):
 	'''
-	Vertical/horizontal bar meter/slider element
+	Vertical/horizontal slider/meter element
 	Contains an optional scale and an optional title
 	Can be output-only or interactive 
 	Scale can be dB or linear
@@ -127,6 +127,24 @@ class BarMeterElement (PatchElement):
 		ct.rectangle(bar_left, bar_h*(1.0-scale_fraction), bar_w, bar_h*scale_fraction)
 		ct.fill() 
 
+	def point_in_slider(self, x, y): 
+		log.debug("slider: checking", x, y)
+		return True 
+
+	def pixdelta2value(self, pixdelta):
+		pix_h = self.texture.get_property('surface_height')-2
+		if self.show_title:
+			pix_h -= self.TITLE_SPACE 
+		return (float(pixdelta)/pix_h) * (self.max_value-self.min_value)
+
+
+	def update_value(self, value):
+		log.debug("slidemeter: update_value(%s)" % value)
+		self.value = value
+		self.texture.clear()
+		self.texture.invalidate()
+		MFPGUI().mfp.send(self.obj_id, 0, self.value)
+
 	def move(self, x, y):
 		self.position_x = x
 		self.position_y = y
@@ -178,7 +196,10 @@ class BarMeterElement (PatchElement):
 		self.texture.invalidate()
 
 	def make_edit_mode(self):
-		return LabelEditMode(self.stage, self, self.title)
+		return SliderEditMode(self.stage, self, self.title)
+
+	def make_control_mode(self):
+		return SliderControlMode(self.stage, self, self.title)
 
 
 
