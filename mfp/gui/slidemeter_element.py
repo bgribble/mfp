@@ -24,11 +24,10 @@ class SlideMeterElement (PatchElement):
 	'''
 
 	element_type = "var"
-	DEFAULT_W = 60
-	DEFAULT_H = 120
-	VERT = 0 
-	HORIZ = 1 
+	DEFAULT_W = 25 
+	DEFAULT_H = 100
 	TITLE_SPACE = 25
+	SCALE_SPACE = 30 
 	TICK_SPACE = 14
 	TICK_LEN = 5
 
@@ -38,17 +37,22 @@ class SlideMeterElement (PatchElement):
 		# parameters controlling display
 		self.value = 0.0
 		self.title = None 
-		self.orientation = self.VERT
-
 		self.min_value = 0.0
 		self.max_value = 1.0 
 		self.scale_ticks = None
 		self.scale_font_size = 8
-		self.show_scale = True
-		self.show_title = True 
-
+		self.show_scale = False 
+		self.show_title = False 
 		self.slider_enable = False 
-		self.slider_zero = True 
+		# value to emit when at bottom of scale, useful for dB scales 
+		self.slider_zero = None	
+
+		# coordinates of "hot" (meter display) area, where 
+		# dragging works 
+		self.hot_x_min = None
+		self.hot_x_max = None
+		self.hot_y_min = None
+		self.hot_y_max = None 
 
 		# create elements
 		self.texture = clutter.CairoTexture.new(self.DEFAULT_W, self.DEFAULT_H)
@@ -78,7 +82,8 @@ class SlideMeterElement (PatchElement):
 
 	def draw_cb(self, texture, ct):
 		def pt2px(x, bar_px):
-			return x * bar_px / (self.max_value-self.min_value)
+			v = (x - self.min_value) * bar_px / float(self.max_value-self.min_value)
+			return v
 
 		w = self.texture.get_property('surface_width')-2
 		h = self.texture.get_property('surface_height')-2
@@ -90,18 +95,18 @@ class SlideMeterElement (PatchElement):
 		ct.set_source_rgb(c.red, c.green, c.blue)
 		
 		scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
-		bar_bottom = h
-		bar_top = 1
-		bar_left = 1 
-		bar_right = w 
+		self.hot_y_max = h
+		self.hot_y_min = 1
+		self.hot_x_min = 1 
+		self.hot_x_max = w 
 
 		if self.show_scale: 
-			bar_left = w/2.0
+			self.hot_x_min = self.SCALE_SPACE
 		if self.show_title: 
-			bar_bottom = h - self.TITLE_SPACE
+			self.hot_y_max = h - self.TITLE_SPACE
 
-		bar_h = bar_bottom-bar_top
-		bar_w = bar_right-bar_left 
+		bar_h = self.hot_y_max-self.hot_y_min
+		bar_w = self.hot_x_max-self.hot_x_min 
 
 		# draw the scale if required
 		if self.show_scale:
@@ -110,26 +115,31 @@ class SlideMeterElement (PatchElement):
 			if self.scale_ticks is None:
 				num_ticks = bar_h/ self.TICK_SPACE 
 				self.scale_ticks = ticks.linear(self.min_value, self.max_value, num_ticks)
+				log.debug("ticks:", num_ticks, self.scale_ticks)
 			for tick in self.scale_ticks:
-				tickht = bar_bottom - pt2px(tick, bar_h)
-				ct.move_to(bar_left-self.TICK_LEN, tickht)
-				ct.line_to(bar_left, tickht)
+				tickht = self.hot_y_max - pt2px(tick, bar_h)
+				ct.move_to(self.hot_x_min-self.TICK_LEN, tickht)
+				ct.line_to(self.hot_x_min, tickht)
 				ct.stroke()
 				ct.move_to(5, tickht)
 				ct.show_text("%.3g" % tick)
 
-		# draw the title if required 
-		if self.show_title:
-			pass
 		# draw the indicator and a surrounding box 
-		ct.rectangle(bar_left, bar_top, bar_w, bar_h)
+		ct.rectangle(self.hot_x_min, self.hot_y_min, bar_w, bar_h)
 		ct.stroke()
-		ct.rectangle(bar_left, bar_h*(1.0-scale_fraction), bar_w, bar_h*scale_fraction)
+		ct.rectangle(self.hot_x_min, bar_h*(1.0-scale_fraction), bar_w, bar_h*scale_fraction)
 		ct.fill() 
 
 	def point_in_slider(self, x, y): 
+		orig_x, orig_y = self.get_position()
+		x -= orig_x
+		y -= orig_y
 		log.debug("slider: checking", x, y)
-		return True 
+		if (self.hot_x_min <= x <= self.hot_x_max
+			and self.hot_y_min <= y <= self.hot_y_max):
+			return True 
+		else:
+			return False 
 
 	def pixdelta2value(self, pixdelta):
 		pix_h = self.texture.get_property('surface_height')-2
@@ -137,13 +147,18 @@ class SlideMeterElement (PatchElement):
 			pix_h -= self.TITLE_SPACE 
 		return (float(pixdelta)/pix_h) * (self.max_value-self.min_value)
 
-
 	def update_value(self, value):
-		log.debug("slidemeter: update_value(%s)" % value)
-		self.value = value
-		self.texture.clear()
-		self.texture.invalidate()
-		MFPGUI().mfp.send(self.obj_id, 0, self.value)
+		if value >= self.max_value:
+			value = self.max_value 
+
+		if value <= self.min_value:
+			value = self.min_value 
+
+		if value != self.value:
+			self.value = value
+			self.texture.clear()
+			self.texture.invalidate()
+			MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def move(self, x, y):
 		self.position_x = x
@@ -157,12 +172,52 @@ class SlideMeterElement (PatchElement):
 			c.draw()
 
 	def configure(self, params):
-		PatchElement.configure(self, params)	
-		v = params.get('value')
-		if v is not None:
-			self.value = v
+		changes = False 
+		
+		v = params.get("show_scale")
+		if v and not self.show_scale:
+			self.show_scale = True 
+			self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
+			changes = True
+		elif v is False and self.show_scale:
+			self.show_scale = False 
+			self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
+			changes = True
+		
+		v = params.get("show_title")
+		if v and not self.show_title:
+			self.show_title = True 
+			self.set_size(self.get_width(), self.get_height() + self.TITLE_SPACE)
+			changes = True
+		elif v is False and self.show_title:
+			self.show_title = False 
+			self.set_size(self.get_width(), self.get_height() - self.TITLE_SPACE)
+			changes = True
+		
+		for p in ("value", "show_title", "slider_enable", "min_value", "max_value"):
+			v = params.get(p)
+			if v is not None and hasattr(self, p):
+				log.debug("slidemeter: setting param", p, v)
+				changes = True 
+				setattr(self, p, v)
+				if p in ("min_value", "max_value"):
+					self.scale_ticks = None 
+
+		log.debug("calling PatchElement.configure")
+		PatchElement.configure(self, params)
+		if changes: 
 			self.texture.clear()
 			self.texture.invalidate()
+
+	def set_size(self, width, height):
+		log.debug("slidemeter: setting size to", width, height)
+		self.width = width
+		self.height = height 
+		clutter.Group.set_size(self, self.width, self.height)
+		if self.show_title:
+			height -= self.TITLE_SPACE
+		self.texture.set_size(width, height)
+		self.texture.set_surface_size(width, height)
 
 	def select(self):
 		self.selected = True 

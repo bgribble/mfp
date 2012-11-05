@@ -44,6 +44,13 @@ class Var (Processor):
 			self.gui_params['value'] = self.value
 			MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 
+	def conf(self, **kwargs):
+		for k, v in kwargs.items():
+			self.gui_params[k] = v
+			if self.gui_params.get("update_required"):
+				MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+
+
 def register():
 	MFPApp().register("var", Var)
 	MFPApp().register("message", Var)

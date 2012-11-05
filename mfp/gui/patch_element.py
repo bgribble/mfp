@@ -100,12 +100,10 @@ class PatchElement (clutter.Group):
 		        self.position_y + ppos[1] + 0.5*self.porthole_height)
 
 	def port_position(self, port_dir, port_num):
-		pobj = self.port_elements.get((port_dir, port_num))
-		if pobj:
-			return pobj.get_position()
-
 		w = self.get_width()
 		h = self.get_height()
+
+		print "port_position: (%s, %s) w=%s h=%s" % (port_dir, port_num, w, h)
 
 		if port_dir == PatchElement.PORT_IN:
 			if self.num_inlets < 2:
@@ -124,6 +122,7 @@ class PatchElement (clutter.Group):
 			return (self.porthole_border + spc*port_num, h-2.0-self.porthole_height)
 
 	def draw_ports(self):
+		print "PatchElement.draw_ports", self.num_inlets, self.num_outlets
 		def confport(pid, px, py):
 			pobj = self.port_elements.get(pid)
 			if pobj is None:
