@@ -37,6 +37,7 @@ class SlideMeterElement (PatchElement):
 		# parameters controlling display
 		self.value = 0.0
 		self.title = None 
+		self.title_text = None 
 		self.min_value = 0.0
 		self.max_value = 1.0 
 		self.scale_ticks = None
@@ -176,49 +177,49 @@ class SlideMeterElement (PatchElement):
 		if v and not self.show_scale:
 			self.show_scale = True 
 			self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
-			self.recenter_title()
+			if self.title: 
+				self.recenter_title()
 			changes = True
 		elif v is False and self.show_scale:
 			self.show_scale = False 
 			self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
+			if self.title: 
+				self.recenter_title()
 			changes = True
 		
 		v = params.get("show_title")
 		if v and not self.show_title:
 			self.show_title = True 
+			self.add_actor(self.title)
 			self.set_size(self.get_width(), self.get_height() + self.TITLE_SPACE)
 			changes = True
 		elif v is False and self.show_title:
 			self.show_title = False 
+			self.remove_actor(self.title)
 			self.set_size(self.get_width(), self.get_height() - self.TITLE_SPACE)
 			changes = True
 		
 		for p in ("value", "slider_enable", "min_value", "max_value"):
 			v = params.get(p)
 			if v is not None and hasattr(self, p):
-				log.debug("slidemeter: setting param", p, v)
 				changes = True 
 				setattr(self, p, v)
 				if p in ("min_value", "max_value"):
 					self.scale_ticks = None 
 
-		log.debug("calling PatchElement.configure")
 		PatchElement.configure(self, params)
 		if changes: 
 			self.texture.clear()
 			self.texture.invalidate()
 
 	def set_size(self, width, height):
-		log.debug("slidemeter: setting size to", width, height)
 		self.width = width
 		self.height = height 
 		clutter.Group.set_size(self, self.width, self.height)
 		if self.show_title:
 			height -= self.TITLE_SPACE
 			title_x, title_y = self.title.get_position()
-			log.debug("slidemeter: moving title to", title_x, height)
-			self.title.set_position(title_x, height)
-		log.debug("slidemeter: setting canvas size to", width, height)
+			self.title.set_position(title_x, height-2)
 		self.texture.set_size(width, height)
 		self.texture.set_surface_size(width, height)
 
@@ -245,22 +246,20 @@ class SlideMeterElement (PatchElement):
 
 	def label_edit_finish(self, *args):
 		self.title_text = self.title.get_text()
-		log.debug("barmeter: label_edit_finish, '%s'" % self.title_text)
-		if not self.title_text: 
-			log.debug("barmeter: no title text, deleting object")
+		if self.show_title and not self.title_text: 
 			self.show_title = False 
 			self.title_text = None 
 			self.remove_actor(self.title)
-			del self.title
-			self.title = None 
-		self.recenter_title()
-		self.texture.invalidate()
+			self.set_size(self.width, self.height)
+			self.texture.invalidate()
+		else:
+			self.recenter_title()
 
 	def make_edit_mode(self):
-		return SliderEditMode(self.stage, self, self.title)
+		return SliderEditMode(self.stage, self, self.title_text or "slidemeter")
 
 	def make_control_mode(self):
-		return SliderControlMode(self.stage, self, self.title)
+		return SliderControlMode(self.stage, self, self.title_text or "slidemeter")
 
 
 

@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from input_mode import InputMode
 from key_sequencer import KeySequencer 
+from mfp import log 
 
 class InputManager (object):
 	def __init__(self):
@@ -82,7 +83,6 @@ class InputManager (object):
 			# then global 
 			handler = self.global_mode.lookup(keysym)
 			if handler is not None: 
-				print keysym, self.global_mode.description, ':', handler[1]
 				handled = handler[0]()
 				if handled:
 					return True 

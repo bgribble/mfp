@@ -26,24 +26,26 @@ class InputMode (object):
 			return binding 
 		
 		# if any extensions are specified, look in them 
+		# (but don't use extension defaults)
 		for ext in self.extensions: 
-			binding = ext.lookup(keysym)
+			binding = ext.bindings.get(keysym)
 			if binding is not None:
 				return binding 
 
 		# do we have a default? 
 		if self.default is not None:
-			log.debug(self, "using self.default handler", self.default)
 			return (lambda: self.default(keysym), "default-key-handler")
 
 		# do extensions have a default: 
 		for ext in self.extensions: 
 			if ext.default is not None:
-				log.debug(self, "using ext.default handler", ext, ext.default)
 				return (lambda: ext.default(keysym), "default-key-handler")
 
 		return None 
 
 	def close(self):
 		pass 
+
+	def __repr__(self):
+		return "<InputMode %s>" % self.description
 	

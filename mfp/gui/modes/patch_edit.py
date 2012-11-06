@@ -37,7 +37,6 @@ class PatchEditMode (InputMode):
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
 		self.bind("C-TAB", self.window.select_mru, "patch-select-mru")
-		self.bind("RET", self.window.edit_selected, "patch-edit-selected")	
 		
 		self.bind("UP", lambda: self.window.move_selected(0, -1), "patch-move-up-1")
 		self.bind("DOWN", lambda: self.window.move_selected(0, 1), "patch-move-down-1")
@@ -59,6 +58,7 @@ class PatchEditMode (InputMode):
 
 		self.bind("DEL", self.window.delete_selected, "patch-delete-selected")
 		self.bind("BS", self.window.delete_selected, "patch-delete-selected")
+		self.bind("RET", self.window.edit_selected, "patch-edit-selected")	
 
 		self.bind("M1DOWN", self.drag_start, "patch-drag-start")
 		self.bind("M1-MOTION", self.drag_selected, "patch-drag-selected")

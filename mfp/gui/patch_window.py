@@ -105,14 +105,14 @@ class PatchWindow(object):
 		obj.select()
 		self.selected = obj
 		
-		if isinstance(self.input_mgr.major_mode, PatchControlMode):
-			obj.begin_control()
+		obj.begin_control()
 
 		# FIXME hook
 		SelectMRUMode.touch(obj) 
 
 	def unselect(self, obj):
 		if self.selected is obj and obj is not None:
+			obj.end_control()
 			obj.unselect()
 			self.selected = None
 

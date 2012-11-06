@@ -30,7 +30,6 @@ class SliderBaseMode (InputMode):
 		self.bind("C-M1-MOTION", lambda: self.drag_selected(0.05), "slider-drag-selected-.05")
 		self.bind("M1UP", self.drag_end, "patch-drag-end")
 
-		self.extend(LabelEditMode(window, element, element.title))
 
 	def drag_start(self):
 		if self.manager.pointer_obj == self.slider:
@@ -38,13 +37,14 @@ class SliderBaseMode (InputMode):
 				self.window.select(self.slider)
 
 			if self.slider.point_in_slider(self.manager.pointer_x, self.manager.pointer_y):
-				log.debug("sliderbasemode: starting drag")
 				self.drag_started = True
 				self.drag_start_x = self.manager.pointer_x
 				self.drag_start_y = self.manager.pointer_y
 				self.drag_last_x = self.manager.pointer_x
 				self.drag_last_y = self.manager.pointer_y
-			return True
+				return True
+			else:
+				return False 
 		else:
 			return False
 
@@ -75,4 +75,6 @@ class SliderControlMode (SliderBaseMode):
 	pass
 
 class SliderEditMode (SliderBaseMode):
-	pass
+	def __init__(self, window, element, descrip): 
+		SliderBaseMode.__init__(self, window, element, descrip)
+		self.extend(LabelEditMode(window, element, element.title))
