@@ -18,7 +18,7 @@ class PatchElement (clutter.Group):
 	PORT_OUT = 1
 	porthole_width = 8
 	porthole_height = 4
-	porthole_border = 5
+	porthole_border = 1
 	porthole_minspace = 10
 
 	def __init__(self, window, x, y):

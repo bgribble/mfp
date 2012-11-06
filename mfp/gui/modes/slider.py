@@ -6,6 +6,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode
+from .label_edit import LabelEditMode 
+
 from mfp import log 
 
 class SliderBaseMode (InputMode):
@@ -27,6 +29,8 @@ class SliderBaseMode (InputMode):
 		self.bind("S-M1-MOTION", lambda: self.drag_selected(0.25), "slider-drag-selected-.25")
 		self.bind("C-M1-MOTION", lambda: self.drag_selected(0.05), "slider-drag-selected-.05")
 		self.bind("M1UP", self.drag_end, "patch-drag-end")
+
+		self.extend(LabelEditMode(window, element, element.title))
 
 	def drag_start(self):
 		if self.manager.pointer_obj == self.slider:

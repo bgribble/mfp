@@ -26,7 +26,7 @@ class SlideMeterElement (PatchElement):
 	element_type = "var"
 	DEFAULT_W = 25 
 	DEFAULT_H = 100
-	TITLE_SPACE = 25
+	TITLE_SPACE = 22
 	SCALE_SPACE = 30 
 	TICK_SPACE = 14
 	TICK_LEN = 5
@@ -42,7 +42,7 @@ class SlideMeterElement (PatchElement):
 		self.scale_ticks = None
 		self.scale_font_size = 8
 		self.show_scale = False 
-		self.show_title = False 
+		self.show_title = True 
 		self.slider_enable = False 
 		# value to emit when at bottom of scale, useful for dB scales 
 		self.slider_zero = None	
@@ -62,10 +62,10 @@ class SlideMeterElement (PatchElement):
 		self.add_actor(self.texture)
 		self.add_actor(self.title) 
 		self.texture.connect("draw", self.draw_cb)
-		self.title.set_position(4, self.DEFAULT_H-self.TITLE_SPACE)
 		
 		self.set_reactive(True)
 
+		self.set_size(self.DEFAULT_W, self.DEFAULT_H)
 		self.texture.invalidate()
 		self.move(x, y)
 
@@ -102,8 +102,6 @@ class SlideMeterElement (PatchElement):
 
 		if self.show_scale: 
 			self.hot_x_min = self.SCALE_SPACE
-		if self.show_title: 
-			self.hot_y_max = h - self.TITLE_SPACE
 
 		bar_h = self.hot_y_max-self.hot_y_min
 		bar_w = self.hot_x_max-self.hot_x_min 
@@ -178,6 +176,7 @@ class SlideMeterElement (PatchElement):
 		if v and not self.show_scale:
 			self.show_scale = True 
 			self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
+			self.recenter_title()
 			changes = True
 		elif v is False and self.show_scale:
 			self.show_scale = False 
@@ -194,7 +193,7 @@ class SlideMeterElement (PatchElement):
 			self.set_size(self.get_width(), self.get_height() - self.TITLE_SPACE)
 			changes = True
 		
-		for p in ("value", "show_title", "slider_enable", "min_value", "max_value"):
+		for p in ("value", "slider_enable", "min_value", "max_value"):
 			v = params.get(p)
 			if v is not None and hasattr(self, p):
 				log.debug("slidemeter: setting param", p, v)
@@ -216,6 +215,10 @@ class SlideMeterElement (PatchElement):
 		clutter.Group.set_size(self, self.width, self.height)
 		if self.show_title:
 			height -= self.TITLE_SPACE
+			title_x, title_y = self.title.get_position()
+			log.debug("slidemeter: moving title to", title_x, height)
+			self.title.set_position(title_x, height)
+		log.debug("slidemeter: setting canvas size to", width, height)
 		self.texture.set_size(width, height)
 		self.texture.set_surface_size(width, height)
 
@@ -232,6 +235,11 @@ class SlideMeterElement (PatchElement):
 			c.delete()
 		PatchElement.delete(self)
 
+	def recenter_title(self):
+		w = self.title.get_width()
+		x,y = self.title.get_position()
+		self.title.set_position((self.texture.get_width()-self.title.get_width())/2.0, y)
+
 	def label_edit_start(self):
 		pass
 
@@ -245,9 +253,7 @@ class SlideMeterElement (PatchElement):
 			self.remove_actor(self.title)
 			del self.title
 			self.title = None 
-		w = self.title.get_width()
-		x,y = self.title.get_position()
-		self.title.set_position((self.texture.get_width()-self.title.get_width())/2.0, y)
+		self.recenter_title()
 		self.texture.invalidate()
 
 	def make_edit_mode(self):
