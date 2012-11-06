@@ -66,7 +66,6 @@ class InputManager (object):
 			for minor in self.minor_modes:
 				handler = minor.lookup(keysym)
 				if handler is not None:
-					# print keysym, minor.description, ':', handler[1]
 					handled = handler[0]()
 					if handled: 
 						return True
@@ -75,7 +74,6 @@ class InputManager (object):
 			if self.major_mode is not None:
 				handler = self.major_mode.lookup(keysym)
 				if handler is not None: 
-					print keysym, self.major_mode.description, ':', handler[1]
 					handled = handler[0]()
 					if handled: 
 						return True 

@@ -168,6 +168,12 @@ class MFPMidiManager(Thread):
 		if ctor is None:
 			print "midi.py: no constructor for", raw_event
 			ctor = MidiUndef
+		# special case for NoteOn with velocity 0 -- it's a NoteOff,
+		# treat it as such 
+		elif ctor is NoteOn:
+			non = ctor(SeqEvent(*raw_event))
+			if non.velocity == 0:
+				return NoteOff(SeqEvent(*raw_event))
 		return ctor(SeqEvent(*raw_event))
 
 	def dispatch_event(self, event):
