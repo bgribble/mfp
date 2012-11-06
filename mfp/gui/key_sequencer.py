@@ -33,11 +33,9 @@ KEY_ENTER = 65293
 
 def get_key_unicode(ev):
 	if ev.unicode_value:
-		#print "unicode:", ev.unicode_value, type(ev.unicode_value)
 		return ord(ev.unicode_value)
 	else:
 		v = clutter.keysym_to_unicode(ev.keyval)
-		#print "converted:", v, type(v)
 		return v 
 
 class KeySequencer (object):
@@ -155,7 +153,7 @@ class KeySequencer (object):
 				if b in self.mouse_buttons:
 					key += 'M%d-' % b
 			key += 'SCROLL'
-			if event.scroll_direction:
+			if event.direction:
 				key += 'DOWN'
 			else:
 				key += 'UP'

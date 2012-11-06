@@ -112,7 +112,10 @@ class MessageElement (PatchElement):
 			c.draw()
 
 	def configure(self, params):
-		self.label.set_text(repr(params.get('value')))
+		if params.get('value') is not None:
+			self.label.set_text(repr(params.get('value')))
+		elif self.obj_args is not None:
+			self.label.set_text(self.obj_args)
 		PatchElement.configure(self, params)	
 
 	def select(self):

@@ -70,8 +70,7 @@ class GUICommand (RPCWrapper):
 		from .gui.plot_element import PlotElement 
 
 		elementtype = params.get('element_type')
-		log.debug("Create:", obj_id, elementtype, params)
-		log.debug("mfpgui:", MFPGUI(), MFPGUI().appwin)
+		log.debug("create:", obj_id, elementtype, params)
 
 		ctors = {
 			'processor': ProcessorElement,
@@ -87,6 +86,7 @@ class GUICommand (RPCWrapper):
 			o.obj_type = obj_type
 			o.obj_args = obj_args
 			o.configure(params)
+			#o.draw_ports()
 			MFPGUI().remember(o)
 
 	@rpcwrap

@@ -120,6 +120,8 @@ class PatchElement (clutter.Group):
 			return (self.porthole_border + spc*port_num, h-2.0-self.porthole_height)
 
 	def draw_ports(self):
+		log.debug("draw_ports:", self)
+
 		def confport(pid, px, py):
 			pobj = self.port_elements.get(pid)
 			if pobj is None:
@@ -143,10 +145,10 @@ class PatchElement (clutter.Group):
 
 
 	def configure(self, params):
-		#self.num_inlets = params.get("num_inlets")
-		#self.num_outlets = params.get("num_outlets")
-		#self.dsp_inlets = params.get("dsp_inlets")
-		#self.dsp_outlets = params.get("dsp_outlets")
+		self.num_inlets = params.get("num_inlets")
+		self.num_outlets = params.get("num_outlets")
+		self.dsp_inlets = params.get("dsp_inlets")
+		self.dsp_outlets = params.get("dsp_outlets")
 		self.draw_ports()
 
 	def make_edit_mode(self):

@@ -74,7 +74,6 @@ class Patch(Processor):
 					inlet = c[1]
 					srcobj.connect(outlet, dstobj, inlet)
 					if not MFPApp.no_gui:
-						print "load_patch: connect", srcobj.obj_id, outlet, dstobj.obj_id, inlet
 						MFPApp().gui_cmd.connect(srcobj.obj_id, outlet, dstobj.obj_id, inlet)
 		# sort inlets and outlets by X position
 		self.inlet_objects.sort(key=getx)

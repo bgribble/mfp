@@ -332,7 +332,7 @@ class XYPlot (clutter.Group):
 		px = self.pt2px(point)
 
 		tiles = []
-
+		pts = self.points.setdefault(curve, {})
 		bytile = self.points_by_tile.setdefault(curve, {})
 		
 		style = self.style.get(curve)
