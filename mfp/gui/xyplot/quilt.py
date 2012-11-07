@@ -9,8 +9,6 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter as clutter
 from gi.repository import GObject
 from mfp import log 
-import gobject
-import cairo
 import math
 
 class Quilt (clutter.Group):

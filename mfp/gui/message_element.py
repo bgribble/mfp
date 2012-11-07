@@ -7,7 +7,6 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter as clutter 
-import cairo
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI

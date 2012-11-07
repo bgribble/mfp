@@ -1,31 +1,57 @@
 MFP -- music for programmers 
 
-Prerequisites: a bunch of dependencies need to be installed for this to 
-work.  I use debian so here are the debian/ubuntu package names: 
+MFP is an environment for visually composing computer programs, with
+an emphasis on music and real-time audio synthesis and analysis.  It's
+very much inspired by Miller Puckette's Pure Data (pd) and MAX/MSP,
+with a bit of LabView and TouchOSC for good measure.  
 
-	python2.6 
-	python2.6-dev (for Python.h)
-	python-gtk (pygtk)
-	python-clutter (pyclutter)
-	python-cairo
-	python-nose 
-	python-setuptools 
-	libjack0
-	libjack0-dev
-	libglib2.0
-	libglib2.0-dev
-	pkg-config 
+MFP is in its early development phases.  Large pieces of core
+functionality are not implemented yet.  
+
+
+Prerequisites: a bunch of dependencies need to be installed for this to 
+work.  I use debian sid (unstable). here are the debian/ubuntu package names: 
+
+	Basics: 
+		python (python2.7 on sid, 2.6 should work too) 
+		python-dev (for Python.h)
+		python-setuptools 
+		python-nose 
+		pkg-config 
+
+	Clutter-based GUI: 
+		python-gi (GObject Introspection for Python)
+		gir1.2-clutter-1.0 (clutter bindings for GI)
+		gir1.2-cogl-1.0 (COGL bindings for GI)
+		gir1.2-coglpango-1.0 (COGL Pango bindings for GI)
+
+	JACK: 
+		libjack0
+		libjack0-dev
 
 Building: I suggest using 'virtualenv' to build in a sandbox.  From
-the top level (where this file is located):
-	$ virtualenv --python=python2.6 virtual
+the top level (where this file is located).  The packages in "lib" are 
+required for MIDI and OSC functionality and I couldn't find them for
+easy_install
+
+	$ virtualenv --python=python2.7 --system-site-packages virtual
 	$ . virtual/bin/activate 
+	$ for dir in testext lib/alsaseq-0.4.1 lib/pyliblo-0.9.1 ;
+	  do (cd $dir ; python ./setup.py install) 
+	  done 
 	$ python ./setup.py install 
 
 Then, run the unit tests:
-	$ python /usr/bin/nosetests -v mfp 
 
-If that works: 
+	$ python /usr/bin/nosetests -v mfp 
+	$ python /usr/bin/nosetests -v --with-testext --exe build 
+
+The second line uses a custom nose plugin (testext) to run unit tests
+in a compiled C extension called "mfpdsp" used by MFP.  I'm not aware
+of another tool to automatically discover and run plain C tests in
+plain C libraries.  
+
+If all that works: 
 	$ mfp 
 
 Enjoy! 

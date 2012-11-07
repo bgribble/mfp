@@ -7,9 +7,6 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter as clutter
-import glib
-import gobject
-import cairo
 import math
 
 from .mark_style import MarkStyle
