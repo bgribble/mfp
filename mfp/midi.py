@@ -154,14 +154,19 @@ class MFPMidiManager(Thread):
 			hh.append(callback)
 
 	def run(self):
+		import select 
+
 		alsaseq.client(appinfo.name, self.num_inports, self.num_outports, True)
 		self.start_time = datetime.now()
 		alsaseq.start()
+		alsafd = alsaseq.fd() 
 
 		while not self.quitreq:
-			raw_event = alsaseq.input()
-			new_event = self.create_event(raw_event)
-			self.dispatch_event(new_event)
+			fds_ready = select.select([alsafd], [], [], 0.1) 
+			if alsaseq.inputpending():
+				raw_event = alsaseq.input()
+				new_event = self.create_event(raw_event)
+				self.dispatch_event(new_event)
 
 	def create_event(self, raw_event):
 		ctor = self.etypemap.get(raw_event[0])
@@ -187,3 +192,7 @@ class MFPMidiManager(Thread):
 	def send(self, port, data):
 		pass
 
+	def finish(self):
+		self.quitreq = True 
+		self.join()
+		

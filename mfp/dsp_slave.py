@@ -45,8 +45,10 @@ class DSPObject(RPCWrapper):
 def dsp_init(pipe, num_inputs, num_outputs):
 	from main import MFPCommand
 	import threading 
+	import os 
+
 	log.log_module = "dsp"
-	log.debug("DSP thread starting") 
+	log.debug("DSP thread started, pid =", os.getpid()) 
 
 	RPCWrapper.node_id = "JACK DSP"
 	DSPObject.pipe = pipe

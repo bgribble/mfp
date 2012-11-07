@@ -15,7 +15,7 @@ from mfp import log
 
 class MessageElement (PatchElement):
 	element_type = "message"
-
+	PORT_TWEAK = 5 
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
@@ -116,6 +116,14 @@ class MessageElement (PatchElement):
 		elif self.obj_args is not None:
 			self.label.set_text(self.obj_args)
 		PatchElement.configure(self, params)	
+
+	def port_position(self, port_dir, port_num):
+		# tweak the right input port display to be left of the "kick" 
+		if port_dir == PatchElement.PORT_IN and port_num == 1:
+			default = PatchElement.port_position(self, port_dir, port_num)
+			return (default[0] - self.PORT_TWEAK, default[1])
+		else:
+			return PatchElement.port_position(self, port_dir, port_num)
 
 	def select(self):
 		self.selected = True 

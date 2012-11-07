@@ -9,6 +9,7 @@ from enum_element import EnumElement
 from plot_element import PlotElement
 
 from mfp import MFPGUI 
+from mfp import log 
 
 from .input_manager import InputManager
 from .modes.patch_edit import PatchEditMode
@@ -45,11 +46,11 @@ class PatchWindow(object):
 		self.view_x = 0
 		self.view_y = 0
 
-		print "PatchWindow: showing clutter stage"
 		self.stage.show()
 		
 		# set up key and mouse handling 
 		self.init_input()
+		log.debug("PatchWindow is up")
 
 	def init_input(self):
 		def handler(stage, event):

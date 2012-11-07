@@ -26,7 +26,7 @@ class MFPCommand(RPCWrapper):
 	def create(self, objtype, initargs=''):
 		obj = MFPApp().create(objtype, initargs)
 		if obj is None:
-			log.debug("MFPApp.create() failed")
+			log.debug("MFPApp.create: failed")
 			return None
 		MFPApp().patch.add(obj)
 		return obj.gui_params
@@ -101,8 +101,6 @@ class MFPApp (object):
 		self.patch = None	
 
 	def setup(self):
-		import os
-		log.debug("MFPApp: setup, pid =", os.getpid())
 
 		from mfp.dsp_slave import dsp_init, DSPObject
 		from mfp.gui_slave import gui_init, GUICommand
@@ -123,13 +121,13 @@ class MFPApp (object):
 			self.gui_cmd = GUICommand()
 			while not self.gui_cmd.ready():
 				time.sleep(0.2)
-			log.debug("MFPApp: GUI is ready")
+			log.debug("MFPApp.setup: GUI is ready")
 
 		# midi manager 
 		from . import midi
 		self.midi_mgr = midi.MFPMidiManager(1, 1)
 		self.midi_mgr.start()	
-		log.debug("MFPMidiManager started")
+		log.debug("MFPApp.setup: MFPMidiManager started")
 
 		# OSC manager 
 		# from . import osc 
@@ -163,9 +161,15 @@ class MFPApp (object):
 
 	def finish(self):
 		if self.dsp_process:
+			log.debug("MFPApp.finish: reaping DSP slave...")
 			self.dsp_process.finish()
 		if self.gui_process:
+			log.debug("MFPApp.finish: reaping GUI slave...")
 			self.gui_process.finish()
+		if self.midi_mgr: 
+			log.debug("MFPApp.finish: reaping MIDI thread...")
+			self.midi_mgr.finish()
+		log.debug("MFPApp.finish: all children reaped")
 
 def main():
 	import os
@@ -173,23 +177,19 @@ def main():
 	import code 
 	import sys
 
-	log.debug("MFP.main, pid =", os.getpid())
+	log.debug("Main thread started, pid =", os.getpid())
 
-	m = MFPApp()
-
-	log.debug("MFPApp created")
-
-	m.setup()
-	
-	log.debug("MFPApp configured")
+	app = MFPApp()
+	app.setup()
 
 	builtins.register()
-
-	log.debug("MFPApp builtins registered")
-
-	if len(sys.argv) > 1:
-		log.debug("loading", sys.argv[1])
-		m.patch.load_file(sys.argv[1])
+	log.debug("main: builtins registered")
 	
+	if len(sys.argv) > 1:
+		log.debug("main: loading", sys.argv[1])
+		app.patch.load_file(sys.argv[1])
+
+	log.debug("main: starting REPL, 'app' is MFP application") 	
 	code.interact(local=locals())
-	m.finish()
+	log.debug("main: REPL exited, good bye!")
+	app.finish()

@@ -20,7 +20,6 @@ def rpcwrap(worker_proc):
 
 class RPCMetaclass(type):
 	def __init__(klass, name, bases, xdict): 
-		log.debug("Registering", name)
 		type.__init__(klass, name, bases, xdict)
 		klass.register(name)
 	

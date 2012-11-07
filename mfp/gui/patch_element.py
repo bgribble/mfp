@@ -120,8 +120,6 @@ class PatchElement (clutter.Group):
 			return (self.porthole_border + spc*port_num, h-2.0-self.porthole_height)
 
 	def draw_ports(self):
-		log.debug("draw_ports:", self)
-
 		def confport(pid, px, py):
 			pobj = self.port_elements.get(pid)
 			if pobj is None:

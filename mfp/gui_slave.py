@@ -17,7 +17,7 @@ from . import log
 def gui_init(pipe):
 	import os
 	log.log_module = "gui"
-	log.debug("gui_init: in worker, pid =", os.getpid())
+	log.debug("GUI thread started, pid =", os.getpid())
 	pipe.on_finish(gui_finish)
 	RPCWrapper.pipe = pipe
 	RPCWrapper.node_id = "Clutter GUI"

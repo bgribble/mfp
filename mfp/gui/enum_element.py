@@ -15,17 +15,22 @@ from .modes.enum_control import EnumControlMode
 
 class EnumElement (PatchElement):
 	element_type = "enum"
+	PORT_TWEAK = 7 
+
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
 		self.value = 0
+		self.digits = 1
+		self.scientific = False 
+		self.format_str = "%.1f"
 		self.connections_out = [] 
 		self.connections_in = [] 
 		self.editable = False 
 		self.update_required = True
 
 		# create elements
-		self.texture = clutter.CairoTexture.new(35, 20)
+		self.texture = clutter.CairoTexture.new(35, 25)
 		self.texture.connect("draw", self.draw_cb)
 		self.label = clutter.Text()
 
@@ -37,16 +42,23 @@ class EnumElement (PatchElement):
 		self.label.set_position(4, 1)
 		self.label.set_color(window.color_unselected) 
 		self.label.connect('text-changed', self.text_changed_cb)
-		self.label.set_text(str(self.value))
+		self.label.set_text(self.format_value(self.value))
 
 		# click handler 
 		# self.actor.connect('button-press-event', self.button_press_cb)
 		
 		self.move(x, y)
-
-		# add components to stage 
-		self.stage.register(self)
 		self.texture.invalidate()
+
+	def format_update(self):
+		if self.scientific:
+			oper = "e"
+		else:
+			oper = "f"
+		self.format_str = "%%.%d%s" % (self.digits, oper)
+
+	def format_value(self, value):
+		return self.format_str % value 
 
 	def draw_cb(self, texture, ct):
 		w = self.texture.get_property('surface_width')-2
@@ -107,7 +119,7 @@ class EnumElement (PatchElement):
 	def update_value(self, value):
 		# called by enumcontrolmode 
 		self.value = value
-		self.label.set_text(str(self.value))
+		self.label.set_text(self.format_value(self.value))
 		if self.obj_id is None:
 			self.create_obj()
 		MFPGUI().mfp.send(self.obj_id, 0, self.value)
@@ -118,16 +130,48 @@ class EnumElement (PatchElement):
 	def label_edit_finish(self, *args):
 		# called by labeleditmode
 		t = self.label.get_text()
-		self.update_value(int(t))
+		self.update_value(float(t))
 		if self.obj_id is None:
 			self.create_obj()
 		MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def configure(self, params):
+		fmt_changed = False 
+		val_changed = False 
+
 		v = params.get("value", float(self.obj_args or 0.0))
-		self.value = v
-		self.label.set_text(str(self.value))
+		if v != self.value: 
+			self.value = v
+			val_changed = True 
+
+		v = params.get("scientific")
+		if v:
+			if not self.scientific: 
+				fmt_changed = True 
+			self.scientific = True 
+		else: 
+			if self.scientific: 
+				fmt_changed = True 
+			self.scientific = False 
+
+		v = params.get("digits") 
+		if v is not None and v != self.digits: 
+			self.digits = v
+			fmt_changed = True 
+
+		if fmt_changed: 
+			self.format_update()
+		if fmt_changed or val_changed: 
+			self.label.set_text(self.format_value(self.value))
 		PatchElement.configure(self, params)	
+
+	def port_position(self, port_dir, port_num):
+		# tweak the right input port display to be left of the slant 
+		if port_dir == PatchElement.PORT_IN and port_num == 1:
+			default = PatchElement.port_position(self, port_dir, port_num)
+			return (default[0] - self.PORT_TWEAK, default[1])
+		else:
+			return PatchElement.port_position(self, port_dir, port_num)
 
 	def select(self):
 		self.selected = True 
