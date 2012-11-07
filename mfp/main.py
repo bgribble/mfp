@@ -1,8 +1,8 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python
 '''
 main.py: main routine for mfp
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2010-2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import sys, os
@@ -92,6 +92,7 @@ class MFPApp (object):
 		# threads in this process 
 		self.midi_mgr = None 
 		self.osc_mgr = None 
+		self.console_mgr = None 
 
 		self.gui_cmd = None
 
@@ -138,6 +139,11 @@ class MFPApp (object):
 		# self.osc_manager = osc.MFPOscManager(5555)
 		# self.osc_manager.start()
 
+		# console 
+		from . import console 
+		self.console_mgr = console.Console(dict(app=self))
+		self.console_mgr.start() 
+
 		# while we only have 1 patch, this is it
 		self.patch = Patch('default', '')
 
@@ -173,6 +179,10 @@ class MFPApp (object):
 		if self.midi_mgr: 
 			log.debug("MFPApp.finish: reaping MIDI thread...")
 			self.midi_mgr.finish()
+		if self.console_mgr:
+			log.debug("MFPApp.finish: reaping REPL thread...")
+			self.console_mgr.finish()
+
 		log.debug("MFPApp.finish: all children reaped, good-bye!")
 
 def main():
@@ -193,11 +203,3 @@ def main():
 		log.debug("main: loading", sys.argv[1])
 		app.patch.load_file(sys.argv[1])
 
-	log.debug("main: starting REPL, 'app' is MFP application") 	
-
-	#console = code.InteractiveConsole(local=locals())
-
-
-	#code.interact(local=locals())
-	#log.debug("main: REPL exited, good bye!")
-	#app.finish()
