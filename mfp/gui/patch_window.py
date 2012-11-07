@@ -8,7 +8,8 @@ from message_element import MessageElement
 from enum_element import EnumElement
 from plot_element import PlotElement
 
-from mfp import MFPGUI 
+from mfp import MFPGUI
+from mfp.main import MFPCommand
 from mfp import log 
 
 from .input_manager import InputManager
@@ -88,7 +89,6 @@ class PatchWindow(object):
 			element.send_params()
 
 	def unregister(self, element):
-		print "unregister:", element, self.objects
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element]
 		self.group.remove_actor(element)
@@ -179,12 +179,12 @@ class PatchWindow(object):
 			self.rezoom()
 
 	def move_view(self, dx, dy):
-		print "move_view:", dx, dy, self.zoom
 		self.view_x += dx
 		self.view_y += dy
 		self.rezoom()
 
 	def quit(self, *rest):
-		clutter.main_quit()
+		log.debug("Quit command from GUI or WM, shutting down")
+		MFPCommand().quit()
 
 

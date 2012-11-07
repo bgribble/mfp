@@ -36,7 +36,7 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 		return NULL;
 	}
 	else {
-		printf("mfp_proc_alloc: %s %d %d %d", typeinfo->name, num_inlets, 
+		printf("mfp_proc_alloc: %s %d %d %d\n", typeinfo->name, num_inlets, 
 				num_outlets, blocksize);
 	}
     p = g_malloc(sizeof(mfp_processor));

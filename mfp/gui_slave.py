@@ -38,7 +38,7 @@ class GUICommand (RPCWrapper):
 
 	@rpcwrap
 	def finish(self):
-		MFPGUI().appwin.destroy()
+		MFPGUI().finish()
 
 	@rpcwrap
 	def configure(self, obj_id, params):
@@ -157,6 +157,12 @@ class MFPGUI (object):
 			import traceback
 			traceback.print_exc()
 
+		# finish
+		log.debug("MFPGUI.clutter_proc: clutter main has quit. finishing up")
+
 	def finish(self):
-		self.appwin.destroy()
+		log.debug("MFPGUI.finish() called")
+		if self.appwin:
+			self.appwin.quit()
+			self.appwin = None 
 

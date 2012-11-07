@@ -8,6 +8,7 @@ from ..input_mode import InputMode
 from ..connection_element import ConnectionElement 
 
 from mfp import MFPGUI 
+from mfp import log 
 
 class ConnectionMode (InputMode):
 	def __init__(self, window, endpoint, connect_rev=False):
@@ -50,9 +51,6 @@ class ConnectionMode (InputMode):
 			self.dest_obj = self.window.selected 
 
 		if self.source_obj and self.dest_obj:
-			print "Making connection:"
-			print self.source_obj, self.source_port, '-->', self.dest_obj, self.dest_port
-
 			if MFPGUI().mfp.connect(self.source_obj.obj_id, self.source_port,
 					  		        self.dest_obj.obj_id, self.dest_port):
 				c = ConnectionElement(self.window, self.source_obj, self.source_port,
@@ -60,13 +58,13 @@ class ConnectionMode (InputMode):
 				self.source_obj.connections_out.append(c)
 				self.dest_obj.connections_in.append(c)
 			else:
-				print "Cannot make connection"
+				log.debug("ConnectionMode: Cannot make connection")
 
 		self.manager.disable_minor_mode(self)	
 		return True 
 
 	def abort_connection(self):
-		print "Aborting connection"
+		log.debug("ConnectionMode: Aborting connection")
 		self.manager.disable_minor_mode(self)	
 		return True 
 

@@ -76,6 +76,10 @@ class MFPCommand(RPCWrapper):
 			        dsp_inlets=obj.dsp_inlets,
 			        dsp_outlets=obj.dsp_outlets)
 
+	@rpcwrap
+	def quit(self):
+		MFPApp().finish()
+
 class MFPApp (object):
 	__metaclass__ = Singleton
 	no_gui = False
@@ -169,7 +173,7 @@ class MFPApp (object):
 		if self.midi_mgr: 
 			log.debug("MFPApp.finish: reaping MIDI thread...")
 			self.midi_mgr.finish()
-		log.debug("MFPApp.finish: all children reaped")
+		log.debug("MFPApp.finish: all children reaped, good-bye!")
 
 def main():
 	import os
@@ -190,6 +194,10 @@ def main():
 		app.patch.load_file(sys.argv[1])
 
 	log.debug("main: starting REPL, 'app' is MFP application") 	
-	code.interact(local=locals())
-	log.debug("main: REPL exited, good bye!")
-	app.finish()
+
+	#console = code.InteractiveConsole(local=locals())
+
+
+	#code.interact(local=locals())
+	#log.debug("main: REPL exited, good bye!")
+	#app.finish()

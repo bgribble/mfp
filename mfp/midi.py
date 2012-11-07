@@ -10,6 +10,8 @@ from threading import Thread
 from datetime import datetime 
 from . import appinfo 
 
+from . import log 
+
 class SeqEvent(object):
 	def __init__(self, etype, flags, tag, queue, timestamp, src, dst, data):
 		self.etype = etype
@@ -159,8 +161,9 @@ class MFPMidiManager(Thread):
 		alsaseq.client(appinfo.name, self.num_inports, self.num_outports, True)
 		self.start_time = datetime.now()
 		alsaseq.start()
-		alsafd = alsaseq.fd() 
+		log.debug("ALSA sequencer started")
 
+		alsafd = alsaseq.fd() 
 		while not self.quitreq:
 			fds_ready = select.select([alsafd], [], [], 0.1) 
 			if alsaseq.inputpending():
@@ -171,7 +174,7 @@ class MFPMidiManager(Thread):
 	def create_event(self, raw_event):
 		ctor = self.etypemap.get(raw_event[0])
 		if ctor is None:
-			print "midi.py: no constructor for", raw_event
+			log.debug("midi: no constructor for", raw_event)
 			ctor = MidiUndef
 		# special case for NoteOn with velocity 0 -- it's a NoteOff,
 		# treat it as such 

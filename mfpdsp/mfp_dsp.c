@@ -39,11 +39,11 @@ ready_to_schedule(mfp_processor * p)
 	int maxdepth = -1;
 
 	if (p == NULL) {
-		printf("p is NULL\n");
+		printf("mfpdsp.ready_to_schedule: p is NULL\n");
 		return -1;
 	}
 	if (p->typeinfo == NULL) {
-		printf("p->typeinfo is NULL\n");
+		printf("mfpdsp.ready_to_schedule: p->typeinfo is NULL\n");
 		return -1;
 	}
 
@@ -162,15 +162,11 @@ mfp_dsp_handle_requests(void)
 			break;
 
 		case REQTYPE_DESTROY:
-			printf("calling mfp_proc_destroy %p\n", cmd.src_proc);
 			mfp_proc_destroy(cmd.src_proc);
-			printf("back from destroy\n");
 			break;
 
 		case REQTYPE_CREATE:
-			printf("handle_requests: calling proc_init\n");
 			mfp_proc_init(cmd.src_proc);
-			printf("handle_requests: back from proc_init\n");
 			break;
 		}
 	}
@@ -212,7 +208,7 @@ mfp_dsp_run(int nsamples)
 	
 	if (mfp_needs_reschedule == 1) {
 		if (!mfp_dsp_schedule()) {
-			printf("DSP Error: Some processors could not be scheduled\n");
+			printf("mfp_dsp_run: DSP Error: Some processors could not be scheduled\n");
 		}
 		mfp_needs_reschedule = 0;
 	}

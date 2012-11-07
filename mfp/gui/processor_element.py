@@ -8,6 +8,7 @@ from gi.repository import Clutter as clutter
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
+from mfp import log 
 from input_mode import InputMode
 from .modes.label_edit import LabelEditMode
 
@@ -72,11 +73,10 @@ class ProcessorElement (PatchElement):
 			if len(parts) > 1:
 				self.obj_args = parts[1]
 
-			print "ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args)
-			print self.label.get_text()
+			log.debug("ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args))
 			self.create(self.obj_type, self.obj_args)
 			if self.obj_id is None:
-				print "ProcessorElement: could not create", self.obj_type, self.obj_args
+				log.debug("ProcessorElement: could not create", self.obj_type, self.obj_args)
 			else:
 				self.send_params()
 				self.draw_ports()
