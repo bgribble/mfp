@@ -192,6 +192,7 @@ def main():
 	import sys
 
 	log.debug("Main thread started, pid =", os.getpid())
+	#log.log_file = open("mfp.log", "w+")
 
 	app = MFPApp()
 	app.setup()

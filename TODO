@@ -2,7 +2,7 @@ Control processors: spigot, if
 
 Signal processors: biquad~, hip~, lop~, phasor~, square~ 
 
-GUI elements: slider, meter 
+GUI elements: button, toggle 
 
 External elements: LADSPA hosts
 
@@ -17,7 +17,6 @@ Basics:
  * undo 
  * Selection management (multi select)
  * cut and paste 
- * Driving creation from mfp master 
  * pd-style save and load 
  * gtk accessorizing for gui window: menu, mode line, left click
  * Add a perf testing script 
@@ -27,7 +26,3 @@ Bugs:
  * [route] allows changing number of outputs but nothing is propagated to the 
    GUI
  * Rebuilding [metro] to [metro 200] in gui doesn't set the time 
- * Numeric entry doesn't update GUI on message 
- * Numeric entry doesn't go to next object with TAB 
- * Numeric entry can't be grabbed to drag in either major mode 
- * ScrollEvent does not have scroll_direction (scrollwheel) 
