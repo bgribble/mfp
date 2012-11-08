@@ -114,5 +114,19 @@ class Patch(Processor):
 			self.outlet_objects.append(obj)
 			self.outlet_objects.sort(key=lambda x: -getx(x))
 
+	def remove(self, obj):
+		del self.objects[obj.obj_id]
+		try:
+			self.inlet_objects.remove(obj)
+		except ValueError:
+			pass
+
+		try:
+			self.outlet_objects.remove(obj)
+		except ValueError:
+			pass
+
+
+
 
 

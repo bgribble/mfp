@@ -9,6 +9,7 @@ from threading import Thread
 import code 
 import sys 
 import select 
+import time 
 from mfp import log 
 
 class Console (Thread):
@@ -24,6 +25,7 @@ class Console (Thread):
 		Thread.__init__(self)
 
 	def run(self):
+		time.sleep(0.1)
 		log.debug("console: starting REPL, 'app' is MFP application") 	
 		continued = False 
 
@@ -46,9 +48,10 @@ class Console (Thread):
 				#log.debug("Got input:", cmd)
 				continued = self.console.push(cmd)
 
-		log.debug("console: REPL thread got quit") 
-
 	def finish(self):
 		self.quitreq = True 
-		self.join()
+		try: 
+			self.join()
+		except:
+			pass 
 
