@@ -7,6 +7,7 @@ A text element (comment) in a patch
 from gi.repository import Clutter as clutter 
 from patch_element import PatchElement 
 from mfp import MFPGUI
+from mfp import log 
 from .modes.label_edit import LabelEditMode
 
 class TextElement (PatchElement):
@@ -21,25 +22,25 @@ class TextElement (PatchElement):
 		self.label.set_reactive(True)
 		self.label.set_color(window.color_unselected) 
 		self.add_actor(self.label)
+		self.update_required = True 
 
-		#self.label.connect('text-changed', self.text_changed_cb)
 		self.move(x, y)
 
 	def unselect(self, *args):
 		self.label.set_color(self.stage.color_unselected) 
-		self.text = self.label.get_text()
+		#self.text = self.label.get_text()
 
 	def label_edit_start(self):
-		pass
+		return self.text 
 
-	def label_edit_finish(self, *args):
-		self.message_text = self.label.get_text()
+	def label_edit_finish(self, widget, new_text):
+		self.text = new_text
 		if self.obj_id is None:
-			self.create("var", self.message_text)
+			self.create("var")
 		if self.obj_id is None:
-			print "MessageElement: could not create message obj"
+			log.debug("TextElement: could not create obj")
 		else:
-			self.send_params(message_text=self.message_text)
+			MFPGUI().mfp.send(self.obj_id, self.text, 0)
 			self.draw_ports()
 
 	def select(self, *args):
@@ -49,8 +50,12 @@ class TextElement (PatchElement):
 		return LabelEditMode(self.stage, self, self.label, multiline=True, markup=True)
 
 	def configure(self, params):
-		self.text = params.get('message_text')
-		self.label.set_text(self.text)
+		log.debug(params)
+		if params.get('value') is not None:
+			new_text = params.get('value')
+			if new_text != self.text:
+				self.text = new_text 
+				self.label.set_markup(self.text)
 		PatchElement.configure(self, params)	
 
 

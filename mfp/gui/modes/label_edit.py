@@ -6,16 +6,18 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode 
+from mfp import log 
 
 # FIXME: need to handle motion differently if markup is enabled
 class LabelEditMode (InputMode):
-	def __init__(self, window, element, label, multiline=False, value=False, markup=False):
+	def __init__(self, window, element, label, multiline=False, markup=False):
 		self.manager = window.input_mgr 
 		self.element = element 
 		self.widget = label
 		self.multiline = multiline 
 		self.markup = markup
 		self.text = self.widget.get_text()
+
 		self.undo_stack  = [ self.text ] 
 		self.undo_pos = -1
 		self.editpos = 0
@@ -38,8 +40,11 @@ class LabelEditMode (InputMode):
 		self.bind("C-z", self.undo_edit, "label-undo-typing")
 		self.bind("C-r", self.redo_edit, "label-redo-typing")
 
+		inittxt = self.element.label_edit_start()
+		if inittxt: 
+			self.text = inittxt
+
 		self.update_label(raw=True)
-		self.element.label_edit_start()
 
 	def insert_char(self, keysym):
 		if len(keysym) > 1:
@@ -58,7 +63,7 @@ class LabelEditMode (InputMode):
 	def commit_edits(self):
 		self.widget.set_cursor_visible(False)
 		self.update_label(raw=False)
-		self.element.label_edit_finish(self.widget)
+		self.element.label_edit_finish(self.widget, self.text)
 		self.element.end_edit()
 		return True 
 
@@ -124,6 +129,7 @@ class LabelEditMode (InputMode):
 
 	def update_label(self, raw=True):
 		if raw or self.markup is False:
+			self.widget.set_use_markup = False 
 			self.widget.set_text(self.text)
 		else:
 			self.widget.set_markup(self.text)
