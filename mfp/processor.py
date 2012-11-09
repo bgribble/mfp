@@ -181,6 +181,10 @@ class Processor (object):
 		if tb:
 			print tb
 
+	def load(self, paramdict):
+		# Override for custom load behavior
+		pass 
+
 	# save/restore helper
 	def save(self):
 		oinfo = {}

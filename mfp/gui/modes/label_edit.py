@@ -34,9 +34,13 @@ class LabelEditMode (InputMode):
 
 		self.bind("ESC", self.rollback_edits, "label-rollback-edits")
 		self.bind("DEL", self.erase_forward, "label-erase-forward")
+		self.bind("C-d", self.erase_forward, "label-erase-forward")
+
 		self.bind("BS", self.erase_backward, "label-erase-backward")
 		self.bind("LEFT", self.move_left, "label-move-left")
 		self.bind("RIGHT", self.move_right, "label-move-right")
+		self.bind("C-e", self.move_to_end, "label-move-to-end")
+		self.bind("C-a", self.move_to_start, "label-move-to-start")
 		self.bind("C-z", self.undo_edit, "label-undo-typing")
 		self.bind("C-r", self.redo_edit, "label-redo-typing")
 
@@ -77,7 +81,7 @@ class LabelEditMode (InputMode):
 
 	def erase_forward(self):
 		if self.editpos > (len(self.text) -1):
-			return 
+			return True 
 
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
@@ -90,7 +94,7 @@ class LabelEditMode (InputMode):
 	def erase_backward(self):
 		if self.editpos <= 0:
 			self.editpos = 0
-			return 
+			return True
 
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
@@ -101,6 +105,14 @@ class LabelEditMode (InputMode):
 		self.editpos = max(self.editpos - 1, 0)
 		self.update_label(raw=True)
 		return True 
+
+	def move_to_start(self):
+		self.editpos = 0
+		self.update_label(raw=True)
+
+	def move_to_end(self):
+		self.editpos = len(self.text)
+		self.update_label(raw=True)
 
 	def move_left(self):
 		self.editpos = max(self.editpos-1, 0)

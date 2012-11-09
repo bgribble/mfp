@@ -41,6 +41,7 @@ class Patch(Processor):
 		idlist.sort(key=lambda x: int(x))
 		for oid in idlist:
 			prms = f.get('objects')[oid]
+
 			otype = prms.get('type')
 			oargs = prms.get('initargs')
 			newobj = MFPApp().create(otype, oargs)
@@ -56,6 +57,8 @@ class Patch(Processor):
 
 			if not MFPApp.no_gui:
 				MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, gp)
+
+			newobj.load(prms)
 
 			idmap[int(oid)] = newobj
 

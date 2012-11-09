@@ -130,6 +130,7 @@ class PatchElement (clutter.Group):
 				self.add_actor(pobj)
 				self.port_elements[pid] = pobj
 			pobj.set_position(px, py)
+			pobj.show()
 
 		for i in range(self.num_inlets):
 			x, y = self.port_position(PatchElement.PORT_IN, i)
@@ -140,6 +141,20 @@ class PatchElement (clutter.Group):
 			x, y = self.port_position(PatchElement.PORT_OUT, i)
 			pid = (PatchElement.PORT_OUT, i)
 			confport(pid, x, y)
+
+	def hide_ports(self):
+		def hideport(pid):
+			pobj = self.port_elements.get(pid)
+			if pobj:
+				pobj.hide()
+
+		for i in range(self.num_inlets):
+			pid = (PatchElement.PORT_IN, i)
+			hideport(pid)
+
+		for i in range(self.num_outlets):
+			pid = (PatchElement.PORT_OUT, i)
+			hideport(pid)
 
 
 	def configure(self, params):
