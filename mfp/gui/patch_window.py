@@ -13,6 +13,7 @@ from mfp.main import MFPCommand
 from mfp import log 
 
 from .input_manager import InputManager
+from .console import ConsoleMgr 
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode 
 from .modes.label_edit import LabelEditMode
@@ -23,9 +24,8 @@ class PatchWindow(object):
 		# load Glade ui
 		self.builder = Gtk.Builder()
 		self.builder.add_from_file("mfp/gui/mfp.glade")
-		#self.builder.connect_signals(self)
 
-		# install Clutter stage (need to swap out for a placeholder)
+		# install Clutter stage
 		self.window = self.builder.get_object("main_window")
 		self.embed = GtkClutter.Embed.new()
 		self.embed.set_sensitive(True)
@@ -33,6 +33,9 @@ class PatchWindow(object):
 		self.stage = self.embed.get_stage()
 		box = self.builder.get_object("stage_box")
 		box.pack_start(self.embed, True, True, 0)
+
+		self.console_view = self.builder.get_object("console_text")
+		self.console_buffer = self.console_view.get_buffer()
 
 		# create top-level group for stage 
 		self.group = Clutter.Group()
@@ -42,7 +45,10 @@ class PatchWindow(object):
 		self.selected = None
 
 		self.input_mgr = InputManager()
-		
+		self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view,
+							   self.console_buffer)
+		self.console_mgr.start()
+
 		# dumb colors 
 		self.color_unselected = Clutter.Color()
 		self.color_unselected.from_string('Black')
@@ -209,13 +215,27 @@ class PatchWindow(object):
 
 	def quit(self, *rest):
 		log.debug("Quit command from GUI or WM, shutting down")
+		if self.console_mgr:
+			self.console_mgr.quitreq = True 
+			self.console_mgr.join()
+			log.debug("Console thread reaped")
+
 		MFPCommand().quit()
+
+	def console_write(self, msg):
+		tv = self.builder.get_object("console_text")
+		buf = tv.get_buffer()
+		iterator = buf.get_end_iter()
+		buf.insert(iterator, msg, -1)
+		tv.scroll_to_iter(iterator, 0, False, 0, 0)
+
 
 	def add_log_entry(self, msg):
 		tv = self.builder.get_object("log_text")
 		buf = tv.get_buffer()
 		iterator = buf.get_end_iter()
-		buf.insert(iterator, msg + '\n', -1)
+		buf.insert(iterator, msg, -1)
+		tv.scroll_to_iter(iterator, 0, False, 0, 0)
 
 
 

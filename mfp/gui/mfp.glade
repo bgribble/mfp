@@ -107,11 +107,19 @@
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
                 <child>
-                  <object class="GtkTextView" id="log_text">
+                  <object class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="editable">False</property>
-                    <property name="cursor_visible">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTextView" id="log_text">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="vscroll_policy">natural</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child type="tab">
@@ -125,10 +133,17 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTextView" id="console_text">
+                  <object class="GtkScrolledWindow" id="scrolledwindow2">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="editable">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTextView" id="console_text">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">1</property>

@@ -45,6 +45,14 @@ class GUICommand (RPCWrapper):
 		MFPGUI().appwin.add_log_entry(msg)
 
 	@rpcwrap
+	def console_write(self, msg): 
+		MFPGUI().clutter_do(lambda: self._console_write(msg))
+		return True 
+
+	def _console_write(self, msg):
+		MFPGUI().appwin.console.append(msg)
+
+	@rpcwrap
 	def finish(self):
 		MFPGUI().finish()
 

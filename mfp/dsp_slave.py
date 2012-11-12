@@ -42,8 +42,19 @@ class DSPObject(RPCWrapper):
 	def disconnect(self, outlet, target, inlet):
 		return mfpdsp.proc_disconnect(self.c_obj, outlet, DSPObject.objects.get(target), 
 								      inlet)
+
+
+class DSPCommand (RPCWrapper):
+	@rpcwrap
+	def log_to_gui(self):
+		from main import MFPCommand 
+		# log to GUI 
+		log.log_func = lambda msg: MFPCommand().add_log_entry(msg)
+		log.debug("DSP process logging to GUI")
+		return True 
+
 def dsp_init(pipe, num_inputs, num_outputs):
-	from main import MFPCommand
+	from main import MFPCommand 
 	import threading 
 	import os 
 
@@ -85,6 +96,7 @@ def dsp_response(*args):
 def dsp_finish():
 	global ttq
 	ttq = True
+	log.log_func = None 
 	mfpdsp.dsp_shutdown()
 
 

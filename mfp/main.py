@@ -13,8 +13,8 @@ import time
 from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang 
 from patch import Patch
-
 from singleton import Singleton
+from interpreter import Interpreter 
 
 from rpc_wrapper import RPCWrapper, rpcwrap
 from rpc_worker import RPCServer
@@ -78,6 +78,15 @@ class MFPCommand(RPCWrapper):
 			        dsp_outlets=obj.dsp_outlets)
 
 	@rpcwrap
+	def add_log_entry(self, msg):
+		MFPApp().gui_cmd.add_log_entry(msg)
+
+	@rpcwrap
+	def console_push(self, cmd):
+		log.debug("console_push:", cmd)
+		return MFPApp().console.runsource(cmd)
+
+	@rpcwrap
 	def quit(self):
 		MFPApp().finish()
 
@@ -93,7 +102,8 @@ class MFPApp (object):
 		# threads in this process 
 		self.midi_mgr = None 
 		self.osc_mgr = None 
-		self.console_mgr = None 
+
+		self.console = None
 
 		self.gui_cmd = None
 
@@ -107,7 +117,7 @@ class MFPApp (object):
 		self.patch = None	
 
 	def setup(self):
-		from mfp.dsp_slave import dsp_init, DSPObject
+		from mfp.dsp_slave import dsp_init, DSPObject, DSPCommand 
 		from mfp.gui_slave import gui_init, GUICommand
 
 		RPCWrapper.node_id = "MFP Master"
@@ -119,6 +129,8 @@ class MFPApp (object):
 			num_outputs = 2
 			self.dsp_process = RPCServer("mfp_dsp", dsp_init, num_inputs, num_outputs)
 			self.dsp_process.serve(DSPObject)
+			self.dsp_process.serve(DSPCommand)
+			self.dsp_command = DSPCommand() 
 		
 		if not MFPApp.no_gui:
 			self.gui_process = RPCServer("mfp_gui", gui_init)
@@ -129,6 +141,10 @@ class MFPApp (object):
 			log.debug("MFPApp.setup: GUI is ready, switching logging to GUI")
 			log.log_func = self.gui_cmd.add_log_entry
 			log.debug("MFPApp.setup: logging to GUI")
+			if self.dsp_command: 
+				self.dsp_command.log_to_gui()
+
+			self.console = Interpreter(self.gui_cmd.console_write, dict(app=self))
 
 		# midi manager 
 		from . import midi
@@ -141,10 +157,6 @@ class MFPApp (object):
 		# self.osc_manager = osc.MFPOscManager(5555)
 		# self.osc_manager.start()
 
-		# console 
-		from . import console 
-		self.console_mgr = console.Console(dict(app=self))
-		self.console_mgr.start() 
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch('default', '')
@@ -184,9 +196,9 @@ class MFPApp (object):
 		if self.midi_mgr: 
 			log.debug("MFPApp.finish: reaping MIDI thread...")
 			self.midi_mgr.finish()
-		if self.console_mgr:
-			log.debug("MFPApp.finish: reaping REPL thread...")
-			self.console_mgr.finish()
+		#if self.console_mgr:
+		#	log.debug("MFPApp.finish: reaping REPL thread...")
+		#	self.console_mgr.finish()
 
 		log.debug("MFPApp.finish: all children reaped, good-bye!")
 
