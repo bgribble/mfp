@@ -37,6 +37,14 @@ class GUICommand (RPCWrapper):
 			return False
 
 	@rpcwrap
+	def add_log_entry(self, msg): 
+		MFPGUI().clutter_do(lambda: self._add_log_entry(msg))
+		return True 
+
+	def _add_log_entry(self, msg):
+		MFPGUI().appwin.add_log_entry(msg)
+
+	@rpcwrap
 	def finish(self):
 		MFPGUI().finish()
 
@@ -139,20 +147,23 @@ class MFPGUI (object):
 		GObject.idle_add(thunk, priority=GObject.PRIORITY_DEFAULT)
 
 	def clutter_proc(self):
-		from gi.repository import Clutter as clutter
-		from gi.repository import GObject
+		from gi.repository import Clutter, GObject, Gtk, GtkClutter
 		
 		# explicit init seems to avoid strange thread sync/blocking issues 
 		GObject.threads_init()
-		clutter.threads_init()
-		clutter.init([])
+		Clutter.threads_init()
+		GtkClutter.init([])
 
 		# create main window
 		from mfp.gui.patch_window import PatchWindow
 		self.appwin = PatchWindow()	
 		self.mfp = MFPCommand()
+
+		# direct logging to GUI log console 
+		log.log_func = self.appwin.add_log_entry
+
 		try:
-			clutter.main()
+			Gtk.main()
 		except Exception, e:
 			import traceback
 			traceback.print_exc()
@@ -163,6 +174,7 @@ class MFPGUI (object):
 	def finish(self):
 		log.debug("MFPGUI.finish() called")
 		if self.appwin:
+			log.log_func = None 
 			self.appwin.quit()
 			self.appwin = None 
 

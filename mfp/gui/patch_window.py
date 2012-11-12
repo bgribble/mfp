@@ -1,5 +1,5 @@
 
-from gi.repository import Clutter as clutter 
+from gi.repository import Gtk, Clutter, GtkClutter 
 
 from text_element import TextElement
 from processor_element import ProcessorElement
@@ -20,8 +20,22 @@ from .modes.select_mru import SelectMRUMode
 
 class PatchWindow(object):
 	def __init__(self):
-		self.stage = clutter.Stage()
-		self.group = clutter.Group()
+		# load Glade ui
+		self.builder = Gtk.Builder()
+		self.builder.add_from_file("mfp/gui/mfp.glade")
+		#self.builder.connect_signals(self)
+
+		# install Clutter stage (need to swap out for a placeholder)
+		self.window = self.builder.get_object("main_window")
+		self.embed = GtkClutter.Embed.new()
+		self.embed.set_sensitive(True)
+		self.embed.set_size_request(600, 400)
+		self.stage = self.embed.get_stage()
+		box = self.builder.get_object("stage_box")
+		box.pack_start(self.embed, True, True, 0)
+
+		# create top-level group for stage 
+		self.group = Clutter.Group()
 		self.stage.add_actor(self.group)
 
 		self.objects = [] 
@@ -29,44 +43,54 @@ class PatchWindow(object):
 
 		self.input_mgr = InputManager()
 		
-		self.color_unselected = clutter.Color()
+		# dumb colors 
+		self.color_unselected = Clutter.Color()
 		self.color_unselected.from_string('Black')
-
-		self.color_selected = clutter.Color()
+		self.color_selected = Clutter.Color()
 		self.color_selected.from_string('Red')
-
-		self.color_bg = clutter.Color()
+		self.color_bg = Clutter.Color()
 		self.color_bg.from_string("White")
 
-		# configure clutter stage 
-		self.stage.set_size(600, 400)
-		self.stage.set_title("MFP")
+		# configure Clutter stage 
 		self.stage.set_color(self.color_bg)
 		self.stage.set_property('user-resizable', True)
 		self.zoom = 1.0
 		self.view_x = 0
 		self.view_y = 0
 
+		# show top-level window
 		self.stage.show()
+		self.window.show_all()
+		
+		# make text entry area invisible 
+		self.builder.get_object("text_entry_group").hide()
 		
 		# set up key and mouse handling 
 		self.init_input()
 		log.debug("PatchWindow is up")
 
 	def init_input(self):
+		def grab_handler(stage, event):
+			if not self.embed.has_focus():
+				self.embed.grab_focus()
+			self.input_mgr.handle_event(stage, event)
+
 		def handler(stage, event):
 			self.input_mgr.handle_event(stage, event)
 
+		self.embed.set_can_focus(True)
+		self.embed.grab_focus()
+
 		# hook up signals 
-		self.stage.connect('button-press-event', handler)
-		self.stage.connect('button-release-event', handler)
-		self.stage.connect('key-press-event', handler)
-		self.stage.connect('key-release-event', handler)
+		self.stage.connect('button-press-event', grab_handler)
+		self.stage.connect('button-release-event', grab_handler)
+		self.stage.connect('key-press-event', grab_handler)
+		self.stage.connect('key-release-event', grab_handler)
+		self.stage.connect('destroy', self.quit)
 		self.stage.connect('motion-event', handler)
 		self.stage.connect('enter-event', handler)
 		self.stage.connect('leave-event', handler) 
-		self.stage.connect('scroll-event', handler) 
-		self.stage.connect('destroy', self.quit)
+		self.stage.connect('scroll-event', grab_handler) 
 
 		# global keybindings 
 		self.input_mgr.global_binding('C-e', self.toggle_major_mode, "toggle-major-mode")
@@ -186,5 +210,12 @@ class PatchWindow(object):
 	def quit(self, *rest):
 		log.debug("Quit command from GUI or WM, shutting down")
 		MFPCommand().quit()
+
+	def add_log_entry(self, msg):
+		tv = self.builder.get_object("log_text")
+		buf = tv.get_buffer()
+		iterator = buf.get_end_iter()
+		buf.insert(iterator, msg + '\n', -1)
+
 
 

@@ -8,6 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor
 from ..main import MFPApp
 from ..bang import Uninit 
+from mfp import log 
 
 class Print (Processor): 
 	def __init__(self, init_type, init_args):
@@ -37,7 +38,7 @@ class Print (Processor):
 					out = leader + str(self.inlets[0])
 
 			self.outlets[0] = out 
-			print repr(out) 
+			log.logprint(out) 
 			
 def register():
 	MFPApp().register("print", Print)

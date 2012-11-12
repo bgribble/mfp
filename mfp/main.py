@@ -107,7 +107,6 @@ class MFPApp (object):
 		self.patch = None	
 
 	def setup(self):
-
 		from mfp.dsp_slave import dsp_init, DSPObject
 		from mfp.gui_slave import gui_init, GUICommand
 
@@ -127,7 +126,9 @@ class MFPApp (object):
 			self.gui_cmd = GUICommand()
 			while not self.gui_cmd.ready():
 				time.sleep(0.2)
-			log.debug("MFPApp.setup: GUI is ready")
+			log.debug("MFPApp.setup: GUI is ready, switching logging to GUI")
+			log.log_func = self.gui_cmd.add_log_entry
+			log.debug("MFPApp.setup: logging to GUI")
 
 		# midi manager 
 		from . import midi
@@ -147,6 +148,8 @@ class MFPApp (object):
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch('default', '')
+
+		# 
 
 	def remember(self, obj):
 		oi = self.next_obj_id
@@ -171,6 +174,7 @@ class MFPApp (object):
 			return obj
 
 	def finish(self):
+		log.log_func = None 
 		if self.dsp_process:
 			log.debug("MFPApp.finish: reaping DSP slave...")
 			self.dsp_process.finish()
