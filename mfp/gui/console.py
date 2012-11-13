@@ -48,7 +48,6 @@ class ConsoleMgr (Thread):
 
 	def key_pressed(self, widget, event):
 		from gi.repository import Gdk
-		print event, type(event), event.keyval,  event.string
 		
 		if event.keyval == KEY_ENTER: 
 			self.append("\n")
@@ -65,7 +64,7 @@ class ConsoleMgr (Thread):
 				self.cursor_pos -= 1
 				self.redisplay()
 			return True
-		elif event.keyval == KEY_DEL:
+		elif (event.keyval == KEY_DEL or event.string == CTRL_D):
 			if self.cursor_pos < len(self.linebuf):
 				self.linebuf = (self.linebuf[:self.cursor_pos] + self.linebuf[self.cursor_pos+1:])
 				self.redisplay()
@@ -99,8 +98,20 @@ class ConsoleMgr (Thread):
 				self.cursor_pos += 1
 			self.redisplay()
 			return True 
+		elif event.string == CTRL_A:
+			self.cursor_pos = 0
+			self.redisplay()
+			return True 
+		elif event.string == CTRL_E:
+			self.cursor_pos = len(self.linebuf)
+			self.redisplay()
+		elif event.string == CTRL_K:
+			self.linebuf = self.linebuf[:self.cursor_pos]
+			self.redisplay()
 		elif len(event.string) > 0:
-			print event.string, event.keyval
+			if ord(event.string[0]) < 32:
+				return True 
+			#print event.string, event.keyval, event.get_keycode()
 			self.linebuf = (self.linebuf[:self.cursor_pos] + event.string 
 							+ self.linebuf[self.cursor_pos:])
 			self.cursor_pos += 1

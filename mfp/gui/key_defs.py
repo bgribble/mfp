@@ -26,3 +26,8 @@ KEY_LEFT = 65361
 KEY_RIGHT = 65363
 KEY_ENTER = 65293 
 
+CTRL_A = chr(1)
+CTRL_D = chr(4)
+CTRL_K = chr(11)
+CTRL_E = chr(5)
+
