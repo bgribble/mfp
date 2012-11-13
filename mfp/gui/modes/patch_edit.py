@@ -25,7 +25,7 @@ class PatchEditMode (InputMode):
 		self.drag_start_off_y = None 
 		self.drag_target = None 
 
-		InputMode.__init__(self, "Edit")
+		InputMode.__init__(self, "Edit patch")
 		
 		self.bind("p", lambda: self.window.add_element(ProcessorElement), 
 			"Add processor box")
@@ -76,7 +76,7 @@ class PatchEditMode (InputMode):
 		self.bind("RET", self.window.edit_selected, "Edit element")
 
 		self.bind("M1DOWN", self.drag_start)
-		self.bind("M1-MOTION", self.drag_selected)
+		self.bind("M1-MOTION", self.drag_selected, "Move element or view")
 		self.bind("M1UP", self.drag_end)
 
 		self.bind('+', lambda: self.window.zoom_in(1.25), "Zoom view in")

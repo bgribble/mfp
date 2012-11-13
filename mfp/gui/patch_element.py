@@ -190,7 +190,6 @@ class PatchElement (Clutter.Group):
 			self.stage.input_mgr.enable_minor_mode(self.control_mode)
 		
 	def end_control(self):
-		log.debug("end_control:", self.control_mode)
 		if self.control_mode:
 			self.stage.input_mgr.disable_minor_mode(self.control_mode)
 			self.control_mode = None

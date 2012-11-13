@@ -19,9 +19,9 @@ class SelectMRUMode (InputMode):
 		self.window = window 
 		self.keyhandler = self.window.stage.connect("key-release-event", self.key_release)
 
-		InputMode.__init__(self, "ConnectionMode")
+		InputMode.__init__(self, "Select Most-Recent")
 
-		self.bind("C-TAB", self.select_next, "mru-select-next")
+		self.bind("C-TAB", self.select_next, "Select most-recent element")
 		SelectMRUMode.touch_enabled = False 
 		self.select_next()
 

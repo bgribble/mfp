@@ -26,21 +26,21 @@ class ConnectionMode (InputMode):
 		else:
 			self.source_obj = endpoint 
 
-		InputMode.__init__(self, "ConnectionMode")
+		InputMode.__init__(self, "Connect")
 
-		self.bind("RET", self.make_connection, "connection-commit")
-		self.bind("ESC", self.abort_connection, "connection-rollback")
+		self.bind("RET", self.make_connection, "Accept connection")
+		self.bind("ESC", self.abort_connection, "Discard connection")
 
-		self.bind("0", lambda: self.set_port_key(0), "connection-to-port-0")
-		self.bind("1", lambda: self.set_port_key(1), "connection-to-port-1")
-		self.bind("2", lambda: self.set_port_key(2), "connection-to-port-2")
-		self.bind("3", lambda: self.set_port_key(3), "connection-to-port-3")
-		self.bind("4", lambda: self.set_port_key(4), "connection-to-port-4")
-		self.bind("5", lambda: self.set_port_key(5), "connection-to-port-5")
-		self.bind("6", lambda: self.set_port_key(6), "connection-to-port-6")
-		self.bind("7", lambda: self.set_port_key(7), "connection-to-port-7")
-		self.bind("8", lambda: self.set_port_key(8), "connection-to-port-8")
-		self.bind("9", lambda: self.set_port_key(9), "connection-to-port-9")
+		self.bind("0", lambda: self.set_port_key(0), "Connect port 0")
+		self.bind("1", lambda: self.set_port_key(1), "Connect port 1")
+		self.bind("2", lambda: self.set_port_key(2), "Connect port 2")
+		self.bind("3", lambda: self.set_port_key(3), "Connect port 3")
+		self.bind("4", lambda: self.set_port_key(4), "Connect port 4")
+		self.bind("5", lambda: self.set_port_key(5), "Connect port 5")
+		self.bind("6", lambda: self.set_port_key(6), "Connect port 6")
+		self.bind("7", lambda: self.set_port_key(7), "Connect port 7")
+		self.bind("8", lambda: self.set_port_key(8), "Connect port 8")
+		self.bind("9", lambda: self.set_port_key(9), "Connect port 9")
 
 	def make_connection(self):
 		# are both ends selected?

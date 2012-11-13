@@ -17,22 +17,22 @@ class PatchControlMode (InputMode):
 		self.drag_last_x = self.manager.pointer_x
 		self.drag_last_y = self.manager.pointer_y
 
-		InputMode.__init__(self, "Control")
+		InputMode.__init__(self, "Operate patch")
 
-		self.bind("TAB", self.window.select_next, "patch-select-next")
-		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
-		self.bind("C-TAB", self.window.select_mru, "patch-select-mru")
+		self.bind("TAB", self.window.select_next, "Select next element")
+		self.bind("S-TAB", self.window.select_prev, "Select previous element")
+		self.bind("C-TAB", self.window.select_mru, "Select most-recent element")
 
-		self.bind("M1DOWN", self.drag_start, "patch-drag-start")
-		self.bind("M1-MOTION", self.drag_selected, "patch-drag-selected")
-		self.bind("M1UP", self.drag_end, "patch-drag-end")
+		self.bind("M1DOWN", self.drag_start)
+		self.bind("M1-MOTION", self.drag_selected, "Move viewport")
+		self.bind("M1UP", self.drag_end)
 
-		self.bind('C-0', self.window.reset_zoom, "patch-reset-zoom")
-		self.bind('+', lambda: self.window.zoom_in(1.25), "patch-zoom-in")
-		self.bind('=', lambda: self.window.zoom_in(1.25), "patch-zoom-in")
-		self.bind('-', lambda: self.window.zoom_out(0.8), "patch-zoom-out")
-		self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "patch-zoom-in-tiny")
-		self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "patch-zoom-out-tiny")
+		self.bind('+', lambda: self.window.zoom_in(1.25), "Zoom view in")
+		self.bind('=', lambda: self.window.zoom_in(1.25), "Zoom view in")
+		self.bind('-', lambda: self.window.zoom_out(0.8), "Zoom view out")
+		self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
+		self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
+		self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
 
 	def drag_start(self):
 		if self.manager.pointer_obj is None:
