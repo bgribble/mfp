@@ -58,6 +58,8 @@ class Var (Processor):
 	def load(self, params):
 		if params.get("value"):
 			self.value = params.get("value")
+			if self.gui_params.get("value") is None:
+				self.gui_params["value"] = self.value
 		elif params.get("gui_params").get("value"):
 			self.value = params.get("gui_params").get("value")
 

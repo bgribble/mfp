@@ -54,11 +54,11 @@ class Patch(Processor):
 
 			gp = prms.get('gui_params')
 			newobj.gui_params = gp 
+			newobj.load(prms)
 
 			if not MFPApp.no_gui:
 				MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, gp)
 
-			newobj.load(prms)
 
 			idmap[int(oid)] = newobj
 

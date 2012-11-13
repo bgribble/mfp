@@ -42,7 +42,8 @@ class Interpreter (InteractiveInterpreter):
 		return False 
 
 	def write(self, msg): 
-		self.write_cb(msg)
+		if self.write_cb:
+			self.write_cb(msg)
 
 	
 

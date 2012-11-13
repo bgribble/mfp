@@ -47,7 +47,6 @@ class ConsoleMgr (Thread):
 		return True 
 
 	def key_pressed(self, widget, event):
-		from gi.repository import Gdk
 		
 		if event.keyval == KEY_ENTER: 
 			self.append("\n")
@@ -188,7 +187,8 @@ class ConsoleMgr (Thread):
 			while cmd is None and not self.quitreq:
 				cmd = self.readline()
 
-			continued = self.evaluate(cmd)
+			if not self.quitreq:
+				continued = self.evaluate(cmd)
 
 	def evaluate(self, cmd):
 		# returns True if a syntactically complete but partial line 
