@@ -64,7 +64,7 @@ class ProcessorElement (PatchElement):
 		# FIXME set label to editing style 
 		pass
 
-	def label_edit_finish(self, *args):
+	def label_edit_finish(self, widget, aborted=False):
 		t = self.label.get_text()
 
 		if t != self.label_text:

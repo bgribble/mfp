@@ -6,11 +6,11 @@ A patch element is the parent of all GUI entities backed by MFP objects
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
-from gi.repository import Clutter as clutter
+from gi.repository import Clutter 
 from mfp import MFPGUI 
 from mfp import log 
 
-class PatchElement (clutter.Group):
+class PatchElement (Clutter.Group):
 	'''
 	Parent class of elements represented in the patch window 
 	'''
@@ -48,7 +48,7 @@ class PatchElement (clutter.Group):
 		self.control_mode = None
 
 		# create placeholder group and add to stage 
-		clutter.Group.__init__(self)
+		Clutter.Group.__init__(self)
 		self.stage.register(self)
 
 	def drag_start(self, x, y):
@@ -123,7 +123,7 @@ class PatchElement (clutter.Group):
 		def confport(pid, px, py):
 			pobj = self.port_elements.get(pid)
 			if pobj is None:
-				pobj = clutter.Rectangle()
+				pobj = Clutter.Rectangle()
 				pobj.set_color(self.stage.color_unselected)
 				pobj.set_size(self.porthole_width, self.porthole_height)
 				pobj.set_reactive(False)
@@ -190,6 +190,7 @@ class PatchElement (clutter.Group):
 			self.stage.input_mgr.enable_minor_mode(self.control_mode)
 		
 	def end_control(self):
+		log.debug("end_control:", self.control_mode)
 		if self.control_mode:
 			self.stage.input_mgr.disable_minor_mode(self.control_mode)
 			self.control_mode = None

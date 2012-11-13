@@ -8,7 +8,6 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode 
 from mfp import log 
 
-# FIXME: need to handle motion differently if markup is enabled
 class LabelEditMode (InputMode):
 	def __init__(self, window, element, label, multiline=False, markup=False):
 		self.manager = window.input_mgr 
@@ -22,27 +21,28 @@ class LabelEditMode (InputMode):
 		self.undo_pos = -1
 		self.editpos = 0
 
-		InputMode.__init__(self, "LabelEditMode")
+		InputMode.__init__(self, "Edit text")
 	
 		self.default = self.insert_char
+		self.default_description = "Insert text"
 
 		if not self.multiline:
-			self.bind("RET", self.commit_edits, "label-commit-edits")
+			self.bind("RET", self.commit_edits, "Accept edits")
 		else:
-			self.bind("C-RET", self.commit_edits, "label-commit-edits")
-			self.bind("RET", lambda: self.insert_char("\n"), "insert-nl")
+			self.bind("C-RET", self.commit_edits, "Accept edits")
+			self.bind("RET", lambda: self.insert_char("\n"), "Insert newline")
 
-		self.bind("ESC", self.rollback_edits, "label-rollback-edits")
-		self.bind("DEL", self.erase_forward, "label-erase-forward")
-		self.bind("C-d", self.erase_forward, "label-erase-forward")
+		self.bind("ESC", self.rollback_edits, "Discard edits")
+		self.bind("DEL", self.erase_forward, "Delete forward")
+		self.bind("C-d", self.erase_forward, "Delete forward")
 
-		self.bind("BS", self.erase_backward, "label-erase-backward")
-		self.bind("LEFT", self.move_left, "label-move-left")
-		self.bind("RIGHT", self.move_right, "label-move-right")
-		self.bind("C-e", self.move_to_end, "label-move-to-end")
-		self.bind("C-a", self.move_to_start, "label-move-to-start")
-		self.bind("C-z", self.undo_edit, "label-undo-typing")
-		self.bind("C-r", self.redo_edit, "label-redo-typing")
+		self.bind("BS", self.erase_backward, "Delete backward")
+		self.bind("LEFT", self.move_left, "Move cursor left")
+		self.bind("RIGHT", self.move_right, "Move cursor right")
+		self.bind("C-e", self.move_to_end, "Move cursor to end")
+		self.bind("C-a", self.move_to_start, "Move cursor to start")
+		self.bind("C-z", self.undo_edit, "Undo typing")
+		self.bind("C-r", self.redo_edit, "Redo typing")
 
 		inittxt = self.element.label_edit_start()
 		if inittxt: 
@@ -75,7 +75,7 @@ class LabelEditMode (InputMode):
 		self.text=self.undo_stack[0]
 		self.update_label(raw=False)
 		self.widget.set_cursor_visible(False)
-		self.element.label_edit_finish(self.widget)
+		self.element.label_edit_finish(self.widget, aborted=True)
 		self.element.end_edit()
 		return True 
 

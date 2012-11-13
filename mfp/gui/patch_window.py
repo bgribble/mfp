@@ -1,5 +1,5 @@
 
-from gi.repository import Gtk, Clutter, GtkClutter 
+from gi.repository import Gtk, Clutter, GtkClutter, Pango
 
 from text_element import TextElement
 from processor_element import ProcessorElement
@@ -44,7 +44,7 @@ class PatchWindow(object):
 		self.objects = [] 
 		self.selected = None
 
-		self.input_mgr = InputManager()
+		self.input_mgr = InputManager(self)
 		self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view,
 							   self.console_buffer)
 		self.console_mgr.start()
@@ -70,7 +70,12 @@ class PatchWindow(object):
 		
 		# make text entry area invisible 
 		self.builder.get_object("text_entry_group").hide()
-		
+	
+		# set tab stops on keybindings view 
+		ta = Pango.TabArray.new(1, True)
+		ta.set_tab(0, Pango.TabAlign.LEFT, 120)
+		self.builder.get_object("key_bindings_text").set_tabs(ta)
+
 		# set up key and mouse handling 
 		self.init_input()
 		log.debug("PatchWindow is up")
@@ -104,6 +109,40 @@ class PatchWindow(object):
 
 		# set initial major mode 
 		self.input_mgr.major_mode = PatchEditMode(self)
+		self.display_bindings()
+
+	def stage_pos(self, x, y):
+		success, new_x, new_y = self.group.transform_stage_point(x, y)
+		if success:
+			return (new_x, new_y) 
+		else:
+			return (x, y)
+
+	def display_bindings(self):
+		lines = ["Active key/mouse bindings"]
+		for m in self.input_mgr.minor_modes: 
+			lines.append("\nMinor mode: " + m.description)
+			for b in m.directory():
+				lines.append("%s\t%s" % (b[0], b[1]))
+
+		m = self.input_mgr.major_mode
+		lines.append("\nMajor mode: " + m.description)
+		for b in m.directory():
+			lines.append("%s\t%s" % (b[0], b[1]))
+
+		lines.append("\nGlobal bindings:")
+		m = self.input_mgr.global_mode 
+		for b in m.directory():
+			lines.append("%s\t%s" % (b[0], b[1]))
+
+		txt = '\n'.join(lines)
+
+		tv = self.builder.get_object("key_bindings_text")
+		buf = tv.get_buffer()
+		iterator = buf.get_end_iter()
+		buf.delete(buf.get_start_iter(), buf.get_end_iter())
+		buf.insert(buf.get_end_iter(), txt) 
+
 
 	def toggle_major_mode(self):
 		if isinstance(self.input_mgr.major_mode, PatchEditMode):

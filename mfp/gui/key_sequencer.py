@@ -11,7 +11,7 @@ def get_key_unicode(ev):
 	if ev.unicode_value:
 		return ord(ev.unicode_value)
 	else:
-		v = clutter.keysym_to_unicode(ev.keyval)
+		v = Clutter.keysym_to_unicode(ev.keyval)
 		return v 
 
 class KeySequencer (object):
@@ -30,10 +30,10 @@ class KeySequencer (object):
 			return None 
 
 	def process(self, event):
-		from gi.repository import Clutter as clutter 
+		from gi.repository import Clutter 
 	
 		# KEY PRESS 
-		if event.type == clutter.EventType.KEY_PRESS: 
+		if event.type == Clutter.EventType.KEY_PRESS: 
 			code = event.keyval
 			if code in MOD_ALL:
 				self.mod_keys.add(code)
@@ -41,7 +41,7 @@ class KeySequencer (object):
 				self.sequences.append(self.canonicalize(event))
 
 		# KEY RELEASE 
-		elif event.type == clutter.EventType.KEY_RELEASE:
+		elif event.type == Clutter.EventType.KEY_RELEASE:
 			code = event.keyval
 			if code in MOD_ALL:
 				try:
@@ -50,12 +50,12 @@ class KeySequencer (object):
 					pass
 
 		# BUTTON PRESS, BUTTON RELEASE, MOUSE MOTION
-		elif event.type in (clutter.EventType.BUTTON_PRESS, clutter.EventType.BUTTON_RELEASE, clutter.EventType.MOTION,
-					        clutter.EventType.SCROLL):
+		elif event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.MOTION,
+					        Clutter.EventType.SCROLL):
 			self.sequences.append(self.canonicalize(event))	
 		
 	def canonicalize(self, event):
-		from gi.repository import Clutter as clutter 
+		from gi.repository import Clutter 
 		key = ''
 		
 		if (MOD_CTRL in self.mod_keys) or (MOD_RCTRL in self.mod_keys):
@@ -65,7 +65,7 @@ class KeySequencer (object):
 		if (MOD_WIN in self.mod_keys) or (MOD_RWIN in self.mod_keys):
 			key += 'W-'
 
-		if event.type in (clutter.EventType.KEY_PRESS, clutter.EventType.KEY_RELEASE):
+		if event.type in (Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE):
 			ks = event.keyval
 			if ks >= 256 and ((MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys)):
 				key = 'S-' + key 
@@ -101,7 +101,7 @@ class KeySequencer (object):
 					key += chr(kuni)
 			else:
 				key += "%d" % ks
-		elif event.type in (clutter.EventType.BUTTON_PRESS, clutter.EventType.BUTTON_RELEASE):
+		elif event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE):
 			button = event.button
 			clicks = event.click_count
 			key += "M%d" % button
@@ -111,27 +111,27 @@ class KeySequencer (object):
 			elif clicks == 3:
 				key += "TRIPLE"
 		
-			if event.type == clutter.EventType.BUTTON_PRESS:
+			if event.type == Clutter.EventType.BUTTON_PRESS:
 				key += 'DOWN'
 				self.mouse_buttons.add(button)
 			else:
 				key += 'UP'
 				self.mouse_buttons.remove(button)
 
-		elif event.type == clutter.EventType.MOTION:
+		elif event.type == Clutter.EventType.MOTION:
 			for b in (1,2,3):
 				if b in self.mouse_buttons:
 					key += 'M%d-' % b
 			key += 'MOTION'
 
-		elif event.type == clutter.EventType.SCROLL:
+		elif event.type == Clutter.EventType.SCROLL:
 			for b in (1,2,3):
 				if b in self.mouse_buttons:
 					key += 'M%d-' % b
 			key += 'SCROLL'
-			if event.direction:
+			if event.direction == Clutter.ScrollDirection.DOWN:
 				key += 'DOWN'
-			else:
+			elif event.direction == Clutter.ScrollDirection.UP:
 				key += 'UP'
 		return key 	
 

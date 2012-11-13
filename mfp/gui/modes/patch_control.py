@@ -17,7 +17,7 @@ class PatchControlMode (InputMode):
 		self.drag_last_x = self.manager.pointer_x
 		self.drag_last_y = self.manager.pointer_y
 
-		InputMode.__init__(self, "PatchControlMode")
+		InputMode.__init__(self, "Control")
 
 		self.bind("TAB", self.window.select_next, "patch-select-next")
 		self.bind("S-TAB", self.window.select_prev, "patch-select-prev")
@@ -41,20 +41,20 @@ class PatchControlMode (InputMode):
 			self.window.select(self.manager.pointer_obj)
 
 		self.drag_started = True
-		self.drag_start_x = self.manager.pointer_x
-		self.drag_start_y = self.manager.pointer_y
-		self.drag_last_x = self.manager.pointer_x
-		self.drag_last_y = self.manager.pointer_y
+		self.drag_start_x = self.manager.pointer_ev_x
+		self.drag_start_y = self.manager.pointer_ev_y
+		self.drag_last_x = self.manager.pointer_ev_x
+		self.drag_last_y = self.manager.pointer_ev_y
 
 	def drag_selected(self):
 		if self.drag_started is False:
 			return
 
-		dx = self.manager.pointer_x - self.drag_last_x
-		dy = self.manager.pointer_y - self.drag_last_y 
+		dx = self.manager.pointer_ev_x - self.drag_last_x
+		dy = self.manager.pointer_ev_y - self.drag_last_y 
 		
-		self.drag_last_x = self.manager.pointer_x
-		self.drag_last_y = self.manager.pointer_y 
+		self.drag_last_x = self.manager.pointer_ev_x
+		self.drag_last_y = self.manager.pointer_ev_y 
 
 		if self.manager.pointer_obj is None:
 			self.window.move_view(dx, dy)

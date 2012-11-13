@@ -43,7 +43,8 @@ class SlideMeterElement (PatchElement):
 		self.scale_font_size = 8
 		self.show_scale = False 
 		self.show_title = True 
-		self.slider_enable = False 
+		self.slider_enable = True  
+
 		# value to emit when at bottom of scale, useful for dB scales 
 		self.slider_zero = None	
 
@@ -132,7 +133,6 @@ class SlideMeterElement (PatchElement):
 		orig_x, orig_y = self.get_position()
 		x -= orig_x
 		y -= orig_y
-		log.debug("slider: checking", x, y)
 		if (self.hot_x_min <= x <= self.hot_x_max
 			and self.hot_y_min <= y <= self.hot_y_max):
 			return True 
@@ -141,8 +141,8 @@ class SlideMeterElement (PatchElement):
 
 	def pixdelta2value(self, pixdelta):
 		pix_h = self.texture.get_property('surface_height')-2
-		if self.show_title:
-			pix_h -= self.TITLE_SPACE 
+		#if self.show_title:
+		#	pix_h -= self.TITLE_SPACE 
 		return (float(pixdelta)/pix_h) * (self.max_value-self.min_value)
 
 	def update_value(self, value):
@@ -255,11 +255,19 @@ class SlideMeterElement (PatchElement):
 			self.recenter_title()
 
 	def make_edit_mode(self):
-		return SliderEditMode(self.stage, self, self.title_text or "slidemeter")
+		return SliderEditMode(self.stage, self, self.title_text or "Fader/meter edit")
 
 	def make_control_mode(self):
-		return SliderControlMode(self.stage, self, self.title_text or "slidemeter")
+		return SliderControlMode(self.stage, self, self.title_text or "Fader/meter control")
+
+class FaderElement(SlideMeterElement):
+	pass
+
+class BarMeterElement(SlideMeterElement):
+	def __init__(self, window, x, y):
+		SlideMeterElement.__init__(self, window, x, y)
+
+		self.slider_enable = False 
 
 
-
-
+	

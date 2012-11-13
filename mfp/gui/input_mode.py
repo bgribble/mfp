@@ -10,14 +10,30 @@ class InputMode (object):
 	def __init__(self, description=''):
 		self.description = description
 		self.default = None 
+		self.default_description = None 
 		self.bindings = {} 
 		self.extensions = [] 
+		self.num_bindings = 0
 
 	def extend(self, mode):
 		self.extensions.append(mode)
 	
-	def bind(self, keysym, action, helptext):
-		self.bindings[keysym] = (action, helptext)
+	def bind(self, keysym, action, helptext=None):
+		self.bindings[keysym] = (action, helptext, self.num_bindings)
+		self.num_bindings += 1
+
+	def directory(self):
+		listing = [] 
+		items = self.bindings.items()
+		items.sort(key=lambda e: e[1][2])
+		for keysym, value in items: 
+			if value[1] is not None:
+				listing.append((keysym, value[1]))
+		if self.default_description is not None:
+			listing.append(("[default]", self.default_description))	
+		for e in self.extensions: 
+			listing.extend(e.directory())
+		return listing 
 
 	def lookup(self, keysym):
 		# first check our direct bindings 

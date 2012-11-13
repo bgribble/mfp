@@ -36,7 +36,7 @@ class SliderBaseMode (InputMode):
 			if self.window.selected != self.slider:
 				self.window.select(self.slider)
 
-			if self.slider.point_in_slider(self.manager.pointer_x, self.manager.pointer_y):
+			if self.slider.slider_enable and self.slider.point_in_slider(self.manager.pointer_x, self.manager.pointer_y):
 				self.drag_started = True
 				self.drag_start_x = self.manager.pointer_x
 				self.drag_start_y = self.manager.pointer_y
@@ -56,7 +56,7 @@ class SliderBaseMode (InputMode):
 		dy = self.manager.pointer_y - self.drag_last_y 
 		
 		self.drag_last_x = self.manager.pointer_x
-		self.drag_last_y = self.manager.pointer_y 
+		self.drag_last_y = self.manager.pointer_y
 			
 		value_change = self.slider.pixdelta2value(delta*dy)
 

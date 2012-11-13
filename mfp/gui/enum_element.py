@@ -6,7 +6,7 @@ A patch element corresponding to a number box or enum selector
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from gi.repository import Clutter as clutter 
+from gi.repository import Clutter
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
@@ -30,9 +30,9 @@ class EnumElement (PatchElement):
 		self.update_required = True
 
 		# create elements
-		self.texture = clutter.CairoTexture.new(35, 25)
+		self.texture = Clutter.CairoTexture.new(35, 25)
 		self.texture.connect("draw", self.draw_cb)
-		self.label = clutter.Text()
+		self.label = Clutter.Text()
 
 		self.set_reactive(True)
 		self.add_actor(self.texture)
@@ -187,7 +187,7 @@ class EnumElement (PatchElement):
 		PatchElement.delete(self)
 
 	def make_edit_mode(self):
-		return LabelEditMode(self.stage, self, self.label, value=True)
+		return LabelEditMode(self.stage, self, self.label)
 
 	def make_control_mode(self):
 		return EnumControlMode(self.stage, self)
