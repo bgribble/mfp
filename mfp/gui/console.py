@@ -12,7 +12,8 @@ import select
 import time 
 from mfp import log 
 from mfp.main import MFPCommand
-from .key_sequencer import KeySequencer
+from mfp.gui_slave import MFPGUI
+
 from .key_defs import * 
 
 class ConsoleMgr (Thread):
@@ -95,19 +96,19 @@ class ConsoleMgr (Thread):
 		while not self.quitreq:
 			# write the line prompt 
 			if not continued: 
-				self.append(self.ps1)
+				MFPGUI().clutter_do(lambda: self.append(self.ps1))
 			else:
-				self.append(self.ps2)
+				MFPGUI().clutter_do(lambda: self.append(self.ps2))
 
 			# wait for input, possibly quitting if needed 
 			cmd = None 
 			while cmd is None and not self.quitreq:
 				cmd = self.readline()
 
-			continued = self.push(cmd)
+			continued = self.evaluate(cmd)
 
-	def push(self, cmd):
-		return MFPCommand().console_push(cmd)
+	def evaluate(self, cmd):
+		return MFPCommand().console_eval(cmd)
 
 	def finish(self):
 		self.quitreq = True 

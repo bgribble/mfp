@@ -37,6 +37,9 @@ class Evaluator (object):
 			extra_bindings = {}
 
 		str2eval = evalstr.strip()
+		if not len(str2eval):
+			return None
+
 		sio = StringIO(str2eval)
 
 		tokens = [ t for t in tokenize.generate_tokens(sio.read) 

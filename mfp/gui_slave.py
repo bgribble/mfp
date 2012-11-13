@@ -37,12 +37,12 @@ class GUICommand (RPCWrapper):
 			return False
 
 	@rpcwrap
-	def add_log_entry(self, msg): 
-		MFPGUI().clutter_do(lambda: self._add_log_entry(msg))
+	def log_write(self, msg): 
+		MFPGUI().clutter_do(lambda: self._log_write(msg))
 		return True 
 
-	def _add_log_entry(self, msg):
-		MFPGUI().appwin.add_log_entry(msg)
+	def _log_write(self, msg):
+		MFPGUI().appwin.log_write(msg)
 
 	@rpcwrap
 	def console_write(self, msg): 
@@ -50,7 +50,7 @@ class GUICommand (RPCWrapper):
 		return True 
 
 	def _console_write(self, msg):
-		MFPGUI().appwin.console.append(msg)
+		MFPGUI().appwin.console_write(msg)
 
 	@rpcwrap
 	def finish(self):
@@ -168,7 +168,7 @@ class MFPGUI (object):
 		self.mfp = MFPCommand()
 
 		# direct logging to GUI log console 
-		log.log_func = self.appwin.add_log_entry
+		log.log_func = self.appwin.log_write
 
 		try:
 			Gtk.main()

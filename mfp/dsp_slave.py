@@ -49,7 +49,7 @@ class DSPCommand (RPCWrapper):
 	def log_to_gui(self):
 		from main import MFPCommand 
 		# log to GUI 
-		log.log_func = lambda msg: MFPCommand().add_log_entry(msg)
+		log.log_func = lambda msg: MFPCommand().log_write(msg)
 		log.debug("DSP process logging to GUI")
 		return True 
 

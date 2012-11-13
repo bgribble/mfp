@@ -78,12 +78,11 @@ class MFPCommand(RPCWrapper):
 			        dsp_outlets=obj.dsp_outlets)
 
 	@rpcwrap
-	def add_log_entry(self, msg):
-		MFPApp().gui_cmd.add_log_entry(msg)
+	def log_write(self, msg):
+		MFPApp().gui_cmd.log_write(msg)
 
 	@rpcwrap
-	def console_push(self, cmd):
-		log.debug("console_push:", cmd)
+	def console_eval(self, cmd):
 		return MFPApp().console.runsource(cmd)
 
 	@rpcwrap
@@ -139,7 +138,7 @@ class MFPApp (object):
 			while not self.gui_cmd.ready():
 				time.sleep(0.2)
 			log.debug("MFPApp.setup: GUI is ready, switching logging to GUI")
-			log.log_func = self.gui_cmd.add_log_entry
+			log.log_func = self.gui_cmd.log_write
 			log.debug("MFPApp.setup: logging to GUI")
 			if self.dsp_command: 
 				self.dsp_command.log_to_gui()

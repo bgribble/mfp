@@ -230,7 +230,7 @@ class PatchWindow(object):
 		tv.scroll_to_iter(iterator, 0, False, 0, 0)
 
 
-	def add_log_entry(self, msg):
+	def log_write(self, msg):
 		tv = self.builder.get_object("log_text")
 		buf = tv.get_buffer()
 		iterator = buf.get_end_iter()
