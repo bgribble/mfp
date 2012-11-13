@@ -17,7 +17,6 @@ class Interpreter (InteractiveInterpreter):
 		InteractiveInterpreter.__init__(self, local)
 
 	def runsource(self, source, filename="<MFP interactive console>", symbol="single"):
-	
 		try:
 			code = self.compile(source, filename, symbol)
 		except (OverflowError, SyntaxError, ValueError):
