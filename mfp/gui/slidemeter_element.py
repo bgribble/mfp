@@ -255,10 +255,10 @@ class SlideMeterElement (PatchElement):
 			self.recenter_title()
 
 	def make_edit_mode(self):
-		return SliderEditMode(self.stage, self, self.title_text or "Fader/meter edit")
+		return SliderEditMode(self.stage, self, "Fader/meter edit")
 
 	def make_control_mode(self):
-		return SliderControlMode(self.stage, self, self.title_text or "Fader/meter control")
+		return SliderControlMode(self.stage, self, "Fader/meter control")
 
 class FaderElement(SlideMeterElement):
 	pass

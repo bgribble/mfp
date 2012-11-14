@@ -45,7 +45,8 @@ class InputManager (object):
 
 	def handle_event(self, stage, event):
 		def show_on_hud(keysym, mode, handler):
-			self.window.hud_write("%s: %s (%s)" % (keysym, handler[1], mode.description))
+			self.window.hud_write("%s: %s (%s)" % (keysym, handler[1] or "(no description)", 
+										 mode.description))
 			#log.debug("[hud] %s: %s (%s)" % (keysym, handler[1], mode.description))
 
 		from gi.repository import Clutter 

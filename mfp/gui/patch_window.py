@@ -193,6 +193,7 @@ class PatchWindow(object):
 
 	def unselect_all(self):
 		if self.selected:
+			self.selected.end_control()
 			self.selected.unselect()
 			self.selected = None
 		return True 
