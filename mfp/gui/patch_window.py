@@ -240,7 +240,6 @@ class PatchWindow(object):
 		if self.selected is None:
 			return
 		o = self.selected
-		self.selected = None
 		o.delete()
 		return True 
 

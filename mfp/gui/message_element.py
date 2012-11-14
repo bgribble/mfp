@@ -189,6 +189,7 @@ class TransientMessageElement (MessageElement):
 		log.debug("Sending message to eval:", self.message_text)
 		MFPGUI().mfp.eval_and_send(self.target_obj.obj_id, self.target_port, 
 								   self.message_text)
+		self.stage.select(self.target_obj)
 		self.delete()	
 
 	def make_edit_mode(self):

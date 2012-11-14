@@ -71,8 +71,7 @@ class PatchEditMode (InputMode):
 		self.bind("c", self.connect_fwd, "Connect from element")
 		self.bind("C", self.connect_rev, "Connect to element")
 
-		self.bind("!", lambda: self.window.add_element(TransientMessageElement), 
-			"Send message to element")
+		self.bind("!", self.transient_msg, "Send message to element")
 
 		self.bind("DEL", self.window.delete_selected, "Delete element")
 		self.bind("BS", self.window.delete_selected, "Delete element")
@@ -88,6 +87,12 @@ class PatchEditMode (InputMode):
 		self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
 		self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
 		self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
+
+	def transient_msg(self):
+		if self.window.selected is not None: 
+			return self.window.add_element(TransientMessageElement)
+		else:
+			return False 
 
 	def drag_start(self):
 		if self.manager.pointer_obj is None:

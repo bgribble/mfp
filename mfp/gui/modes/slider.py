@@ -16,7 +16,7 @@ class SliderBaseMode (InputMode):
 		self.window = window 
 		self.slider = element
 
-		self.drag_started = True
+		self.drag_started = False
 		self.drag_start_x = self.manager.pointer_x
 		self.drag_start_y = self.manager.pointer_y
 		self.drag_last_x = self.manager.pointer_x
