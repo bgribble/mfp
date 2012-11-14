@@ -44,6 +44,10 @@ class InputManager (object):
 		self.window.display_bindings()
 
 	def handle_event(self, stage, event):
+		def show_on_hud(keysym, mode, handler):
+			self.window.hud_write("%s: %s (%s)" % (keysym, handler[1], mode.description))
+			#log.debug("[hud] %s: %s (%s)" % (keysym, handler[1], mode.description))
+
 		from gi.repository import Clutter 
 		keysym = None 
 		if event.type in (Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE, Clutter.EventType.BUTTON_PRESS,
@@ -75,6 +79,7 @@ class InputManager (object):
 				if handler is not None:
 					handled = handler[0]()
 					if handled: 
+						show_on_hud(keysym, minor, handler)
 						return True
 
 			# then major mode 
@@ -83,6 +88,7 @@ class InputManager (object):
 				if handler is not None: 
 					handled = handler[0]()
 					if handled: 
+						show_on_hud(keysym, self.major_mode, handler)
 						return True 
 
 			# then global 
@@ -90,6 +96,7 @@ class InputManager (object):
 			if handler is not None: 
 				handled = handler[0]()
 				if handled:
+					show_on_hud(keysym, self.global_mode, handler)
 					return True 
 
 		return False 

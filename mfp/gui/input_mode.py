@@ -10,7 +10,6 @@ class InputMode (object):
 	def __init__(self, description=''):
 		self.description = description
 		self.default = None 
-		self.default_description = None 
 		self.bindings = {} 
 		self.extensions = [] 
 		self.num_bindings = 0
@@ -19,7 +18,10 @@ class InputMode (object):
 		self.extensions.append(mode)
 	
 	def bind(self, keysym, action, helptext=None):
-		self.bindings[keysym] = (action, helptext, self.num_bindings)
+		if keysym is None:
+			self.default = (action, helptext, self.num_bindings)
+		else:
+			self.bindings[keysym] = (action, helptext, self.num_bindings)
 		self.num_bindings += 1
 
 	def directory(self):
@@ -29,8 +31,8 @@ class InputMode (object):
 		for keysym, value in items: 
 			if value[1] is not None:
 				listing.append((keysym, value[1]))
-		if self.default_description is not None:
-			listing.append(("[default]", self.default_description))	
+		if self.default is not None:
+			listing.append(("[default]", self.default[1]))	
 		for e in self.extensions: 
 			listing.extend(e.directory())
 		return listing 
@@ -48,14 +50,16 @@ class InputMode (object):
 			if binding is not None:
 				return binding 
 
-		# do we have a default? 
+		# do we have a default? They get an extra arg (the keysym) 
 		if self.default is not None:
-			return (lambda: self.default(keysym), "default-key-handler")
+			newfunc = lambda: self.default[0](keysym)
+			return (newfunc, self.default[1], self.default[2])
 
 		# do extensions have a default: 
 		for ext in self.extensions: 
 			if ext.default is not None:
-				return (lambda: ext.default(keysym), "default-key-handler")
+				newfunc = lambda: ext.default[0](keysym)
+				return (newfunc, ext.default[1], ext.default[2])
 
 		return None 
 

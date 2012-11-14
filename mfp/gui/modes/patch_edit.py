@@ -75,9 +75,9 @@ class PatchEditMode (InputMode):
 		self.bind("BS", self.window.delete_selected, "Delete element")
 		self.bind("RET", self.window.edit_selected, "Edit element")
 
-		self.bind("M1DOWN", self.drag_start)
+		self.bind("M1DOWN", self.drag_start, "Select element/start drag")
 		self.bind("M1-MOTION", self.drag_selected, "Move element or view")
-		self.bind("M1UP", self.drag_end)
+		self.bind("M1UP", self.drag_end, "Release element/end drag")
 
 		self.bind('+', lambda: self.window.zoom_in(1.25), "Zoom view in")
 		self.bind('=', lambda: self.window.zoom_in(1.25), "Zoom view in")
@@ -106,7 +106,7 @@ class PatchEditMode (InputMode):
 		self.drag_start_y = py
 		self.drag_last_x = px
 		self.drag_last_y = py 
-
+		return True 
 
 	def drag_selected(self):
 		if self.drag_started is False:
@@ -129,12 +129,14 @@ class PatchEditMode (InputMode):
 			self.window.move_view(dx, dy)
 		else:
 			self.drag_target.drag(dx, dy)
+		return True 
 
 	def drag_end(self):
 		self.drag_started = False
 		if self.drag_target:
 			self.drag_target.send_params()
 		self.drag_target = None 
+		return True 
 
 	def connect_fwd(self):
 		if self.window.selected:

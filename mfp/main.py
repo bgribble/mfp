@@ -144,6 +144,7 @@ class MFPApp (object):
 				self.dsp_command.log_to_gui()
 
 			self.console = Interpreter(self.gui_cmd.console_write, dict(app=self))
+			self.gui_cmd.hud_write("<b>Welcome to MFP</b>")
 
 		# midi manager 
 		from . import midi

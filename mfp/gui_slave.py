@@ -53,6 +53,14 @@ class GUICommand (RPCWrapper):
 		MFPGUI().appwin.console_write(msg)
 
 	@rpcwrap
+	def hud_write(self, msg): 
+		MFPGUI().clutter_do(lambda: self._hud_write(msg))
+		return True 
+
+	def _hud_write(self, msg):
+		MFPGUI().appwin.hud_write(msg)
+
+	@rpcwrap
 	def finish(self):
 		MFPGUI().finish()
 

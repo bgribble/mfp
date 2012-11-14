@@ -23,8 +23,6 @@ class LabelEditMode (InputMode):
 
 		InputMode.__init__(self, "Edit text")
 	
-		self.default = self.insert_char
-		self.default_description = "Insert text"
 
 		if not self.multiline:
 			self.bind("RET", self.commit_edits, "Accept edits")
@@ -43,6 +41,9 @@ class LabelEditMode (InputMode):
 		self.bind("C-a", self.move_to_start, "Move cursor to start")
 		self.bind("C-z", self.undo_edit, "Undo typing")
 		self.bind("C-r", self.redo_edit, "Redo typing")
+
+		# default binding 
+		self.bind(None, self.insert_char, "Insert text")
 
 		inittxt = self.element.label_edit_start()
 		if inittxt: 
@@ -75,7 +76,7 @@ class LabelEditMode (InputMode):
 		self.text=self.undo_stack[0]
 		self.update_label(raw=False)
 		self.widget.set_cursor_visible(False)
-		self.element.label_edit_finish(self.widget, aborted=True)
+		self.element.label_edit_finish(self.widget, None, aborted=True)
 		self.element.end_edit()
 		return True 
 

@@ -6,7 +6,7 @@ A patch element corresponding to a clickable message
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from gi.repository import Clutter as clutter 
+from gi.repository import Clutter
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
@@ -22,8 +22,8 @@ class MessageElement (PatchElement):
 		self.message_text = None 
 
 		# create elements
-		self.texture = clutter.CairoTexture.new(35,25)
-		self.label = clutter.Text()
+		self.texture = Clutter.CairoTexture.new(35,25)
+		self.label = Clutter.Text()
 
 		self.texture.set_size(35, 25)
 		self.texture.connect("draw", self.draw_cb)
@@ -72,7 +72,7 @@ class MessageElement (PatchElement):
 	def label_edit_start(self):
 		pass
 
-	def label_edit_finish(self, *args):
+	def label_edit_finish(self, message=None, aborted=False):
 		self.message_text = self.label.get_text()
 
 		self.create(self.element_type, self.message_text)

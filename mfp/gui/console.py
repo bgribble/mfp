@@ -17,12 +17,12 @@ from mfp.gui_slave import MFPGUI
 from .key_defs import * 
 
 class ConsoleMgr (Thread):
-	def __init__ (self, banner, textview, textbuffer):
+	def __init__ (self, banner, textview):
 		self.quitreq = False 
 		self.lock = Lock()
 		self.condition = Condition(self.lock)
-		self.textbuffer = textbuffer 
 		self.textview = textview 
+		self.textbuffer = self.textview.get_buffer()
 
 		self.linebuf = ''
 		self.history_linebuf = ''
