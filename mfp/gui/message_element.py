@@ -9,8 +9,10 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import math 
 from patch_element import PatchElement
+from connection_element import ConnectionElement 
 from mfp import MFPGUI
 from .modes.label_edit import LabelEditMode
+from .modes.transient import TransientMessageEditMode
 from mfp import log 
 
 class MessageElement (PatchElement):
@@ -141,6 +143,54 @@ class MessageElement (PatchElement):
 	def make_edit_mode(self):
 		return LabelEditMode(self.stage, self, self.label)
 
+class TransientMessageElement (MessageElement): 
+	ELBOW_ROOM = 50
 
+	def __init__(self, window, x, y):
+		self.target_obj = window.selected 
+		self.target_port = None
 
+		MessageElement.__init__(self, window, self.target_obj.position_x, 
+								self.target_obj.position_y - self.ELBOW_ROOM) 
+		
+		self.message_text = "None" 
+
+		self.create(self.element_type, self.message_text)
+		if self.obj_id is None:
+			log.debug("MessageElement: could not create message obj for '%s'" 
+						% self.message_text)
+			return 
+
+		self.send_params()
+		self.draw_ports()
+
+		self.set_port(0)
+
+	def set_port(self, portnum):
+		if portnum == self.target_port:
+			return True 
+
+		for c in self.connections_out:
+			c.delete()
+
+		self.target_port = portnum
+
+		if MFPGUI().mfp.connect(self.obj_id, 0, self.target_obj.obj_id, self.target_port):
+			c = ConnectionElement(self.stage, self, 0, self.target_obj, self.target_port)
+			self.connections_out.append(c)
+			self.target_obj.connections_in.append(c)
+		else:
+			log.debug("TransientMessageElement: Cannot make connection")
+		
+		return True 
+
+	def label_edit_finish(self, message=None, aborted=False):
+		self.message_text = self.label.get_text()
+		log.debug("Sending message to eval:", self.message_text)
+		MFPGUI().mfp.eval_and_send(self.target_obj.obj_id, self.target_port, 
+								   self.message_text)
+		self.delete()	
+
+	def make_edit_mode(self):
+		return TransientMessageEditMode(self.stage, self, self.label)
 

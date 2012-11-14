@@ -11,7 +11,7 @@ from .connection import ConnectionMode
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
 from ..connection_element import ConnectionElement 
-from ..message_element import MessageElement
+from ..message_element import MessageElement, TransientMessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement 
@@ -70,6 +70,9 @@ class PatchEditMode (InputMode):
 
 		self.bind("c", self.connect_fwd, "Connect from element")
 		self.bind("C", self.connect_rev, "Connect to element")
+
+		self.bind("!", lambda: self.window.add_element(TransientMessageElement), 
+			"Send message to element")
 
 		self.bind("DEL", self.window.delete_selected, "Delete element")
 		self.bind("BS", self.window.delete_selected, "Delete element")

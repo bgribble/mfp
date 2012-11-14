@@ -160,6 +160,9 @@ class PatchWindow(object):
 			element.send_params()
 
 	def unregister(self, element):
+		if self.selected == element:
+			self.unselect(element)
+
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element]
 		self.group.remove_actor(element)

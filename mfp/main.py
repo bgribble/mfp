@@ -53,9 +53,9 @@ class MFPCommand(RPCWrapper):
 		return True
 
 	@rpcwrap
-	def send(self, obj_id, port, data):
+	def eval_and_send(self, obj_id, port, message):
 		obj = MFPApp().recall(obj_id)
-		obj.send(data, port)
+		obj.send(obj.parse_obj(message), port)
 		return True
 
 	@rpcwrap
