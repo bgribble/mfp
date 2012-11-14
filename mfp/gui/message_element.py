@@ -50,16 +50,18 @@ class MessageElement (PatchElement):
 		self.update_required = True
 
 	def draw_cb(self, texture, ct):
-		w = self.texture.get_property('surface_width')-2
-		h = self.texture.get_property('surface_height')-2
+		w = self.texture.get_property('surface_width')-1
+		h = self.texture.get_property('surface_height')-1
 		c = None
 		if self.selected: 
 			c = self.stage.color_selected
 		else:
 			c = self.stage.color_unselected
-		ct.set_source_rgb(c.red, c.green, c.blue)
+		texture.clear()
+		ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
 
-		ct.translate(0.5, 0.5)
+		#ct.translate(0.5, 0.5)
+		ct.set_line_width(1.25)
 		ct.move_to(1,1)
 		ct.line_to(1, h)
 		ct.line_to(w, h)

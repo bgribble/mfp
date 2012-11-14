@@ -117,7 +117,7 @@ class PatchElement (Clutter.Group):
 			else:
 				spc = max(self.porthole_minspace, 
 						  (w-self.porthole_width-2.0*self.porthole_border) / (self.num_outlets-1.0))
-			return (self.porthole_border + spc*port_num, h-2.0-self.porthole_height)
+			return (self.porthole_border + spc*port_num, h-self.porthole_height)
 
 	def draw_ports(self):
 		def confport(pid, px, py):
