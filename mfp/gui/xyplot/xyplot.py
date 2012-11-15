@@ -1,25 +1,26 @@
 #! /usr/bin/env python
 '''
 xyplot.py 
-clutter widget supporting scatter, line, and roll plots
+Clutter widget supporting scatter, line, and roll plots
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com> 
 '''
 
-from gi.repository import Clutter as clutter
+from gi.repository import Clutter
 import math
 
 from .mark_style import MarkStyle
 from .quilt import Quilt 
 from .. import ticks 
+from mfp import log 
 
-black = clutter.Color()
+black = Clutter.Color()
 black.from_string("Black")
 
-white = clutter.Color()
+white = Clutter.Color()
 white.from_string("White")
 
-class XYPlot (clutter.Group):
+class XYPlot (Clutter.Group):
 	MARGIN_LEFT = 30 
 	MARGIN_BOT = 30
 	AXIS_PAD = 5
@@ -29,7 +30,7 @@ class XYPlot (clutter.Group):
 	CURVE = 1
 
 	def __init__(self, width, height):
-		clutter.Group.__init__(self)
+		Clutter.Group.__init__(self)
 
 		self.width = width
 		self.height = height
@@ -59,7 +60,7 @@ class XYPlot (clutter.Group):
 		self.create()
 
 	def create(self):
-		self.border = clutter.Rectangle()
+		self.border = Clutter.Rectangle()
 		self.border.set_border_width(0)
 		self.border.set_border_color(black)
 		self.border.set_color(white)
@@ -83,7 +84,7 @@ class XYPlot (clutter.Group):
 		self.x_axis.set_render_cb(self.draw_xaxis_cb)
 		self.y_axis.set_render_cb(self.draw_yaxis_cb)
 
-		self.plot_border = clutter.Rectangle()
+		self.plot_border = Clutter.Rectangle()
 		self.plot_border.set_border_width(0)
 		self.plot_border.set_border_color(black)
 		self.plot_border.set_color(white)
@@ -174,6 +175,7 @@ class XYPlot (clutter.Group):
 		self.plot.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
 
 	def set_style(self, style):
+		log.debug("XYPlot: updating style params", style)
 		for inlet, istyle in style.items():
 			marker = self.style.setdefault(inlet, MarkStyle()) 
 			for k, v in istyle.items():
@@ -183,7 +185,7 @@ class XYPlot (clutter.Group):
 					marker.set_color(v)
 				elif k == "shape":
 					marker.shape = str(v)
-				elif k == "stroke_style":
+				elif k == "stroke":
 					marker.stroke_style = str(v)
 
 	def pt2screen(self, p):
@@ -374,26 +376,4 @@ class XYPlot (clutter.Group):
 			self.reindex()	
 		self.plot.clear()
 
-
-if __name__ == "__main__":
-	import math
-	import glib
-
-	glib.threads_init()
-	clutter.threads_init()
-	clutter.init([])
-
-	stg = clutter.Stage()
-	stg.set_size(600, 400)
-
-	x = XYPlot(600, 400)
-	x.set_style({0: dict(stroke_style="solid")})
-	x.show()
-	stg.add_actor(x)
-	stg.show()	
-
-	for p in range(0, 70):
-		x.append((p/10.0, math.sin(p/10.0)))
-
-	clutter.main()	
 

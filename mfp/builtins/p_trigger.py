@@ -15,7 +15,7 @@ class Trigger (Processor):
 
 	[trigger] clones its input on multiple outputs, number 
 	determined by the creation arg.  Used as a sequencing aid, 
-	since outputs will be activated in order of index 
+	since outputs will be activated in reverse order of index 
 	'''
 	def __init__(self, init_type, init_args):
 
@@ -25,6 +25,7 @@ class Trigger (Processor):
 		else:
 			numout = 1
 		Processor.__init__(self, 1, numout, init_type, init_args)
+		self.outlet_order.reverse() 
 
 	def trigger(self):
 		for i in range(len(self.outlets)):

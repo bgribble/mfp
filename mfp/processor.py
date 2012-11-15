@@ -24,6 +24,7 @@ class Processor (object):
 
 		self.inlets = [ Uninit ] * inlets
 		self.outlets = [ Uninit ] * outlets
+		self.outlet_order = range(outlets)
 		self.status = Processor.OK 
 		self.obj_id = MFPApp().remember(self)
 
@@ -162,7 +163,9 @@ class Processor (object):
 				self.method(value, inlet)
 			else:
 				self.trigger()
-			for conns, val in zip(self.connections_out, self.outlets):
+			output_pairs = zip(self.connections_out, self.outlets)
+
+			for conns, val in [ output_pairs[i] for i in self.outlet_order ]: 
 				if val is not Uninit:
 					for target, inlet in conns:
 						work.append((target, val, inlet))
