@@ -25,6 +25,8 @@ class SliderBaseMode (InputMode):
 		InputMode.__init__(self, descrip)
 
 		self.bind("M1DOWN", self.drag_start, "Adjust fader or move element")
+		self.bind("S-M1DOWN", self.drag_start)
+		self.bind("C-M1DOWN", self.drag_start)
 		self.bind("M1-MOTION", lambda: self.drag_selected(1.0), 
 			"Change value (1x speed)")
 		self.bind("S-M1-MOTION", lambda: self.drag_selected(0.25), 
@@ -32,6 +34,8 @@ class SliderBaseMode (InputMode):
 		self.bind("C-M1-MOTION", lambda: self.drag_selected(0.05), 
 			"Change value (1/20 speed)")
 		self.bind("M1UP", self.drag_end, "Release fader")
+		self.bind("S-M1UP", self.drag_end)
+		self.bind("C-M1UP", self.drag_end)
 
 
 	def drag_start(self):

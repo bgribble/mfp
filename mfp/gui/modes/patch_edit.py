@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode 
 from .connection import ConnectionMode
+from .autoplace import AutoplaceMode 
 
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
@@ -25,23 +26,26 @@ class PatchEditMode (InputMode):
 		self.drag_start_off_y = None 
 		self.drag_target = None 
 
+		self.autoplace_mode = None
+
+
 		InputMode.__init__(self, "Edit patch")
 		
-		self.bind("p", lambda: self.window.add_element(ProcessorElement), 
+		self.bind("p", lambda: self.add_element(ProcessorElement), 
 			"Add processor box")
-		self.bind("t", lambda: self.window.add_element(TextElement), 
+		self.bind("t", lambda: self.add_element(TextElement), 
 			"Add text comment")
-		self.bind("m", lambda: self.window.add_element(MessageElement), 
+		self.bind("m", lambda: self.add_element(MessageElement), 
 			"Add message box")
-		self.bind("n", lambda: self.window.add_element(EnumElement), 
+		self.bind("n", lambda: self.add_element(EnumElement), 
 			"Add number box")
-		self.bind("f", lambda: self.window.add_element(FaderElement), 
+		self.bind("f", lambda: self.add_element(FaderElement), 
 			"Add fader")
-		self.bind("b", lambda: self.window.add_element(BarMeterElement), 
+		self.bind("b", lambda: self.add_element(BarMeterElement), 
 			"Add bar meter")
-		self.bind("x", lambda: self.window.add_element(PlotElement), 
+		self.bind("x", lambda: self.add_element(PlotElement), 
 			"Add X/Y plot")
-		
+
 		self.bind("TAB", self.window.select_next, 
 			"Select next element")
 		self.bind("S-TAB", self.window.select_prev, 
@@ -68,6 +72,9 @@ class PatchEditMode (InputMode):
 		self.bind("C-LEFT", lambda: self.window.move_selected( 25, 0), "Move element left 25")
 		self.bind("C-RIGHT", lambda: self.window.move_selected(25, 0), "Move element right 25")
 
+
+		self.bind("a", self.auto_place_below, "Auto-place below")
+		self.bind("A", self.auto_place_above, "Auto-place above")
 		self.bind("c", self.connect_fwd, "Connect from element")
 		self.bind("C", self.connect_rev, "Connect to element")
 
@@ -87,6 +94,34 @@ class PatchEditMode (InputMode):
 		self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
 		self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
 		self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
+
+
+	def add_element(self, factory):
+		if self.autoplace_mode is None:
+			self.window.add_element(factory)
+		else: 
+			self.window.add_element(factory, self.autoplace_x, self.autoplace_y)
+			self.manager.disable_minor_mode(self.autoplace_mode)
+			self.autoplace_mode = None 
+
+	def auto_place_below(self):
+		self.autoplace_mode = AutoplaceMode(self.window, callback=self.set_autoplace, 
+									  initially_below=True)
+		self.manager.enable_minor_mode(self.autoplace_mode)
+		return True 
+
+	def auto_place_above(self):
+		self.autoplace_mode = AutoplaceMode(self.window, callback=self.set_autoplace, 
+									  initially_below=False)
+		self.manager.enable_minor_mode(self.autoplace_mode)
+		return True 
+
+	def set_autoplace(self, x, y):
+		self.autoplace_x = x
+		self.autoplace_y = y 
+		if x is None and y is None:
+			self.manager.disable_minor_mode(self.autoplace_mode)
+			self.autoplace_mode = None 
 
 	def transient_msg(self):
 		if self.window.selected is not None: 
@@ -156,6 +191,11 @@ class PatchEditMode (InputMode):
 			self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected, 
 												          connect_rev=True))
 		return True 
+
+	def close(self):
+		if self.autoplace_mode:
+			self.manager.disable_minor_mode(self.autoplace_mode)
+			self.autoplace_mode = None 
 	
 
 

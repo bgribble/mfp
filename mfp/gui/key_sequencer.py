@@ -6,6 +6,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from .key_defs import * 
+from mfp import log 
 
 def get_key_unicode(ev):
 	if ev.unicode_value:
@@ -70,7 +71,7 @@ class KeySequencer (object):
 			if ks >= 256 and ((MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys)):
 				key = 'S-' + key 
 		    	
-			if ks == KEY_TAB:
+			if ks in (KEY_TAB, KEY_SHIFTTAB):
 				key += 'TAB'
 			elif ks == KEY_UP:
 				key += 'UP'
@@ -95,13 +96,20 @@ class KeySequencer (object):
 				if kuni < 32:
 					ks = chr(event.keyval)
 					if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
+						log.debug("SHIFT in modifiers but below 256 (%s)" % kuni)
 						ks = ks.upper()
 					key += ks 
 				else:
 					key += chr(kuni)
 			else:
+				log.debug("unhandled keycode", ks)
 				key += "%d" % ks
-		elif event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE):
+			return key 
+
+		if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
+			key = 'S-' + key
+
+		if event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE):
 			button = event.button
 			clicks = event.click_count
 			key += "M%d" % button

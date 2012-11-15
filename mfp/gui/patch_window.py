@@ -21,7 +21,6 @@ from .input_manager import InputManager
 from .console import ConsoleMgr 
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode 
-from .modes.label_edit import LabelEditMode
 from .modes.select_mru import SelectMRUMode 
 
 class PatchWindow(object):
@@ -49,6 +48,7 @@ class PatchWindow(object):
 		self.hud_text = Clutter.Text() 
 		self.hud_animation = None 
 		self.hud_text.set_property("opacity", 0)
+		self.autoplace_marker = None 
 		self.stage.add_actor(self.group)
 		self.stage.add_actor(self.hud_text) 
 
@@ -156,6 +156,19 @@ class PatchWindow(object):
 		buf.insert(buf.get_end_iter(), txt) 
 
 
+	def show_autoplace_marker(self, x, y):
+		if self.autoplace_marker is None:
+			self.autoplace_marker = Clutter.Text()
+			self.autoplace_marker.set_text("+")
+			self.group.add_actor(self.autoplace_marker)
+		self.autoplace_marker.set_position(x, y)
+		self.autoplace_marker.set_depth(-10)
+		self.autoplace_marker.show()
+
+	def hide_autoplace_marker(self):
+		if self.autoplace_marker:
+			self.autoplace_marker.hide()
+
 	def toggle_major_mode(self):
 		if isinstance(self.input_mgr.major_mode, PatchEditMode):
 			self.input_mgr.set_major_mode(PatchControlMode(self))
@@ -180,8 +193,13 @@ class PatchWindow(object):
 		# FIXME hook
 		SelectMRUMode.forget(element)
 
-	def add_element(self, factory):
-		b = factory(self, self.input_mgr.pointer_x, self.input_mgr.pointer_y)
+	def add_element(self, factory, x=None, y=None):
+		if x is None:
+			x = self.input_mgr.pointer_x
+		if y is None:
+			y = self.input_mgr.pointer_y
+		
+		b = factory(self, x, y)
 		self.select(b)
 		b.begin_edit()	
 		return True 
@@ -215,23 +233,27 @@ class PatchWindow(object):
 	def select_next(self):
 		if len(self.objects) == 0:
 			return False 
-		elif self.selected is None and len(self.objects) > 0:
-			self.select(self.objects[0])
+
+		selectable = [ o for o in self.objects if not isinstance(o, ConnectionElement)]
+		if self.selected is None and len(selectable) > 0:
+			self.select(selectable[0])
 			return True 
 		else:
-			cur_ind = self.objects.index(self.selected)
-			self.select(self.objects[(cur_ind+1) % len(self.objects)])
+			cur_ind = selectable.index(self.selected)
+			self.select(selectable[(cur_ind+1) % len(selectable)])
 			return True 
 
 	def select_prev(self):
 		if len(self.objects) == 0:
 			return False 
-		elif self.selected is None and len(self.objects) > 0:
-			self.select(self.objects[-1])
+
+		selectable = [ o for o in self.objects if not isinstance(o, ConnectionElement)]
+		if self.selected is None and len(selectable) > 0:
+			self.select(selectable[-1])
 			return True 
 		else:
-			cur_ind = self.objects.index(self.selected)
-			self.select(self.objects[cur_ind-1])
+			cur_ind = selectable.index(self.selected) 
+			self.select(selectable[cur_ind-1])
 			return True 
 
 	def select_mru(self):
