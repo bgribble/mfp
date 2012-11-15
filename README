@@ -6,11 +6,20 @@ very much inspired by Miller Puckette's Pure Data (pd) and MAX/MSP,
 with a bit of LabView and TouchOSC for good measure.  
 
 MFP is in its early development phases.  Large pieces of core
-functionality are not implemented yet.  
+functionality are not implemented yet, including the equivalents of
+PD's subpatches, abstractions, "r" and "s", complete support for
+extensions, hosting of plugins besides LADSPA v1, JACK MIDI, i18n, 
+etc etc etc.  
 
+What IS there is the basic program window and patch editor, enough 
+message and DSP processors to build some demo patches, a model for how
+a mostly-keyboard-controlled GUI app will work, and the infrastructure
+of the 3 separate processes (main, GUI, and DSP) that work together to
+make MFP happen. 
 
-Prerequisites: a bunch of dependencies need to be installed for this to 
-work.  I use debian sid (unstable). here are the debian/ubuntu package names: 
+Prerequisites: a bunch of dependencies need to be installed for this
+to work.  I use debian sid (unstable) but I don't depend on bleeding
+edge anything beyond that.  
 
 	Basics: 
 		python (python2.7 on sid, 2.6 should work too) 
@@ -22,12 +31,15 @@ work.  I use debian sid (unstable). here are the debian/ubuntu package names:
 	Clutter-based GUI: 
 		python-gi (GObject Introspection for Python)
 		gir1.2-clutter-1.0 (clutter bindings for GI)
+		gir1.2-gtkclutter-1.0 (clutter-GTK bindings for GI)
 		gir1.2-cogl-1.0 (COGL bindings for GI)
 		gir1.2-coglpango-1.0 (COGL Pango bindings for GI)
 
-	JACK: 
+	JACK/ALSA: 
 		libjack0
 		libjack0-dev
+		libasound2
+		libasound2-dev
 
 Building: I suggest using 'virtualenv' to build in a sandbox.  From
 the top level (where this file is located).  The packages in "lib" are 

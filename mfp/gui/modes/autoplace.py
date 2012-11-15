@@ -33,6 +33,7 @@ class AutoplaceMode (InputMode):
 		self.bind("a", self.autoplace_below, "Choose next (below)")
 		self.bind("A", self.autoplace_above, "Choose next (above)")
 		self.bind("ESC", self.autoplace_disable, "Return to manual positioning")
+
 		if initially_below:
 			self.autoplace_below()
 		else:
@@ -53,7 +54,7 @@ class AutoplaceMode (InputMode):
 			if len(self.window.objects):
 				self.window.key_widget = self.window.objects[-1]
 			else: 
-				return self.autoplace_none()
+				return self.autoplace_noselection()
 
 		# there is a key widget.  Placements are above the inlets,
 		# offset by SPACING 
@@ -80,7 +81,7 @@ class AutoplaceMode (InputMode):
 			if len(self.window.objects):
 				self.window.key_widget = self.window.objects[-1]
 			else: 
-				return self.autoplace_none()
+				return self.autoplace_noselection()
 
 		# there is a key widget.  Placements are below the outlets, 
 		# offset by SPACING 
@@ -147,8 +148,7 @@ class AutoplaceMode (InputMode):
 		return y
 
 
-	def autoplace_none(self):
-		log.debug("autoplace_none: trying placement=", self.placement)
+	def autoplace_noselection(self):
 		width, height = self.window.stage.get_size()
 		spacing = self.NONE_SPACING 
 		cols = int(width / spacing)
@@ -171,7 +171,6 @@ class AutoplaceMode (InputMode):
 		self.window.hide_autoplace_marker()
 		if self.callback:
 			self.callback(None, None)
-
 
 	def close(self):
 		self.window.hide_autoplace_marker()
