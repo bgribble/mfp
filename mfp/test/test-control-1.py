@@ -69,7 +69,7 @@ class PrintTest(TestCase):
 		self.pr.send("%s %s %s", 1)
 		self.pr.send([1, 2, 3])
 
-		assert self.out.outlets[0] == Uninit  
+		assert self.out.outlets[0] == "%s %s %s [1, 2, 3]"  
 		
 		self.pr.send((1, 2, 3))
 

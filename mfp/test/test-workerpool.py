@@ -11,7 +11,6 @@ class QueueWorker(BaseWorker):
 	workers = []
 
 	def __init__(self, pool, q, results):
-		print self
 		self.queue = q
 		self.results = results
 		BaseWorker.__init__(self, pool)
@@ -55,6 +54,5 @@ class WorkerPoolTest(TestCase):
 		for n in xrange(20):
 			self.queue.put(n)
 		time.sleep(0.2)
-		print self.results
 		self.results.sort()
 		self.assertEqual(self.results, range(20))

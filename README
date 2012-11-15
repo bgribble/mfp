@@ -6,10 +6,10 @@ very much inspired by Miller Puckette's Pure Data (pd) and MAX/MSP,
 with a bit of LabView and TouchOSC for good measure.  
 
 MFP is in its early development phases.  Large pieces of core
-functionality are not implemented yet, including the equivalents of
+functionality are not implemented yet, including:the equivalents of
 PD's subpatches, abstractions, "r" and "s", complete support for
-extensions, hosting of plugins besides LADSPA v1, JACK MIDI, i18n, 
-etc etc etc.  
+extensions, multiple selection, cut/copy/paste, undo, hosting of 
+plugins, JACK MIDI, i18n, etc etc etc.
 
 What IS there is the basic program window and patch editor, enough 
 message and DSP processors to build some demo patches, a model for how
@@ -19,16 +19,19 @@ make MFP happen.
 
 Prerequisites: a bunch of dependencies need to be installed for this
 to work.  I use debian sid (unstable) but I don't depend on bleeding
-edge anything beyond that.  
+edge anything beyond that.  I think that 'apt-get install' on the below 
+will pull in any necessary dependencies. 
 
 	Basics: 
 		python (python2.7 on sid, 2.6 should work too) 
 		python-dev (for Python.h)
 		python-setuptools 
 		python-nose 
-		pkg-config 
+		pkg-config  
 
 	Clutter-based GUI: 
+		libgtk-3-dev
+		libclutter-1.0-dev 
 		python-gi (GObject Introspection for Python)
 		gir1.2-clutter-1.0 (clutter bindings for GI)
 		gir1.2-gtkclutter-1.0 (clutter-GTK bindings for GI)

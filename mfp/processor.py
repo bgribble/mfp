@@ -107,6 +107,7 @@ class Processor (object):
 					self.disconnect(outlet, tobj, tport)
 			self.outlets[outlets:] = []
 			self.connections_out[outlets:] = []
+		self.outlet_order = range(len(self.outlets))
 
 	def connect(self, outlet, target, inlet):
 		# is this a DSP connection? 

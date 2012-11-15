@@ -193,7 +193,8 @@ class MFPApp (object):
 
 	def finish(self):
 		log.log_func = None 
-		self.console.write_cb = None
+		if self.console: 
+			self.console.write_cb = None
 		if self.dsp_process:
 			log.debug("MFPApp.finish: reaping DSP slave...")
 			self.dsp_process.finish()

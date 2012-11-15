@@ -23,16 +23,16 @@ class DSPObjectTests (TestCase):
 		'''test_read: [dsp] can read back a creation parameter'''
 		o = MFPApp().create("osc~", "500")
 		print "test_read: objid = ", o, o.dsp_obj
-		f = o.dsp_obj.getparam("freq")
+		f = o.dsp_obj.getparam("_sig_1")
 		print f 
 		assert f == 500 
 
 	def test_connect_disconnect(self):
 		'''test_connect_disconnect: [dsp] make/break connections'''
-		print "============= Creating adc~"
-		inp = MFPApp().create("adc~", "0")
-		print "============= Creating adc~ done"
-		outp = MFPApp().create("dac~", "0")
+		print "============= Creating in~"
+		inp = MFPApp().create("in~", "0")
+		print "============= Creating out~"
+		outp = MFPApp().create("out~", "0")
 		
 		print "============= Created objects"
 		inp.connect(0, outp, 0)
@@ -43,8 +43,8 @@ class DSPObjectTests (TestCase):
 	def test_delete(self):
 		'''test_destroy: [dsp] destroy dsp object'''
 		print "Creating"
-		inp = MFPApp().create("adc~", "0")
-		outp = MFPApp().create("dac~", "0")
+		inp = MFPApp().create("in~", "0")
+		outp = MFPApp().create("out~", "0")
 		print "connecting"
 		inp.connect(0, outp, 0)
 		print "deleting"
