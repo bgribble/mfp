@@ -257,7 +257,7 @@ test_osc_2(void)
 	int fail = 0;
 
 	printf("test_osc_2... \n");
-	mfp_proc_setparam_float(osc, "freq", 1000.0);
+	mfp_proc_setparam_float(osc, "_sig_1", 1000.0);
 	mfp_proc_setparam_float(sig, "value", 100.0);
 
 	mfp_proc_connect(sig, 0, osc, 1);
@@ -289,8 +289,8 @@ test_osc_1(void)
 	int fail = 0;
 
 	printf("test_osc_1... \n");
-	mfp_proc_setparam_float(osc, "freq", 1000.0);
-	mfp_proc_setparam_float(osc, "ampl", 100.0);
+	mfp_proc_setparam_float(osc, "_sig_1", 1000.0);
+	mfp_proc_setparam_float(osc, "_sig_2", 100.0);
 
 	printf("calling process()");
 	mfp_proc_process(osc);
@@ -370,8 +370,10 @@ test_buffer_2(void)
 	mfp_dsp_schedule();
 	mfp_dsp_run(mfp_blocksize);
 
-	if((info->shm_fd == -1) || (info->shm_size != mfp_blocksize*sizeof(float))
-		|| (info->chan_count != 1) || (info->chan_size != mfp_blocksize)) {
+	if((info->shm_fd == -1) 
+		|| (info->shm_size != mfp_blocksize*sizeof(float))
+		|| (info->chan_count != 1) 
+		|| (info->chan_size != mfp_blocksize)) {
 		printf("config fail %d %d %d %d\n", info->shm_fd, info->shm_size, 
 				info->chan_count, info->chan_size);
 		return 0;
