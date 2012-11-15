@@ -39,7 +39,6 @@ class ConnectionElement(PatchElement):
 		PatchElement.delete(self)
 
 	def draw(self):
-		log.debug("draw")
 		p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
 		p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
 	

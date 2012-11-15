@@ -13,6 +13,7 @@ import time
 from mfp import log 
 from mfp.main import MFPCommand
 from mfp.gui_slave import MFPGUI
+from gi.repository import Gtk 
 
 from .key_defs import * 
 
@@ -118,6 +119,17 @@ class ConsoleMgr (Thread):
 			return True
 
 		return False 
+	
+	def scroll_to_end(self):
+		iterator = self.textbuffer.get_end_iter()
+		mark = self.textbuffer.get_mark("console_mark")
+		if mark is None:
+			mark = Gtk.TextMark.new("console_mark", False)
+			self.textbuffer.add_mark(mark, iterator)
+		else:
+			self.textbuffer.move_mark(mark, iterator)
+
+		self.textview.scroll_to_mark(mark, 0, True, 0, 0.9)
 
 	def redisplay(self):
 		lastline = self.textbuffer.get_line_count()
@@ -127,11 +139,11 @@ class ConsoleMgr (Thread):
 		end_iter = self.textbuffer.get_end_iter() 
 		self.textbuffer.insert(end_iter, self.linebuf, -1)
 		end_iter = self.textbuffer.get_end_iter() 
-		self.textview.scroll_to_iter(end_iter, 0.2, False, 0, 0)
 
 		cursiter = self.textbuffer.get_iter_at_line_offset(lastline, 
 														   len(self.last_ps) + self.cursor_pos)
 		self.textbuffer.place_cursor(cursiter)
+		self.scroll_to_end()
 
 	def line_ready(self):
 		self.ready = True 
@@ -165,8 +177,7 @@ class ConsoleMgr (Thread):
 	def append(self, msg):
 		iterator = self.textbuffer.get_end_iter()
 		self.textbuffer.insert(iterator, msg, -1)
-		iterator = self.textbuffer.get_end_iter()
-		self.textview.scroll_to_iter(iterator, 0.2, False, 0, 0)
+		self.scroll_to_end()
 
 	def run(self):
 		time.sleep(0.1)

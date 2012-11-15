@@ -31,7 +31,7 @@ def gui_finish():
 class GUICommand (RPCWrapper):
 	@rpcwrap
 	def ready(self):
-		if MFPGUI().appwin is not None:
+		if MFPGUI().appwin is not None and MFPGUI().appwin.ready():
 			return True
 		else:
 			return False

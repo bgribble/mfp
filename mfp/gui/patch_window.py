@@ -1,3 +1,8 @@
+#! /usr/bin/env python
+'''
+patch_window.py
+The main MFP window and associated code 
+'''
 
 from gi.repository import Gtk, Clutter, GtkClutter, Pango
 
@@ -111,6 +116,12 @@ class PatchWindow(object):
 		# set initial major mode 
 		self.input_mgr.major_mode = PatchEditMode(self)
 		self.display_bindings()
+
+	def ready(self):
+		if self.window and self.window.get_realized():
+			return True
+		else:
+			return False 
 
 	def stage_pos(self, x, y):
 		success, new_x, new_y = self.group.transform_stage_point(x, y)
@@ -292,14 +303,29 @@ class PatchWindow(object):
 	def console_write(self, msg):
 		buf = self.console_view.get_buffer()
 		iterator = buf.get_end_iter()
+		mark = buf.get_mark("console_mark")
+		if mark is None:
+			mark = Gtk.TextMark.new("console_mark", False)
+			buf.add_mark(mark, iterator)
+
 		buf.insert(iterator, msg, -1)
-		self.console_view.scroll_to_iter(iterator, 0, False, 0, 0)
+		iterator = buf.get_end_iter()
+		buf.move_mark(mark, iterator)
+		self.console_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 
 	def log_write(self, msg):
+		# this is a bit complicated so that we ensure scrolling is 
+		# reliable... scroll_to_iter can act odd sometimes 
 		buf = self.log_view.get_buffer()
 		iterator = buf.get_end_iter()
+		mark = buf.get_mark("log_mark")
+		if mark is None:
+			mark = Gtk.TextMark.new("log_mark", False)
+			buf.add_mark(mark, iterator)
 		buf.insert(iterator, msg, -1)
-		self.log_view.scroll_to_iter(iterator, 0, False, 0, 0)
+		iterator = buf.get_end_iter()
+		buf.move_mark(mark, iterator)
+		self.log_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 	
 	def hud_write(self, msg, disp_time=2.0):
 		def anim_complete(*args):
