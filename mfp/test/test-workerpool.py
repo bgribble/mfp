@@ -16,14 +16,14 @@ class QueueWorker(BaseWorker):
 		BaseWorker.__init__(self, pool)
 		QueueWorker.workers.append(self)
 		
-	def capture(self):
+	def take_work(self):
 		try:
 			bite = self.queue.get(timeout=0.1)
 			return bite
 		except Queue.Empty:
 			raise WorkerPool.Empty()
 
-	def consume(self, data):
+	def perform_work(self, data):
 		self.results.append(data)
 
 class WorkerPoolTest(TestCase):

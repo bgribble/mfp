@@ -3,7 +3,7 @@ import multiprocessing
 from mfp.request_pipe import RequestPipe
 from mfp.request import Request
 from mfp.rpc_wrapper import RPCWrapper, rpcwrap
-from mfp.rpc_worker import RPCWorker
+from mfp.rpc_worker import RPCServer
 import time
 from unittest import TestCase
 
@@ -85,10 +85,10 @@ class RPCTests(TestCase):
 	def setUp(self):
 		print "==================="
 		print "setup started"
-		self.worker = RPCWorker("test", rpcinit)
-		RPCWrapper.pipe = self.worker.pipe
-		self.worker.serve(WrappedClass)
-		print self.worker
+		self.server = RPCServer("test", rpcinit)
+		RPCWrapper.pipe = self.server.pipe
+		self.server.serve(WrappedClass)
+		print self.server
 		print "-------------------"
 		time.sleep(0.2)
 
@@ -128,7 +128,7 @@ class RPCTests(TestCase):
 		self.assertEqual(failed, 1)
 
 	def tearDown(self):
-		self.worker.finish()
+		self.server.finish()
 
 def winit(*args):
 	# RPCWorkerTests slave init
@@ -138,20 +138,20 @@ def winit(*args):
 	Ponger.local = True
 	Pinger.local = False
 
-class RPCWorkerTests(TestCase):
+class RPCServerTests(TestCase):
 	def setUp(self):
 		print "==================="
 		print "setup started"
-		self.worker = RPCWorker("worker", winit)
-		RPCWrapper.pipe = self.worker.pipe
-		self.worker.serve(ReverseActivatorClass)
-		self.worker.serve(WrappedClass)
-		self.worker.serve(Ponger)
+		self.server = RPCServer("worker", winit)
+		RPCWrapper.pipe = self.server.pipe
+		self.server.serve(ReverseActivatorClass)
+		self.server.serve(WrappedClass)
+		self.server.serve(Ponger)
 
 		ReverseClass.local = True
 		Pinger.local = True
 		Ponger.local = False
-		print self.worker, self.worker.pipe
+		print self.server, self.server.pipe
 		print "--------------------"
 		time.sleep(0.2)
 
@@ -197,6 +197,6 @@ class RPCWorkerTests(TestCase):
 		self.assertEqual(a.ping(), "PING")
 
 	def tearDown(self):
-		self.worker.finish()
+		self.server.finish()
 
 		
