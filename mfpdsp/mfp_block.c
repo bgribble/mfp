@@ -212,18 +212,21 @@ mfp_block_fmod(mfp_block * in, mfp_sample modulus, mfp_block * out)
 #ifdef MFP_USE_SSE 
 	int loc;
 	int end = in->blocksize;
-	__v4sf cval = (__v4sf) { modulus, modulus, modulus, modulus }; 
-	__v4sf xmm0, xmm1;
+	double outv[2];
+	__v2df cval = (__v2df) { modulus, modulus };
+	__v2df xmm0, xmm1;
 	__v4si xmm2;
-	for(loc = 0; loc < end; loc += 4) {
-		xmm0 = *(__v4sf *)(in->data + loc);
+	for(loc = 0; loc < end; loc += 2) {
+		xmm0 = __builtin_ia32_cvtps2pd(*(__v4sf *)(in->data+loc));
 		xmm1 = xmm0;
 		xmm1 = xmm1 / cval;
-		xmm2 = __builtin_ia32_cvttps2dq(xmm1);
-		xmm1 = __builtin_ia32_cvtdq2ps(xmm2);
+		xmm2 = __builtin_ia32_cvttpd2dq(xmm1);
+		xmm1 = __builtin_ia32_cvtdq2pd(xmm2);
 		xmm1 = xmm1 * cval;
 		xmm0 = xmm0 - xmm1;
-		*(__v4sf *)(out->data + loc) = xmm0;
+		*(__v2df *)outv = xmm0;
+		out->data[loc] = (float)(outv[0]);
+		out->data[loc+1] = (float)(outv[1]);
 	}
 #else
 	mfp_sample * iptr, * optr, * iend;

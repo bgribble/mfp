@@ -312,6 +312,48 @@ test_block_ramp(void)
 }
 
 
+static void
+naive_block_fmod(mfp_block * in, mfp_sample mod, mfp_block * out)
+{
+	int i;
+	for(i=0; i < in->blocksize; i++) {
+		out->data[i] = fmodf(in->data[i], mod);
+	}
+}
+
+int 
+benchmark_block_fmod(void) 
+{
+	struct timeval start, end;
+	float naive, fast;
+	mfp_block * in = mfp_block_new(10000);
+	mfp_block * out = mfp_block_new(10000);
+	int x;
+	int fail = 0;
+
+	for(x = 0; x < 10000; x++) {
+		in->data[x] = (float)x * 20*M_PI/1024.0;
+	}
+
+	gettimeofday(&start, NULL);
+	for(x = 0; x < 1024; x++) {
+		mfp_block_fmod(in, 2.0*M_PI, out);
+	}
+	gettimeofday(&end, NULL);
+
+	fast = (end.tv_sec + end.tv_usec/1000000.0) - (start.tv_sec + start.tv_usec / 1000000.0);
+
+	gettimeofday(&start, NULL);
+	for(x = 0; x < 1024; x++) {
+		naive_block_fmod(in, 2.0* M_PI, out);
+	}
+	gettimeofday(&end, NULL);
+	naive = (end.tv_sec + end.tv_usec/1000000.0) - (start.tv_sec + start.tv_usec / 1000000.0);
+
+	printf("\n     Naive: %f, fast: %f\n", naive, fast);
+	return 1;
+}
+
 int
 test_block_fmod(void)
 {
@@ -324,7 +366,7 @@ test_block_fmod(void)
 	mfp_block_fmod(b, 2.0*M_PI, out);
 
 	for(i=0; i< 10000; i++) {
-		if (fabs(out->data[i] - fmod(b->data[i], 2.0*M_PI)) > 0.000001) {
+		if (fabs(out->data[i] - fmod(b->data[i], 2.0*M_PI)) > 0.00001) {
 			if (fail == 0)
 				printf("FAIL: block_fmod %d %f %f %f\n", i, b->data[i], fmod(b->data[i], 2.0*M_PI), out->data[i]);
 			fail ++;
