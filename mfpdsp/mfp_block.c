@@ -209,13 +209,13 @@ mfp_block_fill(mfp_block * in, mfp_sample constant)
 int
 mfp_block_fmod(mfp_block * in, mfp_sample modulus, mfp_block * out) 
 {
-#ifdef MFP_USE_SSE
-	int loc = 0;
+#ifdef MFP_USE_SSE 
+	int loc;
 	int end = in->blocksize;
 	__v4sf cval = (__v4sf) { modulus, modulus, modulus, modulus }; 
 	__v4sf xmm0, xmm1;
 	__v4si xmm2;
-	for(; loc < end; loc+=4) {
+	for(loc = 0; loc < end; loc += 4) {
 		xmm0 = *(__v4sf *)(in->data + loc);
 		xmm1 = xmm0;
 		xmm1 = xmm1 / cval;
@@ -318,40 +318,39 @@ print_v4(char * msg, __v4sf val)
 }
 #endif
 
-mfp_sample
-mfp_block_ramp(mfp_block * out, mfp_sample initval, mfp_sample incr)
+double
+mfp_block_phase(mfp_block * out, mfp_sample initval, double incr, double phase_limit)
 {
-#ifdef MFP_USE_SSE
-	float * outptr, * endptr;
-	__v4sf xmm0, xmm1;
-
-	xmm0 = (__v4sf) { 1.0, 2.0, 3.0, 4.0 };
-	xmm1 = (__v4sf) { incr, incr, incr, incr };
-	xmm0 = xmm0 * xmm1;
-	xmm1 = (__v4sf) { initval-incr, initval-incr, initval-incr, initval-incr };
-
-	outptr = out->data;
-	endptr = out->data + out->blocksize;
-	for(; outptr < endptr; outptr += 4) {
-		xmm1 = xmm1 + xmm0;
-		*(__v4sf *)outptr = xmm1;
-		xmm1 = __builtin_ia32_shufps(xmm1, xmm1, 0xff);
-	}
-	return ((float *)&xmm1)[0];
-#else
 	mfp_sample * optr = out->data, * iend;
-	mfp_sample scratch = initval;
+	double scratch = initval;
+
 	optr = out->data;
 	iend = out->data + out->blocksize;
 	for(; optr < iend; optr++) {
-		*optr = scratch;
+		*optr = (mfp_sample)scratch;
+		scratch += incr;
+		if (scratch > phase_limit) {
+			scratch = fmod(scratch, phase_limit);
+		}
+	}
+	return scratch;
+}
+
+double
+mfp_block_ramp(mfp_block * out, mfp_sample initval, double incr)
+{
+	mfp_sample * optr = out->data, * iend;
+	double scratch = initval;
+	optr = out->data;
+	iend = out->data + out->blocksize;
+	for(; optr < iend; optr++) {
+		*optr = (mfp_sample)scratch;
 		scratch += incr;
 	}
 	return scratch;
-#endif
 }
 
-mfp_sample
+double
 mfp_block_prefix_sum(mfp_block * in, mfp_sample scale, mfp_sample initval, mfp_block * out)
 {
 #ifdef MFP_USE_SSE

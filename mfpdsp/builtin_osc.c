@@ -15,6 +15,39 @@ typedef struct {
 	float phase;
 } builtin_osc_data;
 
+#define OSC_TABSIZE 2048
+#define OSC_TABRANGE (2.0 * M_PI)
+#define OSC_TABSCALE (OSC_TABSIZE / OSC_TABRANGE)
+#define OSC_TABINCR (OSC_TABRANGE / OSC_TABSIZE) 
+
+double osc_table[OSC_TABSIZE + 1]; 
+
+static void 
+table_load() {
+	double phase = 0.0;
+	double phase_incr = OSC_TABINCR;
+	int sample;
+
+	for(sample = 0; sample < OSC_TABSIZE + 1; sample++) {
+		osc_table[sample] = sin(phase);
+		phase += phase_incr;
+	}
+}
+
+
+static mfp_sample 
+table_lookup(double phase) {
+		
+	int index = (int)(phase * OSC_TABSCALE);
+	double rem, s1, s2;
+
+	rem = phase - index*OSC_TABINCR;
+	s1 = osc_table[index];
+	s2 = osc_table[index+1];
+
+	return (mfp_sample)(s1 + (s2-s1)*(rem*OSC_TABSCALE));
+
+}
 
 static int 
 process(mfp_processor * proc) 
@@ -42,18 +75,23 @@ process(mfp_processor * proc)
 
 	if(mode_fm == 1) {
 		newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0); 
+
+		/* wrap the phase to function domain */
+		mfp_block_fmod(d->int_0, 2.0*M_PI, d->int_0);
+
 	}
 	else {
-		newphase = mfp_block_ramp(d->int_0, d->phase, phase_base*d->const_freq);
+		newphase = mfp_block_phase(d->int_0, d->phase, phase_base*d->const_freq, 2.0*M_PI);
 	}
 
 
-	/* wrap the phase to function domain */
-	mfp_block_fmod(d->int_0, 2.0*M_PI, d->int_0);
-
 	/* now the real work */
-	
+#if 0
 	cspline_block_eval(d->spline, d->int_0, proc->outlet_buf[0]);
+#endif 
+	for (c=0; c < proc->outlet_buf[0]->blocksize; c++) {
+		proc->outlet_buf[0]->data[c] = table_lookup(d->int_0->data[c]);
+	}
 
 	/* apply gain or amplitude modulation */
 	if(mode_am == 1) {
@@ -158,6 +196,9 @@ init_builtin_osc(void) {
 	g_hash_table_insert(p->params, "_sig_1", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "_sig_2", (gpointer)PARAMTYPE_FLT);
 	g_hash_table_insert(p->params, "phase", (gpointer)PARAMTYPE_FLT);
+
+	table_load();
+
 	return p;
 }
 

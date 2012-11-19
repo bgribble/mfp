@@ -190,6 +190,8 @@ config(mfp_processor * proc)
 
 	buf_info * d = (buf_info *)(proc->data);
 
+	printf("buffer config\n");
+
 	if ((size_ptr != NULL) || (channels_ptr != NULL)) {
 		if(size_ptr != NULL) {
 			d->chan_size = *(float *)size_ptr;

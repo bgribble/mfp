@@ -416,6 +416,12 @@ init_builtins(void)
 	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 }
 
+int 
+benchmark_SETUP(void) 
+{
+	return test_SETUP();
+}
+
 int
 test_SETUP(void) 
 {

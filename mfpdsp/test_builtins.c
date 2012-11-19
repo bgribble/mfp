@@ -245,6 +245,56 @@ test_line_2(void)
 	return 1;
 }
 
+
+static void
+naive_block_sin(mfp_block * in, mfp_block * out)
+{
+	int i;
+	for(i=0; i < in->blocksize; i++) {
+		out->data[i] = sinf(in->data[i]);
+	}
+}
+
+int 
+benchmark_osc_1(void) 
+{
+	struct timeval start, end;
+	float naive, fast;
+	mfp_block * in = mfp_block_new(mfp_blocksize);
+	mfp_block * out = mfp_block_new(mfp_blocksize);
+	int x;
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc");
+	mfp_processor * osc = mfp_proc_create(proctype, 2, 1, mfp_blocksize);
+	double phase;
+	int i;
+
+	mfp_proc_setparam_float(osc, "_sig_1", 1000.0);
+	mfp_proc_setparam_float(osc, "_sig_2", 100.0);
+
+
+	for(x = 0; x < in->blocksize; x++) {
+		in->data[x] = (float)x * 2.0*M_PI/1024.0;
+	}
+
+	gettimeofday(&start, NULL);
+	for(x = 0; x < 1024; x++) {
+		mfp_proc_process(osc);
+	}
+
+	gettimeofday(&end, NULL);
+	fast = (end.tv_sec + end.tv_usec/1000000.0) - (start.tv_sec + start.tv_usec / 1000000.0);
+
+	gettimeofday(&start, NULL);
+	for(x = 0; x < 1024; x++) {
+		naive_block_sin(in, out);
+	}
+	gettimeofday(&end, NULL);
+	naive = (end.tv_sec + end.tv_usec/1000000.0) - (start.tv_sec + start.tv_usec / 1000000.0);
+
+	printf("\n     Naive: %f, fast: %f\n", naive, fast);
+	return 1;
+}
+
 int
 test_osc_2(void)
 {

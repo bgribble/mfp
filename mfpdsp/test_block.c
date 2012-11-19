@@ -316,17 +316,24 @@ int
 test_block_fmod(void)
 {
 	int i;
-	mfp_block *b = mfp_block_new(1024);
+	int fail = 0;
+	mfp_block *b = mfp_block_new(10000);
+	mfp_block *out = mfp_block_new(10000);
 
-	mfp_block_ramp(b, 0.0, 1);
-	mfp_block_fmod(b, 2.0*M_PI, b);
+	mfp_block_ramp(b, 0.0, .01);
+	mfp_block_fmod(b, 2.0*M_PI, out);
 
-	for(i=0; i< 8; i++) {
-		if (fabs(b->data[i] - fmod(i, 2.0*M_PI)) > 0.001) {
-			printf("FAIL: block_fmod %d %f %f\n", i, fmod(i, 2.0*M_PI), b->data[i]);
-			return 0;
+	for(i=0; i< 10000; i++) {
+		if (fabs(out->data[i] - fmod(b->data[i], 2.0*M_PI)) > 0.000001) {
+			if (fail == 0)
+				printf("FAIL: block_fmod %d %f %f %f\n", i, b->data[i], fmod(b->data[i], 2.0*M_PI), out->data[i]);
+			fail ++;
 		}
 	}
-	return 1;
+	if (fail == 0)
+		return 1;
+	else
+		printf("%d/10000 failures\n", fail);
+		return 0;
 }
 
