@@ -8,6 +8,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode 
 from mfp import log 
 
+from gi.repository import Clutter 
+
 class LabelEditMode (InputMode):
 	def __init__(self, window, element, label, multiline=False, markup=False):
 		self.manager = window.input_mgr 
@@ -16,7 +18,7 @@ class LabelEditMode (InputMode):
 		self.multiline = multiline 
 		self.markup = markup
 		self.text = self.widget.get_text()
-
+		self.black_color = Clutter.Color.new(0,0,0,255)
 		self.undo_stack  = [ self.text ] 
 		self.undo_pos = -1
 		self.editpos = 0
@@ -141,6 +143,13 @@ class LabelEditMode (InputMode):
 		return True 
 
 	def update_label(self, raw=True):
+		print "setting cursor", self.editpos	
+
+		self.widget.set_editable(True)
+		self.widget.set_cursor_color(self.black_color)
+		self.widget.set_cursor_visible(True)
+		self.widget.set_cursor_size(8)
+		self.widget.set_cursor_position(self.editpos)
 		if raw or self.markup is False:
 			self.widget.set_use_markup = False 
 			self.widget.set_text(self.text)

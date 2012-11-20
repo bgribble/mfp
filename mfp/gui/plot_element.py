@@ -10,7 +10,8 @@ from patch_element import PatchElement
 from mfp import MFPGUI
 from input_mode import InputMode
 from .modes.label_edit import LabelEditMode
-from .xyplot import XYPlot
+from .xyplot.scatterplot import ScatterPlot
+from .xyplot.scopeplot import ScopePlot
 
 class PlotElement (PatchElement):
 	element_type = "plot"
@@ -66,8 +67,8 @@ class PlotElement (PatchElement):
 		self.label.connect('text-changed', self.label_changed_cb)
 		self.label.set_reactive(False)
 
-		# chart
-		self.xyplot = XYPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
+		# chart created later 
+		self.xyplot = None
 		self.xyplot.set_position(3, self.LABEL_SPACE)
 
 		self.add_actor(self.xyplot)
@@ -109,13 +110,9 @@ class PlotElement (PatchElement):
 			self.create(self.element_type, self.obj_args)
 			
 			if self.obj_type == "scatter":
-				self.xyplot.mode = XYPlot.SCATTER
-			elif self.obj_type == "line":
-				self.xyplot.mode = XyPlot.LINE
-			elif self.obj_type == "roll":
-				self.xyplot.mode = XyPlot.ROLL
+				self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
 			elif self.obj_type == "scope":
-				self.xyplot.mode = XyPlot.SCOPE
+				self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT)
 
 			if self.obj_id is None:
 				print "PlotElement: could not create", self.obj_type, self.obj_args
@@ -124,7 +121,6 @@ class PlotElement (PatchElement):
 				self.draw_ports()
 
 		# FIXME set label to non-editing style 
-
 		self.update()
 
 	def label_changed_cb(self, *args):
