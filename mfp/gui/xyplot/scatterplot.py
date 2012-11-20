@@ -6,7 +6,12 @@ Specialization of XYPlot for showing sets of discrete datapoints
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import math
+
+from .mark_style import MarkStyle
 from .xyplot import XYPlot 
+from mfp import log 
+
 
 class ScatterPlot (XYPlot):
 	def __init__(self, width, height):	

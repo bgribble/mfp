@@ -69,9 +69,7 @@ class PlotElement (PatchElement):
 
 		# chart created later 
 		self.xyplot = None
-		self.xyplot.set_position(3, self.LABEL_SPACE)
 
-		self.add_actor(self.xyplot)
 		self.add_actor(self.label)
 		self.add_actor(self.rect)
 		self.set_reactive(True)
@@ -113,6 +111,10 @@ class PlotElement (PatchElement):
 				self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
 			elif self.obj_type == "scope":
 				self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT)
+			
+			if self.xyplot:
+				self.add_actor(self.xyplot)
+				self.xyplot.set_position(3, self.LABEL_SPACE)
 
 			if self.obj_id is None:
 				print "PlotElement: could not create", self.obj_type, self.obj_args
