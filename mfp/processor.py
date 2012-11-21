@@ -170,8 +170,11 @@ class Processor (object):
 				if val is not Uninit:
 					for target, inlet in conns:
 						work.append((target, val, inlet))
-		elif inlet in self.dsp_inlets:
-			self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
+		try: 
+			if inlet in self.dsp_inlets:
+				self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
+		except (TypeError, ValueError):
+			pass 
 
 		return work 
 

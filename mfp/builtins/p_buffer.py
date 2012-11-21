@@ -5,7 +5,9 @@ p_buffer.py:  Builtin POSIX shared memory buffer
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 import numpy 
+import os 
 from mfp import Bang, Uninit
+from mfp import log 
 
 from mfp.processor import Processor
 from mfp.main import MFPApp
@@ -24,6 +26,7 @@ class Buffer(Processor):
 	
 	RESP_TRIGGERED = 0
 	RESP_BUFID = 1
+	FLOAT_SIZE = 4
 
 	def __init__(self, init_type, init_args):
 
@@ -47,6 +50,9 @@ class Buffer(Processor):
 		self.dsp_outlets = []
 		print "buffer~: about to call dsp init"
 		self.dsp_init("buffer", size=size, channels=channels)
+
+	def offset(self, channel, start):
+		return (channel*self.size + start)*self.FLOAT_SIZE
 
 	def dsp_response(self, resp_id, resp_value):
 		print "Buffer got response: %d %s\n" % (resp_id, resp_value)
@@ -82,7 +88,7 @@ class Buffer(Processor):
 			slc = os.read(self.shm_obj.fd, (end-start)*self.FLOAT_SIZE)
 			self.outlets[0] = numpy.fromstring(slc, dtype=float)
 		except Exception, e:
-			print e
+			log.debug("buffer~: slice error '%s" % e) 
 			return None
 
 	def bufinfo(self):
