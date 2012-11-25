@@ -38,7 +38,10 @@ class Print (Processor):
 					out = leader + str(self.inlets[0])
 
 			self.outlets[0] = out 
-			log.logprint(out) 
+			if self.init_type == "print":
+				log.logprint(out) 
 			
 def register():
 	MFPApp().register("print", Print)
+	MFPApp().register("format", Print)
+

@@ -143,8 +143,6 @@ class LabelEditMode (InputMode):
 		return True 
 
 	def update_label(self, raw=True):
-		print "setting cursor", self.editpos	
-
 		self.widget.set_editable(True)
 		self.widget.set_cursor_color(self.black_color)
 		self.widget.set_cursor_visible(True)

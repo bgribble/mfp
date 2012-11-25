@@ -4,6 +4,7 @@ p_buffer.py:  Builtin POSIX shared memory buffer
 
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
+
 import numpy 
 import os 
 from mfp import Bang, Uninit
@@ -86,7 +87,7 @@ class Buffer(Processor):
 		try:
 			os.lseek(self.shm_obj.fd, self.offset(channel, start), os.SEEK_SET)
 			slc = os.read(self.shm_obj.fd, (end-start)*self.FLOAT_SIZE)
-			self.outlets[0] = numpy.fromstring(slc, dtype=float)
+			self.outlets[0] = list(numpy.fromstring(slc, dtype=float))
 		except Exception, e:
 			log.debug("buffer~: slice error '%s" % e) 
 			return None
