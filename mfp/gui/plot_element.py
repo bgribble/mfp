@@ -8,13 +8,13 @@ from gi.repository import Clutter as clutter
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
+from mfp import log 
 from input_mode import InputMode
 from .modes.label_edit import LabelEditMode
 from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
 
 class PlotElement (PatchElement):
-	element_type = "plot"
 
 	# constants 
 	INIT_WIDTH = 320
@@ -46,7 +46,6 @@ class PlotElement (PatchElement):
 		self.update()
 
 	def create_display(self, width, height):
-		print "chart_element: create_display", width, height
 		self.rect = clutter.Rectangle()
 		self.label = clutter.Text()
 
@@ -76,7 +75,6 @@ class PlotElement (PatchElement):
 
 	# methods useful for interaction
 	def set_bounds(self, x_min, y_min, x_max, y_max):
-		print "bounds:",  x_min, y_min, x_max, y_max
 		self.x_min = x_min
 		self.x_max = x_max
 		self.y_min = y_min
@@ -104,7 +102,8 @@ class PlotElement (PatchElement):
 			if len(parts) > 1:
 				self.obj_args = parts[1]
 
-			print "PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args)
+			log.debug("PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args))
+			self.element_type = self.obj_type 
 			self.create(self.element_type, self.obj_args)
 			
 			if self.obj_type == "scatter":
@@ -117,7 +116,7 @@ class PlotElement (PatchElement):
 				self.xyplot.set_position(3, self.LABEL_SPACE)
 
 			if self.obj_id is None:
-				print "PlotElement: could not create", self.obj_type, self.obj_args
+				log.debug("PlotElement: could not create", self.obj_type, self.obj_args)
 			else:
 				self.send_params()
 				self.draw_ports()
@@ -175,37 +174,27 @@ class PlotElement (PatchElement):
 	def make_edit_mode(self):
 		return LabelEditMode(self.stage, self, self.label)
 
+	def command(self, action, data): 
+		if self.xyplot.command(action, data):
+			return True 
+		elif action == "clear":
+			self.xyplot.clear(data)
+			return True 
+		elif action == "bounds":
+			self.set_bounds(*data)
+			return True 
+		elif PatchElement.command(self, action, data):
+			return True 
+
+		return False 
+		
 	def configure(self, params):
 		if self.obj_args is None:
 			self.label.set_text("%s" % (self.obj_type,))
 		else:
 			self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+		
+		self.xyplot.configure(params)
 
-		action = params.get("_chart_action")
-		if action == "clear":
-			curve = params.get("_chart_data")
-			self.xyplot.clear(curve)
-		elif action == "add":
-			newpts = params.get("_chart_data")
-			for c in newpts:
-				for p in newpts[c]:
-					self.xyplot.append(p, c)
-		elif action == "bounds":
-			bounds = params.get("_chart_data")
-			self.set_bounds(*bounds)
-		elif action == "roll":
-			start_x = params.get("_chart_data")
-			self.xyplot.set_bounds(None, None, start_x, None)
-			self.xyplot.set_scroll_rate(1.0, 0)
-		elif action == "stop":
-			self.xyplot.set_scroll_rate(0.0, 0.0)
-		elif action == "reset":
-			start_x = params.get("_chart_data")
-			self.xyplot.set_bounds(None, None, start_x, None)
-
-		s = params.get("style")
-		if s:
-			self.xyplot.set_style(s)
-			
 		PatchElement.configure(self, params)	
 

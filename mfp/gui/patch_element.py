@@ -167,6 +167,9 @@ class PatchElement (Clutter.Group):
 			hideport(pid)
 
 
+	def command(self, action, data):
+		pass 
+
 	def configure(self, params):
 		self.num_inlets = params.get("num_inlets")
 		self.num_outlets = params.get("num_outlets")

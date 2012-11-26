@@ -8,8 +8,38 @@ from datetime import datetime
 from ..processor import Processor 
 from ..main import MFPApp
 from .. import Bang, Uninit 
+from ..method import MethodCall
 
-class Plot (Processor):
+from .p_buffer import BufferInfo 
+from mfp import log 
+
+class Scope (Processor): 
+	def __init__(self, init_type, init_args): 
+		self.buffer = None 
+
+		if init_args is not None:
+			log.debug("scope: Does not accept init args")
+
+		Processor.__init__(self, 1, 1, "scopeplot", None)
+
+	def trigger(self): 
+		if isinstance(self.inlets[0], BufferInfo):
+			self.buffer = self.inlets[0]
+			self.gui_params["buffer"] = self.buffer 
+			MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
+
+		elif self.inlets[0] is True: 
+			log.debug("scope: got True from buffer")
+
+		elif self.inlets[0] is False: 
+			log.debug("scope: got False from buffer")
+
+		if self.buffer is None:
+			log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
+			self.outlets[0] = MethodCall("bufinfo")
+			
+
+class Scatter (Processor):
 	def __init__(self, init_type, init_args):
 		self.points = {}
 		self.time_base = None
@@ -35,12 +65,7 @@ class Plot (Processor):
 		return (datetime.now() - self.time_base).total_seconds()
 
 	def _chartconf(self, action, data=None):
-		self.gui_params['_chart_action'] = action
-		self.gui_params['_chart_data'] = data
-
-		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
-		del self.gui_params['_chart_action']
-		del self.gui_params['_chart_data']
+		MFPApp().gui_cmd.command(self.obj_id, action, data)
 		return True 
 	
 	def trigger(self):
@@ -107,4 +132,5 @@ class Plot (Processor):
 
 
 def register():
-	MFPApp().register("plot", Plot)
+	MFPApp().register("scatter", Scatter)
+	MFPApp().register("scope", Scope)

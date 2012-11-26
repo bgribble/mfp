@@ -21,6 +21,10 @@ white = Clutter.Color()
 white.from_string("White")
 
 class XYPlot (Clutter.Group):
+	'''
+	XYPlot: parent class of plot elements (ScatterPlot, ScopePlot)
+	'''
+
 	MARGIN_LEFT = 30 
 	MARGIN_BOT = 30
 	AXIS_PAD = 5

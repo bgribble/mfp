@@ -42,6 +42,9 @@ typedef struct {
 
 #define RESP_TRIGGERED 0
 #define RESP_BUFID 1
+#define RESP_BUFSIZE 2
+#define RESP_BUFCHAN 3
+#define RESP_BUFRDY 4
 
 static void 
 init(mfp_processor * proc) 
@@ -158,7 +161,6 @@ buffer_alloc(buf_info * d)
 	struct timeval tv;
 
 	gettimeofday(&tv, NULL);
-	printf("buffer_alloc %d\n", size);
 
 	snprintf(d->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d", pid, (int)tv.tv_sec, (int)tv.tv_usec); 
 	d->shm_fd = shm_open(d->shm_id, O_RDWR|O_CREAT, S_IRWXU); 
@@ -190,8 +192,6 @@ config(mfp_processor * proc)
 
 	buf_info * d = (buf_info *)(proc->data);
 
-	printf("buffer config\n");
-
 	if ((size_ptr != NULL) || (channels_ptr != NULL)) {
 		if(size_ptr != NULL) {
 			d->chan_size = *(float *)size_ptr;
@@ -203,6 +203,9 @@ config(mfp_processor * proc)
 		buffer_alloc(d);
 
 		mfp_dsp_send_response_str(proc, RESP_BUFID, d->shm_id);
+		mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->chan_size);
+		mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->chan_count);
+		mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
 	}
 
 	if (trigmode_ptr != NULL) {

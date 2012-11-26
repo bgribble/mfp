@@ -159,4 +159,26 @@ class ScatterPlot (XYPlot):
 				elif k == "stroke":
 					marker.stroke_style = str(v)
 
+	def configure(self, params):
+		s = params.get("style")
+		if s:
+			self.xyplot.set_style(s)
+		
+	def command(self, action, data):
+		if action == "add":
+			for c in data:
+				for p in data[c]:
+					self.append(p, c)
+			return True 
+		elif action == "roll":
+			self.set_bounds(None, None, data, None)
+			self.set_scroll_rate(1.0, 0)
+			return True 
+		elif action == "stop":
+			self.set_scroll_rate(0.0, 0.0)
+			return True 
+		elif action == "reset":
+			self.set_bounds(None, None, data, None)
+			return True 
 
+		return False 

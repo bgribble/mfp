@@ -27,6 +27,10 @@ class Buffer(Processor):
 	
 	RESP_TRIGGERED = 0
 	RESP_BUFID = 1
+	RESP_BUFSIZE = 2
+	RESP_BUFCHAN = 3
+	RESP_BUFRDY = 4
+
 	FLOAT_SIZE = 4
 
 	def __init__(self, init_type, init_args):
@@ -39,7 +43,7 @@ class Buffer(Processor):
 		else:
 			channels = 1
 
-		Processor.__init__(self, channels, 2, init_type, init_args)
+		Processor.__init__(self, channels, 3, init_type, init_args)
 		
 		self.buf_id = None
 		self.channels = 0
@@ -48,8 +52,7 @@ class Buffer(Processor):
 		self.shm_obj = None 
 
 		self.dsp_inlets = list(range(channels)) 
-		self.dsp_outlets = []
-		print "buffer~: about to call dsp init"
+		self.dsp_outlets = [ 0 ]
 		self.dsp_init("buffer", size=size, channels=channels)
 
 	def offset(self, channel, start):
@@ -65,7 +68,12 @@ class Buffer(Processor):
 				self.shm_obj.close_fd()
 				self.shm_obj = None
 			self.buf_id = resp_value
-			self.outlets[0] = resp_value
+		elif resp_id == self.RESP_BUFSIZE:
+			self.size = resp_value 
+		elif resp_id == self.RESP_BUFCHAN:
+			self.channels = resp_value 
+		elif resp_id == self.RESP_BUFRDY:
+			self.outlets[1] = BufferInfo(self.buf_id, self.size, self.channels)
 
 	def trigger(self):
 		incoming = self.inlets[0]
@@ -87,13 +95,13 @@ class Buffer(Processor):
 		try:
 			os.lseek(self.shm_obj.fd, self.offset(channel, start), os.SEEK_SET)
 			slc = os.read(self.shm_obj.fd, (end-start)*self.FLOAT_SIZE)
-			self.outlets[0] = list(numpy.fromstring(slc, dtype=float))
+			self.outlets[2] = list(numpy.fromstring(slc, dtype=numpy.float32))
 		except Exception, e:
 			log.debug("buffer~: slice error '%s" % e) 
 			return None
 
 	def bufinfo(self):
-		self.outlets[0] = BufferInfo(self.buf_id, self.size, self.channels)
+		self.outlets[1] = BufferInfo(self.buf_id, self.size, self.channels)
 
 def register():
 	MFPApp().register("buffer~", Buffer)
