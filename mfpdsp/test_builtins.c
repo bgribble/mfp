@@ -8,7 +8,7 @@
 int
 test_sig_1(void) 
 {
-	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig~");
 	mfp_processor * sig = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
 	mfp_sample * outp; 
 
@@ -32,8 +32,8 @@ test_sig_1(void)
 int
 test_sig_2(void) 
 {
-	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
-	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig~");
+	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+~");
 
 	mfp_processor * sig_1 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
 	mfp_processor * sig_2 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
@@ -67,8 +67,8 @@ test_sig_2(void)
 int
 test_plus_multi(void) 
 {
-	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
-	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig~");
+	mfp_procinfo * plustype = g_hash_table_lookup(mfp_proc_registry, "+~");
 
 	mfp_processor * sig_1 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
 	mfp_processor * sig_2 = mfp_proc_create(sigtype, 1, 1, mfp_blocksize);
@@ -107,7 +107,7 @@ test_plus_multi(void)
 int
 test_line_1(void) 
 {
-	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line");
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line~");
 	mfp_processor * line = mfp_proc_create(proctype, 0, 1, mfp_blocksize);
 	mfp_sample * outp; 
 	int snum;
@@ -191,7 +191,7 @@ test_line_1(void)
 int
 test_line_2(void) 
 {
-	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line");
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "line~");
 	mfp_processor * line = mfp_proc_create(proctype, 0, 1, mfp_blocksize);
 	mfp_sample * outp; 
 	int snum;
@@ -263,7 +263,7 @@ benchmark_osc_1(void)
 	mfp_block * in = mfp_block_new(mfp_blocksize);
 	mfp_block * out = mfp_block_new(mfp_blocksize);
 	int x;
-	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc");
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
 	mfp_processor * osc = mfp_proc_create(proctype, 2, 1, mfp_blocksize);
 	double phase;
 	int i;
@@ -298,8 +298,8 @@ benchmark_osc_1(void)
 int
 test_osc_2(void)
 {
-	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc");
-	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig");
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
+	mfp_procinfo * sigtype = g_hash_table_lookup(mfp_proc_registry, "sig~");
 	mfp_processor * osc = mfp_proc_create(proctype, 2, 1, mfp_blocksize);
 	mfp_processor * sig = mfp_proc_create(sigtype, 0, 1, mfp_blocksize);
 	double phase;
@@ -332,7 +332,7 @@ test_osc_2(void)
 int
 test_osc_1(void)
 {
-	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc");
+	mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
 	mfp_processor * osc = mfp_proc_create(proctype, 2, 1, mfp_blocksize);
 	double phase;
 	int i;
@@ -362,7 +362,7 @@ test_osc_1(void)
 int
 test_buffer_1(void)
 {
-	mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer");
+	mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer~");
 	mfp_processor * b = mfp_proc_create(buf_t, 2, 0, mfp_blocksize);
 
 	mfp_proc_setparam_float(b, "trig_triggered", 1.0);
@@ -391,8 +391,8 @@ typedef struct {
 int
 test_buffer_2(void)
 {
-	mfp_procinfo * line_t = g_hash_table_lookup(mfp_proc_registry, "line");
-	mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer");
+	mfp_procinfo * line_t = g_hash_table_lookup(mfp_proc_registry, "line~");
+	mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer~");
 	mfp_processor * line = mfp_proc_create(line_t, 0, 1, mfp_blocksize);
 	mfp_processor * b = mfp_proc_create(buf_t, 2, 0, mfp_blocksize);
 	GArray * lparm = g_array_sized_new(TRUE, TRUE, sizeof(float), 3);

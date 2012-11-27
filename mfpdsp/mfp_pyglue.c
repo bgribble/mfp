@@ -376,7 +376,7 @@ init_builtins(void)
 {
 	int i;
 	mfp_procinfo * pi;
-	mfp_proc_info * (initfuncs[])(void) = { 
+	mfp_procinfo * (* initfuncs[])(void) = { 
 		init_builtin_osc, init_builtin_in, init_builtin_out, 
 		init_builtin_sig, init_builtin_snap, init_builtin_ampl, 
 		init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 

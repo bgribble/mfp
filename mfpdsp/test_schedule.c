@@ -6,8 +6,8 @@
 int
 test_sched_prod_to_sink(void) 
 {
-	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac");
-	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc");
+	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "out~");
+	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
 
 	mfp_processor * osc = mfp_proc_create(osctype, 2, 1, mfp_blocksize);
 	mfp_processor * dac = mfp_proc_create(dactype, 1, 0, mfp_blocksize);
@@ -29,8 +29,8 @@ test_sched_prod_to_sink(void)
 int
 test_sched_y_conn(void)
 {
-	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "dac");
-	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc");
+	mfp_procinfo * dactype = g_hash_table_lookup(mfp_proc_registry, "out~");
+	mfp_procinfo * osctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
 
 	mfp_processor * osc_1 = mfp_proc_create(osctype, 2, 1, mfp_blocksize);
 	mfp_processor * osc_2 = mfp_proc_create(osctype, 2, 1, mfp_blocksize);
