@@ -186,7 +186,7 @@ config(mfp_processor * proc)
 mfp_procinfo *  
 init_builtin_osc(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("osc");
+	p->name = strdup("osc~");
 	p->is_generator = GENERATOR_CONDITIONAL;
 	p->process = process;
 	p->init = init;

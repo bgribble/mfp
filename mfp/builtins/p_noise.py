@@ -13,7 +13,7 @@ class Noise(Processor):
 		Processor.__init__(self, 0, 1, init_type, init_args)
 
 		self.dsp_outlets=[0]
-		self.dsp_init("noise")
+		self.dsp_init("noise~")
 
 	def trigger(self):
 		pass	

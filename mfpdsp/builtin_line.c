@@ -177,7 +177,7 @@ destroy(mfp_processor * proc)
 mfp_procinfo *  
 init_builtin_line(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("line");
+	p->name = strdup("line~");
 	p->is_generator = GENERATOR_ALWAYS;
 	p->process = process;
 	p->init = init;

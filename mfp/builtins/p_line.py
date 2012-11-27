@@ -18,7 +18,7 @@ class Line(Processor):
 			segments = self.convert_segments(initargs[0])
 
 		self.dsp_outlets = [0]
-		self.dsp_init("line", segments=segments)
+		self.dsp_init("line~", segments=segments)
 	
 	def trigger(self):
 		if self.inlets[0] is not None:

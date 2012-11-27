@@ -21,7 +21,7 @@ class Snap(Processor):
 			value = 0
 
 		self.dsp_inlets=[0]
-		self.dsp_init("snap")
+		self.dsp_init("snap~")
 		self.dsp_setparam("retrigger", value)
 
 	def trigger(self):

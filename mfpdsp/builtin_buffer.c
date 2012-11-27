@@ -44,7 +44,9 @@ typedef struct {
 #define RESP_BUFID 1
 #define RESP_BUFSIZE 2
 #define RESP_BUFCHAN 3
-#define RESP_BUFRDY 4
+#define RESP_RATE 4 
+#define RESP_OFFSET 5
+#define RESP_BUFRDY 6
 
 static void 
 init(mfp_processor * proc) 
@@ -205,6 +207,7 @@ config(mfp_processor * proc)
 		mfp_dsp_send_response_str(proc, RESP_BUFID, d->shm_id);
 		mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->chan_size);
 		mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->chan_count);
+		mfp_dsp_send_response_int(proc, RESP_RATE, mfp_samplerate);
 		mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
 	}
 
@@ -245,7 +248,7 @@ mfp_procinfo *
 init_builtin_buffer(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
 	
-	p->name = strdup("buffer");
+	p->name = strdup("buffer~");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init;

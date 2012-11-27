@@ -15,13 +15,15 @@ from mfp.main import MFPApp
 from posix_ipc import SharedMemory
 
 class BufferInfo(object):
-	def __init__(self, buf_id, size, channels):
+	def __init__(self, buf_id, size, channels, rate, offset=0):
 		self.buf_id = buf_id
 		self.size = size
 		self.channels = channels
+		self.rate = rate
+		self.offset = offset
 	
 	def __repr__(self):
-		return "<buf_id=%s, chan_count=%d, chan_size=%d>" % (self.buf_id, self.channels, self.size)
+		return "<buf_id=%s, channels=%d, size=%d, rate=%d>" % (self.buf_id, self.channels, self.size, self.rate)
 
 class Buffer(Processor):
 	
@@ -29,13 +31,15 @@ class Buffer(Processor):
 	RESP_BUFID = 1
 	RESP_BUFSIZE = 2
 	RESP_BUFCHAN = 3
-	RESP_BUFRDY = 4
+	RESP_RATE = 4
+	RESP_OFFSET = 5 
+	RESP_BUFRDY = 6
 
 	FLOAT_SIZE = 4
 
 	def __init__(self, init_type, init_args):
-
 		initargs, kwargs = self.parse_args(init_args)
+
 		if len(initargs):
 			size = initargs[0]
 		if len(initargs) > 1:
@@ -48,19 +52,19 @@ class Buffer(Processor):
 		self.buf_id = None
 		self.channels = 0
 		self.size = 0
+		self.rate = None
+		self.offset = 0
 
 		self.shm_obj = None 
 
 		self.dsp_inlets = list(range(channels)) 
 		self.dsp_outlets = [ 0 ]
-		self.dsp_init("buffer", size=size, channels=channels)
+		self.dsp_init("buffer~", size=size, channels=channels)
 
 	def offset(self, channel, start):
 		return (channel*self.size + start)*self.FLOAT_SIZE
 
 	def dsp_response(self, resp_id, resp_value):
-		print "Buffer got response: %d %s\n" % (resp_id, resp_value)
-
 		if resp_id == self.RESP_TRIGGERED:
 			self.outlets[1] = resp_value
 		elif resp_id == self.RESP_BUFID:
@@ -72,8 +76,13 @@ class Buffer(Processor):
 			self.size = resp_value 
 		elif resp_id == self.RESP_BUFCHAN:
 			self.channels = resp_value 
+		elif resp_id == self.RESP_RATE:
+			self.rate = resp_value 
+		elif resp_id == self.RESP_OFFSET:
+			self.offset = resp_value 
 		elif resp_id == self.RESP_BUFRDY:
-			self.outlets[1] = BufferInfo(self.buf_id, self.size, self.channels)
+			self.outlets[1] = BufferInfo(self.buf_id, self.size, self.channels, self.rate, 
+										 self.offset)
 
 	def trigger(self):
 		incoming = self.inlets[0]

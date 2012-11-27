@@ -68,7 +68,7 @@ config(mfp_processor * proc)
 mfp_procinfo *  
 init_builtin_snap(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("snap");
+	p->name = strdup("snap~");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init;

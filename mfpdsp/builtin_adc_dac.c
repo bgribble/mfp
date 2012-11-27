@@ -6,7 +6,7 @@
 #include "mfp_block.h"
 
 static int 
-adc_process(mfp_processor * proc) 
+in_process(mfp_processor * proc) 
 {
 	gpointer chan_ptr = g_hash_table_lookup(proc->params, "chan");
 	int channel = 0;
@@ -31,7 +31,7 @@ adc_process(mfp_processor * proc)
 }
 
 static int
-dac_process(mfp_processor * proc) 
+out_process(mfp_processor * proc) 
 {
 	gpointer chan_ptr = g_hash_table_lookup(proc->params, "channel");
 	int channel = 0;
@@ -74,11 +74,11 @@ config(mfp_processor * proc)
 
 
 mfp_procinfo *  
-init_builtin_adc(void) {
+init_builtin_in(void) {
 	mfp_procinfo * p = malloc(sizeof(mfp_procinfo));
-	p->name = strdup("adc");
+	p->name = strdup("in~");
 	p->is_generator = 1;
-	p->process = adc_process;
+	p->process = in_process;
 	p->init = init;
 	p->destroy = destroy;
 	p->config = config;
@@ -89,11 +89,11 @@ init_builtin_adc(void) {
 }
 
 mfp_procinfo *  
-init_builtin_dac(void) {
+init_builtin_out(void) {
 	mfp_procinfo * p = malloc(sizeof(mfp_procinfo));
-	p->name = strdup("dac");
+	p->name = strdup("out~");
 	p->is_generator = 0;
-	p->process = dac_process;
+	p->process = out_process;
 	p->init = init;
 	p->destroy = destroy;
 	p->config = config;

@@ -374,46 +374,21 @@ init_globals(void)
 static void
 init_builtins(void)
 {
+	int i;
 	mfp_procinfo * pi;
+	mfp_proc_info * (initfuncs[])(void) = { 
+		init_builtin_osc, init_builtin_in, init_builtin_out, 
+		init_builtin_sig, init_builtin_snap, init_builtin_ampl, 
+		init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 
+		init_builtin_line, init_builtin_noise, init_builtin_buffer
+	};
+	int num_initfuncs = 13;
 
-	pi = init_builtin_osc();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+	for(i = 0; i < num_initfuncs; i++) {
+		pi = initfuncs[i]();
+		g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+	}
 
-	pi = init_builtin_adc();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-	
-	pi = init_builtin_dac();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-	
-	pi = init_builtin_sig();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-	
-	pi = init_builtin_add();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_sub();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_mul();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_div();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_line();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_noise();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_buffer();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_ampl();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
-
-	pi = init_builtin_snap();
-	g_hash_table_insert(mfp_proc_registry, pi->name, pi);
 }
 
 int 

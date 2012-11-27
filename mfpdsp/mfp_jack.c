@@ -11,7 +11,7 @@
 GArray * mfp_input_ports;
 GArray * mfp_output_ports;
 
-int mfp_samplerate =44100; 
+int mfp_samplerate = 44100; 
 int mfp_blocksize = 1024; 
 
 static jack_client_t * client;
@@ -19,6 +19,17 @@ static jack_client_t * client;
 static int
 process (jack_nframes_t nframes, void *arg)
 {
+	jack_position_t trans_info;
+	jack_transport_state_t trans_state; 
+
+	/* get transport info */ 
+	trans_state = jack_transport_query(client, &trans_info);
+	/* 
+	printf("JACK transport: frame %d, rate %d, time %e\n", trans_info.frame, 
+			trans_info.frame_rate, trans_info.frame_time);
+	printf("JACK BBT: %d:%d:%d\n", trans_info.bar, trans_info.beat, trans_info.tick);
+	*/ 
+
 	/* run processing network */ 
 	if (mfp_dsp_enabled == 1) {
 		mfp_dsp_run((int)nframes);

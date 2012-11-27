@@ -107,7 +107,7 @@ mfp_procinfo *
 init_builtin_ampl(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
 
-	p->name = strdup("ampl");
+	p->name = strdup("ampl~");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init;

@@ -21,7 +21,7 @@ class Osc(Processor):
 
 		self.dsp_inlets = [1, 2]
 		self.dsp_outlets = [0]
-		self.dsp_init("osc", _sig_1=float(freq))
+		self.dsp_init("osc~", _sig_1=float(freq))
 
 	def trigger(self):
 		# number inputs to the DSP ins (freq, amp) are

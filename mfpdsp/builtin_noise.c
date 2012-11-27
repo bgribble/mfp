@@ -51,7 +51,7 @@ init_builtin_noise(void) {
 	gettimeofday(&tv, NULL);
 	srandom(tv.tv_usec);
 	
-	p->name = strdup("noise");
+	p->name = strdup("noise~");
 	p->is_generator = 1;
 	p->process = process;
 	p->init = init;

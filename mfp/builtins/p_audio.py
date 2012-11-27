@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 '''
-p_audio.py:  Builtin AudioOut/AudioIn DSP objects
+audio.py:  Builtin AudioOut/AudioIn DSP objects
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
@@ -19,7 +19,7 @@ class AudioOut(Processor):
 			channel = 0
 
 		self.dsp_inlets = [0]
-		self.dsp_init("dac")
+		self.dsp_init("out~")
 		self.dsp_obj.setparam("channel", channel)
 		
 
@@ -41,7 +41,7 @@ class AudioIn(Processor):
 			channel = 0
 
 		self.dsp_outlets = [0]
-		self.dsp_init("adc")
+		self.dsp_init("in~")
 		self.dsp_obj.setparam("channel", channel)
 
 

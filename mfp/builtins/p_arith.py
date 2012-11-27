@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 '''
-p_arith.py:  Builtin arithmetic DSP ops
+arith.py:  Builtin arithmetic DSP ops
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
@@ -10,7 +10,7 @@ from mfp.main import MFPApp
 
 class ArithProcessor(Processor):
 	def __init__(self, init_type, init_args, arith_op):
-		self.arith_op = arith_op
+		self.arith_op = init_type
 
 		Processor.__init__(self, 2, 1, init_type, init_args)
 
@@ -34,19 +34,19 @@ class ArithProcessor(Processor):
 
 class ArithAdd(ArithProcessor):
 	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args, "+")
+		ArithProcessor.__init__(self, init_type, init_args)
 
 class ArithSub(ArithProcessor):
 	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args, "-")
+		ArithProcessor.__init__(self, init_type, init_args)
 
 class ArithMul(ArithProcessor):
 	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args, "*")
+		ArithProcessor.__init__(self, init_type, init_args)
 
 class ArithDiv(ArithProcessor):
 	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args, "/")
+		ArithProcessor.__init__(self, init_type, init_args)
 
 def register():
 	MFPApp().register("+~", ArithAdd)

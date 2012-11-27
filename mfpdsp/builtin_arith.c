@@ -193,7 +193,7 @@ config(mfp_processor * proc)
 mfp_procinfo *  
 init_builtin_add(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("+");
+	p->name = strdup("+~");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init_add;
@@ -207,7 +207,7 @@ init_builtin_add(void) {
 mfp_procinfo *  
 init_builtin_sub(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("-");
+	p->name = strdup("-~");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init_sub;
@@ -221,7 +221,7 @@ init_builtin_sub(void) {
 mfp_procinfo *  
 init_builtin_mul(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("*");
+	p->name = strdup("*~");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init_mul;
@@ -235,7 +235,7 @@ init_builtin_mul(void) {
 mfp_procinfo *  
 init_builtin_div(void) {
 	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("/");
+	p->name = strdup("/~");
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init_div;
