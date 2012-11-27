@@ -380,9 +380,10 @@ init_builtins(void)
 		init_builtin_osc, init_builtin_in, init_builtin_out, 
 		init_builtin_sig, init_builtin_snap, init_builtin_ampl, 
 		init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 
-		init_builtin_line, init_builtin_noise, init_builtin_buffer
+		init_builtin_line, init_builtin_noise, init_builtin_buffer,
+		init_builtin_biquad
 	};
-	int num_initfuncs = 13;
+	int num_initfuncs = 14;
 
 	for(i = 0; i < num_initfuncs; i++) {
 		pi = initfuncs[i]();
