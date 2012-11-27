@@ -16,7 +16,7 @@ class Biquad(Processor):
 
 		self.dsp_inlets = [ 0 ]
 		self.dsp_outlets = [ 0 ]
-		self.dsp_init("ampl~")
+		self.dsp_init("biquad~")
 	
 	def trigger(self):
 		if isinstance(self.inlets[0], dict):

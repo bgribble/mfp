@@ -22,12 +22,12 @@ static int
 process(mfp_processor * proc) 
 {
 	builtin_biquad_data * pdata = (builtin_biquad_data *)proc->data;
-	mfp_sample * in_sample = proc->inlet[0]->data;
-	mfp_sample * out_sample = proc->outlet[0]->data;
+	mfp_sample * in_sample = proc->inlet_buf[0]->data;
+	mfp_sample * out_sample = proc->outlet_buf[0]->data;
 	double tmp, w_n;
 	int scount=0;
 
-	for (; scount < proc->inlet[0]->blocksize; scount++) {
+	for (; scount < proc->inlet_buf[0]->blocksize; scount++) {
 		tmp = *in_sample++;
 		w_n = tmp - (pdata->a1 * pdata->delay_1) - (pdata->a2 * pdata->delay_2);
 		*out_sample ++ = (pdata->b0 * w_n) + (pdata->b1 * pdata->delay_1) + 
@@ -35,6 +35,7 @@ process(mfp_processor * proc)
 		pdata->delay_2 = pdata->delay_1; 
 		pdata->delay_1 = w_n;
 	}
+	return 0;
 	
 
 	
@@ -47,7 +48,7 @@ init(mfp_processor * proc)
 	proc->data = p;
 	p->a1 = 0.0;
 	p->a2 = 0.0;
-	p->b0 = 0.0;
+	p->b0 = 1.0;
 	p->b1 = 0.0;
 	p->b2 = 0.0;
 	p->delay_1 = 0.0;

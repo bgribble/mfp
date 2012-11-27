@@ -22,6 +22,7 @@ def register():
 	from . import listops; listops.register()
 	from . import ampl; ampl.register()
 	from . import snap; snap.register()
+	from . import biquad; biquad.register()
 
 
 
