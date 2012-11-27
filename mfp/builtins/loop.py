@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 '''
-p_for.py:  Builtin iteration constructs 
+loop.py:  Builtin iteration constructs 
 
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''

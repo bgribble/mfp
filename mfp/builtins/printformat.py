@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 '''
-p_print.py: Debugging print processor 
+printformat.py: Debugging print processor 
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
