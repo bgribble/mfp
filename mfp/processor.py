@@ -27,6 +27,8 @@ class Processor (object):
 		self.outlet_order = range(outlets)
 		self.status = Processor.OK 
 		self.obj_id = MFPApp().remember(self)
+		self.obj_name = "%s_%s" % (init_type, str(self.obj_id))
+		self.patch = None 
 
 		# gui params are updated by the gui slave
 		self.gui_params = dict(obj_id=self.obj_id, num_inlets=inlets, num_outlets=outlets)
@@ -41,6 +43,47 @@ class Processor (object):
 
 		self.connections_out = [[] for r in range(outlets)]
 		self.connections_in = [[] for r in range(inlets)]
+		
+		self.osc_pathbase = None
+		self.osc_methods = [] 
+		self.osc_init()
+
+	def osc_init(self): 
+		from .main import MFPApp 
+		def handler(path, args, types, src, data):
+			if types[0] == 's':
+				self.send(self.parse_obj(args[0]), inlet=data)
+			else:
+				self.send(args[0], inlet=data) 
+
+		if MFPApp().osc_mgr is None:
+			return
+
+		if self.patch is None:
+			patchname = "default"
+		else: 
+			patchname = self.patch.obj_name 
+
+		pathbase = "/mfp/%s/%s" % (patchname, self.obj_name)
+		o = MFPApp().osc_mgr
+
+		if self.osc_pathbase is not None and self.osc_pathbase != pathbase:
+			for m in self.osc_methods: 
+				o.del_method(m, None)
+			self.osc_methods = [] 
+			self.osc_pathbase = pathbase 
+
+		for i in range(len(self.inlets)):
+			path = "%s/%s" % (pathbase, str(i))
+			if path not in self.osc_methods: 
+				o.add_method(path, 's', handler, i)
+				o.add_method(path, 'b', handler, i)
+				#o.add_method(path, 'i', handler, i)
+				o.add_method(path, 'f', handler, i)
+
+	def name(self):
+		log.debug("Object name is", self.obj_name)
+		return self.obj_name 
 
 	def dsp_init(self, proc_name, **params):
 		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),

@@ -143,9 +143,9 @@ class MFPApp (object):
 			self.gui_cmd = GUICommand()
 			while not self.gui_cmd.ready():
 				time.sleep(0.2)
-			log.debug("MFPApp.setup: GUI is ready, switching logging to GUI")
+			log.debug("GUI is ready, switching logging to GUI")
 			log.log_func = self.gui_cmd.log_write
-			log.debug("MFPApp.setup: logging to GUI")
+			log.debug("Started logging to GUI")
 			if self.dsp_command: 
 				self.dsp_command.log_to_gui()
 
@@ -156,13 +156,13 @@ class MFPApp (object):
 		from . import midi
 		self.midi_mgr = midi.MFPMidiManager(1, 1)
 		self.midi_mgr.start()	
-		log.debug("MFPApp.setup: MFPMidiManager started")
+		log.debug("MIDI started (ALSA Sequencer)")
 
 		# OSC manager 
-		# from . import osc 
-		# self.osc_manager = osc.MFPOscManager(5555)
-		# self.osc_manager.start()
-
+		from . import osc 
+		self.osc_mgr = osc.MFPOscManager(5555)
+		self.osc_mgr.start()
+		log.debug("OSC started on port 5555")
 
 		# while we only have 1 patch, this is it
 		self.patch = Patch('default', '')
@@ -195,18 +195,22 @@ class MFPApp (object):
 		log.log_func = None 
 		if self.console: 
 			self.console.write_cb = None
+
 		if self.dsp_process:
 			log.debug("MFPApp.finish: reaping DSP slave...")
 			self.dsp_process.finish()
+
 		if self.gui_process:
 			log.debug("MFPApp.finish: reaping GUI slave...")
 			self.gui_process.finish()
+
 		if self.midi_mgr: 
 			log.debug("MFPApp.finish: reaping MIDI thread...")
 			self.midi_mgr.finish()
-		#if self.console_mgr:
-		#	log.debug("MFPApp.finish: reaping REPL thread...")
-		#	self.console_mgr.finish()
+
+		if self.osc_mgr:
+			log.debug("MFPApp.finish: reaping OSC thread...")
+			self.osc_mgr.finish()
 
 		log.debug("MFPApp.finish: all children reaped, good-bye!")
 

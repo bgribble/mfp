@@ -57,6 +57,7 @@ cdef extern from 'lo/lo.h':
     int lo_server_get_port(lo_server s)
     int lo_server_get_protocol(lo_server s)
     lo_method lo_server_add_method(lo_server s, char *path, char *typespec, lo_method_handler h, void *user_data)
+    lo_method lo_server_del_method(lo_server s, char *path, char *typespec)
     int lo_server_recv(lo_server s) nogil
     int lo_server_recv_noblock(lo_server s, int timeout) nogil
     int lo_server_get_socket_fd(lo_server s)

@@ -5,27 +5,42 @@ osc.py: OSC server for MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+from threading import Thread 
 import liblo
+from mfp import log
 
 class MFPOscManager(Thread):
 	def __init__(self, port):
 		self.port = port 
 		self.quitreq = False 
+		self.server = None 
 
 		try:
-			self.server = liblo.server(self.port)
+			self.server = liblo.Server(self.port)
 		except Exception, err:
 			print str(err)
 		
-		self.server.add(None, None, self.default)
+		#self.server.add_method(None, None, self.default)
+		Thread.__init__(self)
 
-	def add_method(self, path, args, handler):
-		pass
+	def add_method(self, path, args, handler, data=None):
+		if data is not None:
+			self.server.add_method(path, args, handler, data)
+		else: 
+			self.server.add_method(path, args, handler)
+	
+	def del_method(self, path, args):
+		self.server.del_method(path, args)
 
 	def default(self, path, args, types, src):
-		print path, args, types, src
+		log.debug("OSC: unhandled message", path, args)
 
 	def run(self):
+		log.debug("OSC server started")
 		while not self.quitreq:
-			self.server.recv()
+			self.server.recv(100)
+		
+	def finish(self):
+		self.quitreq = True
+		self.join()
 

@@ -24,6 +24,7 @@ from liblo cimport *
 
 import inspect as _inspect
 import weakref as _weakref
+import sys 
 
 
 class _weakref_method:
@@ -190,7 +191,6 @@ cdef int _callback(const_char *path, const_char *types, lo_arg **argv, int argc,
     cdef uint32_t size, j
 
     args = []
-
     for i from 0 <= i < argc:
         t = types[i]
         if   t == 'i': v = argv[i].i
@@ -386,6 +386,33 @@ cdef class _ServerBase:
         cb = struct(func=func, user_data=user_data)
         self._keep_refs.append(cb)
         lo_server_add_method(self._server, p, t, _callback, <void*>cb)
+
+    def del_method(self, path, typespec):
+        """
+        del_method(path, typespec)
+
+        Deletes a previously-added callback function from the server 
+        """
+        cdef char *p
+        cdef char *t
+
+        if isinstance(path, (bytes, unicode)):
+            s = _encode(path)
+            p = s
+        elif path == None:
+            p = NULL
+        else:
+            raise TypeError("path must be a string or None")
+
+        if isinstance(typespec, (bytes, unicode)):
+            s2 = _encode(typespec)
+            t = s2
+        elif typespec == None:
+            t = NULL
+        else:
+            raise TypeError("typespec must be a string or None")
+
+        lo_server_del_method(self._server, p, t)
 
     def send(self, target, *args):
         """
