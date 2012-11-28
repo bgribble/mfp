@@ -71,7 +71,7 @@ class Processor (object):
 			for m in self.osc_methods: 
 				o.del_method(m, None)
 			self.osc_methods = [] 
-			self.osc_pathbase = pathbase 
+		self.osc_pathbase = pathbase 
 
 		for i in range(len(self.inlets)):
 			path = "%s/%s" % (pathbase, str(i))
@@ -80,6 +80,7 @@ class Processor (object):
 				o.add_method(path, 'b', handler, i)
 				#o.add_method(path, 'i', handler, i)
 				o.add_method(path, 'f', handler, i)
+			self.osc_methods.append(path)
 
 	def name(self):
 		log.debug("Object name is", self.obj_name)
@@ -98,6 +99,18 @@ class Processor (object):
 		return self.dsp_obj.getparam(param, value)
 
 	def delete(self):
+		from .main import MFPApp
+		print "delete", self
+		if self.osc_pathbase is not None:
+			for m in self.osc_methods: 
+				MFPApp().osc_mgr.del_method(m, 's')
+				MFPApp().osc_mgr.del_method(m, 'b')
+				MFPApp().osc_mgr.del_method(m, 'f')
+
+			self.osc_methods = [] 
+			self.osc_pathbase = None
+		print "delete 2", self
+
 		outport = 0
 		for c in self.connections_out:
 			for tobj, tport in c:

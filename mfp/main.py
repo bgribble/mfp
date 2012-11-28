@@ -66,6 +66,7 @@ class MFPCommand(RPCWrapper):
 
 	@rpcwrap
 	def delete(self, obj_id):
+		log.debug("main: deleting", obj_id)
 		obj = MFPApp().recall(obj_id)
 		MFPApp().patch.remove(obj)
 		obj.delete()

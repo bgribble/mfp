@@ -37,8 +37,9 @@ class MFPOscManager(Thread):
 
 	def run(self):
 		log.debug("OSC server started")
-		while not self.quitreq:
+		while not self.quitreq and self.server is not None:
 			self.server.recv(100)
+		log.debug("OSC server exiting")
 		
 	def finish(self):
 		self.quitreq = True
