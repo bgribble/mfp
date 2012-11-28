@@ -66,7 +66,6 @@ class MFPCommand(RPCWrapper):
 
 	@rpcwrap
 	def delete(self, obj_id):
-		log.debug("main: deleting", obj_id)
 		obj = MFPApp().recall(obj_id)
 		MFPApp().patch.remove(obj)
 		obj.delete()
@@ -120,6 +119,9 @@ class MFPApp (object):
 		self.objects = {}
 		self.next_obj_id = 0 
 	
+		# temporary name cache 
+		self.objects_byname = {} 
+
 		self.patch = None	
 
 	def setup(self):
@@ -180,6 +182,13 @@ class MFPApp (object):
 
 	def recall(self, obj_id):
 		return self.objects.get(obj_id)
+
+	# bind/resolve should resolve in scope: layer, patch, global 
+	def bind(self, obj, name):
+		self.objects_byname[name] = obj
+
+	def resolve(self, name):
+		return self.objects_byname.get(name)
 
 	def register(self, name, ctor):
 		self.registry[name] = ctor 

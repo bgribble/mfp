@@ -30,6 +30,8 @@ class Processor (object):
 		self.obj_name = "%s_%s" % (init_type, str(self.obj_id))
 		self.patch = None 
 
+		MFPApp().bind(self, self.obj_name)
+
 		# gui params are updated by the gui slave
 		self.gui_params = dict(obj_id=self.obj_id, num_inlets=inlets, num_outlets=outlets)
 
@@ -86,6 +88,13 @@ class Processor (object):
 		log.debug("Object name is", self.obj_name)
 		return self.obj_name 
 
+	def bind(self, name):
+		from .main import MFPApp 
+		log.debug("Binding", self.obj_name, "to", name)
+		self.obj_name = name 
+		MFPApp().bind(self, name)
+		self.osc_init()
+
 	def dsp_init(self, proc_name, **params):
 		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
 						         len(self.dsp_outlets), params)
@@ -100,7 +109,6 @@ class Processor (object):
 
 	def delete(self):
 		from .main import MFPApp
-		print "delete", self
 		if self.osc_pathbase is not None:
 			for m in self.osc_methods: 
 				MFPApp().osc_mgr.del_method(m, 's')
@@ -109,7 +117,6 @@ class Processor (object):
 
 			self.osc_methods = [] 
 			self.osc_pathbase = None
-		print "delete 2", self
 
 		outport = 0
 		for c in self.connections_out:

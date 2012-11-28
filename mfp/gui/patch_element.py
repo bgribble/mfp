@@ -119,14 +119,6 @@ class PatchElement (Clutter.Group):
 						  (w-self.porthole_width-2.0*self.porthole_border) / (self.num_outlets-1.0))
 			return (self.porthole_border + spc*port_num, h-self.porthole_height)
 
-	def port_enter_cb(self, *args):
-		print "enter", args
-		return False 
-
-	def port_leave_cb(self, *args):
-		print "leave", args
-		return False 
-
 	def draw_ports(self):
 		def confport(pid, px, py):
 			pobj = self.port_elements.get(pid)
@@ -135,8 +127,6 @@ class PatchElement (Clutter.Group):
 				pobj.set_color(self.stage.color_unselected)
 				pobj.set_size(self.porthole_width, self.porthole_height)
 				pobj.set_reactive(True)
-				pobj.connect("enter-event", self.port_enter_cb)
-				pobj.connect("leave-event", self.port_leave_cb)
 				self.add_actor(pobj)
 				self.port_elements[pid] = pobj
 			pobj.set_position(px, py)
