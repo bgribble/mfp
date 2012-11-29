@@ -42,17 +42,10 @@ class PatchWindow(object):
 		# significant widgets we will be dealing with later 
 		self.console_view = self.builder.get_object("console_text")
 		self.log_view = self.builder.get_object("log_text") 
-		self.layer_view = self.builder.get_object("layer_tree") 
 		self.object_view = self.builder.get_object("object_tree") 
-
-		self.layer_store = Gtk.TreeStore(GObject.TYPE_INT, GObject.TYPE_STRING,
-										 GObject.TYPE_STRING)
-		self.layer_view.set_model(self.layer_store)
-
-		for header, num in [("Num", 0), ("Layer", 1), ("Scope", 2)]:
-			r = Gtk.CellRendererText()
-			col = Gtk.TreeViewColumn(header, r, text=num)
-			self.layer_view.append_column(col)
+		self.layer_view = self.builder.get_object("layer_tree") 
+		self.layer_store = None 
+		self.object_store = None 
 
 
 		# objects for stage -- self.group gets moved to adjust 
@@ -100,8 +93,8 @@ class PatchWindow(object):
 
 		# set up key and mouse handling 
 		self.init_input()
+		self.init_layer_view()
 		self.layer_select(0)
-		self.layer_display_update()
 
 	def init_input(self):
 		def grab_handler(stage, event):
@@ -137,6 +130,27 @@ class PatchWindow(object):
 		self.input_mgr.major_mode = PatchEditMode(self)
 		self.display_bindings()
 
+	def init_layer_view(self):
+		def select_cb(selection):
+			model, iter = selection.get_selected()
+			if iter is None:
+				return 
+			row = self.layer_store.get_value(iter, 0)
+			if row != self.selected_layer:
+				self.layer_select(row, do_update=False)
+
+		self.layer_store = Gtk.TreeStore(GObject.TYPE_INT, GObject.TYPE_STRING,
+										 GObject.TYPE_STRING)
+		self.layer_view.set_model(self.layer_store)
+		self.layer_view.get_selection().connect("changed", select_cb)
+
+		for header, num in [("Num", 0), ("Layer", 1), ("Scope", 2)]:
+			r = Gtk.CellRendererText()
+			col = Gtk.TreeViewColumn(header, r, text=num)
+			self.layer_view.append_column(col)
+
+		self.layer_display_update()
+
 	def layer_select_up(self):
 		if self.selected_layer > 0:
 			self.layer_select(self.selected_layer - 1)
@@ -147,17 +161,28 @@ class PatchWindow(object):
 			self.layer_select(self.selected_layer + 1)
 			return True 
 
-	def layer_select(self, layer_num):
+	def layer_select(self, layer_num, do_update=True):
 		if self.selected_layer is not None:
 			self.layers[self.selected_layer].hide()
 		self.selected_layer = layer_num 
 		self.layers[self.selected_layer].show()
-		self.layer_display_update()
+		if do_update:
+			self.layer_selection_update()
 
 	def layer_new(self):
 		self.layers.append(PatchLayer(self, "Layer %d" % len(self.layers)))
 		self.layer_display_update()
+		self.layer_selection_update()
 		return True 
+
+	def layer_selection_update(self):
+		model, iter = self.layer_view.get_selection().get_selected()
+
+		if iter is None or self.layer_store.get_value(iter, 0) != self.selected_layer:
+			liter = self.layer_store.iter_nth_child(None, self.selected_layer)
+			spath = self.layer_store.get_path(liter)
+			if spath is not None:
+				self.layer_view.get_selection().select_path(spath)
 
 	def layer_display_update(self):
 		self.layer_store.clear()
