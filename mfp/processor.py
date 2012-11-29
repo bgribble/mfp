@@ -29,6 +29,7 @@ class Processor (object):
 		self.obj_id = MFPApp().remember(self)
 		self.obj_name = "%s_%s" % (init_type, str(self.obj_id))
 		self.patch = None 
+		self.scope = 0
 
 		MFPApp().bind(self, self.obj_name)
 

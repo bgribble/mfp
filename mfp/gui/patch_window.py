@@ -4,7 +4,7 @@ patch_window.py
 The main MFP window and associated code 
 '''
 
-from gi.repository import Gtk, Clutter, GtkClutter, Pango
+from gi.repository import Gtk, GObject, Clutter, GtkClutter, Pango
 
 from text_element import TextElement
 from processor_element import ProcessorElement
@@ -12,6 +12,7 @@ from connection_element import ConnectionElement
 from message_element import MessageElement
 from enum_element import EnumElement
 from plot_element import PlotElement
+from patch_layer import PatchLayer 
 
 from mfp import MFPGUI
 from mfp.main import MFPCommand
@@ -41,6 +42,18 @@ class PatchWindow(object):
 		# significant widgets we will be dealing with later 
 		self.console_view = self.builder.get_object("console_text")
 		self.log_view = self.builder.get_object("log_text") 
+		self.layer_view = self.builder.get_object("layer_tree") 
+		self.object_view = self.builder.get_object("object_tree") 
+
+		self.layer_store = Gtk.TreeStore(GObject.TYPE_INT, GObject.TYPE_STRING,
+										 GObject.TYPE_STRING)
+		self.layer_view.set_model(self.layer_store)
+
+		for header, num in [("Num", 0), ("Layer", 1), ("Scope", 2)]:
+			r = Gtk.CellRendererText()
+			col = Gtk.TreeViewColumn(header, r, text=num)
+			self.layer_view.append_column(col)
+
 
 		# objects for stage -- self.group gets moved to adjust 
 		# the view, so anything not in it will be static on the stage 
@@ -54,6 +67,8 @@ class PatchWindow(object):
 
 		self.objects = [] 
 		self.selected = None
+		self.layers = [ PatchLayer(self, "Default") ] 
+		self.selected_layer = None  
 
 		self.input_mgr = InputManager(self)
 		self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view)
@@ -85,6 +100,8 @@ class PatchWindow(object):
 
 		# set up key and mouse handling 
 		self.init_input()
+		self.layer_select(0)
+		self.layer_display_update()
 
 	def init_input(self):
 		def grab_handler(stage, event):
@@ -110,12 +127,48 @@ class PatchWindow(object):
 		self.stage.connect('scroll-event', grab_handler) 
 
 		# global keybindings 
-		self.input_mgr.global_binding('C-e', self.toggle_major_mode, "toggle-major-mode")
-		self.input_mgr.global_binding('C-q', self.quit, "quit")
+		self.input_mgr.global_binding("PGUP", self.layer_select_up, "Select higher layer")
+		self.input_mgr.global_binding("PGDN", self.layer_select_down, "Select lower layer")
+		self.input_mgr.global_binding("C-n", self.layer_new, "Create new layer")
+		self.input_mgr.global_binding('C-e', self.toggle_major_mode, "Toggle edit/control")
+		self.input_mgr.global_binding('C-q', self.quit, "Quit")
 
 		# set initial major mode 
 		self.input_mgr.major_mode = PatchEditMode(self)
 		self.display_bindings()
+
+	def layer_select_up(self):
+		if self.selected_layer > 0:
+			self.layer_select(self.selected_layer - 1)
+			return True 
+	
+	def layer_select_down(self):
+		if self.selected_layer < (len(self.layers)-1):
+			self.layer_select(self.selected_layer + 1)
+			return True 
+
+	def layer_select(self, layer_num):
+		if self.selected_layer is not None:
+			self.layers[self.selected_layer].hide()
+		self.selected_layer = layer_num 
+		self.layers[self.selected_layer].show()
+		self.layer_display_update()
+
+	def layer_new(self):
+		self.layers.append(PatchLayer(self, "Layer %d" % len(self.layers)))
+		self.layer_display_update()
+		return True 
+
+	def layer_display_update(self):
+		self.layer_store.clear()
+		for layernum in range(len(self.layers)):
+			liter = self.layer_store.append(None)
+			self.layer_store.set_value(liter, 0, layernum)
+			self.layer_store.set_value(liter, 1, self.layers[layernum].name)
+			self.layer_store.set_value(liter, 2, "default")
+
+	def active_group(self):
+		return self.layers[self.selected_layer].group 
 
 	def ready(self):
 		if self.window and self.window.get_realized():
@@ -160,7 +213,7 @@ class PatchWindow(object):
 		if self.autoplace_marker is None:
 			self.autoplace_marker = Clutter.Text()
 			self.autoplace_marker.set_text("+")
-			self.group.add_actor(self.autoplace_marker)
+			self.active_group().add_actor(self.autoplace_marker)
 		self.autoplace_marker.set_position(x, y)
 		self.autoplace_marker.set_depth(-10)
 		self.autoplace_marker.show()
@@ -179,7 +232,7 @@ class PatchWindow(object):
 	def register(self, element):
 		self.objects.append(element)
 		self.input_mgr.event_sources[element] = element 
-		self.group.add_actor(element)
+		self.active_group().add_actor(element)
 		if element.obj_id is not None:
 			element.send_params()
 
@@ -189,7 +242,7 @@ class PatchWindow(object):
 
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element]
-		self.group.remove_actor(element)
+		self.active_group().remove_actor(element)
 		# FIXME hook
 		SelectMRUMode.forget(element)
 

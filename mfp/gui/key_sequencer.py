@@ -91,6 +91,10 @@ class KeySequencer (object):
 				key += 'BS'
 			elif ks == KEY_INS:
 				key += 'INS'
+			elif ks == KEY_PGUP:
+				key += 'PGUP'
+			elif ks == KEY_PGDN:
+				key += 'PGDN'
 			elif ks < 256:
 				kuni = get_key_unicode(event)
 				if kuni < 32:

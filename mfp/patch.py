@@ -5,6 +5,7 @@ Patch load/save
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
+
 import simplejson as json
 from .processor import Processor
 
@@ -14,6 +15,8 @@ def getx(o):
 class Patch(Processor):
 	def __init__(self, init_type='none', init_args=None):
 		self.objects = {}
+		self.scopes = {}
+
 		self.inlet_objects = []
 		self.outlet_objects = []
 		Processor.__init__(self, 0, 0, init_type, init_args)
@@ -32,8 +35,15 @@ class Patch(Processor):
 		for o in self.objects.values():
 			o.delete()
 		self.objects = {}
+		self.scopes = {} 
 		self.inlet_objects = []
 		self.outlet_objects = []
+
+		# create new scopes 
+		if f.get("scopes") is not None:
+			self.scopes = f.get("scopes")
+		else: 
+			self.scopes = { 0: "Default" }
 
 		# create new objects
 		idmap = {}
