@@ -170,6 +170,7 @@ class PatchElement (Clutter.Group):
 		self.dsp_outlets = params.get("dsp_outlets")
 		self.obj_name = params.get("obj_name")
 		self.draw_ports()
+		self.stage.refresh(self)
 
 	def make_edit_mode(self):
 		return None
@@ -188,6 +189,7 @@ class PatchElement (Clutter.Group):
 		if self.edit_mode:
 			self.stage.input_mgr.disable_minor_mode(self.edit_mode)
 			self.edit_mode = None
+			self.stage.refresh(self)
 
 	def begin_control(self):
 		if not self.control_mode:

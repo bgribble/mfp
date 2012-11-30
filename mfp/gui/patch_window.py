@@ -342,6 +342,9 @@ class PatchWindow(object):
 		# FIXME hook
 		SelectMRUMode.forget(element)
 
+	def refresh(self, element): 
+		self.object_store_update()
+
 	def add_element(self, factory, x=None, y=None):
 		if x is None:
 			x = self.input_mgr.pointer_x
@@ -354,7 +357,6 @@ class PatchWindow(object):
 		return True 
 
 	def select(self, obj):
-		print "patch_window.select", obj
 		if self.selected is not obj and self.selected is not None:
 			self.unselect(self.selected)
 		obj.select()
@@ -366,17 +368,14 @@ class PatchWindow(object):
 		SelectMRUMode.touch(obj) 
 
 		self.object_selection_update()
-		print "patch_window.select done", obj
 		return True 
 
 	def unselect(self, obj):
-		print "patch_window.unselect", obj
 		if self.selected is obj and obj is not None:
 			obj.end_control()
 			obj.unselect()
 			self.selected = None
 			self.object_selection_update()
-		print "patch_window.unselect done", obj
 		return True 
 
 	def unselect_all(self):

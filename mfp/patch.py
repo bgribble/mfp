@@ -106,7 +106,6 @@ class Patch(Processor):
 		return json.dumps(f)
 
 	def send(self, value, inlet=0):
-		print self, "sending", value, "to", self.inlet_objects[inlet]
 		self.inlet_objects[inlet].send(value)
 
 	def connect(self, outlet, target, inlet):

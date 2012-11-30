@@ -130,15 +130,12 @@ class AutoplaceMode (InputMode):
 			for o in self.window.objects: 
 				ow, oh = o.get_size() 
 				if isinstance(o, ConnectionElement):
-					print o, "continue 1"
 					continue
 				elif (o.position_x > x+self.X_CLEAR 
 					  or o.position_x + ow < x): 
-					print o, "continue 2"
 					continue
 				elif (o.position_y > test_y + self.Y_CLEAR
 					  or o.position_y + oh < test_y):
-					print o, "continue 3"
 					continue 
 				clear = False 
 			if clear:
