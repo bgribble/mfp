@@ -39,12 +39,6 @@ class Patch(Processor):
 		self.inlet_objects = []
 		self.outlet_objects = []
 
-		# create new scopes 
-		if f.get("scopes") is not None:
-			self.scopes = f.get("scopes")
-		else: 
-			self.scopes = { 0: "Default" }
-
 		# create new objects
 		idmap = {}
 		idlist = f.get('objects').keys()
@@ -60,15 +54,18 @@ class Patch(Processor):
 				self.inlet_objects.append(newobj)
 			elif otype == 'outlet':
 				self.outlet_objects.append(newobj)
-				newobj.patch = self
+
+			newobj.patch = self
 
 			gp = prms.get('gui_params')
-			newobj.gui_params = gp 
+			for k,v in gp.items():
+				newobj.gui_params[k] = v
+
+			# custom behaviors implemented by Processor subclass load()
 			newobj.load(prms)
 
 			if not MFPApp.no_gui:
-				MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, gp)
-
+				MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, newobj.gui_params)
 
 			idmap[int(oid)] = newobj
 
@@ -88,6 +85,7 @@ class Patch(Processor):
 					srcobj.connect(outlet, dstobj, inlet)
 					if not MFPApp.no_gui:
 						MFPApp().gui_cmd.connect(srcobj.obj_id, outlet, dstobj.obj_id, inlet)
+
 		# sort inlets and outlets by X position
 		self.inlet_objects.sort(key=getx)
 		self.outlet_objects.sort(key=lambda x: -getx(x))

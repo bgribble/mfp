@@ -11,6 +11,8 @@ class PatchLayer(object):
 	def __init__(self, patch, name):
 		self.patch = patch 
 		self.name = name 
+		self.scope = None  
+
 		self.group = Clutter.Group() 
 		self.group.set_property("opacity", 0)
 		self.patch.group.add_actor(self.group)

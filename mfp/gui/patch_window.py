@@ -47,8 +47,7 @@ class PatchWindow(object):
 		self.layer_store = None 
 		self.object_store = None 
 
-
-		# objects for stage -- self.group gets moved to adjust 
+		# objects for stage -- self.group gets moved/scaled to adjust 
 		# the view, so anything not in it will be static on the stage 
 		self.group = Clutter.Group()
 		self.hud_text = Clutter.Text() 
@@ -58,6 +57,8 @@ class PatchWindow(object):
 		self.stage.add_actor(self.group)
 		self.stage.add_actor(self.hud_text) 
 
+		# self.objects is PatchElement subclasses represented the currently-displayed
+		# patch 
 		self.objects = [] 
 		self.selected = None
 		self.layers = [ PatchLayer(self, "Default") ] 
@@ -86,14 +87,10 @@ class PatchWindow(object):
 		self.stage.show()
 		self.window.show_all()
 		
-		# set tab stops on keybindings view 
-		ta = Pango.TabArray.new(1, True)
-		ta.set_tab(0, Pango.TabAlign.LEFT, 120)
-		self.builder.get_object("key_bindings_text").set_tabs(ta)
-
 		# set up key and mouse handling 
 		self.init_input()
 		self.init_layer_view()
+		self.init_object_view()
 		self.layer_select(0)
 
 	def init_input(self):
@@ -128,6 +125,13 @@ class PatchWindow(object):
 
 		# set initial major mode 
 		self.input_mgr.major_mode = PatchEditMode(self)
+
+		# set tab stops on keybindings view 
+		ta = Pango.TabArray.new(1, True)
+		ta.set_tab(0, Pango.TabAlign.LEFT, 120)
+		self.builder.get_object("key_bindings_text").set_tabs(ta)
+
+		# show keybindings 
 		self.display_bindings()
 
 	def init_layer_view(self):
@@ -149,7 +153,26 @@ class PatchWindow(object):
 			col = Gtk.TreeViewColumn(header, r, text=num)
 			self.layer_view.append_column(col)
 
-		self.layer_display_update()
+		self.layer_store_update()
+
+	def init_object_view(self):
+		def select_cb(selection):
+			model, iter = selection.get_selected()
+			if iter is None: 
+				self.unselect_all()
+			else:
+				obj = self.object_store.get_value(iter, 1) 
+				if obj is not self.selected:
+					self.select(obj)
+
+		self.object_store = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT)
+		self.object_view.set_model(self.object_store)
+		self.object_view.get_selection().connect("changed", select_cb)
+
+		for header, num in [("Name", 0)]:
+			r = Gtk.CellRendererText()
+			col = Gtk.TreeViewColumn(header, r, text=num)
+			self.object_view.append_column(col)
 
 	def layer_select_up(self):
 		if self.selected_layer > 0:
@@ -171,7 +194,7 @@ class PatchWindow(object):
 
 	def layer_new(self):
 		self.layers.append(PatchLayer(self, "Layer %d" % len(self.layers)))
-		self.layer_display_update()
+		self.layer_store_update()
 		self.layer_selection_update()
 		return True 
 
@@ -184,13 +207,56 @@ class PatchWindow(object):
 			if spath is not None:
 				self.layer_view.get_selection().select_path(spath)
 
-	def layer_display_update(self):
+	def layer_store_update(self):
 		self.layer_store.clear()
 		for layernum in range(len(self.layers)):
 			liter = self.layer_store.append(None)
 			self.layer_store.set_value(liter, 0, layernum)
 			self.layer_store.set_value(liter, 1, self.layers[layernum].name)
-			self.layer_store.set_value(liter, 2, "default")
+			self.layer_store.set_value(liter, 2, self.layers[layernum].scope or "Patch")
+
+
+	def object_selection_update(self):
+		found = []
+		def	check(model, path, it, data):
+			if self.object_store.get_value(it, 1) == self.selected:
+				found[:] = path
+				return True
+			return False 
+
+		model, iter = self.object_view.get_selection().get_selected()
+
+		if iter is None or self.object_store.get_value(iter, 1) != self.selected: 
+			self.object_store.foreach(check, None)
+			if found:
+				self.object_view.get_selection().select_path(found[0])
+
+	def object_store_update(self):
+		scopes = {} 
+		self.object_store.clear()
+
+		for s in self.layers:
+			if s.scope is None:
+				continue 
+			oiter = self.object_store.append(None)
+			self.object_store.set_value(oiter, 0, s.scope)
+			self.object_store.set_value(oiter, 1, s)
+			scopes[s] = oiter
+
+		for o in self.objects:
+			if o.obj_name is None:
+				continue
+
+			if o.layer.scope is None:
+				parent = None 
+			else:
+				parent = scopes.get(o.layer.scope)
+			oiter = self.object_store.append(parent)
+			self.object_store.set_value(oiter, 0, o.obj_name)
+			self.object_store.set_value(oiter, 1, o)
+
+	def active_layer(self):
+		return self.layers[self.selected_layer]
 
 	def active_group(self):
 		return self.layers[self.selected_layer].group 
@@ -258,16 +324,21 @@ class PatchWindow(object):
 		self.objects.append(element)
 		self.input_mgr.event_sources[element] = element 
 		self.active_group().add_actor(element)
+		element.layer = self.active_layer()
 		if element.obj_id is not None:
 			element.send_params()
+		self.object_store_update()
 
 	def unregister(self, element):
 		if self.selected == element:
 			self.unselect(element)
 
+		element.layer = None 
 		self.objects.remove(element)
 		del self.input_mgr.event_sources[element]
 		self.active_group().remove_actor(element)
+		self.object_store_update()
+
 		# FIXME hook
 		SelectMRUMode.forget(element)
 
@@ -283,6 +354,7 @@ class PatchWindow(object):
 		return True 
 
 	def select(self, obj):
+		print "patch_window.select", obj
 		if self.selected is not obj and self.selected is not None:
 			self.unselect(self.selected)
 		obj.select()
@@ -292,13 +364,19 @@ class PatchWindow(object):
 
 		# FIXME hook
 		SelectMRUMode.touch(obj) 
+
+		self.object_selection_update()
+		print "patch_window.select done", obj
 		return True 
 
 	def unselect(self, obj):
+		print "patch_window.unselect", obj
 		if self.selected is obj and obj is not None:
 			obj.end_control()
 			obj.unselect()
 			self.selected = None
+			self.object_selection_update()
+		print "patch_window.unselect done", obj
 		return True 
 
 	def unselect_all(self):
@@ -306,6 +384,7 @@ class PatchWindow(object):
 			self.selected.end_control()
 			self.selected.unselect()
 			self.selected = None
+			self.object_selection_update()
 		return True 
 
 	def select_next(self):

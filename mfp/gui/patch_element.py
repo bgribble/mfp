@@ -24,6 +24,7 @@ class PatchElement (Clutter.Group):
 	def __init__(self, window, x, y):
 		# MFP object and UI descriptors 
 		self.obj_id = None
+		self.obj_name = None 
 		self.obj_type = None
 		self.obj_args = None
 		self.num_inlets = 0
@@ -35,6 +36,7 @@ class PatchElement (Clutter.Group):
 
 		# Clutter objects 
 		self.stage = window
+		self.layer = None 
 		self.port_elements = {}
 
 		# UI state 
@@ -72,6 +74,7 @@ class PatchElement (Clutter.Group):
 	def create(self, obj_type, init_args):
 		objinfo = MFPGUI().mfp.create(obj_type, init_args)
 		self.obj_id = objinfo.get('obj_id')
+		self.obj_name = objinfo.get('obj_name')
 		self.num_inlets = objinfo.get("num_inlets")
 		self.num_outlets = objinfo.get("num_outlets")
 		self.dsp_inlets = objinfo.get("dsp_inlets")
@@ -165,6 +168,7 @@ class PatchElement (Clutter.Group):
 		self.num_outlets = params.get("num_outlets")
 		self.dsp_inlets = params.get("dsp_inlets")
 		self.dsp_outlets = params.get("dsp_outlets")
+		self.obj_name = params.get("obj_name")
 		self.draw_ports()
 
 	def make_edit_mode(self):

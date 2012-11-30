@@ -29,12 +29,12 @@ class Processor (object):
 		self.obj_id = MFPApp().remember(self)
 		self.obj_name = "%s_%s" % (init_type, str(self.obj_id))
 		self.patch = None 
-		self.scope = 0
 
 		MFPApp().bind(self, self.obj_name)
 
 		# gui params are updated by the gui slave
-		self.gui_params = dict(obj_id=self.obj_id, num_inlets=inlets, num_outlets=outlets)
+		self.gui_params = dict(obj_id=self.obj_id, obj_name=self.obj_name, 
+						       num_inlets=inlets, num_outlets=outlets)
 
 		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 
 		# of the ordinal inlets/outlets of the DSP object. 
