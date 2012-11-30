@@ -7,6 +7,7 @@
 
 typedef struct {
 	int retrigger;
+	int retrigger_count;
 	int triggered;
 } builtin_snap_data;
 
@@ -15,13 +16,23 @@ process(mfp_processor * proc)
 {
 	builtin_snap_data * pdata = (builtin_snap_data *)proc->data;
 	mfp_sample * sample = proc->inlet_buf[0]->data;
+	int scount = 0;
 
 	/* iterate */ 
-	if (pdata->triggered == 1) {
-		mfp_dsp_send_response_float(proc, 0, *sample);
-		if (pdata->retrigger == 0) {
+	for (;scount < proc->inlet_buf[0]->blocksize; scount++) {
+		if(pdata->triggered == 1) {
+			mfp_dsp_send_response_float(proc, 0, proc->inlet_buf[0]->data[scount]);
 			pdata->triggered = 0;
 		}
+
+		if(pdata->retrigger > 0) {
+			pdata->retrigger_count --;
+			if (pdata->retrigger_count == 0) {
+				pdata->triggered = 1;
+				pdata->retrigger_count = pdata->retrigger;
+			}
+		}
+
 	}
 	return 0;
 }

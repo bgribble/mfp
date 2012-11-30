@@ -16,19 +16,21 @@ class Snap(Processor):
 
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
-			value = initargs[0]
+			self.retrigger = initargs[0]
 		else:
-			value = 0
+			self.retrigger = 0
 
 		self.dsp_inlets=[0]
 		self.dsp_init("snap~")
-		self.dsp_setparam("retrigger", value)
+		self.dsp_setparam("retrigger", self.retrigger)
+		if self.retrigger > 0:
+			self.dsp_setparam("trigger", 1.0)
 
 	def trigger(self):
 		if self.inlets[0] is Bang:
 			self.dsp_setparam("trigger", 1.0)
 		elif self.inlets[0] is True: 
-			self.dsp_setparam("retrigger", 1.0)
+			self.dsp_setparam("retrigger", self.retrigger)
 			self.dsp_setparam("trigger", 1.0)
 		elif self.inlets[0] is False: 
 			self.dsp_setparam("retrigger", 0.0)
