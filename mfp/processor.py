@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from .dsp_slave import DSPObject
 from .method import MethodCall
 from .bang import Uninit 
+from .scope import LexicalScope
 
 from mfp import log 
 
@@ -74,6 +75,13 @@ class Processor (object):
 
 	def rename(self, new_name):
 		self.assign(self.patch, self.scope, new_name)
+
+	def rescope(self, new_scope):
+		if isinstance(new_scope, LexicalScope):
+			self.assign(self.patch, new_scope, self.name)
+		else:
+			self.assign(self.patch, self.patch.scopes.get(new_scope), self.name)
+
 
 	def osc_init(self): 
 		from .main import MFPApp 
@@ -261,6 +269,7 @@ class Processor (object):
 	def method(self, message, inlet):
 		'''Default method handler ignores which inlet the message was received on'''
 		message.call(self)
+		self.inlets[inlet] = Uninit
 
 	def error(self, tb=None):
 		self.status = Processor.ERROR

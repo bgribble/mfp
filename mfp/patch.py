@@ -29,7 +29,7 @@ class Patch(Processor):
 		self.evaluator.bind_local("self", self)
 		self.default_scope.bind("self", self)
 		
-		Processor.__init__(self, 0, 0, init_type, init_args, None, "default", None)
+		Processor.__init__(self, 1, 0, init_type, init_args, None, "default", None)
 
 	#############################
 	# name management 
@@ -48,6 +48,9 @@ class Patch(Processor):
 			exists, val = s.query(name)
 			if exists: 
 				return val 
+		elif self.scopes.has_key(name):
+			return self.scopes.get(name)
+		
 		exists, val = self.default_scope.query(name)
 		if exists:
 			return val
@@ -91,8 +94,8 @@ class Patch(Processor):
 	# patch contents management 
 	#############################
 
-	def send(self, value, inlet=0):
-		self.inlet_objects[inlet].send(value)
+	#def send(self, value, inlet=0):
+	#	self.inlet_objects[inlet].send(value)
 
 	def connect(self, outlet, target, inlet):
 		self.outlet_objects[outlet].connect(0, target, inlet)

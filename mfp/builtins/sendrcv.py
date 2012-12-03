@@ -8,6 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor 
 from ..main import MFPApp
 from .. import Bang, Uninit
+from mfp import log 
 
 class Send (Processor):
 	def __init__ (self, init_type, init_args, patch, scope, name):
@@ -23,6 +24,10 @@ class Send (Processor):
 		if len(initargs):
 			self.dest_name = initargs[0] 
 		
+
+	def method(self, message, inlet):
+		log.debug("send method handler:", message, inlet)
+		self.trigger()
 
 	def trigger(self):
 		if self.inlets[1] is not Uninit:
