@@ -17,10 +17,10 @@ def iterable(o):
 		return False
 
 class For(Processor):
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		self.iterating = False
 		self.startval = False
-		Processor.__init__(self, 2, 1, init_type, init_args)
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 		
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):

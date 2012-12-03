@@ -5,7 +5,6 @@ processor.py: Parent class of all processors
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from .dsp_slave import DSPObject
-from .evaluator import Evaluator
 from .method import MethodCall
 from .bang import Uninit 
 
@@ -17,7 +16,8 @@ class Processor (object):
 	gui_type = 'processor'
 	hot_inlets = [0]
 
-	def __init__(self, inlets, outlets, init_type, init_args):
+	def __init__(self, inlets, outlets, init_type, init_args,
+				 patch, scope, name):
 		from .main import MFPApp 
 		self.init_type = init_type
 		self.init_args = init_args
@@ -27,13 +27,17 @@ class Processor (object):
 		self.outlet_order = range(outlets)
 		self.status = Processor.OK 
 		self.obj_id = MFPApp().remember(self)
-		self.obj_name = "%s_%s" % (init_type, str(self.obj_id))
+		self.name = None 
 		self.patch = None 
+		self.scope = None 
+		self.osc_pathbase = None
+		self.osc_methods = [] 
 
-		MFPApp().bind(self, self.obj_name)
+		if patch is not None:
+			self.assign(patch, scope, name)
 
 		# gui params are updated by the gui slave
-		self.gui_params = dict(obj_id=self.obj_id, obj_name=self.obj_name, 
+		self.gui_params = dict(obj_id=self.obj_id, name=self.name, 
 						       num_inlets=inlets, num_outlets=outlets)
 
 		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 
@@ -47,15 +51,26 @@ class Processor (object):
 		self.connections_out = [[] for r in range(outlets)]
 		self.connections_in = [[] for r in range(inlets)]
 		
-		self.osc_pathbase = None
-		self.osc_methods = [] 
-		self.osc_init()
+	
+	def assign(self, patch, scope, name):
+		if self.patch is not None and self.name is not None: 
+			self.patch.unbind(self.name, self.scope)
+
+		self.name = name or "%s_%s" % (self.init_type, str(self.obj_id))
+		self.scope = scope
+		if self.patch is None or self.patch != patch:
+			if self.patch:
+				self.patch.remove(self)
+			self.patch = patch 
+			self.patch.add(self)
+			self.patch.bind(self.name, self.scope, self)
+		self.osc_init() 
 
 	def osc_init(self): 
 		from .main import MFPApp 
 		def handler(path, args, types, src, data):
 			if types[0] == 's':
-				self.send(self.parse_obj(args[0]), inlet=data)
+				self.send(self.patch.parse_obj(args[0]), inlet=data)
 			else:
 				self.send(args[0], inlet=data) 
 
@@ -65,9 +80,9 @@ class Processor (object):
 		if self.patch is None:
 			patchname = "default"
 		else: 
-			patchname = self.patch.obj_name 
+			patchname = self.patch.name 
 
-		pathbase = "/mfp/%s/%s" % (patchname, self.obj_name)
+		pathbase = "/mfp/%s/%s" % (patchname, self.name)
 		o = MFPApp().osc_mgr
 
 		if self.osc_pathbase is not None and self.osc_pathbase != pathbase:
@@ -85,17 +100,6 @@ class Processor (object):
 				o.add_method(path, 'f', handler, i)
 			self.osc_methods.append(path)
 
-	def name(self):
-		log.debug("Object name is", self.obj_name)
-		return self.obj_name 
-
-	def bind(self, name):
-		from .main import MFPApp 
-		log.debug("Binding", self.obj_name, "to", name)
-		self.obj_name = name 
-		MFPApp().bind(self, name)
-		self.osc_init()
-
 	def dsp_init(self, proc_name, **params):
 		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
 						         len(self.dsp_outlets), params)
@@ -110,6 +114,9 @@ class Processor (object):
 
 	def delete(self):
 		from .main import MFPApp
+		if self.patch is not None:
+			self.patch.unbind(self.name, self.scope)
+
 		if self.osc_pathbase is not None:
 			for m in self.osc_methods: 
 				MFPApp().osc_mgr.del_method(m, 's')
@@ -133,22 +140,6 @@ class Processor (object):
 
 		if self.dsp_obj is not None:
 			self.dsp_obj.delete()
-
-	def parse_obj(self, argstring):
-		if argstring == '' or argstring is None:
-			return ()
-
-		# FIXME: evaluator defines context, should be in patch
-		e = Evaluator()
-		return e.eval(argstring)
-
-	def parse_args(self, argstring):
-		if argstring == '' or argstring is None:
-			return ((), {})
-
-		# FIXME: evaluator defines context, should be in patch
-		e = Evaluator()
-		return e.eval_arglist(argstring)
 
 	def resize(self, inlets, outlets):
 		if inlets > len(self.inlets):
@@ -241,6 +232,22 @@ class Processor (object):
 			pass 
 
 		return work 
+
+	def parse_args(self, pystr):
+		if self.patch:
+			return self.patch.parse_args(pystr)
+		else: 
+			from .evaluator import Evaluator 
+			e = Evaluator()
+			return e.parse_args(pystr)
+
+	def parse_obj(self, pystr):
+		if self.patch:
+			return self.patch.parse_obj(pystr)
+		else: 
+			from .evaluator import Evaluator 
+			e = Evaluator()
+			return e.parse_args(pystr)
 
 	def method(self, message, inlet):
 		'''Default method handler ignores which inlet the message was received on'''

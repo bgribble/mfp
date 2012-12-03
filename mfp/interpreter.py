@@ -13,8 +13,7 @@ class Interpreter (InteractiveInterpreter):
 	def __init__(self, write_cb, local):
 		self.write_cb = write_cb
 		self.evaluator = Evaluator()
-		self.local = local
-		InteractiveInterpreter.__init__(self, local)
+		InteractiveInterpreter.__init__(self)
 
 	def runsource(self, source, filename="<MFP interactive console>", symbol="single"):
 		try:
@@ -32,7 +31,7 @@ class Interpreter (InteractiveInterpreter):
 			self.write('')
 		else:
 			try:
-				result = self.evaluator.eval(source, self.local)
+				result = self.evaluator.eval(source)
 				self.write(repr(result) + "\n")
 			except SystemExit:
 				raise

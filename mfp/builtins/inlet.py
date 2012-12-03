@@ -9,8 +9,8 @@ from mfp.processor import Processor
 from mfp.main import MFPApp
 
 class Inlet(Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 1, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
 	def trigger(self):
 		self.outlets[0] = self.inlets[0]

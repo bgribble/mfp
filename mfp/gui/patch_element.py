@@ -72,9 +72,9 @@ class PatchElement (Clutter.Group):
 			self.obj_id = None
 
 	def create(self, obj_type, init_args):
-		objinfo = MFPGUI().mfp.create(obj_type, init_args)
+		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", "default", None)
 		self.obj_id = objinfo.get('obj_id')
-		self.obj_name = objinfo.get('obj_name')
+		self.obj_name = objinfo.get('name')
 		self.num_inlets = objinfo.get("num_inlets")
 		self.num_outlets = objinfo.get("num_outlets")
 		self.dsp_inlets = objinfo.get("dsp_inlets")
@@ -168,7 +168,7 @@ class PatchElement (Clutter.Group):
 		self.num_outlets = params.get("num_outlets")
 		self.dsp_inlets = params.get("dsp_inlets")
 		self.dsp_outlets = params.get("dsp_outlets")
-		self.obj_name = params.get("obj_name")
+		self.obj_name = params.get("name")
 		self.draw_ports()
 		self.stage.refresh(self)
 

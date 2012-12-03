@@ -11,8 +11,8 @@ from .. import Bang
 from .. import log 
 
 class Snap(Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 1, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):

@@ -15,6 +15,7 @@ from mfp import Bang
 from patch import Patch
 from singleton import Singleton
 from interpreter import Interpreter 
+from evaluator import Evaluator
 
 from rpc_wrapper import RPCWrapper, rpcwrap
 from rpc_worker import RPCServer
@@ -23,12 +24,14 @@ from . import log
 
 class MFPCommand(RPCWrapper):
 	@rpcwrap
-	def create(self, objtype, initargs=''):
-		obj = MFPApp().create(objtype, initargs)
+	def create(self, objtype, initargs, patch_name, scope_name, obj_name):
+		patch = MFPApp().patches.get(patch_name)
+		scope = patch.scopes.get(scope_name) or patch.default_scope
+
+		obj = MFPApp().create(objtype, initargs, patch, scope, obj_name)
 		if obj is None:
 			log.debug("MFPApp.create: failed")
 			return None
-		MFPApp().patch.add(obj)
 		return obj.gui_params
 
 	@rpcwrap
@@ -122,7 +125,7 @@ class MFPApp (object):
 		# temporary name cache 
 		self.objects_byname = {} 
 
-		self.patch = None	
+		self.patches = {}
 
 	def setup(self):
 		from mfp.dsp_slave import dsp_init, DSPObject, DSPCommand 
@@ -168,9 +171,7 @@ class MFPApp (object):
 		log.debug("OSC started on port 5555")
 
 		# while we only have 1 patch, this is it
-		self.patch = Patch('default', '')
-
-		# 
+		self.patches["default"] = Patch('default', '')
 
 	def remember(self, obj):
 		oi = self.next_obj_id
@@ -183,23 +184,23 @@ class MFPApp (object):
 	def recall(self, obj_id):
 		return self.objects.get(obj_id)
 
-	# bind/resolve should resolve in scope: layer, patch, global 
-	def bind(self, obj, name):
-		self.objects_byname[name] = obj
-
-	def resolve(self, name):
-		return self.objects_byname.get(name)
-
 	def register(self, name, ctor):
 		self.registry[name] = ctor 
 
-	def create(self, name, args=''):
-		ctor = self.registry.get(name)
+	def create(self, init_type, init_args, patch, scope, name):
+		ctor = self.registry.get(init_type)
 		if ctor is None:
+			log.debug("No factory for '%s' registered, cannot create" % init_type)
 			return None
 		else:
-			obj = ctor(name, args)
-			return obj
+			try:
+				obj = ctor(init_type, init_args, patch, scope, name)
+				return obj
+			except Exception, e:
+				log.debug("Caught exception while trying to create %s (%s)" 
+						  % (init_type, init_args))
+				log.debug(e)
+				raise
 
 	def finish(self):
 		log.log_func = None 
@@ -225,10 +226,8 @@ class MFPApp (object):
 		log.debug("MFPApp.finish: all children reaped, good-bye!")
 
 def main():
-	import os
-	import builtins 
-	import code 
-	import sys
+	import math, os, sys, re 
+	from mfp import builtins
 
 	log.debug("Main thread started, pid =", os.getpid())
 	#log.log_file = open("mfp.log", "w+")
@@ -236,10 +235,29 @@ def main():
 	app = MFPApp()
 	app.setup()
 
+	# default names known to the evaluator 
+	Evaluator.bind_global("math", math)
+	Evaluator.bind_global("os", os)
+	Evaluator.bind_global("sys", sys)
+	Evaluator.bind_global("re", sys)
+
+	from mfp.bang import Bang, Uninit 
+	from mfp.method import MethodCall 
+	Evaluator.bind_global("Bang", Bang)
+	Evaluator.bind_global("Uninit", Uninit)
+	Evaluator.bind_global("MethodCall", MethodCall)
+
+	from mfp.midi import NoteOn, NoteOff 
+	Evaluator.bind_global("NoteOn", NoteOn)
+	Evaluator.bind_global("NoteOff", NoteOff)
+	
+	Evaluator.bind_global("builtins", builtins)
+	Evaluator.bind_global("app", app)
+
 	builtins.register()
 	log.debug("main: builtins registered")
 	
 	if len(sys.argv) > 1:
 		log.debug("main: loading", sys.argv[1])
-		app.patch.load_file(sys.argv[1])
+		app.patches.get("default").load_file(sys.argv[1])
 

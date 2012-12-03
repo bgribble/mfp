@@ -18,7 +18,7 @@ class Note2Freq(Processor):
 		scale: a subclass of Scale (defaults to Chromatic)
 		tuning: an instance of Tuning (defaults to EqualTemper)
 	'''
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		initargs, kwargs = self.parse_args(init_args)
 		if kwargs.get('scale'):
 			self.scale = kwargs.get('scale')
@@ -29,7 +29,7 @@ class Note2Freq(Processor):
 			self.tuning = kwargs.get('tuning')
 		else:
 			self.tuning = scale.EqualTemper()
-		Processor.__init__(self, 1, 1, init_type, init_args)
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
 	def trigger(self):
 		inval = self.inlets[0]

@@ -1,5 +1,7 @@
 
 def register():
+	from mfp import log
+	log.debug("builtin register begin")
 	from . import var; var.register()
 	from . import metro; metro.register()
 	from . import printformat; printformat.register()
@@ -23,6 +25,6 @@ def register():
 	from . import ampl; ampl.register()
 	from . import snap; snap.register()
 	from . import biquad; biquad.register()
-
 	from . import sendrcv; sendrcv.register()
+	log.debug("builtin register end")
 

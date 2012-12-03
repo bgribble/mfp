@@ -11,8 +11,8 @@ from .. import Bang, Uninit
 from mfp import log 
 
 class Var (Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 2, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 		
 		self.value = None 
@@ -66,3 +66,6 @@ class Var (Processor):
 def register():
 	MFPApp().register("var", Var)
 	MFPApp().register("message", Var)
+	MFPApp().register("text", Var)
+	MFPApp().register("enum", Var)
+

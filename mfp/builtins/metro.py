@@ -18,8 +18,8 @@ class TimerTick (object):
 class Throttle (Processor): 
 	_timer = None 
 
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 2, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
 		self.started = False 
 		self.interval = False 
@@ -63,8 +63,8 @@ class Throttle (Processor):
 class Delay (Processor):
 	_timer = None
 
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 2, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
 		self.delay = False 
 		
@@ -95,8 +95,8 @@ class Delay (Processor):
 class Metro (Processor): 
 	_timer = None 
 
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 2, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
 		self.started = False 
 		self.interval = False 

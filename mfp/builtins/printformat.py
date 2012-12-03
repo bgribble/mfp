@@ -11,8 +11,8 @@ from ..bang import Uninit
 from mfp import log 
 
 class Print (Processor): 
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 2, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.format_string = initargs[0] 

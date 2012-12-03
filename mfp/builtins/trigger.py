@@ -17,14 +17,14 @@ class Trigger (Processor):
 	determined by the creation arg.  Used as a sequencing aid, 
 	since outputs will be activated in reverse order of index 
 	'''
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs) > 0:
 			numout = initargs[0]
 		else:
 			numout = 1
-		Processor.__init__(self, 1, numout, init_type, init_args)
+		Processor.__init__(self, 1, numout, init_type, init_args, patch, scope, name)
 		self.outlet_order.reverse() 
 
 	def trigger(self):

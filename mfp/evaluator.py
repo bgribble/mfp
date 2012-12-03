@@ -10,31 +10,25 @@ from StringIO import StringIO
 from .method import MethodCall
 from .bang import Bang
 
-
 class Evaluator (object):
+	global_names = {} 
+
 	def __init__(self):
-		self._init_globals()
+		self.local_names = { 'self': self} 
 
-	def _init_globals(self):
-		from midi import NoteOn, NoteOff
-		gg = globals()
-		self.globals = { 
-			'MethodCall': gg.get('MethodCall'),
-			'Bang': gg.get('Bang'), 
-			'NoteOn': NoteOn, 
-			'NoteOff': NoteOff 
-		}
+	@classmethod
+	def bind_global(self, name, obj): 
+		self.global_names[name] = obj
 
+	def bind_local(self, name, obj):
+		self.local_names[name] = obj
 
-	def eval_arglist(self, evalstr, extra_bindings=None):
-		return self.eval(evalstr, extra_bindings, True)
+	def eval_arglist(self, evalstr):
+		return self.eval(evalstr, True)
 
-	def eval(self, evalstr, extra_bindings=None, collect=False):
+	def eval(self, evalstr, collect=False):
 		def _eval_collect_args(*args, **kwargs):
 			return (args, kwargs)
-
-		if extra_bindings is None:
-			extra_bindings = {}
 
 		str2eval = evalstr.strip()
 		if not len(str2eval):
@@ -67,9 +61,15 @@ class Evaluator (object):
 		if len(tokens) > 2 and tokens[1][1] == '=':
 			str2eval = ''.join(["dict("] + [t[1] for t in tokens] + [')']) 
 
+		# FIXME race 
 		if collect:
 			str2eval = "_eval_collect_args(%s)" % str2eval
-			extra_bindings[ '_eval_collect_args' ] = _eval_collect_args 
+			self.local_names[ '_eval_collect_args' ] = _eval_collect_args 
 
-		return eval(str2eval, self.globals, extra_bindings)
+		rv = eval(str2eval, self.global_names, self.local_names)
+		
+		if collect:
+			del self.local_names['_eval_collect_args']
+
+		return rv
 

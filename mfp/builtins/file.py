@@ -4,12 +4,12 @@ from ..main import MFPApp
 from ..method import MethodCall
 
 class FileIO(Processor):
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		self.filename = None 
 		self.fileobj = None 
 		self.mode = "r"
 
-		Processor.__init__(self, 1, 1, init_type, init_args)
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs) > 0:
 			self.filename = initargs[0]

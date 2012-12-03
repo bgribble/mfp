@@ -12,8 +12,8 @@ from ..method import MethodCall
 from ..midi import NoteOn, NoteOff, MidiControl, MidiUndef
 
 class MidiIn (Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 1, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
 		self.port = 0
 		self.channels = []
@@ -34,7 +34,7 @@ class MidiIn (Processor):
 				self.outlets[0] = event
 
 class MidiOut (Processor):
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		self.port = 0
 
 	def trigger(self):

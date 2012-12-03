@@ -12,7 +12,7 @@ class ArithProcessor(Processor):
 	def __init__(self, init_type, init_args, arith_op):
 		self.arith_op = init_type
 
-		Processor.__init__(self, 2, 1, init_type, init_args)
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
 		
 		self.dsp_inlets = [0, 1]
@@ -33,20 +33,20 @@ class ArithProcessor(Processor):
 				
 
 class ArithAdd(ArithProcessor):
-	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
 
 class ArithSub(ArithProcessor):
-	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
 
 class ArithMul(ArithProcessor):
-	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
 
 class ArithDiv(ArithProcessor):
-	def __init__(self, init_type, init_args):
-		ArithProcessor.__init__(self, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
 
 def register():
 	MFPApp().register("+~", ArithAdd)

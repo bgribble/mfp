@@ -14,7 +14,7 @@ from .p_buffer import BufferInfo
 from mfp import log 
 
 class Scope (Processor): 
-	def __init__(self, init_type, init_args): 
+	def __init__(self, init_type, init_args, patch, scope, name): 
 		self.buffer = None 
 
 		if init_args is not None:
@@ -40,7 +40,7 @@ class Scope (Processor):
 			
 
 class Scatter (Processor):
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		self.points = {}
 		self.time_base = None
 
@@ -50,7 +50,7 @@ class Scatter (Processor):
 		else: 
 			channels = 1
 		self.hot_inlets = range(channels)
-		Processor.__init__(self, channels, 1, init_type, init_args)
+		Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name)
 
 	def method(self, message, inlet):
 		# magic inlet argument makes messages simpler

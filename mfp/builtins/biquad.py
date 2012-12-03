@@ -10,8 +10,8 @@ from mfp.main import MFPApp
 from mfp import log 
 
 class Biquad(Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 1, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 
 		self.dsp_inlets = [ 0 ]

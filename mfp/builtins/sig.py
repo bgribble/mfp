@@ -9,8 +9,8 @@ from ..processor import Processor
 from ..main import MFPApp
 
 class Sig(Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 1, 0, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
 		initargs, kwargs = self.parse(init_args)
 		if len(initargs):

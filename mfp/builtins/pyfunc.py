@@ -12,10 +12,10 @@ from ..method import MethodCall
 from ..bang import Bang, Uninit
 
 class ApplyMethod(Processor):
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		self.method_name = None
 
-		Processor.__init__(self, 1, 1, init_type, init_args)
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.method_name = initargs[0]
@@ -27,8 +27,8 @@ class ApplyMethod(Processor):
 			self.outlets[0] = MethodCall(self.method_name, *(self.inlets[0]))
 
 class GetElement(Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 2, 2, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.element = initargs[0]
@@ -50,11 +50,11 @@ class GetElement(Processor):
 		self.outlets[1] = self.inlets[0]
 
 class PyEval(Processor):
-	def __init__(self, init_type, init_args):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		self.evaluator = Evaluator()
 		self.bindings = {}
 
-		Processor.__init__(self, 1, 1, init_type, init_args)
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs):
 			self.bindings = initargs[0]
@@ -76,7 +76,7 @@ class PyEval(Processor):
 class PyBinary(Processor):
 	def __init__(self, pyfunc, init_type, init_args):
 		self.function = pyfunc
-		Processor.__init__(self, 2, 1, init_type, init_args)
+		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 		if len(initargs) == 1:
 			self.inlets[1] = initargs[0]
@@ -87,7 +87,7 @@ class PyBinary(Processor):
 class PyUnary(Processor):
 	def __init__(self, pyfunc, init_type, init_args):
 		self.function = pyfunc
-		Processor.__init__(self, 1, 1, init_type, init_args)
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
 	def trigger(self):
 		self.outlets[0] = self.function(self.inlets[0])

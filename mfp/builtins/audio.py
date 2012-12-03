@@ -9,8 +9,8 @@ from mfp.processor import Processor
 from mfp.main import MFPApp
 
 class AudioOut(Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 1, 0, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 
 		if len(initargs):
@@ -31,8 +31,8 @@ class AudioOut(Processor):
 			print "Can't convert %s to a channel number" % self.inlet[0]
 				
 class AudioIn(Processor):
-	def __init__(self, init_type, init_args):
-		Processor.__init__(self, 1, 1, init_type, init_args)
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
 
 		if len(initargs):
