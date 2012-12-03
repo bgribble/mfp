@@ -25,6 +25,10 @@ class Patch(Processor):
 
 		self.inlet_objects = []
 		self.outlet_objects = []
+
+		self.evaluator.bind_local("self", self)
+		self.default_scope.bind("self", self)
+		
 		Processor.__init__(self, 0, 0, init_type, init_args, None, "default", None)
 
 	#############################

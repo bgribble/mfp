@@ -1,4 +1,10 @@
+#! /usr/bin/env python
+'''
+scope.py
+Lexical scope helper 
 
+Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+'''
 
 class LexicalScope (object):
 	def __init__(self):
@@ -19,4 +25,7 @@ class LexicalScope (object):
 			return (True, self.bindings[name])
 		except KeyError:
 			return (False, None)
+
+	def resolve(self, name):
+		return self.bindings.get(name)
 	

@@ -13,6 +13,7 @@ import time
 from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang 
 from patch import Patch
+from scope import LexicalScope 
 from singleton import Singleton
 from interpreter import Interpreter 
 from evaluator import Evaluator
@@ -205,16 +206,38 @@ class MFPApp (object):
 	def resolve(self, name, queryobj=None):
 		'''
 		Attempt to identify an object matching name
+
+		If name has '.'-separated parts, use simple logic to treat
+		parts as a path.  First match to the first element roots the
+		search path; i.e. "foo.bar.baz" will match the first foo in
+		the search path, and the first bar under that foo
 		'''
 
+		def find_part(part, base):
+			if isinstance(base, (Patch, LexicalScope)):
+				return base.resolve(part)
+			return None
+
+		parts = name.split('.')
+		obj = None
+		root = None 
+
+		# first find the base 
 		if queryobj and queryobj.patch:
-			o = queryobj.patch.resolve(name, queryobj.scope)
-			if o:
-				return o
-		for pname, pobj in self.patches.items():
-			o = pobj.resolve(name)
-			if o:
-				return o
+			root = queryobj.patch.resolve(parts[0], queryobj.scope)
+		if not root:
+			for pname, pobj in self.patches.items():
+				root = pobj.resolve(parts[0])
+				
+				if root:
+					break 
+
+		# now descend the path
+		if root: 
+			obj = root 
+			for p in parts[1:]:
+				obj = find_part(p, obj)
+		return obj
 
 	def finish(self):
 		log.log_func = None 
