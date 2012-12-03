@@ -9,7 +9,9 @@ from ..processor import Processor
 from ..main import MFPApp
 
 class Send (Processor):
-	def __init__ (init_type, init_args, patch, scope, name):
+	def __init__ (self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
+
 		self.dest_name = None 
 		self.dest_inlet = 0
 		self.dest_obj = None 
@@ -20,20 +22,20 @@ class Send (Processor):
 		if len(initargs):
 			self.dest_name = initargs[0] 
 		
-		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
 	def trigger(self):
 		if self.dest_obj is None:
-			self.dest_obj = MFPApp().resolve(self.dest_name)
+			self.dest_obj = MFPApp().resolve(self.dest_name, self)
 
 		if self.dest_obj is not None:
 			self.dest_obj.send(self.inlets[0], inlet=self.dest_inlet)
 
 class Recv (Processor):
 	def __init__(self, init_type, init_args, patch, scope, name):
-		initargs, kwargs = self.parse_args(init_args)
 		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-		self.bind(initargs[0])
+		initargs, kwargs = self.parse_args(init_args)
+		if len(initargs):
+			self.rename(initargs[0])
 
 	def trigger(self):
 		self.outlets[0] = self.inlets[0]

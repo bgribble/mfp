@@ -37,7 +37,7 @@ class TextElement (PatchElement):
 
 	def label_edit_finish(self, widget, new_text):
 		if self.obj_id is None:
-			self.create("var", None)
+			self.create(self.element_type, None)
 		if self.obj_id is None:
 			log.debug("TextElement: could not create obj")
 		elif new_text != self.text:

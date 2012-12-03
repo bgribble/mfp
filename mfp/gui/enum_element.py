@@ -98,7 +98,7 @@ class EnumElement (PatchElement):
 
 	def create_obj(self):
 		if self.obj_id is None:
-			self.create("var", str(self.value))
+			self.create(self.element_type, str(self.value))
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 

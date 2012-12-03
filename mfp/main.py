@@ -70,7 +70,7 @@ class MFPCommand(RPCWrapper):
 	@rpcwrap
 	def delete(self, obj_id):
 		obj = MFPApp().recall(obj_id)
-		MFPApp().patch.remove(obj)
+		obj.patch.remove(obj)
 		obj.delete()
 
 	@rpcwrap
@@ -201,6 +201,20 @@ class MFPApp (object):
 						  % (init_type, init_args))
 				log.debug(e)
 				raise
+
+	def resolve(self, name, queryobj=None):
+		'''
+		Attempt to identify an object matching name
+		'''
+
+		if queryobj and queryobj.patch:
+			o = queryobj.patch.resolve(name, queryobj.scope)
+			if o:
+				return o
+		for pname, pobj in self.patches.items():
+			o = pobj.resolve(name)
+			if o:
+				return o
 
 	def finish(self):
 		log.log_func = None 

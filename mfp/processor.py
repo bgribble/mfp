@@ -51,7 +51,12 @@ class Processor (object):
 		self.connections_out = [[] for r in range(outlets)]
 		self.connections_in = [[] for r in range(inlets)]
 		
-	
+
+	def info(self):
+		log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
+			      % (self.obj_id, self.name, self.init_type, self.init_args))
+		return True 
+
 	def assign(self, patch, scope, name):
 		if self.patch is not None and self.name is not None: 
 			self.patch.unbind(self.name, self.scope)
@@ -63,8 +68,12 @@ class Processor (object):
 				self.patch.remove(self)
 			self.patch = patch 
 			self.patch.add(self)
-			self.patch.bind(self.name, self.scope, self)
+
+		self.patch.bind(self.name, self.scope, self)
 		self.osc_init() 
+
+	def rename(self, new_name):
+		self.assign(self.patch, self.scope, new_name)
 
 	def osc_init(self): 
 		from .main import MFPApp 

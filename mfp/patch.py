@@ -10,6 +10,7 @@ import simplejson as json
 from .processor import Processor
 from .evaluator import Evaluator
 from .scope import LexicalScope
+from mfp import log 
 
 def getx(o):
 	return o.gui_params.get('position_x', 0)
@@ -43,11 +44,11 @@ class Patch(Processor):
 			exists, val = s.query(name)
 			if exists: 
 				return val 
-
 		exists, val = self.default_scope.query(name)
 		if exists:
 			return val
 
+		log.debug("Patch: name", name, "not found")
 		return None 
 
 	def add_scope(self, name):
