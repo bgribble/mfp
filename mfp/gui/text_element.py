@@ -35,7 +35,7 @@ class TextElement (PatchElement):
 	def label_edit_start(self):
 		return self.text 
 
-	def label_edit_finish(self, widget, new_text):
+	def label_edit_finish(self, widget, new_text, aborted=False):
 		if self.obj_id is None:
 			self.create(self.element_type, None)
 		if self.obj_id is None:

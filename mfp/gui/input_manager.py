@@ -43,10 +43,17 @@ class InputManager (object):
 		self.minor_modes.remove(mode)
 		self.window.display_bindings()
 
+	def synthesize(self, key):
+		self.keyseq.sequences.append(key)
+
 	def handle_event(self, stage, event):
 		def show_on_hud(keysym, mode, handler):
-			self.window.hud_write("%s: %s (%s)" % (keysym, handler[1] or "(no description)", 
-										 mode.description))
+			mdesc = hdesc = ""
+			if mode and mode.description:
+				mdesc = mode.description
+			if handler and handler[1]:
+				hdesc = handler[1]
+			self.window.hud_write("%s: %s (%s)" % (keysym, hdesc, mdesc))
 			#log.debug("[hud] %s: %s (%s)" % (keysym, handler[1], mode.description))
 
 		from gi.repository import Clutter 
@@ -99,7 +106,7 @@ class InputManager (object):
 				if handled:
 					show_on_hud(keysym, self.global_mode, handler)
 					return True 
-
+			show_on_hud("Unhandled [%s]" % keysym, "", ("", ""))
 		return False 
 
 

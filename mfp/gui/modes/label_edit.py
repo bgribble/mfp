@@ -18,57 +18,87 @@ class LabelEditMode (InputMode):
 		self.multiline = multiline 
 		self.markup = markup
 		self.text = self.widget.get_text()
-		self.black_color = Clutter.Color.new(0,0,0,255)
+		self.cursor_color = Clutter.Color.new(0, 0, 0, 64)
 		self.undo_stack  = [ self.text ] 
 		self.undo_pos = -1
 		self.editpos = 0
 
+		self.activate_handler_id = None
+		self.text_changed_handler_id = None 
+
 		InputMode.__init__(self, "Edit text")
 	
-
 		if not self.multiline:
 			self.bind("RET", self.commit_edits, "Accept edits")
 		else:
 			self.bind("C-RET", self.commit_edits, "Accept edits")
-			self.bind("RET", lambda: self.insert_char("\n"), "Insert newline")
 
 		self.bind("ESC", self.rollback_edits, "Discard edits")
-		self.bind("DEL", self.erase_forward, "Delete forward")
-		self.bind("C-d", self.erase_forward, "Delete forward")
-
-		self.bind("BS", self.erase_backward, "Delete backward")
 		self.bind("LEFT", self.move_left, "Move cursor left")
 		self.bind("RIGHT", self.move_right, "Move cursor right")
-		self.bind("C-e", self.move_to_end, "Move cursor to end")
-		self.bind("C-a", self.move_to_start, "Move cursor to start")
+		self.bind("UP", self.move_up, "Move cursor up one line")
+		self.bind("DOWN", self.move_down, "Move cursor down one line")
 		self.bind("C-z", self.undo_edit, "Undo typing")
 		self.bind("C-r", self.redo_edit, "Redo typing")
 
-		# default binding 
-		self.bind(None, self.insert_char, "Insert text")
 
 		inittxt = self.element.label_edit_start()
 		if inittxt: 
 			self.text = inittxt
 
 		self.update_label(raw=True)
+		self.start_editing() 
 
-	def insert_char(self, keysym):
-		if len(keysym) > 1:
-			return False 
+
+	def start_editing(self):
+		def synth_ret(*args):
+			log.debug("widget activated, synthesizing RET")
+			self.manager.synthesize("RET")
+
+		if self.multiline is False: 
+			self.widget.set_single_line_mode(True)
+			self.activate_handler_id = self.widget.connect("activate", synth_ret)
+		else:
+			self.widget.set_single_line_mode(False)
+
+		self.text_changed_handler_id= self.widget.connect("text-changed", self.text_changed)
+
+		self.editpos = len(self.text)
+
+		self.widget.set_editable(True)
+		self.widget.set_cursor_color(self.cursor_color)
+		self.widget.set_cursor_visible(True)
+		#self.widget.set_cursor_size(8)
+		self.update_cursor()
+
+	def end_editing(self):
+		self.widget.set_editable(False)
+		self.widget.set_cursor_visible(False)
+		if self.activate_handler_id:
+			self.widget.disconnect(self.activate_handler_id)
+			self.activate_handler_id = None
+		if self.text_changed_handler_id:
+			self.widget.disconnect(self.text_changed_handler_id)
+
+	def text_changed(self, *args):
+		new_text = self.widget.get_text()
 
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
 			self.undo_pos = -1
 
 		self.undo_stack.append(self.text)
-		self.text = self.text[:self.editpos] + keysym + self.text[self.editpos:]
-		self.editpos += 1
-		self.update_label(raw=True)
-		return True 
+		self.text = new_text
+		editpos = self.widget.get_cursor_position()
+		if editpos == -1:
+			self.editpos = len(self.text)
+		else: 
+			self.editpos = editpos+1
+		return False 
 
 	def commit_edits(self):
-		self.widget.set_cursor_visible(False)
+		self.text = self.widget.get_text()
+		self.end_editing()
 		self.update_label(raw=False)
 		self.element.label_edit_finish(self.widget, self.text)
 		self.element.end_edit()
@@ -76,9 +106,9 @@ class LabelEditMode (InputMode):
 
 	def rollback_edits(self):
 		self.text=self.undo_stack[0]
+		self.end_editing()
 		self.update_label(raw=False)
-		self.widget.set_cursor_visible(False)
-		self.element.label_edit_finish(self.widget, None, aborted=True)
+		self.element.label_edit_finish(self.widget, None)
 		self.element.end_edit()
 		return True 
 
@@ -119,13 +149,42 @@ class LabelEditMode (InputMode):
 
 	def move_left(self):
 		self.editpos = max(self.editpos-1, 0)
-		self.update_label(raw=True)
+		self.update_cursor()
 		return True 
 
 	def move_right(self):
 		self.editpos = min(self.editpos+1, len(self.text))
-		self.update_label(raw=True)
+		self.update_cursor()
 		return True 
+
+	def move_up(self):
+		lines_above = self.text[:self.editpos].split("\n")
+		line_pos = len(lines_above[-1])
+		if len(lines_above) > 2:
+			self.editpos = (sum([len(l) + 1 for l in lines_above[:-2] ])
+				            + min(len(lines_above[-2]), line_pos))
+		elif len(lines_above) > 1:
+			self.editpos = min(len(lines_above[0]), line_pos)
+		else: 
+			self.editpos = 0
+		self.update_cursor()
+		return True
+
+	def move_down(self):
+		lines_above = self.text[:self.editpos].split("\n")
+		lines_below = self.text[self.editpos:].split("\n")
+		line_pos = len(lines_above[-1])
+		line_start = self.editpos 
+
+		if len(lines_below) > 1:
+			print "move down", lines_below, line_start, line_pos
+			self.editpos = (line_start + len(lines_below[0]) + 1 
+				            + min(len(lines_below[1]), line_pos))  
+		else:
+			print "end of text", lines_below
+			self.editpos = len(self.text)
+		self.update_cursor()
+		return True
 
 	def undo_edit(self):
 		if self.undo_pos > (-len(self.undo_stack)):
@@ -142,18 +201,18 @@ class LabelEditMode (InputMode):
 			self.update_label(raw=True)
 		return True 
 
-	def update_label(self, raw=True):
-		self.widget.set_editable(True)
-		self.widget.set_cursor_color(self.black_color)
-		self.widget.set_cursor_visible(True)
-		self.widget.set_cursor_size(8)
+	def update_cursor(self):
+		self.widget.grab_key_focus()
 		self.widget.set_cursor_position(self.editpos)
+		self.widget.set_selection(self.editpos, self.editpos)
+
+	def update_label(self, raw=True):
 		if raw or self.markup is False:
 			self.widget.set_use_markup = False 
 			self.widget.set_text(self.text)
 		else:
 			self.widget.set_markup(self.text)
-
+		self.update_cursor()
 		return True 
 
 

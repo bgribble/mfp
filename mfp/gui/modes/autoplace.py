@@ -85,14 +85,14 @@ class AutoplaceMode (InputMode):
 
 		# there is a key widget.  Placements are below the outlets, 
 		# offset by SPACING 
-		if self.placement == self.key_widget.num_outlets:
+		if self.placement >= self.key_widget.num_outlets:
 			self.placement = 0 
 
-		if self.placement < self.key_widget.num_outlets:
-			x, y = self.key_widget.port_center(PatchElement.PORT_OUT, self.placement)
-			x -= (PatchElement.porthole_border + PatchElement.porthole_width/2.0) 
-			y = self.find_free_space_down(x, y + self.BELOW_SPACING) 
+		x, y = self.key_widget.port_center(PatchElement.PORT_OUT, self.placement)
+		x -= (PatchElement.porthole_border + PatchElement.porthole_width/2.0) 
+		y = self.find_free_space_down(x, y + self.BELOW_SPACING) 
 		
+
 		self._set_autoplace(x, y)	
 		self.placement += 1 
 		
