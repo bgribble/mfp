@@ -12,6 +12,7 @@ from connection_element import ConnectionElement
 from message_element import MessageElement
 from enum_element import EnumElement
 from plot_element import PlotElement
+from patch_element import PatchElement 
 from patch_layer import PatchLayer 
 
 from mfp import MFPGUI
@@ -164,7 +165,7 @@ class PatchWindow(object):
 				self.unselect_all()
 			else:
 				obj = self.object_store.get_value(iter, 1) 
-				if obj is not self.selected:
+				if isinstance(obj, PatchElement) and obj is not self.selected:
 					self.select(obj)
 
 		self.object_store = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT)
@@ -190,7 +191,9 @@ class PatchWindow(object):
 		if self.selected_layer is not None:
 			self.layers[self.selected_layer].hide()
 		self.selected_layer = layer_num 
-		self.layers[self.selected_layer].show()
+		ll = self.layers[self.selected_layer]
+		ll.show()
+		self.hud_write("Layer %s (lexical scope '%s')" % (ll.name, ll.scope))
 		if do_update:
 			self.layer_selection_update()
 
@@ -253,7 +256,7 @@ class PatchWindow(object):
 			oiter = self.object_store.append(None)
 			self.object_store.set_value(oiter, 0, s.scope)
 			self.object_store.set_value(oiter, 1, s)
-			scopes[s] = oiter
+			scopes[s.scope] = oiter
 
 		for o in self.objects:
 			if o.obj_name is None:

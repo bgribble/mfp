@@ -106,7 +106,7 @@ class InputManager (object):
 				if handled:
 					show_on_hud(keysym, self.global_mode, handler)
 					return True 
-			show_on_hud("Unhandled [%s]" % keysym, "", ("", ""))
+			#show_on_hud("Unhandled [%s]" % keysym, "", ("", ""))
 		return False 
 
 
