@@ -52,7 +52,6 @@ class LabelEditMode (InputMode):
 
 	def start_editing(self):
 		def synth_ret(*args):
-			log.debug("widget activated, synthesizing RET")
 			self.manager.synthesize("RET")
 
 		if self.multiline is False: 
@@ -64,7 +63,6 @@ class LabelEditMode (InputMode):
 		self.text_changed_handler_id= self.widget.connect("text-changed", self.text_changed)
 
 		self.editpos = len(self.text)
-
 		self.widget.set_editable(True)
 		self.widget.set_cursor_color(self.cursor_color)
 		self.widget.set_cursor_visible(True)
@@ -76,6 +74,8 @@ class LabelEditMode (InputMode):
 		self.widget.set_cursor_visible(False)
 		if self.activate_handler_id:
 			self.widget.disconnect(self.activate_handler_id)
+			self.widget.set_activatable(False)
+			self.widget.set_single_line_mode(False)
 			self.activate_handler_id = None
 		if self.text_changed_handler_id:
 			self.widget.disconnect(self.text_changed_handler_id)
@@ -177,11 +177,9 @@ class LabelEditMode (InputMode):
 		line_start = self.editpos 
 
 		if len(lines_below) > 1:
-			print "move down", lines_below, line_start, line_pos
 			self.editpos = (line_start + len(lines_below[0]) + 1 
 				            + min(len(lines_below[1]), line_pos))  
 		else:
-			print "end of text", lines_below
 			self.editpos = len(self.text)
 		self.update_cursor()
 		return True
