@@ -19,7 +19,7 @@ class LabelEditMode (InputMode):
 		self.markup = markup
 		self.text = self.widget.get_text()
 		self.cursor_color = Clutter.Color.new(0, 0, 0, 64)
-		self.undo_stack  = [ self.text ] 
+		self.undo_stack  = [ (self.text, len(self.text)) ] 
 		self.undo_pos = -1
 		self.editpos = 0
 
@@ -82,19 +82,21 @@ class LabelEditMode (InputMode):
 
 	def text_changed(self, *args):
 		new_text = self.widget.get_text()
+		if new_text == self.text:
+			return True 
 
 		if self.undo_pos < -1:
 			self.undo_stack[self.undo_pos:] = []
 			self.undo_pos = -1
 
-		self.undo_stack.append(self.text)
+		self.undo_stack.append((self.text, self.editpos))
 		self.text = new_text
 		editpos = self.widget.get_cursor_position()
 		if editpos == -1:
 			self.editpos = len(self.text)
 		else: 
 			self.editpos = editpos+1
-		return False 
+		return True 
 
 	def commit_edits(self):
 		self.text = self.widget.get_text()
@@ -105,7 +107,8 @@ class LabelEditMode (InputMode):
 		return True 
 
 	def rollback_edits(self):
-		self.text=self.undo_stack[0]
+		txt, pos = self.undo_stack[0] 
+		self.text = txt
 		self.end_editing()
 		self.update_label(raw=False)
 		self.element.label_edit_finish(self.widget, None)
@@ -185,17 +188,22 @@ class LabelEditMode (InputMode):
 		return True
 
 	def undo_edit(self):
+		#print "undo:", self.undo_pos, self.undo_stack
+		if self.undo_pos == -1:
+			self.undo_stack.append((self.text, self.editpos))
+			self.undo_pos = -2
 		if self.undo_pos > (-len(self.undo_stack)):
-			self.text = self.undo_stack[self.undo_pos] 
+			self.text, self.editpos = self.undo_stack[self.undo_pos] 
 			self.undo_pos = max(-len(self.undo_stack), self.undo_pos - 1)
 			self.update_label(raw=True)
 
 		return True 
 
 	def redo_edit(self):
+		#print "redo:", self.undo_pos, self.undo_stack
 		if self.undo_pos < -1:
 			self.undo_pos += 1
-			self.text = self.undo_stack[self.undo_pos] 
+			self.text, self.editpos = self.undo_stack[self.undo_pos] 
 			self.update_label(raw=True)
 		return True 
 
