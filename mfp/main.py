@@ -96,6 +96,10 @@ class MFPCommand(RPCWrapper):
 		return MFPApp().console.runsource(cmd)
 
 	@rpcwrap
+	def add_scope(self, scope_name):
+		MFPApp().patches["default"].add_scope(scope_name)
+
+	@rpcwrap
 	def quit(self):
 		MFPApp().finish()
 
@@ -237,6 +241,7 @@ class MFPApp (object):
 			obj = root 
 			for p in parts[1:]:
 				obj = find_part(p, obj)
+
 		return obj
 
 	def finish(self):

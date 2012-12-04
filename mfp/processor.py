@@ -54,8 +54,8 @@ class Processor (object):
 		
 
 	def info(self):
-		log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
-			      % (self.obj_id, self.name, self.init_type, self.init_args))
+		log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s, patch=%s, scope=%s"
+			      % (self.obj_id, self.name, self.init_type, self.init_args, self.patch, self.scope))
 		return True 
 
 	def assign(self, patch, scope, name):

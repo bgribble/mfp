@@ -120,6 +120,8 @@ class PatchWindow(object):
 		self.input_mgr.global_binding("PGUP", self.layer_select_up, "Select higher layer")
 		self.input_mgr.global_binding("PGDN", self.layer_select_down, "Select lower layer")
 		self.input_mgr.global_binding("C-n", self.layer_new, "Create new layer")
+		self.input_mgr.global_binding("C-N", self.layer_new_scope, 
+								      "Create new layer in a new scope")
 		self.input_mgr.global_binding('C-e', self.toggle_major_mode, "Toggle edit/control")
 		self.input_mgr.global_binding('C-q', self.quit, "Quit")
 
@@ -194,6 +196,16 @@ class PatchWindow(object):
 
 	def layer_new(self):
 		self.layers.append(PatchLayer(self, "Layer %d" % len(self.layers)))
+		self.layer_store_update()
+		self.layer_selection_update()
+		return True 
+
+	def layer_new_scope(self):
+		l = PatchLayer(self, "Layer %d" % len(self.layers))
+		l.scope = l.name.replace(" ", "_").lower()
+		MFPCommand().add_scope(l.scope)
+
+		self.layers.append(l)
 		self.layer_store_update()
 		self.layer_selection_update()
 		return True 
@@ -489,7 +501,7 @@ class PatchWindow(object):
 		buf.insert(iterator, msg, -1)
 		iterator = buf.get_end_iter()
 		buf.move_mark(mark, iterator)
-		self.console_view.scroll_to_mark(mark, 0, True, 0, 0.9)
+		self.console_view.scroll_to_mark(mark, 0, True, 1.0, 0.9)
 
 	def log_write(self, msg):
 		# this is a bit complicated so that we ensure scrolling is 

@@ -55,7 +55,6 @@ class Patch(Processor):
 		if exists:
 			return val
 
-		log.debug("Patch: name", name, "not found")
 		return None 
 
 	def add_scope(self, name):

@@ -26,7 +26,6 @@ class Send (Processor):
 		
 
 	def method(self, message, inlet):
-		log.debug("send method handler:", message, inlet)
 		self.trigger()
 
 	def trigger(self):

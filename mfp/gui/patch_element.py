@@ -72,7 +72,12 @@ class PatchElement (Clutter.Group):
 			self.obj_id = None
 
 	def create(self, obj_type, init_args):
-		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", "default", None)
+		if self.stage.selected_layer:
+			scopename = self.stage.layers[self.stage.selected_layer].scope
+		else:
+			scopename = "default"
+
+		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, None)
 		self.obj_id = objinfo.get('obj_id')
 		self.obj_name = objinfo.get('name')
 		self.num_inlets = objinfo.get("num_inlets")

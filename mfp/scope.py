@@ -28,4 +28,4 @@ class LexicalScope (object):
 
 	def resolve(self, name):
 		return self.bindings.get(name)
-	
+
