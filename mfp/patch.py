@@ -6,17 +6,17 @@ Patch load/save
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-import simplejson as json
 from .processor import Processor
 from .evaluator import Evaluator
 from .scope import LexicalScope
+from .bang import Uninit 
+
 from mfp import log 
 
-def getx(o):
-	return o.gui_params.get('position_x', 0)
-
 class Patch(Processor):
-	def __init__(self, init_type='none', init_args=None):
+	def __init__(self, init_type, init_args, patch, scope, name):
+		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
+
 		self.objects = {}
 		self.scopes = {}
 
@@ -28,8 +28,8 @@ class Patch(Processor):
 
 		self.evaluator.bind_local("self", self)
 		self.default_scope.bind("self", self)
-		
-		Processor.__init__(self, 1, 0, init_type, init_args, None, "default", None)
+	
+		initargs, kwargs = self.parse_args(init_args)
 
 	#############################
 	# name management 
@@ -81,6 +81,9 @@ class Patch(Processor):
 		Parse and evaluate a Python expression representing
 		a function/method argument list (returns tuple of positional
 		args followed by dictionary of keyword args) 
+
+		This uses a tacky trick to capture args and kwargs which 
+		will generate some odd backtraces on error
 		'''
 
 		if argstring == '' or argstring is None:
@@ -93,8 +96,18 @@ class Patch(Processor):
 	# patch contents management 
 	#############################
 
-	#def send(self, value, inlet=0):
-	#	self.inlet_objects[inlet].send(value)
+	def trigger(self):
+		inlist = range(len(self.inlets))
+		inlist.reverse()
+
+		for i in inlist:
+			if self.inlets[i] is not Uninit:
+				self.inlet_objects[i].send(self.inlets[i])
+				self.inlets[i] = Uninit
+
+	def send(self, value, inlet=0):
+		print "Patch.send: sending", value, "to inlet", inlet
+		self.inlet_objects[inlet].send(value)
 
 	def connect(self, outlet, target, inlet):
 		self.outlet_objects[outlet].connect(0, target, inlet)
@@ -102,11 +115,18 @@ class Patch(Processor):
 	def add(self, obj):
 		self.objects[obj.obj_id] = obj
 		if obj.init_type == 'inlet':
-			self.inlet_objects.append(obj)
-			self.inlet_objects.sort(key=getx)
+			num = obj.inletnum
+			if num >= len(self.inlet_objects):
+				self.inlet_objects.extend([None] * (num - len(self.inlet_objects) + 1))
+			self.inlet_objects[num] = obj
+			self.resize(len(self.inlet_objects), len(self.outlet_objects))
+
 		elif obj.init_type == 'outlet':
-			self.outlet_objects.append(obj)
-			self.outlet_objects.sort(key=lambda x: -getx(x))
+			num = obj.outletnum
+			if num >= len(self.outlet_objects):
+				self.outlet_objects.extend([None] * (num - len(self.outlet_objects) + 1))
+			self.outlet_objects[num] = obj
+			self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
 	def remove(self, obj):
 		del self.objects[obj.obj_id]
@@ -124,94 +144,46 @@ class Patch(Processor):
 	# load/save 
 	############################
 
-	def load_file(self, filename):
-		jsdata = open(filename, 'r').read()
-		self.load_string(jsdata)
-
-	def load_string(self, json_data):
+	@classmethod
+	def register_file(self, filename):
 		from main import MFPApp
+		def factory(init_type, init_args, patch, scope, name):
+			log.debug("Patch.register_file: in factory", init_type, init_args, patch, scope, name)
+			p = Patch(init_type, init_args, patch, scope, name)
+			p._load_file(filename)
+			return p 
 
-		f = json.loads(json_data)
-		self.init_type = f.get('type')
-		
-		# clear old objects
-		for o in self.objects.values():
-			o.delete()
-		self.objects = {}
-		self.scopes = {} 
-		self.inlet_objects = []
-		self.outlet_objects = []
+		import os
+		basefile = os.path.basename(filename)
+		parts = os.path.splitext(basefile)
+		log.debug("Patch.register_file: registering type '%s' from file '%s'" 
+			      % (parts[0], filename))
+		MFPApp().register(parts[0], factory)
+		return factory
 
-		# create new objects
-		idmap = {}
-		idlist = f.get('objects').keys()
-		idlist.sort(key=lambda x: int(x))
-		for oid in idlist:
-			prms = f.get('objects')[oid]
+	def _load_file(self, filename):
+		jsdata = open(filename, 'r').read()
+		self.json_deserialize(jsdata)
 
-			otype = prms.get('type')
-			oargs = prms.get('initargs')
-			newobj = MFPApp().create(otype, oargs, self, self.default_scope, None)
+	def create_gui(self):
+		if MFPApp.no_gui:
+			return False 
 
-			if otype == 'inlet':
-				self.inlet_objects.append(newobj)
-			elif otype == 'outlet':
-				self.outlet_objects.append(newobj)
+		for oid, obj in self.objects.items():
+			MFPApp().gui_cmd.create(obj.init_type, obj.init_args, obj.obj_id, 
+						            obj.gui_params)
 
-			newobj.patch = self
-
-			gp = prms.get('gui_params')
-			for k,v in gp.items():
-				newobj.gui_params[k] = v
-
-			# custom behaviors implemented by Processor subclass load()
-			newobj.load(prms)
-
-			if not MFPApp.no_gui:
-				MFPApp().gui_cmd.create(otype, oargs, newobj.obj_id, newobj.gui_params)
-
-			idmap[int(oid)] = newobj
-
-		for oid, mfpobj in idmap.items():
-			self.objects[mfpobj.obj_id] = mfpobj
-
-		# make connections
-		for oid, prms in f.get('objects', {}).items():
-			oid = int(oid)
-			conn = prms.get("connections", [])
-			srcobj = idmap.get(oid)
-			for outlet in range(0, len(conn)):
-				connlist = conn[outlet]
-				for c in connlist:
-					dstobj = idmap.get(c[0])
-					inlet = c[1]
-					srcobj.connect(outlet, dstobj, inlet)
-					if not MFPApp.no_gui:
-						MFPApp().gui_cmd.connect(srcobj.obj_id, outlet, dstobj.obj_id, inlet)
-
-		# sort inlets and outlets by X position
-		self.inlet_objects.sort(key=getx)
-		self.outlet_objects.sort(key=lambda x: -getx(x))
-		self.resize(len(self.inlet_objects), len(self.outlet_objects))
+		for oid, obj in self.objects.items():
+			for srcport, connections in enumerate(obj.connections_out):
+				for dstobj, dstport in connections: 
+					MFPApp().gui_cmd.connect(obj.obj_id, srcport, dstobj.obj_id, dstport)
 
 	def save_file(self, filename=None):
 		savefile = open(filename, "w")
-		savefile.write(self.save_string())		
+		savefile.write(self.json_serialize())		
 
-	def save_string(self):
-		f = {}
-		f['type'] = self.init_type
-		allobj = {}
-		keys = self.objects.keys()
-		keys.sort()
-		for oid in keys:
-			o = self.objects.get(oid)
-			oinfo = o.save()
-			allobj[oid] = oinfo
-
-		f['objects'] = allobj
-		return json.dumps(f)
-
+# load extension methods 
+import patch_json
 
 
 

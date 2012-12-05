@@ -39,6 +39,7 @@ class Processor (object):
 
 		# gui params are updated by the gui slave
 		self.gui_params = dict(obj_id=self.obj_id, name=self.name, 
+							   initargs=self.init_args, 
 						       num_inlets=inlets, num_outlets=outlets)
 
 		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 

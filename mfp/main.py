@@ -130,6 +130,7 @@ class MFPApp (object):
 		# temporary name cache 
 		self.objects_byname = {} 
 
+		self.app_scope = LexicalScope()
 		self.patches = {}
 
 	def setup(self):
@@ -176,7 +177,8 @@ class MFPApp (object):
 		log.debug("OSC started on port 5555")
 
 		# while we only have 1 patch, this is it
-		self.patches["default"] = Patch('default', '')
+		self.patches["default"] = Patch('default', '', None, self.app_scope, 'default')
+
 
 	def remember(self, obj):
 		oi = self.next_obj_id
@@ -195,17 +197,20 @@ class MFPApp (object):
 	def create(self, init_type, init_args, patch, scope, name):
 		ctor = self.registry.get(init_type)
 		if ctor is None:
-			log.debug("No factory for '%s' registered, cannot create" % init_type)
-			return None
-		else:
-			try:
-				obj = ctor(init_type, init_args, patch, scope, name)
-				return obj
-			except Exception, e:
-				log.debug("Caught exception while trying to create %s (%s)" 
-						  % (init_type, init_args))
-				log.debug(e)
-				raise
+			log.debug("No factory for '%s' registered, looking for file." % init_type)
+			ctor = Patch.register_file(init_type + ".mfp")
+			if ctor is None:
+				return None 
+
+		# factory found, use it 
+		try:
+			obj = ctor(init_type, init_args, patch, scope, name)
+			return obj
+		except Exception, e:
+			log.debug("Caught exception while trying to create %s (%s)" 
+					  % (init_type, init_args))
+			log.debug(e)
+			raise
 
 	def resolve(self, name, queryobj=None):
 		'''
@@ -281,7 +286,7 @@ def main():
 	Evaluator.bind_global("math", math)
 	Evaluator.bind_global("os", os)
 	Evaluator.bind_global("sys", sys)
-	Evaluator.bind_global("re", sys)
+	Evaluator.bind_global("re", re)
 
 	from mfp.bang import Bang, Uninit 
 	from mfp.method import MethodCall 
@@ -301,5 +306,5 @@ def main():
 	
 	if len(sys.argv) > 1:
 		log.debug("main: loading", sys.argv[1])
-		app.patches.get("default").load_file(sys.argv[1])
+		app.patches.get("default")._load_file(sys.argv[1])
 

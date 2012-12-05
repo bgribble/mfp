@@ -75,6 +75,11 @@ class ProcessorElement (PatchElement):
 
 			log.debug("ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args))
 			self.create(self.obj_type, self.obj_args)
+
+			# obj_args may get forcibly changed on create
+			if self.obj_args and (len(parts) < 2 or self.obj_args != parts[1]):
+				self.label.set_text(self.obj_type + ' ' + self.obj_args)
+
 			if self.obj_id is None:
 				log.debug("ProcessorElement: could not create", self.obj_type, self.obj_args)
 			else:
