@@ -300,8 +300,6 @@ def main():
 	Evaluator.bind_global("app", app)
 
 	builtins.register()
-	log.debug("main: builtins registered")
-	
 
 	if len(sys.argv) > 2:
 		initargs = sys.argv[2]

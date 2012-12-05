@@ -18,9 +18,9 @@ class Patch(Processor):
 		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
 		self.objects = {}
-		self.scopes = {}
+		self.scopes = { 'default': LexicalScope()}
+		self.default_scope = self.scopes['default']
 
-		self.default_scope = LexicalScope() 
 		self.evaluator = Evaluator()
 
 		self.inlet_objects = []
@@ -59,6 +59,7 @@ class Patch(Processor):
 
 	def add_scope(self, name):
 		self.scopes[name] = LexicalScope()
+		return self.scopes[name]
 
 	def del_scope(self, name):
 		del self.scopes[name]
