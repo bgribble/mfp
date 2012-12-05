@@ -176,8 +176,6 @@ class MFPApp (object):
 		self.osc_mgr.start()
 		log.debug("OSC started on port 5555")
 
-		# while we only have 1 patch, this is it
-		self.patches["default"] = Patch('default', '', None, self.app_scope, 'default')
 
 
 	def remember(self, obj):
@@ -198,7 +196,7 @@ class MFPApp (object):
 		ctor = self.registry.get(init_type)
 		if ctor is None:
 			log.debug("No factory for '%s' registered, looking for file." % init_type)
-			ctor = Patch.register_file(init_type + ".mfp")
+			(name, ctor) = Patch.register_file(init_type + ".mfp")
 			if ctor is None:
 				return None 
 
@@ -304,7 +302,20 @@ def main():
 	builtins.register()
 	log.debug("main: builtins registered")
 	
+
+	if len(sys.argv) > 2:
+		initargs = sys.argv[2]
+	else:
+		initargs = None
+
 	if len(sys.argv) > 1:
 		log.debug("main: loading", sys.argv[1])
-		app.patches.get("default")._load_file(sys.argv[1])
 
+		name, factory = Patch.register_file(sys.argv[1])
+		patch = factory(name, initargs, None, app.app_scope, name) 
+		app.patches['default'] = patch
+	else:
+		patch = Patch('default', '', None, app.app_scope, 'default')
+		app.patches["default"] = patch 
+		
+	patch.create_gui()

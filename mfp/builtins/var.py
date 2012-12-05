@@ -50,10 +50,10 @@ class Var (Processor):
 			if self.gui_params.get("update_required"):
 				MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 
-	def save(self):
-		base_dict = Processor.save(self)
-		base_dict["value"] = self.value 
-		return base_dict 
+	#def save(self):
+	#	base_dict = Processor.save(self)
+	#	base_dict["value"] = self.value 
+	#	return base_dict 
 
 	def load(self, params):
 		if params.get("value"):

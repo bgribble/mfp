@@ -159,14 +159,15 @@ class Patch(Processor):
 		log.debug("Patch.register_file: registering type '%s' from file '%s'" 
 			      % (parts[0], filename))
 		MFPApp().register(parts[0], factory)
-		return factory
+		return (parts[0], factory)
 
 	def _load_file(self, filename):
 		jsdata = open(filename, 'r').read()
 		self.json_deserialize(jsdata)
 
 	def create_gui(self):
-		if MFPApp.no_gui:
+		from main import MFPApp
+		if MFPApp().no_gui:
 			return False 
 
 		for oid, obj in self.objects.items():
