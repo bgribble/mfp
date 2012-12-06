@@ -16,6 +16,9 @@ from .xyplot.scopeplot import ScopePlot
 
 class PlotElement (PatchElement):
 
+	display_type = "plot"
+	proc_type = "plot"
+
 	# constants 
 	INIT_WIDTH = 320
 	INIT_HEIGHT = 240
@@ -103,8 +106,10 @@ class PlotElement (PatchElement):
 				self.obj_args = parts[1]
 
 			log.debug("PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args))
-			self.element_type = self.obj_type 
-			self.create(self.element_type, self.obj_args)
+			self.display_type = self.obj_type 
+			self.proc_type = self.obj_type 
+
+			self.create(self.proc_type, self.obj_args)
 			
 			if self.obj_type == "scatter":
 				self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)

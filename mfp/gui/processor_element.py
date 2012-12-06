@@ -13,7 +13,8 @@ from input_mode import InputMode
 from .modes.label_edit import LabelEditMode
 
 class ProcessorElement (PatchElement):
-	element_type = "processor"
+	display_type = "processor"
+	proc_type = None 
 
 	# constants 
 	label_off_x = 3

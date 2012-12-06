@@ -72,10 +72,7 @@ class PatchElement (Clutter.Group):
 			self.obj_id = None
 
 	def create(self, obj_type, init_args):
-		if self.stage.selected_layer:
-			scopename = self.stage.layers[self.stage.selected_layer].scope
-		else:
-			scopename = "default"
+		scopename = self.layer.scope
 
 		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, None)
 		self.obj_id = objinfo.get('obj_id')
@@ -88,11 +85,13 @@ class PatchElement (Clutter.Group):
 
 		if self.obj_id is not None:
 			MFPGUI().remember(self)
+			self.send_params()
 		return self.obj_id
 			
 	def send_params(self, **extras):
 		prms = dict(position_x=self.position_x, position_y=self.position_y, 
-					update_required=self.update_required, element_type=self.element_type,
+					update_required=self.update_required, display_type=self.display_type,
+					layer=self.layer.name,
 					num_inlets=self.num_inlets, num_outlets=self.num_outlets, 
 					dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 		for k, v in extras.items():

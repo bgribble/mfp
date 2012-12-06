@@ -74,7 +74,7 @@ class PyEval(Processor):
 			self.bindings[name] = value
 
 class PyBinary(Processor):
-	def __init__(self, pyfunc, init_type, init_args):
+	def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
 		self.function = pyfunc
 		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 		initargs, kwargs = self.parse_args(init_args)
@@ -85,7 +85,7 @@ class PyBinary(Processor):
 		self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
 
 class PyUnary(Processor):
-	def __init__(self, pyfunc, init_type, init_args):
+	def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
 		self.function = pyfunc
 		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
@@ -93,14 +93,14 @@ class PyUnary(Processor):
 		self.outlets[0] = self.function(self.inlets[0])
 
 def mk_binary(pyfunc, name):
-	def factory(iname, args):
-		proc = PyBinary(pyfunc, iname, args)
+	def factory(iname, args, patch, scope, obj_name):
+		proc = PyBinary(pyfunc, iname, args, patch, scope, obj_name)
 		return proc 
 	MFPApp().register(name, factory)
 
 def mk_unary(pyfunc, name):
-	def factory(iname, args):
-		proc = PyUnary(pyfunc, iname, args)
+	def factory(iname, args, patch, scope, obj_name):
+		proc = PyUnary(pyfunc, iname, args, patch, scope, obj_name)
 		return proc
 	MFPApp().register(name, factory)
 
@@ -144,6 +144,7 @@ def register():
 	mk_unary(float, "float")
 	mk_unary(tuple, "tuple")
 	mk_unary(list, "list")
+	mk_unary(type, "type")
 
 
 

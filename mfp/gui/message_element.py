@@ -16,7 +16,9 @@ from .modes.transient import TransientMessageEditMode
 from mfp import log 
 
 class MessageElement (PatchElement):
-	element_type = "message"
+	display_type = "message"
+	proc_type = "message" 
+
 	PORT_TWEAK = 5 
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
@@ -79,7 +81,7 @@ class MessageElement (PatchElement):
 	def label_edit_finish(self, message=None, aborted=False):
 		self.message_text = self.label.get_text()
 
-		self.create(self.element_type, self.message_text)
+		self.create(self.proc_type, self.message_text)
 		if self.obj_id is None:
 			log.debug("MessageElement: could not create message obj for '%s'" 
 						% self.message_text)
@@ -157,7 +159,7 @@ class TransientMessageElement (MessageElement):
 		
 		self.message_text = "None" 
 
-		self.create(self.element_type, self.message_text)
+		self.create(self.proc_type, self.message_text)
 		if self.obj_id is None:
 			log.debug("MessageElement: could not create message obj for '%s'" 
 						% self.message_text)

@@ -22,7 +22,9 @@ class SlideMeterElement (PatchElement):
 	Scale can be dB or linear
 	'''
 
-	element_type = "var"
+	display_type = "slidemeter"
+	proc_type = "var"
+
 	DEFAULT_W = 25 
 	DEFAULT_H = 100
 	TITLE_SPACE = 22
@@ -74,7 +76,7 @@ class SlideMeterElement (PatchElement):
 		self.update_required = True
 
 		# create the underlying var
-		self.create(self.element_type, str(self.value))
+		self.create(self.proc_type, str(self.value))
 		if self.obj_id is None:
 			print "PlotElement: could not create", self.obj_type, self.obj_args
 		else:

@@ -14,6 +14,8 @@ from .bang import Uninit
 from mfp import log 
 
 class Patch(Processor):
+	display_type = "patch"
+
 	def __init__(self, init_type, init_args, patch, scope, name):
 		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
@@ -149,7 +151,6 @@ class Patch(Processor):
 	def register_file(self, filename):
 		from main import MFPApp
 		def factory(init_type, init_args, patch, scope, name):
-			log.debug("Patch.register_file: in factory", init_type, init_args, patch, scope, name)
 			p = Patch(init_type, init_args, patch, scope, name)
 			p._load_file(filename)
 			return p 
@@ -172,8 +173,7 @@ class Patch(Processor):
 			return False 
 
 		for oid, obj in self.objects.items():
-			MFPApp().gui_cmd.create(obj.init_type, obj.init_args, obj.obj_id, 
-						            obj.gui_params)
+			obj.create_gui()
 
 		for oid, obj in self.objects.items():
 			for srcport, connections in enumerate(obj.connections_out):

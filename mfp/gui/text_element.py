@@ -11,7 +11,9 @@ from mfp import log
 from .modes.label_edit import LabelEditMode
 
 class TextElement (PatchElement):
-	element_type = "text"
+	display_type = "text"
+	proc_type = "text"
+
 	ELBOW_ROOM = 4 
 
 	def __init__(self, window, x, y):
@@ -24,7 +26,6 @@ class TextElement (PatchElement):
 		self.add_actor(self.label)
 		self.update_required = True 
 		self.draw_ports()	
-		self.hide_ports()
 		self.move(x, y)
 		self.set_reactive(True)
 
@@ -37,7 +38,7 @@ class TextElement (PatchElement):
 
 	def label_edit_finish(self, widget, new_text, aborted=False):
 		if self.obj_id is None:
-			self.create(self.element_type, None)
+			self.create(self.proc_type, None)
 		if self.obj_id is None:
 			log.debug("TextElement: could not create obj")
 		elif new_text != self.text:

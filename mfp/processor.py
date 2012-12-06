@@ -9,12 +9,12 @@ from .method import MethodCall
 from .bang import Uninit 
 from .scope import LexicalScope
 
-from mfp import log 
+from . import log 
 
 class Processor (object): 
 	OK = 0
 	ERROR = 1 
-	gui_type = 'processor'
+	display_type = 'processor'
 	hot_inlets = [0]
 
 	def __init__(self, inlets, outlets, init_type, init_args,
@@ -22,12 +22,12 @@ class Processor (object):
 		from .main import MFPApp 
 		self.init_type = init_type
 		self.init_args = init_args
+		self.obj_id = MFPApp().remember(self)
 
 		self.inlets = [ Uninit ] * inlets
 		self.outlets = [ Uninit ] * outlets
 		self.outlet_order = range(outlets)
 		self.status = Processor.OK 
-		self.obj_id = MFPApp().remember(self)
 		self.name = None 
 		self.patch = None 
 		self.scope = None 
@@ -37,9 +37,10 @@ class Processor (object):
 		if patch is not None:
 			self.assign(patch, scope, name)
 
-		# gui params are updated by the gui slave
+		# gui_params are passed back and forth to the UI process 
+		self.gui_created = False 
 		self.gui_params = dict(obj_id=self.obj_id, name=self.name, 
-							   initargs=self.init_args, 
+							   initargs=self.init_args, display_type=self.display_type, 
 						       num_inlets=inlets, num_outlets=outlets)
 
 		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 
@@ -182,6 +183,9 @@ class Processor (object):
 			self.connections_out[outlets:] = []
 		self.outlet_order = range(len(self.outlets))
 
+		self.gui_params['num_inlets'] = inlets
+		self.gui_params['num_outlets'] = outlets 
+
 	def connect(self, outlet, target, inlet):
 		# is this a DSP connection? 
 		if outlet in self.dsp_outlets:
@@ -278,6 +282,18 @@ class Processor (object):
 		if tb:
 			print tb
 
+	def create_gui(self): 
+		from .main import MFPApp
+		MFPApp().gui_cmd.create(self.init_type, self.init_args, self.obj_id, 
+								self.gui_params)
+		self.gui_created = True 
+
+	def delete_gui(self):
+		from .main import MFPApp
+		MFPApp().gui_cmd.create(self.init_type, self.init_args, self.self_id, 
+								self.gui_params)
+		self.gui_created = False 
+
 	def load(self, paramdict):
 		# Override for custom load behavior
 		pass 
@@ -287,6 +303,7 @@ class Processor (object):
 		oinfo = {}
 		oinfo['type'] = self.init_type
 		oinfo['initargs'] = self.init_args
+		oinfo['name'] = self.name 
 		oinfo['gui_params'] = self.gui_params
 		conn = []
 		for c in self.connections_out:

@@ -5,10 +5,32 @@ label_edit.py: Minor mode for editing contents of a clutter.Text label
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
+import time 
+from threading import Thread 
 from ..input_mode import InputMode 
 from mfp import log 
+from mfp.gui_slave import MFPGUI
 
 from gi.repository import Clutter 
+
+class Blinker (Thread):
+	def __init__(self, txt, blink_time=0.5):
+		self.blink_time = 0.5 
+		self.txt = txt
+		self.quitreq = False 
+		Thread.__init__(self)
+
+	def set_cursor(self, val):
+		MFPGUI().clutter_do(lambda: self.txt.set_cursor_visible(val))
+
+	def run(self):
+		cursor = True 
+		while not self.quitreq:
+			self.set_cursor(cursor)
+			cursor = not cursor
+			time.sleep(self.blink_time)
+			
+
 
 class LabelEditMode (InputMode):
 	def __init__(self, window, element, label, multiline=False, markup=False):
@@ -22,9 +44,10 @@ class LabelEditMode (InputMode):
 		self.undo_stack  = [ (self.text, len(self.text)) ] 
 		self.undo_pos = -1
 		self.editpos = 0
-
 		self.activate_handler_id = None
 		self.text_changed_handler_id = None 
+
+		self.blinker = None 
 
 		InputMode.__init__(self, "Edit text")
 	
@@ -68,6 +91,14 @@ class LabelEditMode (InputMode):
 		self.widget.set_cursor_visible(True)
 		#self.widget.set_cursor_size(8)
 		self.update_cursor()
+		
+		if self.blinker is not None:
+			self.blinker.quitreq = True 
+			self.blinker.join()
+			self.blinker = None 
+
+		self.blinker = Blinker(self.widget)
+		self.blinker.start()
 
 	def end_editing(self):
 		self.widget.set_editable(False)
@@ -79,6 +110,11 @@ class LabelEditMode (InputMode):
 			self.activate_handler_id = None
 		if self.text_changed_handler_id:
 			self.widget.disconnect(self.text_changed_handler_id)
+
+		if self.blinker is not None:
+			self.blinker.quitreq = True 
+			self.blinker.join()
+			self.blinker = None 
 
 	def text_changed(self, *args):
 		new_text = self.widget.get_text()

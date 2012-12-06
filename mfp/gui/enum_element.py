@@ -14,7 +14,9 @@ from .modes.label_edit import LabelEditMode
 from .modes.enum_control import EnumControlMode
 
 class EnumElement (PatchElement):
-	element_type = "enum"
+	display_type = "enum"
+	proc_type = "var"
+
 	PORT_TWEAK = 7 
 
 	def __init__(self, window, x, y):
@@ -98,7 +100,7 @@ class EnumElement (PatchElement):
 
 	def create_obj(self):
 		if self.obj_id is None:
-			self.create(self.element_type, str(self.value))
+			self.create(self.proc_type, str(self.value))
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
 

@@ -101,8 +101,9 @@ class GUICommand (RPCWrapper):
 		from .gui.text_element import TextElement
 		from .gui.enum_element import EnumElement
 		from .gui.plot_element import PlotElement 
+		from .gui.slidemeter_element import SlideMeterElement 
 
-		elementtype = params.get('element_type')
+		elementtype = params.get('display_type')
 		log.debug("create:", obj_id, elementtype, params)
 
 		ctors = {
@@ -110,7 +111,8 @@ class GUICommand (RPCWrapper):
 			'message': MessageElement,
 			'text': TextElement,
 			'enum': EnumElement,
-			'plot': PlotElement
+			'plot': PlotElement,
+			'slidemeter': SlideMeterElement
 		}
 		ctor = ctors.get(elementtype)
 		if ctor:
@@ -134,6 +136,23 @@ class GUICommand (RPCWrapper):
 		c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
 		obj_1.connections_out.append(c)
 		obj_2.connections_in.append(c)
+	
+	@rpcwrap
+	def delete(self, obj_id):
+		MFPGUI().clutter_do(lambda: self._delete(obj_id))
+
+	def _delete(self, obj_id):
+		log.debug("WARNING: untested GUI element delete!")
+		obj = MFPGUI().recall(obj_id)
+		for c in obj.connections_out:
+			MFPGUI().appwin.unregister(c)
+			del c
+
+		for c in obj.connections_in:
+			MFPGUI().appwin.unregister(c)
+			del c
+		obj.obj_id = None
+		del obj
 
 	@rpcwrap
 	def clear(self):

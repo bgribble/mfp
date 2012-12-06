@@ -10,13 +10,13 @@ import simplejson as json
 from .patch import Patch 
 from .utils import extends 
 
-
 @extends(Patch)
 def json_deserialize(self, json_data):
 	from main import MFPApp
 
 	f = json.loads(json_data)
 	self.init_type = f.get('type')
+	self.gui_params = f.get('gui_params', {})
 	
 	# clear old objects
 	for o in self.objects.values():
@@ -25,7 +25,6 @@ def json_deserialize(self, json_data):
 	self.scopes = {} 
 	self.inlet_objects = []
 	self.outlet_objects = []
-
 
 	# create new objects
 	idmap = {}
@@ -72,9 +71,10 @@ def json_deserialize(self, json_data):
 	self.default_scope = self.scopes.get('default') or self.add_scope("default")
 	self.default_scope.bind("self", self)
 
+	# failsafe -- add un-scoped objects to default scope
 	for oid, obj in self.objects.items():
 		if obj.scope is None:
-			self.default_scope.bind(obj.obj_name, obj)
+			self.default_scope.bind(obj.name, obj)
 			obj.scope = self.default_scope
 
 	# make connections
@@ -97,6 +97,7 @@ def json_deserialize(self, json_data):
 def json_serialize(self):
 	f = {}
 	f['type'] = self.init_type
+	f['gui_params'] = self.gui_params
 
 	allobj = {}
 	keys = self.objects.keys()
@@ -105,6 +106,7 @@ def json_serialize(self):
 		o = self.objects.get(oid)
 		oinfo = o.save()
 		allobj[oid] = oinfo
+
 
 	f['objects'] = allobj
 
