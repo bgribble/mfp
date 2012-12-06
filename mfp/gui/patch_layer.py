@@ -8,14 +8,15 @@ from gi.repository import Clutter
 from mfp import log 
 
 class PatchLayer(object):
-	def __init__(self, patch, name):
+	def __init__(self, stage, patch, name, scope=None):
+		self.stage = stage
 		self.patch = patch 
 		self.name = name 
-		self.scope = None  
+		self.scope = scope
 
 		self.group = Clutter.Group() 
 		self.group.set_property("opacity", 0)
-		self.patch.group.add_actor(self.group)
+		self.stage.group.add_actor(self.group)
 
 	def show(self): 
 		self.group.set_property("opacity", 255) 

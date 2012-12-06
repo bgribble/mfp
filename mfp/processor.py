@@ -295,8 +295,7 @@ class Processor (object):
 
 	def delete_gui(self):
 		from .main import MFPApp
-		MFPApp().gui_cmd.create(self.init_type, self.init_args, self.self_id, 
-								self.gui_params)
+		MFPApp().gui_cmd.delete(self.obj_id)
 		self.gui_created = False 
 
 	def load(self, paramdict):

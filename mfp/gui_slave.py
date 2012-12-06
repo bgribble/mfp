@@ -102,6 +102,7 @@ class GUICommand (RPCWrapper):
 		from .gui.enum_element import EnumElement
 		from .gui.plot_element import PlotElement 
 		from .gui.slidemeter_element import SlideMeterElement 
+		from .gui.patch_window import PatchInfo
 
 		elementtype = params.get('display_type')
 		log.debug("create:", obj_id, elementtype, params)
@@ -112,7 +113,8 @@ class GUICommand (RPCWrapper):
 			'text': TextElement,
 			'enum': EnumElement,
 			'plot': PlotElement,
-			'slidemeter': SlideMeterElement
+			'slidemeter': SlideMeterElement,
+			'patch': PatchInfo
 		}
 		ctor = ctors.get(elementtype)
 		if ctor:

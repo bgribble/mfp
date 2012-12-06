@@ -172,6 +172,9 @@ class Patch(Processor):
 		if MFPApp().no_gui:
 			return False 
 
+		# make sure there's a PatchInfo structure on the GUI side 
+		Processor.create_gui(self)
+
 		for oid, obj in self.objects.items():
 			obj.create_gui()
 

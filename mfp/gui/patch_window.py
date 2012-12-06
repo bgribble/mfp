@@ -25,6 +25,52 @@ from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode 
 from .modes.select_mru import SelectMRUMode 
 
+
+class PatchInfo (object):
+	display_type = "patch"
+
+	def __init__(self, window, x, y):
+		print "Creating PatchInfo"
+		self.stage = window 
+		self.obj_id = None
+		self.obj_type = None
+		self.obj_args = None 
+		self.layers = [] 
+
+		self.stage.add_patch(self)
+
+	def send_params(self, **extras):
+		prms = dict(display_type=self.display_type,
+					layers=[ (l.name, l.scope) for l in self.layers ])
+		for k, v in extras.items():
+			prms[k] = v
+		print "PatchInfo send_params:", self.obj_id, prms
+		if self.obj_id is not None:
+			MFPGUI().mfp.set_params(self.obj_id, prms)
+
+	def get_params(self):
+		return MFPGUI().mfp.get_params(self.obj_id)
+
+	def configure(self, params):
+		print "PatchInfo configure:", self.obj_id, params
+		self.num_inlets = params.get("num_inlets")
+		self.num_outlets = params.get("num_outlets")
+		self.dsp_inlets = params.get("dsp_inlets")
+		self.dsp_outlets = params.get("dsp_outlets")
+		self.obj_name = params.get("name")
+
+		layers = params.get("layers", {})
+		for name, scope in layers: 
+			l = PatchLayer(self.stage, self, name, scope)
+			self.layers.append(l)
+			self.stage.layers.append(l)
+		self.stage.layer_store_update()
+		self.stage.layer_selection_update()
+
+
+	def command(self, action, data):
+		pass
+
 class PatchWindow(object):
 	def __init__(self):
 		# load Glade ui
@@ -58,12 +104,14 @@ class PatchWindow(object):
 		self.stage.add_actor(self.group)
 		self.stage.add_actor(self.hud_text) 
 
-		# self.objects is PatchElement subclasses represented the currently-displayed
-		# patch 
+		# self.objects is PatchElement subclasses represented the
+		# currently-displayed patch(es)
+		self.patches = [] 
 		self.objects = [] 
+		self.layers = [] 
 		self.selected = None
-		self.layers = [ PatchLayer(self, "Default") ] 
 		self.selected_layer = None  
+		self.selected_patch = None 
 
 		self.input_mgr = InputManager(self)
 		self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view)
@@ -92,7 +140,6 @@ class PatchWindow(object):
 		self.init_input()
 		self.init_layer_view()
 		self.init_object_view()
-		self.layer_select(0)
 
 	def init_input(self):
 		def grab_handler(stage, event):
@@ -177,6 +224,18 @@ class PatchWindow(object):
 			col = Gtk.TreeViewColumn(header, r, text=num)
 			self.object_view.append_column(col)
 
+	def add_patch(self, patch_info):
+		self.patches.append(patch_info)
+		self.selected_patch = patch_info
+		if not len(self.layers):
+			ll = PatchLayer(self, self.selected_patch, "Default", None)
+			self.selected_patch.layers.append(ll)
+			self.selected_patch.send_params()
+			self.layers.append(ll)
+			self.layer_store_update()
+			self.layer_select(0)
+		
+
 	def layer_select_up(self):
 		if self.selected_layer > 0:
 			self.layer_select(self.selected_layer - 1)
@@ -198,13 +257,16 @@ class PatchWindow(object):
 			self.layer_selection_update()
 
 	def layer_new(self):
-		self.layers.append(PatchLayer(self, "Layer %d" % len(self.layers)))
+		l = PatchLayer(self, self.selected_patch, "Layer %d" % len(self.layers))
+		self.selected_patch.layers.append(l)
+		self.selected_patch.send_params()
+		self.layers.append(l)
 		self.layer_store_update()
 		self.layer_selection_update()
 		return True 
 
 	def layer_new_scope(self):
-		l = PatchLayer(self, "Layer %d" % len(self.layers))
+		l = PatchLayer(self, self.selected_patch, "Layer %d" % len(self.layers))
 		l.scope = l.name.replace(" ", "_").lower()
 		MFPCommand().add_scope(l.scope)
 
@@ -214,8 +276,10 @@ class PatchWindow(object):
 		return True 
 
 	def layer_selection_update(self):
-		model, iter = self.layer_view.get_selection().get_selected()
+		if self.selected_layer is None: 
+			return 
 
+		model, iter = self.layer_view.get_selection().get_selected()
 		if iter is None or self.layer_store.get_value(iter, 0) != self.selected_layer:
 			liter = self.layer_store.iter_nth_child(None, self.selected_layer)
 			spath = self.layer_store.get_path(liter)
