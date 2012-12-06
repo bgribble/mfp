@@ -10,7 +10,7 @@ from ..main import MFPApp
 from .. import Bang, Uninit 
 from ..method import MethodCall
 
-from .p_buffer import BufferInfo 
+from .buffer import BufferInfo 
 from mfp import log 
 
 class Scope (Processor): 

@@ -30,18 +30,21 @@ jsdata_2 = '''
 "type": "default"}
 '''
 
+def mkproc(case, init_type, init_args=None):
+	return MFPApp().create(init_type, init_args, case.patch, None, init_type) 
+
 class PatchTests (TestCase):
 	def setUp(self):
 		MFPApp().no_gui = True		
 		MFPApp().next_obj_id = 0 
 		MFPApp().objects = {}
-		self.patch = Patch()
+		self.patch = Patch('default', '', None, None, 'default')
 		pass
 
 	def test_loadsave(self):
-		self.patch.load_string(jsdata_1)
+		self.patch.json_deserialize(jsdata_1)
 		o1 = json.loads(jsdata_1)
-		o2 = json.loads(self.patch.save_string())
+		o2 = json.loads(self.patch.json_serialize())
 		self.assertEqual(len(o1), len(o2))
 		obj1 = o1.get('objects')
 		obj2 = o2.get('objects')
@@ -53,9 +56,9 @@ class PatchTests (TestCase):
 		self.assertEqual(o1, o2)
 
 	def test_inout(self):
-		self.patch.load_string(jsdata_2)
+		self.patch.json_deserialize(jsdata_2)
 		
-		v = MFPApp().create("var")
+		v = mkproc(self, "var")
 		self.patch.connect(0, v, 0)
 		self.patch.send(True)
 

@@ -61,16 +61,21 @@ class Processor (object):
 		return True 
 
 	def assign(self, patch, scope, name):
-		if self.patch is not None and self.name is not None: 
+		if self.patch is not None and self.scope is not None and self.name is not None: 
 			self.patch.unbind(self.name, self.scope)
 
 		self.name = name or "%s_%s" % (self.init_type, str(self.obj_id))
-		self.scope = scope
+
 		if self.patch is None or self.patch != patch:
 			if self.patch:
 				self.patch.remove(self)
 			self.patch = patch 
 			self.patch.add(self)
+
+		if scope is not None:
+			self.scope = scope
+		else:
+			self.scope = self.patch.default_scope 
 
 		self.patch.bind(self.name, self.scope, self)
 		self.osc_init() 

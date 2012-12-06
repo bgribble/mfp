@@ -35,14 +35,22 @@ class Inlet(Processor):
 
 class Outlet(Processor):
 	def __init__(self, init_type, init_args, patch, scope, name):
-		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-		initargs, kwargs = self.parse_args(init_args)
+		if patch: 
+			initargs, kwargs = patch.parse_args(init_args)
+		else:
+			initargs = [] 
+			kwargs = {} 
 
 		if len(initargs):
 			self.outletnum = initargs[0]
 		elif patch is not None:
 			self.outletnum = len(patch.outlet_objects)
 			self.init_args = str(self.outletnum)
+		else:
+			self.outletnum = 0
+			init_args = "0"
+
+		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
 	def trigger(self):
 		if self.patch:

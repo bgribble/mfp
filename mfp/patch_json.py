@@ -57,7 +57,7 @@ def json_deserialize(self, json_data):
 		self.objects[mfpobj.obj_id] = mfpobj
 
 	# load new scopes 
-	scopes = f.get("scopes")
+	scopes = f.get("scopes", {})
 	for scopename, bindings in scopes.items():
 		s = self.add_scope(scopename)
 		for name, oid in bindings.items():
