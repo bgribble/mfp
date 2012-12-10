@@ -16,6 +16,7 @@ from ..message_element import MessageElement, TransientMessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement 
+from ..via_element import ViaElement
 
 class PatchEditMode (InputMode):
 	def __init__(self, window):
@@ -45,6 +46,8 @@ class PatchEditMode (InputMode):
 			"Add bar meter")
 		self.bind("x", lambda: self.add_element(PlotElement), 
 			"Add X/Y plot")
+		self.bind("v", lambda: self.add_element(ViaElement), 
+			"Add send via")
 
 		self.bind("TAB", self.window.select_next, 
 			"Select next element")
