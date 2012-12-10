@@ -25,4 +25,5 @@ def register():
 	from . import snap; snap.register()
 	from . import biquad; biquad.register()
 	from . import sendrcv; sendrcv.register()
+	from . import phasor; phasor.register()
 
