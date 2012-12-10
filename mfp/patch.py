@@ -20,8 +20,8 @@ class Patch(Processor):
 		Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
 		self.objects = {}
-		self.scopes = { 'default': LexicalScope()}
-		self.default_scope = self.scopes['default']
+		self.scopes = { '__patch__': LexicalScope()}
+		self.default_scope = self.scopes['__patch__']
 
 		self.evaluator = Evaluator()
 
@@ -32,6 +32,7 @@ class Patch(Processor):
 		self.default_scope.bind("self", self)
 	
 		initargs, kwargs = self.parse_args(init_args)
+		self.gui_params['layers'] = [('Layer 0', '__patch__') ]
 
 	#############################
 	# name management 

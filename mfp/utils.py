@@ -44,7 +44,7 @@ def extends(klass):
 	all purposes, but it does help in breaking up large files.  Need
 	to add an import at the end of the class def file.
 	'''
-	print "extends: generating decorator for class", klass
+
 	def ext_decor(func):
 		fn = func.__name__
 		print "extends: adding method", fn, "to", klass 

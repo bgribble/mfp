@@ -102,7 +102,7 @@ class GUICommand (RPCWrapper):
 		from .gui.enum_element import EnumElement
 		from .gui.plot_element import PlotElement 
 		from .gui.slidemeter_element import SlideMeterElement 
-		from .gui.patch_window import PatchInfo
+		from .gui.patch_info import PatchInfo
 
 		elementtype = params.get('display_type')
 		log.debug("create:", obj_id, elementtype, params)

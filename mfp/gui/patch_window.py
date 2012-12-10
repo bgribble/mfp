@@ -13,7 +13,6 @@ from message_element import MessageElement
 from enum_element import EnumElement
 from plot_element import PlotElement
 from patch_element import PatchElement 
-from patch_layer import PatchLayer 
 
 from mfp import MFPGUI
 from mfp.main import MFPCommand
@@ -23,53 +22,7 @@ from .input_manager import InputManager
 from .console import ConsoleMgr 
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode 
-from .modes.select_mru import SelectMRUMode 
-
-
-class PatchInfo (object):
-	display_type = "patch"
-
-	def __init__(self, window, x, y):
-		print "Creating PatchInfo"
-		self.stage = window 
-		self.obj_id = None
-		self.obj_type = None
-		self.obj_args = None 
-		self.layers = [] 
-
-		self.stage.add_patch(self)
-
-	def send_params(self, **extras):
-		prms = dict(display_type=self.display_type,
-					layers=[ (l.name, l.scope) for l in self.layers ])
-		for k, v in extras.items():
-			prms[k] = v
-		print "PatchInfo send_params:", self.obj_id, prms
-		if self.obj_id is not None:
-			MFPGUI().mfp.set_params(self.obj_id, prms)
-
-	def get_params(self):
-		return MFPGUI().mfp.get_params(self.obj_id)
-
-	def configure(self, params):
-		print "PatchInfo configure:", self.obj_id, params
-		self.num_inlets = params.get("num_inlets")
-		self.num_outlets = params.get("num_outlets")
-		self.dsp_inlets = params.get("dsp_inlets")
-		self.dsp_outlets = params.get("dsp_outlets")
-		self.obj_name = params.get("name")
-
-		layers = params.get("layers", {})
-		for name, scope in layers: 
-			l = PatchLayer(self.stage, self, name, scope)
-			self.layers.append(l)
-			self.stage.layers.append(l)
-		self.stage.layer_store_update()
-		self.stage.layer_selection_update()
-
-
-	def command(self, action, data):
-		pass
+from .modes.select_mru import SelectMRUMode
 
 class PatchWindow(object):
 	def __init__(self):
@@ -108,10 +61,10 @@ class PatchWindow(object):
 		# currently-displayed patch(es)
 		self.patches = [] 
 		self.objects = [] 
-		self.layers = [] 
-		self.selected = None
-		self.selected_layer = None  
+
 		self.selected_patch = None 
+		self.selected_layer = None  
+		self.selected = None
 
 		self.input_mgr = InputManager(self)
 		self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view)
@@ -185,20 +138,29 @@ class PatchWindow(object):
 		self.display_bindings()
 
 	def init_layer_view(self):
+		from .patch_info import PatchInfo
+		from .patch_layer import PatchLayer 
+
 		def select_cb(selection):
 			model, iter = selection.get_selected()
 			if iter is None:
 				return 
-			row = self.layer_store.get_value(iter, 0)
-			if row != self.selected_layer:
-				self.layer_select(row, do_update=False)
 
-		self.layer_store = Gtk.TreeStore(GObject.TYPE_INT, GObject.TYPE_STRING,
+			sel_obj = self.layer_store.get_value(iter, 0)
+			if isinstance(sel_obj, PatchInfo):
+				layer = sel_obj.layers[0]
+			elif isinstance(sel_obj, PatchLayer):
+				layer = sel_obj
+
+			if layer != self.selected_layer:
+				self.layer_select(layer, do_update=False)
+
+		self.layer_store = Gtk.TreeStore(GObject.TYPE_PYOBJECT, GObject.TYPE_STRING,
 										 GObject.TYPE_STRING)
 		self.layer_view.set_model(self.layer_store)
 		self.layer_view.get_selection().connect("changed", select_cb)
 
-		for header, num in [("Num", 0), ("Layer", 1), ("Scope", 2)]:
+		for header, num in [("Layer", 1), ("Scope", 2)]:
 			r = Gtk.CellRendererText()
 			col = Gtk.TreeViewColumn(header, r, text=num)
 			self.layer_view.append_column(col)
@@ -227,74 +189,11 @@ class PatchWindow(object):
 	def add_patch(self, patch_info):
 		self.patches.append(patch_info)
 		self.selected_patch = patch_info
-		if not len(self.layers):
-			ll = PatchLayer(self, self.selected_patch, "Default", None)
-			self.selected_patch.layers.append(ll)
-			self.selected_patch.send_params()
-			self.layers.append(ll)
-			self.layer_store_update()
-			self.layer_select(0)
+		self.layer_store_update()
+		print "add_patch: layers=", patch_info.layers
+		if len(patch_info.layers): 
+			self.layer_select(self.selected_patch.layers[0])
 		
-
-	def layer_select_up(self):
-		if self.selected_layer > 0:
-			self.layer_select(self.selected_layer - 1)
-			return True 
-	
-	def layer_select_down(self):
-		if self.selected_layer < (len(self.layers)-1):
-			self.layer_select(self.selected_layer + 1)
-			return True 
-
-	def layer_select(self, layer_num, do_update=True):
-		if self.selected_layer is not None:
-			self.layers[self.selected_layer].hide()
-		self.selected_layer = layer_num 
-		ll = self.layers[self.selected_layer]
-		ll.show()
-		self.hud_write("Layer %s (lexical scope '%s')" % (ll.name, ll.scope))
-		if do_update:
-			self.layer_selection_update()
-
-	def layer_new(self):
-		l = PatchLayer(self, self.selected_patch, "Layer %d" % len(self.layers))
-		self.selected_patch.layers.append(l)
-		self.selected_patch.send_params()
-		self.layers.append(l)
-		self.layer_store_update()
-		self.layer_selection_update()
-		return True 
-
-	def layer_new_scope(self):
-		l = PatchLayer(self, self.selected_patch, "Layer %d" % len(self.layers))
-		l.scope = l.name.replace(" ", "_").lower()
-		MFPCommand().add_scope(l.scope)
-
-		self.layers.append(l)
-		self.layer_store_update()
-		self.layer_selection_update()
-		return True 
-
-	def layer_selection_update(self):
-		if self.selected_layer is None: 
-			return 
-
-		model, iter = self.layer_view.get_selection().get_selected()
-		if iter is None or self.layer_store.get_value(iter, 0) != self.selected_layer:
-			liter = self.layer_store.iter_nth_child(None, self.selected_layer)
-			spath = self.layer_store.get_path(liter)
-			if spath is not None:
-				self.layer_view.get_selection().select_path(spath)
-
-	def layer_store_update(self):
-		self.layer_store.clear()
-		for layernum in range(len(self.layers)):
-			liter = self.layer_store.append(None)
-			self.layer_store.set_value(liter, 0, layernum)
-			self.layer_store.set_value(liter, 1, self.layers[layernum].name)
-			self.layer_store.set_value(liter, 2, self.layers[layernum].scope or "Patch")
-
-
 	def object_selection_update(self):
 		found = []
 		def	check(model, path, it, data):
@@ -314,13 +213,25 @@ class PatchWindow(object):
 		scopes = {} 
 		self.object_store.clear()
 
-		for s in self.layers:
-			if s.scope is None:
-				continue 
-			oiter = self.object_store.append(None)
-			self.object_store.set_value(oiter, 0, s.scope)
-			self.object_store.set_value(oiter, 1, s)
-			scopes[s.scope] = oiter
+		for p in self.patches:
+			piter = self.object_store.append(None)
+			self.object_store.set_value(piter, 0, p.obj_name or "Default Patch")
+			self.object_store.set_value(piter, 1, p)
+
+			oiter = self.object_store.append(piter)
+			self.object_store.set_value(oiter, 0, "__patch__")
+			self.object_store.set_value(oiter, 1, p)
+			scopes['__patch__'] = oiter 
+
+			for l in p.layers: 
+				if l.scope is None:
+					continue 
+				elif scopes.get(l.scope) is not None:
+					continue
+				oiter = self.object_store.append(piter)
+				self.object_store.set_value(oiter, 0, l.scope)
+				self.object_store.set_value(oiter, 1, l)
+				scopes[l.scope] = oiter
 
 		for o in self.objects:
 			if o.obj_name is None:
@@ -333,12 +244,14 @@ class PatchWindow(object):
 			oiter = self.object_store.append(parent)
 			self.object_store.set_value(oiter, 0, o.obj_name)
 			self.object_store.set_value(oiter, 1, o)
+		
+		self.object_view.expand_all()
 
 	def active_layer(self):
-		return self.layers[self.selected_layer]
+		return self.selected_layer
 
 	def active_group(self):
-		return self.layers[self.selected_layer].group 
+		return self.selected_layer.group 
 
 	def ready(self):
 		if self.window and self.window.get_realized():
@@ -435,118 +348,6 @@ class PatchWindow(object):
 		b.begin_edit()	
 		return True 
 
-	def select(self, obj):
-		if self.selected is not obj and self.selected is not None:
-			self.unselect(self.selected)
-		obj.select()
-		self.selected = obj
-		
-		obj.begin_control()
-
-		# FIXME hook
-		SelectMRUMode.touch(obj) 
-
-		self.object_selection_update()
-		return True 
-
-	def unselect(self, obj):
-		if self.selected is obj and obj is not None:
-			obj.end_control()
-			obj.unselect()
-			self.selected = None
-			self.object_selection_update()
-		return True 
-
-	def unselect_all(self):
-		if self.selected:
-			self.selected.end_control()
-			self.selected.unselect()
-			self.selected = None
-			self.object_selection_update()
-		return True 
-
-	def select_next(self):
-		if len(self.objects) == 0:
-			return False 
-
-		selectable = [ o for o in self.objects if not isinstance(o, ConnectionElement)]
-		if self.selected is None and len(selectable) > 0:
-			self.select(selectable[0])
-			return True 
-		else:
-			cur_ind = selectable.index(self.selected)
-			self.select(selectable[(cur_ind+1) % len(selectable)])
-			return True 
-
-	def select_prev(self):
-		if len(self.objects) == 0:
-			return False 
-
-		selectable = [ o for o in self.objects if not isinstance(o, ConnectionElement)]
-		if self.selected is None and len(selectable) > 0:
-			self.select(selectable[-1])
-			return True 
-		else:
-			cur_ind = selectable.index(self.selected) 
-			self.select(selectable[cur_ind-1])
-			return True 
-
-	def select_mru(self):
-		self.input_mgr.enable_minor_mode(SelectMRUMode(self))
-		return True 
-
-	def move_selected(self, dx, dy):
-		if self.selected is None:
-			return
-		self.selected.move(max(0, self.selected.position_x + dx*self.zoom),
-					       max(0, self.selected.position_y + dy*self.zoom))
-		if self.selected.obj_id is not None:
-			self.selected.send_params()
-		return True 
-
-	def delete_selected(self):
-		if self.selected is None:
-			return
-		o = self.selected
-		o.delete()
-		return True 
-
-	def edit_selected(self):
-		if self.selected is None:
-			return True
-		self.selected.begin_edit()
-		return True
-
-	def rezoom(self):
-		w, h = self.group.get_size()
-		self.group.set_scale_full(self.zoom, self.zoom, w/2.0, h/2.0)
-		self.group.set_position(self.view_x, self.view_y)
-
-	def reset_zoom(self):
-		self.zoom = 1.0
-		self.view_x = 0
-		self.view_y = 0
-		self.rezoom()
-		return True 
-
-	def zoom_out(self, ratio):
-		if self.zoom >= 0.1:
-			self.zoom *= ratio
-			self.rezoom()
-		return True 
-		
-	def zoom_in(self, ratio):
-		if self.zoom < 20:
-			self.zoom *= ratio
-			self.rezoom()
-		return True 
-
-	def move_view(self, dx, dy):
-		self.view_x += dx
-		self.view_y += dy
-		self.rezoom()
-		return True 
-
 	def quit(self, *rest):
 		log.debug("Quit command from GUI or WM, shutting down")
 		if self.console_mgr:
@@ -599,5 +400,9 @@ class PatchWindow(object):
 												 disp_time * 1000.0, 
 												 [ 'opacity' ], [ 0 ])
 		self.hud_animation.connect_after("completed", anim_complete)
+
+# additional methods in @extends wrappers 
+import patch_layer
+import patch_funcs 
 
 
