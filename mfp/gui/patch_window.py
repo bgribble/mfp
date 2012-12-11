@@ -137,30 +137,18 @@ class PatchWindow(object):
 		self.display_bindings()
 
 	def init_layer_view(self):
-		from .patch_info import PatchInfo
-		from .patch_layer import PatchLayer 
-
-		def select_cb(selection):
-			model, iter = selection.get_selected()
-			if iter is None:
-				return 
-
-			sel_obj = self.layer_store.get_value(iter, 0)
-			if isinstance(sel_obj, PatchInfo):
-				layer = sel_obj.layers[0]
-			elif isinstance(sel_obj, PatchLayer):
-				layer = sel_obj
-
-			if layer != self.selected_layer:
-				self.layer_select(layer, do_update=False)
-
 		self.layer_store = Gtk.TreeStore(GObject.TYPE_PYOBJECT, GObject.TYPE_STRING,
 										 GObject.TYPE_STRING)
 		self.layer_view.set_model(self.layer_store)
-		self.layer_view.get_selection().connect("changed", select_cb)
+		self.layer_view.get_selection().connect("changed", self.layer_select_cb)
 
-		for header, num in [("Layer", 1), ("Scope", 2)]:
+
+		for header, num, edited_cb in [("Layer", 1, self.layer_name_edited_cb), 
+								       ("Scope", 2, self.layer_scope_edited_cb)]:
 			r = Gtk.CellRendererText()
+			if edited_cb: 
+				r.set_property("editable", 1)
+				r.connect("edited", edited_cb)
 			col = Gtk.TreeViewColumn(header, r, text=num)
 			self.layer_view.append_column(col)
 

@@ -23,6 +23,9 @@ class PatchInfo (object):
 
 		self.stage.add_patch(self)
 
+	def has_scope(self, scope_name):
+		return scope_name in [ l.scope for l in self.layers]
+
 	def send_params(self, **extras):
 		prms = dict(display_type=self.display_type,
 					layers=[ (l.name, l.scope) for l in self.layers ])

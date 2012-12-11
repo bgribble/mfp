@@ -28,6 +28,51 @@ class PatchLayer(object):
 		self.group.set_property("opacity", 0)
 
 @extends(PatchWindow)
+def layer_select_cb(self, selection):
+	from .patch_info import PatchInfo
+	model, iter = selection.get_selected()
+	if iter is None:
+		return 
+
+	sel_obj = self.layer_store.get_value(iter, 0)
+	if isinstance(sel_obj, PatchInfo):
+		layer = sel_obj.layers[0]
+	elif isinstance(sel_obj, PatchLayer):
+		layer = sel_obj
+
+	if layer != self.selected_layer:
+		self.layer_select(layer, do_update=False)
+
+@extends(PatchWindow)
+def layer_name_edited_cb(self, renderer, path, new_value):
+	iter = self.layer_store.get_iter_from_string(path)
+	layer = self.layer_store.get_value(iter, 0)
+	if isinstance(layer, PatchLayer):
+		layer.name = new_value
+		self.selected_patch.send_params()
+		self.layer_store_update()
+	return True 
+
+@extends(PatchWindow)
+def layer_scope_edited_cb(self, renderer, path, new_value):
+	iter = self.layer_store.get_iter_from_string(path)
+	layer = self.layer_store.get_value(iter, 0)
+	if isinstance(layer, PatchLayer):
+		p = self.selected_patch
+		layer.scope = new_value
+		if not p.has_scope(new_value):
+			MFPCommand().add_scope(new_value)
+			
+		self.selected_patch.send_params()
+		for obj in self.objects: 
+			if obj.layer == layer: 
+				MFPCommand().set_scope(obj.obj_id, new_value)
+
+		self.layer_store_update()
+		self.object_store_update()
+	return True 
+
+@extends(PatchWindow)
 def layer_select_up(self):
 	p = self.selected_patch
 	l = p.layers.index(self.selected_layer) 
