@@ -14,12 +14,19 @@ from .modes.label_edit import LabelEditMode
 from .modes.enum_control import EnumControlMode
 
 class ViaElement (PatchElement):
-	display_type = "via"
-	proc_type = "send"
+	display_type = None
+	proc_type = None
+	porthole_width = 0
+	porthole_height = 0
+	autoplace_dx = -2.5
 
 	VIA_SIZE = 10
 	VIA_FUDGE = 5 
-	LABEL_FUDGE = 2 
+	LABEL_HEIGHT = 15 
+	LABEL_FUDGE = 0
+	LABEL_Y = 0
+	STYLE = None
+
 	def __init__(self, window, x, y):
 		PatchElement.__init__(self, window, x, y)
 
@@ -28,11 +35,15 @@ class ViaElement (PatchElement):
 		self.editable = False 
 
 		# create elements
-		self.texture = Clutter.CairoTexture.new(self.VIA_SIZE+self.VIA_FUDGE, 
-												self.VIA_SIZE+self.VIA_FUDGE)
+		txs = self.VIA_SIZE+self.VIA_FUDGE 
+		self.texture = Clutter.CairoTexture.new(txs, txs)
+		self.texture.set_size(txs, txs)
+		self.texture.set_surface_size(txs, txs)
+
 		self.texture.connect("draw", self.draw_cb)
+		self.texture.set_position(0, self.TEXTURE_Y)
 		self.label = Clutter.Text()
-		self.label.set_position(4, self.VIA_SIZE+self.VIA_FUDGE+self.LABEL_FUDGE)
+		self.label.set_position(0, self.LABEL_Y)
 		self.set_reactive(True)
 		self.add_actor(self.texture)
 		self.add_actor(self.label)
@@ -41,14 +52,14 @@ class ViaElement (PatchElement):
 		self.label.set_color(window.color_unselected) 
 		self.label.connect('text-changed', self.text_changed_cb)
 
-		# click handler 
-		# self.actor.connect('button-press-event', self.button_press_cb)
 		self.move(x, y)
+		self.set_size(self.VIA_SIZE + 2*self.VIA_FUDGE,
+					  self.VIA_SIZE + self.LABEL_HEIGHT + self.LABEL_FUDGE + 2*self.VIA_FUDGE)
+
+		self.recenter_label()
 		self.texture.invalidate()
 
 	def draw_cb(self, texture, ct):
-		w = self.texture.get_property('surface_width')-2
-		h = self.texture.get_property('surface_height')-2
 		self.texture.clear()
 		if self.selected: 
 			color = self.stage.color_selected
@@ -57,11 +68,14 @@ class ViaElement (PatchElement):
 
 		ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
 
-		ct.translate(0.5, 0.5)
+		#ct.translate(0.5, 0.5)
 		ct.set_line_width(3)
 		cent = (self.VIA_SIZE + self.VIA_FUDGE)/2.0
 		ct.arc(cent, cent, self.VIA_SIZE/2.0, 0, 2*math.pi)
-		ct.stroke()
+		if self.STYLE == "empty":
+			ct.stroke()
+		else:
+			ct.fill()
 
 	def recenter_label(self):
 		w = self.label.get_width()
@@ -101,11 +115,14 @@ class ViaElement (PatchElement):
 		self.recenter_label()
 
 	def configure(self, params):
+		self.label.set_text(params.get("label", ""))
+		self.recenter_label()
 		PatchElement.configure(self, params)	
 
 	def port_position(self, port_dir, port_num):
-		# tweak the right input port display to be left of the slant 
-		return (self.VIA_SIZE/2.0, self.VIA_SIZE/2.0)
+		# vias connect to the center of the texture 
+		return ((self.VIA_SIZE + self.VIA_FUDGE)/2.0, 
+		         self.TEXTURE_Y + (self.VIA_SIZE + self.VIA_FUDGE)/2.0)
 
 	def select(self):
 		self.selected = True 
@@ -123,6 +140,23 @@ class ViaElement (PatchElement):
 	def make_edit_mode(self):
 		return LabelEditMode(self.stage, self, self.label)
 
-	def make_control_mode(self):
-		return EnumControlMode(self.stage, self)
+class SendViaElement (ViaElement):
+	STYLE = "empty" 
+	LABEL_Y = ViaElement.VIA_SIZE + ViaElement.VIA_FUDGE/2.0
+	TEXTURE_Y = 0 
+
+	display_type = "sendvia"
+	proc_type = "send"
+
+class ReceiveViaElement (ViaElement):
+	STYLE = "filled"
+	LABEL_Y = 0
+	LABEL_FUDGE = 2.5 
+	TEXTURE_Y = ViaElement.LABEL_HEIGHT + LABEL_FUDGE
+	
+	display_type = "recvvia"
+	proc_type = "recv"
+
+
+
 

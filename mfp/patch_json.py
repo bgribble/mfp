@@ -68,7 +68,7 @@ def json_deserialize(self, json_data):
 			s.bind(name, obj)
 			obj.scope = s 
 			
-	self.default_scope = self.scopes.get('default') or self.add_scope("default")
+	self.default_scope = self.scopes.get('__patch__') or self.add_scope("__patch__")
 	self.default_scope.bind("self", self)
 
 	# failsafe -- add un-scoped objects to default scope

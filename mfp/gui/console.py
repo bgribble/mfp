@@ -129,7 +129,7 @@ class ConsoleMgr (Thread):
 		else:
 			self.textbuffer.move_mark(mark, iterator)
 
-		self.textview.scroll_to_mark(mark, 0, True, 0, 0.9)
+		self.textview.scroll_to_mark(mark, 0, True, 1.0, 0.9)
 
 	def redisplay(self):
 		lastline = self.textbuffer.get_line_count()

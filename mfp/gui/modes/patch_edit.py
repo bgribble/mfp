@@ -16,7 +16,7 @@ from ..message_element import MessageElement, TransientMessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement 
-from ..via_element import ViaElement
+from ..via_element import SendViaElement, ReceiveViaElement
 
 class PatchEditMode (InputMode):
 	def __init__(self, window):
@@ -26,9 +26,7 @@ class PatchEditMode (InputMode):
 		self.drag_start_off_x = None
 		self.drag_start_off_y = None 
 		self.drag_target = None 
-
 		self.autoplace_mode = None
-
 
 		InputMode.__init__(self, "Edit patch")
 		
@@ -46,8 +44,11 @@ class PatchEditMode (InputMode):
 			"Add bar meter")
 		self.bind("x", lambda: self.add_element(PlotElement), 
 			"Add X/Y plot")
-		self.bind("v", lambda: self.add_element(ViaElement), 
-			"Add send via")
+		self.bind("v", lambda: self.add_element(SendViaElement), 
+			"Add send message via")
+		self.bind("V", lambda: self.add_element(ReceiveViaElement), 
+			"Add receive message via")
+
 
 		self.bind("TAB", self.window.select_next, 
 			"Select next element")
@@ -103,7 +104,14 @@ class PatchEditMode (InputMode):
 		if self.autoplace_mode is None:
 			self.window.add_element(factory)
 		else: 
-			self.window.add_element(factory, self.autoplace_x, self.autoplace_y)
+			dx = dy = 0
+			if hasattr(factory, "autoplace_dx"):
+				dx = factory.autoplace_dx
+
+			if hasattr(factory, "autoplace_dy"):
+				dy = factory.autoplace_dy 
+
+			self.window.add_element(factory, self.autoplace_x+dx, self.autoplace_y+dy)
 			self.manager.disable_minor_mode(self.autoplace_mode)
 			self.autoplace_mode = None 
 
