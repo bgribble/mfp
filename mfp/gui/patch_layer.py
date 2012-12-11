@@ -50,6 +50,9 @@ def layer_name_edited_cb(self, renderer, path, new_value):
 	if isinstance(layer, PatchLayer):
 		layer.name = new_value
 		self.selected_patch.send_params()
+		for obj in self.objects: 
+			if obj.layer == layer: 
+				obj.send_params()
 		self.layer_store_update()
 	return True 
 
@@ -93,7 +96,8 @@ def layer_select(self, layer, do_update=True):
 	sname = self.selected_layer.scope
 	if sname == "__patch__":
 		sname = "Patch"
-	self.hud_write("Layer %s (lexical scope '%s')" % (self.selected_layer.name, sname))
+
+	self.hud_write("Layer: <b>%s</b> (lexical scope '%s')" % (self.selected_layer.name, sname))
 	if do_update:
 		self.layer_selection_update()
 
