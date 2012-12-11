@@ -100,6 +100,21 @@ class MFPCommand(RPCWrapper):
 		MFPApp().patches["default"].add_scope(scope_name)
 
 	@rpcwrap
+	def rename_scope(self, old_name, new_name):
+		patch = MFPApp.patches['default']
+		scope = patch.scopes.get(old_name)
+		if scope:
+			scope.name = new_name 
+		# FIXME merge scopes if changing to a used name? 
+		# FIXME signal send/receive objects to flush and re-resolve
+
+	@rpcwrap
+	def rename_obj(self, obj_id, new_name):
+		obj = MFPApp().recall(obj_id)
+		patch = obj.patch
+		scope = obj.scope
+		obj.assign(patch, scope, new_name)
+	@rpcwrap
 	def set_scope(self, obj_id, scope_name):
 		obj = MFPApp().recall(obj_id)
 		if obj is None:

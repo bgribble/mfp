@@ -170,10 +170,32 @@ class PatchWindow(object):
 		self.object_view.set_model(self.object_store)
 		self.object_view.get_selection().connect("changed", select_cb)
 
-		for header, num in [("Name", 0)]:
-			r = Gtk.CellRendererText()
-			col = Gtk.TreeViewColumn(header, r, text=num)
-			self.object_view.append_column(col)
+		r = Gtk.CellRendererText()
+		r.set_property("editable", True)
+		r.connect("edited", self.object_name_edited_cb)
+		col = Gtk.TreeViewColumn("Name", r, text=0)
+		self.object_view.append_column(col)
+
+	def object_name_edited_cb(self, renderer, path, new_value):
+		from .patch_layer import PatchLayer 
+
+		iter = self.object_store.get_iter_from_string(path)
+		obj = self.object_store.get_value(iter, 1)
+		if isinstance(obj, PatchElement):
+			obj.obj_name = new_value
+			MFPCommand().rename_obj(obj.obj_id, new_value)
+			obj.send_params()
+
+		elif isinstance(obj, PatchLayer):
+			oldscopename = obj.scope 
+			for l in self.selected_patch.layers:
+				if l.scope == oldscopename:
+					l.scope = new_value
+			MFPCommand.rename_scope(oldscopename, new_value)
+			seld.selected_patch.send_params()
+		self.object_store_update()
+		self.layer_store_update()
+		return True 
 
 	def add_patch(self, patch_info):
 		self.patches.append(patch_info)

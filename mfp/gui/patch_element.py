@@ -97,7 +97,7 @@ class PatchElement (Clutter.Group):
 
 		prms = dict(position_x=self.position_x, position_y=self.position_y, 
 					update_required=self.update_required, display_type=self.display_type,
-					layer=self.layer.name,
+					name=self.obj_name, layer=self.layer.name,
 					num_inlets=self.num_inlets, num_outlets=self.num_outlets, 
 					dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 		for k, v in extras.items():
