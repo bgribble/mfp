@@ -191,7 +191,6 @@ class PatchElement (Clutter.Group):
 
 	def move_to_layer(self, layer):
 		if self.layer:
-			print "Found actor", self, "in", layer, "removing"
 			self.layer.group.remove_actor(self)
 		self.layer = layer
 		self.layer.group.add_actor(self)

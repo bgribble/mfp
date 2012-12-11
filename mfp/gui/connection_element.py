@@ -26,6 +26,8 @@ class ConnectionElement(PatchElement):
 		self.add_actor(self.texture)
 		self.set_reactive(True)
 		self.draw()
+		if obj_1.layer is not None:
+			self.move_to_layer(obj_1.layer)
 
 	def select(self):
 		self.selected = True 

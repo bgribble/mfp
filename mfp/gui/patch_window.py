@@ -8,7 +8,6 @@ from gi.repository import Gtk, GObject, Clutter, GtkClutter, Pango
 
 from text_element import TextElement
 from processor_element import ProcessorElement
-from connection_element import ConnectionElement 
 from message_element import MessageElement
 from enum_element import EnumElement
 from plot_element import PlotElement
@@ -176,6 +175,8 @@ class PatchWindow(object):
 				obj = self.object_store.get_value(iter, 1) 
 				if isinstance(obj, PatchElement) and obj is not self.selected:
 					self.select(obj)
+					if obj.layer is not None:
+						self.layer_select(obj.layer)
 
 		self.object_store = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT)
 		self.object_view.set_model(self.object_store)
@@ -190,7 +191,6 @@ class PatchWindow(object):
 		self.patches.append(patch_info)
 		self.selected_patch = patch_info
 		self.layer_store_update()
-		print "add_patch: layers=", patch_info.layers
 		if len(patch_info.layers): 
 			self.layer_select(self.selected_patch.layers[0])
 		
