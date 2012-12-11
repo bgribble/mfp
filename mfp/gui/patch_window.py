@@ -314,7 +314,7 @@ class PatchWindow(object):
 
 	def register(self, element):
 		self.objects.append(element)
-		self.input_mgr.event_sources[element] = element 
+		self.input_mgr.event_sources[element] = element
 		self.active_group().add_actor(element)
 		element.layer = self.active_layer()
 		if element.obj_id is not None:

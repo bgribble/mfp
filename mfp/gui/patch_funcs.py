@@ -78,8 +78,9 @@ def select_mru(self):
 
 @extends(PatchWindow)
 def move_selected(self, dx, dy):
-	if self.selected is None:
+	if self.selected is None or isinstance(self.selected, ConnectionElement):
 		return
+
 	self.selected.move(max(0, self.selected.position_x + dx*self.zoom),
 					   max(0, self.selected.position_y + dy*self.zoom))
 	if self.selected.obj_id is not None:

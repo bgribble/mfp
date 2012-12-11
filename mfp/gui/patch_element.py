@@ -53,6 +53,9 @@ class PatchElement (Clutter.Group):
 		Clutter.Group.__init__(self)
 		self.stage.register(self)
 
+	def event_source(self):
+		return self 
+
 	def drag_start(self, x, y):
 		self.drag_x = x - self.position_x
 		self.drag_y = y - self.position_y
@@ -89,6 +92,9 @@ class PatchElement (Clutter.Group):
 		return self.obj_id
 			
 	def send_params(self, **extras):
+		if self.obj_id is None:
+			return 
+
 		prms = dict(position_x=self.position_x, position_y=self.position_y, 
 					update_required=self.update_required, display_type=self.display_type,
 					layer=self.layer.name,
@@ -96,8 +102,7 @@ class PatchElement (Clutter.Group):
 					dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 		for k, v in extras.items():
 			prms[k] = v
-		if self.obj_id is not None:
-			MFPGUI().mfp.set_params(self.obj_id, prms)
+		MFPGUI().mfp.set_params(self.obj_id, prms)
 
 	def get_params(self):
 		return MFPGUI().mfp.get_params(self.obj_id)

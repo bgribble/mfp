@@ -147,7 +147,10 @@ class PatchEditMode (InputMode):
 			self.window.select(self.manager.pointer_obj)
 
 		self.drag_started = True
-		self.drag_target = self.manager.pointer_obj
+		if isinstance(self.manager.pointer_obj, ConnectionElement):
+			self.drag_target = None 
+		else:
+			self.drag_target = self.manager.pointer_obj
 
 		if self.manager.pointer_obj is None: 
 			px = self.manager.pointer_ev_x
