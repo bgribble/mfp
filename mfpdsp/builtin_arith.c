@@ -9,6 +9,8 @@
 #define ARITH_OP_SUB 2
 #define ARITH_OP_MUL 3
 #define ARITH_OP_DIV 4
+#define ARITH_OP_GT 5 
+#define ARITH_OP_LT 6
 
 typedef struct {
 	int op_type;
@@ -92,6 +94,55 @@ iterate_add(mfp_sample * in_0, mfp_sample * in_1, mfp_sample const_sample, mfp_s
 	}
 }
 
+static void
+iterate_gt(mfp_sample * in_0, mfp_sample * in_1, mfp_sample const_sample, mfp_sample * outbuf)
+{
+	int scount;
+	int in_1_present=0;
+
+	if (in_1 != NULL)
+		in_1_present = 1;
+
+	/* iterate */ 
+	for(scount=0; scount < mfp_blocksize; scount++) {
+		if (in_1_present) {
+			if (*in_0++ > *in_1++) {
+				*outbuf++ = 1.0;
+			}
+			else {
+				*outbuf++ = 0.0;
+			}
+		}
+		else {
+			if (*in_0++ > const_sample) {
+				*outbuf++ = 1.0;
+			}
+			else {
+				*outbuf++ = 0.0;
+			}
+		}
+	}
+}
+
+static void
+iterate_lt(mfp_sample * in_0, mfp_sample * in_1, mfp_sample const_sample, mfp_sample * outbuf)
+{
+	int scount;
+	int in_1_present=0;
+
+	if (in_1 != NULL)
+		in_1_present = 1;
+
+	/* iterate */ 
+	for(scount=0; scount < mfp_blocksize; scount++) {
+		if (in_1_present)
+			*outbuf++ = ((*in_0++ < *in_1++) ? 1.0 : 0.0);
+		else
+			*outbuf++ = ((*in_0++ < const_sample) ? 1.0 : 0.0);
+
+	}
+}
+
 static int 
 process(mfp_processor * proc) 
 {
@@ -122,6 +173,12 @@ process(mfp_processor * proc)
 			break;
 		case ARITH_OP_DIV:
 			iterate_div(in_0, in_1, const_sample, outbuf);
+			break;
+		case ARITH_OP_GT:
+			iterate_gt(in_0, in_1, const_sample, outbuf);
+			break;
+		case ARITH_OP_LT:
+			iterate_lt(in_0, in_1, const_sample, outbuf);
 			break;
 	}
 
@@ -168,6 +225,28 @@ init_add(mfp_processor * proc)
 	proc->data = d;
 	
 	d->op_type = ARITH_OP_ADD;
+	d->const_sample = (mfp_sample)0.0;
+	return;
+}
+
+static void 
+init_gt(mfp_processor * proc) 
+{
+	builtin_arith_data * d = g_malloc(sizeof(builtin_arith_data));
+	proc->data = d;
+	
+	d->op_type = ARITH_OP_GT;
+	d->const_sample = (mfp_sample)0.0;
+	return;
+}
+
+static void 
+init_lt(mfp_processor * proc) 
+{
+	builtin_arith_data * d = g_malloc(sizeof(builtin_arith_data));
+	proc->data = d;
+	
+	d->op_type = ARITH_OP_LT;
 	d->const_sample = (mfp_sample)0.0;
 	return;
 }
@@ -239,6 +318,34 @@ init_builtin_div(void) {
 	p->is_generator = 0;
 	p->process = process;
 	p->init = init_div;
+	p->config = config;
+	p->destroy = destroy;
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "const", (gpointer)PARAMTYPE_FLT);
+	return p;
+}
+
+mfp_procinfo *  
+init_builtin_lt(void) {
+	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
+	p->name = strdup("<~");
+	p->is_generator = 0;
+	p->process = process;
+	p->init = init_lt;
+	p->config = config;
+	p->destroy = destroy;
+	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_hash_table_insert(p->params, "const", (gpointer)PARAMTYPE_FLT);
+	return p;
+}
+
+mfp_procinfo *  
+init_builtin_gt(void) {
+	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
+	p->name = strdup(">~");
+	p->is_generator = 0;
+	p->process = process;
+	p->init = init_gt;
 	p->config = config;
 	p->destroy = destroy;
 	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);

@@ -9,12 +9,11 @@ from mfp.processor import Processor
 from mfp.main import MFPApp
 
 class ArithProcessor(Processor):
-	def __init__(self, init_type, init_args, arith_op):
+	def __init__(self, init_type, init_args, patch, scope, name):
 		self.arith_op = init_type
 
 		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
-		
 		self.dsp_inlets = [0, 1]
 		self.dsp_outlets = [0]
 		self.dsp_init(self.arith_op)
@@ -23,7 +22,6 @@ class ArithProcessor(Processor):
 		if len(initargs):
 			self.dsp_obj.setparam("const", initargs[0])
 		
-
 	def trigger(self):
 		try:
 			val = float(self.inlets[0])
@@ -33,24 +31,28 @@ class ArithProcessor(Processor):
 				
 
 class ArithAdd(ArithProcessor):
-	def __init__(self, init_type, init_args, patch, scope, name):
-		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
+	pass
 
 class ArithSub(ArithProcessor):
-	def __init__(self, init_type, init_args, patch, scope, name):
-		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
+	pass
 
 class ArithMul(ArithProcessor):
-	def __init__(self, init_type, init_args, patch, scope, name):
-		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
+	pass
 
 class ArithDiv(ArithProcessor):
-	def __init__(self, init_type, init_args, patch, scope, name):
-		ArithProcessor.__init__(self, init_type, init_args, patch, scope, name)
+	pass
+
+class ArithLt(ArithProcessor):
+	pass
+
+class ArithGt (ArithProcessor):
+	pass 
 
 def register():
 	MFPApp().register("+~", ArithAdd)
 	MFPApp().register("-~", ArithSub)
 	MFPApp().register("*~", ArithMul)
 	MFPApp().register("/~", ArithDiv)
+	MFPApp().register(">~", ArithGt)
+	MFPApp().register("<~", ArithLt)
 

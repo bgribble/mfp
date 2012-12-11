@@ -371,6 +371,8 @@ init_globals(void)
 
 }
 
+#define ARRAY_LEN(arry, eltsize) (sizeof(arry) / eltsize)
+
 static void
 init_builtins(void)
 {
@@ -380,10 +382,13 @@ init_builtins(void)
 		init_builtin_osc, init_builtin_in, init_builtin_out, 
 		init_builtin_sig, init_builtin_snap, init_builtin_ampl, 
 		init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 
+		init_builtin_lt, init_builtin_gt,
 		init_builtin_line, init_builtin_noise, init_builtin_buffer,
 		init_builtin_biquad, init_builtin_phasor
 	};
-	int num_initfuncs = 15;
+	int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
+
+	printf("init_builtins: initializing %d builtin DSP processors\n", num_initfuncs);
 
 	for(i = 0; i < num_initfuncs; i++) {
 		pi = initfuncs[i]();
