@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter
+import cairo
 import math 
 from patch_element import PatchElement
 from connection_element import ConnectionElement 
@@ -37,6 +38,7 @@ class MessageElement (PatchElement):
 		self.add_actor(self.label)
 
 		self.texture.invalidate()
+		self.obj_state = self.OBJ_HALFCREATED 
 
 		# configure label
 		self.label.set_position(4, 1)
@@ -62,8 +64,15 @@ class MessageElement (PatchElement):
 		texture.clear()
 		ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
 
+		if self.obj_state == self.OBJ_COMPLETE:
+			ct.set_dash([])
+		else:
+			ct.set_dash([8, 4])
+
+		ct.set_line_width(2.0)
+		ct.set_antialias(cairo.ANTIALIAS_NONE)
 		#ct.translate(0.5, 0.5)
-		ct.set_line_width(1.25)
+		#ct.set_line_width(1.25)
 		ct.move_to(1,1)
 		ct.line_to(1, h)
 		ct.line_to(w, h)
@@ -73,21 +82,25 @@ class MessageElement (PatchElement):
 		ct.stroke()
 
 	def button_press_cb(self, *args):
-		MFPGUI().mfp.send_bang(self.obj_id, 0) 
+		if self.obj_id is not None:
+			MFPGUI().mfp.send_bang(self.obj_id, 0) 
+		return False 
 
 	def label_edit_start(self):
-		pass
+		self.obj_state = self.OBJ_HALFCREATED
+		self.texture.invalidate()
 
 	def label_edit_finish(self, message=None, aborted=False):
-		self.message_text = self.label.get_text()
+		t = self.label.get_text()
+		if t != self.message_text:
+			self.message_text = t 
+			self.create(self.proc_type, self.message_text)
 
-		self.create(self.proc_type, self.message_text)
-		if self.obj_id is None:
-			log.debug("MessageElement: could not create message obj for '%s'" 
-						% self.message_text)
-		else:
+		if self.obj_id is not None:
+			self.obj_state = self.OBJ_COMPLETE 
 			self.send_params()
 			self.draw_ports()
+			self.texture.invalidate()
 
 	def text_changed_cb(self, *args):
 		lwidth = self.label.get_property('width') 

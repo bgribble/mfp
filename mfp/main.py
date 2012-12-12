@@ -31,7 +31,6 @@ class MFPCommand(RPCWrapper):
 
 		obj = MFPApp().create(objtype, initargs, patch, scope, obj_name)
 		if obj is None:
-			log.debug("MFPApp.create: failed")
 			return None
 		return obj.gui_params
 
@@ -78,6 +77,11 @@ class MFPCommand(RPCWrapper):
 	def set_params(self, obj_id, params):
 		obj = MFPApp().recall(obj_id)
 		obj.gui_params = params
+
+	@rpcwrap
+	def set_gui_created(self, obj_id, value):
+		obj = MFPApp().recall(obj_id)
+		obj.gui_created = value 
 
 	@rpcwrap
 	def get_info(self, obj_id):
@@ -201,8 +205,7 @@ class MFPApp (object):
 		from . import osc 
 		self.osc_mgr = osc.MFPOscManager(5555)
 		self.osc_mgr.start()
-		log.debug("OSC started on port 5555")
-
+		log.debug("OSC server started (UDP/5555)")
 
 
 	def remember(self, obj):
@@ -235,7 +238,7 @@ class MFPApp (object):
 			log.debug("Caught exception while trying to create %s (%s)" 
 					  % (init_type, init_args))
 			log.debug(e)
-			raise
+			return None 
 
 	def resolve(self, name, queryobj=None):
 		'''

@@ -21,12 +21,18 @@ class PatchElement (Clutter.Group):
 	porthole_border = 1
 	porthole_minspace = 10
 
+	OBJ_NONE = 0
+	OBJ_HALFCREATED = 1
+	OBJ_ERROR = 2
+	OBJ_COMPLETE = 3
+
 	def __init__(self, window, x, y):
 		# MFP object and UI descriptors 
 		self.obj_id = None
 		self.obj_name = None 
 		self.obj_type = None
 		self.obj_args = None
+		self.obj_state = self.OBJ_COMPLETE
 		self.num_inlets = 0
 		self.num_outlets = 0
 		self.dsp_inlets = []
@@ -76,8 +82,10 @@ class PatchElement (Clutter.Group):
 
 	def create(self, obj_type, init_args):
 		scopename = self.layer.scope
-
 		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, None)
+		if objinfo is None:
+			return None 
+
 		self.obj_id = objinfo.get('obj_id')
 		self.obj_name = objinfo.get('name')
 		self.obj_args = objinfo.get('initargs')
@@ -89,6 +97,7 @@ class PatchElement (Clutter.Group):
 		if self.obj_id is not None:
 			MFPGUI().remember(self)
 			self.send_params()
+			MFPGUI().mfp.set_gui_created(self.obj_id, True)
 		return self.obj_id
 			
 	def send_params(self, **extras):

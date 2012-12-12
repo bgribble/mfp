@@ -96,6 +96,7 @@ class GUICommand (RPCWrapper):
 		MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, params))
 
 	def _create(self, obj_type, obj_args, obj_id, params): 
+		from .gui.patch_element import PatchElement
 		from .gui.processor_element import ProcessorElement
 		from .gui.message_element import MessageElement
 		from .gui.text_element import TextElement
@@ -125,6 +126,7 @@ class GUICommand (RPCWrapper):
 			o.obj_id = obj_id
 			o.obj_type = obj_type
 			o.obj_args = obj_args
+			o.obj_state = PatchElement.OBJ_COMPLETE 
 			o.configure(params)
 			#o.draw_ports()
 			MFPGUI().remember(o)

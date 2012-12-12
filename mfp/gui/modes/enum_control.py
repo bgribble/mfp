@@ -5,6 +5,7 @@ enum_control.py: EnumControl major mode
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
+import math 
 from ..input_mode import InputMode
  
 class EnumControlMode (InputMode):
@@ -12,6 +13,7 @@ class EnumControlMode (InputMode):
 		self.manager = window.input_mgr
 		self.window = window 
 		self.enum = element
+		self.value = element.value 
 
 		self.drag_started = True
 		self.drag_start_x = self.manager.pointer_x
@@ -22,11 +24,11 @@ class EnumControlMode (InputMode):
 		InputMode.__init__(self, "EnumControl")
 
 		self.bind("M1DOWN", self.drag_start)
-		self.bind("M1-MOTION", lambda: self.drag_selected(0.5), 
+		self.bind("M1-MOTION", lambda: self.drag_selected(1.0), 
 			"Change value (1x speed)")
-		self.bind("S-M1-MOTION", lambda: self.drag_selected(5), 
+		self.bind("S-M1-MOTION", lambda: self.drag_selected(10.0), 
 			"Change value (10x speed)")
-		self.bind("C-M1-MOTION", lambda: self.drag_selected(50), 
+		self.bind("C-M1-MOTION", lambda: self.drag_selected(100.0), 
 			"Change value (100x speed)")
 		self.bind("M1UP", self.drag_end)
 
@@ -40,6 +42,7 @@ class EnumControlMode (InputMode):
 			self.drag_start_y = self.manager.pointer_y
 			self.drag_last_x = self.manager.pointer_x
 			self.drag_last_y = self.manager.pointer_y
+			self.value = self.enum.value
 			return True
 		else:
 			return False
@@ -54,7 +57,18 @@ class EnumControlMode (InputMode):
 		self.drag_last_x = self.manager.pointer_x
 		self.drag_last_y = self.manager.pointer_y 
 
-		self.enum.update_value(self.enum.value - delta*dy)
+		if self.enum.scientific:
+			try: 
+				logdigits = int(math.log10(self.enum.value))
+			except ValueError:
+				logdigits = 0 
+
+			base_incr = 10**(logdigits - self.enum.digits)
+		else:
+			base_incr = 10**(-self.enum.digits)
+
+		self.value -= delta*base_incr*float(dy)
+		self.enum.update_value(self.value)
 		return True
 
 	def drag_end(self):

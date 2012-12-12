@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter
+import cairo
 import math 
 from patch_element import PatchElement
 from mfp import MFPGUI
@@ -30,6 +31,8 @@ class EnumElement (PatchElement):
 		self.connections_in = [] 
 		self.editable = False 
 		self.update_required = True
+
+		self.obj_state = self.OBJ_HALFCREATED
 
 		# create elements
 		self.texture = Clutter.CairoTexture.new(35, 25)
@@ -63,21 +66,28 @@ class EnumElement (PatchElement):
 		return self.format_str % value 
 
 	def draw_cb(self, texture, ct):
-		w = self.texture.get_property('surface_width')-2
-		h = self.texture.get_property('surface_height')-2
+		w = self.texture.get_property('surface_width')-1
+		h = self.texture.get_property('surface_height')-1
 		self.texture.clear()
 		if self.selected: 
 			color = self.stage.color_selected
 		else:
 			color = self.stage.color_unselected
 
+		if self.obj_state == self.OBJ_COMPLETE:
+			ct.set_dash([])
+		else:
+			ct.set_dash([8, 4])
+
+		ct.set_line_width(2.0)
+		ct.set_antialias(cairo.ANTIALIAS_NONE)
 		ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
 		ct.translate(0.5, 0.5)
 		ct.move_to(1,1)
 		ct.line_to(1, h)
 		ct.line_to(w, h)
-		ct.line_to(w, h/3.0)
-		ct.line_to(w-h/3.0, 1)
+		ct.line_to(w, h/3.0+1)
+		ct.line_to(w - h/3.0, 1)
 		ct.line_to(1,1)
 		ct.close_path()
 		ct.stroke()
@@ -96,6 +106,7 @@ class EnumElement (PatchElement):
 			self.set_size(new_w, self.texture.get_height())
 			self.texture.set_size(new_w, self.texture.get_height())
 			self.texture.set_surface_size(int(new_w), self.texture.get_property('surface_height'))
+			self.draw_ports()
 			self.texture.invalidate()
 
 	def create_obj(self):
@@ -103,9 +114,12 @@ class EnumElement (PatchElement):
 			self.create(self.proc_type, str(self.value))
 		if self.obj_id is None:
 			print "MessageElement: could not create message obj"
+		else: 
+			self.obj_state = self.OBJ_COMPLETE 
 
 		self.send_params()
 		self.draw_ports()
+		self.texture.invalidate()
 
 	def move(self, x, y):
 		self.position_x = x
@@ -120,11 +134,14 @@ class EnumElement (PatchElement):
 
 	def update_value(self, value):
 		# called by enumcontrolmode 
-		self.value = value
-		self.label.set_text(self.format_value(self.value))
+		str_rep = self.format_value(value)
+		self.label.set_text(str_rep)
+		self.value = float(str_rep)
+
 		if self.obj_id is None:
 			self.create_obj()
-		MFPGUI().mfp.send(self.obj_id, 0, self.value)
+		if self.obj_id is not None:
+			MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def label_edit_start(self):
 		pass
@@ -138,6 +155,7 @@ class EnumElement (PatchElement):
 		MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def configure(self, params):
+		print "enum config:", params
 		fmt_changed = False 
 		val_changed = False 
 

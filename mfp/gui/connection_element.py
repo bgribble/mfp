@@ -1,4 +1,5 @@
 
+import cairo
 from patch_element import PatchElement
 from gi.repository import Clutter 
 import math 
@@ -73,6 +74,7 @@ class ConnectionElement(PatchElement):
 		else:
 			c = self.stage.color_unselected
 		texture.clear()
+		ctx.set_antialias(cairo.ANTIALIAS_NONE)
 		ctx.set_source_rgba(c.red, c.green, c.blue, 1.0)
 		ctx.set_line_width(self.LINE_WIDTH)
 		ctx.move_to(self.width/2.0, 0)

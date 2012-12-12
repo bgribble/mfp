@@ -36,7 +36,6 @@ class MFPOscManager(Thread):
 		log.debug("OSC: unhandled message", path, args)
 
 	def run(self):
-		log.debug("OSC server started")
 		while not self.quitreq and self.server is not None:
 			self.server.recv(100)
 		log.debug("OSC server exiting")
