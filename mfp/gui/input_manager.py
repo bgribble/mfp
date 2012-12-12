@@ -7,12 +7,13 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from input_mode import InputMode
 from key_sequencer import KeySequencer 
+from .modes.global_mode import GlobalMode 
 from mfp import log 
 
 class InputManager (object):
 	def __init__(self, window):
 		self.window = window
-		self.global_mode = InputMode("Global bindings")
+		self.global_mode = None 
 		self.major_mode = None
 		self.minor_modes = [] 
 		self.keyseq = KeySequencer()

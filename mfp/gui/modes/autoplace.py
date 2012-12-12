@@ -24,8 +24,8 @@ class AutoplaceMode (InputMode):
 	def __init__(self, window, callback=None, initially_below=True):
 		self.window = window 
 		self.callback = callback
-
-		self.key_widget = window.selected 
+		self.key_widget = None 
+		self.layer = None 
 		self.placement = 0
 
 		InputMode.__init__(self, "Auto-place next element")
@@ -33,6 +33,14 @@ class AutoplaceMode (InputMode):
 		self.bind("a", self.autoplace_below, "Choose next (below)")
 		self.bind("A", self.autoplace_above, "Choose next (above)")
 		self.bind("ESC", self.autoplace_disable, "Return to manual positioning")
+	
+		if self.window.selected and self.window.selected.layer == self.window.selected_layer:
+			self.key_widget = self.window.selected
+
+		if self.key_widget is not None:
+			self.layer = self.key_widget.layer
+		else:
+			self.layer = window.active_layer()
 
 		if initially_below:
 			self.autoplace_below()
@@ -44,15 +52,25 @@ class AutoplaceMode (InputMode):
 		if self.callback:
 			self.callback(x, y)
 
-	def autoplace_above(self):
+	def _update_key(self):
+		self.layer = self.window.selected_layer 
+
+		# if current layer has changed, can't use key widget 
+		if (self.key_widget is not None and self.key_widget.layer != self.layer):
+			self.placement = 0 
+			self.key_widget = None 
+
 		# if selection has changed, reset placement number 
-		if self.window.selected and self.window.selected != self.key_widget:
+		if (self.window.selected and self.window.selected != self.key_widget
+	        and self.window.selected.layer == self.layer):
 			self.placement = 0 
 			self.key_widget = self.window.selected 
-	
+
+	def autoplace_above(self):
+		self._update_key()
 		if self.key_widget is None:
-			if len(self.window.objects):
-				self.window.key_widget = self.window.objects[-1]
+			if len(self.layer.objects):
+				self.key_widget = self.layer.objects[-1]
 			else: 
 				return self.autoplace_noselection()
 
@@ -72,14 +90,10 @@ class AutoplaceMode (InputMode):
 		return True 
 
 	def autoplace_below(self):
-		# if selection has changed, reset placement number 
-		if self.window.selected and self.window.selected != self.key_widget:
-			self.placement = 0 
-			self.key_widget = self.window.selected 
-	
+		self._update_key()	
 		if self.key_widget is None:
-			if len(self.window.objects):
-				self.window.key_widget = self.window.objects[-1]
+			if len(self.layer.objects):
+				self.key_widget = self.layer.objects[-1]
 			else: 
 				return self.autoplace_noselection()
 
@@ -91,7 +105,6 @@ class AutoplaceMode (InputMode):
 		x, y = self.key_widget.port_center(PatchElement.PORT_OUT, self.placement)
 		x -= (PatchElement.porthole_border + PatchElement.porthole_width/2.0) 
 		y = self.find_free_space_down(x, y + self.BELOW_SPACING) 
-		
 
 		self._set_autoplace(x, y)	
 		self.placement += 1 
@@ -103,7 +116,7 @@ class AutoplaceMode (InputMode):
 		width, height = self.window.stage.get_size() 
 		while (test_y > 0):
 			clear = True
-			for o in self.window.objects: 
+			for o in self.layer.objects: 
 				ow, oh = o.get_size() 
 				if isinstance(o, ConnectionElement):
 					continue
@@ -127,7 +140,7 @@ class AutoplaceMode (InputMode):
 		while (test_y < height - self.Y_CLEAR):
 			clear = True
 			overlaps = [] 
-			for o in self.window.objects: 
+			for o in self.layer.objects: 
 				ow, oh = o.get_size() 
 				if isinstance(o, ConnectionElement):
 					continue

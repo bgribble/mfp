@@ -19,6 +19,7 @@ from mfp import log
 
 from .input_manager import InputManager
 from .console import ConsoleMgr 
+from .modes.global_mode import GlobalMode 
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode 
 from .modes.select_mru import SelectMRUMode
@@ -53,6 +54,8 @@ class PatchWindow(object):
 		self.hud_animation = None 
 		self.hud_text.set_property("opacity", 0)
 		self.autoplace_marker = None 
+		self.autoplace_layer = None 
+
 		self.stage.add_actor(self.group)
 		self.stage.add_actor(self.hud_text) 
 
@@ -116,16 +119,8 @@ class PatchWindow(object):
 		self.stage.connect('leave-event', handler) 
 		self.stage.connect('scroll-event', grab_handler) 
 
-		# global keybindings 
-		self.input_mgr.global_binding("PGUP", self.layer_select_up, "Select higher layer")
-		self.input_mgr.global_binding("PGDN", self.layer_select_down, "Select lower layer")
-		self.input_mgr.global_binding("C-n", self.layer_new, "Create new layer")
-		self.input_mgr.global_binding("C-N", self.layer_new_scope, 
-								      "Create new layer in a new scope")
-		self.input_mgr.global_binding('C-e', self.toggle_major_mode, "Toggle edit/control")
-		self.input_mgr.global_binding('C-q', self.quit, "Quit")
-
 		# set initial major mode 
+		self.input_mgr.global_mode = GlobalMode(self)
 		self.input_mgr.major_mode = PatchEditMode(self)
 
 		# set tab stops on keybindings view 
@@ -306,7 +301,12 @@ class PatchWindow(object):
 		if self.autoplace_marker is None:
 			self.autoplace_marker = Clutter.Text()
 			self.autoplace_marker.set_text("+")
-			self.active_group().add_actor(self.autoplace_marker)
+			self.autoplace_layer = self.selected_layer
+			self.autoplace_layer.group.add_actor(self.autoplace_marker)
+		elif self.autoplace_layer != self.selected_layer: 
+			self.autoplace_layer.group.remove_actor(self.autoplace_marker)
+			self.autoplace_layer = self.selected_layer 
+			self.autoplace_layer.group.add_actor(self.autoplace_marker)
 		self.autoplace_marker.set_position(x, y)
 		self.autoplace_marker.set_depth(-10)
 		self.autoplace_marker.show()
@@ -326,7 +326,9 @@ class PatchWindow(object):
 		self.objects.append(element)
 		self.input_mgr.event_sources[element] = element
 		self.active_group().add_actor(element)
-		element.layer = self.active_layer()
+
+		self.active_layer().add(element)
+
 		if element.obj_id is not None:
 			element.send_params()
 		self.object_store_update()
@@ -335,8 +337,9 @@ class PatchWindow(object):
 		if self.selected == element:
 			self.unselect(element)
 
-		element.layer = None 
+		element.layer.remove(element)
 		self.objects.remove(element)
+
 		del self.input_mgr.event_sources[element]
 		self.active_group().remove_actor(element)
 		self.object_store_update()
@@ -410,6 +413,7 @@ class PatchWindow(object):
 												 disp_time * 1000.0, 
 												 [ 'opacity' ], [ 0 ])
 		self.hud_animation.connect_after("completed", anim_complete)
+	
 
 # additional methods in @extends wrappers 
 import patch_layer

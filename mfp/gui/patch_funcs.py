@@ -45,31 +45,40 @@ def unselect_all(self):
 
 @extends(PatchWindow)
 def select_next(self):
-	if len(self.objects) == 0:
+	if len(self.selected_layer.objects) == 0:
 		return False 
 
-	selectable = [ o for o in self.objects if not isinstance(o, ConnectionElement)]
-	if self.selected is None and len(selectable) > 0:
-		self.select(selectable[0])
-		return True 
+	if (self.selected is None or self.selected not in self.selected_layer.objects):
+		candidate = 0 
 	else:
-		cur_ind = selectable.index(self.selected)
-		self.select(selectable[(cur_ind+1) % len(selectable)])
-		return True 
+		candidate = self.selected_layer.objects.index(self.selected)
+		candidate = (candidate + 1) % len(self.selected_layer.objects)
+
+	while candidate < len(self.selected_layer.objects):
+		if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
+			self.select(self.selected_layer.objects[candidate])
+			return True 
+
+		candidate += 1
+	return False 
 
 @extends(PatchWindow)
 def select_prev(self):
-	if len(self.objects) == 0:
+	if len(self.selected_layer.objects) == 0:
 		return False 
 
-	selectable = [ o for o in self.objects if not isinstance(o, ConnectionElement)]
-	if self.selected is None and len(selectable) > 0:
-		self.select(selectable[-1])
-		return True 
+	if (self.selected is None or self.selected not in self.selected_layer.objects):
+		candidate = -1 
 	else:
-		cur_ind = selectable.index(self.selected) 
-		self.select(selectable[cur_ind-1])
-		return True 
+		candidate = self.selected_layer.objects.index(self.selected) -1
+
+	while candidate > -len(self.selected_layer.objects):
+		if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
+			self.select(self.selected_layer.objects[candidate])
+			return True 
+		candidate -= 1
+
+	return False 
 
 @extends(PatchWindow)
 def select_mru(self):

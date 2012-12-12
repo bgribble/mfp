@@ -8,6 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode 
 from .connection import ConnectionMode
 from .autoplace import AutoplaceMode 
+from .selection import SelectionEditMode
 
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
@@ -27,6 +28,7 @@ class PatchEditMode (InputMode):
 		self.drag_start_off_y = None 
 		self.drag_target = None 
 		self.autoplace_mode = None
+		self.selection_edit_mode = None 
 
 		InputMode.__init__(self, "Edit patch")
 		
@@ -49,44 +51,15 @@ class PatchEditMode (InputMode):
 		self.bind("V", lambda: self.add_element(ReceiveViaElement), 
 			"Add receive message via")
 
+		self.bind("C-n", self.window.layer_new, "Create new layer")
+		self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
 
-		self.bind("TAB", self.window.select_next, 
-			"Select next element")
-		self.bind("S-TAB", self.window.select_prev, 
-			"Select previous element")
-		self.bind("C-TAB", self.window.select_mru, 
-			"Select most-recent element")
-		
-		self.bind("UP", lambda: self.window.move_selected(0, -1), 
-			"Move element up 1 unit")
-		self.bind("DOWN", lambda: self.window.move_selected(0, 1), 
-			"Move element down 1 unit")
-		self.bind("LEFT", lambda: self.window.move_selected(-1, 0), 
-			"Move element left one unit")
-		self.bind("RIGHT", lambda: self.window.move_selected(1, 0), 
-			"Move element right one unit") 
-
-		self.bind("S-UP", lambda: self.window.move_selected(0, -5), "Move element up 5")
-		self.bind("S-DOWN", lambda: self.window.move_selected(0, 5), "Move element down 5")
-		self.bind("S-LEFT", lambda: self.window.move_selected(-5, 0), "Move element left 5")
-		self.bind("S-RIGHT", lambda: self.window.move_selected(5, 0), "Move element right 5")
-
-		self.bind("C-UP", lambda: self.window.move_selected(0,  25), "Move element up 25")
-		self.bind("C-DOWN", lambda: self.window.move_selected(0, 25), "Move element down 25")
-		self.bind("C-LEFT", lambda: self.window.move_selected( 25, 0), "Move element left 25")
-		self.bind("C-RIGHT", lambda: self.window.move_selected(25, 0), "Move element right 25")
-
+		self.bind("TAB", self.select_next, "Select next element")
+		self.bind("S-TAB", self.select_prev, "Select previous element")
+		self.bind("C-TAB", self.select_mru, "Select most-recent element")
 
 		self.bind("a", self.auto_place_below, "Auto-place below")
 		self.bind("A", self.auto_place_above, "Auto-place above")
-		self.bind("c", self.connect_fwd, "Connect from element")
-		self.bind("C", self.connect_rev, "Connect to element")
-
-		self.bind("!", self.transient_msg, "Send message to element")
-
-		self.bind("DEL", self.window.delete_selected, "Delete element")
-		self.bind("BS", self.window.delete_selected, "Delete element")
-		self.bind("RET", self.window.edit_selected, "Edit element")
 
 		self.bind("M1DOWN", self.drag_start, "Select element/start drag")
 		self.bind("M1-MOTION", self.drag_selected, "Move element or view")
@@ -101,6 +74,7 @@ class PatchEditMode (InputMode):
 
 
 	def add_element(self, factory):
+		self.enable_selection_edit()
 		if self.autoplace_mode is None:
 			self.window.add_element(factory)
 		else: 
@@ -117,13 +91,13 @@ class PatchEditMode (InputMode):
 
 	def auto_place_below(self):
 		self.autoplace_mode = AutoplaceMode(self.window, callback=self.set_autoplace, 
-									  initially_below=True)
+									        initially_below=True)
 		self.manager.enable_minor_mode(self.autoplace_mode)
 		return True 
 
 	def auto_place_above(self):
 		self.autoplace_mode = AutoplaceMode(self.window, callback=self.set_autoplace, 
-									  initially_below=False)
+									        initially_below=False)
 		self.manager.enable_minor_mode(self.autoplace_mode)
 		return True 
 
@@ -134,17 +108,35 @@ class PatchEditMode (InputMode):
 			self.manager.disable_minor_mode(self.autoplace_mode)
 			self.autoplace_mode = None 
 
-	def transient_msg(self):
-		if self.window.selected is not None: 
-			return self.window.add_element(TransientMessageElement)
-		else:
-			return False 
+	def select_next(self):
+		self.window.select_next()
+		self.enable_selection_edit()
+
+	def select_prev(self):
+		self.window.select_prev()
+		self.enable_selection_edit()
+
+	def select_mru(self):
+		self.window.select_mru()
+		self.enable_selection_edit()
+
+	def enable_selection_edit(self):
+		if self.selection_edit_mode is None:
+			self.selection_edit_mode = SelectionEditMode(self.window)
+			self.manager.enable_minor_mode(self.selection_edit_mode)
+
+	def disable_selection_edit(self):
+		if self.selection_edit_mode is not None:
+			self.manager.disable_minor_mode(self.selection_edit_mode)
+			self.selection_edit_mode = None 
 
 	def drag_start(self):
 		if self.manager.pointer_obj is None:
 			self.window.unselect_all()
+			self.disable_selection_edit()
 		elif self.manager.pointer_obj != self.window.selected:
 			self.window.select(self.manager.pointer_obj)
+			self.enable_selection_edit()
 
 		self.drag_started = True
 		if isinstance(self.manager.pointer_obj, ConnectionElement):
@@ -191,19 +183,9 @@ class PatchEditMode (InputMode):
 	def drag_end(self):
 		self.drag_started = False
 		if self.drag_target:
+			self.drag_target.layer.resort(self.drag_target)
 			self.drag_target.send_params()
 		self.drag_target = None 
-		return True 
-
-	def connect_fwd(self):
-		if self.window.selected:
-			self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected))
-		return True 
-	
-	def connect_rev(self):
-		if self.window.selected:
-			self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected, 
-												          connect_rev=True))
 		return True 
 
 	def close(self):
