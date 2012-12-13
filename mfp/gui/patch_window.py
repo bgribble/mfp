@@ -50,14 +50,11 @@ class PatchWindow(object):
 		# objects for stage -- self.group gets moved/scaled to adjust 
 		# the view, so anything not in it will be static on the stage 
 		self.group = Clutter.Group()
-		self.hud_text = Clutter.Text() 
-		self.hud_animation = None 
-		self.hud_text.set_property("opacity", 0)
+		self.hud_history = [] 
 		self.autoplace_marker = None 
 		self.autoplace_layer = None 
 
 		self.stage.add_actor(self.group)
-		self.stage.add_actor(self.hud_text) 
 
 		# self.objects is PatchElement subclasses represented the
 		# currently-displayed patch(es)
@@ -398,21 +395,34 @@ class PatchWindow(object):
 		buf.move_mark(mark, iterator)
 		self.log_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 	
-	def hud_write(self, msg, disp_time=2.0):
-		def anim_complete(*args):
-			self.hud_animation = None 
+	def hud_write(self, msg, disp_time=3.0):
+		def anim_complete(anim):
+			new_history = [] 
+			for h_actor, h_anim, h_msg in self.hud_history: 
+				if anim != h_anim:
+					new_history.append((h_actor, h_anim, h_msg))
+				else:
+					h_actor.destroy()
+			self.hud_history = new_history
 
-		if self.hud_animation is not None: 
-			self.hud_animation.completed()
-		
-		self.hud_text.set_position(10, self.stage.get_height() - 25)
-		self.hud_text.set_markup(msg)
-		self.hud_text.set_property("opacity", 255)
 
-		self.hud_animation = self.hud_text.animatev(Clutter.AnimationMode.EASE_IN_CUBIC, 
-												 disp_time * 1000.0, 
-												 [ 'opacity' ], [ 0 ])
-		self.hud_animation.connect_after("completed", anim_complete)
+		if not len(self.hud_history) or self.hud_history[-1][2] != msg:
+			for actor, anim, oldmsg in self.hud_history:
+				actor.set_position(actor.get_x(), actor.get_y() - 20)
+		else:
+			self.hud_history[-1][1].completed() 
+
+		actor = Clutter.Text()
+		self.stage.add_actor(actor)
+		actor.set_position(10, self.stage.get_height() - 25)
+		actor.set_property("opacity", 255)
+		actor.set_markup(msg)
+
+		animation = actor.animatev(Clutter.AnimationMode.EASE_IN_CUBIC, 
+							       disp_time * 1000.0, [ 'opacity' ], [ 0 ])
+		self.hud_history.append((actor, animation, msg))
+		animation.connect_after("completed", anim_complete)
+
 	
 
 # additional methods in @extends wrappers 

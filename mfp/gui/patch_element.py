@@ -84,6 +84,7 @@ class PatchElement (Clutter.Group):
 		scopename = self.layer.scope
 		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, None)
 		if objinfo is None:
+			self.stage.hud_write("ERROR: Could not create, see log for details")
 			return None 
 
 		self.obj_id = objinfo.get('obj_id')

@@ -88,6 +88,7 @@ class PatchEditMode (InputMode):
 			self.window.add_element(factory, self.autoplace_x+dx, self.autoplace_y+dy)
 			self.manager.disable_minor_mode(self.autoplace_mode)
 			self.autoplace_mode = None 
+		return True
 
 	def auto_place_below(self):
 		self.autoplace_mode = AutoplaceMode(self.window, callback=self.set_autoplace, 
@@ -107,28 +108,34 @@ class PatchEditMode (InputMode):
 		if x is None and y is None:
 			self.manager.disable_minor_mode(self.autoplace_mode)
 			self.autoplace_mode = None 
+		return True 
 
 	def select_next(self):
 		self.window.select_next()
 		self.enable_selection_edit()
+		return True 
 
 	def select_prev(self):
 		self.window.select_prev()
 		self.enable_selection_edit()
+		return True 
 
 	def select_mru(self):
 		self.window.select_mru()
 		self.enable_selection_edit()
+		return True 
 
 	def enable_selection_edit(self):
 		if self.selection_edit_mode is None:
 			self.selection_edit_mode = SelectionEditMode(self.window)
 			self.manager.enable_minor_mode(self.selection_edit_mode)
+		return True 
 
 	def disable_selection_edit(self):
 		if self.selection_edit_mode is not None:
 			self.manager.disable_minor_mode(self.selection_edit_mode)
 			self.selection_edit_mode = None 
+		return True 
 
 	def drag_start(self):
 		if self.manager.pointer_obj is None:
