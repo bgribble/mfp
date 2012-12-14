@@ -6,7 +6,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import alsaseq
-from threading import Thread
+from quittable_thread import QuittableThread
 from datetime import datetime 
 from . import appinfo 
 
@@ -76,7 +76,7 @@ class MidiControl (object):
 			self.controller = seqevent.data[1]
 			self.value = seqevent.data[2]
 
-class MFPMidiManager(Thread): 
+class MFPMidiManager(QuittableThread): 
 	etypemap = {
 		alsaseq.SND_SEQ_EVENT_SYSTEM: MidiUndef,
 		alsaseq.SND_SEQ_EVENT_RESULT: MidiUndef,
@@ -144,8 +144,7 @@ class MFPMidiManager(Thread):
 		self.start_time = None 
 		self.handlers = {} 
 
-		self.quitreq = False 	
-		Thread.__init__(self)
+		QuittableThread.__init__(self)
 
 	def register(self, callback, ports=None):
 		if ports is None:
@@ -164,7 +163,7 @@ class MFPMidiManager(Thread):
 		log.debug("ALSA sequencer started")
 
 		alsafd = alsaseq.fd() 
-		while not self.quitreq:
+		while not self.join_req:
 			fds_ready = select.select([alsafd], [], [], 0.1) 
 			if alsaseq.inputpending():
 				raw_event = alsaseq.input()
@@ -195,7 +194,3 @@ class MFPMidiManager(Thread):
 	def send(self, port, data):
 		pass
 
-	def finish(self):
-		self.quitreq = True 
-		self.join()
-		

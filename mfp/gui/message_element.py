@@ -27,6 +27,7 @@ class MessageElement (PatchElement):
 		PatchElement.__init__(self, window, x, y)
 
 		self.message_text = None 
+		self.clickstate = False 
 
 		# create elements
 		self.texture = Clutter.CairoTexture.new(35,25)
@@ -53,8 +54,13 @@ class MessageElement (PatchElement):
 		self.update_required = True
 
 	def draw_cb(self, texture, ct):
-		w = self.texture.get_property('surface_width')-1
-		h = self.texture.get_property('surface_height')-1
+		if self.clickstate:
+			lw = 5.0
+		else:
+			lw = 2.0
+
+		w = self.texture.get_property('surface_width')-lw
+		h = self.texture.get_property('surface_height')-lw
 		c = None
 		if self.selected: 
 			c = self.stage.color_selected
@@ -68,24 +74,29 @@ class MessageElement (PatchElement):
 		else:
 			ct.set_dash([8, 4])
 
-		ct.set_line_width(2.0)
+		ct.set_line_width(lw)
+
 		ct.set_antialias(cairo.ANTIALIAS_NONE)
-		#ct.translate(0.5, 0.5)
+		ct.translate(lw/2.0, lw/2.0)
 		#ct.set_line_width(1.25)
-		ct.move_to(1,1)
-		ct.line_to(1, h)
+		ct.move_to(0,0)
+		ct.line_to(0, h)
 		ct.line_to(w, h)
-		ct.curve_to(w-8, h-8, w-8, 8, w, 1)
-		ct.line_to(1,1)
+		ct.curve_to(w-8, h-8, w-8, 8, w, 0)
+		ct.line_to(0,0)
 		ct.close_path()
 		ct.stroke()
 
 	def clicked(self, *args):
+		self.clickstate = True 
 		if self.obj_id is not None:
 			MFPGUI().mfp.send_bang(self.obj_id, 0) 
+		self.texture.invalidate()
 		return False 
 
 	def unclicked(self):
+		self.clickstate = False 
+		self.texture.invalidate()
 		return False 
 
 	def label_edit_start(self):

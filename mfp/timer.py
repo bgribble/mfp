@@ -3,21 +3,22 @@
 timer.py
 Multi-timer implementation
 '''
-from threading import Thread, Condition, Lock 
+
+from quittable_thread import QuittableThread
+from threading import Condition, Lock 
 from datetime import datetime, timedelta
 
 def tdmag(td):
 	return (td.days * 86400000 + td.seconds * 1000 + td.microseconds / 1000.0) / 1000.0
 
-class MultiTimer(Thread):
+class MultiTimer(QuittableThread):
 	def __init__(self):
-		Thread.__init__(self)
+		QuittableThread.__init__(self)
 
 		self.scheduled = [] 
 		self.lock = Lock()
 		self.cv = Condition(self.lock)
 		self.tolerance = timedelta(microseconds=1000)
-		self.join_req = False 
 		
 	def schedule(self, deadline, callback, data=[]):
 		with self.lock:

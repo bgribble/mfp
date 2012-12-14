@@ -5,14 +5,13 @@ osc.py: OSC server for MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from threading import Thread 
+from quittable_thread import QuittableThread 
 import liblo
 from mfp import log
 
-class MFPOscManager(Thread):
+class MFPOscManager(QuittableThread):
 	def __init__(self, port):
 		self.port = port 
-		self.quitreq = False 
 		self.server = None 
 
 		try:
@@ -21,7 +20,7 @@ class MFPOscManager(Thread):
 			print str(err)
 		
 		#self.server.add_method(None, None, self.default)
-		Thread.__init__(self)
+		QuittableThread.__init__(self)
 
 	def add_method(self, path, args, handler, data=None):
 		if data is not None:
@@ -36,11 +35,7 @@ class MFPOscManager(Thread):
 		log.debug("OSC: unhandled message", path, args)
 
 	def run(self):
-		while not self.quitreq and self.server is not None:
+		while not self.join_req and self.server is not None:
 			self.server.recv(100)
 		log.debug("OSC server exiting")
 		
-	def finish(self):
-		self.quitreq = True
-		self.join()
-

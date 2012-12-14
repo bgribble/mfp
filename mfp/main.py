@@ -289,14 +289,10 @@ class MFPApp (object):
 		if self.gui_process:
 			log.debug("MFPApp.finish: reaping GUI slave...")
 			self.gui_process.finish()
-
-		if self.midi_mgr: 
-			log.debug("MFPApp.finish: reaping MIDI thread...")
-			self.midi_mgr.finish()
-
-		if self.osc_mgr:
-			log.debug("MFPApp.finish: reaping OSC thread...")
-			self.osc_mgr.finish()
+	
+		from quittable_thread import QuittableThread
+		log.debug("MFPApp.finish: reaping threads...")
+		QuittableThread.finish_all()
 
 		log.debug("MFPApp.finish: all children reaped, good-bye!")
 
