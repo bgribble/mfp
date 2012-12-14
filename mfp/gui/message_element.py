@@ -14,6 +14,8 @@ from connection_element import ConnectionElement
 from mfp import MFPGUI
 from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
+from .modes.clickable import ClickableControlMode
+
 from mfp import log 
 
 class MessageElement (PatchElement):
@@ -45,9 +47,6 @@ class MessageElement (PatchElement):
 		self.label.set_color(window.color_unselected) 
 		self.label.connect('text-changed', self.text_changed_cb)
 
-		# click handler 
-		self.connect('button-press-event', self.button_press_cb)
-		
 		self.move(x, y)
 
 		# request update when value changes
@@ -81,9 +80,12 @@ class MessageElement (PatchElement):
 		ct.close_path()
 		ct.stroke()
 
-	def button_press_cb(self, *args):
+	def clicked(self, *args):
 		if self.obj_id is not None:
 			MFPGUI().mfp.send_bang(self.obj_id, 0) 
+		return False 
+
+	def unclicked(self):
 		return False 
 
 	def label_edit_start(self):
@@ -159,6 +161,9 @@ class MessageElement (PatchElement):
 
 	def make_edit_mode(self):
 		return LabelEditMode(self.stage, self, self.label)
+
+	def make_control_mode(self):
+		return ClickableControlMode(self.stage, self, "Message control")
 
 class TransientMessageElement (MessageElement): 
 	ELBOW_ROOM = 50

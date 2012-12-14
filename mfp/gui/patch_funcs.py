@@ -14,14 +14,15 @@ from .modes.select_mru import SelectMRUMode
 def select(self, obj):
 	if self.selected is not obj and self.selected is not None:
 		self.unselect(self.selected)
-	obj.select()
+	
 	self.selected = obj
+	obj.select()
 	
 	obj.begin_control()
 
 	# FIXME hook
-	SelectMRUMode.touch(obj) 
-
+	#SelectMRUMode.touch(obj) 
+	print "before osu:", self.selected
 	self.object_selection_update()
 	return True 
 

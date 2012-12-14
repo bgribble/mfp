@@ -18,6 +18,7 @@ from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement 
 from ..via_element import SendViaElement, ReceiveViaElement
+from ..button_element import BangButtonElement, ToggleButtonElement
 
 class PatchEditMode (InputMode):
 	def __init__(self, window):
@@ -50,6 +51,9 @@ class PatchEditMode (InputMode):
 			"Add send message via")
 		self.bind("V", lambda: self.add_element(ReceiveViaElement), 
 			"Add receive message via")
+		
+		self.bind("u", lambda: self.add_element(ToggleButtonElement),
+			"Add button")
 
 		self.bind("C-n", self.window.layer_new, "Create new layer")
 		self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
@@ -139,10 +143,13 @@ class PatchEditMode (InputMode):
 
 	def drag_start(self):
 		if self.manager.pointer_obj is None:
+			print "PatchEditMode: unselect_all, pointer_obj is None"
 			self.window.unselect_all()
 			self.disable_selection_edit()
 		elif self.manager.pointer_obj != self.window.selected:
+			print "PatchEditMode: selecting new, pointer_obj is different", self.manager.pointer_obj, self.window.selected 
 			self.window.select(self.manager.pointer_obj)
+			#self.manager.synthesize("M1DOWN")
 			self.enable_selection_edit()
 
 		self.drag_started = True
@@ -162,6 +169,7 @@ class PatchEditMode (InputMode):
 		self.drag_start_y = py
 		self.drag_last_x = px
 		self.drag_last_y = py 
+		print "PatchEditMode: leaving drag_start, window selected is", self.window.selected
 		return True 
 
 	def drag_selected(self):
@@ -195,7 +203,7 @@ class PatchEditMode (InputMode):
 		self.drag_target = None 
 		return True 
 
-	def close(self):
+	def disable(self):
 		if self.autoplace_mode:
 			self.manager.disable_minor_mode(self.autoplace_mode)
 			self.autoplace_mode = None 

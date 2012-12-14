@@ -51,8 +51,8 @@ class KeySequencer (object):
 					pass
 
 		# BUTTON PRESS, BUTTON RELEASE, MOUSE MOTION
-		elif event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.MOTION,
-					        Clutter.EventType.SCROLL):
+		elif event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE, 
+					        Clutter.EventType.MOTION, Clutter.EventType.SCROLL):
 			self.sequences.append(self.canonicalize(event))	
 		
 	def canonicalize(self, event):

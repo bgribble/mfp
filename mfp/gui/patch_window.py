@@ -60,6 +60,8 @@ class PatchWindow(object):
 		# currently-displayed patch(es)
 		self.patches = [] 
 		self.objects = [] 
+		self.object_counts_by_type = {} 
+		self.object_paths = {} 
 
 		self.selected_patch = None 
 		self.selected_layer = None  
@@ -157,6 +159,7 @@ class PatchWindow(object):
 					self.select(obj)
 					if obj.layer is not None:
 						self.layer_select(obj.layer)
+			return True 
 
 		self.object_store = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT)
 		self.object_view.set_model(self.object_store)
@@ -197,19 +200,19 @@ class PatchWindow(object):
 			self.layer_select(self.selected_patch.layers[0])
 		
 	def object_selection_update(self):
-		found = []
+		found = [ None ]
 		def	check(model, path, it, data):
 			if self.object_store.get_value(it, 1) == self.selected:
-				found[:] = path
+				found[0] = path.to_string()
 				return True
 			return False 
-
 		model, iter = self.object_view.get_selection().get_selected()
 
 		if iter is None or self.object_store.get_value(iter, 1) != self.selected: 
 			self.object_store.foreach(check, None)
-			if found:
-				self.object_view.get_selection().select_path(found[0])
+			if found[0] is not None:
+				path = Gtk.TreePath.new_from_string(found[0])
+				self.object_view.get_selection().select_path(path)
 
 	def object_store_update(self):
 		scopes = {} 
@@ -235,6 +238,7 @@ class PatchWindow(object):
 				self.object_store.set_value(oiter, 1, l)
 				scopes[l.scope] = oiter
 
+		self.object_paths = {}
 		for o in self.objects:
 			if o.obj_name is None:
 				continue
@@ -244,6 +248,7 @@ class PatchWindow(object):
 			else:
 				parent = scopes.get(o.layer.scope)
 			oiter = self.object_store.append(parent)
+			self.object_paths[o] = self.object_store.get_path(oiter)
 			self.object_store.set_value(oiter, 0, o.obj_name)
 			self.object_store.set_value(oiter, 1, o)
 		
@@ -321,9 +326,10 @@ class PatchWindow(object):
 
 	def register(self, element):
 		self.objects.append(element)
+		oldcount = self.object_counts_by_type.get(element.display_type, 0)
+		self.object_counts_by_type[element.display_type] = oldcount + 1
 		self.input_mgr.event_sources[element] = element
 		self.active_group().add_actor(element)
-
 		self.active_layer().add(element)
 
 		if element.obj_id is not None:
@@ -345,7 +351,14 @@ class PatchWindow(object):
 		SelectMRUMode.forget(element)
 
 	def refresh(self, element): 
-		self.object_store_update()
+		path = self.object_paths.get(element)
+
+		if path: 
+			iter = self.object_store.get_iter(path)
+			self.object_store.set_value(iter, 0, element.obj_name)
+		else:
+			print "refresh: object not found in object_paths", element
+			return 
 
 	def add_element(self, factory, x=None, y=None):
 		if x is None:
@@ -406,11 +419,14 @@ class PatchWindow(object):
 			self.hud_history = new_history
 
 
-		if not len(self.hud_history) or self.hud_history[-1][2] != msg:
+		if not len(self.hud_history) or self.hud_history[0][2] != msg:
 			for actor, anim, oldmsg in self.hud_history:
 				actor.set_position(actor.get_x(), actor.get_y() - 20)
 		else:
-			self.hud_history[-1][1].completed() 
+			self.hud_history[0][1].completed() 
+
+		for actor, anim, oldmsg in self.hud_history[5:]:
+			anim.completed()
 
 		actor = Clutter.Text()
 		self.stage.add_actor(actor)
@@ -420,7 +436,7 @@ class PatchWindow(object):
 
 		animation = actor.animatev(Clutter.AnimationMode.EASE_IN_CUBIC, 
 							       disp_time * 1000.0, [ 'opacity' ], [ 0 ])
-		self.hud_history.append((actor, animation, msg))
+		self.hud_history[0:0] = [(actor, animation, msg)]
 		animation.connect_after("completed", anim_complete)
 
 	

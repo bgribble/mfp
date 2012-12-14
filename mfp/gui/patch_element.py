@@ -82,7 +82,11 @@ class PatchElement (Clutter.Group):
 
 	def create(self, obj_type, init_args):
 		scopename = self.layer.scope
-		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, None)
+
+		name_index = self.stage.object_counts_by_type.get(self.display_type, 0)
+		name = "%s_%s" % (self.display_type, name_index)
+
+		objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, name) 
 		if objinfo is None:
 			self.stage.hud_write("ERROR: Could not create, see log for details")
 			return None 
@@ -99,6 +103,8 @@ class PatchElement (Clutter.Group):
 			MFPGUI().remember(self)
 			self.send_params()
 			MFPGUI().mfp.set_gui_created(self.obj_id, True)
+
+		self.stage.refresh(self)
 		return self.obj_id
 			
 	def send_params(self, **extras):
@@ -149,7 +155,6 @@ class PatchElement (Clutter.Group):
 				pobj = Clutter.Rectangle()
 				pobj.set_color(self.stage.color_unselected)
 				pobj.set_size(self.porthole_width, self.porthole_height)
-				pobj.set_reactive(True)
 				self.add_actor(pobj)
 				self.port_elements[pid] = pobj
 			pobj.set_position(px, py)

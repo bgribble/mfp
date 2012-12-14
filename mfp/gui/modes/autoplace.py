@@ -182,7 +182,7 @@ class AutoplaceMode (InputMode):
 		if self.callback:
 			self.callback(None, None)
 
-	def close(self):
+	def disable(self):
 		self.window.hide_autoplace_marker()
 		
 	

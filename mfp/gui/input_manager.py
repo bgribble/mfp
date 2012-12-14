@@ -31,16 +31,19 @@ class InputManager (object):
 
 	def set_major_mode(self, mode):
 		if isinstance(self.major_mode, InputMode):
-			self.major_mode.close()
+			self.major_mode.disable()
 		self.major_mode = mode 
 		self.window.display_bindings()
 
 	def enable_minor_mode(self, mode):
+		if mode in self.minor_modes:
+			self.minor_modes.remove(mode)
 		self.minor_modes[:0] = [mode]
+		mode.enable()
 		self.window.display_bindings()
 
 	def disable_minor_mode(self, mode):
-		mode.close()
+		mode.disable()
 		self.minor_modes.remove(mode)
 		self.window.display_bindings()
 
@@ -55,7 +58,6 @@ class InputManager (object):
 			if handler and handler[1]:
 				hdesc = handler[1]
 			self.window.hud_write("%s: %s (%s)" % (keysym, hdesc, mdesc))
-			#log.debug("[hud] %s: %s (%s)" % (keysym, handler[1], mode.description))
 
 		from gi.repository import Clutter 
 		keysym = None 
@@ -86,28 +88,27 @@ class InputManager (object):
 			for minor in self.minor_modes:
 				handler = minor.lookup(keysym)
 				if handler is not None:
+					show_on_hud(keysym, minor, handler)
 					handled = handler[0]()
 					if handled: 
-						show_on_hud(keysym, minor, handler)
 						return True
 
 			# then major mode 
 			if self.major_mode is not None:
 				handler = self.major_mode.lookup(keysym)
 				if handler is not None: 
+					show_on_hud(keysym, self.major_mode, handler)
 					handled = handler[0]()
 					if handled: 
-						show_on_hud(keysym, self.major_mode, handler)
 						return True 
 
 			# then global 
 			handler = self.global_mode.lookup(keysym)
 			if handler is not None: 
+				show_on_hud(keysym, self.global_mode, handler)
 				handled = handler[0]()
 				if handled:
-					show_on_hud(keysym, self.global_mode, handler)
 					return True 
-			#show_on_hud("Unhandled [%s]" % keysym, "", ("", ""))
 		return False 
 
 

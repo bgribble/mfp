@@ -1,11 +1,11 @@
 
 class BangType (object):
 	def __repr__ (self):
-		return "bang"
+		return "Bang"
 
 class UninitType (object):
 	def __repr__ (self):
-		return "uninit"
+		return "Uninit"
 
 Bang = BangType() 
 Uninit = UninitType()

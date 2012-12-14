@@ -63,7 +63,10 @@ class InputMode (object):
 
 		return None 
 
-	def close(self):
+	def enable(self):
+		pass
+
+	def disable(self):
 		pass 
 
 	def __repr__(self):
