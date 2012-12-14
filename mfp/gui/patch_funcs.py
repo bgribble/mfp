@@ -21,8 +21,7 @@ def select(self, obj):
 	obj.begin_control()
 
 	# FIXME hook
-	#SelectMRUMode.touch(obj) 
-	print "before osu:", self.selected
+	SelectMRUMode.touch(obj) 
 	self.object_selection_update()
 	return True 
 

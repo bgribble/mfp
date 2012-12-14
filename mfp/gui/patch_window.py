@@ -357,7 +357,6 @@ class PatchWindow(object):
 			iter = self.object_store.get_iter(path)
 			self.object_store.set_value(iter, 0, element.obj_name)
 		else:
-			print "refresh: object not found in object_paths", element
 			return 
 
 	def add_element(self, factory, x=None, y=None):

@@ -155,7 +155,6 @@ class EnumElement (PatchElement):
 		MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
 	def configure(self, params):
-		print "enum config:", params
 		fmt_changed = False 
 		val_changed = False 
 
@@ -183,6 +182,9 @@ class EnumElement (PatchElement):
 			self.format_update()
 		if fmt_changed or val_changed: 
 			self.label.set_text(self.format_value(self.value))
+
+		self.texture.invalidate()
+
 		PatchElement.configure(self, params)	
 
 	def port_position(self, port_dir, port_num):

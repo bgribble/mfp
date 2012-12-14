@@ -41,7 +41,6 @@ class ButtonElement (PatchElement):
 	porthole_width = 6
 	porthole_minspace = 8
 	porthole_border = 3
-	display_type = "button"
 	proc_type = "var" 
 
 	PORT_TWEAK = 5 
@@ -135,6 +134,8 @@ class ButtonElement (PatchElement):
 		return ClickableControlMode(self.stage, self, "Button control")
 
 class BangButtonElement (ButtonElement):
+	display_type = "button"
+
 	def __init__(self, window, x, y):
 		self.message = Bang
 		ButtonElement.__init__(self, window, x, y)
@@ -157,6 +158,8 @@ class BangButtonElement (ButtonElement):
 		return False 
 
 class ToggleButtonElement (ButtonElement):
+	display_type = "toggle"
+
 	def __init__(self, window, x, y):
 		self.message = True 
 		ButtonElement.__init__(self, window, x, y)

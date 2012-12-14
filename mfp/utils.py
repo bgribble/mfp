@@ -47,7 +47,6 @@ def extends(klass):
 
 	def ext_decor(func):
 		fn = func.__name__
-		print "extends: adding method", fn, "to", klass 
 		setattr(klass, fn, func)
 		return func
 	return ext_decor

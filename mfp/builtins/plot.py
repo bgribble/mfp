@@ -44,7 +44,7 @@ class Scatter (Processor):
 		self.points = {}
 		self.time_base = None
 
-		initargs, kwargs = self.parse_args(init_args)
+		initargs, kwargs = patch.parse_args(init_args)
 		if len(initargs) > 0:
 			channels = initargs[0]
 		else: 
@@ -130,6 +130,11 @@ class Scatter (Processor):
 		'''Set viewport boundaries in plot coordinates'''
 		return self._chartconf('bounds', (x_min, y_min, x_max, y_max))
 
+	def save(self):
+		print "scatter: save() called..."
+		s = Processor.save(self)
+		print "scatter: saving", s
+		return s
 
 def register():
 	MFPApp().register("scatter", Scatter)
