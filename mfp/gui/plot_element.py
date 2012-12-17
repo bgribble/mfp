@@ -194,11 +194,22 @@ class PlotElement (PatchElement):
         return False
 
     def configure(self, params):
+        if "plot_type" in params and self.xyplot is None:
+            if params["plot_type"] == "scatter":
+                self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
+            elif params["plot_type"] == "signal":
+                pass
+
+            if self.xyplot:
+                self.add_actor(self.xyplot)
+                self.xyplot.set_position(3, self.LABEL_SPACE)
+
         if self.obj_args is None:
             self.label.set_text("%s" % (self.obj_type,))
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
 
-        self.xyplot.configure(params)
+        if self.xyplot is not None:
+            self.xyplot.configure(params)
 
         PatchElement.configure(self, params)

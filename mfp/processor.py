@@ -35,14 +35,25 @@ class Processor (object):
         self.osc_pathbase = None
         self.osc_methods = []
 
+        print "processor.init:", init_type, init_args, name, self.obj_id
+
         if patch is not None:
             self.assign(patch, scope, name)
 
-        # gui_params are passed back and forth to the UI process
         self.gui_created = False
-        self.gui_params = dict(obj_id=self.obj_id, name=self.name,
-                               initargs=self.init_args, display_type=self.display_type,
-                               num_inlets=inlets, num_outlets=outlets)
+
+        # gui_params are passed back and forth to the UI process
+        # if previously-initialized by the child class, leave alone
+        if not hasattr(self, "gui_params"):
+            self.gui_params = {}
+
+        defaults = dict(obj_id=self.obj_id, name=self.name,
+                        initargs=self.init_args, display_type=self.display_type,
+                        num_inlets=inlets, num_outlets=outlets)
+
+        for k, v in defaults.items():
+            if k not in self.gui_params:
+                self.gui_params[k] = v 
 
         # dsp_inlets and dsp_outlets are the processor inlet/outlet numbers
         # of the ordinal inlets/outlets of the DSP object.
@@ -137,9 +148,11 @@ class Processor (object):
         return self.dsp_obj.getparam(param, value)
 
     def delete(self):
+        print "processor.delete:", self.name, self.obj_id
         from .main import MFPApp
         if self.patch is not None:
             self.patch.unbind(self.name, self.scope)
+            self.patch.remove(self)
 
         if self.osc_pathbase is not None:
             for m in self.osc_methods:

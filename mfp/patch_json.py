@@ -9,13 +9,38 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 import simplejson as json
 from .patch import Patch
 from .utils import extends
+from .bang import BangType, UninitType
+from . import log 
+
+
+class ExtendedEncoder (json.JSONEncoder):
+    TYPES = { 'BangType': BangType, 'UninitType': UninitType }
+
+    def default(self, obj):
+        print "ExtendedEncoder:", obj, ExtendedEncoder.TYPES.values()
+        if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
+            key = "__%s__" % obj.__class__.__name__
+            return {key: obj.__dict__ }
+        else:
+            return json.JSONEncoder.default(obj)
+
+
+def extended_decoder_hook (saved):
+    if (isinstance(saved, dict) and len(saved.keys()) == 1):
+
+        tname, tdict = saved.items()[0]
+        key = tname.strip("_")
+        ctor = ExtendedEncoder.TYPES.get(key)
+        if ctor:
+            return ctor.load(tdict)
+    return saved 
 
 
 @extends(Patch)
 def json_deserialize(self, json_data):
     from main import MFPApp
 
-    f = json.loads(json_data)
+    f = json.loads(json_data, object_hook=extended_decoder_hook)
     self.init_type = f.get('type')
     self.gui_params = f.get('gui_params', {})
 
@@ -36,7 +61,8 @@ def json_deserialize(self, json_data):
 
         otype = prms.get('type')
         oargs = prms.get('initargs')
-        newobj = MFPApp().create(otype, oargs, self, self.default_scope, None)
+        oname = prms.get('name')
+        newobj = MFPApp().create(otype, oargs, self, self.default_scope, oname)
 
         if otype == 'inlet':
             self.inlet_objects.append(newobj)
@@ -66,8 +92,12 @@ def json_deserialize(self, json_data):
                 continue
 
             obj = idmap.get(oid)
-            s.bind(name, obj)
-            obj.scope = s
+            if obj is None:
+                log.debug("Error in patch (object %d not found), continuing anyway" % oid)
+                print "Error loading", scopename, oid
+            else:
+                s.bind(name, obj)
+                obj.scope = s
 
     self.default_scope = self.scopes.get('__patch__') or self.add_scope("__patch__")
     self.default_scope.bind("self", self)
@@ -90,8 +120,6 @@ def json_deserialize(self, json_data):
                 inlet = c[1]
                 srcobj.connect(outlet, dstobj, inlet)
 
-    # self.inlet_objects.sort(key=getx)
-    # self.outlet_objects.sort(key=lambda x: -getx(x))
     self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
 
@@ -120,4 +148,4 @@ def json_serialize(self):
         scopes[scopename] = bindings
 
     f['scopes'] = scopes
-    return json.dumps(f)
+    return json.dumps(f, indent=4, cls=ExtendedEncoder)

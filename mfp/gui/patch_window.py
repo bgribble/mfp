@@ -6,17 +6,10 @@ The main MFP window and associated code
 
 from gi.repository import Gtk, GObject, Clutter, GtkClutter, Pango
 
-from text_element import TextElement
-from processor_element import ProcessorElement
-from message_element import MessageElement
-from enum_element import EnumElement
-from plot_element import PlotElement
-from patch_element import PatchElement
-
-from mfp import MFPGUI
 from mfp.main import MFPCommand
 from mfp import log
 
+from .patch_element import PatchElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
 from .modes.global_mode import GlobalMode
@@ -215,6 +208,13 @@ class PatchWindow(object):
                 self.object_view.get_selection().select_path(path)
 
     def object_store_update(self):
+        def cmpfunc(o1, o2):
+            if o1.layer.scope == o2.layer.scope:
+                return cmp(o1.obj_name, o2.obj_name)
+            else:
+                return cmp(o1.layer.scope, o2.layer.scope)
+
+
         scopes = {}
         self.object_store.clear()
 
@@ -239,7 +239,9 @@ class PatchWindow(object):
                 scopes[l.scope] = oiter
 
         self.object_paths = {}
-        for o in self.objects:
+        obj2disp = sorted(self.objects, cmp=cmpfunc)
+
+        for o in obj2disp:
             if o.obj_name is None:
                 continue
 

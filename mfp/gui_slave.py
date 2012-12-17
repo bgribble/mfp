@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 '''
-gui.py
+gui_slave.py
 GTK/clutter gui for MFP -- main thread
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>

@@ -5,13 +5,8 @@ main.py: main routine for mfp
 Copyright (c) 2010-2012 Bill Gribble <grib@billgribble.com>
 '''
 
-import sys
-import os
-import multiprocessing
-import threading
 import time
 
-from mfp.request_pipe import RequestPipe, Request
 from mfp import Bang
 from patch import Patch
 from scope import LexicalScope
@@ -23,7 +18,6 @@ from rpc_wrapper import RPCWrapper, rpcwrap
 from rpc_worker import RPCServer
 
 from . import log
-
 
 class MFPCommand(RPCWrapper):
     @rpcwrap
@@ -72,7 +66,6 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def delete(self, obj_id):
         obj = MFPApp().recall(obj_id)
-        obj.patch.remove(obj)
         obj.delete()
 
     @rpcwrap

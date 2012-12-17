@@ -1,9 +1,10 @@
 #! /usr/bin/env python2.6
 '''
-p_plot.py: Stub for graphical plot I/O
+plot.py: Stub for graphical plot I/O
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
+
 from datetime import datetime
 from ..processor import Processor
 from ..main import MFPApp
@@ -15,12 +16,15 @@ from mfp import log
 
 
 class Scope (Processor):
+    display_type = "plot"
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.buffer = None
 
         if init_args is not None:
             log.debug("scope: Does not accept init args")
 
+        self.gui_params = dict(plot_type="signal")
         Processor.__init__(self, 1, 1, "scopeplot", None)
 
     def trigger(self):
@@ -41,6 +45,8 @@ class Scope (Processor):
 
 
 class Scatter (Processor):
+    display_type = "plot"
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.points = {}
         self.time_base = None
@@ -51,6 +57,8 @@ class Scatter (Processor):
         else:
             channels = 1
         self.hot_inlets = range(channels)
+        self.gui_params = dict(plot_type="scatter")
+
         Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name)
 
     def method(self, message, inlet):
@@ -60,7 +68,6 @@ class Scatter (Processor):
         message.call(self)
 
     def _time(self):
-        from datetime import datetime
         if self.time_base is None:
             return 0
         return (datetime.now() - self.time_base).total_seconds()
@@ -130,12 +137,6 @@ class Scatter (Processor):
     def bounds(self, x_min, y_min, x_max, y_max):
         '''Set viewport boundaries in plot coordinates'''
         return self._chartconf('bounds', (x_min, y_min, x_max, y_max))
-
-    def save(self):
-        print "scatter: save() called..."
-        s = Processor.save(self)
-        print "scatter: saving", s
-        return s
 
 
 def register():

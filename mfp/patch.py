@@ -132,7 +132,11 @@ class Patch(Processor):
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
     def remove(self, obj):
-        del self.objects[obj.obj_id]
+        try:
+            del self.objects[obj.obj_id]
+        except KeyError: 
+            print "Error deleting obj", obj, "can't find key", obj.obj_id
+
         try:
             self.inlet_objects.remove(obj)
         except ValueError:
