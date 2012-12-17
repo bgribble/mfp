@@ -233,6 +233,7 @@ class MFPApp (object):
             obj = ctor(init_type, init_args, patch, scope, name)
             return obj
         except Exception, e:
+            # FIXME: ctor may have left half-finished object in patch.objects
             log.debug("Caught exception while trying to create %s (%s)"
                       % (init_type, init_args))
             log.debug(e)
