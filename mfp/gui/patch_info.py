@@ -14,7 +14,6 @@ class PatchInfo (object):
     display_type = "patch"
 
     def __init__(self, window, x, y):
-        print "Creating PatchInfo"
         self.stage = window
         self.obj_id = None
         self.obj_type = None
@@ -32,7 +31,6 @@ class PatchInfo (object):
                     layers=[(l.name, l.scope) for l in self.layers])
         for k, v in extras.items():
             prms[k] = v
-        print "PatchInfo send_params:", self.obj_id, prms
         if self.obj_id is not None:
             MFPGUI().mfp.set_params(self.obj_id, prms)
 
@@ -40,7 +38,6 @@ class PatchInfo (object):
         return MFPGUI().mfp.get_params(self.obj_id)
 
     def configure(self, params):
-        print "PatchInfo configure:", self.obj_id, params
         self.num_inlets = params.get("num_inlets")
         self.num_outlets = params.get("num_outlets")
         self.dsp_inlets = params.get("dsp_inlets")

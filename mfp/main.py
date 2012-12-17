@@ -180,12 +180,14 @@ class MFPApp (object):
             num_inputs = 2
             num_outputs = 2
             self.dsp_process = RPCServer("mfp_dsp", dsp_init, num_inputs, num_outputs)
+            self.dsp_process.start()
             self.dsp_process.serve(DSPObject)
             self.dsp_process.serve(DSPCommand)
             self.dsp_command = DSPCommand()
 
         if not MFPApp.no_gui:
             self.gui_process = RPCServer("mfp_gui", gui_init)
+            self.gui_process.start()
             self.gui_process.serve(GUICommand)
             self.gui_cmd = GUICommand()
             while not self.gui_cmd.ready():

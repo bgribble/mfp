@@ -56,8 +56,8 @@ class Processor (object):
         self.connections_in = [[] for r in range(inlets)]
 
     def info(self):
-        log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s, patch=%s, scope=%s"
-                  % (self.obj_id, self.name, self.init_type, self.init_args, self.patch, self.scope))
+        log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
+                  % (self.obj_id, self.name, self.init_type, self.init_args))
         return True
 
     def assign(self, patch, scope, name):

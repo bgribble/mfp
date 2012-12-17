@@ -8,6 +8,7 @@ from rpc_wrapper import RPCWrapper
 from request_pipe import RequestPipe
 from request import Request
 from worker_pool import WorkerPool, BaseWorker
+from quittable_thread import QuittableThread
 import multiprocessing
 import threading
 import Queue
@@ -56,8 +57,9 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
     lck.acquire()
 
 
-class RPCServer(object):
+class RPCServer(QuittableThread):
     def __init__(self, name, initproc=None, *initproc_args):
+        QuittableThread.__init__(self)
         self.name = name
         self.pipe = RequestPipe(factory=lambda pool: RPCWorker(pool, self.pipe))
         self.initproc = initproc
@@ -65,14 +67,11 @@ class RPCServer(object):
         self.worker_lock = multiprocessing.Lock()
         self.worker_lock.acquire()
         self.worker = multiprocessing.Process(target=rpc_server_slave,
-                                              args=(
-                                              self.pipe, self.initproc,
-                                              self.initproc_args, self.worker_lock))
-        self.monitor = threading.Thread(target=self.monitor_proc, args=())
+                                              args=(self.pipe, self.initproc,
+                                                    self.initproc_args, self.worker_lock))
         self.quitreq = False
 
         self.worker.start()
-        self.monitor.start()
 
         self.pipe.init_master()
 
@@ -80,17 +79,16 @@ class RPCServer(object):
         cls.pipe = self.pipe
         cls.local = False
 
-    def monitor_proc(self):
+    def run(self):
         self.worker.join()
-        if not self.quitreq:
+        if not self.join_req:
             log.debug(self.name, 'RPCServer thread EXITED UNEXPECTEDLY')
             self.worker = None
 
     def finish(self):
-        self.quitreq = True
         if self.worker:
             self.pipe.put(Request("quit"))
             self.worker_lock.release()
             self.pipe.finish()
-        if self.monitor:
-            self.monitor.join()
+        QuittableThread.finish(self)
+

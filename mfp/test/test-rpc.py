@@ -93,6 +93,7 @@ class RPCTests(TestCase):
         print "==================="
         print "setup started"
         self.server = RPCServer("test", rpcinit)
+        self.server.start()
         RPCWrapper.pipe = self.server.pipe
         self.server.serve(WrappedClass)
         print self.server
@@ -152,6 +153,7 @@ class RPCServerTests(TestCase):
         print "==================="
         print "setup started"
         self.server = RPCServer("worker", winit)
+        self.server.start()
         RPCWrapper.pipe = self.server.pipe
         self.server.serve(ReverseActivatorClass)
         self.server.serve(WrappedClass)
