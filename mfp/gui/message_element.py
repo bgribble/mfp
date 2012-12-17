@@ -8,223 +8,226 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import cairo
-import math 
+import math
 from patch_element import PatchElement
-from connection_element import ConnectionElement 
+from connection_element import ConnectionElement
 from mfp import MFPGUI
 from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
 from .modes.clickable import ClickableControlMode
 
-from mfp import log 
+from mfp import log
+
 
 class MessageElement (PatchElement):
-	display_type = "message"
-	proc_type = "message" 
+    display_type = "message"
+    proc_type = "message"
 
-	PORT_TWEAK = 5 
-	def __init__(self, window, x, y):
-		PatchElement.__init__(self, window, x, y)
+    PORT_TWEAK = 5
 
-		self.message_text = None 
-		self.clickstate = False 
+    def __init__(self, window, x, y):
+        PatchElement.__init__(self, window, x, y)
 
-		# create elements
-		self.texture = Clutter.CairoTexture.new(35,25)
-		self.label = Clutter.Text()
+        self.message_text = None
+        self.clickstate = False
 
-		self.texture.set_size(35, 25)
-		self.texture.connect("draw", self.draw_cb)
+        # create elements
+        self.texture = Clutter.CairoTexture.new(35, 25)
+        self.label = Clutter.Text()
 
-		self.set_reactive(True)
-		self.add_actor(self.texture)
-		self.add_actor(self.label)
+        self.texture.set_size(35, 25)
+        self.texture.connect("draw", self.draw_cb)
 
-		self.texture.invalidate()
-		self.obj_state = self.OBJ_HALFCREATED 
+        self.set_reactive(True)
+        self.add_actor(self.texture)
+        self.add_actor(self.label)
 
-		# configure label
-		self.label.set_position(4, 1)
-		self.label.set_color(window.color_unselected) 
-		self.label.connect('text-changed', self.text_changed_cb)
+        self.texture.invalidate()
+        self.obj_state = self.OBJ_HALFCREATED
 
-		self.move(x, y)
+        # configure label
+        self.label.set_position(4, 1)
+        self.label.set_color(window.color_unselected)
+        self.label.connect('text-changed', self.text_changed_cb)
 
-		# request update when value changes
-		self.update_required = True
+        self.move(x, y)
 
-	def draw_cb(self, texture, ct):
-		if self.clickstate:
-			lw = 5.0
-		else:
-			lw = 2.0
+        # request update when value changes
+        self.update_required = True
 
-		w = self.texture.get_property('surface_width')-lw
-		h = self.texture.get_property('surface_height')-lw
-		c = None
-		if self.selected: 
-			c = self.stage.color_selected
-		else:
-			c = self.stage.color_unselected
-		texture.clear()
-		ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
+    def draw_cb(self, texture, ct):
+        if self.clickstate:
+            lw = 5.0
+        else:
+            lw = 2.0
 
-		if self.obj_state == self.OBJ_COMPLETE:
-			ct.set_dash([])
-		else:
-			ct.set_dash([8, 4])
+        w = self.texture.get_property('surface_width') - lw
+        h = self.texture.get_property('surface_height') - lw
+        c = None
+        if self.selected:
+            c = self.stage.color_selected
+        else:
+            c = self.stage.color_unselected
+        texture.clear()
+        ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
 
-		ct.set_line_width(lw)
+        if self.obj_state == self.OBJ_COMPLETE:
+            ct.set_dash([])
+        else:
+            ct.set_dash([8, 4])
 
-		ct.set_antialias(cairo.ANTIALIAS_NONE)
-		ct.translate(lw/2.0, lw/2.0)
-		#ct.set_line_width(1.25)
-		ct.move_to(0,0)
-		ct.line_to(0, h)
-		ct.line_to(w, h)
-		ct.curve_to(w-8, h-8, w-8, 8, w, 0)
-		ct.line_to(0,0)
-		ct.close_path()
-		ct.stroke()
+        ct.set_line_width(lw)
 
-	def clicked(self, *args):
-		self.clickstate = True 
-		if self.obj_id is not None:
-			MFPGUI().mfp.send_bang(self.obj_id, 0) 
-		self.texture.invalidate()
-		return False 
+        ct.set_antialias(cairo.ANTIALIAS_NONE)
+        ct.translate(lw / 2.0, lw / 2.0)
+        # ct.set_line_width(1.25)
+        ct.move_to(0, 0)
+        ct.line_to(0, h)
+        ct.line_to(w, h)
+        ct.curve_to(w - 8, h - 8, w - 8, 8, w, 0)
+        ct.line_to(0, 0)
+        ct.close_path()
+        ct.stroke()
 
-	def unclicked(self):
-		self.clickstate = False 
-		self.texture.invalidate()
-		return False 
+    def clicked(self, *args):
+        self.clickstate = True
+        if self.obj_id is not None:
+            MFPGUI().mfp.send_bang(self.obj_id, 0)
+        self.texture.invalidate()
+        return False
 
-	def label_edit_start(self):
-		self.obj_state = self.OBJ_HALFCREATED
-		self.texture.invalidate()
+    def unclicked(self):
+        self.clickstate = False
+        self.texture.invalidate()
+        return False
 
-	def label_edit_finish(self, message=None, aborted=False):
-		t = self.label.get_text()
-		if t != self.message_text:
-			self.message_text = t 
-			self.create(self.proc_type, self.message_text)
+    def label_edit_start(self):
+        self.obj_state = self.OBJ_HALFCREATED
+        self.texture.invalidate()
 
-		if self.obj_id is not None:
-			self.obj_state = self.OBJ_COMPLETE 
-			self.send_params()
-			self.draw_ports()
-			self.texture.invalidate()
+    def label_edit_finish(self, message=None, aborted=False):
+        t = self.label.get_text()
+        if t != self.message_text:
+            self.message_text = t
+            self.create(self.proc_type, self.message_text)
 
-	def text_changed_cb(self, *args):
-		lwidth = self.label.get_property('width') 
-		bwidth = self.texture.get_property('surface_width')
-	
-		new_w = None 
-		if (lwidth > (bwidth - 20)):
-			new_w = lwidth + 20
-		elif (bwidth > 35) and (lwidth < (bwidth - 20)):
-			new_w = max(35, lwidth + 20)
+        if self.obj_id is not None:
+            self.obj_state = self.OBJ_COMPLETE
+            self.send_params()
+            self.draw_ports()
+            self.texture.invalidate()
 
-		if new_w is not None:
-			self.set_size(new_w, self.texture.get_height())
-			self.texture.set_size(new_w, self.texture.get_height())
-			self.texture.set_surface_size(int(new_w), self.texture.get_property('surface_height'))
-			self.texture.invalidate()	
+    def text_changed_cb(self, *args):
+        lwidth = self.label.get_property('width')
+        bwidth = self.texture.get_property('surface_width')
 
-	def move(self, x, y):
-		self.position_x = x
-		self.position_y = y
-		self.set_position(x, y)
+        new_w = None
+        if (lwidth > (bwidth - 20)):
+            new_w = lwidth + 20
+        elif (bwidth > 35) and (lwidth < (bwidth - 20)):
+            new_w = max(35, lwidth + 20)
 
-		for c in self.connections_out:
-			c.draw()
-		
-		for c in self.connections_in:
-			c.draw()
+        if new_w is not None:
+            self.set_size(new_w, self.texture.get_height())
+            self.texture.set_size(new_w, self.texture.get_height())
+            self.texture.set_surface_size(
+                int(new_w), self.texture.get_property('surface_height'))
+            self.texture.invalidate()
 
-	def configure(self, params):
-		if params.get('value') is not None:
-			self.label.set_text(repr(params.get('value')))
-		elif self.obj_args is not None:
-			self.label.set_text(self.obj_args)
-		PatchElement.configure(self, params)	
+    def move(self, x, y):
+        self.position_x = x
+        self.position_y = y
+        self.set_position(x, y)
 
-	def port_position(self, port_dir, port_num):
-		# tweak the right input port display to be left of the "kick" 
-		if port_dir == PatchElement.PORT_IN and port_num == 1:
-			default = PatchElement.port_position(self, port_dir, port_num)
-			return (default[0] - self.PORT_TWEAK, default[1])
-		else:
-			return PatchElement.port_position(self, port_dir, port_num)
+        for c in self.connections_out:
+            c.draw()
 
-	def select(self):
-		self.selected = True 
-		self.texture.invalidate()
+        for c in self.connections_in:
+            c.draw()
 
-	def unselect(self):
-		self.selected = False 
-		self.texture.invalidate()
+    def configure(self, params):
+        if params.get('value') is not None:
+            self.label.set_text(repr(params.get('value')))
+        elif self.obj_args is not None:
+            self.label.set_text(self.obj_args)
+        PatchElement.configure(self, params)
 
-	def delete(self):
-		for c in self.connections_out+self.connections_in:
-			c.delete()
-		PatchElement.delete(self)
+    def port_position(self, port_dir, port_num):
+        # tweak the right input port display to be left of the "kick"
+        if port_dir == PatchElement.PORT_IN and port_num == 1:
+            default = PatchElement.port_position(self, port_dir, port_num)
+            return (default[0] - self.PORT_TWEAK, default[1])
+        else:
+            return PatchElement.port_position(self, port_dir, port_num)
 
-	def make_edit_mode(self):
-		return LabelEditMode(self.stage, self, self.label)
+    def select(self):
+        self.selected = True
+        self.texture.invalidate()
 
-	def make_control_mode(self):
-		return ClickableControlMode(self.stage, self, "Message control")
+    def unselect(self):
+        self.selected = False
+        self.texture.invalidate()
 
-class TransientMessageElement (MessageElement): 
-	ELBOW_ROOM = 50
+    def delete(self):
+        for c in self.connections_out + self.connections_in:
+            c.delete()
+        PatchElement.delete(self)
 
-	def __init__(self, window, x, y):
-		self.target_obj = window.selected 
-		self.target_port = None
+    def make_edit_mode(self):
+        return LabelEditMode(self.stage, self, self.label)
 
-		MessageElement.__init__(self, window, self.target_obj.position_x, 
-								self.target_obj.position_y - self.ELBOW_ROOM) 
-		
-		self.message_text = "None" 
+    def make_control_mode(self):
+        return ClickableControlMode(self.stage, self, "Message control")
 
-		self.create(self.proc_type, self.message_text)
-		if self.obj_id is None:
-			log.debug("MessageElement: could not create message obj for '%s'" 
-						% self.message_text)
-			return 
 
-		self.send_params()
-		self.draw_ports()
+class TransientMessageElement (MessageElement):
+    ELBOW_ROOM = 50
 
-		self.set_port(0)
+    def __init__(self, window, x, y):
+        self.target_obj = window.selected
+        self.target_port = None
 
-	def set_port(self, portnum):
-		if portnum == self.target_port:
-			return True 
+        MessageElement.__init__(self, window, self.target_obj.position_x,
+                                self.target_obj.position_y - self.ELBOW_ROOM)
 
-		for c in self.connections_out:
-			c.delete()
+        self.message_text = "None"
 
-		self.target_port = portnum
+        self.create(self.proc_type, self.message_text)
+        if self.obj_id is None:
+            log.debug("MessageElement: could not create message obj for '%s'"
+                      % self.message_text)
+            return
 
-		if MFPGUI().mfp.connect(self.obj_id, 0, self.target_obj.obj_id, self.target_port):
-			c = ConnectionElement(self.stage, self, 0, self.target_obj, self.target_port)
-			self.connections_out.append(c)
-			self.target_obj.connections_in.append(c)
-		else:
-			log.debug("TransientMessageElement: Cannot make connection")
-		
-		return True 
+        self.send_params()
+        self.draw_ports()
 
-	def label_edit_finish(self, message=None, aborted=False):
-		self.message_text = self.label.get_text()
-		log.debug("Sending message to eval:", self.message_text)
-		MFPGUI().mfp.eval_and_send(self.target_obj.obj_id, self.target_port, 
-								   self.message_text)
-		self.stage.select(self.target_obj)
-		self.delete()	
+        self.set_port(0)
 
-	def make_edit_mode(self):
-		return TransientMessageEditMode(self.stage, self, self.label)
+    def set_port(self, portnum):
+        if portnum == self.target_port:
+            return True
 
+        for c in self.connections_out:
+            c.delete()
+
+        self.target_port = portnum
+
+        if MFPGUI().mfp.connect(self.obj_id, 0, self.target_obj.obj_id, self.target_port):
+            c = ConnectionElement(self.stage, self, 0, self.target_obj, self.target_port)
+            self.connections_out.append(c)
+            self.target_obj.connections_in.append(c)
+        else:
+            log.debug("TransientMessageElement: Cannot make connection")
+
+        return True
+
+    def label_edit_finish(self, message=None, aborted=False):
+        self.message_text = self.label.get_text()
+        log.debug("Sending message to eval:", self.message_text)
+        MFPGUI().mfp.eval_and_send(self.target_obj.obj_id, self.target_port,
+                                   self.message_text)
+        self.stage.select(self.target_obj)
+        self.delete()
+
+    def make_edit_mode(self):
+        return TransientMessageEditMode(self.stage, self, self.label)

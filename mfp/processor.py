@@ -1,317 +1,316 @@
-#! /usr/bin/env python2.6 
+#! /usr/bin/env python2.6
 '''
-processor.py: Parent class of all processors 
+processor.py: Parent class of all processors
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from .dsp_slave import DSPObject
 from .method import MethodCall
-from .bang import Uninit 
+from .bang import Uninit
 from .scope import LexicalScope
 
-from . import log 
-
-class Processor (object): 
-	OK = 0
-	ERROR = 1 
-	display_type = 'processor'
-	hot_inlets = [0]
-
-	def __init__(self, inlets, outlets, init_type, init_args,
-				 patch, scope, name):
-		from .main import MFPApp 
-		self.init_type = init_type
-		self.init_args = init_args
-		self.obj_id = MFPApp().remember(self)
-
-		self.inlets = [ Uninit ] * inlets
-		self.outlets = [ Uninit ] * outlets
-		self.outlet_order = range(outlets)
-		self.status = Processor.OK 
-		self.name = None 
-		self.patch = None 
-		self.scope = None 
-		self.osc_pathbase = None
-		self.osc_methods = [] 
-
-		if patch is not None:
-			self.assign(patch, scope, name)
-
-		# gui_params are passed back and forth to the UI process 
-		self.gui_created = False 
-		self.gui_params = dict(obj_id=self.obj_id, name=self.name, 
-							   initargs=self.init_args, display_type=self.display_type, 
-						       num_inlets=inlets, num_outlets=outlets)
-
-		# dsp_inlets and dsp_outlets are the processor inlet/outlet numbers 
-		# of the ordinal inlets/outlets of the DSP object. 
-		# for example dsp_outlets = [2] means processor outlet 2 
-		# corresponds to outlet 0 of the underlying DSP object 
-		self.dsp_obj = None 
-		self.dsp_inlets = []
-		self.dsp_outlets = [] 
-
-		self.connections_out = [[] for r in range(outlets)]
-		self.connections_in = [[] for r in range(inlets)]
-		
-
-	def info(self):
-		log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s, patch=%s, scope=%s"
-			      % (self.obj_id, self.name, self.init_type, self.init_args, self.patch, self.scope))
-		return True 
-
-	def assign(self, patch, scope, name):
-		if self.patch is not None and self.scope is not None and self.name is not None: 
-			self.patch.unbind(self.name, self.scope)
-
-		self.name = name or "%s_%s" % (self.init_type, str(self.obj_id))
-
-		if self.patch is None or self.patch != patch:
-			if self.patch:
-				self.patch.remove(self)
-			self.patch = patch 
-			self.patch.add(self)
-
-		if scope is not None:
-			self.scope = scope
-		else:
-			self.scope = self.patch.default_scope 
-
-		self.patch.bind(self.name, self.scope, self)
-		self.osc_init() 
-
-	def rename(self, new_name):
-		self.assign(self.patch, self.scope, new_name)
-
-	def rescope(self, new_scope):
-		if isinstance(new_scope, LexicalScope):
-			self.assign(self.patch, new_scope, self.name)
-		else:
-			self.assign(self.patch, self.patch.scopes.get(new_scope), self.name)
+from . import log
 
 
-	def osc_init(self): 
-		from .main import MFPApp 
-		def handler(path, args, types, src, data):
-			if types[0] == 's':
-				self.send(self.patch.parse_obj(args[0]), inlet=data)
-			else:
-				self.send(args[0], inlet=data) 
+class Processor (object):
+    OK = 0
+    ERROR = 1
+    display_type = 'processor'
+    hot_inlets = [0]
 
-		if MFPApp().osc_mgr is None:
-			return
+    def __init__(self, inlets, outlets, init_type, init_args,
+                 patch, scope, name):
+        from .main import MFPApp
+        self.init_type = init_type
+        self.init_args = init_args
+        self.obj_id = MFPApp().remember(self)
 
-		if self.patch is None:
-			patchname = "default"
-		else: 
-			patchname = self.patch.name 
+        self.inlets = [Uninit] * inlets
+        self.outlets = [Uninit] * outlets
+        self.outlet_order = range(outlets)
+        self.status = Processor.OK
+        self.name = None
+        self.patch = None
+        self.scope = None
+        self.osc_pathbase = None
+        self.osc_methods = []
 
-		pathbase = "/mfp/%s/%s" % (patchname, self.name)
-		o = MFPApp().osc_mgr
+        if patch is not None:
+            self.assign(patch, scope, name)
 
-		if self.osc_pathbase is not None and self.osc_pathbase != pathbase:
-			for m in self.osc_methods: 
-				o.del_method(m, None)
-			self.osc_methods = [] 
-		self.osc_pathbase = pathbase 
+        # gui_params are passed back and forth to the UI process
+        self.gui_created = False
+        self.gui_params = dict(obj_id=self.obj_id, name=self.name,
+                               initargs=self.init_args, display_type=self.display_type,
+                               num_inlets=inlets, num_outlets=outlets)
 
-		for i in range(len(self.inlets)):
-			path = "%s/%s" % (pathbase, str(i))
-			if path not in self.osc_methods: 
-				o.add_method(path, 's', handler, i)
-				o.add_method(path, 'b', handler, i)
-				#o.add_method(path, 'i', handler, i)
-				o.add_method(path, 'f', handler, i)
-			self.osc_methods.append(path)
+        # dsp_inlets and dsp_outlets are the processor inlet/outlet numbers
+        # of the ordinal inlets/outlets of the DSP object.
+        # for example dsp_outlets = [2] means processor outlet 2
+        # corresponds to outlet 0 of the underlying DSP object
+        self.dsp_obj = None
+        self.dsp_inlets = []
+        self.dsp_outlets = []
 
-	def dsp_init(self, proc_name, **params):
-		self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
-						         len(self.dsp_outlets), params)
-		self.gui_params['dsp_inlets'] = self.dsp_inlets
-		self.gui_params['dsp_outlets'] = self.dsp_outlets
+        self.connections_out = [[] for r in range(outlets)]
+        self.connections_in = [[] for r in range(inlets)]
 
-	def dsp_setparam(self, param, value):
-		self.dsp_obj.setparam(param, value)
+    def info(self):
+        log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s, patch=%s, scope=%s"
+                  % (self.obj_id, self.name, self.init_type, self.init_args, self.patch, self.scope))
+        return True
 
-	def dsp_getparam(self, param, value):
-		return self.dsp_obj.getparam(param, value)
+    def assign(self, patch, scope, name):
+        if self.patch is not None and self.scope is not None and self.name is not None:
+            self.patch.unbind(self.name, self.scope)
 
-	def delete(self):
-		from .main import MFPApp
-		if self.patch is not None:
-			self.patch.unbind(self.name, self.scope)
+        self.name = name or "%s_%s" % (self.init_type, str(self.obj_id))
 
-		if self.osc_pathbase is not None:
-			for m in self.osc_methods: 
-				MFPApp().osc_mgr.del_method(m, 's')
-				MFPApp().osc_mgr.del_method(m, 'b')
-				MFPApp().osc_mgr.del_method(m, 'f')
+        if self.patch is None or self.patch != patch:
+            if self.patch:
+                self.patch.remove(self)
+            self.patch = patch
+            self.patch.add(self)
 
-			self.osc_methods = [] 
-			self.osc_pathbase = None
+        if scope is not None:
+            self.scope = scope
+        else:
+            self.scope = self.patch.default_scope
 
-		outport = 0
-		for c in self.connections_out:
-			for tobj, tport in c:
-				self.disconnect(outport, tobj, tport)
-			outport += 1
+        self.patch.bind(self.name, self.scope, self)
+        self.osc_init()
 
-		inport = 0
-		for c in self.connections_in:
-			for tobj, tport in c:
-				tobj.disconnect(tport, self, inport)
-			inport += 1
+    def rename(self, new_name):
+        self.assign(self.patch, self.scope, new_name)
 
-		if self.dsp_obj is not None:
-			self.dsp_obj.delete()
+    def rescope(self, new_scope):
+        if isinstance(new_scope, LexicalScope):
+            self.assign(self.patch, new_scope, self.name)
+        else:
+            self.assign(self.patch, self.patch.scopes.get(new_scope), self.name)
 
-	def resize(self, inlets, outlets):
-		if inlets > len(self.inlets):
-			newin = inlets - len(self.inlets)
-			self.inlets += [ Uninit ] * newin
-			self.connections_in += [[] for r in range(newin)]
-		else:
-			for inlet in range(inlets, len(self.inlets)):
-				for tobj, tport in self.connections_in[inlet]:
-					tobj.disconnect(tport, self, inlet)
-			self.inlets[inlets:] = []
+    def osc_init(self):
+        from .main import MFPApp
 
-		if outlets > len(self.outlets):
-			newout = outlets-len(self.outlets)
-			self.outlets += [ Uninit ] * newout
-			self.connections_out += [[] for r in range(newout) ]
-		else:
-			for outlet in range(outlets, len(self.outlets)):
-				for tobj, tport in self.connections_out[outlet]:
-					self.disconnect(outlet, tobj, tport)
-			self.outlets[outlets:] = []
-			self.connections_out[outlets:] = []
-		self.outlet_order = range(len(self.outlets))
+        def handler(path, args, types, src, data):
+            if types[0] == 's':
+                self.send(self.patch.parse_obj(args[0]), inlet=data)
+            else:
+                self.send(args[0], inlet=data)
 
-		self.gui_params['num_inlets'] = inlets
-		self.gui_params['num_outlets'] = outlets 
+        if MFPApp().osc_mgr is None:
+            return
 
-	def connect(self, outlet, target, inlet):
-		# is this a DSP connection? 
-		if outlet in self.dsp_outlets:
-			self.dsp_obj.connect(self.dsp_outlets.index(outlet),
-						         target.obj_id, target.dsp_inlets.index(inlet))
+        if self.patch is None:
+            patchname = "default"
+        else:
+            patchname = self.patch.name
 
-		existing = self.connections_out[outlet]
-		if (target,inlet) not in existing:
-			existing.append((target,inlet))
+        pathbase = "/mfp/%s/%s" % (patchname, self.name)
+        o = MFPApp().osc_mgr
 
-		existing = target.connections_in[inlet]
-		if (self,outlet) not in existing:
-			existing.append((self,outlet))
-		return True
-	
-	def disconnect(self, outlet, target, inlet):
-		# is this a DSP connection? 
-		if outlet in self.dsp_outlets:
-			self.dsp_obj.disconnect(self.dsp_outlets.index(outlet), 
-						            target.obj_id, target.dsp_inlets.index(inlet))
+        if self.osc_pathbase is not None and self.osc_pathbase != pathbase:
+            for m in self.osc_methods:
+                o.del_method(m, None)
+            self.osc_methods = []
+        self.osc_pathbase = pathbase
 
-		existing = self.connections_out[outlet]
-		if (target,inlet) in existing:
-			existing.remove((target,inlet))
+        for i in range(len(self.inlets)):
+            path = "%s/%s" % (pathbase, str(i))
+            if path not in self.osc_methods:
+                o.add_method(path, 's', handler, i)
+                o.add_method(path, 'b', handler, i)
+                # o.add_method(path, 'i', handler, i)
+                o.add_method(path, 'f', handler, i)
+            self.osc_methods.append(path)
 
-		existing = target.connections_in[inlet]
-		if (self,outlet) in existing:
-			existing.remove((self,outlet))
-		return True
+    def dsp_init(self, proc_name, **params):
+        self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
+                                 len(self.dsp_outlets), params)
+        self.gui_params['dsp_inlets'] = self.dsp_inlets
+        self.gui_params['dsp_outlets'] = self.dsp_outlets
 
-	def send(self, value, inlet=0):
-		try:
-			work = self._send(value, inlet)
-			while len(work):
-				w_target, w_val, w_inlet = work[0]
-				work[:1] = w_target._send(w_val, w_inlet)
-		except: 
-			log.debug("send failed:", self, value, inlet)
-			import traceback
-			tb = traceback.format_exc()
-			self.error(tb)
+    def dsp_setparam(self, param, value):
+        self.dsp_obj.setparam(param, value)
 
-	def _send(self, value, inlet=0): 
-		work = [] 
-		if inlet >= 0:
-			self.inlets[inlet] = value
+    def dsp_getparam(self, param, value):
+        return self.dsp_obj.getparam(param, value)
 
-		if inlet in self.hot_inlets or inlet == -1:
-			self.outlets = [ Uninit ] * len(self.outlets)
-			if inlet == -1:
-				self.dsp_response(value[0], value[1])
-			elif isinstance(value, MethodCall):
-				self.method(value, inlet)
-			else:
-				self.trigger()
-			output_pairs = zip(self.connections_out, self.outlets)
+    def delete(self):
+        from .main import MFPApp
+        if self.patch is not None:
+            self.patch.unbind(self.name, self.scope)
 
-			for conns, val in [ output_pairs[i] for i in self.outlet_order ]: 
-				if val is not Uninit:
-					for target, inlet in conns:
-						work.append((target, val, inlet))
-		try: 
-			if inlet in self.dsp_inlets:
-				self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
-		except (TypeError, ValueError):
-			pass 
+        if self.osc_pathbase is not None:
+            for m in self.osc_methods:
+                MFPApp().osc_mgr.del_method(m, 's')
+                MFPApp().osc_mgr.del_method(m, 'b')
+                MFPApp().osc_mgr.del_method(m, 'f')
 
-		return work 
+            self.osc_methods = []
+            self.osc_pathbase = None
 
-	def parse_args(self, pystr):
-		if self.patch:
-			return self.patch.parse_args(pystr)
-		else: 
-			from .evaluator import Evaluator 
-			e = Evaluator()
-			return e.parse_args(pystr)
+        outport = 0
+        for c in self.connections_out:
+            for tobj, tport in c:
+                self.disconnect(outport, tobj, tport)
+            outport += 1
 
-	def parse_obj(self, pystr):
-		if self.patch:
-			return self.patch.parse_obj(pystr)
-		else: 
-			from .evaluator import Evaluator 
-			e = Evaluator()
-			return e.parse_args(pystr)
+        inport = 0
+        for c in self.connections_in:
+            for tobj, tport in c:
+                tobj.disconnect(tport, self, inport)
+            inport += 1
 
-	def method(self, message, inlet):
-		'''Default method handler ignores which inlet the message was received on'''
-		message.call(self)
-		self.inlets[inlet] = Uninit
+        if self.dsp_obj is not None:
+            self.dsp_obj.delete()
 
-	def error(self, tb=None):
-		self.status = Processor.ERROR
-		print "Error:", self
-		if tb:
-			print tb
+    def resize(self, inlets, outlets):
+        if inlets > len(self.inlets):
+            newin = inlets - len(self.inlets)
+            self.inlets += [Uninit] * newin
+            self.connections_in += [[] for r in range(newin)]
+        else:
+            for inlet in range(inlets, len(self.inlets)):
+                for tobj, tport in self.connections_in[inlet]:
+                    tobj.disconnect(tport, self, inlet)
+            self.inlets[inlets:] = []
 
-	def create_gui(self): 
-		from .main import MFPApp
-		MFPApp().gui_cmd.create(self.init_type, self.init_args, self.obj_id, 
-								self.gui_params)
-		self.gui_created = True 
+        if outlets > len(self.outlets):
+            newout = outlets - len(self.outlets)
+            self.outlets += [Uninit] * newout
+            self.connections_out += [[] for r in range(newout)]
+        else:
+            for outlet in range(outlets, len(self.outlets)):
+                for tobj, tport in self.connections_out[outlet]:
+                    self.disconnect(outlet, tobj, tport)
+            self.outlets[outlets:] = []
+            self.connections_out[outlets:] = []
+        self.outlet_order = range(len(self.outlets))
 
-	def delete_gui(self):
-		from .main import MFPApp
-		MFPApp().gui_cmd.delete(self.obj_id)
-		self.gui_created = False 
+        self.gui_params['num_inlets'] = inlets
+        self.gui_params['num_outlets'] = outlets
 
-	def load(self, paramdict):
-		# Override for custom load behavior
-		pass 
+    def connect(self, outlet, target, inlet):
+        # is this a DSP connection?
+        if outlet in self.dsp_outlets:
+            self.dsp_obj.connect(self.dsp_outlets.index(outlet),
+                                 target.obj_id, target.dsp_inlets.index(inlet))
 
-	# save/restore helper
-	def save(self):
-		oinfo = {}
-		oinfo['type'] = self.init_type
-		oinfo['initargs'] = self.init_args
-		oinfo['name'] = self.name 
-		oinfo['gui_params'] = self.gui_params
-		conn = []
-		for c in self.connections_out:
-			conn.append([ (t[0].obj_id, t[1]) for t in c])
-		oinfo['connections'] = conn
-		return oinfo
+        existing = self.connections_out[outlet]
+        if (target, inlet) not in existing:
+            existing.append((target, inlet))
 
+        existing = target.connections_in[inlet]
+        if (self, outlet) not in existing:
+            existing.append((self, outlet))
+        return True
+
+    def disconnect(self, outlet, target, inlet):
+        # is this a DSP connection?
+        if outlet in self.dsp_outlets:
+            self.dsp_obj.disconnect(self.dsp_outlets.index(outlet),
+                                    target.obj_id, target.dsp_inlets.index(inlet))
+
+        existing = self.connections_out[outlet]
+        if (target, inlet) in existing:
+            existing.remove((target, inlet))
+
+        existing = target.connections_in[inlet]
+        if (self, outlet) in existing:
+            existing.remove((self, outlet))
+        return True
+
+    def send(self, value, inlet=0):
+        try:
+            work = self._send(value, inlet)
+            while len(work):
+                w_target, w_val, w_inlet = work[0]
+                work[:1] = w_target._send(w_val, w_inlet)
+        except:
+            log.debug("send failed:", self, value, inlet)
+            import traceback
+            tb = traceback.format_exc()
+            self.error(tb)
+
+    def _send(self, value, inlet=0):
+        work = []
+        if inlet >= 0:
+            self.inlets[inlet] = value
+
+        if inlet in self.hot_inlets or inlet == -1:
+            self.outlets = [Uninit] * len(self.outlets)
+            if inlet == -1:
+                self.dsp_response(value[0], value[1])
+            elif isinstance(value, MethodCall):
+                self.method(value, inlet)
+            else:
+                self.trigger()
+            output_pairs = zip(self.connections_out, self.outlets)
+
+            for conns, val in [output_pairs[i] for i in self.outlet_order]:
+                if val is not Uninit:
+                    for target, inlet in conns:
+                        work.append((target, val, inlet))
+        try:
+            if inlet in self.dsp_inlets:
+                self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
+        except (TypeError, ValueError):
+            pass
+
+        return work
+
+    def parse_args(self, pystr):
+        if self.patch:
+            return self.patch.parse_args(pystr)
+        else:
+            from .evaluator import Evaluator
+            e = Evaluator()
+            return e.parse_args(pystr)
+
+    def parse_obj(self, pystr):
+        if self.patch:
+            return self.patch.parse_obj(pystr)
+        else:
+            from .evaluator import Evaluator
+            e = Evaluator()
+            return e.parse_args(pystr)
+
+    def method(self, message, inlet):
+        '''Default method handler ignores which inlet the message was received on'''
+        message.call(self)
+        self.inlets[inlet] = Uninit
+
+    def error(self, tb=None):
+        self.status = Processor.ERROR
+        print "Error:", self
+        if tb:
+            print tb
+
+    def create_gui(self):
+        from .main import MFPApp
+        MFPApp().gui_cmd.create(self.init_type, self.init_args, self.obj_id,
+                                self.gui_params)
+        self.gui_created = True
+
+    def delete_gui(self):
+        from .main import MFPApp
+        MFPApp().gui_cmd.delete(self.obj_id)
+        self.gui_created = False
+
+    def load(self, paramdict):
+        # Override for custom load behavior
+        pass
+
+    # save/restore helper
+    def save(self):
+        oinfo = {}
+        oinfo['type'] = self.init_type
+        oinfo['initargs'] = self.init_args
+        oinfo['name'] = self.name
+        oinfo['gui_params'] = self.gui_params
+        conn = []
+        for c in self.connections_out:
+            conn.append([(t[0].obj_id, t[1]) for t in c])
+        oinfo['connections'] = conn
+        return oinfo

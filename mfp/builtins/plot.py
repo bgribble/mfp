@@ -4,138 +4,140 @@ p_plot.py: Stub for graphical plot I/O
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-from datetime import datetime 
-from ..processor import Processor 
+from datetime import datetime
+from ..processor import Processor
 from ..main import MFPApp
-from .. import Bang, Uninit 
+from .. import Bang, Uninit
 from ..method import MethodCall
 
-from .buffer import BufferInfo 
-from mfp import log 
+from .buffer import BufferInfo
+from mfp import log
 
-class Scope (Processor): 
-	def __init__(self, init_type, init_args, patch, scope, name): 
-		self.buffer = None 
 
-		if init_args is not None:
-			log.debug("scope: Does not accept init args")
+class Scope (Processor):
+    def __init__(self, init_type, init_args, patch, scope, name):
+        self.buffer = None
 
-		Processor.__init__(self, 1, 1, "scopeplot", None)
+        if init_args is not None:
+            log.debug("scope: Does not accept init args")
 
-	def trigger(self): 
-		if isinstance(self.inlets[0], BufferInfo):
-			self.buffer = self.inlets[0]
-			self.gui_params["buffer"] = self.buffer 
-			MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
+        Processor.__init__(self, 1, 1, "scopeplot", None)
 
-		elif self.inlets[0] is True: 
-			log.debug("scope: got True from buffer")
+    def trigger(self):
+        if isinstance(self.inlets[0], BufferInfo):
+            self.buffer = self.inlets[0]
+            self.gui_params["buffer"] = self.buffer
+            MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
 
-		elif self.inlets[0] is False: 
-			log.debug("scope: got False from buffer")
+        elif self.inlets[0] is True:
+            log.debug("scope: got True from buffer")
 
-		if self.buffer is None:
-			log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
-			self.outlets[0] = MethodCall("bufinfo")
-			
+        elif self.inlets[0] is False:
+            log.debug("scope: got False from buffer")
+
+        if self.buffer is None:
+            log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
+            self.outlets[0] = MethodCall("bufinfo")
+
 
 class Scatter (Processor):
-	def __init__(self, init_type, init_args, patch, scope, name):
-		self.points = {}
-		self.time_base = None
+    def __init__(self, init_type, init_args, patch, scope, name):
+        self.points = {}
+        self.time_base = None
 
-		initargs, kwargs = patch.parse_args(init_args)
-		if len(initargs) > 0:
-			channels = initargs[0]
-		else: 
-			channels = 1
-		self.hot_inlets = range(channels)
-		Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = patch.parse_args(init_args)
+        if len(initargs) > 0:
+            channels = initargs[0]
+        else:
+            channels = 1
+        self.hot_inlets = range(channels)
+        Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name)
 
-	def method(self, message, inlet):
-		# magic inlet argument makes messages simpler
-		if inlet != 0:
-			message.kwargs['inlet'] = inlet
-		message.call(self)
+    def method(self, message, inlet):
+        # magic inlet argument makes messages simpler
+        if inlet != 0:
+            message.kwargs['inlet'] = inlet
+        message.call(self)
 
-	def _time(self):
-		from datetime import datetime
-		if self.time_base is None:
-			return 0
-		return (datetime.now() - self.time_base).total_seconds()
+    def _time(self):
+        from datetime import datetime
+        if self.time_base is None:
+            return 0
+        return (datetime.now() - self.time_base).total_seconds()
 
-	def _chartconf(self, action, data=None):
-		MFPApp().gui_cmd.command(self.obj_id, action, data)
-		return True 
-	
-	def trigger(self):
-		points = {}
-		for i, val in zip(range(len(self.inlets)), self.inlets):
-			v = None
-			if isinstance(val, (tuple, list)):
-				v = tuple(val)
-			elif isinstance(val, (float, int)):
-				v = (self._time(), val)
+    def _chartconf(self, action, data=None):
+        MFPApp().gui_cmd.command(self.obj_id, action, data)
+        return True
 
-			if v is not None:
-				cpts = self.points.setdefault(i, [])
-				cpts.append(v)
-				cpts = points.setdefault(i, [])
-				cpts.append(v)
-			self.inlets[i] = Uninit
+    def trigger(self):
+        points = {}
+        for i, val in zip(range(len(self.inlets)), self.inlets):
+            v = None
+            if isinstance(val, (tuple, list)):
+                v = tuple(val)
+            elif isinstance(val, (float, int)):
+                v = (self._time(), val)
 
-		if points != {}:
-			self._chartconf('add', points)
+            if v is not None:
+                cpts = self.points.setdefault(i, [])
+                cpts.append(v)
+                cpts = points.setdefault(i, [])
+                cpts.append(v)
+            self.inlets[i] = Uninit
 
-	# methods that the object responds to 
-	def roll(self, *args, **kwargs):
-		'''Start the plot roll function.'''
-		if self.time_base is None:
-			self.time_base = datetime.now()
-		return self._chartconf('roll', self._time())
+        if points != {}:
+            self._chartconf('add', points)
 
-	def stop(self, *args, **kwargs):
-		'''Stop the plot roll'''
-		return self._chartconf('stop', self._time())
+    # methods that the object responds to
+    def roll(self, *args, **kwargs):
+        '''Start the plot roll function.'''
+        if self.time_base is None:
+            self.time_base = datetime.now()
+        return self._chartconf('roll', self._time())
 
-	def reset(self, *args, **kwargs):
-		'''Reset time base for items with no X'''
-		self.time_base = datetime.now()
-		return self._chartconf('reset', self._time())
+    def stop(self, *args, **kwargs):
+        '''Stop the plot roll'''
+        return self._chartconf('stop', self._time())
 
-	def clearall(self, *args, **kwargs):
-		'''Clear all data points'''
-		self.points = {}
-		return self._chartconf('clear')
+    def reset(self, *args, **kwargs):
+        '''Reset time base for items with no X'''
+        self.time_base = datetime.now()
+        return self._chartconf('reset', self._time())
 
-	def clear(self, inlet=0):
-		'''Clear a single curve's points'''
-		if inlet is not None and self.points.has_key(inlet):
-			del self.points[inlet]
-		return self._chartconf('clear', inlet)
+    def clearall(self, *args, **kwargs):
+        '''Clear all data points'''
+        self.points = {}
+        return self._chartconf('clear')
 
-	def style(self, **kwargs):
-		'''Set style parameters for a curve'''
-		inlet = kwargs.get('inlet', 0)
-		style = self.gui_params.setdefault('style', {})
-		instyle = style.setdefault(inlet, {})
-		for k, v in kwargs.items():
-			if k != 'inlet':
-				instyle[k] = v
+    def clear(self, inlet=0):
+        '''Clear a single curve's points'''
+        if inlet is not None and inlet in self.points:
+            del self.points[inlet]
+        return self._chartconf('clear', inlet)
 
-		MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
-		return True 
+    def style(self, **kwargs):
+        '''Set style parameters for a curve'''
+        inlet = kwargs.get('inlet', 0)
+        style = self.gui_params.setdefault('style', {})
+        instyle = style.setdefault(inlet, {})
+        for k, v in kwargs.items():
+            if k != 'inlet':
+                instyle[k] = v
 
-	def bounds(self, x_min, y_min, x_max, y_max):
-		'''Set viewport boundaries in plot coordinates'''
-		return self._chartconf('bounds', (x_min, y_min, x_max, y_max))
+        MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+        return True
 
-	def save(self):
-		print "scatter: save() called..."
-		s = Processor.save(self)
-		print "scatter: saving", s
-		return s
+    def bounds(self, x_min, y_min, x_max, y_max):
+        '''Set viewport boundaries in plot coordinates'''
+        return self._chartconf('bounds', (x_min, y_min, x_max, y_max))
+
+    def save(self):
+        print "scatter: save() called..."
+        s = Processor.save(self)
+        print "scatter: saving", s
+        return s
+
 
 def register():
-	MFPApp().register("scatter", Scatter)
-	MFPApp().register("scope", Scope)
+    MFPApp().register("scatter", Scatter)
+    MFPApp().register("scope", Scope)

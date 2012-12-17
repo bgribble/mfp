@@ -8,51 +8,57 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from mfp.processor import Processor
 from mfp.main import MFPApp
 
+
 class ArithProcessor(Processor):
-	def __init__(self, init_type, init_args, patch, scope, name):
-		self.arith_op = init_type
+    def __init__(self, init_type, init_args, patch, scope, name):
+        self.arith_op = init_type
 
-		Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
-		self.dsp_inlets = [0, 1]
-		self.dsp_outlets = [0]
-		self.dsp_init(self.arith_op)
-		
-		initargs, kwargs = self.parse_args(init_args)
-		if len(initargs):
-			self.dsp_obj.setparam("const", initargs[0])
-		
-	def trigger(self):
-		try:
-			val = float(self.inlets[0])
-			self.dsp_obj.setparam("const", val)
-		except:
-			print "Can't convert %s to a value" % self.inlet[0]
-				
+        self.dsp_inlets = [0, 1]
+        self.dsp_outlets = [0]
+        self.dsp_init(self.arith_op)
+
+        initargs, kwargs = self.parse_args(init_args)
+        if len(initargs):
+            self.dsp_obj.setparam("const", initargs[0])
+
+    def trigger(self):
+        try:
+            val = float(self.inlets[0])
+            self.dsp_obj.setparam("const", val)
+        except:
+            print "Can't convert %s to a value" % self.inlet[0]
+
 
 class ArithAdd(ArithProcessor):
-	pass
+    pass
+
 
 class ArithSub(ArithProcessor):
-	pass
+    pass
+
 
 class ArithMul(ArithProcessor):
-	pass
+    pass
+
 
 class ArithDiv(ArithProcessor):
-	pass
+    pass
+
 
 class ArithLt(ArithProcessor):
-	pass
+    pass
+
 
 class ArithGt (ArithProcessor):
-	pass 
+    pass
+
 
 def register():
-	MFPApp().register("+~", ArithAdd)
-	MFPApp().register("-~", ArithSub)
-	MFPApp().register("*~", ArithMul)
-	MFPApp().register("/~", ArithDiv)
-	MFPApp().register(">~", ArithGt)
-	MFPApp().register("<~", ArithLt)
-
+    MFPApp().register("+~", ArithAdd)
+    MFPApp().register("-~", ArithSub)
+    MFPApp().register("*~", ArithMul)
+    MFPApp().register("/~", ArithDiv)
+    MFPApp().register(">~", ArithGt)
+    MFPApp().register("<~", ArithLt)

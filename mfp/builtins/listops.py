@@ -1,34 +1,38 @@
-#! /usr/bin/env python2.6 
+#! /usr/bin/env python2.6
 '''
 p_listops.py: Wrappers for common list operations
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from ..processor import Processor 
+from ..processor import Processor
 from ..main import MFPApp
 from ..evaluator import Evaluator
 from ..method import MethodCall
 from ..bang import Bang, Uninit
 
-class Collect (Processor):
-	def __init__(self, init_type, init_args, patch, scope, name):
-		Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-		initargs, kwargs = self.parse_args(init_args)
-		if len(initargs):
-			num_inlets = initargs[0]
-		else:
-			num_inlets = 1
-		self.resize(num_inlets, 1)
 
-	def trigger(self):
-		self.outlets[0] = self.inlets
+class Collect (Processor):
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+        if len(initargs):
+            num_inlets = initargs[0]
+        else:
+            num_inlets = 1
+        self.resize(num_inlets, 1)
+
+    def trigger(self):
+        self.outlets[0] = self.inlets
+
 
 def list_car(ll):
-	return ll[0]
+    return ll[0]
+
 
 def list_cdr(ll):
-	return ll[1:]
+    return ll[1:]
+
 
 def register():
-	MFPApp().register("collect", Collect)
+    MFPApp().register("collect", Collect)

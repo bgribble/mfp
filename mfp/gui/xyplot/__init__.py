@@ -1,4 +1,2 @@
-# xyplot package __init__.py 
-from xyplot import XYPlot 
-
-
+# xyplot package __init__.py
+from xyplot import XYPlot
