@@ -30,7 +30,8 @@ class PatchLayer(object):
         self.group.set_property("opacity", 0)
 
     def resort(self, obj):
-        self.objects.remove(obj)
+        if obj in self.objects:
+            self.objects.remove(obj)
         self.add(obj)
 
     def add(self, obj):

@@ -71,6 +71,7 @@ class Var (Processor):
             self.outlets[0] = self.value
             self.inlets[0] = Uninit
 
+        print "[var]: got input", self, self.value
         if do_update and self.gui_created and self.gui_params.get("update_required"):
             self.gui_params['value'] = self.value
 

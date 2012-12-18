@@ -104,8 +104,9 @@ class ButtonElement (PatchElement):
             c.draw()
 
     def configure(self, params):
-        if params.get("message"):
-            self.message = params.get("message")
+        if "value" in params:
+            self.message = params.get("value")
+            self.indicator = self.message 
 
         PatchElement.configure(self, params)
         self.texture.invalidate()
@@ -171,19 +172,19 @@ class ToggleButtonElement (ButtonElement):
     display_type = "toggle"
 
     def __init__(self, window, x, y):
-        self.message = True
+        self.message = False 
         ButtonElement.__init__(self, window, x, y)
 
     def clicked(self):
-        if self.obj_id is not None:
-            MFPGUI().mfp.send(self.obj_id, 0, self.message)
-
         if self.message:
             self.message = False
-            self.indicator = True
+            self.indicator = False 
         else:
             self.message = True
-            self.indicator = False
+            self.indicator = True 
+
+        if self.obj_id is not None:
+            MFPGUI().mfp.send(self.obj_id, 0, self.message)
         self.texture.invalidate()
         return False
 

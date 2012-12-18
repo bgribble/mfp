@@ -52,3 +52,5 @@ def register():
     sendrcv.register()
     from . import phasor
     phasor.register()
+    from . import radiogroup
+    radiogroup.register()
