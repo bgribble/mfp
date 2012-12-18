@@ -7,21 +7,23 @@ Copyright (c) 2010-2012 Bill Gribble <grib@billgribble.com>
 
 import time
 
-from mfp import Bang
-from patch import Patch
-from scope import LexicalScope
-from singleton import Singleton
-from interpreter import Interpreter
-from evaluator import Evaluator
+from .bang import Bang
+from .patch import Patch
+from .scope import LexicalScope
+from .singleton import Singleton
+from .interpreter import Interpreter
+from .evaluator import Evaluator
+from .processor import Processor
 
-from rpc_wrapper import RPCWrapper, rpcwrap
-from rpc_worker import RPCServer
+from .rpc_wrapper import RPCWrapper, rpcwrap
+from .rpc_worker import RPCServer
 
 from . import log
 
 class MFPCommand(RPCWrapper):
     @rpcwrap
     def create(self, objtype, initargs, patch_name, scope_name, obj_name):
+        print "rpcwrap: about to call create() from", log.log_module
         patch = MFPApp().patches.get(patch_name)
         scope = patch.scopes.get(scope_name) or patch.default_scope
 
@@ -67,6 +69,7 @@ class MFPCommand(RPCWrapper):
     def delete(self, obj_id):
         obj = MFPApp().recall(obj_id)
         obj.delete()
+        print "rpcwrap: after delete,", obj_id, MFPApp().recall(obj_id)
 
     @rpcwrap
     def set_params(self, obj_id, params):
@@ -217,6 +220,17 @@ class MFPApp (object):
     def recall(self, obj_id):
         return self.objects.get(obj_id)
 
+    def forget(self, obj):
+        print "========================="
+        print "forgetting", obj, obj.obj_id
+        print "before:", obj.obj_id, self.objects.get(obj.obj_id)
+        try:
+            del self.objects[obj.obj_id]
+        except KeyError:
+            print "oops! KeyError"
+            pass 
+        print "after:", obj.obj_id, self.objects.get(obj.obj_id)
+
     def register(self, name, ctor):
         self.registry[name] = ctor
 
@@ -233,11 +247,24 @@ class MFPApp (object):
             obj = ctor(init_type, init_args, patch, scope, name)
             return obj
         except Exception, e:
-            # FIXME: ctor may have left half-finished object in patch.objects
             log.debug("Caught exception while trying to create %s (%s)"
                       % (init_type, init_args))
             log.debug(e)
+            import traceback
+            traceback.print_exc()
+            self.cleanup()
             return None
+
+    def cleanup(self):
+        garbage = [] 
+        for oid, obj in self.objects.items():
+            if obj.status == Processor.CTOR:
+                garbage.append(obj)
+
+        for obj in garbage: 
+            if obj.patch is not None:
+                obj.patch.remove(obj)
+            obj.delete()
 
     def resolve(self, name, queryobj=None):
         '''

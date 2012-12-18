@@ -13,8 +13,9 @@ from . import log
 
 
 class Processor (object):
-    OK = 0
-    ERROR = 1
+    CTOR = 0 
+    READY = 1 
+    ERROR = 2
     display_type = 'processor'
     hot_inlets = [0]
 
@@ -28,7 +29,7 @@ class Processor (object):
         self.inlets = [Uninit] * inlets
         self.outlets = [Uninit] * outlets
         self.outlet_order = range(outlets)
-        self.status = Processor.OK
+        self.status = Processor.CTOR
         self.name = None
         self.patch = None
         self.scope = None
@@ -36,7 +37,7 @@ class Processor (object):
         self.osc_methods = []
 
         print "processor.init:", init_type, init_args, name, self.obj_id
-
+        
         if patch is not None:
             self.assign(patch, scope, name)
 
@@ -150,11 +151,11 @@ class Processor (object):
     def delete(self):
         print "processor.delete:", self.name, self.obj_id
         from .main import MFPApp
-        if self.patch is not None:
+        if hasattr(self, "patch") and self.patch is not None:
             self.patch.unbind(self.name, self.scope)
             self.patch.remove(self)
 
-        if self.osc_pathbase is not None:
+        if hasattr(self, "osc_pathbase") and self.osc_pathbase is not None:
             for m in self.osc_methods:
                 MFPApp().osc_mgr.del_method(m, 's')
                 MFPApp().osc_mgr.del_method(m, 'b')
@@ -163,20 +164,24 @@ class Processor (object):
             self.osc_methods = []
             self.osc_pathbase = None
 
-        outport = 0
-        for c in self.connections_out:
-            for tobj, tport in c:
-                self.disconnect(outport, tobj, tport)
-            outport += 1
+        if hasattr(self, "connections_out"):
+            outport = 0
+            for c in self.connections_out:
+                for tobj, tport in c:
+                    self.disconnect(outport, tobj, tport)
+                outport += 1
 
-        inport = 0
-        for c in self.connections_in:
-            for tobj, tport in c:
-                tobj.disconnect(tport, self, inport)
-            inport += 1
+        if hasattr(self, "connections_in"):
+            inport = 0
+            for c in self.connections_in:
+                for tobj, tport in c:
+                    tobj.disconnect(tport, self, inport)
+                inport += 1
 
-        if self.dsp_obj is not None:
+        if hasattr(self, "dsp_obj") and self.dsp_obj is not None:
             self.dsp_obj.delete()
+
+        MFPApp().forget(self)
 
     def resize(self, inlets, outlets):
         if inlets > len(self.inlets):
@@ -314,6 +319,9 @@ class Processor (object):
     def load(self, paramdict):
         # Override for custom load behavior
         pass
+
+    def mark_ready(self):
+        self.status = Processor.READY
 
     # save/restore helper
     def save(self):

@@ -17,7 +17,6 @@ class ExtendedEncoder (json.JSONEncoder):
     TYPES = { 'BangType': BangType, 'UninitType': UninitType }
 
     def default(self, obj):
-        print "ExtendedEncoder:", obj, ExtendedEncoder.TYPES.values()
         if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
             key = "__%s__" % obj.__class__.__name__
             return {key: obj.__dict__ }
@@ -79,10 +78,6 @@ def json_deserialize(self, json_data):
         newobj.load(prms)
 
         idmap[int(oid)] = newobj
-
-    for oid, mfpobj in idmap.items():
-        self.objects[mfpobj.obj_id] = mfpobj
-
     # load new scopes
     scopes = f.get("scopes", {})
     for scopename, bindings in scopes.items():
@@ -94,7 +89,6 @@ def json_deserialize(self, json_data):
             obj = idmap.get(oid)
             if obj is None:
                 log.debug("Error in patch (object %d not found), continuing anyway" % oid)
-                print "Error loading", scopename, oid
             else:
                 s.bind(name, obj)
                 obj.scope = s

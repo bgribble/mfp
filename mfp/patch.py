@@ -109,7 +109,6 @@ class Patch(Processor):
                 self.inlets[i] = Uninit
 
     def send(self, value, inlet=0):
-        print "Patch.send: sending", value, "to inlet", inlet
         self.inlet_objects[inlet].send(value)
 
     def connect(self, outlet, target, inlet):
@@ -133,6 +132,8 @@ class Patch(Processor):
 
     def remove(self, obj):
         try:
+            if obj.scope is not None and obj.name is not None:
+                self.unbind(obj.name, obj.scope)
             del self.objects[obj.obj_id]
         except KeyError: 
             print "Error deleting obj", obj, "can't find key", obj.obj_id
@@ -147,6 +148,7 @@ class Patch(Processor):
         except ValueError:
             pass
 
+
     ############################
     # load/save
     ############################
@@ -156,8 +158,10 @@ class Patch(Processor):
         from main import MFPApp
 
         def factory(init_type, init_args, patch, scope, name):
+            print "Patch: calling factory for file", filename
             p = Patch(init_type, init_args, patch, scope, name)
             p._load_file(filename)
+            print "Patch: factory done"
             return p
 
         import os

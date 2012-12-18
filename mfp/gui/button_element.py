@@ -8,12 +8,10 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import cairo
-import math
-from patch_element import PatchElement
-from connection_element import ConnectionElement
-from mfp import MFPGUI
+
+from .patch_element import PatchElement
 from .modes.clickable import ClickableControlMode
-from mfp import log
+from ..gui_slave import MFPGUI
 from ..bang import Bang
 
 
@@ -63,13 +61,6 @@ class ButtonElement (PatchElement):
         # request update when value changes
         self.update_required = True
 
-        # create object
-        self.create(self.proc_type, str(self.message))
-
-        # complete drawing
-        self.send_params()
-        self.draw_ports()
-        self.texture.invalidate()
 
     def draw_cb(self, texture, ct):
         w = self.texture.get_property('surface_width') - 2
@@ -117,6 +108,7 @@ class ButtonElement (PatchElement):
             self.message = params.get("message")
 
         PatchElement.configure(self, params)
+        self.texture.invalidate()
 
     def select(self):
         self.selected = True
@@ -130,6 +122,21 @@ class ButtonElement (PatchElement):
         for c in self.connections_out + self.connections_in:
             c.delete()
         PatchElement.delete(self)
+
+    def make_edit_mode(self):
+        if self.obj_id is None:
+            # create object
+            self.create(self.proc_type, str(self.message))
+
+            # complete drawing
+            if self.obj_id is None:
+                return None 
+            else:
+                self.send_params()
+                self.draw_ports()
+                self.texture.invalidate()
+
+        return None 
 
     def make_control_mode(self):
         return ClickableControlMode(self.stage, self, "Button control")

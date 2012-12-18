@@ -6,14 +6,13 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode
-from .connection import ConnectionMode
 from .autoplace import AutoplaceMode
 from .selection import SelectionEditMode
 
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
 from ..connection_element import ConnectionElement
-from ..message_element import MessageElement, TransientMessageElement
+from ..message_element import MessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement
@@ -143,11 +142,9 @@ class PatchEditMode (InputMode):
 
     def drag_start(self):
         if self.manager.pointer_obj is None:
-            print "PatchEditMode: unselect_all, pointer_obj is None"
             self.window.unselect_all()
             self.disable_selection_edit()
         elif self.manager.pointer_obj != self.window.selected:
-            print "PatchEditMode: selecting new, pointer_obj is different", self.manager.pointer_obj, self.window.selected
             self.window.select(self.manager.pointer_obj)
             # self.manager.synthesize("M1DOWN")
             self.enable_selection_edit()
@@ -169,7 +166,6 @@ class PatchEditMode (InputMode):
         self.drag_start_y = py
         self.drag_last_x = px
         self.drag_last_y = py
-        print "PatchEditMode: leaving drag_start, window selected is", self.window.selected
         return True
 
     def drag_selected(self):

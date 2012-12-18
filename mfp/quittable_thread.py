@@ -18,7 +18,10 @@ class QuittableThread(Thread):
 
     def finish(self):
         with QuittableThread._all_threads_lock:
-            QuittableThread._all_threads.remove(self)
+            try:
+                QuittableThread._all_threads.remove(self)
+            except ValueError:
+                print "QuittableThread error:", self, "not in _all_threads"
         self.join_req = True
         self.join()
 

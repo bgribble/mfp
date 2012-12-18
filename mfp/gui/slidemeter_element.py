@@ -76,13 +76,6 @@ class SlideMeterElement (PatchElement):
         # request update when value changes
         self.update_required = True
 
-        # create the underlying var
-        self.create(self.proc_type, str(self.value))
-        if self.obj_id is None:
-            print "PlotElement: could not create", self.obj_type, self.obj_args
-        else:
-            self.send_params()
-            self.draw_ports()
 
     def draw_cb(self, texture, ct):
         def pt2px(x, bar_px):
@@ -259,6 +252,14 @@ class SlideMeterElement (PatchElement):
             self.recenter_title()
 
     def make_edit_mode(self):
+        if self.obj_id is None:
+            # create the underlying var
+            self.create(self.proc_type, str(self.value))
+            if self.obj_id is None:
+                return None 
+            else:
+                self.send_params()
+                self.draw_ports()
         return SliderEditMode(self.stage, self, "Fader/meter edit")
 
     def make_control_mode(self):
