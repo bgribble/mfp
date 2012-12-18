@@ -358,7 +358,7 @@ class PatchWindow(object):
             iter = self.object_store.get_iter(path)
             self.object_store.set_value(iter, 0, element.obj_name)
         else:
-            return
+            self.object_store_update()
 
     def add_element(self, factory, x=None, y=None):
         if x is None:
@@ -369,6 +369,8 @@ class PatchWindow(object):
         b = factory(self, x, y)
         self.select(b)
         b.begin_edit()
+        if b.obj_name is not None:
+            self.object_store_update()
         return True
 
     def quit(self, *rest):

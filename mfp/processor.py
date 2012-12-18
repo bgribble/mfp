@@ -38,9 +38,6 @@ class Processor (object):
 
         print "processor.init:", init_type, init_args, name, self.obj_id
         
-        if patch is not None:
-            self.assign(patch, scope, name)
-
         self.gui_created = False
 
         # gui_params are passed back and forth to the UI process
@@ -48,7 +45,7 @@ class Processor (object):
         if not hasattr(self, "gui_params"):
             self.gui_params = {}
 
-        defaults = dict(obj_id=self.obj_id, name=self.name,
+        defaults = dict(obj_id=self.obj_id, name=name,
                         initargs=self.init_args, display_type=self.display_type,
                         num_inlets=inlets, num_outlets=outlets)
 
@@ -67,6 +64,9 @@ class Processor (object):
         self.connections_out = [[] for r in range(outlets)]
         self.connections_in = [[] for r in range(inlets)]
 
+        if patch is not None:
+            self.assign(patch, scope, name)
+
     def info(self):
         log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
                   % (self.obj_id, self.name, self.init_type, self.init_args))
@@ -77,6 +77,7 @@ class Processor (object):
             self.patch.unbind(self.name, self.scope)
 
         self.name = name or "%s_%s" % (self.init_type, str(self.obj_id))
+        self.gui_params["name"] = self.name 
 
         if self.patch is None or self.patch != patch:
             if self.patch:
