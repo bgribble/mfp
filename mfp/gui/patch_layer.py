@@ -74,7 +74,8 @@ class PatchLayer(object):
             self.objects[newloc:newloc] = [obj]
 
     def remove(self, obj):
-        self.objects.remove(obj)
+        if obj in self.objects:
+            self.objects.remove(obj)
         obj.layer = None
 
 

@@ -3,15 +3,13 @@
 via_element.py
 A patch element corresponding to a send or receive box
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter
 import math
 from patch_element import PatchElement
-from mfp import MFPGUI
 from .modes.label_edit import LabelEditMode
-from .modes.enum_control import EnumControlMode
 
 
 class ViaElement (PatchElement):
