@@ -125,6 +125,8 @@ def register():
     mk_binary(operator.mul, "*")
     mk_binary(operator.div, "/")
     mk_binary(operator.mod, "%")
+    mk_binary(operator.pow, "^")
+    mk_binary(operator.pow, "**")
 
     mk_unary(math.log, "log")
     mk_unary(math.exp, "exp")
@@ -149,6 +151,7 @@ def register():
     mk_unary(operator.neg, "neg")
 
     # type converters
+    mk_unary(complex, "complex")
     mk_unary(int, "int")
     mk_unary(float, "float")
     mk_unary(tuple, "tuple")

@@ -7,12 +7,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..main import MFPApp
-from ..evaluator import Evaluator
-from ..method import MethodCall
-from ..bang import Bang, Uninit
 
-
-class Collect (Processor):
+class Pack (Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
@@ -26,6 +22,25 @@ class Collect (Processor):
         self.outlets[0] = self.inlets
 
 
+class Unpack (Processor):
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+
+        if len(initargs):
+            num_outlets = initargs[0] + 1
+        else:
+            num_outlets = 1
+        self.resize(1, num_outlets)
+
+    def trigger(self):
+        nout = len(self.outlets) - 1 
+        for n in range(nout):
+            self.outlets[n] = self.inlets[0][n]
+
+        self.outlets[-1] = self.inlets[nout:]
+
+
 def list_car(ll):
     return ll[0]
 
@@ -35,4 +50,6 @@ def list_cdr(ll):
 
 
 def register():
-    MFPApp().register("collect", Collect)
+    MFPApp().register("pack", Pack)
+    MFPApp().register("unpack", Unpack)
+

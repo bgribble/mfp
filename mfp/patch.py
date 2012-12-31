@@ -137,6 +137,8 @@ class Patch(Processor):
             del self.objects[obj.obj_id]
         except KeyError: 
             print "Error deleting obj", obj, "can't find key", obj.obj_id
+            import traceback
+            traceback.print_exc()
 
         try:
             self.inlet_objects.remove(obj)

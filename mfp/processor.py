@@ -4,6 +4,7 @@ processor.py: Parent class of all processors
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
+
 from .dsp_slave import DSPObject
 from .method import MethodCall
 from .bang import Uninit

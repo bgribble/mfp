@@ -240,11 +240,15 @@ class MFPApp (object):
             log.debug("No factory for '%s' registered, looking for file." % init_type)
             (name, ctor) = Patch.register_file(init_type + ".mfp")
             if ctor is None:
+                print "No constructor for", init_type
                 return None
 
         # factory found, use it
         try:
             obj = ctor(init_type, init_args, patch, scope, name)
+            if obj and obj.obj_id:
+                obj.mark_ready()
+            print "ctor returned", obj
             return obj
         except Exception, e:
             log.debug("Caught exception while trying to create %s (%s)"
@@ -259,11 +263,16 @@ class MFPApp (object):
         garbage = [] 
         for oid, obj in self.objects.items():
             if obj.status == Processor.CTOR:
+                print "cleanup: marking", obj.name, obj
                 garbage.append(obj)
 
         for obj in garbage: 
             if obj.patch is not None:
+                print "cleanup: removing from patch", obj
                 obj.patch.remove(obj)
+                obj.patch = None 
+
+            print "cleanup: deleting", obj
             obj.delete()
 
     def resolve(self, name, queryobj=None):
@@ -367,9 +376,9 @@ def main():
 
         name, factory = Patch.register_file(sys.argv[1])
         patch = factory(name, initargs, None, app.app_scope, name)
-        app.patches['default'] = patch
     else:
         patch = Patch('default', '', None, app.app_scope, 'default')
-        app.patches["default"] = patch
 
+    app.patches["default"] = patch
+    patch.mark_ready()
     patch.create_gui()
