@@ -115,13 +115,20 @@ class Patch(Processor):
         self.outlet_objects[outlet].connect(0, target, inlet)
 
     def add(self, obj):
+        if self.objects.has_key(obj.obj_id):
+            print "patch.add: obj already added", obj
+            return 
+
         self.objects[obj.obj_id] = obj
         if obj.init_type == 'inlet':
             num = obj.inletnum
+            print "Adding inlet", obj.inletnum, self.inlet_objects
             if num >= len(self.inlet_objects):
                 self.inlet_objects.extend([None] * (num - len(self.inlet_objects) + 1))
             self.inlet_objects[num] = obj
+            print "Before resize:", self.inlet_objects
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
+            print "After resize:", self.inlet_objects
 
         elif obj.init_type == 'outlet':
             num = obj.outletnum

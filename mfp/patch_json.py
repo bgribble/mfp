@@ -64,11 +64,6 @@ def json_deserialize(self, json_data):
         gp = prms.get('gui_params')
         newobj = MFPApp().create(otype, oargs, self, self.default_scope, gp.get("name"))
 
-        if otype == 'inlet':
-            self.inlet_objects.append(newobj)
-        elif otype == 'outlet':
-            self.outlet_objects.append(newobj)
-
         newobj.patch = self
 
         for k, v in gp.items():

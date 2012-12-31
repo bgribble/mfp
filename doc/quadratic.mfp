@@ -1,0 +1,712 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "default",
+        "obj_id": 0,
+        "num_outlets": 3,
+        "display_type": "patch",
+        "num_inlets": 4,
+        "initargs": ""
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        4,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "0",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 61.40899658203125,
+                "name": "processor_1",
+                "obj_id": 1,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 48.07505798339844,
+                "initargs": "0"
+            },
+            "type": "inlet",
+            "name": "processor_1"
+        },
+        "2": {
+            "connections": [
+                [
+                    [
+                        8,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.38914489746094,
+                "name": "processor_2",
+                "obj_id": 2,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 46.631534576416016,
+                "initargs": "1"
+            },
+            "type": "inlet",
+            "name": "processor_2"
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        9,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 297.5212707519531,
+                "name": "processor_3",
+                "obj_id": 3,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 48.94040298461914,
+                "initargs": "2"
+            },
+            "type": "inlet",
+            "name": "processor_3"
+        },
+        "4": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        7,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 61.40899658203125,
+                "name": "processor_4",
+                "obj_id": 4,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 96.07505798339844,
+                "initargs": "2"
+            },
+            "type": "trigger",
+            "name": "processor_4"
+        },
+        "5": {
+            "gui_params": {
+                "value": {
+                    "__BangType__": {}
+                },
+                "layer": "Layer 0",
+                "position_x": 61.40899658203125,
+                "name": "message_1",
+                "obj_id": 5,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 144.07505798339844,
+                "initargs": "Bang"
+            },
+            "name": "message_1",
+            "value": {
+                "__BangType__": {}
+            },
+            "connections": [
+                [
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "Bang",
+            "type": "message"
+        },
+        "6": {
+            "connections": [
+                [
+                    [
+                        8,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        7,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "3",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 61.40899658203125,
+                "name": "processor_5",
+                "obj_id": 6,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 3,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 192.07505798339844,
+                "initargs": "3"
+            },
+            "type": "trigger",
+            "name": "processor_5"
+        },
+        "7": {
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 123.40899658203125,
+                "name": "processor_6",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 144.07505798339844,
+                "dsp_outlets": null
+            },
+            "name": "processor_6",
+            "value": null,
+            "connections": [
+                [
+                    [
+                        15,
+                        0
+                    ],
+                    [
+                        21,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "8": {
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.38914489746094,
+                "name": "processor_7",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 94.63153076171875,
+                "dsp_outlets": null
+            },
+            "name": "processor_7",
+            "value": null,
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "9": {
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 299.513916015625,
+                "name": "processor_8",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 97.9384765625,
+                "dsp_outlets": null
+            },
+            "name": "processor_8",
+            "value": null,
+            "connections": [
+                [
+                    [
+                        12,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "initargs": "0",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 60.902740478515625,
+                "name": "processor_9",
+                "obj_id": 10,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 408.8269958496094,
+                "initargs": "0"
+            },
+            "type": "outlet",
+            "name": "processor_9"
+        },
+        "11": {
+            "connections": [
+                []
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 183.7097625732422,
+                "name": "processor_10",
+                "obj_id": 11,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 407.82708740234375,
+                "initargs": "1"
+            },
+            "type": "outlet",
+            "name": "processor_10"
+        },
+        "12": {
+            "connections": [
+                [
+                    [
+                        18,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 277.5680236816406,
+                "name": "processor_11",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 184.64358520507812,
+                "dsp_outlets": null
+            },
+            "type": "*",
+            "name": "processor_11"
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        12,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "4",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 277.5755615234375,
+                "name": "processor_12",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 143.2299041748047,
+                "dsp_outlets": null
+            },
+            "type": "*",
+            "name": "processor_12"
+        },
+        "16": {
+            "connections": [
+                [
+                    [
+                        22,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.38914489746094,
+                "name": "processor_13",
+                "obj_id": 16,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 135.63153076171875,
+                "initargs": "2"
+            },
+            "type": "trigger",
+            "name": "processor_13"
+        },
+        "17": {
+            "connections": [
+                [
+                    [
+                        18,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.7250213623047,
+                "name": "processor_14",
+                "obj_id": 17,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 180.12461853027344,
+                "initargs": "2"
+            },
+            "type": "**",
+            "name": "processor_14"
+        },
+        "18": {
+            "connections": [
+                [
+                    [
+                        19,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.72943115234375,
+                "name": "processor_15",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 219.1553955078125,
+                "dsp_outlets": null
+            },
+            "type": "-",
+            "name": "processor_15"
+        },
+        "19": {
+            "connections": [
+                [
+                    [
+                        20,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.7250213623047,
+                "name": "processor_16",
+                "obj_id": 19,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 260.1246337890625,
+                "initargs": null
+            },
+            "type": "complex",
+            "name": "processor_16"
+        },
+        "20": {
+            "connections": [
+                [
+                    [
+                        24,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "0.5",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.7323760986328,
+                "name": "processor_17",
+                "obj_id": 20,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 301.17852783203125,
+                "initargs": "0.5"
+            },
+            "type": "**",
+            "name": "processor_17"
+        },
+        "21": {
+            "connections": [
+                [
+                    [
+                        23,
+                        1
+                    ],
+                    [
+                        24,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 122.8147201538086,
+                "name": "processor_18",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 234.059326171875,
+                "dsp_outlets": null
+            },
+            "type": "*",
+            "name": "processor_18"
+        },
+        "22": {
+            "connections": [
+                [
+                    [
+                        23,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "-1",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 60.910316467285156,
+                "name": "processor_19",
+                "obj_id": 22,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 234.0630340576172,
+                "initargs": "-1"
+            },
+            "type": "*",
+            "name": "processor_19"
+        },
+        "23": {
+            "connections": [
+                [
+                    [
+                        25,
+                        0
+                    ],
+                    [
+                        27,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 60.90736389160156,
+                "name": "processor_20",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 281.970703125,
+                "dsp_outlets": null
+            },
+            "type": "/",
+            "name": "processor_20"
+        },
+        "24": {
+            "connections": [
+                [
+                    [
+                        27,
+                        1
+                    ],
+                    [
+                        25,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.7323760986328,
+                "name": "processor_21",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 340.17852783203125,
+                "dsp_outlets": null
+            },
+            "type": "/",
+            "name": "processor_21"
+        },
+        "25": {
+            "connections": [
+                [
+                    [
+                        10,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 60.90736389160156,
+                "name": "processor_22",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 349.970703125,
+                "dsp_outlets": null
+            },
+            "type": "+",
+            "name": "processor_22"
+        },
+        "27": {
+            "connections": [
+                [
+                    [
+                        11,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 182.7323760986328,
+                "name": "processor_23",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 376.1774597167969,
+                "dsp_outlets": null
+            },
+            "type": "-",
+            "name": "processor_23"
+        }
+    },
+    "type": "default",
+    "scopes": {
+        "__patch__": {
+            "processor_21": 24,
+            "processor_20": 23,
+            "processor_23": 27,
+            "self": 0,
+            "processor_14": 17,
+            "processor_15": 18,
+            "processor_16": 19,
+            "processor_17": 20,
+            "processor_10": 11,
+            "processor_11": 12,
+            "processor_12": 15,
+            "processor_13": 16,
+            "processor_18": 21,
+            "processor_19": 22,
+            "message_1": 5,
+            "processor_2": 2,
+            "processor_3": 3,
+            "processor_1": 1,
+            "processor_6": 7,
+            "processor_7": 8,
+            "processor_4": 4,
+            "processor_5": 6,
+            "processor_8": 9,
+            "processor_9": 10
+        }
+    }
+}

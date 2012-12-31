@@ -186,6 +186,7 @@ class Processor (object):
         MFPApp().forget(self)
 
     def resize(self, inlets, outlets):
+        print "processor.resize: before", self.connections_in, self.connections_out
         if inlets > len(self.inlets):
             newin = inlets - len(self.inlets)
             self.inlets += [Uninit] * newin
@@ -210,8 +211,11 @@ class Processor (object):
 
         self.gui_params['num_inlets'] = inlets
         self.gui_params['num_outlets'] = outlets
+        print "processor.resize: after", self, self.connections_in, self.connections_out
 
     def connect(self, outlet, target, inlet):
+        print "connect:", self, outlet, target, inlet
+        print "connect:", self.connections_out, target.connections_in
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             self.dsp_obj.connect(self.dsp_outlets.index(outlet),
