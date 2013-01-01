@@ -34,6 +34,7 @@ class MFPCommand(RPCWrapper):
 
     @rpcwrap
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+        print "MFPApp.connect:", obj_1_id, obj_2_id
         obj_1 = MFPApp().recall(obj_1_id)
         obj_2 = MFPApp().recall(obj_2_id)
         r = obj_1.connect(obj_1_port, obj_2, obj_2_port)

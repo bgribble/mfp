@@ -106,6 +106,7 @@ class ProcessorElement (PatchElement):
                 "ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args))
             self.create(self.obj_type, self.obj_args)
 
+
             # obj_args may get forcibly changed on create
             if self.obj_args and (len(parts) < 2 or self.obj_args != parts[1]):
                 self.label.set_text(self.obj_type + ' ' + self.obj_args)

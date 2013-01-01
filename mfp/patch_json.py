@@ -26,7 +26,6 @@ class ExtendedEncoder (json.JSONEncoder):
 
 def extended_decoder_hook (saved):
     if (isinstance(saved, dict) and len(saved.keys()) == 1):
-
         tname, tdict = saved.items()[0]
         key = tname.strip("_")
         ctor = ExtendedEncoder.TYPES.get(key)
@@ -42,6 +41,10 @@ def json_deserialize(self, json_data):
     f = json.loads(json_data, object_hook=extended_decoder_hook)
     self.init_type = f.get('type')
     self.gui_params = f.get('gui_params', {})
+
+    # reset params that need it 
+    self.gui_params["obj_id"] = self.obj_id 
+    print "json: set gui_params of", self, self.obj_id, "to", self.gui_params
 
     # clear old objects
     for o in self.objects.values():
@@ -69,10 +72,12 @@ def json_deserialize(self, json_data):
         for k, v in gp.items():
             newobj.gui_params[k] = v
 
+        newobj.gui_params["obj_id"] = newobj.obj_id
+
         # custom behaviors implemented by Processor subclass load()
         newobj.load(prms)
-
         idmap[int(oid)] = newobj
+
     # load new scopes
     scopes = f.get("scopes", {})
     for scopename, bindings in scopes.items():

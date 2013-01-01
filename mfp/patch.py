@@ -34,6 +34,7 @@ class Patch(Processor):
 
         initargs, kwargs = self.parse_args(init_args)
         self.gui_params['layers'] = [('Layer 0', '__patch__')]
+        print "Patch.init: created", self, self.obj_id
 
     #############################
     # name management
@@ -163,7 +164,7 @@ class Patch(Processor):
     ############################
 
     @classmethod
-    def register_file(self, filename):
+    def register_file(klass, filename):
         from main import MFPApp
 
         def factory(init_type, init_args, patch, scope, name):
