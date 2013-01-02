@@ -23,7 +23,6 @@ from . import log
 class MFPCommand(RPCWrapper):
     @rpcwrap
     def create(self, objtype, initargs, patch_name, scope_name, obj_name):
-        print "rpcwrap: about to call create() from", log.log_module
         patch = MFPApp().patches.get(patch_name)
         scope = patch.scopes.get(scope_name) or patch.default_scope
 
@@ -34,7 +33,6 @@ class MFPCommand(RPCWrapper):
 
     @rpcwrap
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-        print "MFPApp.connect:", obj_1_id, obj_2_id
         obj_1 = MFPApp().recall(obj_1_id)
         obj_2 = MFPApp().recall(obj_2_id)
         r = obj_1.connect(obj_1_port, obj_2, obj_2_port)
@@ -70,7 +68,6 @@ class MFPCommand(RPCWrapper):
     def delete(self, obj_id):
         obj = MFPApp().recall(obj_id)
         obj.delete()
-        print "rpcwrap: after delete,", obj_id, MFPApp().recall(obj_id)
 
     @rpcwrap
     def set_params(self, obj_id, params):
@@ -222,15 +219,10 @@ class MFPApp (object):
         return self.objects.get(obj_id)
 
     def forget(self, obj):
-        print "========================="
-        print "forgetting", obj, obj.obj_id
-        print "before:", obj.obj_id, self.objects.get(obj.obj_id)
         try:
             del self.objects[obj.obj_id]
         except KeyError:
-            print "oops! KeyError"
             pass 
-        print "after:", obj.obj_id, self.objects.get(obj.obj_id)
 
     def register(self, name, ctor):
         self.registry[name] = ctor
@@ -241,7 +233,6 @@ class MFPApp (object):
             log.debug("No factory for '%s' registered, looking for file." % init_type)
             (name, ctor) = Patch.register_file(init_type + ".mfp")
             if ctor is None:
-                print "No constructor for", init_type
                 return None
 
         # factory found, use it
@@ -249,7 +240,6 @@ class MFPApp (object):
             obj = ctor(init_type, init_args, patch, scope, name)
             if obj and obj.obj_id:
                 obj.mark_ready()
-            print "ctor returned", obj
             return obj
         except Exception, e:
             log.debug("Caught exception while trying to create %s (%s)"
@@ -264,16 +254,13 @@ class MFPApp (object):
         garbage = [] 
         for oid, obj in self.objects.items():
             if obj.status == Processor.CTOR:
-                print "cleanup: marking", obj.name, obj
                 garbage.append(obj)
 
         for obj in garbage: 
             if obj.patch is not None:
-                print "cleanup: removing from patch", obj
                 obj.patch.remove(obj)
                 obj.patch = None 
 
-            print "cleanup: deleting", obj
             obj.delete()
 
     def resolve(self, name, queryobj=None):

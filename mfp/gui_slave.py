@@ -13,6 +13,7 @@ from singleton import Singleton
 from rpc_wrapper import RPCWrapper, rpcwrap
 from main import MFPCommand
 from . import log
+from .utils import profile
 
 
 def gui_init(pipe):
@@ -192,6 +193,7 @@ class MFPGUI (object):
         from gi.repository import GObject
         GObject.idle_add(thunk, priority=GObject.PRIORITY_DEFAULT)
 
+    @profile 
     def clutter_proc(self):
         from gi.repository import Clutter, GObject, Gtk, GtkClutter
 

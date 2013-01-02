@@ -22,12 +22,15 @@ class PatchLayer(object):
         self.group = Clutter.Group()
         self.group.set_property("opacity", 0)
         self.stage.group.add_actor(self.group)
+        self.group.set_depth(1000)
 
     def show(self):
         self.group.set_property("opacity", 255)
+        self.group.set_depth(0)
 
     def hide(self):
         self.group.set_property("opacity", 0)
+        self.group.set_depth(1000)
 
     def resort(self, obj):
         if obj in self.objects:

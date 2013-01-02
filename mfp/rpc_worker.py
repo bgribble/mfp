@@ -10,9 +10,7 @@ from request import Request
 from worker_pool import WorkerPool, BaseWorker
 from quittable_thread import QuittableThread
 import multiprocessing
-import threading
 import Queue
-import time
 from . import log
 
 

@@ -214,7 +214,6 @@ class PatchWindow(object):
             else:
                 return cmp(o1.layer.scope, o2.layer.scope)
 
-
         scopes = {}
         self.object_store.clear()
 
@@ -255,6 +254,11 @@ class PatchWindow(object):
             self.object_store.set_value(oiter, 1, o)
 
         self.object_view.expand_all()
+
+    def object_visible(self, obj):
+        if obj and hasattr(obj, 'layer'):
+            return obj.layer == self.selected_layer
+        return True
 
     def active_layer(self):
         return self.selected_layer

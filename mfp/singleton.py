@@ -13,6 +13,7 @@ class Singleton(type):
         klass._singleton_lock = threading.Lock()
         klass._singleton = None
 
+
     def __call__(klass, *args, **kwargs):
         with klass._singleton_lock:
             if klass._singleton is None:

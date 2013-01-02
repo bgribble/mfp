@@ -52,6 +52,9 @@ class Var (Processor):
                 - ensure that value is a string and save it in the gui_params
 
         '''
+        print "[var] trigger:", self.inlets, (self.inlets[0] is Bang), self
+        if type(self.inlets[0]) == type(Bang):
+            print id(self.inlets[0]), id(Bang)
         do_update = False
         if self.inlets[1] is not Uninit:
             self.value = self.inlets[1]
@@ -71,7 +74,6 @@ class Var (Processor):
             self.outlets[0] = self.value
             self.inlets[0] = Uninit
 
-        print "[var]: got input", self, self.value
         if do_update and self.gui_created and self.gui_params.get("update_required"):
             self.gui_params['value'] = self.value
 

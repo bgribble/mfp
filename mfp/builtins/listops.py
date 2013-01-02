@@ -19,8 +19,7 @@ class Pack (Processor):
         self.resize(num_inlets, 1)
 
     def trigger(self):
-        self.outlets[0] = self.inlets
-
+        self.outlets[0] = [l for l in self.inlets]
 
 class Unpack (Processor):
     def __init__(self, init_type, init_args, patch, scope, name):

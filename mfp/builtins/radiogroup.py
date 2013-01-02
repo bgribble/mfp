@@ -31,9 +31,12 @@ class RadioGroup (Processor):
         self.selection = None 
         self.hot_inlets = range(num_inlets)
 
-        Processor.__init__(self, num_inlets, num_inlets, 
+        Processor.__init__(self, num_inlets, num_inlets+1, 
                            init_type, init_args, patch, scope, name)
+        for i in range(num_inlets):
+            self.send(False, i)
         self.send(True, init_selection)
+
 
     def trigger(self):
         for inum, ival in enumerate(self.inlets):
@@ -51,6 +54,7 @@ class RadioGroup (Processor):
                 break
         for inum in range(len(self.inlets)):
             self.inlets[inum] = Uninit
+        self.outlets[-1] = self.selection
             
 def register():
     MFPApp().register("radiogroup", RadioGroup)

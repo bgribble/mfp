@@ -76,12 +76,23 @@ class InputManager (object):
             if len(self.keyseq.sequences):
                 keysym = self.keyseq.pop()
         elif event.type == Clutter.EventType.ENTER:
-            self.pointer_obj = self.event_sources.get(event.source)
-            if self.pointer_obj == self.pointer_lastobj:
-                self.keyseq.mod_keys = set()
+            src = self.event_sources.get(event.source)
+            #print "ENTER:", src
+            if self.window.object_visible(src):
+                #print src, "is visible, setting as pointer_obj"
+                self.pointer_obj = self.event_sources.get(event.source)
+                if self.pointer_obj == self.pointer_lastobj:
+                    self.keyseq.mod_keys = set()
+            else:
+                #print src, "is not visible"
+                pass
+
         elif event.type == Clutter.EventType.LEAVE:
-            self.pointer_lastobj = self.pointer_obj
-            self.pointer_obj = None
+            src = self.event_sources.get(event.source)
+            #print "LEAVE:", src
+            if src == self.pointer_obj:
+                self.pointer_lastobj = self.pointer_obj
+                self.pointer_obj = None
         else:
             return False
 

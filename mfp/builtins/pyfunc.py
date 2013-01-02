@@ -54,7 +54,6 @@ class GetElement(Processor):
 
 class PyEval(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
-        self.evaluator = Evaluator()
         self.bindings = {}
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
@@ -63,11 +62,10 @@ class PyEval(Processor):
             self.bindings = initargs[0]
 
     def trigger(self):
-        print self.bindings
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         else:
-            self.outlets[0] = self.evaluator.eval(self.inlets[0], self.bindings)
+            self.outlets[0] = self.patch.eval(self.inlets[0], self.bindings)
 
     def clear(self):
         self.bindings = {}
@@ -76,6 +74,25 @@ class PyEval(Processor):
         for name, value in kwargs.items():
             self.bindings[name] = value
 
+class PyFunc(Processor): 
+    def __init__(self, init_type, init_args, patch, scope, name):
+        self.thunk = None
+        if init_args:
+            thunktxt = "lambda " + init_args
+        else:
+            thunktxt = "lambda: None"
+        initargs, kwargs = patch.parse_args(thunktxt)
+        
+        self.thunk = initargs[0]
+        if callable(self.thunk):
+            self.argcount = self.thunk.func_code.co_argcount
+        Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
+
+    def trigger(self):
+        if isinstance(self.inlets[0], MethodCall):
+            self.inlets[0].call(self)
+        else:
+            self.outlets[0] = self.thunk(*[i for i in self.inlets if i is not Uninit]) 
 
 class PyBinary(Processor):
     def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
@@ -119,6 +136,7 @@ def register():
     MFPApp().register("get", GetElement)
     MFPApp().register("eval", PyEval)
     MFPApp().register("apply", ApplyMethod)
+    MFPApp().register("func", PyFunc)
 
     mk_binary(operator.add, "+")
     mk_binary(operator.sub, "-")

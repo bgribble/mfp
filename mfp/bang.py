@@ -1,6 +1,8 @@
-
+from .singleton import Singleton
 
 class BangType (object):
+    __metaclass__ = Singleton
+
     def __repr__(self):
         return "Bang"
 
@@ -10,6 +12,8 @@ class BangType (object):
 
 
 class UninitType (object):
+    __metaclass__ = Singleton
+
     def __repr__(self):
         return "Uninit"
 

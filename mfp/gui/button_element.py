@@ -167,6 +167,13 @@ class BangButtonElement (ButtonElement):
 
         return False
 
+    def configure(self, params):
+        if "value" in params:
+            self.message = params.get("value")
+
+        PatchElement.configure(self, params)
+        self.texture.invalidate()
+
 
 class ToggleButtonElement (ButtonElement):
     display_type = "toggle"

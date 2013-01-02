@@ -9,7 +9,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 import simplejson as json
 from .patch import Patch
 from .utils import extends
-from .bang import BangType, UninitType
+from .bang import BangType, UninitType, Bang, Uninit
 from . import log 
 
 
@@ -28,9 +28,14 @@ def extended_decoder_hook (saved):
     if (isinstance(saved, dict) and len(saved.keys()) == 1):
         tname, tdict = saved.items()[0]
         key = tname.strip("_")
-        ctor = ExtendedEncoder.TYPES.get(key)
-        if ctor:
-            return ctor.load(tdict)
+        if key == "BangType":
+            return Bang
+        elif key == "UninitType":
+            return Uninit
+        else: 
+            ctor = ExtendedEncoder.TYPES.get(key)
+            if ctor:
+                return ctor.load(tdict)
     return saved 
 
 
