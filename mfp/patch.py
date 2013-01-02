@@ -113,7 +113,7 @@ class Patch(Processor):
         self.inlet_objects[inlet].send(value)
 
     def connect(self, outlet, target, inlet):
-        self.outlet_objects[outlet].connect(0, target, inlet)
+        return self.outlet_objects[outlet].connect(0, target, inlet)
 
     def add(self, obj):
         if self.objects.has_key(obj.obj_id):

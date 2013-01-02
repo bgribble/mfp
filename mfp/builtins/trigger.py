@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..main import MFPApp
-from .. import Bang, Uninit
+from ..bang import Uninit
 
 
 class Trigger (Processor):
@@ -32,6 +32,7 @@ class Trigger (Processor):
     def trigger(self):
         for i in range(len(self.outlets)):
             self.outlets[i] = self.inlets[0]
+        self.inlets[0] = Uninit
 
 
 def register():

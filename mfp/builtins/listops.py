@@ -32,6 +32,7 @@ class Unpack (Processor):
         else:
             num_outlets = 1
         self.resize(1, num_outlets)
+        self.outlet_order.reverse()
 
     def trigger(self):
         nout = len(self.outlets) - 1 
