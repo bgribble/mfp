@@ -165,5 +165,9 @@ class ReceiveViaElement (ViaElement):
 
     def label_edit_finish(self, *args):
         ViaElement.label_edit_finish(self, *args)
-        MFPGUI().mfp.rename_obj(self.obj_id, self.label.get_text())
+        self.obj_name = self.label.get_text()
+        MFPGUI().mfp.rename_obj(self.obj_id, self.obj_name)
+
         self.stage.object_store_update()
+        self.stage.select(self)
+

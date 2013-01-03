@@ -194,7 +194,7 @@ class PatchWindow(object):
 
     def object_selection_update(self):
         found = [None]
-        def	check(model, path, it, data):
+        def check(model, path, it, data):
             if self.object_store.get_value(it, 1) == self.selected:
                 found[0] = path.to_string()
                 return True
