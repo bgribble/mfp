@@ -135,6 +135,7 @@ class GUICommand (RPCWrapper):
             o.obj_args = obj_args
             o.obj_state = PatchElement.OBJ_COMPLETE
             o.configure(params)
+            o.update()
             # o.draw_ports()
             MFPGUI().remember(o)
 

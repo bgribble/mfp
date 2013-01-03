@@ -89,6 +89,10 @@ class MessageElement (PatchElement):
         ct.close_path()
         ct.stroke()
 
+    def update(self):
+        self.draw_ports()
+        self.texture.invalidate()
+
     def clicked(self, *args):
         self.clickstate = True
         if self.obj_id is not None:
@@ -114,8 +118,7 @@ class MessageElement (PatchElement):
         if self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
             self.send_params()
-            self.draw_ports()
-            self.texture.invalidate()
+            self.update()
 
     def text_changed_cb(self, *args):
         lwidth = self.label.get_property('width')
@@ -132,7 +135,7 @@ class MessageElement (PatchElement):
             self.texture.set_size(new_w, self.texture.get_height())
             self.texture.set_surface_size(
                 int(new_w), self.texture.get_property('surface_height'))
-            self.texture.invalidate()
+            self.update()
 
     def move(self, x, y):
         self.position_x = x
@@ -150,6 +153,11 @@ class MessageElement (PatchElement):
             self.label.set_text(repr(params.get('value')))
         elif self.obj_args is not None:
             self.label.set_text(self.obj_args)
+
+        if self.obj_state != self.OBJ_COMPLETE and self.obj_id is not None:
+            self.obj_state = self.OBJ_COMPLETE
+            self.update()
+
         PatchElement.configure(self, params)
 
     def port_position(self, port_dir, port_num):

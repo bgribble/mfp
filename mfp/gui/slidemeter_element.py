@@ -155,6 +155,9 @@ class SlideMeterElement (PatchElement):
             self.texture.invalidate()
             MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
+    def update(self):
+        self.texture.invalidate()
+
     def move(self, x, y):
         self.position_x = x
         self.position_y = y

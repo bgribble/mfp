@@ -56,7 +56,6 @@ class ProcessorElement (PatchElement):
         self.set_reactive(True)
 
     def update(self):
-        # FIXME not-created style (dashed lines?)
         self.draw_ports()
         self.texture.invalidate()
 
@@ -91,21 +90,20 @@ class ProcessorElement (PatchElement):
 
     def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
+        self.update()
 
     def label_edit_finish(self, widget, aborted=False):
         t = self.label.get_text()
 
         if t != self.label_text:
-            self.obj_id = None
             parts = t.split(' ', 1)
-            self.obj_type = parts[0]
+            obj_type = parts[0]
             if len(parts) > 1:
-                self.obj_args = parts[1]
+                obj_args = parts[1]
+            else:
+                obj_args = None 
 
-            log.debug(
-                "ProcessorElement: processor=%s, args=%s" % (self.obj_type, self.obj_args))
-            self.create(self.obj_type, self.obj_args)
-
+            self.create(obj_type, obj_args)
 
             # obj_args may get forcibly changed on create
             if self.obj_args and (len(parts) < 2 or self.obj_args != parts[1]):
@@ -184,4 +182,11 @@ class ProcessorElement (PatchElement):
             self.label.set_text("%s" % (self.obj_type,))
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+
+        if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
+            print "configure: setting state to complete", self
+            self.obj_state = self.OBJ_COMPLETE
+            self.draw_ports()
+            self.texture.invalidate()
+
         PatchElement.configure(self, params)

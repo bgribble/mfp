@@ -60,6 +60,9 @@ class PatchElement (Clutter.Group):
         Clutter.Group.__init__(self)
         self.stage.register(self)
 
+    def update(self):
+        pass
+
     def event_source(self):
         return self
 
@@ -83,9 +86,22 @@ class PatchElement (Clutter.Group):
 
     def create(self, obj_type, init_args):
         scopename = self.layer.scope
+        connections_out = []
+        connections_in = [] 
 
-        name_index = self.stage.object_counts_by_type.get(self.display_type, 0)
-        name = "%s_%s" % (self.display_type, name_index)
+        if self.obj_name is not None:
+            name = self.obj_name
+        else:
+            name_index = self.stage.object_counts_by_type.get(self.display_type, 0)
+            name = "%s_%s" % (self.display_type, name_index)
+
+        if self.obj_id is not None:
+            connections_out = self.connections_out
+            self.connections_out = [] 
+            connections_in = self.connections_in
+            self.connections_in = []
+            MFPGUI().mfp.delete(self.obj_id)
+            self.obj_id = None 
 
         objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, name)
         if objinfo is None:
@@ -101,6 +117,13 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = objinfo.get("dsp_outlets")
 
         if self.obj_id is not None:
+            # rebuild connections if necessary 
+            self.connections_in = connections_in
+            self.connections_out = connections_out 
+
+            for c in self.connections_in + self.connections_out:
+                MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
+
             MFPGUI().remember(self)
             self.send_params()
             MFPGUI().mfp.set_gui_created(self.obj_id, True)

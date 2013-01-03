@@ -25,18 +25,21 @@ class Print (Processor):
             self.format_string = self.inlets[1]
 
         if self.inlets[0] is not Uninit:
+            out = None 
             if self.format_string is None:
                 out = str(self.inlets[0])
-            else:
+            elif '%' in self.format_string:
                 try:
                     out = self.format_string % self.inlets[0]
                 except TypeError, e:
-                    if not self.format_string:
-                        leader = ''
-                    else:
-                        leader = self.format_string + ' '
+                    pass
+            if out is None:
+                if not self.format_string:
+                    leader = ''
+                else:
+                    leader = self.format_string + ' '
 
-                    out = leader + str(self.inlets[0])
+                out = leader + str(self.inlets[0])
 
             self.outlets[0] = out
             if self.init_type == "print":
