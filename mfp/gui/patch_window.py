@@ -6,7 +6,7 @@ The main MFP window and associated code
 
 from gi.repository import Gtk, GObject, Clutter, GtkClutter, Pango
 
-from mfp.main import MFPCommand
+from mfp import MFPGUI
 from mfp import log
 
 from .patch_element import PatchElement
@@ -171,7 +171,7 @@ class PatchWindow(object):
         obj = self.object_store.get_value(iter, 1)
         if isinstance(obj, PatchElement):
             obj.obj_name = new_value
-            MFPCommand().rename_obj(obj.obj_id, new_value)
+            MFPGUI().mfp.rename_obj(obj.obj_id, new_value)
             obj.send_params()
 
         elif isinstance(obj, PatchLayer):
@@ -179,7 +179,7 @@ class PatchWindow(object):
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
                     l.scope = new_value
-            MFPCommand.rename_scope(oldscopename, new_value)
+            MFPGUI().mfp.rename_scope(oldscopename, new_value)
             seld.selected_patch.send_params()
         self.object_store_update()
         self.layer_store_update()
@@ -384,7 +384,7 @@ class PatchWindow(object):
             self.console_mgr.join()
             log.debug("Console thread reaped")
 
-        MFPCommand().quit()
+        MFPGUI().mfp.quit()
         return True
 
     def console_write(self, msg):

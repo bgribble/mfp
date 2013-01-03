@@ -8,7 +8,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import math
-from patch_element import PatchElement
+from mfp import MFPGUI
+from .patch_element import PatchElement
 from .modes.label_edit import LabelEditMode
 
 
@@ -148,6 +149,10 @@ class SendViaElement (ViaElement):
     display_type = "sendvia"
     proc_type = "send"
 
+    def label_edit_finish(self, *args):
+        ViaElement.label_edit_finish(self, *args)
+        MFPGUI().mfp.send(self.obj_id, 1, self.label.get_text())
+
 
 class ReceiveViaElement (ViaElement):
     STYLE = "filled"
@@ -157,3 +162,8 @@ class ReceiveViaElement (ViaElement):
 
     display_type = "recvvia"
     proc_type = "recv"
+
+    def label_edit_finish(self, *args):
+        ViaElement.label_edit_finish(self, *args)
+        MFPGUI().mfp.rename_obj(self.obj_id, self.label.get_text())
+        self.stage.object_store_update()
