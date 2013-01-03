@@ -169,5 +169,5 @@ class ReceiveViaElement (ViaElement):
         MFPGUI().mfp.rename_obj(self.obj_id, self.obj_name)
 
         self.stage.object_store_update()
-        self.stage.select(self)
+        # self.stage.select(self)
 

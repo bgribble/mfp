@@ -170,17 +170,20 @@ class PatchWindow(object):
         iter = self.object_store.get_iter_from_string(path)
         obj = self.object_store.get_value(iter, 1)
         if isinstance(obj, PatchElement):
+            print "renaming object", obj
             obj.obj_name = new_value
             MFPGUI().mfp.rename_obj(obj.obj_id, new_value)
             obj.send_params()
 
         elif isinstance(obj, PatchLayer):
+            print "renaming scope", obj.scope, "to", new_value
             oldscopename = obj.scope
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
                     l.scope = new_value
             MFPGUI().mfp.rename_scope(oldscopename, new_value)
-            seld.selected_patch.send_params()
+            self.selected_patch.send_params()
+
         self.object_store_update()
         self.layer_store_update()
         return True
@@ -215,6 +218,7 @@ class PatchWindow(object):
                 return cmp(o1.layer.scope, o2.layer.scope)
 
         scopes = {}
+        saved_sel = self.selected
         self.object_store.clear()
 
         for p in self.patches:
@@ -238,9 +242,11 @@ class PatchWindow(object):
                 scopes[l.scope] = oiter
 
         self.object_paths = {}
+        selpath = None 
         obj2disp = sorted(self.objects, cmp=cmpfunc)
 
         for o in obj2disp:
+            print "   ", o, o.obj_name
             if o.obj_name is None:
                 continue
 
@@ -249,11 +255,16 @@ class PatchWindow(object):
             else:
                 parent = scopes.get(o.layer.scope)
             oiter = self.object_store.append(parent)
-            self.object_paths[o] = self.object_store.get_path(oiter)
+            p = self.object_store.get_path(oiter)
+            self.object_paths[o] = p
+            if saved_sel is o:
+                selpath = p 
             self.object_store.set_value(oiter, 0, o.obj_name)
             self.object_store.set_value(oiter, 1, o)
 
         self.object_view.expand_all()
+        if selpath is not None:
+            self.object_view.get_selection().select_path(selpath)
 
     def object_visible(self, obj):
         if obj and hasattr(obj, 'layer'):

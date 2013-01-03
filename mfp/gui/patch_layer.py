@@ -5,7 +5,7 @@ A layer in the patch window
 '''
 
 from ..utils import extends
-from gi.repository import Clutter
+from gi.repository import Clutter, Gtk
 from mfp import log
 from .patch_window import PatchWindow
 from ..main import MFPCommand
@@ -192,7 +192,7 @@ def layer_selection_update(self):
     def chkfunc(model, path, iter, data):
         if self.layer_store.get_value(iter, 0) == self.selected_layer:
             spath = self.layer_store.get_path(iter)
-            match[:] = [spath]
+            match[0] = spath.to_string()
             return True
         return False
 
@@ -209,13 +209,15 @@ def layer_selection_update(self):
     if iter is None or self.layer_store.get_value(iter, 0) != self.selected_layer:
         self.layer_store.foreach(chkfunc, None)
         if match[0] is not None:
-            spath = match[0]
-            if spath is not None:
-                self.layer_view.get_selection().select_path(spath)
+            path = Gtk.TreePath.new_from_string(match[0])
+            self.layer_view.get_selection().select_path(path)
 
 
 @extends(PatchWindow)
 def layer_store_update(self):
+    saved_sel = self.selected_layer
+    saved_path = None 
+
     self.layer_store.clear()
     for p in self.patches:
         piter = self.layer_store.append(None)
@@ -231,4 +233,11 @@ def layer_store_update(self):
             if not sname or sname == "__patch__":
                 sname = "__patch__"
             self.layer_store.set_value(liter, 2, sname)
+            if saved_sel == l: 
+                saved_path = self.layer_store.get_path(liter)
+
     self.layer_view.expand_all()
+    if saved_path:
+        self.layer_view.get_selection().select_path(saved_path)
+
+
