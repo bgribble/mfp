@@ -173,8 +173,7 @@ class GUICommand (RPCWrapper):
         pass
 
 
-class MFPGUI (object):
-    __metaclass__ = Singleton
+class MFPGUI (Singleton):
 
     def __init__(self):
         self.objects = {}

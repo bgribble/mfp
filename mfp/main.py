@@ -132,8 +132,7 @@ class MFPCommand(RPCWrapper):
         MFPApp().finish()
 
 
-class MFPApp (object):
-    __metaclass__ = Singleton
+class MFPApp (Singleton):
     no_gui = False
     no_dsp = False
 
