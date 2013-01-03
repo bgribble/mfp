@@ -138,15 +138,15 @@ class MFPApp (Singleton):
 
     def __init__(self):
         self.dsp_process = None
+        self.dsp_command = None 
+
         self.gui_process = None
+        self.gui_cmd = None
 
         # threads in this process
         self.midi_mgr = None
         self.osc_mgr = None
-
         self.console = None
-
-        self.gui_cmd = None
 
         # processor class registry
         self.registry = {}
@@ -177,6 +177,8 @@ class MFPApp (Singleton):
             self.dsp_process.serve(DSPObject)
             self.dsp_process.serve(DSPCommand)
             self.dsp_command = DSPCommand()
+            self.samplerate, self.blocksize = self.dsp_command.get_dsp_params()
+            print "DSP params:", self.samplerate, self.blocksize
 
         if not MFPApp.no_gui:
             self.gui_process = RPCServer("mfp_gui", gui_init)

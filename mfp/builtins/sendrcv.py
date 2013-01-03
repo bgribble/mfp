@@ -31,8 +31,6 @@ class Send (Processor):
         self.trigger()
 
     def trigger(self):
-        print "send trigger:", self.name, self.inlets
-
         if self.inlets[1] is not Uninit:
             self.dest_name = self.inlets[1]
             self.gui_params["label"] = self.dest_name
@@ -43,7 +41,6 @@ class Send (Processor):
             self.dest_obj = MFPApp().resolve(self.dest_name, self)
 
         if self.dest_obj is not None:
-            print self.name, "sending to", self.dest_obj
             self.dest_obj.send(self.inlets[0], inlet=self.dest_inlet)
 
 

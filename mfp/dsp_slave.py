@@ -54,6 +54,11 @@ class DSPCommand (RPCWrapper):
         log.debug("DSP process logging to GUI")
         return True
 
+    @rpcwrap
+    def get_dsp_params(self):
+        srate = mfpdsp.dsp_samplerate()
+        blksize = mfpdsp.dsp_blocksize()
+        return (srate, blksize)
 
 def dsp_init(pipe, num_inputs, num_outputs):
     from main import MFPCommand
