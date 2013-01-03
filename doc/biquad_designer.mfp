@@ -531,19 +531,17 @@
         },
         "22": {
             "gui_params": {
+                "value": false,
                 "layer": "Front Panel",
                 "position_x": 34.98871612548828,
                 "name": "rg_lowpass",
-                "obj_id": 22,
-                "dsp_outlets": null,
-                "value": false,
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "toggle",
                 "num_inlets": 2,
-                "position_y": 63.97195687334579,
-                "initargs": "True"
+                "position_y": 61.973459864068445,
+                "dsp_outlets": null
             },
             "name": "rg_lowpass",
             "value": false,
@@ -768,15 +766,15 @@
         },
         "31": {
             "gui_params": {
-                "value": 0.6977104833929632,
                 "layer": "Front Panel",
                 "position_x": 28.97229766845703,
                 "name": "out_a1",
                 "obj_id": 31,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": 0.6977104833929632,
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "enum",
                 "num_inlets": 2,
                 "position_y": 284.9645690917969,
@@ -792,15 +790,15 @@
         },
         "32": {
             "gui_params": {
-                "value": 1.6708691044148263,
                 "layer": "Front Panel",
                 "position_x": 29.970050811767578,
                 "name": "out_a2",
                 "obj_id": 32,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": 1.6708691044148263,
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "enum",
                 "num_inlets": 2,
                 "position_y": 323.95965576171875,
@@ -816,15 +814,15 @@
         },
         "33": {
             "gui_params": {
-                "value": -1.6971720644915307,
                 "layer": "Front Panel",
                 "position_x": 29.968555450439453,
                 "name": "out_b1",
                 "obj_id": 33,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": -1.6971720644915307,
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "enum",
                 "num_inlets": 2,
                 "position_y": 362.9556579589844,
@@ -840,15 +838,15 @@
         },
         "34": {
             "gui_params": {
-                "value": 0.8485860322457653,
                 "layer": "Front Panel",
                 "position_x": 29.970050811767578,
                 "name": "out_b2",
                 "obj_id": 34,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": 0.8485860322457653,
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "enum",
                 "num_inlets": 2,
                 "position_y": 399.95166015625,
@@ -1007,16 +1005,21 @@
         },
         "41": {
             "gui_params": {
+                "value": {
+                    "__BangType__": {}
+                },
                 "layer": "Front Panel",
                 "position_x": 231.70567321777344,
                 "name": "compute_button",
+                "obj_id": 41,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "button",
                 "num_inlets": 2,
                 "position_y": 199.84996032714844,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "compute_button",
             "value": {
@@ -1477,13 +1480,15 @@
                 "layer": "Filter Type",
                 "position_x": 61.96522903442383,
                 "name": "processor_1",
+                "obj_id": 59,
+                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 6,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 5,
                 "position_y": 143.05703735351562,
-                "dsp_outlets": null
+                "initargs": "5"
             },
             "type": "radiogroup",
             "name": "processor_1"
@@ -1896,15 +1901,15 @@
         },
         "75": {
             "gui_params": {
-                "value": "<b>w0</b>: Angle of <i>f</i> on z-plane",
                 "layer": "Highpass",
                 "position_x": 360.6576232910156,
                 "name": "text_23",
                 "obj_id": 75,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": "<b>w0</b>: Angle of <i>f</i> on z-plane",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 110.89569091796875,
@@ -1947,15 +1952,15 @@
         },
         "77": {
             "gui_params": {
-                "value": "<b>alpha</b>: intermediate value",
                 "layer": "Highpass",
                 "position_x": 356.66143798828125,
                 "name": "text_24",
                 "obj_id": 77,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": "<b>alpha</b>: intermediate value",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 256.8071746826172,
@@ -1998,16 +2003,19 @@
         },
         "79": {
             "gui_params": {
+                "value": "<b>b<sub>0</sub>, b<sub>2</sub></b>: biquad coefficients",
                 "layer": "Highpass",
                 "position_x": 357.6605224609375,
                 "name": "text_25",
+                "obj_id": 79,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 163.8723907470703,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_25",
             "value": "<b>b<sub>0</sub>, b<sub>2</sub></b>: biquad coefficients",
@@ -2046,16 +2054,19 @@
         },
         "81": {
             "gui_params": {
+                "value": "<b>b<sub>1</sub></b>: biquad coefficient",
                 "layer": "Highpass",
                 "position_x": 358.6595458984375,
                 "name": "text_26",
+                "obj_id": 81,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 202.83714294433594,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_26",
             "value": "<b>b<sub>1</sub></b>: biquad coefficient",
@@ -2214,15 +2225,15 @@
         },
         "87": {
             "gui_params": {
-                "value": "<b>a<sub>0</sub></b>: biquad coefficient (normalized out)",
                 "layer": "Highpass",
                 "position_x": 305.7097473144531,
                 "name": "text_27",
                 "obj_id": 87,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": "<b>a<sub>0</sub></b>: biquad coefficient (normalized out)",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 291.77642822265625,
@@ -2238,15 +2249,15 @@
         },
         "88": {
             "gui_params": {
-                "value": "<b>a<sub>1</sub></b>: biquad coefficient",
                 "layer": "Highpass",
                 "position_x": 380.762939453125,
                 "name": "text_28",
                 "obj_id": 88,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": "<b>a<sub>1</sub></b>: biquad coefficient",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 402.6623840332031,
@@ -2262,15 +2273,15 @@
         },
         "89": {
             "gui_params": {
-                "value": "<b>a<sub>2</sub></b>: biquad coefficient",
                 "layer": "Highpass",
                 "position_x": 170.83412170410156,
                 "name": "text_29",
                 "obj_id": 89,
                 "dsp_outlets": null,
-                "update_required": true,
+                "value": "<b>a<sub>2</sub></b>: biquad coefficient",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 404.6789245605469,
@@ -2292,7 +2303,7 @@
                         0
                     ],
                     [
-                        103,
+                        105,
                         0
                     ]
                 ]
@@ -2638,7 +2649,7 @@
             "initargs": null,
             "type": "var"
         },
-        "103": {
+        "105": {
             "connections": [
                 []
             ],
@@ -2657,26 +2668,6 @@
             },
             "type": "print",
             "name": "processor_23"
-        },
-        "104": {
-            "connections": [
-                []
-            ],
-            "initargs": "\"hpf: %s\"",
-            "gui_params": {
-                "layer": "Highpass",
-                "position_x": 160.8473358154297,
-                "name": "processor_21",
-                "update_required": false,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "processor",
-                "num_inlets": 2,
-                "position_y": 60.95418167114258,
-                "dsp_outlets": null
-            },
-            "type": "print",
-            "name": "processor_21"
         }
     },
     "type": "default",
@@ -2687,9 +2678,8 @@
             "rg_bandpass": 24,
             "out_a2": 32,
             "out_a1": 31,
-            "sendvia_18": 69,
             "text_22": 53,
-            "sendvia_19": 70,
+            "processor_20": 93,
             "processor_14": 84,
             "processor_15": 85,
             "processor_16": 86,
@@ -2738,8 +2728,9 @@
             "sendvia_11": 54,
             "sendvia_12": 55,
             "sendvia_13": 56,
-            "processor_21": 104,
-            "processor_20": 93,
+            "sendvia_18": 69,
+            "sendvia_19": 70,
+            "processor_23": 105,
             "processor_22": 95,
             "start": 71,
             "frq": 60,
@@ -2775,7 +2766,7 @@
             "text_2": 5,
             "text_3": 6,
             "text_1": 1,
-            "compute_button": 41,
+            "q": 61,
             "self": 0,
             "in_slope": 11,
             "hpf": 90,
@@ -2783,7 +2774,7 @@
             "enum_2": 10,
             "enum_3": 11,
             "enum_4": 14,
-            "q": 61
+            "compute_button": 41
         }
     }
 }
