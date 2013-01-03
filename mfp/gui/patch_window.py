@@ -170,13 +170,11 @@ class PatchWindow(object):
         iter = self.object_store.get_iter_from_string(path)
         obj = self.object_store.get_value(iter, 1)
         if isinstance(obj, PatchElement):
-            print "renaming object", obj
             obj.obj_name = new_value
             MFPGUI().mfp.rename_obj(obj.obj_id, new_value)
             obj.send_params()
 
         elif isinstance(obj, PatchLayer):
-            print "renaming scope", obj.scope, "to", new_value
             oldscopename = obj.scope
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
@@ -216,7 +214,7 @@ class PatchWindow(object):
                 return cmp(o1.obj_name, o2.obj_name)
             else:
                 return cmp(o1.layer.scope, o2.layer.scope)
-
+        print "object_store_update: enter"
         scopes = {}
         saved_sel = self.selected
         self.object_store.clear()
@@ -246,7 +244,6 @@ class PatchWindow(object):
         obj2disp = sorted(self.objects, cmp=cmpfunc)
 
         for o in obj2disp:
-            print "   ", o, o.obj_name
             if o.obj_name is None:
                 continue
 
