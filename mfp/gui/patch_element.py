@@ -217,12 +217,12 @@ class PatchElement (Clutter.Group):
         self.dsp_inlets = params.get("dsp_inlets")
         self.dsp_outlets = params.get("dsp_outlets")
         self.obj_name = params.get("name")
-        layer = params.get("layer")
-        if not self.layer or self.layer.name != layer:
-            for l in self.stage.selected_patch.layers:
-                if l.name == layer:
-                    self.move_to_layer(l)
-                    break
+        layer_name = params.get("layer")
+        layer = self.stage.selected_patch.find_layer(layer_name)
+
+        if layer and self.layer != layer:
+            print "Moving", self, "from", self.layer, layer
+            self.move_to_layer(layer)
 
         self.draw_ports()
         self.stage.refresh(self)
@@ -230,7 +230,8 @@ class PatchElement (Clutter.Group):
     def move_to_layer(self, layer):
         if self.layer:
             self.layer.group.remove_actor(self)
-        self.layer = layer
+            self.layer.remove(self)
+        layer.add(self)
         self.layer.group.add_actor(self)
 
     def make_edit_mode(self):

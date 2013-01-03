@@ -37,6 +37,12 @@ class PatchInfo (object):
         if self.obj_id is not None:
             MFPGUI().mfp.set_params(self.obj_id, prms)
 
+    def find_layer(self, layer):
+        for l in self.layers:
+            if l.name == layer:
+                return l
+        return None
+
     def get_params(self):
         return MFPGUI().mfp.get_params(self.obj_id)
 
