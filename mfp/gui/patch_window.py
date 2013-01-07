@@ -61,6 +61,8 @@ class PatchWindow(object):
         self.selected_layer = None
         self.selected = None
 
+        self.load_in_progress = False 
+
         self.input_mgr = InputManager(self)
         self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view)
         self.console_mgr.start()
@@ -186,6 +188,14 @@ class PatchWindow(object):
         self.layer_store_update()
         return True
 
+    def load_start(self):
+        self.load_in_progress = True 
+
+    def load_complete(self):
+        self.load_in_progress = False 
+        self.layer_store_update()
+        self.object_store_update()
+
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
         self.selected_patch = patch_info
@@ -214,7 +224,11 @@ class PatchWindow(object):
                 return cmp(o1.obj_name, o2.obj_name)
             else:
                 return cmp(o1.layer.scope, o2.layer.scope)
-        print "object_store_update: enter"
+
+        # don't do this during a patch load 
+        if self.load_in_progress:
+            return 
+        
         scopes = {}
         saved_sel = self.selected
         self.object_store.clear()

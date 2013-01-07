@@ -36,9 +36,12 @@ class Unpack (Processor):
     def trigger(self):
         nout = len(self.outlets) - 1 
         for n in range(nout):
-            self.outlets[n] = self.inlets[0][n]
+            try:
+                self.outlets[n] = self.inlets[0][n]
+            except IndexError:
+                pass
 
-        self.outlets[-1] = self.inlets[nout:]
+        self.outlets[-1] = self.inlets[0][nout:]
 
 
 def list_car(ll):

@@ -221,7 +221,6 @@ class PatchElement (Clutter.Group):
         layer = self.stage.selected_patch.find_layer(layer_name)
 
         if layer and self.layer != layer:
-            print "Moving", self, "from", self.layer, layer
             self.move_to_layer(layer)
 
         self.draw_ports()

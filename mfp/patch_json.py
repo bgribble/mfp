@@ -45,11 +45,22 @@ def json_deserialize(self, json_data):
 
     f = json.loads(json_data, object_hook=extended_decoder_hook)
     self.init_type = f.get('type')
-    self.gui_params = f.get('gui_params', {})
+
+    # don't swap Patch gui_params if this isn't a top-level patch
+    if self.patch is None:
+        self.gui_params = f.get('gui_params', {})
+        self.gui_params['top_level'] = True
+    else:
+        # pick out a few things that we need 
+        gp = f.get('gui_params', {})
+        if 'num_inlets' in gp:
+            self.gui_params['num_inlets'] = gp['num_inlets']
+        if 'num_outlets' in gp:
+            self.gui_params['num_outlets'] = gp['num_outlets']
+        self.gui_params['top_level'] = False 
 
     # reset params that need it 
     self.gui_params["obj_id"] = self.obj_id 
-    print "json: set gui_params of", self, self.obj_id, "to", self.gui_params
 
     # clear old objects
     for o in self.objects.values():

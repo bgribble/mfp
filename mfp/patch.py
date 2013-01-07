@@ -34,7 +34,6 @@ class Patch(Processor):
 
         initargs, kwargs = self.parse_args(init_args)
         self.gui_params['layers'] = [('Layer 0', '__patch__')]
-        print "Patch.init: created", self, self.obj_id
 
     #############################
     # name management
@@ -164,10 +163,8 @@ class Patch(Processor):
         from main import MFPApp
 
         def factory(init_type, init_args, patch, scope, name):
-            print "Patch: calling factory for file", filename
             p = Patch(init_type, init_args, patch, scope, name)
             p._load_file(filename)
-            print "Patch: factory done"
             return p
 
         import os
@@ -187,8 +184,14 @@ class Patch(Processor):
         if MFPApp().no_gui:
             return False
 
-        # make sure there's a PatchInfo structure on the GUI side
+        # create the basic element info 
         Processor.create_gui(self)
+
+        # for patches that are not top-level, that's all.
+        if not self.gui_params.get("top_level"):
+            return 
+
+        MFPApp().gui_cmd.load_start()
 
         for oid, obj in self.objects.items():
             obj.create_gui()
@@ -197,8 +200,15 @@ class Patch(Processor):
             for srcport, connections in enumerate(obj.connections_out):
                 for dstobj, dstport in connections:
                     MFPApp().gui_cmd.connect(obj.obj_id, srcport, dstobj.obj_id, dstport)
+        MFPApp().gui_cmd.load_complete()
 
     def save_file(self, filename=None):
+        import os
+        basefile = os.path.basename(filename)
+        parts = os.path.splitext(basefile)
+        if self.patch is None:
+            self.init_type = parts[0]
+
         savefile = open(filename, "w")
         savefile.write(self.json_serialize())
 

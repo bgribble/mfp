@@ -56,6 +56,25 @@ class ProcessorElement (PatchElement):
         self.set_reactive(True)
 
     def update(self):
+        label_width = self.label.get_property('width')
+        box_width = self.texture.get_property('width')
+
+        new_w = None
+        num_ports = max(self.num_inlets, self.num_outlets)
+        port_width = (num_ports * self.porthole_minspace) + 2*self.porthole_border
+
+        if box_width < port_width: 
+            new_w = port_width 
+            box_width = new_w 
+
+        if (label_width > (box_width - 14)):
+            new_w = label_width + 14
+        elif (box_width > 35) and (label_width < (box_width - 14)):
+            new_w = max(35, label_width + 14)
+
+        if new_w is not None:
+            self.set_size(new_w, self.texture.get_property('height'))
+
         self.draw_ports()
         self.texture.invalidate()
 
@@ -112,24 +131,11 @@ class ProcessorElement (PatchElement):
         if self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
             self.send_params()
-            self.draw_ports()
 
         self.update()
 
     def label_changed_cb(self, *args):
-        '''called by clutter when label.set_text or editing occurs'''
-
-        lwidth = self.label.get_property('width')
-        bwidth = self.texture.get_property('width')
-
-        new_w = None
-        if (lwidth > (bwidth - 14)):
-            new_w = lwidth + 14
-        elif (bwidth > 35) and (lwidth < (bwidth - 14)):
-            new_w = max(35, lwidth + 14)
-
-        if new_w is not None:
-            self.set_size(new_w, self.texture.get_property('height'))
+        self.update()
 
     def move(self, x, y):
         self.position_x = x

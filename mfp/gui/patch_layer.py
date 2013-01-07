@@ -20,17 +20,12 @@ class PatchLayer(object):
         self.objects = []
 
         self.group = Clutter.Group()
-        self.group.set_property("opacity", 0)
-        self.stage.group.add_actor(self.group)
-        self.group.set_depth(1000)
 
     def show(self):
-        self.group.set_property("opacity", 255)
-        self.group.set_depth(0)
+        self.stage.group.add_actor(self.group)
 
     def hide(self):
-        self.group.set_property("opacity", 0)
-        self.group.set_depth(1000)
+        self.stage.group.remove_actor(self.group)
 
     def resort(self, obj):
         if obj in self.objects:
@@ -215,6 +210,10 @@ def layer_selection_update(self):
 
 @extends(PatchWindow)
 def layer_store_update(self):
+    # don't do this during a patch load 
+    if self.load_in_progress:
+        return 
+
     saved_sel = self.selected_layer
     saved_path = None 
 

@@ -148,6 +148,8 @@ class GUICommand (RPCWrapper):
 
         obj_1 = MFPGUI().recall(obj_1_id)
         obj_2 = MFPGUI().recall(obj_2_id)
+        print "gui _connect:", obj_1_id,'-->', obj_1, obj_2_id, '-->', obj_2
+
         c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)
@@ -168,6 +170,25 @@ class GUICommand (RPCWrapper):
             del c
         obj.obj_id = None
         del obj
+
+    @rpcwrap
+    def load_start(self):
+        MFPGUI().clutter_do(lambda: self._load_start())
+
+    def _load_start(self):
+        MFPGUI().appwin.load_start()
+
+
+    @rpcwrap
+    def load_complete(self):
+        MFPGUI().clutter_do(lambda: self._load_complete())
+
+    def _load_complete(self):
+        MFPGUI().appwin.load_complete()
+
+
+
+
 
     @rpcwrap
     def clear(self):

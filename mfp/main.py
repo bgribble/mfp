@@ -232,7 +232,7 @@ class MFPApp (Singleton):
         ctor = self.registry.get(init_type)
         if ctor is None:
             log.debug("No factory for '%s' registered, looking for file." % init_type)
-            (name, ctor) = Patch.register_file(init_type + ".mfp")
+            (typename, ctor) = Patch.register_file(init_type + ".mfp")
             if ctor is None:
                 return None
 

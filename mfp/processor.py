@@ -334,3 +334,4 @@ class Processor (object):
             conn.append([(t[0].obj_id, t[1]) for t in c])
         oinfo['connections'] = conn
         return oinfo
+
