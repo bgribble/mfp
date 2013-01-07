@@ -85,7 +85,8 @@ class Var (Processor):
 
     def save(self):
         base_dict = Processor.save(self)
-        base_dict["value"] = self.value
+        if self.init_type != "message":
+            base_dict["value"] = self.value
         return base_dict
 
     def load(self, params):

@@ -17,7 +17,6 @@ def iterable(o):
     except AttributeError, e:
         return False
 
-
 class For(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         self.iterating = False

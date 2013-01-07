@@ -82,6 +82,8 @@ class Scatter (Processor):
             v = None
             if isinstance(val, (tuple, list)):
                 v = tuple(val)
+            elif isinstance(val, complex):
+                v = (val.real, val.imag)
             elif isinstance(val, (float, int)):
                 v = (self._time(), val)
 

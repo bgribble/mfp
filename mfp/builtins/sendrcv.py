@@ -28,7 +28,10 @@ class Send (Processor):
         self.gui_params["label"] = self.dest_name
 
     def method(self, message, inlet):
-        self.trigger()
+        if inlet == 0:
+            self.trigger()
+        else: 
+            message.call(self)
 
     def trigger(self):
         if self.inlets[1] is not Uninit:
@@ -54,11 +57,18 @@ class Recv (Processor):
         if len(initargs):
             self.rename(initargs[0])
 
+    def method(self, message, inlet):
+        if inlet == 0:
+            self.trigger()
+        else:
+            message.call(self)
+
     def trigger(self):
         self.outlets[0] = self.inlets[0]
 
     def rename(self, new_name):
         Processor.rename(self, new_name)
+        self.init_args = '"%s"' % self.name 
         self.gui_params["label"] = self.name
 
         if self.gui_created:

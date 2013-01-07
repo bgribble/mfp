@@ -49,3 +49,4 @@ class MethodCall(object):
         else:
             log.debug("MethodCall.call():", target, self.method, m, type(m))
             raise Exception("Method %s cannot be called" % self.method)
+

@@ -10,6 +10,7 @@ import simplejson as json
 from .patch import Patch
 from .utils import extends
 from .bang import BangType, UninitType, Bang, Uninit
+from .method import MethodCall
 from . import log 
 
 
@@ -21,7 +22,7 @@ class ExtendedEncoder (json.JSONEncoder):
             key = "__%s__" % obj.__class__.__name__
             return {key: obj.__dict__ }
         else:
-            return json.JSONEncoder.default(obj)
+            return json.JSONEncoder.default(self, obj)
 
 
 def extended_decoder_hook (saved):
@@ -123,6 +124,9 @@ def json_deserialize(self, json_data):
         oid = int(oid)
         conn = prms.get("connections", [])
         srcobj = idmap.get(oid)
+        if isinstance(srcobj, Patch):
+            print "connecting outputs of", srcobj
+            print conn
         for outlet in range(0, len(conn)):
             connlist = conn[outlet]
             for c in connlist:

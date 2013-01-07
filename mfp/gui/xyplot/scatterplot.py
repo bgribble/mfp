@@ -160,7 +160,7 @@ class ScatterPlot (XYPlot):
     def configure(self, params):
         s = params.get("style")
         if s:
-            self.xyplot.set_style(s)
+            self.set_style(s)
 
     def command(self, action, data):
         if action == "add":
