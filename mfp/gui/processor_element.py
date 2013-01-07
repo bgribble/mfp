@@ -63,7 +63,6 @@ class ProcessorElement (PatchElement):
         num_ports = max(self.num_inlets, self.num_outlets)
         port_width = (num_ports * self.porthole_minspace) + 2*self.porthole_border
         
-        print "processor_element.update()", box_width, label_width, port_width 
         new_w = max(35, port_width, label_width)
 
         if new_w != box_width: 
@@ -184,7 +183,6 @@ class ProcessorElement (PatchElement):
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
-            print "configure: setting state to complete", self
             self.obj_state = self.OBJ_COMPLETE
             self.draw_ports()
             self.texture.invalidate()
