@@ -7,17 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode
 from .connection import ConnectionMode
-from .autoplace import AutoplaceMode
-
-from ..text_element import TextElement
-from ..processor_element import ProcessorElement
-from ..connection_element import ConnectionElement
-from ..message_element import MessageElement, TransientMessageElement
-from ..enum_element import EnumElement
-from ..plot_element import PlotElement
-from ..slidemeter_element import FaderElement, BarMeterElement
-from ..via_element import SendViaElement, ReceiveViaElement
-
+from ..message_element import TransientMessageElement
 
 class SelectionEditMode (InputMode):
     def __init__(self, window):

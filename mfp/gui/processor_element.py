@@ -56,23 +56,17 @@ class ProcessorElement (PatchElement):
         self.set_reactive(True)
 
     def update(self):
-        label_width = self.label.get_property('width')
+        label_width = self.label.get_property('width') + 14 
         box_width = self.texture.get_property('width')
 
         new_w = None
         num_ports = max(self.num_inlets, self.num_outlets)
         port_width = (num_ports * self.porthole_minspace) + 2*self.porthole_border
+        
+        print "processor_element.update()", box_width, label_width, port_width 
+        new_w = max(35, port_width, label_width)
 
-        if box_width < port_width: 
-            new_w = port_width 
-            box_width = new_w 
-
-        if (label_width > (box_width - 14)):
-            new_w = label_width + 14
-        elif (box_width > 35) and (label_width < (box_width - 14)):
-            new_w = max(35, label_width + 14)
-
-        if new_w is not None:
+        if new_w != box_width: 
             self.set_size(new_w, self.texture.get_property('height'))
 
         self.draw_ports()

@@ -73,6 +73,7 @@ class LabelEditMode (InputMode):
 
     def start_editing(self):
         def synth_ret(*args):
+            print "activate"
             self.manager.synthesize("RET")
 
         if self.multiline is False:
@@ -97,6 +98,7 @@ class LabelEditMode (InputMode):
 
         self.blinker = Blinker(self.widget)
         self.blinker.start()
+        print "LabelEditMode: start_editing complete", self
 
     def end_editing(self):
         self.widget.set_editable(False)
@@ -242,6 +244,7 @@ class LabelEditMode (InputMode):
         return True
 
     def update_cursor(self):
+        print "update_cursor: editpos=", self.editpos
         self.widget.grab_key_focus()
         self.widget.set_cursor_position(self.editpos)
         self.widget.set_selection(self.editpos, self.editpos)

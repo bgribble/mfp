@@ -24,7 +24,7 @@ class PatchInfo (object):
         self.stage.add_patch(self)
 
     def update(self):
-        print "PatchInfo.update() -- need to do anything?"
+        pass
 
     def has_scope(self, scope_name):
         return scope_name in [l.scope for l in self.layers]

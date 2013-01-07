@@ -20,7 +20,7 @@ class PatchElement (Clutter.Group):
     porthole_width = 8
     porthole_height = 4
     porthole_border = 1
-    porthole_minspace = 10
+    porthole_minspace = 11
 
     OBJ_NONE = 0
     OBJ_HALFCREATED = 1
@@ -173,6 +173,7 @@ class PatchElement (Clutter.Group):
             return (self.porthole_border + spc * port_num, h - self.porthole_height)
 
     def draw_ports(self):
+        ports_done = [] 
         def confport(pid, px, py):
             pobj = self.port_elements.get(pid)
             if pobj is None:
@@ -183,6 +184,7 @@ class PatchElement (Clutter.Group):
                 self.port_elements[pid] = pobj
             pobj.set_position(px, py)
             pobj.show()
+            ports_done.append(pobj)
 
         for i in range(self.num_inlets):
             x, y = self.port_position(PatchElement.PORT_IN, i)
@@ -193,6 +195,13 @@ class PatchElement (Clutter.Group):
             x, y = self.port_position(PatchElement.PORT_OUT, i)
             pid = (PatchElement.PORT_OUT, i)
             confport(pid, x, y)
+
+        # clean up -- ports may need to be deleted if 
+        # the object resizes smaller 
+        for pid, port in self.port_elements.items():
+            if port not in ports_done:
+                del self.port_elements[pid]
+                self.remove_actor(port)
 
     def hide_ports(self):
         def hideport(pid):

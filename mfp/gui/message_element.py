@@ -133,8 +133,8 @@ class MessageElement (PatchElement):
         if new_w is not None:
             self.set_size(new_w, self.texture.get_height())
             self.texture.set_size(new_w, self.texture.get_height())
-            self.texture.set_surface_size(
-                int(new_w), self.texture.get_property('surface_height'))
+            self.texture.set_surface_size(int(new_w), 
+                                          self.texture.get_property('surface_height'))
             self.update()
 
     def move(self, x, y):
@@ -197,8 +197,8 @@ class TransientMessageElement (MessageElement):
 
         MessageElement.__init__(self, window, self.target_obj.position_x,
                                 self.target_obj.position_y - self.ELBOW_ROOM)
-
-        self.message_text = "None"
+        self.message_text = "Bang"
+        self.label.set_text(self.message_text)
 
         self.create(self.proc_type, self.message_text)
         if self.obj_id is None:
@@ -208,7 +208,6 @@ class TransientMessageElement (MessageElement):
 
         self.send_params()
         self.draw_ports()
-
         self.set_port(0)
 
     def set_port(self, portnum):
@@ -228,6 +227,11 @@ class TransientMessageElement (MessageElement):
             log.debug("TransientMessageElement: Cannot make connection")
 
         return True
+
+    def label_edit_start(self):
+        self.label.set_text(self.message_text)
+        self.obj_state = self.OBJ_HALFCREATED
+        self.texture.invalidate()
 
     def label_edit_finish(self, message=None, aborted=False):
         self.message_text = self.label.get_text()
