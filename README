@@ -29,6 +29,9 @@ will pull in any necessary dependencies.
         python-nose 
         python-virtualenv
         pkg-config  
+        
+    Python packages from PYPI (not in Debian):
+        posix_ipc 
 
     Clutter-based GUI: 
         libgtk-3-dev
@@ -39,11 +42,13 @@ will pull in any necessary dependencies.
         gir1.2-cogl-1.0 (COGL bindings for GI)
         gir1.2-coglpango-1.0 (COGL Pango bindings for GI)
 
-    JACK/ALSA: 
+    JACK/ALSA/etc: 
         libjack0
         libjack0-dev
         libasound2
         libasound2-dev
+        liblo7 (OSC library, python bindings in lib/)
+        liblo-dev 
 
 Building: I suggest using 'virtualenv' to build in a sandbox.   The
 packages in "lib" are required for MIDI and OSC functionality and I
