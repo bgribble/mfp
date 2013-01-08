@@ -20,7 +20,7 @@ class Note2Freq(Processor):
             tuning: an instance of Tuning (defaults to EqualTemper)
     '''
     def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = self.parse_args(init_args)
+        initargs, kwargs = patch.parse_args(init_args)
         if kwargs.get('scale'):
             self.scale = kwargs.get('scale')
         else:
