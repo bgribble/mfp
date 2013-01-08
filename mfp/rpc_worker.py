@@ -28,7 +28,7 @@ class RPCWorker (BaseWorker):
 
     def perform_work(self, bite):
         req = self.pipe.process(bite)
-        if req.payload == 'quit':
+        if req is None or req.payload == 'quit':
             # escape takes this thread out of the pool for finish()
             self.escape()
             self.pool.finish()
