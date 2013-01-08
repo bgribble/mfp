@@ -68,6 +68,9 @@ class PatchElement (Clutter.Group):
 
     def move_to_top(self):
         p = self.get_parent()
+        if not p: 
+            return 
+
         def bump(actor):
             p.remove_actor(actor)
             p.add_actor(actor)
