@@ -9,6 +9,7 @@ class QuittableThread(Thread):
     def __init__(self, target=None):
         self.join_req = False
         self.target = None
+
         with QuittableThread._all_threads_lock:
             QuittableThread._all_threads.append(self)
         if self.target is not None:
@@ -22,6 +23,7 @@ class QuittableThread(Thread):
                 QuittableThread._all_threads.remove(self)
             except ValueError:
                 print "QuittableThread error:", self, "not in _all_threads"
+        
         self.join_req = True
         self.join()
 
@@ -29,6 +31,5 @@ class QuittableThread(Thread):
     def finish_all(klass):
         with QuittableThread._all_threads_lock:
             work = [ t for t in QuittableThread._all_threads ]
-
         for t in work:
             t.finish()

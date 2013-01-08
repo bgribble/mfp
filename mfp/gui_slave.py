@@ -193,10 +193,6 @@ class GUICommand (RPCWrapper):
     def _load_complete(self):
         MFPGUI().appwin.load_complete()
 
-
-
-
-
     @rpcwrap
     def clear(self):
         pass

@@ -54,7 +54,6 @@ class MultiTimer(QuittableThread):
                     if sleeptime > self.tolerance:
                         self.cv.wait(tdmag(sleeptime))
 
-
 def ptime(sched):
     t = datetime.now()
     print "Scheduled: %s, actual: %s, diff: %s" % (sched, t, t - sched)

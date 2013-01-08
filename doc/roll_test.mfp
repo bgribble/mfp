@@ -1,0 +1,289 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "default",
+        "obj_id": 0,
+        "num_outlets": 0,
+        "display_type": "patch",
+        "num_inlets": 1,
+        "initargs": ""
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                []
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 63.44415283203125,
+                "name": "scatter_0",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "plot",
+                "plot_type": "scatter",
+                "num_inlets": 2,
+                "position_y": 219.22415161132812,
+                "dsp_outlets": null
+            },
+            "type": "scatter",
+            "name": "scatter_0"
+        },
+        "4": {
+            "connections": [
+                [
+                    [
+                        11,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "Bang",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 301.6104278564453,
+                "name": "message_2",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 21.986482620239258,
+                "dsp_outlets": null
+            },
+            "type": "message",
+            "name": "message_2"
+        },
+        "6": {
+            "connections": [
+                [
+                    [
+                        1,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 301.61519622802734,
+                "name": "processor_2",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 140.93215942382812,
+                "dsp_outlets": null
+            },
+            "type": "sin",
+            "name": "processor_2"
+        },
+        "7": {
+            "connections": [
+                [
+                    [
+                        1,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 378.54945373535156,
+                "name": "processor_3",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 149.92781829833984,
+                "dsp_outlets": null
+            },
+            "type": "cos",
+            "name": "processor_3"
+        },
+        "8": {
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 300.6165008544922,
+                "name": "processor_4",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 99.95185852050781,
+                "dsp_outlets": null
+            },
+            "name": "processor_4",
+            "value": 78.19999999999983,
+            "connections": [
+                [
+                    [
+                        9,
+                        0
+                    ],
+                    [
+                        6,
+                        0
+                    ],
+                    [
+                        7,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "0",
+            "type": "var"
+        },
+        "9": {
+            "connections": [
+                [
+                    [
+                        8,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "0.1",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 365.54388427734375,
+                "name": "processor_5",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 98.95231628417969,
+                "dsp_outlets": null
+            },
+            "type": "+",
+            "name": "processor_5"
+        },
+        "10": {
+            "connections": [
+                [
+                    [
+                        1,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "@roll",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 62.920196533203125,
+                "name": "message_3",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 79.96122741699219,
+                "dsp_outlets": null
+            },
+            "type": "message",
+            "name": "message_3"
+        },
+        "11": {
+            "connections": [
+                [
+                    [
+                        8,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "200",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 301.6150207519531,
+                "name": "processor_1",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 60.97060775756836,
+                "dsp_outlets": null
+            },
+            "type": "metro",
+            "name": "processor_1"
+        },
+        "12": {
+            "connections": [
+                [
+                    [
+                        1,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "@stop",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 62.917579650878906,
+                "name": "message_4",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 114.94429779052734,
+                "dsp_outlets": null
+            },
+            "type": "message",
+            "name": "message_4"
+        },
+        "14": {
+            "connections": [
+                [
+                    [
+                        1,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "@clearall",
+            "gui_params": {
+                "layer": "Layer 0",
+                "position_x": 62.914955139160156,
+                "name": "message_5",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 148.92784118652344,
+                "dsp_outlets": null
+            },
+            "type": "message",
+            "name": "message_5"
+        }
+    },
+    "type": "default",
+    "scopes": {
+        "__patch__": {
+            "message_3": 10,
+            "message_2": 4,
+            "message_5": 14,
+            "message_4": 12,
+            "self": 0,
+            "processor_2": 6,
+            "processor_3": 7,
+            "processor_1": 11,
+            "processor_4": 8,
+            "processor_5": 9,
+            "scatter_0": 1
+        }
+    }
+}

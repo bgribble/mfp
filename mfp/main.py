@@ -178,7 +178,6 @@ class MFPApp (Singleton):
             self.dsp_process.serve(DSPCommand)
             self.dsp_command = DSPCommand()
             self.samplerate, self.blocksize = self.dsp_command.get_dsp_params()
-            print "DSP params:", self.samplerate, self.blocksize
 
         if not MFPApp.no_gui:
             self.gui_process = RPCServer("mfp_gui", gui_init)

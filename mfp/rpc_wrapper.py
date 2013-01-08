@@ -15,8 +15,8 @@ def rpcwrap(worker_proc):
         if self.local:
             return worker_proc(self, *args, **kwargs)
         else:
-            rpcdata = dict(
-                func=worker_proc.__name__, rpcid=self.rpcid, args=args, kwargs=kwargs)
+            rpcdata = dict(func=worker_proc.__name__, 
+                           rpcid=self.rpcid, args=args, kwargs=kwargs)
             return self.call_remotely(rpcdata)
     return inner
 
@@ -62,8 +62,8 @@ class RPCWrapper (object):
             RPCWrapper._rpcid_seq += 1
             RPCWrapper.rpcobj[self.rpcid] = self
         else:
-            r = Request(
-                dict(func='__init__', type=type(self).__name__, args=args, kwargs=kwargs))
+            r = Request(dict(func='__init__', type=type(self).__name__, 
+                             args=args, kwargs=kwargs))
             type(self).pipe.put(r)
             type(self).pipe.wait(r)
             if r.response == RPCWrapper.NO_CLASS:
@@ -72,7 +72,6 @@ class RPCWrapper (object):
             self.rpcid = r.response
 
     def call_remotely(self, rpcdata):
-        from datetime import datetime
         r = type(self).pipe.put(Request(rpcdata))
         type(self).pipe.wait(r)
         if r.response == RPCWrapper.METHOD_OK:
