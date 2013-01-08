@@ -41,6 +41,7 @@ class RequestPipe(object):
         master, slave = multiprocessing.Pipe()
 
         self.role = None
+        self.running = True 
 
         # the slave will switch these
         self.this_end = master
@@ -64,6 +65,7 @@ class RequestPipe(object):
         self.finish_callbacks.append(cbk)
 
     def finish(self):
+        self.running = False 
         if self.reader:
             self.reader.finish()
         for cbk in self.finish_callbacks:
@@ -88,6 +90,9 @@ class RequestPipe(object):
         self.reader.start()
 
     def put(self, req):
+        if not self.running:
+            return req 
+
         tosend = {}
         if isinstance(req, Request):
             if req.state == Request.CREATED:
@@ -112,6 +117,9 @@ class RequestPipe(object):
         return req
 
     def wait(self, req):
+        if not self.running:
+            return False 
+
         if not isinstance(req, Request):
             return False
 
@@ -120,6 +128,9 @@ class RequestPipe(object):
                 self.condition.wait()
 
     def get(self, timeout=None):
+        if not self.running:
+            return False 
+
         if timeout is not None:
             ready = self.this_end.poll(timeout)
             if not ready:
@@ -131,6 +142,9 @@ class RequestPipe(object):
             raise Queue.Empty
 
     def process(self, qobj):
+        if not self.running:
+            return False 
+
         req = None
         if qobj.get('type') == 'Request':
             if self.pending is not None and qobj.get('origin') == self.role:

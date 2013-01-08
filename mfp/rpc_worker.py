@@ -67,10 +67,7 @@ class RPCServer(QuittableThread):
         self.worker = multiprocessing.Process(target=rpc_server_slave,
                                               args=(self.pipe, self.initproc,
                                                     self.initproc_args, self.worker_lock))
-        self.quitreq = False
-
         self.worker.start()
-
         self.pipe.init_master()
 
     def serve(self, cls):
