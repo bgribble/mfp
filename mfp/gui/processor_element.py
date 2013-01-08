@@ -104,11 +104,10 @@ class ProcessorElement (PatchElement):
         self.obj_state = self.OBJ_HALFCREATED
         self.update()
 
-    def label_edit_finish(self, widget, aborted=False):
-        t = self.label.get_text()
-
-        if t != self.label_text:
-            parts = t.split(' ', 1)
+    def label_edit_finish(self, widget, text=None):
+        
+        if text is not None and text != self.label_text:
+            parts = text.split(' ', 1)
             obj_type = parts[0]
             if len(parts) > 1:
                 obj_args = parts[1]

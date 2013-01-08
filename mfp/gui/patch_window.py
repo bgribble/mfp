@@ -394,7 +394,6 @@ class PatchWindow(object):
 
         b = factory(self, x, y)
         self.select(b)
-        print "calling begin_edit on", b
         b.begin_edit()
         if b.obj_name is not None:
             self.object_store_update()

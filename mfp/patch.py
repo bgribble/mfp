@@ -177,11 +177,13 @@ class Patch(Processor):
         def factory(init_type, init_args, patch, scope, name):
             p = Patch(init_type, init_args, patch, scope, name)
             p._load_file(filename)
+            p.init_type = init_type
             return p
 
         import os
         basefile = os.path.basename(filename)
         parts = os.path.splitext(basefile)
+        
         log.debug("Patch.register_file: registering type '%s' from file '%s'"
                   % (parts[0], filename))
         MFPApp().register(parts[0], factory)
@@ -215,12 +217,6 @@ class Patch(Processor):
         MFPApp().gui_cmd.load_complete()
 
     def save_file(self, filename=None):
-        import os
-        basefile = os.path.basename(filename)
-        parts = os.path.splitext(basefile)
-        if self.patch is None:
-            self.init_type = parts[0]
-
         savefile = open(filename, "w")
         savefile.write(self.json_serialize())
 

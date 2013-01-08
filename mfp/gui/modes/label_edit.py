@@ -9,10 +9,9 @@ import time
 from threading import Thread
 from ..input_mode import InputMode
 from mfp import log
-from mfp.gui_slave import MFPGUI
+from mfp.gui_slave import clutter_do
 
 from gi.repository import Clutter
-
 
 class Blinker (Thread):
     def __init__(self, txt, blink_time=0.5):
@@ -21,8 +20,9 @@ class Blinker (Thread):
         self.quitreq = False
         Thread.__init__(self)
 
+    @clutter_do
     def set_cursor(self, val):
-        MFPGUI().clutter_do(lambda: self.txt.set_cursor_visible(val))
+        self.txt.set_cursor_visible(val)
 
     def run(self):
         cursor = True
@@ -70,7 +70,8 @@ class LabelEditMode (InputMode):
 
         self.update_label(raw=True)
         self.start_editing()
-
+        self.widget.set_selection(0, len(self.text))
+        
     def start_editing(self):
         def synth_ret(*args):
             self.manager.synthesize("RET")
@@ -178,11 +179,11 @@ class LabelEditMode (InputMode):
 
     def move_to_start(self):
         self.editpos = 0
-        self.update_label(raw=True)
+        self.update_cursor()
 
     def move_to_end(self):
         self.editpos = len(self.text)
-        self.update_label(raw=True)
+        self.update_cursor()
 
     def move_left(self):
         self.editpos = max(self.editpos - 1, 0)

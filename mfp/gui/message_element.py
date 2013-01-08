@@ -42,8 +42,8 @@ class MessageElement (PatchElement):
         self.add_actor(self.texture)
         self.add_actor(self.label)
 
-        self.texture.invalidate()
         self.obj_state = self.OBJ_HALFCREATED
+        self.texture.invalidate()
 
         # configure label
         self.label.set_position(4, 1)
@@ -109,10 +109,9 @@ class MessageElement (PatchElement):
         self.obj_state = self.OBJ_HALFCREATED
         self.texture.invalidate()
 
-    def label_edit_finish(self, message=None, aborted=False):
-        t = self.label.get_text()
-        if t != self.message_text:
-            self.message_text = t
+    def label_edit_finish(self, widget=None, text=None):
+        if text is not None and text != self.message_text:
+            self.message_text = text
             self.create(self.proc_type, self.message_text)
 
         if self.obj_id is not None:
@@ -198,15 +197,10 @@ class TransientMessageElement (MessageElement):
         MessageElement.__init__(self, window, self.target_obj.position_x,
                                 self.target_obj.position_y - self.ELBOW_ROOM)
         self.message_text = "Bang"
+        self.num_inlets = 0
+        self.num_outlets = 1 
         self.label.set_text(self.message_text)
-
-        self.create(self.proc_type, self.message_text)
-        if self.obj_id is None:
-            log.debug("MessageElement: could not create message obj for '%s'"
-                      % self.message_text)
-            return
-
-        self.send_params()
+        self.obj_state = self.OBJ_COMPLETE 
         self.draw_ports()
         self.set_port(0)
 
@@ -218,26 +212,22 @@ class TransientMessageElement (MessageElement):
             c.delete()
 
         self.target_port = portnum
-
-        if MFPGUI().mfp.connect(self.obj_id, 0, self.target_obj.obj_id, self.target_port):
-            c = ConnectionElement(self.stage, self, 0, self.target_obj, self.target_port)
-            self.connections_out.append(c)
-            self.target_obj.connections_in.append(c)
-        else:
-            log.debug("TransientMessageElement: Cannot make connection")
+        c = ConnectionElement(self.stage, self, 0, self.target_obj, self.target_port)
+        self.connections_out.append(c)
+        self.target_obj.connections_in.append(c)
 
         return True
 
     def label_edit_start(self):
         self.label.set_text(self.message_text)
-        self.obj_state = self.OBJ_HALFCREATED
+        self.label.set_selection(0, len(self.message_text))
         self.texture.invalidate()
 
-    def label_edit_finish(self, message=None, aborted=False):
-        self.message_text = self.label.get_text()
-        log.debug("Sending message to eval:", self.message_text)
-        MFPGUI().mfp.eval_and_send(self.target_obj.obj_id, self.target_port,
-                                   self.message_text)
+    def label_edit_finish(self, widget=None, text=None):
+        if text is not None:
+            self.message_text = text 
+            MFPGUI().mfp.eval_and_send(self.target_obj.obj_id, self.target_port,
+                                       self.message_text)
         self.stage.select(self.target_obj)
         self.delete()
 

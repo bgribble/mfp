@@ -32,6 +32,14 @@ def gui_finish():
     MFPGUI().finish()
 
 
+def clutter_do(func):
+    def wrapped(*args, **kwargs):
+        from mfp.gui_slave import MFPGUI
+        MFPGUI().clutter_do(lambda: func(*args, **kwargs))
+
+    return wrapped 
+
+
 class GUICommand (RPCWrapper):
     @rpcwrap
     def ready(self):
@@ -213,7 +221,6 @@ class MFPGUI (Singleton):
         from gi.repository import GObject
         GObject.idle_add(thunk, priority=GObject.PRIORITY_DEFAULT)
 
-    @profile 
     def clutter_proc(self):
         from gi.repository import Clutter, GObject, Gtk, GtkClutter
 
