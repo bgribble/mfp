@@ -71,6 +71,27 @@ plain C libraries.
 If all that works: 
     $ mfp 
 
+Demo patches: There are a few demo patches in doc/ which are really all the
+documentation there is right now.  Since there's no support for load paths
+yet, you need to copy these into the root level of the source tree to run
+them. 
+
+hello_world.mfp:  The classic 
+
+biquad_designer.mfp: What I'm actively working on to exercise new stuff.
+Not complete and broken!  but if you want to try it, you can do this: 
+ * unclick, then reclick "Highpass" on the front layer 
+ * click-to-select, then Return twice, on each parameter input
+ * Go to the "Graphs" page and click all the messages (no loadbang yet)
+ * Go back to the front page, click the "Calculate" button.  Then the
+   pole-zero graph will show up on the "Graphs" page. 
+This one requires "quadratic.mfp" to be in the root src dir also
+
+Saving files: There's no UI for saving yet.  You can do it from the
+console.  
+
+    >>> app.patches['default'].save_file("filename.mfp")
+
 Reporting problems: For now, I will be using the GitHub hosted issue
 tracker and wiki. 
 
