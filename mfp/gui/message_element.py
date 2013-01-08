@@ -64,12 +64,7 @@ class MessageElement (PatchElement):
         w = self.texture.get_property('surface_width') - lw
         h = self.texture.get_property('surface_height') - lw
         c = None
-        if self.selected:
-            c = self.stage.color_selected
-        else:
-            c = self.stage.color_unselected
         texture.clear()
-        ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
 
         if self.obj_state == self.OBJ_COMPLETE:
             ct.set_dash([])
@@ -87,6 +82,18 @@ class MessageElement (PatchElement):
         ct.curve_to(w - 8, h - 8, w - 8, 8, w, 0)
         ct.line_to(0, 0)
         ct.close_path()
+
+        # fill to paint the background 
+        c = self.stage.color_bg 
+        ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
+        ct.fill_preserve()
+
+        # stroke to draw the outline 
+        if self.selected:
+            c = self.stage.color_selected
+        else:
+            c = self.stage.color_unselected
+        ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
         ct.stroke()
 
     def update(self):
@@ -168,6 +175,7 @@ class MessageElement (PatchElement):
             return PatchElement.port_position(self, port_dir, port_num)
 
     def select(self):
+        self.move_to_top()
         self.selected = True
         self.texture.invalidate()
 

@@ -75,19 +75,9 @@ class ProcessorElement (PatchElement):
         w = self.texture.get_property('surface_width') - 1
         h = self.texture.get_property('surface_height') - 1
         self.texture.clear()
-        if self.selected:
-            color = self.stage.color_selected
-        else:
-            color = self.stage.color_unselected
-
-        if self.obj_state == self.OBJ_COMPLETE:
-            ct.set_dash([])
-        else:
-            ct.set_dash([8, 4])
 
         ct.set_line_width(2.0)
         ct.set_antialias(cairo.ANTIALIAS_NONE)
-        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.translate(0.5, 0.5)
         ct.move_to(1, 1)
         ct.line_to(1, h)
@@ -95,7 +85,26 @@ class ProcessorElement (PatchElement):
         ct.line_to(w, 1)
         ct.line_to(1, 1)
         ct.close_path()
+
+        # fill to paint the background 
+        color = self.stage.color_bg 
+        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
+        ct.fill_preserve()
+
+        # stroke to draw the outline 
+        if self.selected:
+            color = self.stage.color_selected
+        else:
+            color = self.stage.color_unselected
+        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
+
+        if self.obj_state == self.OBJ_COMPLETE:
+            ct.set_dash([])
+        else:
+            ct.set_dash([8, 4])
+
         ct.stroke()
+
 
     def get_label(self):
         return self.label
@@ -159,6 +168,7 @@ class ProcessorElement (PatchElement):
             c.draw()
 
     def select(self):
+        self.move_to_top()
         self.selected = True
         self.texture.invalidate()
 

@@ -223,6 +223,7 @@ class SlideMeterElement (PatchElement):
         self.texture.set_surface_size(width, height)
 
     def select(self):
+        self.move_to_top()
         self.selected = True
         self.texture.invalidate()
 

@@ -198,6 +198,7 @@ class EnumElement (PatchElement):
             return PatchElement.port_position(self, port_dir, port_num)
 
     def select(self):
+        self.move_to_top()
         self.selected = True
         self.texture.invalidate()
 

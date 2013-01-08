@@ -66,6 +66,16 @@ class PatchElement (Clutter.Group):
     def event_source(self):
         return self
 
+    def move_to_top(self):
+        p = self.get_parent()
+        def bump(actor):
+            p.remove_actor(actor)
+            p.add_actor(actor)
+
+        bump(self)
+        for c in self.connections_out + self.connections_in:
+            bump(c)
+
     def drag_start(self, x, y):
         self.drag_x = x - self.position_x
         self.drag_y = y - self.position_y
