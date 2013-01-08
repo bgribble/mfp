@@ -28,6 +28,7 @@ will pull in any necessary dependencies.
         python-setuptools 
         python-nose 
         python-virtualenv
+        python-simplejson 
         pkg-config  
         
     Python packages from PYPI (not in Debian):
@@ -58,6 +59,13 @@ From the top level (where this file is located):
 
     $ virtualenv --python=python2.7 --system-site-packages virtual
     $ . virtual/bin/activate 
+    
+If you don't have posix_ipc on your system: 
+
+    $ pip install posix_ipc 
+
+Install libs and main program:
+
     $ for dir in testext lib/alsaseq-0.4.1 lib/pyliblo-0.9.1 ;
       do (cd $dir ; python ./setup.py install) 
       done 
