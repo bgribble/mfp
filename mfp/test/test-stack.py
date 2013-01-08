@@ -48,7 +48,7 @@ class StackDepthTest(TestCase):
         self.inc.limit = 100
         self.var.send(0, 0)
         print "Last value:", self.inc.lastval
-        self.assertEqual(self.var.status, Processor.OK)
+        self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100)
 
     def test_1000(self):
@@ -56,7 +56,7 @@ class StackDepthTest(TestCase):
         self.inc.limit = 1000
         self.var.send(0, 0)
         print "Last value:", self.inc.lastval
-        self.assertEqual(self.var.status, Processor.OK)
+        self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 1000)
 
     def test_10000(self):
@@ -64,7 +64,7 @@ class StackDepthTest(TestCase):
         self.inc.limit = 10000
         self.var.send(0, 0)
         print "Last value:", self.inc.lastval
-        self.assertEqual(self.var.status, Processor.OK)
+        self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 10000)
 
     def test_100000(self):
@@ -72,7 +72,7 @@ class StackDepthTest(TestCase):
         self.inc.limit = 100000
         self.var.send(0, 0)
         print "Last value:", self.inc.lastval
-        self.assertEqual(self.var.status, Processor.OK)
+        self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100000)
 
 

@@ -113,8 +113,6 @@ class Patch(Processor):
 
     def connect(self, outlet, target, inlet):
         Processor.connect(self, outlet, target, inlet)
-        print "Patch.connect:", self, outlet, target, inlet
-        print self.outlet_objects, self.outlet_objects[outlet]
         return self.outlet_objects[outlet].connect(0, target, inlet)
 
     def add(self, obj):
