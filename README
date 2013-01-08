@@ -76,6 +76,10 @@ documentation there is right now.  Since there's no support for load paths
 yet, you need to copy these into the root level of the source tree to run
 them. 
 
+Run the demo patch by putting the file name on the command line, i.e. 
+
+    $ mfp hello_world.mfp
+
 hello_world.mfp:  The classic 
 
 biquad_designer.mfp: What I'm actively working on to exercise new stuff.
