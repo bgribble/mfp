@@ -129,7 +129,7 @@ class RequestPipe(object):
 
     def get(self, timeout=None):
         if not self.running:
-            return False 
+            return None
 
         if timeout is not None:
             ready = self.this_end.poll(timeout)
@@ -143,7 +143,7 @@ class RequestPipe(object):
 
     def process(self, qobj):
         if not self.running:
-            return False 
+            return None
 
         req = None
         if qobj.get('type') == 'Request':

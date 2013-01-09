@@ -9,9 +9,10 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import cairo
 import math
-from patch_element import PatchElement
-from connection_element import ConnectionElement
 from mfp import MFPGUI
+
+from .patch_element import PatchElement
+from .connection_element import ConnectionElement
 from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
 from .modes.clickable import ClickableControlMode
