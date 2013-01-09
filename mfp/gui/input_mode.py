@@ -14,6 +14,8 @@ class InputMode (object):
         self.bindings = {}
         self.extensions = []
         self.num_bindings = 0
+        self.affinity = 0
+        self.seqno = None
 
     def extend(self, mode):
         self.extensions.append(mode)

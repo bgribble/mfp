@@ -17,6 +17,7 @@ class InputManager (object):
         self.global_mode = None
         self.major_mode = None
         self.minor_modes = []
+        self.minor_seqno = 0
         self.keyseq = KeySequencer()
         self.event_sources = {}
         self.root_source = None
@@ -37,9 +38,15 @@ class InputManager (object):
         self.window.display_bindings()
 
     def enable_minor_mode(self, mode):
+        def modecmp(a, b):
+            return cmp(b.affinity, a.affinity) or cmp(b.seqno, a.seqno)
+
         if mode in self.minor_modes:
             self.minor_modes.remove(mode)
+        mode.seqno = self.minor_seqno
+        self.minor_seqno += 1
         self.minor_modes[:0] = [mode]
+        self.minor_modes.sort(cmp=modecmp)
         mode.enable()
         self.window.display_bindings()
 

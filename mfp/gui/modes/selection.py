@@ -16,6 +16,8 @@ class SelectionEditMode (InputMode):
         self.drag_started = False
         InputMode.__init__(self, "Edit selected element")
 
+        self.affinity = -10 
+
         self.bind("UP", lambda: self.window.move_selected(0, -1),
                   "Move element up 1 unit")
         self.bind("DOWN", lambda: self.window.move_selected(0, 1),
