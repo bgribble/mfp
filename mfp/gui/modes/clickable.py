@@ -29,7 +29,8 @@ class ClickableControlMode (InputMode):
         self.bind("M1TRIPLEUP", self.unclick, "Send click up")
 
     def enable(self):
-        if self.manager.pointer_obj is self.widget:
+        if (self.manager.pointer_obj is self.widget 
+            and 1 in self.manager.keyseq.mouse_buttons):
             self.clickstate = True
             self.widget.clicked()
 
