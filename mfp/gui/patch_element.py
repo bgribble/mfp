@@ -40,7 +40,10 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = []
         self.connections_out = []
         self.connections_in = []
-
+        self.param_list = ['position_x', 'position_y', 'update_required', 
+                           'display_type', 'name', 'layername', 'num_inlets', 
+                           'num_outlets', 'dsp_inlets', 'dsp_outlets' ]
+            
         # Clutter objects
         self.stage = window
         self.layer = None
@@ -59,6 +62,14 @@ class PatchElement (Clutter.Group):
         # create placeholder group and add to stage
         Clutter.Group.__init__(self)
         self.stage.register(self)
+
+    @property
+    def layername(self):
+        return self.layer.name 
+
+    @property
+    def name(self):
+        return self.obj_name 
 
     def update(self):
         pass
@@ -147,12 +158,10 @@ class PatchElement (Clutter.Group):
     def send_params(self, **extras):
         if self.obj_id is None:
             return
+        prms = {} 
+        for k in self.param_list:
+            prms[k] = getattr(self, k)
 
-        prms = dict(position_x=self.position_x, position_y=self.position_y,
-                    update_required=self.update_required, display_type=self.display_type,
-                    name=self.obj_name, layer=self.layer.name,
-                    num_inlets=self.num_inlets, num_outlets=self.num_outlets,
-                    dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
         for k, v in extras.items():
             prms[k] = v
         MFPGUI().mfp.set_params(self.obj_id, prms)
@@ -239,7 +248,7 @@ class PatchElement (Clutter.Group):
         self.dsp_inlets = params.get("dsp_inlets")
         self.dsp_outlets = params.get("dsp_outlets")
         self.obj_name = params.get("name")
-        layer_name = params.get("layer")
+        layer_name = params.get("layername") or params.get("layer")
         layer = self.stage.selected_patch.find_layer(layer_name)
 
         if layer and self.layer != layer:

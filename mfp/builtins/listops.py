@@ -43,6 +43,17 @@ class Unpack (Processor):
 
         self.outlets[-1] = self.inlets[0][nout:]
 
+class Append (Processor):
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+        if len(initargs):
+            self.inlets[1] = initargs[0]
+        else:
+            self.inlets[1] = []
+
+    def trigger(self):
+        self.outlets[0] = self.inlets[1].append(self.inlets[0])
 
 def list_car(ll):
     return ll[0]

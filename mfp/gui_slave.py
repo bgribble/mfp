@@ -157,6 +157,11 @@ class GUICommand (RPCWrapper):
         obj_1 = MFPGUI().recall(obj_1_id)
         obj_2 = MFPGUI().recall(obj_2_id)
 
+        if obj_1 is None or obj_2 is None: 
+            log.debug("ERROR: connect: obj_1(%s) --> %s, obj_2(%s) --> %s"
+                      % (obj_1_id, obj_1, obj_2_id, obj_2))
+            return None
+
         c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)

@@ -146,6 +146,7 @@ class ScatterPlot (XYPlot):
     def set_style(self, style):
         log.debug("ScatterPlot: updating style params", style)
         for inlet, istyle in style.items():
+            inlet = int(inlet)
             marker = self.style.setdefault(inlet, MarkStyle())
             for k, v in istyle.items():
                 if k == "size":
@@ -157,7 +158,20 @@ class ScatterPlot (XYPlot):
                 elif k == "stroke":
                     marker.stroke_style = str(v)
 
+    def save_style(self):
+        sd = {} 
+        for inlet, style in self.style.items():
+            props = sd.setdefault(str(inlet), {})
+            props["size"] = style.size
+            props["color"] = style.colorspec
+            props["shape"] = style.shape
+            props["stroke"] = style.stroke_style
+
+        return sd 
+
+
     def configure(self, params):
+        print "ScatterPlot.configure:", params
         s = params.get("style")
         if s:
             self.set_style(s)

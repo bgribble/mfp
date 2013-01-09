@@ -103,7 +103,12 @@ class PyBinary(Processor):
             self.inlets[1] = initargs[0]
 
     def trigger(self):
-        self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
+        if self.inlets[1] is not Uninit:
+            self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
+        else:
+            # hope for a default
+            self.outlets[0] = self.function(self.inlets[0])
+
 
 
 class PyUnary(Processor):
@@ -130,7 +135,7 @@ def mk_unary(pyfunc, name):
 
 import operator
 import math
-
+import cmath
 
 def register():
     MFPApp().register("get", GetElement)
@@ -167,9 +172,10 @@ def register():
 
     mk_unary(abs, "abs")
     mk_unary(operator.neg, "neg")
+    mk_unary(cmath.phase, "phase")
 
     # type converters
-    mk_unary(complex, "complex")
+    mk_binary(complex, "complex")
     mk_unary(int, "int")
     mk_unary(float, "float")
     mk_unary(tuple, "tuple")

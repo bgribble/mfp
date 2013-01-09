@@ -18,6 +18,7 @@ class MarkStyle (object):
         self.col_g = 0
         self.col_b = 0
         self.col_a = 255
+        self.colorspec = (0,0,0,255)
         self.shape = "dot"
         self.size = 1.0
         self.stroke_style = None
@@ -47,6 +48,7 @@ class MarkStyle (object):
         self.col_g = g
         self.col_b = b
         self.col_a = a
+        self.colorspec = newcolor
 
     def mark_dot(self, ctx, point):
         ctx.move_to(point[0] + self.size, point[1])

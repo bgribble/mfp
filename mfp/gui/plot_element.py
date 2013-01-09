@@ -30,6 +30,8 @@ class PlotElement (PatchElement):
     def __init__(self, window, x, y, params={}):
         PatchElement.__init__(self, window, x, y)
 
+        self.param_list.extend(['x_min', 'x_max', 'y_min', 'y_max', 'style', 'plot_type'])
+
         # display elements
         self.rect = None
         self.label = None
@@ -48,6 +50,19 @@ class PlotElement (PatchElement):
         self.create_display(self.INIT_WIDTH + 6, self.INIT_HEIGHT + self.LABEL_SPACE + 4)
         self.move(x, y)
         self.update()
+
+    @property
+    def style(self):
+       return self.xyplot.save_style()
+
+    @property
+    def plot_type(self):
+        if isinstance(self.xyplot, ScatterPlot):
+            return "scatter"
+        elif isinstance(self.xyplot, ScopePlot):
+            return "scope"
+        else:
+            return "none"
 
     def create_display(self, width, height):
         self.rect = clutter.Rectangle()
@@ -85,6 +100,7 @@ class PlotElement (PatchElement):
         self.y_max = y_max
 
         self.xyplot.set_bounds(x_min, y_min, x_max, y_max)
+        self.send_params()
 
     def update(self):
         self.draw_ports()
@@ -144,7 +160,6 @@ class PlotElement (PatchElement):
             c.draw()
 
     def set_size(self, w, h):
-        print "chart_element: set_size", w, h
         self.size_w = w
         self.size_h = h
 
@@ -194,6 +209,7 @@ class PlotElement (PatchElement):
         return False
 
     def configure(self, params):
+        print "PlotElement.configure:", params
         if "plot_type" in params and self.xyplot is None:
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
@@ -208,6 +224,13 @@ class PlotElement (PatchElement):
             self.label.set_text("%s" % (self.obj_type,))
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+
+        x_min = params.get('x_min') or self.x_min
+        x_max = params.get('x_max') or self.x_max
+        y_min = params.get('y_min') or self.y_min
+        y_max = params.get('y_max') or self.y_max
+
+        self.set_bounds(x_min, y_min, x_max, y_max)
 
         if self.xyplot is not None:
             self.xyplot.configure(params)

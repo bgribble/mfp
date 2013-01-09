@@ -20,6 +20,10 @@
             [
                 "Graphs",
                 "__patch__"
+            ],
+            [
+                "Freq resp calc",
+                "__patch__"
             ]
         ],
         "obj_id": 0,
@@ -248,7 +252,7 @@
                 "name": "in_q",
                 "obj_id": 10,
                 "dsp_outlets": null,
-                "value": 3.0,
+                "value": 20.0,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -258,7 +262,7 @@
                 "initargs": "0.0"
             },
             "name": "in_q",
-            "value": 3.0,
+            "value": 20.0,
             "connections": [
                 [
                     [
@@ -277,7 +281,7 @@
                 "name": "in_slope",
                 "obj_id": 11,
                 "dsp_outlets": null,
-                "value": 5.1,
+                "value": 1.0,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -287,7 +291,7 @@
                 "initargs": "0.0"
             },
             "name": "in_slope",
-            "value": 5.1,
+            "value": 1.0,
             "connections": [
                 [
                     [
@@ -517,7 +521,6 @@
         "21": {
             "gui_params": {
                 "value": false,
-                "layer": "Front Panel",
                 "position_x": 34.98871612548828,
                 "name": "rg_lowpass",
                 "update_required": true,
@@ -526,7 +529,8 @@
                 "display_type": "toggle",
                 "num_inlets": 2,
                 "position_y": 61.973459864068445,
-                "dsp_outlets": null
+                "dsp_outlets": null,
+                "layername": "Front Panel"
             },
             "name": "rg_lowpass",
             "value": false,
@@ -543,7 +547,6 @@
         },
         "22": {
             "gui_params": {
-                "layer": "Front Panel",
                 "position_x": 34.987640380859375,
                 "name": "rg_highpass",
                 "update_required": true,
@@ -552,7 +555,8 @@
                 "display_type": "toggle",
                 "num_inlets": 2,
                 "position_y": 89.01678542533125,
-                "dsp_outlets": null
+                "dsp_outlets": null,
+                "layername": "Front Panel"
             },
             "name": "rg_highpass",
             "value": true,
@@ -656,19 +660,19 @@
         },
         "26": {
             "gui_params": {
-                "layer": "Front Panel",
+                "value": "<b>Filter type:</b>",
                 "position_x": 32.97541046142578,
                 "name": "text_14",
                 "obj_id": 26,
                 "dsp_outlets": null,
-                "value": "<b>Filter type:</b>",
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 38.956539154052734,
-                "initargs": null
+                "initargs": null,
+                "layername": "Front Panel"
             },
             "name": "text_14",
             "value": "<b>Filter type:</b>",
@@ -733,7 +737,7 @@
                 "name": "out_a1",
                 "obj_id": 29,
                 "dsp_outlets": null,
-                "value": 0.5040023662998235,
+                "value": 0.9367049680264984,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -743,7 +747,7 @@
                 "initargs": "0.0"
             },
             "name": "out_a1",
-            "value": 0.5040023662998235,
+            "value": 0.9367049680264984,
             "connections": [
                 [
                     [
@@ -762,7 +766,7 @@
                 "name": "out_a2",
                 "obj_id": 30,
                 "dsp_outlets": null,
-                "value": 1.4229546040339014,
+                "value": 1.9356707618463087,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -772,7 +776,7 @@
                 "initargs": "0.0"
             },
             "name": "out_a2",
-            "value": 1.4229546040339014,
+            "value": 1.9356707618463087,
             "connections": [
                 [
                     [
@@ -791,7 +795,7 @@
                 "name": "out_b0",
                 "obj_id": 31,
                 "dsp_outlets": null,
-                "value": 0.43071590256620135,
+                "value": 0.8506050980080216,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -801,7 +805,7 @@
                 "initargs": "0.0"
             },
             "name": "out_b0",
-            "value": 0.43071590256620135,
+            "value": 0.8506050980080216,
             "connections": [
                 [
                     [
@@ -820,7 +824,7 @@
                 "name": "out_b1",
                 "obj_id": 32,
                 "dsp_outlets": null,
-                "value": -0.8614318051324027,
+                "value": -1.7012101960160433,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -830,7 +834,7 @@
                 "initargs": "0.0"
             },
             "name": "out_b1",
-            "value": -0.8614318051324027,
+            "value": -1.7012101960160433,
             "connections": [
                 [
                     [
@@ -849,7 +853,7 @@
                 "name": "out_b2",
                 "obj_id": 33,
                 "dsp_outlets": null,
-                "value": 0.43071590256620135,
+                "value": 0.8506050980080216,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -859,7 +863,7 @@
                 "initargs": "0.0"
             },
             "name": "out_b2",
-            "value": 0.43071590256620135,
+            "value": 0.8506050980080216,
             "connections": [
                 [
                     [
@@ -993,7 +997,6 @@
         },
         "39": {
             "gui_params": {
-                "layer": "Front Panel",
                 "position_x": 231.70567321777344,
                 "name": "compute_button",
                 "update_required": true,
@@ -1002,7 +1005,8 @@
                 "display_type": "button",
                 "num_inlets": 2,
                 "position_y": 199.84996032714844,
-                "dsp_outlets": null
+                "dsp_outlets": null,
+                "layername": "Front Panel"
             },
             "name": "compute_button",
             "value": {
@@ -1245,22 +1249,22 @@
         },
         "49": {
             "gui_params": {
-                "layer": "Param routing",
-                "position_x": 443.55975341796875,
+                "value": "<span size=\"large\"><b>Parameter routing</b></span>",
+                "position_x": 411.5855407714844,
                 "name": "text_21",
                 "obj_id": 49,
                 "dsp_outlets": null,
-                "value": "<b>Parameter routing</b>",
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 40.74458694458008,
-                "initargs": null
+                "position_y": 14.755819320678711,
+                "initargs": null,
+                "layername": "Param routing"
             },
             "name": "text_21",
-            "value": "<b>Parameter routing</b>",
+            "value": "<span size=\"large\"><b>Parameter routing</b></span>",
             "connections": [
                 []
             ],
@@ -1269,19 +1273,19 @@
         },
         "50": {
             "gui_params": {
-                "layer": "Param routing",
-                "position_x": 442.5476989746094,
+                "value": "This is just a subpatch to hide the\nradio group selection and parameter \nrouting. Radiogroup manages the \nfilter type selection buttons, and the\npack/route pair builds params into a \ntuple and sends them to the correct\nsubpatch.",
+                "position_x": 410.5531921386719,
                 "name": "text_22",
                 "obj_id": 50,
                 "dsp_outlets": null,
-                "value": "This is just a subpatch to hide the\nradio group selection and parameter \nrouting. Radiogroup manages the \nfilter type selection buttons, and the\npack/route pair builds params into a \ntuple and sends them to the correct\nsubpatch.",
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 72.71607208251953,
-                "initargs": null
+                "position_y": 47.72687530517578,
+                "initargs": null,
+                "layername": "Param routing"
             },
             "name": "text_22",
             "value": "This is just a subpatch to hide the\nradio group selection and parameter \nrouting. Radiogroup manages the \nfilter type selection buttons, and the\npack/route pair builds params into a \ntuple and sends them to the correct\nsubpatch.",
@@ -1963,19 +1967,16 @@
         },
         "76": {
             "gui_params": {
-                "layer": "Highpass",
-                "position_x": 357.6605224609375,
+                "position_x": 356.661376953125,
                 "name": "text_25",
-                "obj_id": 76,
-                "dsp_outlets": null,
-                "value": "<b>b<sub>0</sub>, b<sub>2</sub></b>: biquad coefficients",
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 163.8723907470703,
-                "initargs": null
+                "position_y": 187.84669494628906,
+                "dsp_outlets": null,
+                "layername": "Highpass"
             },
             "name": "text_25",
             "value": "<b>b<sub>0</sub>, b<sub>2</sub></b>: biquad coefficients",
@@ -3020,13 +3021,16 @@
                 "layer": "Pole-zero calc",
                 "position_x": 271.96356201171875,
                 "name": "polezero",
+                "obj_id": 116,
+                "dsp_outlets": null,
                 "update_required": false,
+                "label": "polezero",
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "recvvia",
                 "num_inlets": 1,
                 "position_y": 20.932937622070312,
-                "dsp_outlets": null
+                "initargs": "\"polezero\""
             },
             "type": "recv",
             "name": "polezero"
@@ -3035,37 +3039,37 @@
             "connections": [
                 [
                     [
-                        118,
+                        202,
                         0
                     ]
                 ],
                 [
                     [
-                        148,
+                        147,
                         2
                     ]
                 ],
                 [
                     [
-                        121,
+                        120,
                         0
                     ]
                 ],
                 [
                     [
-                        121,
+                        120,
                         1
                     ]
                 ],
                 [
                     [
-                        121,
+                        120,
                         2
                     ]
                 ],
                 [
                     [
-                        187,
+                        183,
                         0
                     ]
                 ]
@@ -3092,73 +3096,44 @@
             "connections": [
                 [
                     [
-                        119,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        148,
-                        1
-                    ]
-                ]
-            ],
-            "initargs": "2",
-            "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 143.5680694580078,
-                "name": "processor_26",
-                "update_required": false,
-                "num_outlets": 2,
-                "dsp_inlets": null,
-                "display_type": "processor",
-                "num_inlets": 1,
-                "position_y": 97.01995086669922,
-                "dsp_outlets": null
-            },
-            "type": "trigger",
-            "name": "processor_26"
-        },
-        "119": {
-            "connections": [
-                [
-                    [
-                        148,
+                        147,
                         0
                     ]
                 ]
             ],
             "initargs": "1.0",
             "gui_params": {
-                "layer": "Pole-zero calc",
                 "position_x": 142.5791473388672,
                 "name": "message_1",
-                "obj_id": 119,
+                "obj_id": 118,
                 "dsp_outlets": null,
-                "value": 1.0,
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "message",
                 "num_inlets": 2,
                 "position_y": 132.02017211914062,
-                "initargs": "1.0"
+                "initargs": "1.0",
+                "layername": "Pole-zero calc"
             },
             "type": "message",
             "name": "message_1"
         },
-        "120": {
+        "119": {
             "gui_params": {
                 "layer": "Pole-zero calc",
                 "position_x": 377.3400421142578,
                 "name": "text_30",
-                "update_required": true,
+                "obj_id": 119,
+                "dsp_outlets": null,
+                "value": "(a<sub>1</sub>, a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub>)",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 65.1205825805664,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_30",
             "value": "(a<sub>1</sub>, a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub>)",
@@ -3168,17 +3143,25 @@
             "initargs": null,
             "type": "text"
         },
-        "121": {
+        "120": {
             "connections": [
                 [
                     [
-                        192,
+                        186,
+                        0
+                    ],
+                    [
+                        201,
                         0
                     ]
                 ],
                 [
                     [
-                        192,
+                        186,
+                        0
+                    ],
+                    [
+                        201,
                         0
                     ]
                 ]
@@ -3191,10 +3174,9 @@
                         "__patch__"
                     ]
                 ],
-                "layer": "Pole-zero calc",
                 "position_x": 259.640625,
                 "name": "pole_solver",
-                "obj_id": 121,
+                "obj_id": 120,
                 "dsp_outlets": null,
                 "update_required": false,
                 "top_level": false,
@@ -3203,22 +3185,31 @@
                 "display_type": "processor",
                 "num_inlets": 3,
                 "position_y": 167.20215606689453,
-                "initargs": null
+                "initargs": null,
+                "layername": "Pole-zero calc"
             },
             "type": "quadratic",
             "name": "pole_solver"
         },
-        "148": {
+        "147": {
             "connections": [
                 [
                     [
-                        191,
+                        185,
+                        0
+                    ],
+                    [
+                        199,
                         0
                     ]
                 ],
                 [
                     [
-                        191,
+                        185,
+                        0
+                    ],
+                    [
+                        199,
                         0
                     ]
                 ]
@@ -3231,10 +3222,9 @@
                         "__patch__"
                     ]
                 ],
-                "layer": "Pole-zero calc",
-                "position_x": 172.69482421875,
+                "position_x": 143.69482421875,
                 "name": "zero_solver",
-                "obj_id": 148,
+                "obj_id": 147,
                 "dsp_outlets": null,
                 "update_required": false,
                 "top_level": false,
@@ -3243,23 +3233,27 @@
                 "display_type": "processor",
                 "num_inlets": 3,
                 "position_y": 167.2481231689453,
-                "initargs": null
+                "initargs": null,
+                "layername": "Pole-zero calc"
             },
             "type": "quadratic",
             "name": "zero_solver"
         },
-        "175": {
+        "174": {
             "gui_params": {
                 "layer": "Pole-zero calc",
                 "position_x": 22.217384338378906,
                 "name": "text_31",
-                "update_required": true,
+                "obj_id": 174,
+                "dsp_outlets": null,
+                "value": "Solutions are z-plane poles (left quadratic)\nand zeros (right quadratic)",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 301.8333740234375,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_31",
             "value": "Solutions are z-plane poles (left quadratic)\nand zeros (right quadratic)",
@@ -3269,17 +3263,17 @@
             "initargs": null,
             "type": "text"
         },
-        "176": {
+        "175": {
             "connections": [
                 [
                     [
-                        190,
+                        184,
                         0
                     ]
                 ],
                 [
                     [
-                        198,
+                        189,
                         0
                     ]
                 ]
@@ -3289,7 +3283,7 @@
                 "layer": "Pole-zero calc",
                 "position_x": 343.9248962402344,
                 "name": "processor_29",
-                "obj_id": 176,
+                "obj_id": 175,
                 "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 2,
@@ -3302,11 +3296,11 @@
             "type": "trigger",
             "name": "processor_29"
         },
-        "178": {
+        "176": {
             "connections": [
                 [
                     [
-                        179,
+                        177,
                         0
                     ]
                 ]
@@ -3316,25 +3310,108 @@
                 "layer": "Pole-zero calc",
                 "position_x": 343.923828125,
                 "name": "processor_31",
+                "obj_id": 176,
+                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 2,
                 "position_y": 254.50155639648438,
-                "dsp_outlets": null
+                "initargs": ".02*math.pi"
             },
             "type": "*",
             "name": "processor_31"
         },
-        "179": {
+        "177": {
+            "connections": [
+                [
+                    [
+                        178,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        179,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "layer": "Pole-zero calc",
+                "position_x": 343.923828125,
+                "name": "processor_32",
+                "obj_id": 177,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 295.5015563964844,
+                "initargs": "2"
+            },
+            "type": "trigger",
+            "name": "processor_32"
+        },
+        "178": {
             "connections": [
                 [
                     [
                         180,
                         0
                     ]
-                ],
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Pole-zero calc",
+                "position_x": 343.923828125,
+                "name": "processor_33",
+                "obj_id": 178,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 340.5015563964844,
+                "initargs": null
+            },
+            "type": "cos",
+            "name": "processor_33"
+        },
+        "179": {
+            "connections": [
+                [
+                    [
+                        180,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "layer": "Pole-zero calc",
+                "position_x": 405.9236145019531,
+                "name": "processor_34",
+                "obj_id": 179,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 343.5003662109375,
+                "initargs": null
+            },
+            "type": "sin",
+            "name": "processor_34"
+        },
+        "180": {
+            "connections": [
                 [
                     [
                         181,
@@ -3346,101 +3423,28 @@
             "gui_params": {
                 "layer": "Pole-zero calc",
                 "position_x": 343.923828125,
-                "name": "processor_32",
-                "update_required": false,
-                "num_outlets": 2,
-                "dsp_inlets": null,
-                "display_type": "processor",
-                "num_inlets": 1,
-                "position_y": 295.5015563964844,
-                "dsp_outlets": null
-            },
-            "type": "trigger",
-            "name": "processor_32"
-        },
-        "180": {
-            "connections": [
-                [
-                    [
-                        182,
-                        0
-                    ]
-                ]
-            ],
-            "initargs": null,
-            "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 343.923828125,
-                "name": "processor_33",
-                "update_required": false,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "processor",
-                "num_inlets": 1,
-                "position_y": 340.5015563964844,
-                "dsp_outlets": null
-            },
-            "type": "cos",
-            "name": "processor_33"
-        },
-        "181": {
-            "connections": [
-                [
-                    [
-                        182,
-                        1
-                    ]
-                ]
-            ],
-            "initargs": null,
-            "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 405.9236145019531,
-                "name": "processor_34",
-                "update_required": false,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "processor",
-                "num_inlets": 1,
-                "position_y": 343.5003662109375,
-                "dsp_outlets": null
-            },
-            "type": "sin",
-            "name": "processor_34"
-        },
-        "182": {
-            "connections": [
-                [
-                    [
-                        183,
-                        0
-                    ]
-                ]
-            ],
-            "initargs": "2",
-            "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 343.923828125,
                 "name": "processor_35",
+                "obj_id": 180,
+                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 2,
                 "position_y": 384.5015563964844,
-                "dsp_outlets": null
+                "initargs": "2"
             },
             "type": "pack",
             "name": "processor_35"
         },
-        "183": {
+        "181": {
             "connections": [],
             "initargs": "\"pzg0\"",
             "gui_params": {
                 "layer": "Pole-zero calc",
                 "position_x": 341.423828125,
                 "name": "sendvia_33",
-                "obj_id": 183,
+                "obj_id": 181,
                 "dsp_outlets": null,
                 "update_required": false,
                 "label": "pzg0",
@@ -3454,71 +3458,20 @@
             "type": "send",
             "name": "sendvia_33"
         },
-        "184": {
-            "connections": [
-                []
-            ],
-            "initargs": "3",
-            "gui_params": {
-                "plot_type": "scatter",
-                "layer": "Graphs",
-                "position_x": 31.153793334960938,
-                "name": "scatter_0",
-                "obj_id": 184,
-                "dsp_outlets": null,
-                "style": {
-                    "1": {
-                        "color": "green",
-                        "shape": "triangle",
-                        "size": 5
-                    },
-                    "0": {
-                        "color": "blue",
-                        "stroke": "solid",
-                        "shape": null
-                    },
-                    "2": {
-                        "color": "green",
-                        "shape": "dot",
-                        "size": 5
-                    },
-                    "2": {
-                        "color": "green",
-                        "shape": "circle",
-                        "size": 5
-                    },
-                    "1": {
-                        "color": "green",
-                        "shape": "triangle",
-                        "size": 5
-                    }
-                },
-                "update_required": false,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "plot",
-                "num_inlets": 3,
-                "position_y": 186.46116638183594,
-                "initargs": "3"
-            },
-            "type": "scatter",
-            "name": "scatter_0"
-        },
-        "185": {
+        "182": {
             "connections": [
                 [
                     [
-                        184,
+                        258,
                         0
                     ]
                 ]
             ],
             "initargs": "\"pzg0\"",
             "gui_params": {
-                "layer": "Graphs",
-                "position_x": 29.98733901977539,
+                "position_x": 28.98733901977539,
                 "name": "pzg0",
-                "obj_id": 185,
+                "obj_id": 182,
                 "dsp_outlets": null,
                 "update_required": false,
                 "label": "pzg0",
@@ -3526,17 +3479,18 @@
                 "dsp_inlets": null,
                 "display_type": "recvvia",
                 "num_inlets": 1,
-                "position_y": 91.87734985351562,
-                "initargs": "\"pzg0\""
+                "position_y": 80.87734985351562,
+                "initargs": "\"pzg0\"",
+                "layername": "Graphs"
             },
             "type": "recv",
             "name": "pzg0"
         },
-        "187": {
+        "183": {
             "connections": [
                 [
                     [
-                        176,
+                        175,
                         0
                     ]
                 ]
@@ -3546,72 +3500,24 @@
                 "layer": "Pole-zero calc",
                 "position_x": 343.92401123046875,
                 "name": "message_4",
+                "obj_id": 183,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "message",
                 "num_inlets": 2,
                 "position_y": 130.81582641601562,
-                "dsp_outlets": null
+                "initargs": "Bang"
             },
             "type": "message",
             "name": "message_4"
         },
-        "188": {
+        "184": {
             "connections": [
                 [
                     [
-                        184,
-                        0
-                    ]
-                ]
-            ],
-            "initargs": "@style(shape=None, stroke=\"solid\", color=\"blue\")",
-            "gui_params": {
-                "layer": "Graphs",
-                "position_x": 88.96234893798828,
-                "name": "message_3",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "message",
-                "num_inlets": 2,
-                "position_y": 89.90055084228516,
-                "dsp_outlets": null
-            },
-            "type": "message",
-            "name": "message_3"
-        },
-        "189": {
-            "connections": [
-                [
-                    [
-                        184,
-                        0
-                    ]
-                ]
-            ],
-            "initargs": "@bounds(-2, -2, 2, 2)",
-            "gui_params": {
-                "layer": "Graphs",
-                "position_x": 87.81013488769531,
-                "name": "message_5",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "message",
-                "num_inlets": 2,
-                "position_y": 49.94472122192383,
-                "dsp_outlets": null
-            },
-            "type": "message",
-            "name": "message_5"
-        },
-        "190": {
-            "connections": [
-                [
-                    [
-                        178,
+                        176,
                         0
                     ]
                 ]
@@ -3621,25 +3527,26 @@
                 "layer": "Pole-zero calc",
                 "position_x": 343.923828125,
                 "name": "processor_30",
+                "obj_id": 184,
+                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 2,
                 "position_y": 212.50155639648438,
-                "dsp_outlets": null
+                "initargs": "range(0, 102)"
             },
             "type": "for",
             "name": "processor_30"
         },
-        "191": {
+        "185": {
             "connections": [],
             "initargs": "\"pzg1\"",
             "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 190.95806884765625,
+                "position_x": 205.92282104492188,
                 "name": "sendvia_34",
-                "obj_id": 191,
+                "obj_id": 185,
                 "dsp_outlets": null,
                 "update_required": false,
                 "label": "pzg1",
@@ -3647,20 +3554,20 @@
                 "dsp_inlets": null,
                 "display_type": "sendvia",
                 "num_inlets": 2,
-                "position_y": 242.65841674804688,
-                "initargs": "\"pzg1\""
+                "position_y": 218.6688995361328,
+                "initargs": "\"pzg1\"",
+                "layername": "Pole-zero calc"
             },
             "type": "send",
             "name": "sendvia_34"
         },
-        "192": {
+        "186": {
             "connections": [],
             "initargs": "\"pzg2\"",
             "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 284.93743896484375,
+                "position_x": 321.8990478515625,
                 "name": "sendvia_35",
-                "obj_id": 192,
+                "obj_id": 186,
                 "dsp_outlets": null,
                 "update_required": false,
                 "label": "pzg2",
@@ -3668,27 +3575,27 @@
                 "dsp_inlets": null,
                 "display_type": "sendvia",
                 "num_inlets": 2,
-                "position_y": 240.66123962402344,
-                "initargs": "\"pzg2\""
+                "position_y": 216.67372131347656,
+                "initargs": "\"pzg2\"",
+                "layername": "Pole-zero calc"
             },
             "type": "send",
             "name": "sendvia_35"
         },
-        "193": {
+        "187": {
             "connections": [
                 [
                     [
-                        184,
+                        258,
                         1
                     ]
                 ]
             ],
             "initargs": "\"pzg1\"",
             "gui_params": {
-                "layer": "Graphs",
                 "position_x": 186.59646606445312,
                 "name": "pzg1",
-                "obj_id": 193,
+                "obj_id": 187,
                 "dsp_outlets": null,
                 "update_required": false,
                 "label": "pzg1",
@@ -3696,27 +3603,27 @@
                 "dsp_inlets": null,
                 "display_type": "recvvia",
                 "num_inlets": 1,
-                "position_y": 114.88349914550781,
-                "initargs": "\"pzg1\""
+                "position_y": 81.92288970947266,
+                "initargs": "\"pzg1\"",
+                "layername": "Graphs"
             },
             "type": "recv",
             "name": "pzg1"
         },
-        "194": {
+        "188": {
             "connections": [
                 [
                     [
-                        184,
+                        258,
                         2
                     ]
                 ]
             ],
             "initargs": "\"pzg2\"",
             "gui_params": {
-                "layer": "Graphs",
-                "position_x": 345.25335693359375,
+                "position_x": 344.25335693359375,
                 "name": "pzg2",
-                "obj_id": 194,
+                "obj_id": 188,
                 "dsp_outlets": null,
                 "update_required": false,
                 "label": "pzg2",
@@ -3724,67 +3631,18 @@
                 "dsp_inlets": null,
                 "display_type": "recvvia",
                 "num_inlets": 1,
-                "position_y": 114.88349914550781,
-                "initargs": "\"pzg2\""
+                "position_y": 80.91520690917969,
+                "initargs": "\"pzg2\"",
+                "layername": "Graphs"
             },
             "type": "recv",
             "name": "pzg2"
         },
-        "195": {
+        "189": {
             "connections": [
                 [
                     [
-                        184,
-                        1
-                    ]
-                ]
-            ],
-            "initargs": "@style(shape=\"triangle\", size=5, color=\"green\")",
-            "gui_params": {
-                "layer": "Graphs",
-                "position_x": 226.51016235351562,
-                "name": "message_6",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "message",
-                "num_inlets": 2,
-                "position_y": 134.86325073242188,
-                "dsp_outlets": null
-            },
-            "type": "message",
-            "name": "message_6"
-        },
-        "197": {
-            "connections": [
-                [
-                    [
-                        184,
-                        2
-                    ]
-                ]
-            ],
-            "initargs": "@style(shape=\"dot\", size=5, color=\"green\")",
-            "gui_params": {
-                "layer": "Graphs",
-                "position_x": 346.68975830078125,
-                "name": "message_7",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "message",
-                "num_inlets": 2,
-                "position_y": 58.940208435058594,
-                "dsp_outlets": null
-            },
-            "type": "message",
-            "name": "message_7"
-        },
-        "198": {
-            "connections": [
-                [
-                    [
-                        183,
+                        181,
                         0
                     ]
                 ]
@@ -3794,29 +3652,34 @@
                 "layer": "Pole-zero calc",
                 "position_x": 423.9420166015625,
                 "name": "message_2",
+                "obj_id": 189,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "message",
                 "num_inlets": 2,
                 "position_y": 402.68748474121094,
-                "dsp_outlets": null
+                "initargs": "@clearall"
             },
             "type": "message",
             "name": "message_2"
         },
-        "199": {
+        "190": {
             "gui_params": {
                 "layer": "Pole-zero calc",
                 "position_x": 510.7369384765625,
                 "name": "text_31",
-                "update_required": true,
+                "obj_id": 190,
+                "dsp_outlets": null,
+                "value": "Draw unit circle for reference",
                 "num_outlets": 1,
                 "dsp_inlets": null,
+                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 256.6387481689453,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_31",
             "value": "Draw unit circle for reference",
@@ -3825,30 +3688,1886 @@
             ],
             "initargs": null,
             "type": "text"
+        },
+        "191": {
+            "gui_params": {
+                "value": "<b>Z-plane poles and zeros of filter</b>",
+                "position_x": 81.93672943115234,
+                "name": "text_32",
+                "obj_id": 191,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 399.4899597167969,
+                "initargs": null,
+                "layername": "Graphs"
+            },
+            "name": "text_32",
+            "value": "<b>Z-plane poles and zeros of filter</b>",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "192": {
+            "gui_params": {
+                "value": "Unit circle (blue) shown for reference",
+                "position_x": 75.95203399658203,
+                "name": "text_33",
+                "obj_id": 192,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 424.5020446777344,
+                "initargs": null,
+                "layername": "Graphs"
+            },
+            "name": "text_33",
+            "value": "Unit circle (blue) shown for reference",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "193": {
+            "connections": [
+                []
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "plot_type": "scatter",
+                "style": {},
+                "position_x": 381.7375793457031,
+                "x_max": 44100,
+                "y_max": 10,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": [],
+                "y_min": -1.0,
+                "display_type": "plot",
+                "num_inlets": 1,
+                "position_y": 122.862548828125,
+                "x_min": 0.0,
+                "dsp_outlets": [],
+                "layername": "Graphs",
+                "name": "scatter_0"
+            },
+            "type": "scatter",
+            "name": "scatter_0"
+        },
+        "194": {
+            "gui_params": {
+                "value": "<b>Amplitude response of filter</b>",
+                "position_x": 441.54046630859375,
+                "name": "text_34",
+                "obj_id": 194,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 398.5331726074219,
+                "initargs": null,
+                "layername": "Graphs"
+            },
+            "name": "text_34",
+            "value": "<b>Amplitude response of filter</b>",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "195": {
+            "connections": [
+                [
+                    [
+                        193,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"fr0\"",
+            "gui_params": {
+                "position_x": 379.6026611328125,
+                "name": "fr0",
+                "obj_id": 195,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "fr0",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 80.89273834228516,
+                "initargs": "\"fr0\"",
+                "layername": "Graphs"
+            },
+            "type": "recv",
+            "name": "fr0"
+        },
+        "196": {
+            "gui_params": {
+                "value": "<span size=\"large\"><b>Highpass Filter Coefficients</b></span>",
+                "position_x": 390.5494079589844,
+                "name": "text_36",
+                "obj_id": 196,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 12.986019134521484,
+                "initargs": null,
+                "layername": "Highpass"
+            },
+            "name": "text_36",
+            "value": "<span size=\"large\"><b>Highpass Filter Coefficients</b></span>",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "197": {
+            "gui_params": {
+                "value": "<span size=\"large\"><b>Graphs of filter</b></span>",
+                "position_x": 425.5560302734375,
+                "name": "text_38",
+                "obj_id": 197,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 15.982074737548828,
+                "initargs": null,
+                "layername": "Graphs"
+            },
+            "name": "text_38",
+            "value": "<span size=\"large\"><b>Graphs of filter</b></span>",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "198": {
+            "gui_params": {
+                "value": "<b><span size=\"large\">Z-plane poles and zeros</span></b>",
+                "position_x": 405.48919677734375,
+                "name": "text_39",
+                "obj_id": 198,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 15.991949081420898,
+                "initargs": null,
+                "layername": "Pole-zero calc"
+            },
+            "name": "text_39",
+            "value": "<b><span size=\"large\">Z-plane poles and zeros</span></b>",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "199": {
+            "connections": [],
+            "initargs": "\"pzpoles\"",
+            "gui_params": {
+                "position_x": 141.8217010498047,
+                "name": "sendvia_36",
+                "obj_id": 199,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pzpoles",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 219.89158630371094,
+                "initargs": "\"pzpoles\"",
+                "layername": "Pole-zero calc"
+            },
+            "type": "send",
+            "name": "sendvia_36"
+        },
+        "201": {
+            "connections": [],
+            "initargs": "\"pzzeros\"",
+            "gui_params": {
+                "position_x": 257.7304992675781,
+                "name": "sendvia_37",
+                "obj_id": 201,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pzzeros",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 218.88211059570312,
+                "initargs": "\"pzzeros\"",
+                "layername": "Pole-zero calc"
+            },
+            "type": "send",
+            "name": "sendvia_37"
+        },
+        "202": {
+            "connections": [
+                [
+                    [
+                        203,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        118,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        147,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "3",
+            "gui_params": {
+                "position_x": 112.21949392622233,
+                "name": "processor_26",
+                "obj_id": 202,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 3,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 99.01895141601562,
+                "initargs": "3",
+                "layername": "Pole-zero calc"
+            },
+            "type": "trigger",
+            "name": "processor_26"
+        },
+        "203": {
+            "connections": [],
+            "initargs": "\"pzdone\"",
+            "gui_params": {
+                "position_x": 109.88597869873047,
+                "name": "sendvia_38",
+                "obj_id": 203,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pzdone",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 161.91903686523438,
+                "initargs": "\"pzdone\"",
+                "layername": "Pole-zero calc"
+            },
+            "type": "send",
+            "name": "sendvia_38"
+        },
+        "204": {
+            "connections": [
+                [
+                    [
+                        218,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"pzpoles\"",
+            "gui_params": {
+                "position_x": 321.5147399902344,
+                "name": "pzpoles",
+                "obj_id": 204,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pzpoles",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 60.17626953125,
+                "initargs": "\"pzpoles\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "recv",
+            "name": "recv_212"
+        },
+        "205": {
+            "connections": [
+                [
+                    [
+                        219,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"pzzeros\"",
+            "gui_params": {
+                "position_x": 553.6924743652344,
+                "name": "pzzeros",
+                "obj_id": 205,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pzzeros",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 66.05876159667969,
+                "initargs": "\"pzzeros\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "recv",
+            "name": "pzzeros"
+        },
+        "206": {
+            "connections": [
+                [
+                    [
+                        207,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"pzdone\"",
+            "gui_params": {
+                "position_x": 77.8064193725586,
+                "name": "pzdone",
+                "obj_id": 206,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pzdone",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 68.48038482666016,
+                "initargs": "\"pzdone\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "recv",
+            "name": "pzdone"
+        },
+        "207": {
+            "connections": [
+                [
+                    [
+                        208,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "Bang",
+            "gui_params": {
+                "position_x": 79.8064193725586,
+                "name": "message_8",
+                "obj_id": 207,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 119.83747863769531,
+                "initargs": "Bang",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_8"
+        },
+        "208": {
+            "connections": [
+                [
+                    [
+                        210,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "range(0, 200)",
+            "gui_params": {
+                "position_x": 79.8064193725586,
+                "name": "processor_35",
+                "obj_id": 208,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 159.8374786376953,
+                "initargs": "range(0, 200)",
+                "layername": "Freq resp calc"
+            },
+            "type": "for",
+            "name": "processor_35"
+        },
+        "209": {
+            "connections": [
+                [
+                    [
+                        211,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "3",
+            "gui_params": {
+                "position_x": 79.8064193725586,
+                "name": "processor_37",
+                "obj_id": 209,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 236.8374786376953,
+                "initargs": "3",
+                "layername": "Freq resp calc"
+            },
+            "type": "**",
+            "name": "processor_37"
+        },
+        "210": {
+            "connections": [
+                [
+                    [
+                        209,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "200.0",
+            "gui_params": {
+                "position_x": 79.8064193725586,
+                "name": "processor_36",
+                "obj_id": 210,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 198.8374786376953,
+                "initargs": "200.0",
+                "layername": "Freq resp calc"
+            },
+            "type": "/",
+            "name": "processor_36"
+        },
+        "211": {
+            "connections": [
+                [
+                    [
+                        212,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "math.pi",
+            "gui_params": {
+                "position_x": 79.8064193725586,
+                "name": "processor_38",
+                "obj_id": 211,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 276.83746337890625,
+                "initargs": "math.pi",
+                "layername": "Freq resp calc"
+            },
+            "type": "*",
+            "name": "processor_38"
+        },
+        "212": {
+            "connections": [
+                [
+                    [
+                        213,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        214,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 80.31658172607422,
+                "name": "processor_39",
+                "obj_id": 212,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 315.71459197998047,
+                "initargs": "2",
+                "layername": "Freq resp calc"
+            },
+            "type": "trigger",
+            "name": "processor_39"
+        },
+        "213": {
+            "connections": [
+                [
+                    [
+                        215,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 80.31658172607422,
+                "name": "processor_40",
+                "obj_id": 213,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 355.71459197998047,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "cos",
+            "name": "processor_40"
+        },
+        "214": {
+            "connections": [
+                [
+                    [
+                        215,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 142.31658935546875,
+                "name": "processor_41",
+                "obj_id": 214,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 356.71459197998047,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "sin",
+            "name": "processor_41"
+        },
+        "215": {
+            "connections": [
+                [
+                    [
+                        236,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 79.79647064208984,
+                "name": "processor_43",
+                "obj_id": 215,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 395.2518005371094,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "complex",
+            "name": "processor_43"
+        },
+        "216": {
+            "gui_params": {
+                "position_x": 367.933349609375,
+                "name": "processor_45",
+                "obj_id": 216,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 154.14745330810547,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "processor_45",
+            "value": [],
+            "connections": [
+                [
+                    [
+                        217,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "217": {
+            "connections": [
+                [
+                    [
+                        216,
+                        0
+                    ],
+                    [
+                        222,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "[]",
+            "gui_params": {
+                "position_x": 324.4141540527344,
+                "name": "processor_47",
+                "obj_id": 217,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 152.9068145751953,
+                "initargs": "[]",
+                "layername": "Freq resp calc"
+            },
+            "type": "+",
+            "name": "processor_47"
+        },
+        "218": {
+            "connections": [
+                [
+                    [
+                        217,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "position_x": 324.4207763671875,
+                "name": "processor_46",
+                "obj_id": 218,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 112.9256591796875,
+                "initargs": "1",
+                "layername": "Freq resp calc"
+            },
+            "type": "pack",
+            "name": "processor_46"
+        },
+        "219": {
+            "connections": [
+                [
+                    [
+                        220,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "position_x": 557.1934814453125,
+                "name": "processor_53",
+                "obj_id": 219,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 111.06658172607422,
+                "initargs": "1",
+                "layername": "Freq resp calc"
+            },
+            "type": "pack",
+            "name": "processor_53"
+        },
+        "220": {
+            "connections": [
+                [
+                    [
+                        221,
+                        0
+                    ],
+                    [
+                        230,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "[]",
+            "gui_params": {
+                "position_x": 556.1954040527344,
+                "name": "processor_54",
+                "obj_id": 220,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 148.0838623046875,
+                "initargs": "[]",
+                "layername": "Freq resp calc"
+            },
+            "type": "+",
+            "name": "processor_54"
+        },
+        "221": {
+            "gui_params": {
+                "position_x": 605.5597839355469,
+                "name": "processor_55",
+                "obj_id": 221,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 149.91525268554688,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "processor_55",
+            "value": [],
+            "connections": [
+                [
+                    [
+                        220,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "222": {
+            "connections": [
+                [
+                    [
+                        223,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 288.33552723029044,
+                "name": "processor_56",
+                "obj_id": 222,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 262.27667143123585,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "for",
+            "name": "processor_56"
+        },
+        "223": {
+            "connections": [
+                [
+                    [
+                        225,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 293.6200866699219,
+                "name": "processor_58",
+                "obj_id": 223,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 306.7985534667969,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "-",
+            "name": "processor_58"
+        },
+        "224": {
+            "connections": [
+                [
+                    [
+                        222,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "Bang",
+            "gui_params": {
+                "position_x": 258.19603775850317,
+                "name": "message_10",
+                "obj_id": 224,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 217.01121520996094,
+                "initargs": "Bang",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_10"
+        },
+        "225": {
+            "connections": [
+                [
+                    [
+                        227,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 292.6200866699219,
+                "name": "processor_59",
+                "obj_id": 225,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 343.7985534667969,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "abs",
+            "name": "processor_59"
+        },
+        "226": {
+            "gui_params": {
+                "value": 3.9848986481791258,
+                "position_x": 340.54296875,
+                "name": "processor_61",
+                "obj_id": 226,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 381.5224304199219,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "processor_61",
+            "value": 3.9848986481791258,
+            "connections": [
+                [
+                    [
+                        227,
+                        1
+                    ],
+                    [
+                        228,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "227": {
+            "connections": [
+                [
+                    [
+                        226,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "position_x": 291.6200866699219,
+                "name": "processor_60",
+                "obj_id": 227,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 381.7985534667969,
+                "initargs": "1",
+                "layername": "Freq resp calc"
+            },
+            "type": "*",
+            "name": "processor_60"
+        },
+        "228": {
+            "gui_params": {
+                "value": 3.9848986481791258,
+                "position_x": 275.2218017578125,
+                "name": "processor_62",
+                "obj_id": 228,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 419.2070007324219,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "processor_62",
+            "value": 3.9848986481791258,
+            "connections": [
+                [
+                    [
+                        241,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "229": {
+            "connections": [
+                [
+                    [
+                        230,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "Bang",
+            "gui_params": {
+                "position_x": 516.9452209472656,
+                "name": "message_11",
+                "obj_id": 229,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 230.17283554102733,
+                "initargs": "Bang",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_11"
+        },
+        "230": {
+            "connections": [
+                [
+                    [
+                        231,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 563.6330205471238,
+                "name": "processor_63",
+                "obj_id": 230,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 274.56829757716014,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "for",
+            "name": "processor_63"
+        },
+        "231": {
+            "connections": [
+                [
+                    [
+                        232,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 560.8513793945312,
+                "name": "processor_64",
+                "obj_id": 231,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 312.4837034746115,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "-",
+            "name": "processor_64"
+        },
+        "232": {
+            "connections": [
+                [
+                    [
+                        233,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 560.8594665527344,
+                "name": "processor_65",
+                "obj_id": 232,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 347.3721306543075,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "abs",
+            "name": "processor_65"
+        },
+        "233": {
+            "connections": [
+                [
+                    [
+                        234,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "position_x": 560.8594970703125,
+                "name": "processor_66",
+                "obj_id": 233,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 384.5544729062649,
+                "initargs": "1",
+                "layername": "Freq resp calc"
+            },
+            "type": "*",
+            "name": "processor_66"
+        },
+        "234": {
+            "gui_params": {
+                "value": 15.982419680221952,
+                "position_x": 609.8272399902344,
+                "name": "processor_67",
+                "obj_id": 234,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 384.2669065996115,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "processor_67",
+            "value": 15.982419680221952,
+            "connections": [
+                [
+                    [
+                        233,
+                        1
+                    ],
+                    [
+                        235,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "235": {
+            "gui_params": {
+                "value": 15.982419680221952,
+                "position_x": 486.3571766943519,
+                "name": "processor_68",
+                "obj_id": 235,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 422.68386785352413,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "processor_68",
+            "value": 15.982419680221952,
+            "connections": [
+                [
+                    [
+                        241,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "type": "var"
+        },
+        "236": {
+            "connections": [
+                [
+                    [
+                        244,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        238,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        237,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "3",
+            "gui_params": {
+                "position_x": 79.79647064208984,
+                "name": "processor_69",
+                "obj_id": 236,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 3,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 434.2518005371094,
+                "initargs": "3",
+                "layername": "Freq resp calc"
+            },
+            "type": "trigger",
+            "name": "processor_69"
+        },
+        "237": {
+            "connections": [],
+            "initargs": "\"pmag\"",
+            "gui_params": {
+                "position_x": 139.81069946289062,
+                "name": "sendvia_39",
+                "obj_id": 237,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pmag",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 472.74176025390625,
+                "initargs": "\"pmag\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "send",
+            "name": "sendvia_39"
+        },
+        "238": {
+            "connections": [],
+            "initargs": "\"zmag\"",
+            "gui_params": {
+                "position_x": 108.84986877441406,
+                "name": "sendvia_40",
+                "obj_id": 238,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "zmag",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 481.2999572753906,
+                "initargs": "\"zmag\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "send",
+            "name": "sendvia_40"
+        },
+        "239": {
+            "connections": [
+                [
+                    [
+                        250,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"pmag\"",
+            "gui_params": {
+                "position_x": 239.07940673828125,
+                "name": "pmag",
+                "obj_id": 239,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "pmag",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 57.99617004394531,
+                "initargs": "\"pmag\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "recv",
+            "name": "pmag"
+        },
+        "240": {
+            "connections": [
+                [
+                    [
+                        254,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"zmag\"",
+            "gui_params": {
+                "position_x": 458.438720703125,
+                "name": "zmag",
+                "obj_id": 240,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "zmag",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 67.77117919921875,
+                "initargs": "\"zmag\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "recv",
+            "name": "zmag"
+        },
+        "241": {
+            "connections": [
+                [
+                    [
+                        242,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 402.515380859375,
+                "name": "processor_72",
+                "obj_id": 241,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 460.29913330078125,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "/",
+            "name": "processor_72"
+        },
+        "242": {
+            "connections": [],
+            "initargs": "\"wmag\"",
+            "gui_params": {
+                "position_x": 399.1326599121094,
+                "name": "sendvia_41",
+                "obj_id": 242,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "wmag",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 497.6881103515625,
+                "initargs": "\"wmag\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "send",
+            "name": "sendvia_41"
+        },
+        "243": {
+            "connections": [
+                [
+                    [
+                        247,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "\"wmag\"",
+            "gui_params": {
+                "position_x": 761.9592895507812,
+                "name": "wmag",
+                "obj_id": 243,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "wmag",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 71.89022827148438,
+                "initargs": "\"wmag\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "recv",
+            "name": "wmag"
+        },
+        "244": {
+            "connections": [],
+            "initargs": "\"w\"",
+            "gui_params": {
+                "position_x": 77.53572845458984,
+                "name": "sendvia_42",
+                "obj_id": 244,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "w",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 475.3458557128906,
+                "initargs": "\"w\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "send",
+            "name": "sendvia_42"
+        },
+        "245": {
+            "connections": [
+                [
+                    [
+                        246,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"w\"",
+            "gui_params": {
+                "position_x": 710.69140625,
+                "name": "w",
+                "obj_id": 245,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "w",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 70.10221862792969,
+                "initargs": "\"w\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "recv",
+            "name": "w"
+        },
+        "246": {
+            "connections": [
+                [
+                    [
+                        248,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 707.19873046875,
+                "name": "processor_65",
+                "obj_id": 246,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 121.10066223144531,
+                "initargs": null,
+                "layername": "Freq resp calc"
+            },
+            "type": "phase",
+            "name": "processor_65"
+        },
+        "247": {
+            "connections": [
+                [
+                    [
+                        249,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 717.1023559570312,
+                "name": "processor_66",
+                "obj_id": 247,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 213.771240234375,
+                "initargs": "2",
+                "layername": "Freq resp calc"
+            },
+            "type": "pack",
+            "name": "processor_66"
+        },
+        "248": {
+            "connections": [
+                [
+                    [
+                        247,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "app.samplerate/(2*math.pi)",
+            "gui_params": {
+                "position_x": 707.927490234375,
+                "name": "processor_67",
+                "obj_id": 248,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 169.26583862304688,
+                "initargs": "app.samplerate/(2*math.pi)",
+                "layername": "Freq resp calc"
+            },
+            "type": "*",
+            "name": "processor_67"
+        },
+        "249": {
+            "connections": [],
+            "initargs": "\"fr0\"",
+            "gui_params": {
+                "position_x": 711.5798950195312,
+                "name": "sendvia_43",
+                "obj_id": 249,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "fr0",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 297.58563232421875,
+                "initargs": "\"fr0\"",
+                "layername": "Freq resp calc"
+            },
+            "type": "send",
+            "name": "sendvia_43"
+        },
+        "250": {
+            "connections": [
+                [
+                    [
+                        253,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        224,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        223,
+                        1
+                    ]
+                ],
+                [
+                    [
+                        251,
+                        0
+                    ],
+                    [
+                        252,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "4",
+            "gui_params": {
+                "position_x": 237.79191482312504,
+                "name": "processor_70",
+                "obj_id": 250,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 4,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 111.24758911132812,
+                "initargs": "4",
+                "layername": "Freq resp calc"
+            },
+            "type": "trigger",
+            "name": "processor_70"
+        },
+        "251": {
+            "connections": [
+                [
+                    [
+                        216,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "[]",
+            "gui_params": {
+                "position_x": 384.45208740234375,
+                "name": "message_12",
+                "obj_id": 251,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 111.90450286865234,
+                "initargs": "[]",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_12"
+        },
+        "252": {
+            "connections": [
+                [
+                    [
+                        226,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "position_x": 341.6974792480469,
+                "name": "message_13",
+                "obj_id": 252,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 337.34686279296875,
+                "initargs": "1",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_13"
+        },
+        "253": {
+            "connections": [
+                [
+                    [
+                        228,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "Bang",
+            "gui_params": {
+                "position_x": 236.6591922966484,
+                "name": "message_14",
+                "obj_id": 253,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 375.11309814453125,
+                "initargs": "Bang",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_14"
+        },
+        "254": {
+            "connections": [
+                [
+                    [
+                        257,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        229,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        231,
+                        1
+                    ]
+                ],
+                [
+                    [
+                        255,
+                        0
+                    ],
+                    [
+                        256,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "4",
+            "gui_params": {
+                "position_x": 469.4319152832031,
+                "name": "processor_71",
+                "obj_id": 254,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 4,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 110.76090240478516,
+                "initargs": "4",
+                "layername": "Freq resp calc"
+            },
+            "type": "trigger",
+            "name": "processor_71"
+        },
+        "255": {
+            "connections": [
+                [
+                    [
+                        221,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "[]",
+            "gui_params": {
+                "position_x": 624.3663940429688,
+                "name": "message_15",
+                "obj_id": 255,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 109.36351776123047,
+                "initargs": "[]",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_15"
+        },
+        "256": {
+            "connections": [
+                [
+                    [
+                        234,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "position_x": 609.3816528320312,
+                "name": "message_16",
+                "obj_id": 256,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 338.04827880859375,
+                "initargs": "1",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_16"
+        },
+        "257": {
+            "connections": [
+                [
+                    [
+                        235,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "Bang",
+            "gui_params": {
+                "position_x": 486.5063171386719,
+                "name": "message_17",
+                "obj_id": 257,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 373.9987487792969,
+                "initargs": "Bang",
+                "layername": "Freq resp calc"
+            },
+            "type": "message",
+            "name": "message_17"
+        },
+        "258": {
+            "connections": [
+                []
+            ],
+            "initargs": "3",
+            "gui_params": {
+                "plot_type": "scatter",
+                "style": {},
+                "position_x": 30.963523864746094,
+                "x_max": 2,
+                "y_max": 1.5,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": [],
+                "y_min": -1.5,
+                "display_type": "plot",
+                "num_inlets": 3,
+                "position_y": 124.37521362304688,
+                "x_min": -2,
+                "dsp_outlets": [],
+                "layername": "Graphs",
+                "name": "scatter_1"
+            },
+            "type": "scatter",
+            "name": "scatter_1"
         }
     },
-    "type": "biquad-8",
+    "type": "biquad-9",
     "scopes": {
         "__patch__": {
             "slope": 59,
+            "processor_60": 227,
+            "processor_63": 230,
+            "processor_62": 228,
+            "processor_65": 246,
+            "processor_64": 231,
+            "processor_67": 248,
+            "processor_66": 247,
+            "processor_69": 236,
+            "zmag": 240,
             "rg_highshelf": 24,
             "rg_bandpass": 23,
             "out_a2": 30,
             "out_a1": 29,
-            "message_1": 119,
-            "text_22": 50,
-            "message_3": 188,
-            "processor_20": 90,
+            "message_1": 118,
+            "processor_9": 73,
+            "sendvia_19": 67,
             "processor_14": 81,
             "processor_15": 82,
             "processor_16": 83,
-            "message_2": 198,
+            "message_2": 189,
             "processor_10": 75,
             "processor_11": 77,
             "processor_12": 79,
             "processor_13": 80,
             "polezero": 116,
-            "message_5": 189,
             "processor_18": 88,
             "processor_19": 89,
             "rg0": 44,
@@ -3856,24 +5575,36 @@
             "rg2": 46,
             "rg3": 47,
             "rg4": 48,
-            "message_4": 187,
-            "message_7": 197,
-            "message_6": 195,
-            "scatter_0": 184,
+            "message_4": 183,
+            "message_8": 207,
+            "scatter_0": 193,
+            "scatter_1": 258,
             "in_gain": 14,
             "in_freq": 8,
             "sendvia_32": 115,
-            "sendvia_33": 183,
+            "sendvia_33": 181,
             "sendvia_30": 105,
             "sendvia_31": 106,
-            "sendvia_34": 191,
-            "sendvia_35": 192,
+            "sendvia_36": 199,
+            "sendvia_37": 201,
+            "sendvia_34": 185,
+            "sendvia_35": 186,
+            "wmag": 243,
+            "sendvia_38": 203,
+            "sendvia_39": 237,
             "b0": 109,
             "b1": 110,
             "b2": 111,
-            "text_29": 86,
-            "processor_3": 62,
+            "a1": 107,
+            "pzdone": 206,
+            "processor_2": 61,
+            "text_28": 85,
             "rg_highpass": 22,
+            "processor_1": 56,
+            "sendvia_43": 249,
+            "sendvia_42": 244,
+            "sendvia_41": 242,
+            "sendvia_40": 238,
             "sendvia_21": 94,
             "sendvia_20": 69,
             "sendvia_23": 96,
@@ -3884,13 +5615,17 @@
             "sendvia_26": 101,
             "sendvia_29": 104,
             "sendvia_28": 103,
-            "processor_32": 179,
-            "processor_33": 180,
-            "processor_30": 190,
-            "processor_31": 178,
-            "processor_34": 181,
-            "processor_35": 182,
-            "processor_8": 71,
+            "processor_32": 177,
+            "processor_33": 178,
+            "processor_30": 184,
+            "processor_31": 176,
+            "processor_36": 210,
+            "processor_37": 209,
+            "processor_34": 179,
+            "processor_35": 208,
+            "processor_38": 211,
+            "processor_39": 212,
+            "text_23": 72,
             "sendvia_2": 3,
             "sendvia_3": 4,
             "sendvia_1": 2,
@@ -3900,6 +5635,8 @@
             "sendvia_5": 19,
             "sendvia_8": 42,
             "sendvia_9": 43,
+            "processor_61": 226,
+            "w": 245,
             "rg_lowshelf": 25,
             "out_b2": 33,
             "out_b1": 32,
@@ -3908,17 +5645,18 @@
             "sendvia_15": 63,
             "sendvia_16": 64,
             "sendvia_17": 65,
-            "processor_29": 176,
+            "processor_29": 175,
             "sendvia_11": 51,
             "sendvia_12": 52,
             "sendvia_13": 53,
             "processor_25": 117,
-            "processor_26": 118,
+            "processor_26": 202,
             "sendvia_18": 66,
-            "sendvia_19": 67,
+            "processor_20": 90,
             "processor_23": 114,
             "processor_22": 113,
             "done": 112,
+            "pmag": 239,
             "start": 68,
             "frq": 57,
             "text_18": 35,
@@ -3929,23 +5667,42 @@
             "text_17": 34,
             "text_10": 17,
             "text_11": 20,
-            "pzg1": 193,
-            "pzg0": 185,
+            "pzg1": 187,
+            "pzg0": 182,
+            "processor_58": 223,
+            "message_10": 224,
+            "message_13": 252,
+            "message_12": 251,
+            "message_15": 255,
+            "message_14": 253,
+            "message_16": 256,
+            "processor_53": 219,
+            "processor_54": 220,
+            "processor_55": 221,
+            "processor_56": 222,
             "gain": 60,
-            "pzg2": 194,
-            "processor_2": 61,
-            "text_28": 85,
-            "processor_1": 56,
+            "pzzeros": 205,
+            "pzg2": 188,
+            "text_29": 86,
+            "processor_3": 62,
+            "fr0": 195,
             "processor_7": 70,
             "text_21": 49,
             "text_20": 37,
-            "text_23": 72,
-            "processor_9": 73,
+            "processor_8": 71,
+            "text_22": 50,
             "text_25": 76,
             "text_24": 74,
             "text_27": 84,
             "text_26": 78,
+            "message_11": 229,
             "rg_lowpass": 21,
+            "processor_43": 215,
+            "processor_41": 214,
+            "processor_40": 213,
+            "processor_47": 217,
+            "processor_46": 218,
+            "processor_45": 216,
             "text_8": 15,
             "text_9": 16,
             "text_6": 12,
@@ -3955,22 +5712,31 @@
             "text_2": 5,
             "text_3": 6,
             "text_1": 1,
-            "q": 58,
-            "text_30": 120,
-            "text_31": 199,
+            "text_36": 196,
+            "compute_button": 39,
+            "text_34": 194,
+            "text_32": 191,
+            "text_33": 192,
+            "text_30": 119,
+            "text_31": 190,
             "self": 0,
             "in_slope": 11,
+            "text_38": 197,
             "in_q": 10,
             "hpf": 87,
-            "a1": 107,
+            "processor_72": 241,
+            "processor_70": 250,
+            "processor_71": 254,
+            "pzpoles": 204,
             "a2": 108,
-            "patch_1": 121,
-            "patch_2": 148,
+            "patch_1": 120,
+            "patch_2": 147,
             "enum_1": 8,
             "enum_2": 10,
             "enum_3": 11,
             "enum_4": 14,
-            "compute_button": 39
+            "processor_59": 225,
+            "q": 58
         }
     }
 }

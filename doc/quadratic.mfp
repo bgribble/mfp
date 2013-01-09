@@ -660,7 +660,7 @@
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
-                "num_inlets": 1,
+                "num_inlets": 2,
                 "position_y": 60.94093322753906,
                 "dsp_outlets": null
             },
@@ -685,7 +685,7 @@
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
-                "num_inlets": 1,
+                "num_inlets": 2,
                 "position_y": 57.9438362121582,
                 "dsp_outlets": null
             },
@@ -710,7 +710,7 @@
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
-                "num_inlets": 1,
+                "num_inlets": 2,
                 "position_y": 61.047637939453125,
                 "dsp_outlets": null
             },
