@@ -23,6 +23,10 @@ class DSPObject(RPCWrapper):
             DSPObject.c_objects[self.c_obj] = self.obj_id
 
     @rpcwrap
+    def reset(self):
+        return mfpdsp.proc_reset(self.c_obj)
+
+    @rpcwrap
     def delete(self):
         return mfpdsp.proc_destroy(self.c_obj)
 
@@ -32,6 +36,7 @@ class DSPObject(RPCWrapper):
 
     @rpcwrap
     def setparam(self, param, value):
+        print "setparam:", self, param, value
         return mfpdsp.proc_setparam(self.c_obj, param, value)
 
     @rpcwrap
