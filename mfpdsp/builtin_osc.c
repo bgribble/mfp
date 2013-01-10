@@ -7,10 +7,10 @@
 #include "mfp_block.h"
 
 typedef struct {
-	mfp_block * int_0;
-	double const_freq;
-	double const_ampl;
-	double phase;
+    mfp_block * int_0;
+    double const_freq;
+    double const_ampl;
+    double phase;
 } builtin_osc_data;
 
 #define OSC_TABSIZE 2048
@@ -22,158 +22,158 @@ double osc_table[OSC_TABSIZE + 1];
 
 static void 
 table_load() {
-	double phase = 0.0;
-	double phase_incr = OSC_TABINCR;
-	int sample;
+    double phase = 0.0;
+    double phase_incr = OSC_TABINCR;
+    int sample;
 
-	for(sample = 0; sample < OSC_TABSIZE + 1; sample++) {
-		osc_table[sample] = sin(phase);
-		phase += phase_incr;
-	}
+    for(sample = 0; sample < OSC_TABSIZE + 1; sample++) {
+        osc_table[sample] = sin(phase);
+        phase += phase_incr;
+    }
 }
 
 
 static mfp_sample 
 table_lookup(double phase) {
-		
-	int index = (int)(phase * OSC_TABSCALE);
-	double rem, s1, s2;
+        
+    int index = (int)(phase * OSC_TABSCALE);
+    double rem, s1, s2;
 
-	rem = phase - index*OSC_TABINCR;
-	s1 = osc_table[index];
-	s2 = osc_table[index+1];
+    rem = phase - index*OSC_TABINCR;
+    s1 = osc_table[index];
+    s2 = osc_table[index+1];
 
-	return (mfp_sample)(s1 + (s2-s1)*(rem*OSC_TABSCALE));
+    return (mfp_sample)(s1 + (s2-s1)*(rem*OSC_TABSCALE));
 
 }
 
 static int 
 process(mfp_processor * proc) 
 {
-	builtin_osc_data * d = (builtin_osc_data *)(proc->data);
-	int mode_am = 0, mode_fm = 0;
-	double phase_base;
-	float newphase = 0.0;
-	int c;
+    builtin_osc_data * d = (builtin_osc_data *)(proc->data);
+    int mode_am = 0, mode_fm = 0;
+    double phase_base;
+    float newphase = 0.0;
+    int c;
 
-	if (mfp_proc_has_input(proc, 0)) {
-		mode_fm = 1;
-	}
+    if (mfp_proc_has_input(proc, 0)) {
+        mode_fm = 1;
+    }
 
-	if (mfp_proc_has_input(proc, 1)) {
-		mode_am = 1;
-	}
+    if (mfp_proc_has_input(proc, 1)) {
+        mode_am = 1;
+    }
 
-	phase_base = 2.0*M_PI / (double)mfp_samplerate;
+    phase_base = 2.0*M_PI / (double)mfp_samplerate;
 
-	if (proc->outlet_buf[0] == NULL) {
-		mfp_proc_error(proc, "No output buffers allocated");
-		return 0;
-	}
+    if (proc->outlet_buf[0] == NULL) {
+        mfp_proc_error(proc, "No output buffers allocated");
+        return 0;
+    }
 
-	if(mode_fm == 1) {
-		newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0); 
+    if(mode_fm == 1) {
+        newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0); 
 
-		/* wrap the phase to function domain */
-		mfp_block_fmod(d->int_0, 2.0*M_PI, d->int_0);
+        /* wrap the phase to function domain */
+        mfp_block_fmod(d->int_0, 2.0*M_PI, d->int_0);
 
-	}
-	else {
-		newphase = mfp_block_phase(d->int_0, d->phase, phase_base*d->const_freq, 2.0*M_PI);
-	}
+    }
+    else {
+        newphase = mfp_block_phase(d->int_0, d->phase, phase_base*d->const_freq, 2.0*M_PI);
+    }
 
 
-	/* now the real work */
-	for (c=0; c < proc->outlet_buf[0]->blocksize; c++) {
-		proc->outlet_buf[0]->data[c] = table_lookup(d->int_0->data[c]);
-	}
+    /* now the real work */
+    for (c=0; c < proc->outlet_buf[0]->blocksize; c++) {
+        proc->outlet_buf[0]->data[c] = table_lookup(d->int_0->data[c]);
+    }
 
-	/* apply gain or amplitude modulation */
-	if(mode_am == 1) {
-		mfp_block_mul(proc->inlet_buf[1], proc->outlet_buf[0], proc->outlet_buf[0]);
-	}
-	else {
-		mfp_block_const_mul(proc->outlet_buf[0], d->const_ampl, proc->outlet_buf[0]);
-	}
+    /* apply gain or amplitude modulation */
+    if(mode_am == 1) {
+        mfp_block_mul(proc->inlet_buf[1], proc->outlet_buf[0], proc->outlet_buf[0]);
+    }
+    else {
+        mfp_block_const_mul(proc->outlet_buf[0], d->const_ampl, proc->outlet_buf[0]);
+    }
 
-	d->phase = newphase;
-	return 0;
+    d->phase = newphase;
+    return 0;
 }
 
 static void 
 init(mfp_processor * proc) 
 {
-	builtin_osc_data * d = g_malloc(sizeof(builtin_osc_data));
+    builtin_osc_data * d = g_malloc(sizeof(builtin_osc_data));
 
-	d->const_ampl = 1.0;
-	d->const_freq = 0.0;
-	d->phase = 0;
-	d->int_0 = mfp_block_new(mfp_blocksize);
+    d->const_ampl = 1.0;
+    d->const_freq = 0.0;
+    d->phase = 0;
+    d->int_0 = mfp_block_new(mfp_blocksize);
 
-	proc->data = (void *)d;
+    proc->data = (void *)d;
 
 }
 
 static void
 destroy(mfp_processor * proc) 
 {
-	builtin_osc_data * d = (builtin_osc_data *)(proc->data);
+    builtin_osc_data * d = (builtin_osc_data *)(proc->data);
 
-	if (proc->data != NULL) {
-		g_free(proc->data);
-		proc->data = NULL;
-	}
+    if (proc->data != NULL) {
+        g_free(proc->data);
+        proc->data = NULL;
+    }
 }
 
 static void
 config(mfp_processor * proc) 
 {
-	builtin_osc_data * d = (builtin_osc_data *)(proc->data);
-	gpointer freq_ptr = g_hash_table_lookup(proc->params, "_sig_1");
-	gpointer ampl_ptr = g_hash_table_lookup(proc->params, "_sig_2");
-	gpointer phase_ptr = g_hash_table_lookup(proc->params, "phase");
+    builtin_osc_data * d = (builtin_osc_data *)(proc->data);
+    gpointer freq_ptr = g_hash_table_lookup(proc->params, "_sig_1");
+    gpointer ampl_ptr = g_hash_table_lookup(proc->params, "_sig_2");
+    gpointer phase_ptr = g_hash_table_lookup(proc->params, "phase");
 
-	/* get parameters */ 
-	if (freq_ptr != NULL) {
-		d->const_freq = *(float *)freq_ptr;
-		g_hash_table_remove(proc->params, "_sig_1");
-		g_free(freq_ptr);
-	}
+    /* get parameters */ 
+    if (freq_ptr != NULL) {
+        d->const_freq = *(float *)freq_ptr;
+        g_hash_table_remove(proc->params, "_sig_1");
+        g_free(freq_ptr);
+    }
 
-	if (ampl_ptr != NULL) {
-		d->const_ampl = *(float *)ampl_ptr;
-		g_hash_table_remove(proc->params, "_sig_2");
-		g_free(ampl_ptr);
-	}
+    if (ampl_ptr != NULL) {
+        d->const_ampl = *(float *)ampl_ptr;
+        g_hash_table_remove(proc->params, "_sig_2");
+        g_free(ampl_ptr);
+    }
 
-	if (phase_ptr != NULL) {
-		d->phase = *(float *)phase_ptr;-
-		g_hash_table_remove(proc->params, "phase");
-		g_free(phase_ptr);
-	}
+    if (phase_ptr != NULL) {
+        d->phase = *(float *)phase_ptr;-
+        g_hash_table_remove(proc->params, "phase");
+        g_free(phase_ptr);
+    }
 
-	return;
+    return;
 }
 
 
 
 mfp_procinfo *  
 init_builtin_osc(void) {
-	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-	p->name = strdup("osc~");
-	p->is_generator = GENERATOR_CONDITIONAL;
-	p->process = process;
-	p->init = init;
-	p->destroy = destroy;
-	p->config = config;
-	p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	g_hash_table_insert(p->params, "_sig_1", (gpointer)PARAMTYPE_FLT);
-	g_hash_table_insert(p->params, "_sig_2", (gpointer)PARAMTYPE_FLT);
-	g_hash_table_insert(p->params, "phase", (gpointer)PARAMTYPE_FLT);
+    mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
+    p->name = strdup("osc~");
+    p->is_generator = GENERATOR_CONDITIONAL;
+    p->process = process;
+    p->init = init;
+    p->destroy = destroy;
+    p->config = config;
+    p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+    g_hash_table_insert(p->params, "_sig_1", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "_sig_2", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "phase", (gpointer)PARAMTYPE_FLT);
 
-	table_load();
+    table_load();
 
-	return p;
+    return p;
 }
 
 
