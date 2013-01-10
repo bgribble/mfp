@@ -99,6 +99,12 @@ class PatchElement (Clutter.Group):
         self.position_y = y
         self.set_position(x, y)
 
+        for c in self.connections_out:
+            c.draw()
+
+        for c in self.connections_in:
+            c.draw()
+
     def drag(self, dx, dy):
         self.move(self.position_x + dx, self.position_y + dy)
 
@@ -142,11 +148,21 @@ class PatchElement (Clutter.Group):
 
         if self.obj_id is not None:
             # rebuild connections if necessary 
-            self.connections_in = connections_in
-            self.connections_out = connections_out 
+            for c in connections_in:
+                if c.obj_2 is self and c.port_2 >= self.num_inlets:
+                    c.obj_2 = None 
+                    c.delete()
+                else: 
+                    self.connections_in.append(c)
+                    MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
 
-            for c in self.connections_in + self.connections_out:
-                MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
+            for c in connections_out:
+                if c.obj_1 is self and c.port_1 >= self.num_outlets:
+                    c.obj_1 = None 
+                    c.delete()
+                else: 
+                    self.connections_out.append(c)
+                    MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
 
             MFPGUI().remember(self)
             self.send_params()
@@ -224,6 +240,13 @@ class PatchElement (Clutter.Group):
             if port not in ports_done:
                 del self.port_elements[pid]
                 self.remove_actor(port)
+
+        # redraw connections 
+        for c in self.connections_out:
+            c.draw()
+
+        for c in self.connections_in:
+            c.draw()
 
     def hide_ports(self):
         def hideport(pid):

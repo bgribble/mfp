@@ -70,6 +70,7 @@ class Recv (Processor):
         Processor.rename(self, new_name)
         self.init_args = '"%s"' % self.name 
         self.gui_params["label"] = self.name
+        self.gui_params["init_args"] = self.init_args
 
         if self.gui_created:
             MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)

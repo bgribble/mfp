@@ -92,17 +92,6 @@ class ButtonElement (PatchElement):
         else:
             ct.stroke()
 
-    def move(self, x, y):
-        self.position_x = x
-        self.position_y = y
-        self.set_position(x, y)
-
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
-
     def configure(self, params):
         if "value" in params:
             self.message = params.get("value")

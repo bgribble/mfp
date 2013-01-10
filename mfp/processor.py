@@ -208,6 +208,9 @@ class Processor (object):
         self.gui_params['num_inlets'] = inlets
         self.gui_params['num_outlets'] = outlets
 
+        if self.gui_created:
+            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+
     def connect(self, outlet, target, inlet):
         # is this a DSP connection?
         if outlet in self.dsp_outlets:

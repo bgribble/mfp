@@ -158,17 +158,6 @@ class SlideMeterElement (PatchElement):
     def update(self):
         self.texture.invalidate()
 
-    def move(self, x, y):
-        self.position_x = x
-        self.position_y = y
-        self.set_position(x, y)
-
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
-
     def configure(self, params):
         changes = False
 

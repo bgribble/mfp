@@ -138,17 +138,6 @@ class ProcessorElement (PatchElement):
     def label_changed_cb(self, *args):
         self.update()
 
-    def move(self, x, y):
-        self.position_x = x
-        self.position_y = y
-        self.set_position(x, y)
-
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
-
     def set_size(self, w, h):
         self.size_w = w
         self.size_h = h
@@ -161,11 +150,6 @@ class ProcessorElement (PatchElement):
 
         self.draw_ports()
 
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
 
     def select(self):
         self.move_to_top()
