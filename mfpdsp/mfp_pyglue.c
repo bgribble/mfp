@@ -356,6 +356,19 @@ proc_setparam(PyObject * mod, PyObject * args)
     return Py_False;
 }
 
+static PyObject * 
+proc_reset(PyObject * mod, PyObject * args) 
+{
+    PyObject * self=NULL;
+
+    PyArg_ParseTuple(args, "O", &self);
+    mfp_proc_reset((mfp_processor *)PyCObject_AsVoidPtr(self));
+    Py_INCREF(Py_None);
+    return Py_None;
+
+}
+
+
 static PyMethodDef MfpDspMethods[] = {
     { "dsp_startup",  dsp_startup, METH_VARARGS, "Start processing thread" },
     { "dsp_shutdown",  dsp_shutdown, METH_VARARGS, "Stop processing thread" },
@@ -370,6 +383,7 @@ static PyMethodDef MfpDspMethods[] = {
     { "proc_disconnect", proc_disconnect, METH_VARARGS, "Disconnect DSP processors" },
     { "proc_getparam", proc_getparam, METH_VARARGS, "Get processor parameter" },
     { "proc_setparam", proc_setparam, METH_VARARGS, "Set processor parameter" },
+    { "proc_reset", proc_reset, METH_VARARGS, "Reset processor state" },
     { NULL, NULL, 0, NULL}
 };
 

@@ -13,59 +13,61 @@ typedef jack_default_audio_sample_t mfp_sample;
 struct mfp_procinfo_struct;
 
 typedef struct {
-	/* type, settable parameters, and internal state */
-	struct mfp_procinfo_struct * typeinfo;
-	GHashTable * params; 
-	GHashTable * pyparams; 
-	void * data;
-	int needs_config;
-	
-	/* inlet and outlet connections (g_array of g_array) */
-	GArray * inlet_conn;
-	GArray * outlet_conn; 
+    /* type, settable parameters, and internal state */
+    struct mfp_procinfo_struct * typeinfo;
+    GHashTable * params; 
+    GHashTable * pyparams; 
+    void * data;
+    int needs_config;
+    int needs_reset;
+    
+    /* inlet and outlet connections (g_array of g_array) */
+    GArray * inlet_conn;
+    GArray * outlet_conn; 
 
-	/* input/output buffers */ 
-	mfp_block ** inlet_buf;
-	mfp_block ** outlet_buf;
+    /* input/output buffers */ 
+    mfp_block ** inlet_buf;
+    mfp_block ** outlet_buf;
 
-	/* scheduling information */ 
-	int depth;
+    /* scheduling information */ 
+    int depth;
 
 } mfp_processor;
 
 typedef struct mfp_procinfo_struct {
-	char * name;
-	int  is_generator;
-	GHashTable * params;
-	void (* init)(mfp_processor *);
-	void (* destroy)(mfp_processor *);
-	int  (* process)(mfp_processor *);
-	void (* config)(mfp_processor *);
+    char * name;
+    int  is_generator;
+    GHashTable * params;
+    void (* init)(mfp_processor *);
+    void (* destroy)(mfp_processor *);
+    int  (* process)(mfp_processor *);
+    void (* config)(mfp_processor *);
+    void (* reset)(mfp_processor *);
 } mfp_procinfo;
 
 typedef struct {
-	mfp_processor * dest_proc;
-	int dest_port;
+    mfp_processor * dest_proc;
+    int dest_port;
 } mfp_connection;
 
 typedef struct {
-	int reqtype;
-	mfp_processor * src_proc;
-	int src_port;
-	mfp_processor * dest_proc;
-	int dest_port;
+    int reqtype;
+    mfp_processor * src_proc;
+    int src_port;
+    mfp_processor * dest_proc;
+    int dest_port;
 } mfp_reqdata;
 
 
 typedef struct {
-	mfp_processor * dst_proc;
-	int   msg_type;
-	int   response_type;
-	union {
-		double f;
-		int    i;
-		char   * c;
-	} response;
+    mfp_processor * dst_proc;
+    int   msg_type;
+    int   response_type;
+    union {
+        double f;
+        int    i;
+        char   * c;
+    } response;
 } mfp_respdata;
 
 #define PARAMTYPE_UNDEF 0

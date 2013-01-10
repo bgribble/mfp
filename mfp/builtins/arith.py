@@ -14,22 +14,18 @@ class ArithProcessor(Processor):
         self.arith_op = init_type
 
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+    
+        const = 0.0
+        initargs, kwargs = self.parse_args(init_args)
+        if len(initargs):
+            const = initargs[0] 
 
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
-        self.dsp_init(self.arith_op)
+        self.dsp_init(self.arith_op, _sig_1=const)
 
-        initargs, kwargs = self.parse_args(init_args)
-        if len(initargs):
-            self.dsp_obj.setparam("const", initargs[0])
-
-    def trigger(self):
-        try:
-            val = float(self.inlets[0])
-            self.dsp_obj.setparam("const", val)
-        except:
-            print "Can't convert %s to a value" % self.inlet[0]
-
+    def trigger(self): 
+        pass 
 
 class ArithAdd(ArithProcessor):
     pass
