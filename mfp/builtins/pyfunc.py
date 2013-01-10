@@ -181,3 +181,4 @@ def register():
     mk_unary(tuple, "tuple")
     mk_unary(list, "list")
     mk_unary(type, "type")
+    mk_unary(dict, "dict")

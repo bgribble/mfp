@@ -23,14 +23,13 @@ class Pack (Processor):
 
 class Unpack (Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        initargs, kwargs = patch.parse_args(init_args)
 
         if len(initargs):
             num_outlets = initargs[0] + 1
         else:
             num_outlets = 1
-        self.resize(1, num_outlets)
+        Processor.__init__(self, 1, num_outlets, init_type, init_args, patch, scope, name)
         self.outlet_order.reverse()
 
     def trigger(self):
@@ -55,6 +54,23 @@ class Append (Processor):
     def trigger(self):
         self.outlets[0] = self.inlets[1].append(self.inlets[0])
 
+class Zip (Processor):
+    def __init__(self, init_type, init_args, patch, scope, name):
+        initargs, kwargs = patch.parse_args(init_args)
+
+        if len(initargs):
+            num_inlets = initargs[0]
+        else:
+            num_inlets = 1
+
+        Processor.__init__(self, num_inlets, 1, init_type, init_args, patch, scope, name)
+
+    def trigger(self):
+        if len(self.inlets) == 1:
+            self.outlets[0] = zip(*self.inlets[0])
+        else: 
+            self.outlets[0] = zip(*self.inlets)
+
 def list_car(ll):
     return ll[0]
 
@@ -66,4 +82,5 @@ def list_cdr(ll):
 def register():
     MFPApp().register("pack", Pack)
     MFPApp().register("unpack", Unpack)
+    MFPApp().register("zip", Zip)
 
