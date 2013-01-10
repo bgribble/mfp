@@ -142,6 +142,9 @@ class Processor (object):
         self.gui_params['dsp_inlets'] = self.dsp_inlets
         self.gui_params['dsp_outlets'] = self.dsp_outlets
 
+    def dsp_reset(self):
+        self.dsp_obj.reset()
+
     def dsp_setparam(self, param, value):
         self.dsp_obj.setparam(param, value)
 
