@@ -137,6 +137,7 @@ class PatchWindow(object):
         # show keybindings
         self.display_bindings()
 
+
     def init_layer_view(self):
         self.layer_store = Gtk.TreeStore(GObject.TYPE_PYOBJECT, GObject.TYPE_STRING,
                                          GObject.TYPE_STRING)
