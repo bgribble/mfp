@@ -122,7 +122,6 @@ class ButtonElement (PatchElement):
             if self.obj_id is None:
                 return None 
             else:
-                self.send_params()
                 self.draw_ports()
                 self.texture.invalidate()
 

@@ -126,7 +126,7 @@ class Scatter (Processor):
 
     def style(self, **kwargs):
         '''Set style parameters for a curve'''
-        inlet = kwargs.get('inlet', 0)
+        inlet = str(kwargs.get('inlet', 0))
         style = self.gui_params.setdefault('style', {})
         instyle = style.setdefault(inlet, {})
         for k, v in kwargs.items():

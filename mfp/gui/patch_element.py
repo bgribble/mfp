@@ -165,6 +165,7 @@ class PatchElement (Clutter.Group):
                     MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
 
             MFPGUI().remember(self)
+            print "patch_element.create()"
             self.send_params()
             MFPGUI().mfp.set_gui_created(self.obj_id, True)
 

@@ -129,9 +129,8 @@ class ProcessorElement (PatchElement):
             if self.obj_args and (len(parts) < 2 or self.obj_args != parts[1]):
                 self.label.set_text(self.obj_type + ' ' + self.obj_args)
 
-        if self.obj_id is not None:
+        if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
-            self.send_params()
 
         self.update()
 

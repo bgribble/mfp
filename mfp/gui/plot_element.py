@@ -94,13 +94,25 @@ class PlotElement (PatchElement):
 
     # methods useful for interaction
     def set_bounds(self, x_min, y_min, x_max, y_max):
-        self.x_min = x_min
-        self.x_max = x_max
-        self.y_min = y_min
-        self.y_max = y_max
+        update = False 
 
-        self.xyplot.set_bounds(x_min, y_min, x_max, y_max)
-        self.send_params()
+        if x_min != self.x_min:
+            self.x_min = x_min
+            print "   ", x_min, self.x_min
+            update = True 
+        if x_max != self.x_max: 
+            self.x_max = x_max
+            print "   ", x_max, self.x_max
+            update = True 
+        if y_min != self.y_min: 
+            self.y_min = y_min
+            update = True 
+        if y_max != self.y_max: 
+            self.y_max = y_max
+            update = True 
+
+        if update: 
+            self.xyplot.set_bounds(x_min, y_min, x_max, y_max)
 
     def update(self):
         self.draw_ports()

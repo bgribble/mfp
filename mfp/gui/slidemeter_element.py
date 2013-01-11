@@ -251,7 +251,6 @@ class SlideMeterElement (PatchElement):
             if self.obj_id is None:
                 return None 
             else:
-                self.send_params()
                 self.draw_ports()
         return SliderEditMode(self.stage, self, "Fader/meter edit")
 

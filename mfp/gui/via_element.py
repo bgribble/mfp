@@ -88,10 +88,6 @@ class ViaElement (PatchElement):
     def create_obj(self, label_text):
         if self.obj_id is None:
             self.create(self.proc_type, '"%s"' % label_text)
-        if self.obj_id is None:
-            print "ViaElement: could not create via obj"
-
-        self.send_params()
 
     def move(self, x, y):
         self.position_x = x

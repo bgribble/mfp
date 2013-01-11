@@ -119,7 +119,6 @@ class EnumElement (PatchElement):
         else:
             self.obj_state = self.OBJ_COMPLETE
 
-        self.send_params()
         self.draw_ports()
         self.texture.invalidate()
 
