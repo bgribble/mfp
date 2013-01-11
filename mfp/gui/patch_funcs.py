@@ -13,7 +13,10 @@ from .modes.select_mru import SelectMRUMode
 
 @extends(PatchWindow)
 def select(self, obj):
-    if self.selected is not obj and self.selected is not None:
+    if self.selected is obj: 
+        return True 
+
+    if self.selected is not None:
         self.unselect(self.selected)
 
     self.selected = obj
@@ -23,7 +26,7 @@ def select(self, obj):
 
     # FIXME hook
     SelectMRUMode.touch(obj)
-    self.object_selection_update()
+    self.object_view.select(obj)
     return True
 
 
@@ -32,8 +35,8 @@ def unselect(self, obj):
     if self.selected is obj and obj is not None:
         obj.end_control()
         obj.unselect()
+        self.object_view.select(None)
         self.selected = None
-        self.object_selection_update()
     return True
 
 
@@ -43,7 +46,7 @@ def unselect_all(self):
         self.selected.end_control()
         self.selected.unselect()
         self.selected = None
-        self.object_selection_update()
+        self.object_view.select(None)
     return True
 
 

@@ -52,7 +52,11 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
         initproc(pipe, *initproc_args)
 
     # wait until time to quit
-    lck.acquire()
+    try:
+        lck.acquire()
+    except (KeyboardInterrupt, SystemExit):
+        # it's time to quit anyway
+        pass 
 
 
 class RPCServer(QuittableThread):

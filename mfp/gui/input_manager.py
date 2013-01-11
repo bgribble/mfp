@@ -41,14 +41,19 @@ class InputManager (object):
         def modecmp(a, b):
             return cmp(b.affinity, a.affinity) or cmp(b.seqno, a.seqno)
 
+        do_enable = True 
         if mode in self.minor_modes:
             self.minor_modes.remove(mode)
+            do_enable = False 
+        
         mode.seqno = self.minor_seqno
         self.minor_seqno += 1
         self.minor_modes[:0] = [mode]
         self.minor_modes.sort(cmp=modecmp)
-        mode.enable()
         self.window.display_bindings()
+        
+        if do_enable:
+            mode.enable()
 
     def disable_minor_mode(self, mode):
         mode.disable()

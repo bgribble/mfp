@@ -144,7 +144,7 @@ class ScatterPlot (XYPlot):
         self.plot.clear()
 
     def set_style(self, style):
-        log.debug("ScatterPlot: updating style params", style)
+        print "ScatterPlot: updating style params"
         for inlet, istyle in style.items():
             inlet = int(inlet)
             marker = self.style.setdefault(inlet, MarkStyle())
@@ -159,7 +159,7 @@ class ScatterPlot (XYPlot):
                     marker.stroke_style = str(v)
 
     def save_style(self):
-        sd = {} 
+        sd = {}
         for inlet, style in self.style.items():
             props = sd.setdefault(str(inlet), {})
             props["size"] = style.size
@@ -171,7 +171,7 @@ class ScatterPlot (XYPlot):
 
 
     def configure(self, params):
-        print "ScatterPlot.configure:", params
+        print "ScatterPlot.configure:", self
         s = params.get("style")
         if s:
             self.set_style(s)

@@ -122,9 +122,9 @@ def layer_scope_edited_cb(self, renderer, path, new_value):
         for obj in self.objects:
             if obj.layer == layer:
                 MFPCommand().set_scope(obj.obj_id, new_value)
+                self.refresh(obj)
 
         self.layer_store_update()
-        self.object_store_update()
     return True
 
 

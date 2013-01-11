@@ -12,6 +12,7 @@ from mfp import log
 from .patch_element import PatchElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
+from .tree_display import TreeDisplay
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
@@ -36,10 +37,22 @@ class PatchWindow(object):
         # significant widgets we will be dealing with later
         self.console_view = self.builder.get_object("console_text")
         self.log_view = self.builder.get_object("log_text")
-        self.object_view = self.builder.get_object("object_tree")
+       
+        def get_obj_name(o): 
+            if isinstance(o, PatchElement):
+                return o.obj_name
+            elif isinstance(o, LayerInfo):
+                return o.scope
+            else:
+                return str(o)
+
+        obj_cols = [ ("Name", get_obj_name, True, self.object_name_edited) ] 
+        self.object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
+        self.object_view.select_cb = self.select
+        self.object_view.unselect_cb = self.unselect 
+                                  
         self.layer_view = self.builder.get_object("layer_tree")
         self.layer_store = None
-        self.object_store = None
 
         # objects for stage -- self.group gets moved/scaled to adjust
         # the view, so anything not in it will be static on the stage
@@ -55,7 +68,6 @@ class PatchWindow(object):
         self.patches = []
         self.objects = []
         self.object_counts_by_type = {}
-        self.object_paths = {}
 
         self.selected_patch = None
         self.selected_layer = None
@@ -89,7 +101,6 @@ class PatchWindow(object):
         # set up key and mouse handling
         self.init_input()
         self.init_layer_view()
-        self.init_object_view()
 
     def init_input(self):
         def grab_handler(stage, event):
@@ -143,50 +154,18 @@ class PatchWindow(object):
 
         self.layer_store_update()
 
-    def init_object_view(self):
-        def select_cb(selection):
-            model, iter = selection.get_selected()
-            if iter is None:
-                self.unselect_all()
-            else:
-                obj = self.object_store.get_value(iter, 1)
-                if isinstance(obj, PatchElement) and obj is not self.selected:
-                    self.select(obj)
-                    if obj.layer is not None:
-                        self.layer_select(obj.layer)
-            return True
-
-        self.object_store = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT)
-        self.object_view.set_model(self.object_store)
-        self.object_view.get_selection().connect("changed", select_cb)
-
-        r = Gtk.CellRendererText()
-        r.set_property("editable", True)
-        r.connect("edited", self.object_name_edited_cb)
-        col = Gtk.TreeViewColumn("Name", r, text=0)
-        self.object_view.append_column(col)
-
-    def object_name_edited_cb(self, renderer, path, new_value):
-        from .patch_layer import PatchLayer
-
-        iter = self.object_store.get_iter_from_string(path)
-        obj = self.object_store.get_value(iter, 1)
+    def object_name_edited(self, obj, new_name):
         if isinstance(obj, PatchElement):
             obj.obj_name = new_value
             MFPGUI().mfp.rename_obj(obj.obj_id, new_value)
             obj.send_params()
-
         elif isinstance(obj, PatchLayer):
             oldscopename = obj.scope
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
                     l.scope = new_value
-            MFPGUI().mfp.rename_scope(oldscopename, new_value)
+            MFPGUI().mfp.rename_scope(oldscopename, new_name)
             self.selected_patch.send_params()
-
-        self.object_store_update()
-        self.layer_store_update()
-        return True
 
     def load_start(self):
         self.load_in_progress = True 
@@ -194,7 +173,6 @@ class PatchWindow(object):
     def load_complete(self):
         self.load_in_progress = False 
         self.layer_store_update()
-        self.object_store_update()
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
@@ -202,80 +180,6 @@ class PatchWindow(object):
         self.layer_store_update()
         if len(patch_info.layers):
             self.layer_select(self.selected_patch.layers[0])
-
-    def object_selection_update(self):
-        found = [None]
-        def check(model, path, it, data):
-            if self.object_store.get_value(it, 1) == self.selected:
-                found[0] = path.to_string()
-                return True
-            return False
-        model, iter = self.object_view.get_selection().get_selected()
-
-        if iter is None or self.object_store.get_value(iter, 1) != self.selected:
-            self.object_store.foreach(check, None)
-            if found[0] is not None:
-                path = Gtk.TreePath.new_from_string(found[0])
-                self.object_view.get_selection().select_path(path)
-
-    def object_store_update(self):
-        def cmpfunc(o1, o2):
-            if o1.layer.scope == o2.layer.scope:
-                return cmp(o1.obj_name, o2.obj_name)
-            else:
-                return cmp(o1.layer.scope, o2.layer.scope)
-
-        # don't do this during a patch load 
-        if self.load_in_progress:
-            return 
-        
-        scopes = {}
-        saved_sel = self.selected
-        self.object_store.clear()
-
-        for p in self.patches:
-            piter = self.object_store.append(None)
-            self.object_store.set_value(piter, 0, p.obj_name or "Default Patch")
-            self.object_store.set_value(piter, 1, p)
-
-            oiter = self.object_store.append(piter)
-            self.object_store.set_value(oiter, 0, "__patch__")
-            self.object_store.set_value(oiter, 1, p)
-            scopes['__patch__'] = oiter
-
-            for l in p.layers:
-                if l.scope is None:
-                    continue
-                elif scopes.get(l.scope) is not None:
-                    continue
-                oiter = self.object_store.append(piter)
-                self.object_store.set_value(oiter, 0, l.scope)
-                self.object_store.set_value(oiter, 1, l)
-                scopes[l.scope] = oiter
-
-        self.object_paths = {}
-        selpath = None 
-        obj2disp = sorted(self.objects, cmp=cmpfunc)
-
-        for o in obj2disp:
-            if o.obj_name is None:
-                continue
-
-            if o.layer.scope is None:
-                parent = None
-            else:
-                parent = scopes.get(o.layer.scope)
-            oiter = self.object_store.append(parent)
-            p = self.object_store.get_path(oiter)
-            self.object_paths[o] = p
-            if saved_sel is o:
-                selpath = p 
-            self.object_store.set_value(oiter, 0, o.obj_name)
-            self.object_store.set_value(oiter, 1, o)
-
-        self.object_view.expand_all()
-        if selpath is not None:
-            self.object_view.get_selection().select_path(selpath)
 
     def object_visible(self, obj):
         if obj and hasattr(obj, 'layer'):
@@ -353,15 +257,16 @@ class PatchWindow(object):
 
     def register(self, element):
         self.objects.append(element)
+
         oldcount = self.object_counts_by_type.get(element.display_type, 0)
         self.object_counts_by_type[element.display_type] = oldcount + 1
         self.input_mgr.event_sources[element] = element
         self.active_group().add_actor(element)
         self.active_layer().add(element)
 
+        self.object_view.append(element, element.layer)
         if element.obj_id is not None:
             element.send_params()
-        self.object_store_update()
 
     def unregister(self, element):
         if self.selected == element:
@@ -372,19 +277,13 @@ class PatchWindow(object):
 
         del self.input_mgr.event_sources[element]
         self.active_group().remove_actor(element)
-        self.object_store_update()
+        self.object_view.remove(element)
 
         # FIXME hook
         SelectMRUMode.forget(element)
 
     def refresh(self, element):
-        path = self.object_paths.get(element)
-
-        if path:
-            iter = self.object_store.get_iter(path)
-            self.object_store.set_value(iter, 0, element.obj_name)
-        else:
-            self.object_store_update()
+        self.object_view.update(element)
 
     def add_element(self, factory, x=None, y=None):
         if x is None:
@@ -395,8 +294,6 @@ class PatchWindow(object):
         b = factory(self, x, y)
         self.select(b)
         b.begin_edit()
-        if b.obj_name is not None:
-            self.object_store_update()
         return True
 
     def quit(self, *rest):

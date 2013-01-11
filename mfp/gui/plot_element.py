@@ -5,11 +5,8 @@ A patch element corresponding to an XY scatter or line plot
 '''
 
 from gi.repository import Clutter as clutter
-import math
 from patch_element import PatchElement
-from mfp import MFPGUI
 from mfp import log
-from input_mode import InputMode
 from .modes.label_edit import LabelEditMode
 from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
@@ -53,7 +50,10 @@ class PlotElement (PatchElement):
 
     @property
     def style(self):
-       return self.xyplot.save_style()
+        if self.xyplot: 
+            return self.xyplot.save_style()
+        else: 
+            return {} 
 
     @property
     def plot_type(self):
@@ -221,7 +221,7 @@ class PlotElement (PatchElement):
         return False
 
     def configure(self, params):
-        print "PlotElement.configure:", params
+        print "PlotElement.configure:", self 
         if "plot_type" in params and self.xyplot is None:
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
@@ -248,3 +248,4 @@ class PlotElement (PatchElement):
             self.xyplot.configure(params)
 
         PatchElement.configure(self, params)
+        print "PlotElement.configure: DONE"
