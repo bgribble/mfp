@@ -123,7 +123,7 @@ class PatchElement (Clutter.Group):
             name = self.obj_name
         else:
             name_index = self.stage.object_counts_by_type.get(self.display_type, 0)
-            name = "%s_%s" % (self.display_type, name_index)
+            name = "%s_%03d" % (self.display_type, name_index)
 
         if self.obj_id is not None:
             connections_out = self.connections_out

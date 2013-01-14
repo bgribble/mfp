@@ -12,31 +12,47 @@ from .modes.select_mru import SelectMRUMode
 
 
 @extends(PatchWindow)
-def select(self, obj):
-    if self.selected is obj: 
-        return True 
-
-    if self.selected is not None:
-        self.unselect(self.selected)
-
+def _select(self, obj): 
     self.selected = obj
-    obj.select()
 
+    if obj is None:
+        return 
+
+    obj.select()
     obj.begin_control()
 
     # FIXME hook
     SelectMRUMode.touch(obj)
+    print "Calling object_view.select"
+
+@extends(PatchWindow)
+def select(self, obj):
+    print "PatchWindow._select", obj
+
+    if self.selected is obj: 
+        return True 
+
+    if self.selected is not None:
+        self._unselect(self.selected)
+
+    self._select(obj)
     self.object_view.select(obj)
     return True
 
 
 @extends(PatchWindow)
+def _unselect(self, obj):
+    if obj is None:
+        return 
+    obj.end_control()
+    obj.unselect()
+    self.selected = None
+
+@extends(PatchWindow)
 def unselect(self, obj):
     if self.selected is obj and obj is not None:
-        obj.end_control()
-        obj.unselect()
+        self._unselect(obj)
         self.object_view.select(None)
-        self.selected = None
     return True
 
 

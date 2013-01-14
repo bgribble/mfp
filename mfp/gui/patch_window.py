@@ -10,6 +10,7 @@ from mfp import MFPGUI
 from mfp import log
 
 from .patch_element import PatchElement
+from .connection_element import ConnectionElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
 from .tree_display import TreeDisplay
@@ -48,8 +49,8 @@ class PatchWindow(object):
 
         obj_cols = [ ("Name", get_obj_name, True, self.object_name_edited) ] 
         self.object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
-        self.object_view.select_cb = self.select
-        self.object_view.unselect_cb = self.unselect 
+        self.object_view.select_cb = self._select
+        self.object_view.unselect_cb = self._unselect 
                                   
         self.layer_view = self.builder.get_object("layer_tree")
         self.layer_store = None
@@ -264,8 +265,9 @@ class PatchWindow(object):
         self.input_mgr.event_sources[element] = element
         self.active_group().add_actor(element)
         self.active_layer().add(element)
-
-        self.object_view.append(element, element.layer)
+        
+        if not isinstance(element, ConnectionElement):
+            self.object_view.insert(element, element.layer)
         if element.obj_id is not None:
             element.send_params()
 
@@ -284,7 +286,7 @@ class PatchWindow(object):
         SelectMRUMode.forget(element)
 
     def refresh(self, element):
-        self.object_view.update(element)
+        self.object_view.update(element, element.layer)
 
     def add_element(self, factory, x=None, y=None):
         if x is None:
@@ -293,6 +295,7 @@ class PatchWindow(object):
             y = self.input_mgr.pointer_y
 
         b = factory(self, x, y)
+        self.refresh(b)
         self.select(b)
         b.begin_edit()
         return True
