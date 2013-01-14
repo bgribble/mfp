@@ -20,6 +20,7 @@ class PatchInfo (object):
         self.obj_args = None
         self.obj_name = None
         self.layers = []
+        self.scopes = [] 
 
         self.stage.add_patch(self)
 
@@ -58,6 +59,15 @@ class PatchInfo (object):
         for name, scope in layers:
             l = PatchLayer(self.stage, self, name, scope)
             self.layers.append(l)
+
+        self.scopes = [] 
+        for l in self.layers:
+            if l.scope not in self.scopes:
+                self.scopes.append(l.scope)
+        
+        for s in self.scopes: 
+            self.stage.object_view.insert(s, None)
+
         self.stage.layer_store_update()
         self.stage.layer_selection_update()
 

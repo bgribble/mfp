@@ -42,6 +42,7 @@ class TreeDisplay (object):
 
         self.treestore.set_sort_column_id(0, Gtk.SortType.ASCENDING)
         self.treestore.set_sort_func(0, self._sort_func)
+        self.treeview.expand_all()
 
     def _obj_column_text(self, obj, column):
         getter = self.columns_bynumber[0][1]
@@ -49,19 +50,14 @@ class TreeDisplay (object):
 
     def _select_cb(self, selection): 
         model, iter = self.selection.get_selected()
-        print "_select_cb:", model, iter, self.selected_obj
         if iter is None and self.selected_obj is not None:
             self.unselect_cb(self.selected_obj)
         elif iter is not None:
             obj = self.treestore.get_value(iter, 0)
             if obj is not self.selected_obj:
-                print "unselecting", self.selected_obj
                 self.unselect_cb(self.selected_obj)
                 self.selected_obj = obj 
-                print "selecting", self.selected_obj
                 self.select_cb(obj)
-        else:
-            print "TreeView._select_cb: iter is None?"
         return False 
 
     def _sort_func(self, model, iter_a, iter_b, data):
@@ -76,13 +72,10 @@ class TreeDisplay (object):
         def thunk(model, path, iter, data):
             obj = self.treestore.get_value(iter, 0)
             p[obj] = path.to_string() 
-            print "    ", self.columns_bynumber[0][1](obj), p[obj] 
             return False 
 
-        print "---- updating paths ----"
         self.treestore.foreach(thunk, None)
         self.object_paths = p
-        print "---- done ----" 
 
     def extract_col_cb(self, treecol, renderer, model, iterator, data, *args):
         thunk = self.columns.get(renderer)[1]
@@ -94,17 +87,18 @@ class TreeDisplay (object):
         self.object_paths = {} 
 
     def insert(self, obj, parent):
+        from .patch_layer import PatchLayer 
         piter = None 
         if parent is not None:
             ppath = self.object_paths.get(parent)
             if ppath is not None:
                 piter = self.treestore.get_iter_from_string(ppath)
-        print "inserting", obj, self._obj_column_text(obj, 0)
+
         iter = self.treestore.append(piter)
         self.treestore.set_value(iter, 0, obj)
         self.object_parents[obj] = parent 
         self._update_paths() 
-        pass
+        self.treeview.expand_all()
 
     def remove(self, obj):
         path = self.object_paths.get(obj)

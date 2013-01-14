@@ -42,8 +42,6 @@ class PatchWindow(object):
         def get_obj_name(o): 
             if isinstance(o, PatchElement):
                 return o.obj_name
-            elif isinstance(o, LayerInfo):
-                return o.scope
             else:
                 return str(o)
 
@@ -267,7 +265,7 @@ class PatchWindow(object):
         self.active_layer().add(element)
         
         if not isinstance(element, ConnectionElement):
-            self.object_view.insert(element, element.layer)
+            self.object_view.insert(element, element.layer.scope)
         if element.obj_id is not None:
             element.send_params()
 
@@ -286,7 +284,7 @@ class PatchWindow(object):
         SelectMRUMode.forget(element)
 
     def refresh(self, element):
-        self.object_view.update(element, element.layer)
+        self.object_view.update(element, element.layer.scope)
 
     def add_element(self, factory, x=None, y=None):
         if x is None:

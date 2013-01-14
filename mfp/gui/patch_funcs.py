@@ -7,17 +7,17 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 from ..utils import extends
 from .patch_window import PatchWindow
+from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
 
 
 @extends(PatchWindow)
 def _select(self, obj): 
-    self.selected = obj
-
-    if obj is None:
+    if obj is None or not isinstance(obj, PatchElement):
         return 
 
+    self.selected = obj
     obj.select()
     obj.begin_control()
 
@@ -44,8 +44,9 @@ def select(self, obj):
 def _unselect(self, obj):
     if obj is None:
         return 
-    obj.end_control()
-    obj.unselect()
+    if isinstance(obj, PatchElement):
+        obj.end_control()
+        obj.unselect()
     self.selected = None
 
 @extends(PatchWindow)
