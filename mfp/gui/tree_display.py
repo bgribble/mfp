@@ -113,8 +113,8 @@ class TreeDisplay (object):
         path = self.object_paths.get(obj)
         if path: 
             iter = self.treestore.get_iter_from_string(path)
-        self.treestore.remove(iter)
-        self._update_paths()
+            self.treestore.remove(iter)
+            self._update_paths()
 
     def update(self, obj, parent):
         pathstr = self.object_paths.get(obj)
