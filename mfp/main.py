@@ -101,7 +101,7 @@ class MFPCommand(RPCWrapper):
 
     @rpcwrap
     def rename_scope(self, old_name, new_name):
-        patch = MFPApp.patches['default']
+        patch = MFPApp().patches['default']
         scope = patch.scopes.get(old_name)
         if scope:
             scope.name = new_name

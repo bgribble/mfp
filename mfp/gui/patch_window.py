@@ -156,14 +156,14 @@ class PatchWindow(object):
 
     def object_name_edited(self, obj, new_name):
         if isinstance(obj, PatchElement):
-            obj.obj_name = new_value
-            MFPGUI().mfp.rename_obj(obj.obj_id, new_value)
+            obj.obj_name = new_name
+            MFPGUI().mfp.rename_obj(obj.obj_id, new_name)
             obj.send_params()
-        elif isinstance(obj, PatchLayer):
-            oldscopename = obj.scope
+        else:
+            oldscopename = obj 
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
-                    l.scope = new_value
+                    l.scope = new_name
             MFPGUI().mfp.rename_scope(oldscopename, new_name)
             self.selected_patch.send_params()
 

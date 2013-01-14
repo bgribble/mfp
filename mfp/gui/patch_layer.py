@@ -172,6 +172,7 @@ def layer_new_scope(self):
     l = PatchLayer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     l.scope = l.name.replace(" ", "_").lower()
     MFPCommand().add_scope(l.scope)
+    self.object_view.insert(l.scope, None)
 
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()

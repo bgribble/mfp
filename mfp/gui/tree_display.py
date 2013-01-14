@@ -32,7 +32,7 @@ class TreeDisplay (object):
             r = Gtk.CellRendererText()
             r.set_property("editable", editable)
             if editable and callback:
-                r.connect("edited", callback)
+                r.connect("edited", self._edited_cb)
             col = Gtk.TreeViewColumn(title, r)
             col.set_cell_data_func(r, self.extract_col_cb) 
             self.columns[r] = c
@@ -47,6 +47,13 @@ class TreeDisplay (object):
     def _obj_column_text(self, obj, column):
         getter = self.columns_bynumber[0][1]
         return getter(obj)
+
+    def _edited_cb(self, renderer, path, new_value):
+        iter = self.treestore.get_iter_from_string(path)
+        obj = self.treestore.get_value(iter, 0)
+        colinfo = self.columns.get(renderer)
+        colinfo[3](obj, new_value)
+        return True
 
     def _select_cb(self, selection): 
         model, iter = self.selection.get_selected()
@@ -87,7 +94,6 @@ class TreeDisplay (object):
         self.object_paths = {} 
 
     def insert(self, obj, parent):
-        from .patch_layer import PatchLayer 
         piter = None 
         if parent is not None:
             ppath = self.object_paths.get(parent)
