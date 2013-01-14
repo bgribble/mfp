@@ -28,7 +28,7 @@ class TreeDisplay (object):
 
         colnum = 0
         for c in columns:
-            title, thunk, editable, callback = c 
+            title, thunk, editable, callback, sort = c 
             r = Gtk.CellRendererText()
             r.set_property("editable", editable)
             if editable and callback:
@@ -38,10 +38,11 @@ class TreeDisplay (object):
             self.columns[r] = c
             self.columns_bynumber[colnum] = c
             self.treeview.append_column(col)
+            if sort: 
+                self.treestore.set_sort_column_id(colnum, Gtk.SortType.ASCENDING)
+                self.treestore.set_sort_func(colnum, self._sort_func)
             colnum += 1
 
-        self.treestore.set_sort_column_id(0, Gtk.SortType.ASCENDING)
-        self.treestore.set_sort_func(0, self._sort_func)
         self.treeview.expand_all()
 
     def _obj_column_text(self, obj, column):

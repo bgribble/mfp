@@ -45,14 +45,14 @@ class PatchWindow(object):
             else:
                 return str(o)
 
-        obj_cols = [ ("Name", get_obj_name, True, self.object_name_edited) ] 
+        obj_cols = [ ("Name", get_obj_name, True, self.object_name_edited, True) ] 
         self.object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
         self.object_view.select_cb = self._select
         self.object_view.unselect_cb = self._unselect 
 
         
-        layer_cols = [("Name", lambda l: l.name, True, self.layer_name_edited), 
-                      ("Scope", lambda l: l.scope, True, self.layer_scope_edited)] 
+        layer_cols = [("Name", lambda l: l.name, True, self.layer_name_edited, False), 
+                      ("Scope", lambda l: l.scope, True, self.layer_scope_edited, False)] 
         self.layer_view = TreeDisplay(self.builder.get_object("layer_tree"), *layer_cols)
         self.layer_view.select_cb = self._layer_select
         self.layer_view.unselect_cb = None 

@@ -23,12 +23,9 @@ def _select(self, obj):
 
     # FIXME hook
     SelectMRUMode.touch(obj)
-    print "Calling object_view.select"
 
 @extends(PatchWindow)
 def select(self, obj):
-    print "PatchWindow._select", obj
-
     if self.selected is obj: 
         return True 
 

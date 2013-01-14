@@ -18,7 +18,6 @@ class PatchLayer(object):
         self.name = name
         self.scope = scope
         self.objects = []
-        print "PatchLayer.__init__:", name, scope 
         self.group = Clutter.Group()
 
     def show(self):
