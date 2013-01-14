@@ -49,9 +49,13 @@ class PatchWindow(object):
         self.object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
         self.object_view.select_cb = self._select
         self.object_view.unselect_cb = self._unselect 
-                                  
-        self.layer_view = self.builder.get_object("layer_tree")
-        self.layer_store = None
+
+        
+        layer_cols = [("Name", lambda l: l.name, True, self.layer_name_edited), 
+                      ("Scope", lambda l: l.scope, True, self.layer_scope_edited)] 
+        self.layer_view = TreeDisplay(self.builder.get_object("layer_tree"), *layer_cols)
+        self.layer_view.select_cb = self._layer_select
+        self.layer_view.unselect_cb = None 
 
         # objects for stage -- self.group gets moved/scaled to adjust
         # the view, so anything not in it will be static on the stage
@@ -99,7 +103,6 @@ class PatchWindow(object):
 
         # set up key and mouse handling
         self.init_input()
-        self.init_layer_view()
 
     def init_input(self):
         def grab_handler(stage, event):
@@ -136,24 +139,6 @@ class PatchWindow(object):
         # show keybindings
         self.display_bindings()
 
-
-    def init_layer_view(self):
-        self.layer_store = Gtk.TreeStore(GObject.TYPE_PYOBJECT, GObject.TYPE_STRING,
-                                         GObject.TYPE_STRING)
-        self.layer_view.set_model(self.layer_store)
-        self.layer_view.get_selection().connect("changed", self.layer_select_cb)
-
-        for header, num, edited_cb in [("Layer", 1, self.layer_name_edited_cb),
-                                       ("Scope", 2, self.layer_scope_edited_cb)]:
-            r = Gtk.CellRendererText()
-            if edited_cb:
-                r.set_property("editable", 1)
-                r.connect("edited", edited_cb)
-            col = Gtk.TreeViewColumn(header, r, text=num)
-            self.layer_view.append_column(col)
-
-        self.layer_store_update()
-
     def object_name_edited(self, obj, new_name):
         if isinstance(obj, PatchElement):
             obj.obj_name = new_name
@@ -172,12 +157,10 @@ class PatchWindow(object):
 
     def load_complete(self):
         self.load_in_progress = False 
-        self.layer_store_update()
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
         self.selected_patch = patch_info
-        self.layer_store_update()
         if len(patch_info.layers):
             self.layer_select(self.selected_patch.layers[0])
 
@@ -187,10 +170,14 @@ class PatchWindow(object):
         return True
 
     def active_layer(self):
+        if self.selected_layer is None:
+            if self.selected_patch is not None:
+                self.layer_select(self.selected_patch.layers[0])
+
         return self.selected_layer
 
     def active_group(self):
-        return self.selected_layer.group
+        return self.active_layer().group
 
     def ready(self):
         if self.window and self.window.get_realized():

@@ -62,14 +62,12 @@ class PatchInfo (object):
 
         self.scopes = [] 
         for l in self.layers:
+            self.stage.layer_view.insert(l, None)
             if l.scope not in self.scopes:
                 self.scopes.append(l.scope)
         
         for s in self.scopes: 
             self.stage.object_view.insert(s, None)
-
-        self.stage.layer_store_update()
-        self.stage.layer_selection_update()
 
     def command(self, action, data):
         pass

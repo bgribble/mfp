@@ -57,14 +57,16 @@ class TreeDisplay (object):
 
     def _select_cb(self, selection): 
         model, iter = self.selection.get_selected()
-        if iter is None and self.selected_obj is not None:
+        if iter is None and self.unselect_cb and self.selected_obj is not None:
             self.unselect_cb(self.selected_obj)
         elif iter is not None:
             obj = self.treestore.get_value(iter, 0)
             if obj is not self.selected_obj:
-                self.unselect_cb(self.selected_obj)
+                if self.unselect_cb:
+                    self.unselect_cb(self.selected_obj)
                 self.selected_obj = obj 
-                self.select_cb(obj)
+                if self.select_cb:
+                    self.select_cb(obj)
         return False 
 
     def _sort_func(self, model, iter_a, iter_b, data):
