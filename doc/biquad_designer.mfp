@@ -24,6 +24,10 @@
             [
                 "Freq resp calc",
                 "__patch__"
+            ],
+            [
+                "Lowpass",
+                "__patch__"
             ]
         ],
         "obj_id": 0,
@@ -523,17 +527,19 @@
                 "value": false,
                 "position_x": 34.98871612548828,
                 "name": "rg_lowpass",
+                "obj_id": 21,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "toggle",
                 "num_inlets": 2,
                 "position_y": 60.974802637505945,
-                "dsp_outlets": null,
+                "initargs": "True",
                 "layername": "Front Panel"
             },
             "name": "rg_lowpass",
-            "value": false,
+            "value": true,
             "connections": [
                 [
                     [
@@ -547,15 +553,18 @@
         },
         "22": {
             "gui_params": {
+                "value": true,
                 "position_x": 34.987640380859375,
                 "name": "rg_highpass",
+                "obj_id": 22,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "toggle",
                 "num_inlets": 2,
                 "position_y": 89.01678542533125,
-                "dsp_outlets": null,
+                "initargs": "True",
                 "layername": "Front Panel"
             },
             "name": "rg_highpass",
@@ -1002,15 +1011,20 @@
         },
         "39": {
             "gui_params": {
+                "value": {
+                    "__BangType__": {}
+                },
                 "position_x": 254.67649841308594,
                 "name": "compute_button",
+                "obj_id": 39,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "button",
                 "num_inlets": 2,
                 "position_y": 231.80694580078125,
-                "dsp_outlets": null,
+                "initargs": null,
                 "layername": "Front Panel"
             },
             "name": "compute_button",
@@ -1823,15 +1837,11 @@
                     [
                         71,
                         0
-                    ],
-                    [
-                        265,
-                        0
                     ]
                 ],
                 [
                     [
-                        267,
+                        265,
                         1
                     ]
                 ],
@@ -1860,10 +1870,6 @@
                 [
                     [
                         86,
-                        0
-                    ],
-                    [
-                        266,
                         0
                     ]
                 ]
@@ -2079,7 +2085,7 @@
             "connections": [
                 [
                     [
-                        268,
+                        266,
                         0
                     ]
                 ]
@@ -2275,7 +2281,7 @@
                 ],
                 [
                     [
-                        267,
+                        265,
                         0
                     ]
                 ]
@@ -4048,7 +4054,7 @@
             "connections": [
                 [
                     [
-                        269,
+                        267,
                         0
                     ]
                 ]
@@ -4338,7 +4344,7 @@
                 "layername": "Freq resp calc"
             },
             "name": "processor_45",
-            "value": [],
+            "value": null,
             "connections": [
                 [
                     [
@@ -4482,7 +4488,7 @@
                 "layername": "Freq resp calc"
             },
             "name": "processor_55",
-            "value": [],
+            "value": null,
             "connections": [
                 [
                     [
@@ -5522,6 +5528,7 @@
             ],
             "initargs": "3",
             "gui_params": {
+                "x_max": 2,
                 "plot_type": "scatter",
                 "style": {
                     "1": {
@@ -5544,19 +5551,20 @@
                     }
                 },
                 "position_x": 30.963523864746094,
-                "x_max": 2,
+                "name": null,
+                "obj_id": 255,
+                "dsp_outlets": [],
                 "y_max": 1.5,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": [],
-                "y_min": -1.5,
                 "display_type": "plot",
                 "num_inlets": 3,
                 "position_y": 124.37521362304688,
                 "x_min": -2,
-                "dsp_outlets": [],
+                "initargs": "3",
                 "layername": "Graphs",
-                "name": null
+                "y_min": -1.5
             },
             "type": "scatter",
             "name": "scatter_255"
@@ -5809,50 +5817,6 @@
         },
         "265": {
             "connections": [
-                []
-            ],
-            "initargs": "\"f:\"",
-            "gui_params": {
-                "position_x": 212.8141326904297,
-                "name": "processor_74",
-                "obj_id": 265,
-                "dsp_outlets": null,
-                "update_required": false,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "processor",
-                "num_inlets": 2,
-                "position_y": 70.92390441894531,
-                "initargs": "\"f:\"",
-                "layername": "Highpass"
-            },
-            "type": "print",
-            "name": "processor_74"
-        },
-        "266": {
-            "connections": [
-                []
-            ],
-            "initargs": "\"w0:\"",
-            "gui_params": {
-                "position_x": 331.7102966308594,
-                "name": "processor_75",
-                "obj_id": 266,
-                "dsp_outlets": null,
-                "update_required": false,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "processor",
-                "num_inlets": 2,
-                "position_y": 98.8939208984375,
-                "initargs": "\"w0:\"",
-                "layername": "Highpass"
-            },
-            "type": "print",
-            "name": "processor_75"
-        },
-        "267": {
-            "connections": [
                 [
                     [
                         87,
@@ -5864,7 +5828,7 @@
             "gui_params": {
                 "position_x": 124.46021270751953,
                 "name": "processor_9",
-                "obj_id": 267,
+                "obj_id": 265,
                 "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
@@ -5878,7 +5842,7 @@
             "type": "func",
             "name": "processor_9"
         },
-        "268": {
+        "266": {
             "connections": [
                 [
                     [
@@ -5891,7 +5855,7 @@
             "gui_params": {
                 "position_x": 330.6869888305664,
                 "name": "processor_14",
-                "obj_id": 268,
+                "obj_id": 266,
                 "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
@@ -5905,7 +5869,7 @@
             "type": "*",
             "name": "processor_14"
         },
-        "269": {
+        "267": {
             "connections": [
                 [
                     [
@@ -5915,7 +5879,7 @@
                 ],
                 [
                     [
-                        270,
+                        268,
                         0
                     ]
                 ]
@@ -5924,7 +5888,7 @@
             "gui_params": {
                 "position_x": 81.0398178100586,
                 "name": "processor_76",
-                "obj_id": 269,
+                "obj_id": 267,
                 "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 2,
@@ -5938,11 +5902,11 @@
             "type": "trigger",
             "name": "processor_76"
         },
-        "270": {
+        "268": {
             "connections": [
                 [
                     [
-                        271,
+                        269,
                         0
                     ]
                 ]
@@ -5951,7 +5915,7 @@
             "gui_params": {
                 "position_x": 144.6112823486328,
                 "name": "message_21",
-                "obj_id": 270,
+                "obj_id": 268,
                 "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
@@ -5965,13 +5929,13 @@
             "type": "message",
             "name": "message_21"
         },
-        "271": {
+        "269": {
             "connections": [],
             "initargs": "\"fr0\"",
             "gui_params": {
                 "position_x": 217.53932189941406,
                 "name": "sendvia_45",
-                "obj_id": 271,
+                "obj_id": 269,
                 "dsp_outlets": null,
                 "update_required": false,
                 "label": "fr0",
@@ -5985,9 +5949,279 @@
             },
             "type": "send",
             "name": "sendvia_45"
+        },
+        "270": {
+            "connections": [
+                [
+                    [
+                        271,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"lpf\"",
+            "gui_params": {
+                "position_x": 61.818016052246094,
+                "name": "lpf",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 20.775611877441406,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "recv",
+            "name": "lpf"
+        },
+        "271": {
+            "connections": [
+                [
+                    [
+                        272,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        273,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 64.31800842285156,
+                "name": "processor_077",
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 73.76539611816406,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "trigger",
+            "name": "processor_077"
+        },
+        "272": {
+            "connections": [],
+            "initargs": "\"done\"",
+            "gui_params": {
+                "position_x": 60.821533203125,
+                "name": "sendvia_046",
+                "update_required": false,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 116.85807800292969,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "send",
+            "name": "sendvia_046"
+        },
+        "273": {
+            "connections": [
+                [
+                    [
+                        275,
+                        0
+                    ]
+                ],
+                [],
+                []
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 125.85777282714844,
+                "name": "processor_078",
+                "update_required": false,
+                "num_outlets": 3,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 113.2421875,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "unpack",
+            "name": "processor_078"
+        },
+        "275": {
+            "connections": [
+                [
+                    [
+                        277,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "f: 2 * math.pi * f / app.samplerate",
+            "gui_params": {
+                "position_x": 126.43643188476562,
+                "name": "processor_077",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 160.0393829345703,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "func",
+            "name": "processor_077"
+        },
+        "276": {
+            "connections": [
+                [
+                    [
+                        279,
+                        0
+                    ],
+                    [
+                        281,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "w0: (1 - math.cos(w0))",
+            "gui_params": {
+                "position_x": 62.93016815185547,
+                "name": "processor_078",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 234.94508361816406,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "func",
+            "name": "processor_078"
+        },
+        "277": {
+            "connections": [
+                [
+                    [
+                        276,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 62.930145263671875,
+                "name": "processor_079",
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 197.28012084960938,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "trigger",
+            "name": "processor_079"
+        },
+        "278": {
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 64.92792129516602,
+                "name": "processor_080",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 319.7978515625,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "/",
+            "name": "processor_080"
+        },
+        "279": {
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 113.87355041503906,
+                "name": "processor_081",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 323.3266906738281,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "/",
+            "name": "processor_081"
+        },
+        "280": {
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 166.81472778320312,
+                "name": "processor_082",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 322.1515808105469,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "/",
+            "name": "processor_082"
+        },
+        "281": {
+            "connections": [
+                [
+                    [
+                        278,
+                        0
+                    ],
+                    [
+                        280,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2.0",
+            "gui_params": {
+                "position_x": 67.92459106445312,
+                "name": "processor_083",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 276.5164794921875,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "type": "/",
+            "name": "processor_083"
         }
     },
-    "type": "biquad-2",
+    "type": "biquad-1",
     "scopes": {
         "__patch__": {
             "slope": 59,
@@ -6006,9 +6240,14 @@
             "out_a2": 30,
             "out_a1": 29,
             "message_1": 116,
-            "processor_9": 267,
+            "processor_080": 278,
+            "processor_081": 279,
+            "processor_082": 280,
+            "processor_083": 281,
+            "processor_9": 265,
+            "sendvia_046": 272,
             "sendvia_19": 67,
-            "processor_14": 268,
+            "processor_14": 266,
             "processor_15": 80,
             "processor_16": 81,
             "message_2": 187,
@@ -6046,11 +6285,11 @@
             "b1": 108,
             "b2": 109,
             "a1": 105,
-            "pzdone": 203,
+            "sendvia_25": 96,
             "processor_2": 61,
             "text_28": 83,
             "rg_highpass": 22,
-            "sendvia_45": 271,
+            "sendvia_45": 269,
             "sendvia_44": 260,
             "sendvia_43": 246,
             "sendvia_42": 241,
@@ -6060,7 +6299,7 @@
             "sendvia_20": 69,
             "sendvia_23": 94,
             "sendvia_22": 93,
-            "sendvia_25": 96,
+            "pzdone": 203,
             "sendvia_24": 95,
             "sendvia_27": 100,
             "sendvia_26": 99,
@@ -6086,6 +6325,7 @@
             "sendvia_5": 19,
             "sendvia_8": 42,
             "sendvia_9": 43,
+            "processor_077": 275,
             "processor_61": 223,
             "w": 242,
             "rg_lowshelf": 25,
@@ -6125,6 +6365,7 @@
             "message_13": 256,
             "message_12": 248,
             "message_14": 250,
+            "processor_078": 276,
             "processor_53": 216,
             "processor_54": 217,
             "processor_55": 218,
@@ -6145,7 +6386,7 @@
             "text_27": 82,
             "text_26": 77,
             "message_11": 226,
-            "message_21": 270,
+            "message_21": 268,
             "rg_lowpass": 21,
             "processor_43": 212,
             "processor_41": 211,
@@ -6175,9 +6416,7 @@
             "text_38": 195,
             "in_q": 10,
             "hpf": 85,
-            "processor_76": 269,
-            "processor_74": 265,
-            "processor_75": 266,
+            "processor_76": 267,
             "processor_72": 262,
             "processor_73": 263,
             "processor_70": 259,
@@ -6190,7 +6429,9 @@
             "enum_3": 11,
             "enum_4": 14,
             "processor_59": 222,
-            "q": 58
+            "q": 58,
+            "lpf": 270,
+            "processor_079": 277
         }
     }
 }
