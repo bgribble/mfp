@@ -271,7 +271,10 @@ class PatchWindow(object):
         SelectMRUMode.forget(element)
 
     def refresh(self, element):
-        self.object_view.update(element, element.layer.scope)
+        if element.layer is not None:
+            self.object_view.update(element, element.layer.scope)
+        else:
+            print "WARNING: element has no layer,", element 
 
     def add_element(self, factory, x=None, y=None):
         if x is None:

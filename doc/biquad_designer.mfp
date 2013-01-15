@@ -6,7 +6,15 @@
                 "__patch__"
             ],
             [
+                "Graphs",
+                "__patch__"
+            ],
+            [
                 "Param routing",
+                "__patch__"
+            ],
+            [
+                "Lowpass",
                 "__patch__"
             ],
             [
@@ -18,23 +26,15 @@
                 "__patch__"
             ],
             [
-                "Graphs",
-                "__patch__"
-            ],
-            [
                 "Freq resp calc",
                 "__patch__"
             ],
             [
-                "Lowpass",
+                "Bandpass",
                 "__patch__"
             ]
         ],
-        "obj_id": 0,
-        "top_level": true,
-        "num_outlets": 0,
-        "display_type": "patch",
-        "num_inlets": 0
+        "display_type": "patch"
     },
     "objects": {
         "1": {
@@ -203,7 +203,7 @@
                 "name": "in_freq",
                 "obj_id": 8,
                 "dsp_outlets": null,
-                "value": 10000.0,
+                "value": 5000.0,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -213,7 +213,7 @@
                 "initargs": "0.0"
             },
             "name": "in_freq",
-            "value": 10000.0,
+            "value": 5000.0,
             "connections": [
                 [
                     [
@@ -503,18 +503,15 @@
         },
         "20": {
             "gui_params": {
-                "value": "<b>Compute filter coefficients</b>",
                 "position_x": 283.70472717285156,
                 "name": "text_11",
-                "obj_id": 20,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 228.6942596435547,
-                "initargs": null,
+                "dsp_outlets": null,
                 "layername": "Front Panel"
             },
             "name": "text_11",
@@ -530,19 +527,17 @@
                 "value": false,
                 "position_x": 34.98871612548828,
                 "name": "rg_lowpass",
-                "obj_id": 21,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "toggle",
                 "num_inlets": 2,
                 "position_y": 60.974802637505945,
-                "initargs": "True",
+                "dsp_outlets": null,
                 "layername": "Front Panel"
             },
             "name": "rg_lowpass",
-            "value": true,
+            "value": false,
             "connections": [
                 [
                     [
@@ -556,18 +551,15 @@
         },
         "22": {
             "gui_params": {
-                "value": true,
                 "position_x": 34.987640380859375,
                 "name": "rg_highpass",
-                "obj_id": 22,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "toggle",
                 "num_inlets": 2,
                 "position_y": 89.01678542533125,
-                "initargs": "True",
+                "dsp_outlets": null,
                 "layername": "Front Panel"
             },
             "name": "rg_highpass",
@@ -1014,20 +1006,15 @@
         },
         "39": {
             "gui_params": {
-                "value": {
-                    "__BangType__": {}
-                },
                 "position_x": 254.67649841308594,
                 "name": "compute_button",
-                "obj_id": 39,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "button",
                 "num_inlets": 2,
                 "position_y": 231.80694580078125,
-                "initargs": null,
+                "dsp_outlets": null,
                 "layername": "Front Panel"
             },
             "name": "compute_button",
@@ -3114,22 +3101,20 @@
         },
         "117": {
             "gui_params": {
-                "layer": "Pole-zero calc",
+                "value": "(a<sub>1</sub>, a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub>) from param routing page",
                 "position_x": 377.3400421142578,
                 "name": "text_30",
-                "obj_id": 117,
-                "dsp_outlets": null,
-                "value": "(a<sub>1</sub>, a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub>)",
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 65.1205825805664,
-                "initargs": null
+                "dsp_outlets": null,
+                "layername": "Pole-zero calc"
             },
             "name": "text_30",
-            "value": "(a<sub>1</sub>, a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub>)",
+            "value": "(a<sub>1</sub>, a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub>) from param routing page",
             "connections": [
                 []
             ],
@@ -3153,15 +3138,24 @@
             ],
             "initargs": null,
             "gui_params": {
+                "layers": [
+                    [
+                        "Layer 0",
+                        "__patch__"
+                    ]
+                ],
                 "position_x": 259.640625,
                 "name": "pole_solver",
+                "obj_id": 118,
+                "dsp_outlets": null,
                 "update_required": false,
+                "top_level": false,
                 "num_outlets": 2,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 3,
                 "position_y": 167.20215606689453,
-                "dsp_outlets": null,
+                "initargs": null,
                 "layername": "Pole-zero calc"
             },
             "type": "quadratic",
@@ -3184,15 +3178,24 @@
             ],
             "initargs": null,
             "gui_params": {
+                "layers": [
+                    [
+                        "Layer 0",
+                        "__patch__"
+                    ]
+                ],
                 "position_x": 143.69482421875,
                 "name": "zero_solver",
+                "obj_id": 147,
+                "dsp_outlets": null,
                 "update_required": false,
+                "top_level": false,
                 "num_outlets": 2,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 3,
                 "position_y": 167.2481231689453,
-                "dsp_outlets": null,
+                "initargs": null,
                 "layername": "Pole-zero calc"
             },
             "type": "quadratic",
@@ -3200,19 +3203,16 @@
         },
         "176": {
             "gui_params": {
-                "layer": "Pole-zero calc",
                 "position_x": 22.217384338378906,
                 "name": "text_31",
-                "obj_id": 176,
-                "dsp_outlets": null,
-                "value": "Solutions are z-plane poles (left quadratic)\nand zeros (right quadratic)",
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 301.8333740234375,
-                "initargs": null
+                "position_y": 280.8438720703125,
+                "dsp_outlets": null,
+                "layername": "Pole-zero calc"
             },
             "name": "text_31",
             "value": "Solutions are z-plane poles (left quadratic)\nand zeros (right quadratic)",
@@ -3506,13 +3506,16 @@
             "gui_params": {
                 "position_x": 171.9580841064453,
                 "name": "sendvia_34",
+                "obj_id": 187,
+                "dsp_outlets": null,
                 "update_required": false,
+                "label": "pzg1",
                 "num_outlets": 0,
                 "dsp_inlets": null,
                 "display_type": "sendvia",
                 "num_inlets": 2,
                 "position_y": 214.67091369628906,
-                "dsp_outlets": null,
+                "initargs": "\"pzg1\"",
                 "layername": "Pole-zero calc"
             },
             "type": "send",
@@ -3524,13 +3527,16 @@
             "gui_params": {
                 "position_x": 287.9342956542969,
                 "name": "sendvia_35",
+                "obj_id": 188,
+                "dsp_outlets": null,
                 "update_required": false,
+                "label": "pzg2",
                 "num_outlets": 0,
                 "dsp_inlets": null,
                 "display_type": "sendvia",
                 "num_inlets": 2,
                 "position_y": 216.67372131347656,
-                "dsp_outlets": null,
+                "initargs": "\"pzg2\"",
                 "layername": "Pole-zero calc"
             },
             "type": "send",
@@ -3605,37 +3611,32 @@
             ],
             "initargs": "@clearall",
             "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 423.9420166015625,
+                "position_x": 420.9510803222656,
                 "name": "message_2",
-                "obj_id": 191,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "message",
                 "num_inlets": 2,
-                "position_y": 402.68748474121094,
-                "initargs": "@clearall"
+                "position_y": 398.78517150878906,
+                "dsp_outlets": null,
+                "layername": "Pole-zero calc"
             },
             "type": "message",
             "name": "message_2"
         },
         "192": {
             "gui_params": {
-                "layer": "Pole-zero calc",
-                "position_x": 510.7369384765625,
+                "position_x": 486.05816650390625,
                 "name": "text_31",
-                "obj_id": 192,
-                "dsp_outlets": null,
-                "value": "Draw unit circle for reference",
+                "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
-                "update_required": true,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 256.6387481689453,
-                "initargs": null
+                "position_y": 135.6991729736328,
+                "dsp_outlets": null,
+                "layername": "Pole-zero calc"
             },
             "name": "text_31",
             "value": "Draw unit circle for reference",
@@ -3781,18 +3782,15 @@
         },
         "198": {
             "gui_params": {
-                "value": "<span size=\"large\"><b>Highpass Filter Coefficients</b></span>",
                 "position_x": 390.5494079589844,
                 "name": "text_36",
-                "obj_id": 198,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 12.986019134521484,
-                "initargs": null,
+                "position_y": 7.986019134521484,
+                "dsp_outlets": null,
                 "layername": "Highpass"
             },
             "name": "text_36",
@@ -3829,18 +3827,15 @@
         },
         "200": {
             "gui_params": {
-                "value": "<b><span size=\"large\">Z-plane poles and zeros</span></b>",
                 "position_x": 405.48919677734375,
                 "name": "text_39",
-                "obj_id": 200,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 15.991949081420898,
-                "initargs": null,
+                "position_y": 8.991949081420898,
+                "dsp_outlets": null,
                 "layername": "Pole-zero calc"
             },
             "name": "text_39",
@@ -4081,6 +4076,7 @@
             ],
             "initargs": "3",
             "gui_params": {
+                "x_max": 2,
                 "plot_type": "scatter",
                 "style": {
                     "1": {
@@ -4103,19 +4099,20 @@
                     }
                 },
                 "position_x": 30.963523864746094,
-                "x_max": 2,
+                "name": "pole_zero_graph",
+                "obj_id": 209,
+                "dsp_outlets": [],
                 "y_max": 1.5,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": [],
-                "y_min": -1.5,
                 "display_type": "plot",
                 "num_inlets": 3,
                 "position_y": 124.37521362304688,
                 "x_min": -2,
-                "dsp_outlets": [],
+                "initargs": "3",
                 "layername": "Graphs",
-                "name": "pole_zero_graph"
+                "y_min": -1.5
             },
             "type": "scatter",
             "name": "pole_zero_graph"
@@ -5208,17 +5205,15 @@
             ],
             "initargs": "5",
             "gui_params": {
-                "position_x": 307.3327941894531,
+                "position_x": 330.32867431640625,
                 "name": "processor_093",
-                "obj_id": 248,
-                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 6,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 1,
-                "position_y": 45.98685073852539,
-                "initargs": "5",
+                "position_y": 62.00440979003906,
+                "dsp_outlets": null,
                 "layername": "Freq resp calc"
             },
             "type": "unpack",
@@ -5445,9 +5440,697 @@
             },
             "type": "send",
             "name": "sendvia_053"
+        },
+        "257": {
+            "gui_params": {
+                "position_x": 385.6529235839844,
+                "name": "text_038",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 10.97408676147461,
+                "dsp_outlets": null,
+                "layername": "Lowpass"
+            },
+            "name": "text_038",
+            "value": "<b><span size=\"large\">Lowpass Filter Coefficients</span></b>",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "258": {
+            "gui_params": {
+                "position_x": 485.762451171875,
+                "name": "text_039",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 165.91705322265625,
+                "dsp_outlets": null,
+                "layername": "Pole-zero calc"
+            },
+            "name": "text_039",
+            "value": "First clear, then calculate points",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "259": {
+            "gui_params": {
+                "position_x": 385.9300842285156,
+                "name": "text_040",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 7.991342544555664,
+                "dsp_outlets": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "text_040",
+            "value": "<b><span size=\"large\">Frequency Response Estimate</span></b>",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "260": {
+            "gui_params": {
+                "value": "(a<sub>1</sub>,a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub> from param routing layer",
+                "position_x": 429.9220886230469,
+                "name": "text_041",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 63.989959716796875,
+                "dsp_outlets": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "text_041",
+            "value": "(a<sub>1</sub>,a<sub>2</sub>, b<sub>0</sub>, b<sub>1</sub>, b<sub>2</sub> from param routing layer",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "261": {
+            "gui_params": {
+                "position_x": 367.9333801269531,
+                "name": "text_042",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 221.96530151367188,
+                "dsp_outlets": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "text_042",
+            "value": "Response estimate functions work out the \nquadratic equations for poles (bottom) and \nzeros (top)",
+            "connections": [
+                []
+            ],
+            "initargs": null,
+            "type": "text"
+        },
+        "262": {
+            "connections": [
+                [
+                    [
+                        264,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "\"bpf\"",
+            "gui_params": {
+                "position_x": 69.806396484375,
+                "name": "bpf",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 29.285808563232422,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "recv",
+            "name": "bpf"
+        },
+        "264": {
+            "connections": [
+                [
+                    [
+                        265,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        267,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 72.306396484375,
+                "name": "processor_070",
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 79.28580856323242,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "trigger",
+            "name": "processor_070"
+        },
+        "265": {
+            "connections": [],
+            "initargs": "\"done\"",
+            "gui_params": {
+                "position_x": 69.85139465332031,
+                "name": "sendvia_047",
+                "update_required": false,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 124.60000610351562,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "send",
+            "name": "sendvia_047"
+        },
+        "267": {
+            "connections": [
+                [
+                    [
+                        268,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        278,
+                        1
+                    ]
+                ],
+                []
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 182.66329956054688,
+                "name": "processor_071",
+                "update_required": false,
+                "num_outlets": 3,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 79.33677673339844,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "unpack",
+            "name": "processor_071"
+        },
+        "268": {
+            "connections": [
+                [
+                    [
+                        269,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "f: 2 * math.pi * f / app.samplerate",
+            "gui_params": {
+                "position_x": 182.48052978515625,
+                "name": "processor_072",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 116.35311126708984,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "func",
+            "name": "processor_072"
+        },
+        "269": {
+            "connections": [
+                [
+                    [
+                        270,
+                        0
+                    ],
+                    [
+                        281,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        278,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 139.8362579345703,
+                "name": "processor_073",
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 151.41456604003906,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "trigger",
+            "name": "processor_073"
+        },
+        "270": {
+            "connections": [
+                [
+                    [
+                        273,
+                        0
+                    ],
+                    [
+                        271,
+                        0
+                    ],
+                    [
+                        276,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "w0: math.sin(w0) / 2.0",
+            "gui_params": {
+                "position_x": 91.8851547241211,
+                "name": "processor_074",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 198.27011108398438,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "func",
+            "name": "processor_074"
+        },
+        "271": {
+            "connections": [
+                [
+                    [
+                        274,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 54.9272346496582,
+                "name": "processor_075",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 359.6811828613281,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "/",
+            "name": "processor_075"
+        },
+        "272": {
+            "connections": [
+                [
+                    [
+                        275,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 101.8650131225586,
+                "name": "processor_076",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 359.3630676269531,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "/",
+            "name": "processor_076"
+        },
+        "273": {
+            "connections": [
+                [
+                    [
+                        272,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "-1",
+            "gui_params": {
+                "position_x": 101.8597183227539,
+                "name": "processor_077",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 318.42767333984375,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "*",
+            "name": "processor_077"
+        },
+        "274": {
+            "connections": [],
+            "initargs": "\"out_b0\"",
+            "gui_params": {
+                "position_x": 52.92855453491211,
+                "name": "sendvia_048",
+                "update_required": false,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 410.60662841796875,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "send",
+            "name": "sendvia_048"
+        },
+        "275": {
+            "connections": [],
+            "initargs": "\"out_b2\"",
+            "gui_params": {
+                "position_x": 99.8583984375,
+                "name": "sendvia_049",
+                "update_required": false,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 425.4309387207031,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "send",
+            "name": "sendvia_049"
+        },
+        "276": {
+            "connections": [
+                [
+                    [
+                        277,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "0",
+            "gui_params": {
+                "position_x": 151.79881286621094,
+                "name": "message_008",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 316.7032775878906,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "message",
+            "name": "message_008"
+        },
+        "277": {
+            "connections": [],
+            "initargs": "\"out_b1\"",
+            "gui_params": {
+                "position_x": 149.79750061035156,
+                "name": "sendvia_050",
+                "update_required": false,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 411.60968017578125,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "send",
+            "name": "sendvia_050"
+        },
+        "278": {
+            "connections": [
+                [
+                    [
+                        279,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "w0,q: math.sin(w0) / (2*q)",
+            "gui_params": {
+                "position_x": 201.73341369628906,
+                "name": "processor_078",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 239.73440551757812,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "func",
+            "name": "processor_078"
+        },
+        "279": {
+            "connections": [
+                [
+                    [
+                        284,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        280,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "2",
+            "gui_params": {
+                "position_x": 201.6394500732422,
+                "name": "processor_079",
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 272.6873779296875,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "trigger",
+            "name": "processor_079"
+        },
+        "280": {
+            "connections": [
+                [
+                    [
+                        271,
+                        1
+                    ],
+                    [
+                        272,
+                        1
+                    ],
+                    [
+                        282,
+                        1
+                    ],
+                    [
+                        285,
+                        1
+                    ]
+                ]
+            ],
+            "initargs": "1",
+            "gui_params": {
+                "position_x": 277.48768615722656,
+                "name": "processor_080",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 339.0631103515625,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "+",
+            "name": "processor_080"
+        },
+        "281": {
+            "connections": [
+                [
+                    [
+                        282,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "w0: -2.0*math.cos(w0)",
+            "gui_params": {
+                "position_x": 465.6139831542969,
+                "name": "processor_081",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 230.89927673339844,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "func",
+            "name": "processor_081"
+        },
+        "282": {
+            "connections": [
+                [
+                    [
+                        283,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 465.471435546875,
+                "name": "processor_082",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 264.4824981689453,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "/",
+            "name": "processor_082"
+        },
+        "283": {
+            "connections": [],
+            "initargs": "\"out_a1\"",
+            "gui_params": {
+                "position_x": 463.45587158203125,
+                "name": "sendvia_051",
+                "update_required": false,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 303.65234375,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "send",
+            "name": "sendvia_051"
+        },
+        "284": {
+            "connections": [
+                [
+                    [
+                        285,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": "alpha: 1 - alpha",
+            "gui_params": {
+                "position_x": 201.73822021484375,
+                "name": "processor_083",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 308.6711120605469,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "func",
+            "name": "processor_083"
+        },
+        "285": {
+            "connections": [
+                [
+                    [
+                        286,
+                        0
+                    ]
+                ]
+            ],
+            "initargs": null,
+            "gui_params": {
+                "position_x": 252.206298828125,
+                "name": "processor_084",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 376.4590148925781,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "/",
+            "name": "processor_084"
+        },
+        "286": {
+            "connections": [],
+            "initargs": "\"out_a2\"",
+            "gui_params": {
+                "position_x": 250.17184448242188,
+                "name": "sendvia_052",
+                "update_required": false,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 414.4400939941406,
+                "dsp_outlets": null,
+                "layername": "Bandpass"
+            },
+            "type": "send",
+            "name": "sendvia_052"
         }
     },
-    "type": "biquad-5",
+    "type": "biquad_designer",
     "scopes": {
         "__patch__": {
             "slope": 59,
@@ -5460,27 +6143,28 @@
             "processor_096": 251,
             "processor_095": 250,
             "processor_094": 249,
+            "rg0": 44,
             "sendvia_053": 256,
-            "sendvia_052": 246,
-            "sendvia_051": 245,
-            "sendvia_050": 244,
+            "sendvia_052": 286,
+            "sendvia_051": 283,
+            "sendvia_050": 277,
             "rg_highshelf": 24,
             "rg_bandpass": 23,
             "processor_093": 248,
             "out_a2": 30,
             "out_a1": 29,
-            "processor_084": 234,
+            "processor_084": 285,
             "processor_085": 235,
             "processor_086": 236,
             "processor_087": 237,
-            "processor_080": 230,
-            "processor_081": 231,
-            "processor_082": 232,
-            "processor_083": 233,
-            "text_22": 50,
+            "processor_080": 280,
+            "processor_081": 281,
+            "processor_082": 282,
+            "processor_083": 284,
+            "processor_9": 219,
             "processor_088": 238,
             "sendvia_046": 225,
-            "processor_20": 88,
+            "sendvia_19": 67,
             "processor_14": 220,
             "processor_15": 80,
             "processor_16": 81,
@@ -5498,12 +6182,13 @@
             "rg3": 47,
             "rg4": 48,
             "message_4": 185,
+            "bpf": 262,
             "message_8": 204,
             "scatter_0": 195,
             "scatter_1": 209,
-            "sendvia_048": 242,
-            "sendvia_049": 243,
-            "sendvia_047": 241,
+            "sendvia_048": 274,
+            "sendvia_049": 275,
+            "sendvia_047": 265,
             "in_gain": 14,
             "coeffs": 215,
             "in_freq": 8,
@@ -5517,8 +6202,8 @@
             "b0": 107,
             "b1": 108,
             "b2": 109,
-            "text_29": 84,
-            "processor_3": 62,
+            "processor_2": 61,
+            "text_28": 83,
             "rg_highpass": 22,
             "sendvia_45": 222,
             "sendvia_44": 214,
@@ -5542,7 +6227,7 @@
             "processor_35": 205,
             "processor_38": 208,
             "processor_39": 253,
-            "processor_8": 71,
+            "text_23": 72,
             "sendvia_2": 3,
             "sendvia_3": 4,
             "sendvia_1": 2,
@@ -5550,9 +6235,14 @@
             "sendvia_7": 41,
             "sendvia_4": 18,
             "sendvia_5": 19,
-            "sendvia_8": 42,
+            "processor_071": 267,
+            "processor_070": 264,
+            "processor_073": 269,
             "sendvia_9": 43,
-            "processor_077": 227,
+            "processor_075": 271,
+            "processor_074": 270,
+            "processor_077": 273,
+            "processor_076": 272,
             "rg_lowshelf": 25,
             "out_b2": 33,
             "out_b1": 32,
@@ -5568,10 +6258,12 @@
             "processor_25": 115,
             "processor_26": 201,
             "sendvia_18": 66,
-            "sendvia_19": 67,
+            "processor_20": 88,
             "processor_23": 112,
             "processor_22": 111,
             "done": 110,
+            "text_24": 73,
+            "message_008": 276,
             "start": 68,
             "frq": 57,
             "text_18": 35,
@@ -5584,23 +6276,26 @@
             "text_11": 20,
             "pzg1": 189,
             "pzg0": 184,
-            "processor_079": 229,
+            "processor_079": 279,
             "message_13": 210,
-            "processor_078": 228,
+            "processor_078": 278,
             "gain": 60,
             "pzg2": 190,
-            "processor_2": 61,
-            "text_28": 83,
+            "text_29": 84,
+            "processor_3": 62,
             "processor_1": 56,
             "processor_7": 70,
             "text_21": 49,
             "text_20": 37,
-            "text_23": 72,
-            "processor_9": 219,
+            "processor_8": 71,
+            "text_22": 50,
             "text_25": 75,
-            "text_24": 73,
+            "sendvia_8": 42,
             "text_27": 82,
             "text_26": 77,
+            "text_039": 258,
+            "text_038": 257,
+            "processor_072": 268,
             "message_21": 221,
             "rg_lowpass": 21,
             "text_8": 15,
@@ -5613,7 +6308,7 @@
             "text_3": 6,
             "text_1": 1,
             "text_36": 198,
-            "q": 58,
+            "compute_button": 39,
             "text_34": 196,
             "text_32": 193,
             "text_33": 194,
@@ -5631,19 +6326,21 @@
             "processor_72": 216,
             "processor_73": 217,
             "processor_70": 213,
+            "text_040": 259,
+            "text_041": 260,
+            "text_042": 261,
             "processor_089": 239,
             "a1": 105,
             "a2": 106,
             "patch_1": 118,
             "patch_2": 147,
-            "lpf": 223,
             "sendvia_20": 69,
             "enum_1": 8,
             "enum_2": 10,
             "enum_3": 11,
             "enum_4": 14,
-            "compute_button": 39,
-            "rg0": 44
+            "q": 58,
+            "lpf": 223
         }
     }
 }
