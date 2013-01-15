@@ -158,15 +158,6 @@ class Patch(Processor):
     # load/save
     ############################
 
-    def save(self):
-        base = Processor.save(self)
-        conn = [] 
-        for outlet in self.outlet_objects: 
-            c = outlet.connections_out[0]
-            conn.append([(t[0].obj_id, t[1]) for t in c])
-        base['connections'] = conn
-        return base
-
     @classmethod
     def register_file(klass, filename):
         from main import MFPApp
