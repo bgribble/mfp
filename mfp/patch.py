@@ -108,12 +108,11 @@ class Patch(Processor):
                 self.inlet_objects[i].send(self.inlets[i])
                 self.inlets[i] = Uninit
 
+        for o in range(len(self.outlets)):
+            self.outlets[i] = self.outlet_objects[i].outlets[0]
+
     def send(self, value, inlet=0):
         self.inlet_objects[inlet].send(value)
-
-    def connect(self, outlet, target, inlet):
-        Processor.connect(self, outlet, target, inlet)
-        return self.outlet_objects[outlet].connect(0, target, inlet)
 
     def add(self, obj):
         if self.objects.has_key(obj.obj_id):
