@@ -16,6 +16,7 @@ class TreeDisplay (object):
         self.selection = self.treeview.get_selection()
         self.selected_obj = None 
         self.select_cb = None 
+        self.select_cb_id = None
         self.unselect_cb = None 
 
         self.object_paths = {} 
@@ -24,7 +25,7 @@ class TreeDisplay (object):
         self.columns_bynumber = {}
 
         self.treeview.set_model(self.treestore)
-        self.selection.connect("changed", self._select_cb)
+        self.select_cb_id = self.selection.connect("changed", self._select_cb)
 
         colnum = 0
         for c in columns:
@@ -108,6 +109,7 @@ class TreeDisplay (object):
         self.object_parents[obj] = parent 
         self._update_paths() 
         self.treeview.expand_all()
+        return iter 
 
     def remove(self, obj):
         path = self.object_paths.get(obj)
@@ -117,11 +119,29 @@ class TreeDisplay (object):
             self._update_paths()
 
     def update(self, obj, parent):
+        need_select = False 
+        if self.selected_obj == obj:
+            need_select = True
+
         pathstr = self.object_paths.get(obj)
         path = Gtk.TreePath.new_from_string(pathstr)
         iter = self.treestore.get_iter_from_string(pathstr)
+
+        # temporarily disconnect signal handler  
+        self.selection.disconnect(self.select_cb_id)
         self.treestore.remove(iter)
         self.insert(obj, parent)
+
+        # restore signal handler 
+        self.select_cb_id = self.selection.connect("changed", self._select_cb)
+        self._update_paths()
+
+        if need_select:
+            pathstr = self.object_paths.get(obj)
+            if pathstr: 
+                path = Gtk.TreePath.new_from_string(pathstr)
+                self.selection.select_path(path)
+
 
     def select(self, obj): 
         if self.selected_obj is obj: 
