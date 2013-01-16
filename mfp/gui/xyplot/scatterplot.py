@@ -47,6 +47,8 @@ class ScatterPlot (XYPlot):
         self.y_max = field_vp_pos[1]
         self.y_min = self.y_max - field_h
 
+        print "draw_field_cb:", self, field_vp_pos, self.y_min
+
         for curve in self.points:
             styler = self.style.get(curve)
             if styler is None:
@@ -97,6 +99,9 @@ class ScatterPlot (XYPlot):
                     int(math.floor(point[1] / tile_size) * tile_size))
 
         px = self.pt2px(point)
+        if px is None:
+            # point is not legal, usually on log charts 
+            return []
 
         tiles = []
         pts = self.points.setdefault(curve, {})
@@ -117,9 +122,11 @@ class ScatterPlot (XYPlot):
 
         if style.stroke_style and ptnum > 0:
             prev_pt = pts[ptnum - 1][1]
-            tid = tile_id(self.pt2px(prev_pt))
-            if tid not in tiles:
-                tiles.append(tid)
+            prev_px = self.pt2px(prev_pt)
+            if prev_px is not None:
+                tid = tile_id(prev_px)
+                if tid not in tiles:
+                    tiles.append(tid)
 
         for tile_id in tiles:
             pts = bytile.setdefault(tile_id, [])
@@ -170,9 +177,20 @@ class ScatterPlot (XYPlot):
 
 
     def configure(self, params):
+        modes = dict(LINEAR=0, LOG=1, LOG_10=1, LOG_2=2)
         s = params.get("style")
         if s:
             self.set_style(s)
+
+        x = params.get("x_axis")
+        if x:
+            self.x_axis_mode = modes.get(x.upper())
+            self._recalc_x_scale()
+
+        y = params.get("y_axis")
+        if y:
+            self.y_axis_mode = modes.get(y.upper())
+            self._recalc_y_scale()
 
     def command(self, action, data):
         if action == "add":

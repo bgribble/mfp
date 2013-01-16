@@ -43,6 +43,11 @@ class Scope (Processor):
             log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
             self.outlets[0] = MethodCall("bufinfo")
 
+    def conf(self, **kwargs):
+        for k, v in kwargs.items():
+            self.gui_params[k] = v
+        if self.gui_created:
+            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 
 class Scatter (Processor):
     display_type = "plot"
@@ -124,6 +129,12 @@ class Scatter (Processor):
         if inlet is not None and inlet in self.points:
             del self.points[inlet]
         return self._chartconf('clear', inlet)
+
+    def conf(self, **kwargs):
+        for k, v in kwargs.items():
+            self.gui_params[k] = v
+        if self.gui_created:
+            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
 
     def style(self, **kwargs):
         '''Set style parameters for a curve'''

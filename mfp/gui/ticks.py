@@ -34,13 +34,24 @@ def linear(vmin, vmax, numticks, tick_min=None, tick_max=None):
     first_tick = tickint * math.floor(tick_min / tickint)
     numticks = int(float(tick_max - tick_min) / tickint) + 2
     ticks = [first_tick + n * tickint for n in range(numticks)]
-    return [t for t in ticks if t >= tick_min and t <= tick_max]
-
+    filtered = [t for t in ticks if t >= tick_min and t <= tick_max]
+    return filtered 
 
 def decade(vmin, vmax, numticks, tick_min, tick_max):
     # generate ticks for a decade log-scaled axis
-    pass
+    if tick_min is None:
+        tick_min = vmin
+    if tick_max is None:
+        tick_max = vmax
+    if tick_min <= 0:
+        tick_min = min(tick_max / 100.0, 0.1)
 
+    interv = math.log10(float(vmax)/float(vmin)) / numticks 
+    logbase = math.ceil(interv)
+    first_tick_pow = math.ceil(math.log10(tick_min))
+    ticks = [ pow(10, first_tick_pow + n*logbase) for n in range(int(numticks)+1) ]
+    filtered = [t for t in ticks if t >= tick_min and t <= tick_max]
+    return filtered 
 
 def octave(vmin, vmax, numticks, tick_min, tick_max):
     # generate ticks for an octave log-scaled axis

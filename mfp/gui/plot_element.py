@@ -111,6 +111,7 @@ class PlotElement (PatchElement):
 
         if update: 
             self.xyplot.set_bounds(x_min, y_min, x_max, y_max)
+            self.send_params()
 
     def update(self):
         self.draw_ports()

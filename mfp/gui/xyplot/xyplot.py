@@ -31,8 +31,9 @@ class XYPlot (Clutter.Group):
     AXIS_PAD = 5
     TICK_SIZE = 50
 
-    SCATTER = 0
-    CURVE = 1
+    LINEAR = 0
+    LOG_DECADE = 1
+    LOG_OCTAVE = 2
 
     def __init__(self, width, height):
         Clutter.Group.__init__(self)
@@ -53,7 +54,13 @@ class XYPlot (Clutter.Group):
         self.border = None
         self.plot_border = None
         self.x_axis = None
+        self.x_axis_mode = self.LINEAR 
+        self.x_scale = 1.0
+
         self.y_axis = None
+        self.y_axis_mode = self.LINEAR 
+        self.y_scale = 1.0
+
         self.plot = None
         self.plot_w = 0
         self.plot_h = 0
@@ -71,6 +78,8 @@ class XYPlot (Clutter.Group):
 
         self.plot_w = self.width - self.MARGIN_LEFT
         self.plot_h = self.height - self.MARGIN_BOT
+        self._recalc_x_scale()
+        self._recalc_y_scale()
 
         self.x_axis = Quilt(self.plot_w, self.MARGIN_BOT)
         self.x_axis.set_position(self.MARGIN_LEFT, self.height - self.MARGIN_BOT)
@@ -116,7 +125,32 @@ class XYPlot (Clutter.Group):
         self.y_axis.redraw()
         self.plot.redraw()
 
+    def _recalc_x_scale(self):
+        if self.x_axis_mode == self.LINEAR:
+            self.x_scale = float(self.plot_w) / (self.x_max - self.x_min)
+        elif self.x_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
+            if self.x_min <= 0.0:
+                self.x_min = min(abs(self.x_max / 100.0), 0.1) 
+            self.x_scale = float(self.plot_w) / (math.log(self.x_max / float(self.x_min)))
+
+        if self.x_axis:
+            self.x_axis.clear()
+
+    def _recalc_y_scale(self):
+        if self.y_axis_mode == self.LINEAR:
+            self.y_scale = -1.0 * float(self.plot_h) / (self.y_max - self.y_min)
+        elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
+            if self.y_min <= 0.0:
+                self.y_min = min(abs(self.y_max / 100.0), 0.1) 
+            self.y_scale = -1.0 * float(self.plot_h) / (math.log(self.y_max / float(self.y_min)))
+        print "recalc_y_scale:", self, self.y_axis_mode, self.y_max, self.y_min, self.y_scale
+
+        if self.y_axis:
+            self.y_axis.clear()
+
+
     def set_bounds(self, x_min, y_min, x_max, y_max):
+        print "set_bounds:", self, x_min, y_min, x_max, y_max 
 
         if ((x_min is None or x_min == self.x_min)
             and (x_max is None or x_max == self.x_max)
@@ -145,46 +179,81 @@ class XYPlot (Clutter.Group):
         # if scale is changing, really need to redraw all
         need_x_flush = need_y_flush = False
 
-        if (x_max - x_min != self.x_max - self.x_min):
+        if ((x_max - x_min) != (self.x_max - self.x_min)):
             need_x_flush = True
 
-        if (y_max - y_min != self.y_max - self.y_min):
+        if ((y_max - y_min) != (self.y_max - self.y_min)):
             need_y_flush = True
 
         if ((x_min != self.x_min) or (x_max != self.x_max)):
             self.x_min = x_min
             self.x_max = x_max
-            origin = self.pt2px((x_min, 0))
-            self.x_axis.set_viewport_origin(origin[0], origin[1], need_x_flush)
+            self._recalc_x_scale()
+
+            origin = self.pt2px((x_min, y_min))
+            self.x_axis.set_viewport_origin(origin[0], 0, need_x_flush)
 
         if ((y_min != self.y_min) or (y_max != self.y_max)):
             self.y_min = y_min
             self.y_max = y_max
-            origin = self.pt2px((0, y_max))
-            self.y_axis.set_viewport_origin(origin[0], origin[1], need_y_flush)
+            self._recalc_y_scale()
+            origin = self.pt2px((x_min, y_max))
+            print "set_bounds:", y_min, y_max, origin 
+
+            self.y_axis.set_viewport_origin(0, origin[1], need_y_flush)
 
         origin = self.pt2px((x_min, y_max))
         if need_x_flush or need_y_flush:
             self.reindex()
 
         self.plot.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
+        print "leaving set_bounds:", self.x_min, self.y_min, self.x_max, self.y_max
 
-    def pt2screen(self, p):
-        np = [(p[0] - self.x_min) * float(self.plot_w) / (self.x_max - self.x_min),
-              self.plot_h - (p[1] - self.y_min) * float(self.plot_h) / (self.y_max - self.y_min)]
-        return np
+    #def pt2screen(self, p):
+    #    np = [(p[0] - self.x_min) * float(self.plot_w) / (self.x_max - self.x_min),
+    #          self.plot_h - (p[1] - self.y_min) * float(self.plot_h) / (self.y_max - self.y_min)]
+    #    return np
 
     def pt2px(self, p):
-        np = [p[0] * float(self.plot_w) / (self.x_max - self.x_min),
-              -1.0 * p[1] * float(self.plot_h) / (self.y_max - self.y_min)]
-        return np
+        if self.x_axis_mode == self.LINEAR: 
+            x_pix = p[0] * self.x_scale
+        elif self.x_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE): 
+            if p[0] > 0.0:
+                x_pix = math.log(p[0] / float(self.x_min)) * self.x_scale 
+            else: 
+                return None 
+
+        if self.y_axis_mode == self.LINEAR: 
+            y_pix = p[1] * self.y_scale 
+        elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE): 
+            if p[1] > 0.0: 
+                y_pix = math.log(p[1] / float(self.y_min)) * self.y_scale
+            else: 
+                return None 
+
+        if self.y_axis_mode == self.LOG_DECADE: 
+            print "pt2px:", p, self.y_min, self.y_scale, [x_pix, y_pix]
+
+        return [x_pix, y_pix]
 
     def px2pt(self, p):
-        np = [p[0] / (float(self.plot_w) / (self.x_max - self.x_min)),
-              -1.0 * p[1] / (float(self.plot_h) / (self.y_max - self.y_min))]
-        return np
+        if self.x_axis_mode == self.LINEAR:
+            x_pt = p[0] / self.x_scale 
+        elif self.x_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
+            x_pt = math.exp(p[0] / self.x_scale) * self.x_min 
+
+        if self.y_axis_mode == self.LINEAR: 
+            y_pt = p[1] / self.y_scale 
+        elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
+            y_pt = math.exp(p[1] / self.y_scale) * self.y_min 
+
+        return [x_pt, y_pt]
 
     def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
+        tickfuncs = { self.LINEAR: ticks.linear, self.LOG_DECADE: ticks.decade,
+                      self.LOG_OCTAVE: ticks.octave }
+
+        print "draw_xaxis_cb", px_min, px_max
         pt_min = self.px2pt(px_min)
         pt_max = self.px2pt(px_max)
 
@@ -193,8 +262,9 @@ class XYPlot (Clutter.Group):
         tick_max = pt_max[0] + tick_pad
 
         # X axis
-        xticks = ticks.linear(self.x_min, self.x_max, self.plot_w / self.TICK_SIZE,
-                              tick_min, tick_max)
+        tick_gen = tickfuncs.get(self.x_axis_mode)
+        xticks = tick_gen(self.x_min, self.x_max, self.plot_w / self.TICK_SIZE,
+                          tick_min, tick_max)
         ctx.set_source_rgb(black.red, black.green, black.blue)
         ctx.set_font_size(self.axis_font_size)
 
@@ -205,7 +275,10 @@ class XYPlot (Clutter.Group):
 
         # ticks
         for tick in xticks:
-            tick_px = self.pt2px((tick, 0))
+            tick_px = self.pt2px((tick, self.y_min))
+            if tick_px is None:
+                continue 
+
             ctx.move_to(tick_px[0] - px_min[0], self.AXIS_PAD)
             ctx.line_to(tick_px[0] - px_min[0], 3 * self.AXIS_PAD)
             ctx.stroke()
@@ -213,6 +286,8 @@ class XYPlot (Clutter.Group):
             ctx.show_text("%.3g" % tick)
 
     def draw_yaxis_cb(self, texture, ctx, px_min, px_max):
+        tickfuncs = { self.LINEAR: ticks.linear, self.LOG_DECADE: ticks.decade,
+                      self.LOG_OCTAVE: ticks.octave }
         pt_min = self.px2pt(px_min)
         pt_max = self.px2pt(px_max)
 
@@ -221,8 +296,9 @@ class XYPlot (Clutter.Group):
         tick_max = pt_min[1] + tick_pad
 
         # Y axis ticks
-        yticks = ticks.linear(self.y_min, self.y_max, float(self.plot_h) / self.TICK_SIZE,
-                              tick_min, tick_max)
+        tick_gen = tickfuncs.get(self.y_axis_mode)
+        yticks = tick_gen(self.y_min, self.y_max, float(self.plot_h) / self.TICK_SIZE,
+                           tick_min, tick_max)
         ctx.set_source_rgb(black.red, black.green, black.blue)
         ctx.set_font_size(self.axis_font_size)
 
@@ -233,7 +309,11 @@ class XYPlot (Clutter.Group):
 
         # ticks
         for tick in yticks:
-            tick_px = self.pt2px((0, tick))
+            tick_px = self.pt2px((self.x_min, tick))
+            print "trying to draw tick", tick , "-->", tick_px 
+
+            if tick_px is None:
+                continue
             ctx.move_to(self.MARGIN_LEFT - self.AXIS_PAD, tick_px[1] - px_min[1])
             ctx.line_to(self.MARGIN_LEFT - 3 * self.AXIS_PAD, tick_px[1] - px_min[1])
             ctx.stroke()
