@@ -93,7 +93,6 @@ class ButtonElement (PatchElement):
             ct.stroke()
 
     def configure(self, params):
-        print "Button.configure:", params 
         if "value" in params:
             self.message = params.get("value")
             self.indicator = self.message 

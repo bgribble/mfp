@@ -36,7 +36,6 @@ class DSPObject(RPCWrapper):
 
     @rpcwrap
     def setparam(self, param, value):
-        print "setparam:", self, param, value
         return mfpdsp.proc_setparam(self.c_obj, param, value)
 
     @rpcwrap
