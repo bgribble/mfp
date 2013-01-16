@@ -98,11 +98,9 @@ class PlotElement (PatchElement):
 
         if x_min != self.x_min:
             self.x_min = x_min
-            print "   ", x_min, self.x_min
             update = True 
         if x_max != self.x_max: 
             self.x_max = x_max
-            print "   ", x_max, self.x_max
             update = True 
         if y_min != self.y_min: 
             self.y_min = y_min
@@ -221,7 +219,6 @@ class PlotElement (PatchElement):
         return False
 
     def configure(self, params):
-        print "PlotElement.configure:", self 
         if "plot_type" in params and self.xyplot is None:
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
@@ -248,4 +245,3 @@ class PlotElement (PatchElement):
             self.xyplot.configure(params)
 
         PatchElement.configure(self, params)
-        print "PlotElement.configure: DONE"

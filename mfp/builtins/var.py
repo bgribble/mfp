@@ -26,7 +26,8 @@ class Var (Processor):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        self.value = None
+        self.value = Uninit
+        self.do_onload = False 
 
         if self.init_type == "message":
             self.hot_inlets = (0, 1)
@@ -35,6 +36,10 @@ class Var (Processor):
             self.value = initargs[0]
         elif len(kwargs):
             self.value = kwargs
+
+    def onload(self):
+        if self.value is not Uninit:
+            self.send(Bang)
 
     def trigger(self):
         '''
@@ -71,7 +76,7 @@ class Var (Processor):
             self.outlets[0] = self.value
             self.inlets[0] = Uninit
 
-        if do_update and self.gui_created and self.gui_params.get("update_required"):
+        if do_update and self.gui_params.get("update_required"):
             self.gui_params['value'] = self.value
 
             if self.gui_created:

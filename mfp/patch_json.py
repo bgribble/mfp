@@ -81,10 +81,12 @@ def json_deserialize(self, json_data):
         otype = prms.get('type')
         oargs = prms.get('initargs')
         oname = prms.get('name')
+        do_onload = prms.get('do_onload')
+
         gp = prms.get('gui_params')
         newobj = MFPApp().create(otype, oargs, self, self.default_scope, gp.get("name"))
-
         newobj.patch = self
+        newobj.do_onload = do_onload
 
         for k, v in gp.items():
             newobj.gui_params[k] = v
@@ -124,9 +126,6 @@ def json_deserialize(self, json_data):
         oid = int(oid)
         conn = prms.get("connections", [])
         srcobj = idmap.get(oid)
-        if isinstance(srcobj, Patch):
-            print "connecting outputs of", srcobj
-            print conn
         for outlet in range(0, len(conn)):
             connlist = conn[outlet]
             for c in connlist:

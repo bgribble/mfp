@@ -80,6 +80,11 @@ class MFPCommand(RPCWrapper):
         obj.gui_created = value
 
     @rpcwrap
+    def set_do_onload(self, value):
+        obj = MFPApp().recall(obj_id)
+        obj.do_onload = value 
+
+    @rpcwrap
     def get_info(self, obj_id):
         obj = MFPApp().recall(obj_id)
         return dict(num_inlets=len(obj.inlets),

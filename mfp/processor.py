@@ -38,6 +38,7 @@ class Processor (object):
         self.osc_methods = []
 
         self.gui_created = False
+        self.do_onload = True 
 
         # gui_params are passed back and forth to the UI process
         # if previously-initialized by the child class, leave alone
@@ -70,6 +71,12 @@ class Processor (object):
         log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
                   % (self.obj_id, self.name, self.init_type, self.init_args))
         return True
+
+    def call_onload(self, value=True): 
+        self.do_onload = value 
+
+    def onload(self):
+        pass 
 
     def assign(self, patch, scope, name):
         if self.patch is not None and self.scope is not None and self.name is not None:
@@ -334,6 +341,7 @@ class Processor (object):
         oinfo['type'] = self.init_type
         oinfo['initargs'] = self.init_args
         oinfo['name'] = self.name
+        oinfo['do_onload'] = self.do_onload
         oinfo['gui_params'] = self.gui_params
         conn = []
         for c in self.connections_out:

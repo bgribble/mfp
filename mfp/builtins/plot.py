@@ -73,7 +73,8 @@ class Scatter (Processor):
         return (datetime.now() - self.time_base).total_seconds()
 
     def _chartconf(self, action, data=None):
-        MFPApp().gui_cmd.command(self.obj_id, action, data)
+        if self.gui_created:
+            MFPApp().gui_cmd.command(self.obj_id, action, data)
         return True
 
     def trigger(self):
@@ -132,8 +133,8 @@ class Scatter (Processor):
         for k, v in kwargs.items():
             if k != 'inlet':
                 instyle[k] = v
-
-        MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+        if self.gui_created:
+            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
         return True
 
     def bounds(self, x_min, y_min, x_max, y_max):

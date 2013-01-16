@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.6
 '''
 patch.py
-Patch load/save
+Patch class and methods 
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
@@ -180,6 +180,10 @@ class Patch(Processor):
     def _load_file(self, filename):
         jsdata = open(filename, 'r').read()
         self.json_deserialize(jsdata)
+
+        for obj_id, obj in self.objects.items():
+            if obj.do_onload:
+                obj.onload()
 
     def create_gui(self):
         from main import MFPApp

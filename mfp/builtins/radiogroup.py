@@ -11,6 +11,9 @@ from .. import Bang, Uninit
 from mfp import log
 
 
+class RGForceFalse (object):
+    pass 
+
 class RadioGroup (Processor):
     '''
     Processor to manage a set of toggle buttons
@@ -28,29 +31,40 @@ class RadioGroup (Processor):
         else:
             init_selection = 0
 
-        self.selection = None 
+        self.init_selection = init_selection 
+        self.selection = None
         self.hot_inlets = range(num_inlets)
 
         Processor.__init__(self, num_inlets, num_inlets+1, 
                            init_type, init_args, patch, scope, name)
-        for i in range(num_inlets):
-            self.send(False, i)
-        self.send(True, init_selection)
 
+    def onload(self):
+        print "radiogroup: loadbanging", self.init_selection
+        for i in range(len(self.inlets)):
+            self.send(RGForceFalse(), i)
+        self.send(True, self.init_selection)
 
     def trigger(self):
         for inum, ival in enumerate(self.inlets):
             if ival is Uninit:
                 continue
-            elif ival:
+            elif ival is True:
+                print "[radiogroup]:", ival, "selecting", inum
+                if self.selection is inum:
+                    print "[radiogroup]: same selection"
+                    continue 
                 if self.selection is not None:
                     self.outlets[self.selection] = False 
 
                 self.selection = inum
+                self.outlets[self.selection] = True 
                 break
-            else: 
+            elif (not ival) or isinstance(ival, RGForceFalse): 
                 if inum == self.selection: 
+                    print "[radiogroup]:", ival, "deselecting", inum
                     self.selection = None 
+                if isinstance(ival, RGForceFalse): 
+                    self.outlets[inum] = False 
                 break
         for inum in range(len(self.inlets)):
             self.inlets[inum] = Uninit

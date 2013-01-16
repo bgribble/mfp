@@ -117,6 +117,7 @@ class EnumElement (PatchElement):
         if self.obj_id is None:
             print "MessageElement: could not create message obj"
         else:
+            MFPGUI().mfp.set_do_onload(self.obj_id, True)
             self.obj_state = self.OBJ_COMPLETE
 
         self.draw_ports()

@@ -93,6 +93,7 @@ class ButtonElement (PatchElement):
             ct.stroke()
 
     def configure(self, params):
+        print "Button.configure:", params 
         if "value" in params:
             self.message = params.get("value")
             self.indicator = self.message 
@@ -183,5 +184,10 @@ class ToggleButtonElement (ButtonElement):
         self.texture.invalidate()
         return False
 
+    def create(self, init_type, init_args):
+        ButtonElement.create(self, init_type, init_args)
+        if self.obj_id:
+            MFPGUI().mfp.set_do_onload(self.obj_id, True)
+        
     def unclicked(self):
         return False
