@@ -35,14 +35,18 @@ class PatchEditMode (InputMode):
 
         self.bind("p", lambda: self.add_element(ProcessorElement),
                   "Add processor box")
-        self.bind("t", lambda: self.add_element(TextElement),
-                  "Add text comment")
         self.bind("m", lambda: self.add_element(MessageElement),
                   "Add message box")
         self.bind("n", lambda: self.add_element(EnumElement),
                   "Add number box")
-        self.bind("f", lambda: self.add_element(FaderElement),
-                  "Add fader")
+        self.bind("t", lambda: self.add_element(TextElement),
+                  "Add text comment")
+        self.bind("u", lambda: self.add_element(ToggleButtonElement),
+                  "Add toggle button")
+        self.bind("g", lambda: self.add_element(BangButtonElement),
+                  "Add bang button")
+        self.bind("s", lambda: self.add_element(FaderElement),
+                  "Add slider")
         self.bind("b", lambda: self.add_element(BarMeterElement),
                   "Add bar meter")
         self.bind("x", lambda: self.add_element(PlotElement),
@@ -51,9 +55,6 @@ class PatchEditMode (InputMode):
                   "Add send message via")
         self.bind("V", lambda: self.add_element(ReceiveViaElement),
                   "Add receive message via")
-
-        self.bind("u", lambda: self.add_element(ToggleButtonElement),
-                  "Add button")
 
         self.bind("C-n", self.window.layer_new, "Create new layer")
         self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
