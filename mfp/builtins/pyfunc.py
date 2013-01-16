@@ -109,8 +109,6 @@ class PyBinary(Processor):
             # hope for a default
             self.outlets[0] = self.function(self.inlets[0])
 
-
-
 class PyUnary(Processor):
     def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
         self.function = pyfunc
@@ -119,6 +117,20 @@ class PyUnary(Processor):
     def trigger(self):
         self.outlets[0] = self.function(self.inlets[0])
 
+class PyNullary(Processor):
+    def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
+        self.function = pyfunc
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+
+    def trigger(self):
+        self.outlets[0] = self.function()
+
+
+def mk_nullary(pyfunc, name):
+    def factory(iname, args, patch, scope, obj_name):
+        proc = PyNullary(pyfunc, iname, args, patch, scope, obj_name)
+        return proc
+    MFPApp().register(name, factory)
 
 def mk_binary(pyfunc, name):
     def factory(iname, args, patch, scope, obj_name):
@@ -136,6 +148,20 @@ def mk_unary(pyfunc, name):
 import operator
 import math
 import cmath
+
+def make_date(args):
+    import datetime
+
+    if isinstance(args, datetime.datetime):
+        return args.date()
+    else:
+        return datetime.date(*args)
+
+def applyargs(func):
+    def wrapped(args):
+        return func(*args)
+    return wrapped
+
 
 def register():
     MFPApp().register("get", GetElement)
@@ -182,3 +208,9 @@ def register():
     mk_unary(list, "list")
     mk_unary(type, "type")
     mk_unary(dict, "dict")
+
+    from datetime import datetime 
+    mk_nullary(datetime.now, "now")
+    mk_unary(applyargs(datetime), "datetime")
+    mk_unary(make_date, "date")
+
