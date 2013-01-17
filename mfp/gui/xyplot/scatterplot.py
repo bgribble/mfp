@@ -36,19 +36,24 @@ class ScatterPlot (XYPlot):
             dst_px[0] -= px_min[0]
             dst_px[1] -= px_min[1]
             styler.stroke(ctxt, dst_px, px)
-
+       
+        # if the viewport is animated (viewport_scroll not 0) 
+        # the position of the field may have changed.
         field_vp = self.plot.get_viewport_origin()
         field_vp_pos = self.px2pt(field_vp)
         field_w = self.x_max - self.x_min
         field_h = self.y_max - self.y_min
 
-        self.x_min = field_vp_pos[0]
-        self.x_max = self.x_min + field_w
-        self.y_max = field_vp_pos[1]
-        self.y_min = self.y_max - field_h
+        if self.x_min != field_vp_pos[0]:
+            self.x_min = field_vp_pos[0]
+            self.x_max = self.x_min + field_w
+            self._recalc_x_scale()
 
-        print "draw_field_cb:", self, field_vp_pos, self.y_min
-
+        if self.y_max != field_vp_pos[1]:
+            self.y_max = field_vp_pos[1]
+            self.y_min = self.y_max - field_h
+            self._recalc_y_scale()
+       
         for curve in self.points:
             styler = self.style.get(curve)
             if styler is None:
@@ -181,16 +186,31 @@ class ScatterPlot (XYPlot):
         s = params.get("style")
         if s:
             self.set_style(s)
-
+        
+        need_vp = False 
         x = params.get("x_axis")
         if x:
-            self.x_axis_mode = modes.get(x.upper())
-            self._recalc_x_scale()
+            mode = modes.get(x.upper())
+            if mode != self.x_axis_mode: 
+                self.x_axis_mode = mode 
+                self._recalc_x_scale()
+                xax = self.pt2px((self.x_min, self.y_min))
+                self.x_axis.set_viewport_origin(xax[0], 0, True)
+                need_vp = True 
 
         y = params.get("y_axis")
         if y:
-            self.y_axis_mode = modes.get(y.upper())
-            self._recalc_y_scale()
+            mode = modes.get(y.upper())
+            if mode != self.y_axis_mode:
+                self.y_axis_mode = mode 
+                self._recalc_y_scale()
+                yax = self.pt2px((self.x_min, self.y_max))
+                self.y_axis.set_viewport_origin(0, yax[1], True)
+                need_vp = True 
+
+        if need_vp:
+            origin = self.pt2px((self.x_min, self.y_max))
+            self.plot.set_viewport_origin(origin[0], origin[1], True)
 
     def command(self, action, data):
         if action == "add":

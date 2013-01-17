@@ -198,7 +198,6 @@ class XYPlot (Clutter.Group):
             self.y_max = y_max
             self._recalc_y_scale()
             origin = self.pt2px((x_min, y_max))
-            print "set_bounds:", y_min, y_max, origin 
 
             self.y_axis.set_viewport_origin(0, origin[1], need_y_flush)
 
@@ -207,12 +206,6 @@ class XYPlot (Clutter.Group):
             self.reindex()
 
         self.plot.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
-        print "leaving set_bounds:", self.x_min, self.y_min, self.x_max, self.y_max
-
-    #def pt2screen(self, p):
-    #    np = [(p[0] - self.x_min) * float(self.plot_w) / (self.x_max - self.x_min),
-    #          self.plot_h - (p[1] - self.y_min) * float(self.plot_h) / (self.y_max - self.y_min)]
-    #    return np
 
     def pt2px(self, p):
         if self.x_axis_mode == self.LINEAR: 
@@ -231,9 +224,6 @@ class XYPlot (Clutter.Group):
             else: 
                 return None 
 
-        if self.y_axis_mode == self.LOG_DECADE: 
-            print "pt2px:", p, self.y_min, self.y_scale, [x_pix, y_pix]
-
         return [x_pix, y_pix]
 
     def px2pt(self, p):
@@ -247,13 +237,12 @@ class XYPlot (Clutter.Group):
         elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
             y_pt = math.exp(p[1] / self.y_scale) * self.y_min 
 
-        return [x_pt, y_pt]
+        return [x_pt, y_pt ]
 
     def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
         tickfuncs = { self.LINEAR: ticks.linear, self.LOG_DECADE: ticks.decade,
                       self.LOG_OCTAVE: ticks.octave }
 
-        print "draw_xaxis_cb", px_min, px_max
         pt_min = self.px2pt(px_min)
         pt_max = self.px2pt(px_max)
 
@@ -310,7 +299,6 @@ class XYPlot (Clutter.Group):
         # ticks
         for tick in yticks:
             tick_px = self.pt2px((self.x_min, tick))
-            print "trying to draw tick", tick , "-->", tick_px 
 
             if tick_px is None:
                 continue
