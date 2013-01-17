@@ -1,0 +1,1 @@
+from .pluginfo import * 
