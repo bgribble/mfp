@@ -22,15 +22,23 @@
                 "__patch__"
             ],
             [
+                "Bandpass",
+                "__patch__"
+            ],
+            [
+                "Low shelf",
+                "__patch__"
+            ],
+            [
+                "High shelf",
+                "__patch__"
+            ],
+            [
                 "Pole-zero calc",
                 "__patch__"
             ],
             [
                 "Freq resp calc",
-                "__patch__"
-            ],
-            [
-                "Bandpass",
                 "__patch__"
             ]
         ],
@@ -559,15 +567,18 @@
                 ]
             ],
             "gui_params": {
+                "value": true,
                 "position_x": 34.98871612548828,
                 "name": "rg_lowpass",
+                "obj_id": 21,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "toggle",
                 "num_inlets": 2,
                 "position_y": 60.974802637505945,
-                "dsp_outlets": null,
+                "initargs": "True",
                 "layername": "Front Panel"
             },
             "name": "rg_lowpass",
@@ -787,7 +798,7 @@
                 "name": "out_a1",
                 "obj_id": 29,
                 "dsp_outlets": null,
-                "value": -1.035121791879154,
+                "value": -1.50365042037159,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -797,7 +808,7 @@
                 "initargs": "0.0"
             },
             "name": "out_a1",
-            "value": -1.035121791879154,
+            "value": -1.50365042037159,
             "do_onload": true,
             "initargs": "0.0",
             "type": "var"
@@ -818,7 +829,7 @@
                 "name": "out_a2",
                 "obj_id": 30,
                 "dsp_outlets": null,
-                "value": 0.36774539178022964,
+                "value": 0.6043518701754858,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -828,7 +839,7 @@
                 "initargs": "0.0"
             },
             "name": "out_a2",
-            "value": 0.36774539178022964,
+            "value": 0.6043518701754858,
             "do_onload": true,
             "initargs": "0.0",
             "type": "var"
@@ -849,7 +860,7 @@
                 "name": "out_b0",
                 "obj_id": 31,
                 "dsp_outlets": null,
-                "value": 0.600716795914846,
+                "value": 0.025175362450974015,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -859,7 +870,7 @@
                 "initargs": "0.0"
             },
             "name": "out_b0",
-            "value": 0.600716795914846,
+            "value": 0.025175362450974015,
             "do_onload": true,
             "initargs": "0.0",
             "type": "var"
@@ -880,7 +891,7 @@
                 "name": "out_b1",
                 "obj_id": 32,
                 "dsp_outlets": null,
-                "value": -1.201433591829692,
+                "value": 0.05035072490194803,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -890,7 +901,7 @@
                 "initargs": "0.0"
             },
             "name": "out_b1",
-            "value": -1.201433591829692,
+            "value": 0.05035072490194803,
             "do_onload": true,
             "initargs": "0.0",
             "type": "var"
@@ -911,7 +922,7 @@
                 "name": "out_b2",
                 "obj_id": 33,
                 "dsp_outlets": null,
-                "value": 0.600716795914846,
+                "value": 0.025175362450974015,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "update_required": true,
@@ -921,7 +932,7 @@
                 "initargs": "0.0"
             },
             "name": "out_b2",
-            "value": 0.600716795914846,
+            "value": 0.025175362450974015,
             "do_onload": true,
             "initargs": "0.0",
             "type": "var"
@@ -1061,20 +1072,15 @@
                 ]
             ],
             "gui_params": {
-                "value": {
-                    "__BangType__": {}
-                },
                 "position_x": 254.67649841308594,
                 "name": "compute_button",
-                "obj_id": 39,
-                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "button",
                 "num_inlets": 2,
                 "position_y": 231.80694580078125,
-                "initargs": null,
+                "dsp_outlets": null,
                 "layername": "Front Panel"
             },
             "name": "compute_button",
@@ -2679,7 +2685,7 @@
                 "initargs": null
             },
             "name": "processor_25",
-            "value": 1,
+            "value": 0,
             "do_onload": false,
             "initargs": null,
             "type": "var"
@@ -3861,7 +3867,6 @@
                 []
             ],
             "gui_params": {
-                "x_max": 22050.0,
                 "plot_type": "scatter",
                 "style": {
                     "0": {
@@ -3872,22 +3877,21 @@
                     }
                 },
                 "position_x": 381.7375793457031,
-                "name": "ampl_graph",
-                "obj_id": 191,
-                "dsp_outlets": [],
-                "y_max": 1.5,
+                "x_max": 44100,
+                "y_max": 10,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": [],
+                "y_min": -80,
                 "display_type": "plot",
-                "num_inlets": 3,
+                "num_inlets": 1,
                 "position_y": 122.862548828125,
-                "x_min": 0.0,
-                "initargs": "1",
+                "x_min": 1,
+                "dsp_outlets": [],
                 "layername": "Graphs",
-                "y_min": -1.0
+                "name": "freq_graph"
             },
-            "name": "ampl_graph",
+            "name": "freq_graph",
             "do_onload": true,
             "initargs": "1",
             "type": "scatter"
@@ -4259,7 +4263,6 @@
                 []
             ],
             "gui_params": {
-                "x_max": 2,
                 "plot_type": "scatter",
                 "style": {
                     "1": {
@@ -4282,20 +4285,19 @@
                     }
                 },
                 "position_x": 30.963523864746094,
-                "name": "pole_zero_graph",
-                "obj_id": 205,
-                "dsp_outlets": [],
+                "x_max": 2,
                 "y_max": 1.5,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": [],
+                "y_min": -1.5,
                 "display_type": "plot",
                 "num_inlets": 3,
                 "position_y": 124.37521362304688,
                 "x_min": -2,
-                "initargs": "3",
+                "dsp_outlets": [],
                 "layername": "Graphs",
-                "y_min": -1.5
+                "name": "pole_zero_graph"
             },
             "name": "pole_zero_graph",
             "do_onload": true,
@@ -5533,23 +5535,21 @@
             "connections": [
                 [
                     [
-                        250,
-                        1
+                        281,
+                        0
                     ]
                 ]
             ],
             "gui_params": {
                 "position_x": 261.51898193359375,
                 "name": "processor_097",
-                "obj_id": 248,
-                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 2,
                 "position_y": 245.6338653564453,
-                "initargs": "0.5",
+                "dsp_outlets": null,
                 "layername": "Freq resp calc"
             },
             "name": "processor_097",
@@ -5609,15 +5609,13 @@
             "gui_params": {
                 "position_x": 174.53424072265625,
                 "name": "processor_098",
-                "obj_id": 250,
-                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 2,
                 "position_y": 351.52276611328125,
-                "initargs": "2",
+                "dsp_outlets": null,
                 "layername": "Freq resp calc"
             },
             "name": "processor_098",
@@ -5645,12 +5643,12 @@
                 "display_type": "processor",
                 "num_inlets": 2,
                 "position_y": 311.7777328491211,
-                "initargs": "app.samplerate / math.pi",
+                "initargs": "app.samplerate / (2 * math.pi)",
                 "layername": "Freq resp calc"
             },
             "name": "processor_099",
             "do_onload": true,
-            "initargs": "app.samplerate / math.pi",
+            "initargs": "app.samplerate / (2 * math.pi)",
             "type": "*"
         },
         "252": {
@@ -6458,9 +6456,35 @@
             "do_onload": true,
             "initargs": "\"out_a2\"",
             "type": "send"
+        },
+        "281": {
+            "connections": [
+                [
+                    [
+                        250,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 273.5168151855469,
+                "name": "processor_085",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 310.6390075683594,
+                "dsp_outlets": null,
+                "layername": "Freq resp calc"
+            },
+            "name": "processor_085",
+            "do_onload": true,
+            "initargs": null,
+            "type": "a2db"
         }
     },
-    "type": "biquad_designer",
+    "type": "biquad-1",
     "scopes": {
         "__patch__": {
             "slope": 59,
@@ -6473,6 +6497,7 @@
             "processor_096": 247,
             "processor_095": 246,
             "processor_094": 245,
+            "sendvia_11": 51,
             "sendvia_053": 252,
             "sendvia_052": 280,
             "sendvia_051": 277,
@@ -6483,7 +6508,7 @@
             "out_a2": 30,
             "out_a1": 29,
             "processor_084": 279,
-            "processor_085": 231,
+            "processor_085": 281,
             "processor_086": 232,
             "processor_087": 233,
             "processor_080": 274,
@@ -6513,8 +6538,6 @@
             "message_4": 181,
             "bpf": 258,
             "message_8": 200,
-            "scatter_0": 191,
-            "scatter_1": 205,
             "sendvia_048": 268,
             "sendvia_049": 269,
             "sendvia_047": 260,
@@ -6581,7 +6604,7 @@
             "sendvia_16": 64,
             "sendvia_17": 65,
             "processor_29": 173,
-            "sendvia_11": 51,
+            "freq_graph": 191,
             "sendvia_12": 52,
             "sendvia_13": 53,
             "processor_25": 115,
@@ -6642,7 +6665,6 @@
             "text_33": 190,
             "text_30": 117,
             "text_31": 188,
-            "ampl_graph": 191,
             "self": 0,
             "fr0": 193,
             "in_slope": 11,
