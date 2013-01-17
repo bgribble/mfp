@@ -54,3 +54,7 @@ def register():
     phasor.register()
     from . import radiogroup
     radiogroup.register()
+    from . import dbmath
+    dbmath.register() 
+
+
