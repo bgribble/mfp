@@ -13,4 +13,6 @@ def is_ladspa(filename):
 def list_plugins(filename):
     return _pluginfo.list_plugins(filename)
 
+def describe_plugin(filename, plug_id):
+    return _pluginfo.describe_plugin(filename, plug_id)
 
