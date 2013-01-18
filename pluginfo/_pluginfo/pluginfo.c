@@ -114,7 +114,9 @@ describe_plugin(PyObject * mod, PyObject * args)
         return Py_None;
     }
     dict = PyDict_New();
-    PyDict_SetItemString(dict, "libname", PyString_FromString(libname));
+    PyDict_SetItemString(dict, "lib_name", PyString_FromString(libname));
+    PyDict_SetItemString(dict, "lib_type", PyString_FromString("ladspa"));
+    PyDict_SetItemString(dict, "lib_index", PyInt_FromLong(plug_id));
     PyDict_SetItemString(dict, "unique_id", PyInt_FromLong(descrip->UniqueID));
     PyDict_SetItemString(dict, "properties", PyInt_FromLong(descrip->Properties));
     PyDict_SetItemString(dict, "label", PyString_FromString(descrip->Label));
