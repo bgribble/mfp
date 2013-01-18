@@ -84,6 +84,30 @@ plain C libraries.
 If all that works: 
     $ mfp 
 
+The very, very basic tutorial: follow these steps to create a helloworld
+patch using just the keyboard.  You do need a pointer to activate it. 
+
+You type	What happens
+----------- ------------------
+a			Autoplace mode.  A + appears where the next object will go
+m			Create message (literal data)
+"hello world" RET	Put the string "hello, world" in the message 
+c			Connect mode (will connect selected object to something)
+a			Autoplace mode again
+p			Create a processor
+print RET	Make it a [print] processor
+RET			Make the connection
+
+Now click on the message box to send the "hello, world" string.  
+
+Below the patch editing area, in the "Log" tab, you will see the message 
+appear.
+
+At any time, the "Keybindings" tab to the left of the patch editing area
+will show you all the active key bindings.  Bindings nearer the top are 
+chosen first, so if there are 2 listings for RET for instance the top one will
+be used.
+
 Demo patches: There are a few demo patches in doc/ which are really all the
 documentation there is right now.  Since there's no support for load paths
 yet, you need to copy these into the root level of the source tree to run
