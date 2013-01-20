@@ -117,7 +117,6 @@ config(mfp_processor * proc)
     }
 
     return;
-    return;
 }
 
 mfp_procinfo *  
