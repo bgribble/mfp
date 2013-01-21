@@ -6,6 +6,7 @@ Copyright (c) 2010-2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import time
+from pluginfo import PlugInfo 
 
 from .bang import Bang
 from .patch import Patch
@@ -160,6 +161,9 @@ class MFPApp (Singleton):
         self.objects = {}
         self.next_obj_id = 0
 
+        # plugin info database
+        self.pluginfo = PlugInfo()
+
         # temporary name cache
         self.objects_byname = {}
 
@@ -211,6 +215,13 @@ class MFPApp (Singleton):
         self.osc_mgr = osc.MFPOscManager(5555)
         self.osc_mgr.start()
         log.debug("OSC server started (UDP/5555)")
+
+        # crawl plugins 
+        log.debug("Collecting information about installed plugins...")
+        self.pluginfo.samplerate = self.samplerate 
+        self.pluginfo.index_ladspa()
+        log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo), 
+                                                           len(self.pluginfo.libinfo)))
 
     def remember(self, obj):
         oi = self.next_obj_id

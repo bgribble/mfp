@@ -29,7 +29,7 @@ ladspa_setup(mfp_processor * proc)
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
     gpointer p_lib_name = g_hash_table_lookup(proc->params, "lib_name");
     gpointer p_lib_index = g_hash_table_lookup(proc->params, "lib_index");
-    int lib_index = (int)(p_lib_index);
+    int lib_index = (int)(*(float *)p_lib_index);
     LADSPA_Descriptor * (* descrip_func)(unsigned long);
     int portnum; 
     int portcount;
@@ -38,6 +38,8 @@ ladspa_setup(mfp_processor * proc)
     void * dllib; 
 
     printf("ladspa_setup(%s, %d)\n", (char *)p_lib_name, lib_index);
+    if (p_lib_name == NULL)
+        return;
 
     d->lib_name = g_strdup((char *)p_lib_name);
     dllib = dlopen((char *)p_lib_name, RTLD_NOW);
@@ -48,7 +50,8 @@ ladspa_setup(mfp_processor * proc)
         
     /* get the descriptor */ 
     if (descrip_func != NULL) { 
-        d->plug_descrip = descrip_func((int)p_lib_index);
+        printf("got descriptor, calling\n");
+        d->plug_descrip = descrip_func(lib_index);
     }
 
     /* instantiate the plugin */ 
@@ -73,18 +76,21 @@ ladspa_setup(mfp_processor * proc)
             }
             else if (portdesc & LADSPA_PORT_CONTROL) {
                 d->plug_descrip->connect_port(d->plug_handle, portnum, 
-                        &(d->plug_control[portnum]));
+                                              d->plug_control + portnum);
             }
         }
+        printf("ladspa_setup: ins=%d, outs=%d\n", signal_ins, signal_outs);
 
         /* reconfigure buffers in the processor object */ 
         mfp_proc_free_buffers(proc);
         mfp_proc_alloc_buffers(proc, signal_ins, signal_outs, mfp_blocksize);
 
+        printf("ladspa_setup: connecting\n");
         /* connect signal inputs and outputs to the new buffers */
         signal_ins = 0;
         signal_outs = 0;
         for(portnum=0; portnum < portcount; portnum++) {
+            printf("ladspa_setup: port %d\n", portnum);
             portdesc = d->plug_descrip->PortDescriptors[portnum];
             if (portdesc & LADSPA_PORT_AUDIO) {
                 if (portdesc & LADSPA_PORT_INPUT) {
@@ -93,12 +99,15 @@ ladspa_setup(mfp_processor * proc)
                     signal_ins++;
                 }
                 else if (portdesc & LADSPA_PORT_OUTPUT) {
+                    printf("connecting port %d output to DSP out %d block %p\n",
+                            portnum, signal_outs, proc->outlet_buf[signal_outs]->data);
                     d->plug_descrip->connect_port(d->plug_handle, portnum, 
-                            proc->inlet_buf[signal_outs]->data);
+                            proc->outlet_buf[signal_outs]->data);
                     signal_outs++;
                 }
             }
         }
+        printf("ladspa_setup: done connecting\n");
     }
 }
 
@@ -110,22 +119,25 @@ process(mfp_processor * proc)
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
 
     /* this is simple! */
-    d->plug_descrip->run(d->plug_handle, mfp_blocksize);
+    if (d->plug_descrip != NULL) {
+        d->plug_descrip->run(d->plug_handle, mfp_blocksize);
+    }
     return 0;
 }
 
 static void 
 init(mfp_processor * proc) 
 {
-    builtin_ladspa_data * d = (builtin_ladspa_data *)g_malloc(sizeof(builtin_ladspa_data));
+    builtin_ladspa_data * d = (builtin_ladspa_data *)g_malloc0(sizeof(builtin_ladspa_data));
 
     d->lib_name = NULL;
     d->lib_index = 0;
     d->lib_dlptr = NULL;
     d->plug_descrip = NULL;
     d->plug_control = NULL;
-
+    proc->data = d;
     ladspa_setup(proc);
+    
     return;
 }
 
@@ -169,6 +181,7 @@ config(mfp_processor * proc)
     if (control_p != NULL) { 
         for (portnum=0; portnum < ((GArray *)control_p)->len; portnum++) {
             d->plug_control[portnum] = g_array_index((GArray *)control_p, float, portnum);     
+            printf("setting port %d to %f\n", portnum, d->plug_control[portnum]);
         }
     }
 
@@ -178,6 +191,19 @@ config(mfp_processor * proc)
         d->plug_activated = 1;
     }
     return;
+}
+
+static void
+preconfig(mfp_processor * proc) 
+{
+    builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
+
+    printf("preconfig\n");
+
+    if (d->lib_name == NULL) {
+        ladspa_setup(proc);
+    }
+
 }
 
 mfp_procinfo *  
@@ -191,12 +217,12 @@ init_builtin_ladspa(void) {
     p->process = process;
     p->init = init;
     p->destroy = destroy;
+    p->preconfig = preconfig;
     p->config = config;
-    p->preconfig = NULL;
     p->reset = NULL;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     g_hash_table_insert(p->params, "plug_control", (gpointer)PARAMTYPE_FLTARRAY);
-    g_hash_table_insert(p->params, "lib_name", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "lib_name", (gpointer)PARAMTYPE_STRING);
     g_hash_table_insert(p->params, "lib_index", (gpointer)PARAMTYPE_INT);
     printf("init_builtin_ladspa LEAVE\n");
     return p;

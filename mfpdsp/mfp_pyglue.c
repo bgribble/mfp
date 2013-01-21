@@ -137,6 +137,7 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
+            printf("set_c_param: undefined parameter %s\n", paramname);
             rval = 0;
             break;
         case PARAMTYPE_FLT:
@@ -164,8 +165,9 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
                 cstr = PyString_AsString(val);
                 mfp_proc_setparam_string(proc, paramname, cstr);
             }
-            else
+            else {
                 rval = 0;
+            }
             break;
 
         case PARAMTYPE_FLTARRAY:
@@ -200,11 +202,6 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
         }
         Py_INCREF(val);
         g_hash_table_replace(proc->pyparams, g_strdup(paramname), val);
-
-        /* config_preconfig is the non-RT phase of config */ 
-        if (proc->typeinfo->preconfig != NULL) {
-            proc->typeinfo->preconfig(proc);
-        }
 
         /* FIXME: race on setting needs_config */ 
         proc->needs_config = 1;
@@ -244,26 +241,21 @@ proc_create(PyObject * mod, PyObject *args)
     PyArg_ParseTuple(args, "siiO", &typestr, &num_inlets, &num_outlets, &paramdict); 
 
     mfp_procinfo * pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typestr);
-    mfp_reqdata rd;
+    mfp_processor * proc;
 
     if (pinfo == NULL) {
         Py_INCREF(Py_None);
         return Py_None;
     }
     else {
-        rd.reqtype = REQTYPE_CREATE;
-        rd.src_proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, mfp_blocksize);
-        extract_c_params(rd.src_proc, paramdict);
+        proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, mfp_blocksize);
+        extract_c_params(proc, paramdict);
+        mfp_proc_init(proc);
 
-        pthread_mutex_lock(&mfp_globals_lock);
-        g_array_append_val(mfp_requests_pending, rd);
-        pthread_mutex_unlock(&mfp_globals_lock);
-
-        newobj = PyCObject_FromVoidPtr(rd.src_proc, NULL);
-
+        newobj = PyCObject_FromVoidPtr(proc, NULL);
         Py_INCREF(newobj);
-        g_hash_table_insert(mfp_proc_objects, rd.src_proc, newobj);
 
+        g_hash_table_insert(mfp_proc_objects, proc, newobj);
         Py_INCREF(newobj);
         return newobj;
     }
@@ -367,9 +359,15 @@ proc_setparam(PyObject * mod, PyObject * args)
     PyObject * self=NULL;
     char * param_name=NULL;
     PyObject * param_value = NULL;
+    mfp_processor * p = NULL;
 
     PyArg_ParseTuple(args, "OsO", &self, &param_name, &param_value);
-    set_c_param(((mfp_processor *)PyCObject_AsVoidPtr(self)), param_name, param_value);
+    p = (mfp_processor *)PyCObject_AsVoidPtr(self); 
+    set_c_param(p, param_name, param_value);
+
+    if(p->typeinfo->preconfig) {
+        p->typeinfo->preconfig(p);
+    }
     Py_INCREF(Py_False);
     return Py_False;
 }

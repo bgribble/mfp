@@ -56,5 +56,6 @@ def register():
     radiogroup.register()
     from . import dbmath
     dbmath.register() 
-
+    from . import plugin
+    plugin.register()
 

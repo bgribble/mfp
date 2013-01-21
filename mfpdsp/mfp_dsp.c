@@ -163,9 +163,6 @@ mfp_dsp_handle_requests(void)
             mfp_proc_destroy(cmd.src_proc);
             break;
 
-        case REQTYPE_CREATE:
-            mfp_proc_init(cmd.src_proc);
-            break;
         }
     }
     if (mfp_requests_pending->len) 
