@@ -128,6 +128,7 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
     int rval = 1;
     int vtype = (int)g_hash_table_lookup(proc->typeinfo->params, paramname);    
     float cflt;
+    int cint;
     char * cstr;
     int llen, lpos;
     GArray * g;
@@ -142,6 +143,16 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
             if (PyNumber_Check(val)) {
                 cflt = PyFloat_AsDouble(PyNumber_Float(val));
                 mfp_proc_setparam_float(proc, paramname, cflt);
+            }
+            else {
+                rval = 0;
+            }
+            break;
+
+        case PARAMTYPE_INT:
+            if (PyNumber_Check(val)) {
+                cint = (int)PyFloat_AsDouble(PyNumber_Float(val));
+                mfp_proc_setparam_float(proc, paramname, cint);
             }
             else {
                 rval = 0;
@@ -189,6 +200,13 @@ set_c_param(mfp_processor * proc, char * paramname, PyObject * val)
         }
         Py_INCREF(val);
         g_hash_table_replace(proc->pyparams, g_strdup(paramname), val);
+
+        /* config_preconfig is the non-RT phase of config */ 
+        if (proc->typeinfo->preconfig != NULL) {
+            proc->typeinfo->preconfig(proc);
+        }
+
+        /* FIXME: race on setting needs_config */ 
         proc->needs_config = 1;
     }
 
@@ -416,7 +434,8 @@ init_builtins(void)
         init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 
         init_builtin_lt, init_builtin_gt,
         init_builtin_line, init_builtin_noise, init_builtin_buffer,
-        init_builtin_biquad, init_builtin_phasor
+        init_builtin_biquad, init_builtin_phasor,
+        init_builtin_ladspa
     };
     int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
 
@@ -429,12 +448,6 @@ init_builtins(void)
 
 }
 
-int 
-benchmark_SETUP(void) 
-{
-    return test_SETUP();
-}
-
 int
 test_SETUP(void) 
 {
@@ -443,6 +456,12 @@ test_SETUP(void)
     init_globals();
     init_builtins();
     return 0;
+}
+
+int 
+benchmark_SETUP(void) 
+{
+    return test_SETUP();
 }
 
 int

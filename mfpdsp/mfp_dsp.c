@@ -39,11 +39,9 @@ ready_to_schedule(mfp_processor * p)
     int maxdepth = -1;
 
     if (p == NULL) {
-        printf("mfpdsp.ready_to_schedule: p is NULL\n");
         return -1;
     }
     if (p->typeinfo == NULL) {
-        printf("mfpdsp.ready_to_schedule: p->typeinfo is NULL\n");
         return -1;
     }
 

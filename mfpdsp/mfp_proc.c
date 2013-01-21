@@ -18,7 +18,6 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 {
     if (typeinfo == NULL) 
         return NULL;
-
     return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, blocksize));
 }
 
@@ -27,10 +26,8 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
                int blocksize)
 {
     mfp_processor * p;
-    int incount, outcount;
 
     if (typeinfo == NULL) {
-        printf ("mfp_proc_alloc: typeinfo is NULL!\n");
         return NULL;
     }
 
@@ -41,19 +38,33 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
     p->depth = -1;
     p->needs_config = 0;
     p->needs_reset = 0;
+    p->inlet_conn = NULL;
+    p->outlet_conn = NULL;
+
+    mfp_proc_alloc_buffers(p, num_inlets, num_outlets, blocksize);
+
+    return p;
+}
+
+
+int
+mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int blocksize) 
+{
+    int count;
+    int success=0;
 
     /* create inlet and outlet processor pointer arrays */
     p->inlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_inlets);
     
     /* these are arrays of mfp_connection * */    
-    for (incount = 0; incount < num_inlets; incount++) {
+    for (count = 0; count < num_inlets; count++) {
         GArray * in = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
         g_array_append_val(p->inlet_conn, in);
     }
 
     p->outlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_outlets);
 
-    for (outcount = 0; outcount < num_outlets; outcount++) {
+    for (count = 0; count < num_outlets; count++) {
         GArray * out = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
         g_array_append_val(p->outlet_conn, out);
     }
@@ -61,17 +72,47 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
     /* create input and output buffers (will be reallocated if blocksize changes */
     p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));
 
-    for (outcount = 0; outcount < num_inlets; outcount ++) {
-        p->inlet_buf[outcount] = mfp_block_new(blocksize); 
-    }    
+    for (count = 0; count < num_inlets; count ++) {
+        p->inlet_buf[count] = mfp_block_new(blocksize); 
+    }
 
     p->outlet_buf = g_malloc(num_outlets * sizeof(mfp_sample *));
     
-    for (outcount = 0; outcount < num_outlets; outcount ++) {
-        p->outlet_buf[outcount] = mfp_block_new(blocksize);
+    for (count = 0; count < num_outlets; count ++) {
+        p->outlet_buf[count] = mfp_block_new(blocksize);
     }    
-    return p;
+    return success;
 }
+
+void
+mfp_proc_free_buffers(mfp_processor * self) 
+{
+    int b;
+    int num_inlets = self->inlet_conn->len;
+    int num_outlets = self->outlet_conn->len;
+
+    for (b=0; b < num_inlets; b++) {
+        g_array_free(g_array_index(self->inlet_conn, GArray *, b), TRUE);
+    }
+    g_array_free(self->inlet_conn, TRUE);
+
+
+    for (b=0; b < num_outlets; b++) {
+        g_array_free(g_array_index(self->outlet_conn, GArray *, b), TRUE);
+    }
+    g_array_free(self->outlet_conn, TRUE);
+
+    for (b=0; b < num_inlets; b++) {
+        mfp_block_free(self->inlet_buf[b]);
+    }
+    g_free(self->inlet_buf);
+
+    for (b=0; b < num_outlets; b++) {
+        mfp_block_free(self->outlet_buf[b]);
+    }
+    g_free(self->outlet_buf);
+}
+
 
 mfp_processor *
 mfp_proc_init(mfp_processor * p)
@@ -139,7 +180,6 @@ mfp_proc_reset(mfp_processor * self)
 }
 
 
-
 void
 mfp_proc_destroy(mfp_processor * self) 
 {
@@ -148,7 +188,6 @@ mfp_proc_destroy(mfp_processor * self)
     /* remove from global processor list */
     for(procpos=0; procpos < mfp_proc_list->len; procpos++) {
         if (g_array_index(mfp_proc_list, mfp_processor *, procpos) == self) {
-            printf("proc_delete found processor at index%d\n", procpos);
             g_array_remove_index(mfp_proc_list, procpos);
             break;
         }
@@ -156,13 +195,8 @@ mfp_proc_destroy(mfp_processor * self)
 
     self->typeinfo->destroy(self);
     g_hash_table_destroy(self->params);
-    g_array_free(self->inlet_conn, TRUE);
-    g_array_free(self->outlet_conn, TRUE);
 
-    /* FIXME: mem leak, free blocks */
-
-    g_free(self->inlet_buf);
-    g_free(self->outlet_buf);
+    mfp_proc_free_buffers(self);
     g_free(self);
     mfp_needs_reschedule = 1;
     return;

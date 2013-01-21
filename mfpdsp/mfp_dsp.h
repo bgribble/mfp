@@ -42,6 +42,7 @@ typedef struct mfp_procinfo_struct {
     void (* destroy)(mfp_processor *);
     int  (* process)(mfp_processor *);
     void (* config)(mfp_processor *);
+    void (* preconfig)(mfp_processor *);
     void (* reset)(mfp_processor *);
 } mfp_procinfo;
 
@@ -126,9 +127,12 @@ extern void mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, doub
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);
 extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, int);
 extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, int);
+extern int mfp_proc_alloc_buffers(mfp_processor *, int, int, int);
+extern void mfp_proc_free_buffers(mfp_processor *);
 extern mfp_processor * mfp_proc_init(mfp_processor *);
 extern int mfp_proc_error(mfp_processor * self, const char * message);
 extern void mfp_proc_process(mfp_processor *);
+extern void mfp_proc_reset(mfp_processor *);
 extern void mfp_proc_destroy(mfp_processor *);
 extern int mfp_proc_connect(mfp_processor *, int, mfp_processor *, int);
 extern int mfp_proc_disconnect(mfp_processor *, int, mfp_processor *, int);
