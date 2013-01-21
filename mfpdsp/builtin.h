@@ -17,4 +17,5 @@ extern mfp_procinfo * init_builtin_snap(void);
 extern mfp_procinfo * init_builtin_buffer(void);
 extern mfp_procinfo * init_builtin_biquad(void);
 extern mfp_procinfo * init_builtin_phasor(void);
+extern mfp_procinfo * init_builtin_ladspa(void);
 
