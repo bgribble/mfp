@@ -64,7 +64,6 @@ static void
 init(mfp_processor * proc) 
 {
     builtin_phasor_data * d = g_malloc(sizeof(builtin_phasor_data));
-    printf("phasor~: init called\n");
 
     d->const_ampl = 1.0;
     d->const_freq = 0.0;
@@ -78,8 +77,6 @@ init(mfp_processor * proc)
 static void
 destroy(mfp_processor * proc) 
 {
-    printf("phasor~: destroy called\n");
-
     if (proc->data != NULL) {
         g_free(proc->data);
         proc->data = NULL;
@@ -94,8 +91,6 @@ config(mfp_processor * proc)
     gpointer freq_ptr = g_hash_table_lookup(proc->params, "_sig_1");
     gpointer ampl_ptr = g_hash_table_lookup(proc->params, "_sig_2");
     gpointer phase_ptr = g_hash_table_lookup(proc->params, "phase");
-
-    printf("phasor~: config called\n");
 
     /* get parameters */ 
     if (freq_ptr != NULL) {
@@ -121,10 +116,8 @@ config(mfp_processor * proc)
 
 mfp_procinfo *  
 init_builtin_phasor(void) {
-    mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
+    mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
 
-    printf("phasor~: init_builtin_phasor called\n");
-    
     p->name = strdup("phasor~");
     p->is_generator = 1;
 

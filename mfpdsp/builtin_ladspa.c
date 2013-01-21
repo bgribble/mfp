@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <ladspa.h>
+#include <dlfcn.h>
 
 #include "mfp_dsp.h"
 
@@ -22,87 +23,137 @@ typedef struct {
 } builtin_ladspa_data;
 
 
+static void
+ladspa_setup(mfp_processor * proc)
+{
+    builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
+    gpointer p_lib_name = g_hash_table_lookup(proc->params, "lib_name");
+    gpointer p_lib_index = g_hash_table_lookup(proc->params, "lib_index");
+    int lib_index = (int)(p_lib_index);
+    LADSPA_Descriptor * (* descrip_func)(unsigned long);
+    int portnum; 
+    int portcount;
+    int portdesc;
+    int signal_ins=0, signal_outs=0;
+    void * dllib; 
+
+    printf("ladspa_setup(%s, %d)\n", (char *)p_lib_name, lib_index);
+
+    d->lib_name = g_strdup((char *)p_lib_name);
+    dllib = dlopen((char *)p_lib_name, RTLD_NOW);
+    d->lib_dlptr = dllib;
+
+    /* get the plugin descriptor */ 
+    descrip_func = dlsym(dllib, "ladspa_descriptor");
+        
+    /* get the descriptor */ 
+    if (descrip_func != NULL) { 
+        d->plug_descrip = descrip_func((int)p_lib_index);
+    }
+
+    /* instantiate the plugin */ 
+    if (d->plug_descrip != NULL) {
+        /* allocate storage for control parameters */ 
+        portcount = d->plug_descrip->PortCount;
+        d->plug_control = g_malloc(portcount * sizeof(LADSPA_Data));
+
+        /* actually instantiate the plugin */
+        d->plug_handle = d->plug_descrip->instantiate(d->plug_descrip, mfp_samplerate);
+
+        /* count the signal inputs and outputs, and connect control ports */
+        for(portnum=0; portnum < portcount; portnum++) {
+            portdesc = d->plug_descrip->PortDescriptors[portnum];
+            if (portdesc & LADSPA_PORT_AUDIO) {
+                if (portdesc & LADSPA_PORT_INPUT) {
+                    signal_ins ++;
+                }
+                else if (portdesc & LADSPA_PORT_OUTPUT) {
+                    signal_outs ++;
+                }
+            }
+            else if (portdesc & LADSPA_PORT_CONTROL) {
+                d->plug_descrip->connect_port(d->plug_handle, portnum, 
+                        &(d->plug_control[portnum]));
+            }
+        }
+
+        /* reconfigure buffers in the processor object */ 
+        mfp_proc_free_buffers(proc);
+        mfp_proc_alloc_buffers(proc, signal_ins, signal_outs, mfp_blocksize);
+
+        /* connect signal inputs and outputs to the new buffers */
+        signal_ins = 0;
+        signal_outs = 0;
+        for(portnum=0; portnum < portcount; portnum++) {
+            portdesc = d->plug_descrip->PortDescriptors[portnum];
+            if (portdesc & LADSPA_PORT_AUDIO) {
+                if (portdesc & LADSPA_PORT_INPUT) {
+                    d->plug_descrip->connect_port(d->plug_handle, portnum, 
+                            proc->inlet_buf[signal_ins]->data);
+                    signal_ins++;
+                }
+                else if (portdesc & LADSPA_PORT_OUTPUT) {
+                    d->plug_descrip->connect_port(d->plug_handle, portnum, 
+                            proc->inlet_buf[signal_outs]->data);
+                    signal_outs++;
+                }
+            }
+        }
+    }
+}
+
+
+
 static int 
 process(mfp_processor * proc) 
 {
+    builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
 
+    /* this is simple! */
+    d->plug_descrip->run(d->plug_handle, mfp_blocksize);
+    return 0;
 }
 
 static void 
 init(mfp_processor * proc) 
 {
+    builtin_ladspa_data * d = (builtin_ladspa_data *)g_malloc(sizeof(builtin_ladspa_data));
+
+    d->lib_name = NULL;
+    d->lib_index = 0;
+    d->lib_dlptr = NULL;
+    d->plug_descrip = NULL;
+    d->plug_control = NULL;
+
+    ladspa_setup(proc);
     return;
 }
 
 static void
 destroy(mfp_processor * proc) 
 {
-    return;
-}
+    builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
 
-static void
-free_private(mfp_processor * proc, void * private_data) {
-    builtin_ladspa_data * d = (builtin_ladspa_data *)(data);
+    if (d->plug_descrip != NULL) {
 
-    return;
-}
-
-static void
-prealloc(mfp_processor * proc) 
-{
-    builtin_ladspa_data * old = (builtin_ladspa_data *)(proc->data);
-    builtin_ladspa_data * new = (builtin_ladspa_data *)(proc->prealloc);
-    gpointer p_lib_name = g_hash_table_lookup(proc->params, "lib_name");
-    gpointer p_lib_index = g_hash_table_lookup(proc->params, "lib_index");
-    
-    LADSPA_Descriptor * (* descrip_func)(unsigned long);
-    LADSPA_Descriptor * descrip;
-    int portnum; 
-    void * dllib; 
-
-    printf("ladspa~ prealloc\n");
-
-    /* open a new library if necessary.  Don't close the old one yet. */ 
-    if ((old->lib_name != p_lib_name) 
-        && ((old->lib_name == NULL) || (p_lib_name == NULL) 
-            || strcmp(old->lib_name, (char *)p_lib_name))) {
-        if (p_lib_name == NULL) {
-            new->lib_name = NULL;
-        }
-        else { 
-            new->lib_name = g_strcpy((char *)p_lib_name);
+        if (d->plug_activated == 1) {
+            d->plug_descrip->deactivate(d->plug_handle);
+            d->plug_activated = 0;
         }
 
-        /* need a new library */ 
-        dllib = dlopen((char *)p_lib_name, RTLD_NOW);
-        new->lib_dlptr = dllib;
-    }
-    else {
-        dllib = old->lib_dlptr;
-    }
+        d->plug_descrip->cleanup(d->plug_handle);
+        d->plug_descrip = NULL; 
 
-    /* get the plugin descriptor */ 
-    if ((dllib != old->lib_dlptr) || ((int)p_lib_index != old->lib_index)) {
-        descrip_func = dlsym(dllib, "ladspa_descriptor");
-        
-        /* get the descriptor */ 
-        if (descrip_func != NULL) { 
-            new->plug_descrip = descrip_func((int)p_lib_index);
-        }
-
-        /* instantiate the plugin */ 
-        if (new->plug_descrip != NULL) {
-            /* allocate storage for control parameters */ 
-            new->plug_control = g_malloc(new->plug_descrip->PortCount * sizeof(LADSPA_Data));
-            new->plug_handle = new->plug_descrip->instantiate(new->plug_descrip, 
-                                                              mfp_samplerate);
-            for(portnum=0; portnum < 
+        if (d->lib_dlptr != NULL) {
+            dlclose(d->lib_dlptr);
+            d->lib_dlptr = NULL;
         }
     }
 
-    /* create the control parameters vector */
-
-
+    if (d->plug_control != NULL) {
+        g_free(d->plug_control);
+        d->plug_control = NULL;
+    }
 
     return;
 }
@@ -111,42 +162,43 @@ static void
 config(mfp_processor * proc) 
 {
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
-    builtin_ladspa_data * new = (builtin_ladspa_data *)(proc->prealloc);
-    void * tmp; 
+    gpointer control_p = g_hash_table_lookup(proc->params, "plug_control");
+    int portnum;
 
-    if (new->lib_name != d->lib_name) {
-        tmp = d->lib_name; 
-        d->lib_name = new->lib_name;
-        new->lib_name = tmp;
+    /* copy plugin control values */ 
+    if (control_p != NULL) { 
+        for (portnum=0; portnum < ((GArray *)control_p)->len; portnum++) {
+            d->plug_control[portnum] = g_array_index((GArray *)control_p, float, portnum);     
+        }
     }
 
-    if (new->lib_index != NULL) {
-        d->lib_index = new->lib_index;
+    /* activate the plugin if necessary */ 
+    if (d->plug_activated != 1) {
+        d->plug_descrip->activate(d->plug_handle);
+        d->plug_activated = 1;
     }
-
-    if (new->lib_dlptr != d->lib_dlptr) {
-        tmp = d->lib_dlptr; 
-        d->lib_dlptr = new->lib_dlptr;
-        new->lib_dlptr = tmp;
-    }
-    proc->needs_config = 0;
     return;
 }
 
 mfp_procinfo *  
 init_builtin_ladspa(void) {
-    mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
-    struct timeval tv;
+    mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
+
+    printf("init_builtin_ladspa ENTER\n");
 
     p->name = strdup("ladspa~");
     p->is_generator = 0;
     p->process = process;
     p->init = init;
     p->destroy = destroy;
-    p->free_private = free_private;
-    p->prealloc = prealloc;
     p->config = config;
+    p->preconfig = NULL;
+    p->reset = NULL;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+    g_hash_table_insert(p->params, "plug_control", (gpointer)PARAMTYPE_FLTARRAY);
+    g_hash_table_insert(p->params, "lib_name", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "lib_index", (gpointer)PARAMTYPE_INT);
+    printf("init_builtin_ladspa LEAVE\n");
     return p;
 }
 

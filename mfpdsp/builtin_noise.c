@@ -45,7 +45,7 @@ config(mfp_processor * proc)
 
 mfp_procinfo *  
 init_builtin_noise(void) {
-	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
+	mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
 	struct timeval tv;
 
 	gettimeofday(&tv, NULL);

@@ -44,7 +44,7 @@ config(mfp_processor * proc)
 
 mfp_procinfo *  
 init_builtin_sig(void) {
-	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
+	mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
 	p->name = strdup("sig~");
 	p->is_generator = 1;
 	p->process = process;

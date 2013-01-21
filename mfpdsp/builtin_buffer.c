@@ -246,7 +246,7 @@ config(mfp_processor * proc)
 
 mfp_procinfo *  
 init_builtin_buffer(void) {
-	mfp_procinfo * p = g_malloc(sizeof(mfp_procinfo));
+	mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
 	
 	p->name = strdup("buffer~");
 	p->is_generator = 0;
