@@ -120,13 +120,13 @@ Run the demo patch by putting the file name on the command line, i.e.
 hello_world.mfp:  The classic 
 
 biquad_designer.mfp: What I'm actively working on to exercise new stuff.
-Not complete and broken!  but if you want to try it, you can do this: 
- * unclick, then reclick "Highpass" on the front layer 
- * click-to-select, then Return twice, on each parameter input
- * Go to the "Graphs" page and click all the messages (no loadbang yet)
- * Go back to the front page, click the "Calculate" button.  Then the
-   pole-zero graph will show up on the "Graphs" page. 
-This one requires "quadratic.mfp" to be in the root src dir also
+Not complete!  But at least partly workimg.  Click the "calculate" button to 
+compute biquad coefficients and audition them with a noise input source (I run 
+this into JAAA to check my calculations).  PGDN to shift to the Graphs layer 
+with pole/zero and analytical frequency response.
+
+This one requires "quadratic.mfp" to be in the root src dir also.  Search paths 
+for patches are not done. 
 
 Saving files: There's no UI for saving yet.  You can do it from the
 console.  
