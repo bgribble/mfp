@@ -81,7 +81,7 @@ class MFPCommand(RPCWrapper):
         obj.gui_created = value
 
     @rpcwrap
-    def set_do_onload(self, value):
+    def set_do_onload(self, obj_id, value):
         obj = MFPApp().recall(obj_id)
         obj.do_onload = value 
 
