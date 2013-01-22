@@ -66,7 +66,7 @@ If you don't have posix_ipc on your system:
 
 Install libs and main program:
 
-    $ for dir in testext lib/alsaseq-0.4.1 lib/pyliblo-0.9.1 ;
+    $ for dir in testext pluginfo lib/alsaseq-0.4.1 lib/pyliblo-0.9.1 ;
       do (cd $dir ; python ./setup.py install) 
       done 
     $ python ./setup.py install 
