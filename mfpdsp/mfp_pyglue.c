@@ -1,6 +1,8 @@
 
 #include <Python.h>
 #include <pthread.h>
+#include <signal.h>
+#include <execinfo.h>
 #include "mfp_dsp.h"
 #include "builtin.h"
 
@@ -69,12 +71,12 @@ dsp_response_wait(PyObject * mod, PyObject * args)
     Py_BEGIN_ALLOW_THREADS
     pthread_mutex_lock(&mfp_response_lock);
     pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
+    Py_END_ALLOW_THREADS
 
     /* copy/clear C response objects */
     if(mfp_responses_pending && (mfp_responses_pending->len > 0)) {
         l = PyList_New(mfp_responses_pending->len);
         for(rcount=0; rcount < mfp_responses_pending->len; rcount++) {
-
             t = PyTuple_New(3);
             r = g_array_index(mfp_responses_pending, mfp_respdata, rcount);
 
@@ -102,12 +104,12 @@ dsp_response_wait(PyObject * mod, PyObject * args)
                     break;
             }
             PyList_SetItem(l, rcount, t);
+            responses += 1;
         }
-        responses += 1;
+        g_array_remove_range(mfp_responses_pending, 0, mfp_responses_pending->len);
     }
     pthread_mutex_unlock(&mfp_response_lock);
 
-    Py_END_ALLOW_THREADS
 
     /* build python response */
 
@@ -116,7 +118,6 @@ dsp_response_wait(PyObject * mod, PyObject * args)
         return Py_None;
     }
     else {
-        g_array_remove_range(mfp_responses_pending, 0, mfp_responses_pending->len);
         Py_INCREF(l);
         return l;
     }
@@ -468,9 +469,40 @@ test_TEARDOWN(void)
     return 0;
 }
 
+
+static void
+sigsegv_handler(int sig, siginfo_t *si, void *unused)
+{
+    void * buffer[100];
+    char ** strings;
+    int nptrs, j;
+
+    printf("ERROR: SIGSEGV received\n");
+    nptrs = backtrace(buffer, 100);
+    strings = backtrace_symbols(buffer, nptrs);
+
+    for (j = 0; j < nptrs; j++)
+        printf("%s\n", strings[j]);
+
+    free(strings);
+
+    exit(-11);
+}
+
+
 PyMODINIT_FUNC
 initmfpdsp(void) 
 {
+    struct sigaction sa;
+
+    /* install signal handlers */
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = sigsegv_handler;
+    if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+        printf("testext ERROR: could not install SIGSEGV handler, exiting\n");
+    }
+
     init_globals();
     init_builtins();
     Py_InitModule("mfpdsp", MfpDspMethods);

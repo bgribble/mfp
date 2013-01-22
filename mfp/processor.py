@@ -285,7 +285,9 @@ class Processor (object):
                     for target, inlet in conns:
                         work.append((target, val, inlet))
         try:
-            if inlet in self.dsp_inlets:
+            if ((inlet in self.dsp_inlets) 
+                and not isinstance(value, bool) and isinstance(value, (float,int))):
+                print "_send: sending", value, "as _sig"
                 self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
         except (TypeError, ValueError):
             pass
