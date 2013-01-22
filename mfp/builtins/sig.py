@@ -11,9 +11,9 @@ from ..main import MFPApp
 
 class Sig(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
-        initargs, kwargs = self.parse(init_args)
+        initargs, kwargs = self.parse_args(init_args)
         if len(initargs):
             value = initargs[0]
         else:
