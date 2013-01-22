@@ -47,7 +47,7 @@ ladspa_setup(mfp_processor * proc)
 
     /* get the plugin descriptor */ 
     descrip_func = dlsym(dllib, "ladspa_descriptor");
-        
+ 
     /* get the descriptor */ 
     if (descrip_func != NULL) { 
         printf("got descriptor, calling\n");
@@ -75,6 +75,7 @@ ladspa_setup(mfp_processor * proc)
                 }
             }
             else if (portdesc & LADSPA_PORT_CONTROL) {
+                printf("ladspa_setup: connecting port %d as a control\n", portnum);
                 d->plug_descrip->connect_port(d->plug_handle, portnum, 
                                               d->plug_control + portnum);
             }
@@ -85,7 +86,7 @@ ladspa_setup(mfp_processor * proc)
         mfp_proc_free_buffers(proc);
         mfp_proc_alloc_buffers(proc, signal_ins, signal_outs, mfp_blocksize);
 
-        printf("ladspa_setup: connecting\n");
+        printf("ladspa_setup: connecting audio\n");
         /* connect signal inputs and outputs to the new buffers */
         signal_ins = 0;
         signal_outs = 0;
@@ -135,6 +136,7 @@ init(mfp_processor * proc)
     d->lib_dlptr = NULL;
     d->plug_descrip = NULL;
     d->plug_control = NULL;
+    d->plug_activated = 0;
     proc->data = d;
     ladspa_setup(proc);
     
@@ -149,7 +151,8 @@ destroy(mfp_processor * proc)
     if (d->plug_descrip != NULL) {
 
         if (d->plug_activated == 1) {
-            d->plug_descrip->deactivate(d->plug_handle);
+            if (d->plug_descrip->deactivate != NULL)
+                d->plug_descrip->deactivate(d->plug_handle);
             d->plug_activated = 0;
         }
 
@@ -187,7 +190,9 @@ config(mfp_processor * proc)
 
     /* activate the plugin if necessary */ 
     if (d->plug_activated != 1) {
-        d->plug_descrip->activate(d->plug_handle);
+        printf("ladspa~ config: calling activate()\n");
+        if (d->plug_descrip->activate != NULL)
+            d->plug_descrip->activate(d->plug_handle);
         d->plug_activated = 1;
     }
     return;
@@ -197,8 +202,6 @@ static void
 preconfig(mfp_processor * proc) 
 {
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
-
-    printf("preconfig\n");
 
     if (d->lib_name == NULL) {
         ladspa_setup(proc);

@@ -58,8 +58,10 @@ class Processor (object):
         # for example dsp_outlets = [2] means processor outlet 2
         # corresponds to outlet 0 of the underlying DSP object
         self.dsp_obj = None
-        self.dsp_inlets = []
-        self.dsp_outlets = []
+        if not hasattr(self, 'dsp_inlets'):
+            self.dsp_inlets = []
+        if not hasattr(self, 'dsp_outlets'):
+            self.dsp_outlets = []
 
         self.connections_out = [[] for r in range(outlets)]
         self.connections_in = [[] for r in range(inlets)]
