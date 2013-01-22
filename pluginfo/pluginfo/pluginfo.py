@@ -40,17 +40,12 @@ class PlugInfo (object):
             setattr(self, k, v)
 
     def index_ladspa(self):
-        print "PlugInfo: Crawling LADSPA_PATH"
-
         pathenv = os.environ.get("LADSPA_PATH") 
         if not pathenv: 
             pathenv = self.LADSPA_PATH_DEFAULT % os.environ.get("HOME", "~")
         
-        print "Path to search:", pathenv 
-
         dirs = splitpath(pathenv)
         for d in dirs:
-            print "Looking in directory", d
             try: 
                 candidates = os.listdir(d)
             except:
@@ -59,16 +54,12 @@ class PlugInfo (object):
             for c in candidates: 
                 fullpath = os.path.join(d, c)
                 if _pluginfo.is_ladspa(fullpath):
-                    print "Found LADSPA plugin lib:", fullpath 
                     plugs = _pluginfo.list_plugins(fullpath)
                     self.libinfo[fullpath] = plugs  
                     for p in plugs: 
                         key = p[2].lower()
-                        print "     ", p
                         pinfo = _pluginfo.describe_plugin(p[0], p[1])
                         self.pluginfo[key] = pinfo
-
-        print "done with search, found info about", len(self.pluginfo), "plugins in", len(self.libinfo), "DLLs"
 
     def find(self, name):
         return self.pluginfo.get(name.lower())
