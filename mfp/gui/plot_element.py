@@ -41,8 +41,6 @@ class PlotElement (PatchElement):
         self.y_min = -1.0
         self.y_max = 1.0
 
-        # grab params for creation
-
         # create display
         self.create_display(self.INIT_WIDTH + 6, self.INIT_HEIGHT + self.LABEL_SPACE + 4)
         self.move(x, y)
@@ -133,9 +131,7 @@ class PlotElement (PatchElement):
                 self.obj_args = parts[1]
 
             log.debug("PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args))
-            self.display_type = self.obj_type
-            self.proc_type = self.obj_type
-
+            self.proc_type = self.obj_type 
             self.create(self.proc_type, self.obj_args)
 
             if self.obj_type == "scatter":
@@ -223,7 +219,7 @@ class PlotElement (PatchElement):
         if "plot_type" in params and self.xyplot is None:
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
-            elif params["plot_type"] == "signal":
+            elif params["plot_type"] == "scope":
                 self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT)
             if self.xyplot:
                 self.add_actor(self.xyplot)

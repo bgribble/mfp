@@ -24,13 +24,12 @@ class Scope (Processor):
         if init_args is not None:
             log.debug("scope: Does not accept init args")
 
-        self.gui_params = dict(plot_type="signal")
+        self.gui_params = dict(plot_type="scope")
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         if isinstance(self.inlets[0], BufferInfo):
             self.buffer = self.inlets[0]
-            self.gui_params["buffer"] = self.buffer
             MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
 
         elif self.inlets[0] is True:
