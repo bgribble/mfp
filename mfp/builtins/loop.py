@@ -7,7 +7,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from mfp.processor import Processor
 from mfp.main import MFPApp
-from mfp.bang import Bang
+from mfp.bang import Bang, Uninit 
 
 
 def iterable(o):
@@ -36,8 +36,9 @@ class For(Processor):
             return
         elif iterable(self.inlets[0]):
             self.inlets[1] = self.inlets[0]
+            self.startval = self.inlets[0]
+            self.inlets[0] = Uninit
             self.iterating = True
-            self.startval = self.inlets[1]
         elif self.inlets[0] in (Bang, True):
             self.iterating = True
             self.startval = self.inlets[1]
