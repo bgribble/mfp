@@ -153,8 +153,8 @@ class PlotElement (PatchElement):
                 self.send_params()
                 self.draw_ports()
 
-        # FIXME set label to non-editing style
-        self.update()
+            # FIXME set label to non-editing style
+            self.update()
 
     def label_changed_cb(self, *args):
         pass
@@ -224,8 +224,7 @@ class PlotElement (PatchElement):
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
             elif params["plot_type"] == "signal":
-                pass
-
+                self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT)
             if self.xyplot:
                 self.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)

@@ -210,7 +210,10 @@ class ScatterPlot (XYPlot):
 
         if need_vp:
             origin = self.pt2px((self.x_min, self.y_max))
-            self.plot.set_viewport_origin(origin[0], origin[1], True)
+            self.set_field_origin(origin[0], origin[1], True)
+
+    def set_field_origin(self, x_orig, y_orig, redraw):
+        self.plot.set_viewport_origin(x_orig, y_orig, redraw)
 
     def command(self, action, data):
         if action == "add":

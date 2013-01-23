@@ -40,7 +40,7 @@ class Buffer(Processor):
     FLOAT_SIZE = 4
 
     def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = self.parse_args(init_args)
+        initargs, kwargs = patch.parse_args(init_args)
 
         if len(initargs):
             size = initargs[0]
@@ -55,7 +55,7 @@ class Buffer(Processor):
         self.channels = 0
         self.size = 0
         self.rate = None
-        self.offset = 0
+        self.buf_offset = 0
 
         self.shm_obj = None
 
@@ -68,7 +68,7 @@ class Buffer(Processor):
 
     def dsp_response(self, resp_id, resp_value):
         if resp_id == self.RESP_TRIGGERED:
-            self.outlets[1] = resp_value
+            self.outlets[2] = resp_value
         elif resp_id == self.RESP_BUFID:
             if self.shm_obj:
                 self.shm_obj.close_fd()
@@ -81,10 +81,10 @@ class Buffer(Processor):
         elif resp_id == self.RESP_RATE:
             self.rate = resp_value
         elif resp_id == self.RESP_OFFSET:
-            self.offset = resp_value
+            self.buf_offset = resp_value
         elif resp_id == self.RESP_BUFRDY:
-            self.outlets[1] = BufferInfo(self.buf_id, self.size, self.channels, self.rate,
-                                         self.offset)
+            self.outlets[2] = BufferInfo(self.buf_id, self.size, self.channels, self.rate,
+                                         self.buf_offset)
 
     def trigger(self):
         incoming = self.inlets[0]
@@ -103,16 +103,28 @@ class Buffer(Processor):
         if self.shm_obj is None:
             self.shm_obj = SharedMemory(self.buf_id)
 
+        if start < 0:
+            start = 0
+        if start >= self.size:
+            start = self.size-1
+        if end < 0:
+            end = 0
+
+        if end >= self.size:
+            end = self.size-1
+
+
         try:
             os.lseek(self.shm_obj.fd, self.offset(channel, start), os.SEEK_SET)
             slc = os.read(self.shm_obj.fd, (end - start) * self.FLOAT_SIZE)
-            self.outlets[2] = list(numpy.fromstring(slc, dtype=numpy.float32))
+            self.outlets[1] = list(numpy.fromstring(slc, dtype=numpy.float32))
         except Exception, e:
             log.debug("buffer~: slice error '%s" % e)
             return None
 
     def bufinfo(self):
-        self.outlets[1] = BufferInfo(self.buf_id, self.size, self.channels)
+        self.outlets[2] = BufferInfo(self.buf_id, self.size, self.channels, self.rate,
+                                     self.buf_offset)
 
 
 def register():

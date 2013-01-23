@@ -102,11 +102,14 @@ class XYPlot (Clutter.Group):
         self.plot_border.set_position(self.MARGIN_LEFT, 0)
         self.add_actor(self.plot_border)
 
-        self.plot = Quilt(self.plot_w, self.plot_h)
+        self.create_plot()  
         self.plot.set_position(self.MARGIN_LEFT, 0)
+        self.add_actor(self.plot)
+
+    def create_plot(self): 
+        self.plot = Quilt(self.plot_w, self.plot_h)
         self.plot.set_render_cb(self.draw_field_cb)
         self.plot.set_viewport_origin(0, -self.plot_h / 2.0)
-        self.add_actor(self.plot)
 
     def set_size(self, width, height):
         self.width = width
@@ -143,15 +146,12 @@ class XYPlot (Clutter.Group):
             if self.y_min <= 0.0:
                 self.y_min = min(abs(self.y_max / 100.0), 0.1) 
             self.y_scale = -1.0 * float(self.plot_h) / (math.log(self.y_max / float(self.y_min)))
-        print "recalc_y_scale:", self, self.y_axis_mode, self.y_max, self.y_min, self.y_scale
 
         if self.y_axis:
             self.y_axis.clear()
 
 
     def set_bounds(self, x_min, y_min, x_max, y_max):
-        print "set_bounds:", self, x_min, y_min, x_max, y_max 
-
         if ((x_min is None or x_min == self.x_min)
             and (x_max is None or x_max == self.x_max)
             and (y_min is None or y_min == self.y_min)
@@ -205,7 +205,13 @@ class XYPlot (Clutter.Group):
         if need_x_flush or need_y_flush:
             self.reindex()
 
-        self.plot.set_viewport_origin(origin[0], origin[1], need_x_flush or need_y_flush)
+        self.set_field_origin(origin[0], origin[1], need_x_flush or need_y_flush)
+
+    def set_field_origin(self, x_orig, y_orig, redraw):
+        pass 
+
+    def reindex(self):
+        pass 
 
     def pt2px(self, p):
         if self.x_axis_mode == self.LINEAR: 
@@ -310,3 +316,6 @@ class XYPlot (Clutter.Group):
             ctx.rotate(math.pi / 2)
             ctx.show_text("%.3g" % tick)
             ctx.restore()
+
+    def configure(self, params):
+        pass 

@@ -25,7 +25,7 @@ class Scope (Processor):
             log.debug("scope: Does not accept init args")
 
         self.gui_params = dict(plot_type="signal")
-        Processor.__init__(self, 1, 1, "scopeplot", None)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         if isinstance(self.inlets[0], BufferInfo):
@@ -34,14 +34,17 @@ class Scope (Processor):
             MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
 
         elif self.inlets[0] is True:
-            log.debug("scope: got True from buffer")
-
+            pass
         elif self.inlets[0] is False:
-            log.debug("scope: got False from buffer")
+            MFPApp().gui_cmd.command(self.obj_id, "grab", None)
+            self.outlets[0] = Bang
 
         if self.buffer is None:
             log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
             self.outlets[0] = MethodCall("bufinfo")
+
+    def grab(self):
+        MFPApp().gui_cmd.command(self.obj_id, "grab", None)
 
     def conf(self, **kwargs):
         for k, v in kwargs.items():
