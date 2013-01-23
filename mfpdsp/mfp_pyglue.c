@@ -70,7 +70,9 @@ dsp_response_wait(PyObject * mod, PyObject * args)
 
     Py_BEGIN_ALLOW_THREADS
     pthread_mutex_lock(&mfp_response_lock);
-    pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
+    if (!mfp_responses_pending || (mfp_responses_pending->len == 0)) {
+        pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
+    }
     Py_END_ALLOW_THREADS
 
     /* copy/clear C response objects */
