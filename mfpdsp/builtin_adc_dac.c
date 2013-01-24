@@ -8,7 +8,7 @@
 static int 
 in_process(mfp_processor * proc) 
 {
-    gpointer chan_ptr = g_hash_table_lookup(proc->params, "chan");
+    gpointer chan_ptr = g_hash_table_lookup(proc->params, "channel");
     int channel = 0;
     mfp_sample * inbuf;
     mfp_block * outbuf;
@@ -84,7 +84,7 @@ init_builtin_in(void) {
     p->config = config;
     p->preconfig = NULL;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-    g_hash_table_insert(p->params, "channel", (gpointer)1);
+    g_hash_table_insert(p->params, "channel", (gpointer)PARAMTYPE_INT);
 
     return p;
 }
@@ -100,7 +100,7 @@ init_builtin_out(void) {
     p->config = config;
     p->preconfig = NULL;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-    g_hash_table_insert(p->params, "channel", (gpointer)1);
+    g_hash_table_insert(p->params, "channel", (gpointer)PARAMTYPE_INT);
     return p;
 }
 

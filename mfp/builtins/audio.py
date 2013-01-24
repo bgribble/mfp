@@ -15,18 +15,17 @@ class AudioOut(Processor):
         initargs, kwargs = self.parse_args(init_args)
 
         if len(initargs):
-            channel = initargs[0]
+            self.channel = initargs[0]
         else:
-            channel = 0
+            self.channel = 0
 
         self.dsp_inlets = [0]
-        self.dsp_init("out~")
-        self.dsp_obj.setparam("channel", channel)
+        self.dsp_init("out~", channel=self.channel)
 
     def trigger(self):
         try:
             channel = int(self.inlets[0])
-            self.dsp_obj.setparam("channel", channel)
+            self.dsp_setparam("channel", channel)
         except:
             print "Can't convert %s to a channel number" % self.inlet[0]
 
@@ -37,18 +36,17 @@ class AudioIn(Processor):
         initargs, kwargs = self.parse_args(init_args)
 
         if len(initargs):
-            channel = initargs[0]
+            self.channel = initargs[0]
         else:
-            channel = 0
+            self.channel = 0
 
         self.dsp_outlets = [0]
-        self.dsp_init("in~")
-        self.dsp_obj.setparam("channel", channel)
+        self.dsp_init("in~", channel=self.channel)
 
     def trigger(self):
         try:
-            channel = int(self.inlets[0])
-            self.set_param("channel", channel)
+            self.channel = int(self.inlets[0])
+            self.dsp_setparam("channel", self.channel)
         except:
             print "Can't convert %s to a channel number" % self.inlet[0]
 
