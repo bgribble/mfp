@@ -274,13 +274,14 @@ proc_destroy(PyObject * mod, PyObject * args)
     PyArg_ParseTuple(args, "O", &self);
     rd.reqtype = REQTYPE_DESTROY;
     rd.src_proc = PyCObject_AsVoidPtr(self);
-    
+
     pthread_mutex_lock(&mfp_globals_lock);
     g_array_append_val(mfp_requests_pending, rd);
     pthread_mutex_unlock(&mfp_globals_lock);
 
     objref = (PyObject *)g_hash_table_lookup(mfp_proc_objects, rd.src_proc);
     Py_DECREF(objref);
+
     g_hash_table_remove(mfp_proc_objects, rd.src_proc);
 
     Py_INCREF(Py_False);
@@ -502,7 +503,7 @@ initmfpdsp(void)
     sigemptyset(&sa.sa_mask);
     sa.sa_sigaction = sigsegv_handler;
     if (sigaction(SIGSEGV, &sa, NULL) == -1) {
-        printf("testext ERROR: could not install SIGSEGV handler, exiting\n");
+        printf("mfpdsp init ERROR: could not install SIGSEGV handler\n");
     }
 
     init_globals();

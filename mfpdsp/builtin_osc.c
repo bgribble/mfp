@@ -40,6 +40,11 @@ table_lookup(double phase) {
     double rem, s1, s2;
 
     rem = phase - index*OSC_TABINCR;
+    if((index < 0) || (index > OSC_TABSIZE-1)) {
+        printf("table_lookup: out-of-range phase %f (index %d) max is %d\n", phase, index,
+                OSC_TABSIZE);
+        return 0.0;
+    }
     s1 = osc_table[index];
     s2 = osc_table[index+1];
 
@@ -55,6 +60,7 @@ process(mfp_processor * proc)
     double phase_base;
     float newphase = 0.0;
     int c;
+
 
     if (mfp_proc_has_input(proc, 0)) {
         mode_fm = 1;
@@ -73,6 +79,7 @@ process(mfp_processor * proc)
 
     if(mode_fm == 1) {
         newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0); 
+        newphase = fmod(newphase, 2.0*M_PI);
 
         /* wrap the phase to function domain */
         mfp_block_fmod(d->int_0, 2.0*M_PI, d->int_0);
@@ -103,7 +110,7 @@ process(mfp_processor * proc)
 static void 
 init(mfp_processor * proc) 
 {
-    builtin_osc_data * d = g_malloc(sizeof(builtin_osc_data));
+    builtin_osc_data * d = g_malloc0(sizeof(builtin_osc_data));
 
     d->const_ampl = 1.0;
     d->const_freq = 0.0;

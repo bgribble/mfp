@@ -191,6 +191,7 @@ class Processor (object):
 
         if hasattr(self, "dsp_obj") and self.dsp_obj is not None:
             self.dsp_obj.delete()
+            self.dsp_obj = None
 
         MFPApp().forget(self)
 
