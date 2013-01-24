@@ -84,17 +84,17 @@ class PlugInfo (object):
             return hlower * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_LOW:
             if htype & self.LADSPA_HINT_LOGARITHMIC: 
-                return math.exp(math.log(hlower) * 0.75 + math.log(upper) * 0.25) * multiplier
+                return math.exp(math.log(hlower) * 0.75 + math.log(hupper) * 0.25) * multiplier
             else: 
                 return (hlower * 0.75 + hupper * 0.25) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_MIDDLE:
             if htype & self.LADSPA_HINT_LOGARITHMIC: 
-                return math.exp(math.log(hlower) * 0.5 + math.log(upper) * 0.5) * multiplier
+                return math.exp(math.log(hlower) * 0.5 + math.log(hupper) * 0.5) * multiplier
             else: 
                 return (hlower * 0.5 + hupper * 0.5) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_HIGH:
             if htype & self.LADSPA_HINT_LOGARITHMIC: 
-                return math.exp(math.log(hlower) * 0.25 + math.log(upper) * 0.75) * multiplier
+                return math.exp(math.log(hlower) * 0.25 + math.log(hupper) * 0.75) * multiplier
             else: 
                 return (hlower * 0.25 + hupper * 0.75) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_MAXIMUM: 
