@@ -7,6 +7,7 @@ Python package using C extension to dig info about plugins
 
 import _pluginfo
 import os 
+import math 
 
 def splitpath(p):
     parts = p.split(":")
@@ -85,17 +86,17 @@ class PlugInfo (object):
             if htype & self.LADSPA_HINT_LOGARITHMIC: 
                 return math.exp(math.log(hlower) * 0.75 + math.log(upper) * 0.25) * multiplier
             else: 
-                return (lower * 0.75 + upper * 0.25) * multiplier
+                return (hlower * 0.75 + hupper * 0.25) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_MIDDLE:
             if htype & self.LADSPA_HINT_LOGARITHMIC: 
                 return math.exp(math.log(hlower) * 0.5 + math.log(upper) * 0.5) * multiplier
             else: 
-                return (lower * 0.5 + upper * 0.5) * multiplier
+                return (hlower * 0.5 + hupper * 0.5) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_HIGH:
             if htype & self.LADSPA_HINT_LOGARITHMIC: 
                 return math.exp(math.log(hlower) * 0.25 + math.log(upper) * 0.75) * multiplier
             else: 
-                return (lower * 0.25 + upper * 0.75) * multiplier
+                return (hlower * 0.25 + hupper * 0.75) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_MAXIMUM: 
             return hupper * multiplier
         elif htype & self.ladspa_hint_default_0:
