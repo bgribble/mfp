@@ -43,7 +43,7 @@ class Buffer(Processor):
         initargs, kwargs = patch.parse_args(init_args)
 
         if len(initargs):
-            size = initargs[0]
+            size = initargs[0]*MFPApp().samplerate/1000.0
         if len(initargs) > 1:
             channels = initargs[1]
         else:

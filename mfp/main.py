@@ -15,6 +15,7 @@ from .singleton import Singleton
 from .interpreter import Interpreter
 from .evaluator import Evaluator
 from .processor import Processor
+from .method import MethodCall
 
 from .rpc_wrapper import RPCWrapper, rpcwrap
 from .rpc_worker import RPCServer
@@ -64,6 +65,12 @@ class MFPCommand(RPCWrapper):
         obj = MFPApp().recall(obj_id)
         obj.send(obj.parse_obj(message), port)
         return True
+
+    @rpcwrap
+    def send_methodcall(self, obj_id, port, method, *args, **kwargs): 
+        obj = MFPApp().recall(obj_id)
+        m = MethodCall(method, *args, **kwargs)
+        obj.send(m, port)
 
     @rpcwrap
     def delete(self, obj_id):

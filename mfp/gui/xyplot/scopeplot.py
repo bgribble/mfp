@@ -17,13 +17,21 @@ import numpy
 
 
 class ScopePlot (XYPlot):
+    
     FLOAT_SIZE = 4
-    def __init__(self, width, height):
+
+    def __init__(self, width, height, samplerate):
         self.orig_x = 0
         self.orig_y = 1
+        self.samplerate = samplerate 
         self.buf_info = None
         self.shm_obj = None
+        self.colors = [(0, 0, 1, 1), (0, 1, 0, 1), (0, 1, 1, 1), (1, 0, 1, 1), 
+                       (1, 1, 0, 1), (1, 0, 0, 1) ]
         self.data = []
+        self.data_start = 0
+        self.data_end = -1
+        self.draw_complete_cb = None 
         
         XYPlot.__init__(self, width, height)
 
@@ -38,18 +46,66 @@ class ScopePlot (XYPlot):
         self.plot.connect("draw", self.draw_field_cb)
         self.plot.show()
 
+
+    def draw_curve_simple(self, ctx, curve):
+        dataslice = self.data[curve][self.data_start:self.data_end] 
+        xbase = self.data_start * 1000.0 / self.samplerate
+        xincr = 1000.0 / self.samplerate 
+
+        ctx.set_source_rgba(*self.colors[curve % len (self.colors)])
+        ctx.set_line_width(0.5)
+         
+        ctx.move_to(*self.pt2px((xbase, dataslice[0])))
+        for pt in dataslice:
+            ctx.line_to(*self.pt2px((xbase, pt)))
+            xbase += xincr
+        ctx.stroke()
+
+    def draw_curve_minmax(self, ctx, curve): 
+        dataslice = self.data[curve][self.data_start:self.data_end] 
+        xbase = self.data_start * 1000.0 / self.samplerate
+        xincr = 1000.0 / self.samplerate 
+        dscale = 2*self.plot_w / float(len(dataslice)) 
+        points = [] 
+        ctx.set_source_rgba(*self.colors[curve % len (self.colors)])
+        ctx.set_line_width(0.5)
+        
+        pmin = None
+        pmax = None 
+        ptindex = 0
+        ptpos = 0
+
+        for pt in dataslice: 
+            if pmin is None or pt < pmin:
+                pmin = pt
+            if pmax is None or pt > pmax:  
+                pmax = pt 
+            ptpos += dscale 
+            xbase += xincr 
+            if int(ptpos) > ptindex: 
+                points.append((xbase, pmin, pmax))
+                ptindex = int(ptpos)
+                pmin = None
+                pmax = None 
+
+        for x, ymin, ymax in points:
+            ctx.move_to(*self.pt2px((x, ymin)))
+            ctx.line_to(*self.pt2px((x, ymax)))
+        ctx.stroke()
+
     def draw_field_cb(self, texture, ctx, *rest):
         if not self.data:
             return 
+
         texture.clear()
         ctx.translate(-self.orig_x, -self.orig_y)
-        ctx.set_source_rgba(0, 0, 255, 1.0)
-        ctx.set_line_width(0.3)
-        ctx.move_to(*self.pt2px((0, self.data[0][0])))
-
-        for ptnum, pt in enumerate(self.data[0]):
-            ctx.line_to(*self.pt2px((ptnum, pt)))
-        ctx.stroke()
+        for curve in range(len(self.data)):
+            if (len(self.data[curve]) > 2*self.plot_w): 
+                self.draw_curve_minmax(ctx, curve)
+            else: 
+                self.draw_curve_simple(ctx, curve)
+        if self.draw_complete_cb:
+            self.draw_complete_cb()
 
     def save_style(self):
         print "FIXME: ScopePlot.save_style()"
@@ -72,7 +128,7 @@ class ScopePlot (XYPlot):
                 os.lseek(self.shm_obj.fd, offset(c), os.SEEK_SET)
                 slc = os.read(self.shm_obj.fd, self.buf_info.size * self.FLOAT_SIZE)
                 self.data.append(list(numpy.fromstring(slc, dtype=numpy.float32)))
-                self.set_bounds(0, -1, len(self.data[0]), 1)
+                self.set_bounds(0, -1, len(self.data[0])*1000/self.samplerate, 1)
         except Exception, e:
             log.debug("scopeplot: error grabbing data", e)
             return None

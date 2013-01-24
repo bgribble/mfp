@@ -1,0 +1,233 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "default",
+        "obj_id": 0,
+        "top_level": true,
+        "num_outlets": 0,
+        "display_type": "patch",
+        "num_inlets": 0,
+        "initargs": ""
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 161.13616943359375,
+                "name": "processor_001",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": [],
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 14.984886169433594,
+                "dsp_outlets": [
+                    0
+                ],
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "do_onload": true,
+            "initargs": null,
+            "type": "in~"
+        },
+        "2": {
+            "connections": [
+                [],
+                [],
+                [
+                    [
+                        3,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 161.13616943359375,
+                "name": "processor_002",
+                "update_required": false,
+                "num_outlets": 3,
+                "dsp_inlets": [
+                    0
+                ],
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 148.891357421875,
+                "dsp_outlets": [
+                    0
+                ],
+                "layername": "Layer 0"
+            },
+            "name": "processor_002",
+            "do_onload": true,
+            "initargs": "100",
+            "type": "buffer~"
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "x_max": 6.28,
+                "plot_type": "scope",
+                "style": {},
+                "position_x": 161.13616943359375,
+                "name": "plot_001",
+                "obj_id": 3,
+                "dsp_outlets": null,
+                "y_max": 1.0,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "plot",
+                "num_inlets": 1,
+                "position_y": 191.891357421875,
+                "x_min": 0.0,
+                "initargs": null,
+                "layername": "Layer 0",
+                "y_min": -1.0
+            },
+            "name": "plot_001",
+            "do_onload": true,
+            "initargs": null,
+            "type": "scope"
+        },
+        "4": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ],
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 189.93821716308594,
+                "name": "button_001",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "button",
+                "num_inlets": 2,
+                "position_y": 43.973379135131836,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
+            },
+            "name": "button_001",
+            "value": {
+                "__BangType__": {}
+            },
+            "do_onload": false,
+            "initargs": "Bang",
+            "type": "var"
+        },
+        "5": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 191.95474243164062,
+                "name": "message_001",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 74.92950820922852,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
+            },
+            "name": "message_001",
+            "do_onload": false,
+            "initargs": "@bufinfo",
+            "type": "message"
+        },
+        "6": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 191.9491424560547,
+                "name": "message_002",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 105.8775405883789,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
+            },
+            "name": "message_002",
+            "do_onload": false,
+            "initargs": "trig_mode=1",
+            "type": "message"
+        },
+        "7": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "position_x": 217.93905639648438,
+                "name": "text_001",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 41.951438903808594,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
+            },
+            "name": "text_001",
+            "value": "<b>click to start</b>",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        }
+    },
+    "type": "oscope",
+    "scopes": {
+        "__patch__": {
+            "message_002": 6,
+            "message_001": 5,
+            "plot_001": 3,
+            "self": 0,
+            "button_001": 4,
+            "processor_002": 2,
+            "processor_001": 1,
+            "text_001": 7
+        }
+    }
+}

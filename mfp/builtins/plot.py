@@ -20,6 +20,7 @@ class Scope (Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.buffer = None
+        self.retrig_value = True 
 
         if init_args is not None:
             log.debug("scope: Does not accept init args")
@@ -30,17 +31,24 @@ class Scope (Processor):
     def trigger(self):
         if isinstance(self.inlets[0], BufferInfo):
             self.buffer = self.inlets[0]
-            MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
-
+            if self.gui_created:
+                MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
+            else: 
+                self.need_buffer_send = True 
         elif self.inlets[0] is True:
             pass
         elif self.inlets[0] is False:
-            MFPApp().gui_cmd.command(self.obj_id, "grab", None)
-            self.outlets[0] = Bang
-
+            if self.gui_created:
+                MFPApp().gui_cmd.command(self.obj_id, "grab", None)
         if self.buffer is None:
             log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
             self.outlets[0] = MethodCall("bufinfo")
+
+    def set_retrig(self, value):
+        self.retrig_value = value
+
+    def draw_complete(self):
+        self.outlets[0] = self.retrig_value
 
     def grab(self):
         MFPApp().gui_cmd.command(self.obj_id, "grab", None)

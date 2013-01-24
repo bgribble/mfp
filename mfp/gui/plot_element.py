@@ -7,6 +7,8 @@ A patch element corresponding to an XY scatter or line plot
 from gi.repository import Clutter as clutter
 from patch_element import PatchElement
 from mfp import log
+from mfp.main import MFPApp
+from mfp.gui_slave import MFPGUI
 from .modes.label_edit import LabelEditMode
 from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
@@ -111,6 +113,9 @@ class PlotElement (PatchElement):
             self.xyplot.set_bounds(x_min, y_min, x_max, y_max)
             self.send_params()
 
+    def draw_complete_cb(self): 
+        MFPGUI().mfp.send_methodcall(self.obj_id, 0, "draw_complete")
+
     def update(self):
         self.draw_ports()
 
@@ -137,8 +142,9 @@ class PlotElement (PatchElement):
             if self.obj_type == "scatter":
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
             elif self.obj_type == "scope":
-                self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT)
-
+                self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT, 
+                                        MFPApp().samplerate)
+                self.xyplot.draw_complete_cb = self.draw_complete_cb 
             if self.xyplot:
                 self.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)
@@ -220,7 +226,7 @@ class PlotElement (PatchElement):
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
             elif params["plot_type"] == "scope":
-                self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT)
+                self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT, MFPApp().samplerate)
             if self.xyplot:
                 self.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)

@@ -22,6 +22,7 @@ typedef struct {
     int chan_size;
     int chan_pos;
     int trig_enabled;
+    int trig_pretrigger;
     int trig_triggered;
     int trig_channel;
     int trig_op;
@@ -37,7 +38,7 @@ typedef struct {
 #define TRIG_ONESHOT 0 
 #define TRIG_CONTIN  1
 
-#define TRIG_GT 0
+#define TRIG_GT 0 
 #define TRIG_LT 1
 
 #define RESP_TRIGGERED 0
@@ -51,10 +52,11 @@ typedef struct {
 static void 
 init(mfp_processor * proc) 
 {
-    buf_info * d = g_malloc(sizeof(buf_info));
+    buf_info * d = g_malloc0(sizeof(buf_info));
 
     d->shm_id[0] =0;
     d->shm_fd = -1;
+    d->shm_size = 0;
     d->shm_ptr = NULL;
     d->chan_count=0;
     d->chan_size = 0;
@@ -64,6 +66,7 @@ init(mfp_processor * proc)
     d->trig_op = 0;
     d->trig_thresh = 0;
     d->trig_triggered = 0;
+    d->trig_pretrigger = 0;
     d->trig_enabled = 1;
     d->trig_repeat = 1;
     proc->data = d;
@@ -91,13 +94,28 @@ process(mfp_processor * proc)
         }
         if(!(d->trig_mode == TRIG_BANG)) {
             while(d->trig_triggered == 0) {
-                if((d->trig_op == TRIG_GT) && (trig_block->data[dstart] > d->trig_thresh)) {
-                    d->trig_triggered = 1;
+                if (d->trig_pretrigger == 0) { 
+                    if((d->trig_op == TRIG_GT) 
+                        && (trig_block->data[dstart] <= d->trig_thresh)) {
+                        d->trig_pretrigger = 1;
+                    }
+                    else if((d->trig_op == TRIG_LT) 
+                        && (trig_block->data[dstart] >= d->trig_thresh)) {
+                        d->trig_pretrigger = 1;
+                    }
                 }
-                else if ((d->trig_op == TRIG_LT)  && (trig_block->data[dstart] < d->trig_thresh)) {
-                    d->trig_triggered = 1;
+                else { 
+                    if((d->trig_op == TRIG_GT) 
+                        && (trig_block->data[dstart] > d->trig_thresh)) {
+                        d->trig_triggered = 1;
+                        d->trig_pretrigger = 0;
+                    }
+                    else if ((d->trig_op == TRIG_LT)  
+                        && (trig_block->data[dstart] < d->trig_thresh)) {
+                        d->trig_triggered = 1;
+                        d->trig_pretrigger = 0;
+                    }
                 }
-
                 if(d->trig_triggered == 0)
                     dstart++;
                 if (dstart >= trig_block->blocksize)
@@ -238,7 +256,7 @@ config(mfp_processor * proc)
         else {
             d->trig_triggered = 0;
         }
-
+        g_hash_table_remove(proc->params, "trig_triggered");
         mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, d->trig_triggered);
     }
 
