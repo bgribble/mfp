@@ -99,13 +99,13 @@ class PlugInfo (object):
                 return (hlower * 0.25 + hupper * 0.75) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_MAXIMUM: 
             return hupper * multiplier
-        elif htype & self.ladspa_hint_default_0:
+        elif htype & self.LADSPA_HINT_DEFAULT_0:
             return 0.0
-        elif htype & self.ladspa_hint_default_1:
+        elif htype & self.LADSPA_HINT_DEFAULT_1:
             return 1.0
-        elif htype & self.ladspa_hint_default_100:
+        elif htype & self.LADSPA_HINT_DEFAULT_100:
             return 100.0
-        elif htype & self.ladspa_hint_default_440:
+        elif htype & self.LADSPA_HINT_DEFAULT_440:
             return 440.0
 
 
