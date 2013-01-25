@@ -29,7 +29,7 @@ ladspa_setup(mfp_processor * proc)
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
     gpointer p_lib_name = g_hash_table_lookup(proc->params, "lib_name");
     gpointer p_lib_index = g_hash_table_lookup(proc->params, "lib_index");
-    int lib_index = (int)(*(float *)p_lib_index);
+    int lib_index;
     LADSPA_Descriptor * (* descrip_func)(unsigned long);
     int portnum; 
     int portcount;
@@ -37,8 +37,15 @@ ladspa_setup(mfp_processor * proc)
     int signal_ins=0, signal_outs=0;
     void * dllib; 
 
-    if (p_lib_name == NULL)
+    if (p_lib_name == NULL) 
         return;
+
+    if (p_lib_index == NULL) {
+        lib_index = 0;
+    }
+    else {
+        lib_index = (int)(*(float *)p_lib_index);
+    }
 
     d->lib_name = g_strdup((char *)p_lib_name);
     dllib = dlopen((char *)p_lib_name, RTLD_NOW);
@@ -56,7 +63,7 @@ ladspa_setup(mfp_processor * proc)
     if (d->plug_descrip != NULL) {
         /* allocate storage for control parameters */ 
         portcount = d->plug_descrip->PortCount;
-        d->plug_control = g_malloc(portcount * sizeof(LADSPA_Data));
+        d->plug_control = g_malloc0(portcount * sizeof(LADSPA_Data));
 
         /* actually instantiate the plugin */
         d->plug_handle = d->plug_descrip->instantiate(d->plug_descrip, mfp_samplerate);
@@ -129,6 +136,7 @@ init(mfp_processor * proc)
     d->plug_control = NULL;
     d->plug_activated = 0;
     proc->data = d;
+
     ladspa_setup(proc);
     
     return;

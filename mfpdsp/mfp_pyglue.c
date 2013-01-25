@@ -221,12 +221,14 @@ extract_c_params(mfp_processor * proc, PyObject * params)
     Py_ssize_t pos = 0;
     char * param_name;
     int retval = 1;
+    int success = 1;
 
     while(PyDict_Next(params, &pos, &key, &value)) {
         param_name = PyString_AsString(key);
-        retval = set_c_param(proc, param_name, value);
-        if (retval == 0) 
-            return retval;
+        success = set_c_param(proc, param_name, value);
+        if (success == 0) { 
+            retval = 0;
+        }
     }
     return retval;
 }

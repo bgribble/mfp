@@ -107,6 +107,8 @@ class PlugInfo (object):
             return 100.0
         elif htype & self.LADSPA_HINT_DEFAULT_440:
             return 440.0
+        else: 
+            return hlower
 
 
             
