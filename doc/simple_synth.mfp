@@ -8,9 +8,10 @@
         ],
         "name": "default",
         "obj_id": 0,
+        "top_level": true,
         "num_outlets": 0,
         "display_type": "patch",
-        "num_inlets": 1,
+        "num_inlets": 0,
         "initargs": ""
     },
     "objects": {
@@ -18,39 +19,40 @@
             "connections": [
                 [
                     [
-                        15,
+                        9,
                         0
                     ]
                 ]
             ],
-            "initargs": null,
             "gui_params": {
                 "layer": "Layer 0",
                 "position_x": 159.96261596679688,
                 "name": "processor_1",
+                "obj_id": 1,
+                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 1,
                 "position_y": 79.27659606933594,
-                "dsp_outlets": null
+                "initargs": null
             },
-            "type": "midi_in",
-            "name": "processor_1"
+            "name": "processor_1",
+            "do_onload": null,
+            "initargs": null,
+            "type": "midi_in"
         },
-        "3": {
+        "2": {
             "connections": [
                 [
                     [
-                        4,
+                        3,
                         0
                     ]
                 ]
             ],
-            "initargs": null,
             "gui_params": {
-                "layer": "Layer 0",
                 "position_x": 121.07640075683594,
                 "name": "processor_3",
                 "update_required": false,
@@ -58,30 +60,31 @@
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 1,
-                "position_y": 178.2772979736328,
-                "dsp_outlets": null
+                "position_y": 165.2772979736328,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
             },
-            "type": "note2freq",
-            "name": "processor_3"
+            "name": "processor_3",
+            "do_onload": null,
+            "initargs": null,
+            "type": "note2freq"
         },
-        "4": {
+        "3": {
             "connections": [
                 [
                     [
-                        10,
+                        27,
                         0
                     ]
                 ],
                 [
                     [
-                        5,
+                        4,
                         1
                     ]
                 ]
             ],
-            "initargs": "2",
             "gui_params": {
-                "layer": "Layer 0",
                 "position_x": 121.07640075683594,
                 "name": "processor_4",
                 "update_required": false,
@@ -89,29 +92,30 @@
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 1,
-                "position_y": 215.28533935546875,
-                "dsp_outlets": null
+                "position_y": 198.28533935546875,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
             },
-            "type": "trigger",
-            "name": "processor_4"
+            "name": "processor_4",
+            "do_onload": null,
+            "initargs": "2",
+            "type": "trigger"
         },
-        "5": {
+        "4": {
             "connections": [
                 [
                     [
-                        8,
+                        5,
                         0
                     ],
                     [
-                        9,
+                        6,
                         0
                     ]
                 ]
             ],
-            "initargs": null,
             "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 165.51576232910156,
+                "position_x": 136.54750061035156,
                 "name": "processor_5",
                 "update_required": false,
                 "num_outlets": 1,
@@ -121,21 +125,25 @@
                 ],
                 "display_type": "processor",
                 "num_inlets": 3,
-                "position_y": 311.5246887207031,
+                "position_y": 330.49737548828125,
                 "dsp_outlets": [
                     0
-                ]
+                ],
+                "layername": "Layer 0"
             },
-            "type": "osc~",
-            "name": "processor_5"
+            "name": "processor_5",
+            "do_onload": null,
+            "initargs": null,
+            "type": "osc~"
         },
-        "8": {
+        "5": {
             "connections": [],
-            "initargs": "0",
             "gui_params": {
                 "layer": "Layer 0",
                 "position_x": 136.60032653808594,
                 "name": "processor_6",
+                "obj_id": 5,
+                "position_y": 380.33642578125,
                 "update_required": false,
                 "num_outlets": 0,
                 "dsp_inlets": [
@@ -143,19 +151,22 @@
                 ],
                 "display_type": "processor",
                 "num_inlets": 1,
-                "position_y": 380.33642578125,
-                "dsp_outlets": []
+                "dsp_outlets": [],
+                "initargs": "0"
             },
-            "type": "out~",
-            "name": "processor_6"
+            "name": "processor_6",
+            "do_onload": null,
+            "initargs": "0",
+            "type": "out~"
         },
-        "9": {
+        "6": {
             "connections": [],
-            "initargs": "1",
             "gui_params": {
                 "layer": "Layer 0",
                 "position_x": 200.4136199951172,
                 "name": "processor_7",
+                "obj_id": 6,
+                "position_y": 379.6845703125,
                 "update_required": false,
                 "num_outlets": 0,
                 "dsp_inlets": [
@@ -163,139 +174,104 @@
                 ],
                 "display_type": "processor",
                 "num_inlets": 1,
-                "position_y": 379.6845703125,
-                "dsp_outlets": []
+                "dsp_outlets": [],
+                "initargs": "1"
             },
-            "type": "out~",
-            "name": "processor_7"
+            "name": "processor_7",
+            "do_onload": null,
+            "initargs": "1",
+            "type": "out~"
         },
-        "10": {
+        "9": {
             "connections": [
                 [
                     [
-                        5,
-                        2
-                    ]
-                ]
-            ],
-            "initargs": "1.0",
-            "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 236.7321319580078,
-                "name": "message_1",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "message",
-                "num_inlets": 2,
-                "position_y": 259.2901611328125,
-                "dsp_outlets": null
-            },
-            "type": "message",
-            "name": "message_1"
-        },
-        "11": {
-            "connections": [
-                [
-                    [
-                        5,
-                        2
-                    ]
-                ]
-            ],
-            "initargs": "0.0",
-            "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 236.25631713867188,
-                "name": "message_2",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "message",
-                "num_inlets": 2,
-                "position_y": 212.81385803222656,
-                "dsp_outlets": null
-            },
-            "type": "message",
-            "name": "message_2"
-        },
-        "15": {
-            "connections": [
-                [
-                    [
-                        3,
+                        2,
                         0
                     ]
                 ],
                 [
                     [
-                        11,
+                        26,
                         0
                     ]
                 ],
                 []
             ],
-            "initargs": "NoteOn, NoteOff",
             "gui_params": {
                 "layer": "Layer 0",
                 "position_x": 159.96261596679688,
                 "name": "processor_2",
+                "obj_id": 9,
+                "dsp_outlets": null,
                 "update_required": false,
                 "num_outlets": 3,
                 "dsp_inlets": null,
                 "display_type": "processor",
                 "num_inlets": 2,
                 "position_y": 127.27659606933594,
-                "dsp_outlets": null
+                "initargs": "NoteOn, NoteOff"
             },
-            "type": "case",
-            "name": "processor_2"
+            "name": "processor_2",
+            "do_onload": null,
+            "initargs": "NoteOn, NoteOff",
+            "type": "case"
         },
-        "16": {
+        "10": {
+            "connections": [
+                []
+            ],
             "gui_params": {
+                "value": "midi_in receives all events on ALSA sequencer",
                 "layer": "Layer 0",
                 "position_x": 347.959716796875,
                 "name": "text_1",
+                "obj_id": 10,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 77.92108917236328,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_1",
             "value": "midi_in receives all events on ALSA sequencer",
-            "connections": [
-                []
-            ],
+            "do_onload": null,
             "initargs": null,
             "type": "text"
         },
-        "17": {
+        "11": {
+            "connections": [
+                []
+            ],
             "gui_params": {
+                "value": "Routes input based on type or value",
                 "layer": "Layer 0",
                 "position_x": 347.4879150390625,
                 "name": "text_2",
+                "obj_id": 11,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 126.8870849609375,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_2",
             "value": "Routes input based on type or value",
-            "connections": [
-                []
-            ],
+            "do_onload": null,
             "initargs": null,
             "type": "text"
         },
-        "18": {
+        "12": {
+            "connections": [
+                []
+            ],
             "gui_params": {
-                "layer": "Layer 0",
                 "position_x": 346.4893798828125,
                 "name": "text_3",
                 "update_required": true,
@@ -303,20 +279,21 @@
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 181.83148193359375,
-                "dsp_outlets": null
+                "position_y": 164.83148193359375,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
             },
             "name": "text_3",
             "value": "note2freq converts MIDI NoteOn to frequency",
-            "connections": [
-                []
-            ],
+            "do_onload": null,
             "initargs": null,
             "type": "text"
         },
-        "19": {
+        "13": {
+            "connections": [
+                []
+            ],
             "gui_params": {
-                "layer": "Layer 0",
                 "position_x": 341.7462463378906,
                 "name": "text_4",
                 "update_required": true,
@@ -324,41 +301,46 @@
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 301.7302551269531,
-                "dsp_outlets": null
+                "position_y": 317.7302551269531,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
             },
             "name": "text_4",
             "value": "osc~ is a sine oscillator that takes frequency and \namplitude on inputs 1 and 2 (input 0 is phase reset)",
-            "connections": [
-                []
-            ],
+            "do_onload": null,
             "initargs": null,
             "type": "text"
         },
-        "20": {
+        "14": {
+            "connections": [
+                []
+            ],
             "gui_params": {
+                "value": "write to JACK outputs 0 and 1",
                 "layer": "Layer 0",
                 "position_x": 339.6310729980469,
                 "name": "text_5",
+                "obj_id": 14,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 384.6730041503906,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_5",
             "value": "write to JACK outputs 0 and 1",
-            "connections": [
-                []
-            ],
+            "do_onload": null,
             "initargs": null,
             "type": "text"
         },
-        "21": {
+        "15": {
+            "connections": [
+                []
+            ],
             "gui_params": {
-                "layer": "Layer 0",
                 "position_x": 344.6202087402344,
                 "name": "text_6",
                 "update_required": true,
@@ -366,59 +348,167 @@
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
-                "position_y": 219.61228942871094,
-                "dsp_outlets": null
+                "position_y": 198.61228942871094,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
             },
             "name": "text_6",
             "value": "trigger sends its input to ouputs, right-to-left",
-            "connections": [
-                []
-            ],
+            "do_onload": null,
             "initargs": null,
             "type": "text"
         },
-        "22": {
+        "16": {
+            "connections": [
+                []
+            ],
             "gui_params": {
+                "value": "<b><span size=\"large\">simple_synth.mfp</span></b>",
                 "layer": "Layer 0",
                 "position_x": 59.934364318847656,
                 "name": "text_7",
+                "obj_id": 16,
+                "dsp_outlets": null,
                 "update_required": true,
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "text",
                 "num_inlets": 2,
                 "position_y": 29.930950164794922,
-                "dsp_outlets": null
+                "initargs": null
             },
             "name": "text_7",
             "value": "<b><span size=\"large\">simple_synth.mfp</span></b>",
+            "do_onload": null,
+            "initargs": null,
+            "type": "text"
+        },
+        "17": {
+            "connections": [
+                [
+                    [
+                        4,
+                        2
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 192.7559051513672,
+                "name": "processor_008",
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": [],
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 285.54449462890625,
+                "dsp_outlets": [
+                    0
+                ],
+                "layername": "Layer 0"
+            },
+            "name": "processor_008",
+            "do_onload": true,
+            "initargs": null,
+            "type": "line~"
+        },
+        "25": {
             "connections": [
                 []
             ],
+            "gui_params": {
+                "value": "line~ generates an envelope from (dest, time) pairs",
+                "position_x": 338.6289367675781,
+                "name": "text_008",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 286.6412048339844,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
+            },
+            "name": "text_008",
+            "value": "line~ generates an envelope from (dest, time) pairs",
+            "do_onload": false,
             "initargs": null,
             "type": "text"
+        },
+        "26": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 236.27053833007812,
+                "name": "message_2",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 243.7051239013672,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
+            },
+            "name": "message_2",
+            "do_onload": false,
+            "initargs": "[(0, 20)]",
+            "type": "message"
+        },
+        "27": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 120.73100280761719,
+                "name": "message_1",
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 244.31809997558594,
+                "dsp_outlets": null,
+                "layername": "Layer 0"
+            },
+            "name": "message_1",
+            "do_onload": false,
+            "initargs": "[(0.1, 20)]",
+            "type": "message"
         }
     },
-    "type": "default",
+    "type": "simple_synth",
     "scopes": {
         "__patch__": {
-            "message_1": 10,
-            "message_2": 11,
+            "message_1": 27,
+            "text_6": 15,
+            "message_2": 26,
+            "processor_008": 17,
             "self": 0,
-            "processor_2": 15,
-            "processor_3": 3,
+            "processor_2": 9,
+            "processor_3": 2,
             "processor_1": 1,
-            "processor_6": 8,
-            "processor_7": 9,
-            "processor_4": 4,
-            "processor_5": 5,
-            "text_6": 21,
-            "text_7": 22,
-            "text_4": 19,
-            "text_5": 20,
-            "text_2": 17,
-            "text_3": 18,
-            "text_1": 16
+            "processor_6": 5,
+            "processor_7": 6,
+            "processor_4": 3,
+            "processor_5": 4,
+            "text_008": 25,
+            "text_7": 16,
+            "text_4": 13,
+            "text_5": 14,
+            "text_2": 11,
+            "text_3": 12,
+            "text_1": 10
         }
     }
 }
