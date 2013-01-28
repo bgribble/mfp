@@ -97,7 +97,6 @@ class RPCWrapper (object):
 
     @classmethod
     def register(klass, name):
-        log.debug("RPCWrapper: registering class", klass, name)
         klass.rpctype[name] = klass
 
     @classmethod
