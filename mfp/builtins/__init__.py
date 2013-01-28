@@ -58,4 +58,6 @@ def register():
     dbmath.register() 
     from . import plugin
     plugin.register()
+    from . import loadbang 
+    loadbang.register() 
 
