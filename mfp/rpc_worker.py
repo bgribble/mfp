@@ -52,12 +52,18 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
         initproc(pipe, *initproc_args)
 
     # wait until time to quit
-    try:
-        lck.acquire()
-    except (KeyboardInterrupt, SystemExit):
-        # it's time to quit anyway
-        pass 
-
+    retry = True 
+    while retry: 
+        retry = False 
+        try: 
+            lck.acquire()
+        except (KeyboardInterrupt, SystemExit): 
+            retry = True 
+        except Exception, e: 
+            print "RPCServer remote: caught unhandled error, exiting"
+            import traceback 
+            traceback.print_exc() 
+            pass 
 
 class RPCServer(QuittableThread):
     def __init__(self, name, initproc=None, *initproc_args):
@@ -81,8 +87,9 @@ class RPCServer(QuittableThread):
     def run(self):
         self.worker.join()
         if not self.join_req:
-            log.debug(self.name, 'RPCServer thread EXITED UNEXPECTEDLY')
+            log.debug(self.name, 'RPCServer remote thread EXITED UNEXPECTEDLY')
             self.worker = None
+            self.pipe.finish()
 
     def finish(self):
         if self.worker:

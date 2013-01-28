@@ -20,7 +20,7 @@ from .interpreter import Interpreter
 from .evaluator import Evaluator
 from .processor import Processor
 from .method import MethodCall
-
+from .quittable_thread import QuittableThread 
 from .rpc_wrapper import RPCWrapper, rpcwrap
 from .rpc_worker import RPCServer
 
@@ -156,11 +156,11 @@ class MFPApp (Singleton):
         # configuration items -- should be populated before calling setup() 
         self.no_gui = False
         self.no_dsp = False
-        self.dsp_inputs = None 
-        self.dsp_outputs = None 
         self.osc_port = None 
         self.patch_path = None 
         self.lib_path = None 
+        self.dsp_inputs = 2
+        self.dsp_outputs = 2
         self.samplerate = 44100
         self.blocksize = 256 
 
@@ -447,3 +447,16 @@ def main():
     app.patches["default"] = patch
     patch.mark_ready()
     patch.create_gui()
+
+    try: 
+        QuittableThread.wait_for_all()
+    except (KeyboardInterrupt, SystemExit):
+        print " Quit request received, exiting"
+        app.finish()
+    
+    import threading 
+    threads = threading.enumerate()
+    if len(threads) > 1:
+        print "Threads are still running:"
+        for t in threads:
+            print "   ", t
