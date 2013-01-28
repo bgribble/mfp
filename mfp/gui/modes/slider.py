@@ -1,15 +1,11 @@
 #! /usr/bin/env python2.6
 '''
-slider.py: SliderEdit and SliderControl major modes
+slider.py: SliderEdit and SliderControl minor modes
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode
-from .label_edit import LabelEditMode
-
-from mfp import log
-
 
 class SliderBaseMode (InputMode):
     def __init__(self, window, element, descrip):
@@ -83,6 +79,5 @@ class SliderControlMode (SliderBaseMode):
 
 
 class SliderEditMode (SliderBaseMode):
-    def __init__(self, window, element, descrip):
-        SliderBaseMode.__init__(self, window, element, descrip)
-        self.extend(LabelEditMode(window, element, element.title))
+    pass
+

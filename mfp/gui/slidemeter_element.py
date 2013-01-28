@@ -18,7 +18,7 @@ from . import ticks
 class SlideMeterElement (PatchElement):
     '''
     Vertical/horizontal slider/meter element
-    Contains an optional scale and an optional title
+    Contains an optional scale
     Can be output-only or interactive
     Scale can be dB or linear
     '''
@@ -28,7 +28,6 @@ class SlideMeterElement (PatchElement):
 
     DEFAULT_W = 25
     DEFAULT_H = 100
-    TITLE_SPACE = 22
     SCALE_SPACE = 30
     TICK_SPACE = 14
     TICK_LEN = 5
@@ -38,14 +37,11 @@ class SlideMeterElement (PatchElement):
 
         # parameters controlling display
         self.value = 0.0
-        self.title = None
-        self.title_text = None
         self.min_value = 0.0
         self.max_value = 1.0
         self.scale_ticks = None
         self.scale_font_size = 8
         self.show_scale = False
-        self.show_title = True
         self.slider_enable = True
 
         # value to emit when at bottom of scale, useful for dB scales
@@ -58,13 +54,11 @@ class SlideMeterElement (PatchElement):
         self.hot_y_min = None
         self.hot_y_max = None
 
-        # create elements
+        # create the texture
         self.texture = clutter.CairoTexture.new(self.DEFAULT_W, self.DEFAULT_H)
-        self.title = clutter.Text()
 
         # configure
         self.add_actor(self.texture)
-        self.add_actor(self.title)
         self.texture.connect("draw", self.draw_cb)
 
         self.set_reactive(True)
@@ -75,7 +69,6 @@ class SlideMeterElement (PatchElement):
 
         # request update when value changes
         self.update_required = True
-
 
     def draw_cb(self, texture, ct):
         def pt2px(x, bar_px):
@@ -138,8 +131,6 @@ class SlideMeterElement (PatchElement):
 
     def pixdelta2value(self, pixdelta):
         pix_h = self.texture.get_property('surface_height') - 2
-        # if self.show_title:
-        #	pix_h -= self.TITLE_SPACE
         return (float(pixdelta) / pix_h) * (self.max_value - self.min_value)
 
     def update_value(self, value):
@@ -165,27 +156,12 @@ class SlideMeterElement (PatchElement):
         if v and not self.show_scale:
             self.show_scale = True
             self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
-            if self.title:
-                self.recenter_title()
             changes = True
         elif v is False and self.show_scale:
             self.show_scale = False
             self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
-            if self.title:
-                self.recenter_title()
             changes = True
 
-        v = params.get("show_title")
-        if v and not self.show_title:
-            self.show_title = True
-            self.add_actor(self.title)
-            self.set_size(self.get_width(), self.get_height() + self.TITLE_SPACE)
-            changes = True
-        elif v is False and self.show_title:
-            self.show_title = False
-            self.remove_actor(self.title)
-            self.set_size(self.get_width(), self.get_height() - self.TITLE_SPACE)
-            changes = True
 
         for p in ("value", "slider_enable", "min_value", "max_value"):
             v = params.get(p)
@@ -204,10 +180,6 @@ class SlideMeterElement (PatchElement):
         self.width = width
         self.height = height
         clutter.Group.set_size(self, self.width, self.height)
-        if self.show_title:
-            height -= self.TITLE_SPACE
-            title_x, title_y = self.title.get_position()
-            self.title.set_position(title_x, height - 2)
         self.texture.set_size(width, height)
         self.texture.set_surface_size(width, height)
 
@@ -224,25 +196,6 @@ class SlideMeterElement (PatchElement):
         for c in self.connections_out + self.connections_in:
             c.delete()
         PatchElement.delete(self)
-
-    def recenter_title(self):
-        w = self.title.get_width()
-        x, y = self.title.get_position()
-        self.title.set_position((self.texture.get_width() - self.title.get_width()) / 2.0, y)
-
-    def label_edit_start(self):
-        pass
-
-    def label_edit_finish(self, *args):
-        self.title_text = self.title.get_text()
-        if self.show_title and not self.title_text:
-            self.show_title = False
-            self.title_text = None
-            self.remove_actor(self.title)
-            self.set_size(self.width, self.height)
-            self.texture.invalidate()
-        else:
-            self.recenter_title()
 
     def make_edit_mode(self):
         if self.obj_id is None:
