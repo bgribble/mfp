@@ -222,7 +222,7 @@ class Processor (object):
         self.gui_params['num_outlets'] = outlets
 
         if self.gui_created:
-            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def connect(self, outlet, target, inlet):
         # is this a DSP connection?
@@ -323,13 +323,13 @@ class Processor (object):
 
     def create_gui(self):
         from .main import MFPApp
-        MFPApp().gui_cmd.create(self.init_type, self.init_args, self.obj_id,
+        MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
                                 self.gui_params)
         self.gui_created = True
 
     def delete_gui(self):
         from .main import MFPApp
-        MFPApp().gui_cmd.delete(self.obj_id)
+        MFPApp().gui_command.delete(self.obj_id)
         self.gui_created = False
 
     def load(self, paramdict):

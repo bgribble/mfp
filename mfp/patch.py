@@ -197,7 +197,7 @@ class Patch(Processor):
         if not self.gui_params.get("top_level"):
             return 
 
-        MFPApp().gui_cmd.load_start()
+        MFPApp().gui_command.load_start()
 
         for oid, obj in self.objects.items():
             obj.create_gui()
@@ -205,8 +205,8 @@ class Patch(Processor):
         for oid, obj in self.objects.items():
             for srcport, connections in enumerate(obj.connections_out):
                 for dstobj, dstport in connections:
-                    MFPApp().gui_cmd.connect(obj.obj_id, srcport, dstobj.obj_id, dstport)
-        MFPApp().gui_cmd.load_complete()
+                    MFPApp().gui_command.connect(obj.obj_id, srcport, dstobj.obj_id, dstport)
+        MFPApp().gui_command.load_complete()
 
     def save_file(self, filename=None):
         savefile = open(filename, "w")

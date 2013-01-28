@@ -3,7 +3,7 @@ from mfp import builtins
 
 
 def setup():
-    MFPApp.no_gui = True
+    MFPApp().no_gui = True
     builtins.register()
 
 

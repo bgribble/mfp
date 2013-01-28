@@ -32,14 +32,14 @@ class Scope (Processor):
         if isinstance(self.inlets[0], BufferInfo):
             self.buffer = self.inlets[0]
             if self.gui_created:
-                MFPApp().gui_cmd.command(self.obj_id, "buffer", self.buffer)
+                MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
             else: 
                 self.need_buffer_send = True 
         elif self.inlets[0] is True:
             pass
         elif self.inlets[0] is False:
             if self.gui_created:
-                MFPApp().gui_cmd.command(self.obj_id, "grab", None)
+                MFPApp().gui_command.command(self.obj_id, "grab", None)
         if self.buffer is None:
             log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
             self.outlets[0] = MethodCall("bufinfo")
@@ -51,13 +51,13 @@ class Scope (Processor):
         self.outlets[0] = self.retrig_value
 
     def grab(self):
-        MFPApp().gui_cmd.command(self.obj_id, "grab", None)
+        MFPApp().gui_command.command(self.obj_id, "grab", None)
 
     def conf(self, **kwargs):
         for k, v in kwargs.items():
             self.gui_params[k] = v
         if self.gui_created:
-            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
 class Scatter (Processor):
     display_type = "plot"
@@ -89,7 +89,7 @@ class Scatter (Processor):
 
     def _chartconf(self, action, data=None):
         if self.gui_created:
-            MFPApp().gui_cmd.command(self.obj_id, action, data)
+            MFPApp().gui_command.command(self.obj_id, action, data)
         return True
 
     def trigger(self):
@@ -144,7 +144,7 @@ class Scatter (Processor):
         for k, v in kwargs.items():
             self.gui_params[k] = v
         if self.gui_created:
-            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def style(self, **kwargs):
         '''Set style parameters for a curve'''
@@ -155,7 +155,7 @@ class Scatter (Processor):
             if k != 'inlet':
                 instyle[k] = v
         if self.gui_created:
-            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
         return True
 
     def bounds(self, x_min, y_min, x_max, y_max):

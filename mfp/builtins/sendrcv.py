@@ -73,7 +73,7 @@ class Recv (Processor):
         self.gui_params["init_args"] = self.init_args
 
         if self.gui_created:
-            MFPApp().gui_cmd.configure(self.obj_id, self.gui_params)
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
 
 def register():
