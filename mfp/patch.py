@@ -6,6 +6,8 @@ Patch class and methods
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
+import os
+
 from .processor import Processor
 from .evaluator import Evaluator
 from .scope import LexicalScope
@@ -178,12 +180,27 @@ class Patch(Processor):
         return (parts[0], factory)
 
     def _load_file(self, filename):
-        jsdata = open(filename, 'r').read()
-        self.json_deserialize(jsdata)
+        from .main import MFPApp
+        from .utils import splitpath 
 
-        for obj_id, obj in self.objects.items():
-            if obj.do_onload:
-                obj.onload()
+        searchpath = MFPApp().searchpath or ""
+        searchdirs = splitpath(searchpath)
+        jsdata = None 
+
+        for d in searchdirs:
+            path = os.path.join(d, filename)
+            try: 
+                os.stat(path)
+                jsdata = open(path, 'r').read()
+            except OSError:
+                pass 
+        
+        if jsdata is not None:
+            self.json_deserialize(jsdata)
+            print "JSON data deserialized"
+            for obj_id, obj in self.objects.items():
+                if obj.do_onload:
+                    obj.onload()
 
     def create_gui(self):
         from main import MFPApp

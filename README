@@ -84,8 +84,13 @@ plain C libraries.
 If all that works: 
     $ mfp 
 
-The very, very basic tutorial: follow these steps to create a helloworld
-patch using just the keyboard.  You do need a pointer to activate it. 
+The very, very basic tutorial: 
+
+Try mfp -h for a command line arguments summary
+
+
+Follow these steps to create a helloworld patch using just the keyboard.
+You do need a pointer to activate it. 
 
 You type	What happens
 ----------- ------------------
@@ -95,7 +100,7 @@ m			Create message (literal data)
 c			Connect mode (will connect selected object to something)
 a			Autoplace mode again
 p			Create a processor
-print RET	Make it a [print] processor
+print RET		Make it a [print] processor
 RET			Make the connection
 
 Now click on the message box to send the "hello, world" string.  
@@ -119,14 +124,15 @@ Run the demo patch by putting the file name on the command line, i.e.
 
 hello_world.mfp:  The classic 
 
-biquad_designer.mfp: What I'm actively working on to exercise new stuff.
-Not complete!  But at least partly workimg.  Click the "calculate" button to 
-compute biquad coefficients and audition them with a noise input source (I run 
-this into JAAA to check my calculations).  PGDN to shift to the Graphs layer 
-with pole/zero and analytical frequency response.
+biquad_designer.mfp:  Not complete!  But at least partly working.  Click
+the "calculate" button to compute biquad coefficients and audition them
+with a noise input source (I run this into JAAA to check my calculations).
+PGDN to shift to the Graphs layer with pole/zero and analytical frequency
+response.  You need to add doc/ to the patch search path for this to load 
+(it uses the "quadratic.mfp" patch).  From the directory holding this 
+README: 
 
-This one requires "quadratic.mfp" to be in the root src dir also.  Search paths 
-for patches are not done. 
+    $ mfp -p doc doc/biquad_designer.mfp
 
 Saving files: There's no UI for saving yet.  You can do it from the
 console.  

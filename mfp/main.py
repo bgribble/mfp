@@ -384,6 +384,7 @@ def main():
     #parser.add_argument("-l", "--init-lib", action="append", 
     #                    help="Dynamic library (*.so) to load at launch")
     parser.add_argument("-p", "--patch-path", action="append",
+                        default=[os.getcwd()],
                         help="Search path for patch files")
     #parser.add_argument("-L", "--lib-path", action="append",
     #                    help="Search path for dynamic libraries")
@@ -409,7 +410,7 @@ def main():
     app.dsp_inputs = args.get("inputs")
     app.dsp_outputs = args.get("outputs")
     app.osc_port = args.get("osc_udp_port")
-    app.searchpath = args.get("patch_path")
+    app.searchpath = ':'.join(args.get("patch_path"))
 
     # launch processes and threads 
     app.setup()
@@ -437,8 +438,9 @@ def main():
     # create initial patch
     patchfile = args.get("patchfile")
     if patchfile is not None:
+        print "loading patch file", patchfile
         name, factory = Patch.register_file(patchfile)
-        patch = factory(name, initargs, None, app.app_scope, name)
+        patch = factory(name, "", None, app.app_scope, name)
     else:
         patch = Patch('default', '', None, app.app_scope, 'default')
 
