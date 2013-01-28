@@ -259,13 +259,34 @@ class MFPApp (Singleton):
     def register(self, name, ctor):
         self.registry[name] = ctor
 
+    def find_file_in_path(self, filename):
+        from utils import splitpath 
+        searchdirs = splitpath(self.searchpath)
+        for d in searchdirs: 
+            path = os.path.join(d, filename)
+            try: 
+                s = os.stat(path)
+                if s: 
+                    return path 
+            except: 
+                continue 
+        return None 
+
     def create(self, init_type, init_args, patch, scope, name):
         ctor = self.registry.get(init_type)
         if ctor is None:
             log.debug("No factory for '%s' registered, looking for file." % init_type)
-            (typename, ctor) = Patch.register_file(init_type + ".mfp")
-            if ctor is None:
-                return None
+            filename = init_type + ".mfp"
+            filepath = self.find_file_in_path(filename)
+
+            if filepath: 
+                log.debug("Found file", filepath)
+                (typename, ctor) = Patch.register_file(filepath)
+                if ctor is None:
+                    return None
+            else:
+                log.debug("No file '%s' in search path %s" % (filename, MFPApp().searchpath))
+                return None 
 
         # factory found, use it
         try:
@@ -423,22 +444,22 @@ def main():
 
     pyfiles = args.get("init_file", [])
     for f in pyfiles: 
-        print "initfile: Trying to load", f
+        log.debug("initfile: Loading", f)
         try: 
             os.stat(f)
         except OSError: 
-            print "initfile: Cannot load", f 
+            log.debug("initfile: Cannot find file", f) 
             continue
         try: 
             evaluator.exec_file(f)
         except Exception, e: 
-            print "initfile: Exception while loading initfile", f 
-            print e
+            log.debug("initfile: Exception while loading initfile", f) 
+            log.debug(e)
 
     # create initial patch
     patchfile = args.get("patchfile")
     if patchfile is not None:
-        print "loading patch file", patchfile
+        log.debug("Loading patch file", patchfile)
         name, factory = Patch.register_file(patchfile)
         patch = factory(name, "", None, app.app_scope, name)
     else:
