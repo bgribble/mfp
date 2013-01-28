@@ -4,7 +4,7 @@ patch_window.py
 The main MFP window and associated code
 '''
 
-from gi.repository import Gtk, GObject, Clutter, GtkClutter, Pango
+from gi.repository import Gtk, Clutter, GtkClutter, Pango
 
 from mfp import MFPGUI
 from mfp import log
@@ -18,13 +18,13 @@ from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
 from .modes.select_mru import SelectMRUMode
-
+import pkgutil
 
 class PatchWindow(object):
     def __init__(self):
         # load Glade ui
         self.builder = Gtk.Builder()
-        self.builder.add_from_file("mfp/gui/mfp.glade")
+        self.builder.add_from_string(pkgutil.get_data("mfp.gui", "mfp.glade"))
 
         # install Clutter stage in Gtk window
         self.window = self.builder.get_object("main_window")

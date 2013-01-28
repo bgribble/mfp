@@ -40,5 +40,6 @@ setup (name = 'mfp',
        description = 'Music for programmers',
        packages = ['mfp', 'mfp.builtins', 'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes' ],
        entry_points = { 'console_scripts': [ 'mfp=mfp.main:main'] },
+       package_data = { 'mfp.gui': ['mfp.glade'] },
        ext_modules = [ mfpdsp ])
 
