@@ -8,6 +8,28 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 import cProfile
 
+def homepath(fn):
+    import os.path
+    import os
+    return os.path.join(os.environ.get("HOME", "~"), fn)
+
+def splitpath(p):
+    parts = p.split(":")
+    unescaped = [] 
+    prefix = None 
+    for p in parts: 
+        if p[-1] == '\\':
+            newpart = p[:-1] + ':'
+            if prefix is not None:
+                prefix = prefix + newpart
+            else:
+                prefix = newpart 
+        elif prefix is None:
+            unescaped.append(p)
+        else:
+            unescaped.append(prefix + p)
+            prefix = None 
+    return unescaped 
 
 def profile(func):
     '''

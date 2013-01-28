@@ -73,3 +73,13 @@ class Evaluator (object):
             del self.local_names['_eval_collect_args']
 
         return rv
+
+    def exec_file(self, filename):
+        import os.path 
+        self.local_names["__file__"] = filename 
+        self.local_names["__name__"] = os.path.basename(filename) 
+        fileobj = open(filename, "r")
+        if fileobj:
+            exec(fileobj, self.global_names, self.local_names)
+
+

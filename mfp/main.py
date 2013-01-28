@@ -6,7 +6,11 @@ Copyright (c) 2010-2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import time
+import math 
+import re 
+import sys, os 
 from pluginfo import PlugInfo 
+import argparse
 
 from .bang import Bang
 from .patch import Patch
@@ -21,6 +25,8 @@ from .rpc_wrapper import RPCWrapper, rpcwrap
 from .rpc_worker import RPCServer
 
 from . import log
+from . import builtins 
+from . import utils
 
 class MFPCommand(RPCWrapper):
     @rpcwrap
@@ -102,7 +108,7 @@ class MFPCommand(RPCWrapper):
 
     @rpcwrap
     def log_write(self, msg):
-        MFPApp().gui_cmd.log_write(msg)
+        MFPApp().gui_command.log_write(msg)
 
     @rpcwrap
     def console_eval(self, cmd):
@@ -146,15 +152,24 @@ class MFPCommand(RPCWrapper):
 
 
 class MFPApp (Singleton):
-    no_gui = False
-    no_dsp = False
-
     def __init__(self):
+        # configuration items -- should be populated before calling setup() 
+        self.no_gui = False
+        self.no_dsp = False
+        self.dsp_inputs = None 
+        self.dsp_outputs = None 
+        self.osc_port = None 
+        self.patch_path = None 
+        self.lib_path = None 
+        self.samplerate = 44100
+        self.blocksize = 256 
+
+        # multiprocessing targets and RPC links
         self.dsp_process = None
         self.dsp_command = None 
 
         self.gui_process = None
-        self.gui_cmd = None
+        self.gui_command = None
 
         # threads in this process
         self.midi_mgr = None
@@ -170,10 +185,6 @@ class MFPApp (Singleton):
 
         # plugin info database
         self.pluginfo = PlugInfo()
-
-        # temporary name cache
-        self.objects_byname = {}
-
         self.app_scope = LexicalScope()
         self.patches = {}
 
@@ -185,31 +196,29 @@ class MFPApp (Singleton):
         MFPCommand.local = True
 
         # dsp and gui processes
-        if not MFPApp.no_dsp:
-            num_inputs = 2
-            num_outputs = 2
-            self.dsp_process = RPCServer("mfp_dsp", dsp_init, num_inputs, num_outputs)
+        if not self.no_dsp:
+            self.dsp_process = RPCServer("mfp_dsp", dsp_init, self.dsp_inputs, self.dsp_outputs)
             self.dsp_process.start()
             self.dsp_process.serve(DSPObject)
             self.dsp_process.serve(DSPCommand)
             self.dsp_command = DSPCommand()
             self.samplerate, self.blocksize = self.dsp_command.get_dsp_params()
 
-        if not MFPApp.no_gui:
+        if not self.no_gui:
             self.gui_process = RPCServer("mfp_gui", gui_init)
             self.gui_process.start()
             self.gui_process.serve(GUICommand)
-            self.gui_cmd = GUICommand()
-            while not self.gui_cmd.ready():
+            self.gui_command = GUICommand()
+            while not self.gui_command.ready():
                 time.sleep(0.2)
             log.debug("GUI is ready, switching logging to GUI")
-            log.log_func = self.gui_cmd.log_write
+            log.log_func = self.gui_command.log_write
             log.debug("Started logging to GUI")
             if self.dsp_command:
                 self.dsp_command.log_to_gui()
 
-            self.console = Interpreter(self.gui_cmd.console_write, dict(app=self))
-            self.gui_cmd.hud_write("<b>Welcome to MFP</b>")
+            self.console = Interpreter(self.gui_command.console_write, dict(app=self))
+            self.gui_command.hud_write("<b>Welcome to MFP</b>")
 
         # midi manager
         from . import midi
@@ -219,9 +228,9 @@ class MFPApp (Singleton):
 
         # OSC manager
         from . import osc
-        self.osc_mgr = osc.MFPOscManager(5555)
+        self.osc_mgr = osc.MFPOscManager(self.osc_port)
         self.osc_mgr.start()
-        log.debug("OSC server started (UDP/5555)")
+        log.debug("OSC server started (UDP/%s)" % self.osc_port)
 
         # crawl plugins 
         log.debug("Collecting information about installed plugins...")
@@ -343,19 +352,7 @@ class MFPApp (Singleton):
         log.debug("MFPApp.finish: all children reaped, good-bye!")
 
 
-def main():
-    import math
-    import os
-    import sys
-    import re
-    from mfp import builtins
-
-    log.debug("Main thread started, pid =", os.getpid())
-    # log.log_file = open("mfp.log", "w+")
-
-    app = MFPApp()
-    app.setup()
-
+def add_evaluator_defaults(): 
     # default names known to the evaluator
     Evaluator.bind_global("math", math)
     Evaluator.bind_global("os", os)
@@ -373,19 +370,74 @@ def main():
     Evaluator.bind_global("NoteOff", NoteOff)
 
     Evaluator.bind_global("builtins", builtins)
-    Evaluator.bind_global("app", app)
+    Evaluator.bind_global("app", MFPApp())
 
+
+def main():
+    parser = argparse.ArgumentParser(description="MFP - Music For Programmers",
+                                     epilog="Bugs and code: http://github.com/bgribble/mfp")
+    
+    parser.add_argument("patchfile", nargs="?", default=None, help="Patch file to load")
+    parser.add_argument("-f", "--init-file", action="append",
+                        default=[utils.homepath(".mfp/mfprc.py")],
+                        help="Python source file to exec at launch")
+    #parser.add_argument("-l", "--init-lib", action="append", 
+    #                    help="Dynamic library (*.so) to load at launch")
+    parser.add_argument("-p", "--patch-path", action="append",
+                        help="Search path for patch files")
+    #parser.add_argument("-L", "--lib-path", action="append",
+    #                    help="Search path for dynamic libraries")
+    parser.add_argument("-i", "--inputs", default=2, type=int,
+                        help="Number of JACK audio input ports")
+    parser.add_argument("-o", "--outputs", default=2, type=int,
+                        help="Number of JACK audio output ports")
+    parser.add_argument("-u", "--osc-udp-port", default=5555, type=int, 
+                        help="UDP port to listen for OSC")
+    parser.add_argument("--no-gui", action="store_true", 
+                        help="Do not launch the GUI engine")
+    parser.add_argument("--no-dsp", action="store_true", 
+                        help="Do not launch the DSP engine")
+
+    args = vars(parser.parse_args())
+
+    # create the app object 
+    app = MFPApp()
+   
+    # configure some things from command line
+    app.no_gui = args.get("no_gui")
+    app.no_dsp = args.get("no_dsp")
+    app.dsp_inputs = args.get("inputs")
+    app.dsp_outputs = args.get("outputs")
+    app.osc_port = args.get("osc_udp_port")
+    app.searchpath = args.get("patch_path")
+
+    # launch processes and threads 
+    app.setup()
+
+    # ok, now start configuring the running system  
+    add_evaluator_defaults() 
     builtins.register()
 
-    if len(sys.argv) > 2:
-        initargs = sys.argv[2]
-    else:
-        initargs = None
+    evaluator = Evaluator()
 
-    if len(sys.argv) > 1:
-        log.debug("main: loading", sys.argv[1])
+    pyfiles = args.get("init_file", [])
+    for f in pyfiles: 
+        print "initfile: Trying to load", f
+        try: 
+            os.stat(f)
+        except OSError: 
+            print "initfile: Cannot load", f 
+            continue
+        try: 
+            evaluator.exec_file(f)
+        except Exception, e: 
+            print "initfile: Exception while loading initfile", f 
+            print e
 
-        name, factory = Patch.register_file(sys.argv[1])
+    # create initial patch
+    patchfile = args.get("patchfile")
+    if patchfile is not None:
+        name, factory = Patch.register_file(patchfile)
         patch = factory(name, initargs, None, app.app_scope, name)
     else:
         patch = Patch('default', '', None, app.app_scope, 'default')
