@@ -39,15 +39,19 @@ def select(self, obj):
 
 @extends(PatchWindow)
 def _unselect(self, obj):
+    print "_unselect:", obj, obj.edit_mode  
     if obj is None:
         return 
     if isinstance(obj, PatchElement):
+        if obj.edit_mode:
+            obj.end_edit()
         obj.end_control()
         obj.unselect()
     self.selected = None
 
 @extends(PatchWindow)
 def unselect(self, obj):
+    print "unselect:", obj
     if self.selected is obj and obj is not None:
         self._unselect(obj)
         self.object_view.select(None)
@@ -56,10 +60,10 @@ def unselect(self, obj):
 
 @extends(PatchWindow)
 def unselect_all(self):
+    print "unselect_all", self.selected
     if self.selected:
         self.selected.end_control()
-        self.selected.unselect()
-        self.selected = None
+        self._unselect(self.selected)
         self.object_view.select(None)
     return True
 

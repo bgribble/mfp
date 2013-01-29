@@ -77,6 +77,12 @@ class PatchElement (Clutter.Group):
     def event_source(self):
         return self
 
+    def select(self):
+        pass 
+
+    def unselect(self):
+        pass 
+
     def move_to_top(self):
         p = self.get_parent()
         if not p: 

@@ -71,7 +71,14 @@ class LabelEditMode (InputMode):
         self.update_label(raw=True)
         self.start_editing()
         self.widget.set_selection(0, len(self.text))
-        
+       
+    def disable(self):
+        print "disable called"
+        self.end_editing()
+        self.update_label(raw=False)
+        pass
+
+
     def start_editing(self):
         def synth_ret(*args):
             self.manager.synthesize("RET")
@@ -109,6 +116,7 @@ class LabelEditMode (InputMode):
             self.activate_handler_id = None
         if self.text_changed_handler_id:
             self.widget.disconnect(self.text_changed_handler_id)
+            self.text_changed_handler_id = None 
 
         if self.blinker is not None:
             self.blinker.quitreq = True
