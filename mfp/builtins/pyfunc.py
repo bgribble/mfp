@@ -76,14 +76,29 @@ class PyEval(Processor):
 
 class PyFunc(Processor): 
     def __init__(self, init_type, init_args, patch, scope, name):
-        self.thunk = None
         if init_args:
             thunktxt = "lambda " + init_args
         else:
             thunktxt = "lambda: None"
-        initargs, kwargs = patch.parse_args(thunktxt)
+
+        self.thunk = patch.parse_obj(thunktxt)
+        initargs, kwargs = patch.parse_args(init_args)
         
-        self.thunk = initargs[0]
+        if callable(self.thunk):
+            self.argcount = self.thunk.func_code.co_argcount
+        Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
+
+    def trigger(self):
+        if isinstance(self.inlets[0], MethodCall):
+            self.inlets[0].call(self)
+        else:
+            self.outlets[0] = self.thunk(*[i for i in self.inlets if i is not Uninit]) 
+
+class PyAutoWrap(Processor): 
+    def __init__(self, init_type, init_args, patch, scope, name):
+        self.thunk = patch.parse_obj(init_type)
+        initargs, kwargs = patch.parse_args(init_args)
+        
         if callable(self.thunk):
             self.argcount = self.thunk.func_code.co_argcount
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)

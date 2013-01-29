@@ -273,7 +273,11 @@ class MFPApp (Singleton):
         return None 
 
     def create(self, init_type, init_args, patch, scope, name):
+        
+        # first try: is a factory registered? 
         ctor = self.registry.get(init_type)
+
+        # second try: is there a .mfp patch file in the search path? 
         if ctor is None:
             log.debug("No factory for '%s' registered, looking for file." % init_type)
             filename = init_type + ".mfp"
@@ -282,11 +286,21 @@ class MFPApp (Singleton):
             if filepath: 
                 log.debug("Found file", filepath)
                 (typename, ctor) = Patch.register_file(filepath)
-                if ctor is None:
-                    return None
             else:
                 log.debug("No file '%s' in search path %s" % (filename, MFPApp().searchpath))
-                return None 
+
+        # third try: can we autowrap a python function? 
+        if ctor is None: 
+            try: 
+                thunk = patch.parse_obj(init_type)
+                if callable(thunk): 
+                   ctor = builtins.pyfunc.PyAutoWrap
+            except Exception, e: 
+                log.debug("Cannot autowrap %s as a Python callable" % init_type)
+                print e
+
+        if ctor is None: 
+            return None
 
         # factory found, use it
         try:
