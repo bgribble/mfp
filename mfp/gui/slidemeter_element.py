@@ -35,7 +35,7 @@ class SlideMeterElement (PatchElement):
     VERTICAL = 0x00
     HORIZONTAL = 0x01 
     POSITIVE = 0x00
-    NEGATIVE = 0x02 
+    NEGATIVE = 0x01
     LINEAR = 0x00
     LOG = 0x01 
     LEFT = 0x00
@@ -50,11 +50,12 @@ class SlideMeterElement (PatchElement):
         self.max_value = 1.0
         self.scale_ticks = None
         self.scale_font_size = 8
-        self.scale_type = self.LINEAR 
-        self.scale_position = self.LEFT 
         self.show_scale = False
         self.slider_enable = True
-        self.orientation = self.VERTICAL | self.POSITIVE 
+        self.scale_type = self.LINEAR 
+        self.scale_position = self.LEFT 
+        self.orientation = self.VERTICAL
+        self.direction = self.POSITIVE
 
         # value to emit when at bottom of scale, useful for dB scales
         self.slider_zero = None
@@ -90,9 +91,8 @@ class SlideMeterElement (PatchElement):
             c = self.stage.color_unselected
         ct.set_source_rgb(c.red, c.green, c.blue)
 
-        scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
 
-        if self.orientation & self.HORIZONTAL: 
+        if self.orientation == self.HORIZONTAL: 
             h = self.texture.get_property('surface_width') - 2
             w = self.texture.get_property('surface_height') - 2
         else: 
@@ -116,7 +116,7 @@ class SlideMeterElement (PatchElement):
         bar_w = self.hot_x_max - self.hot_x_min
 
         # rotate if we are drawing horizontally 
-        if self.orientation & self.HORIZONTAL:
+        if self.orientation == self.HORIZONTAL:
             ct.save()
             ct.rotate(math.pi / 2.0)
             ct.translate(0, -h)
@@ -149,8 +149,10 @@ class SlideMeterElement (PatchElement):
                 ct.show_text("%.3g" % tick)
 
         # draw the indicator and a surrounding box
-        if self.orientation & self.NEGATIVE: 
+        scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
+        if self.direction ==  self.NEGATIVE: 
             bar_y_min = self.hot_y_min
+            scale_fraction = 1.0 - scale_fraction 
         else:
             bar_y_min = self.hot_y_min + bar_h * (1.0 - scale_fraction)
 
@@ -159,7 +161,7 @@ class SlideMeterElement (PatchElement):
         ct.stroke()
         ct.rectangle(self.hot_x_min, bar_y_min, bar_w, bar_h * scale_fraction)
         ct.fill()
-        if self.orientation & self.HORIZONTAL:
+        if self.orientation == self.HORIZONTAL:
             ct.restore()
 
     def point_in_slider(self, x, y):
@@ -222,6 +224,14 @@ class SlideMeterElement (PatchElement):
             else:
                 self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
             changes = True
+
+        v = params.get("direction")
+        if (v in (1, "pos", "positive") and self.direction != self.POSITIVE): 
+            self.direction = self.POSITIVE 
+            changes = True 
+        elif (v in (-1,  "neg", "negative") and self.direction != self.NEGATIVE):
+            self.direction = self.NEGATIVE
+            changes = True 
 
         v = params.get("scale_pos")
         if (v in ("r", "R", "right") and self.scale_position != self.RIGHT): 
