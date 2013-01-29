@@ -32,6 +32,15 @@ class SlideMeterElement (PatchElement):
     TICK_SPACE = 14
     TICK_LEN = 5
 
+    VERTICAL = 0x00
+    HORIZONTAL = 0x01 
+    POSITIVE = 0x00
+    NEGATIVE = 0x02 
+    LINEAR = 0x00
+    LOG = 0x01 
+    LEFT = 0x00
+    RIGHT = 0x01
+
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
 
@@ -41,8 +50,11 @@ class SlideMeterElement (PatchElement):
         self.max_value = 1.0
         self.scale_ticks = None
         self.scale_font_size = 8
+        self.scale_type = self.LINEAR 
+        self.scale_position = self.LEFT 
         self.show_scale = False
         self.slider_enable = True
+        self.orientation = self.VERTICAL | self.POSITIVE 
 
         # value to emit when at bottom of scale, useful for dB scales
         self.slider_zero = None
@@ -71,12 +83,6 @@ class SlideMeterElement (PatchElement):
         self.update_required = True
 
     def draw_cb(self, texture, ct):
-        def pt2px(x, bar_px):
-            v = (x - self.min_value) * bar_px / float(self.max_value - self.min_value)
-            return v
-
-        w = self.texture.get_property('surface_width') - 2
-        h = self.texture.get_property('surface_height') - 2
         c = None
         if self.selected:
             c = self.stage.color_selected
@@ -85,16 +91,35 @@ class SlideMeterElement (PatchElement):
         ct.set_source_rgb(c.red, c.green, c.blue)
 
         scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
+
+        if self.orientation & self.HORIZONTAL: 
+            h = self.texture.get_property('surface_width') - 2
+            w = self.texture.get_property('surface_height') - 2
+        else: 
+            w = self.texture.get_property('surface_width') - 2
+            h = self.texture.get_property('surface_height') - 2
+
         self.hot_y_max = h
         self.hot_y_min = 1
-        self.hot_x_min = 1
-        self.hot_x_max = w
 
-        if self.show_scale:
+        if not self.show_scale:
+            self.hot_x_min = 1 
+            self.hot_x_max = w
+        elif self.scale_position == self.LEFT: 
             self.hot_x_min = self.SCALE_SPACE
+            self.hot_x_max = w
+        elif self.scale_position == self.RIGHT: 
+            self.hot_x_min = 1
+            self.hot_x_max = w - self.SCALE_SPACE 
 
         bar_h = self.hot_y_max - self.hot_y_min
         bar_w = self.hot_x_max - self.hot_x_min
+
+        # rotate if we are drawing horizontally 
+        if self.orientation & self.HORIZONTAL:
+            ct.save()
+            ct.rotate(math.pi / 2.0)
+            ct.translate(0, -h)
 
         # draw the scale if required
         if self.show_scale:
@@ -102,22 +127,40 @@ class SlideMeterElement (PatchElement):
 
             if self.scale_ticks is None:
                 num_ticks = bar_h / self.TICK_SPACE
-                self.scale_ticks = ticks.linear(self.min_value, self.max_value, num_ticks)
-                log.debug("ticks:", num_ticks, self.scale_ticks)
+                if self.scale_type == self.LINEAR:
+                    self.scale_ticks = ticks.linear(self.min_value, self.max_value, num_ticks)
+                else: 
+                    self.scale_ticks = ticks.decade(self.min_value, self.max_value, num_ticks)
+
             for tick in self.scale_ticks:
-                tickht = self.hot_y_max - pt2px(tick, bar_h)
-                ct.move_to(self.hot_x_min - self.TICK_LEN, tickht)
-                ct.line_to(self.hot_x_min, tickht)
+                tick_y = self.hot_y_max - (bar_h*(tick - self.min_value)
+                                           /(self.max_value-self.min_value))
+                if self.scale_position == self.LEFT: 
+                    tick_x = self.hot_x_min
+                    txt_x = 5
+                else:
+                    tick_x = self.hot_x_max + self.TICK_LEN
+                    txt_x = self.hot_x_max + self.TICK_LEN + 5
+                        
+                ct.move_to(tick_x - self.TICK_LEN, tick_y)
+                ct.line_to(tick_x, tick_y)
                 ct.stroke()
-                ct.move_to(5, tickht)
+                ct.move_to(txt_x, tick_y + 0.5*self.scale_font_size)
                 ct.show_text("%.3g" % tick)
 
         # draw the indicator and a surrounding box
+        if self.orientation & self.NEGATIVE: 
+            bar_y_min = self.hot_y_min
+        else:
+            bar_y_min = self.hot_y_min + bar_h * (1.0 - scale_fraction)
+
+
         ct.rectangle(self.hot_x_min, self.hot_y_min, bar_w, bar_h)
         ct.stroke()
-        ct.rectangle(
-            self.hot_x_min, bar_h * (1.0 - scale_fraction), bar_w, bar_h * scale_fraction)
+        ct.rectangle(self.hot_x_min, bar_y_min, bar_w, bar_h * scale_fraction)
         ct.fill()
+        if self.orientation & self.HORIZONTAL:
+            ct.restore()
 
     def point_in_slider(self, x, y):
         orig_x, orig_y = self.get_position()
@@ -152,18 +195,43 @@ class SlideMeterElement (PatchElement):
     def configure(self, params):
         changes = False
 
+        v = params.get("orientation")
+        if (v and v in ("h", "horiz", "horizontal") 
+            and not (self.orientation & self.HORIZONTAL)):
+            self.orientation |= self.HORIZONTAL
+            self.set_size(self.height, self.width)
+            changes = True 
+        elif (v and v in ("v", "vert", "vertical") 
+              and (self.orientation & self.HORIZONTAL)):
+            self.orientation &= (~ self.HORIZONTAL)
+            self.set_size(self.height, self.width)
+            changes = True 
+
         v = params.get("show_scale")
         if v and not self.show_scale:
             self.show_scale = True
-            self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
+            if self.orientation & self.HORIZONTAL:  
+                self.set_size(self.get_width(), self.get_height() + self.SCALE_SPACE)
+            else:
+                self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
             changes = True
         elif v is False and self.show_scale:
             self.show_scale = False
-            self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
+            if self.orientation & self.HORIZONTAL:  
+                self.set_size(self.get_width(), self.get_height() - self.SCALE_SPACE)
+            else:
+                self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
             changes = True
 
+        v = params.get("scale_pos")
+        if (v in ("r", "R", "right") and self.scale_position != self.RIGHT): 
+            self.scale_position = self.RIGHT 
+            changes = True 
+        elif (v in ("l", "L", "left") and self.scale_position != self.LEFT):
+            self.scale_position = self.LEFT 
+            changes = True 
 
-        for p in ("value", "slider_enable", "min_value", "max_value"):
+        for p in ("value", "slider_enable", "min_value", "max_value", "scale_ticks"):
             v = params.get(p)
             if v is not None and hasattr(self, p):
                 changes = True
