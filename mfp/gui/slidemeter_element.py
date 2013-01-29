@@ -99,27 +99,36 @@ class SlideMeterElement (PatchElement):
             w = self.texture.get_property('surface_width') - 2
             h = self.texture.get_property('surface_height') - 2
 
-        self.hot_y_max = h
-        self.hot_y_min = 1
+        y_max = h
+        y_min = 1
 
         if not self.show_scale:
-            self.hot_x_min = 1 
-            self.hot_x_max = w
+            x_min = 1 
+            x_max = w
         elif self.scale_position == self.LEFT: 
-            self.hot_x_min = self.SCALE_SPACE
-            self.hot_x_max = w
+            x_min = self.SCALE_SPACE
+            x_max = w
         elif self.scale_position == self.RIGHT: 
-            self.hot_x_min = 1
-            self.hot_x_max = w - self.SCALE_SPACE 
+            x_min = 1
+            x_max = w - self.SCALE_SPACE 
 
-        bar_h = self.hot_y_max - self.hot_y_min
-        bar_w = self.hot_x_max - self.hot_x_min
+        bar_h = y_max - y_min
+        bar_w = x_max - x_min
 
         # rotate if we are drawing horizontally 
         if self.orientation == self.HORIZONTAL:
+            self.hot_x_min = y_min 
+            self.hot_x_max = y_max
+            self.hot_y_min = x_min
+            self.hot_y_max = x_max
             ct.save()
             ct.rotate(math.pi / 2.0)
             ct.translate(0, -h)
+        else:
+            self.hot_x_min = x_min 
+            self.hot_x_max = x_max
+            self.hot_y_min = y_min
+            self.hot_y_max = y_max
 
         # draw the scale if required
         if self.show_scale:
@@ -133,14 +142,14 @@ class SlideMeterElement (PatchElement):
                     self.scale_ticks = ticks.decade(self.min_value, self.max_value, num_ticks)
 
             for tick in self.scale_ticks:
-                tick_y = self.hot_y_max - (bar_h*(tick - self.min_value)
+                tick_y = y_max - (bar_h*(tick - self.min_value)
                                            /(self.max_value-self.min_value))
                 if self.scale_position == self.LEFT: 
-                    tick_x = self.hot_x_min
+                    tick_x = x_min
                     txt_x = 5
                 else:
-                    tick_x = self.hot_x_max + self.TICK_LEN
-                    txt_x = self.hot_x_max + self.TICK_LEN + 5
+                    tick_x = x_max + self.TICK_LEN
+                    txt_x = x_max + self.TICK_LEN + 5
                         
                 ct.move_to(tick_x - self.TICK_LEN, tick_y)
                 ct.line_to(tick_x, tick_y)
@@ -151,15 +160,15 @@ class SlideMeterElement (PatchElement):
         # draw the indicator and a surrounding box
         scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
         if self.direction ==  self.NEGATIVE: 
-            bar_y_min = self.hot_y_min
+            bar_y_min = y_min
             scale_fraction = 1.0 - scale_fraction 
         else:
-            bar_y_min = self.hot_y_min + bar_h * (1.0 - scale_fraction)
+            bar_y_min = y_min + bar_h * (1.0 - scale_fraction)
 
 
-        ct.rectangle(self.hot_x_min, self.hot_y_min, bar_w, bar_h)
+        ct.rectangle(x_min, y_min, bar_w, bar_h)
         ct.stroke()
-        ct.rectangle(self.hot_x_min, bar_y_min, bar_w, bar_h * scale_fraction)
+        ct.rectangle(x_min, bar_y_min, bar_w, bar_h * scale_fraction)
         ct.fill()
         if self.orientation == self.HORIZONTAL:
             ct.restore()
@@ -174,9 +183,15 @@ class SlideMeterElement (PatchElement):
         else:
             return False
 
-    def pixdelta2value(self, pixdelta):
-        pix_h = self.texture.get_property('surface_height') - 2
-        return (float(pixdelta) / pix_h) * (self.max_value - self.min_value)
+    def pixdelta2value(self, dx, dy):
+        if self.orientation == self.VERTICAL:
+            delta = dy 
+            total = self.hot_y_max - self.hot_y_min
+        else: 
+            delta = -dx 
+            total = self.hot_x_max - self.hot_x_min
+
+        return (float(delta) / total) * (self.max_value - self.min_value)
 
     def update_value(self, value):
         if value >= self.max_value:
@@ -231,6 +246,14 @@ class SlideMeterElement (PatchElement):
             changes = True 
         elif (v in (-1,  "neg", "negative") and self.direction != self.NEGATIVE):
             self.direction = self.NEGATIVE
+            changes = True 
+
+        v = params.get("scale")
+        if (v == "linear" and self.scale_type != self.LINEAR): 
+            self.scale_type = self.LINEAR
+            changes = True 
+        elif (v in ("log", "log10", "decade") and self.scale_type != self.LOG):
+            self.scale_type = self.LOG
             changes = True 
 
         v = params.get("scale_pos")

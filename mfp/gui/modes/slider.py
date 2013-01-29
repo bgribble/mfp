@@ -61,7 +61,7 @@ class SliderBaseMode (InputMode):
         self.drag_last_x = self.manager.pointer_x
         self.drag_last_y = self.manager.pointer_y
 
-        value_change = self.slider.pixdelta2value(delta * dy)
+        value_change = self.slider.pixdelta2value(delta * dx, delta * dy)
 
         self.slider.update_value(self.slider.value - value_change)
         return True
