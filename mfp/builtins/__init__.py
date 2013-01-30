@@ -60,4 +60,5 @@ def register():
     plugin.register()
     from . import loadbang 
     loadbang.register() 
-
+    from . import oscutils
+    oscutils.register()
