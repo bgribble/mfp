@@ -86,7 +86,25 @@ class SliderEditMode (InputMode):
         self.bind("s", self.toggle_scale, "Toggle scale display (on/off)")
         self.bind("o", self.toggle_orient, "Toggle orientation (vert/horiz)")
         self.bind("d", self.toggle_direction, "Toggle direction (pull down/pull up)")
-        self.bind("l", self.toggle_side, "Toggle scale side (left/right)")
+        self.bind("r", self.toggle_side, "Toggle scale side (right/left)")
+        self.bind("l", self.set_low, "Enter low value on scale")
+        self.bind("h", self.set_hi, "Enter high value on scale")
+
+    def set_low(self): 
+        def hud_cb(value): 
+            if value is not None:
+                self.slider.min_value = float(value)
+                self.slider.update()
+                self.slider.send_params()
+        self.window.get_prompted_input("<b>Slider minimum value:</b> ", hud_cb)
+
+    def set_hi(self): 
+        def hud_cb(value): 
+            if value is not None:
+                self.slider.max_value = float(value)
+                self.slider.update()
+                self.slider.send_params()
+        self.window.get_prompted_input("<b>Slider maximum value:</b> ", hud_cb)
 
     def toggle_scale(self):
         self.slider.set_show_scale(not self.slider.show_scale)

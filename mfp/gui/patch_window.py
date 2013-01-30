@@ -14,6 +14,7 @@ from .connection_element import ConnectionElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
 from .tree_display import TreeDisplay
+from .prompter import Prompter 
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
@@ -61,6 +62,9 @@ class PatchWindow(object):
         # the view, so anything not in it will be static on the stage
         self.group = Clutter.Group()
         self.hud_history = []
+        self.hud_prompt = None 
+        self.hud_prompt_mgr = Prompter(self)
+
         self.autoplace_marker = None
         self.autoplace_layer = None
 
@@ -325,6 +329,31 @@ class PatchWindow(object):
         buf.move_mark(mark, iterator)
         self.log_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 
+    def get_prompted_input(self, prompt, callback): 
+        self.hud_prompt_mgr.get_input(prompt, callback)
+
+    def hud_set_prompt(self, prompt):
+        if prompt is None:
+            h = self.hud_prompt
+            if h: 
+                htxt = h.get_text()
+            else:
+                htxt = None 
+            self.hud_prompt = None 
+            h.destroy()
+            if htxt: 
+                self.hud_write(htxt)
+            return 
+
+        if self.hud_prompt is None:
+            for actor, anim, oldmsg in self.hud_history:
+                actor.set_position(actor.get_x(), actor.get_y() - 20)
+            self.hud_prompt = Clutter.Text()
+            self.stage.add_actor(self.hud_prompt)
+            self.hud_prompt.set_position(10, self.stage.get_height() - 25)
+            self.hud_prompt.set_property("opacity", 255)
+        self.hud_prompt.set_markup(prompt)
+
     def hud_write(self, msg, disp_time=3.0):
         def anim_complete(anim):
             new_history = []
@@ -346,7 +375,10 @@ class PatchWindow(object):
 
         actor = Clutter.Text()
         self.stage.add_actor(actor)
-        actor.set_position(10, self.stage.get_height() - 25)
+        if self.hud_prompt is None: 
+            actor.set_position(10, self.stage.get_height() - 25)
+        else: 
+            actor.set_position(10, self.stage.get_height() - 45)
         actor.set_property("opacity", 255)
         actor.set_markup(msg)
 

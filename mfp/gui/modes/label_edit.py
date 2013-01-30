@@ -33,7 +33,8 @@ class Blinker (Thread):
 
 
 class LabelEditMode (InputMode):
-    def __init__(self, window, element, label, multiline=False, markup=False):
+    def __init__(self, window, element, label, multiline=False, markup=False,
+                 prompt_locked=False, mode_desc="Edit text"):
         self.manager = window.input_mgr
         self.element = element
         self.widget = label
@@ -43,13 +44,16 @@ class LabelEditMode (InputMode):
         self.cursor_color = Clutter.Color.new(0, 0, 0, 64)
         self.undo_stack = [(self.text, len(self.text))]
         self.undo_pos = -1
-        self.editpos = 0
         self.activate_handler_id = None
         self.text_changed_handler_id = None
-
+        if prompt_locked: 
+            self.min_editpos = len(self.widget.get_text())
+        else: 
+            self.min_editpos = 0 
+        self.editpos = self.min_editpos 
         self.blinker = None
 
-        InputMode.__init__(self, "Edit text")
+        InputMode.__init__(self, mode_desc)
 
         if not self.multiline:
             self.bind("RET", self.commit_edits, "Accept edits")
@@ -70,10 +74,9 @@ class LabelEditMode (InputMode):
 
         self.update_label(raw=True)
         self.start_editing()
-        self.widget.set_selection(0, len(self.text))
+        self.widget.set_selection(self.min_editpos, len(self.text))
        
     def disable(self):
-        print "disable called"
         self.end_editing()
         self.update_label(raw=False)
         pass
@@ -125,6 +128,7 @@ class LabelEditMode (InputMode):
 
     def text_changed(self, *args):
         new_text = self.widget.get_text()
+        print "text changed:", new_text
         if new_text == self.text:
             return True
 
@@ -171,8 +175,8 @@ class LabelEditMode (InputMode):
         return True
 
     def erase_backward(self):
-        if self.editpos <= 0:
-            self.editpos = 0
+        if self.editpos <= self.min_editpos:
+            self.editpos = self.min_editpos
             return True
 
         if self.undo_pos < -1:
@@ -181,12 +185,12 @@ class LabelEditMode (InputMode):
 
         self.undo_stack.append(self.text)
         self.text = self.text[:self.editpos - 1] + self.text[self.editpos:]
-        self.editpos = max(self.editpos - 1, 0)
+        self.editpos = max(self.editpos - 1, self.min_editpos)
         self.update_label(raw=True)
         return True
 
     def move_to_start(self):
-        self.editpos = 0
+        self.editpos = self.min_editpos
         self.update_cursor()
 
     def move_to_end(self):
@@ -194,7 +198,7 @@ class LabelEditMode (InputMode):
         self.update_cursor()
 
     def move_left(self):
-        self.editpos = max(self.editpos - 1, 0)
+        self.editpos = max(self.editpos - 1, self.min_editpos)
         self.update_cursor()
         return True
 
@@ -212,7 +216,7 @@ class LabelEditMode (InputMode):
         elif len(lines_above) > 1:
             self.editpos = min(len(lines_above[0]), line_pos)
         else:
-            self.editpos = 0
+            self.editpos = self.min_editpos  
         self.update_cursor()
         return True
 
