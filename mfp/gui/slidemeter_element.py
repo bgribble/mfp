@@ -115,6 +115,8 @@ class SlideMeterElement (PatchElement):
         bar_h = y_max - y_min
         bar_w = x_max - x_min
 
+        texture.clear()
+
         # rotate if we are drawing horizontally 
         if self.orientation == self.HORIZONTAL:
             self.hot_x_min = y_min 
@@ -209,36 +211,44 @@ class SlideMeterElement (PatchElement):
     def update(self):
         self.texture.invalidate()
 
+    def set_orientation(self, orient): 
+        if orient != self.orientation:
+            self.set_size(self.height, self.width)
+        self.orientation = orient  
+
+    def set_show_scale(self, show_scale):
+        if show_scale == self.show_scale: 
+            return 
+
+        if show_scale:
+            self.show_scale = True
+            if self.orientation & self.HORIZONTAL:  
+                self.set_size(self.get_width(), self.get_height() + self.SCALE_SPACE)
+            else:
+                self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
+        else:
+            self.show_scale = False
+            if self.orientation & self.HORIZONTAL:  
+                self.set_size(self.get_width(), self.get_height() - self.SCALE_SPACE)
+            else:
+                self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
+
+
+
     def configure(self, params):
         changes = False
 
         v = params.get("orientation")
         if (v and v in ("h", "horiz", "horizontal") 
             and not (self.orientation & self.HORIZONTAL)):
-            self.orientation |= self.HORIZONTAL
-            self.set_size(self.height, self.width)
+            self.set_orientation(self.HORIZONTAL)
             changes = True 
         elif (v and v in ("v", "vert", "vertical") 
               and (self.orientation & self.HORIZONTAL)):
-            self.orientation &= (~ self.HORIZONTAL)
-            self.set_size(self.height, self.width)
+            self.set_orientation(self.VERTICAL)
             changes = True 
 
         v = params.get("show_scale")
-        if v and not self.show_scale:
-            self.show_scale = True
-            if self.orientation & self.HORIZONTAL:  
-                self.set_size(self.get_width(), self.get_height() + self.SCALE_SPACE)
-            else:
-                self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
-            changes = True
-        elif v is False and self.show_scale:
-            self.show_scale = False
-            if self.orientation & self.HORIZONTAL:  
-                self.set_size(self.get_width(), self.get_height() - self.SCALE_SPACE)
-            else:
-                self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
-            changes = True
 
         v = params.get("direction")
         if (v in (1, "pos", "positive") and self.direction != self.POSITIVE): 
@@ -283,6 +293,7 @@ class SlideMeterElement (PatchElement):
         clutter.Group.set_size(self, self.width, self.height)
         self.texture.set_size(width, height)
         self.texture.set_surface_size(width, height)
+        self.draw_ports()
 
     def select(self):
         self.move_to_top()

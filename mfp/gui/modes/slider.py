@@ -7,7 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode
 
-class SliderBaseMode (InputMode):
+class SliderControlMode (InputMode):
     def __init__(self, window, element, descrip):
         self.manager = window.input_mgr
         self.window = window
@@ -74,10 +74,56 @@ class SliderBaseMode (InputMode):
             return False
 
 
-class SliderControlMode (SliderBaseMode):
-    pass
+class SliderEditMode (InputMode):
+    def __init__(self, window, element, descrip):
+        self.manager = window.input_mgr
+        self.window = window
+        self.slider = element
 
+        InputMode.__init__(self, descrip)
 
-class SliderEditMode (SliderBaseMode):
-    pass
+        self.bind("ESC", self.end_edits, "End editing")
+        self.bind("s", self.toggle_scale, "Toggle scale display (on/off)")
+        self.bind("o", self.toggle_orient, "Toggle orientation (vert/horiz)")
+        self.bind("d", self.toggle_direction, "Toggle direction (pull down/pull up)")
+        self.bind("l", self.toggle_side, "Toggle scale side (left/right)")
 
+    def toggle_scale(self):
+        self.slider.set_show_scale(not self.slider.show_scale)
+        self.slider.update()
+        self.slider.send_params()
+        return True 
+
+    def toggle_orient(self):
+        if self.slider.orientation == self.slider.HORIZONTAL:
+            self.slider.set_orientation(self.slider.VERTICAL)
+        else: 
+            self.slider.set_orientation(self.slider.HORIZONTAL)
+
+        self.slider.update()
+        self.slider.send_params()
+        return True 
+
+    def toggle_direction(self):
+        if self.slider.direction == self.slider.POSITIVE:
+            self.slider.direction = self.slider.NEGATIVE
+        else: 
+            self.slider.direction = self.slider.POSITIVE
+
+        self.slider.update()
+        self.slider.send_params()
+        return True 
+
+    def toggle_side(self):
+        if self.slider.scale_position == self.slider.RIGHT:
+            self.slider.scale_position = self.slider.LEFT
+        else: 
+            self.slider.scale_position = self.slider.RIGHT 
+
+        self.slider.update()
+        self.slider.send_params()
+        return True 
+
+    def end_edits(self):
+        self.manager.disable_minor_mode(self)
+        self.slider.edit_mode = None 
