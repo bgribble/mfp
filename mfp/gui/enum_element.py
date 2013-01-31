@@ -11,8 +11,7 @@ import cairo
 import math
 from patch_element import PatchElement
 from mfp import MFPGUI
-from .modes.label_edit import LabelEditMode
-from .modes.enum_control import EnumControlMode
+from .modes.enum_control import EnumEditMode, EnumControlMode
 
 
 class EnumElement (PatchElement):
@@ -26,6 +25,8 @@ class EnumElement (PatchElement):
 
         self.value = 0
         self.digits = 1
+        self.min_value = None
+        self.max_value = None 
         self.scientific = False
         self.format_str = "%.1f"
         self.connections_out = []
@@ -64,6 +65,10 @@ class EnumElement (PatchElement):
         self.format_str = "%%.%d%s" % (self.digits, oper)
 
     def format_value(self, value):
+        if self.min_value is not None and value < self.min_value:
+            value = self.min_value 
+        if self.max_value is not None and value > self.max_value:
+            value = self.max_value 
         return self.format_str % value
 
     def draw_cb(self, texture, ct):
@@ -134,7 +139,20 @@ class EnumElement (PatchElement):
         for c in self.connections_in:
             c.draw()
 
+    def set_bounds(self, lower, upper):
+        self.min_value = lower
+        self.max_value = upper 
+
+        if ((self.value < self.min_value) or (self.value > self.max_value)):
+            self.update_value(self.value)
+
     def update_value(self, value):
+        if self.min_value is not None and value < self.min_value:
+            value = self.min_value 
+
+        if self.max_value is not None and value > self.max_value:
+            value = self.max_value 
+
         # called by enumcontrolmode
         str_rep = self.format_value(value)
         self.label.set_text(str_rep)
@@ -145,12 +163,18 @@ class EnumElement (PatchElement):
         if self.obj_id is not None:
             MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
+    def update(self):
+        print "setting text to", self.format_value(self.value)
+        self.label.set_text(self.format_value(self.value))
+        self.texture.invalidate()
+
     def label_edit_start(self):
         pass
 
     def label_edit_finish(self, *args):
         # called by labeleditmode
         t = self.label.get_text()
+        print "edit_finish:", t
         self.update_value(float(t))
         if self.obj_id is None:
             self.create_obj()
@@ -212,7 +236,8 @@ class EnumElement (PatchElement):
         PatchElement.delete(self)
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label)
+        return EnumEditMode(self.stage, self, self.label)
 
     def make_control_mode(self):
         return EnumControlMode(self.stage, self)
+

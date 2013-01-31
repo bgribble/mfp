@@ -2,12 +2,64 @@
 '''
 enum_control.py: EnumControl major mode
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2010-2013 Bill Gribble <grib@billgribble.com>
 '''
 
 import math
 from ..input_mode import InputMode
+from .label_edit import LabelEditMode
 
+class EnumEditMode (InputMode):
+    def __init__(self, window, element, label):
+        self.manager = window.input_mgr
+        self.window = window
+        self.enum = element
+        self.value = element.value
+        InputMode.__init__(self, "Number box config")
+
+        self.bind("C->", self.add_digit, "Increase displayed digits")
+        self.bind("C-<", self.del_digit, "Decrease displayed digits")
+        self.bind("C-[", self.set_lower, "Set lower bound on value")
+        self.bind("C-]", self.set_upper, "Set upper bound on value")
+        self.extend(LabelEditMode(window, element, label))
+
+    def set_upper(self):
+        def cb(value):
+            if value.lower() == "none":
+                value = None
+            else: 
+                value = float(value)
+            self.enum.set_bounds(self.enum.min_value, value) 
+        self.window.get_prompted_input("Number upper bound: ", cb)
+        return True 
+
+    def set_lower(self):
+        def cb(value):
+            if value.lower() == "none":
+                value = None
+            else: 
+                value = float(value)
+            self.enum.set_bounds(value, self.enum.max_value) 
+        self.window.get_prompted_input("Number lower bound: ", cb)
+        return True 
+
+    def add_digit(self):
+        self.enum.digits += 1
+        self.enum.format_update()
+        self.enum.update()
+        return True 
+
+    def del_digit(self):
+        if self.enum.digits > 0:
+            self.enum.digits -= 1
+        self.enum.format_update()
+        self.enum.update()
+        return True 
+
+    def end_edits(self):
+        self.manager.disable_minor_mode(self)
+        self.enum.edit_mode = None 
+        return False 
 
 class EnumControlMode (InputMode):
     def __init__(self, window, element):
@@ -22,7 +74,7 @@ class EnumControlMode (InputMode):
         self.drag_last_x = self.manager.pointer_x
         self.drag_last_y = self.manager.pointer_y
 
-        InputMode.__init__(self, "EnumControl")
+        InputMode.__init__(self, "Number box control")
 
         self.bind("M1DOWN", self.drag_start)
         self.bind("M1-MOTION", lambda: self.drag_selected(1.0),

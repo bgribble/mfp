@@ -87,8 +87,8 @@ class SliderEditMode (InputMode):
         self.bind("o", self.toggle_orient, "Toggle orientation (vert/horiz)")
         self.bind("d", self.toggle_direction, "Toggle direction (pull down/pull up)")
         self.bind("r", self.toggle_side, "Toggle scale side (right/left)")
-        self.bind("l", self.set_low, "Enter lower bound")
-        self.bind("u", self.set_hi, "Enter upper bound")
+        self.bind("C-[", self.set_low, "Enter lower bound")
+        self.bind("C-]", self.set_hi, "Enter upper bound")
 
     def set_low(self): 
         def hud_cb(value): 
