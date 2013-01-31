@@ -89,8 +89,17 @@ class ScopePlot (XYPlot):
                 pmax = None 
 
         for x, ymin, ymax in points:
-            ctx.move_to(*self.pt2px((x, ymin)))
-            ctx.line_to(*self.pt2px((x, ymax)))
+            pmin = self.pt2px((x, ymin))
+            pmax = self.pt2px((x, ymax))
+
+            if abs(pmin[1] - pmax[1]) < 0.25: 
+                delta = 0.25 - abs(pmin[1] - pmax[1])
+                if pmin[1] < pmax[1]:
+                    delta *= -1.0
+                pmin[1] += delta/2.0
+                pmax[1] -= delta/2.0
+            ctx.move_to(*pmin)
+            ctx.line_to(*pmax)
         ctx.stroke()
 
     def draw_field_cb(self, texture, ctx, *rest):
@@ -139,6 +148,5 @@ class ScopePlot (XYPlot):
             self.buf_info = data
         elif action == "grab":
             self._grab()
-            self.plot.clear()
             self.plot.invalidate()
         return True
