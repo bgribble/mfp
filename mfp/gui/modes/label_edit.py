@@ -128,7 +128,6 @@ class LabelEditMode (InputMode):
 
     def text_changed(self, *args):
         new_text = self.widget.get_text()
-        print "text changed:", new_text
         if new_text == self.text:
             return True
 

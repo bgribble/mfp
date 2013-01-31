@@ -91,7 +91,6 @@ class SlideMeterElement (PatchElement):
             c = self.stage.color_unselected
         ct.set_source_rgb(c.red, c.green, c.blue)
 
-
         if self.orientation == self.HORIZONTAL: 
             h = self.texture.get_property('surface_width') - 2
             w = self.texture.get_property('surface_height') - 2
@@ -156,7 +155,9 @@ class SlideMeterElement (PatchElement):
                 ct.move_to(tick_x - self.TICK_LEN, tick_y)
                 ct.line_to(tick_x, tick_y)
                 ct.stroke()
-                ct.move_to(txt_x, tick_y + 0.5*self.scale_font_size)
+
+                txt_y = self.scale_font_size + (tick_y / bar_h)*(bar_h - self.scale_font_size)
+                ct.move_to(txt_x, txt_y)
                 ct.show_text("%.3g" % tick)
 
         # draw the indicator and a surrounding box
@@ -204,7 +205,6 @@ class SlideMeterElement (PatchElement):
 
         if value != self.value:
             self.value = value
-            self.texture.clear()
             self.texture.invalidate()
             MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
@@ -233,7 +233,25 @@ class SlideMeterElement (PatchElement):
             else:
                 self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
 
+    def set_bounds(self, min_val, max_val):
+        self.max_value = max_val
+        self.min_value = min_val
+       
+        newval = False 
+        if self.value > self.max_value:
+            self.value = self.max_value
+            newval = True
 
+        if self.value < self.min_value:
+            self.value = self.min_value
+            newval = True 
+
+        if newval: 
+            MFPGUI().mfp.send(self.obj_id, 0, self.value)
+
+        self.scale_ticks = None 
+        self.update()
+        self.send_params()
 
     def configure(self, params):
         changes = False

@@ -26,17 +26,14 @@ class Prompter (object):
         self.current_callback = callback 
         self.window.hud_set_prompt(prompt)
         self.mode = LabelEditMode(self.window, self, self.window.hud_prompt, 
-                                  markup=True, prompt_locked=True, mode_desc="Prompted input")
+                                  prompt_locked=True, mode_desc="Prompted input")
         self.window.input_mgr.enable_minor_mode(self.mode) 
 
     def label_edit_start(self):
         pass
 
     def label_edit_finish(self, widget, text):
-        print "Prompter: label_edit_finish", text
         if self.current_callback and text:
-            print "current prompt:", self.current_prompt
-            print "Calling back with: '%s'" % text[len(self.current_prompt):]
             self.current_callback(text[len(self.current_prompt):])
 
     def end_edit(self):
