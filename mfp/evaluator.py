@@ -9,7 +9,7 @@ import tokenize
 from StringIO import StringIO
 from .method import MethodCall
 from .bang import Bang
-
+import sys 
 
 class Evaluator (object):
     global_names = {}
@@ -73,6 +73,9 @@ class Evaluator (object):
             del self.local_names['_eval_collect_args']
 
         return rv
+
+    def exec_str(self, pystr):
+        exec(pystr, self.global_names, self.local_names)
 
     def exec_file(self, filename):
         import os.path 
