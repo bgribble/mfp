@@ -291,14 +291,25 @@ class SlideMeterElement (PatchElement):
         elif (v in ("l", "L", "left") and self.scale_position != self.LEFT):
             self.scale_position = self.LEFT 
             changes = True 
+        
 
-        for p in ("value", "slider_enable", "min_value", "max_value", "scale_ticks"):
+        for p in ("slider_enable", "min_value", "max_value", "scale_ticks"):
             v = params.get(p)
             if v is not None and hasattr(self, p):
                 changes = True
                 setattr(self, p, v)
                 if p in ("min_value", "max_value"):
                     self.scale_ticks = None
+
+        v = params.get("value")
+        if v is not None:
+            if v < self.min_value:
+                v = self.min_value
+            if v > self.max_value:
+                v = self.max_value
+            if self.value != v: 
+                changes = True 
+                self.value = v
 
         PatchElement.configure(self, params)
         if changes:
