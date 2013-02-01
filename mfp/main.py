@@ -147,6 +147,16 @@ class MFPCommand(RPCWrapper):
         obj.assign(obj.patch, scope, obj.name)
 
     @rpcwrap
+    def open_file(self, file_name):
+        MFPApp().open_file(file_name)
+
+    @rpcwrap
+    def save_file(self, patch_name, file_name):
+        patch = MFPApp().patches.get(patch_name)
+        if patch:
+            patch.save_file(file_name)
+
+    @rpcwrap
     def quit(self):
         MFPApp().finish()
 
@@ -271,6 +281,22 @@ class MFPApp (Singleton):
             except: 
                 continue 
         return None 
+
+    def open_file(self, file_name):
+        if file_name is not None:
+            log.debug("Opening patch file", file_name)
+            name, factory = Patch.register_file(file_name)
+            patch = factory(name, "", None, self.app_scope, name)
+        else:
+            patch = Patch('default', '', None, self.app_scope, 'default')
+
+        oldpatch = self.patches.get("default") 
+        if oldpatch:
+            oldpatch.delete()
+
+        self.patches["default"] = patch
+        patch.create_gui()
+        patch.mark_ready()
 
     def create(self, init_type, init_args, patch, scope, name):
         
@@ -472,16 +498,7 @@ def main():
 
     # create initial patch
     patchfile = args.get("patchfile")
-    if patchfile is not None:
-        log.debug("Loading patch file", patchfile)
-        name, factory = Patch.register_file(patchfile)
-        patch = factory(name, "", None, app.app_scope, name)
-    else:
-        patch = Patch('default', '', None, app.app_scope, 'default')
-
-    app.patches["default"] = patch
-    patch.mark_ready()
-    patch.create_gui()
+    app.open_file(patchfile)
 
     try: 
         QuittableThread.wait_for_all()

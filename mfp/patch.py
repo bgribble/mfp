@@ -229,5 +229,11 @@ class Patch(Processor):
         savefile = open(filename, "w")
         savefile.write(self.json_serialize())
 
+    def delete(self):
+        for oid, obj in self.objects.items():
+            obj.delete()
+        Processor.delete(self)
+
+
 # load extension methods
 import patch_json

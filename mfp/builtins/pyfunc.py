@@ -82,7 +82,6 @@ class PyFunc(Processor):
             thunktxt = "lambda: None"
 
         self.thunk = patch.parse_obj(thunktxt)
-        initargs, kwargs = patch.parse_args(init_args)
         
         if callable(self.thunk):
             self.argcount = self.thunk.func_code.co_argcount

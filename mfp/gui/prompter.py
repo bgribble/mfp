@@ -34,7 +34,11 @@ class Prompter (object):
 
     def label_edit_finish(self, widget, text):
         if self.current_callback and text:
-            self.current_callback(text[len(self.current_prompt):])
+            try: 
+                self.current_callback(text[len(self.current_prompt):])
+            except Exception, e: 
+                print "Prompter exception in callback:", e
+                pass 
 
     def end_edit(self):
         if self.mode:
