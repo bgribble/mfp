@@ -22,25 +22,37 @@ typedef struct {
     int chan_size;
     int chan_pos;
     int trig_enabled;
+    int trig_chanmask;
     int trig_pretrigger;
     int trig_triggered;
     int trig_channel;
     int trig_op;
     int trig_mode;
     int trig_repeat;
+    int clip_chanmask;
+    int clip_state;
+    int clip_repeat;
+    int clip_start;
+    int clip_end; 
+    int clip_pos;
+
     mfp_sample trig_thresh;
 } buf_info;
 
+/* trig_mode values */ 
 #define TRIG_BANG 0
 #define TRIG_THRESH 1
 #define TRIG_EXT 2
 
-#define TRIG_ONESHOT 0 
-#define TRIG_CONTIN  1
+/* trig_repeat and clip_repeat values */ 
+#define REPEAT_ONESHOT 0 
+#define REPEAT_CONTIN  1
 
+/* trig_op values */ 
 #define TRIG_GT 0 
 #define TRIG_LT 1
 
+/* response types */ 
 #define RESP_TRIGGERED 0
 #define RESP_BUFID 1
 #define RESP_BUFSIZE 2
@@ -48,6 +60,10 @@ typedef struct {
 #define RESP_RATE 4 
 #define RESP_OFFSET 5
 #define RESP_BUFRDY 6
+
+/* clip_state values */ 
+#define CLIP_IDLE 0 
+#define CLIP_PLAYING 1
 
 static void 
 init(mfp_processor * proc) 
@@ -69,6 +85,11 @@ init(mfp_processor * proc)
     d->trig_pretrigger = 0;
     d->trig_enabled = 1;
     d->trig_repeat = 1;
+    d->clip_chanmask = 0;
+    d->clip_repeat = 0;
+    d->clip_start = -1;
+    d->clip_end = -1;
+    d->clip_pos = 0;
     proc->data = d;
 
     return;
@@ -81,7 +102,10 @@ process(mfp_processor * proc)
     int channel, tocopy;
     buf_info * d = (buf_info *)(proc->data);
     mfp_block * trig_block;
+    mfp_sample * outptr, *inptr;
+    int inpos, outpos;
 
+    /* if not currently capturing, check for trigger conditions */ 
     if(d->trig_triggered == 0 && d->trig_enabled) {
         if(d->trig_mode == TRIG_EXT) {
             trig_block = proc->inlet_buf[proc->inlet_conn->len - 1];
@@ -127,15 +151,18 @@ process(mfp_processor * proc)
         }
     }
 
+    /* if we are triggered, copy data from inlets to buffer */
     if(d->trig_triggered) {
         /* copy rest of the block or available space */
         tocopy = MIN(mfp_blocksize-dstart, d->chan_size-d->chan_pos);
 
         /* iterate over channels */
         for(channel=0; channel < d->chan_count; channel++) {
-            memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->chan_pos,
-                    proc->inlet_buf[channel]->data + dstart,
-                    sizeof(mfp_sample)*tocopy);
+            if(!((1 << channel) & d->trig_chanmask)) {
+                memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->chan_pos,
+                        proc->inlet_buf[channel]->data + dstart,
+                        sizeof(mfp_sample)*tocopy);
+            }
         }
 
         /* if we reached the end of the buffer, untrigger */
@@ -143,10 +170,52 @@ process(mfp_processor * proc)
         if(d->chan_pos >= d->chan_size) {
             d->trig_triggered = 0;
             d->chan_pos = 0;
-            if (d->trig_repeat == TRIG_ONESHOT) {
+            if (d->trig_repeat == REPEAT_ONESHOT) {
                 d->trig_enabled = 0;
             }
             mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
+        }
+
+    }
+
+    /* zero output buffer in any case */ 
+    mfp_block_zero(proc->outlet_buf[0]);
+
+    /* if we are playing, copy data from the buffer to the outlet */ 
+    if (d->clip_state == CLIP_PLAYING) {
+        /* accumulate non-masked channels in the output buffer */ 
+        for(channel=0; channel < d->chan_count; channel++) {
+            if(!((1 << channel) & d->trig_chanmask)) {
+                outptr = proc->outlet_buf[0]->data;
+                inptr = (float *)(d->shm_ptr) + (channel*d->chan_size);
+                inpos = d->clip_pos;
+                for(outpos = 0; outpos < mfp_blocksize; outpos++) {
+                    if (inpos < d->clip_end) {
+                        *outptr++ += inptr[inpos++];
+                    }
+                    else if (d->clip_repeat == REPEAT_ONESHOT) {
+                        *outptr++ = 0;
+                    }
+                    else {
+                        inpos = d->clip_start;
+                        *outptr ++ += inptr[inpos++];
+                    }
+                }
+            } 
+        }
+        
+        /* update d->clip_pos for next block */ 
+        if (d->clip_pos + mfp_blocksize < d->clip_end) {
+            d->clip_pos += mfp_blocksize;
+        }
+        else if (d->clip_repeat == REPEAT_ONESHOT) {
+            d->clip_pos = d->clip_start;
+            d->clip_state = CLIP_IDLE;
+        }
+        else {
+            d->clip_pos = 
+                d->clip_start + ((d->clip_pos - d->clip_start + mfp_blocksize) 
+                                 % (d->clip_end - d->clip_start));
         }
 
     }
@@ -195,6 +264,13 @@ buffer_alloc(buf_info * d)
     if (d->shm_ptr == NULL) {
         printf("mmap() failed... %d (%s)\n", d->shm_fd, sys_errlist[errno]);
     }
+    if ((d->clip_start < 0) || (d->clip_start > d->chan_size)) {
+        d->clip_start = 0;
+    }
+    if ((d->clip_end < 0) || (d->clip_end > d->chan_size)) {
+        d->clip_end = d->chan_size;
+    }
+
 }
 
 
@@ -209,6 +285,12 @@ config(mfp_processor * proc)
     gpointer trigtrig_ptr = g_hash_table_lookup(proc->params, "trig_triggered");
     gpointer trigrept_ptr = g_hash_table_lookup(proc->params, "trig_repeat");
     gpointer trigenable_ptr = g_hash_table_lookup(proc->params, "trig_enabled");
+
+    gpointer clipbang_ptr = g_hash_table_lookup(proc->params, "clip_bang");
+    gpointer cliprepeat_ptr = g_hash_table_lookup(proc->params, "clip_repeat");
+    gpointer clipstart_ptr = g_hash_table_lookup(proc->params, "clip_start");
+    gpointer clipend_ptr = g_hash_table_lookup(proc->params, "clip_end");
+
     buf_info * d = (buf_info *)(proc->data);
     float new_size=d->chan_size, new_channels=d->chan_count;
 
@@ -263,6 +345,25 @@ config(mfp_processor * proc)
     if (trigenable_ptr != NULL) {
         d->trig_enabled = (int)(*(float *)trigenable_ptr);
     }
+
+    if (cliprepeat_ptr != NULL) {
+        d->clip_repeat = (int)(*(float *)cliprepeat_ptr);
+    }
+
+    if (clipstart_ptr != NULL) {
+        d->clip_start = (int)(*(float *)clipstart_ptr);
+    }
+
+    if (clipend_ptr != NULL) {
+        d->clip_end = (int)(*(float *)clipend_ptr);
+    }
+
+    if (clipbang_ptr != NULL) {
+        g_hash_table_remove(proc->params, "clip_bang");
+        d->clip_state = CLIP_PLAYING;
+        d->clip_pos = d->clip_start;
+    }
+
     return;
 }
 
@@ -287,6 +388,11 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "trig_triggered", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "trig_repeat", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "trig_enabled", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "clip_repeat", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "clip_bang", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "clip_start", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "clip_end", (gpointer)PARAMTYPE_FLT);
+
     return p;
 }
 
