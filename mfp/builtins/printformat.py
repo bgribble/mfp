@@ -12,6 +12,10 @@ from mfp import log
 
 
 class Print (Processor):
+    doc_tooltip_obj = "Print input to log window, formatting with Python %% operator" 
+    doc_tooltip_inlet = [ "Object to print", "Format string (default: initarg 0)" ]
+    doc_tooltip_outlet = [ "Object formatted as a string" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
@@ -45,7 +49,10 @@ class Print (Processor):
             if self.init_type == "print":
                 log.logprint(out)
 
+class Format (Print):
+    doc_tooltip_obj = "Format input strings with Python %% operator"
+
 
 def register():
     MFPApp().register("print", Print)
-    MFPApp().register("format", Print)
+    MFPApp().register("format", Format)

@@ -14,11 +14,18 @@ from . import log
 
 
 class Processor (object):
+    PORT_IN = 0 
+    PORT_OUT = 1
+
     CTOR = 0 
     READY = 1 
     ERROR = 2
     display_type = 'processor'
     hot_inlets = [0]
+
+    doc_tooltip_obj = "No tooltip defined"
+    doc_tooltip_inlet = []
+    doc_tooltip_outlet = [] 
 
     def __init__(self, inlets, outlets, init_type, init_args,
                  patch, scope, name):
@@ -73,6 +80,33 @@ class Processor (object):
         log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
                   % (self.obj_id, self.name, self.init_type, self.init_args))
         return True
+
+    def tooltip(self, port_dir=None, port_num=None):
+        if port_dir == self.PORT_IN:
+            if port_num < len(self.doc_tooltip_inlet):
+                tip = self.doc_tooltip_inlet[port_num]
+            else: 
+                tip = "No port tip defined"
+            if port_num in self.dsp_inlets: 
+                dsptip = '(~) '
+            else: 
+                dsptip = ''
+
+            return (('<b>[%s] inlet %d:</b> ' + dsptip + tip) % (self.init_type, port_num))
+
+        elif port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
+            if port_num < len(self.doc_tooltip_outlet):
+                tip = self.doc_tooltip_outlet[port_num]
+            else: 
+                tip = "No port tip defined"
+            if port_num in self.dsp_outlets: 
+                dsptip = '(~) '
+            else: 
+                dsptip = ''
+
+            return (('<b>[%s] outlet %d:</b> ' + dsptip + tip) % (self.init_type, port_num))
+        else: 
+            return ('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type
 
     def call_onload(self, value=True): 
         self.do_onload = value 

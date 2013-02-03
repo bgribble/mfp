@@ -77,6 +77,13 @@ class PatchEditMode (InputMode):
         self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
 
+        self.bind("HOVER", self.hover)
+
+    def hover(self):
+        if self.manager.pointer_obj is not None:
+            self.manager.pointer_obj.show_tip(self.manager.pointer_x, self.manager.pointer_y)
+        return False 
+
     def add_element(self, factory):
         self.enable_selection_edit()
         if self.autoplace_mode is None:

@@ -5,11 +5,13 @@ input_manager.py: Handle keyboard and mouse input and route through input modes
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
+from datetime import datetime, timedelta
+import time 
+
 from input_mode import InputMode
 from key_sequencer import KeySequencer
-from .modes.global_mode import GlobalMode
-from mfp import log
-
+from ..quittable_thread import QuittableThread
+from ..gui_slave import MFPGUI
 
 class InputManager (object):
     def __init__(self, window):
@@ -26,8 +28,25 @@ class InputManager (object):
         self.pointer_ev_x = None
         self.pointer_ev_y = None
         self.pointer_obj = None
+        self.pointer_obj_time = None 
         self.pointer_lastobj = None
 
+        self.hover_thresh=timedelta(microseconds=750000)
+        self.hover_mon = QuittableThread(target=self._hover_mon)
+        self.hover_mon.start()
+
+    def _hover_mon(self, thread, *rest):
+        while not thread.join_req:
+            if self.pointer_obj_time is not None:
+                elapsed = datetime.now() - self.pointer_obj_time
+                if elapsed > self.hover_thresh:
+                    MFPGUI().clutter_do(self._hover_handler)
+            time.sleep(0.2)
+
+    def _hover_handler(self):
+        self.handle_keysym("HOVER")
+        return False 
+    
     def global_binding(self, key, action, helptext=''):
         self.global_mode.bind(key, action, helptext)
 
@@ -63,50 +82,15 @@ class InputManager (object):
     def synthesize(self, key):
         self.keyseq.sequences.append(key)
 
-    def handle_event(self, stage, event):
+    def handle_keysym(self, keysym):
         def show_on_hud(keysym, mode, handler):
             mdesc = hdesc = ""
             if mode and mode.description:
                 mdesc = mode.description
             if handler and handler[1]:
                 hdesc = handler[1]
-            self.window.hud_write("%s: %s (%s)" % (keysym, hdesc, mdesc))
-
-        from gi.repository import Clutter
-        keysym = None
-        if event.type in (
-            Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE, Clutter.EventType.BUTTON_PRESS,
-                Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL):
-            self.keyseq.process(event)
-            if len(self.keyseq.sequences):
-                keysym = self.keyseq.pop()
-        elif event.type == Clutter.EventType.MOTION:
-            self.pointer_ev_x = event.x
-            self.pointer_ev_y = event.y
-            self.pointer_x, self.pointer_y = self.window.stage_pos(event.x, event.y)
-            self.keyseq.process(event)
-            if len(self.keyseq.sequences):
-                keysym = self.keyseq.pop()
-        elif event.type == Clutter.EventType.ENTER:
-            src = self.event_sources.get(event.source)
-            #print "ENTER:", src
-            if self.window.object_visible(src):
-                #print src, "is visible, setting as pointer_obj"
-                self.pointer_obj = self.event_sources.get(event.source)
-                if self.pointer_obj == self.pointer_lastobj:
-                    self.keyseq.mod_keys = set()
-            else:
-                #print src, "is not visible"
-                pass
-
-        elif event.type == Clutter.EventType.LEAVE:
-            src = self.event_sources.get(event.source)
-            #print "LEAVE:", src
-            if src == self.pointer_obj:
-                self.pointer_lastobj = self.pointer_obj
-                self.pointer_obj = None
-        else:
-            return False
+            if hdesc: 
+                self.window.hud_write("%s: %s (%s)" % (keysym, hdesc, mdesc))
 
         if keysym is not None:
             # check minor modes first
@@ -135,3 +119,44 @@ class InputManager (object):
                 if handled:
                     return True
         return False
+
+    def handle_event(self, stage, event):
+        from gi.repository import Clutter
+        keysym = None
+        if event.type in (
+            Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE, Clutter.EventType.BUTTON_PRESS,
+                Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL):
+            self.keyseq.process(event)
+            if len(self.keyseq.sequences):
+                keysym = self.keyseq.pop()
+        elif event.type == Clutter.EventType.MOTION:
+            self.pointer_ev_x = event.x
+            self.pointer_ev_y = event.y
+            self.pointer_x, self.pointer_y = self.window.stage_pos(event.x, event.y)
+            self.keyseq.process(event)
+            if len(self.keyseq.sequences):
+                keysym = self.keyseq.pop()
+        elif event.type == Clutter.EventType.ENTER:
+            src = self.event_sources.get(event.source)
+            #print "ENTER:", src
+            if self.window.object_visible(src):
+                #print src, "is visible, setting as pointer_obj"
+                self.pointer_obj = self.event_sources.get(event.source)
+                self.pointer_obj_time = datetime.now()
+                if self.pointer_obj == self.pointer_lastobj:
+                    self.keyseq.mod_keys = set()
+            else:
+                #print src, "is not visible"
+                pass
+
+        elif event.type == Clutter.EventType.LEAVE:
+            src = self.event_sources.get(event.source)
+            #print "LEAVE:", src
+            if src == self.pointer_obj:
+                self.pointer_lastobj = self.pointer_obj
+                self.pointer_obj = None
+                self.pointer_obj_time = None 
+        else:
+            return False
+        return self.handle_keysym(keysym)
+

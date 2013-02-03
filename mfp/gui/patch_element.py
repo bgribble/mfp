@@ -63,6 +63,9 @@ class PatchElement (Clutter.Group):
         Clutter.Group.__init__(self)
         self.stage.register(self)
 
+    def enter_cb(self, *args):
+        print "entering"
+
     @property
     def layername(self):
         return self.layer.name 
@@ -323,3 +326,19 @@ class PatchElement (Clutter.Group):
         if self.control_mode:
             self.stage.input_mgr.disable_minor_mode(self.control_mode)
             self.control_mode = None
+
+    def show_tip(self, xpos, ypos):
+        tiptxt = None 
+        orig_x, orig_y = self.get_position()
+        for (pid, pobj) in self.port_elements.items(): 
+            x, y = pobj.get_position()
+            x += orig_x-1
+            y += orig_y-1
+            w, h = pobj.get_size()
+            w += 2
+            h += 2
+            if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
+                tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1])
+        if tiptxt is None:             
+            tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id)
+        self.stage.hud_write(tiptxt)

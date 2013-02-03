@@ -8,7 +8,7 @@ class QuittableThread(Thread):
 
     def __init__(self, target=None):
         self.join_req = False
-        self.target = None
+        self.target = target
 
         with QuittableThread._all_threads_lock:
             QuittableThread._all_threads.append(self)

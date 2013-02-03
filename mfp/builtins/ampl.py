@@ -12,6 +12,10 @@ from mfp import log
 
 
 class Ampl(Processor):
+    doc_tooltip_obj = "Compute RMS and peak amplitude"
+    doc_tooltip_inlet = [ "Input signal" ]
+    doc_tooltip_outlet = [ "RMS amplitude", "Peak amplitude" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 2, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
