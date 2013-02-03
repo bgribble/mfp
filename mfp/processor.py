@@ -87,12 +87,19 @@ class Processor (object):
                 tip = self.doc_tooltip_inlet[port_num]
             else: 
                 tip = "No port tip defined"
+
             if port_num in self.dsp_inlets: 
                 dsptip = '(~) '
             else: 
                 dsptip = ''
 
-            return (('<b>[%s] inlet %d:</b> ' + dsptip + tip) % (self.init_type, port_num))
+            if port_num in self.hot_inlets:
+                hottip = '(hot) '
+            else: 
+                hottip = ''
+
+            return (('<b>[%s] inlet %d:</b> ' + dsptip + hottip + tip)
+                    % (self.init_type, port_num))
 
         elif port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
             if port_num < len(self.doc_tooltip_outlet):

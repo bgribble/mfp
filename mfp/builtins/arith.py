@@ -10,6 +10,10 @@ from mfp.main import MFPApp
 
 
 class ArithProcessor(Processor):
+    doc_tooltip_obj = "Signal arithmetic"
+    doc_tooltip_inlet = [ "Input signal", "Input signal (default: initarg 0)"]
+    doc_tooltip_outlet = [ "Output signal" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.arith_op = init_type
 
@@ -28,26 +32,34 @@ class ArithProcessor(Processor):
         pass 
 
 class ArithAdd(ArithProcessor):
+    doc_tooltip_obj = "Add signals" 
     pass
 
 
 class ArithSub(ArithProcessor):
+    doc_tooltip_obj = "Subtract signals" 
     pass
 
 
 class ArithMul(ArithProcessor):
+    doc_tooltip_obj = "Multiply signals" 
     pass
 
 
 class ArithDiv(ArithProcessor):
+    doc_tooltip_obj = "Divide signals" 
     pass
 
 
 class ArithLt(ArithProcessor):
+    doc_tooltip_obj = "Compare signals" 
+    doc_tooltip_outlet = [ "Output signal (boolean)" ]
     pass
 
 
 class ArithGt (ArithProcessor):
+    doc_tooltip_obj = "Compare signals" 
+    doc_tooltip_outlet = [ "Output signal (boolean)" ]
     pass
 
 

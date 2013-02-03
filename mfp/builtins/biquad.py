@@ -12,6 +12,10 @@ import math
 from ..bang import Uninit 
 
 class Biquad(Processor):
+    doc_tooltip_obj = "Biquad filter (5-parameter normalized form)"
+    doc_tooltip_inlet = [ "Signal in or parameter dictionary with keys a1, a2, b0, b1, b2" ]
+    doc_tooltip_outlet = [ "Signal out" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
@@ -67,6 +71,12 @@ def bq_bandpass(freq, q):
     return params 
 
 class BiquadWrapper(Processor): 
+    doc_tooltip_obj = "%s filter (biquad implementation)" 
+    doc_tooltip_inlet = ["Signal in", 
+                         "Frequency of interest (default: initarg 0)", 
+                         "Q (filter steepness) (default: initarg 1)"] 
+    doc_tooltip_outlet = ["Signal out"]
+
     def __init__(self, bq_func, init_type, init_args, patch, scope, name): 
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
@@ -102,15 +112,17 @@ class BiquadWrapper(Processor):
             for n, v in self.biquad_params.items():
                 self.dsp_setparam(n, float(v))
 
-def mk_biquad(thunk):
+def mk_biquad(thunk, filter_name):
     def factory(init_type, init_args, patch, scope, name):
-        return BiquadWrapper(thunk, init_type, init_args, patch, scope, name)
+        bq = BiquadWrapper(thunk, init_type, init_args, patch, scope, name)
+        bq.doc_tooltip_obj = BiquadWrapper.doc_tooltip_obj % filter_name 
+        return bq
 
     return factory 
 
 def register():
     MFPApp().register("biquad~", Biquad)
-    MFPApp().register("hip~", mk_biquad(bq_hipass))
-    MFPApp().register("lop~", mk_biquad(bq_lopass))
-    MFPApp().register("bp~", mk_biquad(bq_bandpass))
+    MFPApp().register("hip~", mk_biquad(bq_hipass, "Highpass"))
+    MFPApp().register("lop~", mk_biquad(bq_lopass, "Lowpass"))
+    MFPApp().register("bp~", mk_biquad(bq_bandpass, "Bandpass"))
 
