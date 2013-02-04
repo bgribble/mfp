@@ -464,6 +464,8 @@ def main():
                         help="Do not launch the GUI engine")
     parser.add_argument("--no-dsp", action="store_true", 
                         help="Do not launch the DSP engine")
+    parser.add_argument("--help-builtins", action="store_true", 
+                        help="Display help on builtin objects and exit") 
 
     args = vars(parser.parse_args())
 
@@ -471,7 +473,7 @@ def main():
     app = MFPApp()
    
     # configure some things from command line
-    app.no_gui = args.get("no_gui")
+    app.no_gui = args.get("no_gui") or args.get("help_builtins")
     app.no_dsp = args.get("no_dsp")
     app.dsp_inputs = args.get("inputs")
     app.dsp_outputs = args.get("outputs")
@@ -501,15 +503,32 @@ def main():
             log.debug("initfile: Exception while loading initfile", f) 
             log.debug(e)
 
-    # create initial patch
-    patchfile = args.get("patchfile")
-    app.open_file(patchfile)
-
-    try: 
-        QuittableThread.wait_for_all()
-    except (KeyboardInterrupt, SystemExit):
-        print " Quit request received, exiting"
+    if args.get("help_builtins"):
+        app.open_file(None)
+        for name, factory in sorted(app.registry.items()): 
+            if hasattr(factory, 'doc_tooltip_obj'):
+                print "%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj) 
+            else: 
+                try: 
+                    o = factory(name, None, app.patches['default'], None, "")
+                    print "%-12s : %s" % ("[%s]" % name, o.doc_tooltip_obj) 
+                except Exception, e:
+                    import traceback
+                    print "(caught exception trying to create %s)" % name, e
+                    traceback.print_exc()
+                    print "%-12s : No documentation found" % ("[%s]" % name,)
         app.finish()
+    else: 
+
+        # create initial patch
+        patchfile = args.get("patchfile")
+        app.open_file(patchfile)
+
+        try: 
+            QuittableThread.wait_for_all()
+        except (KeyboardInterrupt, SystemExit):
+            print " Quit request received, exiting"
+            app.finish()
     
     import threading 
     threads = threading.enumerate()

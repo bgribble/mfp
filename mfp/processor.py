@@ -23,7 +23,7 @@ class Processor (object):
     display_type = 'processor'
     hot_inlets = [0]
 
-    doc_tooltip_obj = "No tooltip defined"
+    doc_tooltip_obj = "No documentation found"
     doc_tooltip_inlet = []
     doc_tooltip_outlet = [] 
 

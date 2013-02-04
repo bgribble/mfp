@@ -125,7 +125,8 @@ class PyAutoWrap(Processor):
         
         if callable(self.thunk):
             self.argcount = self.thunk.func_code.co_argcount
-            self.doc_tooltip_obj = self.thunk.__doc__.split("\n")[0]
+            if self.thunk.__doc__:
+                self.doc_tooltip_obj = self.thunk.__doc__.split("\n")[0]
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
@@ -141,7 +142,9 @@ class PyBinary(Processor):
         self.function = pyfunc
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
-        self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
+
+        if self.function.__doc__:
+            self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
         if len(initargs) == 1:
             self.inlets[1] = initargs[0]
 
@@ -159,7 +162,8 @@ class PyUnary(Processor):
         self.function = pyfunc
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
-        self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
+        if self.function.__doc__:
+            self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
 
     def trigger(self):
         self.outlets[0] = self.function(self.inlets[0])
@@ -168,28 +172,36 @@ class PyNullary(Processor):
     def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
         self.function = pyfunc
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
+
+        if self.function.__doc__:
+            self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
 
     def trigger(self):
         self.outlets[0] = self.function()
 
 
-def mk_nullary(pyfunc, name):
+def mk_nullary(pyfunc, name, doc=None):
     def factory(iname, args, patch, scope, obj_name):
         proc = PyNullary(pyfunc, iname, args, patch, scope, obj_name)
+        if doc: 
+            proc.doc_tooltip_obj = doc
         return proc
     MFPApp().register(name, factory)
 
-def mk_binary(pyfunc, name):
+def mk_binary(pyfunc, name, doc=None):
     def factory(iname, args, patch, scope, obj_name):
         proc = PyBinary(pyfunc, iname, args, patch, scope, obj_name)
+        if doc:
+            proc.doc_tooltip_obj = doc
         return proc
     MFPApp().register(name, factory)
 
 
-def mk_unary(pyfunc, name):
+def mk_unary(pyfunc, name, doc=None):
     def factory(iname, args, patch, scope, obj_name):
         proc = PyUnary(pyfunc, iname, args, patch, scope, obj_name)
+        if doc:
+            proc.doc_tooltip_obj = doc
         return proc
     MFPApp().register(name, factory)
 
@@ -217,13 +229,13 @@ def register():
     MFPApp().register("apply", ApplyMethod)
     MFPApp().register("func", PyFunc)
 
-    mk_binary(operator.add, "+")
-    mk_binary(operator.sub, "-")
-    mk_binary(operator.mul, "*")
-    mk_binary(operator.div, "/")
-    mk_binary(operator.mod, "%")
-    mk_binary(operator.pow, "^")
-    mk_binary(operator.pow, "**")
+    mk_binary(operator.add, "+", "Add")
+    mk_binary(operator.sub, "-", "Subtract")
+    mk_binary(operator.mul, "*", "Multiply")
+    mk_binary(operator.div, "/", "Divide")
+    mk_binary(operator.mod, "%", "Modulo")
+    mk_binary(operator.pow, "^", "Raise to a power")
+    mk_binary(operator.pow, "**", "Raise to a power")
 
     mk_binary(math.log, "log")
     mk_unary(math.exp, "exp")
@@ -237,28 +249,28 @@ def register():
     mk_unary(math.asin, "asin")
     mk_binary(math.atan2, "atan2")
 
-    mk_binary(operator.gt, ">")
-    mk_binary(operator.lt, "<")
-    mk_binary(operator.ge, ">=")
-    mk_binary(operator.le, "<=")
-    mk_binary(operator.eq, "==")
-    mk_binary(operator.ne, "!=")
+    mk_binary(operator.gt, ">", "Greater-than comparison")
+    mk_binary(operator.lt, "<", "Less-than comparison")
+    mk_binary(operator.ge, ">=", "Greater than or equal comparison")
+    mk_binary(operator.le, "<=", "Less than or equal comparison")
+    mk_binary(operator.eq, "==", "Equality comparison")
+    mk_binary(operator.ne, "!=", "Not-equal comparison")
 
-    mk_unary(abs, "abs")
-    mk_unary(operator.neg, "neg")
-    mk_unary(cmath.phase, "phase")
+    mk_unary(abs, "abs", "Absolute value/magnitude")
+    mk_unary(operator.neg, "neg", "Negate value")
+    mk_unary(cmath.phase, "phase", "Angle (radians) of complex number")
 
     # type converters
-    mk_binary(complex, "complex")
-    mk_unary(int, "int")
-    mk_unary(float, "float")
-    mk_unary(tuple, "tuple")
-    mk_unary(list, "list")
-    mk_unary(type, "type")
-    mk_unary(dict, "dict")
+    mk_binary(complex, "complex", "Convert to complex")
+    mk_unary(int, "int", "Convert to integer")
+    mk_unary(float, "float", "Convert to float")
+    mk_unary(tuple, "tuple", "Convert to tuple")
+    mk_unary(list, "list", "Convert to list")
+    mk_unary(type, "type", "Extract object type")
+    mk_unary(dict, "dict", "Convert to dictionary")
 
     from datetime import datetime 
-    mk_nullary(datetime.now, "now")
-    mk_unary(applyargs(datetime), "datetime")
-    mk_unary(make_date, "date")
+    mk_nullary(datetime.now, "now", "Current time-of-day")
+    mk_unary(applyargs(datetime), "datetime", "Create a datetime object")
+    mk_unary(make_date, "date", "Convert to a date")
 
