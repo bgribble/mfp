@@ -173,7 +173,6 @@ class EnumElement (PatchElement):
     def label_edit_finish(self, *args):
         # called by labeleditmode
         t = self.label.get_text()
-        print "edit_finish:", t
         self.update_value(float(t))
         if self.obj_id is None:
             self.create_obj()

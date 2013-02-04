@@ -111,6 +111,22 @@ class TreeDisplay (object):
         self.treeview.expand_all()
         return iter 
 
+    def move_before(self, obj, target):
+        path = self.object_paths.get(obj)
+        iter_old = self.treestore.get_iter_from_string(path) 
+        path = self.object_paths.get(target)
+        iter_new = self.treestore.get_iter_from_string(path) 
+        self.treestore.move_before(iter_old, iter_new)
+        self._update_paths()
+
+    def move_after(self, obj, target):
+        path = self.object_paths.get(obj)
+        iter_old = self.treestore.get_iter_from_string(path) 
+        path = self.object_paths.get(target)
+        iter_new = self.treestore.get_iter_from_string(path) 
+        self.treestore.move_after(iter_old, iter_new)
+        self._update_paths()
+
     def remove(self, obj):
         path = self.object_paths.get(obj)
         if path: 

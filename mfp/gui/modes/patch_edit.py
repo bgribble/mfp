@@ -58,6 +58,8 @@ class PatchEditMode (InputMode):
 
         self.bind("C-n", self.window.layer_new, "Create new layer")
         self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
+        self.bind("C-u", self.window.layer_move_up, "Move current layer up")
+        self.bind("C-d", self.window.layer_move_down, "Move current layer down")
 
         self.bind("TAB", self.select_next, "Select next element")
         self.bind("S-TAB", self.select_prev, "Select previous element")
