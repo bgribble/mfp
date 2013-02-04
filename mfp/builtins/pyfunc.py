@@ -7,21 +7,31 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..main import MFPApp
-from ..evaluator import Evaluator
 from ..method import MethodCall
 from ..bang import Bang, Uninit
 
 
 class ApplyMethod(Processor):
+    doc_tooltip_obj = "Create a method call object"
+    doc_tooltip_inlet = ["Arguments to method call", 
+                         "Name of method (default: initarg 0)"]
+    doc_tooltip_outlet = ["MethodCall object output"]
+                         
     def __init__(self, init_type, init_args, patch, scope, name):
         self.method_name = None
 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
         if len(initargs):
             self.method_name = initargs[0]
 
     def trigger(self):
+        if self.inlets[1] is not Uninit: 
+            if isinstance(self.inlets[1], str):
+                self.method_name = self.inlets[1]
+            elif isinstance(self.inlets[1], MethodCall):
+                self.method_name = self.inlets[1].method
+            self.inlets[1] = Uninit 
         if self.inlets[0] is Bang:
             self.outlets[0] = MethodCall(self.method_name)
         else:
@@ -29,6 +39,11 @@ class ApplyMethod(Processor):
 
 
 class GetElement(Processor):
+    doc_tooltip_obj = "Get element or attribute from object" 
+    doc_tooltip_inlet = ["Object to get from",
+                         "Element to get (default: initarg 0)" ]
+    doc_tooltip_outlet = ["Specified element output", "Passthru of source"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
@@ -53,6 +68,10 @@ class GetElement(Processor):
 
 
 class PyEval(Processor):
+    doc_tooltip_obj = "Evaluate Python expression"
+    doc_tooltip_inlet = [ "Expression to evaluate" ]
+    doc_tooltip_outlet = [ "Result of evaluation" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.bindings = {}
 
@@ -75,6 +94,8 @@ class PyEval(Processor):
             self.bindings[name] = value
 
 class PyFunc(Processor): 
+    doc_tooltip_obj = "Evaluate function" 
+
     def __init__(self, init_type, init_args, patch, scope, name):
         if init_args:
             thunktxt = "lambda " + init_args
@@ -85,6 +106,10 @@ class PyFunc(Processor):
         
         if callable(self.thunk):
             self.argcount = self.thunk.func_code.co_argcount
+            self.doc_tooltip_inlet = [] 
+            for v in self.thunk.func_code.co_varnames:
+                self.doc_tooltip_inlet.append("Argument %s" % v)
+
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
@@ -100,6 +125,7 @@ class PyAutoWrap(Processor):
         
         if callable(self.thunk):
             self.argcount = self.thunk.func_code.co_argcount
+            self.doc_tooltip_obj = self.thunk.__doc__.split("\n")[0]
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
@@ -109,10 +135,13 @@ class PyAutoWrap(Processor):
             self.outlets[0] = self.thunk(*[i for i in self.inlets if i is not Uninit]) 
 
 class PyBinary(Processor):
+    doc_tooltip_inlet = ["Argument 1", "Argument 2 (default: initarg 0)"]
+
     def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
         self.function = pyfunc
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
+        self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
         if len(initargs) == 1:
             self.inlets[1] = initargs[0]
 
@@ -124,9 +153,13 @@ class PyBinary(Processor):
             self.outlets[0] = self.function(self.inlets[0])
 
 class PyUnary(Processor):
+    doc_tooltip_inlet = ["Argument"]
+
     def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
         self.function = pyfunc
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+
+        self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
 
     def trigger(self):
         self.outlets[0] = self.function(self.inlets[0])
@@ -135,6 +168,7 @@ class PyNullary(Processor):
     def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
         self.function = pyfunc
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
 
     def trigger(self):
         self.outlets[0] = self.function()
@@ -191,7 +225,7 @@ def register():
     mk_binary(operator.pow, "^")
     mk_binary(operator.pow, "**")
 
-    mk_unary(math.log, "log")
+    mk_binary(math.log, "log")
     mk_unary(math.exp, "exp")
     mk_unary(math.log10, "log10")
     mk_binary(math.pow, "pow")

@@ -23,6 +23,13 @@ class GlobalMode (InputMode):
         self.bind('C-w', self.window.quit, "Quit")
         self.bind('C-q', self.window.quit, "Quit")
 
+        self.bind("HOVER", self.hover)
+
+    def hover(self):
+        if self.manager.pointer_obj is not None:
+            self.manager.pointer_obj.show_tip(self.manager.pointer_x, self.manager.pointer_y)
+        return False 
+
     def save_file(self):
         def cb(fname):
             MFPGUI().mfp.save_file("default", fname)

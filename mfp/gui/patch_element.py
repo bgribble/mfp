@@ -330,6 +330,10 @@ class PatchElement (Clutter.Group):
     def show_tip(self, xpos, ypos):
         tiptxt = None 
         orig_x, orig_y = self.get_position()
+
+        if self.obj_id is None:
+            return False 
+            
         for (pid, pobj) in self.port_elements.items(): 
             x, y = pobj.get_position()
             x += orig_x-1
@@ -342,3 +346,4 @@ class PatchElement (Clutter.Group):
         if tiptxt is None:             
             tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id)
         self.stage.hud_write(tiptxt)
+        return True 

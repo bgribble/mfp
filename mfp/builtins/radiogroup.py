@@ -7,8 +7,6 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..main import MFPApp
-from .. import Bang, Uninit
-from mfp import log
 
 
 class RGForceFalse (object):
@@ -22,6 +20,8 @@ class RadioGroup (Processor):
     All inlets are hot 
     '''
 
+    doc_tooltip_obj = "Control a radio group of toggle buttons"
+
     def __init__(self, init_type, init_args, patch, scope, name):
         initargs, kwargs = patch.parse_args(init_args)
 
@@ -34,6 +34,13 @@ class RadioGroup (Processor):
         self.init_selection = init_selection 
         self.selection = None
         self.hot_inlets = range(num_inlets)
+
+        self.doc_tooltip_inlet = [] 
+        self.doc_tooltip_outlet = [] 
+
+        for i in range(num_inlets):
+            self.doc_tooltip_inlet.append("Button %d input")
+            self.doc_tooltip_outlet.append("Button %d output")
 
         Processor.__init__(self, num_inlets, num_inlets+1, 
                            init_type, init_args, patch, scope, name)
