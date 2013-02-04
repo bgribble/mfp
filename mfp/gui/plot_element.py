@@ -13,6 +13,7 @@ from .modes.label_edit import LabelEditMode
 from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
 
+from datetime import datetime 
 
 class PlotElement (PatchElement):
 
@@ -42,6 +43,9 @@ class PlotElement (PatchElement):
         self.x_max = 6.28
         self.y_min = -1.0
         self.y_max = 1.0
+
+        self.min_interval = 75 
+        self.last_draw = None 
 
         # create display
         self.create_display(self.INIT_WIDTH + 6, self.INIT_HEIGHT + self.LABEL_SPACE + 4)
@@ -114,7 +118,19 @@ class PlotElement (PatchElement):
             self.send_params()
 
     def draw_complete_cb(self): 
-        MFPGUI().mfp.send_methodcall(self.obj_id, 0, "draw_complete")
+        def thunk():
+            self.last_draw = datetime.now()
+            MFPGUI().mfp.send_methodcall(self.obj_id, 0, "draw_complete")
+
+        if self.last_draw != None:
+            time_since_last = datetime.now() - self.last_draw
+            delta_msec = time_since_last.total_seconds() * 1000.0
+            if (delta_msec > self.min_interval):
+                thunk()
+            else: 
+                MFPGUI().clutter_do_later(self.min_interval-delta_msec, thunk)
+        else: 
+            thunk()
 
     def update(self):
         self.draw_ports()
@@ -227,6 +243,7 @@ class PlotElement (PatchElement):
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
             elif params["plot_type"] == "scope":
                 self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT, MFPApp().samplerate)
+                self.xyplot.draw_complete_cb = self.draw_complete_cb 
             if self.xyplot:
                 self.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)

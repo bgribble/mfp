@@ -292,19 +292,20 @@ config(mfp_processor * proc)
     gpointer clipend_ptr = g_hash_table_lookup(proc->params, "clip_end");
 
     buf_info * d = (buf_info *)(proc->data);
-    float new_size=d->chan_size, new_channels=d->chan_count;
+    int new_size=d->chan_size, new_channels=d->chan_count;
 
     if ((size_ptr != NULL) || (channels_ptr != NULL)) {
         if(size_ptr != NULL) {
-            new_size = *(float *)size_ptr;
+            new_size = (int)(*(float *)size_ptr);
         }
         if(channels_ptr != NULL) {
-            new_channels = *(float *)channels_ptr;
+            new_channels = (int)(*(float *)channels_ptr);
         }
 
         if ((new_size != d->chan_size) || (new_channels != d->chan_count)) {
             d->chan_size = new_size;
             d->chan_count = new_channels;
+            d->chan_pos = 0;
             buffer_alloc(d);
 
             mfp_dsp_send_response_str(proc, RESP_BUFID, d->shm_id);

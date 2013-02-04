@@ -11,6 +11,7 @@ from gi.repository import Clutter
 from .xyplot import XYPlot
 from mfp import log
 from posix_ipc import SharedMemory
+from mfp.gui_slave import MFPGUI
 
 import os 
 import numpy 
@@ -23,6 +24,7 @@ class ScopePlot (XYPlot):
     def __init__(self, width, height, samplerate):
         self.orig_x = 0
         self.orig_y = 1
+
         self.samplerate = samplerate 
         self.buf_info = None
         self.shm_obj = None
@@ -32,7 +34,7 @@ class ScopePlot (XYPlot):
         self.data_start = 0
         self.data_end = -1
         self.draw_complete_cb = None 
-        
+
         XYPlot.__init__(self, width, height)
 
     def set_field_origin(self, orig_x, orig_y, redraw=False):
@@ -93,7 +95,7 @@ class ScopePlot (XYPlot):
             pmax = self.pt2px((x, ymax))
 
             if abs(pmin[1] - pmax[1]) < 0.25: 
-                delta = 0.25 - abs(pmin[1] - pmax[1])
+                delta = 0.4 - abs(pmin[1] - pmax[1])
                 if pmin[1] < pmax[1]:
                     delta *= -1.0
                 pmin[1] += delta/2.0
@@ -113,7 +115,7 @@ class ScopePlot (XYPlot):
                 self.draw_curve_minmax(ctx, curve)
             else: 
                 self.draw_curve_simple(ctx, curve)
-        if self.draw_complete_cb:
+        if self.draw_complete_cb is not None:
             self.draw_complete_cb()
 
     def save_style(self):
@@ -146,6 +148,7 @@ class ScopePlot (XYPlot):
         if action == "buffer":
             log.debug("scopeplot: got buffer info", data)
             self.buf_info = data
+            self.shm_obj = None 
         elif action == "grab":
             self._grab()
             self.plot.invalidate()

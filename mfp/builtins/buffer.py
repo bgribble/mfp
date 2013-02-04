@@ -101,6 +101,8 @@ class Buffer(Processor):
             self.dsp_obj.setparam("trig_enabled", 0)
         elif isinstance(incoming, dict):
             for k, v in incoming.items():
+                if k == "size":
+                    v = v*MFPApp().samplerate/1000.0
                 setattr(self, k, v)
                 self.dsp_obj.setparam(k, v)
 

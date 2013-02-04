@@ -24,7 +24,7 @@ class Scope (Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.buffer = None
-        self.retrig_value = True 
+        self.retrig_value = Bang
 
         if init_args is not None:
             log.debug("scope: Does not accept init args")

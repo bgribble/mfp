@@ -218,6 +218,10 @@ class MFPGUI (Singleton):
     def recall(self, obj_id):
         return self.objects.get(obj_id)
 
+    def clutter_do_later(self, delay, thunk):
+        from gi.repository import GObject
+        GObject.timeout_add(int(delay), thunk)
+
     def clutter_do(self, thunk):
         from gi.repository import GObject
         GObject.idle_add(thunk, priority=GObject.PRIORITY_DEFAULT)
