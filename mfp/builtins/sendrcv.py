@@ -12,6 +12,9 @@ from mfp import log
 
 
 class Send (Processor):
+    doc_tooltip_obj = "Send messages to a named receiver (create with 'via' GUI object)"
+    doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 0, init_type, init_args, patch, scope, name)
 
@@ -48,6 +51,10 @@ class Send (Processor):
 
 
 class Recv (Processor):
+    doc_tooltip_obj = "Receive messages to the specified name" 
+    doc_tooltip_inlet = [ "Passthru input" ]
+    doc_tooltip_outlet = [ "Passthru output" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)

@@ -164,7 +164,6 @@ class EnumElement (PatchElement):
             MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
     def update(self):
-        print "setting text to", self.format_value(self.value)
         self.label.set_text(self.format_value(self.value))
         self.texture.invalidate()
 

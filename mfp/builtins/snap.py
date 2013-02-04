@@ -12,6 +12,11 @@ from .. import log
 
 
 class Snap(Processor):
+    doc_tooltip_obj = "Capture a single or periodic snapshot value of a signal"
+    doc_tooltip_inlet = ["Signal to snapshot", 
+                         "Snapshot interval (ms) (default: initarg 0)"]
+    doc_tooltip_outlet = ["Value output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 

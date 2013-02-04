@@ -20,6 +20,11 @@ class Var (Processor):
             [message], [text], [var], [slider], [enum], [slidemeter]
     '''
 
+    doc_tooltip_obj = "Store a variable message (any type)"
+    doc_tooltip_inlet = ["Save input and emit from outlet or (Bang) only emit", 
+                         "Save input but do not emit (default: initarg 0)" ]
+    doc_tooltip_outlet = ["Value output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.gui_type = init_type
 

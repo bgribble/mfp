@@ -11,6 +11,9 @@ from ..bang import Uninit
 
 
 class Trigger (Processor):
+    doc_tooltip_obj = "Pass through input to N outputs, in right-to-left order" 
+    doc_tooltip_inlet = [ "Passthru input" ]
+
     '''
     [trigger {n}]
 
@@ -28,6 +31,10 @@ class Trigger (Processor):
             numout = 1
         self.resize(1, numout)
         self.outlet_order.reverse()
+
+        self.doc_tooltip_outlet = [] 
+        for i in range(numout):
+            self.doc_tooltip_outlet.append("Output %d" % (numout-i,))
 
     def trigger(self):
         for i in range(len(self.outlets)):

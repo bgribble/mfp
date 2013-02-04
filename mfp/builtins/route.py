@@ -11,6 +11,9 @@ from .. import Bang, Uninit
 
 
 class Route (Processor):
+    doc_tooltip_obj = "Route input to a selected output based on type or value"
+    doc_tooltip_inlet = ["Input data", "Updated routing info (default: initargs)"]
+
     '''
     [route 1, 2, int, float]
     [route= 1, 2, (3,1), 4]
@@ -67,6 +70,10 @@ class Route (Processor):
             else:
                 self.addresses[addr] = outlet
         self.nomatch = len(values)
+        self.doc_tooltip_outlet = [] 
+        for i in range(len(values)):
+            self.doc_tooltip_outlet.append("Items matching %s" % values[i])
+        self.doc_tooltip_outlet.append("Unmatched items")
 
     def trigger(self):
         # inlet 1 resets the list of addresses and may change the number of

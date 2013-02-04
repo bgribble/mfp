@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..main import MFPApp
+from ..bang import Uninit
 
 
 class RGForceFalse (object):
@@ -46,7 +47,6 @@ class RadioGroup (Processor):
                            init_type, init_args, patch, scope, name)
 
     def onload(self):
-        print "radiogroup: loadbanging", self.init_selection
         for i in range(len(self.inlets)):
             self.send(RGForceFalse(), i)
         self.send(True, self.init_selection)
@@ -56,9 +56,7 @@ class RadioGroup (Processor):
             if ival is Uninit:
                 continue
             elif ival is True:
-                print "[radiogroup]:", ival, "selecting", inum
                 if self.selection is inum:
-                    print "[radiogroup]: same selection"
                     continue 
                 if self.selection is not None:
                     self.outlets[self.selection] = False 
@@ -68,7 +66,6 @@ class RadioGroup (Processor):
                 break
             elif (not ival) or isinstance(ival, RGForceFalse): 
                 if inum == self.selection: 
-                    print "[radiogroup]:", ival, "deselecting", inum
                     self.selection = None 
                 if isinstance(ival, RGForceFalse): 
                     self.outlets[inum] = False 

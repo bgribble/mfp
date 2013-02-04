@@ -45,8 +45,8 @@ class Unpack (Processor):
         self.outlet_order.reverse()
         self.doc_tooltip_outlet = [] 
         for i in range(num_outlets-1):
-            self.doc.tooltip_outlet.append("List item %d output" % i)
-        self.doc.tooltip_outlet.append("Rest of list output")
+            self.doc_tooltip_outlet.append("List item %d output" % i)
+        self.doc_tooltip_outlet.append("Rest of list output")
 
     def trigger(self):
         nout = len(self.outlets) - 1 

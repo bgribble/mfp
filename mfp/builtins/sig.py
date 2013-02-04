@@ -10,6 +10,10 @@ from ..main import MFPApp
 
 
 class Sig(Processor):
+    doc_tooltip_obj = "Emit a constant signal"
+    doc_tooltip_inlet = ["Value to emit (default: initarg 0)"]
+    doc_tooltip_outlet = ["Signal output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 

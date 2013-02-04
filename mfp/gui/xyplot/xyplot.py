@@ -9,10 +9,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import math
 
-from .mark_style import MarkStyle
 from .quilt import Quilt
 from .. import ticks
-from mfp import log
 
 black = Clutter.Color()
 black.from_string("Black")
@@ -278,7 +276,7 @@ class XYPlot (Clutter.Group):
             ctx.line_to(tick_px[0] - px_min[0], 3 * self.AXIS_PAD)
             ctx.stroke()
             ctx.move_to(tick_px[0] - px_min[0], self.MARGIN_BOT - self.AXIS_PAD)
-            ctx.show_text("%.3g" % tick)
+            ctx.show_text("%.5g" % tick)
 
     def draw_yaxis_cb(self, texture, ctx, px_min, px_max):
         tickfuncs = { self.LINEAR: ticks.linear, self.LOG_DECADE: ticks.decade,
@@ -314,7 +312,7 @@ class XYPlot (Clutter.Group):
             ctx.save()
             ctx.move_to(self.AXIS_PAD, tick_px[1] - px_min[1])
             ctx.rotate(math.pi / 2)
-            ctx.show_text("%.3g" % tick)
+            ctx.show_text("%.5g" % tick)
             ctx.restore()
 
     def configure(self, params):
