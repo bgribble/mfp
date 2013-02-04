@@ -12,6 +12,12 @@ from mfp import log
 
 
 class Phasor(Processor):
+    doc_tooltip_obj = "Phasor (0-1 ramp) oscillator" 
+    doc_tooltip_inlet = ["Phase reset (radians)",
+                         "Frequency (hz) (default: initarg 0 or 0)"
+                         "Amplitude (default: initarg 1 or 1)"]
+    doc_tooltip_outlet = ["Signal output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)

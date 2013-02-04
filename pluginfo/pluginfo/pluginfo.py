@@ -110,6 +110,47 @@ class PlugInfo (object):
         else: 
             return hlower
 
+    def plugin_docstring(self, pluginfo):
+        name = pluginfo.get("name")
+        author = pluginfo.get("maker") 
+
+        if author is not None:
+            astr = "by %s" % author 
+        else:
+            astr = None 
+
+        ds = "LADSPA plugin: %s" % ' '.join([s for s in [name, astr] if s is not None])
+        return ds
+    
+    def port_docstring(self, portinfo): 
+        name = portinfo.get("name")
+        htype = portinfo.get("hint_type") 
+        minval = portinfo.get("hint_lower")
+        maxval = portinfo.get("hint_upper")
+        default = self.port_default(portinfo)
+
+        if minval is not None and (htype & self.LADSPA_HINT_BOUNDED_BELOW):
+            minstr = "min=%s" % minval
+        else: 
+            minstr = None
+
+        if maxval is not None and (htype & self.LADSPA_HINT_BOUNDED_ABOVE):
+            maxstr = "max=%s" % maxval
+        else: 
+            maxstr = None 
+
+        if default is not None and (htype & self.LADSPA_HINT_DEFAULT_MASK):
+            defstr = "default=%s" % default
+        else:
+            defstr = None 
+
+        hints = ', '.join([ h for h in [minstr, maxstr, defstr] if h is not None])
+        if len(hints):
+            hints = " (%s)" % hints 
+            return name + hints 
+        else:
+            return name 
+
 
             
 

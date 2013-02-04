@@ -16,6 +16,10 @@ from mfp import log
 
 
 class Scope (Processor):
+    doc_tooltip_obj = "Scope-style signal display (requires a buffer~)"
+    doc_tooltip_inlet = [ "Config/buffer info input" ]
+    doc_tooltip_outlet = [ "Buffer control output" ]
+
     display_type = "plot"
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -60,6 +64,10 @@ class Scope (Processor):
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
 class Scatter (Processor):
+    doc_tooltip_obj = "Scatter plot for non-signal data points"
+    doc_tooltip_inlet = [] 
+    doc_tooltip_outlet = ["Data recorder output"]
+
     display_type = "plot"
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -73,6 +81,10 @@ class Scatter (Processor):
             channels = 1
         self.hot_inlets = range(channels)
         self.gui_params = dict(plot_type="scatter")
+
+        self.doc_tooltip_inlet = [] 
+        for i in range(channels):
+            self.doc_tooltip_inlet.append("Curve %d data/config input" % i)
 
         Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name)
 

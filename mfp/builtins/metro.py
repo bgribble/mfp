@@ -18,6 +18,11 @@ class TimerTick (object):
 
 
 class Throttle (Processor):
+    doc_tooltip_obj = "Pass through input, but at a limited rate"
+    doc_tooltip_inlet = ["Passthru input", 
+                         "Minimum time between outputs (ms) (default: initarg 0)" ]
+    doc_tooltip_outlet = ["Passthru output" ]
+
     _timer = None
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -64,6 +69,10 @@ class Throttle (Processor):
 
 
 class Delay (Processor):
+    doc_tooltip_obj = "Pass through input messages, delayed by a specified amount"
+    doc_tooltip_inlet = ["Passthru input", "Delay (ms) (default: initarg 0)" ]
+    doc_tooltip_outlet = ["Passthru output"] 
+
     _timer = None
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -96,6 +105,10 @@ class Delay (Processor):
 
 
 class Metro (Processor):
+    doc_tooltip_obj = "Emit a Bang at specified interval"
+    doc_tooltip_inlet = ["Control input (True/Bang/nonzero to start, False/None/zero to stop)",
+                         "Interval between Bang (ms) (default: initarg 0)" ]
+    doc_tooltip_outlet = ["Metronome output"]
     _timer = None
 
     def __init__(self, init_type, init_args, patch, scope, name):

@@ -13,6 +13,10 @@ from ..midi import NoteOn, NoteOff, MidiControl, MidiUndef
 
 
 class MidiIn (Processor):
+    doc_tooltip_obj = "Receive MIDI events from ALSA sequencer" 
+    doc_tooltip_inlet = ["Config/MIDI passthru input" ]
+    doc_tooltip_outlet = ["MIDI event output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
@@ -36,8 +40,13 @@ class MidiIn (Processor):
 
 
 class MidiOut (Processor):
+    doc_tooltip_obj = "Send MIDI events to ALSA sequencer" 
+    doc_tooltip_inlet = ["Config/MIDI data input"]
+    
     def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
         self.port = 0
+        self.channel = None 
 
     def trigger(self):
         event = self.inlets[0]
@@ -49,6 +58,8 @@ class MidiOut (Processor):
             self.method(event, 0)
         elif isinstance(event, [NoteEvent, MidiCCEvent, MidiMiscEvent]):
             event.port = self.port
+            if self.channel is not None:
+                event.channel = self.channel 
             midi.send(event)
 
 

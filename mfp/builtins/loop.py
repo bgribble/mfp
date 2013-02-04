@@ -18,6 +18,11 @@ def iterable(o):
         return False
 
 class For(Processor):
+    doc_tooltip_obj = "Emit an input list one item at a time"
+    doc_tooltip_inlet = ["List or control input (True/Bang to start, False to stop)",
+                         "List to iterate (default: initarg 0)"] 
+    doc_tooltip_outlet = [ "List item output" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.iterating = False
         self.startval = False

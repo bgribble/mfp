@@ -19,6 +19,11 @@ class Note2Freq(Processor):
             scale: a subclass of Scale (defaults to Chromatic)
             tuning: an instance of Tuning (defaults to EqualTemper)
     '''
+    doc_tooltip_obj = "Convert a MIDI note or note number to a frequency"
+    doc_tooltip_inlet = ["Scale (number to note name) (default: Chromatic 60=C4)"
+                         "Tuning (note name to frequency) (default: Equal Temperament A4=440"]
+    doc_tooltip_outlet = ["Frequency output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         initargs, kwargs = patch.parse_args(init_args)
         if kwargs.get('scale'):
@@ -30,24 +35,23 @@ class Note2Freq(Processor):
             self.tuning = kwargs.get('tuning')
         else:
             self.tuning = scale.EqualTemper()
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
+        if self.inlets[1] is not None:
+            self.scale = self.inlets[1]
+            self.inlets[1] = Uninit 
+
+        if self.inlets[2] is not None:
+            self.tuning = self.inlets[2]
+            self.inlets[2] = Uninit 
+
         inval = self.inlets[0]
         note = None
         if isinstance(inval, midi.Note):
             note = inval.key
         elif isinstance(inval, (float, int)):
             note = int(inval)
-        elif isinstance(inval, scale.Scale):
-            self.scale = inval
-        elif isinstance(inval, scale.Tuning):
-            self.tuning = inval
-        elif isinstance(inval, dict):
-            if 'scale' in inval:
-                self.scale = inval.get('scale')
-            if 'tuning' in inval:
-                self.tuning = inval.get('tuning')
 
         if note is not None:
             self.outlets[0] = self.tuning.freq(*self.scale.midinote(note))

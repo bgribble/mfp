@@ -15,6 +15,10 @@ class OSCPacket(object):
 
 
 class OSCIn (Processor):
+    doc_tooltip_obj = "Open Sound Control message receive"
+    doc_tooltip_inlet = ["Config input"]
+    doc_tooltip_outlet = ["OSC data output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.path = None 
         self.types = None 
@@ -68,6 +72,11 @@ class OSCIn (Processor):
         MFPApp().osc_mgr.add_default(self._learn_handler)
 
 class OSCOut (Processor): 
+    doc_tooltip_obj = "Open Sound Control message send"
+    doc_tooltip_inlet = ["Message data", 
+                         "Destination host:port (UDP) (default: initarg 0)", 
+                         "OSC path (default: initarg 1)" ]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.host = None 
         self.port = None 

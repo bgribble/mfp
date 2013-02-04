@@ -10,12 +10,14 @@ from ..processor import Processor
 from ..main import MFPApp 
 from ..bang import Uninit 
 
+
 class Plugin(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         initargs, kwargs = patch.parse_args(init_args)
     
         self.lib_name = None
         self.lib_index = None 
+        self.plug_info = None 
         self.plug_name = None 
         self.plug_inlets = 0
         self.plug_outlets = 0
@@ -35,10 +37,14 @@ class Plugin(Processor):
     def init_plugin(self, pname): 
 
         pinfo = MFPApp().pluginfo.find(pname)
-
+        self.plug_info = pinfo 
         self.lib_name = pinfo.get("lib_name")
         self.lib_index = pinfo.get("lib_index")
         self.plug_name = pinfo.get("label")
+
+        self.doc_tooltip_obj = MFPApp().pluginfo.plugin_docstring(pinfo)
+        self.doc_tooltip_inlet = [] 
+        self.doc_tooltip_outlet = [] 
 
         portinfo = pinfo.get("ports", [])
 
@@ -47,6 +53,7 @@ class Plugin(Processor):
 
             d = port.get("descriptor", 0)
             if d & MFPApp().pluginfo.LADSPA_PORT_INPUT:
+                self.doc_tooltip_inlet.append(MFPApp().pluginfo.port_docstring(port))
                 if d & MFPApp().pluginfo.LADSPA_PORT_AUDIO:
                     self.dsp_inlets.extend([self.plug_inlets])
                 else:
@@ -54,6 +61,7 @@ class Plugin(Processor):
                 self.plug_inlets += 1
 
             elif d & MFPApp().pluginfo.LADSPA_PORT_OUTPUT:
+                self.doc_tooltip_outlet.append(MFPApp().pluginfo.port_docstring(port))
                 if d & MFPApp().pluginfo.LADSPA_PORT_AUDIO:
                     self.dsp_outlets.extend([self.plug_outlets])
                 else:
