@@ -39,6 +39,11 @@ class Buffer(Processor):
 
     FLOAT_SIZE = 4
 
+    doc_tooltip_obj = "Capture a signal to a shared buffer"
+    doc_tooltip_inlet = ["Signal input/control messages"]
+    doc_tooltip_outlet = ["Signal output", "Array output (for @slice)", 
+                          "BufferInfo and status output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         initargs, kwargs = patch.parse_args(init_args)
 

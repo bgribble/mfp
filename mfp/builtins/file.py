@@ -5,6 +5,10 @@ from ..method import MethodCall
 
 
 class FileIO(Processor):
+    doc_tooltip_obj = "File I/O processor"
+    doc_tooltip_inlet = ["Message data or method call input"]
+    doc_tooltip_outlet = ["File data output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.filename = None
         self.fileobj = None

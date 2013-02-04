@@ -11,6 +11,12 @@ from mfp.bang import Uninit
 import math
 
 class Ampl2DB(Processor):
+
+    doc_tooltip_obj = "Convert amplitude to dB values"
+    doc_tooltip_inlet = ["Value to convert to dB", 
+                         "0dB reference level (default: initarg 0, or 1.0)"]
+    doc_tooltip_outlet = ["dB value"] 
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.dbref = 1.0 
         self.lowlow = -1000
@@ -31,6 +37,12 @@ class Ampl2DB(Processor):
 
 
 class DB2Ampl(Processor):
+
+    doc_tooltip_obj = "Convert dB to amplitude/gain"
+    doc_tooltip_inlet = ["dB value to convert", 
+                         "0dB reference level (default: initarg 0, or 1.0)"]
+    doc_tooltip_outlet = ["Amplitude value"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.dbref = 1.0 
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)

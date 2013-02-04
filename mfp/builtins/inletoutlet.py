@@ -11,6 +11,8 @@ from .. import Uninit
 
 
 class Inlet(Processor):
+    doc_tooltip_obj = "Message input to patch"
+
     def __init__(self, init_type, init_args, patch, scope, name):
         if patch:
             initargs, kwargs = patch.parse_args(init_args)
@@ -36,6 +38,8 @@ class Inlet(Processor):
 
 
 class Outlet(Processor):
+    doc_tooltip_obj = "Message output from patch"
+
     def __init__(self, init_type, init_args, patch, scope, name):
         if patch:
             initargs, kwargs = patch.parse_args(init_args)

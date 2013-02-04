@@ -10,6 +10,10 @@ from mfp.main import MFPApp
 
 
 class Line(Processor):
+    doc_tooltip_obj = "Ramp/line generator"
+    doc_tooltip_inlet = ["Line segments input/set position"]
+    doc_tooltip_outlet = ["Signal output"]
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
