@@ -70,6 +70,7 @@ class Quilt (clutter.Group):
         self.viewport_width = width
         self.viewport_height = height
         clutter.Group.set_size(self, width, height)
+        self.set_clip(0, 0, width, height)
         self.rebuild_quilt()
 
     def idle_cb(self, *args):
