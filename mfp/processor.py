@@ -324,8 +324,11 @@ class Processor (object):
 
             for conns, val in [output_pairs[i] for i in self.outlet_order]:
                 if val is not Uninit:
-                    for target, inlet in conns:
-                        work.append((target, val, inlet))
+                    for target, tinlet in conns:
+                        if target is not None:
+                            work.append((target, val, tinlet))
+                        else:
+                            log.debug("Bad output connection: obj_id=%s" % self.obj_id)
         try:
             if ((inlet in self.dsp_inlets) 
                 and not isinstance(value, bool) and isinstance(value, (float,int))):
