@@ -49,18 +49,23 @@ class ButtonElement (PatchElement):
         self.indicator = False
 
         # create elements
-        self.texture = Clutter.CairoTexture.new(30, 30)
-        self.texture.set_size(20, 20)
+        self.texture = Clutter.CairoTexture.new(20, 20)
         self.texture.connect("draw", self.draw_cb)
 
         self.set_reactive(True)
         self.add_actor(self.texture)
 
+        self.set_size(20, 20)
         self.move(x, y)
 
         # request update when value changes
         self.update_required = True
 
+    def set_size(self, width, height):
+        PatchElement.set_size(self, width, height)
+        self.texture.set_size(width, height)
+        self.texture.set_surface_size(width, height)
+        self.texture.invalidate()
 
     def draw_cb(self, texture, ct):
         w = self.texture.get_property('surface_width') - 2
@@ -78,14 +83,15 @@ class ButtonElement (PatchElement):
         ct.set_antialias(cairo.ANTIALIAS_NONE)
 
         # draw the box
-        rounded_box(ct, 1, 1, w, h, 4)
+        corner = max(2, 0.1*min(w, h))
+        rounded_box(ct, 1, 1, w, h, corner)
         ct.stroke()
 
         # draw the indicator
-        ioff = 5
+        ioff = max(3, 0.075*min(w,h))
         iw = w - 2 * ioff
         ih = h - 2 * ioff
-        rounded_box(ct, ioff, ioff, iw, ih, 5)
+        rounded_box(ct, ioff, ioff, iw, ih, corner-1)
 
         if self.indicator:
             ct.fill()
@@ -116,7 +122,7 @@ class ButtonElement (PatchElement):
     def make_edit_mode(self):
         if self.obj_id is None:
             # create object
-            self.create(self.proc_type, str(self.message))
+            self.create(self.proc_type, str(self.indicator))
 
             # complete drawing
             if self.obj_id is None:
@@ -136,7 +142,9 @@ class BangButtonElement (ButtonElement):
 
     def __init__(self, window, x, y):
         self.message = Bang
+
         ButtonElement.__init__(self, window, x, y)
+        self.param_list.extend(['message'])
 
     def clicked(self):
         if self.obj_id is not None:
@@ -156,8 +164,8 @@ class BangButtonElement (ButtonElement):
         return False
 
     def configure(self, params):
-        if "value" in params:
-            self.message = params.get("value")
+        if "message" in params:
+            self.message = params.get("message")
 
         PatchElement.configure(self, params)
         self.texture.invalidate()
@@ -167,21 +175,34 @@ class ToggleButtonElement (ButtonElement):
     display_type = "toggle"
 
     def __init__(self, window, x, y):
-        self.message = False 
+        self.off_message = False 
+        self.on_message = True 
         ButtonElement.__init__(self, window, x, y)
 
+        self.param_list.extend(['on_message', 'off_message'])
+
     def clicked(self):
-        if self.message:
-            self.message = False
+        message = None 
+        if self.indicator:
+            message = self.off_message 
             self.indicator = False 
         else:
-            self.message = True
+            message = self.on_message 
             self.indicator = True 
 
         if self.obj_id is not None:
-            MFPGUI().mfp.send(self.obj_id, 0, self.message)
+            MFPGUI().mfp.send(self.obj_id, 0, message)
         self.texture.invalidate()
         return False
+
+    def configure(self, params):
+        if "on_message" in params:
+            self.on_message = params.get("on_message")
+        if "off_message" in params:
+            self.off_message = params.get("off_message")
+
+        PatchElement.configure(self, params)
+        self.texture.invalidate()
 
     def create(self, init_type, init_args):
         ButtonElement.create(self, init_type, init_args)

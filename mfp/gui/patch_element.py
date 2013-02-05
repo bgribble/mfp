@@ -40,9 +40,9 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = []
         self.connections_out = []
         self.connections_in = []
-        self.param_list = ['position_x', 'position_y', 'update_required', 
-                           'display_type', 'name', 'layername', 'num_inlets', 
-                           'num_outlets', 'dsp_inlets', 'dsp_outlets' ]
+        self.param_list = ['position_x', 'position_y', 'width', 'height', 
+                           'update_required', 'display_type', 'name', 'layername', 
+                           'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets' ]
             
         # Clutter objects
         self.stage = window
@@ -52,6 +52,8 @@ class PatchElement (Clutter.Group):
         # UI state
         self.position_x = x
         self.position_y = y
+        self.width = None
+        self.height = None 
         self.drag_x = None
         self.drag_y = None
         self.selected = False
@@ -274,6 +276,12 @@ class PatchElement (Clutter.Group):
     def command(self, action, data):
         pass
 
+    def set_size(self, width, height):
+        self.width = width
+        self.height = height
+        Clutter.Group.set_size(self, self.width, self.height)
+        self.draw_ports()
+
     def configure(self, params):
         self.num_inlets = params.get("num_inlets")
         self.num_outlets = params.get("num_outlets")
@@ -285,6 +293,16 @@ class PatchElement (Clutter.Group):
 
         if layer and self.layer != layer:
             self.move_to_layer(layer)
+
+        w_orig, h_orig = self.get_size()
+
+        w = params.get("width") or w_orig
+        h = params.get("height") or h_orig
+
+        if (w != w_orig) or (h != h_orig):
+            print "PatchElement: setting size:", self, w_orig, h_orig, w, h
+            print params 
+            self.set_size(w, h)
 
         self.draw_ports()
         self.stage.refresh(self)

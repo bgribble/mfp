@@ -24,6 +24,8 @@ class PlotElement (PatchElement):
     INIT_WIDTH = 320
     INIT_HEIGHT = 240
     LABEL_SPACE = 25
+    WIDTH_PAD = 6
+    HEIGHT_PAD = 4 
     label_off_x = 6
     label_off_y = 0
 
@@ -48,7 +50,10 @@ class PlotElement (PatchElement):
         self.last_draw = None 
 
         # create display
-        self.create_display(self.INIT_WIDTH + 6, self.INIT_HEIGHT + self.LABEL_SPACE + 4)
+        width = self.INIT_WIDTH + self.WIDTH_PAD
+        height = self.INIT_HEIGHT + self.LABEL_SPACE + self.HEIGHT_PAD
+        self.create_display(width, height)
+        self.set_size(width, height)
         self.move(x, y)
         self.update()
 
@@ -67,6 +72,12 @@ class PlotElement (PatchElement):
             return "scope"
         else:
             return "none"
+
+    def set_size(self, width, height): 
+        PatchElement.set_size(self, width, height)
+        self.rect.set_size(width, height)
+        if self.xyplot:
+            self.xyplot.set_size(width-self.WIDTH_PAD, height-self.LABEL_SPACE-self.WIDTH_PAD)
 
     def create_display(self, width, height):
         self.rect = clutter.Rectangle()
@@ -181,24 +192,6 @@ class PlotElement (PatchElement):
         self.position_x = x
         self.position_y = y
         clutter.Group.set_position(self, x, y)
-
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
-
-    def set_size(self, w, h):
-        self.size_w = w
-        self.size_h = h
-
-        self.rect.set_size(w, h)
-        self.rect.set_position(0, 0)
-        self.xyplot.set_size(w - 4, h - self.LABEL_SPACE - 4)
-
-        clutter.Group.set_size(self, w, h)
-
-        self.draw_ports()
 
         for c in self.connections_out:
             c.draw()

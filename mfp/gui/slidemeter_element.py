@@ -6,7 +6,7 @@ A patch element corresponding to a vertical or horizontal slider/meter
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from gi.repository import Clutter as clutter
+from gi.repository import Clutter
 import math
 from patch_element import PatchElement
 from .modes.slider import SliderEditMode, SliderControlMode
@@ -36,6 +36,7 @@ class SlideMeterElement (PatchElement):
     HORIZONTAL = 0x01 
     POSITIVE = 0x00
     NEGATIVE = 0x01
+    CROSSFADE = 0x02 
     LINEAR = 0x00
     LOG = 0x01 
     LEFT = 0x00
@@ -43,7 +44,8 @@ class SlideMeterElement (PatchElement):
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
-
+        self.param_list.extend(['min_value', 'max_value', 'show_scale', 'scale_type',
+                                'scale_position', 'orientation', 'direction'])
         # parameters controlling display
         self.value = 0.0
         self.min_value = 0.0
@@ -68,7 +70,7 @@ class SlideMeterElement (PatchElement):
         self.hot_y_max = None
 
         # create the texture
-        self.texture = clutter.CairoTexture.new(self.DEFAULT_W, self.DEFAULT_H)
+        self.texture = Clutter.CairoTexture.new(self.DEFAULT_W, self.DEFAULT_H)
 
         # configure
         self.add_actor(self.texture)
@@ -257,16 +259,14 @@ class SlideMeterElement (PatchElement):
         changes = False
 
         v = params.get("orientation")
-        if (v and v in ("h", "horiz", "horizontal") 
+        if (v is not None and v in (1, "h", "horiz", "horizontal") 
             and not (self.orientation & self.HORIZONTAL)):
             self.set_orientation(self.HORIZONTAL)
             changes = True 
-        elif (v and v in ("v", "vert", "vertical") 
+        elif (v is not None and v in (0, "v", "vert", "vertical") 
               and (self.orientation & self.HORIZONTAL)):
             self.set_orientation(self.VERTICAL)
             changes = True 
-
-        v = params.get("show_scale")
 
         v = params.get("direction")
         if (v in (1, "pos", "positive") and self.direction != self.POSITIVE): 
@@ -284,16 +284,15 @@ class SlideMeterElement (PatchElement):
             self.scale_type = self.LOG
             changes = True 
 
-        v = params.get("scale_pos")
-        if (v in ("r", "R", "right") and self.scale_position != self.RIGHT): 
+        v = params.get("scale_position")
+        if (v is not None and v in (1, "r", "R", "right") and self.scale_position != self.RIGHT): 
             self.scale_position = self.RIGHT 
             changes = True 
-        elif (v in ("l", "L", "left") and self.scale_position != self.LEFT):
+        elif (v is not None and v in (0, "l", "L", "left") and self.scale_position != self.LEFT):
             self.scale_position = self.LEFT 
             changes = True 
         
-
-        for p in ("slider_enable", "min_value", "max_value", "scale_ticks"):
+        for p in ("show_scale", "slider_enable", "min_value", "max_value", "scale_ticks"):
             v = params.get(p)
             if v is not None and hasattr(self, p):
                 changes = True
@@ -317,12 +316,10 @@ class SlideMeterElement (PatchElement):
             self.texture.invalidate()
 
     def set_size(self, width, height):
-        self.width = width
-        self.height = height
-        clutter.Group.set_size(self, self.width, self.height)
+        PatchElement.set_size(self, width, height)
         self.texture.set_size(width, height)
         self.texture.set_surface_size(width, height)
-        self.draw_ports()
+        self.texture.invalidate()
 
     def select(self):
         self.move_to_top()

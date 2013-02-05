@@ -26,7 +26,7 @@ class TextElement (PatchElement):
         self.label.set_color(window.color_unselected)
         self.add_actor(self.label)
         self.update_required = True
-        self.draw_ports()
+        self.set_size(12, 12)
         self.move(x, y)
         self.set_reactive(True)
 

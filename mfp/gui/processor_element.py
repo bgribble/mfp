@@ -138,17 +138,11 @@ class ProcessorElement (PatchElement):
         self.update()
 
     def set_size(self, w, h):
-        self.size_w = w
-        self.size_h = h
+        PatchElement.set_size(self, w, h)
 
-        clutter.Group.set_size(self, w, h)
         self.texture.set_size(w, h)
         self.texture.set_surface_size(w, h)
-        self.texture.set_position(0, 0)
         self.texture.invalidate()
-
-        self.draw_ports()
-
 
     def select(self):
         self.move_to_top()

@@ -43,6 +43,7 @@ class MessageElement (PatchElement):
         self.add_actor(self.texture)
         self.add_actor(self.label)
 
+        self.set_size(35, 25)
         self.obj_state = self.OBJ_HALFCREATED
         self.texture.invalidate()
 
@@ -55,6 +56,12 @@ class MessageElement (PatchElement):
 
         # request update when value changes
         self.update_required = True
+
+    def set_size(self, width, height):
+        PatchElement.set_size(self, width, height)
+        self.texture.set_size(width, height)
+        self.texture.set_surface_size(width, height)
+        self.texture.invalidate()
 
     def draw_cb(self, texture, ct):
         if self.clickstate:
