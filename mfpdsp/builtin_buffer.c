@@ -64,6 +64,7 @@ typedef struct {
 /* clip_state values */ 
 #define CLIP_IDLE 0 
 #define CLIP_PLAYING 1
+#define CLIP_RECORDING 2
 
 static void 
 init(mfp_processor * proc) 
@@ -85,6 +86,7 @@ init(mfp_processor * proc)
     d->trig_pretrigger = 0;
     d->trig_enabled = 1;
     d->trig_repeat = 1;
+    d->trig_chanmask = 0;
     d->clip_chanmask = 0;
     d->clip_repeat = 0;
     d->clip_start = -1;
@@ -146,6 +148,9 @@ process(mfp_processor * proc)
                     break;
             }
             if (d->trig_triggered) {
+                d->clip_pos = 0;
+                d->clip_start = 0;
+                d->clip_state = CLIP_PLAYING;
                 mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 1);
             }
         }
@@ -182,10 +187,10 @@ process(mfp_processor * proc)
     mfp_block_zero(proc->outlet_buf[0]);
 
     /* if we are playing, copy data from the buffer to the outlet */ 
-    if (d->clip_state == CLIP_PLAYING) {
+    if (d->clip_state != CLIP_IDLE) {
         /* accumulate non-masked channels in the output buffer */ 
         for(channel=0; channel < d->chan_count; channel++) {
-            if(!((1 << channel) & d->trig_chanmask)) {
+            if(!((1 << channel) & d->clip_chanmask)) {
                 outptr = proc->outlet_buf[0]->data;
                 inptr = (float *)(d->shm_ptr) + (channel*d->chan_size);
                 inpos = d->clip_pos;
@@ -285,11 +290,14 @@ config(mfp_processor * proc)
     gpointer trigtrig_ptr = g_hash_table_lookup(proc->params, "trig_triggered");
     gpointer trigrept_ptr = g_hash_table_lookup(proc->params, "trig_repeat");
     gpointer trigenable_ptr = g_hash_table_lookup(proc->params, "trig_enabled");
+    gpointer trigmask_ptr = g_hash_table_lookup(proc->params, "trig_chanmask");
 
-    gpointer clipbang_ptr = g_hash_table_lookup(proc->params, "clip_bang");
+    gpointer clipplay_ptr = g_hash_table_lookup(proc->params, "clip_play");
+    gpointer cliprec_ptr = g_hash_table_lookup(proc->params, "clip_rec");
     gpointer cliprepeat_ptr = g_hash_table_lookup(proc->params, "clip_repeat");
     gpointer clipstart_ptr = g_hash_table_lookup(proc->params, "clip_start");
     gpointer clipend_ptr = g_hash_table_lookup(proc->params, "clip_end");
+    gpointer clipmask_ptr = g_hash_table_lookup(proc->params, "clip_chanmask");
 
     buf_info * d = (buf_info *)(proc->data);
     int new_size=d->chan_size, new_channels=d->chan_count;
@@ -347,6 +355,10 @@ config(mfp_processor * proc)
         d->trig_enabled = (int)(*(float *)trigenable_ptr);
     }
 
+    if (trigmask_ptr != NULL) {
+        d->trig_chanmask = (int)(*(float *)trigmask_ptr);
+    }
+
     if (cliprepeat_ptr != NULL) {
         d->clip_repeat = (int)(*(float *)cliprepeat_ptr);
     }
@@ -359,10 +371,14 @@ config(mfp_processor * proc)
         d->clip_end = (int)(*(float *)clipend_ptr);
     }
 
-    if (clipbang_ptr != NULL) {
-        g_hash_table_remove(proc->params, "clip_bang");
+    if (clipplay_ptr != NULL) {
         d->clip_state = CLIP_PLAYING;
         d->clip_pos = d->clip_start;
+        g_hash_table_remove(proc->params, "clip_play");
+    }
+    
+    if (clipmask_ptr != NULL) {
+        d->clip_chanmask = (int)(*(float *)clipmask_ptr);
     }
 
     return;
@@ -389,10 +405,13 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "trig_triggered", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "trig_repeat", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "trig_enabled", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "trig_chanmask", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "clip_repeat", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "clip_bang", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "clip_play", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "clip_rec", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "clip_start", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "clip_end", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "clip_chanmask", (gpointer)PARAMTYPE_FLT);
 
     return p;
 }

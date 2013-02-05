@@ -1,0 +1,2086 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Front panel",
+                "__patch__"
+            ],
+            [
+                "Buffer control",
+                "__patch__"
+            ],
+            [
+                "Clock",
+                "__patch__"
+            ]
+        ],
+        "display_type": "patch"
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ],
+                    [
+                        2,
+                        1
+                    ],
+                    [
+                        2,
+                        2
+                    ],
+                    [
+                        2,
+                        3
+                    ],
+                    [
+                        51,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 172.5352783203125,
+                "name": "processor_001",
+                "obj_id": 1,
+                "position_y": 72.0774154663086,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": [],
+                "display_type": "processor",
+                "num_inlets": 1,
+                "dsp_outlets": [
+                    0
+                ],
+                "initargs": "0",
+                "layername": "Front panel",
+                "width": 46.0
+            },
+            "name": "processor_001",
+            "do_onload": true,
+            "initargs": "0",
+            "type": "in~"
+        },
+        "2": {
+            "connections": [
+                [
+                    [
+                        4,
+                        0
+                    ]
+                ],
+                [],
+                [
+                    [
+                        65,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 57.88175964355469,
+                "name": "processor_002",
+                "width": 124.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 3,
+                "dsp_inlets": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "display_type": "processor",
+                "num_inlets": 4,
+                "position_y": 121.9570541381836,
+                "dsp_outlets": [
+                    0
+                ],
+                "layername": "Front panel"
+            },
+            "name": "processor_002",
+            "do_onload": true,
+            "initargs": "10000,4",
+            "type": "buffer~"
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 55.85552215576172,
+                "name": "bufctl",
+                "width": 20,
+                "update_required": false,
+                "height": 37.5,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 71.88872528076172,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "bufctl",
+            "do_onload": true,
+            "initargs": "\"bufctl\"",
+            "type": "recv"
+        },
+        "4": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 57.88332748413086,
+                "name": "processor_003",
+                "width": 57.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 0,
+                "dsp_inlets": [
+                    0
+                ],
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 177.9552764892578,
+                "dsp_outlets": [],
+                "layername": "Front panel"
+            },
+            "name": "processor_003",
+            "do_onload": true,
+            "initargs": "0",
+            "type": "out~"
+        },
+        "5": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "<span size=\"large\"><b>looper.mfp</b></span>",
+                "position_x": 352.30072021484375,
+                "name": "text_001",
+                "obj_id": 5,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 20.969219207763672,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_001",
+            "value": "<span size=\"large\"><b>looper.mfp</b></span>",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "6": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "4-channel, 10-second loop sampler",
+                "position_x": 350.7638854980469,
+                "name": "text_002",
+                "obj_id": 6,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 44.906288146972656,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_002",
+            "value": "4-channel, 10-second loop sampler",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "7": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "buffer~ is the heart of the sampler.  The initargs\nmean 10000 ms buffer size, 4 channels input.  \n\nWe send one audio in to all channels; we will use \nbufctl to set record and playback masks.",
+                "position_x": 351.5359191894531,
+                "name": "text_003",
+                "obj_id": 7,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 95.20462799072266,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_003",
+            "value": "buffer~ is the heart of the sampler.  The initargs\nmean 10000 ms buffer size, 4 channels input.  \n\nWe send one audio in to all channels; we will use \nbufctl to set record and playback masks.",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "8": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 41.957706451416016,
+                "name": "toggle_001",
+                "width": 20,
+                "on_message": 1,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 1,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 262.65525817871094,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_001",
+            "value": 1,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "9": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 84.94122314453125,
+                "name": "toggle_002",
+                "width": 20,
+                "on_message": 2,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 2,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 264.4704895019531,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_002",
+            "value": 2,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "10": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 131.90359497070312,
+                "name": "toggle_003",
+                "width": 20,
+                "on_message": 4,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 4,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 262.67665100097656,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_003",
+            "value": 4,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "11": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 180.8604736328125,
+                "name": "toggle_004",
+                "width": 20,
+                "on_message": 8,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 8,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 262.6213073730469,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_004",
+            "value": 8,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "12": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 41.979671478271484,
+                "name": "toggle_005",
+                "width": 20,
+                "on_message": 1,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 1,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 317.7955322265625,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_005",
+            "value": 1,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "13": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 85.9326171875,
+                "name": "toggle_006",
+                "width": 20,
+                "on_message": 2,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 2,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 317.5083923339844,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_006",
+            "value": 2,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "14": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 130.88320922851562,
+                "name": "toggle_007",
+                "width": 20,
+                "on_message": 4,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 4,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 318.49822998046875,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_007",
+            "value": 4,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 179.85731506347656,
+                "name": "toggle_008",
+                "width": 20,
+                "on_message": 8,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": 8,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 318.4822692871094,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_008",
+            "value": 8,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "16": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 244.80088806152344,
+                "name": "sendvia_001",
+                "obj_id": 16,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "play_enable",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 274.5553894042969,
+                "initargs": "\"play_enable\"",
+                "layername": "Front panel"
+            },
+            "name": "sendvia_001",
+            "do_onload": true,
+            "initargs": "\"play_enable\"",
+            "type": "send"
+        },
+        "17": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 247.8055877685547,
+                "name": "sendvia_002",
+                "obj_id": 17,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "rec_enable",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 329.48175048828125,
+                "initargs": "\"rec_enable\"",
+                "layername": "Front panel"
+            },
+            "name": "sendvia_002",
+            "do_onload": true,
+            "initargs": "\"rec_enable\"",
+            "type": "send"
+        },
+        "18": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "ch1",
+                "position_x": 41.224876403808594,
+                "name": "text_004",
+                "obj_id": 18,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 289.52392578125,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_004",
+            "value": "ch1",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "19": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "ch2",
+                "position_x": 84.18411254882812,
+                "name": "text_005",
+                "obj_id": 19,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 289.5248107910156,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_005",
+            "value": "ch2",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "20": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "ch3",
+                "position_x": 129.14569091796875,
+                "name": "text_006",
+                "obj_id": 20,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 288.52593994140625,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_006",
+            "value": "ch3",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "21": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "ch4",
+                "position_x": 178.10726928710938,
+                "name": "text_007",
+                "obj_id": 21,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 289.5250549316406,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_007",
+            "value": "ch4",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "22": {
+            "connections": [
+                [
+                    [
+                        23,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 69.72592163085938,
+                "name": "play_enable",
+                "obj_id": 22,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "play_enable",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 46.60224151611328,
+                "initargs": "\"play_enable\"",
+                "layername": "Buffer control",
+                "init_args": "\"play_enable\""
+            },
+            "name": "play_enable",
+            "do_onload": true,
+            "initargs": "\"play_enable\"",
+            "type": "recv"
+        },
+        "23": {
+            "connections": [
+                [
+                    [
+                        26,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        56,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 72.22592163085938,
+                "name": "processor_004",
+                "obj_id": 23,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 96.60224151611328,
+                "initargs": "2",
+                "layername": "Buffer control"
+            },
+            "name": "processor_004",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "24": {
+            "connections": [
+                [
+                    [
+                        25,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 71.64737701416016,
+                "name": "processor_008",
+                "obj_id": 24,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 192.63343811035156,
+                "initargs": "2",
+                "layername": "Buffer control"
+            },
+            "name": "processor_008",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "pack"
+        },
+        "25": {
+            "connections": [
+                [
+                    [
+                        27,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 71.67557525634766,
+                "name": "processor_009",
+                "obj_id": 25,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 228.6937713623047,
+                "initargs": "1",
+                "layername": "Buffer control"
+            },
+            "name": "processor_009",
+            "do_onload": true,
+            "initargs": "1",
+            "type": "pack"
+        },
+        "26": {
+            "connections": [
+                [
+                    [
+                        24,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 71.79266834259033,
+                "name": "message_001",
+                "obj_id": 26,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 158.65322875976562,
+                "initargs": "\"clip_chanmask\"",
+                "layername": "Buffer control"
+            },
+            "name": "message_001",
+            "do_onload": false,
+            "initargs": "\"clip_chanmask\"",
+            "type": "message"
+        },
+        "27": {
+            "connections": [
+                [
+                    [
+                        28,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 71.67557525634766,
+                "name": "processor_010",
+                "width": 38.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 264.6937713623047,
+                "dsp_outlets": null,
+                "layername": "Buffer control"
+            },
+            "name": "processor_010",
+            "do_onload": true,
+            "initargs": null,
+            "type": "dict"
+        },
+        "28": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 69.17557525634766,
+                "name": "sendvia_003",
+                "obj_id": 28,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "bufctl",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 312.6937713623047,
+                "initargs": "\"bufctl\"",
+                "layername": "Buffer control"
+            },
+            "name": "sendvia_003",
+            "do_onload": true,
+            "initargs": "\"bufctl\"",
+            "type": "send"
+        },
+        "29": {
+            "connections": [
+                [
+                    [
+                        30,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 281.860107421875,
+                "name": "rec_enable",
+                "obj_id": 29,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "rec_enable",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 43.86027526855469,
+                "initargs": "\"rec_enable\"",
+                "layername": "Buffer control",
+                "init_args": "\"rec_enable\""
+            },
+            "name": "rec_enable",
+            "do_onload": true,
+            "initargs": "\"rec_enable\"",
+            "type": "recv"
+        },
+        "30": {
+            "connections": [
+                [
+                    [
+                        32,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        57,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 284.360107421875,
+                "name": "processor_011",
+                "obj_id": 30,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 90.86027526855469,
+                "initargs": "2",
+                "layername": "Buffer control"
+            },
+            "name": "processor_011",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "32": {
+            "connections": [
+                [
+                    [
+                        34,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 284.360107421875,
+                "name": "message_002",
+                "obj_id": 32,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 158.8602752685547,
+                "initargs": "\"trig_chanmask\"",
+                "layername": "Buffer control"
+            },
+            "name": "message_002",
+            "do_onload": false,
+            "initargs": "\"trig_chanmask\"",
+            "type": "message"
+        },
+        "34": {
+            "connections": [
+                [
+                    [
+                        35,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 283.7457580566406,
+                "name": "processor_014",
+                "obj_id": 34,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 194.57095336914062,
+                "initargs": "2",
+                "layername": "Buffer control"
+            },
+            "name": "processor_014",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "pack"
+        },
+        "35": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 283.7457580566406,
+                "name": "processor_015",
+                "obj_id": 35,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 229.57095336914062,
+                "initargs": "1",
+                "layername": "Buffer control"
+            },
+            "name": "processor_015",
+            "do_onload": true,
+            "initargs": "1",
+            "type": "pack"
+        },
+        "36": {
+            "connections": [
+                [
+                    [
+                        37,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 283.7457580566406,
+                "name": "processor_016",
+                "width": 38.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 264.5709533691406,
+                "dsp_outlets": null,
+                "layername": "Buffer control"
+            },
+            "name": "processor_016",
+            "do_onload": true,
+            "initargs": null,
+            "type": "dict"
+        },
+        "37": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 281.2457580566406,
+                "name": "sendvia_004",
+                "obj_id": 37,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "bufctl",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 311.5709533691406,
+                "initargs": "\"bufctl\"",
+                "layername": "Buffer control"
+            },
+            "name": "sendvia_004",
+            "do_onload": true,
+            "initargs": "\"bufctl\"",
+            "type": "send"
+        },
+        "38": {
+            "connections": [
+                [
+                    [
+                        39,
+                        0
+                    ],
+                    [
+                        81,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "value": 10.19999999999998,
+                "direction": 0,
+                "position_x": 101.90516662597656,
+                "name": "slidemeter_001",
+                "width": 100.0,
+                "scale_type": 0,
+                "max_value": 10.0,
+                "min_value": 0.0,
+                "scale_position": 1,
+                "update_required": true,
+                "height": 55.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "show_scale": true,
+                "display_type": "slidemeter",
+                "num_inlets": 2,
+                "position_y": 391.9086608886719,
+                "dsp_outlets": null,
+                "layername": "Front panel",
+                "orientation": 1
+            },
+            "name": "slidemeter_001",
+            "value": 10.19999999999998,
+            "do_onload": false,
+            "initargs": "0.0",
+            "type": "var"
+        },
+        "39": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 99.91771697998047,
+                "name": "sendvia_005",
+                "obj_id": 39,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "jump",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 451.8968200683594,
+                "initargs": "\"jump\"",
+                "layername": "Front panel"
+            },
+            "name": "sendvia_005",
+            "do_onload": true,
+            "initargs": "\"jump\"",
+            "type": "send"
+        },
+        "40": {
+            "connections": [
+                [
+                    [
+                        42,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 350.7005310058594,
+                "name": "toggle_009",
+                "width": 20,
+                "on_message": true,
+                "update_required": true,
+                "height": 20,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "off_message": false,
+                "display_type": "toggle",
+                "num_inlets": 2,
+                "position_y": 262.9399108886719,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "toggle_009",
+            "value": false,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "41": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": "GO",
+                "position_x": 385.6973876953125,
+                "name": "text_008",
+                "obj_id": 41,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "text",
+                "num_inlets": 2,
+                "position_y": 263.9410095214844,
+                "initargs": null,
+                "layername": "Front panel"
+            },
+            "name": "text_008",
+            "value": "GO",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "42": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 349.2005310058594,
+                "name": "sendvia_006",
+                "obj_id": 42,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "go",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 298.9399108886719,
+                "initargs": "\"go\"",
+                "layername": "Front panel"
+            },
+            "name": "sendvia_006",
+            "do_onload": true,
+            "initargs": "\"go\"",
+            "type": "send"
+        },
+        "43": {
+            "connections": [
+                [
+                    [
+                        38,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 69.91693115234375,
+                "name": "clock",
+                "obj_id": 43,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "clock",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 368.9191589355469,
+                "initargs": "\"clock\"",
+                "layername": "Front panel",
+                "init_args": "\"clock\""
+            },
+            "name": "clock",
+            "do_onload": true,
+            "initargs": "\"clock\"",
+            "type": "recv"
+        },
+        "44": {
+            "connections": [
+                [
+                    [
+                        45,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 496.2894287109375,
+                "name": "go",
+                "obj_id": 44,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "go",
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 51.90339660644531,
+                "initargs": "\"go\"",
+                "layername": "Buffer control",
+                "init_args": "\"go\""
+            },
+            "name": "go",
+            "do_onload": true,
+            "initargs": "\"go\"",
+            "type": "recv"
+        },
+        "45": {
+            "connections": [
+                [
+                    [
+                        46,
+                        0
+                    ],
+                    [
+                        55,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        47,
+                        0
+                    ],
+                    [
+                        48,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "position_x": 498.7894287109375,
+                "name": "processor_018",
+                "obj_id": 45,
+                "dsp_outlets": null,
+                "update_required": false,
+                "num_outlets": 3,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 99.90339660644531,
+                "initargs": "True, False",
+                "layername": "Buffer control"
+            },
+            "name": "processor_018",
+            "do_onload": true,
+            "initargs": "True, False",
+            "type": "route"
+        },
+        "46": {
+            "connections": [
+                [
+                    [
+                        49,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 498.7495422363281,
+                "name": "message_020",
+                "obj_id": 46,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 188.64707946777344,
+                "initargs": "clip_play=1, clip_rec=1",
+                "layername": "Buffer control"
+            },
+            "name": "message_020",
+            "do_onload": false,
+            "initargs": "clip_play=1, clip_rec=1",
+            "type": "message"
+        },
+        "47": {
+            "connections": [
+                [
+                    [
+                        50,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 557.7510375976562,
+                "name": "message_021",
+                "obj_id": 47,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 240.5500030517578,
+                "initargs": "trig_enabled=0",
+                "layername": "Buffer control"
+            },
+            "name": "message_021",
+            "do_onload": false,
+            "initargs": "trig_enabled=0",
+            "type": "message"
+        },
+        "48": {
+            "connections": [
+                [
+                    [
+                        50,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 557.7460327148438,
+                "name": "message_022",
+                "obj_id": 48,
+                "dsp_outlets": null,
+                "update_required": true,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 277.48095703125,
+                "initargs": "clip_play=0, clip_rec=0",
+                "layername": "Buffer control"
+            },
+            "name": "message_022",
+            "do_onload": false,
+            "initargs": "clip_play=0, clip_rec=0",
+            "type": "message"
+        },
+        "49": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 495.75347900390625,
+                "name": "sendvia_007",
+                "obj_id": 49,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "bufctl",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 242.5462646484375,
+                "initargs": "\"bufctl\"",
+                "layername": "Buffer control"
+            },
+            "name": "sendvia_007",
+            "do_onload": true,
+            "initargs": "\"bufctl\"",
+            "type": "send"
+        },
+        "50": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 555.7206420898438,
+                "name": "sendvia_008",
+                "obj_id": 50,
+                "dsp_outlets": null,
+                "update_required": false,
+                "label": "bufctl",
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 322.3502502441406,
+                "initargs": "\"bufctl\"",
+                "layername": "Buffer control"
+            },
+            "name": "sendvia_008",
+            "do_onload": true,
+            "initargs": "\"bufctl\"",
+            "type": "send"
+        },
+        "51": {
+            "connections": [
+                [
+                    [
+                        52,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "position_x": 201.84164428710938,
+                "name": "processor_019",
+                "obj_id": 51,
+                "position_y": 106.97605895996094,
+                "update_required": false,
+                "height": null,
+                "num_outlets": 2,
+                "dsp_inlets": [
+                    0
+                ],
+                "display_type": "processor",
+                "num_inlets": 1,
+                "dsp_outlets": [
+                    0,
+                    1
+                ],
+                "initargs": null,
+                "layername": "Front panel",
+                "width": null
+            },
+            "name": "processor_019",
+            "do_onload": true,
+            "initargs": null,
+            "type": "ampl~"
+        },
+        "52": {
+            "connections": [
+                [
+                    [
+                        54,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 201.83773803710938,
+                "name": "processor_020",
+                "width": 83.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": [
+                    0
+                ],
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 142.9646759033203,
+                "dsp_outlets": [],
+                "layername": "Front panel"
+            },
+            "name": "processor_020",
+            "do_onload": true,
+            "initargs": "100",
+            "type": "snap~"
+        },
+        "53": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": -62.952132113568695,
+                "direction": 0,
+                "position_x": 287.7585754394531,
+                "name": "slidemeter_002",
+                "width": 55.0,
+                "scale_type": 0,
+                "max_value": 0.0,
+                "min_value": -60.0,
+                "scale_position": 0,
+                "update_required": true,
+                "height": 100.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "show_scale": true,
+                "display_type": "slidemeter",
+                "num_inlets": 2,
+                "position_y": 223.949951171875,
+                "dsp_outlets": null,
+                "layername": "Front panel",
+                "orientation": 0
+            },
+            "name": "slidemeter_002",
+            "value": -62.952132113568695,
+            "do_onload": false,
+            "initargs": "0.0",
+            "type": "var"
+        },
+        "54": {
+            "connections": [
+                [
+                    [
+                        53,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 201.83773803710938,
+                "name": "processor_021",
+                "width": 46.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 177.968017578125,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "processor_021",
+            "do_onload": true,
+            "initargs": null,
+            "type": "a2db"
+        },
+        "55": {
+            "connections": [
+                [
+                    [
+                        49,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 499.3664245605469,
+                "name": "message_019",
+                "obj_id": 55,
+                "dsp_outlets": null,
+                "update_required": true,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 149.7086944580078,
+                "initargs": "trig_enabled=1, trig_mode=1",
+                "layername": "Buffer control",
+                "width": 215.0
+            },
+            "name": "message_019",
+            "do_onload": false,
+            "initargs": "trig_enabled=1, trig_mode=1",
+            "type": "message"
+        },
+        "56": {
+            "connections": [
+                [
+                    [
+                        62,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 147.79327392578125,
+                "name": "processor_005",
+                "width": 62.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 130.2485809326172,
+                "dsp_outlets": null,
+                "layername": "Buffer control"
+            },
+            "name": "processor_005",
+            "do_onload": true,
+            "initargs": "0xf",
+            "type": "xor"
+        },
+        "57": {
+            "connections": [
+                [
+                    [
+                        63,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 358.6929626464844,
+                "name": "processor_012",
+                "width": 62.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 126.72457885742188,
+                "dsp_outlets": null,
+                "layername": "Buffer control"
+            },
+            "name": "processor_012",
+            "do_onload": true,
+            "initargs": "0xf",
+            "type": "xor"
+        },
+        "62": {
+            "connections": [
+                [
+                    [
+                        24,
+                        1
+                    ],
+                    [
+                        56,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 82.61225128173828,
+                "name": "processor_007",
+                "width": 60.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 129.2479248046875,
+                "dsp_outlets": null,
+                "layername": "Buffer control"
+            },
+            "name": "processor_007",
+            "value": 8,
+            "do_onload": false,
+            "initargs": "0xf",
+            "type": "var"
+        },
+        "63": {
+            "connections": [
+                [
+                    [
+                        34,
+                        1
+                    ],
+                    [
+                        57,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 293.73870849609375,
+                "name": "processor_013",
+                "width": 60.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 126.74453735351562,
+                "dsp_outlets": null,
+                "layername": "Buffer control"
+            },
+            "name": "processor_013",
+            "value": 15,
+            "do_onload": false,
+            "initargs": "0xf",
+            "type": "var"
+        },
+        "65": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 169.86598205566406,
+                "name": "sendvia_009",
+                "width": 20,
+                "label": "bufclk",
+                "update_required": false,
+                "height": 35,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 161.9646759033203,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "sendvia_009",
+            "do_onload": true,
+            "initargs": "\"bufclk\"",
+            "type": "send"
+        },
+        "66": {
+            "connections": [
+                [
+                    [
+                        77,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 68.57545471191406,
+                "name": "bufclk",
+                "width": 20,
+                "update_required": false,
+                "height": 37.5,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "recvvia",
+                "num_inlets": 1,
+                "position_y": 39.90423583984375,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "bufclk",
+            "do_onload": true,
+            "initargs": "\"bufclk\"",
+            "type": "recv"
+        },
+        "68": {
+            "connections": [
+                [
+                    [
+                        75,
+                        0
+                    ],
+                    [
+                        80,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 179.73828125,
+                "name": "processor_025",
+                "width": 35,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 220.71139526367188,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "processor_025",
+            "value": 10.19999999999998,
+            "do_onload": false,
+            "initargs": null,
+            "type": "var"
+        },
+        "69": {
+            "connections": [
+                [
+                    [
+                        68,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 180.5342254638672,
+                "name": "message_007",
+                "width": 35,
+                "update_required": true,
+                "height": 25,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 177.47061157226562,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "message_007",
+            "do_onload": false,
+            "initargs": "0",
+            "type": "message"
+        },
+        "70": {
+            "connections": [
+                [
+                    [
+                        79,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        69,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 69.00481414794922,
+                "name": "processor_026",
+                "width": 72.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 2,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 1,
+                "position_y": 133.4458770751953,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "processor_026",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "72": {
+            "connections": [
+                [
+                    [
+                        68,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 79.06208038330078,
+                "name": "processor_027",
+                "width": 84.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 217.18760681152344,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "processor_027",
+            "do_onload": true,
+            "initargs": "100",
+            "type": "metro"
+        },
+        "75": {
+            "connections": [
+                [
+                    [
+                        68,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 222.6496124267578,
+                "name": "processor_028",
+                "width": 50.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 221.0003662109375,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "processor_028",
+            "do_onload": true,
+            "initargs": "0.1",
+            "type": "+"
+        },
+        "77": {
+            "connections": [
+                [
+                    [
+                        70,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        78,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "position_x": 71.07545471191406,
+                "name": "processor_024",
+                "width": 121.0,
+                "update_required": false,
+                "height": 25.0,
+                "num_outlets": 3,
+                "dsp_inlets": null,
+                "display_type": "processor",
+                "num_inlets": 2,
+                "position_y": 89.90423583984375,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "processor_024",
+            "do_onload": true,
+            "initargs": "True, False",
+            "type": "case"
+        },
+        "78": {
+            "connections": [
+                [
+                    [
+                        72,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 117.68003845214844,
+                "name": "message_009",
+                "width": 55.0,
+                "update_required": true,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 176.6233673095703,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "message_009",
+            "do_onload": false,
+            "initargs": "False",
+            "type": "message"
+        },
+        "79": {
+            "connections": [
+                [
+                    [
+                        72,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "position_x": 63.694644927978516,
+                "name": "message_008",
+                "width": 51.0,
+                "update_required": true,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "message",
+                "num_inlets": 2,
+                "position_y": 177.7576141357422,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "message_008",
+            "do_onload": false,
+            "initargs": "True",
+            "type": "message"
+        },
+        "80": {
+            "connections": [],
+            "gui_params": {
+                "position_x": 177.23828125,
+                "name": "sendvia_010",
+                "width": 20,
+                "label": "clock",
+                "update_required": false,
+                "height": 35,
+                "num_outlets": 0,
+                "dsp_inlets": null,
+                "display_type": "sendvia",
+                "num_inlets": 2,
+                "position_y": 268.7113952636719,
+                "dsp_outlets": null,
+                "layername": "Clock"
+            },
+            "name": "sendvia_010",
+            "do_onload": true,
+            "initargs": "\"clock\"",
+            "type": "send"
+        },
+        "81": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": 10.19999999999998,
+                "position_x": 131.64309692382812,
+                "name": "enum_001",
+                "width": 42.0,
+                "update_required": true,
+                "height": 25.0,
+                "num_outlets": 1,
+                "dsp_inlets": null,
+                "display_type": "enum",
+                "num_inlets": 2,
+                "position_y": 442.313720703125,
+                "dsp_outlets": null,
+                "layername": "Front panel"
+            },
+            "name": "enum_001",
+            "value": 10.19999999999998,
+            "do_onload": true,
+            "initargs": "0.0",
+            "type": "var"
+        }
+    },
+    "type": "looper-12",
+    "scopes": {
+        "__patch__": {
+            "bufctl": 3,
+            "toggle_009": 40,
+            "toggle_008": 15,
+            "toggle_003": 10,
+            "toggle_002": 9,
+            "toggle_001": 8,
+            "toggle_007": 14,
+            "toggle_006": 13,
+            "toggle_005": 12,
+            "toggle_004": 11,
+            "slidemeter_001": 38,
+            "slidemeter_002": 53,
+            "rec_enable": 29,
+            "go": 44,
+            "sendvia_003": 28,
+            "message_002": 32,
+            "message_001": 26,
+            "message_007": 69,
+            "processor_009": 25,
+            "clock": 43,
+            "processor_004": 23,
+            "processor_005": 56,
+            "self": 0,
+            "play_enable": 22,
+            "processor_001": 1,
+            "processor_002": 2,
+            "processor_003": 4,
+            "processor_026": 70,
+            "processor_027": 72,
+            "processor_024": 77,
+            "processor_025": 68,
+            "processor_007": 62,
+            "processor_028": 75,
+            "enum_001": 81,
+            "sendvia_010": 80,
+            "sendvia_007": 49,
+            "message_021": 47,
+            "message_019": 55,
+            "text_001": 5,
+            "text_002": 6,
+            "text_003": 7,
+            "text_004": 18,
+            "text_005": 19,
+            "text_006": 20,
+            "text_007": 21,
+            "text_008": 41,
+            "processor_008": 24,
+            "message_020": 46,
+            "sendvia_008": 50,
+            "sendvia_009": 65,
+            "sendvia_001": 16,
+            "sendvia_002": 17,
+            "message_022": 48,
+            "sendvia_004": 37,
+            "sendvia_005": 39,
+            "sendvia_006": 42,
+            "bufclk": 66,
+            "processor_013": 63,
+            "processor_012": 57,
+            "processor_011": 30,
+            "processor_010": 27,
+            "processor_015": 35,
+            "processor_014": 34,
+            "message_008": 79,
+            "processor_019": 51,
+            "processor_018": 45,
+            "message_009": 78
+        }
+    }
+}
