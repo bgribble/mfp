@@ -127,6 +127,11 @@ class PyAutoWrap(Processor):
             self.argcount = self.thunk.func_code.co_argcount
             if self.thunk.__doc__:
                 self.doc_tooltip_obj = self.thunk.__doc__.split("\n")[0]
+            try: 
+                for v in self.thunk.func_code.co_varnames:
+                    self.doc_tooltip_inlet.append("Argument %s" % v)
+            except AttributeError:
+                pass 
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
@@ -259,6 +264,13 @@ def register():
     mk_unary(abs, "abs", "Absolute value/magnitude")
     mk_unary(operator.neg, "neg", "Negate value")
     mk_unary(cmath.phase, "phase", "Angle (radians) of complex number")
+
+    # logical/bit ops 
+    mk_binary(operator.and_, "and", "Logical and")
+    mk_binary(operator.or_, "or", "Logical or")
+    mk_binary(operator.xor, "xor", "Logical xor")
+    mk_binary(operator.lshift, "<<", "Bit-shift left")
+    mk_binary(operator.rshift, ">>", "Bit-shift right")
 
     # type converters
     mk_binary(complex, "complex", "Convert to complex")
