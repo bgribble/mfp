@@ -281,6 +281,7 @@ class PatchElement (Clutter.Group):
         self.height = height
         Clutter.Group.set_size(self, self.width, self.height)
         self.draw_ports()
+        self.send_params()
 
     def configure(self, params):
         self.num_inlets = params.get("num_inlets")
