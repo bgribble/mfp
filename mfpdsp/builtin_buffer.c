@@ -20,33 +20,42 @@ typedef struct {
     void * shm_ptr;
     int chan_count;
     int chan_size;
-    int chan_pos;
-    int trig_enabled;
-    int trig_chanmask;
+    
+    /* trigger settings (for TRIG_THRESH, TRIG_EXT modes */ 
     int trig_pretrigger;
-    int trig_triggered;
     int trig_channel;
     int trig_op;
-    int trig_mode;
-    int trig_repeat;
-    int clip_chanmask;
-    int clip_state;
-    int clip_repeat;
-    int clip_start;
-    int clip_end; 
-    int clip_pos;
-
     mfp_sample trig_thresh;
+
+    /* record settings */ 
+    int rec_mode;
+    int rec_state;
+    int rec_channels;
+    int rec_enabled;
+    int rec_pos;
+
+    /* play settings */ 
+    int play_mode; 
+    int play_state;
+    int play_channels;
+    int play_pos;
+
+    /* region definition (for LOOP modes) */ 
+    int region_start;
+    int region_end; 
+
 } buf_info;
 
-/* trig_mode values */ 
-#define TRIG_BANG 0
-#define TRIG_THRESH 1
-#define TRIG_EXT 2
+/* rec_mode values */ 
+#define REC_BANG 0    /* on Bang, record buffer and stop */ 
+#define REC_LOOP 1    /* continuously record between region_start and region_end */ 
+#define REC_LOOPSOS 2 /* record in region, adding to previous contents */ 
+#define TRIG_THRESH 3 /* When trig_channel crosses trig_thresh, rec buffer and stop */ 
+#define TRIG_EXT 4    /* when external input crosses trig_thresh, rec buffer and stop */ 
 
-/* trig_repeat and clip_repeat values */ 
-#define REPEAT_ONESHOT 0 
-#define REPEAT_CONTIN  1
+/* play_mode values */
+#define PLAY_TRIG 0   /* output following record state */ 
+#define PLAY_LOOP 1   /* loop over region */ 
 
 /* trig_op values */ 
 #define TRIG_GT 0 
@@ -60,38 +69,44 @@ typedef struct {
 #define RESP_RATE 4 
 #define RESP_OFFSET 5
 #define RESP_BUFRDY 6
+#define RESP_LOOPSTART 7
 
-/* clip_state values */ 
-#define CLIP_IDLE 0 
-#define CLIP_PLAYING 1
-#define CLIP_RECORDING 2
+/* play_state values */ 
+#define PLAY_IDLE 0 
+#define PLAY_ACTIVE 1
+#define REC_IDLE 0 
+#define REC_ACTIVE 1 
 
 static void 
 init(mfp_processor * proc) 
 {
     buf_info * d = g_malloc0(sizeof(buf_info));
 
-    d->shm_id[0] =0;
+    d->shm_id[0] = 0;
     d->shm_fd = -1;
     d->shm_size = 0;
     d->shm_ptr = NULL;
-    d->chan_count=0;
+    d->chan_count = 0;
     d->chan_size = 0;
-    d->chan_pos = 0;
     d->trig_channel = 0;
-    d->trig_mode = 0;
-    d->trig_op = 0;
-    d->trig_thresh = 0;
-    d->trig_triggered = 0;
     d->trig_pretrigger = 0;
-    d->trig_enabled = 1;
-    d->trig_repeat = 1;
-    d->trig_chanmask = 0;
-    d->clip_chanmask = 0;
-    d->clip_repeat = 0;
-    d->clip_start = -1;
-    d->clip_end = -1;
-    d->clip_pos = 0;
+    d->trig_op = TRIG_GT;
+    d->trig_thresh = 0.0;
+    
+    d->rec_mode = REC_BANG;
+    d->rec_state = REC_IDLE;
+    d->rec_enabled = 0;
+    d->rec_channels = 0;
+    d->rec_pos = 0;
+
+    d->play_mode = PLAY_TRIG;
+    d->play_state = PLAY_IDLE; 
+    d->play_channels = 0;
+    d->play_pos = 0;
+
+    d->region_start = 0;
+    d->region_end = 0;
+    
     proc->data = d;
 
     return;
@@ -100,26 +115,33 @@ init(mfp_processor * proc)
 static int 
 process(mfp_processor * proc) 
 {
+    buf_info * d = (buf_info *)(proc->data);
     int dstart = 0;
     int channel, tocopy;
-    buf_info * d = (buf_info *)(proc->data);
     mfp_block * trig_block;
     mfp_sample * outptr, *inptr;
     int inpos, outpos;
+    int loopstart=0; 
 
     /* if not currently capturing, check for trigger conditions */ 
-    if(d->trig_triggered == 0 && d->trig_enabled) {
-        if(d->trig_mode == TRIG_EXT) {
-            trig_block = proc->inlet_buf[proc->inlet_conn->len - 1];
-        }
-        if(d->trig_mode == TRIG_THRESH) {
-            if(d->trig_channel > proc->inlet_conn->len-1) {
-                return -1;
+    if(d->rec_state == REC_IDLE && d->rec_enabled) {
+        if ((d->rec_mode == TRIG_EXT) || (d->rec_mode == TRIG_THRESH)) {
+            /* trig_block is the data we will be looking at to find a trigger condition */
+            switch (d->rec_mode) {
+                case TRIG_EXT: 
+                    trig_block = proc->inlet_buf[proc->inlet_conn->len - 1];
+                    break;
+
+                case TRIG_THRESH:
+                    if(d->trig_channel > proc->inlet_conn->len-1) 
+                        return -1;
+                    trig_block = proc->inlet_buf[d->trig_channel];
+                    break;
             }
-            trig_block = proc->inlet_buf[d->trig_channel];
-        }
-        if(!(d->trig_mode == TRIG_BANG)) {
-            while(d->trig_triggered == 0) {
+
+            /* iterate over trig_block looking for a trigger */ 
+            dstart = 0;
+            while(d->rec_state == 0) {
                 if (d->trig_pretrigger == 0) { 
                     if((d->trig_op == TRIG_GT) 
                         && (trig_block->data[dstart] <= d->trig_thresh)) {
@@ -133,96 +155,180 @@ process(mfp_processor * proc)
                 else { 
                     if((d->trig_op == TRIG_GT) 
                         && (trig_block->data[dstart] > d->trig_thresh)) {
-                        d->trig_triggered = 1;
+                        d->rec_state = REC_ACTIVE;
                         d->trig_pretrigger = 0;
                     }
                     else if ((d->trig_op == TRIG_LT)  
                         && (trig_block->data[dstart] < d->trig_thresh)) {
-                        d->trig_triggered = 1;
+                        d->rec_state = REC_ACTIVE;
                         d->trig_pretrigger = 0;
                     }
                 }
-                if(d->trig_triggered == 0)
+                if(d->rec_state == REC_IDLE)
                     dstart++;
                 if (dstart >= trig_block->blocksize)
                     break;
             }
-            if (d->trig_triggered) {
-                d->clip_pos = 0;
-                d->clip_start = 0;
-                d->clip_state = CLIP_PLAYING;
+
+            if (d->rec_state == REC_ACTIVE) {
+                d->region_start = 0;
+                d->region_end = d->chan_size;
+
+                d->rec_pos = d->region_start;
+                    
+                if (d->play_mode == PLAY_TRIG) {
+                    d->play_pos = d->region_start;
+                    d->play_state = PLAY_ACTIVE; 
+                }
+
                 mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 1);
             }
         }
+        else {
+            printf("rec_enabled TRUE, setting rec_state = REC_ACTIVE\n");
+            printf("region = %d-%d\n", d->region_start, d->region_end);
+            d->rec_state = REC_ACTIVE;
+            d->rec_pos = d->region_start; 
+            loopstart = 1;
+        }
     }
 
-    /* if we are triggered, copy data from inlets to buffer */
-    if(d->trig_triggered) {
-        /* copy rest of the block or available space */
-        tocopy = MIN(mfp_blocksize-dstart, d->chan_size-d->chan_pos);
 
-        /* iterate over channels */
+    /* if we are triggered, copy data from inlets to buffer */
+    if(d->rec_state == REC_ACTIVE) {
+        /* copy rest of the block or available space */
+        if (d->rec_mode == REC_LOOPSOS) {
+            tocopy = mfp_blocksize;
+        }
+        else {
+            tocopy = MIN(mfp_blocksize-dstart, d->chan_size - d->rec_pos);
+        }
+
+        /* iterate over channels, grabbbing data if channel is active */
         for(channel=0; channel < d->chan_count; channel++) {
-            if(!((1 << channel) & d->trig_chanmask)) {
-                memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->chan_pos,
-                        proc->inlet_buf[channel]->data + dstart,
-                        sizeof(mfp_sample)*tocopy);
+            if((1 << channel) & d->rec_channels) {
+                printf("  channel %d active\n", channel);
+                if (d->rec_mode == REC_LOOPSOS) {
+                    /* accumulate into buffer */ 
+                    outptr = (float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos;
+                    outpos = d->rec_pos;
+                    inptr = proc->inlet_buf[channel]->data;
+                    for (inpos = 0; inpos < tocopy; inpos++) {
+                        *outptr++ += *inptr++;
+                        outpos++;
+                        if (outpos > d->region_end) {
+                            outpos = d->region_start;
+                            outptr =  (float *)d->shm_ptr + (channel*d->chan_size) + outpos;
+                        }
+                    }
+                }
+                else {
+                    printf("  calling memcpy()\n");
+                    memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos,
+                            proc->inlet_buf[channel]->data + dstart,
+                            sizeof(mfp_sample)*tocopy);
+                }
             }
         }
 
         /* if we reached the end of the buffer, untrigger */
-        d->chan_pos += tocopy;
-        if(d->chan_pos >= d->chan_size) {
-            d->trig_triggered = 0;
-            d->chan_pos = 0;
-            if (d->trig_repeat == REPEAT_ONESHOT) {
-                d->trig_enabled = 0;
-            }
-            mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
+        switch (d->rec_mode) {
+            case REC_BANG:
+                d->rec_pos += tocopy;
+                if(d->rec_pos >= d->region_end) {
+                    d->rec_state = REC_IDLE;
+                    d->rec_enabled = 0;
+                    d->rec_pos = d->region_start; 
+                }
+                break;
+
+            case TRIG_THRESH:
+            case TRIG_EXT:
+                d->rec_pos += tocopy;
+                if(d->rec_pos >= d->region_end) {
+                    d->rec_state = REC_IDLE;
+                    d->rec_pos = d->region_start; 
+                    d->trig_pretrigger = 0;
+                }
+                break;
+
+            case REC_LOOP:
+                d->rec_pos += tocopy;
+                if (d->rec_pos > d->region_end) 
+                    d->region_end = d->rec_pos;
+
+                if(d->rec_pos >= d->chan_size) {
+                    d->rec_pos = d->region_start; 
+                    loopstart = 1;
+                }
+                printf("Region now %d-%d, rec pos %d\n", d->region_start, d->region_end, d->rec_pos);
+                break;
+
+            case REC_LOOPSOS: 
+                inpos = d->rec_pos - d->region_start; 
+                d->rec_pos = (inpos + mfp_blocksize) % (d->region_end-d->region_start)
+                    + d->region_start;
+                if (inpos + mfp_blocksize > (d->region_end - d->region_start)) {
+                    loopstart = 1;
+                }
+
+                break; 
         }
 
+
+        if (d->rec_state == REC_IDLE) {
+            mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
+        }
     }
 
     /* zero output buffer in any case */ 
     mfp_block_zero(proc->outlet_buf[0]);
 
     /* if we are playing, copy data from the buffer to the outlet */ 
-    if (d->clip_state != CLIP_IDLE) {
+    if (d->play_state != PLAY_IDLE) {
+        if (d->region_end == 0) {
+            printf("nothing in buffer to play, returning 0\n");
+            return 0;
+        }
         /* accumulate non-masked channels in the output buffer */ 
         for(channel=0; channel < d->chan_count; channel++) {
-            if(!((1 << channel) & d->clip_chanmask)) {
+            if((1 << channel) & d->play_channels) {
                 outptr = proc->outlet_buf[0]->data;
                 inptr = (float *)(d->shm_ptr) + (channel*d->chan_size);
-                inpos = d->clip_pos;
+                inpos = d->play_pos;
                 for(outpos = 0; outpos < mfp_blocksize; outpos++) {
-                    if (inpos < d->clip_end) {
+                    if (inpos < d->region_end) {
                         *outptr++ += inptr[inpos++];
                     }
-                    else if (d->clip_repeat == REPEAT_ONESHOT) {
+                    else if (d->play_mode != PLAY_LOOP) {
                         *outptr++ = 0;
                     }
                     else {
-                        inpos = d->clip_start;
+                        inpos = d->region_start;
                         *outptr ++ += inptr[inpos++];
                     }
                 }
             } 
         }
         
-        /* update d->clip_pos for next block */ 
-        if (d->clip_pos + mfp_blocksize < d->clip_end) {
-            d->clip_pos += mfp_blocksize;
+        /* update d->play_pos for next block */ 
+        if (d->play_pos + mfp_blocksize < d->region_end) {
+            d->play_pos += mfp_blocksize;
         }
-        else if (d->clip_repeat == REPEAT_ONESHOT) {
-            d->clip_pos = d->clip_start;
-            d->clip_state = CLIP_IDLE;
+        else if (d->play_mode != PLAY_LOOP) {
+            d->play_pos = d->region_start;
+            d->play_state = PLAY_IDLE;
         }
         else {
-            d->clip_pos = 
-                d->clip_start + ((d->clip_pos - d->clip_start + mfp_blocksize) 
-                                 % (d->clip_end - d->clip_start));
+            d->play_pos = 
+                d->region_start + ((d->play_pos - d->region_start + mfp_blocksize) 
+                                 % (d->region_end - d->region_start));
+            loopstart = 1;
         }
 
+    }
+    if(loopstart > 0) {
+        mfp_dsp_send_response_bool(proc, RESP_LOOPSTART, 1);
     }
 
     return 0;
@@ -269,13 +375,8 @@ buffer_alloc(buf_info * d)
     if (d->shm_ptr == NULL) {
         printf("mmap() failed... %d (%s)\n", d->shm_fd, sys_errlist[errno]);
     }
-    if ((d->clip_start < 0) || (d->clip_start > d->chan_size)) {
-        d->clip_start = 0;
-    }
-    if ((d->clip_end < 0) || (d->clip_end > d->chan_size)) {
-        d->clip_end = d->chan_size;
-    }
-
+    d->region_start = 0;
+    d->region_end = 0;
 }
 
 
@@ -284,20 +385,22 @@ config(mfp_processor * proc)
 {
     gpointer size_ptr = g_hash_table_lookup(proc->params, "size");
     gpointer channels_ptr = g_hash_table_lookup(proc->params, "channels");
-    gpointer trigmode_ptr = g_hash_table_lookup(proc->params, "trig_mode");
+
+    gpointer recmode_ptr = g_hash_table_lookup(proc->params, "rec_mode");
+    gpointer recstate_ptr = g_hash_table_lookup(proc->params, "rec_state");
+    gpointer recenable_ptr = g_hash_table_lookup(proc->params, "rec_enabled");
+    gpointer recchan_ptr = g_hash_table_lookup(proc->params, "rec_channels");
+
     gpointer trigchan_ptr = g_hash_table_lookup(proc->params, "trig_chan");
     gpointer trigthresh_ptr = g_hash_table_lookup(proc->params, "trig_thresh");
-    gpointer trigtrig_ptr = g_hash_table_lookup(proc->params, "trig_triggered");
     gpointer trigrept_ptr = g_hash_table_lookup(proc->params, "trig_repeat");
-    gpointer trigenable_ptr = g_hash_table_lookup(proc->params, "trig_enabled");
-    gpointer trigmask_ptr = g_hash_table_lookup(proc->params, "trig_chanmask");
 
-    gpointer clipplay_ptr = g_hash_table_lookup(proc->params, "clip_play");
-    gpointer cliprec_ptr = g_hash_table_lookup(proc->params, "clip_rec");
-    gpointer cliprepeat_ptr = g_hash_table_lookup(proc->params, "clip_repeat");
-    gpointer clipstart_ptr = g_hash_table_lookup(proc->params, "clip_start");
-    gpointer clipend_ptr = g_hash_table_lookup(proc->params, "clip_end");
-    gpointer clipmask_ptr = g_hash_table_lookup(proc->params, "clip_chanmask");
+    gpointer playmode_ptr = g_hash_table_lookup(proc->params, "play_mode");
+    gpointer playstate_ptr = g_hash_table_lookup(proc->params, "play_state");
+    gpointer playchan_ptr = g_hash_table_lookup(proc->params, "play_channels");
+
+    gpointer regionstart_ptr = g_hash_table_lookup(proc->params, "region_start");
+    gpointer regionend_ptr = g_hash_table_lookup(proc->params, "region_end");
 
     buf_info * d = (buf_info *)(proc->data);
     int new_size=d->chan_size, new_channels=d->chan_count;
@@ -313,7 +416,7 @@ config(mfp_processor * proc)
         if ((new_size != d->chan_size) || (new_channels != d->chan_count)) {
             d->chan_size = new_size;
             d->chan_count = new_channels;
-            d->chan_pos = 0;
+            d->rec_pos = 0;
             buffer_alloc(d);
 
             mfp_dsp_send_response_str(proc, RESP_BUFID, d->shm_id);
@@ -324,8 +427,30 @@ config(mfp_processor * proc)
         }
     }
 
-    if (trigmode_ptr != NULL) {
-        d->trig_mode = *(float *)trigmode_ptr;
+    if (recmode_ptr != NULL) {
+        d->rec_mode = *(float *)recmode_ptr;
+    }
+
+    if (recstate_ptr != NULL) {
+        if ((*(float *)recstate_ptr) > 0.5) {
+            d->rec_state = 1;
+        }
+        else {
+            d->rec_state = 0;
+        }
+        g_hash_table_remove(proc->params, "rec_state");
+        mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, d->rec_state);
+    }
+
+    if (recenable_ptr != NULL) {
+        d->rec_enabled = (int)(*(float *)recenable_ptr);
+        if(!d->rec_enabled) {
+            d->rec_state = REC_IDLE;
+        }
+    }
+
+    if (recchan_ptr != NULL) {
+        d->rec_channels = (int)(*(float *)recchan_ptr);
     }
 
     if (trigchan_ptr != NULL) {
@@ -336,50 +461,28 @@ config(mfp_processor * proc)
         d->trig_thresh = *(float *)trigthresh_ptr;
     }
 
-    if (trigrept_ptr != NULL) {
-        d->trig_repeat = (int)(*(float *)trigrept_ptr);
+    if (regionstart_ptr != NULL) {
+        d->region_start = (int)(*(float *)regionstart_ptr);
     }
 
-    if (trigtrig_ptr != NULL) {
-        if ((*(float *)trigtrig_ptr) > 0.5) {
-            d->trig_triggered = 1;
+    if (regionend_ptr != NULL) {
+        d->region_end = (int)(*(float *)regionend_ptr);
+    }
+
+    if (playstate_ptr != NULL) {
+        d->play_state = (int)(*(float *)playstate_ptr);
+        if((d->play_state == PLAY_ACTIVE) && (d->play_pos == d->region_start)) {
+            mfp_dsp_send_response_bool(proc, RESP_LOOPSTART, 1);
         }
-        else {
-            d->trig_triggered = 0;
-        }
-        g_hash_table_remove(proc->params, "trig_triggered");
-        mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, d->trig_triggered);
-    }
-
-    if (trigenable_ptr != NULL) {
-        d->trig_enabled = (int)(*(float *)trigenable_ptr);
-    }
-
-    if (trigmask_ptr != NULL) {
-        d->trig_chanmask = (int)(*(float *)trigmask_ptr);
-    }
-
-    if (cliprepeat_ptr != NULL) {
-        d->clip_repeat = (int)(*(float *)cliprepeat_ptr);
-    }
-
-    if (clipstart_ptr != NULL) {
-        d->clip_start = (int)(*(float *)clipstart_ptr);
-    }
-
-    if (clipend_ptr != NULL) {
-        d->clip_end = (int)(*(float *)clipend_ptr);
-    }
-
-    if (clipplay_ptr != NULL) {
-        d->clip_state = CLIP_PLAYING;
-        d->clip_pos = d->clip_start;
-        g_hash_table_remove(proc->params, "clip_play");
     }
     
-    if (clipmask_ptr != NULL) {
-        d->clip_chanmask = (int)(*(float *)clipmask_ptr);
+    if (playchan_ptr != NULL) {
+        d->play_channels = (int)(*(float *)playchan_ptr);
     }
+    if (playmode_ptr != NULL) {
+        d->play_mode = (int)(*(float *)playmode_ptr);
+    }
+
 
     return;
 }
@@ -398,20 +501,19 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "buf_id", (gpointer)PARAMTYPE_STRING);
     g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "trig_thresh", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "trig_mode", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "rec_mode", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "rec_state", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "rec_enabled", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "rec_channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "trig_chan", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "trig_op", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "trig_triggered", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "trig_repeat", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "trig_enabled", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "trig_chanmask", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "clip_repeat", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "clip_play", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "clip_rec", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "clip_start", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "clip_end", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "clip_chanmask", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "trig_thresh", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "region_start", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "region_end", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "play_channels", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "play_mode", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "play_state", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "play_pos", (gpointer)PARAMTYPE_FLT);
 
     return p;
 }

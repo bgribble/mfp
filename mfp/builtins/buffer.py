@@ -36,6 +36,7 @@ class Buffer(Processor):
     RESP_RATE = 4
     RESP_OFFSET = 5
     RESP_BUFRDY = 6
+    RESP_LOOPSTART = 7 
 
     FLOAT_SIZE = 4
 
@@ -72,7 +73,7 @@ class Buffer(Processor):
         return (channel * self.size + start) * self.FLOAT_SIZE
 
     def dsp_response(self, resp_id, resp_value):
-        if resp_id == self.RESP_TRIGGERED:
+        if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
             self.outlets[2] = resp_value
         elif resp_id == self.RESP_BUFID:
             if self.shm_obj:
