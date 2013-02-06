@@ -390,7 +390,13 @@ class Processor (object):
         oinfo['initargs'] = self.init_args
         oinfo['name'] = self.name
         oinfo['do_onload'] = self.do_onload
-        oinfo['gui_params'] = self.gui_params
+        oinfo['gui_params'] = {} 
+
+        for k, v in self.gui_params.items():
+            if k not in [ 'name', 'obj_id', 'dsp_inlets', 'dsp_outlets', 'num_inlets', 
+                         'num_outlets']:
+                oinfo['gui_params'][k] = v 
+
         conn = []
         for c in self.connections_out:
             conn.append([(t[0].obj_id, t[1]) for t in c])

@@ -91,7 +91,13 @@ def json_deserialize(self, json_data):
         for k, v in gp.items():
             newobj.gui_params[k] = v
 
+        # these are needed at runtime but don't get saved 
         newobj.gui_params["obj_id"] = newobj.obj_id
+        newobj.gui_params["name"] = oname 
+        newobj.gui_params["dsp_inlets"] = newobj.dsp_inlets
+        newobj.gui_params["dsp_outlets"] = newobj.dsp_outlets
+        newobj.gui_params["num_inlets"] = len(newobj.inlets)
+        newobj.gui_params["num_outlets"] = len(newobj.outlets)
 
         # custom behaviors implemented by Processor subclass load()
         newobj.load(prms)
@@ -131,7 +137,11 @@ def json_deserialize(self, json_data):
             for c in connlist:
                 dstobj = idmap.get(c[0])
                 inlet = c[1]
-                srcobj.connect(outlet, dstobj, inlet)
+                if dstobj is None:
+                    print "Deserializing problem: can't make connection to", c[0]
+                    print prms 
+                else: 
+                    srcobj.connect(outlet, dstobj, inlet)
 
     self.resize(len(self.inlet_objects), len(self.outlet_objects))
 

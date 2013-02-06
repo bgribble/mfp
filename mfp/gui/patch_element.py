@@ -65,9 +65,6 @@ class PatchElement (Clutter.Group):
         Clutter.Group.__init__(self)
         self.stage.register(self)
 
-    def enter_cb(self, *args):
-        print "entering"
-
     @property
     def layername(self):
         return self.layer.name 
@@ -301,8 +298,6 @@ class PatchElement (Clutter.Group):
         h = params.get("height") or h_orig
 
         if (w != w_orig) or (h != h_orig):
-            print "PatchElement: setting size:", self, w_orig, h_orig, w, h
-            print params 
             self.set_size(w, h)
 
         self.draw_ports()
@@ -314,6 +309,7 @@ class PatchElement (Clutter.Group):
             self.layer.remove(self)
         layer.add(self)
         self.layer.group.add_actor(self)
+        self.send_params()
 
     def make_edit_mode(self):
         return None
