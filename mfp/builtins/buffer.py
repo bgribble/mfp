@@ -95,11 +95,11 @@ class Buffer(Processor):
     def trigger(self):
         incoming = self.inlets[0]
         if incoming is Bang:
-            self.dsp_obj.setparam("trig_triggered", 1)
+            self.dsp_obj.setparam("rec_state", 1)
         elif incoming is True:
-            self.dsp_obj.setparam("trig_enabled", 1)
+            self.dsp_obj.setparam("rec_enabled", 1)
         elif incoming is False:
-            self.dsp_obj.setparam("trig_enabled", 0)
+            self.dsp_obj.setparam("rec_enabled", 0)
         elif isinstance(incoming, dict):
             for k, v in incoming.items():
                 if k == "size":

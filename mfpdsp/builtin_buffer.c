@@ -185,8 +185,6 @@ process(mfp_processor * proc)
             }
         }
         else {
-            printf("rec_enabled TRUE, setting rec_state = REC_ACTIVE\n");
-            printf("region = %d-%d\n", d->region_start, d->region_end);
             d->rec_state = REC_ACTIVE;
             d->rec_pos = d->region_start; 
             loopstart = 1;
@@ -207,7 +205,6 @@ process(mfp_processor * proc)
         /* iterate over channels, grabbbing data if channel is active */
         for(channel=0; channel < d->chan_count; channel++) {
             if((1 << channel) & d->rec_channels) {
-                printf("  channel %d active\n", channel);
                 if (d->rec_mode == REC_LOOPSOS) {
                     /* accumulate into buffer */ 
                     outptr = (float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos;
@@ -223,7 +220,6 @@ process(mfp_processor * proc)
                     }
                 }
                 else {
-                    printf("  calling memcpy()\n");
                     memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos,
                             proc->inlet_buf[channel]->data + dstart,
                             sizeof(mfp_sample)*tocopy);
@@ -261,7 +257,6 @@ process(mfp_processor * proc)
                     d->rec_pos = d->region_start; 
                     loopstart = 1;
                 }
-                printf("Region now %d-%d, rec pos %d\n", d->region_start, d->region_end, d->rec_pos);
                 break;
 
             case REC_LOOPSOS: 
@@ -287,7 +282,6 @@ process(mfp_processor * proc)
     /* if we are playing, copy data from the buffer to the outlet */ 
     if (d->play_state != PLAY_IDLE) {
         if (d->region_end == 0) {
-            printf("nothing in buffer to play, returning 0\n");
             return 0;
         }
         /* accumulate non-masked channels in the output buffer */ 
