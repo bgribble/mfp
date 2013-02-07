@@ -135,9 +135,7 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def rename_obj(self, obj_id, new_name):
         obj = MFPApp().recall(obj_id)
-        patch = obj.patch
-        scope = obj.scope
-        obj.assign(patch, scope, new_name)
+        obj.rename(new_name)
 
     @rpcwrap
     def set_scope(self, obj_id, scope_name):
