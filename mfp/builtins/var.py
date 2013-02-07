@@ -34,8 +34,6 @@ class Var (Processor):
         self.value = Uninit
         self.do_onload = False 
 
-        if self.init_type == "message":
-            self.hot_inlets = (0, 1)
 
         if len(initargs):
             self.value = initargs[0]
@@ -55,9 +53,6 @@ class Var (Processor):
                 - anything else on inlet 0: save and output value
                   Possibly update GUI display
 
-        As [message]:
-                - don't save value on inlet 0
-
         As [text]:
                 - ensure that value is a string and save it in the gui_params
 
@@ -71,9 +66,8 @@ class Var (Processor):
             do_update = True
 
         if self.inlets[0] is not Uninit:
-            # messages only change content on inlet 1, and Bang just
-            # causes output
-            if (self.init_type != "message") and (self.inlets[0] is not Bang):
+            # Bang just causes output
+            if (self.inlets[0] is not Bang):
                 self.value = self.inlets[0]
                 if self.init_type == "text":
                     self.value = str(self.value)
@@ -107,9 +101,43 @@ class Var (Processor):
         elif params.get("gui_params").get("value"):
             self.value = params.get("gui_params").get("value")
 
+class Message (Var): 
+    doc_tooltip_obj = "Store literal Python data as a message to emit when clicked/triggered"
+    doc_tooltip_inlet = ["Emit message on any input", 
+                         "Load new message but do not emit" ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Var.__init__(self, init_type, init_args, patch, scope, name)
+        self.hot_inlets = (0, 1)
+
+    def trigger(self): 
+        do_update = False
+        if self.inlets[1] is not Uninit:
+            self.value = self.inlets[1]
+            self.inlets[1] = Uninit
+            do_update = True
+
+        if self.inlets[0] is not Uninit:
+            self.outlets[0] = self.value
+            self.inlets[0] = Uninit
+
+        if do_update and self.gui_params.get("update_required"):
+            self.gui_params['value'] = self.value
+            if self.gui_created:
+                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
+    def save(self):
+        return Processor.save(self)
+
+class Text (Var):
+    doc_tooltip_obj = "Comment using SGML-type markup for style"
+
+class Enum (Var):
+    doc_tooltip_obj = "Enter and update a numeric message"
+
 
 def register():
     MFPApp().register("var", Var)
-    MFPApp().register("message", Var)
-    MFPApp().register("text", Var)
-    MFPApp().register("enum", Var)
+    MFPApp().register("message", Message)
+    MFPApp().register("text", Text)
+    MFPApp().register("enum", Enum)

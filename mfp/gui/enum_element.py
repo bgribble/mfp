@@ -16,7 +16,7 @@ from .modes.enum_control import EnumEditMode, EnumControlMode
 
 class EnumElement (PatchElement):
     display_type = "enum"
-    proc_type = "var"
+    proc_type = "enum"
 
     PORT_TWEAK = 7
 
