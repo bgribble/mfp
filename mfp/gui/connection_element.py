@@ -17,10 +17,14 @@ class ConnectionElement(PatchElement):
         self.port_1 = port_1
         self.obj_2 = obj_2
         self.port_2 = port_2
-        self.swapends = 0
         self.width = None
         self.height = None
         self.rotation = 0.0
+        self.dsp_connect = False 
+
+        if port_1 in obj_1.dsp_outlets:
+            print "Drawing as DSP", obj_1, port_1, obj_2, port_2
+            self.dsp_connect = True 
 
         PatchElement.__init__(self, window, obj_1.position_x, obj_1.position_y)
 
@@ -60,11 +64,15 @@ class ConnectionElement(PatchElement):
         p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
         p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
 
-        self.position_x = p1[0]
-        self.position_y = p1[1]
-        self.width = 1.5 * self.LINE_WIDTH
+        if self.dsp_connect == True:
+            self.width = 2.5 * self.LINE_WIDTH
+        else:
+            self.width = 1.5 * self.LINE_WIDTH
         self.height = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
-        self.rotation = math.atan2(p1[0] - p2[0], p2[1] - p1[1]) * 180.0 / math.pi
+        theta = math.atan2(p1[0] - p2[0], p2[1] - p1[1])
+        self.rotation = theta * 180.0 / math.pi
+        self.position_x = p1[0] - math.cos(theta) * self.width / 2.0
+        self.position_y = p1[1] - math.sin(theta) * self.width / 2.0
 
         self.set_size(self.width, self.height)
         self.set_position(self.position_x, self.position_y)
@@ -83,7 +91,10 @@ class ConnectionElement(PatchElement):
         texture.clear()
         ctx.set_antialias(cairo.ANTIALIAS_NONE)
         ctx.set_source_rgba(c.red, c.green, c.blue, 1.0)
-        ctx.set_line_width(self.LINE_WIDTH)
+        if self.dsp_connect:
+            ctx.set_line_width(2.0 * self.LINE_WIDTH)
+        else:
+            ctx.set_line_width(self.LINE_WIDTH)
         ctx.move_to(self.width / 2.0, 0)
         ctx.line_to(self.width / 2.0, self.height)
         ctx.close_path()
