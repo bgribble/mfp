@@ -15,8 +15,8 @@ class PatchElement (Clutter.Group):
     '''
     PORT_IN = 0
     PORT_OUT = 1
-    porthole_width = 8
-    porthole_height = 4
+    porthole_width = 8 
+    porthole_height = 4 
     porthole_border = 1
     porthole_minspace = 11
 
@@ -149,8 +149,8 @@ class PatchElement (Clutter.Group):
         self.obj_args = objinfo.get('initargs')
         self.num_inlets = objinfo.get("num_inlets")
         self.num_outlets = objinfo.get("num_outlets")
-        self.dsp_inlets = objinfo.get("dsp_inlets")
-        self.dsp_outlets = objinfo.get("dsp_outlets")
+        self.dsp_inlets = objinfo.get("dsp_inlets", [])
+        self.dsp_outlets = objinfo.get("dsp_outlets", [])
 
         if self.obj_id is not None:
             # rebuild connections if necessary 
@@ -223,9 +223,21 @@ class PatchElement (Clutter.Group):
 
         def confport(pid, px, py):
             pobj = self.port_elements.get(pid)
+            dsp_port = False 
+            if (pid[0] == self.PORT_IN) and pid[1] in self.dsp_inlets:
+                dsp_port = True 
+
+            if (pid[0] == self.PORT_OUT) and pid[1] in self.dsp_outlets:
+                dsp_port = True 
+
             if pobj is None:
                 pobj = Clutter.Rectangle()
-                pobj.set_color(self.stage.color_unselected)
+                if dsp_port: 
+                    pobj.set_border_width(1.5)
+                    pobj.set_color(self.stage.color_bg)
+                    pobj.set_border_color(self.stage.color_unselected)
+                else:
+                    pobj.set_color(self.stage.color_unselected)
                 pobj.set_size(self.porthole_width, self.porthole_height)
                 self.add_actor(pobj)
                 self.port_elements[pid] = pobj
@@ -283,10 +295,10 @@ class PatchElement (Clutter.Group):
         self.send_params()
 
     def configure(self, params):
-        self.num_inlets = params.get("num_inlets")
-        self.num_outlets = params.get("num_outlets")
-        self.dsp_inlets = params.get("dsp_inlets")
-        self.dsp_outlets = params.get("dsp_outlets")
+        self.num_inlets = params.get("num_inlets", 0)
+        self.num_outlets = params.get("num_outlets", 0)
+        self.dsp_inlets = params.get("dsp_inlets", [])
+        self.dsp_outlets = params.get("dsp_outlets", [])
         self.obj_name = params.get("name")
         layer_name = params.get("layername") or params.get("layer")
         layer = self.stage.selected_patch.find_layer(layer_name)

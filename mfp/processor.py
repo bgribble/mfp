@@ -191,6 +191,8 @@ class Processor (object):
                                  len(self.dsp_outlets), params)
         self.gui_params['dsp_inlets'] = self.dsp_inlets
         self.gui_params['dsp_outlets'] = self.dsp_outlets
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def dsp_reset(self):
         self.dsp_obj.reset()
