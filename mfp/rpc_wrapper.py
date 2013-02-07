@@ -53,10 +53,12 @@ class RPCWrapper (object):
     local = False
     pipe = None
     node_id = None
+    call_stats = {} 
 
     def __init__(self, *args, **kwargs):
         self.rpcid = None
-
+        
+        
         if self.local:
             self.rpcid = RPCWrapper._rpcid_seq
             RPCWrapper._rpcid_seq += 1
@@ -80,6 +82,9 @@ class RPCWrapper (object):
             raise RPCWrapper.MethodFailed(r.payload)
 
     def call_locally(self, rpcdata):
+        count = self.call_stats.get(rpcdata.get('func'), 0)
+        self.call_stats[rpcdata.get('func')] = count + 1 
+
         methname = rpcdata.get('func')
         args = rpcdata.get('args')
         kwargs = rpcdata.get('kwargs')

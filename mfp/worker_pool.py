@@ -5,9 +5,6 @@ Thread pool for processing units of work
 '''
 
 import threading
-import Queue
-from . import log
-
 
 class BaseWorker (object):
     '''

@@ -303,8 +303,8 @@ class MFPApp (Singleton):
         patch.create_gui()
         patch.mark_ready()
 
+
     def create(self, init_type, init_args, patch, scope, name):
-        
         # first try: is a factory registered? 
         ctor = self.registry.get(init_type)
 
@@ -530,6 +530,10 @@ def main():
             print " Quit request received, exiting"
             app.finish()
     
+    print "Main app RPCWrapper local call counts:"
+    for k in sorted(RPCWrapper.call_stats):
+        print "   ", k, RPCWrapper.call_stats[k]
+
     import threading 
     threads = threading.enumerate()
     if len(threads) > 1:
