@@ -38,11 +38,11 @@ class Note2Freq(Processor):
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
-        if self.inlets[1] is not None:
+        if self.inlets[1] is not Uninit:
             self.scale = self.inlets[1]
             self.inlets[1] = Uninit 
 
-        if self.inlets[2] is not None:
+        if self.inlets[2] is not Uninit:
             self.tuning = self.inlets[2]
             self.inlets[2] = Uninit 
 

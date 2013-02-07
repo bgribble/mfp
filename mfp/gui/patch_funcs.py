@@ -71,17 +71,17 @@ def select_next(self):
         return False
 
     if (self.selected is None or self.selected not in self.selected_layer.objects):
-        candidate = 0
+        start = 0
     else:
-        candidate = self.selected_layer.objects.index(self.selected)
-        candidate = (candidate + 1) % len(self.selected_layer.objects)
+        current = self.selected_layer.objects.index(self.selected)
+        start = (current + 1) % len(self.selected_layer.objects)
+    candidate = start
 
-    while candidate < len(self.selected_layer.objects):
+    for count in range(len(self.selected_layer.objects)):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
             self.select(self.selected_layer.objects[candidate])
             return True
-
-        candidate += 1
+        candidate = (candidate + 1) % len(self.selected_layer.objects)
     return False
 
 

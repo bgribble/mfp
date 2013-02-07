@@ -204,7 +204,6 @@ class GUICommand (RPCWrapper):
 
 
 class MFPGUI (Singleton):
-
     def __init__(self):
         self.objects = {}
         self.mfp = None

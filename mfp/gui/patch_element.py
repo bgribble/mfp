@@ -8,8 +8,6 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 from mfp import MFPGUI
-from mfp import log
-
 
 class PatchElement (Clutter.Group):
     '''
@@ -43,7 +41,7 @@ class PatchElement (Clutter.Group):
         self.param_list = ['position_x', 'position_y', 'width', 'height', 
                            'update_required', 'display_type', 'name', 'layername', 
                            'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets' ]
-            
+
         # Clutter objects
         self.stage = window
         self.layer = None
@@ -207,7 +205,8 @@ class PatchElement (Clutter.Group):
                 spc = 0
             else:
                 spc = max(self.porthole_minspace,
-                         (w - self.porthole_width - 2.0 * self.porthole_border) / (self.num_inlets - 1.0))
+                          ((w - self.porthole_width - 2.0 * self.porthole_border) 
+                           / (self.num_inlets - 1.0)))
             return (self.porthole_border + spc * port_num, 0)
 
         elif port_dir == PatchElement.PORT_OUT:
@@ -215,11 +214,13 @@ class PatchElement (Clutter.Group):
                 spc = 0
             else:
                 spc = max(self.porthole_minspace,
-                         (w - self.porthole_width - 2.0 * self.porthole_border) / (self.num_outlets - 1.0))
+                          ((w - self.porthole_width - 2.0 * self.porthole_border) 
+                           / (self.num_outlets - 1.0)))
             return (self.porthole_border + spc * port_num, h - self.porthole_height)
 
     def draw_ports(self):
         ports_done = [] 
+
         def confport(pid, px, py):
             pobj = self.port_elements.get(pid)
             if pobj is None:
@@ -228,6 +229,7 @@ class PatchElement (Clutter.Group):
                 pobj.set_size(self.porthole_width, self.porthole_height)
                 self.add_actor(pobj)
                 self.port_elements[pid] = pobj
+
             pobj.set_position(px, py)
             pobj.show()
             ports_done.append(pobj)
@@ -307,6 +309,7 @@ class PatchElement (Clutter.Group):
         if self.layer:
             self.layer.group.remove_actor(self)
             self.layer.remove(self)
+
         layer.add(self)
         self.layer.group.add_actor(self)
         self.send_params()
@@ -348,11 +351,11 @@ class PatchElement (Clutter.Group):
 
         if self.obj_id is None:
             return False 
-            
+
         for (pid, pobj) in self.port_elements.items(): 
             x, y = pobj.get_position()
-            x += orig_x-1
-            y += orig_y-1
+            x += orig_x - 1
+            y += orig_y - 1
             w, h = pobj.get_size()
             w += 2
             h += 2
@@ -360,5 +363,6 @@ class PatchElement (Clutter.Group):
                 tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1])
         if tiptxt is None:             
             tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id)
-        self.stage.hud_write(tiptxt)
+        self.stage.hud_banner(tiptxt)
         return True 
+

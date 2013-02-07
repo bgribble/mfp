@@ -21,7 +21,7 @@ class Var (Processor):
     '''
 
     doc_tooltip_obj = "Store a variable message (any type)"
-    doc_tooltip_inlet = ["Save input and emit from outlet or (Bang) only emit", 
+    doc_tooltip_inlet = ["Save input and emit from outlet, or only emit if input is Bang", 
                          "Save input but do not emit (default: initarg 0)" ]
     doc_tooltip_outlet = ["Value output"]
 

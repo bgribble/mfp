@@ -62,6 +62,8 @@ class PatchWindow(object):
         # the view, so anything not in it will be static on the stage
         self.group = Clutter.Group()
         self.hud_history = []
+        self.hud_banner_txt = None 
+        self.hud_banner_anim = None 
         self.hud_prompt = None 
         self.hud_prompt_mgr = Prompter(self)
 
@@ -348,6 +350,7 @@ class PatchWindow(object):
         if self.hud_prompt is None:
             for actor, anim, oldmsg in self.hud_history:
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
+
             self.hud_prompt = Clutter.Text()
             self.stage.add_actor(self.hud_prompt)
             self.hud_prompt.set_position(10, self.stage.get_height() - 25)
@@ -370,7 +373,7 @@ class PatchWindow(object):
         else:
             self.hud_history[0][1].completed()
 
-        for actor, anim, oldmsg in self.hud_history[5:]:
+        for actor, anim, oldmsg in self.hud_history[3:]:
             anim.completed()
 
         actor = Clutter.Text()
@@ -386,6 +389,24 @@ class PatchWindow(object):
                                    disp_time * 1000.0, ['opacity'], [0])
         self.hud_history[0:0] = [(actor, animation, msg)]
         animation.connect_after("completed", anim_complete)
+
+    def hud_banner(self, msg, disp_time=3.0):
+        def anim_complete(anim, actor):
+            actor.destroy()
+
+        if self.hud_banner_anim is not None: 
+            self.hud_banner_anim.completed()
+
+        self.hud_banner_text = Clutter.Text()
+        self.stage.add_actor(self.hud_banner_text)
+        self.hud_banner_text.set_position(12, 4)
+        self.hud_banner_text.set_property("opacity", 255)
+        self.hud_banner_text.set_markup(msg)
+
+        anim = self.hud_banner_text.animatev(Clutter.AnimationMode.EASE_IN_CUBIC,
+                                             disp_time * 1000.0, ['opacity'], [0])
+        anim.connect_after("completed", anim_complete, self.hud_banner_text)
+        self.hud_banner_anim = anim
 
 
 # additional methods in @extends wrappers
