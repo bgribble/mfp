@@ -86,8 +86,9 @@ If all that works:
 
 The very, very basic tutorial: 
 
-Try mfp -h for a command line arguments summary
-
+Try:  
+    mfp -h for a command line arguments summary.  
+    mfp --help-builtins lists the name and tooltip of every builtin object. 
 
 Follow these steps to create a helloworld patch using just the keyboard.
 You do need a pointer to activate it. 
@@ -134,10 +135,20 @@ README:
 
     $ mfp -p doc doc/biquad_designer.mfp
 
-Saving files: There's no UI for saving yet.  You can do it from the
-console.  
+oscope.mfp: Simple demo of the signal<-->control level bridge provided by
+numpy and the buffer~ object.  A very basic oscilloscope. 
 
-    >>> app.patches['default'].save_file("filename.mfp")
+looper.mfp: A simple 4-channel loop sampler inspired by the Akai Headrush,
+also built around a [buffer~].  Connect an audio input via JACK, select a
+channel to record with the toggle, click PLAY then REC.  Unclick REC at the
+end of your loop and PLAY will continue to loop over your recording.
+Change channel, repeat until satisfied.  Arming and disarming "play_enable"
+controls the mix of each loop.
+
+Saving files: There's no UI for saving yet, but there is a key mapping.
+C-s (control S) will prompt for a file to save in.  There's no checking for
+overwrite, and the file is saved in the process working directory. 
+
 
 Reporting problems: For now, I will be using the GitHub hosted issue
 tracker and wiki. 
