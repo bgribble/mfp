@@ -141,7 +141,7 @@ process(mfp_processor * proc)
 
             /* iterate over trig_block looking for a trigger */ 
             dstart = 0;
-            while(d->rec_state == 0) {
+            while(d->rec_state == REC_IDLE) {
                 if (d->trig_pretrigger == 0) { 
                     if((d->trig_op == TRIG_GT) 
                         && (trig_block->data[dstart] <= d->trig_thresh)) {
@@ -202,7 +202,7 @@ process(mfp_processor * proc)
             tocopy = MIN(mfp_blocksize-dstart, d->chan_size - d->rec_pos);
         }
 
-        /* iterate over channels, grabbbing data if channel is active */
+        /* iterate over channels, grabbing data if channel is active */
         for(channel=0; channel < d->chan_count; channel++) {
             if((1 << channel) & d->rec_channels) {
                 if (d->rec_mode == REC_LOOPSOS) {
@@ -243,6 +243,7 @@ process(mfp_processor * proc)
                 d->rec_pos += tocopy;
                 if(d->rec_pos >= d->region_end) {
                     d->rec_state = REC_IDLE;
+                    d->rec_enabled = 0;
                     d->rec_pos = d->region_start; 
                     d->trig_pretrigger = 0;
                 }

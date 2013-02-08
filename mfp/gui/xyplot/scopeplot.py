@@ -139,7 +139,7 @@ class ScopePlot (XYPlot):
                 os.lseek(self.shm_obj.fd, offset(c), os.SEEK_SET)
                 slc = os.read(self.shm_obj.fd, self.buf_info.size * self.FLOAT_SIZE)
                 self.data.append(list(numpy.fromstring(slc, dtype=numpy.float32)))
-                self.set_bounds(0, -1, len(self.data[0])*1000/self.samplerate, 1)
+                self.set_bounds(0, None, len(self.data[0])*1000/self.samplerate, None)
         except Exception, e:
             log.debug("scopeplot: error grabbing data", e)
             return None
