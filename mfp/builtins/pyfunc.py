@@ -11,6 +11,16 @@ from ..method import MethodCall
 from ..bang import Bang, Uninit
 
 
+def get_arglist(thunk): 
+    if hasattr(thunk, 'func_code'): 
+        return thunk.func_code.co_varnames
+    elif hasattr(thunk, '__func__'):
+        return thunk.__func__.func_code.co_varnames 
+    else:
+        return None
+
+
+
 class ApplyMethod(Processor):
     doc_tooltip_obj = "Create a method call object"
     doc_tooltip_inlet = ["Arguments to method call", 
@@ -103,11 +113,12 @@ class PyFunc(Processor):
             thunktxt = "lambda: None"
 
         self.thunk = patch.parse_obj(thunktxt)
-        
-        if callable(self.thunk):
-            self.argcount = self.thunk.func_code.co_argcount
+        arguments = get_arglist(self.thunk)
+
+        if arguments is not None:
+            self.argcount = len(arguments)
             self.doc_tooltip_inlet = [] 
-            for v in self.thunk.func_code.co_varnames:
+            for v in arguments:
                 self.doc_tooltip_inlet.append("Argument %s" % v)
 
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
@@ -122,16 +133,17 @@ class PyAutoWrap(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         self.thunk = patch.parse_obj(init_type)
         initargs, kwargs = patch.parse_args(init_args)
-        
-        if callable(self.thunk):
-            self.argcount = self.thunk.func_code.co_argcount
-            if self.thunk.__doc__:
+       
+        arguments = get_arglist(self.thunk)
+
+        if arguments is not None:
+            self.argcount = len(arguments)
+            if hasattr(self.thunk, '__doc__'):
                 self.doc_tooltip_obj = self.thunk.__doc__.split("\n")[0]
-            try: 
-                for v in self.thunk.func_code.co_varnames:
-                    self.doc_tooltip_inlet.append("Argument %s" % v)
-            except AttributeError:
-                pass 
+            self.doc_tooltip_inlet = []
+            for v in arguments:
+                self.doc_tooltip_inlet.append("Argument %s" % v)
+
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
@@ -150,6 +162,7 @@ class PyBinary(Processor):
 
         if self.function.__doc__:
             self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
+
         if len(initargs) == 1:
             self.inlets[1] = initargs[0]
 
