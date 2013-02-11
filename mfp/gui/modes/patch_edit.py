@@ -17,7 +17,7 @@ from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement
 from ..via_element import SendViaElement, ReceiveViaElement
-from ..button_element import BangButtonElement, ToggleButtonElement
+from ..button_element import BangButtonElement, ToggleButtonElement, ToggleIndicatorElement
 
 
 class PatchEditMode (InputMode):
@@ -45,6 +45,8 @@ class PatchEditMode (InputMode):
                   "Add toggle button")
         self.bind("g", lambda: self.add_element(BangButtonElement),
                   "Add bang button")
+        self.bind("i", lambda: self.add_element(ToggleIndicatorElement),
+                  "Add on/off indicator")
         self.bind("s", lambda: self.add_element(FaderElement),
                   "Add slider")
         self.bind("b", lambda: self.add_element(BarMeterElement),

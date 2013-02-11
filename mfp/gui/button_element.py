@@ -211,3 +211,10 @@ class ToggleButtonElement (ButtonElement):
         
     def unclicked(self):
         return False
+
+class ToggleIndicatorElement (ButtonElement): 
+    display_type = "toggle"
+    def make_control_mode(self):
+        return PatchElement.make_control_mode(self)
+
+

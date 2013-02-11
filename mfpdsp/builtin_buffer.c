@@ -188,6 +188,11 @@ process(mfp_processor * proc)
             }
         }
         else {
+            if (d->rec_mode == REC_LOOPSET) {
+                d->region_start = 0;
+                d->region_end = 0;
+            }
+
             d->rec_state = REC_ACTIVE;
             d->play_state = PLAY_ACTIVE; 
             d->rec_pos = d->region_start; 
