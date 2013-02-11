@@ -72,7 +72,7 @@ class Route (Processor):
         self.nomatch = len(values)
         self.doc_tooltip_outlet = [] 
         for i in range(len(values)):
-            self.doc_tooltip_outlet.append("Items matching %s" % values[i])
+            self.doc_tooltip_outlet.append("Items matching %s" % (values[i],))
         self.doc_tooltip_outlet.append("Unmatched items")
 
     def trigger(self):

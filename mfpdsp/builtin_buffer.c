@@ -40,7 +40,7 @@ typedef struct {
     int play_channels;
     int play_pos;
 
-    /* region definition (for LOOP modes) */ 
+    /* region definition (for LOOP modes, set by REC_LOOPSET) */ 
     int region_start;
     int region_end; 
 
@@ -48,8 +48,8 @@ typedef struct {
 
 /* rec_mode values */ 
 #define REC_BANG 0    /* on Bang, record buffer and stop */ 
-#define REC_LOOP 1    /* continuously record between region_start and region_end */ 
-#define REC_LOOPSOS 2 /* record in region, adding to previous contents */ 
+#define REC_LOOPSET 1 /* record, establishing region_start and region_end */ 
+#define REC_LOOP 2    /* continuously record between region_start and region_end */ 
 #define TRIG_THRESH 3 /* When trig_channel crosses trig_thresh, rec buffer and stop */ 
 #define TRIG_EXT 4    /* when external input crosses trig_thresh, rec buffer and stop */ 
 
@@ -123,6 +123,11 @@ process(mfp_processor * proc)
     int inpos, outpos;
     int loopstart=0; 
 
+    /*
+    printf("buffer~ process: rec_mode=%d, play_mode=%d, play_state=%d, rec_pos=%d, play_pos=%d, region_start=%d, region_end=%d\n",
+        d->rec_mode, d->play_mode, d->play_state, d->rec_pos, d->play_pos, d->region_start, d->region_end);
+    */
+
     /* if not currently capturing, check for trigger conditions */ 
     if(d->rec_state == REC_IDLE && d->rec_enabled) {
         if ((d->rec_mode == TRIG_EXT) || (d->rec_mode == TRIG_THRESH)) {
@@ -176,104 +181,18 @@ process(mfp_processor * proc)
 
                 d->rec_pos = d->region_start;
                     
-                if (d->play_mode == PLAY_TRIG) {
-                    d->play_pos = d->region_start;
-                    d->play_state = PLAY_ACTIVE; 
-                }
+                d->play_pos = d->region_start;
+                d->play_state = PLAY_ACTIVE; 
 
                 mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 1);
             }
         }
         else {
             d->rec_state = REC_ACTIVE;
+            d->play_state = PLAY_ACTIVE; 
             d->rec_pos = d->region_start; 
+            d->play_pos = d->region_start;
             loopstart = 1;
-        }
-    }
-
-
-    /* if we are triggered, copy data from inlets to buffer */
-    if(d->rec_state == REC_ACTIVE) {
-        /* copy rest of the block or available space */
-        if (d->rec_mode == REC_LOOPSOS) {
-            tocopy = mfp_blocksize;
-        }
-        else {
-            tocopy = MIN(mfp_blocksize-dstart, d->chan_size - d->rec_pos);
-        }
-
-        /* iterate over channels, grabbing data if channel is active */
-        for(channel=0; channel < d->chan_count; channel++) {
-            if((1 << channel) & d->rec_channels) {
-                if (d->rec_mode == REC_LOOPSOS) {
-                    /* accumulate into buffer */ 
-                    outptr = (float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos;
-                    outpos = d->rec_pos;
-                    inptr = proc->inlet_buf[channel]->data;
-                    for (inpos = 0; inpos < tocopy; inpos++) {
-                        *outptr++ += *inptr++;
-                        outpos++;
-                        if (outpos > d->region_end) {
-                            outpos = d->region_start;
-                            outptr =  (float *)d->shm_ptr + (channel*d->chan_size) + outpos;
-                        }
-                    }
-                }
-                else {
-                    memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos,
-                            proc->inlet_buf[channel]->data + dstart,
-                            sizeof(mfp_sample)*tocopy);
-                }
-            }
-        }
-
-        /* if we reached the end of the buffer, untrigger */
-        switch (d->rec_mode) {
-            case REC_BANG:
-                d->rec_pos += tocopy;
-                if(d->rec_pos >= d->region_end) {
-                    d->rec_state = REC_IDLE;
-                    d->rec_enabled = 0;
-                    d->rec_pos = d->region_start; 
-                }
-                break;
-
-            case TRIG_THRESH:
-            case TRIG_EXT:
-                d->rec_pos += tocopy;
-                if(d->rec_pos >= d->region_end) {
-                    d->rec_state = REC_IDLE;
-                    d->rec_enabled = 0;
-                    d->rec_pos = d->region_start; 
-                    d->trig_pretrigger = 0;
-                }
-                break;
-
-            case REC_LOOP:
-                d->rec_pos += tocopy;
-                if (d->rec_pos > d->region_end) 
-                    d->region_end = d->rec_pos;
-
-                if(d->rec_pos >= d->chan_size) {
-                    d->rec_pos = d->region_start; 
-                    loopstart = 1;
-                }
-                break;
-
-            case REC_LOOPSOS: 
-                inpos = d->rec_pos - d->region_start; 
-                d->rec_pos = (inpos + mfp_blocksize) % (d->region_end-d->region_start)
-                    + d->region_start;
-                if (inpos + mfp_blocksize > (d->region_end - d->region_start)) {
-                    loopstart = 1;
-                }
-
-                break; 
-        }
-
-
-        if (d->rec_state == REC_IDLE) {
-            mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
         }
     }
 
@@ -281,10 +200,7 @@ process(mfp_processor * proc)
     mfp_block_zero(proc->outlet_buf[0]);
 
     /* if we are playing, copy data from the buffer to the outlet */ 
-    if (d->play_state != PLAY_IDLE) {
-        if (d->region_end == 0) {
-            return 0;
-        }
+    if ((d->play_state != PLAY_IDLE) && (d->region_end > 0))  {
         /* accumulate non-masked channels in the output buffer */ 
         for(channel=0; channel < d->chan_count; channel++) {
             if((1 << channel) & d->play_channels) {
@@ -324,6 +240,85 @@ process(mfp_processor * proc)
     }
     if(loopstart > 0) {
         mfp_dsp_send_response_bool(proc, RESP_LOOPSTART, 1);
+    }
+
+    /* if we are triggered, copy data from inlets to buffer */
+    if(d->rec_state == REC_ACTIVE) {
+        tocopy = MIN(mfp_blocksize-dstart, d->chan_size - d->rec_pos);
+
+        /* iterate over channels, grabbing data if channel is active */
+        for(channel=0; channel < d->chan_count; channel++) {
+            if((1 << channel) & d->rec_channels) {
+                if (d->rec_mode == REC_LOOP) {
+                    /* accumulate into buffer */ 
+                    outptr = (float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos;
+                    outpos = d->rec_pos;
+                    inptr = proc->inlet_buf[channel]->data;
+                    for (inpos = 0; inpos < tocopy; inpos++) {
+                        *outptr++ = *inptr++;
+                        outpos++;
+                        if (outpos > d->region_end) {
+                            outpos = d->region_start;
+                            outptr =  (float *)d->shm_ptr + (channel*d->chan_size) + outpos;
+                        }
+                    }
+                }
+                else {
+                    memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos,
+                            proc->inlet_buf[channel]->data + dstart,
+                            sizeof(mfp_sample)*tocopy);
+                }
+            }
+        }
+
+        /* if we reached the end of the buffer, untrigger */
+        switch (d->rec_mode) {
+            case REC_BANG:
+                d->rec_pos += tocopy;
+                if(d->rec_pos >= d->region_end) {
+                    d->rec_state = REC_IDLE;
+                    d->rec_enabled = 0;
+                    d->rec_pos = d->region_start; 
+                }
+                break;
+
+            case TRIG_THRESH:
+            case TRIG_EXT:
+                d->rec_pos += tocopy;
+                if(d->rec_pos >= d->region_end) {
+                    d->rec_state = REC_IDLE;
+                    d->rec_enabled = 0;
+                    d->rec_pos = d->region_start; 
+                    d->trig_pretrigger = 0;
+                }
+                break;
+
+            case REC_LOOPSET:
+                d->rec_pos += tocopy;
+                if (d->rec_pos > d->region_end) 
+                    d->region_end = d->rec_pos;
+
+                if(d->rec_pos >= d->chan_size) {
+                    d->rec_pos = d->region_start; 
+                    loopstart = 1;
+                }
+                break;
+
+            case REC_LOOP: 
+                inpos = d->rec_pos - d->region_start; 
+                d->rec_pos = (inpos + mfp_blocksize) % (d->region_end-d->region_start)
+                    + d->region_start;
+                if (inpos + mfp_blocksize > (d->region_end - d->region_start)) {
+                    loopstart = 1;
+                }
+
+                break; 
+        }
+
+
+        if (d->rec_state == REC_IDLE) {
+            mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
+        }
     }
 
     return 0;
@@ -487,7 +482,7 @@ init_builtin_buffer(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     
     p->name = strdup("buffer~");
-    p->is_generator = 0;
+    p->is_generator = 1;
     p->process = process;
     p->init = init;
     p->destroy = destroy;

@@ -23,7 +23,6 @@ class ConnectionElement(PatchElement):
         self.dsp_connect = False 
 
         if port_1 in obj_1.dsp_outlets:
-            print "Drawing as DSP", obj_1, port_1, obj_2, port_2
             self.dsp_connect = True 
 
         PatchElement.__init__(self, window, obj_1.position_x, obj_1.position_y)

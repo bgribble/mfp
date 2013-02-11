@@ -2,7 +2,7 @@
     "gui_params": {
         "layers": [
             [
-                "Front panel",
+                "Front Panel",
                 "__patch__"
             ],
             [
@@ -10,7 +10,7 @@
                 "__patch__"
             ],
             [
-                "Clock",
+                "Audio processing",
                 "__patch__"
             ]
         ],
@@ -23,114 +23,95 @@
     "objects": {
         "1": {
             "connections": [
-                [
-                    [
-                        2,
-                        0
-                    ],
-                    [
-                        2,
-                        1
-                    ],
-                    [
-                        2,
-                        2
-                    ],
-                    [
-                        2,
-                        3
-                    ],
-                    [
-                        42,
-                        0
-                    ]
-                ]
+                []
             ],
             "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 46.0,
-                "display_type": "processor",
-                "position_x": 172.5352783203125,
-                "position_y": 72.0774154663086,
-                "layername": "Front panel"
+                "update_required": true,
+                "height": 46.0,
+                "width": 201.0,
+                "display_type": "text",
+                "position_x": 61.48097229003906,
+                "position_y": 58.674102783203125,
+                "layername": "Front Panel"
             },
-            "name": "in~_1",
-            "do_onload": true,
-            "initargs": "0",
-            "type": "in~"
+            "name": "text_1",
+            "value": "Looping sampler with overdub\nInspired by Akai Headrush",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
         },
         "2": {
             "connections": [
-                [
-                    [
-                        4,
-                        0
-                    ]
-                ],
-                [],
-                [
-                    [
-                        50,
-                        0
-                    ]
-                ]
+                []
             ],
             "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 124.0,
-                "display_type": "processor",
-                "position_x": 57.88175964355469,
-                "position_y": 121.9570541381836,
-                "layername": "Front panel"
+                "direction": 0,
+                "orientation": 0,
+                "max_value": 0.0,
+                "min_value": -60.0,
+                "scale_position": 0,
+                "value": -60.14426048749588,
+                "height": 99.99998474121094,
+                "width": 55.0,
+                "show_scale": true,
+                "update_required": true,
+                "position_x": 210.63217163085938,
+                "position_y": 144.8196563720703,
+                "display_type": "slidemeter",
+                "layername": "Front Panel",
+                "scale_type": 0
             },
-            "name": "buffer~_2",
-            "do_onload": true,
-            "initargs": "10000,4",
-            "type": "buffer~"
+            "name": "var_2",
+            "value": -60.14426048749588,
+            "do_onload": false,
+            "initargs": "0.0",
+            "type": "var"
         },
         "3": {
             "connections": [
-                [
-                    [
-                        2,
-                        0
-                    ]
-                ]
+                []
             ],
             "gui_params": {
-                "update_required": false,
-                "label": "bufctl",
-                "height": 37.5,
-                "width": 20,
-                "display_type": "recvvia",
-                "position_x": 55.85552215576172,
-                "position_y": 71.88872528076172,
-                "initargs": "\"bufctl\"",
-                "layername": "Front panel",
-                "init_args": "\"bufctl\""
+                "direction": 0,
+                "orientation": 0,
+                "max_value": 0.0,
+                "min_value": -60.0,
+                "scale_position": 1,
+                "value": -1000,
+                "height": 100.0,
+                "width": 55.0,
+                "show_scale": true,
+                "update_required": true,
+                "position_x": 278.56329345703125,
+                "position_y": 145.85427856445312,
+                "display_type": "slidemeter",
+                "layername": "Front Panel",
+                "scale_type": 0
             },
-            "name": "bufctl",
-            "do_onload": true,
-            "initargs": "\"bufctl\"",
-            "type": "recv"
+            "name": "var_3",
+            "value": -1000,
+            "do_onload": false,
+            "initargs": "0.0",
+            "type": "var"
         },
         "4": {
-            "connections": [],
+            "connections": [
+                []
+            ],
             "gui_params": {
-                "update_required": false,
+                "update_required": true,
                 "height": 25.0,
-                "width": 57.0,
-                "display_type": "processor",
-                "position_x": 57.88332748413086,
-                "position_y": 177.9552764892578,
-                "layername": "Front panel"
+                "width": 76.0,
+                "display_type": "text",
+                "position_x": 194.6511993408203,
+                "position_y": 346.7219543457031,
+                "layername": "Front Panel"
             },
-            "name": "out~_4",
-            "do_onload": true,
-            "initargs": "0",
-            "type": "out~"
+            "name": "text_4",
+            "value": "Play/Pause",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
         },
         "5": {
             "connections": [
@@ -138,15 +119,15 @@
             ],
             "gui_params": {
                 "update_required": true,
-                "height": 29.0,
-                "width": 97.0,
+                "height": 25.0,
+                "width": 50.0,
                 "display_type": "text",
-                "position_x": 352.30072021484375,
-                "position_y": 20.969219207763672,
-                "layername": "Front panel"
+                "position_x": 288.4952392578125,
+                "position_y": 346.3143615722656,
+                "layername": "Front Panel"
             },
             "name": "text_5",
-            "value": "<span size=\"large\"><b>looper.mfp</b></span>",
+            "value": "Record",
             "do_onload": false,
             "initargs": null,
             "type": "text"
@@ -158,14 +139,14 @@
             "gui_params": {
                 "update_required": true,
                 "height": 25.0,
-                "width": 237.0,
+                "width": 68.0,
                 "display_type": "text",
-                "position_x": 350.7638854980469,
-                "position_y": 44.906288146972656,
-                "layername": "Front panel"
+                "position_x": 220.6825408935547,
+                "position_y": 250.49301147460938,
+                "layername": "Front Panel"
             },
             "name": "text_6",
-            "value": "4-channel, 10-second loop sampler",
+            "value": "input (dB)",
             "do_onload": false,
             "initargs": null,
             "type": "text"
@@ -176,717 +157,56 @@
             ],
             "gui_params": {
                 "update_required": true,
-                "height": 109.0,
-                "width": 332.0,
+                "height": 25.0,
+                "width": 48.0,
                 "display_type": "text",
-                "position_x": 351.5359191894531,
-                "position_y": 95.20462799072266,
-                "layername": "Front panel"
+                "position_x": 289.5713195800781,
+                "position_y": 250.47164916992188,
+                "layername": "Front Panel"
             },
             "name": "text_7",
-            "value": "buffer~ is the heart of the sampler.  The initargs\nmean 10000 ms buffer size, 4 channels input.  \n\nWe send one audio in to all channels; we will use \nbufctl to set record and playback masks.",
+            "value": "output",
             "do_onload": false,
             "initargs": null,
             "type": "text"
         },
         "8": {
-            "connections": [
-                [
-                    [
-                        16,
-                        0
-                    ]
-                ]
-            ],
+            "connections": [],
             "gui_params": {
-                "on_message": 1,
-                "update_required": true,
-                "height": 20,
+                "layername": "Front Panel",
+                "update_required": false,
+                "label": "play",
                 "width": 20,
-                "off_message": 1,
-                "display_type": "toggle",
-                "position_x": 42.95692443847656,
-                "position_y": 262.6554718017578,
-                "layername": "Front panel"
+                "display_type": "sendvia",
+                "position_x": 178.79812622070312,
+                "position_y": 298.53717041015625,
+                "initargs": "\"play\"",
+                "height": 35
             },
-            "name": "var_8",
-            "value": 1,
+            "name": "send_8",
             "do_onload": true,
-            "initargs": "False",
-            "type": "var"
+            "initargs": "\"play\"",
+            "type": "send"
         },
         "9": {
-            "connections": [
-                [
-                    [
-                        16,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": 2,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": 2,
-                "value": 2,
-                "position_x": 84.94122314453125,
-                "position_y": 263.4704895019531,
-                "initargs": "False",
-                "layername": "Front panel",
-                "display_type": "toggle"
-            },
-            "name": "var_9",
-            "value": 2,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "10": {
-            "connections": [
-                [
-                    [
-                        16,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": 4,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": 4,
-                "value": 4,
-                "position_x": 131.90359497070312,
-                "position_y": 262.67665100097656,
-                "initargs": "False",
-                "layername": "Front panel",
-                "display_type": "toggle"
-            },
-            "name": "var_10",
-            "value": 4,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "11": {
-            "connections": [
-                [
-                    [
-                        16,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": 8,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": 8,
-                "value": 8,
-                "position_x": 180.8604736328125,
-                "position_y": 262.6213073730469,
-                "initargs": "False",
-                "layername": "Front panel",
-                "display_type": "toggle"
-            },
-            "name": "var_11",
-            "value": 8,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "12": {
-            "connections": [
-                [
-                    [
-                        17,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": 1,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": 1,
-                "display_type": "toggle",
-                "position_x": 41.979671478271484,
-                "position_y": 317.7955322265625,
-                "layername": "Front panel"
-            },
-            "name": "var_12",
-            "value": 1,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "13": {
-            "connections": [
-                [
-                    [
-                        17,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": 2,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": 2,
-                "value": 2,
-                "position_x": 85.9326171875,
-                "position_y": 317.5083923339844,
-                "initargs": "False",
-                "layername": "Front panel",
-                "display_type": "toggle"
-            },
-            "name": "var_13",
-            "value": 2,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "14": {
-            "connections": [
-                [
-                    [
-                        17,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": 4,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": 4,
-                "value": 4,
-                "position_x": 130.88320922851562,
-                "position_y": 318.49822998046875,
-                "initargs": "False",
-                "layername": "Front panel",
-                "display_type": "toggle"
-            },
-            "name": "var_14",
-            "value": 4,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "15": {
-            "connections": [
-                [
-                    [
-                        17,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": 8,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": 8,
-                "value": 8,
-                "position_x": 179.85731506347656,
-                "position_y": 318.4822692871094,
-                "initargs": "False",
-                "layername": "Front panel",
-                "display_type": "toggle"
-            },
-            "name": "var_15",
-            "value": 8,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "16": {
             "connections": [],
             "gui_params": {
-                "update_required": false,
-                "label": "play_enable",
-                "display_type": "sendvia",
-                "position_x": 244.80088806152344,
-                "position_y": 274.5553894042969,
-                "initargs": "\"play_enable\"",
-                "layername": "Front panel"
-            },
-            "name": "send_16",
-            "do_onload": true,
-            "initargs": "\"play_enable\"",
-            "type": "send"
-        },
-        "17": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "label": "rec_enable",
-                "display_type": "sendvia",
-                "position_x": 247.8055877685547,
-                "position_y": 329.48175048828125,
-                "initargs": "\"rec_enable\"",
-                "layername": "Front panel"
-            },
-            "name": "send_17",
-            "do_onload": true,
-            "initargs": "\"rec_enable\"",
-            "type": "send"
-        },
-        "18": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 28.0,
-                "display_type": "text",
-                "position_x": 41.224876403808594,
-                "position_y": 289.52392578125,
-                "layername": "Front panel"
-            },
-            "name": "text_18",
-            "value": "ch1",
-            "do_onload": false,
-            "initargs": null,
-            "type": "text"
-        },
-        "19": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 28.0,
-                "display_type": "text",
-                "position_x": 84.18411254882812,
-                "position_y": 289.5248107910156,
-                "layername": "Front panel"
-            },
-            "name": "text_19",
-            "value": "ch2",
-            "do_onload": false,
-            "initargs": null,
-            "type": "text"
-        },
-        "20": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 28.0,
-                "display_type": "text",
-                "position_x": 129.14569091796875,
-                "position_y": 288.52593994140625,
-                "layername": "Front panel"
-            },
-            "name": "text_20",
-            "value": "ch3",
-            "do_onload": false,
-            "initargs": null,
-            "type": "text"
-        },
-        "21": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 28.0,
-                "display_type": "text",
-                "position_x": 178.10726928710938,
-                "position_y": 289.5250549316406,
-                "layername": "Front panel"
-            },
-            "name": "text_21",
-            "value": "ch4",
-            "do_onload": false,
-            "initargs": null,
-            "type": "text"
-        },
-        "22": {
-            "connections": [
-                [
-                    [
-                        23,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 37.5,
-                "width": 20,
-                "display_type": "recvvia",
-                "position_x": 69.72592163085938,
-                "position_y": 46.60224151611328,
-                "layername": "Buffer control"
-            },
-            "name": "play_enable",
-            "do_onload": true,
-            "initargs": "\"play_enable\"",
-            "type": "recv"
-        },
-        "23": {
-            "connections": [
-                [
-                    [
-                        64,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        46,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 72.0,
-                "display_type": "processor",
-                "position_x": 72.22592163085938,
-                "position_y": 96.60224151611328,
-                "layername": "Buffer control"
-            },
-            "name": "trigger_23",
-            "do_onload": true,
-            "initargs": "2",
-            "type": "trigger"
-        },
-        "24": {
-            "connections": [
-                [
-                    [
-                        25,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 56.0,
-                "display_type": "processor",
-                "position_x": 71.64737701416016,
-                "position_y": 192.63343811035156,
-                "layername": "Buffer control"
-            },
-            "name": "pack_24",
-            "do_onload": true,
-            "initargs": "2",
-            "type": "pack"
-        },
-        "25": {
-            "connections": [
-                [
-                    [
-                        26,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 56.0,
-                "display_type": "processor",
-                "position_x": 71.67557525634766,
-                "position_y": 228.6937713623047,
-                "layername": "Buffer control"
-            },
-            "name": "pack_25",
-            "do_onload": true,
-            "initargs": "1",
-            "type": "pack"
-        },
-        "26": {
-            "connections": [
-                [
-                    [
-                        27,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 38.0,
-                "display_type": "processor",
-                "position_x": 71.67557525634766,
-                "position_y": 264.6937713623047,
-                "layername": "Buffer control"
-            },
-            "name": "dict_26",
-            "do_onload": true,
-            "initargs": null,
-            "type": "dict"
-        },
-        "27": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 69.17557525634766,
-                "position_y": 312.6937713623047,
-                "layername": "Buffer control"
-            },
-            "name": "send_27",
-            "do_onload": true,
-            "initargs": "\"bufctl\"",
-            "type": "send"
-        },
-        "28": {
-            "connections": [
-                [
-                    [
-                        29,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 37.5,
-                "width": 20,
-                "display_type": "recvvia",
-                "position_x": 281.860107421875,
-                "position_y": 43.86027526855469,
-                "layername": "Buffer control"
-            },
-            "name": "rec_enable",
-            "do_onload": true,
-            "initargs": "\"rec_enable\"",
-            "type": "recv"
-        },
-        "29": {
-            "connections": [
-                [
-                    [
-                        65,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        47,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 72.0,
-                "display_type": "processor",
-                "position_x": 284.360107421875,
-                "position_y": 90.86027526855469,
-                "layername": "Buffer control"
-            },
-            "name": "trigger_29",
-            "do_onload": true,
-            "initargs": "2",
-            "type": "trigger"
-        },
-        "30": {
-            "connections": [
-                [
-                    [
-                        31,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 56.0,
-                "display_type": "processor",
-                "position_x": 283.7457580566406,
-                "position_y": 194.57095336914062,
-                "layername": "Buffer control"
-            },
-            "name": "pack_30",
-            "do_onload": true,
-            "initargs": "2",
-            "type": "pack"
-        },
-        "31": {
-            "connections": [
-                [
-                    [
-                        32,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 56.0,
-                "display_type": "processor",
-                "position_x": 283.7457580566406,
-                "position_y": 229.57095336914062,
-                "layername": "Buffer control"
-            },
-            "name": "pack_31",
-            "do_onload": true,
-            "initargs": "1",
-            "type": "pack"
-        },
-        "32": {
-            "connections": [
-                [
-                    [
-                        33,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 38.0,
-                "display_type": "processor",
-                "position_x": 283.7457580566406,
-                "position_y": 264.5709533691406,
-                "layername": "Buffer control"
-            },
-            "name": "dict_32",
-            "do_onload": true,
-            "initargs": null,
-            "type": "dict"
-        },
-        "33": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 281.2457580566406,
-                "position_y": 311.5709533691406,
-                "layername": "Buffer control"
-            },
-            "name": "send_33",
-            "do_onload": true,
-            "initargs": "\"bufctl\"",
-            "type": "send"
-        },
-        "34": {
-            "connections": [
-                [
-                    [
-                        35,
-                        0
-                    ],
-                    [
-                        61,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "direction": 0,
-                "orientation": 1,
-                "max_value": 10.0,
-                "min_value": 0.0,
-                "scale_position": 1,
-                "update_required": true,
-                "height": 55.0,
-                "width": 100.0,
-                "show_scale": true,
-                "display_type": "slidemeter",
-                "position_x": 101.91851806640625,
-                "position_y": 390.9086608886719,
-                "layername": "Front panel",
-                "scale_type": 0
-            },
-            "name": "var_34",
-            "value": 0,
-            "do_onload": false,
-            "initargs": "0.0",
-            "type": "var"
-        },
-        "35": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "label": "jump",
-                "display_type": "sendvia",
-                "position_x": 99.91771697998047,
-                "position_y": 451.8968200683594,
-                "initargs": "\"jump\"",
-                "layername": "Front panel"
-            },
-            "name": "send_35",
-            "do_onload": true,
-            "initargs": "\"jump\"",
-            "type": "send"
-        },
-        "36": {
-            "connections": [
-                [
-                    [
-                        37,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": true,
-                "update_required": true,
-                "height": 40,
-                "width": 40,
-                "off_message": false,
-                "display_type": "toggle",
-                "position_x": 437.76666259765625,
-                "position_y": 266.6709629241021,
-                "layername": "Front panel"
-            },
-            "name": "var_36",
-            "value": false,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "37": {
-            "connections": [],
-            "gui_params": {
-                "layername": "Front panel",
+                "layername": "Front Panel",
                 "update_required": false,
                 "label": "rec",
                 "width": 20,
                 "display_type": "sendvia",
-                "position_x": 437.32843017578125,
-                "position_y": 328.6865234375,
+                "position_x": 262.6211242675781,
+                "position_y": 299.9598388671875,
                 "initargs": "\"rec\"",
                 "height": 35
             },
-            "name": "send_37",
+            "name": "send_9",
             "do_onload": true,
             "initargs": "\"rec\"",
             "type": "send"
         },
-        "38": {
+        "10": {
             "connections": [
                 [
                     [
@@ -900,20 +220,20 @@
                 "height": 37.5,
                 "width": 20,
                 "display_type": "recvvia",
-                "position_x": 69.91693115234375,
-                "position_y": 367.9191589355469,
-                "layername": "Front panel"
+                "position_x": 65.01738739013672,
+                "position_y": 40.970497131347656,
+                "layername": "Buffer control"
             },
-            "name": "clock",
+            "name": "play",
             "do_onload": true,
-            "initargs": "\"clock\"",
+            "initargs": "\"play\"",
             "type": "recv"
         },
-        "39": {
+        "11": {
             "connections": [
                 [
                     [
-                        63,
+                        38,
                         0
                     ]
                 ]
@@ -923,8 +243,8 @@
                 "height": 37.5,
                 "width": 20,
                 "display_type": "recvvia",
-                "position_x": 437.3522644042969,
-                "position_y": 43.91123580932617,
+                "position_x": 209.64645385742188,
+                "position_y": 43.222476959228516,
                 "layername": "Buffer control"
             },
             "name": "rec",
@@ -932,43 +252,177 @@
             "initargs": "\"rec\"",
             "type": "recv"
         },
-        "40": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 438.8141784667969,
-                "position_y": 233.55508422851562,
-                "layername": "Buffer control"
-            },
-            "name": "send_40",
-            "do_onload": true,
-            "initargs": "\"bufctl\"",
-            "type": "send"
-        },
-        "41": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 555.7206420898438,
-                "position_y": 322.3502502441406,
-                "layername": "Buffer control"
-            },
-            "name": "send_41",
-            "do_onload": true,
-            "initargs": "\"bufctl\"",
-            "type": "send"
-        },
-        "42": {
+        "12": {
             "connections": [
                 [
                     [
-                        43,
+                        13,
+                        0
+                    ],
+                    [
+                        15,
+                        1
+                    ],
+                    [
+                        19,
+                        0
+                    ],
+                    [
+                        42,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 430.3187255859375,
+                "position_y": 122.53469848632812,
+                "layername": "Audio processing"
+            },
+            "name": "in~_12",
+            "do_onload": true,
+            "initargs": null,
+            "type": "in~"
+        },
+        "13": {
+            "connections": [
+                [
+                    [
+                        42,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 309.43536376953125,
+                "position_y": 198.14450073242188,
+                "layername": "Audio processing"
+            },
+            "name": "+~_13",
+            "do_onload": true,
+            "initargs": null,
+            "type": "+~"
+        },
+        "14": {
+            "connections": [
+                [
+                    [
+                        13,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 334.4651794433594,
+                "position_y": 350.5540466308594,
+                "layername": "Audio processing"
+            },
+            "name": "*~_14",
+            "do_onload": true,
+            "initargs": null,
+            "type": "*~"
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 405.4566955566406,
+                "position_y": 307.72019958496094,
+                "layername": "Audio processing"
+            },
+            "name": "+~_15",
+            "do_onload": true,
+            "initargs": null,
+            "type": "+~"
+        },
+        "16": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 44.0,
+                "display_type": "processor",
+                "position_x": 405.4566955566406,
+                "position_y": 355.72019958496094,
+                "layername": "Audio processing"
+            },
+            "name": "out~_16",
+            "do_onload": true,
+            "initargs": null,
+            "type": "out~"
+        },
+        "17": {
+            "connections": [
+                [
+                    [
+                        42,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 193.70367431640625,
+                "position_y": 182.04754638671875,
+                "layername": "Audio processing"
+            },
+            "name": "bufctl",
+            "do_onload": true,
+            "initargs": "\"bufctl\"",
+            "type": "recv"
+        },
+        "18": {
+            "connections": [
+                [
+                    [
+                        14,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 356.61920166015625,
+                "position_y": 305.025390625,
+                "layername": "Audio processing"
+            },
+            "name": "overdub",
+            "do_onload": true,
+            "initargs": "\"overdub\"",
+            "type": "recv"
+        },
+        "19": {
+            "connections": [
+                [
+                    [
+                        20,
                         0
                     ]
                 ],
@@ -979,20 +433,20 @@
                 "height": 25.0,
                 "width": 53.0,
                 "display_type": "processor",
-                "position_x": 201.84164428710938,
-                "position_y": 106.97605895996094,
-                "layername": "Front panel"
+                "position_x": 476.67327880859375,
+                "position_y": 171.97247314453125,
+                "layername": "Audio processing"
             },
-            "name": "ampl~_42",
+            "name": "ampl~_19",
             "do_onload": true,
             "initargs": null,
             "type": "ampl~"
         },
-        "43": {
+        "20": {
             "connections": [
                 [
                     [
-                        45,
+                        28,
                         0
                     ]
                 ]
@@ -1002,47 +456,132 @@
                 "height": 25.0,
                 "width": 83.0,
                 "display_type": "processor",
-                "position_x": 201.83773803710938,
-                "position_y": 142.9646759033203,
-                "layername": "Front panel"
+                "position_x": 476.67327880859375,
+                "position_y": 209.55395403227524,
+                "layername": "Audio processing"
             },
-            "name": "snap~_43",
+            "name": "snap~_20",
             "do_onload": true,
             "initargs": "100",
             "type": "snap~"
         },
-        "44": {
-            "connections": [
-                []
-            ],
+        "21": {
+            "connections": [],
             "gui_params": {
-                "direction": 0,
-                "orientation": 0,
-                "max_value": 0.0,
-                "min_value": -60.0,
-                "scale_position": 0,
-                "value": -62.54952430228241,
-                "height": 100.0,
-                "width": 55.0,
-                "show_scale": true,
-                "update_required": true,
-                "position_x": 287.7585754394531,
-                "position_y": 223.949951171875,
-                "display_type": "slidemeter",
-                "layername": "Front panel",
-                "scale_type": 0
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 474.17327880859375,
+                "position_y": 283.2588112132803,
+                "layername": "Audio processing"
             },
-            "name": "var_44",
-            "value": -62.54952430228241,
-            "do_onload": false,
-            "initargs": "0.0",
-            "type": "var"
+            "name": "send_21",
+            "do_onload": true,
+            "initargs": "\"inputdb\"",
+            "type": "send"
         },
-        "45": {
+        "22": {
             "connections": [
                 [
                     [
-                        44,
+                        23,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 53.0,
+                "display_type": "processor",
+                "position_x": 132.835205078125,
+                "position_y": 288.9537658691406,
+                "layername": "Audio processing"
+            },
+            "name": "ampl~_22",
+            "do_onload": true,
+            "initargs": null,
+            "type": "ampl~"
+        },
+        "23": {
+            "connections": [
+                [
+                    [
+                        27,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 83.0,
+                "display_type": "processor",
+                "position_x": 132.835205078125,
+                "position_y": 323.9537658691406,
+                "layername": "Audio processing"
+            },
+            "name": "snap~_23",
+            "do_onload": true,
+            "initargs": "100",
+            "type": "snap~"
+        },
+        "24": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 130.335205078125,
+                "position_y": 389.9537658691406,
+                "layername": "Audio processing"
+            },
+            "name": "send_24",
+            "do_onload": true,
+            "initargs": "\"outputdb\"",
+            "type": "send"
+        },
+        "25": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 383.82669830322266,
+                "position_y": 426.5454864501953,
+                "layername": "Buffer control"
+            },
+            "name": "send_25",
+            "do_onload": true,
+            "initargs": "\"bufctl\"",
+            "type": "send"
+        },
+        "26": {
+            "connections": [],
+            "gui_params": {
+                "layername": "Buffer control",
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 349.6719055175781,
+                "position_y": 390.86883544921875,
+                "label": "overdub"
+            },
+            "name": "send_26",
+            "do_onload": true,
+            "initargs": "\"ch1dub\"",
+            "type": "send"
+        },
+        "27": {
+            "connections": [
+                [
+                    [
+                        24,
                         0
                     ]
                 ]
@@ -1052,20 +591,20 @@
                 "height": 25.0,
                 "width": 46.0,
                 "display_type": "processor",
-                "position_x": 201.83773803710938,
-                "position_y": 177.968017578125,
-                "layername": "Front panel"
+                "position_x": 132.835205078125,
+                "position_y": 358.9537658691406,
+                "layername": "Audio processing"
             },
-            "name": "a2db_45",
+            "name": "a2db_27",
             "do_onload": true,
             "initargs": null,
             "type": "a2db"
         },
-        "46": {
+        "28": {
             "connections": [
                 [
                     [
-                        48,
+                        21,
                         0
                     ]
                 ]
@@ -1073,18 +612,243 @@
             "gui_params": {
                 "update_required": false,
                 "height": 25.0,
-                "width": 62.0,
+                "width": 46.0,
                 "display_type": "processor",
-                "position_x": 147.79327392578125,
-                "position_y": 130.2485809326172,
+                "position_x": 476.67327880859375,
+                "position_y": 247.62432024648325,
+                "layername": "Audio processing"
+            },
+            "name": "a2db_28",
+            "do_onload": true,
+            "initargs": null,
+            "type": "a2db"
+        },
+        "29": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 29.0,
+                "width": 97.0,
+                "display_type": "text",
+                "position_x": 60.91078186035156,
+                "position_y": 34.89462661743164,
+                "layername": "Front Panel"
+            },
+            "name": "text_29",
+            "value": "<span size=\"large\"><b>looper.mfp</b></span>",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "30": {
+            "connections": [
+                [
+                    [
+                        31,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 349.4997863769531,
+                "position_y": 41.927738189697266,
                 "layername": "Buffer control"
             },
-            "name": "xor_46",
+            "name": "newstate",
             "do_onload": true,
-            "initargs": "0xf",
-            "type": "xor"
+            "initargs": "\"newstate\"",
+            "type": "recv"
         },
-        "47": {
+        "31": {
+            "connections": [
+                [
+                    [
+                        33,
+                        1
+                    ],
+                    [
+                        39,
+                        1
+                    ],
+                    [
+                        53,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 47.0,
+                "display_type": "processor",
+                "position_x": 351.9994812011719,
+                "position_y": 90.92774200439453,
+                "layername": "Buffer control"
+            },
+            "name": "var_31",
+            "value": 0,
+            "do_onload": false,
+            "initargs": "0",
+            "type": "var"
+        },
+        "32": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 151.0,
+                "width": 194.0,
+                "display_type": "text",
+                "position_x": 44.39973449707031,
+                "position_y": 300.66336822509766,
+                "layername": "Buffer control"
+            },
+            "name": "text_32",
+            "value": "States: \n0 -- Idle\n1 -- Initial record\n2 -- Play looping base \n3 -- Overdub\n4 -- Play looping overdubbed\n5 -- Reject overdub",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "33": {
+            "connections": [
+                [
+                    [
+                        47,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 67.97174072265625,
+                "position_y": 124.83748626708984,
+                "layername": "Buffer control"
+            },
+            "name": "var_33",
+            "value": 2,
+            "do_onload": false,
+            "initargs": null,
+            "type": "var"
+        },
+        "34": {
+            "connections": [
+                [
+                    [
+                        33,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 52.0,
+                "display_type": "message",
+                "position_x": 67.97005462646484,
+                "position_y": 85.8844223022461,
+                "layername": "Buffer control"
+            },
+            "name": "message_34",
+            "do_onload": false,
+            "initargs": "Bang",
+            "type": "message"
+        },
+        "35": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 90.95992279052734,
+                "position_y": 211.7291717529297,
+                "layername": "Buffer control"
+            },
+            "name": "message_35",
+            "do_onload": false,
+            "initargs": "2",
+            "type": "message"
+        },
+        "36": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 223.9052734375,
+                "position_y": 322.61029052734375,
+                "layername": "Buffer control"
+            },
+            "name": "send_36",
+            "do_onload": true,
+            "initargs": "\"newstate\"",
+            "type": "send"
+        },
+        "37": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 112.94766998291016,
+                "position_y": 249.68106079101562,
+                "layername": "Buffer control"
+            },
+            "name": "message_37",
+            "do_onload": false,
+            "initargs": "0",
+            "type": "message"
+        },
+        "38": {
+            "connections": [
+                [
+                    [
+                        39,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 52.0,
+                "display_type": "message",
+                "position_x": 212.1460418701172,
+                "position_y": 87.2200698852539,
+                "layername": "Buffer control"
+            },
+            "name": "message_38",
+            "do_onload": false,
+            "initargs": "Bang",
+            "type": "message"
+        },
+        "39": {
             "connections": [
                 [
                     [
@@ -1095,148 +859,24 @@
             ],
             "gui_params": {
                 "update_required": false,
-                "height": 25.0,
-                "width": 62.0,
-                "display_type": "processor",
-                "position_x": 358.6929626464844,
-                "position_y": 126.72457885742188,
-                "layername": "Buffer control"
-            },
-            "name": "xor_47",
-            "do_onload": true,
-            "initargs": "0xf",
-            "type": "xor"
-        },
-        "48": {
-            "connections": [
-                [
-                    [
-                        24,
-                        1
-                    ],
-                    [
-                        46,
-                        1
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 60.0,
-                "display_type": "processor",
-                "position_x": 82.61225128173828,
-                "position_y": 129.2479248046875,
-                "layername": "Buffer control"
-            },
-            "name": "var_48",
-            "value": 0,
-            "do_onload": false,
-            "initargs": "0xf",
-            "type": "var"
-        },
-        "49": {
-            "connections": [
-                [
-                    [
-                        30,
-                        1
-                    ],
-                    [
-                        47,
-                        1
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 60.0,
-                "display_type": "processor",
-                "position_x": 293.73870849609375,
-                "position_y": 126.74453735351562,
-                "layername": "Buffer control"
-            },
-            "name": "var_49",
-            "value": 0,
-            "do_onload": false,
-            "initargs": "0xf",
-            "type": "var"
-        },
-        "50": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "label": "bufclk",
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 169.86598205566406,
-                "position_y": 161.9646759033203,
-                "initargs": "\"bufclk\"",
-                "layername": "Front panel"
-            },
-            "name": "send_50",
-            "do_onload": true,
-            "initargs": "\"bufclk\"",
-            "type": "send"
-        },
-        "51": {
-            "connections": [
-                [
-                    [
-                        57,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 37.5,
-                "width": 20,
-                "display_type": "recvvia",
-                "position_x": 68.57545471191406,
-                "position_y": 39.90423583984375,
-                "layername": "Clock"
-            },
-            "name": "bufclk",
-            "do_onload": true,
-            "initargs": "\"bufclk\"",
-            "type": "recv"
-        },
-        "52": {
-            "connections": [
-                [
-                    [
-                        56,
-                        0
-                    ],
-                    [
-                        60,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
                 "height": 25,
                 "width": 35,
                 "display_type": "processor",
-                "position_x": 179.73828125,
-                "position_y": 220.71139526367188,
-                "layername": "Clock"
+                "position_x": 212.17095947265625,
+                "position_y": 126.36931610107422,
+                "layername": "Buffer control"
             },
-            "name": "var_52",
-            "value": 11.099999999999977,
+            "name": "var_39",
+            "value": 3,
             "do_onload": false,
             "initargs": null,
             "type": "var"
         },
-        "53": {
+        "40": {
             "connections": [
                 [
                     [
-                        52,
+                        36,
                         0
                     ]
                 ]
@@ -1246,26 +886,415 @@
                 "height": 25,
                 "width": 35,
                 "display_type": "message",
-                "position_x": 180.5342254638672,
-                "position_y": 177.47061157226562,
-                "layername": "Clock"
+                "position_x": 212.17095947265625,
+                "position_y": 214.36932373046875,
+                "layername": "Buffer control"
             },
-            "name": "message_53",
+            "name": "message_40",
+            "do_onload": false,
+            "initargs": "1",
+            "type": "message"
+        },
+        "41": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 257.889404296875,
+                "position_y": 214.7207489013672,
+                "layername": "Buffer control"
+            },
+            "name": "message_41",
+            "do_onload": false,
+            "initargs": "3",
+            "type": "message"
+        },
+        "42": {
+            "connections": [
+                [
+                    [
+                        14,
+                        0
+                    ],
+                    [
+                        15,
+                        0
+                    ],
+                    [
+                        22,
+                        0
+                    ]
+                ],
+                [],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 124.0,
+                "display_type": "processor",
+                "position_x": 195.71429443359375,
+                "position_y": 237.2351837158203,
+                "layername": "Audio processing"
+            },
+            "name": "buffer~_42",
+            "do_onload": true,
+            "initargs": "20000,2",
+            "type": "buffer~"
+        },
+        "43": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 46.0,
+                "width": 257.0,
+                "display_type": "text",
+                "position_x": 45.19743347167969,
+                "position_y": 130.1499786376953,
+                "layername": "Audio processing"
+            },
+            "name": "text_43",
+            "value": "Channel 0 of buffer is the original loop\nChannel 1 is the overdub scratchpad ",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "44": {
+            "connections": [
+                [
+                    [
+                        26,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 352.0967712402344,
+                "position_y": 213.01637268066406,
+                "layername": "Buffer control"
+            },
+            "name": "message_44",
             "do_onload": false,
             "initargs": "0",
             "type": "message"
         },
-        "54": {
+        "45": {
             "connections": [
                 [
                     [
-                        59,
+                        26,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 417.94580078125,
+                "position_y": 338.4814147949219,
+                "layername": "Buffer control"
+            },
+            "name": "message_45",
+            "do_onload": false,
+            "initargs": "1",
+            "type": "message"
+        },
+        "46": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 135.9387969970703,
+                "position_y": 213.724365234375,
+                "layername": "Buffer control"
+            },
+            "name": "message_46",
+            "do_onload": false,
+            "initargs": "4",
+            "type": "message"
+        },
+        "47": {
+            "connections": [
+                [],
+                [
+                    [
+                        35,
                         0
                     ]
                 ],
                 [
                     [
-                        53,
+                        37,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        46,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        48,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 124.0,
+                "display_type": "processor",
+                "position_x": 67.80726623535156,
+                "position_y": 165.90969848632812,
+                "layername": "Buffer control"
+            },
+            "name": "case_47",
+            "do_onload": true,
+            "initargs": "0, 1, 2, 3, 4",
+            "type": "case"
+        },
+        "48": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 158.97900390625,
+                "position_y": 250.6063232421875,
+                "layername": "Buffer control"
+            },
+            "name": "message_48",
+            "do_onload": false,
+            "initargs": "0",
+            "type": "message"
+        },
+        "49": {
+            "connections": [
+                [
+                    [
+                        40,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        50,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        41,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        51,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        52,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 124.0,
+                "display_type": "processor",
+                "position_x": 212.17095947265625,
+                "position_y": 166.36932373046875,
+                "layername": "Buffer control"
+            },
+            "name": "case_49",
+            "do_onload": true,
+            "initargs": "0, 1, 2, 3, 4",
+            "type": "case"
+        },
+        "50": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 235.89993286132812,
+                "position_y": 249.68948364257812,
+                "layername": "Buffer control"
+            },
+            "name": "message_50",
+            "do_onload": false,
+            "initargs": "0",
+            "type": "message"
+        },
+        "51": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 281.87542724609375,
+                "position_y": 250.7014923095703,
+                "layername": "Buffer control"
+            },
+            "name": "message_51",
+            "do_onload": false,
+            "initargs": "5",
+            "type": "message"
+        },
+        "52": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 302.9619445800781,
+                "position_y": 215.65333557128906,
+                "layername": "Buffer control"
+            },
+            "name": "message_52",
+            "do_onload": false,
+            "initargs": "3",
+            "type": "message"
+        },
+        "53": {
+            "connections": [
+                [
+                    [
+                        44,
+                        0
+                    ],
+                    [
+                        61,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        62,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        66,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        45,
+                        0
+                    ],
+                    [
+                        63,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        64,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        54,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 141.0,
+                "display_type": "processor",
+                "position_x": 351.9994812011719,
+                "position_y": 130.92774200439453,
+                "layername": "Buffer control"
+            },
+            "name": "case_53",
+            "do_onload": true,
+            "initargs": "0, 1, 2, 3, 4, 5",
+            "type": "case"
+        },
+        "54": {
+            "connections": [
+                [
+                    [
+                        55,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        65,
                         0
                     ]
                 ]
@@ -1275,9 +1304,9 @@
                 "height": 25.0,
                 "width": 72.0,
                 "display_type": "processor",
-                "position_x": 69.00481414794922,
-                "position_y": 133.4458770751953,
-                "layername": "Clock"
+                "position_x": 470.9396667480469,
+                "position_y": 356.57806396484375,
+                "layername": "Buffer control"
             },
             "name": "trigger_54",
             "do_onload": true,
@@ -1288,218 +1317,146 @@
             "connections": [
                 [
                     [
-                        52,
+                        56,
                         0
                     ]
                 ]
             ],
             "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 84.0,
-                "display_type": "processor",
-                "position_x": 79.06208038330078,
-                "position_y": 217.18760681152344,
-                "layername": "Clock"
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 470.65118408203125,
+                "position_y": 390.70733642578125,
+                "layername": "Buffer control"
             },
-            "name": "metro_55",
-            "do_onload": true,
-            "initargs": "100",
-            "type": "metro"
+            "name": "message_55",
+            "do_onload": false,
+            "initargs": "2",
+            "type": "message"
         },
         "56": {
-            "connections": [
-                [
-                    [
-                        52,
-                        1
-                    ]
-                ]
-            ],
+            "connections": [],
             "gui_params": {
                 "update_required": false,
-                "height": 25.0,
-                "width": 50.0,
-                "display_type": "processor",
-                "position_x": 222.6496124267578,
-                "position_y": 221.0003662109375,
-                "layername": "Clock"
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 468.13519287109375,
+                "position_y": 426.7449645996094,
+                "layername": "Buffer control"
             },
-            "name": "+_56",
+            "name": "send_56",
             "do_onload": true,
-            "initargs": "0.1",
-            "type": "+"
+            "initargs": "\"newstate\"",
+            "type": "send"
         },
         "57": {
             "connections": [
                 [
                     [
-                        54,
+                        8,
                         0
                     ]
-                ],
-                [
-                    [
-                        58,
-                        0
-                    ]
-                ],
-                []
+                ]
             ],
             "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 121.0,
-                "display_type": "processor",
-                "position_x": 71.07545471191406,
-                "position_y": 89.90423583984375,
-                "layername": "Clock"
+                "update_required": true,
+                "height": 50,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 207.68545532226562,
+                "position_y": 286.40179443359375,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "Front Panel"
             },
-            "name": "case_57",
-            "do_onload": true,
-            "initargs": "True, False",
-            "type": "case"
+            "name": "var_57",
+            "value": false,
+            "do_onload": false,
+            "initargs": "False",
+            "type": "var"
         },
         "58": {
             "connections": [
                 [
                     [
-                        55,
+                        9,
                         0
                     ]
                 ]
             ],
             "gui_params": {
                 "update_required": true,
-                "height": 25.0,
-                "width": 55.0,
-                "display_type": "message",
-                "position_x": 117.68003845214844,
-                "position_y": 176.6233673095703,
-                "layername": "Clock"
+                "height": 50,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 284.54205322265625,
+                "position_y": 286.3861999511719,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "Front Panel"
             },
-            "name": "message_58",
+            "name": "var_58",
+            "value": false,
             "do_onload": false,
             "initargs": "False",
-            "type": "message"
-        },
-        "59": {
-            "connections": [
-                [
-                    [
-                        55,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 51.0,
-                "display_type": "message",
-                "position_x": 63.694644927978516,
-                "position_y": 177.7576141357422,
-                "layername": "Clock"
-            },
-            "name": "message_59",
-            "do_onload": false,
-            "initargs": "True",
-            "type": "message"
-        },
-        "60": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 177.23828125,
-                "position_y": 268.7113952636719,
-                "layername": "Clock"
-            },
-            "name": "send_60",
-            "do_onload": true,
-            "initargs": "\"clock\"",
-            "type": "send"
+            "type": "var"
         },
         "61": {
             "connections": [
-                []
+                [
+                    [
+                        25,
+                        0
+                    ]
+                ]
             ],
             "gui_params": {
                 "update_required": true,
                 "height": 25.0,
-                "width": 42.0,
-                "display_type": "enum",
-                "position_x": 131.64309692382812,
-                "position_y": 442.313720703125,
-                "layername": "Front panel"
-            },
-            "name": "var_61",
-            "value": 0,
-            "do_onload": true,
-            "initargs": "0.0",
-            "type": "var"
-        },
-        "62": {
-            "connections": [],
-            "gui_params": {
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 502.8287353515625,
-                "position_y": 238.55001831054688,
+                "width": 240.0,
+                "display_type": "message",
+                "position_x": 351.8677978515625,
+                "position_y": 168.72555541992188,
                 "layername": "Buffer control"
             },
-            "name": "send_62",
-            "do_onload": true,
-            "initargs": "\"bufclk\"",
-            "type": "send"
+            "name": "message_61",
+            "do_onload": false,
+            "initargs": "rec_enabled=0, play_channels=0",
+            "type": "message"
+        },
+        "62": {
+            "connections": [
+                [
+                    [
+                        25,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 325.0,
+                "display_type": "message",
+                "position_x": 373.8618469238281,
+                "position_y": 244.69064331054688,
+                "layername": "Buffer control"
+            },
+            "name": "message_62",
+            "do_onload": false,
+            "initargs": "rec_mode=1, rec_enabled=1, rec_channels=1",
+            "type": "message"
         },
         "63": {
             "connections": [
                 [
                     [
-                        66,
-                        0
-                    ],
-                    [
-                        67,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        62,
-                        0
-                    ],
-                    [
-                        68,
-                        0
-                    ]
-                ],
-                []
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 121.0,
-                "display_type": "processor",
-                "position_x": 440.8511657714844,
-                "position_y": 90.90634155273438,
-                "layername": "Buffer control"
-            },
-            "name": "case_63",
-            "do_onload": true,
-            "initargs": "True, False",
-            "type": "case"
-        },
-        "64": {
-            "connections": [
-                [
-                    [
-                        24,
+                        25,
                         0
                     ]
                 ]
@@ -1507,22 +1464,45 @@
             "gui_params": {
                 "update_required": true,
                 "height": 25.0,
-                "width": 125.0,
+                "width": 325.0,
                 "display_type": "message",
-                "position_x": 71.79266834259033,
-                "position_y": 158.65322875976562,
+                "position_x": 420.0945129394531,
+                "position_y": 283.5488586425781,
+                "layername": "Buffer control"
+            },
+            "name": "message_63",
+            "do_onload": false,
+            "initargs": "rec_mode=2, rec_channels=2, rec_enabled=1",
+            "type": "message"
+        },
+        "64": {
+            "connections": [
+                [
+                    [
+                        25,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 240.0,
+                "display_type": "message",
+                "position_x": 456.941162109375,
+                "position_y": 318.52435302734375,
                 "layername": "Buffer control"
             },
             "name": "message_64",
             "do_onload": false,
-            "initargs": "\"play_channels\"",
+            "initargs": "rec_enabled=0, play_channels=2",
             "type": "message"
         },
         "65": {
             "connections": [
                 [
                     [
-                        30,
+                        25,
                         0
                     ]
                 ]
@@ -1530,22 +1510,22 @@
             "gui_params": {
                 "update_required": true,
                 "height": 25.0,
-                "width": 119.0,
+                "width": 240.0,
                 "display_type": "message",
-                "position_x": 284.360107421875,
-                "position_y": 158.8602752685547,
+                "position_x": 509.5721435546875,
+                "position_y": 391.5389099121094,
                 "layername": "Buffer control"
             },
             "name": "message_65",
             "do_onload": false,
-            "initargs": "\"rec_channels\"",
+            "initargs": "play_channels=1, rec_enabled=0",
             "type": "message"
         },
         "66": {
             "connections": [
                 [
                     [
-                        40,
+                        25,
                         0
                     ]
                 ]
@@ -1553,293 +1533,81 @@
             "gui_params": {
                 "update_required": true,
                 "height": 25.0,
-                "width": 211.0,
+                "width": 337.0,
                 "display_type": "message",
-                "position_x": 440.13482666015625,
-                "position_y": 142.71556091308594,
+                "position_x": 395.50653076171875,
+                "position_y": 206.6848907470703,
                 "layername": "Buffer control"
             },
             "name": "message_66",
             "do_onload": false,
-            "initargs": "rec_enabled=1, rec_mode=1",
+            "initargs": "play_channels=1, rec_enabled=0, play_mode=1",
             "type": "message"
-        },
-        "67": {
-            "connections": [
-                [
-                    [
-                        40,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 205.0,
-                "display_type": "message",
-                "position_x": 544.7425842285156,
-                "position_y": 183.65200805664062,
-                "layername": "Buffer control"
-            },
-            "name": "message_67",
-            "do_onload": false,
-            "initargs": "play_mode=1, play_state=1",
-            "type": "message"
-        },
-        "68": {
-            "connections": [
-                [
-                    [
-                        41,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 120.0,
-                "display_type": "message",
-                "position_x": 557.7510375976562,
-                "position_y": 240.5500030517578,
-                "layername": "Buffer control"
-            },
-            "name": "message_68",
-            "do_onload": false,
-            "initargs": "rec_enabled=0",
-            "type": "message"
-        },
-        "69": {
-            "connections": [
-                [
-                    [
-                        41,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 108.0,
-                "display_type": "message",
-                "position_x": 584.7460327148438,
-                "position_y": 277.48095703125,
-                "layername": "Buffer control"
-            },
-            "name": "message_69",
-            "do_onload": false,
-            "initargs": "play_state=0",
-            "type": "message"
-        },
-        "70": {
-            "connections": [
-                [
-                    [
-                        71,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 37.5,
-                "width": 20,
-                "display_type": "recvvia",
-                "position_x": 598.40673828125,
-                "position_y": 45.937217712402344,
-                "layername": "Buffer control"
-            },
-            "name": "play",
-            "do_onload": true,
-            "initargs": "\"play\"",
-            "type": "recv"
-        },
-        "71": {
-            "connections": [
-                [
-                    [
-                        67,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        69,
-                        0
-                    ]
-                ],
-                []
-            ],
-            "gui_params": {
-                "update_required": false,
-                "height": 25.0,
-                "width": 121.0,
-                "display_type": "processor",
-                "position_x": 600.9087524414062,
-                "position_y": 85.15380859375,
-                "layername": "Buffer control"
-            },
-            "name": "case_71",
-            "do_onload": true,
-            "initargs": "True, False",
-            "type": "case"
-        },
-        "72": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 31.0,
-                "display_type": "text",
-                "position_x": 444.6511535644531,
-                "position_y": 243.94369506835938,
-                "layername": "Front panel"
-            },
-            "name": "text_72",
-            "value": "REC",
-            "do_onload": false,
-            "initargs": null,
-            "type": "text"
-        },
-        "73": {
-            "connections": [
-                [
-                    [
-                        75,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "on_message": true,
-                "update_required": true,
-                "height": 40,
-                "width": 40,
-                "off_message": false,
-                "display_type": "toggle",
-                "position_x": 498.6087951660156,
-                "position_y": 268.9376525878906,
-                "layername": "Front panel"
-            },
-            "name": "var_73",
-            "value": false,
-            "do_onload": true,
-            "initargs": "False",
-            "type": "var"
-        },
-        "74": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 40.0,
-                "display_type": "text",
-                "position_x": 501.6048583984375,
-                "position_y": 244.94369506835938,
-                "layername": "Front panel"
-            },
-            "name": "text_74",
-            "value": "PLAY",
-            "do_onload": false,
-            "initargs": null,
-            "type": "text"
-        },
-        "75": {
-            "connections": [],
-            "gui_params": {
-                "layername": "Front panel",
-                "update_required": false,
-                "label": "play",
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 497.1087951660156,
-                "position_y": 327.9376525878906,
-                "initargs": "\"play\"",
-                "height": 35
-            },
-            "name": "send_75",
-            "do_onload": true,
-            "initargs": "\"play\"",
-            "type": "send"
         }
     },
-    "type": "looper-10",
+    "type": "headrush-14",
     "scopes": {
         "__patch__": {
-            "bufctl": 3,
-            "toggle_009": 36,
-            "toggle_008": 15,
-            "toggle_003": 10,
-            "toggle_002": 9,
-            "toggle_001": 8,
-            "processor_014": 30,
-            "toggle_007": 14,
-            "toggle_006": 13,
-            "toggle_005": 12,
-            "toggle_004": 11,
-            "slidemeter_001": 34,
-            "slidemeter_002": 44,
-            "sendvia_006": 37,
-            "bufclk": 51,
-            "message_002": 65,
-            "message_001": 64,
-            "message_007": 53,
-            "processor_009": 25,
-            "clock": 38,
-            "processor_004": 23,
-            "processor_005": 46,
-            "message_009": 58,
-            "play_enable": 22,
-            "processor_001": 1,
-            "processor_002": 2,
-            "processor_003": 4,
-            "processor_026": 71,
-            "processor_024": 57,
-            "processor_010": 26,
-            "processor_007": 48,
-            "message_022": 69,
-            "rec": 39,
-            "enum_001": 61,
-            "sendvia_001": 16,
-            "sendvia_010": 60,
-            "play": 70,
-            "sendvia_011": 62,
-            "message_021": 68,
-            "message_008": 59,
-            "text_001": 5,
-            "text_002": 6,
-            "text_003": 7,
-            "text_004": 18,
-            "text_005": 19,
-            "text_006": 20,
-            "text_007": 21,
-            "text_009": 72,
-            "message_020": 67,
-            "sendvia_008": 41,
-            "sendvia_009": 50,
-            "processor_008": 24,
-            "message_019": 66,
-            "sendvia_002": 17,
-            "sendvia_003": 27,
-            "sendvia_004": 33,
-            "sendvia_005": 35,
-            "rec_enable": 28,
-            "sendvia_007": 40,
-            "processor_013": 49,
-            "processor_012": 47,
-            "processor_011": 29,
-            "text_010": 74,
-            "processor_015": 31,
-            "sendvia_012": 75,
-            "toggle_010": 73,
-            "processor_019": 42,
-            "processor_018": 63,
+            "bufctl": 17,
+            "message_008": 38,
+            "play": 10,
+            "text_012": 43,
+            "inputdb": 2,
+            "outputdb": 3,
+            "message_007": 46,
+            "processor_009": 15,
+            "message_005": 35,
+            "message_004": 34,
+            "processor_004": 13,
+            "message_009": 40,
+            "sendvia_010": 56,
+            "processor_001": 12,
+            "processor_026": 60,
+            "processor_027": 49,
+            "processor_024": 54,
+            "processor_025": 59,
+            "processor_022": 67,
+            "processor_007": 14,
+            "buffer~_15": 42,
+            "rec": 11,
+            "processor_028": 53,
+            "button_002": 58,
+            "button_001": 57,
+            "message_006": 37,
+            "message_011": 41,
+            "message_021": 55,
+            "message_019": 64,
+            "text_002": 1,
+            "text_003": 4,
+            "text_004": 5,
+            "text_005": 6,
+            "text_006": 29,
+            "text_009": 32,
+            "message_020": 65,
+            "message_010": 50,
+            "sendvia_009": 36,
+            "message_012": 51,
+            "message_013": 61,
+            "message_014": 66,
+            "message_015": 63,
+            "message_016": 45,
+            "message_017": 48,
+            "message_018": 52,
+            "sendvia_001": 8,
+            "sendvia_002": 9,
+            "sendvia_004": 21,
+            "sendvia_005": 24,
+            "sendvia_006": 25,
+            "sendvia_007": 26,
+            "processor_013": 22,
+            "processor_012": 20,
+            "processor_011": 19,
+            "processor_010": 16,
+            "processor_016": 28,
+            "processor_015": 27,
+            "processor_014": 23,
+            "overdub": 18,
+            "newstate": 30,
             "self": 0
         }
     }

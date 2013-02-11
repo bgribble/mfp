@@ -48,6 +48,10 @@ class Scope (Processor):
             log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
             self.outlets[0] = MethodCall("bufinfo")
 
+    def range(self, minval, maxval): 
+        self.gui_params['y_min'] = minval
+        self.gui_params['y_max'] = maxval
+
     def set_retrig(self, value):
         self.retrig_value = value
 
