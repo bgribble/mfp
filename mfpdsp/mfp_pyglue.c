@@ -56,6 +56,24 @@ dsp_blocksize(PyObject * mod, PyObject * args)
     Py_INCREF(rval);
     return rval;
 }
+static PyObject * 
+dsp_in_latency(PyObject * mod, PyObject * args)
+{
+    PyObject * rval = PyFloat_FromDouble((double)mfp_in_latency);
+    Py_INCREF(rval);
+    return rval;
+}
+
+
+static PyObject * 
+dsp_out_latency(PyObject * mod, PyObject * args)
+{
+    PyObject * rval = PyFloat_FromDouble((double)mfp_out_latency);
+    Py_INCREF(rval);
+    return rval;
+}
+
+
 
 
 static PyObject *
@@ -398,6 +416,8 @@ static PyMethodDef MfpDspMethods[] = {
     { "dsp_disable",  dsp_disable, METH_VARARGS, "Disable dsp" },
     { "dsp_samplerate",  dsp_samplerate, METH_VARARGS, "Return samplerate" },
     { "dsp_blocksize",  dsp_blocksize, METH_VARARGS, "Return blocksize" },
+    { "dsp_in_latency",  dsp_blocksize, METH_VARARGS, "Return input latency" },
+    { "dsp_out_latency",  dsp_blocksize, METH_VARARGS, "Return output latency" },
     { "dsp_response_wait",  dsp_response_wait, METH_VARARGS, "Return next DSP responses" },
     { "proc_create", proc_create, METH_VARARGS, "Create DSP processor" },
     { "proc_destroy", proc_destroy, METH_VARARGS, "Destroy DSP processor" },
@@ -439,7 +459,7 @@ init_builtins(void)
         init_builtin_lt, init_builtin_gt,
         init_builtin_line, init_builtin_noise, init_builtin_buffer,
         init_builtin_biquad, init_builtin_phasor,
-        init_builtin_ladspa
+        init_builtin_ladspa, init_builtin_delay
     };
     int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
 

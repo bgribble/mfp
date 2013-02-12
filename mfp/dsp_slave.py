@@ -62,7 +62,9 @@ class DSPCommand (RPCWrapper):
     def get_dsp_params(self):
         srate = mfpdsp.dsp_samplerate()
         blksize = mfpdsp.dsp_blocksize()
-        return (srate, blksize)
+        in_latency = mfpdsp.dsp_in_latency()
+        out_latency = mfpdsp.dsp_out_latency()
+        return (srate, blksize, in_latency, out_latency)
 
 def dsp_init(pipe, num_inputs, num_outputs):
     from main import MFPCommand

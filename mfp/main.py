@@ -176,6 +176,8 @@ class MFPApp (Singleton):
         self.dsp_outputs = 2
         self.samplerate = 44100
         self.blocksize = 256 
+        self.in_latency = 0
+        self.out_latency = 0
 
         # multiprocessing targets and RPC links
         self.dsp_process = None
@@ -215,7 +217,8 @@ class MFPApp (Singleton):
             self.dsp_process.serve(DSPObject)
             self.dsp_process.serve(DSPCommand)
             self.dsp_command = DSPCommand()
-            self.samplerate, self.blocksize = self.dsp_command.get_dsp_params()
+            self.samplerate, self.blocksize, self.in_latency, self.out_latency = \
+                    self.dsp_command.get_dsp_params()
 
         if not self.no_gui:
             self.gui_process = RPCServer("mfp_gui", gui_init)
