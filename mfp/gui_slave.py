@@ -117,7 +117,9 @@ class GUICommand (RPCWrapper):
         from .gui.slidemeter_element import SlideMeterElement
         from .gui.patch_info import PatchInfo
         from .gui.via_element import SendViaElement, ReceiveViaElement
-        from .gui.button_element import ToggleButtonElement, BangButtonElement
+        from .gui.button_element import ToggleButtonElement
+        from .gui.button_element import ToggleIndicatorElement
+        from .gui.button_element import BangButtonElement
 
         elementtype = params.get('display_type')
         log.debug("create:", obj_id, elementtype, params)
@@ -134,6 +136,7 @@ class GUICommand (RPCWrapper):
             'recvvia': ReceiveViaElement,
             'toggle': ToggleButtonElement,
             'button': BangButtonElement,
+            'indicator': ToggleIndicatorElement
         }
         ctor = ctors.get(elementtype)
         if ctor:

@@ -213,7 +213,7 @@ class ToggleButtonElement (ButtonElement):
         return False
 
 class ToggleIndicatorElement (ButtonElement): 
-    display_type = "toggle"
+    display_type = "indicator"
     def make_control_mode(self):
         return PatchElement.make_control_mode(self)
 
