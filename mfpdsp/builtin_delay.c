@@ -58,7 +58,6 @@ process(mfp_processor * proc)
 
     /* now copy some input into the buffer */
     if (pdata->delay_buffer->blocksize <= proc->inlet_buf[0]->blocksize) {
-        printf("case 0\n");
         pdata->buf_zero = 0;
         memcpy(pdata->delay_buffer->data, 
                proc->inlet_buf[0]->data + proc->inlet_buf[0]->blocksize 
@@ -115,9 +114,6 @@ config(mfp_processor * proc)
         buf_samples = buf_ms * mfp_samplerate / 1000.0;
         buf_samples = ((int)(buf_samples / mfp_blocksize) + 1) * mfp_blocksize;
 
-        printf("allocating storage for delay of %f ms (%d samples in buffer)\n",
-                buf_ms, buf_samples);
-
         if (pdata->delay_buffer == NULL) {
             pdata->delay_buffer = mfp_block_new(buf_samples);
         }
@@ -127,7 +123,6 @@ config(mfp_processor * proc)
         mfp_block_zero(pdata->delay_buffer);
         g_hash_table_remove(proc->params, "bufsize");
     } 
-    printf("done with del~ config\n");
 
     return;
 }
