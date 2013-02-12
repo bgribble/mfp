@@ -123,11 +123,6 @@ process(mfp_processor * proc)
     int inpos, outpos;
     int loopstart=0; 
 
-    /*
-    printf("buffer~ process: rec_mode=%d, play_mode=%d, play_state=%d, rec_pos=%d, play_pos=%d, region_start=%d, region_end=%d\n",
-        d->rec_mode, d->play_mode, d->play_state, d->rec_pos, d->play_pos, d->region_start, d->region_end);
-    */
-
     /* if not currently capturing, check for trigger conditions */ 
     if(d->rec_state == REC_IDLE && d->rec_enabled) {
         if ((d->rec_mode == TRIG_EXT) || (d->rec_mode == TRIG_THRESH)) {
@@ -191,12 +186,12 @@ process(mfp_processor * proc)
             if (d->rec_mode == REC_LOOPSET) {
                 d->region_start = 0;
                 d->region_end = 0;
+                d->rec_pos = d->region_start; 
+                d->play_pos = d->region_start;
             }
 
             d->rec_state = REC_ACTIVE;
             d->play_state = PLAY_ACTIVE; 
-            d->rec_pos = d->region_start; 
-            d->play_pos = d->region_start;
             loopstart = 1;
         }
     }

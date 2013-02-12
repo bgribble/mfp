@@ -62,3 +62,5 @@ def register():
     loadbang.register() 
     from . import oscutils
     oscutils.register()
+    from . import delay
+    delay.register()
