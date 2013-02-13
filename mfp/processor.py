@@ -239,6 +239,7 @@ class Processor (object):
         MFPApp().forget(self)
 
     def resize(self, inlets, outlets):
+        from .main import MFPApp
         if inlets > len(self.inlets):
             newin = inlets - len(self.inlets)
             self.inlets += [Uninit] * newin
@@ -268,8 +269,28 @@ class Processor (object):
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def connect(self, outlet, target, inlet):
+        # make sure this is a possibility 
+        if not isinstance(target, Processor):
+            log.debug("Error: Can't connect '%s' (obj_id %d) to %s"
+                      % (self.name, self.obj_id, target))
+            return False 
+
+        if outlet > len(self.outlets):
+            log.debug("Error: Can't connect '%s' (obj_id %d) outlet %d (only %d outlets)"
+                      % (self.name, self.obj_id, outlet, len(self.outlets)))
+            return False 
+        
+        if inlet > len(target.inlets):
+            log.debug("Error: Can't connect to '%s' (obj_id %d) inlet %d (only %d inlets)"
+                      % (target.name, target.obj_id, inlet, len(target.inlets)))
+            return False 
+
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
+            if inlet not in target.dsp_inlets: 
+                log.debug("Error: Can't connect DSP outlet of '%s' to non-DSP inlet of '%s'" 
+                          % (self.name, target.name))
+                return False 
             self.dsp_obj.connect(self.dsp_outlets.index(outlet),
                                  target.obj_id, target.dsp_inlets.index(inlet))
 
