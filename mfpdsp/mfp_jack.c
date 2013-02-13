@@ -81,10 +81,11 @@ info_callback(const char * msg)
 }
 
 static void
-connect_cb (jack_port_id_t p1, jack_port_id_t p2, int connect, void * arg) 
+reorder_cb (void * arg) 
 {
     jack_latency_range_t range;
     int portno;
+    int lastval;
     int maxval;
 
     jack_recompute_total_latencies(client);
@@ -96,6 +97,14 @@ connect_cb (jack_port_id_t p1, jack_port_id_t p2, int connect, void * arg)
         if (range.max > maxval) {
             maxval = range.max;
         }
+
+        lastval = jack_port_get_total_latency(client, 
+                    g_array_index(mfp_input_ports, jack_port_t *, portno));
+        printf("  capture \"total\" latency port %d: %d\n", portno, lastval);
+        if (lastval > maxval) {
+            maxval = lastval;
+        }
+
     }
     mfp_in_latency = 1000.0 * maxval / mfp_samplerate;
 
@@ -107,11 +116,19 @@ connect_cb (jack_port_id_t p1, jack_port_id_t p2, int connect, void * arg)
         if (range.max > maxval) {
             maxval = range.max;
         }
+        lastval = jack_port_get_total_latency(client, 
+                    g_array_index(mfp_output_ports, jack_port_t *, portno));
+        printf("  playback \"total\" latency port %d: %d\n", portno, lastval);
+        if (lastval > maxval) {
+            maxval = lastval;
+        }
     }
 
     mfp_out_latency = 1000.0 * maxval / mfp_samplerate;
     printf("Connections changed: setting input latency to %.1f ms, output to %.1f ms\n",
             mfp_in_latency, mfp_out_latency);
+
+
 }
 
 
@@ -131,7 +148,7 @@ mfp_jack_startup(int num_inputs, int num_outputs)
     }
     
     jack_set_process_callback(client, process, 0);
-    jack_set_port_connect_callback(client, connect_cb, NULL);
+    jack_set_graph_order_callback(client, reorder_cb, NULL);
 
     /* no info logging to console */ 
     jack_set_info_function(info_callback);
