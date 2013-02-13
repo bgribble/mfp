@@ -1,7 +1,6 @@
 
 
 def register():
-    from mfp import log
     from . import var
     var.register()
     from . import metro
@@ -64,3 +63,5 @@ def register():
     oscutils.register()
     from . import delay
     delay.register()
+    from . import dispatch
+    dispatch.register()

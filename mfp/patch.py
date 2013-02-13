@@ -30,6 +30,7 @@ class Patch(Processor):
 
         self.inlet_objects = []
         self.outlet_objects = []
+        self.dispatch_objects = [] 
 
         self.evaluator.bind_local("self", self)
         self.default_scope.bind("self", self)
@@ -113,6 +114,16 @@ class Patch(Processor):
         for o in range(len(self.outlets)):
             self.outlets[i] = self.outlet_objects[i].outlets[0]
 
+    def method(self, message, inlet=0):
+        if len(self.dispatch_objects): 
+            for d in self.dispatch_objects:
+                d.send(message)
+        else:
+            self.baseclass_method(message, inlet)
+
+    def baseclass_method(self, message, inlet=0):
+        Processor.method(self, message, inlet) 
+
     def send(self, value, inlet=0):
         self.inlet_objects[inlet].send(value)
 
@@ -135,6 +146,9 @@ class Patch(Processor):
             self.outlet_objects[num] = obj
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
+        elif obj.init_type == 'dispatch':
+            self.dispatch_objects.append(obj)
+
     def remove(self, obj):
         try:
             if obj.scope is not None and obj.name is not None:
@@ -154,6 +168,12 @@ class Patch(Processor):
             self.outlet_objects.remove(obj)
         except ValueError:
             pass
+
+        try:
+            self.dispatch_objects.remove(obj)
+        except ValueError:
+            pass
+
 
 
     ############################
