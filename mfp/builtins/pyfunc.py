@@ -20,32 +20,43 @@ def get_arglist(thunk):
         return None
 
 
-
 class ApplyMethod(Processor):
     doc_tooltip_obj = "Create a method call object"
-    doc_tooltip_inlet = ["Arguments to method call", 
-                         "Name of method (default: initarg 0)"]
+    doc_tooltip_inlet = ["Name of method",
+                         "Positional arguments to method call", 
+                         "Keyword arguments to method call" ]
+                         
     doc_tooltip_outlet = ["MethodCall object output"]
                          
     def __init__(self, init_type, init_args, patch, scope, name):
         self.method_name = None
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
         if len(initargs):
-            self.method_name = initargs[0]
+            self.method_name = str(initargs[0])
 
     def trigger(self):
+        pargs = None
+        kargs = None 
+       
+        if self.inlets[0] is not Bang:
+            self.method_name = str(self.inlets[0])
+
         if self.inlets[1] is not Uninit: 
-            if isinstance(self.inlets[1], str):
-                self.method_name = self.inlets[1]
-            elif isinstance(self.inlets[1], MethodCall):
-                self.method_name = self.inlets[1].method
-            self.inlets[1] = Uninit 
-        if self.inlets[0] is Bang:
-            self.outlets[0] = MethodCall(self.method_name)
+            pargs = self.inlets[1]
+
+        if self.inlets[2] is not Uninit:
+            kargs = self.inlets[2]
+
+        if kargs is not None and pargs is not None: 
+            self.outlets[0] = MethodCall(self.method_name, *pargs, **kargs)
+        elif pargs is not None:
+            self.outlets[0] = MethodCall(self.method_name, *pargs)
+        elif kargs is not None:
+            self.outlets[0] = MethodCall(self.method_name, **kargs)
         else:
-            self.outlets[0] = MethodCall(self.method_name, *(self.inlets[0]))
+            self.outlets[0] = MethodCall(self.method_name)
 
 
 class GetElement(Processor):

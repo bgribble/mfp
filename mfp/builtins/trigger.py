@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 '''
-p_trigger.py: Repeat input on multiple outputs
+trigger.py: Repeat input on multiple outputs
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''

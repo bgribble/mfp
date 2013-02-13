@@ -2,48 +2,252 @@
     "gui_params": {
         "layers": [
             [
-                "Layer 0",
+                "Front Panel",
+                "__patch__"
+            ],
+            [
+                "Buffer",
+                "__patch__"
+            ],
+            [
+                "Vert pos",
                 "__patch__"
             ]
         ],
-        "name": "default",
         "obj_id": 0,
         "top_level": true,
         "num_outlets": 0,
         "display_type": "patch",
-        "num_inlets": 0,
-        "initargs": ""
+        "num_inlets": 0
     },
     "objects": {
         "1": {
             "connections": [
                 [
                     [
-                        2,
+                        13,
                         0
                     ]
                 ]
             ],
             "gui_params": {
+                "plot_type": "scope",
+                "style": {},
+                "position_x": 22.797134399414062,
+                "y_max": 0.5,
                 "update_required": false,
-                "display_type": "processor",
-                "position_x": 161.13616943359375,
-                "position_y": 14.984886169433594,
-                "initargs": null,
-                "layername": "Layer 0"
+                "height": 269,
+                "width": 326,
+                "display_type": "plot",
+                "x_max": 6.28,
+                "position_y": 68.27943420410156,
+                "x_min": 0.0,
+                "layername": "Front Panel",
+                "y_min": -0.5
             },
-            "name": "processor_001",
+            "name": "scope_1",
             "do_onload": true,
             "initargs": null,
-            "type": "in~"
+            "type": "scope"
         },
         "2": {
+            "connections": [
+                [
+                    [
+                        3,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 66.0,
+                "display_type": "enum",
+                "position_x": 475.1360778808594,
+                "position_y": 186.91236114501953,
+                "layername": "Front Panel"
+            },
+            "name": "enum_2",
+            "value": 0.0,
+            "do_onload": true,
+            "initargs": "0.0",
+            "type": "enum"
+        },
+        "3": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "label": "threshold",
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 472.4683837890625,
+                "position_y": 220.78292083740234,
+                "initargs": "\"threshold\"",
+                "layername": "Front Panel"
+            },
+            "name": "send_3",
+            "do_onload": true,
+            "initargs": "\"threshold\"",
+            "type": "send"
+        },
+        "4": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "value": 0.5,
+                "update_required": true,
+                "height": 25.0,
+                "width": 42.0,
+                "display_type": "enum",
+                "position_x": 377.8760070800781,
+                "position_y": 96.84796142578125,
+                "initargs": "0.0",
+                "layername": "Front Panel"
+            },
+            "name": "enum_4",
+            "value": 0.5,
+            "do_onload": true,
+            "initargs": "0.0",
+            "type": "enum"
+        },
+        "5": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "label": "v_range",
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 375.3760070800781,
+                "position_y": 131.84796142578125,
+                "initargs": "\"v_range\"",
+                "layername": "Front Panel"
+            },
+            "name": "send_5",
+            "do_onload": true,
+            "initargs": "\"v_range\"",
+            "type": "send"
+        },
+        "6": {
+            "connections": [
+                [
+                    [
+                        7,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "value": 0,
+                "update_required": true,
+                "height": 25.0,
+                "width": 42.0,
+                "display_type": "enum",
+                "position_x": 378.19677734375,
+                "position_y": 182.78611755371094,
+                "initargs": "0.0",
+                "layername": "Front Panel"
+            },
+            "name": "enum_6",
+            "value": 0.0,
+            "do_onload": true,
+            "initargs": "0.0",
+            "type": "enum"
+        },
+        "7": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "label": "v_pos",
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 375.69677734375,
+                "position_y": 215.7861328125,
+                "initargs": "\"v_pos\"",
+                "layername": "Front Panel"
+            },
+            "name": "send_7",
+            "do_onload": true,
+            "initargs": "\"v_pos\"",
+            "type": "send"
+        },
+        "8": {
+            "connections": [
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 60.0,
+                "display_type": "enum",
+                "position_x": 474.78070068359375,
+                "position_y": 96.83755493164062,
+                "layername": "Front Panel"
+            },
+            "name": "enum_8",
+            "value": 10.0,
+            "do_onload": true,
+            "initargs": "0.0",
+            "type": "enum"
+        },
+        "9": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "label": "h_range",
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 472.28070068359375,
+                "position_y": 132.83755493164062,
+                "initargs": "\"h_range\"",
+                "layername": "Front Panel"
+            },
+            "name": "send_9",
+            "do_onload": true,
+            "initargs": "\"h_range\"",
+            "type": "send"
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 29.0,
+                "width": 290.0,
+                "display_type": "text",
+                "position_x": 25.992706298828125,
+                "position_y": 23.965179443359375,
+                "layername": "Front Panel"
+            },
+            "name": "text_10",
+            "value": "<span size=\"large\"><b>oscope.mfp:</b></span> single-channel oscilloscope",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "11": {
             "connections": [
                 [],
                 [],
                 [
                     [
-                        3,
+                        12,
                         0
                     ]
                 ]
@@ -53,122 +257,100 @@
                 "height": 25.0,
                 "width": 93.0,
                 "display_type": "processor",
-                "position_x": 161.13616943359375,
-                "position_y": 148.891357421875,
-                "layername": "Layer 0"
+                "position_x": 204.32235717773438,
+                "position_y": 158.4948272705078,
+                "layername": "Buffer"
             },
-            "name": "processor_002",
+            "name": "buffer~_11",
             "do_onload": true,
             "initargs": "100",
             "type": "buffer~"
         },
-        "3": {
+        "12": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 283.8223571777344,
+                "position_y": 206.4948272705078,
+                "layername": "Buffer"
+            },
+            "name": "send_12",
+            "do_onload": true,
+            "initargs": "\"scope_1\"",
+            "type": "send"
+        },
+        "13": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "label": "buffer",
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 20.297134399414062,
+                "position_y": 341.27943420410156,
+                "initargs": "\"buffer\"",
+                "layername": "Front Panel"
+            },
+            "name": "send_13",
+            "do_onload": true,
+            "initargs": "\"buffer\"",
+            "type": "send"
+        },
+        "14": {
             "connections": [
                 [
                     [
-                        2,
+                        11,
                         0
                     ]
                 ]
             ],
             "gui_params": {
-                "plot_type": "scope",
-                "style": {},
-                "x_max": 6.28,
-                "y_max": 1.0,
                 "update_required": false,
-                "display_type": "plot",
-                "position_x": 161.13616943359375,
-                "position_y": 191.891357421875,
-                "x_min": 0.0,
-                "initargs": null,
-                "layername": "Layer 0",
-                "y_min": -1.0
+                "height": 25.0,
+                "width": 46.0,
+                "display_type": "processor",
+                "position_x": 204.44509887695312,
+                "position_y": 79.80123138427734,
+                "layername": "Buffer"
             },
-            "name": "plot_001",
+            "name": "in~_14",
+            "do_onload": true,
+            "initargs": "0",
+            "type": "in~"
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 73.0,
+                "display_type": "processor",
+                "position_x": 256.59191513061523,
+                "position_y": 78.93416595458984,
+                "layername": "Buffer"
+            },
+            "name": "loadbang_15",
             "do_onload": true,
             "initargs": null,
-            "type": "scope"
+            "type": "loadbang"
         },
-        "4": {
+        "16": {
             "connections": [
                 [
                     [
-                        5,
-                        0
-                    ],
-                    [
-                        8,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": true,
-                "value": {
-                    "__BangType__": {}
-                },
-                "position_x": 189.93821716308594,
-                "position_y": 43.973379135131836,
-                "initargs": "Bang",
-                "layername": "Layer 0",
-                "display_type": "button"
-            },
-            "name": "button_001",
-            "value": {
-                "__BangType__": {}
-            },
-            "do_onload": false,
-            "initargs": "Bang",
-            "type": "var"
-        },
-        "5": {
-            "connections": [
-                [
-                    [
-                        2,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 80.0,
-                "display_type": "message",
-                "position_x": 191.95474243164062,
-                "position_y": 74.92950820922852,
-                "layername": "Layer 0"
-            },
-            "name": "message_001",
-            "do_onload": false,
-            "initargs": "@bufinfo",
-            "type": "message"
-        },
-        "7": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "update_required": true,
-                "height": 25.0,
-                "width": 94.0,
-                "display_type": "text",
-                "position_x": 217.93905639648438,
-                "position_y": 41.951438903808594,
-                "layername": "Layer 0"
-            },
-            "name": "text_001",
-            "value": "<b>click to start</b>",
-            "do_onload": false,
-            "initargs": null,
-            "type": "text"
-        },
-        "8": {
-            "connections": [
-                [
-                    [
-                        2,
+                        11,
                         0
                     ]
                 ]
@@ -178,27 +360,937 @@
                 "height": 25.0,
                 "width": 325.0,
                 "display_type": "message",
-                "position_x": 191.9491424560547,
-                "position_y": 105.8775405883789,
-                "layername": "Layer 0"
+                "position_x": 256.7077445983887,
+                "position_y": 120.67037963867188,
+                "layername": "Buffer"
             },
-            "name": "message_002",
+            "name": "message_16",
             "do_onload": false,
             "initargs": "rec_mode=3, rec_enabled=1, rec_channels=1",
             "type": "message"
+        },
+        "17": {
+            "connections": [
+                [
+                    [
+                        18,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 28.935508728027344,
+                "position_y": 69.82991790771484,
+                "layername": "Buffer"
+            },
+            "name": "h_range",
+            "do_onload": true,
+            "initargs": "\"h_range\"",
+            "type": "recv"
+        },
+        "18": {
+            "connections": [
+                [
+                    [
+                        20,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        19,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 15.435508728027344,
+                "position_y": 112.82991790771484,
+                "layername": "Buffer"
+            },
+            "name": "trigger_18",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "19": {
+            "connections": [
+                [
+                    [
+                        21,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "processor",
+                "position_x": 42.947654724121094,
+                "position_y": 213.55157470703125,
+                "layername": "Buffer"
+            },
+            "name": "pack_19",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "pack"
+        },
+        "20": {
+            "connections": [
+                [
+                    [
+                        19,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 58.0,
+                "display_type": "message",
+                "position_x": 15.930648803710938,
+                "position_y": 143.6947021484375,
+                "layername": "Buffer"
+            },
+            "name": "message_20",
+            "do_onload": false,
+            "initargs": "\"size\"",
+            "type": "message"
+        },
+        "21": {
+            "connections": [
+                [
+                    [
+                        22,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "processor",
+                "position_x": 42.946449279785156,
+                "position_y": 246.5406036376953,
+                "layername": "Buffer"
+            },
+            "name": "pack_21",
+            "do_onload": true,
+            "initargs": "1",
+            "type": "pack"
+        },
+        "22": {
+            "connections": [
+                [
+                    [
+                        26,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 38.0,
+                "display_type": "processor",
+                "position_x": 42.946449279785156,
+                "position_y": 277.70404052734375,
+                "layername": "Buffer"
+            },
+            "name": "dict_22",
+            "do_onload": true,
+            "initargs": null,
+            "type": "dict"
+        },
+        "23": {
+            "connections": [
+                [
+                    [
+                        24,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 90.82965087890625,
+                "position_y": 70.83142852783203,
+                "layername": "Buffer"
+            },
+            "name": "threshold",
+            "do_onload": true,
+            "initargs": "\"threshold\"",
+            "type": "recv"
+        },
+        "24": {
+            "connections": [
+                [
+                    [
+                        25,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        19,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 93.32965087890625,
+                "position_y": 111.83142852783203,
+                "layername": "Buffer"
+            },
+            "name": "trigger_24",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "25": {
+            "connections": [
+                [
+                    [
+                        19,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 106.0,
+                "display_type": "message",
+                "position_x": 92.35398864746094,
+                "position_y": 146.7859344482422,
+                "layername": "Buffer"
+            },
+            "name": "message_25",
+            "do_onload": false,
+            "initargs": "\"trig_thresh\"",
+            "type": "message"
+        },
+        "26": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 40.446449279785156,
+                "position_y": 313.70404052734375,
+                "layername": "Buffer"
+            },
+            "name": "send_26",
+            "do_onload": true,
+            "initargs": "\"buffer\"",
+            "type": "send"
+        },
+        "27": {
+            "connections": [
+                [
+                    [
+                        32,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 73.90383911132812,
+                "position_y": 23.97176742553711,
+                "layername": "Vert pos"
+            },
+            "name": "v_pos",
+            "do_onload": true,
+            "initargs": "\"v_pos\"",
+            "type": "recv"
+        },
+        "28": {
+            "connections": [
+                [
+                    [
+                        29,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 248.9283447265625,
+                "position_y": 23.340431213378906,
+                "layername": "Vert pos"
+            },
+            "name": "v_range",
+            "do_onload": true,
+            "initargs": "\"v_range\"",
+            "type": "recv"
+        },
+        "29": {
+            "connections": [
+                [
+                    [
+                        31,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        34,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 250.51370239257812,
+                "position_y": 75.34347534179688,
+                "layername": "Vert pos"
+            },
+            "name": "trigger_29",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "30": {
+            "connections": [
+                [
+                    [
+                        33,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        34,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 164.7307891845703,
+                "position_y": 85.8358383178711,
+                "layername": "Vert pos"
+            },
+            "name": "trigger_30",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "31": {
+            "connections": [
+                [
+                    [
+                        30,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 52.0,
+                "display_type": "message",
+                "position_x": 164.7371826171875,
+                "position_y": 51.66687774658203,
+                "layername": "Vert pos"
+            },
+            "name": "message_31",
+            "do_onload": false,
+            "initargs": "Bang",
+            "type": "message"
+        },
+        "32": {
+            "connections": [
+                [
+                    [
+                        31,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        33,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 76.40383911132812,
+                "position_y": 73.97176742553711,
+                "layername": "Vert pos"
+            },
+            "name": "trigger_32",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "33": {
+            "connections": [
+                [
+                    [
+                        37,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 47.0,
+                "display_type": "processor",
+                "position_x": 83.34144592285156,
+                "position_y": 128.81005859375,
+                "layername": "Vert pos"
+            },
+            "name": "var_33",
+            "value": 0.0,
+            "do_onload": false,
+            "initargs": "0",
+            "type": "var"
+        },
+        "34": {
+            "connections": [
+                [
+                    [
+                        49,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 65.0,
+                "display_type": "processor",
+                "position_x": 258.4434051513672,
+                "position_y": 130.95459747314453,
+                "layername": "Vert pos"
+            },
+            "name": "var_34",
+            "value": 0.5,
+            "do_onload": false,
+            "initargs": "100",
+            "type": "var"
+        },
+        "35": {
+            "connections": [
+                [
+                    [
+                        38,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 82.83413696289062,
+                "position_y": 202.0169677734375,
+                "layername": "Vert pos"
+            },
+            "name": "-_35",
+            "do_onload": true,
+            "initargs": null,
+            "type": "-"
+        },
+        "36": {
+            "connections": [
+                [
+                    [
+                        41,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 234.67782592773438,
+                "position_y": 201.9664764404297,
+                "layername": "Vert pos"
+            },
+            "name": "+_36",
+            "do_onload": true,
+            "initargs": null,
+            "type": "+"
+        },
+        "37": {
+            "connections": [
+                [
+                    [
+                        35,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 83.34144592285156,
+                "position_y": 162.81005859375,
+                "layername": "Vert pos"
+            },
+            "name": "trigger_37",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "38": {
+            "connections": [
+                [
+                    [
+                        39,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        40,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 82.83413696289062,
+                "position_y": 238.0169677734375,
+                "layername": "Vert pos"
+            },
+            "name": "trigger_38",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "39": {
+            "connections": [
+                [
+                    [
+                        40,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 69.0,
+                "display_type": "message",
+                "position_x": 82.83413696289062,
+                "position_y": 273.0169677734375,
+                "layername": "Vert pos"
+            },
+            "name": "message_39",
+            "do_onload": false,
+            "initargs": "\"y_min\"",
+            "type": "message"
+        },
+        "40": {
+            "connections": [
+                [
+                    [
+                        44,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "processor",
+                "position_x": 82.83413696289062,
+                "position_y": 310.0169677734375,
+                "layername": "Vert pos"
+            },
+            "name": "pack_40",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "pack"
+        },
+        "41": {
+            "connections": [
+                [
+                    [
+                        42,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        43,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 234.67782592773438,
+                "position_y": 238.9664764404297,
+                "layername": "Vert pos"
+            },
+            "name": "trigger_41",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "42": {
+            "connections": [
+                [
+                    [
+                        43,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 73.0,
+                "display_type": "message",
+                "position_x": 234.67782592773438,
+                "position_y": 272.96649169921875,
+                "layername": "Vert pos"
+            },
+            "name": "message_42",
+            "do_onload": false,
+            "initargs": "\"y_max\"",
+            "type": "message"
+        },
+        "43": {
+            "connections": [
+                [
+                    [
+                        44,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "processor",
+                "position_x": 234.67782592773438,
+                "position_y": 307.96649169921875,
+                "layername": "Vert pos"
+            },
+            "name": "pack_43",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "pack"
+        },
+        "44": {
+            "connections": [
+                [
+                    [
+                        45,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "processor",
+                "position_x": 159.83413696289062,
+                "position_y": 343.0169677734375,
+                "layername": "Vert pos"
+            },
+            "name": "pack_44",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "pack"
+        },
+        "45": {
+            "connections": [
+                [
+                    [
+                        52,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 38.0,
+                "display_type": "processor",
+                "position_x": 160.39488220214844,
+                "position_y": 375.92020416259766,
+                "layername": "Vert pos"
+            },
+            "name": "dict_45",
+            "do_onload": true,
+            "initargs": null,
+            "type": "dict"
+        },
+        "47": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 423.43898010253906,
+                "position_y": 291.8923568725586,
+                "layername": "Vert pos"
+            },
+            "name": "send_47",
+            "do_onload": true,
+            "initargs": "\"scope_1\"",
+            "type": "send"
+        },
+        "49": {
+            "connections": [
+                [
+                    [
+                        36,
+                        1
+                    ],
+                    [
+                        35,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 45.0,
+                "display_type": "processor",
+                "position_x": 258.4434051513672,
+                "position_y": 166.95459747314453,
+                "layername": "Vert pos"
+            },
+            "name": "/_49",
+            "do_onload": true,
+            "initargs": "2.0",
+            "type": "/"
+        },
+        "50": {
+            "connections": [
+                [
+                    [
+                        47,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 93.0,
+                "display_type": "processor",
+                "position_x": 426.5957717895508,
+                "position_y": 256.4028015136719,
+                "layername": "Vert pos"
+            },
+            "name": "apply_50",
+            "do_onload": true,
+            "initargs": "\"conf\"",
+            "type": "apply"
+        },
+        "51": {
+            "connections": [
+                [
+                    [
+                        54,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        50,
+                        2
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 426.6661682128906,
+                "position_y": 185.7247772216797,
+                "layername": "Vert pos"
+            },
+            "name": "processor_027",
+            "do_onload": true,
+            "initargs": "2",
+            "type": "trigger"
+        },
+        "52": {
+            "connections": [],
+            "gui_params": {
+                "layername": "Vert pos",
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 158.8760223388672,
+                "position_y": 408.60247802734375,
+                "label": "make_apply"
+            },
+            "name": "sendvia_009",
+            "do_onload": true,
+            "initargs": "\"make_apply\"",
+            "type": "send"
+        },
+        "53": {
+            "connections": [
+                [
+                    [
+                        51,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 424.6685485839844,
+                "position_y": 137.8658447265625,
+                "layername": "Vert pos"
+            },
+            "name": "make_apply",
+            "do_onload": true,
+            "initargs": "\"make_apply\"",
+            "type": "recv"
+        },
+        "54": {
+            "connections": [
+                [
+                    [
+                        50,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 52.0,
+                "display_type": "message",
+                "position_x": 425.7281188964844,
+                "position_y": 219.32102966308594,
+                "layername": "Vert pos"
+            },
+            "name": "message_007",
+            "do_onload": false,
+            "initargs": "Bang",
+            "type": "message"
         }
     },
-    "type": "oscope",
+    "type": "oscope-8",
     "scopes": {
         "__patch__": {
-            "message_002": 8,
-            "message_001": 5,
-            "plot_001": 3,
+            "threshold": 23,
+            "sendvia_007": 26,
+            "message_024": 42,
+            "processor_008": 22,
+            "message_023": 39,
+            "processor_027": 51,
+            "processor_004": 15,
+            "processor_005": 18,
+            "processor_006": 19,
+            "processor_007": 21,
+            "processor_003": 14,
+            "h_range": 17,
+            "processor_024": 40,
+            "processor_025": 41,
+            "processor_022": 37,
+            "processor_023": 38,
+            "processor_020": 35,
+            "scope_1": 1,
+            "enum_004": 8,
+            "enum_002": 4,
+            "enum_003": 6,
+            "enum_001": 2,
+            "v_range": 28,
+            "message_011": 20,
+            "buffer": 11,
+            "processor_021": 36,
+            "text_001": 10,
+            "v_pos": 27,
+            "message_007": 54,
+            "message_010": 16,
+            "make_apply": 53,
+            "message_014": 25,
+            "sendvia_001": 3,
+            "sendvia_002": 5,
+            "sendvia_003": 7,
+            "sendvia_004": 9,
+            "sendvia_005": 12,
+            "sendvia_006": 13,
+            "sendvia_009": 52,
+            "processor_013": 29,
+            "processor_012": 34,
+            "processor_011": 33,
+            "processor_010": 24,
+            "message_021": 31,
+            "processor_030": 50,
+            "processor_015": 32,
+            "processor_014": 30,
+            "processor_029": 48,
             "self": 0,
-            "processor_001": 1,
-            "processor_002": 2,
-            "text_001": 7,
-            "button_001": 4
+            "/_35": 49
         }
     }
 }

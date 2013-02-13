@@ -38,6 +38,8 @@ class MethodCall(object):
             try:
                 return m(*self.args, **self.kwargs)
             except Exception, e:
+                print "Error calling", self.method, "on", target
+                print "args=%s, kwargs=%s" % (self.args, self.kwargs)
                 raise Exception("Method %s for %s raised exception %s"
                                 % (self.method, target, e))
         elif self.fallback:
