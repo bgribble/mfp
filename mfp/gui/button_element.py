@@ -167,7 +167,7 @@ class BangButtonElement (ButtonElement):
         if "message" in params:
             self.message = params.get("message")
 
-        PatchElement.configure(self, params)
+        ButtonElement.configure(self, params)
         self.texture.invalidate()
 
 
@@ -196,12 +196,13 @@ class ToggleButtonElement (ButtonElement):
         return False
 
     def configure(self, params):
+        print "configure:", params
         if "on_message" in params:
             self.on_message = params.get("on_message")
         if "off_message" in params:
             self.off_message = params.get("off_message")
 
-        PatchElement.configure(self, params)
+        ButtonElement.configure(self, params)
         self.texture.invalidate()
 
     def create(self, init_type, init_args):

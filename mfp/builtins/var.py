@@ -58,6 +58,7 @@ class Var (Processor):
 
         '''
         do_update = False
+        print "var.trigger:", self.inlets
         if self.inlets[1] is not Uninit:
             self.value = self.inlets[1]
             if self.init_type == "text":

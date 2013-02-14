@@ -151,14 +151,29 @@ class Processor (object):
         else:
             self.assign(self.patch, self.patch.scopes.get(new_scope), self.name)
 
+    def _osc_handler(self, path, args, types, src, data):
+        print "@osc_handler"
+        if types[0] == 's':
+            print "@osc_handler sending eval-ed data", args[0]
+            self.send(self.patch.parse_obj(args[0]))
+        else:
+            print "@osc_handler sending raw data", args[0], data
+            self.send(args[0])
+
+    def _osc_learn_handler(self, path, args, types, src, data):
+        print "@osc_learn: learning", path
+        from .main import MFPApp
+        MFPApp().osc_mgr.del_default(self._osc_learn_handler)
+        MFPApp().osc_mgr.add_method(path, types, self._osc_handler)
+        self._osc_handler(path, args, types, src, data)
+
+    def osc_learn(self):
+        from .main import MFPApp
+        print "@osc_learn"
+        MFPApp().osc_mgr.add_default(self._osc_learn_handler)
+
     def osc_init(self):
         from .main import MFPApp
-
-        def handler(path, args, types, src, data):
-            if types[0] == 's':
-                self.send(self.patch.parse_obj(args[0]), inlet=data)
-            else:
-                self.send(args[0], inlet=data)
 
         if MFPApp().osc_mgr is None:
             return
@@ -180,10 +195,10 @@ class Processor (object):
         for i in range(len(self.inlets)):
             path = "%s/%s" % (pathbase, str(i))
             if path not in self.osc_methods:
-                o.add_method(path, 's', handler, i)
-                o.add_method(path, 'b', handler, i)
+                o.add_method(path, 's', self._osc_handler, i)
+                o.add_method(path, 'b', self._osc_handler, i)
                 # o.add_method(path, 'i', handler, i)
-                o.add_method(path, 'f', handler, i)
+                o.add_method(path, 'f', self._osc_handler, i)
             self.osc_methods.append(path)
 
     def dsp_init(self, proc_name, **params):
