@@ -23,7 +23,6 @@ class OSCIn (Processor):
         self.path = None 
         self.types = None 
         self.handler = None 
-        self.learning = False 
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
@@ -54,22 +53,6 @@ class OSCIn (Processor):
                 self.handler = None 
             self.handler = MFPApp().osc_mgr.add_method(self.path, self.types, self._handler)
 
-    def _handler(self, path, args, types, src, data):
-        if types[0] == 's':
-            self.send(OSCPacket(self.patch.parse_obj(args[0])))
-        else:
-            self.send(OSCPacket(args[0]))
-    
-    def _learn_handler(self, path, args, types, src, data):
-        MFPApp().osc_mgr.del_default(self._learn_handler)
-        self.path = path
-        self.types = types 
-        MFPApp().osc_mgr.add_method(self.path, self.types, self._handler)
-        self._handler(path, args, types, src, data)
-
-    def learn(self):
-        self.learning = True 
-        MFPApp().osc_mgr.add_default(self._learn_handler)
 
 class OSCOut (Processor): 
     doc_tooltip_obj = "Open Sound Control message send"
