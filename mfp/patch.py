@@ -190,7 +190,6 @@ class Patch(Processor):
             p.init_type = init_type
             return p
 
-        import os
         basefile = os.path.basename(filename)
         parts = os.path.splitext(basefile)
         
@@ -217,7 +216,6 @@ class Patch(Processor):
         
         if jsdata is not None:
             self.json_deserialize(jsdata)
-            print "JSON data deserialized"
             for obj_id, obj in self.objects.items():
                 if obj.do_onload:
                     obj.onload()
