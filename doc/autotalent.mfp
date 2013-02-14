@@ -1,0 +1,345 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "default",
+        "obj_id": 0,
+        "top_level": true,
+        "num_outlets": 0,
+        "display_type": "patch",
+        "num_inlets": 0,
+        "initargs": ""
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 58.0,
+                "display_type": "processor",
+                "position_x": 104.6484375,
+                "position_y": 76.3963623046875,
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "do_onload": true,
+            "initargs": null,
+            "type": "midi_in"
+        },
+        "2": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        8,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 163.0,
+                "display_type": "processor",
+                "position_x": 104.6484375,
+                "position_y": 124.3963623046875,
+                "layername": "Layer 0"
+            },
+            "name": "processor_002",
+            "do_onload": true,
+            "initargs": "NoteOn, NoteOff",
+            "type": "case"
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        4,
+                        27
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 395.18316650390625,
+                "position_y": 258.72711181640625,
+                "layername": "Layer 0"
+            },
+            "name": "processor_004",
+            "do_onload": true,
+            "initargs": null,
+            "type": "in~"
+        },
+        "4": {
+            "connections": [
+                [],
+                [],
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 310,
+                "display_type": "processor",
+                "position_x": 95.22232818603516,
+                "position_y": 306.5245056152344,
+                "layername": "Layer 0"
+            },
+            "name": "processor_005",
+            "do_onload": true,
+            "initargs": "\"autotalent\"",
+            "type": "plugin~"
+        },
+        "5": {
+            "connections": [
+                [
+                    [
+                        6,
+                        0
+                    ],
+                    [
+                        7,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 74.0,
+                "display_type": "processor",
+                "position_x": 104.6484375,
+                "position_y": 178.3963623046875,
+                "layername": "Layer 0"
+            },
+            "name": "processor_003",
+            "do_onload": true,
+            "initargs": "\"key\"",
+            "type": "get"
+        },
+        "6": {
+            "connections": [
+                [
+                    [
+                        4,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 42.0,
+                "display_type": "processor",
+                "position_x": 105.6484375,
+                "position_y": 240.3963623046875,
+                "layername": "Layer 0"
+            },
+            "name": "processor_006",
+            "do_onload": true,
+            "initargs": "69",
+            "type": "-"
+        },
+        "7": {
+            "connections": [
+                [
+                    [
+                        4,
+                        2
+                    ],
+                    [
+                        4,
+                        15
+                    ],
+                    [
+                        4,
+                        26
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 154.9166259765625,
+                "position_y": 239.6107635498047,
+                "layername": "Layer 0"
+            },
+            "name": "message_001",
+            "do_onload": false,
+            "initargs": "1",
+            "type": "message"
+        },
+        "8": {
+            "connections": [
+                [
+                    [
+                        4,
+                        2
+                    ],
+                    [
+                        4,
+                        15
+                    ],
+                    [
+                        4,
+                        26
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 218.8936004638672,
+                "position_y": 240.58306884765625,
+                "layername": "Layer 0"
+            },
+            "name": "message_002",
+            "do_onload": false,
+            "initargs": "0",
+            "type": "message"
+        },
+        "9": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 44.0,
+                "display_type": "processor",
+                "position_x": 295.8343505859375,
+                "position_y": 357.0186767578125,
+                "layername": "Layer 0"
+            },
+            "name": "processor_007",
+            "do_onload": true,
+            "initargs": null,
+            "type": "out~"
+        },
+        "11": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 29.0,
+                "width": 132.0,
+                "display_type": "text",
+                "position_x": 329.5644836425781,
+                "position_y": 55.95965576171875,
+                "layername": "Layer 0"
+            },
+            "name": "text_001",
+            "value": "<span size=\"large\"><b>autotalent.mfp</b></span>",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "12": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 46.0,
+                "width": 295.0,
+                "display_type": "text",
+                "position_x": 327.5927429199219,
+                "position_y": 88.93055725097656,
+                "layername": "Layer 0"
+            },
+            "name": "text_002",
+            "value": "Control the pitch of an input signal with the \nautotalent plugin and a MIDI note stream. ",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "13": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 46.0,
+                "width": 342.0,
+                "display_type": "text",
+                "position_x": 325.6839294433594,
+                "position_y": 142.90037536621094,
+                "layername": "Layer 0"
+            },
+            "name": "text_003",
+            "value": "Pitch correction is applied while a note is sustained,\nbypassed when it is released. ",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "14": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 46.0,
+                "width": 388.0,
+                "display_type": "text",
+                "position_x": 326.6619567871094,
+                "position_y": 196.87295532226562,
+                "layername": "Layer 0"
+            },
+            "name": "text_004",
+            "value": "THIS PATCH IS PROVIDED FOR COMEDIC VALUE ONLY\nNOT TO BE USED IN  HIT SONGS",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        }
+    },
+    "type": "autotalent-1",
+    "scopes": {
+        "__patch__": {
+            "message_002": 8,
+            "message_001": 7,
+            "processor_004": 3,
+            "processor_005": 4,
+            "processor_006": 6,
+            "processor_007": 9,
+            "processor_001": 1,
+            "processor_002": 2,
+            "processor_003": 5,
+            "text_001": 11,
+            "text_002": 12,
+            "text_003": 13,
+            "text_004": 14,
+            "self": 0
+        }
+    }
+}
