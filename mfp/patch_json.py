@@ -84,7 +84,7 @@ def json_deserialize(self, json_data):
         do_onload = prms.get('do_onload')
 
         gp = prms.get('gui_params')
-        newobj = MFPApp().create(otype, oargs, self, self.default_scope, gp.get("name"))
+        newobj = MFPApp().create(otype, oargs, self, self.default_scope, oname)
         newobj.patch = self
         newobj.do_onload = do_onload
 
@@ -93,7 +93,7 @@ def json_deserialize(self, json_data):
 
         # these are needed at runtime but don't get saved 
         newobj.gui_params["obj_id"] = newobj.obj_id
-        newobj.gui_params["name"] = oname 
+        newobj.gui_params["name"] = newobj.obj_name 
         newobj.gui_params["dsp_inlets"] = newobj.dsp_inlets
         newobj.gui_params["dsp_outlets"] = newobj.dsp_outlets
         newobj.gui_params["num_inlets"] = len(newobj.inlets)
