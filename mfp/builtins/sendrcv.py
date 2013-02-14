@@ -22,6 +22,9 @@ class Send (Processor):
         self.dest_inlet = 0
         self.dest_obj = None
 
+        # needed so that name changes happen timely 
+        self.hot_inlets = [0, 1]
+
         initargs, kwargs = self.parse_args(init_args)
         if len(initargs) > 1:
             self.dest_inlet = initargs[1]
@@ -39,15 +42,19 @@ class Send (Processor):
     def trigger(self):
         if self.inlets[1] is not Uninit:
             self.dest_name = self.inlets[1]
+            self.init_args = '"%s"' % self.dest_name 
             self.gui_params["label"] = self.dest_name
             self.dest_obj = None
             self.inlets[1] = Uninit
+            if self.gui_created:
+                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
         if self.dest_obj is None:
             self.dest_obj = MFPApp().resolve(self.dest_name, self)
 
-        if self.dest_obj is not None:
+        if self.inlets[0] is not Uninit and self.dest_obj is not None:
             self.dest_obj.send(self.inlets[0], inlet=self.dest_inlet)
+            self.inlets[0] = Uninit 
 
 
 class Recv (Processor):
@@ -74,10 +81,10 @@ class Recv (Processor):
         self.outlets[0] = self.inlets[0]
 
     def rename(self, new_name):
+        print "Recv.rename:", self, new_name
         Processor.rename(self, new_name)
         self.init_args = '"%s"' % self.name 
         self.gui_params["label"] = self.name
-        self.gui_params["init_args"] = self.init_args
 
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
