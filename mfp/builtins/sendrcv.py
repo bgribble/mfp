@@ -81,7 +81,6 @@ class Recv (Processor):
         self.outlets[0] = self.inlets[0]
 
     def rename(self, new_name):
-        print "Recv.rename:", self, new_name
         Processor.rename(self, new_name)
         self.init_args = '"%s"' % self.name 
         self.gui_params["label"] = self.name
