@@ -96,6 +96,10 @@ class PatchWindow(object):
         self.color_bg = Clutter.Color()
         self.color_bg.from_string("White")
 
+        # 
+        self.callbacks = {} 
+        self.callbacks_last_id = 0
+
         # configure Clutter stage
         self.stage.set_color(self.color_bg)
         self.stage.set_property('user-resizable', True)
@@ -262,6 +266,8 @@ class PatchWindow(object):
         if element.obj_id is not None:
             element.send_params()
 
+        self.emit_signal("add", element)
+
     def unregister(self, element):
         if self.selected == element:
             self.unselect(element)
@@ -273,8 +279,7 @@ class PatchWindow(object):
         self.active_group().remove_actor(element)
         self.object_view.remove(element)
 
-        # FIXME hook
-        SelectMRUMode.forget(element)
+        self.emit_signal("remove", element)
 
     def refresh(self, element):
         if element.layer is not None:
@@ -409,6 +414,30 @@ class PatchWindow(object):
         self.hud_banner_anim = anim
 
 
+    def add_callback(self, signal_name, callback): 
+        cbid = self.callbacks_last_id
+        self.callbacks_last_id += 1
+
+        oldlist = self.callbacks.setdefault(signal_name, [])
+        oldlist.append((cbid, callback))
+
+        return cbid
+
+    def remove_callback(self, cb_id):
+        for signal, hlist in self.callbacks.items():
+            for num, cbinfo in enumerate(hlist):
+                if cbinfo[0] == cb_id:
+                    hlist[num:num+1] = [] 
+                    return True 
+        return False
+
+    def emit_signal(self, signal_name, *args):
+        for cbinfo in self.callbacks.get(signal_name, []):
+            cbinfo[1](*args)
+
+
+
+        
 # additional methods in @extends wrappers
 import patch_layer
 import patch_funcs

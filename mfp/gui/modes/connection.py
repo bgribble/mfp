@@ -17,6 +17,9 @@ class ConnectionMode (InputMode):
         self.window = window
         self.reverse = connect_rev
 
+        self.connection = None
+        self.select_cbid = None 
+
         self.source_obj = None
         self.source_port = 0
         self.dest_obj = None
@@ -32,6 +35,7 @@ class ConnectionMode (InputMode):
         self.bind("RET", self.make_connection, "Accept connection")
         self.bind("ESC", self.abort_connection, "Discard connection")
 
+        self.bind("C-p", self.get_port_key, "Enter port to connect")
         self.bind("0", lambda: self.set_port_key(0), "Connect port 0")
         self.bind("1", lambda: self.set_port_key(1), "Connect port 1")
         self.bind("2", lambda: self.set_port_key(2), "Connect port 2")
@@ -42,6 +46,68 @@ class ConnectionMode (InputMode):
         self.bind("7", lambda: self.set_port_key(7), "Connect port 7")
         self.bind("8", lambda: self.set_port_key(8), "Connect port 8")
         self.bind("9", lambda: self.set_port_key(9), "Connect port 9")
+
+        self.select_cbid = self.window.add_callback("select", self.select)
+
+    def update_connection(self): 
+        if self.connection and (self.source_obj is None or self.dest_obj is None):
+            self.connection.delete()
+            self.connection = None 
+            return True 
+
+        if self.connection is None:
+            self.connection = ConnectionElement(self.window, 
+                                                self.source_obj, self.source_port,
+                                                self.dest_obj, self.dest_port, 
+                                                dashed=True)
+            self.source_obj.connections_out.append(self.connection)
+            self.dest_obj.connections_in.append(self.connection)
+        else: 
+            if self.connection.obj_1 and self.connection.obj_1 != self.source_obj:
+                if self.connection in self.connection.obj_1.connections_out:
+                    self.connection.obj_1.connections_out.remove(self.connection)
+                self.source_obj.connections_out.append(self.connection)
+            
+            if self.connection.obj_2 and self.connection.obj_2 != self.dest_obj:
+                if self.connection in self.connection.obj_2.connections_in:
+                    self.connection.obj_2.connections_in.remove(self.connection)
+                self.dest_obj.connections_in.append(self.connection)
+
+            self.connection.obj_1 = self.source_obj
+            self.connection.obj_2 = self.dest_obj
+            self.connection.port_1 = self.source_port
+            self.connection.port_2 = self.dest_port 
+
+            self.connection.draw()
+
+    def select(self, obj):
+        if self.reverse:
+            if self.dest_obj is not None and obj and self.dest_obj != obj:
+                self.source_obj = obj
+        else: 
+            if self.source_obj is not None and obj and self.source_obj != obj:
+                self.dest_obj = obj
+
+        self.update_connection()
+
+    def disable(self):
+        self.window.remove_callback(self.select_cbid)
+        self.select_cbid = None
+        if self.connection:
+            self.connection.delete()
+
+    def get_port_key(self): 
+        def callback(txt): 
+            self.set_port_key(int(txt))
+
+        if ((self.dest_obj is not None) 
+            or (self.window.selected is not None and self.window.selected != self.source_obj)):
+            dirspec = "destination input"
+        else: 
+            dirspec = "source output"
+
+        self.window.get_prompted_input("Enter %s port:" % dirspec, callback)
+        return True 
 
     def make_connection(self):
         # are both ends selected?
@@ -88,4 +154,5 @@ class ConnectionMode (InputMode):
                 self.dest_port = portnum
             else:
                 self.source_port = portnum
+        self.update_connection()
         return True

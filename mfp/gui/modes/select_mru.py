@@ -26,6 +26,9 @@ class SelectMRUMode (InputMode):
         SelectMRUMode.touch_enabled = False
         self.select_next()
 
+        self.select_cbid = self.window.add_callback("select", self.touch)
+        self.remove_cbid = self.window.add_callback("remove", self.forget)
+
     def select_next(self):
         try:
             curloc = SelectMRUMode.mru_list.index(self.window.selected)
@@ -45,6 +48,12 @@ class SelectMRUMode (InputMode):
             SelectMRUMode.touch(self.window.selected)
             self.window.stage.disconnect(self.keyhandler)
             self.window.input_mgr.disable_minor_mode(self)
+
+    def disable(self): 
+        self.window.remove_callback(self.select_cbid)
+        self.select_cbid = None 
+        self.window.remove_callback(self.remove_cbid)
+        self.remove_cbid = None 
 
     @classmethod
     def touch(self, obj):

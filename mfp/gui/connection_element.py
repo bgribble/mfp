@@ -10,7 +10,7 @@ class ConnectionElement(PatchElement):
     display_type = "connection"
     LINE_WIDTH = 1.25
 
-    def __init__(self, window, obj_1, port_1, obj_2, port_2):
+    def __init__(self, window, obj_1, port_1, obj_2, port_2, dashed=False):
 
         self.texture = Clutter.CairoTexture.new(10, 10)
         self.obj_1 = obj_1
@@ -20,6 +20,7 @@ class ConnectionElement(PatchElement):
         self.width = None
         self.height = None
         self.rotation = 0.0
+        self.dashed = dashed 
         self.dsp_connect = False 
 
         if port_1 in obj_1.dsp_outlets:
@@ -43,7 +44,7 @@ class ConnectionElement(PatchElement):
         self.draw()
 
     def delete(self):
-        if (self.obj_1 and self.obj_2 and 
+        if (not self.dashed and self.obj_1 and self.obj_2 and 
             self.obj_1.obj_id is not None and self.obj_2.obj_id is not None):
             MFPGUI().mfp.disconnect(self.obj_1.obj_id, self.port_1, 
                                     self.obj_2.obj_id, self.port_2)
@@ -94,7 +95,12 @@ class ConnectionElement(PatchElement):
             ctx.set_line_width(2.0 * self.LINE_WIDTH)
         else:
             ctx.set_line_width(self.LINE_WIDTH)
+
+        if self.dashed: 
+            ctx.set_dash([8, 4])
+        else:
+            ctx.set_dash([])
+
         ctx.move_to(self.width / 2.0, 0)
         ctx.line_to(self.width / 2.0, self.height)
-        ctx.close_path()
         ctx.stroke()

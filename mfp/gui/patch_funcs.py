@@ -22,7 +22,8 @@ def _select(self, obj):
     obj.begin_control()
 
     # FIXME hook
-    SelectMRUMode.touch(obj)
+    self.emit_signal("select", obj)
+
 
 @extends(PatchWindow)
 def select(self, obj):
@@ -47,6 +48,8 @@ def _unselect(self, obj):
         obj.end_control()
         obj.unselect()
     self.selected = None
+
+    self.emit_signal("unselect", obj)
 
 @extends(PatchWindow)
 def unselect(self, obj):
