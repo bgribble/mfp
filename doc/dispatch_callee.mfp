@@ -1,0 +1,165 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "default",
+        "obj_id": 0,
+        "top_level": true,
+        "num_outlets": 0,
+        "display_type": "patch",
+        "num_inlets": 1,
+        "initargs": ""
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 68.0,
+                "display_type": "processor",
+                "position_x": 153.26873779296875,
+                "position_y": 89.03486633300781,
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "do_onload": true,
+            "initargs": null,
+            "type": "dispatch"
+        },
+        "2": {
+            "connections": [
+                [
+                    [
+                        3,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        7,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        8,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 166.0,
+                "display_type": "processor",
+                "position_x": 153.26873779296875,
+                "position_y": 137.0348663330078,
+                "layername": "Layer 0"
+            },
+            "name": "processor_002",
+            "do_onload": true,
+            "initargs": "\"m1\", \"m2\", \"m3\"",
+            "type": "route"
+        },
+        "3": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 85.0,
+                "display_type": "processor",
+                "position_x": 153.26873779296875,
+                "position_y": 185.0348663330078,
+                "layername": "Layer 0"
+            },
+            "name": "processor_003",
+            "do_onload": true,
+            "initargs": "\"m1:\"",
+            "type": "print"
+        },
+        "6": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 77.0,
+                "display_type": "processor",
+                "position_x": 309.26873779296875,
+                "position_y": 185.0348663330078,
+                "layername": "Layer 0"
+            },
+            "name": "processor_006",
+            "do_onload": true,
+            "initargs": null,
+            "type": "baseclass"
+        },
+        "7": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 85.0,
+                "display_type": "processor",
+                "position_x": 205.26873779296875,
+                "position_y": 215.0348663330078,
+                "layername": "Layer 0"
+            },
+            "name": "processor_004",
+            "do_onload": true,
+            "initargs": "\"m2:\"",
+            "type": "print"
+        },
+        "8": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 85.0,
+                "display_type": "processor",
+                "position_x": 257.26873779296875,
+                "position_y": 245.0348663330078,
+                "layername": "Layer 0"
+            },
+            "name": "processor_005",
+            "do_onload": true,
+            "initargs": "\"m3:\"",
+            "type": "print"
+        }
+    },
+    "type": "dispatch_callee",
+    "scopes": {
+        "__patch__": {
+            "processor_004": 7,
+            "processor_005": 8,
+            "processor_006": 6,
+            "processor_001": 1,
+            "processor_002": 2,
+            "processor_003": 3,
+            "self": 0
+        }
+    }
+}

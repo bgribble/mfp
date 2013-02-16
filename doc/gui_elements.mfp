@@ -1,0 +1,320 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "default",
+        "obj_id": 0,
+        "num_outlets": 0,
+        "display_type": "patch",
+        "num_inlets": 1,
+        "initargs": ""
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 45.0,
+                "display_type": "processor",
+                "position_x": 67.55913543701172,
+                "position_y": 54.61725616455078,
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "do_onload": true,
+            "initargs": null,
+            "type": "print"
+        },
+        "2": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 70.0,
+                "display_type": "text",
+                "position_x": 66.97431945800781,
+                "position_y": 81.4521484375,
+                "layername": "Layer 0"
+            },
+            "name": "text_001",
+            "value": "Processor",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "3": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 66.0,
+                "display_type": "message",
+                "position_x": 151.79070281982422,
+                "position_y": 56.470489501953125,
+                "layername": "Layer 0"
+            },
+            "name": "message_001",
+            "do_onload": false,
+            "initargs": "\"hello\"",
+            "type": "message"
+        },
+        "5": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 62.0,
+                "display_type": "text",
+                "position_x": 150.8334503173828,
+                "position_y": 81.70713806152344,
+                "layername": "Layer 0"
+            },
+            "name": "text_002",
+            "value": "Message",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "6": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "value": 3.142,
+                "update_required": true,
+                "height": 25.0,
+                "width": 60.0,
+                "display_type": "enum",
+                "position_x": 64.71134948730469,
+                "position_y": 119.35581970214844,
+                "layername": "Layer 0"
+            },
+            "name": "enum_001",
+            "value": 3.142,
+            "do_onload": true,
+            "initargs": "3.1",
+            "type": "enum"
+        },
+        "7": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 84.0,
+                "display_type": "text",
+                "position_x": 63.58918762207031,
+                "position_y": 144.69158935546875,
+                "layername": "Layer 0"
+            },
+            "name": "text_003",
+            "value": "Number box",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "8": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 49.0,
+                "display_type": "text",
+                "position_x": 154.68439483642578,
+                "position_y": 145.314208984375,
+                "layername": "Layer 0"
+            },
+            "name": "text_004",
+            "value": "Button",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "9": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "on_message": true,
+                "update_required": true,
+                "height": 20,
+                "width": 20,
+                "off_message": false,
+                "display_type": "toggle",
+                "position_x": 167.7081527709961,
+                "position_y": 122.84950256347656,
+                "layername": "Layer 0"
+            },
+            "name": "toggle_001",
+            "value": true,
+            "do_onload": true,
+            "initargs": "False",
+            "type": "var"
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "direction": 0,
+                "orientation": 0,
+                "max_value": 1.0,
+                "min_value": 0.0,
+                "scale_position": 0,
+                "update_required": true,
+                "height": 100.0,
+                "width": 55.0,
+                "show_scale": true,
+                "display_type": "slidemeter",
+                "position_x": 233.70337295532227,
+                "position_y": 58.79582214355469,
+                "layername": "Layer 0",
+                "scale_type": 0
+            },
+            "name": "slidemeter_001",
+            "value": 0.5,
+            "do_onload": false,
+            "initargs": "0.0",
+            "type": "var"
+        },
+        "11": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "plot_type": "scatter",
+                "style": {},
+                "position_x": 60.682518005371094,
+                "y_max": 1.0,
+                "update_required": false,
+                "height": 269,
+                "width": 326,
+                "display_type": "plot",
+                "x_max": 6.28,
+                "position_y": 186.16244506835938,
+                "x_min": 0.0,
+                "layername": "Layer 0",
+                "y_min": -1.0
+            },
+            "name": "plot_001",
+            "do_onload": true,
+            "initargs": "1",
+            "type": "scatter"
+        },
+        "12": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 87.0,
+                "display_type": "text",
+                "position_x": 226.6301498413086,
+                "position_y": 156.92486572265625,
+                "layername": "Layer 0"
+            },
+            "name": "text_005",
+            "value": "Slider/meter",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "13": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 63.0,
+                "display_type": "text",
+                "position_x": 59.949806213378906,
+                "position_y": 460.09478759765625,
+                "layername": "Layer 0"
+            },
+            "name": "text_006",
+            "value": "X/Y plot ",
+            "do_onload": false,
+            "initargs": null,
+            "type": "text"
+        },
+        "14": {
+            "connections": [],
+            "gui_params": {
+                "layername": "Layer 0",
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 334.29241943359375,
+                "position_y": 111.97806549072266,
+                "label": "send via"
+            },
+            "name": "sendvia_001",
+            "do_onload": true,
+            "initargs": "\"send via\"",
+            "type": "send"
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        14,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "layername": "Layer 0",
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 334.7034606933594,
+                "position_y": 65.98938751220703,
+                "label": "receive via"
+            },
+            "name": "receive via",
+            "do_onload": true,
+            "initargs": "\"receive via\"",
+            "type": "recv"
+        }
+    },
+    "type": "default",
+    "scopes": {
+        "__patch__": {
+            "message_001": 3,
+            "receive via": 15,
+            "plot_001": 11,
+            "self": 0,
+            "processor_001": 1,
+            "slidemeter_001": 10,
+            "text_001": 2,
+            "text_002": 5,
+            "text_003": 7,
+            "text_004": 8,
+            "text_005": 12,
+            "text_006": 13,
+            "sendvia_001": 14,
+            "toggle_001": 9,
+            "enum_001": 6
+        }
+    }
+}

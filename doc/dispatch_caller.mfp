@@ -1,0 +1,113 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "default",
+        "obj_id": 0,
+        "num_outlets": 0,
+        "display_type": "patch",
+        "num_inlets": 1,
+        "initargs": ""
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 55.0,
+                "display_type": "message",
+                "position_x": 183.25323486328125,
+                "position_y": 56.4073371887207,
+                "layername": "Layer 0"
+            },
+            "name": "message_001",
+            "do_onload": false,
+            "initargs": "@m1",
+            "type": "message"
+        },
+        "2": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 116.0,
+                "display_type": "processor",
+                "position_x": 183.25323486328125,
+                "position_y": 176.31869506835938,
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "do_onload": true,
+            "initargs": null,
+            "type": "dispatch_callee"
+        },
+        "10": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 55.0,
+                "display_type": "message",
+                "position_x": 215.4605712890625,
+                "position_y": 130.77200317382812,
+                "layername": "Layer 0"
+            },
+            "name": "message_003",
+            "do_onload": false,
+            "initargs": "@m4",
+            "type": "message"
+        },
+        "9": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 131.0,
+                "display_type": "message",
+                "position_x": 198.82374572753906,
+                "position_y": 93.85114288330078,
+                "layername": "Layer 0"
+            },
+            "name": "message_002",
+            "do_onload": false,
+            "initargs": "@m2(\"with arg\")",
+            "type": "message"
+        }
+    },
+    "type": "default",
+    "scopes": {
+        "__patch__": {
+            "message_003": 10,
+            "message_002": 9,
+            "self": 0,
+            "message_001": 1,
+            "processor_001": 2
+        }
+    }
+}

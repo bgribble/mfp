@@ -49,14 +49,18 @@ def json_deserialize(self, json_data):
 
     # don't swap Patch gui_params if this isn't a top-level patch
     if self.patch is None:
+        print "loading top-level patch"
         self.gui_params = f.get('gui_params', {})
         self.gui_params['top_level'] = True
     else:
+        print "loading non-top-level patch"
         # pick out a few things that we need 
         gp = f.get('gui_params', {})
         if 'num_inlets' in gp:
+            print "found num_inlets=", gp['num_inlets']
             self.gui_params['num_inlets'] = gp['num_inlets']
         if 'num_outlets' in gp:
+            print "found num_outlets=", gp['num_outlets']
             self.gui_params['num_outlets'] = gp['num_outlets']
         self.gui_params['top_level'] = False 
 
@@ -70,6 +74,7 @@ def json_deserialize(self, json_data):
     self.scopes = {}
     self.inlet_objects = []
     self.outlet_objects = []
+    self.dispatch_objects = [] 
 
     # create new objects
     idmap = {}
@@ -142,8 +147,10 @@ def json_deserialize(self, json_data):
                     print prms 
                 else: 
                     srcobj.connect(outlet, dstobj, inlet)
-
-    self.resize(len(self.inlet_objects), len(self.outlet_objects))
+    inlets = len(self.inlet_objects)
+    if not inlets and len(self.dispatch_objects):
+        inlets = 1
+    self.resize(inlets, len(self.outlet_objects))
 
 
 @extends(Patch)
