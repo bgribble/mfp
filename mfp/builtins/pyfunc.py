@@ -149,7 +149,7 @@ class PyAutoWrap(Processor):
 
         if arguments is not None:
             self.argcount = len(arguments)
-            if hasattr(self.thunk, '__doc__'):
+            if hasattr(self.thunk, '__doc__') and self.thunk.__doc__ is not None:
                 self.doc_tooltip_obj = self.thunk.__doc__.split("\n")[0]
             self.doc_tooltip_inlet = []
             for v in arguments:
