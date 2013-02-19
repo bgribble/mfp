@@ -152,16 +152,15 @@ class Processor (object):
             self.assign(self.patch, self.patch.scopes.get(new_scope), self.name)
 
     def _osc_handler(self, path, args, types, src, data):
-        print "@osc_handler"
         if types[0] == 's':
-            print "@osc_handler sending eval-ed data", args[0]
             self.send(self.patch.parse_obj(args[0]))
         else:
-            print "@osc_handler sending raw data", args[0], data
             self.send(args[0])
 
+        # return 0 means completely handled, nonzero keep trying 
+        return 0
+
     def _osc_learn_handler(self, path, args, types, src, data):
-        print "@osc_learn: learning", path
         from .main import MFPApp
         MFPApp().osc_mgr.del_default(self._osc_learn_handler)
         MFPApp().osc_mgr.add_method(path, types, self._osc_handler)
@@ -170,7 +169,6 @@ class Processor (object):
 
     def osc_learn(self):
         from .main import MFPApp
-        print "@osc_learn"
         MFPApp().osc_mgr.add_default(self._osc_learn_handler)
 
     def osc_init(self):
@@ -201,6 +199,7 @@ class Processor (object):
                     self.osc_methods.append((path, t))
 
     def dsp_init(self, proc_name, **params):
+        from .main import MFPApp
         self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
                                  len(self.dsp_outlets), params)
         self.gui_params['dsp_inlets'] = self.dsp_inlets

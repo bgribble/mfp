@@ -30,11 +30,16 @@ class MFPOscManager(QuittableThread):
         else:
             self.server.add_method(path, args, handler)
 
+        # put the default method back at the end of the line 
+        # there's a tiny little race condition here 
+        self.server.del_method(None, None)
+        self.server.add_method(None, None, self.default)
+
     def del_method(self, path, args):
         self.server.del_method(path, args)
 
     def default(self, path, args, types, src):
-        print "Got default OSC data:", path, args, types, src
+        print "Received unmatched OSC data:", path, args, types
         for handler, data in self.default_handlers: 
             handler(path, args, types, src, data)
         return True
