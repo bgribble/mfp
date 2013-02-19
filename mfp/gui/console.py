@@ -36,6 +36,7 @@ class ConsoleMgr (Thread):
         self.ps1 = '>>> '
         self.ps2 = '... '
         self.last_ps = self.ps1
+        self.continue_buffer = '' 
 
         self.textview.connect('key-press-event', self.key_pressed)
         self.textview.connect('button-press-event', self.button_pressed)
@@ -52,9 +53,9 @@ class ConsoleMgr (Thread):
 
         if event.keyval == KEY_ENTER:
             self.append("\n")
-            self.linebuf = self.linebuf.strip()
-            if (len(self.linebuf)
-                    and (not len(self.history) or self.linebuf != self.history[0])):
+            stripped_buf = self.linebuf.strip()
+            if (len(stripped_buf)
+                and (not len(self.history) or stripped_buf != self.history[0])):
                 self.history[:0] = [self.linebuf]
                 self.history_pos = -1
             self.line_ready()
@@ -202,7 +203,10 @@ class ConsoleMgr (Thread):
                 cmd = self.readline()
 
             if not self.quitreq:
-                continued = self.evaluate(cmd)
+                self.continue_buffer += '\n' + cmd 
+                continued = self.evaluate(self.continue_buffer)
+                if not continued: 
+                    self.continue_buffer = ''
 
     def evaluate(self, cmd):
         # returns True if a syntactically complete but partial line
@@ -210,7 +214,8 @@ class ConsoleMgr (Thread):
 
         # returns False if an incorrect or complete and correct
         # expression was entered.
-        return MFPCommand().console_eval(cmd)
+
+        return MFPCommand().console_eval(cmd)  
 
     def finish(self):
         self.quitreq = True
