@@ -75,7 +75,7 @@ class Evaluator (object):
         return rv
 
     def exec_str(self, pystr):
-        exec(pystr, self.global_names, self.local_names)
+        exec(pystr, self.global_names)
 
     def exec_file(self, filename):
         import os.path 
@@ -83,6 +83,6 @@ class Evaluator (object):
         self.local_names["__name__"] = os.path.basename(filename) 
         fileobj = open(filename, "r")
         if fileobj:
-            exec(fileobj, self.global_names, self.local_names)
+            exec(fileobj, self.global_names)
 
 
