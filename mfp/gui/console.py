@@ -47,6 +47,7 @@ class ConsoleMgr (Thread):
 
     def button_pressed(self, *args):
         # ignore pesky mousing
+        self.textview.grab_focus()
         return True
 
     def key_pressed(self, widget, event):
