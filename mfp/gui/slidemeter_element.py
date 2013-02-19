@@ -24,7 +24,7 @@ class SlideMeterElement (PatchElement):
     '''
 
     display_type = "slidemeter"
-    proc_type = "var"
+    proc_type = "slidemeter"
 
     DEFAULT_W = 25
     DEFAULT_H = 100

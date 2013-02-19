@@ -34,6 +34,8 @@ class EnumElement (PatchElement):
         self.editable = False
         self.update_required = True
 
+        self.param_list.extend(['digits', 'min_value', 'max_value', 'scientific'])
+
         self.obj_state = self.OBJ_HALFCREATED
 
         # create elements
@@ -145,6 +147,7 @@ class EnumElement (PatchElement):
 
         if ((self.value < self.min_value) or (self.value > self.max_value)):
             self.update_value(self.value)
+        self.send_params()
 
     def update_value(self, value):
         if self.min_value is not None and value < self.min_value:

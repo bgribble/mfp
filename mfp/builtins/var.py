@@ -135,9 +135,59 @@ class Text (Var):
 class Enum (Var):
     doc_tooltip_obj = "Enter and update a numeric message"
 
+    def tooltip(self, port_dir=None, port_num=None):
+        if port_dir is not None:
+            return Var.tooltip(self, port_dir, port_num)
+        else: 
+            tt = ('<b>[%s]:</b> ' + self.doc_tooltip_obj ) % self.init_type 
+            minv = self.gui_params.get("min_value")
+            maxv = self.gui_params.get("max_value") 
+            digits = self.gui_params.get("digits", 1)
+            ffmt = "%%.%df" % digits 
 
+            vv = '' 
+            if minv is not None or maxv is not None:
+                vv = "val"
+
+            if minv is not None:
+                vv = (ffmt + " &lt;= ") % minv + vv
+
+            if maxv is not None:
+                vv = vv + (" &lt;=" + ffmt) % maxv
+
+            if vv != '':
+                vv = " (%s)" % vv
+        return tt + vv
+
+
+class SlideMeter (Var):
+    doc_tooltip_obj = "Display/control a number with a slider"
+
+    def tooltip(self, port_dir=None, port_num=None):
+        if port_dir is not None:
+            return Var.tooltip(self, port_dir, port_num)
+        else: 
+            tt = ('<b>[%s]:</b> ' + self.doc_tooltip_obj ) % self.init_type 
+            minv = self.gui_params.get("min_value")
+            maxv = self.gui_params.get("max_value") 
+            ffmt = "%.1f"
+
+            vv = '' 
+            if minv is not None or maxv is not None:
+                vv = "val"
+
+            if minv is not None:
+                vv = (ffmt + " &lt;= ") % minv + vv
+
+            if maxv is not None:
+                vv = vv + (" &lt;=" + ffmt) % maxv
+
+            if vv != '':
+                vv = " (%s)" % vv
+        return tt + vv
 def register():
     MFPApp().register("var", Var)
     MFPApp().register("message", Message)
-    MFPApp().register("text", Text)
     MFPApp().register("enum", Enum)
+    MFPApp().register("slidemeter", SlideMeter)
+    MFPApp().register("text", Text)
