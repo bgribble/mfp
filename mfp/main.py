@@ -296,10 +296,8 @@ class MFPApp (Singleton):
         else:
             patch = Patch('default', '', None, self.app_scope, 'default')
 
-        oldpatch = self.patches.get("default") 
-        if oldpatch:
-            oldpatch.delete()
-
+        print "open_file: opening patch as name", patch.name 
+        self.patches[patch.name] = patch 
         self.patches["default"] = patch
         patch.create_gui()
         patch.mark_ready()
@@ -444,7 +442,8 @@ def main():
     parser = argparse.ArgumentParser(description="MFP - Music For Programmers",
                                      epilog="Bugs and code: http://github.com/bgribble/mfp")
     
-    parser.add_argument("patchfile", nargs="?", default=None, help="Patch file to load")
+    parser.add_argument("patchfile", nargs='*', 
+                        help="Patch files to load")
     parser.add_argument("-f", "--init-file", action="append",
                         default=[utils.homepath(".mfp/mfprc.py")],
                         help="Python source file to exec at launch")
@@ -522,8 +521,11 @@ def main():
     else: 
 
         # create initial patch
-        patchfile = args.get("patchfile")
-        app.open_file(patchfile)
+        patchfiles = args.get("patchfile")
+        print "Opening patch files:", patchfiles
+
+        for p in patchfiles: 
+            app.open_file(p)
 
         try: 
             QuittableThread.wait_for_all()

@@ -18,7 +18,6 @@ from .prompter import Prompter
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
-from .modes.select_mru import SelectMRUMode
 import pkgutil
 
 class PatchWindow(object):
@@ -41,7 +40,8 @@ class PatchWindow(object):
         self.log_view = self.builder.get_object("log_text")
        
         def get_obj_name(o): 
-            if isinstance(o, PatchElement):
+            from .patch_info import PatchInfo
+            if isinstance(o, (PatchElement, PatchInfo)):
                 return o.obj_name
             else:
                 return str(o)
@@ -51,9 +51,24 @@ class PatchWindow(object):
         self.object_view.select_cb = self._select
         self.object_view.unselect_cb = self._unselect 
 
+        def get_layer_name(o):
+            from .patch_info import PatchInfo
+            from .patch_layer import PatchLayer 
+            if isinstance(o, PatchLayer):
+                return o.name
+            elif isinstance(o, PatchInfo):
+                return o.obj_name 
+
+        def get_layer_scopename(o):
+            from .patch_layer import PatchLayer 
+            if isinstance(o, PatchLayer):
+                return o.scope
+            else: 
+                return ''
+
         
-        layer_cols = [("Name", lambda l: l.name, True, self.layer_name_edited, False), 
-                      ("Scope", lambda l: l.scope, True, self.layer_scope_edited, False)] 
+        layer_cols = [("Name", get_layer_name, True, self.layer_name_edited, False), 
+                      ("Scope", get_layer_scopename, True, self.layer_scope_edited, False)] 
         self.layer_view = TreeDisplay(self.builder.get_object("layer_tree"), *layer_cols)
         self.layer_view.select_cb = self._layer_select
         self.layer_view.unselect_cb = None 

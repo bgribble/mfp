@@ -5,11 +5,9 @@ A layer in the patch window
 '''
 
 from ..utils import extends
-from gi.repository import Clutter, Gtk
-from mfp import log
-from .patch_window import PatchWindow
+from gi.repository import Clutter
 from ..main import MFPCommand
-
+from .patch_window import PatchWindow 
 
 class PatchLayer(object):
     def __init__(self, stage, patch, name, scope="__patch__"):
@@ -141,7 +139,7 @@ def layer_new(self):
     l = PatchLayer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
-    self.layer_view.insert(l, None)
+    self.layer_view.insert(l, self.selected_patch)
     self.layer_select(l)
     return True
 
@@ -151,8 +149,8 @@ def layer_new_scope(self):
     l = PatchLayer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     l.scope = l.name.replace(" ", "_").lower()
     MFPCommand().add_scope(l.scope)
-    self.layer_view.insert(l, None)
-    self.object_view.insert(l.scope, None)
+    self.layer_view.insert(l, self.selected_patch)
+    self.object_view.insert(l.scope, self.selected_patch)
 
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
