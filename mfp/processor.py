@@ -165,6 +165,7 @@ class Processor (object):
         from .main import MFPApp
         MFPApp().osc_mgr.del_default(self._osc_learn_handler)
         MFPApp().osc_mgr.add_method(path, types, self._osc_handler)
+        self.osc_methods.append((path, types))
         self._osc_handler(path, args, types, src, data)
 
     def osc_learn(self):
@@ -195,11 +196,9 @@ class Processor (object):
         for i in range(len(self.inlets)):
             path = "%s/%s" % (pathbase, str(i))
             if path not in self.osc_methods:
-                o.add_method(path, 's', self._osc_handler, i)
-                o.add_method(path, 'b', self._osc_handler, i)
-                # o.add_method(path, 'i', handler, i)
-                o.add_method(path, 'f', self._osc_handler, i)
-            self.osc_methods.append(path)
+                for t in ('s', 'b', 'f'):
+                    o.add_method(path, t, self._osc_handler, i)
+                    self.osc_methods.append((path, t))
 
     def dsp_init(self, proc_name, **params):
         self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
@@ -225,10 +224,8 @@ class Processor (object):
             self.patch.remove(self)
 
         if hasattr(self, "osc_pathbase") and self.osc_pathbase is not None:
-            for m in self.osc_methods:
-                MFPApp().osc_mgr.del_method(m, 's')
-                MFPApp().osc_mgr.del_method(m, 'b')
-                MFPApp().osc_mgr.del_method(m, 'f')
+            for m, t in self.osc_methods:
+                MFPApp().osc_mgr.del_method(m, t)
 
             self.osc_methods = []
             self.osc_pathbase = None

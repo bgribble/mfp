@@ -13,7 +13,6 @@ class OSCPacket(object):
     def __init__(self, payload):
         self.payload = payload 
 
-
 class OSCIn (Processor):
     doc_tooltip_obj = "Open Sound Control message receive"
     doc_tooltip_inlet = ["Config input"]
