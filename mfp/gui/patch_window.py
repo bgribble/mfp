@@ -43,8 +43,8 @@ class PatchWindow(object):
             from .patch_info import PatchInfo
             if isinstance(o, (PatchElement, PatchInfo)):
                 return o.obj_name
-            else:
-                return str(o)
+            elif isinstance(o, tuple):
+                return o[0]
 
         obj_cols = [ ("Name", get_obj_name, True, self.object_name_edited, True) ] 
         self.object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
@@ -186,6 +186,7 @@ class PatchWindow(object):
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
         self.selected_patch = patch_info
+        self.selected_layer = None 
         if len(patch_info.layers):
             self.layer_select(self.selected_patch.layers[0])
 
@@ -275,9 +276,9 @@ class PatchWindow(object):
         self.input_mgr.event_sources[element] = element
         self.active_group().add_actor(element)
         self.active_layer().add(element)
-        
+       
         if not isinstance(element, ConnectionElement):
-            self.object_view.insert(element, element.layer.scope)
+            self.object_view.insert(element, (element.layer.scope, element.layer.patch))
         if element.obj_id is not None:
             element.send_params()
 
@@ -298,7 +299,7 @@ class PatchWindow(object):
 
     def refresh(self, element):
         if element.layer is not None:
-            self.object_view.update(element, element.layer.scope)
+            self.object_view.update(element, (element.layer.scope, element.layer.patch))
         else:
             print "WARNING: element has no layer,", element 
 

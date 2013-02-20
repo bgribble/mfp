@@ -123,6 +123,8 @@ def layer_select(self, layer):
 
 @extends(PatchWindow)
 def _layer_select(self, layer):
+    if not isinstance(layer, PatchLayer): 
+        return 
     if self.selected_layer is not None:
         self.selected_layer.hide()
     self.selected_layer = layer
@@ -150,7 +152,7 @@ def layer_new_scope(self):
     l.scope = l.name.replace(" ", "_").lower()
     MFPCommand().add_scope(l.scope)
     self.layer_view.insert(l, self.selected_patch)
-    self.object_view.insert(l.scope, self.selected_patch)
+    self.object_view.insert((l.scope, self.selected_patch), self.selected_patch)
 
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()

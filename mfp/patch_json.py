@@ -66,6 +66,7 @@ def json_deserialize(self, json_data):
 
     # reset params that need it 
     self.gui_params["obj_id"] = self.obj_id 
+    self.gui_params["name"] = self.name  
 
     # clear old objects
     for o in self.objects.values():

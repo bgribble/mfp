@@ -36,7 +36,7 @@ class Patch(Processor):
         self.default_scope.bind("self", self)
 
         initargs, kwargs = self.parse_args(init_args)
-        self.gui_params['layers'] = [('Layer 0', '__patch__')]
+        self.gui_params['layers'] = []
 
     #############################
     # name management

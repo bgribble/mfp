@@ -52,7 +52,7 @@ class Processor (object):
         if not hasattr(self, "gui_params"):
             self.gui_params = {}
 
-        defaults = dict(obj_id=self.obj_id, name=name,
+        defaults = dict(obj_id=self.obj_id, 
                         initargs=self.init_args, display_type=self.display_type,
                         num_inlets=inlets, num_outlets=outlets)
 
@@ -73,8 +73,7 @@ class Processor (object):
         self.connections_out = [[] for r in range(outlets)]
         self.connections_in = [[] for r in range(inlets)]
 
-        if patch is not None:
-            self.assign(patch, scope, name)
+        self.assign(patch, scope, name)
 
     def info(self):
         log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
@@ -125,10 +124,9 @@ class Processor (object):
         if self.patch is not None and self.scope is not None and self.name is not None:
             self.patch.unbind(self.name, self.scope)
 
-        self.name = name or "%s_%s" % (self.init_type, str(self.obj_id))
-        self.gui_params["name"] = self.name 
+        name = name or "%s_%s" % (self.init_type, str(self.obj_id))
 
-        if self.patch is None or self.patch != patch:
+        if patch is not None and self.patch is None or self.patch != patch:
             if self.patch:
                 self.patch.remove(self)
             self.patch = patch
@@ -139,8 +137,15 @@ class Processor (object):
         else:
             self.scope = self.patch.default_scope
 
-        self.patch.bind(self.name, self.scope, self)
+        if patch is None: 
+            self.name = scope.bind(name, self)
+            self.patch = None 
+        else: 
+            self.name = self.patch.bind(name, self.scope, self)
+
+        self.gui_params["name"] = self.name 
         self.osc_init()
+        return self.name
 
     def rename(self, new_name):
         self.assign(self.patch, self.scope, new_name)
@@ -402,7 +407,7 @@ class Processor (object):
     def create_gui(self):
         from .main import MFPApp
         MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
-                                self.gui_params)
+                                    self.gui_params)
         self.gui_created = True
 
     def delete_gui(self):

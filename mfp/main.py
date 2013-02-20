@@ -291,12 +291,13 @@ class MFPApp (Singleton):
     def open_file(self, file_name):
         if file_name is not None:
             log.debug("Opening patch file", file_name)
+            print "Patch.open_file: Opening patch file", file_name
             name, factory = Patch.register_file(file_name)
             patch = factory(name, "", None, self.app_scope, name)
         else:
             patch = Patch('default', '', None, self.app_scope, 'default')
+            patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
-        print "open_file: opening patch as name", patch.name 
         self.patches[patch.name] = patch 
         self.patches["default"] = patch
         patch.create_gui()
@@ -519,14 +520,15 @@ def main():
                     print "%-12s : No documentation found" % ("[%s]" % name,)
         app.finish()
     else: 
-
         # create initial patch
         patchfiles = args.get("patchfile")
-        print "Opening patch files:", patchfiles
+        if len(patchfiles): 
+            print "Opening patch files:", patchfiles
 
-        for p in patchfiles: 
-            app.open_file(p)
-
+            for p in patchfiles: 
+                app.open_file(p)
+        else: 
+            app.open_file(None)
         try: 
             QuittableThread.wait_for_all()
         except (KeyboardInterrupt, SystemExit):

@@ -23,6 +23,8 @@ class PatchInfo (object):
         self.scopes = [] 
 
         self.stage.add_patch(self)
+        self.stage.layer_view.insert(self, None)
+        self.stage.object_view.insert(self, None)
 
     def update(self):
         pass
@@ -62,12 +64,12 @@ class PatchInfo (object):
 
         self.scopes = [] 
         for l in self.layers:
-            self.stage.layer_view.insert(l, None)
+            self.stage.layer_view.insert(l, self)
             if l.scope not in self.scopes:
                 self.scopes.append(l.scope)
         
         for s in self.scopes: 
-            self.stage.object_view.insert(s, None)
+            self.stage.object_view.insert((s, self), self)
 
     def command(self, action, data):
         pass

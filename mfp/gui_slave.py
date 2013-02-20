@@ -122,7 +122,6 @@ class GUICommand (RPCWrapper):
         from .gui.button_element import BangButtonElement
 
         elementtype = params.get('display_type')
-        log.debug("create:", obj_id, elementtype, params)
 
         ctors = {
             'processor': ProcessorElement,
