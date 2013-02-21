@@ -141,7 +141,7 @@ class MFPCommand(RPCWrapper):
     def set_scope(self, obj_id, scope_name):
         obj = MFPApp().recall(obj_id)
         if obj is None:
-            log.debug("Cannot find object for %d to set scope to %s" % (obj_id, scope_name))
+            log.debug("Cannot find object for %s to set scope to %s" % (obj_id, scope_name))
             return
 
         scope = obj.patch.scopes.get(scope_name)
@@ -295,7 +295,7 @@ class MFPApp (Singleton):
             name, factory = Patch.register_file(file_name)
             patch = factory(name, "", None, self.app_scope, name)
         else:
-            patch = Patch('default', '', None, self.app_scope, 'default')
+            patch = Patch('default', '', None, self.app_scope, None)
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
         self.patches[patch.name] = patch 
@@ -380,9 +380,17 @@ class MFPApp (Singleton):
         obj = None
         root = None
 
-        # first find the base
+        # first find the base. 
+        # 1. Look in the queryobj's patch 
         if queryobj and queryobj.patch:
             root = queryobj.patch.resolve(parts[0], queryobj.scope)
+
+        # 2. Try the global scope 
+        if not root:
+            root = self.app_scope.resolve(parts[0]) 
+
+        # 3. Check the patch-scope of all the loaded patches. 
+        # (this is pretty suspect)
         if not root:
             for pname, pobj in self.patches.items():
                 root = pobj.resolve(parts[0])

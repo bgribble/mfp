@@ -122,6 +122,7 @@ class PatchElement (Clutter.Group):
 
     def create(self, obj_type, init_args):
         scopename = self.layer.scope
+        patchname = self.layer.patch.obj_name
         connections_out = []
         connections_in = [] 
 
@@ -139,7 +140,7 @@ class PatchElement (Clutter.Group):
             MFPGUI().mfp.delete(self.obj_id)
             self.obj_id = None 
 
-        objinfo = MFPGUI().mfp.create(obj_type, init_args, "default", scopename, name)
+        objinfo = MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name)
         if objinfo is None:
             self.stage.hud_write("ERROR: Could not create, see log for details")
             return None

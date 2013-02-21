@@ -71,5 +71,22 @@ class PatchInfo (object):
         for s in self.scopes: 
             self.stage.object_view.insert((s, self), self)
 
+    def delete(self):
+        # delete all the processor elements 
+        for l in self.layers: 
+            for o in l.objects:
+                o.delete()
+            l.hide() 
+            del l.group
+            l.group = None 
+
+        # remove the patch from layers and objects lists 
+        self.stage.object_view.remove(self)
+        self.stage.layer_view.remove(self)
+
+        # last, delete the patch on the control side 
+        MFPGUI().mfp.delete(self.obj_id)
+        self.obj_id = None 
+
     def command(self, action, data):
         pass

@@ -10,7 +10,39 @@ from .patch_window import PatchWindow
 from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
+from ..gui_slave import MFPGUI
 
+@extends(PatchWindow)
+def patch_select_prev(self): 
+    if not self.selected_patch:
+        self.layer_select(self.patches[0].layers[0])
+    else:
+        pnum = self.patches.index(self.selected_patch)
+        pnum -= 1
+        self.layer_select(self.patches[pnum].layers[0])
+
+@extends(PatchWindow)
+def patch_select_next(self): 
+    if not self.selected_patch:
+        self.layer_select(self.patches[0].layers[0])
+    else:
+        pnum = self.patches.index(self.selected_patch)
+        pnum = (pnum + 1) % len(self.patches)
+        self.layer_select(self.patches[pnum].layers[0])
+
+@extends(PatchWindow)
+def patch_close(self):
+    if len(self.patches) > 1:
+        p = self.selected_patch
+        self.patch_select_next() 
+        self.patches.remove(p)
+        p.delete()
+    else: 
+        self.quit()
+
+@extends(PatchWindow)
+def patch_new(self):
+    MFPGUI().mfp.open_file(None)
 
 @extends(PatchWindow)
 def _select(self, obj): 

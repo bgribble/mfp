@@ -72,7 +72,8 @@ class Processor (object):
 
         self.connections_out = [[] for r in range(outlets)]
         self.connections_in = [[] for r in range(inlets)]
-
+        if name is None:
+            name = self.display_type 
         self.assign(patch, scope, name)
 
     def info(self):
@@ -197,7 +198,7 @@ class Processor (object):
 
         if self.osc_pathbase is not None and self.osc_pathbase != pathbase:
             for m in self.osc_methods:
-                o.del_method(m, None)
+                o.del_method(*m)
             self.osc_methods = []
         self.osc_pathbase = pathbase
 

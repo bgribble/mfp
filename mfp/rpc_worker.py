@@ -64,10 +64,6 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
             import traceback 
             traceback.print_exc() 
             pass 
-    print "RPCServer local call counts:"
-    for k in sorted(RPCWrapper.call_stats):
-        print "   ", k, RPCWrapper.call_stats[k]
-
 
 class RPCServer(QuittableThread):
     def __init__(self, name, initproc=None, *initproc_args):

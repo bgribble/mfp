@@ -36,7 +36,6 @@ class Interpreter (InteractiveInterpreter):
                 results = [] 
                 stree = ast.parse(source)
                 for obj in stree.body:
-                    print "checking", obj, isinstance(obj, ast.Expr)
                     if isinstance(obj, ast.Expr):
                         results.append(self.evaluator.eval(source))
                     else:

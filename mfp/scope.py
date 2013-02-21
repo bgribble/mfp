@@ -15,12 +15,12 @@ class LexicalScope (object):
         basename = name 
         testname = name 
         counter = 1
-        fmt = "%03d"
+        fmt = "_%03d"
 
         while self.bindings.has_key(testname):
             counter += 1
             if counter > 999:
-                fmt = "%d"
+                fmt = "_%d"
             
             testname = basename + fmt % counter
         return testname 

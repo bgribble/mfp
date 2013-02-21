@@ -248,7 +248,9 @@ class Patch(Processor):
         savefile.write(self.json_serialize())
 
     def delete(self):
+        print "Patch.delete()"
         for oid, obj in self.objects.items():
+            print "    Deleting patch object", oid, obj
             obj.delete()
         Processor.delete(self)
 
