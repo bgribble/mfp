@@ -38,7 +38,7 @@ class GlobalMode (InputMode):
 
     def save_file(self):
         def cb(fname):
-            MFPGUI().mfp.save_file("default", fname)
+            MFPGUI().mfp.save_file(self.window.selected_patch.obj_name, fname)
         self.window.get_prompted_input("File name to save: ", cb)
 
     def open_file(self):

@@ -1,0 +1,39 @@
+MFP -- Music For Programmers 
+Release 0.1, "Mining For Participants" 
+
+MFP is an environment for visually composing computer programs, with
+an emphasis on music and real-time audio synthesis and analysis.  It's
+very much inspired by Miller Puckette's Pure Data (pd) and Max/MSP,
+with a bit of LabView and TouchOSC for good measure.  It is targeted
+at musicians, recording engineers, and software developers who like
+the "patching" dataflow metaphor for constructing audio synthesis,
+processing, and analysis networks. 
+
+MFP is a completely new code base, written in Python and C, with a
+Clutter UI.  It has been under development by a solo developer (me!),
+as a spare-time project for several years. 
+
+Compared to Pure Data, its nearest relative, MFP is superficially
+pretty similar but differs in that it uses Python data natively and
+provides fairly raw access to Python constructs if desired.  For example, 
+the built-in Python console allows live coding of Python functions 
+as patch elements at runtime.  
+
+The code is still in early days, but has reached a point in its
+lifecycle where at least some interesting workflows are operational
+and it can be used for a good number of things.  I think MFP is now
+ripe for those with an experimental streak and/or development skills
+to grab it, use it, and contribute to its design and development. 
+
+The code and issue tracker are hosted on GitHub: 
+
+    https://github.com/bgribble/mfp
+
+You can find an introductory paper (submitted to LAC-2013) and
+accompanying screenshots in the doc/lac2013 directory of the GitHub
+repo.  
+
+Thanks,
+Bill Gribble 
+
+
