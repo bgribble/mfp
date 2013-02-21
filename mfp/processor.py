@@ -134,14 +134,19 @@ class Processor (object):
 
         if scope is not None:
             self.scope = scope
-        else:
+        elif patch is not None:
             self.scope = self.patch.default_scope
+        else:
+            self.scope = None 
 
-        if patch is None: 
+        if patch is not None: 
+            self.name = self.patch.bind(name, self.scope, self)
+        elif scope is not None: 
             self.name = scope.bind(name, self)
             self.patch = None 
         else: 
-            self.name = self.patch.bind(name, self.scope, self)
+            self.name = name
+            self.patch = None 
 
         self.gui_params["name"] = self.name 
         self.osc_init()
