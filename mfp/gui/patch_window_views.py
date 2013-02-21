@@ -4,6 +4,8 @@ from ..main import MFPCommand
 from .tree_display import TreeDisplay
 from .patch_window import PatchWindow 
 from .patch_element import PatchElement 
+from .patch_info import PatchInfo 
+from .layer import Layer 
 
 @extends(PatchWindow)
 def init_object_view(self):
@@ -27,18 +29,32 @@ def init_object_view(self):
             MFPCommand().rename_scope(oldscopename, new_name)
             self.selected_patch.send_params()
 
+    def obj_selected(obj):
+        self._select(obj)
+        if isinstance(obj, PatchElement): 
+            self.layer_select(obj.layer)
+        elif isinstance(obj, PatchInfo):
+            self.layer_select(obj.layers[0])
+        elif isinstance(obj, tuple):
+            scope = obj[0]
+            patch = obj[1] 
+            for l in patch.layers:
+                if l.scope == scope:
+                    self.layer_select(l)
+                    return 
+            self.layer_select(patch.layers[0])
+
     obj_cols = [ ("Name", get_obj_name, True, obj_name_edited, True) ] 
     object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
-    object_view.select_cb = self._select
+    object_view.select_cb = obj_selected
     object_view.unselect_cb = self._unselect 
 
     return object_view 
 
 @extends(PatchWindow)
 def init_layer_view(self):
-    from .layer import Layer 
+
     def get_layer_name(o):
-        from .patch_info import PatchInfo
         if isinstance(o, Layer):
             return o.name
         elif isinstance(o, PatchInfo):
@@ -73,11 +89,17 @@ def init_layer_view(self):
                     self.refresh(obj)
         return True
 
+    def sel_layer(l):
+        if isinstance(l, PatchInfo):
+            self.layer_select(l.layers[0])
+        else:
+            self._layer_select(l)
+
 
     layer_cols = [("Name", get_layer_name, True, layer_name_edited, False), 
                   ("Scope", get_layer_scopename, True, layer_scope_edited, False)] 
     layer_view = TreeDisplay(self.builder.get_object("layer_tree"), *layer_cols)
-    layer_view.select_cb = self._layer_select
+    layer_view.select_cb = sel_layer
     layer_view.unselect_cb = None 
 
     return layer_view 

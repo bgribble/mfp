@@ -12,15 +12,25 @@ from .layer import Layer
 @extends(PatchWindow)
 def layer_select_up(self):
     p = self.selected_patch
-    l = p.layers.index(self.selected_layer)
-    self.layer_select(p.layers[l - 1])
+    if self.selected_layer in p.layers: 
+        l = p.layers.index(self.selected_layer)
+        self.layer_select(p.layers[l - 1])
+    else: 
+        print "WARNING: selected layer not in selected patch!"
+        print self.selected_layer
+        print self.selected_patch 
 
 
 @extends(PatchWindow)
 def layer_select_down(self):
     p = self.selected_patch
-    l = p.layers.index(self.selected_layer)
-    self.layer_select(p.layers[(l + 1) % len(p.layers)])
+    if self.selected_layer in p.layers: 
+        l = p.layers.index(self.selected_layer)
+        self.layer_select(p.layers[(l + 1) % len(p.layers)])
+    else: 
+        print "WARNING: selected layer not in selected patch!"
+        print self.selected_layer
+        print self.selected_patch 
 
 
 @extends(PatchWindow)
@@ -36,6 +46,9 @@ def _layer_select(self, layer):
         self.selected_layer.hide()
     self.selected_layer = layer
     self.selected_layer.show()
+    if self.selected_layer.patch != self.selected_patch:
+        self.selected_patch = self.selected_layer.patch 
+
     sname = self.selected_layer.scope
     if sname == "__patch__":
         sname = "Patch"

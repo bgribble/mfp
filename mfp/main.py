@@ -292,7 +292,6 @@ class MFPApp (Singleton):
     def open_file(self, file_name):
         if file_name is not None:
             log.debug("Opening patch file", file_name)
-            print "Patch.open_file: Opening patch file", file_name
             name, factory = Patch.register_file(file_name)
             patch = factory(name, "", None, self.app_scope, name)
         else:
@@ -412,7 +411,6 @@ class MFPApp (Singleton):
             log.debug("MFPApp.finish: reaping GUI slave...")
             self.gui_process.finish()
 
-        from quittable_thread import QuittableThread
         log.debug("MFPApp.finish: reaping threads...")
         QuittableThread.finish_all()
 

@@ -143,7 +143,6 @@ class PatchWindow(object):
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
         self.selected_patch = patch_info
-        self.selected_layer = None 
         if len(patch_info.layers):
             self.layer_select(self.selected_patch.layers[0])
 
