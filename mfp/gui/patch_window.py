@@ -9,11 +9,9 @@ from gi.repository import Gtk, Clutter, GtkClutter, Pango
 from mfp import MFPGUI
 from mfp import log
 
-from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
-from .tree_display import TreeDisplay
 from .prompter import Prompter 
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
@@ -38,44 +36,15 @@ class PatchWindow(object):
         # significant widgets we will be dealing with later
         self.console_view = self.builder.get_object("console_text")
         self.log_view = self.builder.get_object("log_text")
-       
-        def get_obj_name(o): 
-            from .patch_info import PatchInfo
-            if isinstance(o, (PatchElement, PatchInfo)):
-                return o.obj_name
-            elif isinstance(o, tuple):
-                return o[0]
-
-        obj_cols = [ ("Name", get_obj_name, True, self.object_name_edited, True) ] 
-        self.object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
-        self.object_view.select_cb = self._select
-        self.object_view.unselect_cb = self._unselect 
-
-        def get_layer_name(o):
-            from .patch_info import PatchInfo
-            from .patch_layer import PatchLayer 
-            if isinstance(o, PatchLayer):
-                return o.name
-            elif isinstance(o, PatchInfo):
-                return o.obj_name 
-
-        def get_layer_scopename(o):
-            from .patch_layer import PatchLayer 
-            if isinstance(o, PatchLayer):
-                return o.scope
-            else: 
-                return ''
-
+        self.object_view = self.init_object_view()
+        self.layer_view = self.init_layer_view()
         
-        layer_cols = [("Name", get_layer_name, True, self.layer_name_edited, False), 
-                      ("Scope", get_layer_scopename, True, self.layer_scope_edited, False)] 
-        self.layer_view = TreeDisplay(self.builder.get_object("layer_tree"), *layer_cols)
-        self.layer_view.select_cb = self._layer_select
-        self.layer_view.unselect_cb = None 
-
         # objects for stage -- self.group gets moved/scaled to adjust
         # the view, so anything not in it will be static on the stage
         self.group = Clutter.Group()
+
+        # The HUD is the text overlay at the bottom/top of the window that 
+        # fades after a short display
         self.hud_history = []
         self.hud_banner_txt = None 
         self.hud_banner_anim = None 
@@ -87,7 +56,7 @@ class PatchWindow(object):
 
         self.stage.add_actor(self.group)
 
-        # self.objects is PatchElement subclasses represented the
+        # self.objects is PatchElement subclasses representing the
         # currently-displayed patch(es)
         self.patches = []
         self.objects = []
@@ -111,7 +80,8 @@ class PatchWindow(object):
         self.color_bg = Clutter.Color()
         self.color_bg.from_string("White")
 
-        # 
+        # callbacks facility... not yet too much used, but "select" and 
+        # "add" are in use 
         self.callbacks = {} 
         self.callbacks_last_id = 0
 
@@ -163,19 +133,6 @@ class PatchWindow(object):
 
         # show keybindings
         self.display_bindings()
-
-    def object_name_edited(self, obj, new_name):
-        if isinstance(obj, PatchElement):
-            obj.obj_name = new_name
-            MFPGUI().mfp.rename_obj(obj.obj_id, new_name)
-            obj.send_params()
-        else:
-            oldscopename = obj 
-            for l in self.selected_patch.layers:
-                if l.scope == oldscopename:
-                    l.scope = new_name
-            MFPGUI().mfp.rename_scope(oldscopename, new_name)
-            self.selected_patch.send_params()
 
     def load_start(self):
         self.load_in_progress = True 
@@ -429,6 +386,9 @@ class PatchWindow(object):
         anim.connect_after("completed", anim_complete, self.hud_banner_text)
         self.hud_banner_anim = anim
 
+    #####################
+    # callbacks
+    #####################
 
     def add_callback(self, signal_name, callback): 
         cbid = self.callbacks_last_id
@@ -452,8 +412,9 @@ class PatchWindow(object):
             cbinfo[1](*args)
 
 
-
         
 # additional methods in @extends wrappers
-import patch_layer
-import patch_funcs
+import patch_window_layer
+import patch_window_views 
+import patch_window_select 
+

@@ -7,7 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..gui_slave import MFPGUI
-from .patch_layer import PatchLayer
+from .layer import Layer
 
 
 class PatchInfo (object):
@@ -59,7 +59,7 @@ class PatchInfo (object):
         self.layers = []
         layers = params.get("layers", [])
         for name, scope in layers:
-            l = PatchLayer(self.stage, self, name, scope)
+            l = Layer(self.stage, self, name, scope)
             self.layers.append(l)
 
         self.scopes = [] 

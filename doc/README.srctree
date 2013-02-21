@@ -119,6 +119,9 @@ Main window:
                           loaded for editing
    prompter.py            Manage prompted input in HUD area at bottom 
                           of editing window
+   tree_display.py        TreeDisplay class, a convenience wrapper around 
+                          GtkTreeView/GtkTreeStore used in object_view and 
+                          layer_view 
 
 Element UI types: 
 
