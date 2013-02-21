@@ -1,8 +1,7 @@
 
 
-# build with 'python ./setup.py 
+# build with 'python ./setup.py install' 
 from setuptools import setup, Extension
-from subprocess import Popen 
 
 def shcall(cmdline):
     from subprocess import Popen,PIPE
@@ -16,6 +15,11 @@ def pkgconf_libs(pkg):
     return [ f.strip() for f in shcall("pkg-config --libs %s" % pkg).split('-l')
              if f ]
     
+def git_version(): 
+    vers = shcall("git show --oneline").split('\n')[0].split(' ')[0]
+    return 'git_' + vers.strip()
+
+
 x86_args = ['-march=686', '-mstackrealign', '-mpreferred-stack-boundary=4']
 platform_args = [ "-DMFP_USE_SSE"]
 
@@ -35,8 +39,10 @@ mfpdsp = Extension('mfpdsp',
                    sources = [ 'mfpdsp/' + f for f in mfp_c_sources ]
                   )
 
+
+
 setup (name = 'mfp',
-       version = '0.01',
+       version = '0.01_' + git_version(),
        description = 'Music for programmers',
        packages = ['mfp', 'mfp.builtins', 'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes' ],
        entry_points = { 'console_scripts': [ 'mfp=mfp.main:main'] },

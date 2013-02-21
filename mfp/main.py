@@ -229,12 +229,13 @@ class MFPApp (Singleton):
                 time.sleep(0.2)
             log.debug("GUI is ready, switching logging to GUI")
             log.log_func = self.gui_command.log_write
+
             log.debug("Started logging to GUI")
             if self.dsp_command:
                 self.dsp_command.log_to_gui()
 
             self.console = Interpreter(self.gui_command.console_write, dict(app=self))
-            self.gui_command.hud_write("<b>Welcome to MFP</b>")
+            self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
 
         # midi manager
         from . import midi
@@ -418,6 +419,12 @@ class MFPApp (Singleton):
         log.debug("MFPApp.finish: all children reaped, good-bye!")
 
 
+   
+def version():
+    import pkg_resources 
+    vers = pkg_resources.require("mfp")[0].version
+    return vers
+
 def add_evaluator_defaults(): 
     # default names known to the evaluator
     Evaluator.bind_global("math", math)
@@ -438,10 +445,24 @@ def add_evaluator_defaults():
     Evaluator.bind_global("builtins", builtins)
     Evaluator.bind_global("app", MFPApp())
 
+mfp_banner = "MFP - Music For Programmers, version %s"
+
+mfp_footer = """
+To report bugs or download source: 
+    
+    http://github.com/bgribble.mfp 
+
+Copyright (c) 2009-2013 Bill Gribble <grib@billgribble.com> 
+
+MFP is free software, and you are welcome to redistribute it 
+under certain conditions.  See the file COPYING for details.
+"""
 
 def main():
-    parser = argparse.ArgumentParser(description="MFP - Music For Programmers",
-                                     epilog="Bugs and code: http://github.com/bgribble/mfp")
+    description = mfp_banner % version() 
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description=description, epilog=mfp_footer)
     
     parser.add_argument("patchfile", nargs='*', 
                         help="Patch files to load")
@@ -535,13 +556,3 @@ def main():
             print " Quit request received, exiting"
             app.finish()
     
-    print "Main app RPCWrapper local call counts:"
-    for k in sorted(RPCWrapper.call_stats):
-        print "   ", k, RPCWrapper.call_stats[k]
-
-    import threading 
-    threads = threading.enumerate()
-    if len(threads) > 1:
-        print "Threads are still running:"
-        for t in threads:
-            print "   ", t
