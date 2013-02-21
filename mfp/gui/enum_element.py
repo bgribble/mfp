@@ -34,6 +34,8 @@ class EnumElement (PatchElement):
         self.editable = False
         self.update_required = True
 
+        self.param_list.remove('width')
+        self.param_list.remove('height')
         self.param_list.extend(['digits', 'min_value', 'max_value', 'scientific'])
 
         self.obj_state = self.OBJ_HALFCREATED
@@ -115,7 +117,6 @@ class EnumElement (PatchElement):
             self.texture.set_size(new_w, self.texture.get_height())
             self.texture.set_surface_size(
                 int(new_w), self.texture.get_property('surface_height'))
-            self.draw_ports()
             self.texture.invalidate()
 
     def create_obj(self):
@@ -211,6 +212,11 @@ class EnumElement (PatchElement):
             self.label.set_text(self.format_value(self.value))
 
         self.texture.invalidate()
+
+        if 'width' in params:
+            del params['width']
+        if 'height' in params:
+            del params['height']
 
         PatchElement.configure(self, params)
 

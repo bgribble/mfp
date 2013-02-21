@@ -200,7 +200,6 @@ class PatchElement (Clutter.Group):
     def port_position(self, port_dir, port_num):
         w = self.get_width()
         h = self.get_height()
-
         if port_dir == PatchElement.PORT_IN:
             if self.num_inlets < 2:
                 spc = 0
@@ -302,7 +301,9 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = params.get("dsp_outlets", [])
         self.obj_name = params.get("name")
         layer_name = params.get("layername") or params.get("layer")
-        layer = self.stage.selected_patch.find_layer(layer_name)
+        mypatch = self.layer.patch or self.stage.selected_patch 
+
+        layer = mypatch.find_layer(layer_name)
 
         if layer and self.layer != layer:
             self.move_to_layer(layer)
