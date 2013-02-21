@@ -1,0 +1,114 @@
+The following is the output of 'mfp --help-builtins', which prints the
+tooltips for every object type known at startup time. 
+
+[name] is using the PD "ASCII patch drawing" convention and indicates
+a processor box of type 'name'.  You could create this box by clicking
+in the patch edit area of the main window and typing "p" to place a
+processor box followed by "name" and RET (return).
+
+[!=]         : Not-equal comparison
+[%]          : Modulo
+[*]          : Multiply
+[**]         : Raise to a power
+[*~]         : Multiply signals
+[+]          : Add
+[+~]         : Add signals
+[-]          : Subtract
+[-~]         : Subtract signals
+[/]          : Divide
+[/~]         : Divide signals
+[<]          : Less-than comparison
+[<<]         : Bit-shift left
+[<=]         : Less than or equal comparison
+[<~]         : Compare signals
+[==]         : Equality comparison
+[>]          : Greater-than comparison
+[>=]         : Greater than or equal comparison
+[>>]         : Bit-shift right
+[>~]         : Compare signals
+[^]          : Raise to a power
+[a2db]       : Convert amplitude to dB values
+[abs]        : Absolute value/magnitude
+[acos]       : acos(x)
+[ampl~]      : Compute RMS and peak amplitude
+[and]        : Logical and
+[apply]      : Create a method call object
+[asin]       : asin(x)
+[atan2]      : atan2(y, x)
+[baseclass]  : Pass method call objects to the Patch base class
+[biquad~]    : Biquad filter (5-parameter normalized form)
+[bp~]        : Bandpass filter (biquad implementation)
+[buffer~]    : Capture a signal to a shared buffer
+[case]       : Route input to a selected output based on type or value
+[case=]      : Route input to a selected output based on type or value
+[complex]    : Convert to complex
+[cos]        : cos(x)
+[date]       : Convert to a date
+[datetime]   : Create a datetime object
+[db2a]       : Convert dB to amplitude/gain
+[delay]      : Pass through input messages, delayed by a specified amount
+[del~]       : Signal delay line
+[dict]       : Convert to dictionary
+[dispatch]   : Receive method call objects for the patch
+[enum]       : Enter and update a numeric message
+[eval]       : Evaluate Python expression
+[exp]        : exp(x)
+[file]       : File I/O processor
+[float]      : Convert to float
+[for]        : Emit an input list one item at a time
+[format]     : Format input strings with Python %% operator
+[func]       : Evaluate function
+[get]        : Get element or attribute from object
+[hip~]       : Highpass filter (biquad implementation)
+[inlet]      : Message input to patch
+[int]        : Convert to integer
+[in~]        : Input from JACK port
+[line~]      : Ramp/line generator
+[list]       : Convert to list
+[loadbang]   : Emit a Bang message on patch load
+[log]        : log(x[, base])
+[log10]      : log10(x)
+[lop~]       : Lowpass filter (biquad implementation)
+[message]    : Store literal Python data as a message to emit when clicked/triggered
+[metro]      : Emit a Bang at specified interval
+[midi_in]    : Receive MIDI events from ALSA sequencer
+[midi_out]   : Send MIDI events to ALSA sequencer
+[neg]        : Negate value
+[noise~]     : Generate white noise
+[note2freq]  : Convert a MIDI note or note number to a frequency
+[now]        : Current time-of-day
+[or]         : Logical or
+[osc_in]     : Open Sound Control message receive
+[osc_out]    : Open Sound Control message send
+[osc~]       : Sine oscillator
+[outlet]     : Message output from patch
+[out~]       : Output to JACK port
+[pack]       : Collect inputs into a list
+[phase]      : Angle (radians) of complex number
+[phasor~]    : Phasor (0-1 ramp) oscillator
+[plugin~]    : LADSPA plugin host
+[pow]        : pow(x, y)
+[print]      : Print input to log window, formatting with Python %% operator
+[r]          : Receive messages to the specified name
+[radiogroup] : Control a radio group of toggle buttons
+[recv]       : Receive messages to the specified name
+[route]      : Route input to a selected output based on type or value
+[route=]     : Route input to a selected output based on type or value
+[s]          : Send messages to a named receiver (create with 'via' GUI object)
+[scatter]    : Scatter plot for non-signal data points
+[scope]      : Scope-style signal display (requires a buffer~)
+[send]       : Send messages to a named receiver (create with 'via' GUI object)
+[sig~]       : Emit a constant signal
+[sin]        : sin(x)
+[slidemeter] : Display/control a number with a slider
+[snap~]      : Capture a single or periodic snapshot value of a signal
+[tan]        : tan(x)
+[text]       : Comment using SGML-type markup for style
+[throttle]   : Pass through input, but at a limited rate
+[trigger]    : Pass through input to N outputs, in right-to-left order
+[tuple]      : Convert to tuple
+[type]       : Extract object type
+[unpack]     : Break list into items
+[var]        : Store a variable message (any type)
+[xor]        : Logical xor
+[zip]        : Merge input lists by item
