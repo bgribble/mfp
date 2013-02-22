@@ -20,11 +20,10 @@ class GlobalMode (InputMode):
         self.bind("C-PGUP", self.window.patch_select_prev, "Select higher patch")
         self.bind("C-PGDN", self.window.patch_select_next, "Select lower patch")
 
-        self.bind('C-s', self.save_file, "Save patch to file")
+        self.bind('C-f', self.window.patch_new, "Create a new patch")
         self.bind('C-o', self.open_file, "Load file into new patch")
-        self.bind('C-f', self.load_file, "Load file into current patch")
+        self.bind('C-s', self.save_file, "Save patch to file")
         self.bind('C-w', self.window.patch_close, "Close current patch")
-        self.bind('C-p', self.window.patch_new, "Create a new patch")
 
         self.bind('C-e', self.window.toggle_major_mode, "Toggle edit/control")
         self.bind('C-q', self.window.quit, "Quit")
@@ -44,9 +43,4 @@ class GlobalMode (InputMode):
     def open_file(self):
         def cb(fname):
             MFPGUI().mfp.open_file(fname)
-        self.window.get_prompted_input("File name to load: ", cb)
-
-    def load_file(self):
-        def cb(fname):
-            MFPGUI().mfp.load_file(fname)
         self.window.get_prompted_input("File name to load: ", cb)

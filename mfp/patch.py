@@ -198,28 +198,6 @@ class Patch(Processor):
         MFPApp().register(parts[0], factory)
         return (parts[0], factory)
 
-    def _load_file(self, filename):
-        from .main import MFPApp
-        from .utils import splitpath 
-
-        searchpath = MFPApp().searchpath or ""
-        searchdirs = splitpath(searchpath)
-        jsdata = None 
-
-        for d in searchdirs:
-            path = os.path.join(d, filename)
-            try: 
-                os.stat(path)
-                jsdata = open(path, 'r').read()
-            except OSError:
-                pass 
-        
-        if jsdata is not None:
-            self.json_deserialize(jsdata)
-            for obj_id, obj in self.objects.items():
-                if obj.do_onload:
-                    obj.onload()
-
     def create_gui(self):
         from main import MFPApp
         if MFPApp().no_gui:
@@ -243,9 +221,31 @@ class Patch(Processor):
                     MFPApp().gui_command.connect(obj.obj_id, srcport, dstobj.obj_id, dstport)
         MFPApp().gui_command.load_complete()
 
-    def save_file(self, filename=None):
+    def save_file(self, filename):
         savefile = open(filename, "w")
         savefile.write(self.json_serialize())
+
+    def _load_file(self, filename):
+        from .main import MFPApp
+        from .utils import splitpath 
+
+        searchpath = MFPApp().searchpath or ""
+        searchdirs = splitpath(searchpath)
+        jsdata = None 
+
+        for d in searchdirs:
+            path = os.path.join(d, filename)
+            try: 
+                os.stat(path)
+                jsdata = open(path, 'r').read()
+            except OSError:
+                pass 
+
+        if jsdata is not None:
+            self.json_deserialize(jsdata)
+            for obj_id, obj in self.objects.items():
+                if obj.do_onload:
+                    obj.onload()
 
     def delete(self):
         print "Patch.delete()"
