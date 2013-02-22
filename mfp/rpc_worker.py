@@ -49,7 +49,12 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
     pipe.init_slave()
 
     if initproc:
-        initproc(pipe, *initproc_args)
+        try: 
+            initproc(pipe, *initproc_args)
+        except Exception, e:
+            print "RPCServer remote: unhandled error in startup, exiting"
+            pipe.finish()
+            return 
 
     # wait until time to quit
     retry = True 
@@ -64,6 +69,7 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
             import traceback 
             traceback.print_exc() 
             pass 
+    pipe.finish()
 
 class RPCServer(QuittableThread):
     def __init__(self, name, initproc=None, *initproc_args):
@@ -80,6 +86,11 @@ class RPCServer(QuittableThread):
         self.worker.start()
         self.pipe.init_master()
 
+    def alive(self): 
+        if self.worker is None:
+            return False
+        return True 
+
     def serve(self, cls):
         cls.pipe = self.pipe
         cls.local = False
@@ -90,11 +101,13 @@ class RPCServer(QuittableThread):
             log.debug(self.name, 'RPCServer remote thread EXITED UNEXPECTEDLY')
             self.worker = None
             self.pipe.finish()
+            log.debug(self.name, 'RPCServer shutting down, finished with pipe')
 
     def finish(self):
         if self.worker:
             self.pipe.put(Request("quit"))
             self.worker_lock.release()
             self.pipe.finish()
+            self.worker = None 
         QuittableThread.finish(self)
 

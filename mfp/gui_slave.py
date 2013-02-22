@@ -7,14 +7,10 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 import threading
-import os
-from request import Request
 from singleton import Singleton
 from rpc_wrapper import RPCWrapper, rpcwrap
 from main import MFPCommand
 from . import log
-from .utils import profile
-
 
 def gui_init(pipe):
     import os
@@ -26,7 +22,6 @@ def gui_init(pipe):
     GUICommand.local = True
     MFPCommand.local = False
     MFPGUI()
-
 
 def gui_finish():
     MFPGUI().finish()

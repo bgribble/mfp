@@ -108,9 +108,8 @@ def dsp_response(*args):
             recip = DSPObject.c_objects.get(m[0], -1)
             mfp.send(recip, -1, (m[1], m[2]))
 
-
 def dsp_finish():
+    mfpdsp.dsp_shutdown()
     global ttq
     ttq = True
     log.log_func = None
-    mfpdsp.dsp_shutdown()

@@ -28,6 +28,10 @@ from . import log
 from . import builtins 
 from . import utils
 
+
+class StartupError(Exception):
+    pass 
+
 class MFPCommand(RPCWrapper):
     @rpcwrap
     def create(self, objtype, initargs, patch_name, scope_name, obj_name):
@@ -217,16 +221,25 @@ class MFPApp (Singleton):
             self.dsp_process.serve(DSPObject)
             self.dsp_process.serve(DSPCommand)
             self.dsp_command = DSPCommand()
-            self.samplerate, self.blocksize, self.in_latency, self.out_latency = \
-                    self.dsp_command.get_dsp_params()
+            params = self.dsp_command.get_dsp_params() 
+            if params is not None: 
+                self.samplerate, self.blocksize, self.in_latency, self.out_latency = params
+
+            if not self.dsp_process.alive():
+                raise StartupError("DSP process died during startup")
 
         if not self.no_gui:
             self.gui_process = RPCServer("mfp_gui", gui_init)
             self.gui_process.start()
             self.gui_process.serve(GUICommand)
             self.gui_command = GUICommand()
-            while not self.gui_command.ready():
+
+            while self.gui_process.alive() and not self.gui_command.ready():
                 time.sleep(0.2)
+
+            if not self.gui_process.alive():
+                raise StartupError("GUI process died during setup")
+
             log.debug("GUI is ready, switching logging to GUI")
             log.log_func = self.gui_command.log_write
 
@@ -509,7 +522,12 @@ def main():
     app.searchpath = ':'.join(args.get("patch_path"))
 
     # launch processes and threads 
-    app.setup()
+    try: 
+        app.setup()
+    except (StartupError, KeyboardInterrupt, SystemExit):
+        log.debug("Setup did not complete properly, exiting")
+        app.finish()
+        return 
 
     # ok, now start configuring the running system  
     add_evaluator_defaults() 

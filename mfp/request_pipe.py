@@ -66,10 +66,14 @@ class RequestPipe(object):
 
     def finish(self):
         self.running = False 
+
         if self.reader:
             self.reader.finish()
         for cbk in self.finish_callbacks:
             cbk()
+
+        with self.lock:
+            self.condition.notify_all()
 
     def init_master(self):
         self.lock = threading.Lock()
@@ -126,6 +130,8 @@ class RequestPipe(object):
         with self.lock:
             while req.state != Request.RESPONSE_RCVD:
                 self.condition.wait()
+                if not self.running: 
+                    return False 
 
     def get(self, timeout=None):
         if not self.running:
