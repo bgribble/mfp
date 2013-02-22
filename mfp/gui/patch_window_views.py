@@ -10,7 +10,6 @@ from .layer import Layer
 @extends(PatchWindow)
 def init_object_view(self):
     def get_obj_name(o): 
-        from .patch_info import PatchInfo
         if isinstance(o, (PatchElement, PatchInfo)):
             return o.obj_name
         elif isinstance(o, tuple):
@@ -28,6 +27,7 @@ def init_object_view(self):
                     l.scope = new_name
             MFPCommand().rename_scope(oldscopename, new_name)
             self.selected_patch.send_params()
+        self.object_view.update(obj, (obj.layer.scope, obj.layer.patch)) 
 
     def obj_selected(obj):
         self._select(obj)
