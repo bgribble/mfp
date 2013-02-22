@@ -1,5 +1,5 @@
 MFP -- Music For Programmers 
-Release 0.1, "Mining For Participants" 
+Release 0.01, "Mining For Participants" 
 
 MFP is an environment for visually composing computer programs, with
 an emphasis on music and real-time audio synthesis and analysis.  It's

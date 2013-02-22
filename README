@@ -51,6 +51,12 @@ will pull in any necessary dependencies.
         liblo7 (OSC library, python bindings in lib/)
         liblo-dev 
 
+Clutter depends on OpenGL, so you will need a working OpenGL setup,
+which you can test for with "glxinfo".  Lots of output is Good, little
+output is Bad.  If that works, "glxgears" should show some spinny
+gears.  Debugging OpenGL beyond that is way beyond the scope of this
+README :) 
+
 Building: I suggest using 'virtualenv' to build in a sandbox.   The
 packages in "lib" are required for MIDI and OSC functionality and I
 couldn't find them for easy_install.
@@ -63,6 +69,16 @@ From the top level (where this file is located):
 If you don't have posix_ipc on your system: 
 
     $ pip install posix_ipc 
+
+Also, it may be better to install "nose" in your virtualenv, since some
+distros don't install a Python script as /usr/bin/nosetests, which will 
+break running tests below:
+
+    $ pip install nose 
+
+If pip complains that nose is already installed on your system, and
+the trick for running "python /usr/bin/nosetests" below doesn't work,
+force it with "pip install -I nose" 
 
 Install libs and main program:
 
