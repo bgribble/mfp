@@ -14,10 +14,26 @@ Clutter UI.  It has been under development by a solo developer (me!),
 as a spare-time project for several years. 
 
 Compared to Pure Data, its nearest relative, MFP is superficially
-pretty similar but differs in that it uses Python data natively and
-provides fairly raw access to Python constructs if desired.  For example, 
-the built-in Python console allows live coding of Python functions 
-as patch elements at runtime.  
+pretty similar but differs in a few key ways: 
+
+ * MFP uses Python data natively.  Any literal data entered in the 
+   UI is parsed by the Python evaluator, and any Python value is a 
+   legitimate "message" on the dataflow network 
+ 
+ * MFP provides fairly raw access to Python constructs if desired.  
+   For example, the built-in Python console allows live coding of
+   Python functions as patch elements at runtime. 
+
+ * Name resolution and namespacing are addressed more robustly, 
+   with explicit support for lexical scoping 
+
+ * The UI is largely keyboard-driven, with a modal input system 
+   that feels a bit like vim.  The graphical presentation is a
+   single-window style with layers rather than multiple windows.   
+
+ * There is fairly deep integration of Open Sound Control (OSC), with 
+   every patch element having an OSC address and the ability to learn
+   any other desired address.  
 
 The code is still in early days, but has reached a point in its
 lifecycle where at least some interesting workflows are operational
@@ -30,8 +46,10 @@ The code and issue tracker are hosted on GitHub:
     https://github.com/bgribble/mfp
 
 You can find an introductory paper (submitted to LAC-2013) and
-accompanying screenshots in the doc/lac2013 directory of the GitHub
-repo.  
+accompanying screenshots, some sample patches, and a few other bits of
+documentation in the doc directory of the GitHub repo.  The README 
+at the top level of the source tree contains dependency, build, 
+and getting-started information.
 
 Thanks,
 Bill Gribble 

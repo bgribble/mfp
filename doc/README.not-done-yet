@@ -1,0 +1,26 @@
+A list of things that a reasonable person would expect this app to
+have that are not in this release. 
+
+I make no excuses!  These things are on The List of things to do.
+They just aren't done yet.  I thought it would be polite to list them
+here so you don't tear your hair out looking for them. 
+
+ * Cut/copy/paste. 
+
+ * Multiple selection/rubberband selection.
+
+ * Undo/redo 
+
+ * Click-and-drag connections between processors.  You have to use the 
+   keyboard to do it: select start processor, type c, optionally type
+   a number to change the origin port, select end processor,
+   optionally type a number to select destination port, RET.  It's
+   faster than it sounds. 
+
+* File dialogs for load/save. 
+
+* Close confirmation if there are unsaved changes 
+
+* Signal vias ([send~]/[recv~])  
+
+
