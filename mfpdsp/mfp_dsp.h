@@ -98,10 +98,13 @@ extern float mfp_out_latency;
 extern GHashTable * mfp_proc_registry;
 extern GHashTable * mfp_proc_objects;
 extern GArray * mfp_proc_list; 
-extern GArray * mfp_requests_pending;
+extern GArray * mfp_requests_incoming;
+extern GArray * mfp_requests_working; 
+extern int mfp_requests_pending;
+
 extern GArray * mfp_responses_pending;
 
-extern pthread_mutex_t mfp_globals_lock;
+extern pthread_mutex_t mfp_request_lock;
 extern pthread_mutex_t mfp_response_lock;
 extern pthread_cond_t mfp_response_cond;
 
@@ -120,6 +123,7 @@ extern int mfp_dsp_schedule(void);
 extern void mfp_dsp_run(int nsamples);
 extern void mfp_dsp_set_blocksize(int nsamples);
 extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
+extern void mfp_dsp_push_request(mfp_reqdata rd); 
 extern void mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response);
 extern void mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int response);
 extern void mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response);

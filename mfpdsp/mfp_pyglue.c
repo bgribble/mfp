@@ -295,9 +295,7 @@ proc_destroy(PyObject * mod, PyObject * args)
     rd.reqtype = REQTYPE_DESTROY;
     rd.src_proc = PyCObject_AsVoidPtr(self);
 
-    pthread_mutex_lock(&mfp_globals_lock);
-    g_array_append_val(mfp_requests_pending, rd);
-    pthread_mutex_unlock(&mfp_globals_lock);
+    mfp_dsp_push_request(rd);
 
     objref = (PyObject *)g_hash_table_lookup(mfp_proc_objects, rd.src_proc);
     Py_DECREF(objref);
@@ -325,10 +323,8 @@ proc_connect(PyObject * mod, PyObject * args)
     rd.src_port = (int)PyFloat_AsDouble(srcport);
     rd.dest_proc = PyCObject_AsVoidPtr(dst);
     rd.dest_port = (int)PyFloat_AsDouble(dstport);
-    
-    pthread_mutex_lock(&mfp_globals_lock);
-    g_array_append_val(mfp_requests_pending, rd);
-    pthread_mutex_unlock(&mfp_globals_lock);
+   
+    mfp_dsp_push_request(rd);
 
     Py_INCREF(Py_False);
     return Py_False; 
@@ -350,10 +346,8 @@ proc_disconnect(PyObject * mod, PyObject * args)
     rd.src_port = (int)PyFloat_AsDouble(srcport);
     rd.dest_proc = PyCObject_AsVoidPtr(dst);
     rd.dest_port = (int)PyFloat_AsDouble(dstport);
-    
-    pthread_mutex_lock(&mfp_globals_lock);
-    g_array_append_val(mfp_requests_pending, rd);
-    pthread_mutex_unlock(&mfp_globals_lock);
+   
+    mfp_dsp_push_request(rd);
 
     Py_INCREF(Py_False);
     return Py_False; 
@@ -436,12 +430,13 @@ init_globals(void)
     mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
     mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
     mfp_proc_objects = g_hash_table_new(NULL, NULL);
-    mfp_requests_pending = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
+    mfp_requests_incoming = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
+    mfp_requests_working = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
     mfp_responses_pending = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
 
     pthread_cond_init(&mfp_response_cond, NULL);
     pthread_mutex_init(&mfp_response_lock, NULL);
-    pthread_mutex_init(&mfp_globals_lock, NULL);
+    pthread_mutex_init(&mfp_request_lock, NULL);
 
 }
 

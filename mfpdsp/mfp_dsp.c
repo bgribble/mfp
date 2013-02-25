@@ -7,11 +7,14 @@
 #include "mfp_dsp.h"
 
 
-GArray          * mfp_requests_pending = NULL;
+GArray          * mfp_requests_incoming= NULL;
+GArray          * mfp_requests_working = NULL;
+int             mfp_requests_pending = 0;
+
 GArray          * mfp_responses_pending = NULL;
-pthread_mutex_t mfp_globals_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mfp_request_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mfp_response_lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t    mfp_response_cond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t  mfp_response_cond = PTHREAD_COND_INITIALIZER;
 
 int mfp_dsp_enabled = 0;
 int mfp_needs_reschedule = 1;
@@ -141,13 +144,37 @@ mfp_dsp_schedule(void)
     }
 }
 
+
+void 
+mfp_dsp_push_request(mfp_reqdata rd) 
+{
+    GArray * tmp;
+
+    pthread_mutex_lock(&mfp_request_lock);
+    g_array_append_val(mfp_requests_incoming, rd);
+    if (mfp_requests_pending == 0) {
+        tmp = mfp_requests_working;
+        mfp_requests_working = mfp_requests_incoming;
+        mfp_requests_pending = 1;
+
+        if (tmp->len) 
+            g_array_remove_range(tmp, 0, tmp->len);
+        mfp_requests_incoming = tmp;
+    }
+    pthread_mutex_unlock(&mfp_request_lock);
+}
+
 void
 mfp_dsp_handle_requests(void)
 {
     int count;
 
-    for(count=0; count < mfp_requests_pending->len; count++) {
-        mfp_reqdata cmd = g_array_index(mfp_requests_pending, mfp_reqdata, count);
+    if (mfp_requests_pending == 0) {
+        return;
+    }
+
+    for(count=0; count < mfp_requests_working->len; count++) {
+        mfp_reqdata cmd = g_array_index(mfp_requests_working, mfp_reqdata, count);
         int type = cmd.reqtype;
 
         switch (type) {
@@ -165,9 +192,7 @@ mfp_dsp_handle_requests(void)
 
         }
     }
-    if (mfp_requests_pending->len) 
-        g_array_remove_range(mfp_requests_pending, 0, mfp_requests_pending->len);
-
+    mfp_requests_pending = 0;
 }
 
 
@@ -187,9 +212,7 @@ mfp_dsp_run(int nsamples)
     mfp_dsp_set_blocksize(nsamples);
 
     /* handle any DSP config requests */
-    pthread_mutex_lock(&mfp_globals_lock);
     mfp_dsp_handle_requests();
-    pthread_mutex_unlock(&mfp_globals_lock);
 
     /* zero output buffers ... out~ will accumulate into them */ 
     if (mfp_output_ports != NULL) {
