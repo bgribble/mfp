@@ -123,6 +123,12 @@ process(mfp_processor * proc)
     int inpos, outpos;
     int loopstart=0; 
 
+    printf("in buffer~ process\n");
+
+    if (d->shm_ptr == NULL) {
+        return 0;
+    }
+
     /* if not currently capturing, check for trigger conditions */ 
     if(d->rec_state == REC_IDLE && d->rec_enabled) {
         if ((d->rec_mode == TRIG_EXT) || (d->rec_mode == TRIG_THRESH)) {
@@ -196,8 +202,12 @@ process(mfp_processor * proc)
         }
     }
 
+    printf("buffer~ mark 0\n");
+
     /* zero output buffer in any case */ 
     mfp_block_zero(proc->outlet_buf[0]);
+
+    printf("buffer~ mark 0.1 -- %p\n", d);
 
     /* if we are playing, copy data from the buffer to the outlet */ 
     if ((d->play_state != PLAY_IDLE) && (d->region_end > 0))  {
@@ -238,10 +248,12 @@ process(mfp_processor * proc)
         }
 
     }
+    printf("buffer~ mark 1\n");
     if(loopstart > 0) {
         mfp_dsp_send_response_bool(proc, RESP_LOOPSTART, 1);
     }
 
+    printf("buffer~ mark 2\n");
     /* if we are triggered, copy data from inlets to buffer */
     if(d->rec_state == REC_ACTIVE) {
         tocopy = MIN(mfp_blocksize-dstart, d->chan_size - d->rec_pos);
@@ -321,6 +333,7 @@ process(mfp_processor * proc)
         }
     }
 
+    printf("buffer~ mark 3\n");
     return 0;
 }
 
@@ -394,6 +407,8 @@ config(mfp_processor * proc)
 
     buf_info * d = (buf_info *)(proc->data);
     int new_size=d->chan_size, new_channels=d->chan_count;
+
+    printf("in buffer~ config\n");
 
     if ((size_ptr != NULL) || (channels_ptr != NULL)) {
         if(size_ptr != NULL) {

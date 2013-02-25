@@ -57,6 +57,7 @@ typedef struct {
     int src_port;
     mfp_processor * dest_proc;
     int dest_port;
+
 } mfp_reqdata;
 
 
@@ -107,8 +108,6 @@ extern GArray * mfp_responses_pending;
 extern pthread_mutex_t mfp_request_lock;
 extern pthread_mutex_t mfp_response_lock;
 extern pthread_cond_t mfp_response_cond;
-
-
 
 /* mfp_jack.c */
 extern GArray * mfp_input_ports;

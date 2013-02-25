@@ -124,8 +124,9 @@ mfp_proc_init(mfp_processor * p)
     /* config_preconfig is the non-RT phase of config */ 
     if (p->typeinfo->preconfig != NULL) {
         p->typeinfo->preconfig(p);
-        p->needs_config = 1;
     }
+
+    p->needs_config = 1;
 
     /* add proc to global list */
     g_array_append_val(mfp_proc_list, p); 
@@ -149,6 +150,7 @@ mfp_proc_process(mfp_processor * self)
 
     /* run config() if params have changed */
     if (self->needs_config) {
+        printf("about to call config\n");
         self->typeinfo->config(self);
         self->needs_config = 0;
     }
