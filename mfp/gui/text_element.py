@@ -50,12 +50,12 @@ class TextElement (PatchElement):
         self.draw_ports()
 
     def select(self, *args):
-        self.selected = True
+        PatchElement.select(self)
         self.label.set_color(self.stage.color_selected)
         self.draw_ports()
 
     def unselect(self, *args):
-        self.selected = True
+        PatchElement.unselect(self)
         self.label.set_color(self.stage.color_unselected)
         self.hide_ports()
 

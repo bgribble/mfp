@@ -11,6 +11,7 @@ import math
 from mfp import MFPGUI
 from .patch_element import PatchElement
 from .modes.label_edit import LabelEditMode
+from .colordb import ColorDB
 
 
 class ViaElement (PatchElement):
@@ -61,12 +62,8 @@ class ViaElement (PatchElement):
 
     def draw_cb(self, texture, ct):
         self.texture.clear()
-        if self.selected:
-            color = self.stage.color_selected
-        else:
-            color = self.stage.color_unselected
-
-        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
+        color = ColorDB.to_cairo(self.color_fg)
+        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
         # ct.translate(0.5, 0.5)
         ct.set_line_width(3)
@@ -121,11 +118,11 @@ class ViaElement (PatchElement):
                 self.TEXTURE_Y + (self.VIA_SIZE + self.VIA_FUDGE) / 2.0)
 
     def select(self):
-        self.selected = True
+        PatchElement.select(self)
         self.texture.invalidate()
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self)
         self.texture.invalidate()
 
     def delete(self):

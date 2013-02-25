@@ -9,7 +9,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import cairo
 import math
-from patch_element import PatchElement
+from .patch_element import PatchElement
+from .colordb import ColorDB
 from mfp import MFPGUI
 from .modes.enum_control import EnumEditMode, EnumControlMode
 
@@ -79,19 +80,14 @@ class EnumElement (PatchElement):
         w = self.texture.get_property('surface_width') - 1
         h = self.texture.get_property('surface_height') - 1
         self.texture.clear()
-        if self.selected:
-            color = self.stage.color_selected
-        else:
-            color = self.stage.color_unselected
 
         if self.obj_state == self.OBJ_COMPLETE:
             ct.set_dash([])
         else:
             ct.set_dash([8, 4])
-
+        
         ct.set_line_width(2.0)
         ct.set_antialias(cairo.ANTIALIAS_NONE)
-        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.translate(0.5, 0.5)
         ct.move_to(1, 1)
         ct.line_to(1, h)
@@ -100,6 +96,13 @@ class EnumElement (PatchElement):
         ct.line_to(w - h / 3.0, 1)
         ct.line_to(1, 1)
         ct.close_path()
+
+        color = ColorDB.to_cairo(self.color_bg)
+        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
+        ct.fill_preserve()
+
+        color = ColorDB.to_cairo(self.color_fg)
+        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.stroke()
 
     def text_changed_cb(self, *args):
@@ -229,12 +232,11 @@ class EnumElement (PatchElement):
             return PatchElement.port_position(self, port_dir, port_num)
 
     def select(self):
-        self.move_to_top()
-        self.selected = True
+        PatchElement.select(self)
         self.texture.invalidate()
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self)
         self.texture.invalidate()
 
     def delete(self):

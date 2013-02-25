@@ -8,7 +8,6 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import cairo
-import math
 from mfp import MFPGUI
 
 from .patch_element import PatchElement
@@ -16,9 +15,7 @@ from .connection_element import ConnectionElement
 from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
 from .modes.clickable import ClickableControlMode
-
-from mfp import log
-
+from .colordb import ColorDB 
 
 class MessageElement (PatchElement):
     display_type = "message"
@@ -92,16 +89,13 @@ class MessageElement (PatchElement):
         ct.close_path()
 
         # fill to paint the background 
-        c = self.stage.color_bg 
-        ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
+        c = ColorDB.to_cairo(self.color_bg)
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.fill_preserve()
 
         # stroke to draw the outline 
-        if self.selected:
-            c = self.stage.color_selected
-        else:
-            c = self.stage.color_unselected
-        ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
+        c = ColorDB.to_cairo(self.color_fg)
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.stroke()
 
     def update(self):
@@ -172,12 +166,11 @@ class MessageElement (PatchElement):
             return PatchElement.port_position(self, port_dir, port_num)
 
     def select(self):
-        self.move_to_top()
-        self.selected = True
+        PatchElement.select(self)
         self.texture.invalidate()
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self)
         self.texture.invalidate()
 
     def delete(self):

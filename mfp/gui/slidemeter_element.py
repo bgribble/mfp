@@ -8,10 +8,10 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import math
-from patch_element import PatchElement
+from .patch_element import PatchElement
+from .colordb import ColorDB
 from .modes.slider import SliderEditMode, SliderControlMode
 from mfp import MFPGUI
-from mfp import log
 from . import ticks
 
 
@@ -86,12 +86,8 @@ class SlideMeterElement (PatchElement):
         self.update_required = True
 
     def draw_cb(self, texture, ct):
-        c = None
-        if self.selected:
-            c = self.stage.color_selected
-        else:
-            c = self.stage.color_unselected
-        ct.set_source_rgb(c.red, c.green, c.blue)
+        c = ColorDB.to_cairo(self.color_fg)
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
 
         if self.orientation == self.HORIZONTAL: 
             h = self.texture.get_property('surface_width') - 2
@@ -322,12 +318,11 @@ class SlideMeterElement (PatchElement):
         self.texture.invalidate()
 
     def select(self):
-        self.move_to_top()
-        self.selected = True
+        PatchElement.select(self)
         self.texture.invalidate()
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self)
         self.texture.invalidate()
 
     def delete(self):

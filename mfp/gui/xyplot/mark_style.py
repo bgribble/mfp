@@ -6,7 +6,7 @@ Helper class to save style info and render a styled mark/stroke
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from gi.repository import Clutter as clutter
+from  ..colordb import ColorDB
 import math
 
 
@@ -17,8 +17,8 @@ class MarkStyle (object):
         self.col_r = 0
         self.col_g = 0
         self.col_b = 0
-        self.col_a = 255
-        self.colorspec = (0,0,0,255)
+        self.col_a = 1 
+        self.colorspec = (0,0,0,1)
         self.shape = "dot"
         self.size = 1.0
         self.stroke_style = None
@@ -27,28 +27,12 @@ class MarkStyle (object):
         self.alpha_elt = None
 
     def set_color(self, newcolor):
-        r = g = b = 0
-        a = 1.0
-
-        if isinstance(newcolor, str):
-            c = clutter.Color()
-            c.from_string(newcolor)
-            r = c.red
-            g = c.green
-            b = c.blue
-            a = c.alpha
-        elif isinstance(newcolor, (list, tuple)) and len(newcolor) > 2:
-            r = newcolor[0]
-            g = newcolor[1]
-            b = newcolor[2]
-            if len(newcolor) > 3:
-                a = newcolor[3]
-
-        self.col_r = r
-        self.col_g = g
-        self.col_b = b
-        self.col_a = a
-        self.colorspec = newcolor
+        c = ColorDB().find_cairo(newcolor)
+        self.col_r = c.red
+        self.col_g = c.green
+        self.col_b = c.blue
+        self.col_a = c.alpha
+        self.colorspec = c
 
     def mark_dot(self, ctx, point):
         ctx.move_to(point[0] + self.size, point[1])

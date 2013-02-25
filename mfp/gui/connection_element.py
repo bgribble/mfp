@@ -1,9 +1,10 @@
 
 import cairo
-from patch_element import PatchElement
+from .patch_element import PatchElement
+from .colordb import ColorDB
 from gi.repository import Clutter
 import math
-from mfp import MFPGUI, log
+from mfp import MFPGUI
 
 
 class ConnectionElement(PatchElement):
@@ -36,11 +37,11 @@ class ConnectionElement(PatchElement):
             self.move_to_layer(obj_1.layer)
 
     def select(self):
-        self.selected = True
+        PatchElement.select(self)
         self.draw()
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self)
         self.draw()
 
     def delete(self):
@@ -84,13 +85,11 @@ class ConnectionElement(PatchElement):
         self.texture.invalidate()
 
     def draw_cb(self, texture, ctx):
-        if self.selected:
-            c = self.stage.color_selected
-        else:
-            c = self.stage.color_unselected
         texture.clear()
         ctx.set_antialias(cairo.ANTIALIAS_NONE)
-        ctx.set_source_rgba(c.red, c.green, c.blue, 1.0)
+
+        c = ColorDB.to_cairo(self.color_fg)
+        ctx.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         if self.dsp_connect:
             ctx.set_line_width(2.0 * self.LINE_WIDTH)
         else:

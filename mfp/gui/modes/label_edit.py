@@ -8,6 +8,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 import time
 from threading import Thread
 from ..input_mode import InputMode
+from ..colordb import ColorDB 
+
 from mfp import log
 from mfp.gui_slave import clutter_do
 
@@ -41,7 +43,7 @@ class LabelEditMode (InputMode):
         self.multiline = multiline
         self.markup = markup
         self.text = self.widget.get_text()
-        self.cursor_color = Clutter.Color.new(0, 0, 0, 64)
+        self.cursor_color = ColorDB().find("default_txtcursor") 
         self.undo_stack = [(self.text, len(self.text))]
         self.undo_pos = -1
         self.activate_handler_id = None

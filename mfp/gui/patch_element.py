@@ -8,6 +8,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 from mfp import MFPGUI
+from .colordb import ColorDB 
 
 class PatchElement (Clutter.Group):
     '''
@@ -47,6 +48,10 @@ class PatchElement (Clutter.Group):
         self.layer = None
         self.port_elements = {}
 
+        # colors 
+        self.color_fg = self.stage.color_unselected
+        self.color_bg = self.stage.color_bg 
+
         # UI state
         self.position_x = x
         self.position_y = y
@@ -78,10 +83,13 @@ class PatchElement (Clutter.Group):
         return self
 
     def select(self):
-        pass 
+        self.color_fg = self.stage.color_selected 
+        self.selected = True 
+        self.move_to_top()
 
     def unselect(self):
-        pass 
+        self.color_fg = self.stage.color_unselected 
+        self.selected = False 
 
     def move_to_top(self):
         p = self.get_parent()

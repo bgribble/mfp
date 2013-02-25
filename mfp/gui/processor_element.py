@@ -6,13 +6,9 @@ A patch element corresponding to a signal or control processor
 
 from gi.repository import Clutter as clutter
 import cairo
-import math
-from patch_element import PatchElement
-from mfp import MFPGUI
-from mfp import log
-from input_mode import InputMode
+from .patch_element import PatchElement
+from .colordb import ColorDB 
 from .modes.label_edit import LabelEditMode
-
 
 class ProcessorElement (PatchElement):
     display_type = "processor"
@@ -87,16 +83,13 @@ class ProcessorElement (PatchElement):
         ct.close_path()
 
         # fill to paint the background 
-        color = self.stage.color_bg 
-        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
+        color = ColorDB.to_cairo(self.color_bg)
+        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ct.fill_preserve()
 
         # stroke to draw the outline 
-        if self.selected:
-            color = self.stage.color_selected
-        else:
-            color = self.stage.color_unselected
-        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
+        color = ColorDB.to_cairo(self.color_fg)
+        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
         if self.obj_state == self.OBJ_COMPLETE:
             ct.set_dash([])
@@ -145,12 +138,11 @@ class ProcessorElement (PatchElement):
         self.texture.invalidate()
 
     def select(self):
-        self.move_to_top()
-        self.selected = True
+        PatchElement.select(self) 
         self.texture.invalidate()
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self) 
         self.texture.invalidate()
 
     def delete(self):

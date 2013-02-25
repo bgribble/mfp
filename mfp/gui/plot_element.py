@@ -200,11 +200,11 @@ class PlotElement (PatchElement):
             c.draw()
 
     def select(self):
-        self.selected = True
+        PatchElement.select(self)
         self.rect.set_border_color(self.stage.color_selected)
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self)
         self.rect.set_border_color(self.stage.color_unselected)
 
     def delete(self):

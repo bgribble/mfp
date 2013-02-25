@@ -8,16 +8,9 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import math
-
 from .quilt import Quilt
 from .. import ticks
-
-black = Clutter.Color()
-black.from_string("Black")
-
-white = Clutter.Color()
-white.from_string("White")
-
+from ..colordb import ColorDB 
 
 class XYPlot (Clutter.Group):
     '''
@@ -48,6 +41,11 @@ class XYPlot (Clutter.Group):
         self.y_max = 1
         self.axis_font_size = 8
 
+        # colors 
+        self.color_fg = ColorDB().find("default_fg_unsel")
+        self.color_bg = ColorDB().find("default_bg")
+        self.color_axes = ColorDB().find_cairo("default_fg_unsel")
+
         # initialized by create() call
         self.border = None
         self.plot_border = None
@@ -68,8 +66,8 @@ class XYPlot (Clutter.Group):
     def create(self):
         self.border = Clutter.Rectangle()
         self.border.set_border_width(0)
-        self.border.set_border_color(black)
-        self.border.set_color(white)
+        self.border.set_border_color(self.color_fg)
+        self.border.set_color(self.color_bg)
         self.border.set_size(self.width, self.height)
         self.border.set_position(0, 0)
         self.add_actor(self.border)
@@ -94,8 +92,8 @@ class XYPlot (Clutter.Group):
 
         self.plot_border = Clutter.Rectangle()
         self.plot_border.set_border_width(0)
-        self.plot_border.set_border_color(black)
-        self.plot_border.set_color(white)
+        self.plot_border.set_border_color(self.color_fg)
+        self.plot_border.set_color(self.color_bg)
         self.plot_border.set_size(self.plot_w, self.plot_h)
         self.plot_border.set_position(self.MARGIN_LEFT, 0)
         self.add_actor(self.plot_border)
@@ -258,7 +256,8 @@ class XYPlot (Clutter.Group):
         tick_gen = tickfuncs.get(self.x_axis_mode)
         xticks = tick_gen(self.x_min, self.x_max, self.plot_w / self.TICK_SIZE,
                           tick_min, tick_max)
-        ctx.set_source_rgb(black.red, black.green, black.blue)
+        ctx.set_source_rgba(self.color_axes.red, self.color_axes.green,
+                           self.color_axes.blue, self.color_axes.alpha)
         ctx.set_font_size(self.axis_font_size)
 
         # the axis line
@@ -292,7 +291,8 @@ class XYPlot (Clutter.Group):
         tick_gen = tickfuncs.get(self.y_axis_mode)
         yticks = tick_gen(self.y_min, self.y_max, float(self.plot_h) / self.TICK_SIZE,
                            tick_min, tick_max)
-        ctx.set_source_rgb(black.red, black.green, black.blue)
+        ctx.set_source_rgba(self.color_axes.red, self.color_axes.blue, 
+                            self.color_axes.green, self.color_axes.alpha)
         ctx.set_font_size(self.axis_font_size)
 
         # the axis line

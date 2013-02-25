@@ -13,6 +13,7 @@ from .connection_element import ConnectionElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
 from .prompter import Prompter 
+from .colordb import ColorDB
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
@@ -73,12 +74,9 @@ class PatchWindow(object):
         self.console_mgr.start()
 
         # dumb colors
-        self.color_unselected = Clutter.Color()
-        self.color_unselected.from_string('Black')
-        self.color_selected = Clutter.Color()
-        self.color_selected.from_string('Red')
-        self.color_bg = Clutter.Color()
-        self.color_bg.from_string("White")
+        self.color_unselected = ColorDB().find("default_fg_unsel")
+        self.color_selected = ColorDB().find("default_fg_sel")
+        self.color_bg = ColorDB().find("default_bg")
 
         # callbacks facility... not yet too much used, but "select" and 
         # "add" are in use 

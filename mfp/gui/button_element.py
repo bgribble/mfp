@@ -10,6 +10,7 @@ from gi.repository import Clutter
 import cairo
 
 from .patch_element import PatchElement
+from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
 from ..gui_slave import MFPGUI
 from ..bang import Bang
@@ -47,11 +48,13 @@ class ButtonElement (PatchElement):
         PatchElement.__init__(self, window, x, y)
 
         self.indicator = False
+        self.color_indicator = None 
 
         # create elements
         self.texture = Clutter.CairoTexture.new(20, 20)
         self.texture.connect("draw", self.draw_cb)
 
+        
         self.set_reactive(True)
         self.add_actor(self.texture)
 
@@ -71,13 +74,9 @@ class ButtonElement (PatchElement):
         w = self.texture.get_property('surface_width') - 2
         h = self.texture.get_property('surface_height') - 2
 
-        c = None
-        if self.selected:
-            c = self.stage.color_selected
-        else:
-            c = self.stage.color_unselected
+        c = ColorDB.to_cairo(self.color_fg)
         texture.clear()
-        ct.set_source_rgba(c.red, c.green, c.blue, 1.0)
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
 
         ct.set_line_width(1.5)
         ct.set_antialias(cairo.ANTIALIAS_NONE)
@@ -86,6 +85,13 @@ class ButtonElement (PatchElement):
         corner = max(2, 0.1*min(w, h))
         rounded_box(ct, 1, 1, w, h, corner)
         ct.stroke()
+
+        if self.color_indicator is not None:
+            c = self.color_indicator 
+        else: 
+            c = ColorDB.to_cairo(self.color_fg)
+
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
 
         # draw the indicator
         ioff = max(3, 0.075*min(w,h))
@@ -107,11 +113,11 @@ class ButtonElement (PatchElement):
         self.texture.invalidate()
 
     def select(self):
-        self.selected = True
+        PatchElement.select(self)
         self.texture.invalidate()
 
     def unselect(self):
-        self.selected = False
+        PatchElement.unselect(self)
         self.texture.invalidate()
 
     def delete(self):
