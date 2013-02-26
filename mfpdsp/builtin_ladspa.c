@@ -196,7 +196,7 @@ config(mfp_processor * proc)
 }
 
 static void
-preconfig(mfp_processor * proc) 
+preconfig(mfp_processor * proc, mfp_reqdata * rd) 
 {
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
 

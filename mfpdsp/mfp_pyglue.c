@@ -49,6 +49,7 @@ dsp_samplerate(PyObject * mod, PyObject * args)
     Py_INCREF(rval);
     return rval;
 }
+
 static PyObject * 
 dsp_blocksize(PyObject * mod, PyObject * args)
 {
@@ -56,6 +57,7 @@ dsp_blocksize(PyObject * mod, PyObject * args)
     Py_INCREF(rval);
     return rval;
 }
+
 static PyObject * 
 dsp_in_latency(PyObject * mod, PyObject * args)
 {
@@ -72,9 +74,6 @@ dsp_out_latency(PyObject * mod, PyObject * args)
     Py_INCREF(rval);
     return rval;
 }
-
-
-
 
 static PyObject *
 dsp_response_wait(PyObject * mod, PyObject * args)
@@ -143,115 +142,118 @@ dsp_response_wait(PyObject * mod, PyObject * args)
     }
 }
 
-static int
-set_c_param(mfp_processor * proc, char * paramname, PyObject * val) 
+static void * 
+py_floatlist_to_c(PyObject * val) 
 {
-    int rval = 1;
-    int vtype = (int)g_hash_table_lookup(proc->typeinfo->params, paramname);    
-    float cflt;
-    int cint;
-    char * cstr;
-    int llen, lpos;
-    GArray * g;
-    PyObject * oldval;
+    int llen = PyList_Size(val);
+    int lpos; 
+    GArray * g; 
     PyObject * listval;
+    float cflt;
+
+    g = g_array_sized_new(FALSE, FALSE, sizeof(float), llen);
+    for(lpos=0; lpos < llen; lpos++) {
+        listval = PyList_GetItem(val, lpos);
+        if (PyNumber_Check(listval)) {
+            cflt = (float)PyFloat_AsDouble(PyNumber_Float(listval));
+            g_array_append_val(g, cflt); 
+        }
+        else {
+            g_array_free(g, TRUE);
+            g = NULL;
+            break;
+        }
+    }
+    return g; 
+}
+
+
+static void * 
+py_float_to_c(PyObject * val) 
+{
+    gpointer newval = g_malloc(sizeof(float));
+    *(float *)newval = (float)PyFloat_AsDouble(val); 
+    return newval;
+}
+
+static void * 
+py_string_to_c(PyObject * val) 
+{
+    gpointer newval = g_strdup(PyString_AsString(val));
+    return newval;
+}
+
+static void * 
+py_param_value_to_c(mfp_processor * proc, char * paramname, PyObject * val) 
+{
+    int vtype = (int)g_hash_table_lookup(proc->typeinfo->params, paramname);    
+    void * rval = NULL;
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
-            printf("set_c_param: undefined parameter %s\n", paramname);
-            rval = 0;
+            printf("py_param_value_to_c: undefined parameter %s\n", paramname);
             break;
         case PARAMTYPE_FLT:
             if (PyNumber_Check(val)) {
-                cflt = PyFloat_AsDouble(PyNumber_Float(val));
-                mfp_proc_setparam_float(proc, paramname, cflt);
-            }
-            else {
-                rval = 0;
+                rval = py_float_to_c(PyNumber_Float(val));
             }
             break;
 
         case PARAMTYPE_INT:
             if (PyNumber_Check(val)) {
-                cint = (int)PyFloat_AsDouble(PyNumber_Float(val));
-                mfp_proc_setparam_float(proc, paramname, cint);
-            }
-            else {
-                rval = 0;
+                rval = py_float_to_c(PyNumber_Float(val));
             }
             break;
 
         case PARAMTYPE_STRING:
             if (PyString_Check(val)) {
-                cstr = PyString_AsString(val);
-                mfp_proc_setparam_string(proc, paramname, cstr);
-            }
-            else {
-                rval = 0;
+                rval = py_string_to_c(val);
             }
             break;
 
         case PARAMTYPE_FLTARRAY:
             if (PyList_Check(val)) {
-                llen = PyList_Size(val);
-                g = g_array_sized_new(FALSE, FALSE, sizeof(float), llen);
-                for(lpos=0; lpos < llen; lpos++) {
-                    listval = PyList_GetItem(val, lpos);
-                    if (PyNumber_Check(listval)) {
-                        cflt = (float)PyFloat_AsDouble(PyNumber_Float(listval));
-                        g_array_append_val(g, cflt); 
-                    }
-                    else {
-                        rval = 0;
-                    }
-                }
-                if (rval == 1) 
-                    mfp_proc_setparam_array(proc, paramname, g);
-                else {
-                    g_array_free(g, TRUE);
-                }
-            }
-            else {
-                rval = 0;
+                rval = py_floatlist_to_c(val);
             }
             break;
     }
-    if (rval != 0) {
-        oldval = g_hash_table_lookup(proc->pyparams, paramname);
-        if (oldval != NULL) {
-            Py_DECREF(oldval);
-        }
-        Py_INCREF(val);
-        g_hash_table_replace(proc->pyparams, g_strdup(paramname), val);
-
-        /* FIXME: race on setting needs_config */ 
-        proc->needs_config = 1;
-    }
-
     return rval;
 }
 
+static void
+set_pyparam(mfp_processor * proc, char * param_name, PyObject * val)
+{
+    PyObject * oldval;
+    oldval = g_hash_table_lookup(proc->pyparams, param_name);
+    if (oldval != NULL) {
+        Py_DECREF(oldval);
+    }
+    Py_INCREF(val);
+    g_hash_table_replace(proc->pyparams, g_strdup(param_name), val);
+}
 
 static int
-extract_c_params(mfp_processor * proc, PyObject * params)
+init_params(mfp_processor * proc, PyObject * params)
 {
     PyObject *key, *value;
     Py_ssize_t pos = 0;
+    void * param_value = NULL;
     char * param_name;
     int retval = 1;
-    int success = 1;
 
     while(PyDict_Next(params, &pos, &key, &value)) {
         param_name = PyString_AsString(key);
-        success = set_c_param(proc, param_name, value);
-        if (success == 0) { 
+        param_value = py_param_value_to_c(proc, param_name, value);
+        if (param_value == NULL) { 
             retval = 0;
+        }
+        else {
+            mfp_proc_setparam(proc, g_strdup(param_name), param_value);
+            set_pyparam(proc, g_strdup(param_name), value);
         }
     }
     return retval;
 }
-
-
 
 static PyObject * 
 proc_create(PyObject * mod, PyObject *args)
@@ -272,7 +274,7 @@ proc_create(PyObject * mod, PyObject *args)
     }
     else {
         proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, mfp_blocksize);
-        extract_c_params(proc, paramdict);
+        init_params(proc, paramdict);
         mfp_proc_init(proc);
 
         newobj = PyCObject_FromVoidPtr(proc, NULL);
@@ -377,15 +379,28 @@ proc_setparam(PyObject * mod, PyObject * args)
     PyObject * self=NULL;
     char * param_name=NULL;
     PyObject * param_value = NULL;
+    void * param_c_value = NULL; 
+
     mfp_processor * p = NULL;
+    mfp_reqdata rd; 
 
     PyArg_ParseTuple(args, "OsO", &self, &param_name, &param_value);
     p = (mfp_processor *)PyCObject_AsVoidPtr(self); 
-    set_c_param(p, param_name, param_value);
+    param_c_value = py_param_value_to_c(p, param_name, param_value);
+
+    rd.src_proc = p;
+    rd.reqtype = REQTYPE_SETPARAM;
+    rd.param_name = g_strdup(param_name);
+    rd.param_value = param_c_value; 
 
     if(p->typeinfo->preconfig) {
-        p->typeinfo->preconfig(p);
+        p->typeinfo->preconfig(p, &rd);
     }
+
+    set_pyparam(p, g_strdup(param_name), param_value);
+
+    mfp_dsp_push_request(rd);
+
     Py_INCREF(Py_False);
     return Py_False;
 }

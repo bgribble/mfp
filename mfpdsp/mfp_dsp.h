@@ -34,6 +34,16 @@ typedef struct {
 
 } mfp_processor;
 
+typedef struct {
+    int reqtype;
+    mfp_processor * src_proc;
+    int src_port;
+    mfp_processor * dest_proc;
+    int dest_port;
+    gpointer param_name;
+    gpointer param_value;
+} mfp_reqdata;
+
 typedef struct mfp_procinfo_struct {
     char * name;
     int  is_generator;
@@ -42,7 +52,7 @@ typedef struct mfp_procinfo_struct {
     void (* destroy)(mfp_processor *);
     int  (* process)(mfp_processor *);
     void (* config)(mfp_processor *);
-    void (* preconfig)(mfp_processor *);
+    void (* preconfig)(mfp_processor *, mfp_reqdata *);
     void (* reset)(mfp_processor *);
 } mfp_procinfo;
 
@@ -50,15 +60,6 @@ typedef struct {
     mfp_processor * dest_proc;
     int dest_port;
 } mfp_connection;
-
-typedef struct {
-    int reqtype;
-    mfp_processor * src_proc;
-    int src_port;
-    mfp_processor * dest_proc;
-    int dest_port;
-
-} mfp_reqdata;
 
 
 typedef struct {
@@ -83,6 +84,7 @@ typedef struct {
 #define REQTYPE_DESTROY 2
 #define REQTYPE_CONNECT 3
 #define REQTYPE_DISCONNECT 4
+#define REQTYPE_SETPARAM 5 
 
 #define GENERATOR_NEVER 0
 #define GENERATOR_ALWAYS 1
@@ -141,9 +143,7 @@ extern void mfp_proc_reset(mfp_processor *);
 extern void mfp_proc_destroy(mfp_processor *);
 extern int mfp_proc_connect(mfp_processor *, int, mfp_processor *, int);
 extern int mfp_proc_disconnect(mfp_processor *, int, mfp_processor *, int);
-extern int mfp_proc_setparam_float(mfp_processor * self, char * param_name, float param_val);
-extern int mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_val);
-extern int mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_val);
+extern int mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val);
 
 extern int mfp_proc_has_input(mfp_processor * self, int inlet_num);
 

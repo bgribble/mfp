@@ -121,11 +121,6 @@ mfp_proc_init(mfp_processor * p)
     if (p->typeinfo->init)
         p->typeinfo->init(p);
 
-    /* config_preconfig is the non-RT phase of config */ 
-    if (p->typeinfo->preconfig != NULL) {
-        p->typeinfo->preconfig(p);
-    }
-
     p->needs_config = 1;
 
     /* add proc to global list */
@@ -284,40 +279,10 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 }
 
 int
-mfp_proc_setparam_float(mfp_processor * self, char * param_name, float param_val)
+mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
 {
-    gpointer newval = g_malloc(sizeof(float));
-    gpointer oldval = g_hash_table_lookup(self->params, param_name);
-    if (oldval)
-        g_free(oldval);
-    
-    *(float *)newval = param_val;
-    g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)newval);
-    return 0;
-}
-
-int
-mfp_proc_setparam_string(mfp_processor * self, char * param_name, char * param_val)
-{
-    gpointer newval = g_strdup(param_val);
-    gpointer oldval = g_hash_table_lookup(self->params, param_name);
-
-    if (oldval)
-        g_free(oldval);
-
-    g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)newval);
-    return 0;
-}
-
-int
-mfp_proc_setparam_array(mfp_processor * self, char * param_name, GArray * param_val)
-{
-    gpointer oldval = g_hash_table_lookup(self->params, param_name);
-    if (oldval)
-        g_array_free(oldval, TRUE);
-
-    g_hash_table_replace(self->params, g_strdup(param_name), (gpointer)param_val);
-    return 0;
+    /* note: params hash table takes ownership of both name and value */ 
+    g_hash_table_replace(self->params, (gpointer)param_name, (gpointer)param_val);
 }
 
 int

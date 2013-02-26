@@ -5,6 +5,20 @@
 #include "builtin.h"
 
 
+static void
+setparam_gpointer(mfp_processor * proc, char * param_name, gpointer value)
+{
+    mfp_proc_setparam(proc, g_strdup(param_name), value); 
+}
+
+static void
+setparam_float(mfp_processor * proc, char * param_name, float value)
+{
+    gpointer val = g_malloc(sizeof(float));
+    *(float *)val = value;
+    mfp_proc_setparam(proc, g_strdup(param_name), val); 
+}
+
 int
 test_sig_1(void) 
 {
@@ -13,7 +27,7 @@ test_sig_1(void)
     mfp_sample * outp; 
 
     printf("   test_sig_1... ");
-    mfp_proc_setparam_float(sig, "value", 13.0);
+    setparam_float(sig, "value", 13.0);
     mfp_proc_process(sig);
 
     outp = sig->outlet_buf[0]->data;
@@ -45,8 +59,8 @@ test_sig_2(void)
     mfp_proc_connect(sig_1, 0, dac, 0);
     mfp_proc_connect(sig_2, 0, dac, 0);
 
-    mfp_proc_setparam_float(sig_1, "value", 13.0);
-    mfp_proc_setparam_float(sig_2, "value", 12.0);
+    setparam_float(sig_1, "value", 13.0);
+    setparam_float(sig_2, "value", 12.0);
     mfp_dsp_schedule();
     mfp_dsp_run(mfp_blocksize);
 
@@ -82,10 +96,10 @@ test_plus_multi(void)
     mfp_proc_connect(sig_2, 0, dac, 0);
     mfp_proc_connect(sig_3, 0, dac, 1);
 
-    mfp_proc_setparam_float(sig_1, "value", 13.0);
-    mfp_proc_setparam_float(sig_2, "value", 11.0);
-    mfp_proc_setparam_float(sig_3, "value", 51.0);
-    mfp_proc_setparam_float(dac, "const", 10.0);
+    setparam_float(sig_1, "value", 13.0);
+    setparam_float(sig_2, "value", 11.0);
+    setparam_float(sig_3, "value", 51.0);
+    setparam_float(dac, "const", 10.0);
 
     mfp_dsp_schedule();
     mfp_dsp_run(mfp_blocksize);
@@ -128,7 +142,7 @@ test_line_1(void)
         return 0;
     }
 
-    mfp_proc_setparam_array(line, "segments", env_1);
+    setparam_gpointer(line, "segments", env_1);
     line->needs_config = 1;
 
     mfp_proc_process(line);
@@ -214,7 +228,7 @@ test_line_2(void)
         return 0;
     }
 
-    mfp_proc_setparam_array(line, "segments", env_1);
+    setparam_gpointer(line, "segments", env_1);
     line->needs_config = 1;
     mfp_proc_process(line);
 
@@ -228,7 +242,7 @@ test_line_2(void)
         return 0;
     }
 
-    mfp_proc_setparam_array(line, "segments", env_2);
+    setparam_gpointer(line, "segments", env_2);
     line->needs_config = 1;
     mfp_proc_process(line);
 
@@ -268,8 +282,8 @@ benchmark_osc_1(void)
     double phase;
     int i;
 
-    mfp_proc_setparam_float(osc, "_sig_1", 1000.0);
-    mfp_proc_setparam_float(osc, "_sig_2", 100.0);
+    setparam_float(osc, "_sig_1", 1000.0);
+    setparam_float(osc, "_sig_2", 100.0);
 
 
     for(x = 0; x < in->blocksize; x++) {
@@ -307,8 +321,8 @@ test_osc_2(void)
     int fail = 0;
 
     printf("test_osc_2... \n");
-    mfp_proc_setparam_float(osc, "_sig_1", 1000.0);
-    mfp_proc_setparam_float(sig, "value", 100.0);
+    setparam_float(osc, "_sig_1", 1000.0);
+    setparam_float(sig, "value", 100.0);
 
     mfp_proc_connect(sig, 0, osc, 1);
 
@@ -339,8 +353,8 @@ test_osc_1(void)
     int fail = 0;
 
     printf("test_osc_1... \n");
-    mfp_proc_setparam_float(osc, "_sig_1", 1000.0);
-    mfp_proc_setparam_float(osc, "_sig_2", 100.0);
+    setparam_float(osc, "_sig_1", 1000.0);
+    setparam_float(osc, "_sig_2", 100.0);
 
     printf("calling process()");
     mfp_proc_process(osc);
@@ -422,14 +436,14 @@ test_buffer_2(void)
     ft = 0.0;
     g_array_append_val(lparm, ft);
 
-    mfp_proc_setparam_array(line, "segments", lparm);
+    setparam_gpointer(line, "segments", lparm);
 
-    mfp_proc_setparam_float(b, "rec_mode", 3.0);
-    mfp_proc_setparam_float(b, "rec_channels", 1.0);
-    mfp_proc_setparam_float(b, "rec_enabled", 1.0);
-    mfp_proc_setparam_float(b, "trig_thresh", 2.0);
-    mfp_proc_setparam_float(b, "channels", 1.0);
-    mfp_proc_setparam_float(b, "size", mfp_blocksize);
+    setparam_float(b, "rec_mode", 3.0);
+    setparam_float(b, "rec_channels", 1.0);
+    setparam_float(b, "rec_enabled", 1.0);
+    setparam_float(b, "trig_thresh", 2.0);
+    setparam_float(b, "channels", 1.0);
+    setparam_float(b, "size", mfp_blocksize);
 
     mfp_proc_connect(line, 0, b, 0);
 

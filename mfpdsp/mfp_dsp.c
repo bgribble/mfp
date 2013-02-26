@@ -190,6 +190,11 @@ mfp_dsp_handle_requests(void)
             mfp_proc_destroy(cmd.src_proc);
             break;
 
+        case REQTYPE_SETPARAM:
+            mfp_proc_setparam(cmd.src_proc, cmd.param_name, cmd.param_value);
+            cmd.src_proc->needs_config = 1;
+            break;
+
         }
     }
     mfp_requests_pending = 0;
