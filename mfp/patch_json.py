@@ -145,7 +145,7 @@ def json_deserialize(self, json_data):
                 else: 
                     srcobj.connect(outlet, dstobj, inlet)
     inlets = len(self.inlet_objects)
-    if not inlets and len(self.dispatch_objects):
+    if not inlets:
         inlets = 1
     self.resize(inlets, len(self.outlet_objects))
 

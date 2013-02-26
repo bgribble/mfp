@@ -10,7 +10,7 @@
 
 #define TEST_NOSSE(FN) int FN ## _nosse(void) { \
     int retval = 1; \
-    printf("in nosse version of test " #FN "\n");\
+    printf("Testing nosse version of test " #FN "\n");\
     if (mfp_block_use_sse) { \
         mfp_block_use_sse = 0; \
         retval = FN (); \

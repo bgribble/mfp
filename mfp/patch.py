@@ -37,6 +37,11 @@ class Patch(Processor):
 
         initargs, kwargs = self.parse_args(init_args)
         self.gui_params['layers'] = []
+        if patch is None:
+            self.gui_params['top_level'] = True
+        else:
+            self.gui_params['top_level'] = False 
+
 
     #############################
     # name management
@@ -123,9 +128,6 @@ class Patch(Processor):
 
     def baseclass_method(self, message, inlet=0):
         Processor.method(self, message, inlet) 
-
-    def send(self, value, inlet=0):
-        self.inlet_objects[inlet].send(value)
 
     def add(self, obj):
         if self.objects.has_key(obj.obj_id):
