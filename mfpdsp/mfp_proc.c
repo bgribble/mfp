@@ -33,7 +33,7 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
     p = g_malloc(sizeof(mfp_processor));
     p->typeinfo = typeinfo; 
-    p->params = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     p->pyparams = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     p->depth = -1;
     p->needs_config = 0;
@@ -145,7 +145,6 @@ mfp_proc_process(mfp_processor * self)
 
     /* run config() if params have changed */
     if (self->needs_config) {
-        printf("about to call config\n");
         self->typeinfo->config(self);
         self->needs_config = 0;
     }
@@ -278,11 +277,42 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
     return 0;
 }
 
+int 
+mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd) 
+{
+    gpointer orig_key;
+    gpointer orig_val;
+    gboolean found; 
+
+    found = g_hash_table_lookup_extended(self->params, (gpointer)rd->param_name, 
+                                         &orig_key, &orig_val);
+    g_hash_table_replace(self->params, (gpointer)(rd->param_name), 
+                         (gpointer)(rd->param_value));
+    if (found) { 
+        rd->param_name = orig_key;
+        rd->param_value = orig_val;
+    }
+    else {
+        rd->param_name = NULL;
+        rd->param_value = NULL; 
+    }
+}
+
 int
 mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
 {
-    /* note: params hash table takes ownership of both name and value */ 
-    g_hash_table_replace(self->params, (gpointer)param_name, (gpointer)param_val);
+    gpointer orig_key;
+    gpointer orig_val;
+    gboolean found; 
+
+    found = g_hash_table_lookup_extended(self->params, (gpointer)param_name, 
+                                         &orig_key, &orig_val);
+    g_hash_table_replace(self->params, (gpointer)(param_name), 
+                         (gpointer)(param_val));
+    if (found) { 
+        g_free(orig_key);
+        g_free(orig_val);
+    }
 }
 
 int

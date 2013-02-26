@@ -149,13 +149,39 @@ void
 mfp_dsp_push_request(mfp_reqdata rd) 
 {
     GArray * tmp;
+    int count; 
 
+    /* note: this mutex just keeps a single writer thread with access 
+     * to the requests data, it doesn't block the JACK callback thread */ 
     pthread_mutex_lock(&mfp_request_lock);
+
+    /* mfp_requests_incoming is not touched by the JACK callback thread */
     g_array_append_val(mfp_requests_incoming, rd);
+
     if (mfp_requests_pending == 0) {
+        /* if mfp_requests_pending is 0, that means the callback thread is 
+         * not looking.  We can swap the incoming/working pointers */ 
         tmp = mfp_requests_working;
         mfp_requests_working = mfp_requests_incoming;
+
+        /* setting mfp_requests_pending to 1 lets the callback thread 
+         * know that there's something to do in mfp_requests_working */ 
         mfp_requests_pending = 1;
+
+        /* now that JACK has access to the new data, we can clean up 
+         * the old data at our leisure.  mfp_dsp_handle_requests will 
+         * put any old values that need to be freed into cmd.param_value */ 
+        for(count=0; count < tmp->len; count++) {
+            mfp_reqdata cmd = g_array_index(mfp_requests_working, mfp_reqdata, count);
+            if (cmd.reqtype == REQTYPE_SETPARAM) {
+                if (cmd.param_value != NULL) {
+                    g_free(cmd.param_value);
+                }
+                if (cmd.param_name != NULL) {
+                    g_free(cmd.param_name);
+                }
+            }
+        }
 
         if (tmp->len) 
             g_array_remove_range(tmp, 0, tmp->len);
@@ -191,7 +217,7 @@ mfp_dsp_handle_requests(void)
             break;
 
         case REQTYPE_SETPARAM:
-            mfp_proc_setparam(cmd.src_proc, cmd.param_name, cmd.param_value);
+            mfp_proc_setparam_req(cmd.src_proc, &cmd);
             cmd.src_proc->needs_config = 1;
             break;
 
