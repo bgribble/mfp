@@ -66,10 +66,10 @@ destroy(mfp_processor * proc)
     return;
 }
 
-static void
+static int
 config(mfp_processor * proc)
 {
-    return;
+    return 1;
 }
 
 
@@ -82,7 +82,6 @@ init_builtin_in(void) {
     p->init = init;
     p->destroy = destroy;
     p->config = config;
-    p->preconfig = NULL;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     g_hash_table_insert(p->params, "channel", (gpointer)PARAMTYPE_INT);
 
@@ -98,7 +97,6 @@ init_builtin_out(void) {
     p->init = init;
     p->destroy = destroy;
     p->config = config;
-    p->preconfig = NULL;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     g_hash_table_insert(p->params, "channel", (gpointer)PARAMTYPE_INT);
     return p;

@@ -67,7 +67,7 @@ destroy(mfp_processor * proc)
     return;
 }
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     builtin_biquad_data * pdata = (builtin_biquad_data *)proc->data;
@@ -97,10 +97,7 @@ config(mfp_processor * proc)
         pdata->a2 = *(float *)a2_ptr ;
     }
 
-
-    
-
-    return;
+    return 1;
 }
 
 static void

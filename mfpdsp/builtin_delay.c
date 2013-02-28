@@ -96,7 +96,7 @@ destroy(mfp_processor * proc)
     return;
 }
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     builtin_delay_data * pdata = (builtin_delay_data *)proc->data;
@@ -124,7 +124,7 @@ config(mfp_processor * proc)
         g_hash_table_remove(proc->params, "bufsize");
     } 
 
-    return;
+    return 1;
 }
 
 mfp_procinfo *  

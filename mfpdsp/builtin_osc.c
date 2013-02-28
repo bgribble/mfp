@@ -132,7 +132,7 @@ destroy(mfp_processor * proc)
     }
 }
 
-static void
+static int 
 config(mfp_processor * proc) 
 {
     builtin_osc_data * d = (builtin_osc_data *)(proc->data);
@@ -159,7 +159,7 @@ config(mfp_processor * proc)
         g_free(phase_ptr);
     }
 
-    return;
+    return 1;
 }
 
 

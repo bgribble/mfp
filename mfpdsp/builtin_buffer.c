@@ -13,11 +13,24 @@
 
 #include "mfp_dsp.h"
 
+
 typedef struct {
     char shm_id[64];
-    int shm_fd;
-    int shm_size;
-    void * shm_ptr;
+    int  shm_fd;
+    int  buf_type;
+    void * buf_ptr;
+    int  buf_chancount;
+    int  buf_chansize;
+    int  buf_size;
+    int  buf_ready; 
+} buf_info;
+
+
+typedef struct {
+    buf_info buf_active;
+    buf_info buf_to_alloc; 
+
+    mfp_sample * buf_base;  
     int chan_count;
     int chan_size;
     
@@ -44,7 +57,11 @@ typedef struct {
     int region_start;
     int region_end; 
 
-} buf_info;
+} builtin_buffer_data;
+
+/* buf_type values */ 
+#define BUFTYPE_PRIVATE 0
+#define BUFTYPE_SHARED 1 
 
 /* rec_mode values */ 
 #define REC_BANG 0    /* on Bang, record buffer and stop */ 
@@ -80,12 +97,23 @@ typedef struct {
 static void 
 init(mfp_processor * proc) 
 {
-    buf_info * d = g_malloc0(sizeof(buf_info));
+    builtin_buffer_data * d = g_malloc0(sizeof(builtin_buffer_data));
 
-    d->shm_id[0] = 0;
-    d->shm_fd = -1;
-    d->shm_size = 0;
-    d->shm_ptr = NULL;
+    d->buf_active.shm_id[0] = 0;
+    d->buf_active.shm_fd = -1;
+    d->buf_active.buf_type = BUFTYPE_SHARED;
+    d->buf_active.buf_size = 0;
+    d->buf_active.buf_ptr = NULL;
+    d->buf_active.buf_ready = 0; 
+
+    d->buf_to_alloc.shm_id[0] = 0;
+    d->buf_to_alloc.shm_fd = -1;
+    d->buf_to_alloc.buf_type = BUFTYPE_SHARED;
+    d->buf_to_alloc.buf_size = 0;
+    d->buf_to_alloc.buf_ptr = NULL;
+    d->buf_to_alloc.buf_ready = 0; 
+
+    d->buf_base = NULL;
     d->chan_count = 0;
     d->chan_size = 0;
     d->trig_channel = 0;
@@ -115,7 +143,7 @@ init(mfp_processor * proc)
 static int 
 process(mfp_processor * proc) 
 {
-    buf_info * d = (buf_info *)(proc->data);
+    builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
     int dstart = 0;
     int channel, tocopy;
     mfp_block * trig_block;
@@ -123,9 +151,7 @@ process(mfp_processor * proc)
     int inpos, outpos;
     int loopstart=0; 
 
-    printf("in buffer~ process\n");
-
-    if (d->shm_ptr == NULL) {
+    if (d->buf_base == NULL) {
         return 0;
     }
 
@@ -170,8 +196,10 @@ process(mfp_processor * proc)
                         d->trig_pretrigger = 0;
                     }
                 }
-                if(d->rec_state == REC_IDLE)
+                if(d->rec_state == REC_IDLE) {
                     dstart++;
+                }
+
                 if (dstart >= trig_block->blocksize)
                     break;
             }
@@ -202,12 +230,8 @@ process(mfp_processor * proc)
         }
     }
 
-    printf("buffer~ mark 0\n");
-
     /* zero output buffer in any case */ 
     mfp_block_zero(proc->outlet_buf[0]);
-
-    printf("buffer~ mark 0.1 -- %p\n", d);
 
     /* if we are playing, copy data from the buffer to the outlet */ 
     if ((d->play_state != PLAY_IDLE) && (d->region_end > 0))  {
@@ -215,7 +239,7 @@ process(mfp_processor * proc)
         for(channel=0; channel < d->chan_count; channel++) {
             if((1 << channel) & d->play_channels) {
                 outptr = proc->outlet_buf[0]->data;
-                inptr = (float *)(d->shm_ptr) + (channel*d->chan_size);
+                inptr = (float *)(d->buf_base) + (channel*d->chan_size);
                 inpos = d->play_pos;
                 for(outpos = 0; outpos < mfp_blocksize; outpos++) {
                     if (inpos < d->region_end) {
@@ -248,12 +272,10 @@ process(mfp_processor * proc)
         }
 
     }
-    printf("buffer~ mark 1\n");
     if(loopstart > 0) {
         mfp_dsp_send_response_bool(proc, RESP_LOOPSTART, 1);
     }
 
-    printf("buffer~ mark 2\n");
     /* if we are triggered, copy data from inlets to buffer */
     if(d->rec_state == REC_ACTIVE) {
         tocopy = MIN(mfp_blocksize-dstart, d->chan_size - d->rec_pos);
@@ -263,7 +285,7 @@ process(mfp_processor * proc)
             if((1 << channel) & d->rec_channels) {
                 if (d->rec_mode == REC_LOOP) {
                     /* accumulate into buffer */ 
-                    outptr = (float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos;
+                    outptr = (float *)d->buf_base + (channel*d->chan_size) + d->rec_pos;
                     outpos = d->rec_pos;
                     inptr = proc->inlet_buf[channel]->data;
                     for (inpos = 0; inpos < tocopy; inpos++) {
@@ -271,12 +293,12 @@ process(mfp_processor * proc)
                         outpos++;
                         if (outpos > d->region_end) {
                             outpos = d->region_start;
-                            outptr =  (float *)d->shm_ptr + (channel*d->chan_size) + outpos;
+                            outptr =  (float *)d->buf_base + (channel*d->chan_size) + outpos;
                         }
                     }
                 }
                 else {
-                    memcpy((float *)d->shm_ptr + (channel*d->chan_size) + d->rec_pos,
+                    memcpy((float *)d->buf_base + (channel*d->chan_size) + d->rec_pos,
                             proc->inlet_buf[channel]->data + dstart,
                             sizeof(mfp_sample)*tocopy);
                 }
@@ -333,22 +355,26 @@ process(mfp_processor * proc)
         }
     }
 
-    printf("buffer~ mark 3\n");
     return 0;
 }
 
 static void
 destroy(mfp_processor * proc) 
 {
-    buf_info * d = (buf_info *)(proc->data);
-    if(d->shm_ptr != NULL) 
-        munmap(d->shm_ptr, d->shm_size);
+    builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
+    if(d->buf_active.buf_ptr != NULL) {
+        if (d->buf_active.buf_type == BUFTYPE_SHARED) 
+            munmap(d->buf_active.buf_ptr, d->buf_active.buf_size);
+        else {
+            g_free(d->buf_active.buf_ptr);
+        }
 
-    if(d->shm_fd > -1) {
-        close(d->shm_fd);
-        shm_unlink(d->shm_id);
+        if(d->buf_active.shm_fd > -1) {
+            close(d->buf_active.shm_fd);
+            shm_unlink(d->buf_active.shm_id);
+        }
     }
-    
+
     g_free(d);
     proc->data = NULL;
 
@@ -357,33 +383,59 @@ destroy(mfp_processor * proc)
 }
 
 static void
-buffer_alloc(buf_info * d)
+shared_buffer_alloc(buf_info * buf)
 {
-    int size = d->chan_count*d->chan_size*sizeof(mfp_sample);
+    int size = buf->buf_chancount * buf->buf_chansize * sizeof(mfp_sample);
     int pid = getpid();
     struct timeval tv;
 
     gettimeofday(&tv, NULL);
 
-    snprintf(d->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d", pid, (int)tv.tv_sec, (int)tv.tv_usec); 
-    d->shm_fd = shm_open(d->shm_id, O_RDWR|O_CREAT, S_IRWXU); 
+    snprintf(buf->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d", 
+             pid, (int)tv.tv_sec, (int)tv.tv_usec); 
+    buf->shm_fd = shm_open(buf->shm_id, O_RDWR|O_CREAT, S_IRWXU); 
     
-    if(d->shm_ptr != NULL) {
-        munmap(d->shm_ptr, d->shm_size);
-        d->shm_ptr = NULL;
+    if(buf->buf_ptr != NULL) {
+        munmap(buf->buf_ptr, buf->buf_size);
+        buf->buf_ptr = NULL;
     }
-    ftruncate(d->shm_fd, size);
-    d->shm_size = size;
-    d->shm_ptr = mmap(NULL,  size, PROT_READ|PROT_WRITE, MAP_SHARED, d->shm_fd, 0);
-    if (d->shm_ptr == NULL) {
-        printf("mmap() failed... %d (%s)\n", d->shm_fd, sys_errlist[errno]);
+    ftruncate(buf->shm_fd, size);
+    buf->buf_size = size;
+    buf->buf_ptr = mmap(NULL,  size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
+    if (buf->buf_ptr == NULL) {
+        printf("mmap() failed... %d (%s)\n", buf->shm_fd, sys_errlist[errno]);
     }
-    d->region_start = 0;
-    d->region_end = 0;
+}
+
+static void
+buffer_activate(builtin_buffer_data * d) 
+{
+    d->buf_to_alloc.buf_ready = ALLOC_IDLE;
+    memcpy(&(d->buf_active), &(d->buf_to_alloc), sizeof(buf_info));
+    d->chan_count = d->buf_active.buf_chancount;
+    d->chan_size = d->buf_active.buf_chansize;
+    d->buf_base = d->buf_active.buf_ptr;
+
+}
+
+static void 
+alloc(mfp_processor * proc, void * alloc_data) 
+{
+    buf_info * buf = (buf_info *)alloc_data;
+
+    if (buf->buf_type == BUFTYPE_SHARED) {
+        shared_buffer_alloc(buf);
+    }
+    else {
+        /* private buffer alloc, not shared with other processes */
+        int allocsize = buf->buf_chancount * buf->buf_chansize * sizeof(float);
+        buf->buf_size = allocsize;
+        buf->buf_ptr = g_malloc0(allocsize);
+    }   
 }
 
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     gpointer size_ptr = g_hash_table_lookup(proc->params, "size");
@@ -396,7 +448,6 @@ config(mfp_processor * proc)
 
     gpointer trigchan_ptr = g_hash_table_lookup(proc->params, "trig_chan");
     gpointer trigthresh_ptr = g_hash_table_lookup(proc->params, "trig_thresh");
-    gpointer trigrept_ptr = g_hash_table_lookup(proc->params, "trig_repeat");
 
     gpointer playmode_ptr = g_hash_table_lookup(proc->params, "play_mode");
     gpointer playstate_ptr = g_hash_table_lookup(proc->params, "play_state");
@@ -405,30 +456,48 @@ config(mfp_processor * proc)
     gpointer regionstart_ptr = g_hash_table_lookup(proc->params, "region_start");
     gpointer regionend_ptr = g_hash_table_lookup(proc->params, "region_end");
 
-    buf_info * d = (buf_info *)(proc->data);
+    builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
+
     int new_size=d->chan_size, new_channels=d->chan_count;
 
-    printf("in buffer~ config\n");
+    int config_handled = 1; 
 
-    if ((size_ptr != NULL) || (channels_ptr != NULL)) {
-        if(size_ptr != NULL) {
-            new_size = (int)(*(float *)size_ptr);
-        }
-        if(channels_ptr != NULL) {
-            new_channels = (int)(*(float *)channels_ptr);
-        }
+    if(size_ptr != NULL) {
+        new_size = (int)(*(float *)size_ptr);
+    }
+    if(channels_ptr != NULL) {
+        new_channels = (int)(*(float *)channels_ptr);
+    }
 
-        if ((new_size != d->chan_size) || (new_channels != d->chan_count)) {
-            d->chan_size = new_size;
-            d->chan_count = new_channels;
+    if ((new_size != d->chan_size) || (new_channels != d->chan_count)) {
+        if(d->buf_to_alloc.buf_ready == ALLOC_READY) {
+            buffer_activate(d);
+            d->region_start = 0;
+            d->region_end = 0; 
             d->rec_pos = 0;
-            buffer_alloc(d);
+            d->play_pos = 0;
+            if (d->buf_active.buf_type == BUFTYPE_SHARED) {
+                mfp_dsp_send_response_str(proc, RESP_BUFID, d->buf_active.shm_id);
+                mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->buf_active.buf_chansize);
+                mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->buf_active.buf_chancount);
+                mfp_dsp_send_response_int(proc, RESP_RATE, mfp_samplerate);
+                mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
+            }
+        }
+        else if (d->buf_to_alloc.buf_ready == ALLOC_IDLE) {
+            d->buf_to_alloc.shm_fd = -1;
+            d->buf_to_alloc.shm_id[0] = 0;
+            d->buf_to_alloc.buf_type = d->buf_active.buf_type;
+            d->buf_to_alloc.buf_ptr = NULL;
+            d->buf_to_alloc.buf_chancount = new_channels;
+            d->buf_to_alloc.buf_chansize = new_size;
 
-            mfp_dsp_send_response_str(proc, RESP_BUFID, d->shm_id);
-            mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->chan_size);
-            mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->chan_count);
-            mfp_dsp_send_response_int(proc, RESP_RATE, mfp_samplerate);
-            mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
+            mfp_alloc_allocate(proc, &d->buf_to_alloc, &(d->buf_to_alloc.buf_ready));
+            config_handled = 0;
+        }
+        else {
+            /* still working */ 
+            config_handled = 0;
         }
     }
 
@@ -487,9 +556,7 @@ config(mfp_processor * proc)
     if (playmode_ptr != NULL) {
         d->play_mode = (int)(*(float *)playmode_ptr);
     }
-
-
-    return;
+    return config_handled;
 }
 
 mfp_procinfo *  
@@ -497,11 +564,12 @@ init_builtin_buffer(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     
     p->name = strdup("buffer~");
-    p->is_generator = 1;
+    p->is_generator = 0;
     p->process = process;
     p->init = init;
     p->destroy = destroy;
     p->config = config;
+    p->alloc = alloc;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     g_hash_table_insert(p->params, "buf_id", (gpointer)PARAMTYPE_STRING);
     g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);

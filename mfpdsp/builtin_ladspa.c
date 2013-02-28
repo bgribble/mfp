@@ -20,6 +20,8 @@ typedef struct {
     LADSPA_Data * plug_control; 
     int plug_activated;
 
+    int plug_ready; 
+
 } builtin_ladspa_data;
 
 
@@ -172,7 +174,7 @@ destroy(mfp_processor * proc)
     return;
 }
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
@@ -192,19 +194,9 @@ config(mfp_processor * proc)
             d->plug_descrip->activate(d->plug_handle);
         d->plug_activated = 1;
     }
-    return;
+    return 1;
 }
 
-static void
-preconfig(mfp_processor * proc, mfp_reqdata * rd) 
-{
-    builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
-
-    if (d->lib_name == NULL) {
-        ladspa_setup(proc);
-    }
-
-}
 
 mfp_procinfo *  
 init_builtin_ladspa(void) {
@@ -215,7 +207,6 @@ init_builtin_ladspa(void) {
     p->process = process;
     p->init = init;
     p->destroy = destroy;
-    p->preconfig = preconfig;
     p->config = config;
     p->reset = NULL;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);

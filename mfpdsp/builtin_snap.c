@@ -58,7 +58,7 @@ destroy(mfp_processor * proc)
     return;
 }
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     builtin_snap_data * pdata = (builtin_snap_data *)proc->data;
@@ -74,7 +74,7 @@ config(mfp_processor * proc)
     }
 
 
-    return;
+    return 1;
 }
 
 mfp_procinfo *  

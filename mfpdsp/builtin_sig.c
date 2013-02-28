@@ -53,7 +53,7 @@ destroy(mfp_processor * proc)
     return;
 }
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     builtin_sig_data * d = (builtin_sig_data *)(proc->data);
@@ -64,7 +64,7 @@ config(mfp_processor * proc)
         printf("sig~ config: %f\n", d->sample);
     }
 
-    return;
+    return 1;
 }
 
 mfp_procinfo *  

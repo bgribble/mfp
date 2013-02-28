@@ -329,7 +329,7 @@ destroy(mfp_processor * proc)
     return;
 }
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     gpointer sig_0_ptr = g_hash_table_lookup(proc->params, "_sig_0");
@@ -343,7 +343,7 @@ config(mfp_processor * proc)
     if (sig_1_ptr != NULL) {
         d->const_in_1 = (mfp_sample)(*(float *)sig_1_ptr);
     }
-    return;
+    return 1;
 }
 
 mfp_procinfo *  

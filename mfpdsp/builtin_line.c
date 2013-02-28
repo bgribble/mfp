@@ -20,7 +20,7 @@ typedef struct {
     int nsegs;
 } builtin_line_data;
 
-static void
+static int
 config(mfp_processor * proc) 
 {
     builtin_line_data * pdata = (builtin_line_data *)proc->data;
@@ -83,6 +83,7 @@ config(mfp_processor * proc)
         }
 
     }
+    return 1;
 }
 
 static int 
