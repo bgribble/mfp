@@ -172,7 +172,7 @@ mfp_dsp_push_request(mfp_reqdata rd)
          * the old data at our leisure.  mfp_dsp_handle_requests will 
          * put any old values that need to be freed into cmd.param_value */ 
         for(count=0; count < tmp->len; count++) {
-            mfp_reqdata cmd = g_array_index(mfp_requests_working, mfp_reqdata, count);
+            mfp_reqdata cmd = g_array_index(tmp, mfp_reqdata, count);
             if (cmd.reqtype == REQTYPE_SETPARAM) {
                 if (cmd.param_value != NULL) {
                     g_free(cmd.param_value);
