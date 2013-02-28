@@ -261,7 +261,7 @@
                 "position_y": 158.4948272705078,
                 "layername": "Buffer"
             },
-            "name": "buffer~_11",
+            "name": "buffer",
             "do_onload": true,
             "initargs": "100",
             "type": "buffer~"
