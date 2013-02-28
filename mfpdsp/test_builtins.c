@@ -1,6 +1,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "mfp_dsp.h"
 #include "builtin.h"
 
@@ -279,12 +280,9 @@ benchmark_osc_1(void)
     int x;
     mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
     mfp_processor * osc = mfp_proc_create(proctype, 2, 1, mfp_blocksize);
-    double phase;
-    int i;
 
     setparam_float(osc, "_sig_1", 1000.0);
     setparam_float(osc, "_sig_2", 100.0);
-
 
     for(x = 0; x < in->blocksize; x++) {
         in->data[x] = (float)x * 2.0*M_PI/1024.0;
@@ -373,21 +371,24 @@ test_osc_1(void)
 
 }
 
-int
-test_buffer_1(void)
-{
-    mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer~");
-    mfp_processor * b = mfp_proc_create(buf_t, 2, 1, mfp_blocksize);
-    mfp_proc_process(b);
-    return 1;
-}
-
 
 typedef struct {
     char shm_id[64];
-    int shm_fd;
-    int shm_size;
-    void * shm_ptr;
+    int  shm_fd;
+    int  buf_type;
+    void * buf_ptr;
+    int  buf_chancount;
+    int  buf_chansize;
+    int  buf_size;
+    int  buf_ready; 
+} buf_info;
+
+
+typedef struct {
+    buf_info buf_active;
+    buf_info buf_to_alloc; 
+
+    mfp_sample * buf_base;  
     int chan_count;
     int chan_size;
     
@@ -414,7 +415,17 @@ typedef struct {
     int region_start;
     int region_end; 
 
-} buf_info;
+} builtin_buffer_data;
+
+int
+test_buffer_1(void)
+{
+    mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer~");
+    mfp_processor * b = mfp_proc_create(buf_t, 2, 1, mfp_blocksize);
+    mfp_proc_process(b);
+    return 1;
+}
+
 
 int
 test_buffer_2(void)
@@ -424,7 +435,7 @@ test_buffer_2(void)
     mfp_processor * line = mfp_proc_create(line_t, 0, 1, mfp_blocksize);
     mfp_processor * b = mfp_proc_create(buf_t, 2, 1, mfp_blocksize);
     GArray * lparm = g_array_sized_new(TRUE, TRUE, sizeof(float), 3);
-    buf_info * info = (buf_info *) b->data;
+    builtin_buffer_data * info = (builtin_buffer_data *)b->data;
     int i;
     int fail=0;
     float ft;
@@ -436,11 +447,11 @@ test_buffer_2(void)
     ft = 0.0;
     g_array_append_val(lparm, ft);
 
-    setparam_gpointer(line, "segments", lparm);
 
     setparam_float(b, "rec_mode", 3.0);
     setparam_float(b, "rec_channels", 1.0);
     setparam_float(b, "rec_enabled", 1.0);
+    setparam_float(b, "trig_channel", 0.0);
     setparam_float(b, "trig_thresh", 2.0);
     setparam_float(b, "channels", 1.0);
     setparam_float(b, "size", mfp_blocksize);
@@ -450,25 +461,32 @@ test_buffer_2(void)
     mfp_dsp_schedule();
     mfp_dsp_run(mfp_blocksize);
 
-    if((info->shm_fd == -1) 
-        || (info->shm_size != mfp_blocksize*sizeof(float))
+    /* giver alloc thread time to work */
+    usleep(100000);
+
+    /* bang the line~ */ 
+    setparam_gpointer(line, "segments", lparm);
+    line->needs_config = 1;
+    mfp_dsp_run(mfp_blocksize);
+
+    if((info->buf_active.shm_fd == -1) 
+        || (info->buf_active.buf_size != mfp_blocksize*sizeof(float))
         || (info->chan_count != 1) 
         || (info->chan_size != mfp_blocksize)) {
-        printf("config fail %d %d %d %d\n", info->shm_fd, info->shm_size, 
+        printf("config fail %d %d %d %d\n", info->buf_active.shm_fd, 
+                info->buf_active.buf_size, 
                 info->chan_count, info->chan_size);
         return 0;
     }
 
     for(i=0; i < mfp_blocksize; i++) {
         if (i < mfp_blocksize/2.0) {
-            if (info->shm_ptr == NULL || ((float *)(info->shm_ptr))[i] != 5.0) {
-                printf("  triggered %d %f\n", i, ((float *)(info->shm_ptr))[i]);
+            if (info->buf_base == NULL || ((float *)(info->buf_base))[i] != 5.0) {
                 fail = 1;
             }
         }
         else {
-            if (info->shm_ptr == NULL || ((float *)(info->shm_ptr))[i] != 0.0) {
-                printf("  zero %d %f", i, ((float *)(info->shm_ptr))[i]);
+            if (info->buf_base == NULL || ((float *)(info->buf_base))[i] != 0.0) {
                 fail = 1;
             }
         }

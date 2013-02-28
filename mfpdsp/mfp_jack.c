@@ -134,6 +134,8 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 
     char namebuf[16];
 
+    mfp_alloc_init();
+
     if ((client = jack_client_open("mfp", JackNullOption, &status, NULL)) == 0) {
         fprintf (stderr, "jack_client_open() failed.");
         return 0;

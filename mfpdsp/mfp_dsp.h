@@ -51,8 +51,8 @@ typedef struct mfp_procinfo_struct {
     void (* init)(mfp_processor *);
     void (* destroy)(mfp_processor *);
     int  (* process)(mfp_processor *);
-    void (* config)(mfp_processor *);
-    void (* preconfig)(mfp_processor *, mfp_reqdata *);
+    int  (* config)(mfp_processor *);
+    void (* alloc)(mfp_processor *, void * allocdata);
     void (* reset)(mfp_processor *);
 } mfp_procinfo;
 
@@ -85,6 +85,10 @@ typedef struct {
 #define REQTYPE_CONNECT 3
 #define REQTYPE_DISCONNECT 4
 #define REQTYPE_SETPARAM 5 
+
+#define ALLOC_IDLE 0
+#define ALLOC_WORKING 1
+#define ALLOC_READY 2
 
 #define GENERATOR_NEVER 0
 #define GENERATOR_ALWAYS 1
@@ -147,8 +151,10 @@ extern int mfp_proc_setparam(mfp_processor * self, char * param_name, void * par
 
 extern int mfp_proc_has_input(mfp_processor * self, int inlet_num);
 
-/* mfp_pyglue.c */
-extern void dsp_handle_queue(void);
+/* mfp_alloc.c */ 
+extern void mfp_alloc_init(void);
+extern void mfp_alloc_finish(void);
+extern int mfp_alloc_allocate(mfp_processor *, void * data, int * status);
 
 #endif
 

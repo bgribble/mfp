@@ -393,10 +393,6 @@ proc_setparam(PyObject * mod, PyObject * args)
     rd.param_name = g_strdup(param_name);
     rd.param_value = param_c_value; 
 
-    if(p->typeinfo->preconfig) {
-        p->typeinfo->preconfig(p, &rd);
-    }
-
     set_pyparam(p, g_strdup(param_name), param_value);
 
     mfp_dsp_push_request(rd);
@@ -489,6 +485,8 @@ test_SETUP(void)
      * in a separate executable */
     init_globals();
     init_builtins();
+
+    mfp_alloc_init();
     return 0;
 }
 
@@ -501,6 +499,7 @@ benchmark_SETUP(void)
 int
 test_TEARDOWN(void)
 {
+    mfp_alloc_finish();
     return 0;
 }
 
@@ -540,6 +539,7 @@ initmfpdsp(void)
 
     init_globals();
     init_builtins();
+
     Py_InitModule("mfpdsp", MfpDspMethods);
 }
 

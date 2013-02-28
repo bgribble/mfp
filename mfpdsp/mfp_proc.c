@@ -141,15 +141,21 @@ mfp_proc_process(mfp_processor * self)
     mfp_block     * upstream_outlet_buf;
     int           upstream_outlet_num;
 
+    int config_rv;
     int inlet_num;
 
     /* run config() if params have changed */
     if (self->needs_config) {
-        self->typeinfo->config(self);
-        self->needs_config = 0;
+        config_rv = self->typeinfo->config(self);
+        if (config_rv != 0) {
+            self->needs_config = 0;
+        }
+        else {
+            self->needs_config = 1;
+        }
     }
 
-    if (self->needs_reset) {
+    if (self->needs_reset != 0) {
         if (self->typeinfo->reset != NULL) {
             self->typeinfo->reset(self);
         }
@@ -288,6 +294,7 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
                                          &orig_key, &orig_val);
     g_hash_table_replace(self->params, (gpointer)(rd->param_name), 
                          (gpointer)(rd->param_value));
+
     if (found) { 
         rd->param_name = orig_key;
         rd->param_value = orig_val;
