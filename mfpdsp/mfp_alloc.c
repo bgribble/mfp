@@ -11,12 +11,12 @@ typedef struct {
     int * status;
 } mfp_alloc_reqinfo;
 
-#define REQUEST_BUFSIZE 128
-#define REQUEST_LASTIND 127 
+#define ALLOC_BUFSIZE 128
+#define ALLOC_LASTIND 127 
 
-mfp_alloc_reqinfo request_queue[REQUEST_BUFSIZE];
-int request_queue_read = 0;
-int request_queue_write = 0;
+mfp_alloc_reqinfo alloc_queue[ALLOC_BUFSIZE];
+int alloc_queue_read = 0;
+int alloc_queue_write = 0;
 
 int mfp_alloc_quit = 0; 
 
@@ -36,22 +36,20 @@ mfp_alloc_allocate(mfp_processor * proc, void * req_data, int * req_status)
         return 0;
     }
     
-    if((request_queue_read == 0 && request_queue_write == REQUEST_LASTIND)
-        || (request_queue_write + 1 == request_queue_read)) {
+    if((alloc_queue_read == 0 && alloc_queue_write == ALLOC_LASTIND)
+        || (alloc_queue_write + 1 == alloc_queue_read)) {
         *req_status = ALLOC_IDLE;
         return 0;
     }
     else {
-        printf("allocate: pushing request at position %d\n", request_queue_write);
         *req_status = ALLOC_WORKING;
-        request_queue[request_queue_write] = req;
-        if(request_queue_write == REQUEST_LASTIND) {
-            request_queue_write = 0;
+        alloc_queue[alloc_queue_write] = req;
+        if(alloc_queue_write == ALLOC_LASTIND) {
+            alloc_queue_write = 0;
         }
         else {
-            request_queue_write += 1;
+            alloc_queue_write += 1;
         }
-        printf("allocate: new write position %d\n", request_queue_write);
         return 1;
     }
 }
@@ -62,23 +60,15 @@ mfp_alloc_thread_func(void * data)
 {
     mfp_alloc_reqinfo req; 
 
-    printf("alloc_thread: started\n");
-
     while(mfp_alloc_quit == 0) {
-        while(request_queue_read != request_queue_write) {
-            printf("alloc_thread: found work to do at position %d\n",
-                    request_queue_read);
-            req = request_queue[request_queue_read];
-            printf("alloc_thread: calling handler %p for proc %p\n", 
-                    req.handler, req.proc);
+        while(alloc_queue_read != alloc_queue_write) {
+            req = alloc_queue[alloc_queue_read];
             req.handler(req.proc, req.data);
             *req.status = ALLOC_READY; 
-            printf("alloc_thread: all done with handler\n");
-            request_queue_read = (request_queue_read+1) % REQUEST_BUFSIZE;
+            alloc_queue_read = (alloc_queue_read+1) % ALLOC_BUFSIZE;
         }
         usleep(10000);
     }
-    printf("alloc_thread: exiting\n");
     return NULL;
 }
 

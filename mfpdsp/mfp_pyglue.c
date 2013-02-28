@@ -229,7 +229,7 @@ set_pyparam(mfp_processor * proc, char * param_name, PyObject * val)
         Py_DECREF(oldval);
     }
     Py_INCREF(val);
-    g_hash_table_replace(proc->pyparams, g_strdup(param_name), val);
+    g_hash_table_replace(proc->pyparams, param_name, val);
 }
 
 static int
@@ -441,9 +441,7 @@ init_globals(void)
     mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
     mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
     mfp_proc_objects = g_hash_table_new(NULL, NULL);
-    mfp_requests_incoming = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
-    mfp_requests_working = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
-    mfp_responses_pending = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
+    mfp_request_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata));
 
     pthread_cond_init(&mfp_response_cond, NULL);
     pthread_mutex_init(&mfp_response_lock, NULL);

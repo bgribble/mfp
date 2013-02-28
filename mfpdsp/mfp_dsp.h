@@ -105,9 +105,7 @@ extern float mfp_out_latency;
 extern GHashTable * mfp_proc_registry;
 extern GHashTable * mfp_proc_objects;
 extern GArray * mfp_proc_list; 
-extern GArray * mfp_requests_incoming;
-extern GArray * mfp_requests_working; 
-extern int mfp_requests_pending;
+extern GArray * mfp_request_cleanup;
 
 extern GArray * mfp_responses_pending;
 

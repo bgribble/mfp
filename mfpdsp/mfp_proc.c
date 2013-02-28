@@ -31,7 +31,7 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
         return NULL;
     }
 
-    p = g_malloc(sizeof(mfp_processor));
+    p = g_malloc0(sizeof(mfp_processor));
     p->typeinfo = typeinfo; 
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     p->pyparams = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
@@ -295,7 +295,7 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
     g_hash_table_replace(self->params, (gpointer)(rd->param_name), 
                          (gpointer)(rd->param_value));
 
-    if (found) { 
+    if (found == TRUE) { 
         rd->param_name = orig_key;
         rd->param_value = orig_val;
     }
@@ -314,11 +314,12 @@ mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
 
     found = g_hash_table_lookup_extended(self->params, (gpointer)param_name, 
                                          &orig_key, &orig_val);
-    g_hash_table_replace(self->params, (gpointer)(param_name), 
-                         (gpointer)(param_val));
-    if (found) { 
-        g_free(orig_key);
-        g_free(orig_val);
+    g_hash_table_replace(self->params, (gpointer)(param_name), (gpointer)(param_val));
+    if (found) {
+        if (orig_key != NULL)  
+            g_free(orig_key);
+        if (orig_val != NULL) 
+            g_free(orig_val);
     }
 }
 

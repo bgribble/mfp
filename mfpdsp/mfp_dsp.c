@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,10 +7,13 @@
 
 #include "mfp_dsp.h"
 
+#define REQ_BUFSIZE 2048
+#define REQ_LASTIND (REQ_BUFSIZE-1)
 
-GArray          * mfp_requests_incoming= NULL;
-GArray          * mfp_requests_working = NULL;
-int             mfp_requests_pending = 0;
+GArray      * mfp_request_cleanup = NULL;
+mfp_reqdata request_queue[REQ_BUFSIZE];
+int         request_queue_write = 0;
+int         request_queue_read = 0;
 
 GArray          * mfp_responses_pending = NULL;
 pthread_mutex_t mfp_request_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -148,31 +152,37 @@ mfp_dsp_schedule(void)
 void 
 mfp_dsp_push_request(mfp_reqdata rd) 
 {
-    GArray * tmp;
     int count; 
+    int cleanup = 0; 
 
     /* note: this mutex just keeps a single writer thread with access 
      * to the requests data, it doesn't block the JACK callback thread */ 
     pthread_mutex_lock(&mfp_request_lock);
+    if (request_queue_read == request_queue_write) {
+        //cleanup = 1;
+        /* cleanup is causing double frees, need to debug */ 
+        cleanup = 0; 
+    }
+    
+    while((request_queue_read == 0 && request_queue_write == REQ_LASTIND)
+        || (request_queue_write + 1 == request_queue_read)) {
+        usleep(100);
+    }
 
-    /* mfp_requests_incoming is not touched by the JACK callback thread */
-    g_array_append_val(mfp_requests_incoming, rd);
+    request_queue[request_queue_write] = rd;
+    if(request_queue_write == REQ_LASTIND) {
+        request_queue_write = 0;
+    }
+    else {
+        request_queue_write += 1;
+    }
 
-    if (mfp_requests_pending == 0) {
-        /* if mfp_requests_pending is 0, that means the callback thread is 
-         * not looking.  We can swap the incoming/working pointers */ 
-        tmp = mfp_requests_working;
-        mfp_requests_working = mfp_requests_incoming;
-
-        /* setting mfp_requests_pending to 1 lets the callback thread 
-         * know that there's something to do in mfp_requests_working */ 
-        mfp_requests_pending = 1;
-
-        /* now that JACK has access to the new data, we can clean up 
+    if (cleanup == 1) {
+        /* now that JACK has finished with the new data, we can clean up 
          * the old data at our leisure.  mfp_dsp_handle_requests will 
          * put any old values that need to be freed into cmd.param_value */ 
-        for(count=0; count < tmp->len; count++) {
-            mfp_reqdata cmd = g_array_index(tmp, mfp_reqdata, count);
+        for(count=0; count < mfp_request_cleanup->len; count++) {
+            mfp_reqdata cmd = g_array_index(mfp_request_cleanup, mfp_reqdata, count);
             if (cmd.reqtype == REQTYPE_SETPARAM) {
                 if (cmd.param_value != NULL) {
                     g_free(cmd.param_value);
@@ -183,10 +193,13 @@ mfp_dsp_push_request(mfp_reqdata rd)
             }
         }
 
-        if (tmp->len) 
-            g_array_remove_range(tmp, 0, tmp->len);
-        mfp_requests_incoming = tmp;
+        if (mfp_request_cleanup->len > 0) 
+            g_array_remove_range(mfp_request_cleanup, 0, mfp_request_cleanup->len);
     }
+
+    /* we will clean this one up at some time in the future */ 
+    g_array_append_val(mfp_request_cleanup, rd);
+
     pthread_mutex_unlock(&mfp_request_lock);
 }
 
@@ -195,12 +208,8 @@ mfp_dsp_handle_requests(void)
 {
     int count;
 
-    if (mfp_requests_pending == 0) {
-        return;
-    }
-
-    for(count=0; count < mfp_requests_working->len; count++) {
-        mfp_reqdata cmd = g_array_index(mfp_requests_working, mfp_reqdata, count);
+    while(request_queue_read != request_queue_write) {
+        mfp_reqdata cmd = request_queue[request_queue_read];
         int type = cmd.reqtype;
 
         switch (type) {
@@ -222,8 +231,8 @@ mfp_dsp_handle_requests(void)
             break;
 
         }
+        request_queue_read = (request_queue_read+1) % REQ_BUFSIZE;
     }
-    mfp_requests_pending = 0;
 }
 
 
