@@ -21,6 +21,9 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
     return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, blocksize));
 }
 
+
+
+
 mfp_processor *
 mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
                int blocksize)
@@ -286,8 +289,8 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 int 
 mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd) 
 {
-    gpointer orig_key;
-    gpointer orig_val;
+    gpointer orig_key=NULL;
+    gpointer orig_val=NULL;
     gboolean found; 
 
     found = g_hash_table_lookup_extended(self->params, (gpointer)rd->param_name, 
@@ -308,9 +311,9 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
 int
 mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
 {
-    gpointer orig_key;
-    gpointer orig_val;
-    gboolean found; 
+    gpointer orig_key=NULL;
+    gpointer orig_val=NULL;
+    gboolean found=FALSE; 
 
     found = g_hash_table_lookup_extended(self->params, (gpointer)param_name, 
                                          &orig_key, &orig_val);

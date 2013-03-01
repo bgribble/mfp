@@ -513,6 +513,7 @@ config(mfp_processor * proc)
             d->rec_state = 0;
         }
         g_hash_table_remove(proc->params, "rec_state");
+        g_free(recstate_ptr);
         mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, d->rec_state);
     }
 

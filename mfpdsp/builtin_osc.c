@@ -143,14 +143,10 @@ config(mfp_processor * proc)
     /* get parameters */ 
     if (freq_ptr != NULL) {
         d->const_freq = *(float *)freq_ptr;
-        g_hash_table_remove(proc->params, "_sig_1");
-        g_free(freq_ptr);
     }
 
     if (ampl_ptr != NULL) {
         d->const_ampl = *(float *)ampl_ptr;
-        g_hash_table_remove(proc->params, "_sig_2");
-        g_free(ampl_ptr);
     }
 
     if (phase_ptr != NULL) {
