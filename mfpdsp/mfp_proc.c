@@ -76,13 +76,15 @@ mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int b
     p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));
 
     for (count = 0; count < num_inlets; count ++) {
-        p->inlet_buf[count] = mfp_block_new(blocksize); 
+        p->inlet_buf[count] = mfp_block_new(mfp_max_blocksize); 
+        mfp_block_resize(p->inlet_buf[count], blocksize);
     }
 
     p->outlet_buf = g_malloc(num_outlets * sizeof(mfp_sample *));
     
     for (count = 0; count < num_outlets; count ++) {
-        p->outlet_buf[count] = mfp_block_new(blocksize);
+        p->outlet_buf[count] = mfp_block_new(mfp_max_blocksize);
+        mfp_block_resize(p->outlet_buf[count], blocksize);
     }    
     return success;
 }

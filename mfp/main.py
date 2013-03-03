@@ -180,6 +180,7 @@ class MFPApp (Singleton):
         self.dsp_outputs = 2
         self.samplerate = 44100
         self.blocksize = 256 
+        self.max_blocksize = 2048 
         self.in_latency = 0
         self.out_latency = 0
 
@@ -216,7 +217,8 @@ class MFPApp (Singleton):
 
         # dsp and gui processes
         if not self.no_dsp:
-            self.dsp_process = RPCServer("mfp_dsp", dsp_init, self.dsp_inputs, self.dsp_outputs)
+            self.dsp_process = RPCServer("mfp_dsp", dsp_init, 
+                                         self.max_blocksize, self.dsp_inputs, self.dsp_outputs)
             self.dsp_process.start()
             self.dsp_process.serve(DSPObject)
             self.dsp_process.serve(DSPCommand)
@@ -488,11 +490,11 @@ def main():
     parser.add_argument("-f", "--init-file", action="append",
                         default=[utils.homepath(".mfp/mfprc.py")],
                         help="Python source file to exec at launch")
-    #parser.add_argument("-l", "--init-lib", action="append", 
-    #                    help="Dynamic library (*.so) to load at launch")
     parser.add_argument("-p", "--patch-path", action="append",
                         default=[os.getcwd()],
                         help="Search path for patch files")
+    #parser.add_argument("-l", "--init-lib", action="append", 
+    #                    help="Dynamic library (*.so) to load at launch")
     #parser.add_argument("-L", "--lib-path", action="append",
     #                    help="Search path for dynamic libraries")
     parser.add_argument("-i", "--inputs", default=2, type=int,
@@ -500,7 +502,9 @@ def main():
     parser.add_argument("-o", "--outputs", default=2, type=int,
                         help="Number of JACK audio output ports")
     parser.add_argument("-u", "--osc-udp-port", default=5555, type=int, 
-                        help="UDP port to listen for OSC")
+                        help="UDP port to listen for OSC (default: 5555)")
+    parser.add_argument("--max-bufsize", default=2048,
+                        help="Maximum JACK buffer size to support (default: 2048 frames)")
     parser.add_argument("--no-gui", action="store_true", 
                         help="Do not launch the GUI engine")
     parser.add_argument("--no-dsp", action="store_true", 
@@ -520,6 +524,7 @@ def main():
     app.dsp_outputs = args.get("outputs")
     app.osc_port = args.get("osc_udp_port")
     app.searchpath = ':'.join(args.get("patch_path"))
+    app.max_blocksize = args.get("max_bufsize") 
 
     # launch processes and threads 
     try: 

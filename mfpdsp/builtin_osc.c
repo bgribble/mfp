@@ -115,7 +115,8 @@ init(mfp_processor * proc)
     d->const_ampl = 1.0;
     d->const_freq = 0.0;
     d->phase = 0;
-    d->int_0 = mfp_block_new(mfp_blocksize);
+    d->int_0 = mfp_block_new(mfp_max_blocksize);
+    mfp_block_resize(d->int_0, mfp_blocksize);
 
     proc->data = (void *)d;
 
@@ -139,6 +140,11 @@ config(mfp_processor * proc)
     gpointer freq_ptr = g_hash_table_lookup(proc->params, "_sig_1");
     gpointer ampl_ptr = g_hash_table_lookup(proc->params, "_sig_2");
     gpointer phase_ptr = g_hash_table_lookup(proc->params, "phase");
+
+    /* if blocksize has changed, resize internal buffer */ 
+    if (d->int_0->blocksize != mfp_blocksize) {
+        mfp_block_resize(d->int_0, mfp_blocksize);
+    }
 
     /* get parameters */ 
     if (freq_ptr != NULL) {

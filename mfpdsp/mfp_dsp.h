@@ -99,6 +99,7 @@ extern int mfp_dsp_enabled;
 extern int mfp_needs_reschedule;
 extern int mfp_samplerate;
 extern int mfp_blocksize; 
+extern int mfp_max_blocksize; 
 extern float mfp_in_latency;
 extern float mfp_out_latency;
 

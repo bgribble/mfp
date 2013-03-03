@@ -66,7 +66,7 @@ class DSPCommand (RPCWrapper):
         out_latency = mfpdsp.dsp_out_latency()
         return (srate, blksize, in_latency, out_latency)
 
-def dsp_init(pipe, num_inputs, num_outputs):
+def dsp_init(pipe, max_bufsize, num_inputs, num_outputs):
     from main import MFPCommand
     import threading
     import os
@@ -82,7 +82,7 @@ def dsp_init(pipe, num_inputs, num_outputs):
     pipe.on_finish(dsp_finish)
 
     # start JACK thread
-    mfpdsp.dsp_startup(num_inputs, num_outputs)
+    mfpdsp.dsp_startup(max_bufsize, num_inputs, num_outputs)
     mfpdsp.dsp_enable()
 
     # start response thread

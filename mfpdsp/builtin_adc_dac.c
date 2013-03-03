@@ -24,7 +24,7 @@ in_process(mfp_processor * proc)
         return 0;
     }
     else {
-        memcpy(outbuf, inbuf, mfp_blocksize * sizeof(mfp_sample));
+        memcpy(outbuf, inbuf, proc->outlet_buf[0]->blocksize* sizeof(mfp_sample));
     }
 
     return 1;

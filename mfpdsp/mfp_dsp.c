@@ -22,6 +22,7 @@ pthread_cond_t  mfp_response_cond = PTHREAD_COND_INITIALIZER;
 
 int mfp_dsp_enabled = 0;
 int mfp_needs_reschedule = 1;
+int mfp_max_blocksize = 2048; 
 int proc_count = 0; 
 
 static int 
@@ -285,9 +286,34 @@ mfp_dsp_run(int nsamples)
 void
 mfp_dsp_set_blocksize(int nsamples) 
 {
-    mfp_blocksize = nsamples;
+    mfp_processor ** p;
+    int count;
 
-    /* FIXME need to inform all processors so to reallocate buffers */ 
+    if (nsamples > mfp_max_blocksize) {
+        printf("WARNING: JACK requests blocksize larger than mfp_max_blocksize (%d)\n",
+                nsamples);
+        nsamples = mfp_max_blocksize;
+    }
+
+    if (nsamples != mfp_blocksize) {
+
+        printf("mfp_dsp_set_blocksize: size changed, updating processors (%d --> %d)\n",
+                mfp_blocksize, nsamples);
+        for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
+            /* i/o buffers are pre-allocated to mfp_max_blocksize */ 
+            for (count = 0; count < (*p)->inlet_conn->len; count ++) {
+                mfp_block_resize((*p)->inlet_buf[count], nsamples);
+            }
+
+            for (count = 0; count < (*p)->outlet_conn->len; count ++) {
+                mfp_block_resize((*p)->outlet_buf[count], nsamples);
+            }    
+
+            (*p)->needs_config = 1;
+        }
+    }
+
+    mfp_blocksize = nsamples;
 }
 
 void

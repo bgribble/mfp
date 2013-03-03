@@ -26,6 +26,7 @@ process (jack_nframes_t nframes, void *arg)
 
     /* get transport info */ 
     trans_state = jack_transport_query(client, &trans_info);
+
     /* 
     printf("JACK transport: frame %d, rate %d, time %e\n", trans_info.frame, 
             trans_info.frame_rate, trans_info.frame_time);
@@ -123,8 +124,6 @@ reorder_cb (void * arg)
     mfp_out_latency = 1000.0 * maxval / mfp_samplerate;
 }
 
-
-
 int
 mfp_jack_startup(int num_inputs, int num_outputs) 
 {
@@ -141,6 +140,7 @@ mfp_jack_startup(int num_inputs, int num_outputs)
         return 0;
     }
     
+    /* callbacks */ 
     jack_set_process_callback(client, process, 0);
     jack_set_graph_order_callback(client, reorder_cb, NULL);
 
