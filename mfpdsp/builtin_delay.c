@@ -10,6 +10,9 @@
 #include "mfp_dsp.h"
 
 typedef struct {
+    mfp_block * alloc_buffer;
+    int alloc_ready; 
+
     mfp_block * delay_buffer;
     int buf_zero; 
 
@@ -79,7 +82,9 @@ init(mfp_processor * proc)
 {
     builtin_delay_data * p = g_malloc0(sizeof(builtin_delay_data));
     proc->data = p;
-    p->delay_buffer = NULL;
+    p->delay_buffer = mfp_block_new(mfp_max_blocksize);
+    p->alloc_buffer = mfp_block_new(mfp_max_blocksize);
+    p->alloc_ready = ALLOC_IDLE;
     p->const_delay_ms = 0.0;
     p->buf_zero = 0;
 
@@ -102,41 +107,65 @@ config(mfp_processor * proc)
     builtin_delay_data * pdata = (builtin_delay_data *)proc->data;
     gpointer delay_ptr = g_hash_table_lookup(proc->params, "_sig_1");
     gpointer bufsize_ptr = g_hash_table_lookup(proc->params, "bufsize");
+    mfp_block * tmp;
     float buf_ms;
     int buf_samples; 
+    int config_handled = 1;
 
     if(delay_ptr != NULL) {
         pdata->const_delay_ms = *(float *)delay_ptr;
     }
 
     if (bufsize_ptr != NULL) {
-        buf_ms = *(float *)(delay_ptr);
+        buf_ms = *(float *)(bufsize_ptr);
         buf_samples = buf_ms * mfp_samplerate / 1000.0;
         buf_samples = ((int)(buf_samples / mfp_blocksize) + 1) * mfp_blocksize;
 
-        if (pdata->delay_buffer == NULL) {
-            pdata->delay_buffer = mfp_block_new(buf_samples);
-        }
-        else {
+        if (buf_samples < (pdata->delay_buffer->allocsize)) {
             mfp_block_resize(pdata->delay_buffer, buf_samples);
         }
-        mfp_block_zero(pdata->delay_buffer);
-        g_hash_table_remove(proc->params, "bufsize");
+        else if ( buf_samples > (pdata->delay_buffer->allocsize)) {
+            if (pdata->alloc_ready == ALLOC_READY) {
+                tmp = pdata->delay_buffer;
+                pdata->delay_buffer = pdata->alloc_buffer;
+                pdata->alloc_buffer = tmp;
+                pdata->alloc_ready = ALLOC_IDLE;
+                mfp_block_zero(pdata->delay_buffer);
+            }
+            else if (pdata->alloc_ready == ALLOC_IDLE) {
+                pdata->alloc_buffer->blocksize = buf_samples;
+                mfp_alloc_allocate(proc, pdata->alloc_buffer, &(pdata->alloc_ready));
+                config_handled = 0;
+            }
+            else if (pdata->alloc_ready == ALLOC_WORKING) {
+                config_handled = 0;
+            }
+        }
     } 
 
-    return 1;
+    return config_handled;
 }
+
+
+static void 
+alloc(mfp_processor * proc, void * alloc_data) 
+{
+    mfp_block * alloc_block = (mfp_block *)alloc_data;
+    mfp_block_resize(alloc_block, alloc_block->blocksize);
+}
+
 
 mfp_procinfo *  
 init_builtin_delay(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
 
     p->name = strdup("del~");
-    p->is_generator = 0;
+    p->is_generator = GENERATOR_NEVER;
     p->process = process;
     p->init = init;
     p->destroy = destroy;
     p->config = config;
+    p->alloc = alloc;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     g_hash_table_insert(p->params, "_sig_1", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "bufsize", (gpointer)PARAMTYPE_FLT);

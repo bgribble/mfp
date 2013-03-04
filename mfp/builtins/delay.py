@@ -11,9 +11,9 @@ from .. import Bang, Uninit
 from mfp import log
 
 
-class DelaySig(Processor):
+class DelaySig (Processor):
     doc_tooltip_obj = "Signal delay line"
-    doc_tooltip_inlet = ["Input signal to delay"
+    doc_tooltip_inlet = ["Input signal to delay",
                          "Delay (ms) (default: initarg 0)"]
     doc_tooltip_outlet = ["Signal output" ]
 
@@ -29,6 +29,11 @@ class DelaySig(Processor):
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
         self.dsp_init("del~", bufsize=size, _sig_1=size)
+
+    def trigger(self):
+        if isinstance(self.inlets[0], dict):
+            for k, v in self.inlets[0].items():
+                self.dsp_setparam(k, v)
 
 def register():
     MFPApp().register("del~", DelaySig)
