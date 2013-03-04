@@ -50,9 +50,10 @@ class ConnectionMode (InputMode):
         self.select_cbid = self.window.add_callback("select", self.select)
 
     def update_connection(self): 
-        if self.connection and (self.source_obj is None or self.dest_obj is None):
-            self.connection.delete()
-            self.connection = None 
+        if (self.source_obj is None or self.dest_obj is None):
+            if self.connection:
+                self.connection.delete()
+                self.connection = None 
             return True 
 
         if self.connection is None:
