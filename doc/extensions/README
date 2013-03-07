@@ -1,0 +1,27 @@
+MFP compiled DSP extensions
+--------------------------------------
+
+The file extension_1.c represents the simplest possible C extension to
+MFP.  It creates a new type of DSP object called ext1~ which does
+nothing.  
+
+To use the extension, you need to build a .so file.  The Makefile does that in a 
+very simple way.  
+
+    $ make
+
+will build extension_1.so
+
+To use the .so file, you need to point MFP to the extension at startup
+time.  If you are running mfp from the top of the source tree,  
+
+    $ mfp -L doc/extensions -l extension_1.so 
+
+Should do it. 
+
+This extension is doubly totally useless, because there's no Python
+Processor subclass that uses it.  This extension just enables the
+method Processor.dsp_init("ext1~", ...) to find the ext1~ DSP object
+type. 
+
+
