@@ -414,6 +414,16 @@ proc_reset(PyObject * mod, PyObject * args)
 
 }
 
+static PyObject * 
+ext_load(PyObject * mod, PyObject * args)
+{
+    char * filename = NULL;
+    PyArg_ParseTuple(args, "s", &filename);
+    mfp_reqdata rd;
+    rd.reqtype = REQTYPE_EXTLOAD;
+    rd.param_value = mfp_ext_load(filename);
+    mfp_dsp_push_request(rd);
+}
 
 static PyMethodDef MfpDspMethods[] = {
     { "dsp_startup",  dsp_startup, METH_VARARGS, "Start processing thread" },
@@ -432,6 +442,7 @@ static PyMethodDef MfpDspMethods[] = {
     { "proc_getparam", proc_getparam, METH_VARARGS, "Get processor parameter" },
     { "proc_setparam", proc_setparam, METH_VARARGS, "Set processor parameter" },
     { "proc_reset", proc_reset, METH_VARARGS, "Reset processor state" },
+    { "ext_load", ext_load, METH_VARARGS, "Load an extension (shared library)" },
     { NULL, NULL, 0, NULL}
 };
 
@@ -442,6 +453,8 @@ init_globals(void)
     mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
     mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
     mfp_proc_objects = g_hash_table_new(NULL, NULL);
+    mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal); 
+
     mfp_request_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata *));
     mfp_responses_pending = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
 

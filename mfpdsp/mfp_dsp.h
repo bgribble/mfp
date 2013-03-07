@@ -73,6 +73,12 @@ typedef struct {
     } response;
 } mfp_respdata;
 
+typedef struct {
+    char * filename; 
+    void * dlinfo;
+    int  state;
+} mfp_extinfo;
+
 #define PARAMTYPE_UNDEF 0
 #define PARAMTYPE_FLT 1
 #define PARAMTYPE_STRING 2
@@ -85,6 +91,7 @@ typedef struct {
 #define REQTYPE_CONNECT 3
 #define REQTYPE_DISCONNECT 4
 #define REQTYPE_SETPARAM 5 
+#define REQTYPE_EXTLOAD 6 
 
 #define ALLOC_IDLE 0
 #define ALLOC_WORKING 1
@@ -93,6 +100,10 @@ typedef struct {
 #define GENERATOR_NEVER 0
 #define GENERATOR_ALWAYS 1
 #define GENERATOR_CONDITIONAL 2
+
+#define EXTINFO_NULL 0
+#define EXTINFO_LOADED 1 
+#define EXTINFO_READY 2 
 
 /* global variables */ 
 extern int mfp_dsp_enabled;
@@ -105,6 +116,8 @@ extern float mfp_out_latency;
 
 extern GHashTable * mfp_proc_registry;
 extern GHashTable * mfp_proc_objects;
+extern GHashTable * mfp_extensions; 
+
 extern GArray * mfp_proc_list; 
 extern GArray * mfp_request_cleanup;
 
@@ -155,5 +168,8 @@ extern void mfp_alloc_init(void);
 extern void mfp_alloc_finish(void);
 extern int mfp_alloc_allocate(mfp_processor *, void * data, int * status);
 
+/* mfp_ext.c */
+extern mfp_extinfo * mfp_ext_load(char *);
+extern void mfp_ext_init(mfp_extinfo *);
 #endif
 

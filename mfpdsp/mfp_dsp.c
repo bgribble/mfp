@@ -234,6 +234,11 @@ mfp_dsp_handle_requests(void)
             cmd->src_proc->needs_config = 1;
             break;
 
+        case REQTYPE_EXTLOAD:
+            printf("handle_requests: loading extension\n");
+            mfp_ext_init((mfp_extinfo *)cmd->param_value);
+            break;
+
         }
         request_queue_read = (request_queue_read+1) % REQ_BUFSIZE;
     }

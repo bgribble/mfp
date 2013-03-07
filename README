@@ -87,7 +87,18 @@ Install libs and main program:
       done 
     $ python ./setup.py install 
 
-Then, run the unit tests:
+Then, run the unit tests.  
+
+If you have a virtualenv-installed "nose", "nosetests" should be in 
+your $PATH: 
+
+    $ nosetests -v mfp 
+    $ nosetests -v --with-testext --exe build 
+
+If instead you have a system-installed "nosetests", you need to make
+sure it uses the virtualenv-installed python.  Usually
+/usr/bin/nosetests is a Python source file, and you can do it like
+this: 
 
     $ python /usr/bin/nosetests -v mfp 
     $ python /usr/bin/nosetests -v --with-testext --exe build 
@@ -97,7 +108,9 @@ in a compiled C extension called "mfpdsp" used by MFP.  I'm not aware
 of another tool to automatically discover and run plain C tests in
 plain C libraries.  
 
-If all that works: 
+If all that works (or if it's not but you are feeling like a
+daredevil):
+
     $ mfp 
 
 The very, very basic tutorial: 
