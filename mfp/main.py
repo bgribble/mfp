@@ -174,8 +174,8 @@ class MFPApp (Singleton):
         self.no_gui = False
         self.no_dsp = False
         self.osc_port = None 
-        self.patch_path = None 
-        self.lib_path = None 
+        self.searchpath = None 
+        self.extpath = None 
         self.dsp_inputs = 2
         self.dsp_outputs = 2
         self.samplerate = 44100
@@ -291,19 +291,6 @@ class MFPApp (Singleton):
     def register(self, name, ctor):
         self.registry[name] = ctor
 
-    def find_file_in_path(self, filename):
-        from utils import splitpath 
-        searchdirs = splitpath(self.searchpath)
-        for d in searchdirs: 
-            path = os.path.join(d, filename)
-            try: 
-                s = os.stat(path)
-                if s: 
-                    return path 
-            except: 
-                continue 
-        return None 
-
     def open_file(self, file_name):
         if file_name is not None:
             log.debug("Opening patch file", file_name)
@@ -318,6 +305,9 @@ class MFPApp (Singleton):
         patch.create_gui()
         patch.mark_ready()
 
+    def load_extension(self, libname):
+        fullpath = utils.find_file_in_path(libname, self.extpath)
+        self.dsp_command.ext_load(fullpath)
 
     def create(self, init_type, init_args, patch, scope, name):
         # first try: is a factory registered? 
@@ -327,7 +317,7 @@ class MFPApp (Singleton):
         if ctor is None:
             log.debug("No factory for '%s' registered, looking for file." % init_type)
             filename = init_type + ".mfp"
-            filepath = self.find_file_in_path(filename)
+            filepath = utils.find_file_in_path(filename, self.searchpath)
 
             if filepath: 
                 log.debug("Found file", filepath)
@@ -493,10 +483,10 @@ def main():
     parser.add_argument("-p", "--patch-path", action="append",
                         default=[os.getcwd()],
                         help="Search path for patch files")
-    #parser.add_argument("-l", "--init-lib", action="append", 
-    #                    help="Dynamic library (*.so) to load at launch")
-    #parser.add_argument("-L", "--lib-path", action="append",
-    #                    help="Search path for dynamic libraries")
+    parser.add_argument("-l", "--init-lib", action="append", 
+                        help="Extension library (*.so) to load at launch")
+    parser.add_argument("-L", "--lib-path", action="append",
+                        help="Search path for extension libraries")
     parser.add_argument("-i", "--inputs", default=2, type=int,
                         help="Number of JACK audio input ports")
     parser.add_argument("-o", "--outputs", default=2, type=int,
@@ -524,6 +514,7 @@ def main():
     app.dsp_outputs = args.get("outputs")
     app.osc_port = args.get("osc_udp_port")
     app.searchpath = ':'.join(args.get("patch_path"))
+    app.extpath = ':'.join(args.get("lib_path"))
     app.max_blocksize = args.get("max_bufsize") 
 
     # launch processes and threads 
@@ -538,18 +529,27 @@ def main():
     add_evaluator_defaults() 
     builtins.register()
 
+    for libname in args.get("init_lib"):
+        app.load_extension(libname)
+
+
     evaluator = Evaluator()
 
     pyfiles = args.get("init_file", [])
     for f in pyfiles: 
-        log.debug("initfile: Loading", f)
-        try: 
-            os.stat(f)
-        except OSError: 
+        fullpath = utils.find_file_in_path(f, app.searchpath)
+        log.debug("initfile: Loading", fullpath)
+        if not fullpath: 
             log.debug("initfile: Cannot find file", f) 
             continue
+
         try: 
-            evaluator.exec_file(f)
+            os.stat(fullpath)
+        except OSError: 
+            log.debug("initfile: Error accessing file", fullpath) 
+            continue
+        try: 
+            evaluator.exec_file(fullpath)
         except Exception, e: 
             log.debug("initfile: Exception while loading initfile", f) 
             log.debug(e)

@@ -66,6 +66,11 @@ class DSPCommand (RPCWrapper):
         out_latency = mfpdsp.dsp_out_latency()
         return (srate, blksize, in_latency, out_latency)
 
+    @rpcwrap
+    def ext_load(self, extension_path):
+        mfpdsp.ext_load(extension_path)
+
+
 def dsp_init(pipe, max_bufsize, num_inputs, num_outputs):
     from main import MFPCommand
     import threading

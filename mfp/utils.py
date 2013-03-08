@@ -31,6 +31,20 @@ def splitpath(p):
             prefix = None 
     return unescaped 
 
+def find_file_in_path(filename, pathspec):
+    import os.path 
+    import os 
+    searchdirs = splitpath(pathspec)
+    for d in searchdirs: 
+        path = os.path.join(d, filename)
+        try: 
+            s = os.stat(path)
+            if s: 
+                return path 
+        except: 
+            continue 
+    return None 
+
 def profile(func):
     '''
     Decorator to profile the decorated function using cProfile

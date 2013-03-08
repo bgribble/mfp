@@ -420,9 +420,12 @@ ext_load(PyObject * mod, PyObject * args)
     char * filename = NULL;
     PyArg_ParseTuple(args, "s", &filename);
     mfp_reqdata rd;
+    printf("ext_load: loading extension %s\n", filename);
     rd.reqtype = REQTYPE_EXTLOAD;
     rd.param_value = mfp_ext_load(filename);
     mfp_dsp_push_request(rd);
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 static PyMethodDef MfpDspMethods[] = {

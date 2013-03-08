@@ -19,9 +19,12 @@ time.  If you are running mfp from the top of the source tree,
 
 Should do it. 
 
-This extension is doubly totally useless, because there's no Python
-Processor subclass that uses it.  This extension just enables the
-method Processor.dsp_init("ext1~", ...) to find the ext1~ DSP object
-type. 
+This extension is doubly totally useless unless you also create a Processor 
+subclass that knows to use that DSP class.  This exists in extension_1.py, which 
+registers a new type [ext1~] which uses the "ext1~" DSP class.  To load it at runtime
+as well, 
+
+    $ mfp -L doc/extensions -l extension_1.so -p doc/extensions -f extension_1.py 
+
 
 
