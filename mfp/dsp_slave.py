@@ -5,7 +5,7 @@ Python main loop for DSP subprocess
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-import mfpdsp
+
 from mfp.rpc_wrapper import RPCWrapper, rpcwrap
 from . import log
 
@@ -18,33 +18,40 @@ class DSPObject(RPCWrapper):
         self.obj_id = obj_id
         RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params)
         if self.local:
+            import mfpdsp
             self.c_obj = mfpdsp.proc_create(name, inlets, outlets, params)
             DSPObject.objects[self.obj_id] = self.c_obj
             DSPObject.c_objects[self.c_obj] = self.obj_id
 
     @rpcwrap
     def reset(self):
+        import mfpdsp
         return mfpdsp.proc_reset(self.c_obj)
 
     @rpcwrap
     def delete(self):
+        import mfpdsp
         return mfpdsp.proc_destroy(self.c_obj)
 
     @rpcwrap
     def getparam(self, param):
+        import mfpdsp
         return mfpdsp.proc_getparam(self.c_obj, param)
 
     @rpcwrap
     def setparam(self, param, value):
+        import mfpdsp
         return mfpdsp.proc_setparam(self.c_obj, param, value)
 
     @rpcwrap
     def connect(self, outlet, target, inlet):
+        import mfpdsp
         return mfpdsp.proc_connect(self.c_obj, outlet, DSPObject.objects.get(target),
                                    inlet)
 
     @rpcwrap
     def disconnect(self, outlet, target, inlet):
+        import mfpdsp
         return mfpdsp.proc_disconnect(self.c_obj, outlet, DSPObject.objects.get(target),
                                       inlet)
 
@@ -60,6 +67,7 @@ class DSPCommand (RPCWrapper):
 
     @rpcwrap
     def get_dsp_params(self):
+        import mfpdsp
         srate = mfpdsp.dsp_samplerate()
         blksize = mfpdsp.dsp_blocksize()
         in_latency = mfpdsp.dsp_in_latency()
@@ -68,6 +76,7 @@ class DSPCommand (RPCWrapper):
 
     @rpcwrap
     def ext_load(self, extension_path):
+        import mfpdsp
         mfpdsp.ext_load(extension_path)
 
 
@@ -75,6 +84,11 @@ def dsp_init(pipe, max_bufsize, num_inputs, num_outputs):
     from main import MFPCommand
     import threading
     import os
+    import sys 
+    import DLFCN 
+
+    sys.setdlopenflags(DLFCN.RTLD_NOW | DLFCN.RTLD_GLOBAL)
+    import mfpdsp 
 
     log.log_module = "dsp"
     log.debug("DSP thread started, pid =", os.getpid())
@@ -98,6 +112,7 @@ ttq = False
 
 
 def dsp_response(*args):
+    import mfpdsp
     from .main import MFPCommand
 
     # from mfp.main import MFPCommand
@@ -114,6 +129,7 @@ def dsp_response(*args):
             mfp.send(recip, -1, (m[1], m[2]))
 
 def dsp_finish():
+    import mfpdsp
     mfpdsp.dsp_shutdown()
     global ttq
     ttq = True

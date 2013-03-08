@@ -7,7 +7,7 @@ class Extension1 (Processor):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
         self.dsp_inlets = [0]
         self.dsp_outlets = [0] 
-        self.dsp_init("ext~")
+        self.dsp_init("ext1~")
 
     def trigger(self):
         pass 

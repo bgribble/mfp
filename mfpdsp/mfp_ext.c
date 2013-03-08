@@ -14,8 +14,9 @@ mfp_ext_load(char * filename)
     void * dlinfo;
     mfp_extinfo * rv; 
     dlinfo = dlopen(filename, RTLD_NOW);
-    
+   
     if (dlinfo == NULL) {
+        printf("dlopen(%s) failed, error: %s\n", filename, dlerror());
         return NULL; 
     }
     rv = g_malloc0(sizeof(mfp_extinfo));

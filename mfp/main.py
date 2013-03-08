@@ -483,9 +483,9 @@ def main():
     parser.add_argument("-p", "--patch-path", action="append",
                         default=[os.getcwd()],
                         help="Search path for patch files")
-    parser.add_argument("-l", "--init-lib", action="append", 
+    parser.add_argument("-l", "--init-lib", action="append", default=[],
                         help="Extension library (*.so) to load at launch")
-    parser.add_argument("-L", "--lib-path", action="append",
+    parser.add_argument("-L", "--lib-path", action="append", default=[],
                         help="Search path for extension libraries")
     parser.add_argument("-i", "--inputs", default=2, type=int,
                         help="Number of JACK audio input ports")
