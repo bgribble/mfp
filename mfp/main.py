@@ -196,6 +196,10 @@ class MFPApp (Singleton):
         self.osc_mgr = None
         self.console = None
 
+        # app callbacks 
+        self.callbacks = {}
+        self.callbacks_last_id = 0
+
         # processor class registry
         self.registry = {}
 
@@ -225,7 +229,11 @@ class MFPApp (Singleton):
             self.dsp_command = DSPCommand()
             params = self.dsp_command.get_dsp_params() 
             if params is not None: 
-                self.samplerate, self.blocksize, self.in_latency, self.out_latency = params
+                self.samplerate, self.blocksize = params
+
+            params = self.dsp_command.get_latency() 
+            if params is not None: 
+                self.in_latency, self.out_latency = params
 
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
@@ -280,7 +288,7 @@ class MFPApp (Singleton):
         return oi
 
     def recall(self, obj_id):
-        return self.objects.get(obj_id)
+        return self.objects.get(obj_id, self)
 
     def forget(self, obj):
         try:
@@ -430,6 +438,35 @@ class MFPApp (Singleton):
         log.debug("MFPApp.finish: all children reaped, good-bye!")
 
 
+    def send(self, msg, port): 
+        msgid, msgval = msg 
+        if msgid == 1: # latency changed  
+            self.emit_signal("latency") 
+
+    #####################
+    # callbacks
+    #####################
+
+    def add_callback(self, signal_name, callback): 
+        cbid = self.callbacks_last_id
+        self.callbacks_last_id += 1
+
+        oldlist = self.callbacks.setdefault(signal_name, [])
+        oldlist.append((cbid, callback))
+
+        return cbid
+
+    def remove_callback(self, cb_id):
+        for signal, hlist in self.callbacks.items():
+            for num, cbinfo in enumerate(hlist):
+                if cbinfo[0] == cb_id:
+                    hlist[num:num+1] = [] 
+                    return True 
+        return False
+
+    def emit_signal(self, signal_name, *args):
+        for cbinfo in self.callbacks.get(signal_name, []):
+            cbinfo[1](*args)
    
 def version():
     import pkg_resources 

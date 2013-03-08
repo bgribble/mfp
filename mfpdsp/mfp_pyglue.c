@@ -1,4 +1,3 @@
-
 #include <Python.h>
 #include <pthread.h>
 #include <signal.h>
@@ -102,7 +101,7 @@ dsp_response_wait(PyObject * mod, PyObject * args)
 
             proc = g_hash_table_lookup(mfp_proc_objects, r.dst_proc);
             if (proc == NULL)
-                continue;
+                proc = Py_None;
 
             Py_INCREF(proc);
 
@@ -420,7 +419,6 @@ ext_load(PyObject * mod, PyObject * args)
     char * filename = NULL;
     PyArg_ParseTuple(args, "s", &filename);
     mfp_reqdata rd;
-    printf("ext_load: loading extension %s\n", filename);
     rd.reqtype = REQTYPE_EXTLOAD;
     rd.param_value = mfp_ext_load(filename);
     mfp_dsp_push_request(rd);
@@ -435,8 +433,8 @@ static PyMethodDef MfpDspMethods[] = {
     { "dsp_disable",  dsp_disable, METH_VARARGS, "Disable dsp" },
     { "dsp_samplerate",  dsp_samplerate, METH_VARARGS, "Return samplerate" },
     { "dsp_blocksize",  dsp_blocksize, METH_VARARGS, "Return blocksize" },
-    { "dsp_in_latency",  dsp_blocksize, METH_VARARGS, "Return input latency" },
-    { "dsp_out_latency",  dsp_blocksize, METH_VARARGS, "Return output latency" },
+    { "dsp_in_latency",  dsp_in_latency, METH_VARARGS, "Return input latency" },
+    { "dsp_out_latency",  dsp_out_latency, METH_VARARGS, "Return output latency" },
     { "dsp_response_wait",  dsp_response_wait, METH_VARARGS, "Return next DSP responses" },
     { "proc_create", proc_create, METH_VARARGS, "Create DSP processor" },
     { "proc_destroy", proc_destroy, METH_VARARGS, "Destroy DSP processor" },

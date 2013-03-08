@@ -70,9 +70,14 @@ class DSPCommand (RPCWrapper):
         import mfpdsp
         srate = mfpdsp.dsp_samplerate()
         blksize = mfpdsp.dsp_blocksize()
+        return (srate, blksize)
+
+    @rpcwrap
+    def get_latency(self):
+        import mfpdsp
         in_latency = mfpdsp.dsp_in_latency()
         out_latency = mfpdsp.dsp_out_latency()
-        return (srate, blksize, in_latency, out_latency)
+        return (in_latency, out_latency)
 
     @rpcwrap
     def ext_load(self, extension_path):
@@ -115,7 +120,6 @@ def dsp_response(*args):
     import mfpdsp
     from .main import MFPCommand
 
-    # from mfp.main import MFPCommand
     # FIXME there is a thread mess waiting just offstage
     # with multiple threads invoking send() in main process
     global ttq

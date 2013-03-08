@@ -122,6 +122,8 @@ reorder_cb (void * arg)
     }
 
     mfp_out_latency = 1000.0 * maxval / mfp_samplerate;
+
+    mfp_dsp_send_response_float(NULL, 1, 0.0);
 }
 
 int

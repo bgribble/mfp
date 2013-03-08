@@ -65,3 +65,6 @@ def register():
     delay.register()
     from . import dispatch
     dispatch.register()
+    from . import latency
+    latency.register() 
+
