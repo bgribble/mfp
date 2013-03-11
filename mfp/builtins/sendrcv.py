@@ -5,6 +5,8 @@ sendrcv.py: Bus/virtual wire objects.
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import time 
+from ..quittable_thread import QuittableThread 
 from ..processor import Processor
 from ..main import MFPApp
 from .. import Uninit
@@ -56,6 +58,38 @@ class Send (Processor):
             self.dest_obj.send(self.inlets[0], inlet=self.dest_inlet)
             self.inlets[0] = Uninit 
 
+class SendSignal (Send):
+    doc_tooltip_obj = "Send signals to the specified name"
+
+    def __init__(self, init_type, init_args, patch, scope, name): 
+        Send.__init__(self, init_type, init_args, patch, scope, name)
+        
+        self.dsp_inlets = [0]
+        self.dsp_outlets = [0] 
+        self.dsp_init("noop~")
+
+        self.monitor_thread = QuittableThread(target=self._monitor)
+        self.monitor_thread.start()
+
+    def _monitor(self, threadobj): 
+        # FIXME race between monitor and trigger method 
+        while not threadobj.join_req:
+            if self.dest_obj is not None and self.dest_obj.status == Processor.DELETED:
+                self.dest_obj = None 
+
+            if self.dest_obj is None and self.dest_name is not None:
+                self.reconnect()
+                    
+            time.sleep(0.5)
+
+    def reconnect(self): 
+        self.dest_obj = MFPApp().resolve(self.dest_name, self)
+        if self.dest_obj and self.dest_inlet not in self.dest_obj.dsp_inlets:
+            self.dest_obj = None
+
+        if self.dest_obj is not None:
+            self.dsp_obj.connect(0, self.dest_obj.obj_id, 
+                                 self.dest_obj.dsp_inlets.index(self.dest_inlet))
 
 class Recv (Processor):
     doc_tooltip_obj = "Receive messages to the specified name" 
@@ -89,8 +123,21 @@ class Recv (Processor):
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
 
+class RecvSignal (Recv): 
+    doc_tooltip_obj = "Receive signals to the specified name"
+    
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Recv.__init__(self, init_type, init_args, patch, scope, name)
+        self.dsp_inlets = [0]
+        self.dsp_outlets = [0]
+        self.dsp_init("noop~")
+
 def register():
     MFPApp().register("send", Send)
     MFPApp().register("recv", Recv)
     MFPApp().register("s", Send)
     MFPApp().register("r", Recv)
+    MFPApp().register("send~", SendSignal)
+    MFPApp().register("recv~", RecvSignal)
+    MFPApp().register("s~", SendSignal)
+    MFPApp().register("r~", RecvSignal)

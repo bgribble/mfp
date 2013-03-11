@@ -20,6 +20,8 @@ class Processor (object):
     CTOR = 0 
     READY = 1 
     ERROR = 2
+    DELETED = 3 
+
     display_type = 'processor'
     hot_inlets = [0]
 
@@ -259,6 +261,7 @@ class Processor (object):
             self.dsp_obj = None
 
         MFPApp().forget(self)
+        self.status = self.DELETED 
 
     def resize(self, inlets, outlets):
         from .main import MFPApp
