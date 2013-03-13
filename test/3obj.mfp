@@ -1,1 +1,0 @@
-{"objects": {"0": {"connections": [[[1, 0]]], "initargs": "Bang", "type": "var", "gui_params": {}}, "1": {"connections": [[]], "initargs": "500", "type": "metro", "gui_params": {"element_type": "processor", "position_x": 111.0, "position_y": 110.0}}, "2": {"connections": [[[1, 0]]], "initargs": "False", "type": "var", "gui_params": {}}}, "name": "Default"}

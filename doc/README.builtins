@@ -63,6 +63,7 @@ processor box followed by "name" and RET (return).
 [inlet]      : Message input to patch
 [int]        : Convert to integer
 [in~]        : Input from JACK port
+[latency]    : Report DSP latency changes (in milliseconds)
 [line~]      : Ramp/line generator
 [list]       : Convert to list
 [loadbang]   : Emit a Bang message on patch load
@@ -92,16 +93,20 @@ processor box followed by "name" and RET (return).
 [r]          : Receive messages to the specified name
 [radiogroup] : Control a radio group of toggle buttons
 [recv]       : Receive messages to the specified name
+[recv~]      : Receive signals to the specified name
 [route]      : Route input to a selected output based on type or value
 [route=]     : Route input to a selected output based on type or value
+[r~]         : Receive signals to the specified name
 [s]          : Send messages to a named receiver (create with 'via' GUI object)
 [scatter]    : Scatter plot for non-signal data points
 [scope]      : Scope-style signal display (requires a buffer~)
 [send]       : Send messages to a named receiver (create with 'via' GUI object)
+[send~]      : Send signals to the specified name
 [sig~]       : Emit a constant signal
 [sin]        : sin(x)
 [slidemeter] : Display/control a number with a slider
 [snap~]      : Capture a single or periodic snapshot value of a signal
+[s~]         : Send signals to the specified name
 [tan]        : tan(x)
 [text]       : Comment using SGML-type markup for style
 [throttle]   : Pass through input, but at a limited rate

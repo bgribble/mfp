@@ -1,0 +1,28 @@
+mfp v0.02, 2013 Mar 13 
+
+  * #30: Fix RMS calculation in [ampl~]
+
+  * #37: Add [s~], [r~] and different via graphics 
+
+  * #41: Clean up SSE vs non-SSE, add tests for non-SSE build
+
+  * #42: Make parameter setting non-locking; add mfp_alloc thread 
+         for non-blocking memory allocation 
+
+  * #43: Refactor color name usage to avoid API breakage with 
+         different versions of Clutter python bindings 
+
+  * #44: Fix broken tests 
+
+  * #46: Add ability to load .so extension libraries with new DSP types 
+
+  * #47: Handle JACK block size changes at runtime 
+
+  * #48: Add [latency] object to report JACK input and output latency 
+         to patches 
+
+mfp v0.01, 2013-Feb-22 
+
+  * Initial release 
+
+

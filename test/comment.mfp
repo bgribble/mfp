@@ -1,1 +1,0 @@
-{"objects": {"0": {"connections": [[]], "initargs": null, "type": "print", "gui_params": {"element_type": "processor", "position_x": 94.0, "position_y": 72.0}}, "1": {"connections": [[]], "initargs": "", "type": "var", "gui_params": {"message_text": "multiline\ncomment\nstring", "element_type": "text", "position_x": 100.0, "position_y": 128.0}}}, "name": "Default"}
