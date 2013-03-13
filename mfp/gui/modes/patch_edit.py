@@ -59,9 +59,9 @@ class PatchEditMode (InputMode):
         self.bind("V", lambda: self.add_element(ReceiveViaElement),
                   "Add receive message via")
         self.bind("A-v", lambda: self.add_element(SendSignalViaElement),
-                  "Add send message via")
+                  "Add send signal via")
         self.bind("A-V", lambda: self.add_element(ReceiveSignalViaElement),
-                  "Add receive message via")
+                  "Add receive signal via")
         
         self.bind("C-n", self.window.layer_new, "Create new layer")
         self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
