@@ -17,6 +17,7 @@ from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement
 from ..via_element import SendViaElement, ReceiveViaElement
+from ..via_element import SendSignalViaElement, ReceiveSignalViaElement 
 from ..button_element import BangButtonElement, ToggleButtonElement, ToggleIndicatorElement
 
 
@@ -57,7 +58,11 @@ class PatchEditMode (InputMode):
                   "Add send message via")
         self.bind("V", lambda: self.add_element(ReceiveViaElement),
                   "Add receive message via")
-
+        self.bind("A-v", lambda: self.add_element(SendSignalViaElement),
+                  "Add send message via")
+        self.bind("A-V", lambda: self.add_element(ReceiveSignalViaElement),
+                  "Add receive message via")
+        
         self.bind("C-n", self.window.layer_new, "Create new layer")
         self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
         self.bind("C-u", self.window.layer_move_up, "Move current layer up")

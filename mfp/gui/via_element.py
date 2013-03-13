@@ -65,14 +65,27 @@ class ViaElement (PatchElement):
         color = ColorDB.to_cairo(self.color_fg)
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
+        if self.STYLE in ("empty_circled", "filled_circled"):
+            arcsize = self.VIA_SIZE / 3.5
+            linewidth = 1
+        else:
+            arcsize = self.VIA_SIZE / 2.0
+            linewidth = 3
+
         # ct.translate(0.5, 0.5)
-        ct.set_line_width(3)
+        ct.set_line_width(linewidth)
         cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
-        ct.arc(cent, cent, self.VIA_SIZE / 2.0, 0, 2 * math.pi)
-        if self.STYLE == "empty":
+        ct.arc(cent, cent, arcsize, 0, 2 * math.pi)
+        if self.STYLE[:5] == "empty":
             ct.stroke()
         else:
             ct.fill()
+
+        if self.STYLE[-7:] == "circled":
+            ct.set_line_width(1)
+            cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
+            ct.arc(cent, cent, self.VIA_SIZE/2.0, 0, 2 * math.pi)
+            ct.stroke()
 
     def recenter_label(self):
         w = self.label.get_width()
@@ -133,7 +146,6 @@ class ViaElement (PatchElement):
     def make_edit_mode(self):
         return LabelEditMode(self.stage, self, self.label)
 
-
 class SendViaElement (ViaElement):
     STYLE = "empty"
     LABEL_Y = ViaElement.VIA_SIZE + ViaElement.VIA_FUDGE / 2.0
@@ -146,6 +158,11 @@ class SendViaElement (ViaElement):
         ViaElement.label_edit_finish(self, *args)
         MFPGUI().mfp.send(self.obj_id, 1, self.label.get_text())
 
+class SendSignalViaElement (SendViaElement): 
+    VIA_SIZE = 12 
+    STYLE = "empty_circled"
+    display_type = "sendsignalvia"
+    proc_type = "send~"
 
 class ReceiveViaElement (ViaElement):
     STYLE = "filled"
@@ -162,4 +179,10 @@ class ReceiveViaElement (ViaElement):
         MFPGUI().mfp.rename_obj(self.obj_id, self.obj_name)
 
         self.stage.refresh(self)
+
+class ReceiveSignalViaElement (ReceiveViaElement):
+    VIA_SIZE = 12 
+    STYLE = "filled_circled"
+    display_type = "recvsignalvia"
+    proc_type = "recv~"
 
