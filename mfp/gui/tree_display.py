@@ -97,6 +97,9 @@ class TreeDisplay (object):
         self.treestore.clear()
         self.object_paths = {} 
 
+    def unselect(self, obj): 
+        print "TreeDisplay.unselect not done yet"
+
     def insert(self, obj, parent):
         piter = None 
         if parent is not None:

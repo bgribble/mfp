@@ -210,9 +210,10 @@ class TransientMessageElement (MessageElement):
             c.delete()
 
         self.target_port = portnum
-        c = ConnectionElement(self.stage, self, 0, self.target_obj, self.target_port)
-        self.connections_out.append(c)
-        self.target_obj.connections_in.append(c)
+        for to in self.target_obj: 
+            c = ConnectionElement(self.stage, self, 0, to, self.target_port)
+            self.connections_out.append(c)
+            to.connections_in.append(c)
 
         return True
 

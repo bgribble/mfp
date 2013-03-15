@@ -1,10 +1,6 @@
 Control processors: spigot, if
 
-Signal processors: biquad~, hip~, lop~, phasor~, square~ 
-
-GUI elements: button, toggle 
-
-External elements: LADSPA hosts
+Signal processors: square~ 
 
 Architectural issues: 
  * Signal-processing domain issues (can't route fft~ to dac~)

@@ -54,6 +54,8 @@ class PatchWindow(object):
 
         self.autoplace_marker = None
         self.autoplace_layer = None
+        self.selection_box = None 
+        self.selection_box_layer = None 
 
         self.stage.add_actor(self.group)
 
@@ -65,7 +67,7 @@ class PatchWindow(object):
 
         self.selected_patch = None
         self.selected_layer = None
-        self.selected = None
+        self.selected = []
 
         self.load_in_progress = False 
 
@@ -75,6 +77,7 @@ class PatchWindow(object):
 
         # dumb colors
         self.color_unselected = ColorDB().find("default_fg_unsel")
+        self.color_transparent = ColorDB().find(255, 255, 255, 0)
         self.color_selected = ColorDB().find("default_fg_sel")
         self.color_bg = ColorDB().find("default_bg")
 
@@ -239,7 +242,7 @@ class PatchWindow(object):
         self.emit_signal("add", element)
 
     def unregister(self, element):
-        if self.selected == element:
+        if element in self.selected:
             self.unselect(element)
 
         element.layer.remove(element)

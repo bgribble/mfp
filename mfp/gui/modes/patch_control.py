@@ -38,7 +38,7 @@ class PatchControlMode (InputMode):
     def drag_start(self):
         if self.manager.pointer_obj is None:
             self.window.unselect_all()
-        elif self.manager.pointer_obj != self.window.selected:
+        elif self.manager.pointer_obj not in self.window.selected:
             self.window.select(self.manager.pointer_obj)
 
         self.drag_started = True

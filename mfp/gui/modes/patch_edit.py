@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode
 from .autoplace import AutoplaceMode
-from .selection import SelectionEditMode
+from .selection import SelectionEditMode, SingleSelectionEditMode, MultiSelectionEditMode
 
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
@@ -26,10 +26,16 @@ class PatchEditMode (InputMode):
         self.manager = window.input_mgr
         self.window = window
         self.drag_started = False
-        self.drag_start_off_x = None
-        self.drag_start_off_y = None
+        self.selbox_started = False 
+        self.selbox_changed = [] 
+        self.drag_start_x = None
+        self.drag_start_y = None
+        self.drag_last_x = None
+        self.drag_last_y = None
         self.drag_target = None
         self.autoplace_mode = None
+        self.autoplace_x = None 
+        self.autoplace_y = None 
         self.selection_edit_mode = None
 
         InputMode.__init__(self, "Edit patch")
@@ -76,8 +82,16 @@ class PatchEditMode (InputMode):
         self.bind("A", self.auto_place_above, "Auto-place above")
 
         self.bind("M1DOWN", self.drag_start, "Select element/start drag")
-        self.bind("M1-MOTION", self.drag_selected, "Move element or view")
+        self.bind("M1-MOTION", self.drag_motion, "Move element or view")
         self.bind("M1UP", self.drag_end, "Release element/end drag")
+
+        self.bind("S-M1DOWN", lambda: self.selbox_start(True), "Start selection box")
+        self.bind("S-M1-MOTION", lambda: self.selbox_motion(True), "Drag selection box")
+        self.bind("S-M1UP", lambda: self.selbox_end(), "End selection box")
+
+        self.bind("C-M1DOWN", lambda: self.selbox_start(False), "Start unselection box")
+        self.bind("C-M1-MOTION", lambda: self.selbox_motion(False), "Drag unselection box")
+        self.bind("C-M1UP", lambda: self.selbox_end(), "End unselection box")
 
         self.bind('+', lambda: self.window.zoom_in(1.25), "Zoom view in")
         self.bind('=', lambda: self.window.zoom_in(1.25), "Zoom view in")
@@ -139,9 +153,21 @@ class PatchEditMode (InputMode):
         return True
 
     def enable_selection_edit(self):
-        if self.selection_edit_mode is None:
-            self.selection_edit_mode = SelectionEditMode(self.window)
-            self.manager.enable_minor_mode(self.selection_edit_mode)
+        if len(self.window.selected) > 1:
+            if isinstance(self.selection_edit_mode, SingleSelectionEditMode):
+                self.manager.disable_minor_mode(self.selection_edit_mode)
+                self.selection_edit_mode = None 
+            if not self.selection_edit_mode: 
+                self.selection_edit_mode = MultiSelectionEditMode(self.window)
+                self.manager.enable_minor_mode(self.selection_edit_mode)
+        elif len(self.window.selected) == 1:
+            if isinstance(self.selection_edit_mode, MultiSelectionEditMode):
+                self.manager.disable_minor_mode(self.selection_edit_mode)
+                self.selection_edit_mode = None 
+            if not self.selection_edit_mode: 
+                self.selection_edit_mode = SingleSelectionEditMode(self.window)
+                self.manager.enable_minor_mode(self.selection_edit_mode)
+
         return True
 
     def disable_selection_edit(self):
@@ -154,16 +180,16 @@ class PatchEditMode (InputMode):
         if self.manager.pointer_obj is None:
             self.window.unselect_all()
             self.disable_selection_edit()
-        elif self.manager.pointer_obj != self.window.selected:
+        elif self.manager.pointer_obj not in self.window.selected:
+            self.window.unselect_all()
             self.window.select(self.manager.pointer_obj)
-            # self.manager.synthesize("M1DOWN")
             self.enable_selection_edit()
 
         self.drag_started = True
         if isinstance(self.manager.pointer_obj, ConnectionElement):
             self.drag_target = None
         else:
-            self.drag_target = self.manager.pointer_obj
+            self.drag_target = self.window.selected
 
         if self.manager.pointer_obj is None:
             px = self.manager.pointer_ev_x
@@ -178,9 +204,9 @@ class PatchEditMode (InputMode):
         self.drag_last_y = py
         return True
 
-    def drag_selected(self):
+    def drag_motion(self):
         if self.drag_started is False:
-            return
+            return False 
 
         if self.drag_target is None:
             px = self.manager.pointer_ev_x
@@ -198,15 +224,98 @@ class PatchEditMode (InputMode):
         if self.drag_target is None:
             self.window.move_view(dx, dy)
         else:
-            self.drag_target.drag(dx, dy)
+            for obj in self.drag_target:
+                obj.drag(dx, dy)
         return True
 
     def drag_end(self):
+        if self.selbox_started:
+            self.selbox_end() 
+
         self.drag_started = False
         if self.drag_target:
-            self.drag_target.layer.resort(self.drag_target)
-            self.drag_target.send_params()
+            layers = []
+            for obj in self.drag_target:
+                if obj.layer not in layers: 
+                    obj.layer.resort(obj)
+                    layers.append(obj.layer)
+                obj.send_params()
         self.drag_target = None
+        return True
+
+    def selbox_start(self, select_mode):
+        self.selbox_started = True
+
+        if (self.manager.pointer_obj is not None and
+            self.manager.pointer_obj not in self.window.selected):
+
+            if select_mode:
+                self.window.select(self.manager.pointer_obj)
+            else:
+                self.window.unselect(self.manager.pointer_obj)
+
+            if self.window.selected:
+                self.enable_selection_edit()
+            else: 
+                self.disable_selection_edit()
+
+        px = self.manager.pointer_ev_x
+        py = self.manager.pointer_ev_y
+
+        self.drag_start_x = px
+        self.drag_start_y = py
+        self.drag_last_x = px
+        self.drag_last_y = py
+        return True
+
+    def selbox_motion(self, select_mode): 
+        if self.selbox_started is False:
+            return False 
+
+        px = self.manager.pointer_ev_x
+        py = self.manager.pointer_ev_y
+
+        dx = px - self.drag_last_x
+        dy = py - self.drag_last_y
+
+        self.drag_last_x = px
+        self.drag_last_y = py
+
+        enclosed = self.window.show_selection_box(self.drag_start_x, self.drag_start_y, 
+                                                  self.drag_last_x, self.drag_last_y)
+
+        for obj in enclosed:
+            if select_mode:
+                if obj not in self.window.selected:
+                    if obj not in self.selbox_changed:
+                        self.selbox_changed.append(obj)
+                    self.window.select(obj)
+                    self.enable_selection_edit()
+            else:
+                if obj in self.window.selected:
+                    if obj not in self.selbox_changed:
+                        self.selbox_changed.append(obj)
+                    self.window.unselect(obj)
+
+            if not self.window.selected:
+                self.disable_selection_edit()
+
+        new_changed = []
+        for obj in self.selbox_changed: 
+            if obj not in enclosed:
+                if select_mode:
+                    self.window.unselect(obj)
+                else: 
+                    self.window.select(obj)
+            else:
+                new_changed.append(obj)
+        self.selbox_changed = new_changed 
+
+        return True
+
+    def selbox_end(self):
+        self.selbox_started = False
+        self.window.hide_selection_box()
         return True
 
     def disable(self):

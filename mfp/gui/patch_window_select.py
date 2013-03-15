@@ -49,21 +49,17 @@ def _select(self, obj):
     if obj is None or not isinstance(obj, PatchElement):
         return 
 
-    self.selected = obj
+    self.selected[:0] = [obj]
     obj.select()
     obj.begin_control()
 
-    # FIXME hook
     self.emit_signal("select", obj)
 
 
 @extends(PatchWindow)
 def select(self, obj):
-    if self.selected is obj: 
+    if obj in self.selected: 
         return True 
-
-    if self.selected is not None:
-        self._unselect(self.selected)
 
     self._select(obj)
     self.object_view.select(obj)
@@ -79,41 +75,49 @@ def _unselect(self, obj):
             obj.end_edit()
         obj.end_control()
         obj.unselect()
-    self.selected = None
+    self.selected.remove(obj)
 
     self.emit_signal("unselect", obj)
 
 @extends(PatchWindow)
 def unselect(self, obj):
-    if self.selected is obj and obj is not None:
+    if obj in self.selected and obj is not None:
         self._unselect(obj)
-        self.object_view.select(None)
+        self.object_view.unselect(obj)
     return True
 
 
 @extends(PatchWindow)
 def unselect_all(self):
-    if self.selected:
-        self.selected.end_control()
-        self._unselect(self.selected)
-        self.object_view.select(None)
+    for obj in self.selected: 
+        obj.end_control()
+        self._unselect(obj)
+        self.object_view.unselect(obj)
     return True
 
 
 @extends(PatchWindow)
 def select_next(self):
+    key_obj = None 
+
     if len(self.selected_layer.objects) == 0:
         return False
 
-    if (self.selected is None or self.selected not in self.selected_layer.objects):
+    for obj in self.selected: 
+        if obj in self.selected_layer.objects: 
+            key_obj = obj
+            break 
+
+    if (not self.selected or (key_obj is None)):
         start = 0
     else:
-        current = self.selected_layer.objects.index(self.selected)
+        current = self.selected_layer.objects.index(key_obj)
         start = (current + 1) % len(self.selected_layer.objects)
     candidate = start
 
     for count in range(len(self.selected_layer.objects)):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
+            self.unselect_all()
             self.select(self.selected_layer.objects[candidate])
             return True
         candidate = (candidate + 1) % len(self.selected_layer.objects)
@@ -122,13 +126,19 @@ def select_next(self):
 
 @extends(PatchWindow)
 def select_prev(self):
+    key_obj = None 
     if len(self.selected_layer.objects) == 0:
         return False
 
-    if (self.selected is None or self.selected not in self.selected_layer.objects):
+    for obj in self.selected: 
+        if obj in self.selected_layer.objects: 
+            key_obj = obj
+            break 
+
+    if (not self.selected or (key_obj is None)):
         candidate = -1
     else:
-        candidate = self.selected_layer.objects.index(self.selected) - 1
+        candidate = self.selected_layer.objects.index(key_obj) - 1
 
     while candidate > -len(self.selected_layer.objects):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
@@ -147,30 +157,21 @@ def select_mru(self):
 
 @extends(PatchWindow)
 def move_selected(self, dx, dy):
-    if self.selected is None or isinstance(self.selected, ConnectionElement):
-        return
 
-    self.selected.move(max(0, self.selected.position_x + dx * self.zoom),
-                       max(0, self.selected.position_y + dy * self.zoom))
-    if self.selected.obj_id is not None:
-        self.selected.send_params()
-    return True
-
+    for obj in self.selected:
+        obj.move(max(0, obj.position_x + dx * self.zoom),
+                 max(0, obj.position_y + dy * self.zoom))
+        if obj.obj_id is not None:
+            obj.send_params()
+    if self.selected: 
+        return True
+    else: 
+        return False
 
 @extends(PatchWindow)
 def delete_selected(self):
-    if self.selected is None:
-        return
-    o = self.selected
-    o.delete()
-    return True
-
-
-@extends(PatchWindow)
-def edit_selected(self):
-    if self.selected is None:
-        return True
-    self.selected.begin_edit()
+    for o in self.selected:
+        o.delete()
     return True
 
 
@@ -212,3 +213,45 @@ def move_view(self, dx, dy):
     self.view_y += dy
     self.rezoom()
     return True
+
+@extends(PatchWindow)
+def show_selection_box(self, x0, y0, x1, y1): 
+    def boxes_overlap(b1, b2): 
+        def _bxo(bx1, bx2):
+            if ((((bx1[0] >= bx2[0]) and (bx1[0] <= bx2[2]))
+                 or ((bx1[2] >= bx2[0]) and (bx1[2] <= bx2[2])))
+                and (((bx1[1] >= bx2[1]) and (bx1[1] <= bx2[3]))
+                     or ((bx1[3] >= bx2[1]) and (bx1[3] <= bx2[3])))):
+                return True 
+            return False 
+        return _bxo(b1, b2) or _bxo(b2, b1)
+
+    from gi.repository import Clutter 
+    if self.selection_box is None:
+        self.selection_box = Clutter.Rectangle()
+        self.selection_box.set_position(x0, y0)
+        self.selection_box.set_border_width(1.0)
+        self.selection_box.set_color(self.color_transparent)
+        self.selection_box.set_border_color(self.color_unselected)
+        self.selection_box_layer = self.selected_layer
+        self.selection_box_layer.group.add_actor(self.selection_box)
+    elif self.selection_box_layer != self.selected_layer:
+        self.selection_box_layer.group.remove_actor(self.selection_box)
+        self.selection_box_layer = self.selected_layer
+        self.selection_box_layer.group.add_actor(self.selection_box)
+    self.selection_box.set_size(x1-x0, y1-y0)
+    self.selection_box.show()
+
+    enclosed = [] 
+    for obj in self.selected_layer.objects: 
+        if boxes_overlap((x0, y0, x1, y1),
+                         (obj.position_x, obj.position_y, 
+                          obj.position_x + obj.width, obj.position_y + obj.height)):
+            enclosed.append(obj)
+    return enclosed 
+
+@extends(PatchWindow)
+def hide_selection_box(self):
+    if self.selection_box:
+        self.selection_box.hide()
+
