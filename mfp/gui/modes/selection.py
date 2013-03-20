@@ -64,12 +64,14 @@ class SingleSelectionEditMode (InputMode):
 
     def connect_fwd(self):
         if self.window.selected:
-            self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected))
+            self.manager.enable_minor_mode(ConnectionMode(self.window, 
+                                                          self.window.selected[0]))
         return True
 
     def connect_rev(self):
         if self.window.selected:
-            self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected,
+            self.manager.enable_minor_mode(ConnectionMode(self.window, 
+                                                          self.window.selected[0],
                                                           connect_rev=True))
         return True
 

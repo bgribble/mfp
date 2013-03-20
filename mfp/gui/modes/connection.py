@@ -102,7 +102,7 @@ class ConnectionMode (InputMode):
             self.set_port_key(int(txt))
 
         if ((self.dest_obj is not None) 
-            or (self.window.selected is not None and self.window.selected != self.source_obj)):
+            or (self.window.selected and self.window.selected[0] != self.source_obj)):
             dirspec = "destination input"
         else: 
             dirspec = "source output"
@@ -113,10 +113,10 @@ class ConnectionMode (InputMode):
     def make_connection(self):
         # are both ends selected?
         if self.reverse and self.source_obj is None and self.window.selected:
-            self.source_obj = self.window.selected
+            self.source_obj = self.window.selected[0]
 
         if not self.reverse and self.dest_obj is None and self.window.selected:
-            self.dest_obj = self.window.selected
+            self.dest_obj = self.window.selected[0]
 
         if self.source_obj and self.dest_obj:
             if MFPGUI().mfp.connect(self.source_obj.obj_id, self.source_port,
@@ -139,8 +139,8 @@ class ConnectionMode (InputMode):
     def set_port_key(self, portnum):
         if self.reverse:
             if (self.source_obj is None and self.window.selected and
-                    self.window.selected != self.dest_obj):
-                self.source_obj = self.window.selected
+                    self.window.selected[0] != self.dest_obj):
+                self.source_obj = self.window.selected[0]
 
             if self.source_obj is not None:
                 self.source_port = portnum
@@ -148,8 +148,8 @@ class ConnectionMode (InputMode):
                 self.dest_port = portnum
         else:
             if (self.dest_obj is None and self.window.selected and
-                    self.window.selected != self.source_obj):
-                self.dest_obj = self.window.selected
+                    self.window.selected[0] != self.source_obj):
+                self.dest_obj = self.window.selected[0]
 
             if self.dest_obj is not None:
                 self.dest_port = portnum

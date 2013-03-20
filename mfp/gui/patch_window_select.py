@@ -75,7 +75,8 @@ def _unselect(self, obj):
             obj.end_edit()
         obj.end_control()
         obj.unselect()
-    self.selected.remove(obj)
+    if obj in self.selected: 
+        self.selected.remove(obj)
 
     self.emit_signal("unselect", obj)
 
@@ -89,7 +90,11 @@ def unselect(self, obj):
 
 @extends(PatchWindow)
 def unselect_all(self):
-    for obj in self.selected: 
+    print "unselect_all:", self.selected
+    oldsel = self.selected 
+    self.selected = [] 
+    for obj in oldsel:
+        print "unselect_all: unselecting", obj
         obj.end_control()
         self._unselect(obj)
         self.object_view.unselect(obj)
@@ -142,6 +147,7 @@ def select_prev(self):
 
     while candidate > -len(self.selected_layer.objects):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
+            self.unselect_all()
             self.select(self.selected_layer.objects[candidate])
             return True
         candidate -= 1
@@ -157,7 +163,6 @@ def select_mru(self):
 
 @extends(PatchWindow)
 def move_selected(self, dx, dy):
-
     for obj in self.selected:
         obj.move(max(0, obj.position_x + dx * self.zoom),
                  max(0, obj.position_y + dy * self.zoom))
@@ -170,10 +175,13 @@ def move_selected(self, dx, dy):
 
 @extends(PatchWindow)
 def delete_selected(self):
-    for o in self.selected:
+    olist = self.selected
+    self.unselect_all()
+    print "delete_selected: after unselect_all, ", self.selected
+    for o in olist:
+        print "Deleting", o
         o.delete()
     return True
-
 
 @extends(PatchWindow)
 def rezoom(self):
@@ -217,19 +225,30 @@ def move_view(self, dx, dy):
 @extends(PatchWindow)
 def show_selection_box(self, x0, y0, x1, y1): 
     def boxes_overlap(b1, b2): 
-        def _bxo(bx1, bx2):
-            if ((((bx1[0] >= bx2[0]) and (bx1[0] <= bx2[2]))
-                 or ((bx1[2] >= bx2[0]) and (bx1[2] <= bx2[2])))
-                and (((bx1[1] >= bx2[1]) and (bx1[1] <= bx2[3]))
-                     or ((bx1[3] >= bx2[1]) and (bx1[3] <= bx2[3])))):
-                return True 
+        if ((b1[0] >= b2[0]) and (b1[0] <= b2[2])
+            or (b2[0] >= b1[0]) and (b2[0] <= b1[2])
+            or (b1[2] >= b2[0]) and (b1[2] <= b2[2])
+            or (b2[2] >= b1[0]) and (b2[2] <= b1[2])):
+            pass
+        else:
             return False 
-        return _bxo(b1, b2) or _bxo(b2, b1)
+        if ((b1[1] >= b2[1]) and (b1[1] <= b2[3])
+            or (b2[1] >= b1[1]) and (b2[1] <= b1[3])
+            or (b1[3] >= b2[1]) and (b1[3] <= b2[3])
+            or (b2[3] >= b1[1]) and (b2[3] <= b1[3])):
+            return True 
+        else:
+            return False 
+
+    if x0 > x1:
+        t = x1; x1 = x0; x0 = t
+
+    if y0 > y1:
+        t = y1; y1 = y0; y0 = t
 
     from gi.repository import Clutter 
     if self.selection_box is None:
         self.selection_box = Clutter.Rectangle()
-        self.selection_box.set_position(x0, y0)
         self.selection_box.set_border_width(1.0)
         self.selection_box.set_color(self.color_transparent)
         self.selection_box.set_border_color(self.color_unselected)
@@ -239,7 +258,8 @@ def show_selection_box(self, x0, y0, x1, y1):
         self.selection_box_layer.group.remove_actor(self.selection_box)
         self.selection_box_layer = self.selected_layer
         self.selection_box_layer.group.add_actor(self.selection_box)
-    self.selection_box.set_size(x1-x0, y1-y0)
+    self.selection_box.set_position(x0, y0)
+    self.selection_box.set_size(max(1, x1-x0), max(1, y1-y0))
     self.selection_box.show()
 
     enclosed = [] 

@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode
 from .autoplace import AutoplaceMode
-from .selection import SelectionEditMode, SingleSelectionEditMode, MultiSelectionEditMode
+from .selection import SingleSelectionEditMode, MultiSelectionEditMode
 
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
@@ -177,7 +177,9 @@ class PatchEditMode (InputMode):
         return True
 
     def drag_start(self):
+        print "drag_start"
         if self.manager.pointer_obj is None:
+            print "  no pointer_obj"
             self.window.unselect_all()
             self.disable_selection_edit()
         elif self.manager.pointer_obj not in self.window.selected:

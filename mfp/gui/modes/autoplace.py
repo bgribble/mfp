@@ -35,8 +35,8 @@ class AutoplaceMode (InputMode):
         self.bind("A", self.autoplace_above, "Choose next (above)")
         self.bind("ESC", self.autoplace_disable, "Return to manual positioning")
 
-        if self.window.selected and self.window.selected.layer == self.window.selected_layer:
-            self.key_widget = self.window.selected
+        if self.window.selected and self.window.selected[0].layer == self.window.selected_layer:
+            self.key_widget = self.window.selected[0]
 
         if self.key_widget is not None:
             self.layer = self.key_widget.layer
@@ -62,10 +62,10 @@ class AutoplaceMode (InputMode):
             self.key_widget = None
 
         # if selection has changed, reset placement number
-        if (self.window.selected and self.window.selected != self.key_widget
-                and self.window.selected.layer == self.layer):
+        if (self.window.selected and self.window.selected[0] != self.key_widget
+                and self.window.selected[0].layer == self.layer):
             self.placement = 0
-            self.key_widget = self.window.selected
+            self.key_widget = self.window.selected[0]
 
     def autoplace_above(self):
         self._update_key()
