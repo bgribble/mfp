@@ -10,22 +10,25 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 from gi.repository import Gtk, GObject
 
 class TreeDisplay (object): 
-    def __init__(self, treeview, *columns):
+    def __init__(self, treeview, multisel, *columns):
         self.treeview = treeview 
         self.treestore = Gtk.TreeStore(GObject.TYPE_PYOBJECT)
         self.selection = self.treeview.get_selection()
-        self.selected_obj = None 
+        self.selected = []
         self.select_cb = None 
-        self.select_cb_id = None
         self.unselect_cb = None 
+        self.glib_select_cb_id = None
 
         self.object_paths = {} 
         self.object_parents = {} 
         self.columns = {} 
         self.columns_bynumber = {}
 
+        if multisel:
+            self.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
+
         self.treeview.set_model(self.treestore)
-        self.select_cb_id = self.selection.connect("changed", self._select_cb)
+        self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)
 
         colnum = 0
         for c in columns:
@@ -58,17 +61,25 @@ class TreeDisplay (object):
         return True
 
     def _select_cb(self, selection): 
-        model, iter = self.selection.get_selected()
-        if iter is None and self.unselect_cb and self.selected_obj is not None:
-            self.unselect_cb(self.selected_obj)
-        elif iter is not None:
-            obj = self.treestore.get_value(iter, 0)
-            if obj is not self.selected_obj:
+        selections = [] 
+
+        def selfn(mod, path, itr, data):
+            selections[:0] = [self.treestore.get_value(itr, 0)]
+        
+        self.selection.selected_foreach(selfn, None)
+
+        for s in self.selected:
+            if s not in selections: 
                 if self.unselect_cb:
-                    self.unselect_cb(self.selected_obj)
-                self.selected_obj = obj 
+                    self.unselect_cb(s)
+
+        for s in selections: 
+            if s not in self.selected: 
                 if self.select_cb:
-                    self.select_cb(obj)
+                    self.select_cb(s)
+
+        self.selected = selections
+
         return False 
 
     def _sort_func(self, model, iter_a, iter_b, data):
@@ -98,7 +109,14 @@ class TreeDisplay (object):
         self.object_paths = {} 
 
     def unselect(self, obj): 
-        print "TreeDisplay.unselect not done yet"
+        if obj not in self.selected: 
+            return 
+        else:
+            self.selected.remove(obj)
+            pathstr = self.object_paths.get(obj)
+            if pathstr: 
+                path = Gtk.TreePath.new_from_string(pathstr)
+                self.selection.unselect_path(path)
 
     def insert(self, obj, parent):
         piter = None 
@@ -139,7 +157,7 @@ class TreeDisplay (object):
 
     def update(self, obj, parent):
         need_select = False 
-        if self.selected_obj == obj:
+        if obj in self.selected:
             need_select = True
 
         pathstr = self.object_paths.get(obj)
@@ -147,12 +165,12 @@ class TreeDisplay (object):
         iter = self.treestore.get_iter_from_string(pathstr)
 
         # temporarily disconnect signal handler  
-        self.selection.disconnect(self.select_cb_id)
+        self.selection.disconnect(self.glib_select_cb_id)
         self.treestore.remove(iter)
         self.insert(obj, parent)
 
         # restore signal handler 
-        self.select_cb_id = self.selection.connect("changed", self._select_cb)
+        self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)
         self._update_paths()
 
         if need_select:
@@ -163,13 +181,13 @@ class TreeDisplay (object):
 
 
     def select(self, obj): 
-        if self.selected_obj is obj: 
+        if obj in self.selected: 
             return 
         elif obj is None: 
-            self.selected_obj = None 
+            self.selected = [] 
             self.selection.unselect_all()
         else:
-            self.selected_obj = obj 
+            self.selected[:0] = [obj] 
             pathstr = self.object_paths.get(obj)
             if pathstr: 
                 path = Gtk.TreePath.new_from_string(pathstr)

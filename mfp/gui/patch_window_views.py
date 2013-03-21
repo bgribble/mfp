@@ -45,7 +45,7 @@ def init_object_view(self):
             self.layer_select(patch.layers[0])
 
     obj_cols = [ ("Name", get_obj_name, True, obj_name_edited, True) ] 
-    object_view = TreeDisplay(self.builder.get_object("object_tree"), *obj_cols)
+    object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
     object_view.select_cb = obj_selected
     object_view.unselect_cb = self._unselect 
 
@@ -98,7 +98,7 @@ def init_layer_view(self):
 
     layer_cols = [("Name", get_layer_name, True, layer_name_edited, False), 
                   ("Scope", get_layer_scopename, True, layer_scope_edited, False)] 
-    layer_view = TreeDisplay(self.builder.get_object("layer_tree"), *layer_cols)
+    layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
     layer_view.select_cb = sel_layer
     layer_view.unselect_cb = None 
 

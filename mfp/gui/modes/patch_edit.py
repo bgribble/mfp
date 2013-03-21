@@ -101,7 +101,7 @@ class PatchEditMode (InputMode):
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
 
     def add_element(self, factory):
-        self.enable_selection_edit()
+        self.window.unselect_all()
         if self.autoplace_mode is None:
             self.window.add_element(factory)
         else:
@@ -115,6 +115,7 @@ class PatchEditMode (InputMode):
             self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
+        self.enable_selection_edit()
         return True
 
     def auto_place_below(self):
@@ -177,18 +178,14 @@ class PatchEditMode (InputMode):
         return True
 
     def drag_start(self):
-        print "drag_start"
-        if self.manager.pointer_obj is None:
-            print "  no pointer_obj"
-            self.window.unselect_all()
-            self.disable_selection_edit()
-        elif self.manager.pointer_obj not in self.window.selected:
+        if self.manager.pointer_obj and self.manager.pointer_obj not in self.window.selected:
             self.window.unselect_all()
             self.window.select(self.manager.pointer_obj)
             self.enable_selection_edit()
 
         self.drag_started = True
-        if isinstance(self.manager.pointer_obj, ConnectionElement):
+        if (self.manager.pointer_obj is None 
+            or isinstance(self.manager.pointer_obj, ConnectionElement)):
             self.drag_target = None
         else:
             self.drag_target = self.window.selected
@@ -242,6 +239,13 @@ class PatchEditMode (InputMode):
                     obj.layer.resort(obj)
                     layers.append(obj.layer)
                 obj.send_params()
+        else: 
+            if self.manager.pointer_obj is None: 
+                if (self.manager.pointer_ev_x == self.drag_start_x
+                    and self.manager.pointer_ev_y == self.drag_start_y): 
+                    self.window.unselect_all()
+                    self.disable_selection_edit()
+
         self.drag_target = None
         return True
 

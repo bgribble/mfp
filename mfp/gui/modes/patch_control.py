@@ -36,9 +36,8 @@ class PatchControlMode (InputMode):
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
 
     def drag_start(self):
-        if self.manager.pointer_obj is None:
+        if self.manager.pointer_obj and self.manager.pointer_obj not in self.window.selected:
             self.window.unselect_all()
-        elif self.manager.pointer_obj not in self.window.selected:
             self.window.select(self.manager.pointer_obj)
 
         self.drag_started = True
@@ -62,3 +61,7 @@ class PatchControlMode (InputMode):
 
     def drag_end(self):
         self.drag_started = False
+        if (self.manager.pointer_obj is None 
+            and self.manager.pointer_ev_x == self.drag_start_x
+            and self.manager.pointer_ev_y == self.drag_start_y):
+            self.window.unselect_all()

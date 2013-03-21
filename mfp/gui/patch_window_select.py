@@ -90,11 +90,9 @@ def unselect(self, obj):
 
 @extends(PatchWindow)
 def unselect_all(self):
-    print "unselect_all:", self.selected
     oldsel = self.selected 
     self.selected = [] 
     for obj in oldsel:
-        print "unselect_all: unselecting", obj
         obj.end_control()
         self._unselect(obj)
         self.object_view.unselect(obj)
@@ -177,9 +175,7 @@ def move_selected(self, dx, dy):
 def delete_selected(self):
     olist = self.selected
     self.unselect_all()
-    print "delete_selected: after unselect_all, ", self.selected
     for o in olist:
-        print "Deleting", o
         o.delete()
     return True
 
