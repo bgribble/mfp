@@ -486,9 +486,12 @@ def add_evaluator_defaults():
     Evaluator.bind_global("Uninit", Uninit)
     Evaluator.bind_global("MethodCall", MethodCall)
 
-    from mfp.midi import NoteOn, NoteOff
+    from mfp.midi import NoteOn, NoteOff, NotePress, MidiCC, MidiPgmChange
     Evaluator.bind_global("NoteOn", NoteOn)
     Evaluator.bind_global("NoteOff", NoteOff)
+    Evaluator.bind_global("NotePress", NotePress)
+    Evaluator.bind_global("MidiCC", MidiCC)
+    Evaluator.bind_global("MidiPgmChange", MidiPgmChange)
 
     Evaluator.bind_global("builtins", builtins)
     Evaluator.bind_global("app", MFPApp())

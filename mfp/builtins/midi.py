@@ -9,7 +9,7 @@ from .. import midi
 from ..processor import Processor
 from ..main import MFPApp
 from ..method import MethodCall
-from ..midi import NoteOn, NoteOff, MidiControl, MidiUndef
+from ..midi import NoteOn, NoteOff, NotePress, MidiCC, MidiPgmChange, MidiUndef
 
 
 class MidiIn (Processor):
@@ -32,7 +32,7 @@ class MidiIn (Processor):
                 setattr(self, attr, val)
         elif isinstance(event, MethodCall):
             self.method(event, 0)
-        elif isinstance(event, (NoteOn, NoteOff, MidiControl, MidiUndef)):
+        elif isinstance(event, (NoteOn, NoteOff, NotePress, MidiPgmChange, MidiCC, MidiUndef)):
             if event.seqevent and event.seqevent.dst and event.seqevent.dst[1] != self.port:
                 pass
             elif (self.channels == []) or (event.channel in self.channels) or event.channel == -1:

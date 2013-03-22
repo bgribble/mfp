@@ -24,6 +24,8 @@ class SeqEvent(object):
         self.dst = dst
         self.data = data
 
+    def __repr__(self): 
+        return "<SeqEvent 0x%02x 0x%02x %s>" % (self.etype, self.flags, self.data)
 
 class MidiUndef (object):
     def __init__(self, seqevent=None):
@@ -50,7 +52,7 @@ class NoteOn (Note):
             self.velocity = seqevent.data[2]
 
     def __repr__(self):
-        return "<NoteOn %d %d %d>" % (self.key, self.velocity, self.channel)
+        return "<NoteOn %s %s %s>" % (self.channel, self.key, self.velocity)
 
 
 class NoteOff (Note):
@@ -66,10 +68,41 @@ class NoteOff (Note):
             self.velocity = seqevent.data[2]
 
     def __repr__(self):
-        return "<NoteOff %d %d %d>" % (self.key, self.velocity, self.channel)
+        return "<NoteOff %s %s %s>" % (self.channel, self.key, self.velocity)
 
+class NotePress (object): 
+    def __init__(self, seqevent=None):
+        self.seqevent = seqevent
+        self.channel = None
+        self.key = None
+        self.pressure = None
 
-class MidiControl (object):
+        if self.seqevent is not None:
+            if self.seqevent.etype == alsaseq.SND_SEQ_EVENT_NOTEPRESS:
+                self.channel = seqevent.data[0]
+                self.key = seqevent.data[1]
+                self.pressure = seqevent.data[2]
+            elif self.seqevent.etype == alsaseq.SND_SEQ_EVENT_CHANPRESS:
+                self.channel = seqevent.data[0]
+                self.pressure = seqevent.data[2]
+
+    def __repr__(self):
+        return "<NotePress %s %s %s>" % (self.channel, self.key, self.pressure)
+
+class MidiPgmChange (object): 
+    def __init__(self, seqevent=None):
+        self.seqevent = seqevent
+        self.channel = None 
+        self.program = None 
+
+        if self.seqevent is not None:
+            self.channel = seqevent.data[0]
+            self.program = seqevent.data[5]
+
+    def __repr__(self):
+        return "<MidiPgmChange %s %s>" % (self.channel, self.program)
+
+class MidiCC (object):
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = None
@@ -78,9 +111,11 @@ class MidiControl (object):
 
         if self.seqevent is not None:
             self.channel = seqevent.data[0]
-            self.controller = seqevent.data[1]
-            self.value = seqevent.data[2]
+            self.controller = seqevent.data[4]
+            self.value = seqevent.data[5]
 
+    def __repr__(self):
+        return "<MidiCC %s %s %s>" % (self.channel, self.controller, self.value)
 
 class MFPMidiManager(QuittableThread):
     etypemap = {
@@ -89,10 +124,11 @@ class MFPMidiManager(QuittableThread):
         alsaseq.SND_SEQ_EVENT_NOTE: MidiUndef,
         alsaseq.SND_SEQ_EVENT_NOTEON: NoteOn,
         alsaseq.SND_SEQ_EVENT_NOTEOFF: NoteOff,
-        alsaseq.SND_SEQ_EVENT_KEYPRESS: MidiControl,
-        alsaseq.SND_SEQ_EVENT_CONTROLLER: MidiControl,
-        alsaseq.SND_SEQ_EVENT_PGMCHANGE: MidiControl,
-        alsaseq.SND_SEQ_EVENT_CHANPRESS: MidiControl,
+        alsaseq.SND_SEQ_EVENT_KEYPRESS: NotePress,
+        alsaseq.SND_SEQ_EVENT_CONTROLLER: MidiCC,
+        alsaseq.SND_SEQ_EVENT_PGMCHANGE: MidiPgmChange,
+        alsaseq.SND_SEQ_EVENT_CHANPRESS: NotePress,
+
         alsaseq.SND_SEQ_EVENT_CONTROL14: MidiUndef,
         alsaseq.SND_SEQ_EVENT_NONREGPARAM: MidiUndef,
         alsaseq.SND_SEQ_EVENT_REGPARAM: MidiUndef,
