@@ -182,6 +182,7 @@ class PatchEditMode (InputMode):
             self.window.unselect_all()
             self.window.select(self.manager.pointer_obj)
             self.enable_selection_edit()
+            raise self.manager.InputNeedsRequeue()
 
         self.drag_started = True
         if (self.manager.pointer_obj is None 
@@ -252,12 +253,10 @@ class PatchEditMode (InputMode):
     def selbox_start(self, select_mode):
         self.selbox_started = True
 
-        if (self.manager.pointer_obj is not None and
-            self.manager.pointer_obj not in self.window.selected):
-
-            if select_mode:
+        if (self.manager.pointer_obj is not None):
+            if self.manager.pointer_obj not in self.window.selected:
                 self.window.select(self.manager.pointer_obj)
-            else:
+            elif (not select_mode) and self.manager.pointer_obj in self.window.selected:
                 self.window.unselect(self.manager.pointer_obj)
 
             if self.window.selected:
@@ -281,9 +280,6 @@ class PatchEditMode (InputMode):
         px = self.manager.pointer_ev_x
         py = self.manager.pointer_ev_y
 
-        dx = px - self.drag_last_x
-        dy = py - self.drag_last_y
-
         self.drag_last_x = px
         self.drag_last_y = py
 
@@ -298,10 +294,12 @@ class PatchEditMode (InputMode):
                     self.window.select(obj)
                     self.enable_selection_edit()
             else:
+                if obj not in self.selbox_changed:
+                    self.selbox_changed.append(obj)
                 if obj in self.window.selected:
-                    if obj not in self.selbox_changed:
-                        self.selbox_changed.append(obj)
                     self.window.unselect(obj)
+                else: 
+                    self.window.select(obj)
 
             if not self.window.selected:
                 self.disable_selection_edit()
@@ -321,6 +319,7 @@ class PatchEditMode (InputMode):
 
     def selbox_end(self):
         self.selbox_started = False
+        self.selbox_changed = [] 
         self.window.hide_selection_box()
         return True
 

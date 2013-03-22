@@ -14,6 +14,9 @@ from ..quittable_thread import QuittableThread
 from ..gui_slave import MFPGUI
 
 class InputManager (object):
+    class InputNeedsRequeue (Exception):
+        pass 
+
     def __init__(self, window):
         self.window = window
         self.global_mode = None
@@ -158,5 +161,15 @@ class InputManager (object):
                 self.pointer_obj_time = None 
         else:
             return False
-        return self.handle_keysym(keysym)
 
+        retry_count = 0
+        while True:
+            try: 
+                retry_count += 1
+                rv = self.handle_keysym(keysym)
+            except self.InputNeedsRequeue, e:
+                if retry_count < 5:
+                    continue
+                else:
+                    return False 
+            return rv 

@@ -39,6 +39,7 @@ class PatchControlMode (InputMode):
         if self.manager.pointer_obj and self.manager.pointer_obj not in self.window.selected:
             self.window.unselect_all()
             self.window.select(self.manager.pointer_obj)
+            raise self.manager.InputNeedsRequeue()
 
         self.drag_started = True
         self.drag_start_x = self.manager.pointer_ev_x
