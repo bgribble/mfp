@@ -22,8 +22,7 @@ class MidiIn (Processor):
 
         self.port = 0
         self.channels = []
-
-        MFPApp().midi_mgr.register(self.send)
+        self.handler = MFPApp().midi_mgr.register(self.send)
 
     def trigger(self):
         event = self.inlets[0]

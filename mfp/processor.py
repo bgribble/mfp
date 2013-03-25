@@ -45,6 +45,10 @@ class Processor (object):
         self.scope = None
         self.osc_pathbase = None
         self.osc_methods = []
+        self.midi_mode = None 
+        self.midi_filters = None 
+        self.midi_cbid = None 
+        self.midi_learn_cbid = None 
 
         self.gui_created = False
         self.do_onload = True 
@@ -210,6 +214,83 @@ class Processor (object):
                 for t in ('s', 'b', 'f'):
                     o.add_method(path, t, self._osc_handler, i)
                     self.osc_methods.append((path, t))
+
+    def _midi_handler(self, event, data): 
+        from .midi import NoteOff, NoteOn 
+        if self.midi_mode == "note_bang":
+            self.send(Bang)
+        elif self.midi_mode == "note_onoff":
+            if isinstance(event, NoteOn):
+                self.send(True)
+            elif isinstance(event, NoteOff):
+                self.send(False)
+        elif self.midi_mode == "note_vel":
+            if isinstance(event, NoteOn):
+                self.send(event.velocity)
+            elif isinstance(event, NoteOff):
+                self.send(0.0)
+        elif self.midi_mode == "cc_val":
+            self.send(event.value)
+        elif self.midi_mode in ("note", "cc", "event"):
+            self.send(event)
+
+    def _midi_learn_handler(self, event, mode): 
+        from .main import MFPApp
+        from .midi import Note, NotePress, NoteOff, NoteOn, MidiCC, MidiPgmChange
+        
+        filters = {} 
+        port, etype, channel, unit = event.source()
+
+        if mode.startswith("note"):
+            if not isinstance(event, NoteOn):
+                return 
+            filters["typeinfo"] = [ NoteOn, NoteOff, NotePress ]
+            filters["channel"] = [channel] 
+            filters["port"] = [port] 
+            filters["unit"] = [unit] 
+
+        elif mode.startswith("cc"):
+            if not isinstance(event, MidiCC):
+                return 
+            filters["typeinfo"] = [ MidiCC ]
+            filters["channel"] = [channel]
+            filters["port"] = [port]
+            filters["unit"] = [unit]
+
+        elif mode.startswith("pgm"):
+            if not isinstance(event, MidiPgmChange):
+                return 
+            filters["typeinfo"] = [ MidiPgmChange ]
+            filters["channel"] = [channel]
+            filters["port"] = [port]
+
+        elif mode.startswith("auto"):
+            if not isinstance(event, (Note, MidiCC, MidiPgmChange)):
+                return 
+            filters["port"] = [port] 
+            filters["channel"] = [channel]
+            filters["unit"] = [unit]
+            if isinstance(event, Note):
+                mode = "note_vel"
+            elif isinstance(event, MidiCC):
+                mode = "cc_val"
+
+        MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
+        self.midi_learn_cbid = None 
+        self.midi_filters = filters 
+        self.midi_cbid = MFPApp().midi_mgr.register(self._midi_handler, filters=filters)
+        self.midi_mode = mode 
+
+    def midi_learn(self, *args, **kwargs):
+        from .main import MFPApp
+        mode = kwargs.get("mode", "auto") 
+        
+        if self.midi_learn_cbid is None:
+            if self.midi_cbid is not None:
+                MFPApp().midi_mgr.unregister(self.midi_cbid)
+                self.midi_cbid = None 
+            self.midi_learn_cbid = MFPApp().midi_mgr.register(self._midi_learn_handler,
+                                                              data=mode)
 
     def dsp_init(self, proc_name, **params):
         from .main import MFPApp

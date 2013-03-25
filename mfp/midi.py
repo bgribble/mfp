@@ -7,6 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 import alsaseq
 from quittable_thread import QuittableThread
+from threading import Lock 
 from datetime import datetime
 from . import appinfo
 
@@ -30,6 +31,10 @@ class SeqEvent(object):
 class MidiUndef (object):
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
+        self.channel = seqevent.data[0] 
+
+    def source(self):
+        return (self.seqevent.dst, self.seqevent.etype, self.channel, None)
 
     def __repr__(self):
         return "<MidiUndef %s>" % self.seqevent
@@ -51,6 +56,9 @@ class NoteOn (Note):
             self.key = seqevent.data[1]
             self.velocity = seqevent.data[2]
 
+    def source(self):
+        return (self.seqevent.dst, NoteOn, self.channel, self.key)
+
     def __repr__(self):
         return "<NoteOn %s %s %s>" % (self.channel, self.key, self.velocity)
 
@@ -67,10 +75,13 @@ class NoteOff (Note):
             self.key = seqevent.data[1]
             self.velocity = seqevent.data[2]
 
+    def source(self):
+        return (self.seqevent.dst, NoteOff, self.channel, self.key)
+
     def __repr__(self):
         return "<NoteOff %s %s %s>" % (self.channel, self.key, self.velocity)
 
-class NotePress (object): 
+class NotePress (Note): 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = None
@@ -86,6 +97,9 @@ class NotePress (object):
                 self.channel = seqevent.data[0]
                 self.pressure = seqevent.data[2]
 
+    def source(self):
+        return (self.seqevent.dst, NotePress, self.channel, self.key)
+
     def __repr__(self):
         return "<NotePress %s %s %s>" % (self.channel, self.key, self.pressure)
 
@@ -98,6 +112,9 @@ class MidiPgmChange (object):
         if self.seqevent is not None:
             self.channel = seqevent.data[0]
             self.program = seqevent.data[5]
+
+    def source(self):
+        return (self.seqevent.dst, MidiPgmChange, self.channel, None)
 
     def __repr__(self):
         return "<MidiPgmChange %s %s>" % (self.channel, self.program)
@@ -113,6 +130,9 @@ class MidiCC (object):
             self.channel = seqevent.data[0]
             self.controller = seqevent.data[4]
             self.value = seqevent.data[5]
+
+    def source(self):
+        return (self.seqevent.dst, MidiCC, self.channel, self.controller)
 
     def __repr__(self):
         return "<MidiCC %s %s %s>" % (self.channel, self.controller, self.value)
@@ -184,17 +204,69 @@ class MFPMidiManager(QuittableThread):
         self.num_inports = inports
         self.num_outports = outports
         self.start_time = None
-        self.handlers = {}
+        self.handlers_by_id = {} 
+        self.handlers_by_filter = { None: { None: { None: { None: [] }}}}
+        self.handlers_lock = Lock() 
+        self.handlers_next_id = 0
 
         QuittableThread.__init__(self)
 
-    def register(self, callback, ports=None):
-        if ports is None:
-            ports = [0]
+    def _filt2paths(self, filters):
+        ports = filters.get("port") or [ None ] 
+        typeinfos = filters.get("etype") or [ None ] 
+        channels = filters.get("channel") or [ None ] 
+        units = filters.get("unit") or [ None ] 
+        paths = [] 
 
-        for p in ports:
-            hh = self.handlers.setdefault(p, [])
-            hh.append(callback)
+        for port in ports: 
+            for typeinfo in typeinfos:
+                for channel in channels: 
+                    for unit in units: 
+                        paths.append((port, typeinfo, channel, unit))
+
+        return paths 
+
+    
+    def _savepath(self, path, value):
+        typeinfo = self.handlers_by_filter.setdefault(path[0], {})
+        chaninfo = typeinfo.setdefault(path[1], {})
+        unitinfo = chaninfo.setdefault(path[2], {})
+        dest = unitinfo.setdefault(path[3], [])
+        dest.append(value)
+
+    def _delpath(self, path, value):
+        typeinfo = self.handlers_by_filter.setdefault(path[0], {})
+        chaninfo = typeinfo.setdefault(path[1], {})
+        unitinfo = chaninfo.setdefault(path[2], {})
+        dest = unitinfo.setdefault(path[3], [])
+        if value in dest: 
+            dest.remove(value)
+
+    def register(self, callback, data=None, filters=None):
+        if filters == None:
+            filters = {} 
+
+        with self.handlers_lock:
+            cb_id = self.handlers_next_id
+            self.handlers_next_id += 1 
+
+            self.handlers_by_id[cb_id] = (cb_id, callback, filters, data) 
+            paths = self._filt2paths(filters)
+            for p in paths: 
+                self._savepath(p, cb_id)
+
+        return cb_id
+
+    def unregister(self, cb_id):
+        cbinfo = self.handlers_by_id.get(cb_id)
+        if cbinfo is None:
+            return None
+
+        cb_id, callback, filters, data = cbinfo
+        paths = self._filt2paths(filters)
+        for p in paths: 
+            self._delpath(p, cb_id)
+
 
     def run(self):
         import select
@@ -226,12 +298,41 @@ class MFPMidiManager(QuittableThread):
         return ctor(SeqEvent(*raw_event))
 
     def dispatch_event(self, event):
-        handlers = self.handlers.get(event.seqevent.dst[1], None)
-        if handlers is None:
-            return
+        port, typeinfo, channel, unit = event.source()  
 
-        for h in handlers:
-            h(event)
+        handlers = [] 
+        port_by_name = None if port is None else self.handlers_by_filter.get(port) 
+        port_default = self.handlers_by_filter.get(None) 
+
+        for portdict in port_by_name, port_default: 
+            if portdict is None:
+                continue 
+            type_by_name = None if typeinfo is None else portdict.get(typeinfo) 
+            type_default = portdict.get(None)
+
+            for typedict in type_by_name, type_default: 
+                if typedict is None:
+                    continue 
+                channel_by_name = None if channel is None else typedict.get(channel)
+                channel_default = typedict.get(None)
+
+                for chandict in channel_by_name, channel_default:
+                    if chandict is None:
+                        continue 
+                    unit_by_name = None if unit is None else chandict.get(unit)
+                    unit_default = chandict.get(None)
+
+                    for unitlist in unit_by_name, unit_default:
+                        if not unitlist:
+                            continue 
+                        handlers.extend(unitlist)
+
+        # now handlers should have all the relevant (cb_id, callback) pairs  
+        for h in handlers: 
+            cbinfo = self.handlers_by_id.get(h)
+            if cbinfo is not None:
+                cb_id, callback, filters, data = cbinfo
+                callback(event, data)
 
     def send(self, port, data):
         pass
