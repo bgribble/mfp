@@ -12,7 +12,6 @@ from .scope import LexicalScope
 
 from . import log
 
-
 class Processor (object):
     PORT_IN = 0 
     PORT_OUT = 1
@@ -231,7 +230,9 @@ class Processor (object):
                 self.send(0.0)
         elif self.midi_mode == "cc_val":
             self.send(event.value)
-        elif self.midi_mode in ("note", "cc", "event"):
+        elif self.midi_mode == "pgm":
+            self.send(event.program)
+        elif self.midi_mode in ("chan_note", "chan", "note", "cc", "event"):
             self.send(event)
 
     def _midi_learn_handler(self, event, mode): 
@@ -244,7 +245,7 @@ class Processor (object):
         if mode.startswith("note"):
             if not isinstance(event, NoteOn):
                 return 
-            filters["typeinfo"] = [ NoteOn, NoteOff, NotePress ]
+            filters["etype"] = [ NoteOn, NoteOff, NotePress ]
             filters["channel"] = [channel] 
             filters["port"] = [port] 
             filters["unit"] = [unit] 
@@ -252,7 +253,7 @@ class Processor (object):
         elif mode.startswith("cc"):
             if not isinstance(event, MidiCC):
                 return 
-            filters["typeinfo"] = [ MidiCC ]
+            filters["etype"] = [ MidiCC ]
             filters["channel"] = [channel]
             filters["port"] = [port]
             filters["unit"] = [unit]
@@ -260,13 +261,14 @@ class Processor (object):
         elif mode.startswith("pgm"):
             if not isinstance(event, MidiPgmChange):
                 return 
-            filters["typeinfo"] = [ MidiPgmChange ]
+            filters["etype"] = [ MidiPgmChange ]
             filters["channel"] = [channel]
             filters["port"] = [port]
 
         elif mode.startswith("auto"):
             if not isinstance(event, (Note, MidiCC, MidiPgmChange)):
                 return 
+            filters["etype"] = [ type(event) ]
             filters["port"] = [port] 
             filters["channel"] = [channel]
             filters["unit"] = [unit]
@@ -274,6 +276,8 @@ class Processor (object):
                 mode = "note_vel"
             elif isinstance(event, MidiCC):
                 mode = "cc_val"
+            elif isinstance(event, MidiPgmChange):
+                mode = "pgm"
 
         MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
         self.midi_learn_cbid = None 

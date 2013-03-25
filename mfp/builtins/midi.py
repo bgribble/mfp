@@ -9,7 +9,7 @@ from .. import midi
 from ..processor import Processor
 from ..main import MFPApp
 from ..method import MethodCall
-from ..midi import NoteOn, NoteOff, NotePress, MidiCC, MidiPgmChange, MidiUndef
+from ..midi import Note, NoteOn, NoteOff, NotePress, MidiCC, MidiPgmChange, MidiUndef
 
 
 class MidiIn (Processor):
@@ -55,7 +55,7 @@ class MidiOut (Processor):
                 setattr(self, attr, val)
         elif isinstance(event, MethodCall):
             self.method(event, 0)
-        elif isinstance(event, [NoteEvent, MidiCCEvent, MidiMiscEvent]):
+        elif isinstance(event, [Note, MidiCC, MidiUndef]):
             event.port = self.port
             if self.channel is not None:
                 event.channel = self.channel 

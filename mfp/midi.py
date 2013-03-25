@@ -242,6 +242,7 @@ class MFPMidiManager(QuittableThread):
         if value in dest: 
             dest.remove(value)
 
+
     def register(self, callback, data=None, filters=None):
         if filters == None:
             filters = {} 
@@ -332,7 +333,10 @@ class MFPMidiManager(QuittableThread):
             cbinfo = self.handlers_by_id.get(h)
             if cbinfo is not None:
                 cb_id, callback, filters, data = cbinfo
-                callback(event, data)
+                try:
+                    callback(event, data)
+                except Exception, e: 
+                    log.debug("Error in MIDI event handler:", e)
 
     def send(self, port, data):
         pass
