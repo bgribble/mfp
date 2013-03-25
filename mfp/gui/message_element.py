@@ -192,8 +192,8 @@ class TransientMessageElement (MessageElement):
         self.target_obj = window.selected
         self.target_port = None
 
-        MessageElement.__init__(self, window, self.target_obj.position_x,
-                                self.target_obj.position_y - self.ELBOW_ROOM)
+        MessageElement.__init__(self, window, self.target_obj[0].position_x,
+                                self.target_obj[0].position_y - self.ELBOW_ROOM)
         self.message_text = "Bang"
         self.num_inlets = 0
         self.num_outlets = 1 
@@ -225,9 +225,12 @@ class TransientMessageElement (MessageElement):
     def label_edit_finish(self, widget=None, text=None):
         if text is not None:
             self.message_text = text 
-            MFPGUI().mfp.eval_and_send(self.target_obj.obj_id, self.target_port,
-                                       self.message_text)
-        self.stage.select(self.target_obj)
+            for to in self.target_obj:
+                if to is not self:
+                    MFPGUI().mfp.eval_and_send(to.obj_id, self.target_port,
+                                               self.message_text)
+        for to in self.target_obj:
+            self.stage.select(to)
         self.delete()
 
     def make_edit_mode(self):
