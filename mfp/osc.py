@@ -51,9 +51,9 @@ class MFPOscManager(QuittableThread):
         self.default_handlers = [ h for h in self.default_handlers 
                                  if h != (handler, data) ]
 
-    def send(self, target, path, data):
+    def send(self, target, path, *data):
         m = liblo.Message(path)
-        m.add(data)
+        m.add(*data)
         self.server.send(target, m)
 
     def run(self):

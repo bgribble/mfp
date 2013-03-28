@@ -9,7 +9,6 @@ import time
 import math 
 import re 
 import sys, os 
-from pluginfo import PlugInfo 
 import argparse
 
 from .bang import Bang
@@ -24,10 +23,12 @@ from .quittable_thread import QuittableThread
 from .rpc_wrapper import RPCWrapper, rpcwrap
 from .rpc_worker import RPCServer
 
+from pluginfo import PlugInfo 
+
 from . import log
 from . import builtins 
 from . import utils
-
+from . import nsm 
 
 class StartupError(Exception):
     pass 
@@ -196,6 +197,9 @@ class MFPApp (Singleton):
         self.osc_mgr = None
         self.console = None
 
+        # True if NSM_URL set on launch 
+        self.session_managed = None 
+
         # app callbacks 
         self.callbacks = {}
         self.callbacks_last_id = 0
@@ -271,6 +275,9 @@ class MFPApp (Singleton):
         self.osc_mgr = osc.MFPOscManager(self.osc_port)
         self.osc_mgr.start()
         log.debug("OSC server started (UDP/%s)" % self.osc_port)
+
+        # set up session management 
+        self.session_managed = nsm.init_nsm()
 
         # crawl plugins 
         log.debug("Collecting information about installed plugins...")
@@ -624,4 +631,5 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             print " Quit request received, exiting"
             app.finish()
-    
+
+import nsm  
