@@ -7,7 +7,7 @@ log_module = "main"
 log_file = sys.stdout
 log_func = None
 log_debug = True
-
+log_force_console = False 
 
 def make_log_entry(tag, *parts):
     global log_time_base
@@ -22,9 +22,12 @@ def write_log_entry(msg):
     global log_file
     global log_func
 
+    logged = False 
     if log_func:
         log_func(msg)
-    elif log_file:
+        logged = True 
+
+    if log_file and ((not logged) or log_force_console):
         log_file.write(msg)
 
 

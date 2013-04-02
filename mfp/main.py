@@ -28,7 +28,6 @@ from pluginfo import PlugInfo
 from . import log
 from . import builtins 
 from . import utils
-from . import nsm 
 
 class StartupError(Exception):
     pass 
@@ -199,6 +198,7 @@ class MFPApp (Singleton):
 
         # True if NSM_URL set on launch 
         self.session_managed = None 
+        self.session_dir = None 
 
         # app callbacks 
         self.callbacks = {}
@@ -219,9 +219,12 @@ class MFPApp (Singleton):
     def setup(self):
         from mfp.dsp_slave import dsp_init, DSPObject, DSPCommand
         from mfp.gui_slave import gui_init, GUICommand
+        from mfp import nsm 
 
         RPCWrapper.node_id = "MFP Master"
         MFPCommand.local = True
+
+        log.debug("Main thread started, pid = %s" % os.getpid())
 
         # dsp and gui processes
         if not self.no_dsp:
@@ -475,6 +478,34 @@ class MFPApp (Singleton):
         for cbinfo in self.callbacks.get(signal_name, []):
             cbinfo[1](*args)
    
+    def session_load(self, session_path, session_id):
+
+        pass
+
+    def session_init(self, session_path, session_id):
+        import os
+        import os.path
+        os.mkdir(session_path)
+        sessfile = open(os.path.join(session_path, "session_data"), "w+")
+        if sessfile is None: 
+            return None 
+        sessfile.write("[mfp]\n")
+    
+        sessfile.write("no_gui=%s\n" % self.no_gui) 
+        sessfile.write("no_dsp=%s\n" % self.no_dsp) 
+        sessfile.write("dsp_inputs=%s\n" % self.dsp_inputs) 
+        sessfile.write("dsp_outputs=%s\n" % self.dsp_outputs) 
+        sessfile.write("osc_port=%s\n" % self.osc_port) 
+        sessfile.write("searchpath=%s\n" % self.searchpath) 
+        sessfile.write("extpath=%s\n" % self.extpath) 
+        sessfile.write("max_blocksize=%s\n" % self.max_blocksize) 
+        sessfile.write("\n\n")
+        sessfile.close()
+        self.session_dir = session_path 
+
+    def session_save(self, session_path, session_id):
+        pass 
+
 def version():
     import pkg_resources 
     vers = pkg_resources.require("mfp")[0].version
@@ -515,6 +546,11 @@ Copyright (c) 2009-2013 Bill Gribble <grib@billgribble.com>
 MFP is free software, and you are welcome to redistribute it 
 under certain conditions.  See the file COPYING for details.
 """
+
+def exit_sighandler(signum, frame):
+    log.log_force_console = True 
+    log.debug("Received terminating signal %s, exiting" % signum)
+    sys.exit(-signum)
 
 def main():
     description = mfp_banner % version() 
@@ -565,6 +601,9 @@ def main():
     app.max_blocksize = args.get("max_bufsize") 
 
     # launch processes and threads 
+    import signal
+    signal.signal(signal.SIGTERM, exit_sighandler)
+
     try: 
         app.setup()
     except (StartupError, KeyboardInterrupt, SystemExit):
@@ -629,7 +668,7 @@ def main():
         try: 
             QuittableThread.wait_for_all()
         except (KeyboardInterrupt, SystemExit):
-            print " Quit request received, exiting"
+            log.log_force_console = True 
+            log.debug("Quit request received, exiting")
             app.finish()
 
-import nsm  
