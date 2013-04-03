@@ -10,6 +10,7 @@ import math
 import re 
 import sys, os 
 import argparse
+import ConfigParser
 
 from .bang import Bang
 from .patch import Patch
@@ -199,6 +200,7 @@ class MFPApp (Singleton):
         # True if NSM_URL set on launch 
         self.session_managed = None 
         self.session_dir = None 
+        self.session_id = None 
 
         # app callbacks 
         self.callbacks = {}
@@ -478,34 +480,55 @@ class MFPApp (Singleton):
         for cbinfo in self.callbacks.get(signal_name, []):
             cbinfo[1](*args)
    
-    def session_load(self, session_path, session_id):
-
-        pass
-
     def session_init(self, session_path, session_id):
         import os
-        import os.path
         os.mkdir(session_path)
-        sessfile = open(os.path.join(session_path, "session_data"), "w+")
+        self.session_dir = session_path 
+        self.session_id = session_id 
+        self.session_save()
+
+    def session_save(self):
+        import os.path
+
+        print "MFPApp.session_save", self.session_dir
+        sessfile = open(os.path.join(self.session_dir, "session_data"), "w+")
         if sessfile is None: 
             return None 
-        sessfile.write("[mfp]\n")
-    
-        sessfile.write("no_gui=%s\n" % self.no_gui) 
-        sessfile.write("no_dsp=%s\n" % self.no_dsp) 
-        sessfile.write("dsp_inputs=%s\n" % self.dsp_inputs) 
-        sessfile.write("dsp_outputs=%s\n" % self.dsp_outputs) 
-        sessfile.write("osc_port=%s\n" % self.osc_port) 
-        sessfile.write("searchpath=%s\n" % self.searchpath) 
-        sessfile.write("extpath=%s\n" % self.extpath) 
-        sessfile.write("max_blocksize=%s\n" % self.max_blocksize) 
-        sessfile.write("\n\n")
+        
+        cp = ConfigParser.SafeConfigParser(allow_no_value=True)
+        cp.add_section("mfp")
+
+        for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs", 
+                     "osc_port", "searchpath", "extpath", "max_blocksize"):
+            cp.set("mfp", attr, getattr(self, attr))
+
+        patches = [] 
+        for obj_id, patch in self.patches.items():
+            print "about to save patch", obj_id, patch, patch.name 
+            patch.save_file(os.path.join(self.session_dir, patch.name))
+            print "done saving patch"
+            patches.append(patch.name)
+        cp.set("patches", patches)
+        cp.write(sessfile)
         sessfile.close()
+
+    def session_load(self, session_path, session_id):
         self.session_dir = session_path 
+        self.session_id = session_id 
+        cp = ConfigParser.SafeConfigParser(allow_no_value=True)
+        
+        print "MFPApp.session_load: loading", session_path, session_id 
 
-    def session_save(self, session_path, session_id):
-        pass 
+        print "about to read session file in", self.session_dir
+        cp.read(os.path.join(self.session_dir, "session_data"))
 
+        for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs", 
+                     "osc_port", "searchpath", "extpath", "max_blocksize"):
+            setattr(self, attr, cp.get("mfp", attr))
+
+        patches = cp.get("patches") 
+
+        
 def version():
     import pkg_resources 
     vers = pkg_resources.require("mfp")[0].version
