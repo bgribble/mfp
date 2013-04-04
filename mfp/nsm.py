@@ -31,15 +31,13 @@ def nsm_reply(path, message):
 # OSC handlers 
 
 def nsm_reply_handler(path, args, types, src, data):
-    print "mfp.nsm: got reply:", path, args, types, src, data 
     if args[0] == "/nsm/server/announce":
         log.debug("Under session management. Server says:", args[1])
     else: 
         print "mfp.nsm: Unhandled /reply message:", args
 
 def nsm_error_handler(path, args, types, src, data):
-    print "mfp.nsm error:", path, args, types, src, data 
-    pass
+    log.debug("Session manager reports error:", args)
 
 def nsm_open_handler(path, args, types, src, data):
     print "mfp.nsm open:", path, args, types, src, data 
@@ -61,13 +59,12 @@ def nsm_open_handler(path, args, types, src, data):
     nsm_reply(path, "OK")
 
 def nsm_save_handler(path, args, types, src, data):
-    print "mfp.nsm save:", path, args, types, src, data
     log.debug("Session manager requests session save")
     MFPApp().session_save()
     nsm_reply(path, "OK")
 
 def nsm_loaded_handler(path, args, types, src, data):
-    print "mfp.nsm loaded:", path, args, types, src, data
+    log.debug("Session manager reports session is completely loaded")
     #MFPApp().session_load(args[0], args[2])
 
 # initialization
@@ -84,6 +81,5 @@ def init_nsm():
     MFPApp().osc_mgr.add_method("/nsm/client/save", None, nsm_save_handler, None)
     MFPApp().osc_mgr.add_method("/nsm/client/session_is_loaded", None, nsm_loaded_handler, 
                                None)
-
     nsm_announce() 
-    MFPApp().osc_mgr.send
+    return True 
