@@ -127,7 +127,7 @@ reorder_cb (void * arg)
 }
 
 int
-mfp_jack_startup(int num_inputs, int num_outputs) 
+mfp_jack_startup(char * client_name, int num_inputs, int num_outputs) 
 {
     jack_status_t status;
     jack_port_t * port;
@@ -137,7 +137,7 @@ mfp_jack_startup(int num_inputs, int num_outputs)
 
     mfp_alloc_init();
 
-    if ((client = jack_client_open("mfp", JackNullOption, &status, NULL)) == 0) {
+    if ((client = jack_client_open(client_name, JackNullOption, &status, NULL)) == 0) {
         fprintf (stderr, "jack_client_open() failed.");
         return 0;
     }

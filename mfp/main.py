@@ -230,7 +230,7 @@ class MFPApp (Singleton):
 
         # dsp and gui processes
         if not self.no_dsp:
-            self.dsp_process = RPCServer("mfp_dsp", dsp_init, 
+            self.dsp_process = RPCServer("mfp_dsp", dsp_init, "mfp",
                                          self.max_blocksize, self.dsp_inputs, self.dsp_outputs)
             self.dsp_process.start()
             self.dsp_process.serve(DSPObject)
@@ -487,10 +487,14 @@ class MFPApp (Singleton):
         self.session_id = session_id 
         self.session_save()
 
+        # reinitialize JACK 
+        if self.dsp_command:
+            self.dsp_command.reinit(self.session_id, self.max_blocksize, 
+                                    self.dsp_inputs, self.dsp_outputs)
+
     def session_save(self):
         import os.path
 
-        print "MFPApp.session_save", self.session_dir
         sessfile = open(os.path.join(self.session_dir, "session_data"), "w+")
         if sessfile is None: 
             return None 
@@ -509,10 +513,9 @@ class MFPApp (Singleton):
 
         patches = [] 
         for obj_id, patch in self.patches.items():
-            print "about to save patch", obj_id, patch, patch.name 
             patch.save_file(os.path.join(self.session_dir, patch.name + '.mfp'))
-            print "done saving patch"
             patches.append(patch.name + '.mfp')
+
         cp.set("mfp", "patches", str(patches))
         cp.write(sessfile)
         sessfile.close()
@@ -533,6 +536,12 @@ class MFPApp (Singleton):
             if not val: 
                 val = "''"
             setattr(self, attr, eval(val))
+
+
+        # reinitialize JACK 
+        if self.dsp_command:
+            self.dsp_command.reinit(self.session_id, self.max_blocksize, 
+                                    self.dsp_inputs, self.dsp_outputs)
 
         patches = eval(cp.get("mfp", "patches")) 
 

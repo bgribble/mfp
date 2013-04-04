@@ -10,10 +10,11 @@ static PyObject *
 dsp_startup(PyObject * mod, PyObject * args) 
 {
     int num_inputs, num_outputs, max_blocksize;
-    PyArg_ParseTuple(args, "iii", &max_blocksize, &num_inputs, &num_outputs);
+    char * client_name;
+    PyArg_ParseTuple(args, "siii", &client_name, &max_blocksize, &num_inputs, &num_outputs);
 
     mfp_max_blocksize = max_blocksize; 
-    mfp_jack_startup(num_inputs, num_outputs);
+    mfp_jack_startup(client_name, num_inputs, num_outputs);
     Py_INCREF(Py_None);
     return Py_None;
 }

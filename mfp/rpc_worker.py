@@ -52,6 +52,8 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
         try: 
             initproc(pipe, *initproc_args)
         except Exception, e:
+            import traceback
+            traceback.print_exc()
             print "RPCServer remote: unhandled error in startup, exiting"
             pipe.finish()
             return 

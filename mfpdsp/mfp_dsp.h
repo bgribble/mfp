@@ -130,7 +130,7 @@ extern pthread_cond_t mfp_response_cond;
 /* mfp_jack.c */
 extern GArray * mfp_input_ports;
 extern GArray * mfp_output_ports;
-extern int mfp_jack_startup(int num_inputs, int num_outputs);
+extern int mfp_jack_startup(char * client_name, int num_inputs, int num_outputs);
 extern void mfp_jack_shutdown(void);
 extern mfp_sample * mfp_get_input_buffer(int);
 extern mfp_sample * mfp_get_output_buffer(int);

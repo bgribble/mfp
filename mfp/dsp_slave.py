@@ -84,8 +84,15 @@ class DSPCommand (RPCWrapper):
         import mfpdsp
         mfpdsp.ext_load(extension_path)
 
-
-def dsp_init(pipe, max_bufsize, num_inputs, num_outputs):
+    @rpcwrap
+    def reinit(self, client_name, max_bufsize, num_inputs, num_outputs):
+        import mfpdsp
+        mfpdsp.dsp_disable()
+        mfpdsp.dsp_shutdown()
+        mfpdsp.dsp_startup(client_name, max_bufsize, num_inputs, num_outputs)
+        mfpdsp.dsp_enable()
+        
+def dsp_init(pipe, client_name, max_bufsize, num_inputs, num_outputs):
     from main import MFPCommand
     import threading
     import os
@@ -106,7 +113,7 @@ def dsp_init(pipe, max_bufsize, num_inputs, num_outputs):
     pipe.on_finish(dsp_finish)
 
     # start JACK thread
-    mfpdsp.dsp_startup(max_bufsize, num_inputs, num_outputs)
+    mfpdsp.dsp_startup(client_name, max_bufsize, num_inputs, num_outputs)
     mfpdsp.dsp_enable()
 
     # start response thread
