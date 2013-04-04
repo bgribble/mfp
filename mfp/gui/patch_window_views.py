@@ -25,7 +25,7 @@ def init_object_view(self):
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
                     l.scope = new_name
-            MFPCommand().rename_scope(oldscopename, new_name)
+            MFPCommand().rename_scope(self.selected_patch.obj_id, oldscopename, new_name)
             self.selected_patch.send_params()
         self.object_view.update(obj, (obj.layer.scope, obj.layer.patch)) 
 
@@ -80,7 +80,7 @@ def init_layer_view(self):
             p = self.selected_patch
             layer.scope = new_value
             if not p.has_scope(new_value):
-                MFPCommand().add_scope(new_value)
+                MFPCommand().add_scope(self.selected_patch.obj_id, new_value)
 
             self.selected_patch.send_params()
             for obj in self.objects:

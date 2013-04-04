@@ -168,17 +168,24 @@ class GUICommand (RPCWrapper):
         MFPGUI().clutter_do(lambda: self._delete(obj_id))
 
     def _delete(self, obj_id):
+        from .gui.patch_info import PatchInfo
         log.debug("WARNING: untested GUI element delete!")
         obj = MFPGUI().recall(obj_id)
-        for c in obj.connections_out:
-            MFPGUI().appwin.unregister(c)
-            del c
+        if isinstance(obj, PatchInfo): 
+            MFPGUI().appwin.patches.remove(obj)
+            obj.obj_id = None 
+            obj.delete()
+        else: 
+            for c in obj.connections_out:
+                MFPGUI().appwin.unregister(c)
+                del c
 
-        for c in obj.connections_in:
-            MFPGUI().appwin.unregister(c)
-            del c
-        obj.obj_id = None
-        del obj
+            for c in obj.connections_in:
+                MFPGUI().appwin.unregister(c)
+                del c
+
+            obj.obj_id = None
+            del obj
 
     @rpcwrap
     def load_start(self):

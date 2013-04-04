@@ -125,12 +125,13 @@ class MFPCommand(RPCWrapper):
         return MFPApp().console.runsource(cmd)
 
     @rpcwrap
-    def add_scope(self, scope_name):
-        MFPApp().patches["default"].add_scope(scope_name)
+    def add_scope(self, patch_id, scope_name):
+        patch = MFPApp().recall(patch_id)
+        patch.add_scope(scope_name)
 
     @rpcwrap
-    def rename_scope(self, old_name, new_name):
-        patch = MFPApp().patches['default']
+    def rename_scope(self, patch_id, old_name, new_name):
+        patch = MFPApp().recall(patch_id)
         scope = patch.scopes.get(old_name)
         if scope:
             scope.name = new_name
@@ -221,7 +222,6 @@ class MFPApp (Singleton):
     def setup(self):
         from mfp.dsp_slave import dsp_init, DSPObject, DSPCommand
         from mfp.gui_slave import gui_init, GUICommand
-        from mfp import nsm 
 
         RPCWrapper.node_id = "MFP Master"
         MFPCommand.local = True
@@ -281,9 +281,6 @@ class MFPApp (Singleton):
         self.osc_mgr.start()
         log.debug("OSC server started (UDP/%s)" % self.osc_port)
 
-        # set up session management 
-        self.session_managed = nsm.init_nsm()
-
         # crawl plugins 
         log.debug("Collecting information about installed plugins...")
         self.pluginfo.samplerate = self.samplerate 
@@ -321,7 +318,6 @@ class MFPApp (Singleton):
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
         self.patches[patch.name] = patch 
-        self.patches["default"] = patch
         patch.create_gui()
         patch.mark_ready()
 
@@ -479,7 +475,11 @@ class MFPApp (Singleton):
     def emit_signal(self, signal_name, *args):
         for cbinfo in self.callbacks.get(signal_name, []):
             cbinfo[1](*args)
-   
+  
+    def session_management_setup(self): 
+        from . import nsm 
+        self.session_managed = nsm.init_nsm()
+
     def session_init(self, session_path, session_id):
         import os
         os.mkdir(session_path)
@@ -500,7 +500,12 @@ class MFPApp (Singleton):
 
         for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs", 
                      "osc_port", "searchpath", "extpath", "max_blocksize"):
-            cp.set("mfp", attr, getattr(self, attr))
+            val = getattr(self, attr)
+            if isinstance(val, str):
+                val = '"%s"' % val 
+            else: 
+                val = str(val)
+            cp.set("mfp", attr, val)
 
         patches = [] 
         for obj_id, patch in self.patches.items():
@@ -508,7 +513,7 @@ class MFPApp (Singleton):
             patch.save_file(os.path.join(self.session_dir, patch.name))
             print "done saving patch"
             patches.append(patch.name)
-        cp.set("patches", patches)
+        cp.set("mfp", "patches", str(patches))
         cp.write(sessfile)
         sessfile.close()
 
@@ -524,10 +529,24 @@ class MFPApp (Singleton):
 
         for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs", 
                      "osc_port", "searchpath", "extpath", "max_blocksize"):
-            setattr(self, attr, cp.get("mfp", attr))
+            val = cp.get("mfp", attr)
+            if not val: 
+                val = "''"
+            setattr(self, attr, eval(val))
 
-        patches = cp.get("patches") 
+        patches = eval(cp.get("mfp", "patches")) 
 
+        # if we made it this far, clean up the existing session and go
+        for obj_id, patch in self.patches.items():
+            patch.delete_gui()
+            patch.delete()
+        self.patches = {} 
+
+        self.searchpath = utils.prepend_path(session_path, self.searchpath)
+        self.extpath = utils.prepend_path(session_path, self.extpath)
+
+        for p in patches: 
+            self.open_file(p)
         
 def version():
     import pkg_resources 
@@ -647,9 +666,9 @@ def main():
     pyfiles = args.get("init_file", [])
     for f in pyfiles: 
         fullpath = utils.find_file_in_path(f, app.searchpath)
-        log.debug("initfile: Loading", fullpath)
+        log.debug("initfile: Looking for", f)
         if not fullpath: 
-            log.debug("initfile: Cannot find file", f) 
+            log.debug("initfile: Cannot find file %s, skipping" % f) 
             continue
 
         try: 
@@ -670,7 +689,7 @@ def main():
                 print "%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj) 
             else: 
                 try: 
-                    o = factory(name, None, app.patches['default'], None, "")
+                    o = factory(name, None, app.patches['patch'], None, "")
                     print "%-12s : %s" % ("[%s]" % name, o.doc_tooltip_obj) 
                 except Exception, e:
                     import traceback
@@ -688,6 +707,10 @@ def main():
                 app.open_file(p)
         else: 
             app.open_file(None)
+
+        # allow session management 
+        app.session_management_setup()
+
         try: 
             QuittableThread.wait_for_all()
         except (KeyboardInterrupt, SystemExit):

@@ -49,18 +49,22 @@ def nsm_open_handler(path, args, types, src, data):
 
     log.debug("Session manager requests open of", args[0])
     if os.path.isdir(projectpath):
+        log.debug("Existing session found, opening")
         MFPApp().session_load(projectpath, client_id)
     elif not os.path.exists(projectpath):
+        log.debug("Session not found, creating new")
         MFPApp().session_init(projectpath, client_id)
     else:
+        log.debug("Error while trying to open session, signaling session manager")
         nsm_error(path, -9, "Could not open session")    
 
     nsm_reply(path, "OK")
-    pass
 
 def nsm_save_handler(path, args, types, src, data):
     print "mfp.nsm save:", path, args, types, src, data
+    log.debug("Session manager requests session save")
     MFPApp().session_save()
+    nsm_reply(path, "OK")
 
 def nsm_loaded_handler(path, args, types, src, data):
     print "mfp.nsm loaded:", path, args, types, src, data

@@ -85,8 +85,9 @@ class PatchInfo (object):
         self.stage.layer_view.remove(self)
 
         # last, delete the patch on the control side 
-        MFPGUI().mfp.delete(self.obj_id)
-        self.obj_id = None 
+        if self.obj_id is not None:
+            MFPGUI().mfp.delete(self.obj_id)
+            self.obj_id = None 
 
     def command(self, action, data):
         pass

@@ -14,10 +14,14 @@ def homepath(fn):
     return os.path.join(os.environ.get("HOME", "~"), fn)
 
 def splitpath(p):
+    if not p:
+        return []
     parts = p.split(":")
     unescaped = [] 
     prefix = None 
     for p in parts: 
+        if not p:
+            continue 
         if p[-1] == '\\':
             newpart = p[:-1] + ':'
             if prefix is not None:
@@ -30,6 +34,13 @@ def splitpath(p):
             unescaped.append(prefix + p)
             prefix = None 
     return unescaped 
+
+def joinpath(elts):
+    parts = [] 
+    for e in elts: 
+        parts.append(e.replace(':', '\\:'))
+            
+    return ':'.join(parts)
 
 def find_file_in_path(filename, pathspec):
     import os.path 
@@ -44,6 +55,13 @@ def find_file_in_path(filename, pathspec):
         except: 
             continue 
     return None 
+
+def prepend_path(newpath, searchpath):
+    searchdirs = splitpath(searchpath)
+    if newpath in searchdirs: 
+        searchdirs.remove(newpath)
+    searchdirs[:0] = [newpath]
+    return joinpath(searchdirs)
 
 def profile(func):
     '''
