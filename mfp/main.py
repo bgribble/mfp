@@ -510,9 +510,9 @@ class MFPApp (Singleton):
         patches = [] 
         for obj_id, patch in self.patches.items():
             print "about to save patch", obj_id, patch, patch.name 
-            patch.save_file(os.path.join(self.session_dir, patch.name))
+            patch.save_file(os.path.join(self.session_dir, patch.name + '.mfp'))
             print "done saving patch"
-            patches.append(patch.name)
+            patches.append(patch.name + '.mfp')
         cp.set("mfp", "patches", str(patches))
         cp.write(sessfile)
         sessfile.close()

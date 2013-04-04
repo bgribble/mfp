@@ -316,9 +316,13 @@ class Processor (object):
 
     def delete(self):
         from .main import MFPApp
+        from .patch import Patch
+
         if hasattr(self, "patch") and self.patch is not None:
             self.patch.unbind(self.name, self.scope)
             self.patch.remove(self)
+        elif isinstance(self, Patch) and self.scope is not None:
+            self.scope.unbind(self.name)
 
         if hasattr(self, "osc_pathbase") and self.osc_pathbase is not None:
             for m, t in self.osc_methods:
