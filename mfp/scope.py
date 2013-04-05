@@ -6,6 +6,7 @@ Lexical scope helper
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import re 
 
 class LexicalScope (object):
     def __init__(self):
@@ -16,6 +17,10 @@ class LexicalScope (object):
         testname = name 
         counter = 1
         fmt = "_%03d"
+        
+        m = re.search("_[0-9]{3}$", name) 
+        if m:
+            basename = name[:-4]
 
         while self.bindings.has_key(testname):
             counter += 1
