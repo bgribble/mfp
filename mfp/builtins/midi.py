@@ -22,20 +22,22 @@ class MidiIn (Processor):
 
         self.port = 0
         self.channels = []
-        self.handler = MFPApp().midi_mgr.register(self.send)
+        self.handler = MFPApp().midi_mgr.register(self.send, 0)
+
+    def filter(self, **filters):
+        MFPApp().midi_mgr.unregister(self.handler)
+        MFPApp().midi_mgr.register(self.send, 0, filters) 
 
     def trigger(self):
         event = self.inlets[0]
+        print "midi_in: trigger", event
         if isinstance(event, dict):
             for attr, val in event.items():
                 setattr(self, attr, val)
         elif isinstance(event, MethodCall):
             self.method(event, 0)
         elif isinstance(event, (NoteOn, NoteOff, NotePress, MidiPgmChange, MidiCC, MidiUndef)):
-            if event.seqevent and event.seqevent.dst and event.seqevent.dst[1] != self.port:
-                pass
-            elif (self.channels == []) or (event.channel in self.channels) or event.channel == -1:
-                self.outlets[0] = event
+            self.outlets[0] = event
 
 
 class MidiOut (Processor):
@@ -55,11 +57,11 @@ class MidiOut (Processor):
                 setattr(self, attr, val)
         elif isinstance(event, MethodCall):
             self.method(event, 0)
-        elif isinstance(event, [Note, MidiCC, MidiUndef]):
+        elif isinstance(event, (Note, MidiCC, MidiPgmChange, MidiUndef)):
             event.port = self.port
             if self.channel is not None:
                 event.channel = self.channel 
-            midi.send(event)
+            MFPApp().midi_mgr.send(self.port, event)
 
 
 def register():

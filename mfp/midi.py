@@ -28,7 +28,38 @@ class SeqEvent(object):
     def __repr__(self): 
         return "<SeqEvent 0x%02x 0x%02x %s>" % (self.etype, self.flags, self.data)
 
-class MidiUndef (object):
+def mk_raw(event, port=0): 
+    raw = [0, 0, 0, 0, (0, 0), (0, port), (0, 0)]
+    if event.seqevent is not None:
+        raw[0] = event.seqevent.ev_type 
+        raw[1] = event.seqevent.flags
+        raw[2] = event.seqevent.tag
+        raw[3] = event.seqevent.queue
+        raw[4] = (event.seqevent.timestamp.tv_sec, event.seqevent.timestamp.tv_nsec)
+        raw[5] = (event.seqevent.src.client, event.seqevent.src.port)
+        raw[6] = (event.dest.client, event.dest.port)
+    else: 
+        raw[0] = event.seq_type()
+
+    raw.append(event.seq_data())
+    return tuple(raw) 
+
+
+class MidiEvent (object): 
+    def seq_type(self): 
+        if self.seqevent is not None:
+            return self.seqevent.ev_type 
+        else:
+            return self.alsa_type
+
+    def seq_data(self):
+        if self.seqevent is not None:
+            return self.seqevent.data
+        else: 
+            return () 
+
+
+class MidiUndef (MidiEvent):
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = seqevent.data[0] 
@@ -40,11 +71,16 @@ class MidiUndef (object):
         return "<MidiUndef %s>" % self.seqevent
 
 
-class Note (object):
-    pass
+class Note (MidiEvent):
+    alsa_type = alsaseq.SND_SEQ_EVENT_NOTE
+
+    def seq_data(self): 
+        return (self.channel, self.key, self.velocity, 0, 0)
 
 
 class NoteOn (Note):
+    alsa_type = alsaseq.SND_SEQ_EVENT_NOTEON
+
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = None
@@ -64,6 +100,8 @@ class NoteOn (Note):
 
 
 class NoteOff (Note):
+    alsa_type = alsaseq.SND_SEQ_EVENT_NOTEOFF
+
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = None
@@ -74,6 +112,9 @@ class NoteOff (Note):
             self.channel = seqevent.data[0]
             self.key = seqevent.data[1]
             self.velocity = seqevent.data[2]
+
+    def seq_data(self): 
+        return (self.channel, self.key, 0, self.velocity, 0)
 
     def source(self):
         return (self.seqevent.dst, NoteOff, self.channel, self.key)
@@ -86,24 +127,26 @@ class NotePress (Note):
         self.seqevent = seqevent
         self.channel = None
         self.key = None
-        self.pressure = None
+        self.velocity = None
 
         if self.seqevent is not None:
-            if self.seqevent.etype == alsaseq.SND_SEQ_EVENT_NOTEPRESS:
+            if self.seqevent.etype == alsaseq.SND_SEQ_EVENT_KEYPRESS:
                 self.channel = seqevent.data[0]
                 self.key = seqevent.data[1]
-                self.pressure = seqevent.data[2]
+                self.velocity = seqevent.data[2]
             elif self.seqevent.etype == alsaseq.SND_SEQ_EVENT_CHANPRESS:
                 self.channel = seqevent.data[0]
-                self.pressure = seqevent.data[2]
+                self.velocity = seqevent.data[2]
 
     def source(self):
         return (self.seqevent.dst, NotePress, self.channel, self.key)
 
     def __repr__(self):
-        return "<NotePress %s %s %s>" % (self.channel, self.key, self.pressure)
+        return "<NotePress %s %s %s>" % (self.channel, self.key, self.velocity)
 
-class MidiPgmChange (object): 
+class MidiPgmChange (MidiEvent): 
+    alsa_type = alsaseq.SND_SEQ_EVENT_PGMCHANGE 
+
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = None 
@@ -113,13 +156,18 @@ class MidiPgmChange (object):
             self.channel = seqevent.data[0]
             self.program = seqevent.data[5]
 
+    def seq_data(self):
+        return (self.channel, 0, 0, 0, 0, self.program)
+
     def source(self):
         return (self.seqevent.dst, MidiPgmChange, self.channel, None)
 
     def __repr__(self):
         return "<MidiPgmChange %s %s>" % (self.channel, self.program)
 
-class MidiCC (object):
+class MidiCC (MidiEvent):
+    alsa_type = alsaseq.SND_SEQ_EVENT_CONTROLLER 
+
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = None
@@ -130,6 +178,9 @@ class MidiCC (object):
             self.channel = seqevent.data[0]
             self.controller = seqevent.data[4]
             self.value = seqevent.data[5]
+        
+    def seq_data(self):
+        return (self.channel, 0, 0, 0, self.controller, self.value)
 
     def source(self):
         return (self.seqevent.dst, MidiCC, self.channel, self.controller)
@@ -223,7 +274,7 @@ class MFPMidiManager(QuittableThread):
                 for channel in channels: 
                     for unit in units: 
                         paths.append((port, typeinfo, channel, unit))
-
+        print "_filt2paths:", paths
         return paths 
 
     
@@ -233,6 +284,8 @@ class MFPMidiManager(QuittableThread):
         unitinfo = chaninfo.setdefault(path[2], {})
         dest = unitinfo.setdefault(path[3], [])
         dest.append(value)
+
+        print "_savepath:", self.handlers_by_filter
 
     def _delpath(self, path, value):
         typeinfo = self.handlers_by_filter.setdefault(path[0], {})
@@ -306,31 +359,37 @@ class MFPMidiManager(QuittableThread):
         port_default = self.handlers_by_filter.get(None) 
 
         for portdict in port_by_name, port_default: 
+            print "dispatch: looking at portdict=", portdict
             if portdict is None:
                 continue 
             type_by_name = None if typeinfo is None else portdict.get(typeinfo) 
             type_default = portdict.get(None)
 
             for typedict in type_by_name, type_default: 
+                print "dispatch: looking at typedict=", typedict
                 if typedict is None:
                     continue 
                 channel_by_name = None if channel is None else typedict.get(channel)
                 channel_default = typedict.get(None)
 
                 for chandict in channel_by_name, channel_default:
+                    print "dispatch: looking at chandict=", chandict 
                     if chandict is None:
                         continue 
                     unit_by_name = None if unit is None else chandict.get(unit)
                     unit_default = chandict.get(None)
 
                     for unitlist in unit_by_name, unit_default:
+                        print "dispatch: looking at unitlist=", unitlist 
                         if not unitlist:
                             continue 
                         handlers.extend(unitlist)
 
         # now handlers should have all the relevant (cb_id, callback) pairs  
+        print "dispatch: found handlers:", handlers 
         for h in handlers: 
             cbinfo = self.handlers_by_id.get(h)
+            print "dispatch: trying callback", cbinfo
             if cbinfo is not None:
                 cb_id, callback, filters, data = cbinfo
                 try:
@@ -338,5 +397,16 @@ class MFPMidiManager(QuittableThread):
                 except Exception, e: 
                     log.debug("Error in MIDI event handler:", e)
 
-    def send(self, port, data):
-        pass
+    def send(self, port, event):
+        from datetime import datetime, timedelta
+        starttime = datetime.now()
+
+        raw_tuple = mk_raw(event, port)
+        alsaseq.output(raw_tuple)
+        
+        elapsed = datetime.now() - starttime
+
+        if elapsed > timedelta(microseconds=1000):
+            print "MIDI send took %s milliseconds" % timedelta.total_seconds() * 1000
+
+

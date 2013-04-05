@@ -87,6 +87,47 @@ class GetElement(Processor):
 
         self.outlets[1] = self.inlets[0]
 
+class SetElement(Processor):
+    doc_tooltip_obj = "Set element or attribute of object" 
+    doc_tooltip_inlet = ["Object to modify",
+                         "Element to set (default: initarg 0)",
+                         "Value to set (default: initarg 1)"]
+    doc_tooltip_outlet = ["Modified object"]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+        self.element = None 
+        self.newval = None 
+
+        if len(initargs) > 1:
+            self.newval = initargs[1]
+
+        if len(initargs):
+            self.element = initargs[0]
+
+    def trigger(self):
+        if self.inlets[1] is not Uninit:
+            self.element = self.inlets[1]
+            self.inlets[1] = Uninit 
+
+        if self.inlets[2] is not Uninit: 
+            self.newval = self.inlets[2]
+            self.inlets[2] = Uninit 
+
+        if self.element is None:
+            return
+
+        target = self.inlets[0]
+        self.inlets[0] = Uninit 
+
+        if isinstance(self.element, (int, float)) or isinstance(target, dict):
+            target[self.element] = self.newval 
+        elif isinstance(self.element, str):
+            setattr(target, self.element, self.newval)
+
+        self.outlets[0] = target 
+
 
 class PyEval(Processor):
     doc_tooltip_obj = "Evaluate Python expression"
@@ -143,6 +184,7 @@ class PyFunc(Processor):
 class PyAutoWrap(Processor): 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.thunk = patch.parse_obj(init_type)
+        self.argcount = 0
         initargs, kwargs = patch.parse_args(init_args)
        
         arguments = get_arglist(self.thunk)
@@ -155,13 +197,15 @@ class PyAutoWrap(Processor):
             for v in arguments:
                 self.doc_tooltip_inlet.append("Argument %s" % v)
 
-        Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         else:
-            self.outlets[0] = self.thunk(*[i for i in self.inlets if i is not Uninit]) 
+            args = [i for i in self.inlets if i is not Uninit] 
+            args = args[:self.argcount]
+            self.outlets[0] = self.thunk(*args)
 
 class PyBinary(Processor):
     doc_tooltip_inlet = ["Argument 1", "Argument 2 (default: initarg 0)"]
@@ -254,6 +298,7 @@ def applyargs(func):
 
 def register():
     MFPApp().register("get", GetElement)
+    MFPApp().register("set", SetElement)
     MFPApp().register("eval", PyEval)
     MFPApp().register("apply", ApplyMethod)
     MFPApp().register("func", PyFunc)
