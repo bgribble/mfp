@@ -83,9 +83,9 @@ class NoteOn (Note):
 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
-        self.channel = None
-        self.key = None
-        self.velocity = None
+        self.channel = 0
+        self.key = 0
+        self.velocity = 0
 
         if self.seqevent is not None:
             self.channel = seqevent.data[0]
@@ -104,9 +104,9 @@ class NoteOff (Note):
 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
-        self.channel = None
-        self.key = None
-        self.velocity = None
+        self.channel = 0
+        self.key = 0
+        self.velocity = 0
 
         if self.seqevent is not None:
             self.channel = seqevent.data[0]
@@ -125,9 +125,9 @@ class NoteOff (Note):
 class NotePress (Note): 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
-        self.channel = None
-        self.key = None
-        self.velocity = None
+        self.channel = 0
+        self.key = 0
+        self.velocity = 0
 
         if self.seqevent is not None:
             if self.seqevent.etype == alsaseq.SND_SEQ_EVENT_KEYPRESS:
@@ -274,7 +274,6 @@ class MFPMidiManager(QuittableThread):
                 for channel in channels: 
                     for unit in units: 
                         paths.append((port, typeinfo, channel, unit))
-        print "_filt2paths:", paths
         return paths 
 
     
@@ -284,8 +283,6 @@ class MFPMidiManager(QuittableThread):
         unitinfo = chaninfo.setdefault(path[2], {})
         dest = unitinfo.setdefault(path[3], [])
         dest.append(value)
-
-        print "_savepath:", self.handlers_by_filter
 
     def _delpath(self, path, value):
         typeinfo = self.handlers_by_filter.setdefault(path[0], {})
@@ -359,37 +356,31 @@ class MFPMidiManager(QuittableThread):
         port_default = self.handlers_by_filter.get(None) 
 
         for portdict in port_by_name, port_default: 
-            print "dispatch: looking at portdict=", portdict
             if portdict is None:
                 continue 
             type_by_name = None if typeinfo is None else portdict.get(typeinfo) 
             type_default = portdict.get(None)
 
             for typedict in type_by_name, type_default: 
-                print "dispatch: looking at typedict=", typedict
                 if typedict is None:
                     continue 
                 channel_by_name = None if channel is None else typedict.get(channel)
                 channel_default = typedict.get(None)
 
                 for chandict in channel_by_name, channel_default:
-                    print "dispatch: looking at chandict=", chandict 
                     if chandict is None:
                         continue 
                     unit_by_name = None if unit is None else chandict.get(unit)
                     unit_default = chandict.get(None)
 
                     for unitlist in unit_by_name, unit_default:
-                        print "dispatch: looking at unitlist=", unitlist 
                         if not unitlist:
                             continue 
                         handlers.extend(unitlist)
 
         # now handlers should have all the relevant (cb_id, callback) pairs  
-        print "dispatch: found handlers:", handlers 
         for h in handlers: 
             cbinfo = self.handlers_by_id.get(h)
-            print "dispatch: trying callback", cbinfo
             if cbinfo is not None:
                 cb_id, callback, filters, data = cbinfo
                 try:
