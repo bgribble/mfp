@@ -294,19 +294,31 @@ def clipboard_copy(self, pointer_pos):
     else:
         return False 
 
+
+
 @extends(PatchWindow)
 def clipboard_paste(self, pointer_pos=None):
     clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
     cliptxt = clipboard.wait_for_text()
     if not cliptxt: 
         return False 
+    
+    newobj = MFPGUI().mfp.clipboard_paste(cliptxt, self.selected_patch.obj_id, 
+                                          self.selected_layer.scope, None)
 
-    orig_pos = MFPGUI().mfp.clipboard_paste(cliptxt, self.selected_patch.obj_id, 
-                                            self.selected_layer.scope, None)
-    if orig_pos is not None:
+    def paste_select_helper():
+        for o in newobj:
+            obj = MFPGUI().recall(o)
+            if obj is None:
+                return True 
+            elif obj not in self.selected: 
+                self.select(MFPGUI().recall(o))
+        return False 
+
+    if newobj is not None:
         self.delete_selected()
-        if pointer_pos is not None:
-            self.move_selected(pointer_pos[0]-orig_pos[0], pointer_pos[1]-orig_pos[1])
+        MFPGUI().clutter_do(paste_select_helper)
+
         return True 
     else:
         return False 

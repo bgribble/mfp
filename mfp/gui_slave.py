@@ -90,15 +90,6 @@ class GUICommand (RPCWrapper):
         obj.configure(params)
 
     @rpcwrap
-    def command(self, obj_id, cmd, cmd_params):
-        MFPGUI().clutter_do(lambda: self._command(obj_id, cmd, cmd_params))
-        return True
-
-    def _command(self, obj_id, cmd, cmd_params):
-        obj = MFPGUI().recall(obj_id)
-        obj.command(cmd, cmd_params)
-
-    @rpcwrap
     def create(self, obj_type, obj_args, obj_id, params):
         MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, params))
 

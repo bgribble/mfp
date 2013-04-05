@@ -608,6 +608,7 @@ class MFPApp (Singleton):
         jdata = json.loads(json_text, object_hook=extended_decoder_hook)
         idmap = patch.json_unpack_objects(jdata, scope)
         patch.json_unpack_connections(jdata, idmap)
+        return [ o.obj_id for o in idmap.values() ]
 
 def version():
     import pkg_resources 
