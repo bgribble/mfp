@@ -11,6 +11,7 @@ import re
 import sys, os 
 import argparse
 import ConfigParser
+import simplejson as json
 
 from .bang import Bang
 from .patch import Patch
@@ -23,6 +24,7 @@ from .method import MethodCall
 from .quittable_thread import QuittableThread 
 from .rpc_wrapper import RPCWrapper, rpcwrap
 from .rpc_worker import RPCServer
+from .patch_json import ExtendedEncoder, extended_decoder_hook
 
 from pluginfo import PlugInfo 
 
@@ -164,6 +166,16 @@ class MFPCommand(RPCWrapper):
         patch = MFPApp().patches.get(patch_name)
         if patch:
             patch.save_file(file_name)
+
+    @rpcwrap
+    def clipboard_copy(self, pointer_pos, objlist):
+        return MFPApp().clipboard_copy(pointer_pos, objlist)
+
+    @rpcwrap
+    def clipboard_paste(self, json_txt, patch_id, scope_name, mode):
+        patch = MFPApp().recall(patch_id)
+        scope = patch.scopes.get(scope_name)
+        return MFPApp().clipboard_paste(json_txt, patch, scope, mode)
 
     @rpcwrap
     def quit(self):
@@ -556,7 +568,47 @@ class MFPApp (Singleton):
 
         for p in patches: 
             self.open_file(p)
+       
+    def clipboard_copy(self, pointer_pos, obj_ids):
+        toplevel = {} 
+        objects = {} 
+
+        free_conn_in = [] 
+        free_conn_out = [] 
+
+        # save connections into and out of the set of objects 
+        for o in obj_ids:
+            srcobj = self.recall(o)
+
+            objects[srcobj.obj_id] = srcobj.save()
+
+            for port_num, port_conn in enumerate(srcobj.connections_in):
+                for tobj, tport in port_conn:
+                    if tobj.obj_id not in obj_ids: 
+                        free_conn_in.append((tobj.obj_id, tport, o, port_num))
+
+            for port_num, port_conn in enumerate(srcobj.connections_out):
+                for tobj, tport in port_conn:
+                    if tobj.obj_id not in obj_ids: 
+                        free_conn_out.append((tobj.obj_id, tport, o, port_num))
+
+        # return JSON 
+        toplevel['free_conn_in'] = free_conn_in
+        toplevel['free_conn_out'] = free_conn_out 
+        toplevel['pointer'] = pointer_pos
+        toplevel['objects'] = objects 
+        toplevel['mfp_version'] = version()
+        js = json.dumps(toplevel, indent=4, cls=ExtendedEncoder)
+        return js 
+
+    def clipboard_paste(self, json_text, patch, scope, paste_mode):
+        print "clipboard_paste: got json text"
+        print json_text
         
+        jdata = json.loads(json_text, object_hook=extended_decoder_hook)
+        idmap = patch.json_unpack_objects(jdata, scope)
+        patch.json_unpack_connections(jdata, idmap)
+
 def version():
     import pkg_resources 
     vers = pkg_resources.require("mfp")[0].version

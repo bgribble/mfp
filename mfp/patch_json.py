@@ -10,9 +10,7 @@ import simplejson as json
 from .patch import Patch
 from .utils import extends
 from .bang import BangType, UninitType, Bang, Uninit
-from .method import MethodCall
 from . import log 
-
 
 class ExtendedEncoder (json.JSONEncoder):
     TYPES = { 'BangType': BangType, 'UninitType': UninitType }
@@ -42,7 +40,6 @@ def extended_decoder_hook (saved):
 
 @extends(Patch)
 def json_deserialize(self, json_data):
-    from main import MFPApp
 
     f = json.loads(json_data, object_hook=extended_decoder_hook)
     self.init_type = f.get('type')
@@ -74,36 +71,8 @@ def json_deserialize(self, json_data):
     self.dispatch_objects = [] 
 
     # create new objects
-    idmap = {}
-    idlist = f.get('objects').keys()
-    idlist.sort(key=lambda x: int(x))
-    for oid in idlist:
-        prms = f.get('objects')[oid]
-
-        otype = prms.get('type')
-        oargs = prms.get('initargs')
-        oname = prms.get('name')
-        do_onload = prms.get('do_onload')
-
-        gp = prms.get('gui_params')
-        newobj = MFPApp().create(otype, oargs, self, self.default_scope, oname)
-        newobj.patch = self
-        newobj.do_onload = do_onload
-
-        for k, v in gp.items():
-            newobj.gui_params[k] = v
-
-        # these are needed at runtime but don't get saved 
-        newobj.gui_params["obj_id"] = newobj.obj_id
-        newobj.gui_params["name"] = newobj.name 
-        newobj.gui_params["dsp_inlets"] = newobj.dsp_inlets
-        newobj.gui_params["dsp_outlets"] = newobj.dsp_outlets
-        newobj.gui_params["num_inlets"] = len(newobj.inlets)
-        newobj.gui_params["num_outlets"] = len(newobj.outlets)
-
-        # custom behaviors implemented by Processor subclass load()
-        newobj.load(prms)
-        idmap[int(oid)] = newobj
+    # FIXME -- will break with name collisions on multi-scope json file 
+    idmap = self.json_unpack_objects(f, self.default_scope)
 
     # load new scopes
     scopes = f.get("scopes", {})
@@ -130,7 +99,17 @@ def json_deserialize(self, json_data):
             obj.scope = self.default_scope
 
     # make connections
-    for oid, prms in f.get('objects', {}).items():
+    self.json_unpack_connections(f, idmap)
+
+    inlets = len(self.inlet_objects)
+    if not inlets:
+        inlets = 1
+    self.resize(inlets, len(self.outlet_objects))
+
+@extends(Patch)
+def json_unpack_connections(self, data, idmap):
+    from main import MFPApp
+    for oid, prms in data.get('objects', {}).items():
         oid = int(oid)
         conn = prms.get("connections", [])
         srcobj = idmap.get(oid)
@@ -144,11 +123,47 @@ def json_deserialize(self, json_data):
                     print prms 
                 else: 
                     srcobj.connect(outlet, dstobj, inlet)
-    inlets = len(self.inlet_objects)
-    if not inlets:
-        inlets = 1
-    self.resize(inlets, len(self.outlet_objects))
+                    if srcobj.gui_created:
+                        MFPApp().gui_command.connect(srcobj.obj_id, outlet, 
+                                                     dstobj.obj_id, inlet)
 
+@extends(Patch)
+def json_unpack_objects(self, data, scope):
+    from main import MFPApp
+    idmap = {}
+    idlist = data.get('objects').keys()
+    idlist.sort(key=lambda x: int(x))
+    for oid in idlist:
+        prms = data.get('objects')[oid]
+
+        otype = prms.get('type')
+        oargs = prms.get('initargs')
+        oname = prms.get('name')
+        do_onload = prms.get('do_onload')
+
+        gp = prms.get('gui_params')
+        newobj = MFPApp().create(otype, oargs, self, scope, oname)
+        newobj.patch = self
+        newobj.do_onload = do_onload
+
+        for k, v in gp.items():
+            newobj.gui_params[k] = v
+
+        # these are needed at runtime but don't get saved 
+        newobj.gui_params["obj_id"] = newobj.obj_id
+        newobj.gui_params["name"] = newobj.name 
+        newobj.gui_params["dsp_inlets"] = newobj.dsp_inlets
+        newobj.gui_params["dsp_outlets"] = newobj.dsp_outlets
+        newobj.gui_params["num_inlets"] = len(newobj.inlets)
+        newobj.gui_params["num_outlets"] = len(newobj.outlets)
+
+        # custom behaviors implemented by Processor subclass load()
+        newobj.load(prms)
+        if self.gui_created:
+            newobj.create_gui()
+        idmap[int(oid)] = newobj
+
+    return idmap
 
 @extends(Patch)
 def json_serialize(self):

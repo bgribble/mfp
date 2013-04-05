@@ -69,6 +69,11 @@ class PatchEditMode (InputMode):
         self.bind("A-V", lambda: self.add_element(ReceiveSignalViaElement),
                   "Add receive signal via")
         
+        self.bind("C-x", self.cut, "Cut selection to clipboard")
+        self.bind("C-c", self.copy, "Copy selection to clipboard")
+        self.bind("C-v", self.paste, "Paste clipboard to selection")
+        self.bind("C-V", self.paste_at_ptr, "Past clipboard at pointer")
+
         self.bind("C-n", self.window.layer_new, "Create new layer")
         self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
         self.bind("C-u", self.window.layer_move_up, "Move current layer up")
@@ -327,3 +332,17 @@ class PatchEditMode (InputMode):
         if self.autoplace_mode:
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
+
+    def cut(self):
+        return self.window.clipboard_cut((self.manager.pointer_x, 
+                                          self.manager.pointer_y))
+
+    def copy(self):
+        return self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
+
+    def paste(self):
+        return self.window.clipboard_paste()
+
+    def paste_at_ptr(self):
+        return self.window.clipboard_paste((self.manager.pointer_x, self.manager.pointer_y))
+

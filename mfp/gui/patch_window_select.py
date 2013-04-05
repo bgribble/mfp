@@ -1,16 +1,19 @@
 #! /usr/bin/env python
 '''
-patch_funcs.py
-Helper methods for patch window input modes
+patch_window_select.py
+Helper methods for patch window selection
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2012-2013 Bill Gribble <grib@billgribble.com>
 '''
+
 from ..utils import extends
 from .patch_window import PatchWindow
 from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
 from ..gui_slave import MFPGUI
+
+from gi.repository import Gtk, Gdk
 
 @extends(PatchWindow)
 def patch_select_prev(self): 
@@ -270,4 +273,41 @@ def show_selection_box(self, x0, y0, x1, y1):
 def hide_selection_box(self):
     if self.selection_box:
         self.selection_box.hide()
+
+@extends(PatchWindow)
+def clipboard_cut(self, pointer_pos):
+    if self.selected:
+        self.clipboard_copy(pointer_pos)
+        self.delete_selected()
+        return True 
+    else:
+        return False 
+
+@extends(PatchWindow)
+def clipboard_copy(self, pointer_pos):
+    if self.selected:
+        cliptxt = MFPGUI().mfp.clipboard_copy(pointer_pos, [o.obj_id for o in self.selected 
+                                                            if o.obj_id is not None])
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(cliptxt, -1)
+        return True 
+    else:
+        return False 
+
+@extends(PatchWindow)
+def clipboard_paste(self, pointer_pos=None):
+    clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+    cliptxt = clipboard.wait_for_text()
+    if not cliptxt: 
+        return False 
+
+    orig_pos = MFPGUI().mfp.clipboard_paste(cliptxt, self.selected_patch.obj_id, 
+                                            self.selected_layer.scope, None)
+    if orig_pos is not None:
+        self.delete_selected()
+        if pointer_pos is not None:
+            self.move_selected(pointer_pos[0]-orig_pos[0], pointer_pos[1]-orig_pos[1])
+        return True 
+    else:
+        return False 
 
