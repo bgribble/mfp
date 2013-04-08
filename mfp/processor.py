@@ -202,9 +202,13 @@ class Processor (object):
         o = MFPApp().osc_mgr
 
         if self.osc_pathbase is not None and self.osc_pathbase != pathbase:
+            saved = [] 
             for m in self.osc_methods:
-                o.del_method(*m)
-            self.osc_methods = []
+                if m[0].startswith(self.osc_pathbase):
+                    o.del_method(*m)
+                else: 
+                    saved.append(m)
+            self.osc_methods = saved 
         self.osc_pathbase = pathbase
 
         for i in range(len(self.inlets)):
@@ -281,8 +285,8 @@ class Processor (object):
 
         MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
         self.midi_learn_cbid = None 
-        self.midi_filters = filters 
         self.midi_cbid = MFPApp().midi_mgr.register(self._midi_handler, filters=filters)
+        self.midi_filters = filters 
         self.midi_mode = mode 
 
     def midi_learn(self, *args, **kwargs):
@@ -528,6 +532,15 @@ class Processor (object):
         oinfo['name'] = self.name
         oinfo['do_onload'] = self.do_onload
         oinfo['gui_params'] = {} 
+
+        oinfo['midi_filters'] = self.midi_filters
+
+        nonstd_osc = [] 
+        for o in self.osc_methods:
+            if not o[0].startswith(self.osc_pathbase):
+                nonstd_osc.append(o)
+
+        oinfo['osc_methods' ] = nonstd_osc
 
         for k, v in self.gui_params.items():
             if k not in [ 'name', 'obj_id', 'dsp_inlets', 'dsp_outlets', 'num_inlets', 

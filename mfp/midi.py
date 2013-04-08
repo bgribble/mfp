@@ -94,7 +94,7 @@ class NoteOn (Note):
             self.velocity = seqevent.data[2]
 
     def source(self):
-        return (self.seqevent.dst, NoteOn, self.channel, self.key)
+        return (self.seqevent.dst, NoteOn.__name__, self.channel, self.key)
 
     def __repr__(self):
         return "<NoteOn %s %s %s>" % (self.channel, self.key, self.velocity)
@@ -118,7 +118,7 @@ class NoteOff (Note):
         return (self.channel, self.key, 0, self.velocity, 0)
 
     def source(self):
-        return (self.seqevent.dst, NoteOff, self.channel, self.key)
+        return (self.seqevent.dst, NoteOff.__name__, self.channel, self.key)
 
     def __repr__(self):
         return "<NoteOff %s %s %s>" % (self.channel, self.key, self.velocity)
@@ -140,7 +140,7 @@ class NotePress (Note):
                 self.velocity = seqevent.data[2]
 
     def source(self):
-        return (self.seqevent.dst, NotePress, self.channel, self.key)
+        return (self.seqevent.dst, NotePress.__name__, self.channel, self.key)
 
     def __repr__(self):
         return "<NotePress %s %s %s>" % (self.channel, self.key, self.velocity)
@@ -161,7 +161,7 @@ class MidiPgmChange (MidiEvent):
         return (self.channel, 0, 0, 0, 0, self.program)
 
     def source(self):
-        return (self.seqevent.dst, MidiPgmChange, self.channel, None)
+        return (self.seqevent.dst, MidiPgmChange.__name__, self.channel, None)
 
     def __repr__(self):
         return "<MidiPgmChange %s %s>" % (self.channel, self.program)
@@ -184,7 +184,7 @@ class MidiCC (MidiEvent):
         return (self.channel, 0, 0, 0, self.controller, self.value)
 
     def source(self):
-        return (self.seqevent.dst, MidiCC, self.channel, self.controller)
+        return (self.seqevent.dst, MidiCC.__name__, self.channel, self.controller)
 
     def __repr__(self):
         return "<MidiCC %s %s %s>" % (self.channel, self.controller, self.value)
@@ -305,8 +305,15 @@ class MFPMidiManager(QuittableThread):
 
     def register(self, callback, data=None, filters=None):
         import copy 
+        from utils import isiterable 
         if filters == None:
             filters = {} 
+
+        if "etype" in filters: 
+            old = filters.get("etype") 
+            if not isiterable(old):
+                old = [ old ] 
+            filters["etype"] = [ e.__name__ if isinstance(e, type) else e for e in old ]
 
         with self.handlers_lock:
             cb_id = self.handlers_next_id

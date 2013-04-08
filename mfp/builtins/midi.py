@@ -24,8 +24,10 @@ class MidiIn (Processor):
         self.handler = MFPApp().midi_mgr.register(self.send, 0)
 
     def filter(self, **filters):
+        import copy
         MFPApp().midi_mgr.unregister(self.handler) 
         self.handler = MFPApp().midi_mgr.register(self.send, 0, filters) 
+        self.midi_filters = copy.copy(filters)
 
     def trigger(self):
         event = self.inlets[0]
