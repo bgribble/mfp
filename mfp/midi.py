@@ -12,6 +12,7 @@ from datetime import datetime
 from . import appinfo
 
 from . import log
+from .utils import isiterable 
 
 
 class SeqEvent(object):
@@ -269,6 +270,15 @@ class MFPMidiManager(QuittableThread):
         units = filters.get("unit") or [ None ] 
         paths = [] 
 
+        if not isiterable(ports):
+            ports = [ ports ]
+        if not isiterable(typeinfos):
+            typeinfos = [ typeinfos ] 
+        if not isiterable(channels):
+            channels = [channels]
+        if not isiterable(units):
+            units = [units]
+
         for port in ports: 
             for typeinfo in typeinfos:
                 for channel in channels: 
@@ -294,18 +304,17 @@ class MFPMidiManager(QuittableThread):
 
 
     def register(self, callback, data=None, filters=None):
+        import copy 
         if filters == None:
             filters = {} 
 
         with self.handlers_lock:
             cb_id = self.handlers_next_id
             self.handlers_next_id += 1 
-
-            self.handlers_by_id[cb_id] = (cb_id, callback, filters, data) 
+            self.handlers_by_id[cb_id] = (cb_id, callback, copy.copy(filters), data) 
             paths = self._filt2paths(filters)
             for p in paths: 
                 self._savepath(p, cb_id)
-
         return cb_id
 
     def unregister(self, cb_id):

@@ -106,3 +106,13 @@ def extends(klass):
         setattr(klass, fn, func)
         return func
     return ext_decor
+
+
+def isiterable(obj):
+    try:
+        if hasattr(obj, '__iter__'):
+            return True 
+    except:
+        pass 
+
+    return False 

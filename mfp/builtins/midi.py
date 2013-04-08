@@ -5,7 +5,6 @@ p_midi.py: builtins for MIDI I/O
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from .. import midi
 from ..processor import Processor
 from ..main import MFPApp
 from ..method import MethodCall
@@ -25,12 +24,11 @@ class MidiIn (Processor):
         self.handler = MFPApp().midi_mgr.register(self.send, 0)
 
     def filter(self, **filters):
-        MFPApp().midi_mgr.unregister(self.handler)
-        MFPApp().midi_mgr.register(self.send, 0, filters) 
+        MFPApp().midi_mgr.unregister(self.handler) 
+        self.handler = MFPApp().midi_mgr.register(self.send, 0, filters) 
 
     def trigger(self):
         event = self.inlets[0]
-        print "midi_in: trigger", event
         if isinstance(event, dict):
             for attr, val in event.items():
                 setattr(self, attr, val)
