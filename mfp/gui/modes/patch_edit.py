@@ -72,16 +72,17 @@ class PatchEditMode (InputMode):
         self.bind("C-x", self.cut, "Cut selection to clipboard")
         self.bind("C-c", self.copy, "Copy selection to clipboard")
         self.bind("C-v", self.paste, "Paste clipboard to selection")
-        self.bind("C-V", self.paste_at_ptr, "Past clipboard at pointer")
+        self.bind("C-d", self.duplicate, "Duplicate selection")
 
         self.bind("C-n", self.window.layer_new, "Create new layer")
         self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
-        self.bind("C-u", self.window.layer_move_up, "Move current layer up")
-        self.bind("C-d", self.window.layer_move_down, "Move current layer down")
+        self.bind("C-U", self.window.layer_move_up, "Move current layer up")
+        self.bind("C-D", self.window.layer_move_down, "Move current layer down")
 
         self.bind("TAB", self.select_next, "Select next element")
         self.bind("S-TAB", self.select_prev, "Select previous element")
         self.bind("C-TAB", self.select_mru, "Select most-recent element")
+        self.bind("C-a", self.select_all, "Select all (in this layer)") 
 
         self.bind("a", self.auto_place_below, "Auto-place below")
         self.bind("A", self.auto_place_above, "Auto-place above")
@@ -142,6 +143,10 @@ class PatchEditMode (InputMode):
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
         return True
+
+    def select_all(self):
+        self.window.select_all()
+        self.enable_selection_edit()
 
     def select_next(self):
         self.window.select_next()
@@ -343,6 +348,7 @@ class PatchEditMode (InputMode):
     def paste(self):
         return self.window.clipboard_paste()
 
-    def paste_at_ptr(self):
-        return self.window.clipboard_paste((self.manager.pointer_x, self.manager.pointer_y))
+    def duplicate(self):
+        self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
+        return self.window.clipboard_paste()
 

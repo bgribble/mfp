@@ -602,9 +602,6 @@ class MFPApp (Singleton):
         return js 
 
     def clipboard_paste(self, json_text, patch, scope, paste_mode):
-        print "clipboard_paste: got json text"
-        print json_text
-        
         jdata = json.loads(json_text, object_hook=extended_decoder_hook)
         idmap = patch.json_unpack_objects(jdata, scope)
         patch.json_unpack_connections(jdata, idmap)

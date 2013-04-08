@@ -90,6 +90,13 @@ def unselect(self, obj):
         self.object_view.unselect(obj)
     return True
 
+@extends(PatchWindow)
+def select_all(self):
+    self.unselect_all()
+    for obj in self.objects:
+        if obj.layer == self.active_layer(): 
+            self.select(obj)
+    return True 
 
 @extends(PatchWindow)
 def unselect_all(self):
@@ -316,7 +323,7 @@ def clipboard_paste(self, pointer_pos=None):
         return False 
 
     if newobj is not None:
-        self.delete_selected()
+        self.unselect_all()
         MFPGUI().clutter_do(paste_select_helper)
 
         return True 
