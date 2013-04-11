@@ -94,6 +94,7 @@ class Var (Processor):
         return base_dict
 
     def load(self, params):
+        Processor.load(self, params)
         if params.get("value"):
             self.value = params.get("value")
             if self.gui_params.get("value") is None:

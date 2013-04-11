@@ -349,6 +349,14 @@ class Processor (object):
                     tobj.disconnect(tport, self, inport)
                 inport += 1
 
+        if hasattr(self, "midi_learn_cbid") and self.midi_learn_cbid is not None:
+            MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
+            self.midi_learn_cbid = None 
+
+        if hasattr(self, "midi_cbid") and self.midi_cbid is not None:
+            MFPApp().midi_mgr.unregister(self.midi_cbid)
+            self.midi_cbid = None 
+
         if hasattr(self, "dsp_obj") and self.dsp_obj is not None:
             self.dsp_obj.delete()
             self.dsp_obj = None
@@ -517,15 +525,18 @@ class Processor (object):
         MFPApp().gui_command.delete(self.obj_id)
         self.gui_created = False
 
-    def load(self, paramdict):
-        # Override for custom load behavior
-        pass
-
     def mark_ready(self):
         self.status = Processor.READY
 
     # save/restore helper
     def save(self):
+        '''
+        Save object state to a dictionary suitable for serialization 
+
+        Custom behavior in subclasses should call Processor.save() 
+        first, then modify the dictionary that it returns.
+        '''
+
         oinfo = {}
         oinfo['type'] = self.init_type
         oinfo['initargs'] = self.init_args
@@ -534,6 +545,7 @@ class Processor (object):
         oinfo['gui_params'] = {} 
 
         oinfo['midi_filters'] = self.midi_filters
+        oinfo['midi_mode'] = self.midi_mode 
 
         nonstd_osc = [] 
         for o in self.osc_methods:
@@ -553,3 +565,42 @@ class Processor (object):
         oinfo['connections'] = conn
         return oinfo
 
+    def load(self, prms):
+        '''
+        Initialize a Processor from a dictionary returned by save() 
+
+        Custom behavior in Processor subclasses must call Processor.load,
+        probably before anything else. 
+        '''
+
+        from .main import MFPApp
+
+        # special handling for gui_params 
+        gp = prms.get('gui_params')
+
+        for k, v in gp.items():
+            self.gui_params[k] = v
+
+        # these are needed at runtime but don't get saved 
+        self.gui_params["obj_id"] = self.obj_id
+        self.gui_params["name"] = self.name 
+        self.gui_params["dsp_inlets"] = self.dsp_inlets
+        self.gui_params["dsp_outlets"] = self.dsp_outlets
+        self.gui_params["num_inlets"] = len(self.inlets)
+        self.gui_params["num_outlets"] = len(self.outlets)
+
+        self.do_onload = prms.get('do_onload', False)
+
+        # set up saved OSC controllers 
+        for path, types in prms.get("osc_methods", []):
+            MFPApp().osc_mgr.add_method(path, types, self._osc_handler)
+            self.osc_methods.append((path, types))
+
+        # and MIDI 
+        self.midi_mode = prms.get("midi_mode", None)
+        self.midi_filters = prms.get("midi_filters", None)
+        if self.midi_filters is not None:
+            ports = self.midi_filters.get("port")
+            self.midi_filters["port"] = [ tuple(p) for p in ports ]
+            self.midi_cbid = MFPApp().midi_mgr.register(self._midi_handler, 
+                                                        filters=self.midi_filters)

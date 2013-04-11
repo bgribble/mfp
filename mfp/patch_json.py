@@ -139,28 +139,14 @@ def json_unpack_objects(self, data, scope):
         otype = prms.get('type')
         oargs = prms.get('initargs')
         oname = prms.get('name')
-        do_onload = prms.get('do_onload')
 
-        gp = prms.get('gui_params')
         newobj = MFPApp().create(otype, oargs, self, scope, oname)
         newobj.patch = self
-        newobj.do_onload = do_onload
-
-        for k, v in gp.items():
-            newobj.gui_params[k] = v
-
-        # these are needed at runtime but don't get saved 
-        newobj.gui_params["obj_id"] = newobj.obj_id
-        newobj.gui_params["name"] = newobj.name 
-        newobj.gui_params["dsp_inlets"] = newobj.dsp_inlets
-        newobj.gui_params["dsp_outlets"] = newobj.dsp_outlets
-        newobj.gui_params["num_inlets"] = len(newobj.inlets)
-        newobj.gui_params["num_outlets"] = len(newobj.outlets)
-
-        # custom behaviors implemented by Processor subclass load()
         newobj.load(prms)
+
         if self.gui_created:
             newobj.create_gui()
+
         idmap[int(oid)] = newobj
 
     return idmap
