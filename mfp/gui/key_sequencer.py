@@ -39,7 +39,11 @@ class KeySequencer (object):
         if event.type == Clutter.EventType.KEY_PRESS:
             code = event.keyval
             if code in MOD_ALL:
-                self.mod_keys.add(code)
+                if code in (MOD_SHIFTALT, MOD_SHIFTRALT): 
+                    self.mod_keys.add(MOD_SHIFT)
+                    self.mod_keys.add(MOD_ALT)
+                else:
+                    self.mod_keys.add(code)
             else:
                 self.sequences.append(self.canonicalize(event))
 
@@ -48,7 +52,11 @@ class KeySequencer (object):
             code = event.keyval
             if code in MOD_ALL:
                 try:
-                    self.mod_keys.remove(code)
+                    if code in (MOD_SHIFTALT, MOD_SHIFTRALT): 
+                        self.mod_keys.remove(MOD_SHIFT)
+                        self.mod_keys.remove(MOD_ALT)
+                    else:
+                        self.mod_keys.remove(code)
                 except KeyError:
                     pass
 
