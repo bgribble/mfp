@@ -414,8 +414,8 @@ class Processor (object):
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             if inlet not in target.dsp_inlets: 
-                log.debug("Error: Can't connect DSP outlet of '%s' to non-DSP inlet of '%s'" 
-                          % (self.name, target.name))
+                log.debug("Error: Can't connect DSP outlet %s of '%s' to non-DSP inlet %s of '%s'" 
+                          % (outlet, self.name, inlet, target.name))
                 return False 
             self.dsp_obj.connect(self.dsp_outlets.index(outlet),
                                  target.obj_id, target.dsp_inlets.index(inlet))

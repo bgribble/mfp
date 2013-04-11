@@ -98,11 +98,24 @@ class MessageBus (Processor):
     def trigger(self):
         self.outlets[0] = self.inlets[0]
 
+class SignalBus (Processor): 
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        self.dsp_inlets = [0]
+        self.dsp_outlets = [0]
+        self.dsp_init("noop~")
+
+    def trigger(self):
+        self.outlets[0] = self.inlets[0]
+
+
 
 class Recv (Processor):
     doc_tooltip_obj = "Receive messages to the specified name" 
     doc_tooltip_inlet = [ "Passthru input" ]
     doc_tooltip_outlet = [ "Passthru output" ]
+
+    bus_type = "bus" 
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
@@ -143,7 +156,8 @@ class Recv (Processor):
         if obj is not None:
             self.bus_obj = obj 
         else: 
-            self.bus_obj = MFPApp().create("bus", "", self.patch, self.scope, self.bus_name)
+            self.bus_obj = MFPApp().create(self.bus_type, "", self.patch, 
+                                           self.scope, self.bus_name)
             
         if self.bus_obj and (self not in self.bus_obj.connections_out[0]):
             self.bus_obj.connect(0, self, 0)
@@ -157,12 +171,26 @@ class Recv (Processor):
 
 class RecvSignal (Recv): 
     doc_tooltip_obj = "Receive signals to the specified name"
+    bus_type = "bus~"
     
     def __init__(self, init_type, init_args, patch, scope, name):
-        Recv.__init__(self, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+
+        self.gui_params["label"] = self.name
+        self.bus_name = None 
+        self.bus_obj = None 
+
+        # needed so that name changes happen timely 
+        self.hot_inlets = [0, 1]
+
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
         self.dsp_init("noop~")
+
+        if len(initargs):
+            self.bus_connect(initargs[0])
+
 
 def register():
     MFPApp().register("send", Send)
@@ -174,3 +202,4 @@ def register():
     MFPApp().register("s~", SendSignal)
     MFPApp().register("r~", RecvSignal)
     MFPApp().register("bus", MessageBus)
+    MFPApp().register("bus~", SignalBus)
