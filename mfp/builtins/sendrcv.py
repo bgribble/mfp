@@ -91,19 +91,32 @@ class SendSignal (Send):
             self.dsp_obj.connect(0, self.dest_obj.obj_id, 
                                  self.dest_obj.dsp_inlets.index(self.dest_inlet))
 
+class MessageBus (Processor): 
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+
+    def trigger(self):
+        self.outlets[0] = self.inlets[0]
+
+
 class Recv (Processor):
     doc_tooltip_obj = "Receive messages to the specified name" 
     doc_tooltip_inlet = [ "Passthru input" ]
     doc_tooltip_outlet = [ "Passthru output" ]
 
     def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
         self.gui_params["label"] = self.name
+        self.bus_name = None 
+        self.bus_obj = None 
+
+        # needed so that name changes happen timely 
+        self.hot_inlets = [0, 1]
 
         if len(initargs):
-            self.rename(initargs[0])
+            self.bus_connect(initargs[0])
 
     def method(self, message, inlet):
         if inlet == 0:
@@ -112,12 +125,31 @@ class Recv (Processor):
             message.call(self)
 
     def trigger(self):
-        self.outlets[0] = self.inlets[0]
+        if self.inlets[1] is not Uninit: 
+            self.bus_connect(self.inlets[1])
+            self.inlets[1] = Uninit 
 
-    def rename(self, new_name):
-        Processor.rename(self, new_name)
-        self.init_args = '"%s"' % self.name 
-        self.gui_params["label"] = self.name
+        if self.inlets[0] is not Uninit:
+            self.outlets[0] = self.inlets[0]
+            self.inlets[0] = Uninit 
+
+    def bus_connect(self, bus_name):
+        if self.bus_obj is not None and self.bus_name != bus_name:
+            self.bus_obj.disconnect(0, self, 0)
+            self.bus_obj = None 
+        self.bus_name = bus_name 
+
+        obj = MFPApp().resolve(self.bus_name, self)
+        if obj is not None:
+            self.bus_obj = obj 
+        else: 
+            self.bus_obj = MFPApp().create("bus", "", self.patch, self.scope, self.bus_name)
+            
+        if self.bus_obj and (self not in self.bus_obj.connections_out[0]):
+            self.bus_obj.connect(0, self, 0)
+
+        self.init_args = '"%s"' % self.bus_name 
+        self.gui_params["label"] = self.bus_name
 
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
@@ -141,3 +173,4 @@ def register():
     MFPApp().register("recv~", RecvSignal)
     MFPApp().register("s~", SendSignal)
     MFPApp().register("r~", RecvSignal)
+    MFPApp().register("bus", MessageBus)

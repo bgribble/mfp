@@ -175,10 +175,7 @@ class ReceiveViaElement (ViaElement):
 
     def label_edit_finish(self, *args):
         ViaElement.label_edit_finish(self, *args)
-        self.obj_name = self.label.get_text()
-        MFPGUI().mfp.rename_obj(self.obj_id, self.obj_name)
-
-        self.stage.refresh(self)
+        MFPGUI().mfp.send(self.obj_id, 1, self.label.get_text())
 
 class ReceiveSignalViaElement (ReceiveViaElement):
     VIA_SIZE = 12 
