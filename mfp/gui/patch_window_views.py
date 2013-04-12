@@ -61,6 +61,12 @@ def init_object_view(self):
 
 @extends(PatchWindow)
 def init_layer_view(self):
+    def get_sortname(o): 
+        if isinstance(o, Layer):
+            return o.patch.obj_name + ':%s' % o.patch.layers.index(o) 
+        elif isinstance(o, PatchInfo):
+            return o.obj_name 
+
     def get_layer_name(o):
         if isinstance(o, Layer):
             return o.name
@@ -107,7 +113,7 @@ def init_layer_view(self):
             self._layer_select(l)
 
 
-    layer_cols = [("Name", get_layer_name, True, layer_name_edited, False), 
+    layer_cols = [("Name", get_layer_name, True, layer_name_edited, get_sortname), 
                   ("Scope", get_layer_scopename, True, layer_scope_edited, False)] 
     layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
     layer_view.select_cb = sel_layer

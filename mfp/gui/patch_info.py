@@ -71,6 +71,7 @@ class PatchInfo (object):
         for s in self.scopes: 
             self.stage.object_view.insert((s, self), self)
 
+        self.stage.refresh(self)
     def delete(self):
         # delete all the processor elements 
         for l in self.layers: 

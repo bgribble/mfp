@@ -255,6 +255,12 @@ class PatchWindow(object):
         self.emit_signal("remove", element)
 
     def refresh(self, element):
+        from .patch_info import PatchInfo
+        if isinstance(element, PatchInfo): 
+            self.object_view.update(element, None)
+            self.layer_view.update(element, None)
+            return 
+
         if element.layer is not None:
             self.object_view.update(element, (element.layer.scope, element.layer.patch))
         else:

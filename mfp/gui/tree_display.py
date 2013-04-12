@@ -50,8 +50,17 @@ class TreeDisplay (object):
         self.treeview.expand_all()
 
     def _obj_column_text(self, obj, column):
-        getter = self.columns_bynumber[0][1]
+        getter = self.columns_bynumber[column][1]
         return getter(obj)
+
+    def _obj_column_sorttext(self, obj, column):
+        sorttext = self.columns_bynumber[column][4]
+        default = self.columns_bynumber[column][1]
+        if callable(sorttext):
+            return sorttext(obj)
+        else:
+            return default(obj) 
+
 
     def _edited_cb(self, renderer, path, new_value):
         iter = self.treestore.get_iter_from_string(path)
@@ -86,7 +95,7 @@ class TreeDisplay (object):
         obj_a = model.get_value(iter_a, 0)
         obj_b = model.get_value(iter_b, 0)
 
-        return cmp(self._obj_column_text(obj_a, 0), self._obj_column_text(obj_b, 0))
+        return cmp(self._obj_column_sorttext(obj_a, 0), self._obj_column_sorttext(obj_b, 0))
 
     def _update_paths(self):
         p = {} 
