@@ -1,4 +1,24 @@
-mfp v0.02, 2013 Mar 13 
+
+mfp v0.03
+
+  * #49: Remove last lock calls from JACK process() path 
+
+  * #51: Multiple [r]/[r~] receivers can share a name (multicast/bus)
+
+  * #52: Multiple selection in UI (rubberband box/Shift+click)
+
+  * #55: Cut/copy/paste using JSON to X Clipboard 
+
+  * #57: Support for NSM session management 
+
+  * #58: Implement MIDI control learning for all Processors 
+
+  * #65: Save/restore MIDI and OSC controller routings
+
+  * Many other bugfixes and improvements 
+
+
+mfp v0.02, 2013-Mar-13 
 
   * #30: Fix RMS calculation in [ampl~]
 
@@ -20,6 +40,7 @@ mfp v0.02, 2013 Mar 13
 
   * #48: Add [latency] object to report JACK input and output latency 
          to patches 
+
 
 mfp v0.01, 2013-Feb-22 
 
