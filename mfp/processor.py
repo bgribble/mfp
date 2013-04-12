@@ -129,6 +129,8 @@ class Processor (object):
     def assign(self, patch, scope, name):
         if self.patch is not None and self.scope is not None and self.name is not None:
             self.patch.unbind(self.name, self.scope)
+        elif self.scope is not None and self.name is not None:
+            self.scope.unbind(self.name)
 
         name = name or "%s_%s" % (self.init_type, str(self.obj_id))
 

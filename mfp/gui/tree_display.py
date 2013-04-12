@@ -88,7 +88,6 @@ class TreeDisplay (object):
 
         return cmp(self._obj_column_text(obj_a, 0), self._obj_column_text(obj_b, 0))
 
-
     def _update_paths(self):
         p = {} 
         def thunk(model, path, iter, data):
@@ -160,14 +159,15 @@ class TreeDisplay (object):
         if obj in self.selected:
             need_select = True
 
+        # temporarily disconnect signal handler  
+        self.selection.disconnect(self.glib_select_cb_id)
+        
         pathstr = self.object_paths.get(obj)
         path = Gtk.TreePath.new_from_string(pathstr)
         iter = self.treestore.get_iter_from_string(pathstr)
 
-        # temporarily disconnect signal handler  
-        self.selection.disconnect(self.glib_select_cb_id)
-        self.treestore.remove(iter)
-        self.insert(obj, parent)
+        # re-sort the object (and all its children, unfortunately)
+        self.treestore.set(iter, 0, obj)
 
         # restore signal handler 
         self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)
@@ -178,7 +178,6 @@ class TreeDisplay (object):
             if pathstr: 
                 path = Gtk.TreePath.new_from_string(pathstr)
                 self.selection.select_path(path)
-
 
     def select(self, obj): 
         if obj in self.selected: 

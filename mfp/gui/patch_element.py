@@ -134,6 +134,8 @@ class PatchElement (Clutter.Group):
         connections_out = []
         connections_in = [] 
 
+        # FIXME: optional name-root argument?  Need to pass the number at all,
+        # with the scope handling it?  
         if self.obj_name is not None:
             name = self.obj_name
         else:

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 patch.py
 Patch class and methods 
@@ -75,6 +75,13 @@ class Patch(Processor):
 
     def del_scope(self, name):
         del self.scopes[name]
+
+    def rename(self, new_name):
+        from .main import MFPApp
+        oldname = self.name
+        Processor.rename(self, new_name)
+        del MFPApp().patches[oldname]
+        MFPApp().patches[new_name] = self 
 
     #############################
     # evaluator

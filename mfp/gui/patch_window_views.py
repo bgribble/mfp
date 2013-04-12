@@ -16,7 +16,7 @@ def init_object_view(self):
             return o[0]
 
     def obj_name_edited(obj, new_name):
-        if isinstance(obj, PatchElement):
+        if isinstance(obj, (PatchElement, PatchInfo)):
             obj.obj_name = new_name
             MFPCommand().rename_obj(obj.obj_id, new_name)
             obj.send_params()
@@ -27,7 +27,15 @@ def init_object_view(self):
                     l.scope = new_name
             MFPCommand().rename_scope(self.selected_patch.obj_id, oldscopename, new_name)
             self.selected_patch.send_params()
-        self.object_view.update(obj, (obj.layer.scope, obj.layer.patch)) 
+
+        if isinstance(obj, PatchElement):
+            parent = (obj.layer.scope, obj.layer.patch) 
+        elif isinstance(obj, PatchInfo): 
+            parent = None 
+        else: 
+            parent = (self.selected_layer,)
+
+        self.object_view.update(obj, parent)
 
     def obj_selected(obj):
         self._select(obj)
@@ -53,7 +61,6 @@ def init_object_view(self):
 
 @extends(PatchWindow)
 def init_layer_view(self):
-
     def get_layer_name(o):
         if isinstance(o, Layer):
             return o.name
@@ -66,13 +73,17 @@ def init_layer_view(self):
         else: 
             return ''
 
-    def layer_name_edited(layer, new_value):
-        if isinstance(layer, Layer):
-            layer.name = new_value
+    def layer_name_edited(obj, new_value):
+        if isinstance(obj, Layer):
+            obj.name = new_value
             self.selected_patch.send_params()
-            for obj in self.objects:
-                if obj.layer == layer:
-                    obj.send_params()
+            for lobj in self.objects:
+                if lobj.layer == obj:
+                    lobj.send_params()
+        elif isinstance(obj, (PatchElement, PatchInfo)):
+            obj.obj_name = new_value
+            MFPCommand().rename_obj(obj.obj_id, new_value)
+            obj.send_params()
         return True
 
     def layer_scope_edited(layer, new_value):
