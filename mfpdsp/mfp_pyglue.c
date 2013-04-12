@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <execinfo.h>
+#include <sys/time.h>
 #include "mfp_dsp.h"
 #include "builtin.h"
 
@@ -85,20 +86,26 @@ dsp_response_wait(PyObject * mod, PyObject * args)
     PyObject * proc;
     mfp_respdata r;
     int rcount;
+    struct timespec alarmtime;
+    struct timeval nowtime;
 
     Py_BEGIN_ALLOW_THREADS
     pthread_mutex_lock(&mfp_response_lock);
-    if (!mfp_responses_pending || (mfp_responses_pending->len == 0)) {
-        pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
+    gettimeofday(&nowtime, NULL);
+    alarmtime.tv_sec = nowtime.tv_sec; 
+    alarmtime.tv_nsec = nowtime.tv_usec*1000 + 10000000;
+
+    if (mfp_response_queue_read == mfp_response_queue_write) { 
+        pthread_cond_timedwait(&mfp_response_cond, &mfp_response_lock, &alarmtime);
     }
     Py_END_ALLOW_THREADS
 
     /* copy/clear C response objects */
-    if(mfp_responses_pending && (mfp_responses_pending->len > 0)) {
-        l = PyList_New(mfp_responses_pending->len);
-        for(rcount=0; rcount < mfp_responses_pending->len; rcount++) {
+    if(mfp_response_queue_read != mfp_response_queue_write) {
+        l = PyList_New(0);
+        while(mfp_response_queue_read != mfp_response_queue_write) {
             t = PyTuple_New(3);
-            r = g_array_index(mfp_responses_pending, mfp_respdata, rcount);
+            r = mfp_response_queue[mfp_response_queue_read];
 
             proc = g_hash_table_lookup(mfp_proc_objects, r.dst_proc);
             if (proc == NULL)
@@ -123,16 +130,14 @@ dsp_response_wait(PyObject * mod, PyObject * args)
                     g_free(r.response.c);
                     break;
             }
-            PyList_SetItem(l, rcount, t);
+            PyList_Append(l, t);
             responses += 1;
+            mfp_response_queue_read = (mfp_response_queue_read+1) % REQ_BUFSIZE;
         }
-        g_array_remove_range(mfp_responses_pending, 0, mfp_responses_pending->len);
     }
     pthread_mutex_unlock(&mfp_response_lock);
 
-
     /* build python response */
-
     if (responses == 0) {
         Py_INCREF(Py_None);
         return Py_None;
@@ -458,7 +463,6 @@ init_globals(void)
     mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal); 
 
     mfp_request_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata *));
-    mfp_responses_pending = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
 
     pthread_cond_init(&mfp_response_cond, NULL);
     pthread_mutex_init(&mfp_response_lock, NULL);

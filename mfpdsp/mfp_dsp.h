@@ -105,6 +105,9 @@ typedef struct {
 #define EXTINFO_LOADED 1 
 #define EXTINFO_READY 2 
 
+#define REQ_BUFSIZE 2048
+#define REQ_LASTIND (REQ_BUFSIZE-1)
+
 /* global variables */ 
 extern int mfp_dsp_enabled;
 extern int mfp_needs_reschedule;
@@ -121,11 +124,12 @@ extern GHashTable * mfp_extensions;
 extern GArray * mfp_proc_list; 
 extern GArray * mfp_request_cleanup;
 
-extern GArray * mfp_responses_pending;
-
 extern pthread_mutex_t mfp_request_lock;
 extern pthread_mutex_t mfp_response_lock;
 extern pthread_cond_t mfp_response_cond;
+extern int mfp_response_queue_read;
+extern int mfp_response_queue_write;
+extern mfp_respdata mfp_response_queue[REQ_BUFSIZE];
 
 /* mfp_jack.c */
 extern GArray * mfp_input_ports;

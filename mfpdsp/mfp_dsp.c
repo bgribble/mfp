@@ -7,16 +7,17 @@
 
 #include "mfp_dsp.h"
 
-#define REQ_BUFSIZE 2048
-#define REQ_LASTIND (REQ_BUFSIZE-1)
 
 GArray      * mfp_request_cleanup = NULL;
 mfp_reqdata * request_queue[REQ_BUFSIZE];
 int         request_queue_write = 0;
 int         request_queue_read = 0;
-
-GArray          * mfp_responses_pending = NULL;
 pthread_mutex_t mfp_request_lock = PTHREAD_MUTEX_INITIALIZER;
+
+mfp_respdata mfp_response_queue[REQ_BUFSIZE];
+int          mfp_response_queue_write = 0;
+int          mfp_response_queue_read = 0;
+
 pthread_mutex_t mfp_response_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  mfp_response_cond = PTHREAD_COND_INITIALIZER;
 
@@ -333,6 +334,28 @@ mfp_dsp_accum(mfp_sample * accum, mfp_sample * addend, int blocksize)
     }
 }
 
+static int
+push_response(mfp_respdata rd) 
+{
+
+    if((mfp_response_queue_read == 0 && mfp_response_queue_write == REQ_LASTIND)
+        || (mfp_response_queue_write + 1 == mfp_response_queue_read)) {
+        return 0;
+    }
+
+    mfp_response_queue[mfp_response_queue_write] = rd;
+    if(mfp_response_queue_write == REQ_LASTIND) {
+        mfp_response_queue_write = 0;
+    }
+    else {
+        mfp_response_queue_write += 1;
+    }
+
+    return 1;
+}
+
+
+
 void
 mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response)
 {
@@ -342,12 +365,13 @@ mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response)
     rd.msg_type = msg_type;
     rd.response_type = PARAMTYPE_STRING;
     rd.response.c = g_strdup(response);
-    
-    pthread_mutex_lock(&mfp_response_lock);
-    g_array_append_val(mfp_responses_pending, rd);
-    pthread_cond_broadcast(&mfp_response_cond);
-    pthread_mutex_unlock(&mfp_response_lock);
-    
+   
+    if(push_response(rd)) {
+        pthread_cond_broadcast(&mfp_response_cond);
+    }
+    else {
+        printf("DSP Response queue full, dropping response\n");
+    }
 }
 
 void
@@ -360,11 +384,12 @@ mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int response)
     rd.response_type = PARAMTYPE_BOOL;
     rd.response.i = response;
     
-    pthread_mutex_lock(&mfp_response_lock);
-    g_array_append_val(mfp_responses_pending, rd);
-    pthread_cond_broadcast(&mfp_response_cond);
-    pthread_mutex_unlock(&mfp_response_lock);
-    
+    if(push_response(rd)) {
+        pthread_cond_broadcast(&mfp_response_cond);
+    }
+    else {
+        printf("DSP Response queue full, dropping response\n");
+    }
 }
 
 void
@@ -377,11 +402,12 @@ mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response)
     rd.response_type = PARAMTYPE_INT;
     rd.response.i = response;
     
-    pthread_mutex_lock(&mfp_response_lock);
-    g_array_append_val(mfp_responses_pending, rd);
-    pthread_cond_broadcast(&mfp_response_cond);
-    pthread_mutex_unlock(&mfp_response_lock);
-    
+    if(push_response(rd)) {
+        pthread_cond_broadcast(&mfp_response_cond);
+    }
+    else {
+        printf("DSP Response queue full, dropping response\n");
+    }
 }
 
 void
@@ -394,10 +420,11 @@ mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response)
     rd.response_type = PARAMTYPE_FLT;
     rd.response.f = response;
     
-    pthread_mutex_lock(&mfp_response_lock);
-    g_array_append_val(mfp_responses_pending, rd);
-    pthread_cond_broadcast(&mfp_response_cond);
-    pthread_mutex_unlock(&mfp_response_lock);
-    
+    if(push_response(rd)) {
+        pthread_cond_broadcast(&mfp_response_cond);
+    }
+    else {
+        printf("DSP Response queue full, dropping response\n");
+    }
 }
 
