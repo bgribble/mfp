@@ -95,9 +95,9 @@ class PatchEditMode (InputMode):
         self.bind("S-M1-MOTION", lambda: self.selbox_motion(True), "Drag selection box")
         self.bind("S-M1UP", lambda: self.selbox_end(), "End selection box")
 
-        self.bind("C-M1DOWN", lambda: self.selbox_start(False), "Start unselection box")
-        self.bind("C-M1-MOTION", lambda: self.selbox_motion(False), "Drag unselection box")
-        self.bind("C-M1UP", lambda: self.selbox_end(), "End unselection box")
+        self.bind("C-M1DOWN", lambda: self.selbox_start(False), "Start toggle-selection box")
+        self.bind("C-M1-MOTION", lambda: self.selbox_motion(False), "Drag toggle-selection box")
+        self.bind("C-M1UP", lambda: self.selbox_end(), "End toggle-selection box")
 
         self.bind('+', lambda: self.window.zoom_in(1.25), "Zoom view in")
         self.bind('=', lambda: self.window.zoom_in(1.25), "Zoom view in")
@@ -306,10 +306,10 @@ class PatchEditMode (InputMode):
             else:
                 if obj not in self.selbox_changed:
                     self.selbox_changed.append(obj)
-                if obj in self.window.selected:
-                    self.window.unselect(obj)
-                else: 
-                    self.window.select(obj)
+                    if obj in self.window.selected:
+                        self.window.unselect(obj)
+                    else: 
+                        self.window.select(obj)
 
             if not self.window.selected:
                 self.disable_selection_edit()
@@ -317,7 +317,7 @@ class PatchEditMode (InputMode):
         new_changed = []
         for obj in self.selbox_changed: 
             if obj not in enclosed:
-                if select_mode:
+                if obj in self.window.selected:
                     self.window.unselect(obj)
                 else: 
                     self.window.select(obj)

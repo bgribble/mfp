@@ -49,9 +49,9 @@ def patch_new(self):
 
 @extends(PatchWindow)
 def _select(self, obj): 
-    if obj is None or not isinstance(obj, PatchElement):
+    if obj is None or not isinstance(obj, PatchElement) or obj in self.selected:
         return 
-
+    
     self.selected[:0] = [obj]
     obj.select()
     obj.begin_control()
@@ -106,6 +106,7 @@ def unselect_all(self):
         obj.end_control()
         self._unselect(obj)
         self.object_view.unselect(obj)
+    self.object_view.unselect_all()
     return True
 
 
@@ -194,7 +195,7 @@ def rezoom(self):
     w, h = self.group.get_size()
     self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
     self.group.set_position(self.view_x, self.view_y)
-    self.input_mgr.rezoom()
+    #self.input_mgr.rezoom()
 
 @extends(PatchWindow)
 def reset_zoom(self):

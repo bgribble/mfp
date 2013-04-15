@@ -144,20 +144,16 @@ class InputManager (object):
                 keysym = self.keyseq.pop()
         elif event.type == Clutter.EventType.ENTER:
             src = self.event_sources.get(event.source)
-            #print "ENTER:", src
             if self.window.object_visible(src):
-                #print src, "is visible, setting as pointer_obj"
                 self.pointer_obj = self.event_sources.get(event.source)
                 self.pointer_obj_time = datetime.now()
                 if self.pointer_obj == self.pointer_lastobj:
                     self.keyseq.mod_keys = set()
             else:
-                #print src, "is not visible"
                 pass
 
         elif event.type == Clutter.EventType.LEAVE:
             src = self.event_sources.get(event.source)
-            #print "LEAVE:", src
             if src == self.pointer_obj:
                 self.pointer_lastobj = self.pointer_obj
                 self.pointer_obj = None

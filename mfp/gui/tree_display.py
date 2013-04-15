@@ -115,6 +115,11 @@ class TreeDisplay (object):
         self.treestore.clear()
         self.object_paths = {} 
 
+    def unselect_all(self):
+        to_remove = [s for s in self.selected ]
+        for obj in to_remove:
+            self.unselect(obj)
+
     def unselect(self, obj): 
         if obj not in self.selected: 
             return 
