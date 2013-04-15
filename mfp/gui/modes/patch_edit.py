@@ -274,8 +274,8 @@ class PatchEditMode (InputMode):
             else: 
                 self.disable_selection_edit()
 
-        px = self.manager.pointer_ev_x
-        py = self.manager.pointer_ev_y
+        px = self.manager.pointer_x
+        py = self.manager.pointer_y
 
         self.drag_start_x = px
         self.drag_start_y = py
@@ -287,8 +287,8 @@ class PatchEditMode (InputMode):
         if self.selbox_started is False:
             return False 
 
-        px = self.manager.pointer_ev_x
-        py = self.manager.pointer_ev_y
+        px = self.manager.pointer_x
+        py = self.manager.pointer_y
 
         self.drag_last_x = px
         self.drag_last_y = py

@@ -85,15 +85,5 @@ class MultiSelectionEditMode (InputMode):
 
         self.extend(SelectionEditMode(window))
 
-    def connect_fwd(self):
-        if self.window.selected:
-            self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected))
-        return True
-
-    def connect_rev(self):
-        if self.window.selected:
-            self.manager.enable_minor_mode(ConnectionMode(self.window, self.window.selected,
-                                                          connect_rev=True))
-        return True
 
 

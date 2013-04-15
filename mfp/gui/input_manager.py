@@ -133,6 +133,9 @@ class InputManager (object):
             if len(self.keyseq.sequences):
                 keysym = self.keyseq.pop()
         elif event.type == Clutter.EventType.MOTION:
+            # FIXME: if the scaling changes so that window.stage_pos would return a 
+            # different value, that should generate a MOTION event.  Currently we are 
+            # just kludging pointer_x and pointer_y from the scale callback.
             self.pointer_ev_x = event.x
             self.pointer_ev_y = event.y
             self.pointer_x, self.pointer_y = self.window.stage_pos(event.x, event.y)
@@ -173,3 +176,7 @@ class InputManager (object):
                 else:
                     return False 
             return rv 
+
+    def rezoom(self): 
+        self.pointer_x, self.pointer_y = self.window.stage_pos(self.pointer_ev_x, 
+                                                               self.pointer_ev_y)

@@ -194,7 +194,7 @@ def rezoom(self):
     w, h = self.group.get_size()
     self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
     self.group.set_position(self.view_x, self.view_y)
-
+    self.input_mgr.rezoom()
 
 @extends(PatchWindow)
 def reset_zoom(self):
