@@ -83,9 +83,8 @@ class TreeDisplay (object):
                     self.unselect_cb(s)
 
         for s in selections: 
-            if s not in self.selected: 
-                if self.select_cb:
-                    self.select_cb(s)
+            if self.select_cb:
+                self.select_cb(s)
 
         self.selected = selections
 

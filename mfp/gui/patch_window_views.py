@@ -108,16 +108,16 @@ def init_layer_view(self):
 
     def sel_layer(l):
         if isinstance(l, PatchInfo):
+            self.layer_view.select(None)
             self.layer_select(l.layers[0])
         else:
             self._layer_select(l)
-
 
     layer_cols = [("Name", get_layer_name, True, layer_name_edited, get_sortname), 
                   ("Scope", get_layer_scopename, True, layer_scope_edited, False)] 
     layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
     layer_view.select_cb = sel_layer
-    layer_view.unselect_cb = None 
+    layer_view.unselect_cb = None
 
     return layer_view 
 
