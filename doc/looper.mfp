@@ -64,7 +64,7 @@
                 "layername": "Front Panel",
                 "scale_type": 0
             },
-            "name": "var_2",
+            "name": "inputdb",
             "value": -1000,
             "do_onload": false,
             "initargs": "0.0",
@@ -90,7 +90,7 @@
                 "layername": "Front Panel",
                 "scale_type": 0
             },
-            "name": "var_3",
+            "name": "outputdb",
             "value": -1000,
             "do_onload": false,
             "initargs": "0.0",
@@ -226,7 +226,7 @@
                 "position_y": 40.970497131347656,
                 "layername": "Buffer control"
             },
-            "name": "play",
+            "name": "recvvia_001",
             "do_onload": true,
             "initargs": "\"play\"",
             "type": "recv"
@@ -249,7 +249,7 @@
                 "position_y": 43.222476959228516,
                 "layername": "Buffer control"
             },
-            "name": "rec",
+            "name": "recvvia_002",
             "do_onload": true,
             "initargs": "\"rec\"",
             "type": "recv"
@@ -396,7 +396,7 @@
                 "position_y": 182.04754638671875,
                 "layername": "Audio processing"
             },
-            "name": "bufctl",
+            "name": "recvvia_003",
             "do_onload": true,
             "initargs": "\"bufctl\"",
             "type": "recv"
@@ -419,7 +419,7 @@
                 "position_y": 305.025390625,
                 "layername": "Audio processing"
             },
-            "name": "overdub",
+            "name": "recvvia_004",
             "do_onload": true,
             "initargs": "\"overdub\"",
             "type": "recv"
@@ -665,7 +665,7 @@
                 "position_y": 41.927738189697266,
                 "layername": "Buffer control"
             },
-            "name": "newstate",
+            "name": "recvvia_005",
             "do_onload": true,
             "initargs": "\"newstate\"",
             "type": "recv"
@@ -1808,7 +1808,7 @@
                 "position_y": 51.85431671142578,
                 "layername": "Indicators"
             },
-            "name": "indicators",
+            "name": "recvvia_006",
             "do_onload": true,
             "initargs": "\"indicators\"",
             "type": "recv"
@@ -2123,13 +2123,13 @@
     "type": "looper",
     "scopes": {
         "__patch__": {
-            "bufctl": 17,
+            "recvvia_003": 17,
             "message_008": 37,
             "message_011": 39,
             "toggle_002": 75,
             "toggle_001": 74,
             "processor_014": 23,
-            "play": 10,
+            "recvvia_001": 10,
             "message_028": 82,
             "text_012": 41,
             "inputdb": 2,
@@ -2148,14 +2148,12 @@
             "processor_001": 12,
             "case_53": 64,
             "processor_027": 86,
-            "processor_024": 73,
             "processor_025": 78,
-            "processor_022": 71,
             "processor_007": 14,
             "message_48": 66,
             "buffer~_15": 40,
-            "indicators": 77,
-            "rec": 11,
+            "recvvia_006": 77,
+            "recvvia_002": 11,
             "processor_023": 72,
             "sendvia_001": 8,
             "button_002": 52,
@@ -2200,9 +2198,9 @@
             "processor_016": 28,
             "processor_015": 27,
             "case_47": 60,
-            "overdub": 18,
+            "recvvia_004": 18,
             "text_004": 5,
-            "newstate": 30,
+            "recvvia_005": 30,
             "self": 0
         }
     }
