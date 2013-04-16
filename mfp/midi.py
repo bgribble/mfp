@@ -166,6 +166,7 @@ class MidiPgmChange (MidiEvent):
     def __repr__(self):
         return "<MidiPgmChange %s %s>" % (self.channel, self.program)
 
+
 class MidiCC (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_CONTROLLER 
 
@@ -189,6 +190,30 @@ class MidiCC (MidiEvent):
     def __repr__(self):
         return "<MidiCC %s %s %s>" % (self.channel, self.controller, self.value)
 
+class MidiPitchbend (MidiCC):
+    alsa_type = alsaseq.SND_SEQ_EVENT_PITCHBEND
+
+    def __init__(self, seqevent=None):
+        self.seqevent = seqevent
+        self.channel = None
+        self.controller = None
+        self.note = None 
+        self.value = None
+
+        if self.seqevent is not None:
+            self.channel = seqevent.data[0]
+            self.note = seqevent.data[1]
+            self.value = seqevent.data[5]
+        
+    def seq_data(self):
+        return (self.channel, self.note, 0, 0, 1, self.value)
+
+    def source(self):
+        return (self.seqevent.dst, MidiPitchbend.__name__, self.channel, self.note)
+
+    def __repr__(self):
+        return "<MidiPitchbend %s %s %s>" % (self.channel, self.note, self.value)
+
 class MFPMidiManager(QuittableThread):
     etypemap = {
         alsaseq.SND_SEQ_EVENT_SYSTEM: MidiUndef,
@@ -200,7 +225,7 @@ class MFPMidiManager(QuittableThread):
         alsaseq.SND_SEQ_EVENT_CONTROLLER: MidiCC,
         alsaseq.SND_SEQ_EVENT_PGMCHANGE: MidiPgmChange,
         alsaseq.SND_SEQ_EVENT_CHANPRESS: NotePress,
-
+        alsaseq.SND_SEQ_EVENT_PITCHBEND: MidiPitchbend, 
         alsaseq.SND_SEQ_EVENT_CONTROL14: MidiUndef,
         alsaseq.SND_SEQ_EVENT_NONREGPARAM: MidiUndef,
         alsaseq.SND_SEQ_EVENT_REGPARAM: MidiUndef,

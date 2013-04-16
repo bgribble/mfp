@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from .dsp_slave import DSPObject
 from .method import MethodCall
-from .bang import Uninit
+from .bang import Uninit, Bang
 from .scope import LexicalScope
 
 from . import log
@@ -233,7 +233,7 @@ class Processor (object):
             if isinstance(event, NoteOn):
                 self.send(event.velocity)
             elif isinstance(event, NoteOff):
-                self.send(0.0)
+                self.send(0)
         elif self.midi_mode == "cc_val":
             self.send(event.value)
         elif self.midi_mode == "pgm":
@@ -251,7 +251,11 @@ class Processor (object):
         if mode.startswith("note"):
             if not isinstance(event, NoteOn):
                 return 
-            filters["etype"] = [ NoteOn, NoteOff, NotePress ]
+            if mode == "note_bang":
+                filters["etype"] = [ NoteOn ]
+            else:
+                filters["etype"] = [ NoteOn, NoteOff, NotePress ]
+
             filters["channel"] = [channel] 
             filters["port"] = [port] 
             filters["unit"] = [unit] 
@@ -259,7 +263,7 @@ class Processor (object):
         elif mode.startswith("cc"):
             if not isinstance(event, MidiCC):
                 return 
-            filters["etype"] = [ MidiCC ]
+            filters["etype"] = [ type(event) ]
             filters["channel"] = [channel]
             filters["port"] = [port]
             filters["unit"] = [unit]
@@ -268,6 +272,15 @@ class Processor (object):
             if not isinstance(event, MidiPgmChange):
                 return 
             filters["etype"] = [ MidiPgmChange ]
+            filters["channel"] = [channel]
+            filters["port"] = [port]
+
+        elif mode.startswith("chan"):
+            if mode == "chan_note":
+                if not isinstance(event, NoteOn):
+                    return 
+                filters["etype"] = [ NoteOn, NoteOff, NotePress ]
+
             filters["channel"] = [channel]
             filters["port"] = [port]
 
