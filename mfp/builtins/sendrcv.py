@@ -34,7 +34,7 @@ class Send (Processor):
 
         self.gui_params["label"] = self.dest_name
 
-    def method(self, message, inlet):
+    def method(self, message, inlet=0):
         if inlet == 0:
             self.trigger()
         else: 
@@ -100,6 +100,12 @@ class MessageBus (Processor):
     def trigger(self):
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit 
+
+    def method(self, message, inlet=0):
+        if inlet == 0:
+            self.trigger()
+        else: 
+            message.call(self)
 
 class SignalBus (Processor): 
     display_type = "hidden"
