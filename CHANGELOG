@@ -1,5 +1,5 @@
 
-mfp v0.03
+mfp v0.03, 2013-Apr-16 
 
   * #49: Remove last lock calls from JACK process() path 
 
