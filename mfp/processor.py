@@ -22,15 +22,16 @@ class Processor (object):
     DELETED = 3 
 
     display_type = 'processor'
+    save_to_patch = True 
     hot_inlets = [0]
 
     doc_tooltip_obj = "No documentation found"
     doc_tooltip_inlet = []
     doc_tooltip_outlet = [] 
 
-    def __init__(self, inlets, outlets, init_type, init_args,
-                 patch, scope, name):
+    def __init__(self, inlets, outlets, init_type, init_args, patch, scope, name):
         from .main import MFPApp
+
         self.init_type = init_type
         self.init_args = init_args
         self.obj_id = MFPApp().remember(self)

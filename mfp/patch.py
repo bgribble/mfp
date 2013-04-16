@@ -222,12 +222,15 @@ class Patch(Processor):
         MFPApp().gui_command.load_start()
 
         for oid, obj in self.objects.items():
-            obj.create_gui()
+            if obj.display_type != "hidden":
+                obj.create_gui()
 
         for oid, obj in self.objects.items():
             for srcport, connections in enumerate(obj.connections_out):
                 for dstobj, dstport in connections:
-                    MFPApp().gui_command.connect(obj.obj_id, srcport, dstobj.obj_id, dstport)
+                    if obj.display_type != "hidden" and dstobj.display_type != "hidden":
+                        MFPApp().gui_command.connect(obj.obj_id, srcport, 
+                                                     dstobj.obj_id, dstport)
         MFPApp().gui_command.load_complete()
 
     def save_file(self, filename):

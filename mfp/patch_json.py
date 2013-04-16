@@ -40,6 +40,7 @@ def extended_decoder_hook (saved):
 
 @extends(Patch)
 def json_deserialize(self, json_data):
+    from .scope import NaiveScope
 
     f = json.loads(json_data, object_hook=extended_decoder_hook)
     self.init_type = f.get('type')
@@ -71,8 +72,10 @@ def json_deserialize(self, json_data):
     self.dispatch_objects = [] 
 
     # create new objects
-    # FIXME -- will break with name collisions on multi-scope json file 
-    idmap = self.json_unpack_objects(f, self.default_scope)
+    # dumb_scope will allow multiple objects with a name, we will resolve when
+    # reloading scopes 
+    dumb_scope = NaiveScope()
+    idmap = self.json_unpack_objects(f, dumb_scope)
 
     # load new scopes
     scopes = f.get("scopes", {})
@@ -86,7 +89,8 @@ def json_deserialize(self, json_data):
             if obj is None:
                 log.debug("Error in patch (object %d not found), continuing anyway" % oid)
             else:
-                s.bind(name, obj)
+                dumb_scope.unbind(obj.name)
+                self.bind(name, s, obj)
                 obj.scope = s
 
     self.default_scope = self.scopes.get('__patch__') or self.add_scope("__patch__")
@@ -94,8 +98,9 @@ def json_deserialize(self, json_data):
 
     # failsafe -- add un-scoped objects to default scope
     for oid, obj in self.objects.items():
-        if obj.scope is None:
-            self.default_scope.bind(obj.name, obj)
+        if obj.scope is dumb_scope:
+            dumb_scope.unbind(obj.name)
+            self.bind(obj.name, self.default_scope, obj)
             obj.scope = self.default_scope
 
     # make connections
@@ -162,6 +167,8 @@ def json_serialize(self):
     keys.sort()
     for oid in keys:
         o = self.objects.get(oid)
+        if not o.save_to_patch:
+            continue
         oinfo = o.save()
         allobj[oid] = oinfo
 
@@ -171,6 +178,8 @@ def json_serialize(self):
     for scopename, scope in self.scopes.items():
         bindings = {}
         for objname, obj in scope.bindings.items():
+            if not obj.save_to_patch:
+                continue
             bindings[objname] = obj.obj_id
 
         scopes[scopename] = bindings

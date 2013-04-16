@@ -50,3 +50,11 @@ class LexicalScope (object):
 
     def resolve(self, name):
         return self.bindings.get(name)
+
+
+class NaiveScope (LexicalScope): 
+    def bind(self, name, obj):
+        self.bindings[name] = obj 
+        return name 
+
+

@@ -10,7 +10,6 @@ from ..quittable_thread import QuittableThread
 from ..processor import Processor
 from ..main import MFPApp
 from .. import Uninit
-from mfp import log
 
 
 class Send (Processor):
@@ -92,13 +91,20 @@ class SendSignal (Send):
                                  self.dest_obj.dsp_inlets.index(self.dest_inlet))
 
 class MessageBus (Processor): 
+    display_type = "hidden"
+    save_to_patch = False 
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         self.outlets[0] = self.inlets[0]
+        self.inlets[0] = Uninit 
 
 class SignalBus (Processor): 
+    display_type = "hidden"
+    save_to_patch = False 
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         self.dsp_inlets = [0]
@@ -121,15 +127,16 @@ class Recv (Processor):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        self.gui_params["label"] = self.name
-        self.bus_name = None 
+        self.bus_name = self.name 
+        if len(initargs):
+            self.bus_name = initargs[0]
+
+        self.gui_params["label"] = self.bus_name
         self.bus_obj = None 
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
 
-        if len(initargs):
-            self.bus_connect(initargs[0])
 
     def method(self, message, inlet):
         if inlet == 0:
@@ -145,6 +152,9 @@ class Recv (Processor):
         if self.inlets[0] is not Uninit:
             self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
+
+    def onload(self):
+        self.bus_connect(self.bus_name)
 
     def bus_connect(self, bus_name):
         if self.bus_obj is not None and self.bus_name != bus_name:
