@@ -1204,7 +1204,7 @@
                 "initargs": "\"rg0\"",
                 "init_args": "\"rg0\""
             },
-            "name": "rg0",
+            "name": "recvvia_001",
             "do_onload": true,
             "initargs": "\"rg0\"",
             "type": "recv"
@@ -1234,7 +1234,7 @@
                 "initargs": "\"rg1\"",
                 "init_args": "\"rg1\""
             },
-            "name": "rg1",
+            "name": "recvvia_002",
             "do_onload": true,
             "initargs": "\"rg1\"",
             "type": "recv"
@@ -1264,7 +1264,7 @@
                 "initargs": "\"rg2\"",
                 "init_args": "\"rg2\""
             },
-            "name": "rg2",
+            "name": "recvvia_003",
             "do_onload": true,
             "initargs": "\"rg2\"",
             "type": "recv"
@@ -1294,7 +1294,7 @@
                 "initargs": "\"rg3\"",
                 "init_args": "\"rg3\""
             },
-            "name": "rg3",
+            "name": "recvvia_004",
             "do_onload": true,
             "initargs": "\"rg3\"",
             "type": "recv"
@@ -1324,7 +1324,7 @@
                 "initargs": "\"rg4\"",
                 "init_args": "\"rg4\""
             },
-            "name": "rg4",
+            "name": "recvvia_005",
             "do_onload": true,
             "initargs": "\"rg4\"",
             "type": "recv"
@@ -1572,7 +1572,7 @@
                 "initargs": "\"frq\"",
                 "init_args": "\"frq\""
             },
-            "name": "frq",
+            "name": "recvvia_006",
             "do_onload": true,
             "initargs": "\"frq\"",
             "type": "recv"
@@ -1602,7 +1602,7 @@
                 "initargs": "\"q\"",
                 "init_args": "\"q\""
             },
-            "name": "q",
+            "name": "recvvia_007",
             "do_onload": true,
             "initargs": "\"q\"",
             "type": "recv"
@@ -1632,7 +1632,7 @@
                 "initargs": "\"slope\"",
                 "init_args": "\"slope\""
             },
-            "name": "slope",
+            "name": "recvvia_008",
             "do_onload": true,
             "initargs": "\"slope\"",
             "type": "recv"
@@ -1662,7 +1662,7 @@
                 "initargs": "\"gain\"",
                 "init_args": "\"gain\""
             },
-            "name": "gain",
+            "name": "recvvia_009",
             "do_onload": true,
             "initargs": "\"gain\"",
             "type": "recv"
@@ -1883,7 +1883,7 @@
                 "initargs": "\"start\"",
                 "init_args": "\"start\""
             },
-            "name": "start",
+            "name": "recvvia_010",
             "do_onload": true,
             "initargs": "\"start\"",
             "type": "recv"
@@ -2353,7 +2353,7 @@
                 "initargs": "\"hpf\"",
                 "init_args": "\"hpf\""
             },
-            "name": "hpf",
+            "name": "recvvia_011",
             "do_onload": true,
             "initargs": "\"hpf\"",
             "type": "recv"
@@ -2881,7 +2881,7 @@
                 "initargs": "\"a1\"",
                 "init_args": "\"a1\""
             },
-            "name": "a1",
+            "name": "recvvia_012",
             "do_onload": true,
             "initargs": "\"a1\"",
             "type": "recv"
@@ -2911,7 +2911,7 @@
                 "initargs": "\"a2\"",
                 "init_args": "\"a2\""
             },
-            "name": "a2",
+            "name": "recvvia_013",
             "do_onload": true,
             "initargs": "\"a2\"",
             "type": "recv"
@@ -2941,7 +2941,7 @@
                 "initargs": "\"b0\"",
                 "init_args": "\"b0\""
             },
-            "name": "b0",
+            "name": "recvvia_014",
             "do_onload": true,
             "initargs": "\"b0\"",
             "type": "recv"
@@ -2971,7 +2971,7 @@
                 "initargs": "\"b1\"",
                 "init_args": "\"b1\""
             },
-            "name": "b1",
+            "name": "recvvia_015",
             "do_onload": true,
             "initargs": "\"b1\"",
             "type": "recv"
@@ -3001,7 +3001,7 @@
                 "initargs": "\"b2\"",
                 "init_args": "\"b2\""
             },
-            "name": "b2",
+            "name": "recvvia_016",
             "do_onload": true,
             "initargs": "\"b2\"",
             "type": "recv"
@@ -3031,7 +3031,7 @@
                 "initargs": "\"done\"",
                 "init_args": "\"done\""
             },
-            "name": "done",
+            "name": "recvvia_017",
             "do_onload": true,
             "initargs": "\"done\"",
             "type": "recv"
@@ -3144,7 +3144,7 @@
                 "initargs": "\"polezero\"",
                 "init_args": "\"polezero\""
             },
-            "name": "polezero",
+            "name": "recvvia_018",
             "do_onload": true,
             "initargs": "\"polezero\"",
             "type": "recv"
@@ -3594,7 +3594,7 @@
                 "layername": "Graphs",
                 "init_args": "\"pzg0\""
             },
-            "name": "pzg0",
+            "name": "recvvia_019",
             "do_onload": true,
             "initargs": "\"pzg0\"",
             "type": "recv"
@@ -3724,7 +3724,7 @@
                 "layername": "Graphs",
                 "init_args": "\"pzg1\""
             },
-            "name": "pzg1",
+            "name": "recvvia_020",
             "do_onload": true,
             "initargs": "\"pzg1\"",
             "type": "recv"
@@ -3754,7 +3754,7 @@
                 "layername": "Graphs",
                 "init_args": "\"pzg2\""
             },
-            "name": "pzg2",
+            "name": "recvvia_021",
             "do_onload": true,
             "initargs": "\"pzg2\"",
             "type": "recv"
@@ -3946,7 +3946,7 @@
                 "layername": "Graphs",
                 "init_args": "\"fr0\""
             },
-            "name": "fr0",
+            "name": "recvvia_022",
             "do_onload": true,
             "initargs": "\"fr0\"",
             "type": "recv"
@@ -4103,19 +4103,19 @@
                 "obj_id": 199,
                 "dsp_outlets": null,
                 "update_required": false,
-                "label": "pzdone",
+                "label": "frcoeffs",
                 "num_outlets": 1,
                 "dsp_inlets": null,
                 "display_type": "recvvia",
                 "num_inlets": 1,
                 "position_y": 10.515045166015625,
-                "initargs": "\"pzdone\"",
+                "initargs": "\"frcoeffs\"",
                 "layername": "Freq resp calc",
-                "init_args": "\"pzdone\""
+                "init_args": "\"frcoeffs\""
             },
-            "name": "pzdone",
+            "name": "recvvia_023",
             "do_onload": true,
-            "initargs": "\"pzdone\"",
+            "initargs": "\"frcoeffs\"",
             "type": "recv"
         },
         "200": {
@@ -4473,7 +4473,7 @@
                 "layername": "Front Panel",
                 "init_args": "\"coeffs\""
             },
-            "name": "coeffs",
+            "name": "recvvia_024",
             "do_onload": true,
             "initargs": "\"coeffs\"",
             "type": "recv"
@@ -4694,7 +4694,7 @@
                 "layername": "Lowpass",
                 "init_args": "\"lpf\""
             },
-            "name": "lpf",
+            "name": "recvvia_025",
             "do_onload": true,
             "initargs": "\"lpf\"",
             "type": "recv"
@@ -5823,7 +5823,7 @@
                 "layername": "Bandpass",
                 "init_args": "\"bpf\""
             },
-            "name": "bpf",
+            "name": "recvvia_027",
             "do_onload": true,
             "initargs": "\"bpf\"",
             "type": "recv"
@@ -6487,7 +6487,7 @@
     "type": "biquad-1",
     "scopes": {
         "__patch__": {
-            "slope": 59,
+            "recvvia_008": 59,
             "processor_099": 251,
             "processor_098": 250,
             "processor_69": 208,
@@ -6527,22 +6527,22 @@
             "processor_11": 76,
             "processor_12": 78,
             "processor_13": 79,
-            "polezero": 114,
+            "recvvia_018": 114,
             "processor_18": 86,
             "processor_19": 87,
             "message_1": 116,
-            "rg1": 45,
-            "rg2": 46,
-            "rg3": 47,
-            "rg4": 48,
+            "recvvia_002": 45,
+            "recvvia_003": 46,
+            "recvvia_004": 47,
+            "recvvia_005": 48,
             "message_4": 181,
-            "bpf": 258,
+            "recvvia_027": 258,
             "message_8": 200,
             "sendvia_048": 268,
             "sendvia_049": 269,
             "sendvia_047": 260,
             "in_gain": 14,
-            "coeffs": 211,
+            "recvvia_024": 211,
             "in_freq": 8,
             "sendvia_32": 113,
             "sendvia_33": 179,
@@ -6551,9 +6551,9 @@
             "sendvia_34": 183,
             "sendvia_35": 184,
             "sendvia_38": 198,
-            "b0": 107,
-            "b1": 108,
-            "b2": 109,
+            "recvvia_014": 107,
+            "recvvia_015": 108,
+            "recvvia_016": 109,
             "text_29": 84,
             "processor_3": 62,
             "rg_highpass": 22,
@@ -6613,10 +6613,10 @@
             "sendvia_19": 67,
             "processor_23": 112,
             "processor_22": 111,
-            "done": 110,
+            "recvvia_017": 110,
             "message_008": 270,
-            "start": 68,
-            "frq": 57,
+            "recvvia_010": 68,
+            "recvvia_006": 57,
             "text_18": 35,
             "text_19": 36,
             "text_14": 26,
@@ -6625,13 +6625,13 @@
             "text_17": 34,
             "text_10": 17,
             "text_11": 20,
-            "pzg1": 185,
-            "pzg0": 180,
+            "recvvia_020": 185,
+            "recvvia_019": 180,
             "processor_079": 273,
             "message_13": 206,
             "processor_078": 272,
-            "gain": 60,
-            "pzg2": 186,
+            "recvvia_009": 60,
+            "recvvia_021": 186,
             "processor_2": 61,
             "text_28": 83,
             "processor_1": 56,
@@ -6659,20 +6659,20 @@
             "text_3": 6,
             "text_1": 1,
             "text_36": 194,
-            "q": 58,
+            "recvvia_007": 58,
             "text_34": 192,
             "text_32": 189,
             "text_33": 190,
             "text_30": 117,
             "text_31": 188,
             "self": 0,
-            "fr0": 193,
+            "recvvia_022": 193,
             "in_slope": 11,
             "text_38": 195,
             "in_q": 10,
-            "frcoeffs": 199,
+            "recvvia_023": 199,
             "sendvia_8": 42,
-            "hpf": 85,
+            "recvvia_011": 85,
             "processor_76": 243,
             "processor_72": 212,
             "processor_73": 213,
@@ -6681,18 +6681,18 @@
             "text_041": 256,
             "text_042": 257,
             "processor_089": 235,
-            "a1": 105,
-            "a2": 106,
+            "recvvia_012": 105,
+            "recvvia_013": 106,
             "patch_1": 118,
             "patch_2": 145,
-            "lpf": 219,
+            "recvvia_025": 219,
             "sendvia_20": 69,
             "enum_1": 8,
             "enum_2": 10,
             "enum_3": 11,
             "enum_4": 14,
             "compute_button": 39,
-            "rg0": 44
+            "recvvia_001": 44
         }
     }
 }
