@@ -124,7 +124,7 @@ class Processor (object):
     def call_onload(self, value=True): 
         self.do_onload = value 
 
-    def onload(self):
+    def onload(self, phase):
         pass 
 
     def assign(self, patch, scope, name):

@@ -40,8 +40,8 @@ class Var (Processor):
         elif len(kwargs):
             self.value = kwargs
 
-    def onload(self):
-        if self.value is not Uninit:
+    def onload(self, phase):
+        if phase == 1 and self.value is not Uninit:
             self.send(Bang)
 
     def trigger(self):

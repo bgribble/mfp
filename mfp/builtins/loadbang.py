@@ -19,8 +19,9 @@ class LoadBang (Processor):
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit
 
-    def onload(self):
-        self.send(Bang)
+    def onload(self, phase):
+        if phase == 1:
+            self.send(Bang)
 
 def register():
     MFPApp().register("loadbang", LoadBang)

@@ -255,9 +255,10 @@ class Patch(Processor):
 
         if jsdata is not None:
             self.json_deserialize(jsdata)
-            for obj_id, obj in self.objects.items():
-                if obj.do_onload:
-                    obj.onload()
+            for phase in (0,1):
+                for obj_id, obj in self.objects.items():
+                    if obj.do_onload:
+                        obj.onload(phase)
 
     def delete(self):
         for oid, obj in self.objects.items():

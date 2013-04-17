@@ -159,8 +159,9 @@ class Recv (Processor):
             self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
 
-    def onload(self):
-        self.bus_connect(self.bus_name)
+    def onload(self, phase):
+        if phase == 0:
+            self.bus_connect(self.bus_name)
 
     def bus_connect(self, bus_name):
         if self.bus_obj is not None and self.bus_name != bus_name:

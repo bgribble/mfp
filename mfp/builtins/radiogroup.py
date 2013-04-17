@@ -46,10 +46,11 @@ class RadioGroup (Processor):
         Processor.__init__(self, num_inlets, num_inlets+1, 
                            init_type, init_args, patch, scope, name)
 
-    def onload(self):
-        for i in range(len(self.inlets)):
-            self.send(RGForceFalse(), i)
-        self.send(True, self.init_selection)
+    def onload(self, phase):
+        if phase == 1:
+            for i in range(len(self.inlets)):
+                self.send(RGForceFalse(), i)
+            self.send(True, self.init_selection)
 
     def trigger(self):
         for inum, ival in enumerate(self.inlets):
