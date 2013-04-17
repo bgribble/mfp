@@ -1,4 +1,16 @@
 
+mfp v0.03.1, 2013-Apr-17
+
+  * #74: Changes to [r] semantics mean that saved patches containing [r] 
+    objects will not load.  Demo patches edited to make them loadable. 
+
+  * #77: Save/restore of [s]/[r] objects was broken, preventing successful load 
+    of patches containing them 
+
+  * #76: Added [delblk~] processor (delay of at least one JACK buffer) to allow 
+    scheduling of patches with feedback loops 
+
+
 mfp v0.03, 2013-Apr-16 
 
   * #49: Remove last lock calls from JACK process() path 
