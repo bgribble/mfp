@@ -41,6 +41,12 @@ process(mfp_processor * proc)
         delptr = NULL;
     }
 
+    if (pdata->min_blk == 1) {
+        delay_samples = MAX(mfp_blocksize, delay_samples);
+    }
+
+    delay_samples = MIN(delblk_size, delay_samples);
+
     outptr = proc->outlet_buf[0]->data;
     inptr = proc->inlet_buf[0]->data;
     bufptr = pdata->delay_buffer->data;
