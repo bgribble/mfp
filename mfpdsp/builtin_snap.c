@@ -23,13 +23,15 @@ process(mfp_processor * proc)
         if(pdata->triggered == 1) {
             mfp_dsp_send_response_float(proc, 0, proc->inlet_buf[0]->data[scount]);
             pdata->triggered = 0;
+            if (pdata->retrigger > 0) {
+                pdata->retrigger_count = pdata->retrigger;
+            }
         }
 
         if(pdata->retrigger > 0) {
             pdata->retrigger_count --;
-            if (pdata->retrigger_count == 0) {
+            if (pdata->retrigger_count <= 0) {
                 pdata->triggered = 1;
-                pdata->retrigger_count = pdata->retrigger;
             }
         }
 
@@ -44,6 +46,7 @@ init(mfp_processor * proc)
     proc->data = p;
     p->triggered = 0;
     p->retrigger = 0;
+    p->retrigger_count = 0;
 
     return;
 }
@@ -70,7 +73,7 @@ config(mfp_processor * proc)
     }
     if(retrigger_ptr != NULL) {
         pdata->retrigger = (int)((*(float *)retrigger_ptr) * mfp_samplerate / 1000.0);
-        printf("snap~: retriggering every %d samples\n", pdata->retrigger);
+        pdata->retrigger_count = 0;
     }
 
 
