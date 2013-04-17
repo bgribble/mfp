@@ -2117,7 +2117,7 @@
             "name": "processor_026",
             "do_onload": true,
             "initargs": "15",
-            "type": "del~"
+            "type": "delblk~"
         }
     },
     "type": "looper",

@@ -484,7 +484,7 @@ init_builtins(void)
         init_builtin_lt, init_builtin_gt,
         init_builtin_line, init_builtin_noise, init_builtin_buffer,
         init_builtin_biquad, init_builtin_phasor,
-        init_builtin_ladspa, init_builtin_delay, init_builtin_noop
+        init_builtin_ladspa, init_builtin_delay, init_builtin_delblk, init_builtin_noop
     };
     int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
 

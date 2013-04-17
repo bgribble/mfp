@@ -15,6 +15,7 @@ typedef struct {
 
     mfp_block * delay_buffer;
     int buf_zero; 
+    int min_blk;
 
     float const_delay_ms;
 } builtin_delay_data;
@@ -84,6 +85,22 @@ init(mfp_processor * proc)
     proc->data = p;
     p->delay_buffer = mfp_block_new(mfp_max_blocksize);
     p->alloc_buffer = mfp_block_new(mfp_max_blocksize);
+    p->min_blk = 0;
+    p->alloc_ready = ALLOC_IDLE;
+    p->const_delay_ms = 0.0;
+    p->buf_zero = 0;
+
+    return;
+}
+
+static void 
+init_blk(mfp_processor * proc) 
+{
+    builtin_delay_data * p = g_malloc0(sizeof(builtin_delay_data));
+    proc->data = p;
+    p->delay_buffer = mfp_block_new(mfp_max_blocksize);
+    p->alloc_buffer = mfp_block_new(mfp_max_blocksize);
+    p->min_blk = 1;
     p->alloc_ready = ALLOC_IDLE;
     p->const_delay_ms = 0.0;
     p->buf_zero = 0;
@@ -120,6 +137,10 @@ config(mfp_processor * proc)
         buf_ms = *(float *)(bufsize_ptr);
         buf_samples = buf_ms * mfp_samplerate / 1000.0;
         buf_samples = ((int)(buf_samples / mfp_blocksize) + 1) * mfp_blocksize;
+
+        if (pdata->min_blk == 1) {
+            buf_samples = MAX(mfp_blocksize, buf_samples);
+        }
 
         if (buf_samples < (pdata->delay_buffer->allocsize)) {
             mfp_block_resize(pdata->delay_buffer, buf_samples);
@@ -163,6 +184,24 @@ init_builtin_delay(void) {
     p->is_generator = GENERATOR_NEVER;
     p->process = process;
     p->init = init;
+    p->destroy = destroy;
+    p->config = config;
+    p->alloc = alloc;
+    p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+    g_hash_table_insert(p->params, "_sig_1", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "bufsize", (gpointer)PARAMTYPE_FLT);
+
+    return p;
+}
+
+mfp_procinfo *  
+init_builtin_delblk(void) {
+    mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
+
+    p->name = strdup("delblk~");
+    p->is_generator = GENERATOR_ALWAYS;
+    p->process = process;
+    p->init = init_blk;
     p->destroy = destroy;
     p->config = config;
     p->alloc = alloc;
