@@ -521,6 +521,20 @@ config(mfp_processor * proc)
     if (playchan_ptr != NULL) {
         d->play_channels = (int)(*(float *)playchan_ptr);
     }
+
+    if (clearchan_ptr != NULL) { 
+        int channel;
+        int clear_channels = (int)(*(float *)clearchan_ptr);
+        for(channel = 0; channel < d->chan_count; channel++) {
+            if((1 << channel) & clear_channels) {
+                bzero(d->buf_base + channel*d->chan_size, 
+                      sizeof(float)*d->chan_size);
+            }
+        }
+        g_hash_table_remove(proc->params, "clear_channels");
+        g_free(clearchan_ptr);
+    }
+
     return config_handled;
 }
 
