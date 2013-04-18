@@ -326,10 +326,6 @@
         "15": {
             "connections": [
                 [
-                    [
-                        16,
-                        0
-                    ]
                 ]
             ],
             "gui_params": {
@@ -387,7 +383,7 @@
                 "position_y": 69.82991790771484,
                 "layername": "Buffer"
             },
-            "name": "h_range",
+            "name": "recvvia_001",
             "do_onload": true,
             "initargs": "\"h_range\"",
             "type": "recv"
@@ -531,7 +527,7 @@
                 "position_y": 70.83142852783203,
                 "layername": "Buffer"
             },
-            "name": "threshold",
+            "name": "recvvia_002",
             "do_onload": true,
             "initargs": "\"threshold\"",
             "type": "recv"
@@ -622,7 +618,7 @@
                 "position_y": 23.97176742553711,
                 "layername": "Vert pos"
             },
-            "name": "v_pos",
+            "name": "recvvia_003",
             "do_onload": true,
             "initargs": "\"v_pos\"",
             "type": "recv"
@@ -645,7 +641,7 @@
                 "position_y": 23.340431213378906,
                 "layername": "Vert pos"
             },
-            "name": "v_range",
+            "name": "recvvia_004",
             "do_onload": true,
             "initargs": "\"v_range\"",
             "type": "recv"
@@ -1209,7 +1205,7 @@
                 "position_y": 137.8658447265625,
                 "layername": "Vert pos"
             },
-            "name": "make_apply",
+            "name": "recvvia_006",
             "do_onload": true,
             "initargs": "\"make_apply\"",
             "type": "recv"
@@ -1241,7 +1237,7 @@
     "type": "oscope-8",
     "scopes": {
         "__patch__": {
-            "threshold": 23,
+            "recvvia_002": 23,
             "sendvia_007": 26,
             "message_024": 42,
             "processor_008": 22,
@@ -1252,7 +1248,7 @@
             "processor_006": 19,
             "processor_007": 21,
             "processor_003": 14,
-            "h_range": 17,
+            "recvvia_001": 17,
             "processor_024": 40,
             "processor_025": 41,
             "processor_022": 37,
@@ -1263,15 +1259,15 @@
             "enum_002": 4,
             "enum_003": 6,
             "enum_001": 2,
-            "v_range": 28,
+            "recvvia_004": 28,
             "message_011": 20,
             "buffer": 11,
             "processor_021": 36,
             "text_001": 10,
-            "v_pos": 27,
+            "recvvia_003": 27,
             "message_007": 54,
             "message_010": 16,
-            "make_apply": 53,
+            "recvvia_006": 53,
             "message_014": 25,
             "sendvia_001": 3,
             "sendvia_002": 5,
@@ -1288,7 +1284,6 @@
             "processor_030": 50,
             "processor_015": 32,
             "processor_014": 30,
-            "processor_029": 48,
             "self": 0,
             "/_35": 49
         }
