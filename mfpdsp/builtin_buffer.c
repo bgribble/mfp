@@ -214,23 +214,25 @@ process(mfp_processor * proc)
     }
 
     /* zero output buffer in preparation for PLAY operations */ 
-    mfp_block_zero(proc->outlet_buf[0]);
+    for(channel=0; channel < d->chan_count; channel++) {
+        mfp_block_zero(proc->outlet_buf[channel]);
+    }
 
     /* if we are playing, copy data from the buffer to the outlet */ 
     if (d->buf_state != BUF_IDLE) {
         /* accumulate non-masked channels in the output buffer */ 
         for(channel=0; channel < d->chan_count; channel++) {
             if((1 << channel) & d->play_channels) {
-                outptr = proc->outlet_buf[0]->data;
+                outptr = proc->outlet_buf[channel]->data;
                 inptr = (float *)(d->buf_base) + (channel*d->chan_size);
                 inpos = d->buf_pos;
                 for(outpos = 0; outpos < mfp_blocksize; outpos++) {
                     if (inpos < d->region_end) {
-                        outptr[outpos] += inptr[inpos++];
+                        outptr[outpos] = inptr[inpos++];
                     }
                     else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
                         inpos = d->region_start;
-                        outptr[outpos] += inptr[inpos++];
+                        outptr[outpos] = inptr[inpos++];
                     }
                     else {
                         outptr[outpos] = 0;

@@ -55,7 +55,8 @@ class Buffer(Processor):
         else:
             channels = 1
 
-        Processor.__init__(self, channels, 3, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, channels, channels+2, init_type, init_args, 
+                           patch, scope, name)
 
         self.buf_id = None
         self.channels = 0
@@ -66,7 +67,7 @@ class Buffer(Processor):
         self.shm_obj = None
 
         self.dsp_inlets = list(range(channels))
-        self.dsp_outlets = [0]
+        self.dsp_outlets = list(range(channels))
         self.dsp_init("buffer~", size=size, channels=channels)
 
     def offset(self, channel, start):
