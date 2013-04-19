@@ -287,41 +287,15 @@ process(mfp_processor * proc)
             loopstart = 1;
         }
         else {
+            /* we have reached the end of the buffer in a 1-shot mode.  Stop. */
             d->buf_pos = d->region_start;
-            if (d->buf_state == REC_LOOPSET) {
-                d->region_end = d->buf_pos;
-            }
             d->buf_state = BUF_IDLE;
-        }
-        /* if we reached the end of the buffer, untrigger */
-        switch (d->buf_mode) {
-            case REC_BANG:
-                if(loopstart == 1) {
-                    d->buf_state = BUF_IDLE;
-                    d->rec_enabled = 0;
-                }
-                break;
-
-            case REC_TRIG_THRESH:
-            case REC_TRIG_EXT:
-                if(loopstart == 1) {
-                    d->buf_state = BUF_IDLE;
-                    d->rec_enabled = 0;
-                    d->trig_pretrigger = 0;
-                }
-                break;
-
-            case REC_LOOPSET:
-                if (d->buf_pos > d->region_end) 
-                    d->region_end = d->buf_pos;
-
-                break;
+            d->rec_enabled = 0;
+            d->trig_pretrigger = 0;
+            mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
         }
     }
 
-    if (d->buf_state == BUF_IDLE) {
-        mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
-    }
     if(loopstart > 0) {
         mfp_dsp_send_response_bool(proc, RESP_LOOPSTART, 1);
     }

@@ -25,6 +25,7 @@ class Scope (Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         self.buffer = None
         self.retrig_value = True 
+        self.need_buffer_send = False 
 
         if init_args is not None:
             log.debug("scope: Does not accept init args")
@@ -43,10 +44,14 @@ class Scope (Processor):
             pass
         elif self.inlets[0] is False:
             if self.gui_created:
-                MFPApp().gui_command.command(self.obj_id, "grab", None)
+                self.grab()
         if self.buffer is None:
             log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
             self.outlets[0] = MethodCall("bufinfo")
+
+        if self.gui_created and self.need_buffer_send:
+            self.need_buffer_send = False 
+            MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
 
     def range(self, minval, maxval): 
         self.gui_params['y_min'] = minval
