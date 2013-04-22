@@ -25,6 +25,7 @@ class PatchElement (Clutter.Group):
     OBJ_HALFCREATED = 1
     OBJ_ERROR = 2
     OBJ_COMPLETE = 3
+    OBJ_DELETED = 4 
 
     def __init__(self, window, x, y):
         # MFP object and UI descriptors
@@ -127,6 +128,7 @@ class PatchElement (Clutter.Group):
         if self.obj_id is not None:
             MFPGUI().mfp.delete(self.obj_id)
             self.obj_id = None
+        self.obj_state = self.OBJ_DELETED 
 
     def create(self, obj_type, init_args):
         scopename = self.layer.scope

@@ -244,11 +244,13 @@ class PatchWindow(object):
     def unregister(self, element):
         if element in self.selected:
             self.unselect(element)
+        if element.layer:
+            element.layer.remove(element)
+        if element in self.objects:
+            self.objects.remove(element)
+        if element in self.input_mgr.event_sources: 
+            del self.input_mgr.event_sources[element]
 
-        element.layer.remove(element)
-        self.objects.remove(element)
-
-        del self.input_mgr.event_sources[element]
         self.active_group().remove_actor(element)
         self.object_view.remove(element)
 

@@ -6,6 +6,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from ..input_mode import InputMode
 from ..connection_element import ConnectionElement
+from ..patch_element import PatchElement 
 
 from mfp import MFPGUI
 from mfp import log
@@ -48,6 +49,7 @@ class ConnectionMode (InputMode):
         self.bind("9", lambda: self.set_port_key(9), "Connect port 9")
 
         self.select_cbid = self.window.add_callback("select", self.select)
+        self.remove_cbid = self.window.add_callback("remove", self.remove_cb)
 
     def update_connection(self): 
         if (self.source_obj is None or self.dest_obj is None):
@@ -55,8 +57,8 @@ class ConnectionMode (InputMode):
                 self.connection.delete()
                 self.connection = None 
             return True 
-
-        if self.connection is None:
+        
+        if self.connection is None or self.connection.obj_state == PatchElement.OBJ_DELETED:
             self.connection = ConnectionElement(self.window, 
                                                 self.source_obj, self.source_port,
                                                 self.dest_obj, self.dest_port, 
@@ -91,11 +93,28 @@ class ConnectionMode (InputMode):
 
         self.update_connection()
 
+    def remove_cb(self, obj):
+        if obj is self.connection: 
+            self.connection = None 
+        elif obj is self.dest_obj: 
+            self.dest_obj = None 
+            if self.reverse: 
+                self.manager.disable_minor_mode(self)
+        elif obj is self.source_obj:
+            self.source_obj = None
+            if not self.reverse: 
+                self.manager.disable_minor_mode(self)
+
+
     def disable(self):
         self.window.remove_callback(self.select_cbid)
         self.select_cbid = None
+        self.window.remove_callback(self.remove_cbid)
+        self.remove_cbid = None
+
         if self.connection:
             self.connection.delete()
+            self.connection = None 
 
     def get_port_key(self): 
         def callback(txt): 
@@ -118,7 +137,8 @@ class ConnectionMode (InputMode):
         if not self.reverse and self.dest_obj is None and self.window.selected:
             self.dest_obj = self.window.selected[0]
 
-        if self.source_obj and self.dest_obj:
+        if (self.source_obj and self.dest_obj 
+            and self.connection.obj_state != PatchElement.OBJ_DELETED):
             if MFPGUI().mfp.connect(self.source_obj.obj_id, self.source_port,
                                     self.dest_obj.obj_id, self.dest_port):
                 c = ConnectionElement(self.window, self.source_obj, self.source_port,
