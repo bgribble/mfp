@@ -448,7 +448,7 @@ test_buffer_2(void)
     g_array_append_val(lparm, ft);
 
 
-    setparam_float(b, "rec_mode", 3.0);
+    setparam_float(b, "buf_mode", 3.0);
     setparam_float(b, "rec_channels", 1.0);
     setparam_float(b, "rec_enabled", 1.0);
     setparam_float(b, "trig_channel", 0.0);
