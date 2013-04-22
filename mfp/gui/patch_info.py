@@ -56,22 +56,28 @@ class PatchInfo (object):
         self.dsp_outlets = params.get("dsp_outlets")
         self.obj_name = params.get("name")
 
-        self.layers = []
         layers = params.get("layers", [])
+        newlayers = [] 
         for name, scope in layers:
-            l = Layer(self.stage, self, name, scope)
-            self.layers.append(l)
+            l = self.find_layer(name)
+            if l is None: 
+                l = Layer(self.stage, self, name, scope)
+            newlayers.append(l)
+        self.layers = newlayers 
 
         self.scopes = [] 
         for l in self.layers:
-            self.stage.layer_view.insert(l, self)
+            if not self.stage.layer_view.in_tree(l): 
+                self.stage.layer_view.insert(l, self)
             if l.scope not in self.scopes:
                 self.scopes.append(l.scope)
         
         for s in self.scopes: 
-            self.stage.object_view.insert((s, self), self)
+            if not self.stage.object_view.in_tree((s, self)):
+                self.stage.object_view.insert((s, self), self)
 
         self.stage.refresh(self)
+
     def delete(self):
         # delete all the processor elements 
         for l in self.layers: 

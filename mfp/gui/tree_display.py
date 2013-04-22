@@ -192,6 +192,13 @@ class TreeDisplay (object):
                 path = Gtk.TreePath.new_from_string(pathstr)
                 self.selection.select_path(path)
 
+    def in_tree(self, obj): 
+        p = self.object_paths.get(obj)
+        if p:
+            return True 
+        else: 
+            return False 
+    
     def select(self, obj): 
         if obj in self.selected: 
             return 

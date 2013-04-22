@@ -90,10 +90,11 @@ class GUICommand (RPCWrapper):
         obj.configure(params)
 
     @rpcwrap
-    def create(self, obj_type, obj_args, obj_id, params):
-        MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, params))
+    def create(self, obj_type, obj_args, obj_id, parent_id, params):
+        MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, parent_id, 
+                                                 params))
 
-    def _create(self, obj_type, obj_args, obj_id, params):
+    def _create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui.patch_element import PatchElement
         from .gui.processor_element import ProcessorElement
         from .gui.message_element import MessageElement

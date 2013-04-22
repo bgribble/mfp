@@ -325,6 +325,12 @@ class Processor (object):
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
+    def dsp_inlet(self, inlet):
+        return (self.dsp_obj, self.dsp_inlets.index(inlet))
+
+    def dsp_outlet(self, outlet):
+        return (self.dsp_obj, self.dsp_outlets.index(outlet))
+
     def dsp_reset(self):
         self.dsp_obj.reset()
 
@@ -413,8 +419,8 @@ class Processor (object):
     def connect(self, outlet, target, inlet):
         # make sure this is a possibility 
         if not isinstance(target, Processor):
-            log.debug("Error: Can't connect '%s' (obj_id %d) to %s"
-                      % (self.name, self.obj_id, target))
+            log.debug("Error: Can't connect '%s' (obj_id %d) to %s inlet %d"
+                      % (self.name, self.obj_id, target, inlet))
             return False 
 
         if outlet > len(self.outlets):
@@ -433,8 +439,11 @@ class Processor (object):
                 log.debug("Error: Can't connect DSP outlet %s of '%s' to non-DSP inlet %s of '%s'" 
                           % (outlet, self.name, inlet, target.name))
                 return False 
-            self.dsp_obj.connect(self.dsp_outlets.index(outlet),
-                                 target.obj_id, target.dsp_inlets.index(inlet))
+
+            out_obj, out_outlet = self.dsp_outlet(outlet)
+            in_obj, in_inlet = target.dsp_inlet(inlet)
+
+            out_obj.connect(out_outlet, in_obj.obj_id, in_inlet)
 
         existing = self.connections_out[outlet]
         if (target, inlet) not in existing:
@@ -448,8 +457,10 @@ class Processor (object):
     def disconnect(self, outlet, target, inlet):
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
-            self.dsp_obj.disconnect(self.dsp_outlets.index(outlet),
-                                    target.obj_id, target.dsp_inlets.index(inlet))
+            out_obj, out_outlet = self.dsp_outlet(outlet)
+            in_obj, in_inlet = target.dsp_inlet(inlet)
+
+            out_obj.disconnect(out_outlet, in_obj.obj_id, in_inlet)
 
         existing = self.connections_out[outlet]
         if (target, inlet) in existing:
@@ -533,7 +544,7 @@ class Processor (object):
     def create_gui(self):
         from .main import MFPApp
         MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
-                                    self.gui_params)
+                                    None, self.gui_params)
         self.gui_created = True
 
     def delete_gui(self):

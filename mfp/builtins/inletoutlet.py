@@ -18,7 +18,6 @@ class Inlet(Processor):
             initargs, kwargs = patch.parse_args(init_args)
         else:
             initargs = []
-            kwargs = {}
 
         if len(initargs):
             self.inletnum = initargs[0]
@@ -36,6 +35,14 @@ class Inlet(Processor):
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit
 
+class SignalInlet(Inlet): 
+    doc_tooltip_obj = "Signal input to patch"
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Inlet.__init__(self, init_type, init_args, patch, scope, name)
+        self.dsp_outlets = [0]
+        self.dsp_inlets = [0] 
+        self.dsp_init("noop~") 
 
 class Outlet(Processor):
     doc_tooltip_obj = "Message output from patch"
@@ -65,7 +72,17 @@ class Outlet(Processor):
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit
 
+class SignalOutlet(Outlet): 
+    doc_tooltip_obj = "Signal output from patch"
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Outlet.__init__(self, init_type, init_args, patch, scope, name)
+        self.dsp_outlets = [0]
+        self.dsp_inlets = [0] 
+        self.dsp_init("noop~") 
 
 def register():
     MFPApp().register("inlet", Inlet)
     MFPApp().register("outlet", Outlet)
+    MFPApp().register("inlet~", SignalInlet)
+    MFPApp().register("outlet~", SignalOutlet)

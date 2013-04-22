@@ -141,19 +141,29 @@ class Patch(Processor):
             return 
 
         self.objects[obj.obj_id] = obj
-        if obj.init_type == 'inlet':
+        if obj.init_type in ('inlet', 'inlet~'):
             num = obj.inletnum
             if num >= len(self.inlet_objects):
                 self.inlet_objects.extend([None] * (num - len(self.inlet_objects) + 1))
             self.inlet_objects[num] = obj
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
-        elif obj.init_type == 'outlet':
+            if obj.init_type == 'inlet~':
+                self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects) 
+                                    if p[1].init_type == 'inlet~' ]
+                self.gui_params['dsp_inlets'] = self.dsp_inlets 
+
+        elif obj.init_type in ('outlet', 'outlet~'):
             num = obj.outletnum
             if num >= len(self.outlet_objects):
                 self.outlet_objects.extend([None] * (num - len(self.outlet_objects) + 1))
             self.outlet_objects[num] = obj
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
+
+            if obj.init_type == 'outlet~':
+                self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects) 
+                                    if p[1].init_type == 'outlet~' ]
+                self.gui_params['dsp_outlets'] = self.dsp_outlets 
 
         elif obj.init_type == 'dispatch':
             self.dispatch_objects.append(obj)
@@ -184,6 +194,14 @@ class Patch(Processor):
             pass
 
 
+    ############################
+    # DSP inlet/outlet access 
+    ############################
+    def dsp_inlet(self, inlet):
+        return (self.inlet_objects[inlet].dsp_obj, 0)
+        
+    def dsp_outlet(self, outlet):
+        return (self.outlet_objects[outlet].dsp_obj, 0)
 
     ############################
     # load/save

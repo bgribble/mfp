@@ -158,6 +158,7 @@ class PatchElement (Clutter.Group):
         self.obj_id = objinfo.get('obj_id')
         self.obj_name = objinfo.get('name')
         self.obj_args = objinfo.get('initargs')
+        self.obj_type = obj_type
         self.num_inlets = objinfo.get("num_inlets")
         self.num_outlets = objinfo.get("num_outlets")
         self.dsp_inlets = objinfo.get("dsp_inlets", [])
