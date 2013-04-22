@@ -33,7 +33,7 @@ class PatchInfo (object):
         return scope_name in [l.scope for l in self.layers]
 
     def send_params(self, **extras):
-        prms = dict(display_type=self.display_type,
+        prms = dict(display_type=self.display_type, name=self.obj_name,
                     layers=[(l.name, l.scope) for l in self.layers])
         for k, v in extras.items():
             prms[k] = v
