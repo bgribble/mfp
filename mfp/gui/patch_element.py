@@ -99,15 +99,12 @@ class PatchElement (Clutter.Group):
             p = actor.get_parent()
             if not p: 
                 return 
-            print "bump:", actor, p
             p.remove_actor(actor)
             p.add_actor(actor)
 
-        print "move_to_top: enter"
         bump(self)
         for c in self.connections_out + self.connections_in:
             bump(c)
-        print "move_to_top: leave"
 
     def drag_start(self, x, y):
         self.drag_x = x - self.position_x
@@ -212,9 +209,17 @@ class PatchElement (Clutter.Group):
     def port_center(self, port_dir, port_num):
         ppos = self.port_position(port_dir, port_num)
         pos_x, pos_y = self.get_transformed_position() 
-        print "port_center:", self, self.position_x, self.position_y, pos_x, pos_y
-        return (self.position_x + ppos[0] + 0.5 * self.porthole_width,
-                self.position_y + ppos[1] + 0.5 * self.porthole_height)
+
+        # FIXME: why are these unreliable at startup time?  
+        # this shouldn't be called until after element is mapped
+        if abs(pos_x) < 0.1 or pos_x > 10000:
+            pos_x = self.position_x
+
+        if abs(pos_y) < 0.1 or pos_y > 10000:
+            pos_y = self.position_y
+
+        return (pos_x + ppos[0] + 0.5 * self.porthole_width,
+                pos_y + ppos[1] + 0.5 * self.porthole_height)
 
     def port_position(self, port_dir, port_num):
         w = self.get_width()
