@@ -9,6 +9,7 @@ from gi.repository import Gtk, Clutter, GtkClutter, Pango
 from mfp import MFPGUI
 from mfp import log
 
+from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
@@ -237,9 +238,10 @@ class PatchWindow(object):
             element.container = element.layer.group
        
         if not isinstance(element, ConnectionElement):
-            # FIXME:  not right for GOP children, scope and patch are those of the 
-            # element.parent_id object
-            self.object_view.insert(element, (element.layer.scope, element.layer.patch))
+            if isinstance(element.container, PatchElement):
+                self.object_view.insert(element, element.container)
+            else: 
+                self.object_view.insert(element, (element.layer.scope, element.layer.patch))
         if element.obj_id is not None:
             element.send_params()
 
