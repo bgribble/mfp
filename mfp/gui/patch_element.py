@@ -168,6 +168,7 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = objinfo.get("dsp_outlets", [])
 
         if self.obj_id is not None:
+            self.configure(objinfo)
             # rebuild connections if necessary 
             for c in connections_in:
                 if c.obj_2 is self and c.port_2 >= self.num_inlets:

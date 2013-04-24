@@ -47,6 +47,15 @@ class MFPCommand(RPCWrapper):
         return obj.gui_params
 
     @rpcwrap
+    def create_export_gui(self, obj_id):
+        obj = MFPApp().recall(obj_id)
+        if isinstance(obj, Patch):
+            obj.create_export_gui()
+            return True
+        else:
+            return False 
+
+    @rpcwrap
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         obj_1 = MFPApp().recall(obj_1_id)
         obj_2 = MFPApp().recall(obj_2_id)

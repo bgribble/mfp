@@ -9,6 +9,7 @@ import cairo
 from .patch_element import PatchElement
 from .colordb import ColorDB 
 from .modes.label_edit import LabelEditMode
+from ..gui_slave import MFPGUI 
 
 class ProcessorElement (PatchElement):
     display_type = "processor"
@@ -27,6 +28,7 @@ class ProcessorElement (PatchElement):
         self.label_text = None
         self.export_x = None
         self.export_y = None 
+        self.export_created = False 
 
         # create display
         self.create_display()
@@ -61,7 +63,7 @@ class ProcessorElement (PatchElement):
         num_ports = max(self.num_inlets, self.num_outlets)
         port_width = (num_ports * self.porthole_minspace) + 2*self.porthole_border
         
-        new_w = max(35, port_width, label_width)
+        new_w = max(35, port_width, label_width, box_width)
 
         if new_w != box_width: 
             self.set_size(new_w, self.texture.get_property('height'))
@@ -163,13 +165,14 @@ class ProcessorElement (PatchElement):
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
 
         if "export_w" in params and "export_h" in params:
-            params["width"] = max(self.width, params.get("export_w") + 5)
+            params["width"] = max(self.width, params.get("export_w"))
             params["height"] = max(self.height, params.get("export_h") + 15)
             self.export_x = params.get("export_x")
             self.export_y = params.get("export_y")
-
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
+            if self.export_x is not None and self.export_y is not None:
+                MFPGUI().mfp.create_export_gui(self.obj_id)
             self.draw_ports()
             self.texture.invalidate()
 

@@ -251,14 +251,7 @@ class Patch(Processor):
                                                          dstobj.obj_id, dstport)
             MFPApp().gui_command.load_complete()
         else:
-            # non-toplevel Patch means show the Export UI layer only 
-            for oid, obj in self.objects.items():
-                if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
-                    and "display_type" in obj.gui_params 
-                    and (obj.gui_params.get("display_type") not in 
-                         ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
-                    obj.create_gui()
-
+            self.create_export_gui()
 
     def save_file(self, filename):
         self.update_export_bounds()
@@ -318,6 +311,15 @@ class Patch(Processor):
             self.gui_params["export_y"] = min_y
             self.gui_params["export_w"] = max_x - min_x
             self.gui_params["export_h"] = max_y - min_y
+
+    def create_export_gui(self): 
+        # non-toplevel Patch means show the Export UI layer only 
+        for oid, obj in self.objects.items():
+            if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
+                and "display_type" in obj.gui_params 
+                and (obj.gui_params.get("display_type") not in 
+                     ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
+                obj.create_gui()
 
     def delete(self):
         for oid, obj in self.objects.items():

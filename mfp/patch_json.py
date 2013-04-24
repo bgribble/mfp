@@ -52,10 +52,10 @@ def json_deserialize(self, json_data):
     else:
         # pick out a few things that we need 
         gp = f.get('gui_params', {})
-        if 'num_inlets' in gp:
-            self.gui_params['num_inlets'] = gp['num_inlets']
-        if 'num_outlets' in gp:
-            self.gui_params['num_outlets'] = gp['num_outlets']
+        for prm in ('num_inlets', 'num_outlets', 'export_x', 'export_y', 'export_w',
+                    'export_h'):
+            if prm in gp:
+                self.gui_params[prm] = gp[prm]
         self.gui_params['top_level'] = False 
 
     # reset params that need it 
