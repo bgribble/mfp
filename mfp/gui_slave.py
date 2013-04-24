@@ -141,6 +141,8 @@ class GUICommand (RPCWrapper):
                     else: 
                         layer = MFPGUI().appwin.active_layer()
                     layer.add(o)
+                    layer.group.add_actor(o)
+                    o.container = layer.group
                 elif isinstance(parent, PatchElement): 
                     # FIXME: don't hardcode GOP offsets 
                     xpos = params.get("position_x", 0) - parent.export_x

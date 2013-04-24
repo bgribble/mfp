@@ -257,7 +257,6 @@ class Patch(Processor):
                     and "display_type" in obj.gui_params 
                     and (obj.gui_params.get("display_type") not in 
                          ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
-                    print "Patch.create_gui: export object", obj, obj.gui_params
                     obj.create_gui()
 
 

@@ -32,12 +32,10 @@ class ConnectionElement(PatchElement):
         self.texture.connect("draw", self.draw_cb)
         self.add_actor(self.texture)
         self.set_reactive(True)
-        self.draw()
         if obj_1.layer is not None:
-            print "ConnectionElement: moving to", obj_1.layer
             self.move_to_layer(obj_1.layer)
-        else:
-            print "ConnectionElement: not moving to layer!"
+
+        self.draw()
 
     def select(self):
         PatchElement.select(self)
@@ -48,7 +46,6 @@ class ConnectionElement(PatchElement):
         self.draw()
 
     def delete(self):
-        print "deleting connection", self
         if (not self.dashed and self.obj_1 and self.obj_2 and 
             self.obj_1.obj_id is not None and self.obj_2.obj_id is not None):
             MFPGUI().mfp.disconnect(self.obj_1.obj_id, self.port_1, 
@@ -61,7 +58,6 @@ class ConnectionElement(PatchElement):
         self.obj_1 = None
         self.obj_2 = None
         PatchElement.delete(self)
-        print "done deleting connection", self
 
     def draw(self):
         if self.obj_1 is None or self.obj_2 is None:
