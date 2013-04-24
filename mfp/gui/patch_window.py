@@ -246,9 +246,11 @@ class PatchWindow(object):
         self.emit_signal("add", element)
 
     def unregister(self, element):
+        print "unregister:", element 
         if element in self.selected:
             self.unselect(element)
         if element.layer:
+            print "removing from layer", element, element.layer
             element.layer.remove(element)
         if element in self.objects:
             self.objects.remove(element)
@@ -256,8 +258,10 @@ class PatchWindow(object):
             del self.input_mgr.event_sources[element]
 
         if element.container: 
+            print "removing from container", element, element.container, element.get_parent()
             element.container.remove_actor(element)
             element.container = None 
+            print "done removing from container"
 
         self.object_view.remove(element)
 

@@ -191,9 +191,10 @@ class TransientMessageElement (MessageElement):
     def __init__(self, window, x, y):
         self.target_obj = window.selected
         self.target_port = None
+        
+        pos_x, pos_y = self.target_obj[0].get_transformed_position()
+        MessageElement.__init__(self, window, pos_x, pos_y - self.ELBOW_ROOM)
 
-        MessageElement.__init__(self, window, self.target_obj[0].position_x,
-                                self.target_obj[0].position_y - self.ELBOW_ROOM)
         self.message_text = "Bang"
         self.num_inlets = 0
         self.num_outlets = 1 
@@ -203,6 +204,7 @@ class TransientMessageElement (MessageElement):
         self.set_port(0)
 
     def set_port(self, portnum):
+        print "Transient: set_port", portnum
         if portnum == self.target_port:
             return True
 
@@ -211,10 +213,14 @@ class TransientMessageElement (MessageElement):
 
         self.target_port = portnum
         for to in self.target_obj: 
+            print "making connection", self, to 
             c = ConnectionElement(self.stage, self, 0, to, self.target_port)
+            self.stage.active_layer().add(c)
+            self.stage.register(c)
             self.connections_out.append(c)
             to.connections_in.append(c)
 
+        print "Transient: set_port finished"
         return True
 
     def label_edit_start(self):
@@ -223,15 +229,19 @@ class TransientMessageElement (MessageElement):
         self.texture.invalidate()
 
     def label_edit_finish(self, widget=None, text=None):
+        print "Transient: label_edit_finish"
         if text is not None:
             self.message_text = text 
             for to in self.target_obj:
                 if to is not self:
                     MFPGUI().mfp.eval_and_send(to.obj_id, self.target_port,
                                                self.message_text)
+        print "Transient: selecting"
         for to in self.target_obj:
             self.stage.select(to)
+        print "Transient: about to delete"
         self.delete()
+        print "Transient: done deleting"
 
     def make_edit_mode(self):
         return TransientMessageEditMode(self.stage, self, self.label)

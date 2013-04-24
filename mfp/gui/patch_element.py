@@ -95,17 +95,19 @@ class PatchElement (Clutter.Group):
         self.selected = False 
 
     def move_to_top(self):
-        p = self.get_parent()
-        if not p: 
-            return 
-
         def bump(actor):
+            p = actor.get_parent()
+            if not p: 
+                return 
+            print "bump:", actor, p
             p.remove_actor(actor)
             p.add_actor(actor)
 
+        print "move_to_top: enter"
         bump(self)
         for c in self.connections_out + self.connections_in:
             bump(c)
+        print "move_to_top: leave"
 
     def drag_start(self, x, y):
         self.drag_x = x - self.position_x
@@ -209,6 +211,8 @@ class PatchElement (Clutter.Group):
 
     def port_center(self, port_dir, port_num):
         ppos = self.port_position(port_dir, port_num)
+        pos_x, pos_y = self.get_transformed_position() 
+        print "port_center:", self, self.position_x, self.position_y, pos_x, pos_y
         return (self.position_x + ppos[0] + 0.5 * self.porthole_width,
                 self.position_y + ppos[1] + 0.5 * self.porthole_height)
 
@@ -335,12 +339,22 @@ class PatchElement (Clutter.Group):
         self.stage.refresh(self)
 
     def move_to_layer(self, layer):
+        layer_child = False 
         if self.layer:
-            self.layer.group.remove_actor(self)
+            if self.get_parent() == self.layer.group:
+                self.layer.group.remove_actor(self)
+                self.container = None
+                layer_child = True 
+            elif self.get_parent() is None:
+                layer_child = True 
             self.layer.remove(self)
+        else:
+            layer_child = True
 
         layer.add(self)
-        self.layer.group.add_actor(self)
+        if layer_child:
+            self.layer.group.add_actor(self)
+            self.container = self.layer.group
         self.send_params()
 
     def make_edit_mode(self):
