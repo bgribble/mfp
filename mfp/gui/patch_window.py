@@ -231,10 +231,14 @@ class PatchWindow(object):
         oldcount = self.object_counts_by_type.get(element.display_type, 0)
         self.object_counts_by_type[element.display_type] = oldcount + 1
         self.input_mgr.event_sources[element] = element
-        self.active_group().add_actor(element)
-        self.active_layer().add(element)
+
+        if element.container is None:
+            element.layer.group.add_actor(element)
+            element.container = element.layer.group
        
         if not isinstance(element, ConnectionElement):
+            # FIXME:  not right for GOP children, scope and patch are those of the 
+            # element.parent_id object
             self.object_view.insert(element, (element.layer.scope, element.layer.patch))
         if element.obj_id is not None:
             element.send_params()
@@ -251,7 +255,10 @@ class PatchWindow(object):
         if element in self.input_mgr.event_sources: 
             del self.input_mgr.event_sources[element]
 
-        self.active_group().remove_actor(element)
+        if element.container: 
+            element.container.remove_actor(element)
+            element.container = None 
+
         self.object_view.remove(element)
 
         self.emit_signal("remove", element)
@@ -275,8 +282,12 @@ class PatchWindow(object):
             y = self.input_mgr.pointer_y
 
         b = factory(self, x, y)
+
+        self.active_layer().add(b)
+        self.register(b) 
         self.refresh(b)
         self.select(b)
+
         b.begin_edit()
         return True
 

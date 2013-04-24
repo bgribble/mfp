@@ -25,6 +25,8 @@ class ProcessorElement (PatchElement):
         self.texture = None
         self.label = None
         self.label_text = None
+        self.export_x = None
+        self.export_y = None 
 
         # create display
         self.create_display()
@@ -159,6 +161,12 @@ class ProcessorElement (PatchElement):
             self.label.set_text("%s" % (self.obj_type,))
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+
+        if "export_w" in params and "export_h" in params:
+            params["width"] = max(self.width, params.get("export_w") + 5)
+            params["height"] = max(self.height, params.get("export_h") + 15)
+            self.export_x = params.get("export_x")
+            self.export_y = params.get("export_y")
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE

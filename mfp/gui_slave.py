@@ -11,6 +11,7 @@ from singleton import Singleton
 from rpc_wrapper import RPCWrapper, rpcwrap
 from main import MFPCommand
 from . import log
+from utils import profile 
 
 def gui_init(pipe):
     import os
@@ -93,7 +94,6 @@ class GUICommand (RPCWrapper):
     def create(self, obj_type, obj_args, obj_id, parent_id, params):
         MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, parent_id, 
                                                  params))
-
     def _create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui.patch_element import PatchElement
         from .gui.processor_element import ProcessorElement
@@ -128,12 +128,34 @@ class GUICommand (RPCWrapper):
         if ctor:
             o = ctor(MFPGUI().appwin, params.get('position_x', 0), params.get('position_y', 0))
             o.obj_id = obj_id
+            o.parent_id = parent_id
             o.obj_type = obj_type
             o.obj_args = obj_args
             o.obj_state = PatchElement.OBJ_COMPLETE
+            if isinstance(o, PatchElement):
+                parent = MFPGUI().recall(o.parent_id)
+                layer = None 
+                if isinstance(parent, PatchInfo):
+                    if "layername" in params:
+                        layer = parent.find_layer(params["layername"])
+                    else: 
+                        layer = MFPGUI().appwin.active_layer()
+                    layer.add(o)
+                elif isinstance(parent, PatchElement): 
+                    # FIXME: don't hardcode GOP offsets 
+                    xpos = params.get("position_x", 0) - parent.export_x
+                    ypos = params.get("position_y", 0) - parent.export_y + 20
+                    o.move(xpos, ypos)
+                    o.editable = False 
+
+                    parent.layer.add(o)
+                    parent.add_actor(o)    
+                    o.container = parent 
+                    
+                MFPGUI().appwin.register(o)
+
             o.configure(params)
             o.update()
-            # o.draw_ports()
             MFPGUI().remember(o)
 
     @rpcwrap

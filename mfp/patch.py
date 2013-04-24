@@ -17,8 +17,9 @@ from mfp import log
 
 
 class Patch(Processor):
+    EXPORT_LAYER = "Interface"
     display_type = "patch"
-
+    
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
@@ -230,28 +231,38 @@ class Patch(Processor):
         if MFPApp().no_gui:
             return False
 
+        self.update_export_bounds()
+
         # create the basic element info 
         Processor.create_gui(self)
 
-        # for patches that are not top-level, that's all.
-        if not self.gui_params.get("top_level"):
-            return 
+        if self.gui_params.get("top_level"):
+            MFPApp().gui_command.load_start()
 
-        MFPApp().gui_command.load_start()
+            for oid, obj in self.objects.items():
+                if obj.display_type != "hidden":
+                    obj.create_gui()
 
-        for oid, obj in self.objects.items():
-            if obj.display_type != "hidden":
-                obj.create_gui()
+            for oid, obj in self.objects.items():
+                for srcport, connections in enumerate(obj.connections_out):
+                    for dstobj, dstport in connections:
+                        if obj.display_type != "hidden" and dstobj.display_type != "hidden":
+                            MFPApp().gui_command.connect(obj.obj_id, srcport, 
+                                                         dstobj.obj_id, dstport)
+            MFPApp().gui_command.load_complete()
+        else:
+            # non-toplevel Patch means show the Export UI layer only 
+            for oid, obj in self.objects.items():
+                if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
+                    and "display_type" in obj.gui_params 
+                    and (obj.gui_params.get("display_type") not in 
+                         ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
+                    print "Patch.create_gui: export object", obj, obj.gui_params
+                    obj.create_gui()
 
-        for oid, obj in self.objects.items():
-            for srcport, connections in enumerate(obj.connections_out):
-                for dstobj, dstport in connections:
-                    if obj.display_type != "hidden" and dstobj.display_type != "hidden":
-                        MFPApp().gui_command.connect(obj.obj_id, srcport, 
-                                                     dstobj.obj_id, dstport)
-        MFPApp().gui_command.load_complete()
 
     def save_file(self, filename):
+        self.update_export_bounds()
         savefile = open(filename, "w")
         savefile.write(self.json_serialize())
 
@@ -277,6 +288,37 @@ class Patch(Processor):
                 for obj_id, obj in self.objects.items():
                     if obj.do_onload:
                         obj.onload(phase)
+
+    def update_export_bounds(self):
+        min_x = min_y = max_x = max_y = None 
+
+        for obj_id, obj in self.objects.items():
+            if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
+                and "display_type" in obj.gui_params 
+                and (obj.gui_params.get("display_type") not in 
+                     ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
+                x = obj.gui_params.get("position_x")
+                y = obj.gui_params.get("position_y")
+                w = obj.gui_params.get("width")
+                h = obj.gui_params.get("height")
+
+                if min_x is None or (x < min_x):
+                    min_x = x
+                if min_y is None or (y < min_y):
+                    min_y = y
+                if max_x is None or (x+w > max_x):
+                    max_x = x+w
+                if max_y is None or (y+h > max_y):
+                    max_y = y+h
+        if None in (min_x, min_y, max_x, max_y):
+            for p in ("export_x", "export_y", "export_w", "export_h"):
+                if p in self.gui_params:
+                    del self.gui_params[p]
+        else:
+            self.gui_params["export_x"] = min_x
+            self.gui_params["export_y"] = min_y
+            self.gui_params["export_w"] = max_x - min_x
+            self.gui_params["export_h"] = max_y - min_y
 
     def delete(self):
         for oid, obj in self.objects.items():

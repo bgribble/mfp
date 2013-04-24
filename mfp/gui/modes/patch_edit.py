@@ -235,7 +235,8 @@ class PatchEditMode (InputMode):
             self.window.move_view(dx, dy)
         else:
             for obj in self.drag_target:
-                obj.drag(dx, dy)
+                if obj.editable:
+                    obj.drag(dx, dy)
         return True
 
     def drag_end(self):

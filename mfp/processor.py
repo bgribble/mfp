@@ -543,8 +543,9 @@ class Processor (object):
 
     def create_gui(self):
         from .main import MFPApp
+        parent_id = self.patch.obj_id if self.patch is not None else None 
         MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
-                                    None, self.gui_params)
+                                    parent_id, self.gui_params)
         self.gui_created = True
 
     def delete_gui(self):

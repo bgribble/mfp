@@ -30,6 +30,7 @@ class PatchElement (Clutter.Group):
     def __init__(self, window, x, y):
         # MFP object and UI descriptors
         self.obj_id = None
+        self.parent_id = None
         self.obj_name = None
         self.obj_type = None
         self.obj_args = None
@@ -46,6 +47,7 @@ class PatchElement (Clutter.Group):
 
         # Clutter objects
         self.stage = window
+        self.container = None 
         self.layer = None
         self.port_elements = {}
 
@@ -61,13 +63,13 @@ class PatchElement (Clutter.Group):
         self.drag_x = None
         self.drag_y = None
         self.selected = False
+        self.editable = True 
         self.update_required = False
         self.edit_mode = None
         self.control_mode = None
 
         # create placeholder group and add to stage
         Clutter.Group.__init__(self)
-        self.stage.register(self)
 
     @property
     def layername(self):
@@ -348,6 +350,9 @@ class PatchElement (Clutter.Group):
         return None
 
     def begin_edit(self):
+        if not self.editable: 
+            return False 
+
         if not self.edit_mode:
             self.edit_mode = self.make_edit_mode()
 
@@ -374,13 +379,13 @@ class PatchElement (Clutter.Group):
 
     def show_tip(self, xpos, ypos):
         tiptxt = None 
-        orig_x, orig_y = self.get_position()
+        orig_x, orig_y = self.get_transformed_position()
 
         if self.obj_id is None:
             return False 
 
         for (pid, pobj) in self.port_elements.items(): 
-            x, y = pobj.get_position()
+            x, y = pobj.get_transformed_position()
             x += orig_x - 1
             y += orig_y - 1
             w, h = pobj.get_size()

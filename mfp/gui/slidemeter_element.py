@@ -175,11 +175,11 @@ class SlideMeterElement (PatchElement):
             ct.restore()
 
     def point_in_slider(self, x, y):
-        orig_x, orig_y = self.get_position()
+        orig_x, orig_y = self.get_transformed_position()
         x -= orig_x
         y -= orig_y
         if (self.hot_x_min <= x <= self.hot_x_max
-                and self.hot_y_min <= y <= self.hot_y_max):
+            and self.hot_y_min <= y <= self.hot_y_max):
             return True
         else:
             return False

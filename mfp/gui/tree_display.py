@@ -176,11 +176,13 @@ class TreeDisplay (object):
         self.selection.disconnect(self.glib_select_cb_id)
         
         pathstr = self.object_paths.get(obj)
-        path = Gtk.TreePath.new_from_string(pathstr)
-        iter = self.treestore.get_iter_from_string(pathstr)
+       
+        if pathstr: 
+            path = Gtk.TreePath.new_from_string(pathstr)
+            iter = self.treestore.get_iter_from_string(pathstr)
 
-        # re-sort the object (and all its children, unfortunately)
-        self.treestore.set(iter, 0, obj)
+            # re-sort the object (and all its children, unfortunately)
+            self.treestore.set(iter, 0, obj)
 
         # restore signal handler 
         self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)
