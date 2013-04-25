@@ -173,10 +173,11 @@ def select_mru(self):
 @extends(PatchWindow)
 def move_selected(self, dx, dy):
     for obj in self.selected:
-        obj.move(max(0, obj.position_x + dx * self.zoom),
-                 max(0, obj.position_y + dy * self.zoom))
-        if obj.obj_id is not None:
-            obj.send_params()
+        if obj.editable:
+            obj.move(max(0, obj.position_x + dx * self.zoom),
+                     max(0, obj.position_y + dy * self.zoom))
+            if obj.obj_id is not None:
+                obj.send_params()
     if self.selected: 
         return True
     else: 
@@ -187,7 +188,8 @@ def delete_selected(self):
     olist = self.selected
     self.unselect_all()
     for o in olist:
-        o.delete()
+        if o.editable:
+            o.delete()
     return True
 
 @extends(PatchWindow)

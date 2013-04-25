@@ -244,6 +244,9 @@ class PatchElement (Clutter.Group):
             return (self.porthole_border + spc * port_num, h - self.porthole_height)
 
     def draw_ports(self):
+        if self.editable is False: 
+            return 
+
         ports_done = [] 
 
         def confport(pid, px, py):

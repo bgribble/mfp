@@ -281,14 +281,21 @@ class Patch(Processor):
                     if obj.do_onload:
                         obj.onload(phase)
 
+    def obj_is_exportable(self, obj): 
+        if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
+            and obj.gui_params.get("no_export", False) is not True
+            and "display_type" in obj.gui_params 
+            and (obj.gui_params.get("display_type") not in 
+                 ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
+            return True
+        else: 
+            return False 
+
     def update_export_bounds(self):
         min_x = min_y = max_x = max_y = None 
 
         for obj_id, obj in self.objects.items():
-            if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
-                and "display_type" in obj.gui_params 
-                and (obj.gui_params.get("display_type") not in 
-                     ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
+            if self.obj_is_exportable(obj):
                 x = obj.gui_params.get("position_x")
                 y = obj.gui_params.get("position_y")
                 w = obj.gui_params.get("width")
@@ -315,10 +322,7 @@ class Patch(Processor):
     def create_export_gui(self): 
         # non-toplevel Patch means show the Export UI layer only 
         for oid, obj in self.objects.items():
-            if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
-                and "display_type" in obj.gui_params 
-                and (obj.gui_params.get("display_type") not in 
-                     ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
+            if self.obj_is_exportable(obj):
                 obj.create_gui()
 
     def delete(self):

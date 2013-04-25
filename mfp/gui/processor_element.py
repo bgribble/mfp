@@ -166,7 +166,7 @@ class ProcessorElement (PatchElement):
 
         if "export_w" in params and "export_h" in params:
             params["width"] = max(self.width, params.get("export_w"))
-            params["height"] = max(self.height, params.get("export_h") + 15)
+            params["height"] = max(self.height, params.get("export_h") + 20)
             self.export_x = params.get("export_x")
             self.export_y = params.get("export_y")
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:

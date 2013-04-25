@@ -233,11 +233,14 @@ class PatchEditMode (InputMode):
 
         if self.drag_target is None:
             self.window.move_view(dx, dy)
+            return True
         else:
+            dragged_something = False 
             for obj in self.drag_target:
                 if obj.editable:
                     obj.drag(dx, dy)
-        return True
+                    dragged_something = True 
+            return dragged_something
 
     def drag_end(self):
         if self.selbox_started:
