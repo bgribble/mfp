@@ -141,6 +141,12 @@ class PatchWindow(object):
 
     def load_complete(self):
         self.load_in_progress = False 
+        if self.selected_patch is None and len(self.patches):
+            self.selected_patch = self.patches[0]
+        if self.selected_layer is None and self.selected_patch is not None:
+            self.layer_select(self.selected_patch.layers[0])
+
+
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
