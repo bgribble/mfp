@@ -192,7 +192,7 @@ class TransientMessageElement (MessageElement):
         self.target_obj = window.selected
         self.target_port = None
         
-        pos_x, pos_y = self.target_obj[0].get_transformed_position()
+        pos_x, pos_y = self.target_obj[0].get_stage_position()
         MessageElement.__init__(self, window, pos_x, pos_y - self.ELBOW_ROOM)
 
         self.message_text = "Bang"

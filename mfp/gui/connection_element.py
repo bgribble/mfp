@@ -26,7 +26,7 @@ class ConnectionElement(PatchElement):
 
         if port_1 in obj_1.dsp_outlets:
             self.dsp_connect = True 
-        px, py = obj_1.get_transformed_position()
+        px, py = obj_1.get_stage_position()
         PatchElement.__init__(self, window, px, py)
 
         self.texture.connect("draw", self.draw_cb)

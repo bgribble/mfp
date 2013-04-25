@@ -207,17 +207,24 @@ class PatchElement (Clutter.Group):
     def get_params(self):
         return MFPGUI().mfp.get_params(self.obj_id)
 
+    def get_stage_position(self): 
+        if self.container == self.layer.group:
+            return (self.position_x, self.position_y)
+        else: 
+            pos_x = self.position_x
+            pos_y = self.position_y 
+
+            c = self.container
+            while isinstance(c, PatchElement):
+                pos_x += c.position_x
+                pos_y += c.position_y 
+                c = c.container
+
+            return (pos_x, pos_y)
+
     def port_center(self, port_dir, port_num):
         ppos = self.port_position(port_dir, port_num)
-        pos_x, pos_y = self.get_transformed_position() 
-
-        # FIXME: why are these unreliable at startup time?  
-        # this shouldn't be called until after element is mapped
-        if abs(pos_x) < 0.1 or pos_x > 10000:
-            pos_x = self.position_x
-
-        if abs(pos_y) < 0.1 or pos_y > 10000:
-            pos_y = self.position_y
+        pos_x, pos_y = self.get_stage_position() 
 
         return (pos_x + ppos[0] + 0.5 * self.porthole_width,
                 pos_y + ppos[1] + 0.5 * self.porthole_height)
@@ -402,13 +409,13 @@ class PatchElement (Clutter.Group):
 
     def show_tip(self, xpos, ypos):
         tiptxt = None 
-        orig_x, orig_y = self.get_transformed_position()
+        orig_x, orig_y = self.get_stage_position()
 
         if self.obj_id is None:
             return False 
 
         for (pid, pobj) in self.port_elements.items(): 
-            x, y = pobj.get_transformed_position()
+            x, y = pobj.get_position()
             x += orig_x - 1
             y += orig_y - 1
             w, h = pobj.get_size()
