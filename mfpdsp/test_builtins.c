@@ -175,12 +175,12 @@ test_line_1(void)
         return 0;
     }
 
-    if (outp[89] != 0.0) {
-        printf("FAIL: outp[89] was %f not 0.0\n", outp[89]);
+    if (outp[88] != 0.0) {
+        printf("FAIL: outp[88] was %f not 0.0\n", outp[89]);
         return 0;
     }
 
-    if (outp[100] != 0.25) {
+    if (outp[99] != 0.25) {
         printf("FAIL: outp[100] was %f not 0.25\n", outp[100]);
         return 0;
     }
@@ -440,7 +440,7 @@ test_buffer_2(void)
     int fail=0;
     float ft;
 
-    ft = (float)(1000.0*(mfp_blocksize/2 -1)/mfp_samplerate);
+    ft = (float)(1000.0*(mfp_blocksize/2)/mfp_samplerate);
     g_array_append_val(lparm, ft); 
     ft = 5.0;
     g_array_append_val(lparm, ft);
@@ -461,7 +461,7 @@ test_buffer_2(void)
     mfp_dsp_schedule();
     mfp_dsp_run(mfp_blocksize);
 
-    /* giver alloc thread time to work */
+    /* give alloc thread time to work */
     usleep(100000);
 
     /* bang the line~ */ 
@@ -482,11 +482,13 @@ test_buffer_2(void)
     for(i=0; i < mfp_blocksize; i++) {
         if (i < mfp_blocksize/2.0) {
             if (info->buf_base == NULL || ((float *)(info->buf_base))[i] != 5.0) {
+                printf("Fail at %d (%f should be 5.0)\n", i, ((float *)(info->buf_base))[i]);
                 fail = 1;
             }
         }
         else {
             if (info->buf_base == NULL || ((float *)(info->buf_base))[i] != 0.0) {
+                printf("Fail at %d (%f should be 0.0)\n", i, ((float *)(info->buf_base))[i]);
                 fail = 1;
             }
         }

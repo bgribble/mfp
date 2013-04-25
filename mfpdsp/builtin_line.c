@@ -27,6 +27,8 @@ config(mfp_processor * proc)
     GArray * segments_raw = (GArray *)g_hash_table_lookup(proc->params, "segments");
     gpointer position_ptr = g_hash_table_lookup(proc->params, "position");
     float delay_ms, end_val, ramp_ms, frames_per_ms;
+    float ideal_ms = 0.0;
+    int ideal_frame, actual_frame;
     segment * segments = NULL;
     int numsegs = 0;
     int rawpos = 0;
@@ -42,7 +44,7 @@ config(mfp_processor * proc)
         }
         else {
             numsegs = (segments_raw->len)/3; 
-            segments = g_malloc(numsegs * sizeof(segment));
+            segments = g_malloc0(numsegs * sizeof(segment));
         }
 
         rawpos = 0;
@@ -51,15 +53,21 @@ config(mfp_processor * proc)
             delay_ms = g_array_index(segments_raw, float, rawpos++);
             end_val = g_array_index(segments_raw, float, rawpos++);
             ramp_ms = g_array_index(segments_raw, float, rawpos++);
-            segments[scount].start_frame = framebase + (int)(delay_ms*frames_per_ms + 0.5);
+
+            ideal_ms += delay_ms;
+            ideal_frame = (int)(ideal_ms * frames_per_ms + 0.5);
+            actual_frame = MAX(framebase, ideal_frame);
+
+            segments[scount].start_frame = actual_frame;
             segments[scount].end_val = end_val;
 
-            /* every segment is at least 1 frame */
-            if (ramp_ms * frames_per_ms < 0.5) {
-                framebase++;
-            }
-            segments[scount].end_frame = framebase + (int)((delay_ms+ramp_ms)*frames_per_ms + 0.5);
-            framebase = segments[scount].end_frame;
+            ideal_ms += ramp_ms;
+            ideal_frame = (int)(ideal_ms * frames_per_ms + 0.5);
+            actual_frame = MAX(framebase, ideal_frame);
+            //segments[scount].end_frame = framebase + (int)((delay_ms+ramp_ms)*frames_per_ms + 0.5);
+            segments[scount].end_frame = actual_frame;
+            
+            framebase = segments[scount].end_frame + 1;
         }
         if (pdata->segv != NULL) 
             g_free(pdata->segv);
@@ -96,18 +104,11 @@ process(mfp_processor * proc)
     int scount;
     float * sample = proc->outlet_buf[0]->data;
 
-    if (sample == NULL) {
+    if ((sample == NULL) || (data == NULL) || (data->nsegs == 0)) {
+        mfp_block_zero(proc->outlet_buf[0]);
         return 0;
     }
     
-    if (data == NULL) {
-        return 0;
-    }
-
-    if (data->nsegs == 0) {
-        return 0;
-    }
-
     slope = ((double)(cseg->end_val - data->start_val))/(cseg->end_frame-cseg->start_frame);
     offset = data->start_val;
 
@@ -147,7 +148,7 @@ process(mfp_processor * proc)
 static void 
 init(mfp_processor * proc) 
 {
-    builtin_line_data * p = g_malloc(sizeof(builtin_line_data));
+    builtin_line_data * p = g_malloc0(sizeof(builtin_line_data));
 
     proc->data = p; 
     
