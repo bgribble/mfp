@@ -54,7 +54,6 @@ class ConnectionMode (InputMode):
     def update_connection(self): 
         if (self.source_obj is None or self.dest_obj is None):
             if self.connection:
-                print "update_connection: deleting connection", self.connection
                 self.connection.delete()
                 self.connection = None 
             return True 
@@ -64,7 +63,6 @@ class ConnectionMode (InputMode):
                                                 self.source_obj, self.source_port,
                                                 self.dest_obj, self.dest_port, 
                                                 dashed=True)
-            print "update_connection: made dashed connection", self.connection
             self.source_obj.connections_out.append(self.connection)
             self.dest_obj.connections_in.append(self.connection)
         else: 
@@ -109,14 +107,12 @@ class ConnectionMode (InputMode):
 
 
     def disable(self):
-        print "connection_mode: disable"
         self.window.remove_callback(self.select_cbid)
         self.select_cbid = None
         self.window.remove_callback(self.remove_cbid)
         self.remove_cbid = None
 
         if self.connection:
-            print "connection_mode: deleting", self.connection
             self.connection.delete()
             self.connection = None 
 

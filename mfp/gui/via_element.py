@@ -33,7 +33,6 @@ class ViaElement (PatchElement):
 
         self.connections_out = []
         self.connections_in = []
-        self.editable = False
 
         # create elements
         txs = self.VIA_SIZE + self.VIA_FUDGE

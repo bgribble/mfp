@@ -32,7 +32,6 @@ class EnumElement (PatchElement):
         self.format_str = "%.1f"
         self.connections_out = []
         self.connections_in = []
-        self.editable = False
         self.update_required = True
 
         self.param_list.remove('width')
