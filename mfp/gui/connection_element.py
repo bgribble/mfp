@@ -59,6 +59,9 @@ class ConnectionElement(PatchElement):
         self.obj_2 = None
         PatchElement.delete(self)
 
+    def draw_ports(self):
+        pass 
+
     def draw(self):
         if self.obj_1 is None or self.obj_2 is None:
             return
