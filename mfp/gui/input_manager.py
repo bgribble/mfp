@@ -144,8 +144,8 @@ class InputManager (object):
                 keysym = self.keyseq.pop()
         elif event.type == Clutter.EventType.ENTER:
             src = self.event_sources.get(event.source)
-            if self.window.object_visible(src):
-                self.pointer_obj = self.event_sources.get(event.source)
+            if src and self.window.object_visible(src):
+                self.pointer_obj = src
                 self.pointer_obj_time = datetime.now()
                 if self.pointer_obj == self.pointer_lastobj:
                     self.keyseq.mod_keys = set()

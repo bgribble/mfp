@@ -8,7 +8,6 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 from mfp import MFPGUI
-from .colordb import ColorDB 
 
 class PatchElement (Clutter.Group):
     '''
@@ -208,7 +207,7 @@ class PatchElement (Clutter.Group):
         return MFPGUI().mfp.get_params(self.obj_id)
 
     def get_stage_position(self): 
-        if self.container == self.layer.group:
+        if not self.container or not self.layer or self.container == self.layer.group:
             return (self.position_x, self.position_y)
         else: 
             pos_x = self.position_x
