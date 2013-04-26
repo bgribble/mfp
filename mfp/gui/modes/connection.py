@@ -143,6 +143,7 @@ class ConnectionMode (InputMode):
                                     self.dest_obj.obj_id, self.dest_port):
                 c = ConnectionElement(self.window, self.source_obj, self.source_port,
                                       self.dest_obj, self.dest_port)
+                MFPGUI().appwin.register(c)
                 self.source_obj.connections_out.append(c)
                 self.dest_obj.connections_in.append(c)
             else:

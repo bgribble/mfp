@@ -176,6 +176,7 @@ class GUICommand (RPCWrapper):
             return None
 
         c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
+        MFPGUI().appwin.register(c)
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)
 
