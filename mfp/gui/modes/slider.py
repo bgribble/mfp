@@ -21,6 +21,7 @@ class SliderControlMode (InputMode):
 
         InputMode.__init__(self, descrip)
 
+        self.bind("M1DOUBLEDOWN", self.set_value, "Set fader value")
         self.bind("M1DOWN", self.drag_start, "Adjust fader or move element")
         self.bind("S-M1DOWN", self.drag_start)
         self.bind("C-M1DOWN", self.drag_start)
@@ -33,6 +34,11 @@ class SliderControlMode (InputMode):
         self.bind("M1UP", self.drag_end, "Release fader")
         self.bind("S-M1UP", self.drag_end)
         self.bind("C-M1UP", self.drag_end)
+
+    def set_value(self):
+        new_value = self.slider.pixpos2value(self.manager.pointer_x-self.slider.position_x, 
+                                             self.manager.pointer_y-self.slider.position_y)
+        self.slider.update_value(new_value)
 
     def drag_start(self):
         if self.manager.pointer_obj == self.slider:

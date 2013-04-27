@@ -34,8 +34,8 @@ class SlideMeterElement (PatchElement):
 
     VERTICAL = 0x00
     HORIZONTAL = 0x01 
-    POSITIVE = 0x00
-    NEGATIVE = 0x01
+    POSITIVE = 1
+    NEGATIVE = -1
     CROSSFADE = 0x02 
     LINEAR = 0x00
     LOG = 0x01 
@@ -160,7 +160,7 @@ class SlideMeterElement (PatchElement):
 
         # draw the indicator and a surrounding box
         scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
-        if self.direction ==  self.NEGATIVE: 
+        if self.direction == self.NEGATIVE: 
             bar_y_min = y_min
             scale_fraction = 1.0 - scale_fraction 
         else:
@@ -183,6 +183,17 @@ class SlideMeterElement (PatchElement):
             return True
         else:
             return False
+
+    def pixpos2value(self, xpos, ypos):
+        if self.orientation == self.VERTICAL:
+            delta = self.hot_y_max - ypos    
+            total = self.hot_y_max - self.hot_y_min
+        else: 
+            delta = xpos - self.hot_x_min
+            total = self.hot_x_max - self.hot_x_min
+
+        rv = (float(delta) / total) * (self.max_value - self.min_value)
+        return rv
 
     def pixdelta2value(self, dx, dy):
         if self.orientation == self.VERTICAL:
