@@ -81,16 +81,14 @@ def layer_new_scope(self):
 def layer_move_up(self):
     p = self.selected_patch
     oldpos = p.layers.index(self.selected_layer)
+
     if oldpos == 0:
         return 
-    
     newpos = oldpos-1
-    friend = p.layers[newpos]
     pre = p.layers[:newpos]
     post = [p.layers[newpos]] + p.layers[oldpos+1:]
     p.layers = pre + [self.selected_layer] + post 
-
-    self.layer_view.move_before(self.selected_layer, friend)
+    self.layer_view.update(self.selected_layer, p)
 
 @extends(PatchWindow)
 def layer_move_down(self):
@@ -100,11 +98,10 @@ def layer_move_down(self):
         return 
 
     newpos = oldpos + 1
-    friend = p.layers[newpos]
     pre = p.layers[:oldpos] + [p.layers[newpos]]
     post = p.layers[newpos+1:]
     p.layers = pre + [self.selected_layer] + post 
     
-    self.layer_view.move_after(self.selected_layer, friend)
+    self.layer_view.update(self.selected_layer, p)
 
 
