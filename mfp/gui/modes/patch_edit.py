@@ -15,7 +15,7 @@ from ..connection_element import ConnectionElement
 from ..message_element import MessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
-from ..slidemeter_element import FaderElement, BarMeterElement
+from ..slidemeter_element import FaderElement, BarMeterElement, DialElement 
 from ..via_element import SendViaElement, ReceiveViaElement
 from ..via_element import SendSignalViaElement, ReceiveSignalViaElement 
 from ..button_element import BangButtonElement, ToggleButtonElement, ToggleIndicatorElement
@@ -58,6 +58,8 @@ class PatchEditMode (InputMode):
                   "Add slider")
         self.bind("b", lambda: self.add_element(BarMeterElement),
                   "Add bar meter")
+        self.bind("d", lambda: self.add_element(DialElement),
+                  "Add dial control")
         self.bind("x", lambda: self.add_element(PlotElement),
                   "Add X/Y plot")
         self.bind("v", lambda: self.add_element(SendViaElement),

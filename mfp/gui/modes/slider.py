@@ -149,3 +149,11 @@ class SliderEditMode (InputMode):
     def end_edits(self):
         self.manager.disable_minor_mode(self)
         self.slider.edit_mode = None 
+
+class DialControlMode(SliderControlMode):
+      pass
+
+class DialEditMode(DialControlMode):
+    pass 
+
+

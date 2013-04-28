@@ -10,7 +10,7 @@ from gi.repository import Clutter
 import math
 from .patch_element import PatchElement
 from .colordb import ColorDB
-from .modes.slider import SliderEditMode, SliderControlMode
+from .modes.slider import SliderEditMode, SliderControlMode, DialEditMode, DialControlMode
 from mfp import MFPGUI
 from . import ticks
 
@@ -364,3 +364,92 @@ class BarMeterElement(SlideMeterElement):
         SlideMeterElement.__init__(self, window, x, y)
 
         self.slider_enable = False
+
+class DialElement(SlideMeterElement): 
+    DEFAULT_W = 50 
+    DEFAULT_H = 50 
+    BAR_WIDTH = 0.7
+    THETA_MIN = 0.65*math.pi
+    THETA_MAX = 0.35*math.pi 
+    DRAG_SCALE = 0.01
+
+    def set_show_scale(self, show): 
+        pass 
+
+    def set_orientation(self, orientation):
+        pass 
+
+    def p2r(self, r, theta):
+        x = (self.width / 2.0) + r * math.cos(theta)
+        y = (self.height / 2.0) + r * math.sin(theta)
+        return (x, y)
+
+    def r2p(self, x, y):
+        dx = x - self.width/2.0
+        dy = y - self.height/2.0
+        theta = math.atan2(dy, dx)
+        r = (x*x + y*y)**0.5
+        return (r, theta)
+
+    def point_in_slider(self, x, y):
+        r, theta = self.r2p(x, y)
+        if theta > self.THETA_MAX and theta < self.THETA_MIN:
+            return False 
+        else: 
+            return True 
+
+    def pixpos2value(self, x, y):
+        r, theta = self.r2p(x, y)
+        if theta > self.THETA_MAX and theta < self.THETA_MIN:
+            return None 
+        elif theta < self.THETA_MIN:
+            theta += 2*math.pi
+
+        theta -= self.THETA_MIN
+        scale_fraction = theta / (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
+        return self.min_value + scale_fraction * (self.max_value - self.min_value)
+            
+    def pixdelta2value(self, dx, dy): 
+        return dy * self.DRAG_SCALE * (self.max_value - self.min_value)
+
+    def draw_cb(self, texture, ct): 
+        c = ColorDB.to_cairo(self.color_fg)
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
+        ct.set_line_width(1.0)
+        scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
+        theta = self.THETA_MIN + scale_fraction * (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
+        texture.clear()
+
+        r = min(self.width, self.height)/2.2
+        ct.move_to(*self.p2r(r, self.THETA_MIN))
+        ct.arc(self.width/2.0, self.height/2.0, r, self.THETA_MIN, self.THETA_MAX)
+        r = r * (1.0 - self.BAR_WIDTH)
+        ct.line_to(*self.p2r(r, self.THETA_MAX))
+        ct.arc_negative(self.width/2.0, self.height/2.0, r, self.THETA_MAX, self.THETA_MIN)
+        ct.close_path()
+        ct.stroke()
+
+        r = min(self.width, self.height)/2.2
+        ct.move_to(*self.p2r(r, self.THETA_MIN))
+        ct.arc(self.width/2.0, self.height/2.0, r, self.THETA_MIN, theta)
+        r = r * (1.0 - self.BAR_WIDTH)
+        ct.line_to(*self.p2r(r, theta))
+        ct.arc_negative(self.width/2.0, self.height/2.0, r, theta, self.THETA_MIN)
+        ct.close_path()
+        ct.fill()
+
+    def make_edit_mode(self):
+        if self.obj_id is None:
+            # create the underlying var
+            self.create(self.proc_type, str(self.value))
+            if self.obj_id is None:
+                return None 
+            else:
+                self.draw_ports()
+        return DialEditMode(self.stage, self, "Fader/meter edit")
+
+    def make_control_mode(self):
+        return DialControlMode(self.stage, self, "Dial control")
+
+
+
