@@ -166,16 +166,6 @@ class PlotElement (PatchElement):
             self.proc_type = self.obj_type 
             self.create(self.proc_type, self.obj_args)
 
-            if self.obj_type == "scatter":
-                self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
-            elif self.obj_type == "scope":
-                self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT, 
-                                        MFPApp().samplerate)
-                self.xyplot.draw_complete_cb = self.draw_complete_cb 
-            if self.xyplot:
-                self.add_actor(self.xyplot)
-                self.xyplot.set_position(3, self.LABEL_SPACE)
-
             if self.obj_id is None:
                 log.debug("PlotElement: could not create", self.obj_type, self.obj_args)
             else:

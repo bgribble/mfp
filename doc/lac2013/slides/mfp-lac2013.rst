@@ -58,7 +58,7 @@ About MFP
 :Team: Solo developer
 :Timeline: 2010-present 
 :Status: Pre-alpha/experimental, active development  
-:User base: 0-5 
+:User base: 0-5 bold pioneers  
 :OS: Linux
 :License: GPL 
 :Languages: Python with C extensions
@@ -91,6 +91,18 @@ Hello, World: Message boxes and expressions
 
 Hello, World: String reversal 
 ---------------------------------------------
+
+Hello, World: Basics of data flow 
+---------------------------------------------
+
+ * "Hot" inlets trigger processing, other inputs are buffered 
+
+ * Depth first (sequencing of steps)
+
+ * Right-to-left output order (sequencing of steps)
+
+ * Multiple connections on an outlet may be followed in any order 
+
 
 Hello, World: Saving and using a patch 
 ---------------------------------------------

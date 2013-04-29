@@ -125,10 +125,8 @@ class ScopePlot (XYPlot):
     def _grab(self):
         def offset(channel):
             return channel * self.buf_info.size * self.FLOAT_SIZE
-
         if self.buf_info is None:
             return None
-
         if self.shm_obj is None:
             self.shm_obj = SharedMemory(self.buf_info.buf_id)
 
@@ -137,11 +135,13 @@ class ScopePlot (XYPlot):
         try:
             for c in range(self.buf_info.channels):
                 os.lseek(self.shm_obj.fd, offset(c), os.SEEK_SET)
-                slc = os.read(self.shm_obj.fd, self.buf_info.size * self.FLOAT_SIZE)
+                slc = os.read(self.shm_obj.fd, int(self.buf_info.size * self.FLOAT_SIZE))
                 self.data.append(list(numpy.fromstring(slc, dtype=numpy.float32)))
                 self.set_bounds(0, None, len(self.data[0])*1000/self.samplerate, None)
         except Exception, e:
             log.debug("scopeplot: error grabbing data", e)
+            import traceback
+            traceback.print_exc()
             return None
 
     def command(self, action, data):

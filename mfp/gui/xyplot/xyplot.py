@@ -244,7 +244,7 @@ class XYPlot (Clutter.Group):
     def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
         tickfuncs = { self.LINEAR: ticks.linear, self.LOG_DECADE: ticks.decade,
                       self.LOG_OCTAVE: ticks.octave }
-
+        texture.clear()
         pt_min = self.px2pt(px_min)
         pt_max = self.px2pt(px_max)
 
@@ -259,7 +259,7 @@ class XYPlot (Clutter.Group):
         ctx.set_source_rgba(self.color_axes.red, self.color_axes.green,
                            self.color_axes.blue, self.color_axes.alpha)
         ctx.set_font_size(self.axis_font_size)
-
+        
         # the axis line
         ctx.move_to(0, self.AXIS_PAD)
         ctx.line_to(texture.get_width(), self.AXIS_PAD)
