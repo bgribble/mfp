@@ -31,12 +31,10 @@ class SlideMeterElement (PatchElement):
     SCALE_SPACE = 30
     TICK_SPACE = 14
     TICK_LEN = 5
+    MIN_BARSIZE = 2.0
 
     VERTICAL = 0x00
     HORIZONTAL = 0x01 
-    POSITIVE = 1
-    NEGATIVE = -1
-    CROSSFADE = 0x02 
     LINEAR = 0x00
     LOG = 0x01 
     LEFT = 0x00
@@ -45,7 +43,7 @@ class SlideMeterElement (PatchElement):
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
         self.param_list.extend(['min_value', 'max_value', 'show_scale', 'scale_type',
-                                'scale_position', 'orientation', 'direction'])
+                                'scale_position', 'orientation', 'zeropoint'])
         # parameters controlling display
         self.value = 0.0
         self.min_value = 0.0
@@ -57,7 +55,7 @@ class SlideMeterElement (PatchElement):
         self.scale_type = self.LINEAR 
         self.scale_position = self.LEFT 
         self.orientation = self.VERTICAL
-        self.direction = self.POSITIVE
+        self.zeropoint = None 
 
         # value to emit when at bottom of scale, useful for dB scales
         self.slider_zero = None
@@ -158,21 +156,39 @@ class SlideMeterElement (PatchElement):
                 ct.move_to(txt_x, txt_y)
                 ct.show_text("%.3g" % tick)
 
-        # draw the indicator and a surrounding box
-        scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
-        if self.direction == self.NEGATIVE: 
-            bar_y_min = y_min
-            scale_fraction = 1.0 - scale_fraction 
-        else:
-            bar_y_min = y_min + bar_h * (1.0 - scale_fraction)
+        def val2pixels(val):
+            scale_fraction = abs((val - self.min_value) / (self.max_value - self.min_value))
+            return scale_fraction*bar_h 
 
-
+        # box 
         ct.rectangle(x_min, y_min, bar_w, bar_h)
         ct.stroke()
-        ct.rectangle(x_min, bar_y_min, bar_w, bar_h * scale_fraction)
+
+        # filling 
+        min_fillval, max_fillval = self.fill_interval() 
+
+        h = val2pixels(max_fillval) - val2pixels(min_fillval)
+        if self.zeropoint is not None and h < self.MIN_BARSIZE:
+            h = self.MIN_BARSIZE 
+
+        ct.rectangle(x_min, y_max - val2pixels(max_fillval), bar_w, h)
         ct.fill()
+
         if self.orientation == self.HORIZONTAL:
             ct.restore()
+
+
+    def fill_interval(self): 
+        if self.zeropoint is None:
+            return (self.min_value, self.value)
+        else:
+            if self.value > self.zeropoint: 
+                pmin = self.zeropoint
+                pmax = self.value 
+            else: 
+                pmin = self.value 
+                pmax = self.zeropoint 
+            return (pmin, pmax)
 
     def point_in_slider(self, x, y):
         orig_x, orig_y = self.get_stage_position()
@@ -262,6 +278,11 @@ class SlideMeterElement (PatchElement):
         self.update()
         self.send_params()
 
+    def set_zeropoint(self, zp):
+        self.zeropoint = zp
+        self.update()
+        self.send_params()
+
     def configure(self, params):
         changes = False
 
@@ -275,12 +296,9 @@ class SlideMeterElement (PatchElement):
             self.set_orientation(self.VERTICAL)
             changes = True 
 
-        v = params.get("direction")
-        if (v in (1, "pos", "positive") and self.direction != self.POSITIVE): 
-            self.direction = self.POSITIVE 
-            changes = True 
-        elif (v in (-1,  "neg", "negative") and self.direction != self.NEGATIVE):
-            self.direction = self.NEGATIVE
+        v = params.get("zeropoint")
+        if v != self.zeropoint: 
+            self.zeropoint = v
             changes = True 
 
         v = params.get("scale")
@@ -366,18 +384,36 @@ class BarMeterElement(SlideMeterElement):
         self.slider_enable = False
 
 class DialElement(SlideMeterElement): 
+    display_type = "dial" 
+    proc_type = "slidemeter" 
+
     DEFAULT_W = 50 
     DEFAULT_H = 50 
+    DEFAULT_R = 24
     BAR_WIDTH = 0.7
     THETA_MIN = 0.65*math.pi
     THETA_MAX = 0.35*math.pi 
     DRAG_SCALE = 0.01
+    MIN_WEDGE = 0.1
 
-    def set_show_scale(self, show): 
-        pass 
+    def __init__(self, window, x, y):
+        self.dial_radius = self.DEFAULT_R 
+        SlideMeterElement.__init__(self, window, x, y)
 
     def set_orientation(self, orientation):
         pass 
+
+    def set_show_scale(self, show_scale):
+        if show_scale == self.show_scale: 
+            return 
+
+        if show_scale:
+            self.show_scale = True
+            self.set_size(2*self.dial_radius + 2.0 + 7*self.scale_font_size, 
+                          2*self.dial_radius + 2.0 + 3*self.scale_font_size)
+        else:
+            self.show_scale = False
+            self.set_size(2*self.dial_radius + 2.0, 2*self.dial_radius + 2.0)
 
     def p2r(self, r, theta):
         x = (self.width / 2.0) + r * math.cos(theta)
@@ -412,29 +448,72 @@ class DialElement(SlideMeterElement):
     def pixdelta2value(self, dx, dy): 
         return dy * self.DRAG_SCALE * (self.max_value - self.min_value)
 
+    def val2theta(self, value):
+        scale_fraction = abs((value - self.min_value) / (self.max_value - self.min_value))
+        if scale_fraction > 1.0:
+            scale_fraction = 1.0
+        elif scale_fraction < 0:
+            scale_fraction = 0
+        theta = self.THETA_MIN + scale_fraction * (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
+        return theta
+
     def draw_cb(self, texture, ct): 
         c = ColorDB.to_cairo(self.color_fg)
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
-        scale_fraction = abs((self.value - self.min_value) / (self.max_value - self.min_value))
-        theta = self.THETA_MIN + scale_fraction * (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
+        theta = self.val2theta(self.value)
         texture.clear()
 
-        r = min(self.width, self.height)/2.2
-        ct.move_to(*self.p2r(r, self.THETA_MIN))
-        ct.arc(self.width/2.0, self.height/2.0, r, self.THETA_MIN, self.THETA_MAX)
-        r = r * (1.0 - self.BAR_WIDTH)
+        # draw the scale if required
+        if self.show_scale:
+            ct.set_font_size(self.scale_font_size)
+
+            if self.scale_ticks is None:
+                num_ticks = int(self.dial_radius / 10)
+                if not num_ticks % 2:
+                    num_ticks += 1
+                self.scale_ticks = ticks.linear(self.min_value, self.max_value, num_ticks)
+
+            for tick in self.scale_ticks:
+                tick_theta = self.val2theta(tick)
+                tick_x0, tick_y0 = self.p2r(self.dial_radius, tick_theta)
+                tick_x1, tick_y1 = self.p2r(self.dial_radius + self.TICK_LEN, tick_theta)
+                ct.move_to(tick_x0, tick_y0)
+                ct.line_to(tick_x1, tick_y1)
+                ct.stroke()
+                
+                txt_x, txt_y = self.p2r(self.dial_radius + self.TICK_LEN + 1, tick_theta)
+
+                txt_x -= 2*self.scale_font_size * math.sin(tick_theta/2.0)
+                txt_y += self.scale_font_size * (math.cos(tick_theta-math.pi/2.0)+1)/2.0
+                ct.move_to(txt_x, txt_y)
+                ct.show_text("%.3g" % tick)
+
+        # Draw the outline of the dial 
+        ct.move_to(*self.p2r(self.dial_radius, self.THETA_MIN))
+        ct.arc(self.width/2.0, self.height/2.0, self.dial_radius, self.THETA_MIN, self.THETA_MAX)
+
+        r = self.dial_radius * (1.0 - self.BAR_WIDTH)
         ct.line_to(*self.p2r(r, self.THETA_MAX))
         ct.arc_negative(self.width/2.0, self.height/2.0, r, self.THETA_MAX, self.THETA_MIN)
         ct.close_path()
         ct.stroke()
 
-        r = min(self.width, self.height)/2.2
-        ct.move_to(*self.p2r(r, self.THETA_MIN))
-        ct.arc(self.width/2.0, self.height/2.0, r, self.THETA_MIN, theta)
-        r = r * (1.0 - self.BAR_WIDTH)
-        ct.line_to(*self.p2r(r, theta))
-        ct.arc_negative(self.width/2.0, self.height/2.0, r, theta, self.THETA_MIN)
+        # and the tasty filling 
+        min_val, max_val = self.fill_interval()
+        min_theta = self.val2theta(min_val)
+        max_theta = self.val2theta(max_val)
+
+        if self.zeropoint is not None and abs(max_theta - min_theta) < self.MIN_WEDGE:
+            max_theta += self.MIN_WEDGE/2.0
+            min_theta -= self.MIN_WEDGE/2.0
+
+        ct.move_to(*self.p2r(self.dial_radius, min_theta))
+        ct.arc(self.width/2.0, self.height/2.0, self.dial_radius, min_theta, max_theta)
+
+        r = self.dial_radius * (1.0 - self.BAR_WIDTH)
+        ct.line_to(*self.p2r(r, max_theta))
+        ct.arc_negative(self.width/2.0, self.height/2.0, r, max_theta, min_theta)
         ct.close_path()
         ct.fill()
 
@@ -446,7 +525,7 @@ class DialElement(SlideMeterElement):
                 return None 
             else:
                 self.draw_ports()
-        return DialEditMode(self.stage, self, "Fader/meter edit")
+        return DialEditMode(self.stage, self, "Dial edit")
 
     def make_control_mode(self):
         return DialControlMode(self.stage, self, "Dial control")

@@ -91,10 +91,10 @@ class SliderEditMode (InputMode):
         self.bind("ESC", self.end_edits, "End editing")
         self.bind("s", self.toggle_scale, "Toggle scale display (on/off)")
         self.bind("o", self.toggle_orient, "Toggle orientation (vert/horiz)")
-        self.bind("d", self.toggle_direction, "Toggle direction (pull down/pull up)")
         self.bind("r", self.toggle_side, "Toggle scale side (right/left)")
         self.bind("C-[", self.set_low, "Enter lower bound")
         self.bind("C-]", self.set_hi, "Enter upper bound")
+        self.bind("C-|", self.set_zero, "Enter zero point")
 
     def set_low(self): 
         def hud_cb(value): 
@@ -108,6 +108,16 @@ class SliderEditMode (InputMode):
             if value is not None:
                 self.slider.set_bounds(self.slider.min_value, float(value))
         self.window.get_prompted_input("Slider upper bound: ", hud_cb)
+        return True 
+
+    def set_zero(self): 
+        def hud_cb(value): 
+            if value is not None:
+                if value != "None":
+                    self.slider.set_zeropoint(float(value))
+                else: 
+                    self.slider.set_zeropoint(None)
+        self.window.get_prompted_input("Slider zero point: ", hud_cb)
         return True 
 
     def toggle_scale(self):
@@ -151,9 +161,9 @@ class SliderEditMode (InputMode):
         self.slider.edit_mode = None 
 
 class DialControlMode(SliderControlMode):
-      pass
+    pass
 
-class DialEditMode(DialControlMode):
+class DialEditMode(SliderEditMode):
     pass 
 
 
