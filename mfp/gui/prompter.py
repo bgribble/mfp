@@ -15,16 +15,16 @@ class Prompter (object):
         self.current_callback = None 
         self.mode = None 
 
-    def get_input(self, prompt, callback): 
+    def get_input(self, prompt, callback, default): 
         if self.mode is None:
-            self._begin(prompt, callback)
+            self._begin(prompt, callback, default)
         else: 
             self.queue.append([prompt, callback])
 
-    def _begin(self, prompt, callback): 
+    def _begin(self, prompt, callback, default): 
         self.current_prompt = prompt
         self.current_callback = callback 
-        self.window.hud_set_prompt(prompt)
+        self.window.hud_set_prompt(prompt + default)
         self.mode = LabelEditMode(self.window, self, self.window.hud_prompt, 
                                   prompt_locked=True, mode_desc="Prompted input")
         self.window.input_mgr.enable_minor_mode(self.mode) 

@@ -36,9 +36,23 @@ class GlobalMode (InputMode):
         return False 
 
     def save_file(self):
+        patch = self.window.selected_patch
+        if patch.last_filename is None: 
+            default_filename = patch.obj_name + '.mfp'
+        else:
+            default_filename = patch.last_filename 
+
         def cb(fname):
-            MFPGUI().mfp.save_file(self.window.selected_patch.obj_name, fname)
-        self.window.get_prompted_input("File name to save: ", cb)
+            if fname:
+                patch.last_filename = fname 
+                if fname != default_filename:
+                    newname ='.'.join(fname.split(".")[:-1]) 
+                    patch.obj_name = newname
+                    MFPGUI().mfp.rename_obj(patch.obj_id, newname)
+                    patch.send_params()
+                    self.window.refresh(patch)
+                MFPGUI().mfp.save_file(patch.obj_name, fname)
+        self.window.get_prompted_input("File name to save: ", cb, default_filename)
 
     def open_file(self):
         def cb(fname):

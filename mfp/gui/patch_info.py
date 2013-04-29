@@ -19,6 +19,7 @@ class PatchInfo (object):
         self.obj_type = None
         self.obj_args = None
         self.obj_name = None
+        self.last_filename = None 
         self.layers = []
         self.scopes = [] 
 

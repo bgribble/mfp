@@ -336,8 +336,8 @@ class PatchWindow(object):
         buf.move_mark(mark, iterator)
         self.log_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 
-    def get_prompted_input(self, prompt, callback): 
-        self.hud_prompt_mgr.get_input(prompt, callback)
+    def get_prompted_input(self, prompt, callback, default=''): 
+        self.hud_prompt_mgr.get_input(prompt, callback, default)
 
     def hud_set_prompt(self, prompt):
         if prompt is None:
