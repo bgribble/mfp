@@ -548,7 +548,6 @@ class MFPApp (Singleton):
         
         print "MFPApp.session_load: loading", session_path, session_id 
 
-        print "about to read session file in", self.session_dir
         cp.read(os.path.join(self.session_dir, "session_data"))
 
         for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs", 

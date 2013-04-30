@@ -154,11 +154,13 @@ class GUICommand (RPCWrapper):
                     parent.add_actor(o)    
                     o.container = parent 
                     
+                o.configure(params)
                 MFPGUI().appwin.register(o)
+            else: 
+                o.configure(params)
 
-            o.configure(params)
-            o.update()
             MFPGUI().remember(o)
+            o.update()
 
     @rpcwrap
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
