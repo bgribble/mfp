@@ -125,6 +125,10 @@ Generating audio: Simple kick drum
 Generating audio: Drum kit patch 
 -------------------------------------------
 
+Generating audio: Connect to looper 
+-------------------------------------------
+
+
 
 
 
