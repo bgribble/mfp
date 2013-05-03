@@ -32,6 +32,7 @@ class InputManager (object):
         self.pointer_ev_y = None
         self.pointer_obj = None
         self.pointer_obj_time = None 
+        self.pointer_leave_time = None 
         self.pointer_lastobj = None
 
         self.hover_thresh=timedelta(microseconds=750000)
@@ -142,18 +143,22 @@ class InputManager (object):
             self.keyseq.process(event)
             if len(self.keyseq.sequences):
                 keysym = self.keyseq.pop()
+
         elif event.type == Clutter.EventType.ENTER:
             src = self.event_sources.get(event.source)
+
+            now = datetime.now()
+            if (self.pointer_leave_time is not None 
+                and (now - self.pointer_leave_time) > timedelta(milliseconds=100)):
+                self.keyseq.mod_keys = set()
+
             if src and self.window.object_visible(src):
                 self.pointer_obj = src
-                self.pointer_obj_time = datetime.now()
-                if self.pointer_obj == self.pointer_lastobj:
-                    self.keyseq.mod_keys = set()
-            else:
-                pass
+                self.pointer_obj_time = now
 
         elif event.type == Clutter.EventType.LEAVE:
             src = self.event_sources.get(event.source)
+            self.pointer_leave_time = datetime.now()
             if src == self.pointer_obj:
                 self.pointer_lastobj = self.pointer_obj
                 self.pointer_obj = None
