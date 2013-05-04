@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from mfp.processor import Processor
 from mfp.main import MFPApp
-
+from mfp.bang import Uninit 
 
 class AudioOut(Processor):
     doc_tooltip_obj = "Output to JACK port"
@@ -28,11 +28,8 @@ class AudioOut(Processor):
 
     def trigger(self):
         if self.inlets[1] is not Uninit:
-            try:
-                channel = int(self.inlets[1])
-                self.dsp_setparam("channel", channel)
-            except:
-                print "Can't convert %s to a channel number" % self.inlet[1]
+            channel = int(self.inlets[1])
+            self.dsp_setparam("channel", channel)
 
 
 class AudioIn(Processor):
@@ -54,11 +51,8 @@ class AudioIn(Processor):
         self.dsp_init("in~", channel=self.channel)
 
     def trigger(self):
-        try:
-            self.channel = int(self.inlets[0])
-            self.dsp_setparam("channel", self.channel)
-        except:
-            print "Can't convert %s to a channel number" % self.inlet[0]
+        self.channel = int(self.inlets[0])
+        self.dsp_setparam("channel", self.channel)
 
 
 def register():

@@ -39,12 +39,8 @@ class Osc(Processor):
         if self.inlets[0] is Bang:
             self.dsp_setparam("phase", float(0))
         else:
-            try:
-                phase = float(self.inlets[0])
-                self.dsp_setparam("phase", phase)
-            except Exception, e:
-                log.debug("osc~: Can't convert %s to a frequency value" % self.inlets[0])
-                log.debug("osc~: Exception:", e)
+            phase = float(self.inlets[0])
+            self.dsp_setparam("phase", phase)
 
 
 def register():

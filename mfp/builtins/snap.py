@@ -46,8 +46,11 @@ class Snap(Processor):
                 try:
                     self.dsp_setparam(param, float(val))
                 except Exception, e:
+                    import traceback 
+                    tb = traceback.format_exc()
                     log.debug("snap~: Error setting param", param, "to", type(val), str(val))
                     log.debug("snap~: Exception:", str(e))
+                    self.error(tb)
 
     def dsp_response(self, resp_type, resp_value):
         self.outlets[0] = resp_value

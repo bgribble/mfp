@@ -7,7 +7,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from mfp.processor import Processor
 from mfp.main import MFPApp
-
+from mfp import log 
 
 class Line(Processor):
     doc_tooltip_obj = "Ramp/line generator"
@@ -31,13 +31,8 @@ class Line(Processor):
                 pos = float(self.inlets[0])
                 self.dsp_obj.setparam("position", pos)
             else: 
-                try:
-                    segs = self.convert_segments(self.inlets[0])
-                    self.dsp_obj.setparam("segments", segs)
-                except:
-                    import traceback
-                    traceback.print_exc()
-                    print "Error processing arg for line~:", self.inlets[0]
+                segs = self.convert_segments(self.inlets[0])
+                self.dsp_obj.setparam("segments", segs)
 
     def convert_segments(self, segments):
         if (isinstance(segments, (list, tuple)) 
@@ -45,20 +40,16 @@ class Line(Processor):
             # one-segment message 
             segments = [segments]
 
-        try:
-            unpacked = []
-            for s in segments:
-                if isinstance(s, (float, int)):
-                    unpacked.extend([float(0.0), float(s), float(0.0)])
-                elif len(s) == 3:
-                    unpacked.extend([float(s[0]), float(s[1]), float(s[2])])
-                elif len(s) == 2:
-                    unpacked.extend([float(0.0), float(s[0]), float(s[1])])
+        unpacked = []
+        for s in segments:
+            if isinstance(s, (float, int)):
+                unpacked.extend([float(0.0), float(s), float(0.0)])
+            elif len(s) == 3:
+                unpacked.extend([float(s[0]), float(s[1]), float(s[2])])
+            elif len(s) == 2:
+                unpacked.extend([float(0.0), float(s[0]), float(s[1])])
 
-            return unpacked
-        except Exception, e:
-            return []
-
+        return unpacked
 
 def register():
     MFPApp().register("line~", Line)

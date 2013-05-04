@@ -30,8 +30,11 @@ class Biquad(Processor):
                 try:
                     self.dsp_setparam(param, float(val))
                 except Exception, e:
+                    import traceback
+                    tb = traceback.format_exc()
                     log.debug("biquad~: Error setting param", param, "to", type(val), str(val))
                     log.debug("biquad~: Exception:", str(e))
+                    self.error(tb)
 
 
 def bq_hipass(freq, q): 

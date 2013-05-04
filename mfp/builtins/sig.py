@@ -28,11 +28,8 @@ class Sig(Processor):
         self.dsp_obj.setparam("value", value)
 
     def trigger(self):
-        try:
-            val = float(self.inlets[0])
-            self.dsp_obj.setparam("value", val)
-        except:
-            print "Can't convert %s to a value" % self.inlet[0]
+        val = float(self.inlets[0])
+        self.dsp_obj.setparam("value", val)
 
 
 def register():

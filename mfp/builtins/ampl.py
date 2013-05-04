@@ -30,9 +30,11 @@ class Ampl(Processor):
                 try:
                     self.dsp_setparam(param, float(val))
                 except Exception, e:
+                    import traceback
+                    tb = traceback.format_exc()
                     log.debug("ampl~: Error setting param", param, "to", type(val), str(val))
                     log.debug("ampl~: Exception:", str(e))
-
+                    self.error(tb)
 
 def register():
     MFPApp().register("ampl~", Ampl)

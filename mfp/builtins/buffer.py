@@ -128,7 +128,10 @@ class Buffer(Processor):
             slc = os.read(self.shm_obj.fd, (end - start) * self.FLOAT_SIZE)
             self.outlets[1] = list(numpy.fromstring(slc, dtype=numpy.float32))
         except Exception, e:
+            import traceback 
+            tb = traceback.format_exc()
             log.debug("buffer~: slice error '%s" % e)
+            self.error(tb)
             return None
 
     def bufinfo(self):
