@@ -40,6 +40,7 @@ class Processor (object):
         self.outlets = [Uninit] * outlets
         self.outlet_order = range(outlets)
         self.status = Processor.CTOR
+        self.tags = {} 
         self.name = None
         self.patch = None
         self.scope = None
@@ -185,10 +186,12 @@ class Processor (object):
         MFPApp().osc_mgr.add_method(path, types, self._osc_handler)
         self.osc_methods.append((path, types))
         self._osc_handler(path, args, types, src, data)
+        self.set_tag("osc", "learned")
 
     def osc_learn(self):
         from .main import MFPApp
         MFPApp().osc_mgr.add_default(self._osc_learn_handler)
+        self.set_tag("osc", "learning")
 
     def osc_init(self):
         from .main import MFPApp
@@ -304,6 +307,7 @@ class Processor (object):
         self.midi_cbid = MFPApp().midi_mgr.register(self._midi_handler, filters=filters)
         self.midi_filters = filters 
         self.midi_mode = mode 
+        self.set_tag("midi", "learned")
 
     def midi_learn(self, *args, **kwargs):
         from .main import MFPApp
@@ -315,6 +319,7 @@ class Processor (object):
                 self.midi_cbid = None 
             self.midi_learn_cbid = MFPApp().midi_mgr.register(self._midi_learn_handler,
                                                               data=mode)
+            self.set_tag("midi", "learning")
 
     def dsp_init(self, proc_name, **params):
         from .main import MFPApp
@@ -478,7 +483,8 @@ class Processor (object):
                 w_target, w_val, w_inlet = work[0]
                 work[:1] = w_target._send(w_val, w_inlet)
         except:
-            log.debug("Processor: send failed:", self, value, inlet)
+            log.debug("%s %s: send to inlet %d failed: %s" % (self.init_type, self.name, inlet,
+                                                           value))
             import traceback
             tb = traceback.format_exc()
             self.error(tb)
@@ -536,7 +542,9 @@ class Processor (object):
         self.inlets[inlet] = Uninit
 
     def error(self, tb=None):
-        self.status = Processor.ERROR
+        ecount = self.tags.get("errorcount", 0)
+        self.set_tag("errorcount", ecount + 1)
+
         print "Error:", self
         if tb:
             print tb
@@ -552,6 +560,13 @@ class Processor (object):
         from .main import MFPApp
         MFPApp().gui_command.delete(self.obj_id)
         self.gui_created = False
+
+    def set_tag(self, tag, value): 
+        from .main import MFPApp
+        self.tags[tag] = value 
+        self.gui_params["tags"] = self.tags
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def mark_ready(self):
         self.status = Processor.READY

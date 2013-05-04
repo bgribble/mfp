@@ -8,6 +8,8 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 from mfp import MFPGUI
+from .colordb import ColorDB 
+import math 
 
 class PatchElement (Clutter.Group):
     '''
@@ -19,6 +21,7 @@ class PatchElement (Clutter.Group):
     porthole_height = 4 
     porthole_border = 1
     porthole_minspace = 11
+    badge_size = 15 
 
     OBJ_NONE = 0
     OBJ_HALFCREATED = 1
@@ -48,7 +51,11 @@ class PatchElement (Clutter.Group):
         self.stage = window
         self.container = None 
         self.layer = None
+        self.badge = None 
+        self.badge_times = {} 
+        self.badge_current = None 
         self.port_elements = {}
+        self.tags = {}
 
         # colors 
         self.color_fg = self.stage.color_unselected
@@ -249,6 +256,66 @@ class PatchElement (Clutter.Group):
                            / (self.num_outlets - 1.0)))
             return (self.porthole_border + spc * port_num, h - self.porthole_height)
 
+    def draw_badge_cb(self, tex, ctx): 
+        tex.clear()
+        if self.badge_current is None:
+            print "No current badge, skipping"
+            return 
+        btext, bcolor = self.badge_current 
+
+        color = ColorDB.to_cairo(bcolor)
+        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
+        ctx.move_to(self.badge_size/2.0, self.badge_size/2.0)
+        ctx.arc(self.badge_size / 2.0, self.badge_size/2.0, self.badge_size/2.0, 
+                0, 2*math.pi)
+        ctx.fill()
+
+        extents = ctx.text_extents(btext)
+        color = ColorDB.to_cairo(ColorDB().find("white"))
+        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
+        twidth = extents[4]
+        theight = extents[3]
+        
+        ctx.move_to(self.badge_size/2.0 - twidth/2.0, 
+                    self.badge_size/2.0 + theight/2.0)
+        ctx.show_text(btext)
+
+    def update_badge(self):
+        if self.badge is None:
+            self.badge = Clutter.CairoTexture.new(self.badge_size, self.badge_size)
+            ypos = min(self.porthole_height + self.porthole_border, 
+                       self.height - self.badge_size / 2)
+            self.badge.set_position(self.width - self.badge_size/2.0, ypos)
+            self.add_actor(self.badge)
+            self.badge.connect("draw", self.draw_badge_cb)
+
+        tagged = False  
+        if "midi" in self.tags: 
+            if self.tags["midi"] == "learning":
+                self.badge_current = ("M", ColorDB().find(128, 255, 128))
+                tagged = True 
+            else:
+                self.badge_current = None 
+
+        if not tagged and "osc" in self.tags: 
+            if self.tags["osc"] == "learning":
+                self.badge_current = ("O", ColorDB().find(128, 255, 128))
+                tagged = True 
+            else:
+                self.badge_current = None 
+
+        if not tagged and "errorcount" in self.tags:
+            ec = self.tags["errorcount"]
+            if ec > 9: 
+                ec = "!"
+            elif ec > 0: 
+                ec = "%d" % ec
+            if ec:
+                self.badge_current = (ec, ColorDB().find(255, 0, 0))
+                tagged = True 
+
+        self.badge.invalidate()
+
     def draw_ports(self):
         if self.editable is False: 
             return 
@@ -335,6 +402,11 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = params.get("dsp_outlets", [])
         self.obj_name = params.get("name")
 
+        if params.get("tags") is not None and self.tags != params.get("tags"):
+            print "PatchElement.configure: tags = ", params.get("tags")
+            self.tags = params.get("tags")
+            self.update_badge()
+
         layer_name = params.get("layername") or params.get("layer")
         mypatch = self.layer.patch or self.stage.selected_patch 
         layer = mypatch.find_layer(layer_name)
@@ -349,7 +421,6 @@ class PatchElement (Clutter.Group):
 
         if (w != w_orig) or (h != h_orig):
             self.set_size(w, h)
-
         self.draw_ports()
         self.stage.refresh(self)
 
