@@ -6,6 +6,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode
+from ..message_element import TransientMessageElement
 from mfp import MFPGUI
 
 class GlobalMode (InputMode):
@@ -15,6 +16,8 @@ class GlobalMode (InputMode):
         InputMode.__init__(self, "Global input bindings")
 
         # global keybindings
+        self.bind("!", self.transient_msg, "Send message to selection")
+
         self.bind("PGUP", self.window.layer_select_up, "Select higher layer")
         self.bind("PGDN", self.window.layer_select_down, "Select lower layer")
         self.bind("C-PGUP", self.window.patch_select_prev, "Select higher patch")
@@ -24,11 +27,15 @@ class GlobalMode (InputMode):
         self.bind('C-o', self.open_file, "Load file into new patch")
         self.bind('C-s', self.save_file, "Save patch to file")
         self.bind('C-w', self.window.patch_close, "Close current patch")
-
         self.bind('C-q', self.window.quit, "Quit")
 
         self.bind("HOVER", self.hover)
 
+    def transient_msg(self):
+        if self.window.selected is not None:
+            return self.window.add_element(TransientMessageElement)
+        else:
+            return False
     def hover(self):
         if self.manager.pointer_obj is not None:
             self.manager.pointer_obj.show_tip(self.manager.pointer_x, self.manager.pointer_y)

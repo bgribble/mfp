@@ -54,7 +54,6 @@ def _select(self, obj):
     
     self.selected[:0] = [obj]
     obj.select()
-    obj.begin_control()
 
     self.emit_signal("select", obj)
 

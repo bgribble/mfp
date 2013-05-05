@@ -291,7 +291,7 @@ class PatchElement (Clutter.Group):
         tagged = False  
 
         if self.edit_mode:
-            self.badge_current = ("E", ColorDB().find("purple"))
+            self.badge_current = ("E", ColorDB().find(255, 0, 255))
             tagged = True 
         else: 
             self.badge_current = None 

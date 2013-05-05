@@ -5,6 +5,7 @@ patch_control.py: PatchControl major mode
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from ..input_mode import InputMode
+from mfp.main import MFPApp
 
 
 class PatchControlMode (InputMode):
@@ -35,6 +36,18 @@ class PatchControlMode (InputMode):
         self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
         self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
+
+        self.window.add_callback("select", self.begin_control)
+        self.window.add_callback("unselect", self.end_control)
+
+
+    def begin_control(self, obj):
+        if obj is not None: 
+            obj.begin_control()
+
+    def end_control(self, obj):
+        if obj is not None:
+            obj.end_control()
 
     def drag_start(self):
         if self.manager.pointer_obj and self.manager.pointer_obj not in self.window.selected:

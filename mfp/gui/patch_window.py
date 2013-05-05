@@ -237,11 +237,18 @@ class PatchWindow(object):
             self.autoplace_marker.hide()
 
     def edit_major_mode(self):
+        for o in self.selected:
+            o.end_control()
+
         if isinstance(self.input_mgr.major_mode, PatchControlMode):
             self.input_mgr.set_major_mode(PatchEditMode(self))
         return True
 
     def control_major_mode(self):
+        for o in self.selected:
+            o.end_edit()
+            o.begin_control()
+
         if isinstance(self.input_mgr.major_mode, PatchEditMode):
             self.input_mgr.set_major_mode(PatchControlMode(self))
         return True

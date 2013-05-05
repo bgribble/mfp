@@ -7,7 +7,6 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode
 from .connection import ConnectionMode
-from ..message_element import TransientMessageElement
 
 class SelectionEditMode (InputMode):
     def __init__(self, window):
@@ -36,15 +35,9 @@ class SelectionEditMode (InputMode):
         self.bind("C-DOWN", lambda: self.window.move_selected(0, 25), "Move selection down 25")
         self.bind("C-LEFT", lambda: self.window.move_selected(-25, 0), "Move selection left 25")
         self.bind("C-RIGHT", lambda: self.window.move_selected(25, 0), "Move selection right 25")
-        self.bind("!", self.transient_msg, "Send message to selection")
         self.bind("DEL", self.window.delete_selected, "Delete selection")
         self.bind("BS", self.window.delete_selected, "Delete selection")
 
-    def transient_msg(self):
-        if self.window.selected is not None:
-            return self.window.add_element(TransientMessageElement)
-        else:
-            return False
 
 class SingleSelectionEditMode (InputMode):
     def __init__(self, window):
@@ -87,6 +80,4 @@ class MultiSelectionEditMode (InputMode):
         self.affinity = -10
 
         self.extend(SelectionEditMode(window))
-
-
 
