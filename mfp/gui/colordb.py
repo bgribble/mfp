@@ -61,8 +61,8 @@ class ColorDB (Singleton):
 
     @classmethod
     def to_cairo(klass, color): 
-        return RGBAColor(color.red / 256.0, color.blue / 256.0, color.green / 256.0, 
-                         color.alpha / 256.0)
+        return RGBAColor(color.red / 255.0, color.green/ 255.0, color.blue / 255.0, 
+                         color.alpha / 255.0)
 
     
 
