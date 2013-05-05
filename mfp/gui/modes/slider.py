@@ -88,7 +88,7 @@ class SliderEditMode (InputMode):
 
         InputMode.__init__(self, descrip)
 
-        self.bind("ESC", self.end_edits, "End editing")
+        self.bind("RET", self.end_edits, "End editing")
         self.bind("s", self.toggle_scale, "Toggle scale display (on/off)")
         self.bind("o", self.toggle_orient, "Toggle orientation (vert/horiz)")
         self.bind("r", self.toggle_side, "Toggle scale side (right/left)")
@@ -157,8 +157,8 @@ class SliderEditMode (InputMode):
         return True 
 
     def end_edits(self):
-        self.manager.disable_minor_mode(self)
-        self.slider.edit_mode = None 
+        self.slider.end_edit()
+        return True 
 
 class DialControlMode(SliderControlMode):
     pass

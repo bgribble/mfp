@@ -259,7 +259,6 @@ class PatchElement (Clutter.Group):
     def draw_badge_cb(self, tex, ctx): 
         tex.clear()
         if self.badge_current is None:
-            print "No current badge, skipping"
             return 
         btext, bcolor = self.badge_current 
 
@@ -283,14 +282,21 @@ class PatchElement (Clutter.Group):
     def update_badge(self):
         if self.badge is None:
             self.badge = Clutter.CairoTexture.new(self.badge_size, self.badge_size)
-            ypos = min(self.porthole_height + self.porthole_border, 
-                       self.height - self.badge_size / 2)
-            self.badge.set_position(self.width - self.badge_size/2.0, ypos)
             self.add_actor(self.badge)
             self.badge.connect("draw", self.draw_badge_cb)
 
+        ypos = min(self.porthole_height + self.porthole_border, 
+                   self.height - self.badge_size / 2)
+        self.badge.set_position(self.width - self.badge_size/2.0, ypos)
         tagged = False  
-        if "midi" in self.tags: 
+
+        if self.edit_mode:
+            self.badge_current = ("E", ColorDB().find("purple"))
+            tagged = True 
+        else: 
+            self.badge_current = None 
+
+        if not tagged and "midi" in self.tags: 
             if self.tags["midi"] == "learning":
                 self.badge_current = ("M", ColorDB().find(128, 255, 128))
                 tagged = True 
@@ -392,6 +398,7 @@ class PatchElement (Clutter.Group):
         self.width = width
         self.height = height
         Clutter.Group.set_size(self, self.width, self.height)
+        self.update_badge()
         self.draw_ports()
         self.send_params()
 
@@ -403,7 +410,6 @@ class PatchElement (Clutter.Group):
         self.obj_name = params.get("name")
 
         if params.get("tags") is not None and self.tags != params.get("tags"):
-            print "PatchElement.configure: tags = ", params.get("tags")
             self.tags = params.get("tags")
             self.update_badge()
 
@@ -458,12 +464,15 @@ class PatchElement (Clutter.Group):
 
         if self.edit_mode:
             self.stage.input_mgr.enable_minor_mode(self.edit_mode)
+        self.update_badge()
+
 
     def end_edit(self):
         if self.edit_mode:
             self.stage.input_mgr.disable_minor_mode(self.edit_mode)
             self.edit_mode = None
             self.stage.refresh(self)
+        self.update_badge()
 
     def begin_control(self):
         if not self.control_mode:
