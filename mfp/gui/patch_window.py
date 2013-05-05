@@ -52,6 +52,7 @@ class PatchWindow(object):
         self.hud_banner_anim = None 
         self.hud_prompt = None 
         self.hud_prompt_mgr = Prompter(self)
+        self.hud_mode_txt = None 
 
         self.autoplace_marker = None
         self.autoplace_layer = None
@@ -191,6 +192,16 @@ class PatchWindow(object):
 
         m = self.input_mgr.major_mode
         lines.append("\nMajor mode: " + m.description)
+
+        if self.hud_mode_txt is None:
+            self.hud_mode_txt = Clutter.Text.new()
+            self.hud_mode_txt.set_position(self.stage.get_width()-80,
+                                           self.stage.get_height()-25)
+            self.stage.add_actor(self.hud_mode_txt)
+            
+
+        self.hud_mode_txt.set_markup("<b>%s</b>" % m.short_description)
+
         for b in m.directory():
             lines.append("%s\t%s" % (b[0], b[1]))
 
@@ -225,11 +236,14 @@ class PatchWindow(object):
         if self.autoplace_marker:
             self.autoplace_marker.hide()
 
-    def toggle_major_mode(self):
+    def edit_major_mode(self):
+        if isinstance(self.input_mgr.major_mode, PatchControlMode):
+            self.input_mgr.set_major_mode(PatchEditMode(self))
+        return True
+
+    def control_major_mode(self):
         if isinstance(self.input_mgr.major_mode, PatchEditMode):
             self.input_mgr.set_major_mode(PatchControlMode(self))
-        else:
-            self.input_mgr.set_major_mode(PatchEditMode(self))
         return True
 
     def register(self, element):

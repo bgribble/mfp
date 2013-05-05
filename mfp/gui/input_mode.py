@@ -8,8 +8,13 @@ from mfp import log
 
 
 class InputMode (object):
-    def __init__(self, description=''):
+    def __init__(self, description='', short_description=None):
         self.description = description
+        if short_description is not None:
+            self.short_description = short_description
+        else:
+            self.short_description = self.description 
+
         self.default = None
         self.bindings = {}
         self.extensions = []

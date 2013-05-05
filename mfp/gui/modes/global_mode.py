@@ -25,7 +25,6 @@ class GlobalMode (InputMode):
         self.bind('C-s', self.save_file, "Save patch to file")
         self.bind('C-w', self.window.patch_close, "Close current patch")
 
-        self.bind('C-e', self.window.toggle_major_mode, "Toggle edit/control")
         self.bind('C-q', self.window.quit, "Quit")
 
         self.bind("HOVER", self.hover)

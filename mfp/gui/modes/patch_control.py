@@ -18,8 +18,9 @@ class PatchControlMode (InputMode):
         self.drag_last_x = self.manager.pointer_x
         self.drag_last_y = self.manager.pointer_y
 
-        InputMode.__init__(self, "Operate patch")
-
+        InputMode.__init__(self, "Operate patch", "Operate")
+        
+        self.bind("C- ", self.window.edit_major_mode, "Enter edit mode")
         self.bind("TAB", self.window.select_next, "Select next element")
         self.bind("S-TAB", self.window.select_prev, "Select previous element")
         self.bind("C-TAB", self.window.select_mru, "Select most-recent element")

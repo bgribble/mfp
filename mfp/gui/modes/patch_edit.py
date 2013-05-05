@@ -38,7 +38,8 @@ class PatchEditMode (InputMode):
         self.autoplace_y = None 
         self.selection_edit_mode = None
 
-        InputMode.__init__(self, "Edit patch")
+        InputMode.__init__(self, "Edit patch", "Edit")
+        self.bind('ESC', self.window.control_major_mode, "Exit edit mode")
 
         self.bind("p", lambda: self.add_element(ProcessorElement),
                   "Add processor box")
@@ -107,6 +108,7 @@ class PatchEditMode (InputMode):
         self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
         self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
+
 
     def add_element(self, factory):
         self.window.unselect_all()
