@@ -123,9 +123,9 @@ class MFPCommand(RPCWrapper):
                     dsp_outlets=obj.dsp_outlets)
     
     @rpcwrap
-    def get_tooltip(self, obj_id, direction=None, portno=None):
+    def get_tooltip(self, obj_id, direction=None, portno=None, details=False):
         obj = MFPApp().recall(obj_id)
-        return obj.tooltip(direction, portno)
+        return obj.tooltip(direction, portno, details)
 
     @rpcwrap
     def log_write(self, msg):
