@@ -6,6 +6,9 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode
+from .label_edit import LabelEditMode 
+from .transient import TransientMessageEditMode
+from .enum_control import EnumEditMode 
 from ..message_element import TransientMessageElement
 from mfp import MFPGUI
 
@@ -73,6 +76,11 @@ class GlobalMode (InputMode):
             return False
 
     def hover(self, details):
+        for m in self.manager.minor_modes:
+            if m.enabled and isinstance(m, (TransientMessageEditMode, LabelEditMode,
+                                           EnumEditMode)):
+                details = False 
+
         if self.manager.pointer_obj is not None:
             self.manager.pointer_obj.show_tip(self.manager.pointer_x, self.manager.pointer_y,
                                              details)

@@ -120,9 +120,15 @@ class Processor (object):
 
             return (('<b>[%s] outlet %d:</b> ' + dsptip + tip) % (self.init_type, port_num))
         else: 
+            # basic one-liner 
             lines = [ ('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type ]
+
+            # details for geeks like me 
             if details: 
+                # name and ID 
                 lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
+
+                # class-provided extra details 
                 otherinfo = self.tooltip_extra()
                 if otherinfo:
                     if isinstance(otherinfo, str):
@@ -130,13 +136,28 @@ class Processor (object):
                     for o in otherinfo:
                         if isinstance(o, str):
                             lines.append('      ' + o)
+
+                # OSC controllers 
                 lines.append('      <b>OSC handlers:</b>')
                 minfo = {} 
                 for m in self.osc_methods: 
                     s = minfo.setdefault(m[0], [])
                     s.append(m[1])
                 for m in sorted(minfo.keys()):
-                    lines.append('        %s %s' % (m, minfo[m]))
+                    lines.append('          %s %s' % (m, minfo[m]))
+
+                # MIDI controllers 
+                from .main import MFPApp
+                if self.midi_filters: 
+                    paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
+                    lines.append('      <b>MIDI handlers:</b>')
+                    for p in paths:
+                        lines.append('          Chan: %s, Type: %s, Number: %s'
+                                     % (p[2] if p[2] is not None else "All", 
+                                        p[1] if p[1] is not None else "All", 
+                                        p[3] if p[3] is not None else "All"))
+
+
 
             return '\n'.join(lines)
 
