@@ -14,7 +14,8 @@ class InputMode (object):
             self.short_description = short_description
         else:
             self.short_description = self.description 
-
+        
+        self.enabled = False 
         self.default = None
         self.bindings = {}
         self.extensions = []
@@ -72,10 +73,10 @@ class InputMode (object):
         return None
 
     def enable(self):
-        pass
+        self.enabled = True 
 
     def disable(self):
-        pass
+        self.enabled = False 
 
     def __repr__(self):
         return "<InputMode %s>" % self.description

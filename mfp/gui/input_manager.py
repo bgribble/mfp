@@ -58,6 +58,7 @@ class InputManager (object):
         if isinstance(self.major_mode, InputMode):
             self.major_mode.disable()
         self.major_mode = mode
+        mode.enable()
         self.window.display_bindings()
 
     def enable_minor_mode(self, mode):
