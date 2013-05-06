@@ -195,11 +195,10 @@ class PatchWindow(object):
 
         if self.hud_mode_txt is None:
             self.hud_mode_txt = Clutter.Text.new()
-            self.hud_mode_txt.set_position(self.stage.get_width()-80,
-                                           self.stage.get_height()-25)
             self.stage.add_actor(self.hud_mode_txt)
             
-
+        self.hud_mode_txt.set_position(self.stage.get_width()-80,
+                                       self.stage.get_height()-25)
         self.hud_mode_txt.set_markup("<b>%s</b>" % m.short_description)
 
         for b in m.directory():

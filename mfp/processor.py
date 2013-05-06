@@ -46,6 +46,10 @@ class Processor (object):
         self.scope = None
         self.osc_pathbase = None
         self.osc_methods = []
+        self.count_in = 0
+        self.count_out = 0
+        self.count_trigger = 0 
+        self.count_errors = 0 
         self.midi_mode = None 
         self.midi_filters = None 
         self.midi_cbid = None 
@@ -127,7 +131,10 @@ class Processor (object):
             if details: 
                 # name and ID 
                 lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
-
+                lines.append('          <b>Messages in:</b> %s, <b>Messages out:</b> %s'
+                             % (self.count_in, self.count_out))
+                lines.append('          <b>Times triggered:</b> %s, <b>Errors:</b> %s'
+                             % (self.count_trigger, self.count_errors))
                 # class-provided extra details 
                 otherinfo = self.tooltip_extra()
                 if otherinfo:
@@ -536,6 +543,8 @@ class Processor (object):
         if inlet >= 0:
             self.inlets[inlet] = value
 
+        self.count_in += 1 
+
         if inlet in self.hot_inlets or inlet == -1:
             self.outlets = [Uninit] * len(self.outlets)
             if inlet == -1:
@@ -544,10 +553,12 @@ class Processor (object):
                 self.method(value, inlet)
             else:
                 self.trigger()
+                self.count_trigger += 1
             output_pairs = zip(self.connections_out, self.outlets)
 
             for conns, val in [output_pairs[i] for i in self.outlet_order]:
                 if val is not Uninit:
+                    self.count_out += 1
                     for target, tinlet in conns:
                         if target is not None:
                             work.append((target, val, tinlet))
@@ -583,9 +594,15 @@ class Processor (object):
         message.call(self)
         self.inlets[inlet] = Uninit
 
+    def reset_counts(self):
+        self.count_in = 0
+        self.count_out = 0
+        self.count_errors = 0
+        self.count_trigger = 0
+
     def error(self, tb=None):
-        ecount = self.tags.get("errorcount", 0)
-        self.set_tag("errorcount", ecount + 1)
+        self.count_errors += 1
+        self.set_tag("errorcount", self.count_errors)
 
         print "Error:", self
         if tb:
