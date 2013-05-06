@@ -88,7 +88,7 @@ class Processor (object):
                   % (self.obj_id, self.name, self.init_type, self.init_args))
         return True
 
-    def tooltip(self, port_dir=None, port_num=None):
+    def tooltip(self, port_dir=None, port_num=None, details=False):
         if port_dir == self.PORT_IN:
             if port_num < len(self.doc_tooltip_inlet):
                 tip = self.doc_tooltip_inlet[port_num]
@@ -120,7 +120,28 @@ class Processor (object):
 
             return (('<b>[%s] outlet %d:</b> ' + dsptip + tip) % (self.init_type, port_num))
         else: 
-            return ('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type
+            lines = [ ('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type ]
+            if details: 
+                lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
+                otherinfo = self.tooltip_extra()
+                if otherinfo:
+                    if isinstance(otherinfo, str):
+                        otherinfo = [ otherinfo ]
+                    for o in otherinfo:
+                        if isinstance(o, str):
+                            lines.append('      ' + o)
+                lines.append('      <b>OSC handlers:</b>')
+                minfo = {} 
+                for m in self.osc_methods: 
+                    s = minfo.setdefault(m[0], [])
+                    s.append(m[1])
+                for m in sorted(minfo.keys()):
+                    lines.append('        %s %s' % (m, minfo[m]))
+
+            return '\n'.join(lines)
+
+    def tooltip_extra(self):
+        return False 
 
     def call_onload(self, value=True): 
         self.do_onload = value 

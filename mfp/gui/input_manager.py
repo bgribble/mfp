@@ -48,7 +48,7 @@ class InputManager (object):
             time.sleep(0.2)
 
     def _hover_handler(self):
-        self.handle_keysym("HOVER")
+        self.handle_keysym(self.keyseq.canonicalize("HOVER"))
         return False 
     
     def global_binding(self, key, action, helptext=''):

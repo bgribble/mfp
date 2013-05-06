@@ -76,6 +76,12 @@ class KeySequencer (object):
         if (MOD_WIN in self.mod_keys) or (MOD_RWIN in self.mod_keys):
             key += 'W-'
 
+        if isinstance(event, str):
+            if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
+                key = 'S-' + key
+
+            return key + event 
+
         if event.type in (Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE):
             ks = event.keyval
             if ks >= 256 and ((MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys)):

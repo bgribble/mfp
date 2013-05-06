@@ -63,16 +63,19 @@ class GlobalMode (InputMode):
         self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
         self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
-        self.bind("HOVER", self.hover)
+        self.bind("HOVER", lambda: self.hover(False))
+        self.bind("S-HOVER", lambda: self.hover(True))
 
     def transient_msg(self):
         if self.window.selected is not None:
             return self.window.add_element(TransientMessageElement)
         else:
             return False
-    def hover(self):
+
+    def hover(self, details):
         if self.manager.pointer_obj is not None:
-            self.manager.pointer_obj.show_tip(self.manager.pointer_x, self.manager.pointer_y)
+            self.manager.pointer_obj.show_tip(self.manager.pointer_x, self.manager.pointer_y,
+                                             details)
         return False 
 
     def save_file(self):

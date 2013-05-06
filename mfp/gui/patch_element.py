@@ -486,7 +486,7 @@ class PatchElement (Clutter.Group):
             self.stage.input_mgr.disable_minor_mode(self.control_mode)
             self.control_mode = None
 
-    def show_tip(self, xpos, ypos):
+    def show_tip(self, xpos, ypos, details):
         tiptxt = None 
         orig_x, orig_y = self.get_stage_position()
 
@@ -501,9 +501,9 @@ class PatchElement (Clutter.Group):
             w += 2
             h += 2
             if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
-                tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1])
+                tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1], details)
         if tiptxt is None:             
-            tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id)
+            tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id, None, None, details)
         self.stage.hud_banner(tiptxt)
         return True 
 

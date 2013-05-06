@@ -102,6 +102,16 @@ class Var (Processor):
         elif params.get("gui_params").get("value"):
             self.value = params.get("gui_params").get("value")
 
+    def tooltip_extra(self):
+        dots = ''
+        if isinstance(self.value, str):
+            vs = '"' + self.value + '"'
+        else:
+            vs = str(self.value)
+        if len(vs) > 30:
+            dots = '...'
+        return "<b>Value:</b> %s%s" % (vs[:30], dots)  
+
 class Message (Var): 
     doc_tooltip_obj = "Store literal Python data as a message to emit when clicked/triggered"
     doc_tooltip_inlet = ["Emit message on any input", 
@@ -136,56 +146,51 @@ class Text (Var):
 class Enum (Var):
     doc_tooltip_obj = "Enter and update a numeric message"
 
-    def tooltip(self, port_dir=None, port_num=None):
-        if port_dir is not None:
-            return Var.tooltip(self, port_dir, port_num)
+    def tooltip_extra(self):
+        minv = self.gui_params.get("min_value")
+        maxv = self.gui_params.get("max_value") 
+        digits = self.gui_params.get("digits", 1)
+        ffmt = "%%.%df" % digits 
+
+        vv = '' 
+        if minv is not None or maxv is not None:
+            vv = "val"
+
+        if minv is not None:
+            vv = (ffmt + " &lt;= ") % minv + vv
+
+        if maxv is not None:
+            vv = vv + (" &lt;=" + ffmt) % maxv
+
+        if vv != '':
+            vv = "<b>Range:</b> (%s)" % vv
         else: 
-            tt = ('<b>[%s]:</b> ' + self.doc_tooltip_obj ) % self.init_type 
-            minv = self.gui_params.get("min_value")
-            maxv = self.gui_params.get("max_value") 
-            digits = self.gui_params.get("digits", 1)
-            ffmt = "%%.%df" % digits 
-
-            vv = '' 
-            if minv is not None or maxv is not None:
-                vv = "val"
-
-            if minv is not None:
-                vv = (ffmt + " &lt;= ") % minv + vv
-
-            if maxv is not None:
-                vv = vv + (" &lt;=" + ffmt) % maxv
-
-            if vv != '':
-                vv = " (%s)" % vv
-        return tt + vv
-
+            vv = None 
+        return [ vv, Var.tooltip_extra(self) ]
 
 class SlideMeter (Var):
     doc_tooltip_obj = "Display/control a number with a slider"
 
-    def tooltip(self, port_dir=None, port_num=None):
-        if port_dir is not None:
-            return Var.tooltip(self, port_dir, port_num)
-        else: 
-            tt = ('<b>[%s]:</b> ' + self.doc_tooltip_obj ) % self.init_type 
-            minv = self.gui_params.get("min_value")
-            maxv = self.gui_params.get("max_value") 
-            ffmt = "%.1f"
+    def tooltip_extra(self):
+        minv = self.gui_params.get("min_value")
+        maxv = self.gui_params.get("max_value") 
+        ffmt = "%.1f"
 
-            vv = '' 
-            if minv is not None or maxv is not None:
-                vv = "val"
+        vv = '' 
+        if minv is not None or maxv is not None:
+            vv = "val"
 
-            if minv is not None:
-                vv = (ffmt + " &lt;= ") % minv + vv
+        if minv is not None:
+            vv = (ffmt + " &lt;= ") % minv + vv
 
-            if maxv is not None:
-                vv = vv + (" &lt;=" + ffmt) % maxv
+        if maxv is not None:
+            vv = vv + (" &lt;=" + ffmt) % maxv
 
-            if vv != '':
-                vv = " (%s)" % vv
-        return tt + vv
+        if vv != '':
+            vv = " (%s)" % vv
+
+        return [ '<b>Range:</b> ' + vv, Var.tooltip_extra(self) ]
+
 def register():
     MFPApp().register("var", Var)
     MFPApp().register("message", Message)
