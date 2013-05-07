@@ -1,0 +1,336 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "reversal",
+        "display_type": "patch"
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 113.0,
+                "display_type": "message",
+                "position_x": 176.39080810546875,
+                "position_y": 54.23506164550781,
+                "layername": "Layer 0"
+            },
+            "name": "message_001",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "\"dlrow ,olleh\"",
+            "type": "message",
+            "osc_methods": []
+        },
+        "2": {
+            "connections": [
+                [
+                    [
+                        3,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 37.0,
+                "display_type": "processor",
+                "position_x": 209.39080810546875,
+                "position_y": 142.2314453125,
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "for",
+            "osc_methods": []
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        10,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 76.0,
+                "display_type": "processor",
+                "position_x": 208.39080810546875,
+                "position_y": 187.2350616455078,
+                "layername": "Layer 0"
+            },
+            "name": "processor_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "2",
+            "type": "trigger",
+            "osc_methods": []
+        },
+        "4": {
+            "connections": [
+                [
+                    [
+                        5,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 38.0,
+                "display_type": "processor",
+                "position_x": 272.67591857910156,
+                "position_y": 261.5197296142578,
+                "layername": "Layer 0"
+            },
+            "name": "processor_003",
+            "midi_mode": null,
+            "value": "ello, world",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "var",
+            "osc_methods": []
+        },
+        "5": {
+            "connections": [
+                [
+                    [
+                        4,
+                        1
+                    ],
+                    [
+                        8,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 207.78634643554688,
+                "position_y": 261.8253479003906,
+                "layername": "Layer 0"
+            },
+            "name": "processor_004",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "+",
+            "osc_methods": []
+        },
+        "6": {
+            "connections": [
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        7,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 76.0,
+                "display_type": "processor",
+                "position_x": 175.76808166503906,
+                "position_y": 95.98258972167969,
+                "layername": "Layer 0"
+            },
+            "name": "processor_005",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "3",
+            "type": "trigger",
+            "osc_methods": []
+        },
+        "7": {
+            "connections": [
+                [
+                    [
+                        4,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25,
+                "width": 35,
+                "display_type": "message",
+                "position_x": 333.6344299316406,
+                "position_y": 225.9339599609375,
+                "layername": "Layer 0"
+            },
+            "name": "message_002",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "''",
+            "type": "message",
+            "osc_methods": []
+        },
+        "8": {
+            "connections": [
+                [
+                    [
+                        11,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 38.0,
+                "display_type": "processor",
+                "position_x": 154.72239685058594,
+                "position_y": 306.7646026611328,
+                "layername": "Layer 0"
+            },
+            "name": "processor_006",
+            "midi_mode": null,
+            "value": "hello, world",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "var",
+            "osc_methods": []
+        },
+        "9": {
+            "connections": [
+                [
+                    [
+                        8,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 52.0,
+                "display_type": "message",
+                "position_x": 154.72052001953125,
+                "position_y": 218.95289611816406,
+                "layername": "Layer 0"
+            },
+            "name": "message_003",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "Bang",
+            "type": "message",
+            "osc_methods": []
+        },
+        "10": {
+            "connections": [
+                [
+                    [
+                        4,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 52.0,
+                "display_type": "message",
+                "position_x": 273.5100555419922,
+                "position_y": 225.81655883789062,
+                "layername": "Layer 0"
+            },
+            "name": "message_004",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "Bang",
+            "type": "message",
+            "osc_methods": []
+        },
+        "11": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 49.0,
+                "display_type": "processor",
+                "position_x": 154.7188720703125,
+                "position_y": 354.7646026611328,
+                "layername": "Layer 0"
+            },
+            "name": "processor_007",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "print",
+            "osc_methods": []
+        }
+    },
+    "type": "default",
+    "scopes": {
+        "__patch__": {
+            "message_003": 9,
+            "message_002": 7,
+            "message_001": 1,
+            "message_004": 10,
+            "processor_004": 5,
+            "processor_005": 6,
+            "self": 0,
+            "processor_007": 11,
+            "processor_001": 2,
+            "processor_002": 3,
+            "processor_003": 4,
+            "processor_006": 8
+        }
+    }
+}

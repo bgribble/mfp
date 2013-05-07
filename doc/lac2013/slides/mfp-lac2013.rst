@@ -44,6 +44,19 @@ Institute of Electronic Music and Acoustics
 University of Music and Performing Arts, Graz, Austria 
 
 
+What is MFP? 
+-----------------------------------------
+
+* Graphical dataflow programming system 
+
+* Inspired by Max/MSP and Pure Data 
+
+* Diagrams with "boxes" (builtins, plugins, or extensions) and
+  "connections" (carrying audio signals or data messages) 
+
+* Thinning the abstraction barrier between the language implemented by
+  the system and the language that the system is implemented in 
+
 Metadata 
 -----------------------------------------
 
@@ -86,11 +99,21 @@ Example 1: Hello, World/Tour
 Hello, World: Basic program 
 ---------------------------------------------
 
+.. image:: hello-world.png
+    :height: 4.5in 
+
 Hello, World: Message boxes and expressions
 ---------------------------------------------
 
+.. image:: expressions.png
+    :height: 4.5in 
+
 Hello, World: String reversal 
 ---------------------------------------------
+
+.. image:: reversal.png
+    :height: 4.5in 
+
 
 Hello, World: Basics of data flow 
 ---------------------------------------------
@@ -104,8 +127,17 @@ Hello, World: Basics of data flow
  * Multiple connections on an outlet may be followed in any order 
 
 
-Hello, World: Saving and using a patch 
+Hello, World: Saving and using a patch (1) 
 ---------------------------------------------
+
+.. image:: string-reverse.png
+    :height: 4.5in 
+
+Hello, World: Saving and using a patch (2) 
+---------------------------------------------
+
+.. image:: subpatch.png
+    :height: 4.5in 
 
 Example 2: Generating audio 
 -------------------------------------------
@@ -116,11 +148,18 @@ Example 2: Generating audio
 
  * Connect it to external MIDI control 
 
-Generating audio: Simple snare drum 
--------------------------------------------
 
 Generating audio: Simple kick drum 
 -------------------------------------------
+
+.. image:: kick-1.png
+    :height: 4.5in 
+
+Generating audio: Simple snare drum 
+-------------------------------------------
+
+
+
 
 Generating audio: Drum kit patch 
 -------------------------------------------
