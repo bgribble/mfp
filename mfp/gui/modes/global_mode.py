@@ -145,7 +145,9 @@ class GlobalMode (InputMode):
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected: 
                     self.window.unselect_all()
-                self.window.select(self.manager.pointer_obj)
+                    self.window.select(self.manager.pointer_obj)
+                    raise self.manager.InputNeedsRequeue()
+
                 if self.allow_selection_drag:
                     self.selection_drag_started = True 
             else: 
