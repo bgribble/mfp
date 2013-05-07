@@ -134,6 +134,8 @@ class PatchWindow(object):
         ta.set_tab(0, Pango.TabAlign.LEFT, 120)
         self.builder.get_object("key_bindings_text").set_tabs(ta)
 
+        self.input_mgr.pointer_x, self.input_mgr.pointer_y = self.embed.get_pointer()
+
         # show keybindings
         self.display_bindings()
 
