@@ -134,7 +134,7 @@ process(mfp_processor * proc)
 {
     builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
     int dstart = 0;
-    int channel, tocopy;
+    int channel, tocopy=0;
     mfp_block * trig_block;
     mfp_sample * outptr, *inptr;
     int inpos, outpos;
@@ -195,7 +195,7 @@ process(mfp_processor * proc)
 
             if (d->buf_state == BUF_ACTIVE) {
                 d->region_start = 0;
-                d->region_end = d->chan_size;
+                d->region_end = d->chan_size-1;
                 d->buf_pos = 0;
 
                 mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 1);
@@ -272,17 +272,22 @@ process(mfp_processor * proc)
     }
 
     if (d->buf_state != BUF_IDLE) {
+
+        if (tocopy == 0) { 
+            tocopy = mfp_blocksize;
+        }
+
         /* update d->buf_pos for next block */ 
         if (d->buf_mode == REC_LOOPSET) {
             d->buf_pos = MIN(d->buf_pos + mfp_blocksize, d->chan_size);
             d->region_end = d->buf_pos;
         }
-        else if (d->buf_pos + mfp_blocksize < d->region_end) {
-            d->buf_pos += mfp_blocksize;
+        else if (d->buf_pos + tocopy < d->region_end) {
+            d->buf_pos += tocopy;
         }
         else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
             d->buf_pos = 
-                d->region_start + ((d->buf_pos - d->region_start + mfp_blocksize) 
+                d->region_start + ((d->buf_pos - d->region_start + tocopy) 
                         % (d->region_end - d->region_start));
             loopstart = 1;
         }
