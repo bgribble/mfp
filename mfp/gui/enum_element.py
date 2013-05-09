@@ -34,8 +34,6 @@ class EnumElement (PatchElement):
         self.connections_in = []
         self.update_required = True
 
-        self.param_list.remove('width')
-        self.param_list.remove('height')
         self.param_list.extend(['digits', 'min_value', 'max_value', 'scientific'])
 
         self.obj_state = self.OBJ_HALFCREATED
