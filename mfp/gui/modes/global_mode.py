@@ -218,6 +218,9 @@ class GlobalMode (InputMode):
         return True
 
     def selbox_end(self):
+        if self.selection_drag_started: 
+            for obj in self.window.selected:
+                obj.send_params()
         self.selbox_started = False
         self.selection_drag_started = False 
         self.selbox_changed = [] 
