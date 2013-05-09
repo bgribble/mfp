@@ -128,6 +128,7 @@ class PatchWindow(object):
         # set initial major mode
         self.input_mgr.global_mode = GlobalMode(self)
         self.input_mgr.major_mode = PatchEditMode(self)
+        self.input_mgr.major_mode.enable()
 
         # set tab stops on keybindings view
         ta = Pango.TabArray.new(1, True)
