@@ -185,7 +185,8 @@ class GlobalMode (InputMode):
 
         if self.selection_drag_started: 
             for obj in self.window.selected:
-                obj.drag(dx, dy)
+                if obj.editable:
+                    obj.drag(dx, dy)
             return True 
 
         enclosed = self.window.show_selection_box(self.drag_start_x, self.drag_start_y, 
