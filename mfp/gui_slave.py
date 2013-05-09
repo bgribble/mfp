@@ -138,7 +138,7 @@ class GUICommand (RPCWrapper):
                 if isinstance(parent, PatchInfo):
                     if "layername" in params:
                         layer = parent.find_layer(params["layername"])
-                    else: 
+                    if not layer: 
                         layer = MFPGUI().appwin.active_layer()
                     layer.add(o)
                     layer.group.add_actor(o)
@@ -148,6 +148,7 @@ class GUICommand (RPCWrapper):
                     xpos = params.get("position_x", 0) - parent.export_x + 2
                     ypos = params.get("position_y", 0) - parent.export_y + 20
                     o.move(xpos, ypos)
+                    print "setting editable to False:", o
                     o.editable = False 
 
                     parent.layer.add(o)
