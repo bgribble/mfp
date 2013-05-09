@@ -330,11 +330,23 @@ class MFPApp (Singleton):
         self.registry[name] = ctor
 
     def open_file(self, file_name):
+        patch = None 
         if file_name is not None:
+            filepath = utils.find_file_in_path(file_name, self.searchpath)
+
+            if filepath: 
+                log.debug("Found file", filepath)
+                (name, factory) = Patch.register_file(filepath)
+            else:
+                log.debug("No file '%s' in search path %s" % (file_name, MFPApp().searchpath))
+                name = file_name
+                factory = None 
+
             log.debug("Opening patch file", file_name)
-            name, factory = Patch.register_file(file_name)
-            patch = factory(name, "", None, self.app_scope, name)
-        else:
+            if factory: 
+                patch = factory(name, "", None, self.app_scope, name)
+
+        if patch is None:
             patch = Patch('default', '', None, self.app_scope, None)
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
