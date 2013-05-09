@@ -55,7 +55,8 @@ What is MFP?
   "connections" (carrying audio signals or data messages) 
 
 * Thinning the abstraction barrier between the language implemented by
-  the system and the language that the system is implemented in 
+  the system (dataflow) and the language that the system is implemented in 
+  (Python)
 
 Metadata 
 -----------------------------------------
@@ -158,15 +159,18 @@ Generating audio: Simple kick drum
 Generating audio: Simple snare drum 
 -------------------------------------------
 
-
-
+.. image:: snare-1.png
+    :height: 4.5in
 
 Generating audio: Drum kit patch 
 -------------------------------------------
 
+
 Generating audio: Connect to looper 
 -------------------------------------------
 
+Architecture 
+-------------------------------------------
 
 
 
