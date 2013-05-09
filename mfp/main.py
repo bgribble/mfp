@@ -468,9 +468,12 @@ class MFPApp (Singleton):
 
 
     def send(self, msg, port): 
-        msgid, msgval = msg 
-        if msgid == 1: # latency changed  
-            self.emit_signal("latency") 
+        if isinstance(msg, MethodCall): 
+            msg.call(self)
+        elif isinstance(msg, (list, tuple)):
+            msgid, msgval = msg 
+            if msgid == 1: # latency changed  
+                self.emit_signal("latency") 
 
     #####################
     # callbacks

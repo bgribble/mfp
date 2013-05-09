@@ -54,7 +54,7 @@ class Send (Processor):
             self.dest_obj = MFPApp().resolve(self.dest_name, self)
 
         if self.inlets[0] is not Uninit and self.dest_obj is not None:
-            self.dest_obj.send(self.inlets[0], inlet=self.dest_inlet)
+            self.dest_obj.send(self.inlets[0], self.dest_inlet)
             self.inlets[0] = Uninit 
 
 class SendSignal (Send):

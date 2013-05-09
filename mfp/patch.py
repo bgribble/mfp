@@ -12,7 +12,6 @@ from .processor import Processor
 from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit
-
 from mfp import log
 
 
@@ -21,6 +20,7 @@ class Patch(Processor):
     display_type = "patch"
     
     def __init__(self, init_type, init_args, patch, scope, name):
+        from .main import MFPApp
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
         self.objects = {}
@@ -35,6 +35,7 @@ class Patch(Processor):
 
         self.evaluator.bind_local("self", self)
         self.default_scope.bind("self", self)
+        self.default_scope.bind("app", MFPApp())
 
         initargs, kwargs = self.parse_args(init_args)
         self.gui_params['layers'] = []
