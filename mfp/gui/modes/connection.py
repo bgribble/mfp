@@ -84,6 +84,9 @@ class ConnectionMode (InputMode):
             self.connection.draw()
 
     def select(self, obj):
+        if not obj.editable: 
+            return
+
         if self.reverse:
             if self.dest_obj is not None and obj and self.dest_obj != obj:
                 self.source_obj = obj
