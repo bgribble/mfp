@@ -331,7 +331,11 @@ class MFPApp (Singleton):
 
     def open_file(self, file_name):
         patch = None 
+        factory = None 
+        name = 'default'
+
         if file_name is not None:
+            log.debug("Opening patch", file_name)
             filepath = utils.find_file_in_path(file_name, self.searchpath)
 
             if filepath: 
@@ -339,15 +343,17 @@ class MFPApp (Singleton):
                 (name, factory) = Patch.register_file(filepath)
             else:
                 log.debug("No file '%s' in search path %s" % (file_name, MFPApp().searchpath))
-                name = file_name
+                if "." in file_name:
+                    name = '.'.join(file_name.split('.')[:-1])
+                else: 
+                    name = file_name
                 factory = None 
 
-            log.debug("Opening patch file", file_name)
             if factory: 
                 patch = factory(name, "", None, self.app_scope, name)
 
         if patch is None:
-            patch = Patch('default', '', None, self.app_scope, None)
+            patch = Patch(name, '', None, self.app_scope, name)
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
         self.patches[patch.name] = patch 
