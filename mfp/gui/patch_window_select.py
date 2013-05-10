@@ -101,11 +101,10 @@ def select_all(self):
 def unselect_all(self):
     oldsel = self.selected 
     self.selected = [] 
+    self.object_view.unselect_all()
     for obj in oldsel:
         obj.end_control()
         self._unselect(obj)
-        self.object_view.unselect(obj)
-    self.object_view.unselect_all()
     return True
 
 

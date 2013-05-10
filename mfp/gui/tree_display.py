@@ -117,8 +117,14 @@ class TreeDisplay (object):
 
     def unselect_all(self):
         to_remove = [s for s in self.selected ]
+
+        # FIXME: kludge to work around layer-jumping of #115 
+        cb = self.select_cb
+        self.select_cb = None 
+        
         for obj in to_remove:
             self.unselect(obj)
+        self.select_cb = cb
 
     def unselect(self, obj): 
         if obj not in self.selected: 
