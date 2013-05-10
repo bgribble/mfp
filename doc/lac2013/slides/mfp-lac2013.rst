@@ -166,11 +166,19 @@ Generating audio: Drum kit patch
 -------------------------------------------
 
 
-Generating audio: Connect to looper 
--------------------------------------------
-
 Architecture 
 -------------------------------------------
+
+* Three processes connected with Python `multiprocessing`: GUI, engine, 
+  DSP
+
+* DSP uses a C extension `mfpdsp` for all signal operations
+
+* Only simple messages (float, array of float, string) transferred between engine
+  and DSP
+
+
+ 
 
 
 
