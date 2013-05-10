@@ -57,6 +57,9 @@ class Send (Processor):
             self.dest_obj.send(self.inlets[0], self.dest_inlet)
             self.inlets[0] = Uninit 
 
+    def tooltip_extra(self):
+        return "<b>Connected to:</b> %s" % self.dest_name
+
 class SendSignal (Send):
     doc_tooltip_obj = "Send signals to the specified name"
 
@@ -170,11 +173,12 @@ class Recv (Processor):
         self.bus_name = bus_name 
 
         obj = MFPApp().resolve(self.bus_name, self)
-        if obj is not None:
+        if obj is not None and isinstance(obj, (MessageBus, SignalBus)):
             self.bus_obj = obj 
         else: 
             self.bus_obj = MFPApp().create(self.bus_type, "", self.patch, 
                                            self.scope, self.bus_name)
+            self.bus_name = self.bus_obj.name
             
         if self.bus_obj and (self not in self.bus_obj.connections_out[0]):
             self.bus_obj.connect(0, self, 0)
@@ -185,6 +189,8 @@ class Recv (Processor):
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
+    def tooltip_extra(self):
+        return "<b>Connected to:</b> %s" % self.bus_name
 
 class RecvSignal (Recv): 
     doc_tooltip_obj = "Receive signals to the specified name"
