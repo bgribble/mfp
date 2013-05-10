@@ -281,7 +281,8 @@ def show_selection_box(self, x0, y0, x1, y1):
 @extends(PatchWindow)
 def hide_selection_box(self):
     if self.selection_box:
-        self.selection_box.hide()
+        self.selection_box.destroy()
+        self.selection_box = None 
 
 @extends(PatchWindow)
 def clipboard_cut(self, pointer_pos):
@@ -320,7 +321,8 @@ def clipboard_paste(self, pointer_pos=None):
             obj = MFPGUI().recall(o)
             if obj is None:
                 return True 
-            elif obj not in self.selected: 
+            obj.move_to_layer(self.selected_layer)
+            if obj not in self.selected: 
                 self.select(MFPGUI().recall(o))
         return False 
 

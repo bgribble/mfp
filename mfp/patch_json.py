@@ -144,9 +144,10 @@ def json_unpack_objects(self, data, scope):
         otype = prms.get('type')
         oargs = prms.get('initargs')
         oname = prms.get('name')
-
+        
         newobj = MFPApp().create(otype, oargs, self, scope, oname)
         newobj.patch = self
+
         newobj.load(prms)
 
         if self.gui_created:
@@ -158,6 +159,7 @@ def json_unpack_objects(self, data, scope):
 
 @extends(Patch)
 def json_serialize(self):
+    from .main import MFPApp
     f = {}
     f['type'] = self.init_type
     f['gui_params'] = self.gui_params
@@ -167,7 +169,8 @@ def json_serialize(self):
     keys.sort()
     for oid in keys:
         o = self.objects.get(oid)
-        if not o.save_to_patch:
+        if o and (isinstance(o, MFPApp) or not o.save_to_patch):
+            print "json_serialize: skipping object", oid, o
             continue
         oinfo = o.save()
         allobj[oid] = oinfo
@@ -178,7 +181,8 @@ def json_serialize(self):
     for scopename, scope in self.scopes.items():
         bindings = {}
         for objname, obj in scope.bindings.items():
-            if not obj.save_to_patch:
+            if obj and (isinstance(obj, MFPApp) or not obj.save_to_patch):
+                print "json_serialize: skipping object", objname, obj
                 continue
             bindings[objname] = obj.obj_id
 
