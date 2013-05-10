@@ -72,6 +72,8 @@ class ScopePlot (XYPlot):
         ctx.set_source_rgba(*self.colors[curve % len (self.colors)])
         ctx.set_line_width(0.5)
         
+        prevmin = 10000000
+        prevmax = -10000000
         pmin = None
         pmax = None 
         ptindex = 0
@@ -85,8 +87,14 @@ class ScopePlot (XYPlot):
             ptpos += dscale 
             xbase += xincr 
             if int(ptpos) > ptindex: 
+                if ((pmin > prevmin) and (pmin > prevmax)):
+                    pmin = prevmax 
+                elif ((pmax < prevmin) and (pmax < prevmax)):
+                    pmax = prevmin
                 points.append((xbase, pmin, pmax))
                 ptindex = int(ptpos)
+                prevmin = pmin
+                prevmax = pmax
                 pmin = None
                 pmax = None 
 
