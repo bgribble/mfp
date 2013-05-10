@@ -104,6 +104,7 @@ class GUICommand (RPCWrapper):
         from .gui.slidemeter_element import SlideMeterElement
         from .gui.patch_info import PatchInfo
         from .gui.via_element import SendViaElement, ReceiveViaElement
+        from .gui.via_element import SendSignalViaElement, ReceiveSignalViaElement
         from .gui.button_element import ToggleButtonElement
         from .gui.button_element import ToggleIndicatorElement
         from .gui.button_element import BangButtonElement
@@ -120,6 +121,8 @@ class GUICommand (RPCWrapper):
             'patch': PatchInfo,
             'sendvia': SendViaElement,
             'recvvia': ReceiveViaElement,
+            'sendsignalvia': SendSignalViaElement,
+            'recvsignalvia': ReceiveSignalViaElement,
             'toggle': ToggleButtonElement,
             'button': BangButtonElement,
             'indicator': ToggleIndicatorElement
@@ -174,7 +177,7 @@ class GUICommand (RPCWrapper):
         obj_2 = MFPGUI().recall(obj_2_id)
 
         if obj_1 is None or obj_2 is None: 
-            log.debug("ERROR: connect: obj_1(%s) --> %s, obj_2(%s) --> %s"
+            log.debug("ERROR: connect: obj_1 (id=%s) --> %s, obj_2 (id=%s) --> %s"
                       % (obj_1_id, obj_1, obj_2_id, obj_2))
             return None
 
