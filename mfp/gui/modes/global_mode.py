@@ -84,8 +84,14 @@ class GlobalMode (InputMode):
                 details = False 
 
         o = self.manager.pointer_obj 
-        if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE: 
-            o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
+        try: 
+            if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE: 
+                o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
+        except Exception, e:
+            print "oops! exception in hover"
+            import traceback
+            traceback.print_exc()
+            pass 
         return False 
 
     def save_file(self):

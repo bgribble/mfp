@@ -48,7 +48,7 @@ class PatchWindow(object):
         # The HUD is the text overlay at the bottom/top of the window that 
         # fades after a short display
         self.hud_history = []
-        self.hud_banner_txt = None 
+        self.hud_banner_text = None 
         self.hud_banner_anim = None 
         self.hud_prompt = None 
         self.hud_prompt_mgr = Prompter(self)
@@ -425,11 +425,19 @@ class PatchWindow(object):
         if self.hud_banner_anim is not None: 
             self.hud_banner_anim.completed()
 
-        self.hud_banner_text = Clutter.Text()
+        self.hud_banner_text = Clutter.Group()
+        txt = Clutter.Text()
+        bg = Clutter.Rectangle()
+        self.hud_banner_text.add_actor(bg)
+        self.hud_banner_text.add_actor(txt)
+
+        bg.set_color(ColorDB().find(255, 255, 255, 200))
+
         self.stage.add_actor(self.hud_banner_text)
         self.hud_banner_text.set_position(12, 4)
         self.hud_banner_text.set_property("opacity", 255)
-        self.hud_banner_text.set_markup(msg)
+        txt.set_markup(msg)
+        bg.set_size(self.hud_banner_text.get_width(), self.hud_banner_text.get_height())
 
         anim = self.hud_banner_text.animatev(Clutter.AnimationMode.EASE_IN_CUBIC,
                                              disp_time * 1000.0, ['opacity'], [0])

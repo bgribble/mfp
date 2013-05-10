@@ -152,6 +152,7 @@ class InputManager (object):
             if (self.pointer_leave_time is not None 
                 and (now - self.pointer_leave_time) > timedelta(milliseconds=100)):
                 self.keyseq.mod_keys = set()
+                self.window.embed.grab_focus()
 
             if src and self.window.object_visible(src):
                 self.pointer_obj = src

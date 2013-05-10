@@ -119,7 +119,6 @@ class ScopePlot (XYPlot):
             self.draw_complete_cb()
 
     def save_style(self):
-        print "FIXME: ScopePlot.save_style()"
         return {}
 
     def _grab(self):
