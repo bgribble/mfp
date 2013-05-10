@@ -47,16 +47,25 @@ University of Music and Performing Arts, Graz, Austria
 What is MFP? 
 -----------------------------------------
 
-* Graphical dataflow programming system 
+Context
+===============
 
-* Inspired by Max/MSP and Pure Data 
+* Graphical dataflow patching system inspired by Max/MSP and Pure Data 
 
-* Diagrams with "boxes" (builtins, plugins, or extensions) and
-  "connections" (carrying audio signals or data messages) 
+* Patches are diagrams with "boxes" (builtins, plugins, or extensions) and
+  "connections" (carrying audio signals or data messages)
 
-* Thinning the abstraction barrier between the language implemented by
-  the system (dataflow) and the language that the system is implemented in 
-  (Python)
+* "The diagram is the program" -- patches are computer programs, the tool is a 
+  sort of IDE 
+
+Purpose
+================
+
+* Build tools for audio analysis and synthesis 
+
+* Explore some concepts about programming languages 
+
+* Experiment with user interface and information display
 
 Metadata 
 -----------------------------------------
@@ -72,8 +81,8 @@ About MFP
 :Team: Solo developer
 :Timeline: 2010-present 
 :Status: Pre-alpha/experimental, active development  
-:User base: 0-5 bold pioneers  
-:OS: Linux
+:User base: 0-10 bold pioneers  
+:OS: Linux 
 :License: GPL 
 :Languages: Python with C extensions
 :Supports: JACK, NSM, LADSPA, MIDI, OSC, GTK+, Clutter 
@@ -145,7 +154,9 @@ Example 2: Generating audio
 
  * Show how signals and controls work together 
 
- * Create a kick and snare drum kit
+ * Create a simple kick and snare drum synth
+
+ * Use ``[osc~]``, ``[noise~]``, ``[line~]``, ``[lop~]``
 
  * Connect it to external MIDI control 
 
@@ -185,8 +196,23 @@ Architecture
 * Only simple messages (float, array of float, string) transferred between engine
   and DSP
 
+Future work
+-------------------------------------------
 
- 
+* UI improvements: Undo/redo, click/drag to connect, file dialogs for
+  load/save, menus
+
+* Debugging tools: step execution, better error management
+
+* Audio file handling: libsndfile for loading and saving samples and
+  generated output
+
+* Standards: JACK MIDI and transport, LV2 hosting, possible LV2 client
+  mode, improved NSM support  
+
+* Bug fixes, test coverage, optimization... 
+
+
 
 
 
