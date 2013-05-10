@@ -1,0 +1,851 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "kick",
+                "__patch__"
+            ],
+            [
+                "snare",
+                "__patch__"
+            ],
+            [
+                "IO",
+                "__patch__"
+            ]
+        ],
+        "name": "ekit",
+        "num_outlets": 2,
+        "display_type": "patch",
+        "num_inlets": 2,
+        "dsp_outlets": [
+            0,
+            1
+        ]
+    },
+    "objects": {
+        "2": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 48.0,
+                "display_type": "processor",
+                "position_x": 180.6559295654297,
+                "position_y": 265.9573669433594,
+                "layername": "kick"
+            },
+            "name": "processor_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "osc~",
+            "osc_methods": []
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        2,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 50.0,
+                "display_type": "processor",
+                "position_x": 171.49913024902344,
+                "position_y": 173.4344024658203,
+                "layername": "kick"
+            },
+            "name": "processor_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "line~",
+            "osc_methods": []
+        },
+        "4": {
+            "connections": [
+                [
+                    [
+                        2,
+                        2
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 50.0,
+                "display_type": "processor",
+                "position_x": 239.5525360107422,
+                "position_y": 202.2991180419922,
+                "layername": "kick"
+            },
+            "name": "processor_003",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "line~",
+            "osc_methods": []
+        },
+        "5": {
+            "connections": [
+                [
+                    [
+                        3,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 155.0,
+                "display_type": "message",
+                "position_x": 170.52655029296875,
+                "position_y": 134.53990173339844,
+                "layername": "kick"
+            },
+            "name": "message_003",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "[(200, 0), (25, 200)]",
+            "type": "message",
+            "osc_methods": []
+        },
+        "7": {
+            "connections": [
+                [
+                    [
+                        4,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 128.0,
+                "display_type": "message",
+                "position_x": 240.56631469726562,
+                "position_y": 167.43434143066406,
+                "layername": "kick"
+            },
+            "name": "message_002",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "[(1, 5), (0, 180)]",
+            "type": "message",
+            "osc_methods": []
+        },
+        "9": {
+            "connections": [
+                [
+                    [
+                        39,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 36.0,
+                "display_type": "processor",
+                "position_x": 213.82022094726562,
+                "position_y": 320.9922180175781,
+                "layername": "snare"
+            },
+            "name": "processor_005",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "+~",
+            "osc_methods": []
+        },
+        "10": {
+            "connections": [
+                [
+                    [
+                        11,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 60.0,
+                "display_type": "processor",
+                "position_x": 44.80413055419922,
+                "position_y": 170.38204956054688,
+                "layername": "snare"
+            },
+            "name": "processor_006",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "noise~",
+            "osc_methods": []
+        },
+        "11": {
+            "connections": [
+                [
+                    [
+                        14,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 87.0,
+                "display_type": "processor",
+                "position_x": 44.80645751953125,
+                "position_y": 214.67422485351562,
+                "layername": "snare"
+            },
+            "name": "processor_007",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "1500",
+            "type": "lop~",
+            "osc_methods": []
+        },
+        "12": {
+            "connections": [
+                [
+                    [
+                        13,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 60.0,
+                "display_type": "processor",
+                "position_x": 281.3554992675781,
+                "position_y": 173.99700927734375,
+                "layername": "snare"
+            },
+            "name": "processor_008",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "noise~",
+            "osc_methods": []
+        },
+        "13": {
+            "connections": [
+                [
+                    [
+                        15,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 78.0,
+                "display_type": "processor",
+                "position_x": 281.3554992675781,
+                "position_y": 221.99700927734375,
+                "layername": "snare"
+            },
+            "name": "processor_009",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "500",
+            "type": "lop~",
+            "osc_methods": []
+        },
+        "14": {
+            "connections": [
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 121.93099975585938,
+                "position_y": 272.2481689453125,
+                "layername": "snare"
+            },
+            "name": "processor_010",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "*~",
+            "osc_methods": []
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 281.3554992675781,
+                "position_y": 274.99700927734375,
+                "layername": "snare"
+            },
+            "name": "processor_011",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "*~",
+            "osc_methods": []
+        },
+        "16": {
+            "connections": [
+                [
+                    [
+                        14,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 50.0,
+                "display_type": "processor",
+                "position_x": 146.86659240722656,
+                "position_y": 214.83602905273438,
+                "layername": "snare"
+            },
+            "name": "processor_012",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "line~",
+            "osc_methods": []
+        },
+        "17": {
+            "connections": [
+                [
+                    [
+                        15,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 50.0,
+                "display_type": "processor",
+                "position_x": 363.734130859375,
+                "position_y": 222.83489990234375,
+                "layername": "snare"
+            },
+            "name": "processor_013",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "line~",
+            "osc_methods": []
+        },
+        "18": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 150.0,
+                "display_type": "message",
+                "position_x": 386.3556213378906,
+                "position_y": 184.857666015625,
+                "layername": "snare"
+            },
+            "name": "message_005",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "[(0.4, 20), (0, 200)]",
+            "type": "message",
+            "osc_methods": []
+        },
+        "19": {
+            "connections": [
+                [
+                    [
+                        20,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 79.0,
+                "display_type": "processor",
+                "position_x": 466.6904296875,
+                "position_y": 226.83224487304688,
+                "layername": "snare"
+            },
+            "name": "processor_014",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "200",
+            "type": "osc~",
+            "osc_methods": []
+        },
+        "20": {
+            "connections": [
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 466.6904296875,
+                "position_y": 274.8322448730469,
+                "layername": "snare"
+            },
+            "name": "processor_015",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "*~",
+            "osc_methods": []
+        },
+        "21": {
+            "connections": [
+                [
+                    [
+                        20,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 50.0,
+                "display_type": "processor",
+                "position_x": 567.3348388671875,
+                "position_y": 227.850341796875,
+                "layername": "snare"
+            },
+            "name": "processor_016",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "line~",
+            "osc_methods": []
+        },
+        "22": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 123.0,
+                "display_type": "message",
+                "position_x": 115.74026489257812,
+                "position_y": 174.86009216308594,
+                "layername": "snare"
+            },
+            "name": "message_006",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "[(.6, 0), (0, 50)]",
+            "type": "message",
+            "osc_methods": []
+        },
+        "23": {
+            "connections": [
+                [
+                    [
+                        21,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": true,
+                "height": 25.0,
+                "width": 141.0,
+                "display_type": "message",
+                "position_x": 571.6939086914062,
+                "position_y": 197.86703491210938,
+                "layername": "snare"
+            },
+            "name": "message_007",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "[(0.1, 10), (0, 80)]",
+            "type": "message",
+            "osc_methods": []
+        },
+        "26": {
+            "connections": [
+                [
+                    [
+                        28,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 61.0,
+                "display_type": "processor",
+                "position_x": 106.8104248046875,
+                "position_y": 100.31280517578125,
+                "layername": "IO"
+            },
+            "name": "processor_019",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "0",
+            "type": "inlet",
+            "osc_methods": []
+        },
+        "27": {
+            "connections": [
+                [
+                    [
+                        29,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 61.0,
+                "display_type": "processor",
+                "position_x": 219.96517944335938,
+                "position_y": 98.11270904541016,
+                "layername": "IO"
+            },
+            "name": "processor_020",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "1",
+            "type": "inlet",
+            "osc_methods": []
+        },
+        "28": {
+            "connections": [],
+            "gui_params": {
+                "layername": "IO",
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 104.3104248046875,
+                "position_y": 148.31280517578125,
+                "label": "kick_trig"
+            },
+            "name": "sendvia_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"kick_trig\"",
+            "type": "send",
+            "osc_methods": []
+        },
+        "29": {
+            "connections": [],
+            "gui_params": {
+                "layername": "IO",
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 217.46517944335938,
+                "position_y": 146.11270904541016,
+                "label": "snare_trig"
+            },
+            "name": "sendvia_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"snare_trig\"",
+            "type": "send",
+            "osc_methods": []
+        },
+        "30": {
+            "connections": [
+                [
+                    [
+                        32,
+                        0
+                    ],
+                    [
+                        33,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 39.5,
+                "width": 22,
+                "display_type": "recvsignalvia",
+                "position_x": 168.4194793701172,
+                "position_y": 221.6212158203125,
+                "layername": "IO"
+            },
+            "name": "recvsignalvia_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"audio\"",
+            "type": "recv~",
+            "osc_methods": []
+        },
+        "32": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 80.0,
+                "display_type": "processor",
+                "position_x": 92.19429016113281,
+                "position_y": 281.0249938964844,
+                "layername": "IO"
+            },
+            "name": "processor_021",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "0",
+            "type": "outlet~",
+            "osc_methods": []
+        },
+        "33": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 25.0,
+                "width": 80.0,
+                "display_type": "processor",
+                "position_x": 195.83702087402344,
+                "position_y": 282.6697998046875,
+                "layername": "IO"
+            },
+            "name": "processor_022",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "1",
+            "type": "outlet~",
+            "osc_methods": []
+        },
+        "34": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ],
+                    [
+                        7,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 204.68499755859375,
+                "position_y": 81.7683334350586,
+                "layername": "kick"
+            },
+            "name": "recvvia_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"kick_trig\"",
+            "type": "recv",
+            "osc_methods": []
+        },
+        "36": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 37,
+                "width": 22,
+                "display_type": "sendsignalvia",
+                "position_x": 177.1559295654297,
+                "position_y": 313.9573669433594,
+                "layername": "kick"
+            },
+            "name": "sendsignalvia_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"audio\"",
+            "type": "send~",
+            "osc_methods": []
+        },
+        "37": {
+            "connections": [
+                [
+                    [
+                        22,
+                        0
+                    ],
+                    [
+                        18,
+                        0
+                    ],
+                    [
+                        23,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 310.6972351074219,
+                "position_y": 103.9250717163086,
+                "layername": "snare"
+            },
+            "name": "recvvia_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"snare_trig\"",
+            "type": "recv",
+            "osc_methods": []
+        },
+        "39": {
+            "connections": [],
+            "gui_params": {
+                "update_required": false,
+                "height": 37,
+                "width": 22,
+                "display_type": "sendsignalvia",
+                "position_x": 210.32022094726562,
+                "position_y": 368.9922180175781,
+                "layername": "snare"
+            },
+            "name": "sendsignalvia_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"audio\"",
+            "type": "send~",
+            "osc_methods": []
+        }
+    },
+    "type": "ekit",
+    "scopes": {
+        "__patch__": {
+            "message_003": 5,
+            "message_002": 7,
+            "processor_008": 12,
+            "processor_009": 13,
+            "message_005": 18,
+            "processor_005": 9,
+            "processor_006": 10,
+            "processor_007": 11,
+            "processor_001": 2,
+            "processor_002": 3,
+            "processor_003": 4,
+            "processor_022": 33,
+            "processor_020": 27,
+            "recvvia_001": 34,
+            "recvvia_002": 37,
+            "recvsignalvia_001": 30,
+            "processor_021": 32,
+            "sendsignalvia_002": 39,
+            "message_007": 23,
+            "sendsignalvia_001": 36,
+            "message_006": 22,
+            "sendvia_001": 28,
+            "sendvia_002": 29,
+            "processor_013": 17,
+            "processor_012": 16,
+            "processor_011": 15,
+            "processor_010": 14,
+            "processor_016": 21,
+            "processor_015": 20,
+            "processor_014": 19,
+            "processor_019": 26,
+            "self": 0
+        }
+    }
+}

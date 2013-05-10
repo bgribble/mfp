@@ -162,17 +162,25 @@ Generating audio: Simple snare drum
 .. image:: snare-1.png
     :height: 4.5in
 
-Generating audio: Drum kit patch 
--------------------------------------------
+Generating audio: Drum kit patch (patch)
+--------------------------------------------------
 
+.. image:: ekit-1.png
+    :height: 4.5in
+
+Generating audio: Drum kit patch (using)
+--------------------------------------------------
+
+.. image:: ekit-2.png
+    :height: 4.5in
 
 Architecture 
 -------------------------------------------
 
-* Three processes connected with Python `multiprocessing`: GUI, engine, 
+* Three processes connected with Python ``multiprocessing``: GUI, engine, 
   DSP
 
-* DSP uses a C extension `mfpdsp` for all signal operations
+* DSP uses a C extension ``mfpdsp`` for all signal operations
 
 * Only simple messages (float, array of float, string) transferred between engine
   and DSP
