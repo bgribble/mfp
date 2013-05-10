@@ -10,6 +10,8 @@ from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
 from .enum_control import EnumEditMode 
 from ..message_element import TransientMessageElement
+from ..patch_element import PatchElement 
+
 from mfp import MFPGUI
 
 class GlobalMode (InputMode):
@@ -81,9 +83,9 @@ class GlobalMode (InputMode):
                                            EnumEditMode)):
                 details = False 
 
-        if self.manager.pointer_obj is not None:
-            self.manager.pointer_obj.show_tip(self.manager.pointer_x, self.manager.pointer_y,
-                                             details)
+        o = self.manager.pointer_obj 
+        if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE: 
+            o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
         return False 
 
     def save_file(self):

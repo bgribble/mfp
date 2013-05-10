@@ -125,6 +125,9 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def get_tooltip(self, obj_id, direction=None, portno=None, details=False):
         obj = MFPApp().recall(obj_id)
+        if not obj or isinstance(obj, MFPApp):
+            # FIXME: this is to wallpaper over bad behavior when deleting, #110 
+            return ''
         return obj.tooltip(direction, portno, details)
 
     @rpcwrap

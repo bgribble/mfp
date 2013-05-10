@@ -163,9 +163,6 @@ class Processor (object):
                                      % (p[2] if p[2] is not None else "All", 
                                         p[1] if p[1] is not None else "All", 
                                         p[3] if p[3] is not None else "All"))
-
-
-
             return '\n'.join(lines)
 
     def tooltip_extra(self):
