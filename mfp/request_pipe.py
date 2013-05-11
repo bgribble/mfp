@@ -69,6 +69,7 @@ class RequestPipe(object):
 
         if self.reader:
             self.reader.finish()
+
         for cbk in self.finish_callbacks:
             cbk()
 

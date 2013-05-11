@@ -23,6 +23,9 @@ class QuittableThread(Thread):
                 QuittableThread._all_threads.remove(self)
             except ValueError:
                 print "QuittableThread error:", self, "not in _all_threads"
+            except Exception, e: 
+                print "QuittableThread error:", self, e 
+                print "Remaining threads:", QuittableThread._all_threads
         
         self.join_req = True
         self.join()

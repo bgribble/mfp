@@ -72,6 +72,7 @@ def rpc_server_slave(pipe, initproc, initproc_args, lck):
             traceback.print_exc() 
             pass 
     pipe.finish()
+    return
 
 class RPCServer(QuittableThread):
     def __init__(self, name, initproc=None, *initproc_args):
@@ -102,8 +103,8 @@ class RPCServer(QuittableThread):
         if not self.join_req:
             log.debug(self.name, 'RPCServer remote thread EXITED UNEXPECTEDLY')
             self.worker = None
-            self.pipe.finish()
-            log.debug(self.name, 'RPCServer shutting down, finished with pipe')
+        self.pipe.finish()
+        log.debug(self.name, 'RPCServer shutting down, finished with pipe')
 
     def finish(self):
         if self.worker:

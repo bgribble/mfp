@@ -71,7 +71,7 @@ class BaseWorker (object):
     def finish(self):
         with self.lock:
             self.exit()
-            self.condition.notify()
+            self.condition.notify_all()
 
 
 class WorkerPool (object):
@@ -165,5 +165,5 @@ class WorkerPool (object):
 
         with self.lock:
             self.quit_req = True
-            self.condition.notify()
+            self.condition.notify_all()
         self.reaper.join()
