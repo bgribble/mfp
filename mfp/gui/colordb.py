@@ -53,9 +53,13 @@ class ColorDB (Singleton):
 
     def find_cairo(self, *colorinfo):
         tmp = self.find(*colorinfo)
-        rv = RGBAColor(tmp.red / 255.0, tmp.green / 255.0, tmp.blue/255.0, tmp.alpha/255.0)
+        if tmp is not None:
+            rv = RGBAColor(tmp.red / 255.0, tmp.green / 255.0, tmp.blue/255.0, tmp.alpha/255.0)
+        else: 
+            print "ColorDB(): did not find color", colorinfo
+            rv = RGBAColor(0, 0, 0, 255)
         return rv 
-
+        
     def insert(self, name, color):
         self.named_colors[name] = color
 
