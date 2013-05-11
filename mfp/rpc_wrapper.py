@@ -42,9 +42,10 @@ class RPCWrapper (object):
         pass
 
     class MethodFailed(Exception):
-        def __init__(self, tb):
+        def __init__(self, local, tb):
             self.traceback = tb
-            log.debug(tb)
+            if local:
+                log.debug(tb)
             Exception.__init__(self)
 
     _rpcid_seq = 0
@@ -57,7 +58,6 @@ class RPCWrapper (object):
 
     def __init__(self, *args, **kwargs):
         self.rpcid = None
-        
         
         if self.local:
             self.rpcid = RPCWrapper._rpcid_seq
@@ -79,7 +79,7 @@ class RPCWrapper (object):
         if r.response == RPCWrapper.METHOD_OK:
             return r.payload
         elif r.response == RPCWrapper.METHOD_FAILED:
-            raise RPCWrapper.MethodFailed(r.payload)
+            raise RPCWrapper.MethodFailed(False, r.payload)
 
     def call_locally(self, rpcdata):
         count = self.call_stats.get(rpcdata.get('func'), 0)
@@ -96,7 +96,7 @@ class RPCWrapper (object):
                 return rv
             except Exception, e:
                 import traceback
-                raise RPCWrapper.MethodFailed(traceback.format_exc())
+                raise RPCWrapper.MethodFailed(True, traceback.format_exc())
         else:
             raise RPCWrapper.MethodNotFound()
 
