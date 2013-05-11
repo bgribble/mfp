@@ -1,3 +1,19 @@
+mfp v0.04
+
+  * #31: Support exported UIs from user patches ("graph-on-parent") 
+
+  * #64: Improved implementation of "Operate" mode, making editing/control
+    fully modal 
+
+  * #66: Expanded information in tooltips and "badges" 
+
+  * #87: New Dial object (round slider)
+
+  * #85: Support audio input/output in user patches 
+
+  * #111: Bind "app" to allow a message via to send messages to it 
+
+  * Many other bugfixes and improvements.
 
 mfp v0.03.1, 2013-Apr-17
 

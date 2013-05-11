@@ -1,0 +1,96 @@
+
+MFP -- Music For Programmers 
+Release 0.04, "" 
+
+I'm pleased to announce a new version of MFP, containing many fixes
+and improvements.   It is still not at a "production" level, but is
+becoming more and more usable.  Your interest and participation are
+invited!    
+
+A summary of changes is below.  Please see the GitHub issue tracker
+for complete details: 
+
+  http://github.com/bgribble/mfp 
+
+Thanks to the great environment, continuous hacking time, and great
+feedback at LAC-2013, I was able to put in a record (for me) number of
+commits (50+) during the last week and make many small and
+not-so-small bugfixes and improvements.  Please see http://lac.iem.at
+for a video of my talk, and/or have a look at the paper and slides in
+the source repository under doc/lac2013.
+
+Changes since release v0.03.1: 
+----------------------------------------
+
+  * #31: Support exported UIs from user patches ("graph-on-parent") 
+
+  * #64: Improved implementation of "Operate" mode, making editing/control
+    fully modal 
+
+  * #66: Expanded information in tooltips and "badges" 
+
+  * #87: New Dial object (round slider)
+
+  * #85: Support audio input/output in user patches 
+
+  * #111: Bind "app" to allow a message via to send messages to it 
+
+  * Many other bugfixes and improvements.
+
+About MFP:
+----------------------------------------
+
+MFP is an environment for visually composing computer programs, with
+an emphasis on music and real-time audio synthesis and analysis.  It's
+very much inspired by Miller Puckette's Pure Data (pd) and Max/MSP,
+with a bit of LabView and TouchOSC for good measure.  It is targeted
+at musicians, recording engineers, and software developers who like
+the "patching" dataflow metaphor for constructing audio synthesis,
+processing, and analysis networks. 
+
+MFP is a completely new code base, written in Python and C, with a
+Clutter UI.  It has been under development by a solo developer (me!),
+as a spare-time project for several years. 
+
+Compared to Pure Data, its nearest relative, MFP is superficially
+pretty similar but differs in a few key ways: 
+
+ * MFP uses Python data natively.  Any literal data entered in the 
+   UI is parsed by the Python evaluator, and any Python value is a 
+   legitimate "message" on the dataflow network 
+ 
+ * MFP provides fairly raw access to Python constructs if desired.  
+   For example, the built-in Python console allows live coding of
+   Python functions as patch elements at runtime. 
+
+ * Name resolution and namespacing are addressed more robustly, 
+   with explicit support for lexical scoping 
+
+ * The UI is largely keyboard-driven, with a modal input system 
+   that feels a bit like vim.  The graphical presentation is a
+   single-window style with layers rather than multiple windows.   
+
+ * There is fairly deep integration of Open Sound Control (OSC), with 
+   every patch element having an OSC address and the ability to learn
+   any other desired address.  
+
+The code is still in early days, but has reached a point in its
+lifecycle where at least some interesting workflows are operational
+and it can be used for a good number of things.  I think MFP is now
+ripe for those with an experimental streak and/or development skills
+to grab it, use it, and contribute to its design and development. 
+
+The code and issue tracker are hosted on GitHub: 
+
+    https://github.com/bgribble/mfp
+
+You can find the LAC-2013 paper and accompanying screenshots, some
+sample patches, and a few other bits of documentation in the doc
+directory of the GitHub repo.  The README at the top level of the
+source tree contains dependency, build, and getting-started
+information.
+
+Thanks,
+Bill Gribble 
+
+
