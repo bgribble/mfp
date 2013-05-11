@@ -780,7 +780,7 @@ def main():
                 print "%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj) 
             else: 
                 try: 
-                    o = factory(name, None, app.patches['patch'], None, "")
+                    o = factory(name, None, app.patches['default'], None, "")
                     print "%-12s : %s" % ("[%s]" % name, o.doc_tooltip_obj) 
                 except Exception, e:
                     import traceback
