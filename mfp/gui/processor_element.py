@@ -28,6 +28,8 @@ class ProcessorElement (PatchElement):
         self.label_text = None
         self.export_x = None
         self.export_y = None 
+        self.export_w = None 
+        self.export_h = None 
         self.export_created = False 
 
         # create display
@@ -57,7 +59,7 @@ class ProcessorElement (PatchElement):
 
     def update(self):
         label_width = self.label.get_property('width') + 14 
-        box_width = self.texture.get_property('width')
+        box_width = self.export_w or 0
 
         new_w = None
         num_ports = max(self.num_inlets, self.num_outlets)
@@ -169,9 +171,14 @@ class ProcessorElement (PatchElement):
             params["height"] = max(self.height, params.get("export_h") + 20)
             self.export_x = params.get("export_x")
             self.export_y = params.get("export_y")
+            self.export_w = params.get("export_w")
+            self.export_h = params.get("export_h")
+            if self.export_x is not None and self.export_y is not None:
+                self.export_created = True 
+            
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
-            if self.export_x is not None and self.export_y is not None:
+            if self.export_created:
                 MFPGUI().mfp.create_export_gui(self.obj_id)
             self.draw_ports()
             self.texture.invalidate()
