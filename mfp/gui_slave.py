@@ -252,13 +252,22 @@ class MFPGUI (Singleton):
     def recall(self, obj_id):
         return self.objects.get(obj_id)
 
+    def _callback_wrapper(self, thunk):
+        try:
+            return thunk()
+        except Exception, e: 
+            import traceback 
+            traceback.print_exc()
+            log.debug("Exception in GUI operation:", e)
+            return False 
+
     def clutter_do_later(self, delay, thunk):
         from gi.repository import GObject
-        GObject.timeout_add(int(delay), thunk)
+        GObject.timeout_add(int(delay), self._callback_wrapper, thunk)
 
     def clutter_do(self, thunk):
         from gi.repository import GObject
-        GObject.idle_add(thunk, priority=GObject.PRIORITY_DEFAULT)
+        GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
 
     def clutter_proc(self):
         from gi.repository import Clutter, GObject, Gtk, GtkClutter
