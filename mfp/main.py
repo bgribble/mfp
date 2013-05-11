@@ -774,6 +774,8 @@ def main():
             log.debug(e)
 
     if args.get("help_builtins"):
+        log.log_debug = None
+        log.log_file = None 
         app.open_file(None)
         for name, factory in sorted(app.registry.items()): 
             if hasattr(factory, 'doc_tooltip_obj'):
