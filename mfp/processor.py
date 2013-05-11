@@ -528,7 +528,8 @@ class Processor (object):
             while len(work):
                 w_target, w_val, w_inlet = work[0]
                 work[:1] = w_target._send(w_val, w_inlet)
-        except:
+        except Exception, e:
+            log.debug("Exception: " + e.message)
             log.debug("%s %s: send to inlet %d failed: %s" % (self.init_type, self.name, inlet,
                                                            value))
             import traceback
@@ -592,10 +593,15 @@ class Processor (object):
         self.inlets[inlet] = Uninit
 
     def reset_counts(self):
+        from .main import MFPApp
         self.count_in = 0
         self.count_out = 0
         self.count_errors = 0
         self.count_trigger = 0
+        self.set_tag("errorcount", self.count_errors)
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
 
     def error(self, tb=None):
         self.count_errors += 1

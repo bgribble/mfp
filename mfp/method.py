@@ -6,6 +6,8 @@ Copyright (c) 2011-2012 Bill Gribble <grib@billgribble.com>
 '''
 from mfp import log
 
+class MethodCallError (Exception):
+    pass
 
 class MethodCall(object):
     def __init__(self, method, *args, **kwargs):
@@ -32,7 +34,7 @@ class MethodCall(object):
         try:
             m = getattr(target, self.method)
         except AttributeError, e:
-            raise Exception("Method %s not found for %s" % (self.method, target))
+            raise MethodCallError("Method '%s' not found for type '%s'" % (self.method, target.init_type))
 
         if callable(m):
             try:
@@ -40,15 +42,16 @@ class MethodCall(object):
             except Exception, e:
                 print "Error calling", self.method, "on", target
                 print "args=%s, kwargs=%s" % (self.args, self.kwargs)
-                raise Exception("Method %s for %s raised exception %s"
-                                % (self.method, target, e))
+                raise MethodCallError("Method '%s' for type '%s' raised exception %s"
+                                      % (self.method, target.init_type, e))
         elif self.fallback:
             try:
                 return self.fallback([self] + self.args, **self.kwargs)
             except Exception, e:
-                raise Exception("Method %s for %s raised exception %s"
-                                % (self.method, target, e))
+                raise MethodCallError("Method '%s' for type '%s' raised exception %s"
+                                      % (self.method, target.init_type, e))
         else:
             log.debug("MethodCall.call():", target, self.method, m, type(m))
-            raise Exception("Method %s cannot be called" % self.method)
+            raise MethodCallError("Method '%s' of type '%s' cannot be called" 
+                            % (self.method, target.init_type))
 
