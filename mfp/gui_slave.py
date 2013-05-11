@@ -199,13 +199,12 @@ class GUICommand (RPCWrapper):
         else: 
             for c in obj.connections_out:
                 MFPGUI().appwin.unregister(c)
-                c.delete()
+                del c
 
             for c in obj.connections_in:
                 MFPGUI().appwin.unregister(c)
-                c.delete()
+                del c
 
-            MFPGUI().appwin.unregister(obj)
             obj.obj_id = None
             obj.delete()
 

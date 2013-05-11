@@ -414,8 +414,12 @@ class PatchElement (Clutter.Group):
             self.update_badge()
 
         layer_name = params.get("layername") or params.get("layer")
-        mypatch = self.layer.patch or self.stage.selected_patch 
-        layer = mypatch.find_layer(layer_name)
+
+        mypatch = ((self.layer and self.layer.patch) 
+                   or (self.stage and self.stage.selected_patch))
+        layer = None 
+        if mypatch: 
+            layer = mypatch.find_layer(layer_name)
 
         if layer and self.layer != layer:
             self.move_to_layer(layer)
