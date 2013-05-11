@@ -236,10 +236,10 @@ class PlotElement (PatchElement):
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
 
-        x_min = params.get('x_min') or self.x_min
-        x_max = params.get('x_max') or self.x_max
-        y_min = params.get('y_min') or self.y_min
-        y_max = params.get('y_max') or self.y_max
+        x_min = params.get('x_min', self.x_min)
+        x_max = params.get('x_max', self.x_max)
+        y_min = params.get('y_min', self.y_min)
+        y_max = params.get('y_max', self.y_max)
 
         self.set_bounds(x_min, y_min, x_max, y_max)
 
