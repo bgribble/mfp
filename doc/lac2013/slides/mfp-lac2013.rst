@@ -199,6 +199,8 @@ Architecture
 Future work
 -------------------------------------------
 
+* Documentation and online help
+
 * UI improvements: Undo/redo, click/drag to connect, file dialogs for
   load/save, menus
 
