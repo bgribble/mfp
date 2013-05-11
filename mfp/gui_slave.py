@@ -151,7 +151,6 @@ class GUICommand (RPCWrapper):
                     xpos = params.get("position_x", 0) - parent.export_x + 2
                     ypos = params.get("position_y", 0) - parent.export_y + 20
                     o.move(xpos, ypos)
-                    print "setting editable to False:", o
                     o.editable = False 
 
                     parent.layer.add(o)
@@ -192,7 +191,6 @@ class GUICommand (RPCWrapper):
 
     def _delete(self, obj_id):
         from .gui.patch_info import PatchInfo
-        log.debug("WARNING: untested GUI element delete!")
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchInfo): 
             MFPGUI().appwin.patches.remove(obj)
@@ -201,14 +199,15 @@ class GUICommand (RPCWrapper):
         else: 
             for c in obj.connections_out:
                 MFPGUI().appwin.unregister(c)
-                del c
+                c.delete()
 
             for c in obj.connections_in:
                 MFPGUI().appwin.unregister(c)
-                del c
+                c.delete()
 
+            MFPGUI().appwin.unregister(obj)
             obj.obj_id = None
-            del obj
+            obj.delete()
 
     @rpcwrap
     def load_start(self):

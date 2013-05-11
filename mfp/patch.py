@@ -328,7 +328,9 @@ class Patch(Processor):
 
     def delete(self):
         for oid, obj in self.objects.items():
-            obj.delete()
+            if obj.gui_created:
+                obj.delete_gui()
+                obj.delete()
         Processor.delete(self)
 
 
