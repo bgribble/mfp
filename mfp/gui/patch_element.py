@@ -44,7 +44,8 @@ class PatchElement (Clutter.Group):
         self.connections_out = []
         self.connections_in = []
         self.param_list = ['position_x', 'position_y', 'width', 'height', 
-                           'update_required', 'display_type', 'name', 'layername', 
+                           'update_required', 'display_type', 'name', 'layername',
+                           'no_export',
                            'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets' ]
 
         # Clutter objects
@@ -71,6 +72,7 @@ class PatchElement (Clutter.Group):
         self.selected = False
         self.editable = True 
         self.update_required = False
+        self.no_export = False 
         self.edit_mode = None
         self.control_mode = None
 
@@ -408,6 +410,7 @@ class PatchElement (Clutter.Group):
         self.dsp_inlets = params.get("dsp_inlets", [])
         self.dsp_outlets = params.get("dsp_outlets", [])
         self.obj_name = params.get("name")
+        self.no_export = params.get("no_export", False)
 
         if params.get("tags") is not None and self.tags != params.get("tags"):
             self.tags = params.get("tags")
