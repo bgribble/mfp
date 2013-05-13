@@ -29,6 +29,10 @@ class TextElement (PatchElement):
         self.set_size(12, 12)
         self.move(x, y)
         self.set_reactive(True)
+        self.label.connect('text-changed', self.text_changed_cb)
+
+    def update(self):
+        self.draw_ports()
 
     def draw_ports(self):
         if self.selected:
@@ -48,6 +52,11 @@ class TextElement (PatchElement):
                           widget.get_height() + self.ELBOW_ROOM)
             MFPGUI().mfp.send(self.obj_id, 0, self.text)
         self.draw_ports()
+
+    def text_changed_cb(self, *args):
+        self.set_size(20 + self.label.get_property('width'), 
+                      self.label.get_property('height'))
+        self.update()
 
     def select(self, *args):
         PatchElement.select(self)
