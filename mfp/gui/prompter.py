@@ -24,9 +24,9 @@ class Prompter (object):
     def _begin(self, prompt, callback, default): 
         self.current_prompt = prompt
         self.current_callback = callback 
-        self.window.hud_set_prompt(prompt + default)
-        self.mode = LabelEditMode(self.window, self, self.window.hud_prompt, 
-                                  prompt_locked=True, mode_desc="Prompted input")
+        self.window.hud_set_prompt(prompt, default)
+        self.mode = LabelEditMode(self.window, self, self.window.hud_prompt_input, 
+                                  mode_desc="Prompted input")
         self.window.input_mgr.enable_minor_mode(self.mode) 
 
     def label_edit_start(self):
@@ -35,7 +35,7 @@ class Prompter (object):
     def label_edit_finish(self, widget, text):
         if self.current_callback and text:
             try: 
-                self.current_callback(text[len(self.current_prompt):])
+                self.current_callback(text)
             except Exception, e: 
                 print "Prompter exception in callback:", e
                 pass 

@@ -36,7 +36,7 @@ class Blinker (Thread):
 
 class LabelEditMode (InputMode):
     def __init__(self, window, element, label, multiline=False, markup=False,
-                 prompt_locked=False, mode_desc="Edit text"):
+                 mode_desc="Edit text"):
         self.manager = window.input_mgr
         self.element = element
         self.widget = label
@@ -48,11 +48,7 @@ class LabelEditMode (InputMode):
         self.undo_pos = -1
         self.activate_handler_id = None
         self.text_changed_handler_id = None
-        if prompt_locked: 
-            self.min_editpos = len(self.widget.get_text())
-        else: 
-            self.min_editpos = 0 
-        self.editpos = self.min_editpos 
+        self.editpos = 0
         self.blinker = None
 
         InputMode.__init__(self, mode_desc)
@@ -76,7 +72,7 @@ class LabelEditMode (InputMode):
 
         self.update_label(raw=True)
         self.start_editing()
-        self.widget.set_selection(self.min_editpos, len(self.text))
+        self.widget.set_selection(0, len(self.text))
        
     def disable(self):
         self.end_editing()
@@ -176,8 +172,8 @@ class LabelEditMode (InputMode):
         return True
 
     def erase_backward(self):
-        if self.editpos <= self.min_editpos:
-            self.editpos = self.min_editpos
+        if self.editpos <= 0:
+            self.editpos = 0
             return True
 
         if self.undo_pos < -1:
@@ -186,12 +182,12 @@ class LabelEditMode (InputMode):
 
         self.undo_stack.append(self.text)
         self.text = self.text[:self.editpos - 1] + self.text[self.editpos:]
-        self.editpos = max(self.editpos - 1, self.min_editpos)
+        self.editpos = max(self.editpos - 1, 0)
         self.update_label(raw=True)
         return True
 
     def move_to_start(self):
-        self.editpos = self.min_editpos
+        self.editpos = 0
         self.update_cursor()
 
     def move_to_end(self):
@@ -199,7 +195,7 @@ class LabelEditMode (InputMode):
         self.update_cursor()
 
     def move_left(self):
-        self.editpos = max(self.editpos - 1, self.min_editpos)
+        self.editpos = max(self.editpos - 1, 0)
         self.update_cursor()
         return True
 
@@ -217,7 +213,7 @@ class LabelEditMode (InputMode):
         elif len(lines_above) > 1:
             self.editpos = min(len(lines_above[0]), line_pos)
         else:
-            self.editpos = self.min_editpos  
+            self.editpos = 0  
         self.update_cursor()
         return True
 

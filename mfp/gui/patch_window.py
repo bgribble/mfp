@@ -362,15 +362,11 @@ class PatchWindow(object):
     def get_prompted_input(self, prompt, callback, default=''): 
         self.hud_prompt_mgr.get_input(prompt, callback, default)
 
-    def hud_set_prompt(self, prompt):
-        if prompt is None:
-            h = self.hud_prompt
-            if h: 
-                htxt = h.get_text()
-            else:
-                htxt = None 
-            self.hud_prompt = None 
-            h.destroy()
+    def hud_set_prompt(self, prompt, default=''):
+        if (prompt is None) and self.hud_prompt_input:
+            htxt = self.hud_prompt_input.get_text()
+            self.hud_prompt.hide()
+            self.hud_prompt_input.hide()
             if htxt: 
                 self.hud_write(htxt)
             return 
@@ -380,10 +376,20 @@ class PatchWindow(object):
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
 
             self.hud_prompt = Clutter.Text()
+            self.hud_prompt_input = Clutter.Text()
             self.stage.add_actor(self.hud_prompt)
             self.hud_prompt.set_position(10, self.stage.get_height() - 25)
             self.hud_prompt.set_property("opacity", 255)
+            self.stage.add_actor(self.hud_prompt_input)
+            self.hud_prompt.set_position(10, self.stage.get_height() - 25)
+            self.hud_prompt.set_property("opacity", 255)
+        else:
+            self.hud_prompt.show()
+            self.hud_prompt_input.show()
         self.hud_prompt.set_markup(prompt)
+        self.hud_prompt_input.set_text(default)
+        self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
+                                           self.stage.get_height() - 25)
 
     def hud_write(self, msg, disp_time=3.0):
         def anim_complete(anim):
