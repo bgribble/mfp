@@ -131,6 +131,7 @@ a			Autoplace mode again
 p			Create a processor
 print RET		Make it a [print] processor
 RET			Make the connection
+ESC			Enter Operate major mode 
 
 Now click on the message box to send the "hello, world" string.  
 
@@ -142,14 +143,25 @@ will show you all the active key bindings.  Bindings nearer the top are
 chosen first, so if there are 2 listings for RET for instance the top one will
 be used.
 
-Demo patches: There are a few demo patches in doc/ which are really all the
-documentation there is right now.  Since there's no support for load paths
-yet, you need to copy these into the root level of the source tree to run
-them. 
+If you hover the mouse over any object, a tooltip with some
+documentation will appear at the top of the canvas area.  Hold down
+SHIFT to expand the tooltip to show current information about the
+object, including assigned MIDI and OSC controllers. 
 
-Run the demo patch by putting the file name on the command line, i.e. 
+Demo patches: There are a few demo patches in doc/ which are really all the
+documentation there is right now. 
+
+If your $PWD is in the doc/ directory, just run the demo patch by putting
+the file name on the command line, i.e. 
 
     $ mfp hello_world.mfp
+
+To run it from elsewhere, use the "-p" option to add the doc directory
+to your MFP searchpath.  For example, from the top-level src
+directory, 
+
+    $ mfp -p doc hello_world.mfp
+
 
 hello_world.mfp:  The classic 
 
@@ -170,7 +182,7 @@ looper.mfp: A simple overdubbing loop sampler inspired by the Akai
 Headrush, also built around a [buffer~].  
 
 Saving files: There's no UI for saving yet, but there is a key mapping.
-C-s (control S) will prompt for a file to save in.  There's no checking for
+C-s (control-s) will prompt for a file to save in.  There's no checking for
 overwrite, and the file is saved in the process working directory. 
 
 Reporting problems: For now, I will be using the GitHub hosted issue

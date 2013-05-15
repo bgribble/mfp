@@ -1,6 +1,6 @@
 
 MFP -- Music For Programmers 
-Release 0.04, "" 
+Release 0.04, "Making Fun Patches" 
 
 I'm pleased to announce a new version of MFP, containing many fixes
 and improvements.   It is still not at a "production" level, but is
