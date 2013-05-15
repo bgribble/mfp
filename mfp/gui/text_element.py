@@ -20,18 +20,24 @@ class TextElement (PatchElement):
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
         self.text = ''
-        self.label = clutter.Text()
 
         # configure label
+        self.label = clutter.Text()
+        self.label.set_use_markup(True)
         self.label.set_color(window.color_unselected)
         self.add_actor(self.label)
+
         self.update_required = True
         self.set_size(12, 12)
         self.move(x, y)
         self.set_reactive(True)
-        self.label.connect('text-changed', self.text_changed_cb)
+        self.label_changed_cb = None 
+
 
     def update(self):
+        if self.label_changed_cb is None: 
+            self.label_changed_cb = self.label.connect('text-changed', self.text_changed_cb)
+
         self.draw_ports()
 
     def draw_ports(self):
@@ -48,15 +54,17 @@ class TextElement (PatchElement):
             log.debug("TextElement: could not create obj")
         elif new_text != self.text:
             self.text = new_text
+            self.label.set_markup(self.text)
             self.set_size(widget.get_width() + self.ELBOW_ROOM,
                           widget.get_height() + self.ELBOW_ROOM)
             MFPGUI().mfp.send(self.obj_id, 0, self.text)
         self.draw_ports()
 
     def text_changed_cb(self, *args):
-        self.set_size(20 + self.label.get_property('width'), 
-                      self.label.get_property('height'))
+        self.set_size(self.label.get_width() + self.ELBOW_ROOM, 
+                      self.label.get_height() + self.ELBOW_ROOM)
         self.update()
+        return 
 
     def select(self, *args):
         PatchElement.select(self)

@@ -204,12 +204,14 @@ class PatchElement (Clutter.Group):
     def send_params(self, **extras):
         if self.obj_id is None:
             return
+
         prms = {} 
         for k in self.param_list:
             prms[k] = getattr(self, k)
 
         for k, v in extras.items():
             prms[k] = v
+
         MFPGUI().mfp.set_params(self.obj_id, prms)
 
     def get_params(self):
@@ -397,6 +399,9 @@ class PatchElement (Clutter.Group):
         pass
 
     def set_size(self, width, height):
+        if width == self.width and height == self.height: 
+            return 
+
         self.width = width
         self.height = height
         Clutter.Group.set_size(self, self.width, self.height)
