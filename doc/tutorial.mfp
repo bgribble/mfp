@@ -1,0 +1,532 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "0. Introduction",
+                "__patch__"
+            ],
+            [
+                "1. Creating a patch",
+                "__patch__"
+            ]
+        ],
+        "name": "tutorial-4",
+        "display_type": "patch"
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 39.0,
+                "width": 160.0,
+                "display_type": "text",
+                "position_x": 35.56041717529297,
+                "position_y": 25.977832794189453,
+                "layername": "0. Introduction"
+            },
+            "name": "text_002",
+            "midi_mode": null,
+            "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "2": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 46.0,
+                "width": 351.0,
+                "display_type": "text",
+                "position_x": 231.84161758422852,
+                "position_y": 24.951431274414062,
+                "layername": "0. Introduction"
+            },
+            "name": "text_003",
+            "midi_mode": null,
+            "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "3": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 193.0,
+                "width": 547.0,
+                "display_type": "text",
+                "position_x": 57.91237258911133,
+                "position_y": 73.91848754882812,
+                "layername": "0. Introduction"
+            },
+            "name": "text_004",
+            "midi_mode": null,
+            "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "4": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 172.0,
+                "width": 602.0,
+                "display_type": "text",
+                "position_x": 58.82697677612305,
+                "position_y": 268.9297180175781,
+                "layername": "0. Introduction"
+            },
+            "name": "text_005",
+            "midi_mode": null,
+            "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page. \n\nClick the \"Next\" button now to get started. \nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started. ",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "5": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 365.0,
+                "display_type": "text",
+                "position_x": 39.9422492980957,
+                "position_y": 497.1565856933594,
+                "layername": "0. Introduction"
+            },
+            "name": "text_007",
+            "midi_mode": null,
+            "value": "Copyright (c) 2013 Bill Gribble <grib@billgribble.com>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "6": {
+            "connections": [],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "layername": "0. Introduction"
+            },
+            "name": "sendvia_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"window\"",
+            "type": "send",
+            "osc_methods": []
+        },
+        "7": {
+            "connections": [
+                [
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "0. Introduction"
+            },
+            "name": "button_001",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "8": {
+            "connections": [
+                [
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "0. Introduction"
+            },
+            "name": "button_002",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "9": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "layername": "0. Introduction"
+            },
+            "name": "text_006",
+            "midi_mode": null,
+            "value": "<span size=\"small\">NEXT</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "layername": "0. Introduction"
+            },
+            "name": "text_008",
+            "midi_mode": null,
+            "value": "<span size=\"small\">PREV</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "11": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 361.0,
+                "display_type": "text",
+                "position_x": 33.986785888671875,
+                "position_y": 499.73907470703125,
+                "layername": "0. Introduction"
+            },
+            "name": "text_009",
+            "midi_mode": null,
+            "value": "Copyright &#169; 2013 Bill Gribble &lt;grib@billgribble.com&gt;",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "12": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 457.0,
+                "display_type": "text",
+                "position_x": 57.97983169555664,
+                "position_y": 454.3450012207031,
+                "layername": "0. Introduction"
+            },
+            "name": "text_010",
+            "midi_mode": null,
+            "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. ",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "13": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 34.0,
+                "width": 170.0,
+                "display_type": "text",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "layername": "1. Creating a patch"
+            },
+            "name": "text_011",
+            "midi_mode": null,
+            "value": "<span size=\"x-large\"><b>Creating a patch</b></span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "14": {
+            "connections": [],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "layername": "1. Creating a patch"
+            },
+            "name": "sendvia_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"window\"",
+            "type": "send",
+            "osc_methods": []
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        14,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "1. Creating a patch"
+            },
+            "name": "button_003",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "16": {
+            "connections": [
+                [
+                    [
+                        14,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "1. Creating a patch"
+            },
+            "name": "button_004",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "17": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "layername": "1. Creating a patch"
+            },
+            "name": "text_012",
+            "midi_mode": null,
+            "value": "<span size=\"small\">NEXT</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "18": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "layername": "1. Creating a patch"
+            },
+            "name": "text_013",
+            "midi_mode": null,
+            "value": "<span size=\"small\">PREV</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "19": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 67.0,
+                "width": 556.0,
+                "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  ",
+                "position_x": 75.97604370117188,
+                "position_y": 78.92110443115234,
+                "layername": "1. Creating a patch",
+                "display_type": "text"
+            },
+            "name": "text_014",
+            "midi_mode": null,
+            "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  ",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "20": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 214.0,
+                "width": 606.0,
+                "value": "C-f means control-f (hold down Control key while typing f).  Type C-f now to create \na new patch.  This will only work if your pointer is over the \"canvas\", the main patch \narea where this text appears.  Observe that a message appears at the bottom of the canvas,\nthen fades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe Page Up (PGUP) and Page Down (PGDN) keys will cycle through layers in the current \npatch; to cycle through patches, C-PGUP and C-PGDN.",
+                "position_x": 76.97566223144531,
+                "position_y": 161.81930541992188,
+                "layername": "1. Creating a patch",
+                "display_type": "text"
+            },
+            "name": "text_015",
+            "midi_mode": null,
+            "value": "C-f means control-f (hold down Control key while typing f).  Type C-f now to create \na new patch.  This will only work if your pointer is over the \"canvas\", the main patch \narea where this text appears.  Observe that a message appears at the bottom of the canvas,\nthen fades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe Page Up (PGUP) and Page Down (PGDN) keys will cycle through layers in the current \npatch; to cycle through patches, C-PGUP and C-PGDN.",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        }
+    },
+    "type": "tutorial-2",
+    "scopes": {
+        "__patch__": {
+            "button_003": 15,
+            "button_002": 8,
+            "button_001": 7,
+            "text_006": 9,
+            "button_004": 16,
+            "sendvia_001": 6,
+            "self": 0,
+            "text_007": 5,
+            "text_002": 1,
+            "text_013": 18,
+            "text_012": 17,
+            "text_011": 13,
+            "text_010": 12,
+            "text_004": 3,
+            "text_005": 4,
+            "text_015": 20,
+            "text_014": 19,
+            "text_008": 10,
+            "text_009": 11,
+            "text_003": 2,
+            "sendvia_002": 14
+        }
+    }
+}
