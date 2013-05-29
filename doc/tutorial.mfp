@@ -16,9 +16,17 @@
             [
                 "3. File operations",
                 "__patch__"
+            ],
+            [
+                "4. Hello, world",
+                "__patch__"
+            ],
+            [
+                "5. Creating elements",
+                "__patch__"
             ]
         ],
-        "name": "tutorial-6",
+        "name": "tutorial-8",
         "display_type": "patch"
     },
     "objects": {
@@ -75,17 +83,16 @@
             "gui_params": {
                 "no_export": false,
                 "update_required": true,
-                "height": 256.0,
-                "width": 602.0,
-                "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page.  Instructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Click the \"Next\" button now to get started.</i> \n\nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started.\n\nYou can also use PGUP and PGDN (Page Up and Page Down) keys to move to the previous \nand next layers, or click on the layer name you want to visit in the Layers tab to the left.  ",
-                "position_x": 47.830448150634766,
-                "position_y": 164.14801025390625,
-                "layername": "0. Introduction",
-                "display_type": "text"
+                "height": 277.0,
+                "width": 607.0,
+                "display_type": "text",
+                "position_x": 48.830448150634766,
+                "position_y": 150.14801025390625,
+                "layername": "0. Introduction"
             },
             "name": "text_005",
             "midi_mode": null,
-            "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page.  Instructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Click the \"Next\" button now to get started.</i> \n\nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started.\n\nYou can also use PGUP and PGDN (Page Up and Page Down) keys to move to the previous \nand next layers, or click on the layer name you want to visit in the Layers tab to the left.  ",
+            "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page.  Instructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Click the \"Next\" button now to get started.</i> \n\nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started.\n\nYou can also use PGUP and PGDN (Page Up and Page Down) keys to move to the previous \nand next layers, or click on the layer name you want to visit in the Layers tab to the left.  To\nre-enter Edit mode, type C-SPC (Control-Space).",
             "do_onload": false,
             "midi_filters": null,
             "initargs": null,
@@ -118,7 +125,6 @@
         "5": {
             "connections": [],
             "gui_params": {
-                "layername": "0. Introduction",
                 "no_export": false,
                 "update_required": false,
                 "height": 35,
@@ -126,7 +132,7 @@
                 "display_type": "sendvia",
                 "position_x": 673.2089233398438,
                 "position_y": 471.5054931640625,
-                "label": "self"
+                "layername": "0. Introduction"
             },
             "name": "sendvia_001",
             "midi_mode": null,
@@ -278,7 +284,7 @@
                 "width": 457.0,
                 "display_type": "text",
                 "position_x": 48.982669830322266,
-                "position_y": 430.5323486328125,
+                "position_y": 434.5323486328125,
                 "layername": "0. Introduction"
             },
             "name": "text_010",
@@ -316,7 +322,6 @@
         "13": {
             "connections": [],
             "gui_params": {
-                "layername": "2. Creating a patch",
                 "no_export": false,
                 "update_required": false,
                 "height": 35,
@@ -324,7 +329,7 @@
                 "display_type": "sendvia",
                 "position_x": 673.2089233398438,
                 "position_y": 471.5054931640625,
-                "label": "self"
+                "layername": "2. Creating a patch"
             },
             "name": "sendvia_002",
             "midi_mode": null,
@@ -451,11 +456,10 @@
                 "update_required": true,
                 "height": 88.0,
                 "width": 561.0,
-                "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key.  ",
-                "position_x": 75.97604370117188,
-                "position_y": 84.92110443115234,
-                "layername": "2. Creating a patch",
-                "display_type": "text"
+                "display_type": "text",
+                "position_x": 62.976043701171875,
+                "position_y": 83.92110443115234,
+                "layername": "2. Creating a patch"
             },
             "name": "text_014",
             "midi_mode": null,
@@ -475,11 +479,10 @@
                 "update_required": true,
                 "height": 256.0,
                 "width": 584.0,
-                "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab.",
-                "position_x": 76.97566223144531,
-                "position_y": 182.81930541992188,
-                "layername": "2. Creating a patch",
-                "display_type": "text"
+                "display_type": "text",
+                "position_x": 63.97566223144531,
+                "position_y": 181.81930541992188,
+                "layername": "2. Creating a patch"
             },
             "name": "text_015",
             "midi_mode": null,
@@ -493,7 +496,6 @@
         "20": {
             "connections": [],
             "gui_params": {
-                "layername": "1. Command line",
                 "no_export": false,
                 "update_required": false,
                 "height": 35,
@@ -501,7 +503,7 @@
                 "display_type": "sendvia",
                 "position_x": 673.2089233398438,
                 "position_y": 471.5054931640625,
-                "label": "self"
+                "layername": "1. Command line"
             },
             "name": "sendvia_003",
             "midi_mode": null,
@@ -697,11 +699,10 @@
                 "update_required": true,
                 "height": 88.0,
                 "width": 549.0,
-                "value": "Note especially the -v option, which copies all log messages to the console.  \nThis may be helpful if a problem is causing MFP to crash and take log messages \nwith it.  Usually, after startup all log messages will go to the \"Log\" tab below, but \nwill not be printed to stdout.",
+                "display_type": "text",
                 "position_x": 58.97983169555664,
                 "position_y": 288.694580078125,
-                "layername": "1. Command line",
-                "display_type": "text"
+                "layername": "1. Command line"
             },
             "name": "text_021",
             "midi_mode": null,
@@ -721,11 +722,10 @@
                 "update_required": true,
                 "height": 34.0,
                 "width": 155.0,
-                "value": "<span size=\"x-large\"><b>File operations</b></span>",
+                "display_type": "text",
                 "position_x": 39.7034912109375,
                 "position_y": 28.57501220703125,
-                "layername": "3. File operations",
-                "display_type": "text"
+                "layername": "3. File operations"
             },
             "name": "text_004",
             "midi_mode": null,
@@ -1024,14 +1024,949 @@
             "initargs": null,
             "type": "text",
             "osc_methods": []
+        },
+        "42": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 34.0,
+                "width": 137.0,
+                "display_type": "text",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_031",
+            "midi_mode": null,
+            "value": "<span size=\"x-large\"><b>Hello, World</b></span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "43": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 46.0,
+                "width": 496.0,
+                "display_type": "text",
+                "position_x": 43.82478332519531,
+                "position_y": 72.19137573242188,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_032",
+            "midi_mode": null,
+            "value": "To build a simple patch, you need to know how to create the elements and \nhow to use Connection mode to hook them up.  In your working patch:",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "44": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 319.0,
+                "display_type": "text",
+                "position_x": 59.90829086303711,
+                "position_y": 129.77536010742188,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_033",
+            "midi_mode": null,
+            "value": "<i>--> Type the following to create a message box:</i>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "45": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 142.0,
+                "display_type": "text",
+                "position_x": 86.8471908569336,
+                "position_y": 156.15927124023438,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_034",
+            "midi_mode": null,
+            "value": "m \"hello, world\" RET",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "46": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 46.0,
+                "width": 335.0,
+                "value": "<i>--> Type the following to create a print processor:</i>\n      ap print RET",
+                "position_x": 65.89913177490234,
+                "position_y": 195.82044982910156,
+                "layername": "4. Hello, world",
+                "display_type": "text"
+            },
+            "name": "text_035",
+            "midi_mode": null,
+            "value": "<i>--> Type the following to create a print processor:</i>\n      ap print RET",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "47": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 257.0,
+                "display_type": "text",
+                "position_x": 67.89301300048828,
+                "position_y": 252.06478881835938,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_036",
+            "midi_mode": null,
+            "value": "<i>--> Hit TAB to select the message box</i>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "48": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 109.0,
+                "width": 555.0,
+                "value": "<i>--> Type the following to connect the message box to the print processor:</i>\n     c             <i>(to enter Connection mode with the message as the start of connection)</i>\n     TAB        <i>(to select the print processor as the other end of connection)</i>\n     RET        <i>(to create the connection)</i>\n     Your patch should look like the one to the right",
+                "position_x": 68.89801025390625,
+                "position_y": 286.9288024902344,
+                "layername": "4. Hello, world",
+                "display_type": "text"
+            },
+            "name": "text_037",
+            "midi_mode": null,
+            "value": "<i>--> Type the following to connect the message box to the print processor:</i>\n     c             <i>(to enter Connection mode with the message as the start of connection)</i>\n     TAB        <i>(to select the print processor as the other end of connection)</i>\n     RET        <i>(to create the connection)</i>\n     Your patch should look like the one to the right",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "49": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 67.0,
+                "width": 473.0,
+                "display_type": "text",
+                "position_x": 70.89775085449219,
+                "position_y": 405.02801513671875,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_038",
+            "midi_mode": null,
+            "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. ",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "50": {
+            "connections": [],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "layername": "4. Hello, world"
+            },
+            "name": "sendvia_005",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"self\"",
+            "type": "send",
+            "osc_methods": []
+        },
+        "51": {
+            "connections": [
+                [
+                    [
+                        50,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "4. Hello, world"
+            },
+            "name": "button_009",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "52": {
+            "connections": [
+                [
+                    [
+                        50,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "4. Hello, world"
+            },
+            "name": "button_010",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "53": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_039",
+            "midi_mode": null,
+            "value": "<span size=\"small\">NEXT</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "54": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "layername": "4. Hello, world"
+            },
+            "name": "text_040",
+            "midi_mode": null,
+            "value": "<span size=\"small\">PREV</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "55": {
+            "connections": [
+                [
+                    [
+                        56,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 113.0,
+                "display_type": "message",
+                "position_x": 454.8407897949219,
+                "position_y": 167.82728576660156,
+                "layername": "4. Hello, world"
+            },
+            "name": "message_001",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "\"hello, world\"",
+            "type": "message",
+            "osc_methods": []
+        },
+        "56": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 45.0,
+                "display_type": "processor",
+                "position_x": 454.841796875,
+                "position_y": 215.8342742919922,
+                "layername": "4. Hello, world"
+            },
+            "name": "processor_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "print",
+            "osc_methods": []
+        },
+        "57": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 34.0,
+                "width": 190.0,
+                "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "layername": "5. Creating elements",
+                "display_type": "text"
+            },
+            "name": "text_041",
+            "midi_mode": null,
+            "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "58": {
+            "connections": [],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "layername": "5. Creating elements"
+            },
+            "name": "sendvia_006",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"self\"",
+            "type": "send",
+            "osc_methods": []
+        },
+        "59": {
+            "connections": [
+                [
+                    [
+                        58,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "5. Creating elements"
+            },
+            "name": "button_011",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "60": {
+            "connections": [
+                [
+                    [
+                        58,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 30,
+                "width": 50,
+                "display_type": "button",
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "5. Creating elements"
+            },
+            "name": "button_012",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "61": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_042",
+            "midi_mode": null,
+            "value": "<span size=\"small\">NEXT</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "62": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 35.0,
+                "display_type": "text",
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_043",
+            "midi_mode": null,
+            "value": "<span size=\"small\">PREV</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "63": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 403.0,
+                "width": 564.0,
+                "display_type": "text",
+                "position_x": 53.99140548706055,
+                "position_y": 69.88384246826172,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_044",
+            "midi_mode": null,
+            "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  ",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "64": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 66.0,
+                "display_type": "message",
+                "position_x": 506.82916259765625,
+                "position_y": 128.84127807617188,
+                "layername": "5. Creating elements"
+            },
+            "name": "message_002",
+            "midi_mode": null,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "\"hello\"",
+            "type": "message",
+            "osc_methods": []
+        },
+        "65": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 45.0,
+                "display_type": "processor",
+                "position_x": 507.82879638671875,
+                "position_y": 161.81533813476562,
+                "layername": "5. Creating elements"
+            },
+            "name": "processor_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "print",
+            "osc_methods": []
+        },
+        "66": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "digits": 1,
+                "no_export": false,
+                "scientific": false,
+                "max_value": null,
+                "min_value": null,
+                "update_required": true,
+                "height": 25.0,
+                "width": 42.0,
+                "display_type": "enum",
+                "position_x": 507.82879638671875,
+                "position_y": 194.77142333984375,
+                "layername": "5. Creating elements"
+            },
+            "name": "enum_001",
+            "midi_mode": null,
+            "value": 0.0,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "0.0",
+            "type": "enum",
+            "osc_methods": []
+        },
+        "67": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 62.0,
+                "display_type": "text",
+                "position_x": 588.8088989257812,
+                "position_y": 129.85923767089844,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_045",
+            "midi_mode": null,
+            "value": "Message",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "68": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 70.0,
+                "display_type": "text",
+                "position_x": 589.8108520507812,
+                "position_y": 164.81732177734375,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_046",
+            "midi_mode": null,
+            "value": "Processor",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "69": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "text",
+                "position_x": 589.8136596679688,
+                "position_y": 196.79537963867188,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_047",
+            "midi_mode": null,
+            "value": "Number",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "70": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 46.0,
+                "display_type": "text",
+                "position_x": 507.83953857421875,
+                "position_y": 229.7684326171875,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_048",
+            "midi_mode": null,
+            "value": "Hello!",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "71": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 66.0,
+                "display_type": "text",
+                "position_x": 587.8133544921875,
+                "position_y": 228.77142333984375,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_049",
+            "midi_mode": null,
+            "value": "Comment",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "72": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "on_message": true,
+                "no_export": false,
+                "update_required": true,
+                "height": 20,
+                "width": 20,
+                "off_message": false,
+                "display_type": "toggle",
+                "position_x": 518.8341674804688,
+                "position_y": 258.73150634765625,
+                "layername": "5. Creating elements"
+            },
+            "name": "toggle_001",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "73": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 50.0,
+                "display_type": "text",
+                "position_x": 589.8136596679688,
+                "position_y": 259.7294921875,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_050",
+            "midi_mode": null,
+            "value": "Toggle",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "74": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 20,
+                "width": 20,
+                "display_type": "button",
+                "position_x": 518.8341674804688,
+                "position_y": 290.6846008300781,
+                "message": {
+                    "__BangType__": {}
+                },
+                "layername": "5. Creating elements"
+            },
+            "name": "button_013",
+            "midi_mode": null,
+            "value": false,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "False",
+            "type": "var",
+            "osc_methods": []
+        },
+        "75": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 36.0,
+                "display_type": "text",
+                "position_x": 590.8133544921875,
+                "position_y": 290.67962646484375,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_051",
+            "midi_mode": null,
+            "value": "Bang",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "76": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "zeropoint": null,
+                "scale_position": 0,
+                "min_value": 0.0,
+                "orientation": 1,
+                "max_value": 1.0,
+                "no_export": false,
+                "update_required": true,
+                "height": 25,
+                "width": 100,
+                "show_scale": false,
+                "display_type": "slidemeter",
+                "position_x": 478.8487548828125,
+                "position_y": 324.6755676269531,
+                "layername": "5. Creating elements",
+                "scale_type": 0
+            },
+            "name": "slidemeter_001",
+            "midi_mode": null,
+            "value": 0.0,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "0.0",
+            "type": "slidemeter",
+            "osc_methods": []
+        },
+        "77": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 43.0,
+                "display_type": "text",
+                "position_x": 589.812744140625,
+                "position_y": 325.67462158203125,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_052",
+            "midi_mode": null,
+            "value": "Slider",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "78": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "zeropoint": null,
+                "scale_position": 0,
+                "min_value": 0.0,
+                "orientation": 0,
+                "max_value": 1.0,
+                "no_export": false,
+                "update_required": true,
+                "height": 50,
+                "width": 50,
+                "show_scale": false,
+                "display_type": "dial",
+                "position_x": 501.83795166015625,
+                "position_y": 359.6197204589844,
+                "layername": "5. Creating elements",
+                "scale_type": 0
+            },
+            "name": "dial_001",
+            "midi_mode": null,
+            "value": 0.0,
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "0.0",
+            "type": "slidemeter",
+            "osc_methods": []
+        },
+        "79": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 30.0,
+                "display_type": "text",
+                "position_x": 590.812744140625,
+                "position_y": 369.6336975097656,
+                "layername": "5. Creating elements"
+            },
+            "name": "text_053",
+            "midi_mode": null,
+            "value": "Dial",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
         }
     },
-    "type": "tutorial-2",
+    "type": "tutorial-6",
     "scopes": {
         "__patch__": {
+            "text_039": 53,
+            "text_038": 49,
             "text_006": 8,
+            "text_031": 42,
             "text_030": 41,
-            "text_007": 4,
+            "text_033": 44,
+            "text_032": 43,
+            "text_035": 46,
+            "text_034": 45,
+            "text_037": 48,
+            "text_036": 47,
             "text_013": 17,
             "text_012": 16,
             "text_011": 12,
@@ -1040,37 +1975,67 @@
             "text_016": 23,
             "text_015": 19,
             "text_014": 18,
+            "text_050": 73,
+            "button_007": 38,
             "text_019": 26,
             "text_018": 25,
+            "text_023": 31,
+            "text_049": 71,
+            "message_002": 64,
+            "message_001": 55,
+            "button_005": 21,
             "self": 0,
+            "processor_001": 56,
+            "processor_002": 65,
+            "text_024": 32,
+            "button_009": 51,
+            "text_053": 79,
+            "enum_001": 66,
             "button_003": 14,
             "button_002": 7,
             "button_001": 6,
-            "button_007": 38,
-            "button_006": 22,
-            "button_005": 21,
-            "button_004": 15,
             "button_008": 39,
+            "text_048": 70,
+            "button_006": 22,
+            "dial_001": 78,
+            "button_004": 15,
+            "text_044": 63,
+            "text_045": 67,
+            "text_046": 68,
+            "text_047": 69,
+            "text_040": 54,
+            "text_041": 57,
+            "text_042": 61,
+            "button_011": 59,
             "text_026": 34,
             "text_027": 35,
             "text_002": 1,
             "text_003": 2,
             "text_004": 29,
-            "text_005": 3,
+            "button_012": 60,
             "text_020": 27,
             "text_021": 28,
             "text_008": 9,
             "text_009": 10,
+            "text_043": 62,
+            "text_052": 77,
             "text_028": 36,
             "text_029": 40,
+            "slidemeter_001": 76,
+            "text_007": 4,
+            "button_013": 74,
             "sendvia_001": 5,
             "sendvia_002": 13,
             "sendvia_003": 20,
             "sendvia_004": 37,
-            "text_024": 32,
+            "sendvia_005": 50,
+            "sendvia_006": 58,
             "text_025": 33,
+            "toggle_001": 72,
+            "button_010": 52,
             "text_022": 30,
-            "text_023": 31
+            "text_051": 75,
+            "text_005": 3
         }
     }
 }
