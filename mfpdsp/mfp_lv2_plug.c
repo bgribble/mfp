@@ -20,6 +20,7 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
 {
     mfp_lv2_info * self = g_malloc(sizeof(mfp_lv2_info));
 
+    printf("mfp_lv2_instantiate: %s\n", bundle_path);
         
     return (LV2_Handle)self;
 }
@@ -29,28 +30,34 @@ static void
 mfp_lv2_connect_port(LV2_Handle instance, uint32_t port, void * data) 
 {
     mfp_lv2_info * self = (mfp_lv2_info *)instance;
+    printf("mfp_lv2_connect_port: %d %p\n", port, data);
 }
 
 static void
 mfp_lv2_activate(LV2_Handle instance)
 {
     mfp_lv2_info * self = (mfp_lv2_info *)instance;
+    printf("mfp_lv2_activate\n")
 }
 
 static void
 mfp_lv2_run(LV2_Handle instance, uint32_t sample_count) 
 {
     mfp_lv2_info * self = (mfp_lv2_info *)instance;
+    printf("mfp_lv2_run\n");
 }
 
 static void
 mfp_lv2_deactivate(LV2_Handle instance)
-{ }
+{ 
+    printf("mfp_lv2_deactivate\n");
+}
 
 static void
 mfp_lv2_cleanup(LV2_Handle instance)
 {
-    free(instance);
+    printf("mfp_lv2_cleanup\n");
+    g_free(instance);
 }
 
 static const void*
@@ -60,7 +67,7 @@ mfp_lv2_extension_data(const char* uri)
 }
 
 static const LV2_Descriptor descriptor = {
-    MIDIGATE_URI,
+    MFP_LV2_URL,
     mfp_lv2_instantiate,
     mfp_lv2_connect_port,
     mfp_lv2_activate,
@@ -69,4 +76,17 @@ static const LV2_Descriptor descriptor = {
     mfp_lv2_cleanup,
     mfp_lv2_extension_data
 };
+
+LV2_SYMBOL_EXPORT
+const LV2_Descriptor*
+lv2_descriptor(uint32_t index)
+{
+    switch (index) {
+        case 0:
+            return &descriptor;
+        default:
+            return NULL;
+    }
+}
+
 
