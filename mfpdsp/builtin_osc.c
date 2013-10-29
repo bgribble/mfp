@@ -21,7 +21,7 @@ typedef struct {
 double osc_table[OSC_TABSIZE + 1]; 
 
 static void 
-table_load() {
+table_load(void) {
     double phase = 0.0;
     double phase_incr = OSC_TABINCR;
     int sample;

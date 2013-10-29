@@ -354,7 +354,7 @@ shared_buffer_alloc(buf_info * buf)
     buf->buf_size = size;
     buf->buf_ptr = mmap(NULL,  size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
     if (buf->buf_ptr == NULL) {
-        printf("mmap() failed... %d (%s)\n", buf->shm_fd, sys_errlist[errno]);
+        printf("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
     }
 }
 

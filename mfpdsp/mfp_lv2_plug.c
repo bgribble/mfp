@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/atom/util.h"
@@ -37,7 +38,7 @@ static void
 mfp_lv2_activate(LV2_Handle instance)
 {
     mfp_lv2_info * self = (mfp_lv2_info *)instance;
-    printf("mfp_lv2_activate\n")
+    printf("mfp_lv2_activate\n");
 }
 
 static void
