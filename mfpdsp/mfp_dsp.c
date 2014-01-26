@@ -1,3 +1,5 @@
+#include "mfp_dsp.h"
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,7 +7,7 @@
 #include <glib.h>
 #include <pthread.h>
 
-#include "mfp_dsp.h"
+#include <time.h>
 
 
 GArray      * mfp_request_cleanup = NULL;
@@ -22,9 +24,40 @@ pthread_mutex_t mfp_response_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  mfp_response_cond = PTHREAD_COND_INITIALIZER;
 
 int mfp_dsp_enabled = 0;
+int mfp_initialized = 0;
 int mfp_needs_reschedule = 1;
 int mfp_max_blocksize = 2048; 
 int proc_count = 0; 
+
+int mfp_samplerate = 44100; 
+int mfp_blocksize = 1024; 
+float mfp_in_latency = 0.0;
+float mfp_out_latency = 0.0;
+
+mfp_sample * 
+mfp_get_input_buffer(mfp_context * ctxt, int chan) {
+    if (ctxt.ctype == CTYPE_JACK) {
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack.input_ports, 
+                                    jack_port_t *, chan), ctxt->info.jack.blocksize);
+    }
+    else {
+        return mfp_lv2_get_data(g_array_index(ctxt->info.lv2.input_ports, 
+                                mfp_lv2_info *, chan)); 
+    }
+}
+
+mfp_sample * 
+mfp_get_output_buffer(mfp_context * ctxt, int chan) {
+    if (ctxt.ctype == CTYPE_JACK) {
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack.output_ports, 
+                                    jack_port_t *, chan), ctxt->info.jack.blocksize);
+    }
+    else {
+        return mfp_lv2_get_data(g_array_index(ctxt->info.lv2.output_ports, 
+                                mfp_lv2_info *, chan)); 
+    }
+}
+
 
 static int 
 depth_cmp_func(const void * a, const void *b) 
@@ -157,6 +190,9 @@ mfp_dsp_push_request(mfp_reqdata rd)
     int count; 
     int cleanup = 0; 
     gpointer newreq = g_malloc0(sizeof(mfp_reqdata));
+    struct timespec shorttime;
+
+    shorttime.tv_sec = 0; shorttime.tv_nsec = 1000;
 
     memcpy(newreq, &rd, sizeof(mfp_reqdata)); 
 
@@ -169,7 +205,7 @@ mfp_dsp_push_request(mfp_reqdata rd)
     
     while((request_queue_read == 0 && request_queue_write == REQ_LASTIND)
         || (request_queue_write + 1 == request_queue_read)) {
-        usleep(100);
+        nanosleep(&shorttime, NULL);
     }
 
     request_queue[request_queue_write] = newreq;

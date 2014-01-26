@@ -11,18 +11,18 @@
 
 #define MFP_LV2_URL "http://www.billgribble.com/mfp/mfp_lv2"
 
-typedef struct {
-
-} mfp_lv2_info; 
-
 static LV2_Handle
 mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate, 
                     const char * bundle_path, const LV2_Feature * const * features)
 {
-    mfp_lv2_info * self = g_malloc(sizeof(mfp_lv2_info));
+    mfp_lv2_info * self = g_malloc0(sizeof(mfp_lv2_info));
 
     printf("mfp_lv2_instantiate: %s\n", bundle_path);
-        
+    self->port_symbol = g_array_new(FALSE, TRUE, sizeof(char *));
+    self->port_name = g_array_new(FALSE, TRUE, sizeof(char *));
+    self->port_data = g_array_new(FALSE, TRUE, sizeof(void *));
+    mfp_lv2_ttl_read(self, bundle_path);
+
     return (LV2_Handle)self;
 }
 
@@ -31,7 +31,9 @@ static void
 mfp_lv2_connect_port(LV2_Handle instance, uint32_t port, void * data) 
 {
     mfp_lv2_info * self = (mfp_lv2_info *)instance;
+
     printf("mfp_lv2_connect_port: %d %p\n", port, data);
+    g_array_insert_val(self->port_data, port, data);
 }
 
 static void
@@ -45,7 +47,9 @@ static void
 mfp_lv2_run(LV2_Handle instance, uint32_t sample_count) 
 {
     mfp_lv2_info * self = (mfp_lv2_info *)instance;
-    printf("mfp_lv2_run\n");
+    printf("mfp_lv2_run %d\n");
+
+    /* mfp_dsp_run(sample_count); */
 }
 
 static void

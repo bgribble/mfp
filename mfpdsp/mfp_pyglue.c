@@ -85,7 +85,6 @@ dsp_response_wait(PyObject * mod, PyObject * args)
     PyObject * t;
     PyObject * proc;
     mfp_respdata r;
-    int rcount;
     struct timespec alarmtime;
     struct timeval nowtime;
 

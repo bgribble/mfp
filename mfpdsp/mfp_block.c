@@ -304,14 +304,16 @@ mfp_block_mac(mfp_block * in_1, mfp_block * in_2, mfp_block * in_3, mfp_block * 
         if (in_3 != NULL) {
             i3 = in_3->data;
             for(; i1 < iend; i1++) {
-                *optr++ = *optr + *i1 * *i2 * *i3;
+                *optr = *optr + *i1 * *i2 * *i3;
+                optr++;
                 i2++;
                 i3++;            
             }
         }
         else {
             for(; i1 < iend; i1++) {
-                *optr++ = *optr + *i1 * *i2 ;
+                *optr = *optr + *i1 * *i2 ;
+                optr++;
                 i2++;
             }
         }

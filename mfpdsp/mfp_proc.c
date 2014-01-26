@@ -308,6 +308,7 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
         rd->param_name = NULL;
         rd->param_value = NULL; 
     }
+    return 0;
 }
 
 int
