@@ -35,7 +35,7 @@ config(mfp_processor * proc)
     int scount;
     int framebase = 0;
     
-    frames_per_ms = mfp_samplerate / 1000.0; 
+    frames_per_ms = proc->context->samplerate / 1000.0; 
 
     /* populate new segment data if passed */
     if (segments_raw != NULL) {
@@ -113,7 +113,7 @@ process(mfp_processor * proc)
     offset = data->start_val;
 
     /* iterate */ 
-    for(scount=0; scount < mfp_blocksize; scount++) {
+    for(scount=0; scount < proc->context->blocksize; scount++) {
         if (cframe < cseg->start_frame) {
             *sample++ = data->cur_val;
         }

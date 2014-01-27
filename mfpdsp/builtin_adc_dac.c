@@ -17,8 +17,8 @@ in_process(mfp_processor * proc)
         channel = (int)(*(float *)chan_ptr);
     }
 
-    inbuf = mfp_get_input_buffer(channel);
-    outbuf = proc->outlet_buf[0]->data;
+    inbuf = mfp_get_input_buffer(proc->context, channel);
+    outbuf = (mfp_block *)(proc->outlet_buf[0]->data);
 
     if ((inbuf == NULL) || (outbuf == NULL)) {
         return 0;
@@ -42,14 +42,14 @@ out_process(mfp_processor * proc)
     if (chan_ptr != NULL) {
         channel = (int)(*(float *)chan_ptr);
     }
-    outbuf = mfp_get_output_buffer(channel);
+    outbuf = mfp_get_output_buffer(proc->context, channel);
     inbuf = proc->inlet_buf[0]->data;
 
     if ((outbuf == NULL) || (inbuf == NULL)) {
         return 0;
     }
 
-    mfp_dsp_accum(outbuf, inbuf, mfp_blocksize);
+    mfp_dsp_accum(outbuf, inbuf, proc->context->blocksize);
 
     return 1;
 }

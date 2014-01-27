@@ -1,6 +1,6 @@
 #! /usr/bin/env python2.6
 '''
-del.py:  Builtin delay DSP object
+delay.py:  Builtin delay DSP object
 
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''

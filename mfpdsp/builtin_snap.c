@@ -72,7 +72,7 @@ config(mfp_processor * proc)
         pdata->triggered = (int)(*(float *)trigger_ptr);
     }
     if(retrigger_ptr != NULL) {
-        pdata->retrigger = (int)((*(float *)retrigger_ptr) * mfp_samplerate / 1000.0);
+        pdata->retrigger = (int)((*(float *)retrigger_ptr) * proc->context->samplerate / 1000.0);
         pdata->retrigger_count = 0;
     }
 

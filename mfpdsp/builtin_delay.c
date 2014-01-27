@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -30,7 +29,7 @@ process(mfp_processor * proc)
     mfp_sample * bufptr;
     int outpos; 
     int calcind;
-    int delay_samples = (int)(pdata->const_delay_ms * mfp_samplerate / 1000.0);
+    int delay_samples = (int)(pdata->const_delay_ms * proc->context->samplerate / 1000.0);
     int delblk_size = pdata->delay_buffer->blocksize;
     int delblk;
     
@@ -42,7 +41,7 @@ process(mfp_processor * proc)
     }
 
     if (pdata->min_blk == 1) {
-        delay_samples = MAX(mfp_blocksize, delay_samples);
+        delay_samples = MAX(proc->context->blocksize, delay_samples);
     }
 
     delay_samples = MIN(delblk_size, delay_samples);
@@ -52,10 +51,10 @@ process(mfp_processor * proc)
     bufptr = pdata->delay_buffer->data;
     delblk = pdata->delay_buffer->blocksize;
 
-    for(outpos=0; outpos < mfp_blocksize; outpos++) {
+    for(outpos=0; outpos < proc->context->blocksize; outpos++) {
         if (delptr != NULL) {
             delay_samples = MIN(delblk_size-1, 
-                                MAX(0, (int)(*delptr * mfp_samplerate / 1000.0)));
+                                MAX(0, (int)(*delptr * proc->context->samplerate / 1000.0)));
         }
         calcind = outpos - delay_samples;
         if (calcind >= 0) {
@@ -141,11 +140,11 @@ config(mfp_processor * proc)
 
     if (bufsize_ptr != NULL) {
         buf_ms = *(float *)(bufsize_ptr);
-        buf_samples = buf_ms * mfp_samplerate / 1000.0;
-        buf_samples = ((int)(buf_samples / mfp_blocksize) + 1) * mfp_blocksize;
+        buf_samples = buf_ms * proc->context->samplerate / 1000.0;
+        buf_samples = ((int)(buf_samples / proc->context->blocksize) + 1) * proc->context->blocksize;
 
         if (pdata->min_blk == 1) {
-            buf_samples = MAX(mfp_blocksize, buf_samples);
+            buf_samples = MAX(proc->context->blocksize, buf_samples);
         }
 
         if (buf_samples < (pdata->delay_buffer->allocsize)) {

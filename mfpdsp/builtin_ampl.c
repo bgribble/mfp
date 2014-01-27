@@ -32,7 +32,8 @@ process(mfp_processor * proc)
     mfp_sample * rms_buffer = pdata->rms_buffer->data + pdata->rms_pointer;
     mfp_sample * rms_bufend = pdata->rms_buffer->data + pdata->rms_buffer->blocksize;
     mfp_sample sample;
-    double peak_slope = 1000.0/((double)pdata->peak_decay_ms*(double)mfp_samplerate);
+    double peak_slope = 1000.0/((double)pdata->peak_decay_ms * 
+                                (double)(proc->context->samplerate));
     double peak = pdata->last_peak;
     double rms_accum = pdata->rms_accum;
     double rms_scale = 1.0 / (pdata->rms_buffer->blocksize);
@@ -43,7 +44,7 @@ process(mfp_processor * proc)
         return 0;
     }
 
-    for(scount = 0; scount < mfp_blocksize; scount++) {
+    for(scount = 0; scount < proc->context->blocksize; scount++) {
         sample = *in_sample++;
 
         /* peak */
@@ -88,8 +89,8 @@ init(mfp_processor * proc)
     p->peak_decay_ms = 200;
     p->last_peak = 0.0;
     p->rms_window_ms = 20;
-    p->rms_buffer = mfp_block_new((int)(20 * mfp_samplerate / 1000.0));
-    p->rms_alloc = mfp_block_new((int)(20 * mfp_samplerate / 1000.0));
+    p->rms_buffer = mfp_block_new((int)(20 * proc->context->samplerate / 1000.0));
+    p->rms_alloc = mfp_block_new((int)(20 * proc->context->samplerate / 1000.0));
     p->rms_alloc_ready = ALLOC_IDLE;
     p->rms_accum = 0.0;
     p->rms_pointer = 0;
@@ -132,7 +133,7 @@ config(mfp_processor * proc)
 
     if(rms_window_ptr != NULL) {
         rms_window = *(float *)rms_window_ptr;
-        rms_samples = (int)(rms_window * mfp_samplerate / 1000.0);
+        rms_samples = (int)(rms_window * proc->context->samplerate / 1000.0);
         if (rms_samples < pdata->rms_buffer->allocsize) {
             mfp_block_resize(pdata->rms_buffer, rms_samples);
             pdata->rms_accum = 0.0;

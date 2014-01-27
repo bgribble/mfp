@@ -226,7 +226,7 @@ process(mfp_processor * proc)
                 outptr = proc->outlet_buf[channel]->data;
                 inptr = (float *)(d->buf_base) + (channel*d->chan_size);
                 inpos = d->buf_pos;
-                for(outpos = 0; outpos < mfp_blocksize; outpos++) {
+                for(outpos = 0; outpos < proc->context->blocksize; outpos++) {
                     if (inpos < d->region_end) {
                         outptr[outpos] = inptr[inpos++];
                     }
@@ -244,7 +244,7 @@ process(mfp_processor * proc)
 
     /* if we are triggered, copy data from inlets to buffer */
     if(d->buf_state == BUF_ACTIVE && d->rec_enabled) {
-        tocopy = MIN(mfp_blocksize-dstart, d->chan_size - d->buf_pos);
+        tocopy = MIN(proc->context->blocksize-dstart, d->chan_size - d->buf_pos);
 
         /* iterate over channels, grabbing data if channel is active */
         for(channel=0; channel < d->chan_count; channel++) {
@@ -274,12 +274,12 @@ process(mfp_processor * proc)
     if (d->buf_state != BUF_IDLE) {
 
         if (tocopy == 0) { 
-            tocopy = mfp_blocksize;
+            tocopy = proc->context->blocksize;
         }
 
         /* update d->buf_pos for next block */ 
         if (d->buf_mode == REC_LOOPSET) {
-            d->buf_pos = MIN(d->buf_pos + mfp_blocksize, d->chan_size);
+            d->buf_pos = MIN(d->buf_pos + proc->context->blocksize, d->chan_size);
             d->region_end = d->buf_pos;
         }
         else if (d->buf_pos + tocopy < d->region_end) {
@@ -429,7 +429,7 @@ config(mfp_processor * proc)
                 mfp_dsp_send_response_str(proc, RESP_BUFID, d->buf_active.shm_id);
                 mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->buf_active.buf_chansize);
                 mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->buf_active.buf_chancount);
-                mfp_dsp_send_response_int(proc, RESP_RATE, mfp_samplerate);
+                mfp_dsp_send_response_int(proc, RESP_RATE, proc->context->samplerate);
                 mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
             }
         }

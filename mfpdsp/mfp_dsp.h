@@ -2,7 +2,7 @@
 #ifndef MFP_DSP_H
 #define MFP_DSP_H
 
-#define _POSIX_C_SOURCE 199309L
+/* #define _POSIX_C_SOURCE 199309L */
 #include <glib.h>
 #include <jack/jack.h>
 #include <pthread.h>
@@ -99,16 +99,12 @@ typedef struct {
     int port_audio_mask;
     int port_control_mask; 
     int port_midi_mask; 
-    int samplerate;
-    int blocksize; 
 } mfp_lv2_info; 
 
 typedef struct {
     jack_client_t * client;
     GArray * input_ports;
     GArray * output_ports; 
-    int samplerate;
-    int blocksize; 
 } mfp_jack_info; 
 
 #define CTYPE_JACK 0
@@ -117,6 +113,9 @@ typedef struct {
 typedef struct mfp_context_struct { 
     int ctype; 
     int id;
+    int samplerate;
+    int blocksize; 
+    int proc_count;
     union {
         mfp_jack_info * jack;
         mfp_lv2_info * lv2;
