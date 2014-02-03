@@ -1,9 +1,11 @@
 #include "mfp_dsp.h"
+#include "builtin.h"
 
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <execinfo.h>
 #include <glib.h>
 #include <pthread.h>
 
@@ -16,6 +18,44 @@ int mfp_max_blocksize = 4096;
 
 float mfp_in_latency = 0.0;
 float mfp_out_latency = 0.0;
+
+#define ARRAY_LEN(arry, eltsize) (sizeof(arry) / eltsize)
+
+void
+mfp_dsp_init(void) {
+    int i;
+    mfp_procinfo * pi;
+    mfp_procinfo * (* initfuncs[])(void) = { 
+        init_builtin_osc, init_builtin_in, init_builtin_out, 
+        init_builtin_sig, init_builtin_snap, init_builtin_ampl, 
+        init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 
+        init_builtin_lt, init_builtin_gt,
+        init_builtin_line, init_builtin_noise, init_builtin_buffer,
+        init_builtin_biquad, init_builtin_phasor,
+        init_builtin_ladspa, init_builtin_delay, init_builtin_delblk, init_builtin_noop
+    };
+    int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
+
+    /* init global vars */
+    mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
+    mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
+    mfp_proc_objects = g_hash_table_new(NULL, NULL);
+    mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal); 
+
+    mfp_request_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata *));
+
+    pthread_cond_init(&mfp_response_cond, NULL);
+    pthread_mutex_init(&mfp_response_lock, NULL);
+    pthread_mutex_init(&mfp_request_lock, NULL);
+
+    printf("mfp_dsp_init: initializing %d builtin DSP processors\n", num_initfuncs);
+
+    for(i = 0; i < num_initfuncs; i++) {
+        pi = initfuncs[i]();
+        g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+    }
+}
+
 
 mfp_sample * 
 mfp_get_input_buffer(mfp_context * ctxt, int chan) {

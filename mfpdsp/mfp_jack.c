@@ -1,13 +1,14 @@
 #include <glib.h>
 #include <jack/jack.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <execinfo.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <semaphore.h>
 
 #include "mfp_dsp.h"
-
 
 static int
 process_cb (jack_nframes_t nframes, void * ctxt_arg)
@@ -177,6 +178,56 @@ mfp_jack_shutdown(mfp_context * ctxt)
     ctxt->info.jack->client = NULL;
 }
 
+void * 
+test_SETUP(void) 
+{
+    mfp_context * ctxt = g_malloc0(sizeof(mfp_context));
+    ctxt->blocksize = 1024;
+    ctxt->samplerate = 44100;
+    
+    /* called before each test case, where each test case is run 
+     * in a separate executable */
+    mfp_dsp_init();
+    mfp_alloc_init();
+
+
+    return (void *)ctxt;
+}
+
+void * 
+benchmark_SETUP(void) 
+{
+    return test_SETUP();
+}
+
+int
+test_TEARDOWN(void)
+{
+    mfp_alloc_finish();
+    return 0;
+}
+
+
+static void
+sigsegv_handler(int sig, siginfo_t *si, void *unused)
+{
+    void * buffer[100];
+    char ** strings;
+    int nptrs, j;
+
+    printf("ERROR: SIGSEGV received\n");
+    nptrs = backtrace(buffer, 100);
+    strings = backtrace_symbols(buffer, nptrs);
+
+    for (j = 0; j < nptrs; j++)
+        printf("%s\n", strings[j]);
+
+    free(strings);
+
+    exit(-11);
+}
+
+
 
 /* main() gets called only if this is a standalone JACK client 
  * startup.  The MFP process will cause this to be run */ 
@@ -196,6 +247,7 @@ main(int argc, char ** argv)
     printf("mfp_jack:main() Starting up as standalone JACK client\n");
   
     /* set up global state */
+    mfp_dsp_init();
     mfp_alloc_init();
     mfp_comm_init(argv[1]);
 

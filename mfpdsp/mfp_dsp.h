@@ -192,6 +192,7 @@ extern int mfp_num_input_ports(mfp_context * ctxt);
 
 
 /* mfp_dsp.c */
+extern void mfp_dsp_init(void);
 extern int mfp_dsp_schedule(void);
 extern void mfp_dsp_run(mfp_context * ctxt);
 extern void mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples);
@@ -206,8 +207,8 @@ extern int mfp_num_input_buffers(mfp_context * ctxt);
 extern int mfp_num_output_buffers(mfp_context * ctxt);
 /* mfp_proc.c */
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);
-extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, int);
-extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, int);
+extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, mfp_context *);
+extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, mfp_context *);
 extern int mfp_proc_alloc_buffers(mfp_processor *, int, int, int);
 extern void mfp_proc_free_buffers(mfp_processor *);
 extern mfp_processor * mfp_proc_init(mfp_processor *);

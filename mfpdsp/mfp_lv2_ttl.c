@@ -1,4 +1,4 @@
-
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <glib.h>
@@ -41,7 +41,7 @@
 
 
 typedef struct { 
-    SerdNode * plugin_node;
+    const SerdNode * plugin_node;
     char * current_port_name; 
     int  current_port_num;
     mfp_lv2_info * lv2;    
@@ -49,21 +49,21 @@ typedef struct {
 
 
 static SerdStatus 
-ttl_base(void * pinfo, SerdNode * uri)
+ttl_base(void * pinfo, const SerdNode * uri)
 {
     return SERD_SUCCESS;
 }
 
 static SerdStatus
-ttl_prefix(void * pinfo, SerdNode * name, SerdNode * uri)
+ttl_prefix(void * pinfo, const SerdNode * name, const SerdNode * uri)
 {
     return SERD_SUCCESS;
 }
 
 static SerdStatus
 ttl_statement(void * data, SerdStatementFlags flags, const SerdNode * graph, 
-              SerdNode * subject, SerdNode * predicate, SerdNode * object, 
-              SerdNode * object_datatype, SerdNode * object_lang)
+              const SerdNode * subject, const SerdNode * predicate, const SerdNode * object, 
+              const SerdNode * object_datatype, const SerdNode * object_lang)
 {
     ttl_parse_info * pinfo = data;
     char * tmpstr; 
@@ -166,7 +166,7 @@ ttl_statement(void * data, SerdStatementFlags flags, const SerdNode * graph,
 }
 
 static SerdStatus
-ttl_end(void * pinfo, SerdNode * end)
+ttl_end(void * pinfo, const SerdNode * end)
 {
     return SERD_SUCCESS;
 }

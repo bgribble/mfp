@@ -14,11 +14,11 @@ GHashTable      * mfp_proc_objects = NULL;    /* hash of pointers to PyObject * 
 
 mfp_processor *
 mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
-                int blocksize)
+                mfp_context * ctxt)
 {
     if (typeinfo == NULL) 
         return NULL;
-    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, blocksize));
+    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, ctxt));
 }
 
 
@@ -26,7 +26,7 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
 mfp_processor *
 mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
-               int blocksize)
+               mfp_context * ctxt)
 {
     mfp_processor * p;
 
@@ -36,6 +36,7 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
     p = g_malloc0(sizeof(mfp_processor));
     p->typeinfo = typeinfo; 
+    p->context = ctxt;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     p->pyparams = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     p->depth = -1;
@@ -44,7 +45,7 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
     p->inlet_conn = NULL;
     p->outlet_conn = NULL;
 
-    mfp_proc_alloc_buffers(p, num_inlets, num_outlets, blocksize);
+    mfp_proc_alloc_buffers(p, num_inlets, num_outlets, ctxt->blocksize);
 
     return p;
 }
