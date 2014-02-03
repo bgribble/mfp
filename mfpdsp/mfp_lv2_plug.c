@@ -11,6 +11,19 @@
 
 #define MFP_LV2_URL "http://www.billgribble.com/mfp/mfp_lv2"
 
+
+void * 
+mfp_lv2_get_port_data(mfp_lv2_info * self, int port)
+{
+    return g_array_index(self->port_data, void *, port);
+}
+
+
+/*
+ * static functions for LV2 descriptor  
+ */
+
+
 static LV2_Handle
 mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate, 
                     const char * bundle_path, const LV2_Feature * const * features)

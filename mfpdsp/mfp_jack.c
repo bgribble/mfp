@@ -17,7 +17,7 @@ process_cb (jack_nframes_t nframes, void * ctxt_arg)
     jack_transport_state_t trans_state; 
 
     /* get transport info */ 
-    trans_state = jack_transport_query(ctxt->jack.client, &trans_info);
+    trans_state = jack_transport_query(ctxt->info.jack->client, &trans_info);
     trans_state; 
 
     /* 
@@ -28,7 +28,8 @@ process_cb (jack_nframes_t nframes, void * ctxt_arg)
 
     /* run processing network */ 
     if (mfp_dsp_enabled == 1) {
-        mfp_dsp_run((int)nframes);
+        mfp_dsp_set_blocksize(ctxt, nframes);
+        mfp_dsp_run(ctxt);
     }
     else {
         printf("DSP DISABLED, process() not running network\n");
@@ -44,7 +45,7 @@ info_cb (const char * msg)
     return;
 }
 
-static void
+static int 
 reorder_cb (void * ctxt_arg) 
 {
     mfp_context * ctxt = (mfp_context *)ctxt_arg;
@@ -52,43 +53,49 @@ reorder_cb (void * ctxt_arg)
     int portno;
     int lastval;
     int maxval;
+    int num_inports = mfp_num_input_buffers(ctxt);
+    int num_outports = mfp_num_output_buffers(ctxt);
 
-    jack_recompute_total_latencies(ctxt->jack.client);
+    jack_recompute_total_latencies(ctxt->info.jack->client);
     maxval = 0;
-    for (portno = 0; portno < mfp_input_ports->len; portno++) {
-        jack_port_get_latency_range(g_array_index(mfp_input_ports, jack_port_t *, portno),
-                JackCaptureLatency, & range); 
+    for (portno = 0; portno < num_inports; portno++) {
+        jack_port_get_latency_range(g_array_index(ctxt->info.jack->input_ports, 
+                                                  jack_port_t *, portno),
+                                    JackCaptureLatency, & range); 
         if (range.max > maxval) {
             maxval = range.max;
         }
 
-        lastval = jack_port_get_total_latency(ctxt->jack.client, 
-                    g_array_index(mfp_input_ports, jack_port_t *, portno));
+        lastval = jack_port_get_total_latency(ctxt->info.jack->client, 
+                                              g_array_index(ctxt->info.jack->input_ports, 
+                                                            jack_port_t *, portno));
         if (lastval > maxval) {
             maxval = lastval;
         }
 
     }
-    mfp_in_latency = 1000.0 * maxval / ctxt->jack.samplerate;
+    mfp_in_latency = 1000.0 * maxval / ctxt->samplerate;
 
     maxval = 0;
-    for (portno = 0; portno < mfp_output_ports->len; portno++) {
-        jack_port_get_latency_range(g_array_index(mfp_output_ports, jack_port_t *,  portno),
+    for (portno = 0; portno < num_outports; portno++) {
+        jack_port_get_latency_range(g_array_index(ctxt->info.jack->output_ports, 
+                                                  jack_port_t *,  portno),
                                     JackPlaybackLatency, & range); 
         if (range.max > maxval) {
             maxval = range.max;
         }
-        lastval = jack_port_get_total_latency(ctxt->jack.client, 
-                                              g_array_index(mfp_output_ports, 
+        lastval = jack_port_get_total_latency(ctxt->info.jack->client, 
+                                              g_array_index(ctxt->info.jack->output_ports, 
                                                             jack_port_t *, portno));
         if (lastval > maxval) {
             maxval = lastval;
         }
     }
 
-    mfp_out_latency = 1000.0 * maxval / ctxt->jack.samplerate;
+    mfp_out_latency = 1000.0 * maxval / ctxt->samplerate;
 
     mfp_dsp_send_response_float(NULL, 1, 0.0);
+    return 0;
 }
 
 mfp_context * 
@@ -103,15 +110,16 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
 
     ctxt = g_malloc(sizeof(mfp_context));
     ctxt->ctype = CTYPE_JACK;
+    ctxt->info.jack = g_malloc(sizeof(mfp_jack_info));
 
-    if ((ctxt->jack.client = jack_client_open(client_name, JackNullOption, &status, NULL)) == 0) {
+    if ((ctxt->info.jack->client = jack_client_open(client_name, JackNullOption, &status, NULL)) == 0) {
         fprintf (stderr, "jack_client_open() failed.");
         return NULL;
     }
     
     /* callbacks */ 
-    jack_set_process_callback(ctxt->jack.client, process_cb, ctxt);
-    jack_set_graph_order_callback(ctxt->jack.client, reorder_cb, ctxt);
+    jack_set_process_callback(ctxt->info.jack->client, process_cb, ctxt);
+    jack_set_graph_order_callback(ctxt->info.jack->client, reorder_cb, ctxt);
 
     /* no info logging to console */ 
     jack_set_info_function(info_cb);
@@ -119,39 +127,39 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
     
     /* create application input and output ports */ 
     if (num_inputs > 0) {
-        input_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
+        ctxt->info.jack->input_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
 
         for(i=0; i<num_inputs; i++) {
             snprintf(namebuf, 16, "in_%d", i);
-            port = jack_port_register (ctxt->jack.client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
+            port = jack_port_register (ctxt->info.jack->client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
                                        JackPortIsInput, i);
-            g_array_append_val(mfp_input_ports, port);
+            g_array_append_val(ctxt->info.jack->input_ports, port);
         }
     }
 
     if (num_outputs > 0) {
-        mfp_output_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
+        ctxt->info.jack->output_ports = g_array_new(TRUE, TRUE, sizeof(jack_port_t *));
 
         for(i=0; i<num_outputs; i++) {
             snprintf(namebuf, 16, "out_%d", i);
-            port = jack_port_register (ctxt->jack.client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
+            port = jack_port_register (ctxt->info.jack->client, namebuf, JACK_DEFAULT_AUDIO_TYPE, 
                                        JackPortIsOutput, i);
-            g_array_append_val(mfp_output_ports, port);
+            g_array_append_val(ctxt->info.jack->output_ports, port);
         }
 
     }
     
     /* find out sample rate */ 
-    ctxt->jack.samplerate = jack_get_sample_rate(ctxt->jack.client);
-    ctxt->jack.blocksize = jack_get_buffer_size(ctxt->jack.client);
-    mfp_in_latency = 3000.0 * ctxt->jack.blocksize / ctxt->jack.samplerate; 
-    mfp_out_latency = 3000.0 * ctxt->jack.blocksize / ctxt->jack.samplerate; 
+    ctxt->samplerate = jack_get_sample_rate(ctxt->info.jack->client);
+    ctxt->blocksize = jack_get_buffer_size(ctxt->info.jack->client);
+    mfp_in_latency = 3000.0 * ctxt->blocksize / ctxt->samplerate; 
+    mfp_out_latency = 3000.0 * ctxt->blocksize / ctxt->samplerate; 
 
     printf("jack_startup: samplerate=%d, blocksize=%d, in_latency=%.1f, out_latency = %.1f\n", 
-            ctxt->jack.samplerate, ctxt->jack.blocksize, mfp_in_latency, mfp_out_latency); 
+            ctxt->samplerate, ctxt->blocksize, mfp_in_latency, mfp_out_latency); 
 
     /* tell the JACK server that we are ready to roll */
-    if (jack_activate (ctxt->jack.client)) {
+    if (jack_activate (ctxt->info.jack->client)) {
         fprintf (stderr, "cannot activate client");
         return NULL;
     }
@@ -164,9 +172,9 @@ void
 mfp_jack_shutdown(mfp_context * ctxt) 
 {
     printf("jack_shutdown: closing client, good-bye!\n");
-    jack_deactivate(ctxt->jack.client);
-    jack_client_close(ctxt->jack.client);
-    ctxt->jack.client = NULL;
+    jack_deactivate(ctxt->info.jack->client);
+    jack_client_close(ctxt->info.jack->client);
+    ctxt->info.jack->client = NULL;
 }
 
 
@@ -175,11 +183,21 @@ mfp_jack_shutdown(mfp_context * ctxt)
 int
 main(int argc, char ** argv) 
 {
+    char * sockname;
+    char default_sockname[] = MFP_DEFAULT_SOCKET; 
+
+    if (argc < 2) {
+        printf("mfp_jack:main() No socket specified, using default\n");
+        sockname = default_sockname;
+    }
+    else {
+        sockname = argv[1];
+    }
     printf("mfp_jack:main() Starting up as standalone JACK client\n");
   
     /* set up global state */
     mfp_alloc_init();
-    mfp_comm_init();
+    mfp_comm_init(argv[1]);
 
     /* enter main lister loop */ 
     printf("mfpdsp:main() Entering comm event loop, will not return to main()\n");

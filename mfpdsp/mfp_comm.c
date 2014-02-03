@@ -1,20 +1,25 @@
 #include <glib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
 #include <sys/stat.h>
 #include <sys/socket.h> 
-#include <sys/un.h>
+#include <sys/time.h>
+#include <linux/un.h> 
 #include <sys/unistd.h>
-
+#include <json-glib/json-glib.h>
 #include "mfp_dsp.h"
+
+#define MFP_PORT_DEFAULT "/tmp/mfp_socket"
+#define MFP_MAX_MSGSIZE 2048 
 
 static char * comm_sockname = NULL;
 static int comm_socket = -1;
 static pthread_t comm_io_reader_thread;
 static pthread_t comm_io_writer_thread;
 static int comm_io_quitreq = 0;
-static pmutex_t comm_io_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t comm_io_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int
 mfp_comm_connect(char * sockname) 
@@ -32,9 +37,9 @@ mfp_comm_connect(char * sockname)
 
     memset(&address, 0, sizeof(struct sockaddr_un));
     address.sun_family = AF_UNIX;
-    address.sun_path = strndup(sockname, UNIX_PATH_MAX);
+    strncpy(address.sun_path, sockname, UNIX_PATH_MAX);
 
-    if (connect(socket_fd, &address, sizeof(struct sockaddr_un)) < 0) {
+    if (connect(socket_fd, (struct sockaddr *)&address, sizeof(struct sockaddr_un)) < 0) {
         printf("mfp_comm_connect: connect() failed, is MFP running?\n");
         return -1;
     }
@@ -43,6 +48,13 @@ mfp_comm_connect(char * sockname)
     comm_socket = socket_fd; 
     return socket_fd;
 }
+
+static int
+mfp_comm_launch(char * sockid)
+{
+    printf("Launching main mfp process\n");
+}
+
 
 int
 mfp_comm_init(char * init_sockid) 
@@ -53,7 +65,7 @@ mfp_comm_init(char * init_sockid)
 
     printf("mfp_comm_init(): enter\n");
 
-    if(init_socket > 0) {
+    if(init_sockid > 0) {
         conn_sockid = init_sockid;
     }
     else if (env_sockid != NULL) { 
@@ -78,26 +90,13 @@ mfp_comm_init(char * init_sockid)
         }
     }
 
-    /* start the IO thread */ 
+    /* start the IO threads */ 
     mfp_comm_io_start();
     return 0;
 }
 
-void mfp_comm_io_start(void) {
-    
-    printf("mfp_comm_start_io(): enter\n");
-    pthread_create(&comm_io_reader_thread, NULL, mfp_comm_io_reader_thread, NULL);
-    pthread_create(&comm_io_writer_thread, NULL, mfp_comm_io_writer_thread, NULL);
-}
-
-void mfp_comm_io_finish(void) {
-    pthread_mutex_lock(comm_io_mutex);
-    comm_io_quitreq = 1;
-    pthread_mutex_unlock(comm_io_mutex);
-
-}
-
-void mfp_comm_io_reader_thread(void * tdata) 
+static void *  
+mfp_comm_io_reader_thread(void * tdata) 
 {
     int quitreq = 0;
     char msgbuf[MFP_MAX_MSGSIZE];
@@ -108,29 +107,37 @@ void mfp_comm_io_reader_thread(void * tdata)
     while(!quitreq) {
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
 
-        pthread_mutex_lock(comm_io_lock);
+        /* FIXME: do something with the new data */ 
+
+        pthread_mutex_lock(&comm_io_lock);
         quitreq = comm_io_quitreq;
-        pthread_mutex_unlock(comm_io_lock);
+        pthread_mutex_unlock(&comm_io_lock);
     }
 
 
 }
 
-void mfp_comm_io_writer_thread(void * tdata) 
+static void * 
+mfp_comm_io_writer_thread(void * tdata) 
 {
     int quitreq = 0;
-    char msgbuf[MFP_MAX_MSGSIZE];
-    int bytesread; 
+    char * msgbuf;
+    gsize buflen; 
+    int responses=0;
     struct timespec alarmtime;
     struct timeval nowtime;
+    mfp_respdata r;
+    mfp_processor * proc;
+    JsonBuilder * build; 
+    JsonGenerator * gen;
+    char pbuff[32];
 
     printf("mfp_comm_io_writer_thread: enter\n");
    
     while(!quitreq) {
-        bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
-
+        /* wait for a signal that there's data to write */ 
         pthread_mutex_lock(&mfp_response_lock);
-        pthread_cond_wait(mfp_respose_cond);
+        pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
 
         gettimeofday(&nowtime, NULL);
         alarmtime.tv_sec = nowtime.tv_sec; 
@@ -142,54 +149,75 @@ void mfp_comm_io_writer_thread(void * tdata)
 
         /* copy/clear C response objects */
         if(mfp_response_queue_read != mfp_response_queue_write) {
-            l = PyList_New(0);
+            build = json_builder_new(); 
+            json_builder_begin_array(build); 
+
             while(mfp_response_queue_read != mfp_response_queue_write) {
-                t = PyTuple_New(3);
+                json_builder_begin_array(build); 
                 r = mfp_response_queue[mfp_response_queue_read];
 
                 proc = g_hash_table_lookup(mfp_proc_objects, r.dst_proc);
-                if (proc == NULL)
-                    proc = Py_None;
-
-                Py_INCREF(proc);
-
-                PyTuple_SetItem(t, 0, proc);
-                PyTuple_SetItem(t, 1, PyInt_FromLong(r.msg_type));
+        
+                snprintf(pbuff, 32, "%p", proc);
+                json_builder_add_string_value(build, pbuff);
+                json_builder_add_int_value(build, r.msg_type);
                 switch(r.response_type) {
                     case PARAMTYPE_FLT:
-                        PyTuple_SetItem(t, 2, PyFloat_FromDouble(r.response.f));
+                        json_builder_add_double_value(build, r.response.f);
                         break;
                     case PARAMTYPE_BOOL:
-                        PyTuple_SetItem(t, 2, PyBool_FromLong(r.response.i));
+                        json_builder_add_boolean_value(build, r.response.i);
                         break;
                     case PARAMTYPE_INT:
-                        PyTuple_SetItem(t, 2, PyInt_FromLong(r.response.i));
+                        json_builder_add_int_value(build, r.response.i);
                         break;
                     case PARAMTYPE_STRING:
-                        PyTuple_SetItem(t, 2, PyString_FromString(r.response.c));
+                        json_builder_add_string_value(build, r.response.c);
                         g_free(r.response.c);
                         break;
                 }
-                PyList_Append(l, t);
+                json_builder_end_array(build);
                 responses += 1;
                 mfp_response_queue_read = (mfp_response_queue_read+1) % REQ_BUFSIZE;
             }
+            json_builder_end_array(build);
         }
         pthread_mutex_unlock(&mfp_response_lock);
 
-        pthread_mutex_lock(comm_io_lock);
+        /* convert built list to text */ 
+        gen = json_generator_new();
+        json_generator_set_root(gen, json_builder_get_root(build));
+        msgbuf = json_generator_to_data(gen, &buflen);
+
+        /* free up resources */ 
+        json_node_free(json_builder_get_root(build));
+
+        send(comm_socket, msgbuf, buflen, 0);     
+
+        pthread_mutex_lock(&comm_io_lock);
         quitreq = comm_io_quitreq;
-        pthread_mutex_unlock(comm_io_lock);
+        pthread_mutex_unlock(&comm_io_lock);
     }
 
 
 }
 
-void mfp_comm_io_run(void)
+void 
+mfp_comm_io_start(void) 
 {
-    void * thread_result;
+    printf("mfp_comm_start_io(): enter\n");
+    pthread_create(&comm_io_reader_thread, NULL, mfp_comm_io_reader_thread, NULL);
+    pthread_create(&comm_io_writer_thread, NULL, mfp_comm_io_writer_thread, NULL);
+}
 
-    mfp_comm_io_start();
-    pthread_join(comm_io_thread, *result);
+void 
+mfp_comm_io_finish(void) 
+{
+    pthread_mutex_lock(&comm_io_lock);
+    comm_io_quitreq = 1;
+    pthread_mutex_unlock(&comm_io_lock);
+
+    pthread_join(comm_io_reader_thread, NULL);
+    pthread_join(comm_io_writer_thread, NULL);
 }
 

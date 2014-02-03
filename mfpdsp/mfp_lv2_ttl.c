@@ -174,7 +174,7 @@ ttl_end(void * pinfo, SerdNode * end)
 
 
 int
-mfp_lv2_ttl_read(mfp_lv2_info * self, char * bundle_path) 
+mfp_lv2_ttl_read(mfp_lv2_info * self, const char * bundle_path) 
 {
     char mfest[] = "/manifest.ttl";
     int base_pathlen = strlen(bundle_path);

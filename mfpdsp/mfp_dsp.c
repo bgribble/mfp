@@ -19,25 +19,47 @@ float mfp_out_latency = 0.0;
 
 mfp_sample * 
 mfp_get_input_buffer(mfp_context * ctxt, int chan) {
-    if (ctxt.ctype == CTYPE_JACK) {
-        return jack_port_get_buffer(g_array_index(ctxt->info.jack.input_ports, 
-                                    jack_port_t *, chan), ctxt->info.jack.blocksize);
+    if (ctxt->ctype == CTYPE_JACK) {
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack->input_ports, 
+                                    jack_port_t *, chan), ctxt->blocksize);
     }
     else {
-        return mfp_lv2_get_data(g_array_index(ctxt->info.lv2.input_ports, 
-                                mfp_lv2_info *, chan)); 
+        return mfp_lv2_get_port_data(ctxt->info.lv2, 
+                                     g_array_index(ctxt->info.lv2->input_ports, 
+                                                   int, chan)); 
     }
 }
 
 mfp_sample * 
 mfp_get_output_buffer(mfp_context * ctxt, int chan) {
-    if (ctxt.ctype == CTYPE_JACK) {
-        return jack_port_get_buffer(g_array_index(ctxt->info.jack.output_ports, 
-                                    jack_port_t *, chan), ctxt->info.jack.blocksize);
+    if (ctxt->ctype == CTYPE_JACK) {
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack->output_ports, 
+                                    jack_port_t *, chan), ctxt->blocksize);
     }
     else {
-        return mfp_lv2_get_data(g_array_index(ctxt->info.lv2.output_ports, 
-                                mfp_lv2_info *, chan)); 
+        return mfp_lv2_get_port_data(ctxt->info.lv2, 
+                                     g_array_index(ctxt->info.lv2->output_ports, 
+                                                   int, chan)); 
+    }
+}
+
+int 
+mfp_num_output_buffers(mfp_context * ctxt) {
+    if (ctxt->ctype == CTYPE_JACK) {
+        return ctxt->info.jack->output_ports->len;
+    }
+    else {
+        return ctxt->info.lv2->output_ports->len;
+    }
+}
+
+int 
+mfp_num_input_buffers(mfp_context * ctxt) {
+    if (ctxt->ctype == CTYPE_JACK) {
+        return ctxt->info.jack->input_ports->len;
+    }
+    else {
+        return ctxt->info.lv2->input_ports->len;
     }
 }
 
@@ -179,17 +201,16 @@ mfp_dsp_run(mfp_context * ctxt)
     mfp_processor ** p;
     mfp_sample * buf;
     int chan;
+    int chancount = mfp_num_output_ports(ctxt);
 
     /* handle any DSP config requests */
     mfp_dsp_handle_requests();
 
     /* zero output buffers ... out~ will accumulate into them */ 
-    if (mfp_output_ports != NULL) {
-        for(chan=0; chan < mfp_output_ports->len ; chan++) {
-            buf = mfp_get_output_buffer(ctxt, chan);
-            if (buf != NULL) { 
-                memset(buf, 0, nsamples * sizeof(mfp_sample));
-            }
+    for(chan=0; chan < chancount; chan++) {
+        buf = mfp_get_output_buffer(ctxt, chan);
+        if (buf != NULL) { 
+            memset(buf, 0, ctxt->blocksize * sizeof(mfp_sample));
         }
     }
     
@@ -211,7 +232,7 @@ mfp_dsp_run(mfp_context * ctxt)
 }
 
 void
-mfp_dsp_set_blocksize(int nsamples) 
+mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples) 
 {
     mfp_processor ** p;
     int count;
@@ -222,10 +243,10 @@ mfp_dsp_set_blocksize(int nsamples)
         nsamples = mfp_max_blocksize;
     }
 
-    if (nsamples != mfp_blocksize) {
+    if (nsamples != ctxt->blocksize) {
 
         printf("mfp_dsp_set_blocksize: size changed, updating processors (%d --> %d)\n",
-                mfp_blocksize, nsamples);
+                ctxt->blocksize, nsamples);
         for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
             /* i/o buffers are pre-allocated to mfp_max_blocksize */ 
             for (count = 0; count < (*p)->inlet_conn->len; count ++) {
@@ -240,7 +261,7 @@ mfp_dsp_set_blocksize(int nsamples)
         }
     }
 
-    mfp_blocksize = nsamples;
+    ctxt->blocksize = nsamples;
 }
 
 void

@@ -87,18 +87,25 @@ typedef struct {
 } mfp_extinfo;
 
 typedef struct {
-    GArray * port_symbol;
-    GArray * port_name;
-    GArray * port_data;
-    GArray * input_ports;
-    GArray * output_ports; 
+    /* parsed from the TTL file */ 
     char * object_name;
     int port_count;
+    GArray * port_symbol;
+    GArray * port_name;
     int port_input_mask; 
     int port_output_mask;
     int port_audio_mask;
     int port_control_mask; 
     int port_midi_mask; 
+
+    /* port_data is the LV2 data for each port */ 
+    GArray * port_data;
+
+    /* input_ports and output_ports are vectors of the LV2 port 
+     * numbers for input and output... i.e. port data for the first 
+     * output port is at port_data[output_ports[0]] */ 
+    GArray * input_ports;
+    GArray * output_ports; 
 } mfp_lv2_info; 
 
 typedef struct {
@@ -151,6 +158,8 @@ typedef struct mfp_context_struct {
 #define REQ_BUFSIZE 2048
 #define REQ_LASTIND (REQ_BUFSIZE-1)
 
+#define MFP_DEFAULT_SOCKET "/tmp/mfp_comm"
+
 /* global variables */ 
 extern int mfp_dsp_enabled;
 extern int mfp_dsp_usejack;
@@ -174,15 +183,18 @@ extern int mfp_response_queue_write;
 extern mfp_respdata mfp_response_queue[REQ_BUFSIZE];
 
 /* mfp_jack.c */
-extern int mfp_jack_startup(char * client_name, int num_inputs, int num_outputs);
-extern void mfp_jack_shutdown(void);
+extern mfp_context * mfp_jack_startup(char * client_name, int num_inputs, int num_outputs);
+extern void mfp_jack_shutdown(mfp_context * ctxt);
 extern mfp_sample * mfp_get_input_buffer(mfp_context *, int);
 extern mfp_sample * mfp_get_output_buffer(mfp_context *, int);
+extern int mfp_num_output_ports(mfp_context * ctxt);
+extern int mfp_num_input_ports(mfp_context * ctxt);
+
 
 /* mfp_dsp.c */
 extern int mfp_dsp_schedule(void);
-extern void mfp_dsp_run(int nsamples);
-extern void mfp_dsp_set_blocksize(int nsamples);
+extern void mfp_dsp_run(mfp_context * ctxt);
+extern void mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples);
 extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
 extern void mfp_dsp_push_request(mfp_reqdata rd); 
 extern void mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response);
@@ -190,6 +202,8 @@ extern void mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int r
 extern void mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response);
 extern void mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response);
 
+extern int mfp_num_input_buffers(mfp_context * ctxt); 
+extern int mfp_num_output_buffers(mfp_context * ctxt);
 /* mfp_proc.c */
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);
 extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, int);
@@ -218,6 +232,17 @@ extern mfp_extinfo * mfp_ext_load(char *);
 extern void mfp_ext_init(mfp_extinfo *);
 
 /* mfp_lv2_ttl.c */ 
-extern int mfp_lv2_ttl_read(mfp_lv2_info * self, char * bundle_path);  
+extern int mfp_lv2_ttl_read(mfp_lv2_info * self, const char * bundle_path);  
+extern void * mfp_lv2_get_port_data(mfp_lv2_info * self, int portnum);
+
+/* mfp_comm.c */ 
+extern void mfp_comm_io_start(void);
+extern void mfp_comm_io_finish(void); 
+extern int mfp_comm_init(char * init_sockid); 
+extern int mfp_comm_connect(char * sockname);
+
+/* mfp_request.c */
+extern void mfp_dsp_push_request(mfp_reqdata rd);
+extern void mfp_dsp_handle_requests(void);
 #endif
 
