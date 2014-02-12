@@ -1,14 +1,13 @@
 #! /usr/bin/env python2.6
 '''
 rpc_wrapper.py:
-Simple RPC manager working with Request/RequestPipe classes
+Simple RPC-able class wrapper working with RPCHost
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2010-2014 Bill Gribble <grib@billgribble.com>
 '''
 
 from request import Request
-from . import log
-
+from mfp import log
 
 def rpcwrap(worker_proc):
     def inner(self, *args, **kwargs):
@@ -52,7 +51,7 @@ class RPCWrapper (object):
     rpcobj = {}
     rpctype = {}
     local = False
-    pipe = None
+    rpchost = None
     node_id = None
     call_stats = {} 
 
@@ -64,18 +63,18 @@ class RPCWrapper (object):
             RPCWrapper._rpcid_seq += 1
             RPCWrapper.rpcobj[self.rpcid] = self
         else:
-            r = Request(dict(func='__init__', type=type(self).__name__, 
-                             args=args, kwargs=kwargs))
-            type(self).pipe.put(r)
-            type(self).pipe.wait(r)
+            r = Request("create", dict(type=type(self).__name__, 
+                                       args=args, kwargs=kwargs))
+            self.rpchost.put(r, self.node_id)
+            self.rpchost.wait(r)
             if r.response == RPCWrapper.NO_CLASS:
                 raise RPCWrapper.ClassNotFound()
 
             self.rpcid = r.response
 
     def call_remotely(self, rpcdata):
-        r = type(self).pipe.put(Request(rpcdata))
-        type(self).pipe.wait(r)
+        r = self.rpchost.put(Request("call", rpcdata))
+        self.rpchost.wait(r)
         if r.response == RPCWrapper.METHOD_OK:
             return r.payload
         elif r.response == RPCWrapper.METHOD_FAILED:
@@ -106,40 +105,37 @@ class RPCWrapper (object):
 
     @classmethod
     def handle(klass, req):
-        rpcdata = req.payload
-        func = rpcdata.get('func')
+        method = req.method 
+        rpcdata = req.params
         rpcid = rpcdata.get('rpcid')
         args = rpcdata.get('args')
         kwargs = rpcdata.get('kwargs')
 
         req.state = Request.RESPONSE_DONE
 
-        if func == '__init__':
+        if method == 'create':
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
+            print "RPCWrapper.handle(): calling factory", factory
             if factory:
                 obj = factory(*args, **kwargs)
                 req.response = obj.rpcid
             else:
                 req.response = RPCWrapper.NO_CLASS
 
-        elif func == '__del__':
+        elif method == 'delete':
             del RPCWrapper.objects[rpcid]
             req.response = True
-
-        else:
+        elif method == 'call':
             obj = RPCWrapper.rpcobj.get(rpcid)
             try:
-                req.payload = obj.call_locally(rpcdata)
-                req.response = RPCWrapper.METHOD_OK
+                retval = obj.call_locally(rpcdata)
+                req.response = (RPCWrapper.METHOD_OK, retval)
             except RPCWrapper.MethodNotFound, e:
-                req.payload = None
-                req.response = RPCWrapper.NO_METHOD
+                req.response = (RPCWrapper.NO_METHOD, None)
             except RPCWrapper.MethodFailed, e:
-                req.payload = e.traceback
-                req.response = RPCWrapper.METHOD_FAILED
+                req.response = (RPCWrapper.METHOD_FAILED, e.traceback)
             except Exception, e:
                 import traceback
                 einfo = "Method call failed for rpcid=%s node=%s\nobj=%s data=%s\n" % (rpcid,
                                                                                        RPCWrapper.node_id, obj, rpcdata)
-                req.payload = einfo + traceback.format_exc()
-                req.response = RPCWrapper.METHOD_FAILED
+                req.response = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())

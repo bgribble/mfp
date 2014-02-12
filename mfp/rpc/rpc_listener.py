@@ -3,12 +3,14 @@ import sys
 import os 
 
 from mfp.utils import QuittableThread 
+from request import Request 
 
 class RPCListener (QuittableThread): 
     '''
     RPCListener -- listen for incoming connections on a UNIX socket, 
     hand off to an RPCHost 
     '''
+    _rpc_last_peer = 0 
 
     def __init__(self, socketpath, name, rpc_host):
         QuittableThread.__init__(self)
@@ -36,7 +38,8 @@ class RPCListener (QuittableThread):
             try: 
                 sock, addr = self.socket.accept()
                 sock.settimeout(None)
-                self.rpc_host.manage(sock, addr)
+                self._rpc_last_peer += 1
+                self.rpc_host.manage(sock, self._rpc_last_peer)
 
             except socket.timeout:
                 pass
@@ -54,6 +57,7 @@ class RPCRemote (object):
     def connect(self):
         self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.socket.connect(self.socketpath)
+        self.rpc_host.manage(0, self.socket)
 
 
 
