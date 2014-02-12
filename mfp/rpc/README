@@ -1,0 +1,13 @@
+mfp.rpc should wither away and die if I'm lucky. 
+
+I started building it to make a useful layer of rpc-like behavior around
+python multiprocessing.  I had to extend it numerous times to allow for
+the bidirectional recursive RPC calls that cropped up in MFP usage.
+Then finally extend it again to support plain C library interoperability 
+for mfpdsp. 
+
+Unfortunately I've by now reimplemented big pieces of several json-rpc 
+packages.  One day I am going to refactor and use one of those.  One
+day.
+
+
