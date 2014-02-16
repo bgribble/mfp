@@ -52,11 +52,12 @@ class RPCWrapper (object):
     rpctype = {}
     local = False
     rpchost = None
-    node_id = 0
+    publishers = [] 
     call_stats = {} 
 
     def __init__(self, *args, **kwargs):
         self.rpcid = None
+        self.peer_id = None 
         
         if self.local:
             self.rpcid = RPCWrapper._rpcid_seq
@@ -65,20 +66,30 @@ class RPCWrapper (object):
         else:
             r = Request("create", dict(type=type(self).__name__, 
                                        args=args, kwargs=kwargs))
-            self.rpchost.put(r, self.node_id)
+            self.peer_id = kwargs.get("peer_id")
+            if self.peer_id is None:
+                if self.publishers: 
+                    self.peer_id = self.publishers[0]
+                else:
+                    self.peer_id = 0
+
+            self.rpchost.put(r, self.peer_id)
             self.rpchost.wait(r)
-            if r.response == RPCWrapper.NO_CLASS:
+            if r.response[0] == RPCWrapper.NO_CLASS:
                 raise RPCWrapper.ClassNotFound()
 
-            self.rpcid = r.response
+            self.rpcid = r.response[0]
 
     def call_remotely(self, rpcdata):
-        r = self.rpchost.put(Request("call", rpcdata), self.node_id)
+        r = Request("call", rpcdata)
+        self.rpchost.put(r, self.peer_id)
         self.rpchost.wait(r)
-        if r.response == RPCWrapper.METHOD_OK:
-            return r.payload
+
+        status, retval = r.response 
+        if status == RPCWrapper.METHOD_OK:
+            return retval 
         elif r.response == RPCWrapper.METHOD_FAILED:
-            raise RPCWrapper.MethodFailed(False, r.payload)
+            raise RPCWrapper.MethodFailed(False, retval)
 
     def call_locally(self, rpcdata):
         count = self.call_stats.get(rpcdata.get('func'), 0)
@@ -104,7 +115,7 @@ class RPCWrapper (object):
         klass.rpctype[name] = klass
 
     @classmethod
-    def handle(klass, req):
+    def handle(klass, req, peer_id):
         method = req.method 
         rpcdata = req.params
         rpcid = rpcdata.get('rpcid')
@@ -112,11 +123,11 @@ class RPCWrapper (object):
         kwargs = rpcdata.get('kwargs')
 
         req.state = Request.RESPONSE_DONE
-        print "RPCWrapper.handle", klass, req
+        print "handle:", klass, req, peer_id
 
         if method == 'create':
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
-            print "RPCWrapper.handle(): calling factory", factory
+            print "create: calling factory", factory
             if factory:
                 obj = factory(*args, **kwargs)
                 req.response = (obj.rpcid, None)
@@ -128,6 +139,7 @@ class RPCWrapper (object):
             req.response = (True, None)
         elif method == 'call':
             obj = RPCWrapper.rpcobj.get(rpcid)
+            print "call: calling method on id=%s obj=%s" % (rpcid, obj)
             try:
                 retval = obj.call_locally(rpcdata)
                 req.response = (RPCWrapper.METHOD_OK, retval)
@@ -137,11 +149,14 @@ class RPCWrapper (object):
                 req.response = (RPCWrapper.METHOD_FAILED, e.traceback)
             except Exception, e:
                 import traceback
-                einfo = "Method call failed for rpcid=%s node=%s\nobj=%s data=%s\n" % (rpcid,
-                                                                                       RPCWrapper.node_id, obj, rpcdata)
+                einfo = "Method call failed rpcid=%s node=%s\nobj=%s data=%s\n" % (rpcid, self.peer_id, obj, rpcdata)
                 req.response = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())
         elif method == 'publish': 
-            print "RPCWrapper.handle: Got publish() call"
+            for clsname in req.params.get("classes"): 
+                cls = RPCWrapper.rpctype.get(clsname)
+                if cls is not None:
+                    print "publish: Got notification -- %s (%s) on %s" % (clsname, cls, peer_id)
+                    cls.publishers.append(peer_id)
             req.response = (True, None) 
 
         req.method = None 

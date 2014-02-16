@@ -59,6 +59,11 @@ class RPCRemote (object):
         self.socket.connect(self.socketpath)
         self.rpc_host.manage(0, self.socket)
 
+    def close(self): 
+        self.rpc_host.unmanage(0)
+        self.socket.close()
+        self.socket = None
+
 
 
 

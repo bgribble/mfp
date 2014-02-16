@@ -26,7 +26,7 @@ class Request(object):
 
     def serialize(self):
         obj = dict(jsonrpc="2.0", id=self.request_id, method=self.method, 
-                   params=self.params)
+                   result=self.response, params=self.params)
         return json.dumps(obj)
 
     def is_request(self):
@@ -47,9 +47,12 @@ class Request(object):
             req.response = obj['error']
         elif obj.has_key("result"):
             req.response = obj['result']
+            if req.response is not None:
+                req.state = Request.RESPONSE_RCVD
             # a notification
         return req
 
     def __repr__(self):
-        return "<Request %s %s>" % (self.method, self.params)
+        return "<Request %s %s %s %s>" % (self.request_id, self.method, self.params,
+                                          self.response)
 
