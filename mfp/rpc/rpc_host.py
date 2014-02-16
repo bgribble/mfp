@@ -106,9 +106,10 @@ class RPCHost (QuittableThread):
                 # actually call the local handler
                 RPCWrapper.handle(req, peer_id)
 
-                print "dispatch_rpcdata: sending response to", peer_id, req 
                 # and send back the response                
-                self.put(req, peer_id)
+                if req.request_id is not None:
+                    print "dispatch_rpcdata: sending response to", peer_id, req 
+                    self.put(req, peer_id)
             else: 
                 print "dispatch_rpcdata: fell through!", req, req.is_request(), req.is_response()
         return True
@@ -150,6 +151,14 @@ class RPCHost (QuittableThread):
                 elif not errshown and event & (select.POLLERR | select.POLLHUP):
                     print "RPCHost.run: Socket error", event 
                     errshown = True 
+
+        req = Request("peer_exit", {})
+        self.put(req, 0)
+        self.wait(req)
+        print "rpc_host: join_req received, quitting worker_pool..."
+        self.read_workers.finish()
+        print "rpc_host: finished"
+
 
 
 

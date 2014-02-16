@@ -26,5 +26,5 @@ foo = p.foo()
 
 print "client: p.foo() = ", foo 
 
-host.join()
+host.finish()
 remote.close()

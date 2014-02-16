@@ -15,20 +15,20 @@ int error_happened = 0;
 static void
 sigsegv_handler(int sig, siginfo_t *si, void *unused)
 {
-	void * buffer[100];
-	char ** strings;
-	int nptrs, j;
+    void * buffer[100];
+    char ** strings;
+    int nptrs, j;
 
-	printf("ERROR: SIGSEGV received\n");
-	nptrs = backtrace(buffer, 100);
-	strings = backtrace_symbols(buffer, nptrs);
+    printf("ERROR: SIGSEGV received\n");
+    nptrs = backtrace(buffer, 100);
+    strings = backtrace_symbols(buffer, nptrs);
 
-	for (j = 0; j < nptrs; j++)
-		printf("%s\n", strings[j]);
+    for (j = 0; j < nptrs; j++)
+        printf("%s\n", strings[j]);
 
-	free(strings);
+    free(strings);
 
-	exit(-11);
+    exit(-11);
 }
 
 /*
@@ -43,108 +43,109 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
 PyObject * 
 run_dl_test(PyObject * mod, PyObject * args)
 {
-	char * libname = NULL;
-	char * funcname = NULL;
-	char * setup = NULL;
-	char * teardown = NULL;
+    char * libname = NULL;
+    char * funcname = NULL;
+    char * setup = NULL;
+    char * teardown = NULL;
+    void * setup_ret = NULL;
+    void * dlfile;
+    void * (* setupfunc)(void);
+    int (* dlfunc)(void *);
+    int testres;
+    struct sigaction sa;
+    PyObject * pyres;
 
-	void * dlfile;
-	int (* dlfunc)(void);
-	int testres;
-	struct sigaction sa;
-	PyObject * pyres;
+    error_happened = 0;
 
-	error_happened = 0;
+    /* grab lib and symbol name */
+    PyArg_ParseTuple(args, "ssss", &libname, &funcname, &setup, &teardown);
 
-	/* grab lib and symbol name */
-	PyArg_ParseTuple(args, "ssss", &libname, &funcname, &setup, &teardown);
+    if (libname == NULL || funcname == NULL) {
+        printf("testext ERROR: Library (%s) or function (%s) name could not be parsed", libname, funcname);
+        Py_IncRef(Py_None);
+        return Py_None;
+    }
 
-	if (libname == NULL || funcname == NULL) {
-		printf("testext ERROR: Library (%s) or function (%s) name could not be parsed", libname, funcname);
-		Py_IncRef(Py_None);
-		return Py_None;
-	}
+    /* install signal handlers */
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = sigsegv_handler;
+    if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+        printf("testext ERROR: could not install SIGSEGV handler, exiting\n");
+        Py_IncRef(Py_None);
+        return Py_None;
+    }
+    
+    /* look up test */
+    dlfile = dlopen(libname, RTLD_NOW);
+    if (dlfile == NULL) {
+        printf("testext ERROR: Could not dlopen library %s (error: %s)\n", libname, dlerror());
+        Py_IncRef(Py_None);
+        return Py_None;
+    }
 
-	/* install signal handlers */
-	sa.sa_flags = SA_SIGINFO;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_sigaction = sigsegv_handler;
-	if (sigaction(SIGSEGV, &sa, NULL) == -1) {
-		printf("testext ERROR: could not install SIGSEGV handler, exiting\n");
-		Py_IncRef(Py_None);
-		return Py_None;
-	}
-	
-	/* look up test */
-	dlfile = dlopen(libname, RTLD_NOW);
-	if (dlfile == NULL) {
-		printf("testext ERROR: Could not dlopen library %s (error: %s)\n", libname, dlerror());
-		Py_IncRef(Py_None);
-		return Py_None;
-	}
+    
+    if(strcmp(setup, "None")) {
+        setupfunc = dlsym(dlfile, setup);
+        if (setupfunc == NULL) {
+            printf("testext ERROR: Could not look up setup symbol %s (error: %s)\n", setup, dlerror());
+            dlclose(dlfile);
+            Py_IncRef(Py_None);
+            return Py_None;
+        }
 
-	
-	if(strcmp(setup, "None")) {
-		dlfunc = dlsym(dlfile, setup);
-		if (dlfunc == NULL) {
-			printf("testext ERROR: Could not look up setup symbol %s (error: %s)\n", setup, dlerror());
-			dlclose(dlfile);
-			Py_IncRef(Py_None);
-			return Py_None;
-		}
+        /* run setup */
+        setup_ret = setupfunc();
+    }
 
-		/* run setup */
-		dlfunc();
-	}
+    /* now the real test */
+    dlfunc = dlsym(dlfile, funcname);
+    if (dlfunc == NULL) {
+        printf("testext ERROR: Could not look up symbol %s (error: %s)\n", funcname, dlerror());
+        dlclose(dlfile);
+        Py_IncRef(Py_None);
+        return Py_None;
+    }
 
-	/* now the real test */
-	dlfunc = dlsym(dlfile, funcname);
-	if (dlfunc == NULL) {
-		printf("testext ERROR: Could not look up symbol %s (error: %s)\n", funcname, dlerror());
-		dlclose(dlfile);
-		Py_IncRef(Py_None);
-		return Py_None;
-	}
+    /* run test */
+    testres = dlfunc(setup_ret);
 
-	/* run test */
-	testres = dlfunc();
+    if(strcmp(teardown, "None")) {
+        dlfunc = dlsym(dlfile, teardown);
+        if (dlfunc == NULL) {
+            printf("testext ERROR: Could not look up teardown symbol %s (error: %s)\n", teardown, dlerror());
+            dlclose(dlfile);
+            Py_IncRef(Py_None);
+            return Py_None;
+        }
 
-	if(strcmp(teardown, "None")) {
-		dlfunc = dlsym(dlfile, teardown);
-		if (dlfunc == NULL) {
-			printf("testext ERROR: Could not look up teardown symbol %s (error: %s)\n", teardown, dlerror());
-			dlclose(dlfile);
-			Py_IncRef(Py_None);
-			return Py_None;
-		}
+        /* run teardown */
+        dlfunc(setup_ret);
+    }
 
-		/* run setup */
-		dlfunc();
-	}
+    /* clean up */
+    dlclose(dlfile);
 
-	/* clean up */
-	dlclose(dlfile);
+    if (error_happened)
+        pyres = Py_None;
+    else if (testres) 
+        pyres = Py_True;
+    else
+        pyres = Py_False;
 
-	if (error_happened)
-		pyres = Py_None;
-	else if (testres) 
-		pyres = Py_True;
-	else
-		pyres = Py_False;
-
-	Py_IncRef(pyres);
-	return pyres;
+    Py_IncRef(pyres);
+    return pyres;
 
 }
 
 static PyMethodDef TestExtExtMethods[] = {
-	{"run_dl_test", run_dl_test, METH_VARARGS, "Run a named test from a named dynamic library" },
-	{ NULL, NULL, 0, NULL }
+    {"run_dl_test", run_dl_test, METH_VARARGS, "Run a named test from a named dynamic library" },
+    { NULL, NULL, 0, NULL }
 };
 
 PyMODINIT_FUNC
 init_testext(void) 
 {
 
-	Py_InitModule("_testext", TestExtExtMethods);
+    Py_InitModule("_testext", TestExtExtMethods);
 }

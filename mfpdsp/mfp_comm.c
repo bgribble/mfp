@@ -113,8 +113,6 @@ mfp_comm_io_reader_thread(void * tdata)
         quitreq = comm_io_quitreq;
         pthread_mutex_unlock(&comm_io_lock);
     }
-
-
 }
 
 static void * 
@@ -211,13 +209,19 @@ mfp_comm_io_start(void)
 }
 
 void 
+mfp_comm_io_wait(void) 
+{
+    printf("mfp_comm_io_wait(): enter\n");
+    pthread_join(comm_io_reader_thread, NULL);
+    pthread_join(comm_io_writer_thread, NULL);
+}
+
+void 
 mfp_comm_io_finish(void) 
 {
     pthread_mutex_lock(&comm_io_lock);
     comm_io_quitreq = 1;
     pthread_mutex_unlock(&comm_io_lock);
-
-    pthread_join(comm_io_reader_thread, NULL);
-    pthread_join(comm_io_writer_thread, NULL);
+    mfp_comm_io_wait();
 }
 

@@ -241,7 +241,7 @@ mfp_dsp_run(mfp_context * ctxt)
     mfp_processor ** p;
     mfp_sample * buf;
     int chan;
-    int chancount = mfp_num_output_ports(ctxt);
+    int chancount = mfp_num_output_buffers(ctxt);
 
     /* handle any DSP config requests */
     mfp_dsp_handle_requests();

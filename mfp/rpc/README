@@ -23,7 +23,7 @@ For now, here's the summary of what's going on.
    hub that manages the socket IO and request/response cycles. 
 
  - At the Python application level, you inform the RPCHost that you are
-   serving a class for remote-object RPC by calling RPCHost.serve(cls).
+   serving a class for remote-object RPC by calling RPCHost.publish(cls).
    This means that you can create actual instances of the class on this
    host.  Any connected peer can create proxy objects that will cause
    the local creation of such local instances.  
@@ -37,5 +37,9 @@ For now, here's the summary of what's going on.
    the body of any methods, it just marshals the arguments into a
    request.Request object and sends them over the appropriate socket
    connection. 
+
+ - If there are multiple peers who have published for a certain class, the 
+   first one gets used unless a peer_id argument is passed to the RPCWrapper 
+   constructor.  
 
 

@@ -187,8 +187,8 @@ extern mfp_context * mfp_jack_startup(char * client_name, int num_inputs, int nu
 extern void mfp_jack_shutdown(mfp_context * ctxt);
 extern mfp_sample * mfp_get_input_buffer(mfp_context *, int);
 extern mfp_sample * mfp_get_output_buffer(mfp_context *, int);
-extern int mfp_num_output_ports(mfp_context * ctxt);
-extern int mfp_num_input_ports(mfp_context * ctxt);
+extern int mfp_num_output_buffers(mfp_context * ctxt);
+extern int mfp_num_input_buffers(mfp_context * ctxt);
 
 
 /* mfp_dsp.c */
@@ -239,6 +239,7 @@ extern void * mfp_lv2_get_port_data(mfp_lv2_info * self, int portnum);
 /* mfp_comm.c */ 
 extern void mfp_comm_io_start(void);
 extern void mfp_comm_io_finish(void); 
+extern void mfp_comm_io_wait(void); 
 extern int mfp_comm_init(char * init_sockid); 
 extern int mfp_comm_connect(char * sockname);
 
