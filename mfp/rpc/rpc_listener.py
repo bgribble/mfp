@@ -39,7 +39,7 @@ class RPCListener (QuittableThread):
                 sock, addr = self.socket.accept()
                 sock.settimeout(None)
                 self._rpc_last_peer += 1
-                self.rpc_host.manage(sock, self._rpc_last_peer)
+                self.rpc_host.manage(self._rpc_last_peer, sock)
 
             except socket.timeout:
                 pass

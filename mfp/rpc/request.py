@@ -36,9 +36,7 @@ class Request(object):
         return (self.response is not None)
 
     @classmethod
-    def deserialize(cls, jsdata):
-        obj = json.loads(jsdata)
-
+    def from_dict(cls, obj):
         req = Request(obj.get("method"), obj.get("params"))
 
         if obj.has_key("id"):
@@ -51,4 +49,7 @@ class Request(object):
             req.response = obj['result']
             # a notification
         return req
+
+    def __repr__(self):
+        return "<Request %s %s>" % (self.method, self.params)
 

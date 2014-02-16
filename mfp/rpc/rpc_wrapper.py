@@ -52,7 +52,7 @@ class RPCWrapper (object):
     rpctype = {}
     local = False
     rpchost = None
-    node_id = None
+    node_id = 0
     call_stats = {} 
 
     def __init__(self, *args, **kwargs):
@@ -73,7 +73,7 @@ class RPCWrapper (object):
             self.rpcid = r.response
 
     def call_remotely(self, rpcdata):
-        r = self.rpchost.put(Request("call", rpcdata))
+        r = self.rpchost.put(Request("call", rpcdata), self.node_id)
         self.rpchost.wait(r)
         if r.response == RPCWrapper.METHOD_OK:
             return r.payload
@@ -112,19 +112,20 @@ class RPCWrapper (object):
         kwargs = rpcdata.get('kwargs')
 
         req.state = Request.RESPONSE_DONE
+        print "RPCWrapper.handle", klass, req
 
         if method == 'create':
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
             print "RPCWrapper.handle(): calling factory", factory
             if factory:
                 obj = factory(*args, **kwargs)
-                req.response = obj.rpcid
+                req.response = (obj.rpcid, None)
             else:
-                req.response = RPCWrapper.NO_CLASS
+                req.response = (RPCWrapper.NO_CLASS, None)
 
         elif method == 'delete':
             del RPCWrapper.objects[rpcid]
-            req.response = True
+            req.response = (True, None)
         elif method == 'call':
             obj = RPCWrapper.rpcobj.get(rpcid)
             try:
@@ -139,3 +140,9 @@ class RPCWrapper (object):
                 einfo = "Method call failed for rpcid=%s node=%s\nobj=%s data=%s\n" % (rpcid,
                                                                                        RPCWrapper.node_id, obj, rpcdata)
                 req.response = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())
+        elif method == 'publish': 
+            print "RPCWrapper.handle: Got publish() call"
+            req.response = (True, None) 
+
+        req.method = None 
+        req.params = None 

@@ -61,7 +61,7 @@ class BaseWorker (object):
             self.pool.submitted_data = None 
             return rd 
         else: 
-            raise WorkerPool.empty()
+            raise WorkerPool.Empty()
 
     def perform_work(self, data):
         '''Process chunk of data'''
