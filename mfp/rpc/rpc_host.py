@@ -3,6 +3,7 @@ from request import Request
 from rpc_wrapper import RPCWrapper 
 from mfp.utils import QuittableThread
 from worker_pool import WorkerPool 
+import time 
 import simplejson as json 
 import threading 
 
@@ -44,7 +45,6 @@ class RPCHost (QuittableThread):
             del self.peers_by_socket[oldsock]
 
     def notify_peer(self, peer_id): 
-        print "RPCHost.notify_peer", peer_id, self.served_classes.keys()
         req = Request("publish", dict(classes=self.served_classes.keys()))
         self.put(req, peer_id)
         self.wait(req)
@@ -55,12 +55,19 @@ class RPCHost (QuittableThread):
 
     def publish(self, cls):
         '''
-        RPCHost.serve: Register a class as constructable on this end
+        RPCHost.publish: Register a class as constructable on this end
         '''
         self.served_classes[cls.__name__] = cls 
         cls.local = True 
         self.notify_all()
-       
+      
+    def subscribe(self, cls):
+        '''
+        RPCHost.subscribe: Wait for a class to become available
+        '''
+        while not cls.publishers:
+            time.sleep(0.1)
+
     def put(self, req, peer_id):
 
         # find the right socket 
@@ -76,7 +83,6 @@ class RPCHost (QuittableThread):
 
         # write the data to the socket 
         jdata = req.serialize()
-        print "sending", jdata, "on", sock
         sock.send(jdata)
 
     def wait(self, req):
@@ -88,30 +94,24 @@ class RPCHost (QuittableThread):
 
     def dispatch_rpcdata(self, rpc_worker, rpcdata):
         json_data, peer_id = rpcdata 
-        print "dispatch_rpcdata:", json_data
         py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
         for obj in py_data: 
             req = Request.from_dict(obj)
         
             # is someone waiting on this response? 
             if req.is_response() and req.request_id in self.pending:
-                print "dispatch_rpcdata: got a response"
                 oldreq = self.pending.get(req.request_id)
                 oldreq.response = req.response 
                 oldreq.state = req.state
                 with rpc_worker.pool.lock:
                     rpc_worker.pool.condition.notify()
             elif req.is_request() and req.request_id is not None:
-                print "dispatch_rpcdata: got a method call for local obj"
                 # actually call the local handler
                 RPCWrapper.handle(req, peer_id)
 
                 # and send back the response                
                 if req.request_id is not None:
-                    print "dispatch_rpcdata: sending response to", peer_id, req 
                     self.put(req, peer_id)
-            else: 
-                print "dispatch_rpcdata: fell through!", req, req.is_request(), req.is_response()
         return True
 
     def run(self):
@@ -120,6 +120,9 @@ class RPCHost (QuittableThread):
         '''
 
         self.read_workers.start()
+
+        if RPCWrapper.rpchost is None:
+            RPCWrapper.rpchost = self
 
         import select 
         self.pollobj = select.poll() 
@@ -132,7 +135,6 @@ class RPCHost (QuittableThread):
         self.pollsockets = {} 
         errshown = False 
 
-        print "rpc_host: run() started"
         while not self.join_req:
             for s in self.managed_sockets.values(): 
                 if s.fileno() not in self.pollsockets: 

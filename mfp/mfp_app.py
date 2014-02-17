@@ -25,7 +25,6 @@ class StartupError(Exception):
 class MFPApp (Singleton):
     def __init__(self):
         # configuration items -- should be populated before calling setup() 
-        print "MFPApp.__init__: clearing no_gui"
         self.no_gui = False
         self.no_dsp = False
         self.osc_port = None 
@@ -182,15 +181,12 @@ class MFPApp (Singleton):
             if factory: 
                 patch = factory(name, "", None, self.app_scope, name)
 
-        log.debug("Before creating Patch:", MFPApp().no_gui)
         if patch is None:
             patch = Patch(name, '', None, self.app_scope, name)
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
-        log.debug("After creating Patch:", MFPApp().no_gui, id(MFPApp()))
         self.patches[patch.name] = patch 
         patch.create_gui()
-        log.debug("After creating gui:", MFPApp().no_gui)
         patch.mark_ready()
 
     def load_extension(self, libname):
@@ -369,7 +365,6 @@ class MFPApp (Singleton):
 
     def session_save(self):
         import os.path
-        log.debug("session_save")
 
         sessfile = open(os.path.join(self.session_dir, "session_data"), "w+")
         if sessfile is None: 

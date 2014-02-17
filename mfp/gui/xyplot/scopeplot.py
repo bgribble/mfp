@@ -11,7 +11,7 @@ from gi.repository import Clutter
 from .xyplot import XYPlot
 from mfp import log
 from posix_ipc import SharedMemory
-from mfp.gui_slave import MFPGUI
+from mfp.gui_main import MFPGUI
 
 import os 
 import numpy 

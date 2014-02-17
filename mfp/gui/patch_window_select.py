@@ -11,7 +11,7 @@ from .patch_window import PatchWindow
 from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
-from ..gui_slave import MFPGUI
+from ..gui_main import MFPGUI
 
 from gi.repository import Gtk, Gdk
 

@@ -230,7 +230,6 @@ class Patch(Processor):
     def create_gui(self):
         from .mfp_app import MFPApp
 
-        log.debug("patch.py: no_gui is", MFPApp().no_gui, id(MFPApp()))
         if MFPApp().no_gui:
             return False
 

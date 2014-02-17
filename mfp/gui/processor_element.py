@@ -9,7 +9,7 @@ import cairo
 from .patch_element import PatchElement
 from .colordb import ColorDB 
 from .modes.label_edit import LabelEditMode
-from ..gui_slave import MFPGUI 
+from ..gui_main import MFPGUI 
 
 class ProcessorElement (PatchElement):
     display_type = "processor"

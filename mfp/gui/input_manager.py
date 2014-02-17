@@ -10,8 +10,8 @@ import time
 
 from input_mode import InputMode
 from key_sequencer import KeySequencer
-from ..quittable_thread import QuittableThread
-from ..gui_slave import MFPGUI
+from ..utils import QuittableThread
+from ..gui_main import MFPGUI
 
 class InputManager (object):
     class InputNeedsRequeue (Exception):

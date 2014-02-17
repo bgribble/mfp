@@ -13,14 +13,14 @@ from mfp_command import MFPCommand
 from . import log
 
 from .gui_command import GUICommand
-from .rpc import RPCRemote, RPCHost 
+from .rpc import RPCRemote, RPCHost
 
 def gui_finish():
     MFPGUI().finish()
 
 def clutter_do(func):
     def wrapped(*args, **kwargs):
-        from mfp.gui_slave import MFPGUI
+        from mfp.gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: func(*args, **kwargs))
 
     return wrapped 
@@ -114,7 +114,9 @@ def main():
     remote = RPCRemote(socketpath, "MFP GUI", host)
     remote.connect() 
 
-    gui = MFPGUI() 
-    host.publish(GUICommand)
+    host.subscribe(MFPCommand)
 
+    gui = MFPGUI() 
+
+    host.publish(GUICommand)
 

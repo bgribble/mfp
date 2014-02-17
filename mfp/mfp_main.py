@@ -184,15 +184,11 @@ def main():
         # create initial patch
         patchfiles = args.get("patchfile")
         if len(patchfiles): 
-            print "Opening patch files:", patchfiles
-
             for p in patchfiles: 
                 app.open_file(p)
         else: 
-            log.debug("Before open_file, no_gui:", MFPApp().no_gui, app.no_gui)
             app.open_file(None)
 
-        log.debug("After open_file, no_gui:", MFPApp().no_gui, app.no_gui)
         # allow session management 
         app.session_management_setup()
 

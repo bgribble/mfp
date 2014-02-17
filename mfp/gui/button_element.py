@@ -12,7 +12,7 @@ import cairo
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
-from ..gui_slave import MFPGUI
+from ..gui_main import MFPGUI
 from ..bang import Bang
 
 
