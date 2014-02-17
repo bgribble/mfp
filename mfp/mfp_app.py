@@ -12,6 +12,7 @@ from .processor import Processor
 from .method import MethodCall
 from .quittable_thread import QuittableThread 
 from .rpc import RPCListener, RPCHost, RPCExecRemote, RPCMultiProcRemote 
+from .mfp_main import StartupError 
 
 from pluginfo import PlugInfo 
 
@@ -79,21 +80,24 @@ class MFPApp (Singleton):
 
         # RPC service setup
         self.rpc_host = RPCHost()
-        self.rpc_host.serve(MFPCommand)
+        self.rpc_host.start()
 
         self.rpc_listener = RPCListener(self.socketpath, "MFP Master", self.rpc_host)
         self.rpc_listener.start()
 
+        # classes served by this RPC host:
+        self.rpc_host.publish(MFPCommand)
+
         # dsp and gui processes
         if not self.no_dsp:
-            self.dsp_process = RPCExecRemote("mfpdsp", self.max_blocksize, 
+            self.dsp_process = RPCExecRemote(self.socketpath, "mfpdsp", self.max_blocksize, 
                                              self.dsp_inputs, self.dsp_outputs)
             self.dsp_process.start()
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
 
         if not self.no_gui:
-            self.gui_process = RPCMultiProcRemote("mfpgui", GUIHost)
+            self.gui_process = RPCExecRemote(self.socketpath, "mfpgui", GUIHost)
             self.gui_process.start()
 
             while self.gui_process.alive() and not self.gui_command.ready():

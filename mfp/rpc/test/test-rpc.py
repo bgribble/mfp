@@ -1,7 +1,3 @@
-
-import multiprocessing
-from mfp.request_pipe import RequestPipe
-from mfp.request import Request
 from mfp.rpc_wrapper import RPCWrapper, rpcwrap
 from mfp.rpc_worker import RPCServer
 import time
