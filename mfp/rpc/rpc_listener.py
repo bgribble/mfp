@@ -70,13 +70,23 @@ class RPCExecRemote (object):
     '''
     def __init__(self, exec_file, *args): 
         self.exec_file = exec_file 
-        self.exec_args = args
+        self.exec_args = list(args)
         self.process = None 
 
     def start(self):
         import subprocess 
-        self.process = subprocess.Popen([self.exec_file] + self.exec_args)
+        arglist = [self.exec_file] + self.exec_args
+        print "RPCExecRemote:", arglist
+        self.process = subprocess.Popen(arglist)
 
+    def finish(self):
+        self.process.terminate()
+        self.process.wait()
 
+    def alive(self): 
+        if not self.process:
+            return False 
+        else: 
+            return not self.process.poll()
 
         

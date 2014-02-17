@@ -78,6 +78,8 @@ class MFPApp (Singleton):
 
     def setup(self):
         from .mfp_command import MFPCommand 
+        from .gui_command import GUICommand 
+        from .mfp_main import version 
 
         log.debug("Main thread started, pid = %s" % os.getpid())
 
@@ -100,8 +102,11 @@ class MFPApp (Singleton):
                 raise StartupError("DSP process died during startup")
 
         if not self.no_gui:
-            self.gui_process = RPCExecRemote(self.socket_path, "mfpgui", "-s", self.socket_path)
+            self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path)
             self.gui_process.start()
+            
+            self.rpc_host.subscribe(GUICommand)
+            self.gui_command = GUICommand()
 
             while self.gui_process.alive() and not self.gui_command.ready():
                 time.sleep(0.2)
