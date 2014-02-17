@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from datetime import datetime
 from ..processor import Processor
-from ..main import MFPApp
+from ..mfp_app import MFPApp
 from .. import Bang, Uninit
 from ..method import MethodCall
 

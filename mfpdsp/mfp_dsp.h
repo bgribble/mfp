@@ -158,7 +158,7 @@ typedef struct mfp_context_struct {
 #define REQ_BUFSIZE 2048
 #define REQ_LASTIND (REQ_BUFSIZE-1)
 
-#define MFP_DEFAULT_SOCKET "/tmp/mfp_comm"
+#define MFP_DEFAULT_SOCKET "/tmp/mfp_rpcsock"
 
 /* global variables */ 
 extern int mfp_dsp_enabled;

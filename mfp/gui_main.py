@@ -9,7 +9,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 import threading
 import argparse 
 from singleton import Singleton
-from main import MFPCommand
+from mfp_command import MFPCommand
 from . import log
 
 from .gui_command import GUICommand

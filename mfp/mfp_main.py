@@ -16,14 +16,11 @@ from .bang import Bang, Uninit
 from .method import MethodCall
 from .midi import NoteOn, NoteOff, NotePress, MidiCC, MidiPgmChange
 
-from .mfp_app import MFPApp
+from .mfp_app import MFPApp, StartupError 
 
 from . import log
 from . import builtins 
 from . import utils
-
-class StartupError(Exception):
-    pass 
 
 def version():
     import pkg_resources 
@@ -118,6 +115,12 @@ def main():
     app.max_blocksize = args.get("max_bufsize") 
     app.socket_path = args.get("socket_path")
 
+    if app.no_gui:
+        log.debug("Not starting GUI services")
+
+    if app.no_dsp: 
+        log.debug("Not starting DSP engine")
+
     # launch processes and threads 
     import signal
     signal.signal(signal.SIGTERM, exit_sighandler)
@@ -128,6 +131,8 @@ def main():
         log.debug("Setup did not complete properly, exiting")
         app.finish()
         return 
+
+    log.debug("After setup, no_gui:", MFPApp().no_gui, app.no_gui)
 
     # ok, now start configuring the running system  
     add_evaluator_defaults() 
@@ -184,8 +189,10 @@ def main():
             for p in patchfiles: 
                 app.open_file(p)
         else: 
+            log.debug("Before open_file, no_gui:", MFPApp().no_gui, app.no_gui)
             app.open_file(None)
 
+        log.debug("After open_file, no_gui:", MFPApp().no_gui, app.no_gui)
         # allow session management 
         app.session_management_setup()
 

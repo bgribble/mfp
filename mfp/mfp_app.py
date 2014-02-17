@@ -1,8 +1,8 @@
+import os 
 import time
 import ConfigParser
 import simplejson as json
 
-from .gui_host import GUIHost
 from .patch import Patch
 from .patch_json import ExtendedEncoder, extended_decoder_hook
 from .scope import LexicalScope
@@ -10,9 +10,8 @@ from .singleton import Singleton
 from .interpreter import Interpreter
 from .processor import Processor
 from .method import MethodCall
-from .quittable_thread import QuittableThread 
-from .rpc import RPCListener, RPCHost, RPCExecRemote, RPCMultiProcRemote 
-from .mfp_main import StartupError 
+from .utils import QuittableThread 
+from .rpc import RPCListener, RPCHost, RPCExecRemote
 
 from pluginfo import PlugInfo 
 
@@ -20,9 +19,13 @@ from . import log
 from . import builtins 
 from . import utils
 
+class StartupError(Exception):
+    pass 
+
 class MFPApp (Singleton):
     def __init__(self):
         # configuration items -- should be populated before calling setup() 
+        print "MFPApp.__init__: clearing no_gui"
         self.no_gui = False
         self.no_dsp = False
         self.osc_port = None 
@@ -35,6 +38,7 @@ class MFPApp (Singleton):
         self.max_blocksize = 2048 
         self.in_latency = 0
         self.out_latency = 0
+        self.socket_path = "/tmp/mfp_rpcsock"
 
         # RPC host 
         self.rpc_listener = None 
@@ -82,7 +86,7 @@ class MFPApp (Singleton):
         self.rpc_host = RPCHost()
         self.rpc_host.start()
 
-        self.rpc_listener = RPCListener(self.socketpath, "MFP Master", self.rpc_host)
+        self.rpc_listener = RPCListener(self.socket_path, "MFP Master", self.rpc_host)
         self.rpc_listener.start()
 
         # classes served by this RPC host:
@@ -90,14 +94,14 @@ class MFPApp (Singleton):
 
         # dsp and gui processes
         if not self.no_dsp:
-            self.dsp_process = RPCExecRemote(self.socketpath, "mfpdsp", self.max_blocksize, 
+            self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize, 
                                              self.dsp_inputs, self.dsp_outputs)
             self.dsp_process.start()
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
 
         if not self.no_gui:
-            self.gui_process = RPCExecRemote(self.socketpath, "mfpgui", GUIHost)
+            self.gui_process = RPCExecRemote(self.socket_path, "mfpgui", "-s", self.socket_path)
             self.gui_process.start()
 
             while self.gui_process.alive() and not self.gui_command.ready():
@@ -178,12 +182,15 @@ class MFPApp (Singleton):
             if factory: 
                 patch = factory(name, "", None, self.app_scope, name)
 
+        log.debug("Before creating Patch:", MFPApp().no_gui)
         if patch is None:
             patch = Patch(name, '', None, self.app_scope, name)
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
+        log.debug("After creating Patch:", MFPApp().no_gui, id(MFPApp()))
         self.patches[patch.name] = patch 
         patch.create_gui()
+        log.debug("After creating gui:", MFPApp().no_gui)
         patch.mark_ready()
 
     def load_extension(self, libname):
@@ -362,6 +369,7 @@ class MFPApp (Singleton):
 
     def session_save(self):
         import os.path
+        log.debug("session_save")
 
         sessfile = open(os.path.join(self.session_dir, "session_data"), "w+")
         if sessfile is None: 
@@ -393,7 +401,7 @@ class MFPApp (Singleton):
         self.session_id = session_id 
         cp = ConfigParser.SafeConfigParser(allow_no_value=True)
         
-        print "MFPApp.session_load: loading", session_path, session_id 
+        log.debug("Loading saved session", session_path, session_id)
 
         cp.read(os.path.join(self.session_dir, "session_data"))
 
@@ -403,7 +411,6 @@ class MFPApp (Singleton):
             if not val: 
                 val = "''"
             setattr(self, attr, eval(val))
-
 
         # reinitialize JACK 
         if self.dsp_command:

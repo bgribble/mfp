@@ -20,7 +20,7 @@ class Patch(Processor):
     display_type = "patch"
     
     def __init__(self, init_type, init_args, patch, scope, name):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
         self.objects = {}
@@ -79,7 +79,7 @@ class Patch(Processor):
         del self.scopes[name]
 
     def rename(self, new_name):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         oldname = self.name
         Processor.rename(self, new_name)
         del MFPApp().patches[oldname]
@@ -211,7 +211,7 @@ class Patch(Processor):
 
     @classmethod
     def register_file(klass, filename):
-        from main import MFPApp
+        from .mfp_app import MFPApp
 
         def factory(init_type, init_args, patch, scope, name):
             p = Patch(init_type, init_args, patch, scope, name)
@@ -228,7 +228,9 @@ class Patch(Processor):
         return (parts[0], factory)
 
     def create_gui(self):
-        from main import MFPApp
+        from .mfp_app import MFPApp
+
+        log.debug("patch.py: no_gui is", MFPApp().no_gui, id(MFPApp()))
         if MFPApp().no_gui:
             return False
 
@@ -260,7 +262,7 @@ class Patch(Processor):
         savefile.write(self.json_serialize())
 
     def _load_file(self, filename):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         from .utils import splitpath 
 
         searchpath = MFPApp().searchpath or ""

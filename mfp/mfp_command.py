@@ -1,7 +1,7 @@
 from .bang import Bang
 from .patch import Patch
 from .method import MethodCall
-from .rpc_wrapper import RPCWrapper, rpcwrap
+from .rpc import RPCWrapper, rpcwrap
 from . import log
 
 class MFPCommand(RPCWrapper):

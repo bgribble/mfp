@@ -68,9 +68,9 @@ class RPCExecRemote (object):
     '''
     RPCExecRemote -- launch a process which will connect back to this process
     '''
-    def __init__(self, exec_file, args=None): 
+    def __init__(self, exec_file, *args): 
         self.exec_file = exec_file 
-        self.exec_args = args if args is not None else [] 
+        self.exec_args = args
         self.process = None 
 
     def start(self):

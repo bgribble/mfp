@@ -1,6 +1,6 @@
 
 from mfp.processor import Processor
-from mfp.main import MFPApp
+from mfp.mfp_app import MFPApp
 
 class Extension1 (Processor):
     def __init__(self, init_type, init_args, patch, scope, name):

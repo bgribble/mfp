@@ -113,7 +113,7 @@ def json_deserialize(self, json_data):
 
 @extends(Patch)
 def json_unpack_connections(self, data, idmap):
-    from main import MFPApp
+    from .mfp_app import MFPApp
     for oid, prms in data.get('objects', {}).items():
         oid = int(oid)
         conn = prms.get("connections", [])
@@ -134,7 +134,7 @@ def json_unpack_connections(self, data, idmap):
 
 @extends(Patch)
 def json_unpack_objects(self, data, scope):
-    from main import MFPApp
+    from .mfp_app import MFPApp
     idmap = {}
     idlist = data.get('objects').keys()
     idlist.sort(key=lambda x: int(x))
@@ -159,7 +159,7 @@ def json_unpack_objects(self, data, scope):
 
 @extends(Patch)
 def json_serialize(self):
-    from .main import MFPApp
+    from .mfp_app import MFPApp
     f = {}
     f['type'] = self.init_type
     f['gui_params'] = self.gui_params

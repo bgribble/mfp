@@ -1,6 +1,6 @@
 
 from unittest import TestCase
-from mfp.main import MFPApp
+from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
 from mfp.bang import Bang, Uninit
 

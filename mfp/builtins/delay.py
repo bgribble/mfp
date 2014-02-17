@@ -6,7 +6,7 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from mfp.processor import Processor
-from mfp.main import MFPApp
+from ..mfp_app import MFPApp
 from .. import Bang, Uninit
 from mfp import log
 

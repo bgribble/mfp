@@ -6,7 +6,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..processor import Processor
-from ..main import MFPApp
+from ..mfp_app import MFPApp
 
 class Pack (Processor):
     doc_tooltip_obj = "Collect inputs into a list" 

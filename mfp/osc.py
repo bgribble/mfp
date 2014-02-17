@@ -5,9 +5,9 @@ osc.py: OSC server for MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from quittable_thread import QuittableThread
+from .utils import QuittableThread
+from . import log
 import liblo
-from mfp import log
 
 
 class MFPOscManager(QuittableThread):

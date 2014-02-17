@@ -1,6 +1,6 @@
 
 from ..processor import Processor
-from ..main import MFPApp
+from ..mfp_app import MFPApp
 from ..method import MethodCall
 
 

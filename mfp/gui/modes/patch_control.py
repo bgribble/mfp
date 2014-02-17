@@ -5,8 +5,6 @@ patch_control.py: PatchControl major mode
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from ..input_mode import InputMode
-from mfp.main import MFPApp
-
 
 class PatchControlMode (InputMode):
     def __init__(self, window):

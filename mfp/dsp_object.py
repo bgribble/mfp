@@ -6,7 +6,7 @@ Python main loop for DSP subprocess
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from mfp.rpc_wrapper import RPCWrapper, rpcwrap
+from .rpc import RPCWrapper, rpcwrap
 from . import log
 
 
@@ -59,7 +59,7 @@ class DSPObject(RPCWrapper):
 class DSPCommand (RPCWrapper):
     @rpcwrap
     def log_to_gui(self):
-        from main import MFPCommand
+        from .mfp_command import MFPCommand
         # log to GUI
         log.log_func = lambda msg: MFPCommand().log_write(msg)
         log.debug("DSP process logging to GUI")
@@ -93,7 +93,7 @@ class DSPCommand (RPCWrapper):
         mfpdsp.dsp_enable()
         
 def dsp_init(pipe, client_name, max_bufsize, num_inputs, num_outputs):
-    from main import MFPCommand
+    from .mfp_command import MFPCommand
     import threading
     import os
     import sys 
@@ -125,7 +125,7 @@ ttq = False
 
 def dsp_response(*args):
     import mfpdsp
-    from .main import MFPCommand
+    from .mfp_command import MFPCommand
 
     # FIXME there is a thread mess waiting just offstage
     # with multiple threads invoking send() in main process

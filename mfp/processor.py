@@ -5,7 +5,7 @@ processor.py: Parent class of all processors
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from .dsp_slave import DSPObject
+from .dsp_object import DSPObject
 from .method import MethodCall
 from .bang import Uninit, Bang
 from .scope import LexicalScope
@@ -30,7 +30,7 @@ class Processor (object):
     doc_tooltip_outlet = [] 
 
     def __init__(self, inlets, outlets, init_type, init_args, patch, scope, name):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
 
         self.init_type = init_type
         self.init_args = init_args
@@ -154,7 +154,7 @@ class Processor (object):
                     lines.append('          %s %s' % (m, minfo[m]))
 
                 # MIDI controllers 
-                from .main import MFPApp
+                from .mfp_app import MFPApp
                 if self.midi_filters: 
                     paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
                     lines.append('      <b>MIDI handlers:</b>')
@@ -227,7 +227,7 @@ class Processor (object):
         return 0
 
     def _osc_learn_handler(self, path, args, types, src, data):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         MFPApp().osc_mgr.del_default(self._osc_learn_handler)
         MFPApp().osc_mgr.add_method(path, types, self._osc_handler)
         self.osc_methods.append((path, types))
@@ -235,12 +235,12 @@ class Processor (object):
         self.set_tag("osc", "learned")
 
     def osc_learn(self):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         MFPApp().osc_mgr.add_default(self._osc_learn_handler)
         self.set_tag("osc", "learning")
 
     def osc_init(self):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
 
         if MFPApp().osc_mgr is None:
             return
@@ -292,7 +292,7 @@ class Processor (object):
             self.send(event)
 
     def _midi_learn_handler(self, event, mode): 
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         from .midi import Note, NotePress, NoteOff, NoteOn, MidiCC, MidiPgmChange
         
         filters = {} 
@@ -356,7 +356,7 @@ class Processor (object):
         self.set_tag("midi", "learned")
 
     def midi_learn(self, *args, **kwargs):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         mode = kwargs.get("mode", "auto") 
         
         if self.midi_learn_cbid is None:
@@ -368,7 +368,7 @@ class Processor (object):
             self.set_tag("midi", "learning")
 
     def dsp_init(self, proc_name, **params):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
                                  len(self.dsp_outlets), params)
         self.gui_params['dsp_inlets'] = self.dsp_inlets
@@ -392,7 +392,7 @@ class Processor (object):
         return self.dsp_obj.getparam(param, value)
 
     def delete(self):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         from .patch import Patch
 
         if hasattr(self, "patch") and self.patch is not None:
@@ -438,7 +438,7 @@ class Processor (object):
         self.status = self.DELETED 
 
     def resize(self, inlets, outlets):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         if inlets > len(self.inlets):
             newin = inlets - len(self.inlets)
             self.inlets += [Uninit] * newin
@@ -593,7 +593,7 @@ class Processor (object):
         self.inlets[inlet] = Uninit
 
     def reset_counts(self):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         self.count_in = 0
         self.count_out = 0
         self.count_errors = 0
@@ -612,19 +612,19 @@ class Processor (object):
             print tb
 
     def create_gui(self):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         parent_id = self.patch.obj_id if self.patch is not None else None 
         MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
                                     parent_id, self.gui_params)
         self.gui_created = True
 
     def delete_gui(self):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         MFPApp().gui_command.delete(self.obj_id)
         self.gui_created = False
 
     def set_tag(self, tag, value): 
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         self.tags[tag] = value 
         self.gui_params["tags"] = self.tags
         if self.gui_created:
@@ -678,7 +678,7 @@ class Processor (object):
         probably before anything else. 
         '''
 
-        from .main import MFPApp
+        from .mfp_app import MFPApp
 
         # special handling for gui_params 
         gp = prms.get('gui_params')

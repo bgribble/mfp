@@ -14,7 +14,9 @@ def git_version():
 setup (name = 'mfp',
        version = '0.01_' + git_version(),
        description = 'Music for programmers',
-       packages = ['mfp', 'mfp.builtins', 'mfp.rpc', 'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes' ],
-       entry_points = { 'console_scripts': [ 'mfp=mfp.main:main'] },
+       packages = ['mfp', 'mfp.builtins', 'mfp.rpc', 
+                   'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes' ],
+       entry_points = { 'console_scripts': ['mfp=mfp.mfp_main:main',
+                                            'mfpgui=mfp.gui_main:main'] },
        package_data = { 'mfp.gui': ['mfp.glade'] })
 

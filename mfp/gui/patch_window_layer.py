@@ -5,7 +5,7 @@ Extra methods to manage the layer display in the main window
 '''
 
 from ..utils import extends
-from ..main import MFPCommand
+from ..mfp_command import MFPCommand
 from .patch_window import PatchWindow 
 from .layer import Layer 
 

@@ -1,7 +1,7 @@
 
 from unittest import TestCase
 from mfp.patch import Patch
-from mfp.main import MFPApp
+from ..mfp_app import MFPApp
 
 import simplejson as json
 

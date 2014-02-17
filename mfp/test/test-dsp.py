@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import mfpdsp
 import mfp
-from mfp.main import MFPApp
+from ..mfp_app import MFPApp
 from mfp.patch import Patch
 
 
