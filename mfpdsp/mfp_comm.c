@@ -107,7 +107,7 @@ mfp_comm_io_reader_thread(void * tdata)
     while(!quitreq) {
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
 
-        /* FIXME: do something with the new data */ 
+        mfp_rpc_dispatch(msgbuf, bytesread);
 
         pthread_mutex_lock(&comm_io_lock);
         quitreq = comm_io_quitreq;
@@ -119,19 +119,16 @@ static void *
 mfp_comm_io_writer_thread(void * tdata) 
 {
     int quitreq = 0;
-    char * msgbuf;
-    gsize buflen; 
-    int responses=0;
+    char  * msgbuf;
+    GArray * rdata;
     struct timespec alarmtime;
     struct timeval nowtime;
     mfp_respdata r;
-    mfp_processor * proc;
-    JsonBuilder * build; 
-    JsonGenerator * gen;
     char pbuff[32];
 
     printf("mfp_comm_io_writer_thread: enter\n");
-   
+    jdata = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
+
     while(!quitreq) {
         /* wait for a signal that there's data to write */ 
         pthread_mutex_lock(&mfp_response_lock);
@@ -147,51 +144,22 @@ mfp_comm_io_writer_thread(void * tdata)
 
         /* copy/clear C response objects */
         if(mfp_response_queue_read != mfp_response_queue_write) {
-            build = json_builder_new(); 
-            json_builder_begin_array(build); 
-
             while(mfp_response_queue_read != mfp_response_queue_write) {
-                json_builder_begin_array(build); 
                 r = mfp_response_queue[mfp_response_queue_read];
-
-                proc = g_hash_table_lookup(mfp_proc_objects, r.dst_proc);
-        
-                snprintf(pbuff, 32, "%p", proc);
-                json_builder_add_string_value(build, pbuff);
-                json_builder_add_int_value(build, r.msg_type);
-                switch(r.response_type) {
-                    case PARAMTYPE_FLT:
-                        json_builder_add_double_value(build, r.response.f);
-                        break;
-                    case PARAMTYPE_BOOL:
-                        json_builder_add_boolean_value(build, r.response.i);
-                        break;
-                    case PARAMTYPE_INT:
-                        json_builder_add_int_value(build, r.response.i);
-                        break;
-                    case PARAMTYPE_STRING:
-                        json_builder_add_string_value(build, r.response.c);
-                        g_free(r.response.c);
-                        break;
-                }
-                json_builder_end_array(build);
-                responses += 1;
+                g_array_append(jdata, r);
                 mfp_response_queue_read = (mfp_response_queue_read+1) % REQ_BUFSIZE;
             }
-            json_builder_end_array(build);
         }
         pthread_mutex_unlock(&mfp_response_lock);
 
         /* convert built list to text */ 
-        gen = json_generator_new();
-        json_generator_set_root(gen, json_builder_get_root(build));
-        msgbuf = json_generator_to_data(gen, &buflen);
+        for(int reqno=0; reqno < rdata->len; reqno++) {
+            mfp_rpc_json_build(g_array_index(rdata, mfp_respdata, reqno), 
+                               msgbuf); 
+            send(comm_socket, msgbuf, strlen(msgbuf), 0);     
 
-        /* free up resources */ 
-        json_node_free(json_builder_get_root(build));
-
-        send(comm_socket, msgbuf, buflen, 0);     
-
+        }
+        g_array_remove_range(rdata, 0, rdata->len);
         pthread_mutex_lock(&comm_io_lock);
         quitreq = comm_io_quitreq;
         pthread_mutex_unlock(&comm_io_lock);

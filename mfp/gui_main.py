@@ -15,9 +15,6 @@ from . import log
 from .gui_command import GUICommand
 from .rpc import RPCRemote, RPCHost
 
-def gui_finish():
-    MFPGUI().finish()
-
 def clutter_do(func):
     def wrapped(*args, **kwargs):
         from mfp.gui_main import MFPGUI

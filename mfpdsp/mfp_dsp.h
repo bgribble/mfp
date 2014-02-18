@@ -20,6 +20,7 @@ struct mfp_context_struct;
 
 typedef struct {
     /* type, settable parameters, and internal state */
+    int rpc_id;
     struct mfp_context_struct * context; 
     struct mfp_procinfo_struct * typeinfo;
     GHashTable * params; 

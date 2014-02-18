@@ -1,11 +1,12 @@
+import time 
+import simplejson as json 
+import threading 
+from datetime import datetime
 
 from request import Request 
 from rpc_wrapper import RPCWrapper 
 from mfp.utils import QuittableThread
 from worker_pool import WorkerPool 
-import time 
-import simplejson as json 
-import threading 
 
 class RPCHost (QuittableThread): 
     '''
@@ -21,7 +22,7 @@ class RPCHost (QuittableThread):
         self.lock = threading.Lock()
         self.condition = threading.Condition(self.lock)
         self.pending = {}
-        
+
         self.pollobj = None
         self.poll_sockets = {} 
 
@@ -69,7 +70,6 @@ class RPCHost (QuittableThread):
             time.sleep(0.1)
 
     def put(self, req, peer_id):
-
         # find the right socket 
         sock = self.managed_sockets.get(peer_id)
         if sock is None: 
@@ -108,7 +108,6 @@ class RPCHost (QuittableThread):
             elif req.is_request() and req.request_id is not None:
                 # actually call the local handler
                 RPCWrapper.handle(req, peer_id)
-
                 # and send back the response                
                 if req.request_id is not None:
                     self.put(req, peer_id)
@@ -153,10 +152,11 @@ class RPCHost (QuittableThread):
                 elif not errshown and event & (select.POLLERR | select.POLLHUP):
                     print "RPCHost.run: Socket error", event 
                     errshown = True 
-
-        req = Request("peer_exit", {})
-        self.put(req, 0)
-        self.wait(req)
+                
+        if 0 in self.managed_sockets:
+            req = Request("peer_exit", {})
+            self.put(req, 0)
+            self.wait(req)
         print "rpc_host: join_req received, quitting worker_pool..."
         self.read_workers.finish()
         print "rpc_host: finished"

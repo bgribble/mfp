@@ -76,7 +76,6 @@ class RPCExecRemote (object):
     def start(self):
         import subprocess 
         arglist = [self.exec_file] + self.exec_args
-        print "RPCExecRemote:", arglist
         self.process = subprocess.Popen(arglist)
 
     def finish(self):

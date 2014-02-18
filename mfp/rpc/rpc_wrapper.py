@@ -8,6 +8,7 @@ Copyright (c) 2010-2014 Bill Gribble <grib@billgribble.com>
 
 from request import Request
 from mfp import log
+from mfp.utils import profile 
 
 def rpcwrap(worker_proc):
     def inner(self, *args, **kwargs):
@@ -123,24 +124,19 @@ class RPCWrapper (object):
         kwargs = rpcdata.get('kwargs')
 
         req.state = Request.RESPONSE_DONE
-        print "handle:", klass, req, peer_id
 
         if method == 'create':
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
-            print "create: calling factory", factory
             if factory:
                 obj = factory(*args, **kwargs)
                 req.response = (obj.rpcid, None)
             else:
                 req.response = (RPCWrapper.NO_CLASS, None)
-
         elif method == 'delete':
             del RPCWrapper.objects[rpcid]
             req.response = (True, None)
-
         elif method == 'call':
             obj = RPCWrapper.rpcobj.get(rpcid)
-            print "call: calling method on id=%s obj=%s" % (rpcid, obj)
             try:
                 retval = obj.call_locally(rpcdata)
                 req.response = (RPCWrapper.METHOD_OK, retval)
@@ -152,26 +148,24 @@ class RPCWrapper (object):
                 import traceback
                 einfo = "Method call failed rpcid=%s node=%s\nobj=%s data=%s\n" % (rpcid, self.peer_id, obj, rpcdata)
                 req.response = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())
-
         elif method == 'publish': 
             for clsname in req.params.get("classes"): 
                 cls = RPCWrapper.rpctype.get(clsname)
-                print "publish: looking for class", clsname, cls
                 if cls is not None:
-                    print "publish: Got notification -- %s (%s) on %s" % (clsname, cls, peer_id)
                     cls.publishers.append(peer_id)
             req.response = (True, None) 
 
         elif method == "peer_exit": 
             # remove this peer as a publisher for any classes
             for clsname, cls in RPCWrapper.rpctype.items():
-                print "peer_exit: looking at", clsname, cls.publishers
                 if peer_id in cls.publishers:
-                    print "exit: found peer_id", peer_id, "for", clsname
                     cls.publishers.remove(peer_id)
             klass.rpchost.unmanage(peer_id) 
 
             req.request_id = None
+        else:
+            print "rpc_wrapper: WARNING: no handler for method '%s'" % method
 
         req.method = None 
         req.params = None 
+
