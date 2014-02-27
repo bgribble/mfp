@@ -160,6 +160,10 @@ typedef struct mfp_context_struct {
 #define REQ_LASTIND (REQ_BUFSIZE-1)
 
 #define MFP_DEFAULT_SOCKET "/tmp/mfp_rpcsock"
+#define MFP_EXEC_NAME "mfp"
+#define MFP_EXEC_SHELLMAX 2048
+#define MFP_MAX_MSGSIZE 2048 
+
 
 /* global variables */ 
 extern int mfp_dsp_enabled;
@@ -243,9 +247,15 @@ extern void mfp_comm_io_finish(void);
 extern void mfp_comm_io_wait(void); 
 extern int mfp_comm_init(char * init_sockid); 
 extern int mfp_comm_connect(char * sockname);
+extern int mfp_comm_send(const char * msg);
 
 /* mfp_request.c */
 extern void mfp_dsp_push_request(mfp_reqdata rd);
 extern void mfp_dsp_handle_requests(void);
+
+extern int mfp_rpc_json_dispatch_request(const char *, int);
+extern int mfp_rpc_json_dsp_response(mfp_respdata, char *);
+extern void mfp_rpc_init(void);
+
 #endif
 

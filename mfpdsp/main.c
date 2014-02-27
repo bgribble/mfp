@@ -63,10 +63,14 @@ main(int argc, char ** argv)
 
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
 
-    /* enter main lister loop */ 
-    printf("mfpdsp: Entering comm event loop, will not return to main()\n");
+    /* start main listener loop */ 
     mfp_comm_io_start();
+    
+    mfp_rpc_init();
+
+    printf("mfpdsp: Entering comm event loop, will not return to main()\n");
     mfp_comm_io_wait();
+
 
     printf("mfpdsp: Returned from comm event loop, will exit.\n"); 
     return 0;

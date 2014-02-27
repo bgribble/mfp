@@ -138,7 +138,10 @@ class WorkerPool (object):
                     self.active_worker = self.waiting_pool.pop()
                     goworker = 1
                 else:
-                    self.active_worker = self.factory(self)
+                    if isinstance(self.factory, type):
+                        self.active_worker = self.factory(self)
+                    else: 
+                        self.active_worker = BaseWorker(self, self.factory)
                     goworker = 1
             self.condition.notify()
         if goworker:

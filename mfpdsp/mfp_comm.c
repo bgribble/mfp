@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <sys/stat.h>
 #include <sys/socket.h> 
@@ -11,11 +12,9 @@
 #include <json-glib/json-glib.h>
 #include "mfp_dsp.h"
 
-#define MFP_PORT_DEFAULT "/tmp/mfp_socket"
-#define MFP_MAX_MSGSIZE 2048 
-
 static char * comm_sockname = NULL;
 static int comm_socket = -1;
+static int comm_procpid = -1;
 static pthread_t comm_io_reader_thread;
 static pthread_t comm_io_writer_thread;
 static int comm_io_quitreq = 0;
@@ -49,10 +48,35 @@ mfp_comm_connect(char * sockname)
     return socket_fd;
 }
 
-static int
-mfp_comm_launch(char * sockid)
+int 
+mfp_comm_send(const char * msg)
 {
-    printf("Launching main mfp process\n");
+    send(comm_socket, msg, strlen(msg), 0);
+}
+
+static int
+mfp_comm_launch(char * sockname)
+{
+    char mfpcmd[MFP_EXEC_SHELLMAX];  
+    char * const execargs[4] = {"/bin/bash", "-c", mfpcmd, NULL};
+
+    snprintf(mfpcmd, MFP_EXEC_SHELLMAX-1, "mfp --no-dsp -s %s", sockname);
+
+    printf("mfp_comm_launch: Launching main mfp process with '%s'\n", mfpcmd);
+
+    if (comm_procpid = fork()) {
+        printf("mfp_comm_launch (parent): got child PID %d\n", comm_procpid);
+        printf("mfp_comm_launch (parent): waiting for child startup\n");
+        sleep(3);
+        return 0;
+    }
+    else {
+        printf("mfp_comm_launch (child): about to exec\n");
+        execv("/bin/bash", execargs);
+        printf("mfp_comm_launch: exec failed\n");
+        perror("execve");
+    }
+
 }
 
 
@@ -62,6 +86,7 @@ mfp_comm_init(char * init_sockid)
     char * env_sockid = getenv("MFP_SOCKET");
     int connectfd; 
     char * conn_sockid = NULL;
+    int connect_tries = 0;
 
     printf("mfp_comm_init(): enter\n");
 
@@ -72,7 +97,7 @@ mfp_comm_init(char * init_sockid)
         conn_sockid = env_sockid;
     }
     else {
-        conn_sockid = MFP_PORT_DEFAULT;
+        conn_sockid = MFP_DEFAULT_SOCKET;
     }
 
     connectfd = mfp_comm_connect(conn_sockid);
@@ -81,11 +106,18 @@ mfp_comm_init(char * init_sockid)
         printf("mfp_comm_init: can't connect to MFP, trying to start\n");
         mfp_comm_launch(conn_sockid);
 
-        /* try again */
-        connectfd = mfp_comm_connect(conn_sockid);
+        while(connect_tries < 10) {
+            /* try again */
+            connectfd = mfp_comm_connect(conn_sockid);
 
-        if (connectfd < 0) {
-            printf("mfp_comm_init: can't connect to MFP on second try, giving up\n");
+            if (connectfd < 0) {
+                printf("mfp_comm_init: connect attempt %d failed\n", connect_tries);
+                sleep(1);
+                connect_tries ++;
+            }
+        }
+        if (connect_tries == 10) {
+            printf("mfp_comm_init: can't connect after 10 tries, giving up\n");
             return -1;
         }
     }
@@ -101,13 +133,20 @@ mfp_comm_io_reader_thread(void * tdata)
     int quitreq = 0;
     char msgbuf[MFP_MAX_MSGSIZE];
     int bytesread; 
+    int errstat = 0; 
 
-    printf("mfp_comm_io_reader_thread: enter\n");
-   
     while(!quitreq) {
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
-
-        mfp_rpc_dispatch(msgbuf, bytesread);
+        if (bytesread > 0) { 
+            errstat = 0;
+            mfp_rpc_json_dispatch_request(msgbuf, bytesread);
+        }
+        else {
+            if (errstat == 0) {
+                printf("comm IO reader: error reading from socket %d\n", comm_socket);
+                errstat = 1;
+            }
+        }
 
         pthread_mutex_lock(&comm_io_lock);
         quitreq = comm_io_quitreq;
@@ -119,7 +158,7 @@ static void *
 mfp_comm_io_writer_thread(void * tdata) 
 {
     int quitreq = 0;
-    char  * msgbuf;
+    char msgbuf[MFP_MAX_MSGSIZE];
     GArray * rdata;
     struct timespec alarmtime;
     struct timeval nowtime;
@@ -127,7 +166,7 @@ mfp_comm_io_writer_thread(void * tdata)
     char pbuff[32];
 
     printf("mfp_comm_io_writer_thread: enter\n");
-    jdata = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
+    rdata = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
 
     while(!quitreq) {
         /* wait for a signal that there's data to write */ 
@@ -146,20 +185,20 @@ mfp_comm_io_writer_thread(void * tdata)
         if(mfp_response_queue_read != mfp_response_queue_write) {
             while(mfp_response_queue_read != mfp_response_queue_write) {
                 r = mfp_response_queue[mfp_response_queue_read];
-                g_array_append(jdata, r);
+                g_array_append_val(rdata, r);
                 mfp_response_queue_read = (mfp_response_queue_read+1) % REQ_BUFSIZE;
             }
         }
         pthread_mutex_unlock(&mfp_response_lock);
 
-        /* convert built list to text */ 
         for(int reqno=0; reqno < rdata->len; reqno++) {
-            mfp_rpc_json_build(g_array_index(rdata, mfp_respdata, reqno), 
-                               msgbuf); 
-            send(comm_socket, msgbuf, strlen(msgbuf), 0);     
-
+            mfp_rpc_json_dsp_response(g_array_index(rdata, mfp_respdata, reqno), msgbuf); 
+            send(comm_socket, msgbuf, strlen(msgbuf), 0);
         }
-        g_array_remove_range(rdata, 0, rdata->len);
+        if (rdata->len > 0) { 
+            g_array_remove_range(rdata, 0, rdata->len);
+        }
+
         pthread_mutex_lock(&comm_io_lock);
         quitreq = comm_io_quitreq;
         pthread_mutex_unlock(&comm_io_lock);

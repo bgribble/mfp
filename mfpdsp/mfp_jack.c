@@ -32,9 +32,6 @@ process_cb (jack_nframes_t nframes, void * ctxt_arg)
         mfp_dsp_set_blocksize(ctxt, nframes);
         mfp_dsp_run(ctxt);
     }
-    else {
-        printf("DSP DISABLED, process() not running network\n");
-    }
 
     return 0;
 }
@@ -95,7 +92,7 @@ reorder_cb (void * ctxt_arg)
 
     mfp_out_latency = 1000.0 * maxval / ctxt->samplerate;
 
-    mfp_dsp_send_response_float(NULL, 1, 0.0);
+    /* mfp_dsp_send_response_float(NULL, 1, 0.0); */
     return 0;
 }
 
