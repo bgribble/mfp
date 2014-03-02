@@ -65,8 +65,14 @@ class BaseWorker (object):
 
     def perform_work(self, data):
         '''Process chunk of data'''
-        if callable(self.thunk): 
-            return self.thunk(self, data)
+        try:
+            if callable(self.thunk): 
+                return self.thunk(self, data)
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
+            print e
+            return True
         
     def go(self):
         with self.lock:

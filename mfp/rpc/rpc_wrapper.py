@@ -25,6 +25,7 @@ class RPCMetaclass(type):
     def __init__(klass, name, bases, xdict):
         type.__init__(klass, name, bases, xdict)
         klass.register(name)
+        klass.publishers = []
 
 
 class RPCWrapper (object):
@@ -53,7 +54,6 @@ class RPCWrapper (object):
     rpctype = {}
     local = False
     rpchost = None
-    publishers = [] 
     call_stats = {} 
 
     def __init__(self, *args, **kwargs):
@@ -76,7 +76,7 @@ class RPCWrapper (object):
 
             self.rpchost.put(r, self.peer_id)
             self.rpchost.wait(r)
-            if r.response[0] == RPCWrapper.NO_CLASS:
+            if not r.response or r.response[0] == RPCWrapper.NO_CLASS:
                 raise RPCWrapper.ClassNotFound()
 
             self.rpcid = r.response[0]
@@ -84,7 +84,7 @@ class RPCWrapper (object):
     def call_remotely(self, rpcdata):
         r = Request("call", rpcdata)
         self.rpchost.put(r, self.peer_id)
-        self.rpchost.wait(r)
+        self.rpchost.wait(r, timeout=5)
 
         status, retval = r.response 
         if status == RPCWrapper.METHOD_OK:

@@ -18,6 +18,7 @@ class RPCListener (QuittableThread):
         self.socket = None 
         self.name = name 
         self.rpc_host = rpc_host 
+        self.rpc_host.node_id = 0
 
     def run(self): 
         # create socket 
@@ -39,8 +40,9 @@ class RPCListener (QuittableThread):
                 sock, addr = self.socket.accept()
                 sock.settimeout(None)
                 self._rpc_last_peer += 1
-                self.rpc_host.manage(self._rpc_last_peer, sock)
-
+                newpeer = self._rpc_last_peer
+                self.rpc_host.manage(newpeer, sock)
+                self.rpc_host.put(Request("node_id", dict(node_id=newpeer)), newpeer)  
             except socket.timeout:
                 pass
         
@@ -76,7 +78,7 @@ class RPCExecRemote (object):
     def start(self):
         import subprocess 
         arglist = [self.exec_file] + self.exec_args
-        self.process = subprocess.Popen(arglist)
+        self.process = subprocess.Popen([str(a) for a in arglist])
 
     def finish(self):
         self.process.terminate()

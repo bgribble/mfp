@@ -1,7 +1,6 @@
 import time 
 import simplejson as json 
 import threading 
-from datetime import datetime
 
 from request import Request 
 from rpc_wrapper import RPCWrapper 
@@ -23,6 +22,8 @@ class RPCHost (QuittableThread):
         self.condition = threading.Condition(self.lock)
         self.pending = {}
 
+        self.node_id = None 
+
         self.pollobj = None
         self.poll_sockets = {} 
 
@@ -32,7 +33,10 @@ class RPCHost (QuittableThread):
         self.managed_objects = {} 
 
         self.read_workers = WorkerPool(self.dispatch_rpcdata)
-        
+    
+    def __repr__(self):
+        return "<RPCHost node=%s>" % self.node_id
+
     def manage(self, peer_id, sock):
         if peer_id not in self.managed_sockets:
             self.managed_sockets[peer_id] = sock
@@ -73,7 +77,7 @@ class RPCHost (QuittableThread):
         # find the right socket 
         sock = self.managed_sockets.get(peer_id)
         if sock is None: 
-            print "RPCHost.put: peer_id", peer_id, "has no mapped socket"
+            print self, "RPCHost.put: peer_id", peer_id, "has no mapped socket"
             raise Exception()
 
         # is this a request?  if so, put it in the pending dict 
@@ -85,15 +89,25 @@ class RPCHost (QuittableThread):
         jdata = req.serialize()
         sock.send(jdata)
 
-    def wait(self, req):
+    def wait(self, req, timeout=None):
+        import datetime
+        endtime = None
+        if timeout is not None:
+            endtime = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
+
         with self.lock:
             while req.state != Request.RESPONSE_RCVD:
                 self.condition.wait(0.1)
                 if self.join_req: 
                     return False 
+                elif timeout is not None and datetime.datetime.now() > endtime: 
+                    print "RPCHost.wait(): Request timed out after %s sec -- %s" % (timeout, req)
+                    raise Exception()
 
     def dispatch_rpcdata(self, rpc_worker, rpcdata):
         json_data, peer_id = rpcdata 
+        print self, "from node", peer_id, json_data
+
         py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
         for obj in py_data: 
             req = Request.from_dict(obj)
@@ -196,12 +210,13 @@ class RPCHost (QuittableThread):
                 req.response = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())
         elif method == 'publish': 
             for clsname in req.params.get("classes"): 
-                print "RPCHost: publishing", clsname, "on", peer_id
                 cls = RPCWrapper.rpctype.get(clsname)
                 if cls is not None:
                     cls.publishers.append(peer_id)
             req.response = (True, None) 
-
+        elif method == "node_id":
+            self.node_id = req.params.get("node_id")
+            req.response = (True, None)
         elif method == "peer_exit": 
             # remove this peer as a publisher for any classes
             for clsname, cls in RPCWrapper.rpctype.items():

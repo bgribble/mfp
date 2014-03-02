@@ -10,6 +10,15 @@ from .rpc import RPCWrapper, rpcwrap
 from . import log
 
 
+def dprint(func):
+    def inner(*args, **kwargs):
+        log.debug("%s: enter" % func.__name__ )
+        rv = func(*args, **kwargs)
+        log.debug("%s: leave" % func.__name__ )
+        return rv
+    return inner
+
+
 class DSPObject(RPCWrapper):
     objects = {}
     c_objects = {}
@@ -17,43 +26,30 @@ class DSPObject(RPCWrapper):
     def __init__(self, obj_id, name, inlets, outlets, params={}):
         self.obj_id = obj_id
         RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params)
-        if self.local:
-            import mfpdsp
-            self.c_obj = mfpdsp.proc_create(name, inlets, outlets, params)
-            DSPObject.objects[self.obj_id] = self.c_obj
-            DSPObject.c_objects[self.c_obj] = self.obj_id
 
     @rpcwrap
     def reset(self):
-        import mfpdsp
-        return mfpdsp.proc_reset(self.c_obj)
+        pass
 
     @rpcwrap
     def delete(self):
-        import mfpdsp
-        return mfpdsp.proc_destroy(self.c_obj)
+        pass
 
     @rpcwrap
     def getparam(self, param):
-        import mfpdsp
-        return mfpdsp.proc_getparam(self.c_obj, param)
+        pass
 
     @rpcwrap
     def setparam(self, param, value):
-        import mfpdsp
-        return mfpdsp.proc_setparam(self.c_obj, param, value)
+        pass
 
     @rpcwrap
     def connect(self, outlet, target, inlet):
-        import mfpdsp
-        return mfpdsp.proc_connect(self.c_obj, outlet, DSPObject.objects.get(target),
-                                   inlet)
+        pass
 
     @rpcwrap
     def disconnect(self, outlet, target, inlet):
-        import mfpdsp
-        return mfpdsp.proc_disconnect(self.c_obj, outlet, DSPObject.objects.get(target),
-                                      inlet)
+        pass
 
 
 class DSPCommand (RPCWrapper):

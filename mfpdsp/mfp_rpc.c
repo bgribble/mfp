@@ -40,6 +40,7 @@ mfp_rpc_send_response(int req_id, const char * result)
     char reqbuf[MFP_MAX_MSGSIZE];
     snprintf(reqbuf, MFP_MAX_MSGSIZE-1, 
             "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": \"%s\"}", req_id, result);
+    printf("Response: id %d\n",  req_id);
     mfp_comm_send(reqbuf);
 }
 
@@ -53,6 +54,7 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
     const char * methodname;
     int success;
     int reqid;
+    int need_response = 0; 
 
     success = json_parser_load_from_data(parser, msgbuf, msglen, &err);
     printf("parsing '%s'\n", msgbuf);
@@ -76,6 +78,7 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
             printf("json_dispatch: got response (NULL methodname)\n");
             break;
         case JSON_NODE_VALUE:
+            need_response = 1;
             methodname = json_node_get_string(val);
             if (methodname != NULL) {
                 printf("json_dispatch: got methodcall '%s'\n", json_node_get_string(val));
@@ -84,9 +87,9 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
     }
 
     val = json_object_get_member(msgobj, "id");
-    if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) {
+    if (need_response && val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) {
         reqid = (int)json_node_get_double(val);
-        mfp_rpc_send_response(reqid, "true");
+        mfp_rpc_send_response(reqid, "[ true, true]");
     }
 
     return 0;

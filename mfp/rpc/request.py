@@ -25,8 +25,14 @@ class Request(object):
         Request._next_id += 1
 
     def serialize(self):
-        obj = dict(jsonrpc="2.0", id=self.request_id, method=self.method, 
-                   result=self.response, params=self.params)
+        obj = dict(jsonrpc="2.0", id=self.request_id)
+        
+        if self.method is not None:
+            obj["method"] = self.method
+            obj["params"] = self.params
+        else: 
+            obj["result"] = self.response
+
         return json.dumps(obj)
 
     def is_request(self):
