@@ -124,6 +124,7 @@ typedef struct mfp_context_struct {
     int samplerate;
     int blocksize; 
     int proc_count;
+    int needs_reschedule;
     union {
         mfp_jack_info * jack;
         mfp_lv2_info * lv2;
@@ -143,6 +144,8 @@ typedef struct mfp_context_struct {
 #define REQTYPE_DISCONNECT 4
 #define REQTYPE_SETPARAM 5 
 #define REQTYPE_EXTLOAD 6 
+#define REQTYPE_GETPARAM 7
+#define REQTYPE_RESET 8
 
 #define ALLOC_IDLE 0
 #define ALLOC_WORKING 1
@@ -164,17 +167,15 @@ typedef struct mfp_context_struct {
 #define MFP_EXEC_SHELLMAX 2048
 #define MFP_MAX_MSGSIZE 2048 
 
-
-/* global variables */ 
+/* library global variables */ 
 extern int mfp_dsp_enabled;
-extern int mfp_dsp_usejack;
-extern int mfp_needs_reschedule;
 extern int mfp_max_blocksize; 
 extern float mfp_in_latency;
 extern float mfp_out_latency;
 
 extern GHashTable * mfp_proc_registry;
 extern GHashTable * mfp_proc_objects;
+extern GHashTable * mfp_contexts;
 extern GHashTable * mfp_extensions; 
 
 extern GArray * mfp_proc_list; 
@@ -198,7 +199,7 @@ extern int mfp_num_input_buffers(mfp_context * ctxt);
 
 /* mfp_dsp.c */
 extern void mfp_dsp_init(void);
-extern int mfp_dsp_schedule(void);
+extern int mfp_dsp_schedule(mfp_context * ctxt);
 extern void mfp_dsp_run(mfp_context * ctxt);
 extern void mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples);
 extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
@@ -210,7 +211,9 @@ extern void mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, doub
 
 extern int mfp_num_input_buffers(mfp_context * ctxt); 
 extern int mfp_num_output_buffers(mfp_context * ctxt);
+
 /* mfp_proc.c */
+extern mfp_processor * mfp_proc_lookup(int proc_id);
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);
 extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, mfp_context *);
 extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, mfp_context *);
@@ -256,6 +259,9 @@ extern void mfp_dsp_handle_requests(void);
 extern int mfp_rpc_json_dispatch_request(const char *, int);
 extern int mfp_rpc_json_dsp_response(mfp_respdata, char *);
 extern void mfp_rpc_init(void);
+
+/* mfp_context.c */
+extern mfp_context * mfp_context_new(int ctype);
 
 #endif
 

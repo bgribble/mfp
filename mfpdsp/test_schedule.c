@@ -14,7 +14,7 @@ test_sched_prod_to_sink(void * data)
     printf("   test_sched_prod_to_sink... ");
 
     mfp_proc_connect(osc, 0, dac, 0);
-    mfp_dsp_schedule();
+    mfp_dsp_schedule((mfp_context *)data);
 
     if ((osc->depth == 0) && (dac->depth == 1)) {
         printf("ok\n");
@@ -45,7 +45,7 @@ test_sched_y_conn(void * data)
 
     mfp_proc_connect(osc_2, 0, dac, 0);
     mfp_proc_connect(osc_1, 0, dac, 0);
-    mfp_dsp_schedule();
+    mfp_dsp_schedule((mfp_context *)data);
     
     if ((osc_1->depth == 0) && (osc_2->depth == 0) && (dac->depth == 1) ) {
         printf("ok\n");

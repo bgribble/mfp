@@ -109,6 +109,14 @@ mfp_dsp_handle_requests(void)
             cmd->src_proc->needs_config = 1;
             break;
 
+        case REQTYPE_GETPARAM:
+            printf("FIXME: getparam unimplemented\n");
+            break;
+
+        case REQTYPE_RESET: 
+            printf("FIXME: reset unimplemented\n");
+            break;
+
         case REQTYPE_EXTLOAD:
             mfp_ext_init((mfp_extinfo *)cmd->param_value);
             break;

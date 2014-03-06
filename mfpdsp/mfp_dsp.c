@@ -13,7 +13,6 @@
 
 int mfp_dsp_enabled = 0;
 int mfp_initialized = 0;
-int mfp_needs_reschedule = 1;
 int mfp_max_blocksize = 4096; 
 
 float mfp_in_latency = 0.0;
@@ -39,7 +38,8 @@ mfp_dsp_init(void) {
     /* init global vars */
     mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
     mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
-    mfp_proc_objects = g_hash_table_new(NULL, NULL);
+    mfp_proc_objects = g_hash_table_new(g_direct_hash, g_direct_equal);
+    mfp_contexts = g_hash_table_new(g_direct_hash, g_direct_equal);
     mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal); 
 
     mfp_request_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata *));
@@ -175,7 +175,7 @@ ready_to_schedule(mfp_processor * p)
 }
 
 int 
-mfp_dsp_schedule(void) 
+mfp_dsp_schedule(mfp_context * ctxt) 
 {
     int pass = 0;
     int lastpass_unsched = -1;
@@ -187,20 +187,24 @@ mfp_dsp_schedule(void)
 
     /* unschedule everything */
     for (p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
-        (*p)->depth = -1;
-        proc_count ++;
+        if ((*p)->context == ctxt) {
+            (*p)->depth = -1;
+            proc_count ++;
+        }
     }
 
     /* calculate scheduling order */ 
     while (another_pass == 1) {
         for (p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
-            if ((*p)->depth < 0) {
-                depth = ready_to_schedule(*p);
-                if (depth >= 0) {
-                    (*p)->depth = depth;
-                }
-                else {
-                    thispass_unsched++;
+            if ((*p)->context == ctxt) {
+                if ((*p)->depth < 0) {
+                    depth = ready_to_schedule(*p);
+                    if (depth >= 0) {
+                        (*p)->depth = depth;
+                    }
+                    else {
+                        thispass_unsched++;
+                    }
                 }
             }
         }
@@ -254,11 +258,11 @@ mfp_dsp_run(mfp_context * ctxt)
         }
     }
     
-    if (mfp_needs_reschedule == 1) {
-        if (!mfp_dsp_schedule()) {
+    if (ctxt->needs_reschedule == 1) {
+        if (!mfp_dsp_schedule(ctxt)) {
             printf("mfp_dsp_run: DSP Error: Some processors could not be scheduled\n");
         }
-        mfp_needs_reschedule = 0;
+        ctxt->needs_reschedule = 0;
     }
 
     /* the proclist is already scheduled, so iterating in order is OK */

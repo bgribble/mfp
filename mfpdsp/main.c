@@ -71,7 +71,6 @@ main(int argc, char ** argv)
     printf("mfpdsp: Entering comm event loop, will not return to main()\n");
     mfp_comm_io_wait();
 
-
     printf("mfpdsp: Returned from comm event loop, will exit.\n"); 
     return 0;
 

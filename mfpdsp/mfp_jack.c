@@ -106,9 +106,7 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
 
     char namebuf[16];
 
-    ctxt = g_malloc(sizeof(mfp_context));
-    ctxt->ctype = CTYPE_JACK;
-    ctxt->info.jack = g_malloc(sizeof(mfp_jack_info));
+    ctxt = mfp_context_new(CTYPE_JACK);
 
     if ((ctxt->info.jack->client = jack_client_open(client_name, JackNullOption, &status, NULL)) == 0) {
         fprintf (stderr, "jack_client_open() failed.");

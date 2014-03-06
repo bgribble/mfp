@@ -5,6 +5,214 @@
 #include <glib.h>
 #include <json-glib/json-glib.h>
 
+static int
+json_notval(JsonNode * node)
+{
+    if (node == NULL) {
+        return 1;
+    }
+    else if (JSON_NODE_TYPE(node) != JSON_NODE_VALUE) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+static gpointer 
+extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * param_val)
+{
+    int vtype = GPOINTER_TO_INT(g_hash_table_lookup(proc->typeinfo->params, param_name));
+    JsonArray * jarray;
+    void * rval = NULL;
+    double dval;
+    const char * strval;
+    int i, endex;
+
+    switch ((int)vtype) {
+        case PARAMTYPE_UNDEF:
+            printf("extract_param_value: undefined parameter %s\n", param_name);
+            break;
+        case PARAMTYPE_FLT:
+        case PARAMTYPE_INT:
+            dval = json_node_get_double(param_val);
+            rval = (gpointer)g_malloc0(sizeof(double));
+            *(double *)rval = dval;
+            break;
+
+        case PARAMTYPE_STRING:
+            strval = json_node_get_string(param_val);
+            rval = (gpointer)g_strdup(strval);
+            break;
+
+        case PARAMTYPE_FLTARRAY:
+            jarray = json_node_get_array(param_val);
+            endex = json_array_get_length(jarray);
+            rval = (gpointer)g_array_sized_new(FALSE, FALSE, sizeof(float), endex);
+            dval = json_node_get_double(json_array_get_element(jarray, i));
+            for (i=0; i < endex; i++) { 
+                g_array_append_val((GArray *)rval, dval);
+            }
+            break;
+    }
+    return rval;
+}
+
+/*
+ * dispatch_object_methodcall implments the API of the Python DSPObject class 
+ * (see dsp_object.py)
+ */
+
+static int
+dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args)
+{
+    JsonNode * val;
+    mfp_reqdata rd;
+
+    printf("dispatch_object_methodcall: '%s' on %d\n", methodname, obj_id); 
+    
+    if(!strcmp(methodname, "connect")) {
+        rd.reqtype = REQTYPE_CONNECT;
+        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.src_port = (int)(json_node_get_double(json_array_get_element(args, 0)));
+        rd.dest_proc = mfp_proc_lookup((int)(json_node_get_double(
+                        json_array_get_element(args, 1))));
+        rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
+    }
+    else if (!strcmp(methodname, "disconnect")) {
+        rd.reqtype = REQTYPE_DISCONNECT;
+        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.src_port = (int)(json_node_get_double(json_array_get_element(args, 0)));
+        rd.dest_proc = mfp_proc_lookup((int)(json_node_get_double(
+                        json_array_get_element(args, 1))));
+        rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
+    }
+    else if (!strcmp(methodname, "getparam")) {
+        rd.reqtype = REQTYPE_GETPARAM;
+        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.param_name = (gpointer)json_node_get_string(json_array_get_element(args, 0));
+    }
+    else if (!strcmp(methodname, "setparam")) {
+        rd.reqtype = REQTYPE_SETPARAM;
+        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.param_name = (gpointer)json_node_get_string(json_array_get_element(args, 0));
+        rd.param_value = (gpointer)extract_param_value(rd.src_proc, rd.param_name, 
+                                                       json_array_get_element(args, 1));
+    }
+    else if (!strcmp(methodname, "destroy")) {
+        rd.reqtype = REQTYPE_DESTROY;
+        rd.src_proc = mfp_proc_lookup(obj_id); 
+    }
+    else if (!strcmp(methodname, "reset")) {
+        rd.reqtype = REQTYPE_RESET;
+        rd.src_proc = mfp_proc_lookup(obj_id); 
+    }
+    else {
+        printf("methodcall: unhandled method '%s'\n", methodname);
+    }
+
+    return 0;
+}
+
+
+static void
+init_param_helper(JsonObject * obj, const gchar * key, JsonNode * val, gpointer udata)
+{
+    mfp_processor * proc = (mfp_processor *)udata;
+    void * c_value = extract_param_value(proc, key, val);
+
+    if (c_value != NULL) { 
+        printf("   init_param: prm='%s' val=%p\n", key, c_value); 
+        mfp_proc_setparam(proc, g_strdup(key), c_value);
+    }
+}
+
+static mfp_processor * 
+dispatch_create(const char * typename, JsonArray * args, JsonObject * kwargs)
+{
+    int num_inlets, num_outlets;
+    int ctxt_id;
+    mfp_procinfo * pinfo;
+    mfp_processor * proc;
+    mfp_context * ctxt;
+    JsonObject * createprms;
+
+    pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typename);
+
+    if (pinfo == NULL) {
+        printf("create: could not find type info for type '%s'\n", typename);
+        return NULL;
+    }
+    else {
+        num_inlets = (int)json_node_get_double(json_array_get_element(args, 1));
+        num_outlets = (int)json_node_get_double(json_array_get_element(args, 2));
+        createprms = json_node_get_object(json_array_get_element(args, 3));
+        ctxt_id =  (int)json_node_get_double(json_array_get_element(args, 4));
+
+        printf("create: init '%s' inlets=%d outlets=%d context=%d\n", typename, num_inlets, 
+               num_outlets, ctxt_id);
+        ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
+        proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, ctxt);
+        json_object_foreach_member(createprms, init_param_helper, (gpointer)proc);
+        mfp_proc_init(proc);
+        return proc;
+    }
+}
+
+
+/* 
+ * dispatch_methodcall implements the API of the Python RPCHost class 
+ * (see RPCHost.py:RPCHost.handle_request).
+ */ 
+
+static int 
+dispatch_methodcall(const char * methodname, JsonObject * params) 
+{
+
+    if(!strcmp(methodname, "call")) {
+        JsonNode * funcname, * funcparams, * funcobj;
+
+       printf("dispatch_methodcall: handling call\n");
+        funcname = json_object_get_member(params, "func");
+        funcparams = json_object_get_member(params, "args");
+        funcobj = json_object_get_member(params, "rpcid");
+
+        /* all must be set */
+        if (json_notval(funcname) || json_notval(funcparams) || json_notval(funcobj)) {
+            printf("dispatch_methodcall: problem with func, args, or rpcid\n");
+            return -1;
+        }
+        else {
+            dispatch_object_methodcall((int)json_node_get_double(funcobj), 
+                                       json_node_get_string(funcname), 
+                                       json_node_get_array(funcparams));
+        }
+    }
+    else if (!strcmp(methodname, "create")) {
+       JsonNode * typename, * args, * kwargs;
+
+       printf("dispatch_methodcall: handling create\n");
+       typename = json_object_get_member(params, "type");
+       args = json_object_get_member(params, "args");
+       kwargs = json_object_get_member(params, "kwargs");
+       if (json_notval(typename) || json_notval(args) || json_notval(kwargs)) {
+
+       }
+       else {
+           dispatch_create(json_node_get_string(typename), 
+                           json_node_get_array(args), 
+                           json_node_get_object(kwargs));
+       }
+    }
+    else if (!strcmp(methodname, "peer_exit")) {
+        printf("FIXME: peer_exit unhandled\n");
+    }
+    else if (!strcmp(methodname, "publish")) {
+        printf("FIXME: publish unhandled\n");
+    }
+
+}
+
 int  
 mfp_rpc_json_dsp_response(mfp_respdata r, char * outbuf)
 {
@@ -48,7 +256,7 @@ int
 mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen) 
 {
     JsonParser * parser = json_parser_new();
-    JsonNode * root, * val;
+    JsonNode * root, * val, * params;
     JsonObject * msgobj;
     GError * err;
     const char * methodname;
@@ -67,23 +275,14 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
     msgobj = json_node_get_object(root);
 
     val = json_object_get_member(msgobj, "method");
-    switch JSON_NODE_TYPE(val) { 
-        case JSON_NODE_OBJECT: 
-            printf("get_member returned an object\n");
-            break;
-        case JSON_NODE_ARRAY:
-            printf("get_member returned an array\n");
-            break;
-        case JSON_NODE_NULL:
-            printf("json_dispatch: got response (NULL methodname)\n");
-            break;
-        case JSON_NODE_VALUE:
-            need_response = 1;
-            methodname = json_node_get_string(val);
-            if (methodname != NULL) {
-                printf("json_dispatch: got methodcall '%s'\n", json_node_get_string(val));
-            }
-            break;
+    if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) { 
+        need_response = 1;
+        methodname = json_node_get_string(val);
+        params = json_object_get_member(msgobj, "params");
+        if (methodname != NULL) {
+            printf("json_dispatch: got methodcall '%s'\n", methodname);
+            dispatch_methodcall(methodname, json_node_get_object(params));
+        }
     }
 
     val = json_object_get_member(msgobj, "id");

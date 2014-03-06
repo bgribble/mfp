@@ -63,7 +63,7 @@ test_sig_2(void * data)
 
     setparam_float(sig_1, "value", 13.0);
     setparam_float(sig_2, "value", 12.0);
-    mfp_dsp_schedule();
+    mfp_dsp_schedule((mfp_context *)data);
     mfp_dsp_run((mfp_context *)data);
 
     outp = dac->inlet_buf[0]->data;
@@ -103,7 +103,7 @@ test_plus_multi(void * data)
     setparam_float(sig_3, "value", 51.0);
     setparam_float(dac, "const", 10.0);
 
-    mfp_dsp_schedule();
+    mfp_dsp_schedule((mfp_context *)data);
     mfp_dsp_run((mfp_context *)data);
 
     outp = dac->outlet_buf[0]->data;
@@ -319,7 +319,7 @@ test_osc_2(void * data)
 
     mfp_proc_connect(sig, 0, osc, 1);
 
-    mfp_dsp_schedule();
+    mfp_dsp_schedule((mfp_context *)data);
     mfp_dsp_run((mfp_context *)data);
 
     for(i=0; i<((mfp_context *)data)->blocksize; i++) {
@@ -454,7 +454,7 @@ test_buffer_2(void * data)
 
     mfp_proc_connect(line, 0, b, 0);
 
-    mfp_dsp_schedule();
+    mfp_dsp_schedule((mfp_context *)data);
     mfp_dsp_run((mfp_context *)data);
 
     /* give alloc thread time to work */

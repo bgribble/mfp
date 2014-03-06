@@ -9,7 +9,16 @@
 
 GArray          * mfp_proc_list = NULL;       /* all mfp_processors */ 
 GHashTable      * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */ 
-GHashTable      * mfp_proc_objects = NULL;    /* hash of pointers to PyObject * */ 
+GHashTable      * mfp_proc_objects = NULL;    /* hash of int ID to mfp_processor * */ 
+GHashTable      * mfp_contexts = NULL;        /* hash of int ID to mfp_context */ 
+
+int next_rpc_id = 1;  /* FIXME race */ 
+
+mfp_processor * 
+mfp_proc_lookup(int rpcid) 
+{
+    return g_hash_table_lookup(mfp_proc_objects, GINT_TO_POINTER(rpcid));
+}
 
 
 mfp_processor *
@@ -123,6 +132,9 @@ mfp_proc_free_buffers(mfp_processor * self)
 mfp_processor *
 mfp_proc_init(mfp_processor * p)
 {
+    p->rpc_id = next_rpc_id;
+    next_rpc_id ++;
+
     /* call type-specific initializer */
     if (p->typeinfo->init)
         p->typeinfo->init(p);
@@ -131,8 +143,9 @@ mfp_proc_init(mfp_processor * p)
 
     /* add proc to global list */
     g_array_append_val(mfp_proc_list, p); 
+    g_hash_table_insert(mfp_proc_objects, GINT_TO_POINTER(p->rpc_id), p); 
 
-    mfp_needs_reschedule = 1;
+    p->context->needs_reschedule = 1;
     return p;
 }
 
@@ -212,7 +225,7 @@ mfp_proc_destroy(mfp_processor * self)
 
     mfp_proc_free_buffers(self);
     g_free(self);
-    mfp_needs_reschedule = 1;
+    self->context->needs_reschedule = 1;
     return;
 }
 
@@ -237,7 +250,7 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
     xlets =  g_array_index(target->inlet_conn, GArray *, targ_inlet);
     g_array_append_val(xlets, targ_conn);
 
-    mfp_needs_reschedule = 1;
+    self->context->needs_reschedule = 1;
     return 0;
 }
 
@@ -285,7 +298,7 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
         }
     }
 
-    mfp_needs_reschedule = 1;
+    self->context->needs_reschedule = 1;
     return 0;
 }
 
