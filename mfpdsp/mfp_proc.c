@@ -12,8 +12,6 @@ GHashTable      * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo *
 GHashTable      * mfp_proc_objects = NULL;    /* hash of int ID to mfp_processor * */ 
 GHashTable      * mfp_contexts = NULL;        /* hash of int ID to mfp_context */ 
 
-int next_rpc_id = 1;  /* FIXME race */ 
-
 mfp_processor * 
 mfp_proc_lookup(int rpcid) 
 {
@@ -27,7 +25,7 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 {
     if (typeinfo == NULL) 
         return NULL;
-    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, ctxt));
+    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, ctxt), 0);
 }
 
 
@@ -47,7 +45,6 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
     p->typeinfo = typeinfo; 
     p->context = ctxt;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-    p->pyparams = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     p->depth = -1;
     p->needs_config = 0;
     p->needs_reset = 0;
@@ -130,10 +127,9 @@ mfp_proc_free_buffers(mfp_processor * self)
 
 
 mfp_processor *
-mfp_proc_init(mfp_processor * p)
+mfp_proc_init(mfp_processor * p, int rpc_id)
 {
-    p->rpc_id = next_rpc_id;
-    next_rpc_id ++;
+    p->rpc_id = rpc_id;
 
     /* call type-specific initializer */
     if (p->typeinfo->init)

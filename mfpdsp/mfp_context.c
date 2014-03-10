@@ -2,7 +2,7 @@
 #include <glib.h>
 #include "mfp_dsp.h"
 
-int next_context_id = 1;
+int next_context_id = 0;
 
 mfp_context * 
 mfp_context_new(int ctxt_type)

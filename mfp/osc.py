@@ -57,6 +57,7 @@ class MFPOscManager(QuittableThread):
         self.server.send(target, m)
 
     def run(self):
+        from datetime import datetime
         while not self.join_req and self.server is not None:
             self.server.recv(100)
         log.debug("OSC server exiting")

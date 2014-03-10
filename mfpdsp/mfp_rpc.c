@@ -11,7 +11,7 @@ json_notval(JsonNode * node)
     if (node == NULL) {
         return 1;
     }
-    else if (JSON_NODE_TYPE(node) != JSON_NODE_VALUE) {
+    else if (JSON_NODE_TYPE(node) == JSON_NODE_NULL) {
         return 1;
     }
     else {
@@ -63,11 +63,12 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
  * (see dsp_object.py)
  */
 
-static int
+static char *  
 dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args)
 {
     JsonNode * val;
     mfp_reqdata rd;
+    char * rval = NULL;
 
     printf("dispatch_object_methodcall: '%s' on %d\n", methodname, obj_id); 
     
@@ -111,7 +112,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
         printf("methodcall: unhandled method '%s'\n", methodname);
     }
 
-    return 0;
+    return rval;
 }
 
 
@@ -120,6 +121,7 @@ init_param_helper(JsonObject * obj, const gchar * key, JsonNode * val, gpointer 
 {
     mfp_processor * proc = (mfp_processor *)udata;
     void * c_value = extract_param_value(proc, key, val);
+    printf("init_param_helper: key='%s'\n", key);
 
     if (c_value != NULL) { 
         printf("   init_param: prm='%s' val=%p\n", key, c_value); 
@@ -128,14 +130,16 @@ init_param_helper(JsonObject * obj, const gchar * key, JsonNode * val, gpointer 
 }
 
 static mfp_processor * 
-dispatch_create(const char * typename, JsonArray * args, JsonObject * kwargs)
+dispatch_create(JsonArray * args, JsonObject * kwargs)
 {
     int num_inlets, num_outlets;
     int ctxt_id;
+    int rpc_id;
     mfp_procinfo * pinfo;
     mfp_processor * proc;
     mfp_context * ctxt;
     JsonObject * createprms;
+    const char * typename = json_node_get_string(json_array_get_element(args, 1));
 
     pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typename);
 
@@ -144,17 +148,22 @@ dispatch_create(const char * typename, JsonArray * args, JsonObject * kwargs)
         return NULL;
     }
     else {
-        num_inlets = (int)json_node_get_double(json_array_get_element(args, 1));
-        num_outlets = (int)json_node_get_double(json_array_get_element(args, 2));
-        createprms = json_node_get_object(json_array_get_element(args, 3));
-        ctxt_id =  (int)json_node_get_double(json_array_get_element(args, 4));
+        rpc_id = (int)json_node_get_double(json_array_get_element(args, 0));
+        num_inlets = (int)json_node_get_double(json_array_get_element(args, 2));
+        num_outlets = (int)json_node_get_double(json_array_get_element(args, 3));
+        createprms = json_node_get_object(json_array_get_element(args, 4));
+        ctxt_id =  (int)json_node_get_double(json_array_get_element(args, 5));
 
         printf("create: init '%s' inlets=%d outlets=%d context=%d\n", typename, num_inlets, 
                num_outlets, ctxt_id);
         ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
+        printf("create: context is %p\n", ctxt);
+
         proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, ctxt);
+        printf("create: setting initial params\n");
         json_object_foreach_member(createprms, init_param_helper, (gpointer)proc);
-        mfp_proc_init(proc);
+        printf("create: calling proc_init\n");
+        mfp_proc_init(proc, rpc_id);
         return proc;
     }
 }
@@ -165,9 +174,11 @@ dispatch_create(const char * typename, JsonArray * args, JsonObject * kwargs)
  * (see RPCHost.py:RPCHost.handle_request).
  */ 
 
-static int 
+static char * 
 dispatch_methodcall(const char * methodname, JsonObject * params) 
 {
+    char * rval = NULL; 
+
 
     if(!strcmp(methodname, "call")) {
         JsonNode * funcname, * funcparams, * funcobj;
@@ -180,29 +191,33 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
         /* all must be set */
         if (json_notval(funcname) || json_notval(funcparams) || json_notval(funcobj)) {
             printf("dispatch_methodcall: problem with func, args, or rpcid\n");
-            return -1;
         }
         else {
-            dispatch_object_methodcall((int)json_node_get_double(funcobj), 
-                                       json_node_get_string(funcname), 
-                                       json_node_get_array(funcparams));
+            rval = dispatch_object_methodcall((int)json_node_get_double(funcobj), 
+                                               json_node_get_string(funcname), 
+                                               json_node_get_array(funcparams));
         }
     }
     else if (!strcmp(methodname, "create")) {
-       JsonNode * typename, * args, * kwargs;
+        JsonNode * typename, * args, * kwargs;
+        mfp_processor * proc=NULL;
+        char ret[32];
 
-       printf("dispatch_methodcall: handling create\n");
-       typename = json_object_get_member(params, "type");
-       args = json_object_get_member(params, "args");
-       kwargs = json_object_get_member(params, "kwargs");
-       if (json_notval(typename) || json_notval(args) || json_notval(kwargs)) {
-
-       }
-       else {
-           dispatch_create(json_node_get_string(typename), 
-                           json_node_get_array(args), 
-                           json_node_get_object(kwargs));
-       }
+        printf("dispatch_methodcall: handling create\n");
+        typename = json_object_get_member(params, "type");
+        args = json_object_get_member(params, "args");
+        kwargs = json_object_get_member(params, "kwargs");
+        if (json_notval(typename) || json_notval(args) || json_notval(kwargs)) {
+            printf("dispatch_methodcall: couldn't parse one of type, args, kwargs\n");
+        }
+        else {
+            proc = dispatch_create(json_node_get_array(args), 
+                    json_node_get_object(kwargs));
+            if (proc != NULL) {
+                snprintf(ret, 31, "[true, %d]", proc->rpc_id);
+                rval = g_strdup(ret);
+            }
+        }
     }
     else if (!strcmp(methodname, "peer_exit")) {
         printf("FIXME: peer_exit unhandled\n");
@@ -210,6 +225,7 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
     else if (!strcmp(methodname, "publish")) {
         printf("FIXME: publish unhandled\n");
     }
+    return rval;
 
 }
 
@@ -247,7 +263,7 @@ mfp_rpc_send_response(int req_id, const char * result)
 {
     char reqbuf[MFP_MAX_MSGSIZE];
     snprintf(reqbuf, MFP_MAX_MSGSIZE-1, 
-            "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": \"%s\"}", req_id, result);
+            "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": %s}", req_id, result);
     printf("Response: id %d\n",  req_id);
     mfp_comm_send(reqbuf);
 }
@@ -260,6 +276,7 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
     JsonObject * msgobj;
     GError * err;
     const char * methodname;
+    char * result = NULL;
     int success;
     int reqid;
     int need_response = 0; 
@@ -281,14 +298,22 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
         params = json_object_get_member(msgobj, "params");
         if (methodname != NULL) {
             printf("json_dispatch: got methodcall '%s'\n", methodname);
-            dispatch_methodcall(methodname, json_node_get_object(params));
+            result = dispatch_methodcall(methodname, json_node_get_object(params));
         }
     }
 
     val = json_object_get_member(msgobj, "id");
     if (need_response && val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) {
+        char * respbuf;
+
         reqid = (int)json_node_get_double(val);
-        mfp_rpc_send_response(reqid, "[ true, true]");
+        if (result != NULL) {
+            mfp_rpc_send_response(reqid, result);
+            g_free(result);
+        }
+        else {
+            mfp_rpc_send_response(reqid, "[ true, true]");
+        }
     }
 
     return 0;

@@ -4,7 +4,7 @@ import threading
 
 from request import Request 
 from rpc_wrapper import RPCWrapper 
-from mfp.utils import QuittableThread
+from mfp.utils import QuittableThread, profile
 from worker_pool import WorkerPool 
 
 class RPCHost (QuittableThread): 
@@ -24,8 +24,7 @@ class RPCHost (QuittableThread):
 
         self.node_id = None 
 
-        self.pollobj = None
-        self.poll_sockets = {} 
+        self.fdsockets = {} 
 
         self.served_classes = {}
         self.managed_sockets = {}  
@@ -131,42 +130,38 @@ class RPCHost (QuittableThread):
         '''
         RPCHost.run: perform IO on managed sockets, dispatch data 
         '''
-
         self.read_workers.start()
 
         if RPCWrapper.rpchost is None:
             RPCWrapper.rpchost = self
 
         import select 
-        self.pollobj = select.poll() 
-        for fd in (0,1,2):
-            try:
-                self.pollobj.unregister(fd)
-            except KeyError:
-                pass
 
-        self.pollsockets = {} 
+        self.fdsockets = {} 
         errshown = False 
 
         while not self.join_req:
             for s in self.managed_sockets.values(): 
-                if s.fileno() not in self.pollsockets: 
-                    self.pollobj.register(s, select.POLLIN)
-                    self.pollsockets[s.fileno()] = s  
-            rdy = self.pollobj.poll(0.1)
+                if s.fileno() not in self.fdsockets: 
+                    self.fdsockets[s.fileno()] = s  
+            try: 
+                rdy, _w, _x = select.select(self.fdsockets.keys(), [], [], 0.1)
+            except Exception, e: 
+                print "select exception:", e
 
-            for rsock, event in rdy: 
-                if event & select.POLLIN:
-                    sock = self.pollsockets.get(rsock)
+            for rsock in rdy: 
+                sock = self.fdsockets.get(rsock)
+                try: 
                     jdata = sock.recv(4096)
-                    if len(jdata):
-                        peer_id = self.peers_by_socket.get(sock)
-                        self.read_workers.submit((jdata, peer_id))
-                        errshown = False 
-                elif not errshown and event & (select.POLLERR | select.POLLHUP):
-                    print "RPCHost.run: Socket error", event 
-                    errshown = True 
-                
+                except Exception, e: 
+                    print "RPCHost: caught exception", jdata 
+                    jdata = ""
+
+                if len(jdata):
+                    peer_id = self.peers_by_socket.get(sock)
+                    self.read_workers.submit((jdata, peer_id))
+                    errshown = False 
+            
         if 0 in self.managed_sockets:
             req = Request("peer_exit", {})
             self.put(req, 0)

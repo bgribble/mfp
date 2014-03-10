@@ -25,22 +25,23 @@ class BaseWorker (object):
         self.thread.start()
 
     def _thread_func(self):
+        from datetime import datetime
         while not self.quit_req:
             # get in line
             self.pool.worker_ready(self)
-
             with self.lock:
-                while not self.quit_req and self.pool.active_worker != self:
-                    self.condition.wait()
+                self.condition.wait()
 
             if self.quit_req:
                 break
+            elif self.pool.active_worker != self: 
+                continue 
 
             # take_work a chunk of data
             try:
                 workunit = self.take_work()
             except WorkerPool.Empty, e:
-                continue
+                continue 
 
             # perform_work data
             self.pool.worker_consuming(self)
@@ -56,12 +57,13 @@ class BaseWorker (object):
 
     def take_work(self):
         '''Grab next available chunk of data'''
-        if self.pool.submitted_data is not None:
-            rd = self.pool.submitted_data
-            self.pool.submitted_data = None 
-            return rd 
-        else: 
-            raise WorkerPool.Empty()
+        with self.pool.lock: 
+            if self.pool.submitted_data:
+                rd = self.pool.submitted_data[0]
+                self.pool.submitted_data = self.pool.submitted_data[1:] 
+                return rd 
+            else: 
+                raise WorkerPool.Empty()
 
     def perform_work(self, data):
         '''Process chunk of data'''
@@ -76,7 +78,7 @@ class BaseWorker (object):
         
     def go(self):
         with self.lock:
-            self.condition.notify()
+            self.condition.notify_all()
 
     def exit(self):
         self.quit_req = True
@@ -102,7 +104,7 @@ class WorkerPool (object):
         self.quit_req = False
 
         self.active_worker = None
-        self.submitted_data = None 
+        self.submitted_data = []
         self.waiting_pool = []
         self.working_pool = []
         self.dead_pool = []
@@ -136,6 +138,7 @@ class WorkerPool (object):
             self.condition.notify()
 
     def worker_consuming(self, worker):
+        from datetime import datetime 
         goworker = 0
         with self.lock:
             if worker == self.active_worker:
@@ -179,7 +182,7 @@ class WorkerPool (object):
 
     def submit(self, job_data):
         with self.lock:
-            self.submitted_data = job_data 
+            self.submitted_data.append(job_data)
             self.active_worker.go()
 
     def finish(self, wait=True):

@@ -121,11 +121,14 @@ from threading import Thread, Lock
 
 class QuittableThread(Thread):
     _all_threads = []
-    _all_threads_lock = Lock()
+    _all_threads_lock = None
 
     def __init__(self, target=None):
         self.join_req = False
         self.target = target
+
+        if QuittableThread._all_threads_lock is None:
+            QuittableThread._all_threads_lock = Lock()
 
         with QuittableThread._all_threads_lock:
             QuittableThread._all_threads.append(self)
