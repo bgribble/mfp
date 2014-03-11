@@ -36,8 +36,8 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
             dval = json_node_get_double(param_val);
-            rval = (gpointer)g_malloc0(sizeof(double));
-            *(double *)rval = dval;
+            rval = (gpointer)g_malloc0(sizeof(float));
+            *(float *)rval = (float)dval;
             break;
 
         case PARAMTYPE_STRING:
@@ -79,6 +79,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
         rd.dest_proc = mfp_proc_lookup((int)(json_node_get_double(
                         json_array_get_element(args, 1))));
         rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
+        mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "disconnect")) {
         rd.reqtype = REQTYPE_DISCONNECT;
@@ -87,6 +88,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
         rd.dest_proc = mfp_proc_lookup((int)(json_node_get_double(
                         json_array_get_element(args, 1))));
         rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
+        mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "getparam")) {
         rd.reqtype = REQTYPE_GETPARAM;
@@ -99,14 +101,17 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
         rd.param_name = (gpointer)json_node_get_string(json_array_get_element(args, 0));
         rd.param_value = (gpointer)extract_param_value(rd.src_proc, rd.param_name, 
                                                        json_array_get_element(args, 1));
+        mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "destroy")) {
         rd.reqtype = REQTYPE_DESTROY;
         rd.src_proc = mfp_proc_lookup(obj_id); 
+        mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "reset")) {
         rd.reqtype = REQTYPE_RESET;
         rd.src_proc = mfp_proc_lookup(obj_id); 
+        mfp_dsp_push_request(rd);
     }
     else {
         printf("methodcall: unhandled method '%s'\n", methodname);

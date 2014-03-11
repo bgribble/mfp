@@ -105,7 +105,7 @@ class RPCHost (QuittableThread):
 
     def dispatch_rpcdata(self, rpc_worker, rpcdata):
         json_data, peer_id = rpcdata 
-        print self, "from node", peer_id, json_data
+        print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
 
         py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
         for obj in py_data: 
@@ -183,7 +183,7 @@ class RPCHost (QuittableThread):
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
             if factory:
                 obj = factory(*args, **kwargs)
-                req.response = (obj.rpcid, None)
+                req.response = (True, obj.rpcid)
             else:
                 req.response = (RPCWrapper.NO_CLASS, None)
         elif method == 'delete':

@@ -68,6 +68,7 @@ main(int argc, char ** argv)
     
     mfp_rpc_init();
 
+    mfp_dsp_enabled = 1;
     printf("mfpdsp: Entering comm event loop, will not return to main()\n");
     mfp_comm_io_wait();
 

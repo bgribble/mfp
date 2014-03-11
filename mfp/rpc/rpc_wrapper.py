@@ -79,7 +79,7 @@ class RPCWrapper (object):
             if not r.response or r.response[0] == RPCWrapper.NO_CLASS:
                 raise RPCWrapper.ClassNotFound()
 
-            self.rpcid = r.response[0]
+            self.rpcid = r.response[1]
 
     def call_remotely(self, rpcdata):
         r = Request("call", rpcdata)

@@ -14,7 +14,7 @@ typedef struct {
 } builtin_osc_data;
 
 #define OSC_TABSIZE 2048
-#define OSC_TABRANGE (2.0 * M_PI)
+#define OSC_TABRANGE (2.0 * M_PI + 0.000001)
 #define OSC_TABSCALE (OSC_TABSIZE / OSC_TABRANGE)
 #define OSC_TABINCR (OSC_TABRANGE / OSC_TABSIZE) 
 
