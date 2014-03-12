@@ -22,6 +22,7 @@ class Request(object):
         self.response = None
         self.callback = callback
         self.request_id = Request._next_id
+        self.diagnostic = {}
         Request._next_id += 1
 
     def serialize(self):
@@ -32,6 +33,7 @@ class Request(object):
             obj["params"] = self.params
         else: 
             obj["result"] = self.response
+        obj["diagnostic"] = self.diagnostic
 
         return json.dumps(obj)
 
@@ -47,6 +49,9 @@ class Request(object):
 
         if obj.has_key("id"):
             req.request_id = obj['id']
+
+        if obj.has_key("diagnostic"):
+            req.diagnostic = obj['diagnostic']
 
         if obj.has_key("error"):
             # a response 

@@ -136,7 +136,6 @@ mfp_comm_io_reader_thread(void * tdata)
     int errstat = 0; 
 
     while(!quitreq) {
-        printf("comm_io_reader: calling recv\n");
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
         if (bytesread > 0) { 
             errstat = 0;

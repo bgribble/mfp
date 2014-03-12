@@ -82,9 +82,19 @@ class RPCWrapper (object):
             self.rpcid = r.response[1]
 
     def call_remotely(self, rpcdata):
+        from datetime import datetime 
+
         r = Request("call", rpcdata)
+        r.diagnostic["remote_call_start"] = str(datetime.now())
         self.rpchost.put(r, self.peer_id)
+        puttime = str(datetime.now())
         self.rpchost.wait(r, timeout=5)
+        r.diagnostic["remote_call_complete"] = str(datetime.now())
+        r.diagnostic["remote_call_put"] = puttime 
+
+        print "Request", id(r), rpcdata
+        for key in sorted(r.diagnostic):
+            print "   ", key, r.diagnostic[key]
 
         status, retval = r.response 
         if status == RPCWrapper.METHOD_OK:

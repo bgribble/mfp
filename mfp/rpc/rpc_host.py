@@ -116,8 +116,9 @@ class RPCHost (QuittableThread):
                 oldreq = self.pending.get(req.request_id)
                 oldreq.response = req.response 
                 oldreq.state = req.state
-                with rpc_worker.pool.lock:
-                    rpc_worker.pool.condition.notify()
+                oldreq.diagnostic = req.diagnostic
+                with self.lock:
+                    self.condition.notify()
             elif req.is_request():
                 # actually call the local handler
                 self.handle_request(req, peer_id)
@@ -130,6 +131,7 @@ class RPCHost (QuittableThread):
         '''
         RPCHost.run: perform IO on managed sockets, dispatch data 
         '''
+        from datetime import datetime
         self.read_workers.start()
 
         if RPCWrapper.rpchost is None:
@@ -171,6 +173,8 @@ class RPCHost (QuittableThread):
         print "rpc_host: finished"
 
     def handle_request(self, req, peer_id):
+        from datetime import datetime 
+
         method = req.method 
         rpcdata = req.params
         rpcid = rpcdata.get('rpcid')
@@ -178,6 +182,8 @@ class RPCHost (QuittableThread):
         kwargs = rpcdata.get('kwargs')
 
         req.state = Request.RESPONSE_DONE
+
+        req.diagnostic['local_call_started'] = str(datetime.now())
 
         if method == 'create':
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
@@ -230,6 +236,7 @@ class RPCHost (QuittableThread):
         req.method = None 
         req.params = None 
 
+        req.diagnostic['local_call_complete'] = str(datetime.now())
 
 
 

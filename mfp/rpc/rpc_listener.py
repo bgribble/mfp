@@ -38,7 +38,7 @@ class RPCListener (QuittableThread):
         while not self.join_req: 
             try: 
                 sock, addr = self.socket.accept()
-                sock.settimeout(None)
+                sock.settimeout(0.0)
                 self._rpc_last_peer += 1
                 newpeer = self._rpc_last_peer
                 self.rpc_host.manage(newpeer, sock)
