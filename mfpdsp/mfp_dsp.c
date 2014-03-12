@@ -254,8 +254,6 @@ mfp_dsp_run(mfp_context * ctxt)
     int chan;
     int chancount = mfp_num_output_buffers(ctxt);
 
-    printf("mfp_dsp_run: enter, context= %p\n", ctxt);
-
     if (!ctxt->dsp_enabled) {
         return;
     }

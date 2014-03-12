@@ -162,7 +162,10 @@ dispatch_create(JsonArray * args, JsonObject * kwargs)
         printf("create: init '%s' inlets=%d outlets=%d context=%d\n", typename, num_inlets, 
                num_outlets, ctxt_id);
         ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
-        printf("create: context is %p\n", ctxt);
+        if (ctxt == NULL) {
+            printf("create: cannot find context %d\n", ctxt_id);
+            return NULL; 
+        }
 
         proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, ctxt);
         printf("create: setting initial params\n");

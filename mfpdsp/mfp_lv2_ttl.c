@@ -17,7 +17,7 @@
  *
  * 1. LV2 host finds a saved MFP LV2 plugin def in mymfpplugin.lv2/manifest.ttl 
  * 2. LV2 host parses the .ttl file and finds that mymfpplugin is implemented 
- *    in the shared library mfpdsp.so.  ALL saved MFP plugins are implemented in
+ *    in the shared library libmfpdsp.so.  ALL saved MFP plugins are implemented in
  *    this same shared object, but have different .ttl files. 
  * 3. LV2 host does a dlopen() on mfpdsp.so and then calls lv2_descriptor() from 
  *    mfp_lv2_plug.c 
@@ -105,6 +105,7 @@ ttl_statement(void * data, SerdStatementFlags flags, const SerdNode * graph,
                 && object && object->buf && (!strcmp(object->buf, "lv2:InputPort"))) {
             printf("    port %d is an input port\n", pinfo->current_port_num);
             pinfo->lv2->port_input_mask |= (0x0001 << pinfo->current_port_num);
+            g_array_append_val(pinfo->lv2->input_ports, pinfo->current_port_num);
         }
 
         /* lv2:OutputPort is on all audio and control outputs */ 
@@ -113,6 +114,7 @@ ttl_statement(void * data, SerdStatementFlags flags, const SerdNode * graph,
                 && object && object->buf && !strcmp(object->buf, "lv2:OutputPort")) {
             printf("    port %d is an output port\n", pinfo->current_port_num);
             pinfo->lv2->port_output_mask |= (0x0001 << pinfo->current_port_num);
+            g_array_append_val(pinfo->lv2->output_ports, pinfo->current_port_num);
         }
 
         /* lv2:ControlPort is on all control ports */ 
