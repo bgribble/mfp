@@ -67,7 +67,7 @@ mfp_comm_launch(char * sockname)
     if (comm_procpid = fork()) {
         printf("mfp_comm_launch (parent): got child PID %d\n", comm_procpid);
         printf("mfp_comm_launch (parent): waiting for child startup\n");
-        sleep(3);
+        sleep(1);
         return 0;
     }
     else {
@@ -115,11 +115,17 @@ mfp_comm_init(char * init_sockid)
                 sleep(1);
                 connect_tries ++;
             }
+            else {
+                break;
+            }
         }
         if (connect_tries == 10) {
             printf("mfp_comm_init: can't connect after 10 tries, giving up\n");
             return -1;
         }
+    }
+    else {
+        printf("mfp_comm_init: comm_connect returned %d\n", connectfd);
     }
 
     /* start the IO threads */ 

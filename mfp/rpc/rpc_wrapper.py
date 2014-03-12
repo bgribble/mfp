@@ -92,9 +92,9 @@ class RPCWrapper (object):
         r.diagnostic["remote_call_complete"] = str(datetime.now())
         r.diagnostic["remote_call_put"] = puttime 
 
-        print "Request", id(r), rpcdata
-        for key in sorted(r.diagnostic):
-            print "   ", key, r.diagnostic[key]
+        #print "Request %d <%s> %s" % (r.rpc_id, id(r), rpcdata)
+        #for key in sorted(r.diagnostic):
+        #    print "   ", key, r.diagnostic[key]
 
         status, retval = r.response 
         if status == RPCWrapper.METHOD_OK:

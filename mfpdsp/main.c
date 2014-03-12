@@ -11,6 +11,24 @@
 
 #include "mfp_dsp.h"
 
+
+void
+mfp_init_all(char * sockname) 
+{
+    printf("mfp_init_all: enter\n");
+    mfp_dsp_init();
+    mfp_alloc_init();
+    mfp_comm_init(sockname);
+    mfp_comm_io_start();
+    mfp_rpc_init();
+    mfp_initialized = 1;
+
+    printf("mfp_init_all: leave\n");
+    return;
+}
+
+
+
 /* main() gets called only if this is a standalone JACK client 
  * startup.  The MFP process will cause this to be run */ 
 int
@@ -57,18 +75,10 @@ main(int argc, char ** argv)
     printf("mfpdsp:main() Starting up as standalone JACK client\n");
   
     /* set up global state */
-    mfp_dsp_init();
-    mfp_alloc_init();
-    mfp_comm_init(argv[1]);
+    mfp_init_all(sockname);
 
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
 
-    /* start main listener loop */ 
-    mfp_comm_io_start();
-    
-    mfp_rpc_init();
-
-    mfp_dsp_enabled = 1;
     printf("mfpdsp: Entering comm event loop, will not return to main()\n");
     mfp_comm_io_wait();
 

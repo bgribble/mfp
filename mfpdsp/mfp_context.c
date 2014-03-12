@@ -1,5 +1,7 @@
 
 #include <glib.h>
+#include <stdio.h>
+
 #include "mfp_dsp.h"
 
 int next_context_id = 0;
@@ -12,6 +14,8 @@ mfp_context_new(int ctxt_type)
     ctxt->id = next_context_id;
     next_context_id ++;
     ctxt->ctype = ctxt_type; 
+    ctxt->dsp_enabled = 1;
+
     if (ctxt_type == CTYPE_JACK) {
         ctxt->info.jack = g_malloc(sizeof(mfp_jack_info));
     }
@@ -21,5 +25,12 @@ mfp_context_new(int ctxt_type)
 
     g_hash_table_insert(mfp_contexts, GINT_TO_POINTER(ctxt->id), (gpointer)ctxt);
     return ctxt;
+}
+
+int
+mfp_context_load_patch(mfp_context * context, char * patchname) 
+{
+    printf("LOAD PATCH: mfp_context_load_patch not implemented, sorry!\n"); 
+    return TRUE;
 }
 

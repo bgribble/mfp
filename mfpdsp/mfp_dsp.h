@@ -123,6 +123,7 @@ typedef struct mfp_context_struct {
     int samplerate;
     int blocksize; 
     int proc_count;
+    int dsp_enabled;
     int needs_reschedule;
     union {
         mfp_jack_info * jack;
@@ -167,7 +168,7 @@ typedef struct mfp_context_struct {
 #define MFP_MAX_MSGSIZE 2048 
 
 /* library global variables */ 
-extern int mfp_dsp_enabled;
+extern int mfp_initialized;
 extern int mfp_max_blocksize; 
 extern float mfp_in_latency;
 extern float mfp_out_latency;
@@ -186,6 +187,9 @@ extern pthread_cond_t mfp_response_cond;
 extern int mfp_response_queue_read;
 extern int mfp_response_queue_write;
 extern mfp_respdata mfp_response_queue[REQ_BUFSIZE];
+
+/* main.c */
+extern void mfp_init_all(char * sockname);
 
 /* mfp_jack.c */
 extern mfp_context * mfp_jack_startup(char * client_name, int num_inputs, int num_outputs);
@@ -261,6 +265,7 @@ extern void mfp_rpc_init(void);
 
 /* mfp_context.c */
 extern mfp_context * mfp_context_new(int ctype);
+extern int mfp_context_load_patch(mfp_context * ctxt, char * patchname);
 
 #endif
 

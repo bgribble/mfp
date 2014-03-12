@@ -28,10 +28,8 @@ process_cb (jack_nframes_t nframes, void * ctxt_arg)
     */ 
 
     /* run processing network */ 
-    if (mfp_dsp_enabled == 1) {
-        mfp_dsp_set_blocksize(ctxt, nframes);
-        mfp_dsp_run(ctxt);
-    }
+    mfp_dsp_set_blocksize(ctxt, nframes);
+    mfp_dsp_run(ctxt);
 
     return 0;
 }

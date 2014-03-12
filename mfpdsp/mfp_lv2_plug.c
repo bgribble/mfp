@@ -28,58 +28,76 @@ static LV2_Handle
 mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate, 
                     const char * bundle_path, const LV2_Feature * const * features)
 {
-    mfp_lv2_info * self = g_malloc0(sizeof(mfp_lv2_info));
+    mfp_context * context = mfp_context_new(CTYPE_LV2);
+    mfp_lv2_info * self = context->info.lv2;
 
     printf("mfp_lv2_instantiate: %s\n", bundle_path);
     self->port_symbol = g_array_new(FALSE, TRUE, sizeof(char *));
     self->port_name = g_array_new(FALSE, TRUE, sizeof(char *));
     self->port_data = g_array_new(FALSE, TRUE, sizeof(void *));
+
+    /* mfp_lv2_ttl_read populates self with info about this plugin */ 
     mfp_lv2_ttl_read(self, bundle_path);
 
-    return (LV2_Handle)self;
+    /* make sure that the MFP process is running */ 
+    if (!mfp_initialized) {
+        mfp_init_all(NULL);
+    }
+
+    /* request that the MFP app build this patch */
+    mfp_context_load_patch(context, self->object_name);
+
+    return (LV2_Handle)context;
 }
 
 
 static void
 mfp_lv2_connect_port(LV2_Handle instance, uint32_t port, void * data) 
 {
-    mfp_lv2_info * self = (mfp_lv2_info *)instance;
+    mfp_context * context = (mfp_context *)instance; 
+    mfp_lv2_info * self = context->info.lv2;
 
-    printf("mfp_lv2_connect_port: %d %p\n", port, data);
+    printf("connect_port: port %d data %p\n", port, data);
     g_array_insert_val(self->port_data, port, data);
 }
 
 static void
 mfp_lv2_activate(LV2_Handle instance)
 {
-    mfp_lv2_info * self = (mfp_lv2_info *)instance;
+    mfp_context * context = (mfp_context *)instance; 
+    mfp_lv2_info * self = context->info.lv2;
     printf("mfp_lv2_activate\n");
 }
 
 static void
-mfp_lv2_run(LV2_Handle instance, uint32_t sample_count) 
+mfp_lv2_run(LV2_Handle instance, uint32_t nframes) 
 {
-    mfp_lv2_info * self = (mfp_lv2_info *)instance;
-    printf("mfp_lv2_run %d\n");
+    mfp_context * context = (mfp_context *)instance; 
+    mfp_lv2_info * self = context->info.lv2;
 
-    /* mfp_dsp_run(sample_count); */
+    mfp_dsp_set_blocksize(context, nframes);
+    printf("About to call mfp_dsp_run, context = %p\n", context);
+    mfp_dsp_run(context);
 }
 
 static void
 mfp_lv2_deactivate(LV2_Handle instance)
 { 
+    mfp_context * context = (mfp_context *)instance; 
+    mfp_lv2_info * self = context->info.lv2;
     printf("mfp_lv2_deactivate\n");
 }
 
 static void
 mfp_lv2_cleanup(LV2_Handle instance)
 {
+    mfp_context * context = (mfp_context *)instance; 
+    mfp_lv2_info * self = context->info.lv2;
     printf("mfp_lv2_cleanup\n");
-    g_free(instance);
 }
 
-static const void*
-mfp_lv2_extension_data(const char* uri)
+static const void *
+mfp_lv2_extension_data(const char * uri)
 {
     return NULL;
 }

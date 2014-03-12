@@ -11,9 +11,8 @@
 
 #include <time.h>
 
-int mfp_dsp_enabled = 0;
 int mfp_initialized = 0;
-int mfp_max_blocksize = 4096; 
+int mfp_max_blocksize = 32768; 
 
 float mfp_in_latency = 0.0;
 float mfp_out_latency = 0.0;
@@ -85,11 +84,19 @@ mfp_get_output_buffer(mfp_context * ctxt, int chan) {
 
 int 
 mfp_num_output_buffers(mfp_context * ctxt) {
+    GArray * ports = NULL;
+
     if (ctxt->ctype == CTYPE_JACK) {
-        return ctxt->info.jack->output_ports->len;
+        ports = ctxt->info.jack->output_ports;
     }
     else {
-        return ctxt->info.lv2->output_ports->len;
+        ports = ctxt->info.lv2->output_ports;
+    }
+    if (ports != NULL) {
+        return ports->len;
+    }
+    else {
+        return 0;
     }
 }
 
@@ -234,8 +241,8 @@ mfp_dsp_schedule(mfp_context * ctxt)
 
 
 /*
- * mfp_dsp_run is the bridge between JACK processing and the MFP DSP 
- * network.  It is called once per JACK block from the process() 
+ * mfp_dsp_run is the bridge between JACK/LV2 processing and the MFP DSP 
+ * network.  It is called once per JACK/LV2 block from the process() 
  * callback.
  */
 
@@ -246,6 +253,12 @@ mfp_dsp_run(mfp_context * ctxt)
     mfp_sample * buf;
     int chan;
     int chancount = mfp_num_output_buffers(ctxt);
+
+    printf("mfp_dsp_run: enter, context= %p\n", ctxt);
+
+    if (!ctxt->dsp_enabled) {
+        return;
+    }
 
     /* handle any DSP config requests */
     mfp_dsp_handle_requests();
@@ -288,7 +301,6 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
     }
 
     if (nsamples != ctxt->blocksize) {
-
         printf("mfp_dsp_set_blocksize: size changed, updating processors (%d --> %d)\n",
                 ctxt->blocksize, nsamples);
         for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
