@@ -27,10 +27,8 @@ mfp_context_new(int ctxt_type)
     return ctxt;
 }
 
-int
-mfp_context_load_patch(mfp_context * context, char * patchname) 
+void
+mfp_context_destroy(mfp_context * context)
 {
-    printf("LOAD PATCH: mfp_context_load_patch not implemented, sorry!\n"); 
-    return TRUE;
 }
 

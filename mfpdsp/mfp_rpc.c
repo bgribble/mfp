@@ -5,6 +5,10 @@
 #include <glib.h>
 #include <json-glib/json-glib.h>
 
+static int _next_reqid = 1;
+static GHashTable * request_callbacks = NULL;
+
+
 static int
 json_notval(JsonNode * node)
 {
@@ -126,7 +130,6 @@ init_param_helper(JsonObject * obj, const gchar * key, JsonNode * val, gpointer 
 {
     mfp_processor * proc = (mfp_processor *)udata;
     void * c_value = extract_param_value(proc, key, val);
-    printf("init_param_helper: key='%s'\n", key);
 
     if (c_value != NULL) { 
         printf("   init_param: prm='%s' val=%p\n", key, c_value); 
@@ -220,7 +223,7 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
         }
         else {
             proc = dispatch_create(json_node_get_array(args), 
-                    json_node_get_object(kwargs));
+                                   json_node_get_object(kwargs));
             if (proc != NULL) {
                 snprintf(ret, 31, "[true, %d]", proc->rpc_id);
                 rval = g_strdup(ret);
@@ -276,17 +279,37 @@ mfp_rpc_send_response(int req_id, const char * result)
     mfp_comm_send(reqbuf);
 }
 
+
+void 
+mfp_rpc_send_request(const char * method, const char * params, 
+                     void (* callback)(JsonNode *, void *), void * cb_data) 
+{
+    char reqbuf[MFP_MAX_MSGSIZE];
+    int req_id = _next_reqid ++; 
+
+    snprintf(reqbuf, MFP_MAX_MSGSIZE-1, 
+            "{\"jsonrpc\": \"2.0\", \"id\": %d, \"method\": \"%s\", \"params\": %s}", 
+            req_id, method, params);
+    if (callback != NULL) {
+        g_hash_table_insert(request_callbacks, GINT_TO_POINTER(req_id), callback);
+    }
+    mfp_comm_send(reqbuf);
+}
+
+
+
 int 
 mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen) 
 {
     JsonParser * parser = json_parser_new();
-    JsonNode * root, * val, * params;
+    JsonNode * id, * root, * val, * params;
     JsonObject * msgobj;
     GError * err;
     const char * methodname;
     char * result = NULL;
+    void * callback;
     int success;
-    int reqid;
+    int reqid = -1;
     int need_response = 0; 
 
     success = json_parser_load_from_data(parser, msgbuf, msglen, &err);
@@ -298,29 +321,44 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
 
     root = json_parser_get_root(parser);
     msgobj = json_node_get_object(root);
-
-    val = json_object_get_member(msgobj, "method");
-    if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) { 
-        need_response = 1;
-        methodname = json_node_get_string(val);
-        params = json_object_get_member(msgobj, "params");
-        if (methodname != NULL) {
-            printf("json_dispatch: got methodcall '%s'\n", methodname);
-            result = dispatch_methodcall(methodname, json_node_get_object(params));
-        }
+    id = json_object_get_member(msgobj, "id");
+    if (id && (JSON_NODE_TYPE(id) == JSON_NODE_VALUE)) {
+        reqid = (int)json_node_get_double(id);
     }
 
-    val = json_object_get_member(msgobj, "id");
-    if (need_response && val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) {
-        char * respbuf;
+    val = json_object_get_member(msgobj, "result");
+    if ((val != NULL) && (reqid != -1)) {
+        /* it's a response, is there a callback? */ 
+        callback = g_hash_table_lookup(request_callbacks, GINT_TO_POINTER(reqid));
+        if (callback != NULL) {
+            void (* cbfunc)(JsonNode *, void *) = (void (*)(JsonNode *, void *))callback;
+            cbfunc(val, NULL);
+            /* FIXME : Remove callback from table */ 
 
-        reqid = (int)json_node_get_double(val);
-        if (result != NULL) {
-            mfp_rpc_send_response(reqid, result);
-            g_free(result);
+            /* FIXME: callback data pointer */ 
         }
-        else {
-            mfp_rpc_send_response(reqid, "[ true, true]");
+    }
+    else { 
+        val = json_object_get_member(msgobj, "method");
+        if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) { 
+            need_response = 1;
+            methodname = json_node_get_string(val);
+            params = json_object_get_member(msgobj, "params");
+            if (methodname != NULL) {
+                printf("json_dispatch: got methodcall '%s'\n", methodname);
+                result = dispatch_methodcall(methodname, json_node_get_object(params));
+            }
+        }
+
+        if (need_response && (reqid != -1)) {
+            char * respbuf;
+            if (result != NULL) {
+                mfp_rpc_send_response(reqid, result);
+                g_free(result);
+            }
+            else {
+                mfp_rpc_send_response(reqid, "[ true, true]");
+            }
         }
     }
 
@@ -333,6 +371,9 @@ mfp_rpc_init(void)
 {
     const char req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"publish\", "
         "\"params\": { \"classes\": [\"DSPObject\"]}}";
+
+    request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal); 
+    
     printf("sending publish req: %s\n", req);
     mfp_comm_send(req);
 }

@@ -178,14 +178,15 @@ class RPCHost (QuittableThread):
         method = req.method 
         rpcdata = req.params
         rpcid = rpcdata.get('rpcid')
-        args = rpcdata.get('args')
-        kwargs = rpcdata.get('kwargs')
+        args = rpcdata.get('args') or [] 
+        kwargs = rpcdata.get('kwargs') or {}
 
         req.state = Request.RESPONSE_DONE
 
         req.diagnostic['local_call_started'] = str(datetime.now())
 
         if method == 'create':
+            print "handle_request: got CREATE", rpcdata
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
             if factory:
                 obj = factory(*args, **kwargs)

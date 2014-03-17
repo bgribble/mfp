@@ -6,6 +6,7 @@
 #include <glib.h>
 #include <jack/jack.h>
 #include <pthread.h>
+#include <json-glib/json-glib.h>
 
 #ifndef M_PI
 #    define M_PI 3.14159265358979323846
@@ -261,11 +262,18 @@ extern void mfp_dsp_handle_requests(void);
 
 extern int mfp_rpc_json_dispatch_request(const char *, int);
 extern int mfp_rpc_json_dsp_response(mfp_respdata, char *);
+extern void mfp_rpc_send_request(const char * method, const char * params, 
+                                void (* callback)(JsonNode *, void *), void *);
+extern void mfp_rpc_send_response(int request_id, const char * result);
 extern void mfp_rpc_init(void);
 
 /* mfp_context.c */
 extern mfp_context * mfp_context_new(int ctype);
-extern int mfp_context_load_patch(mfp_context * ctxt, char * patchname);
+extern void mfp_context_destroy(mfp_context * context);
+
+/* mfp_api.c */
+extern void mfp_api_init(void);
+extern int mfp_api_load_patch(mfp_context * ctxt, char * patchname);
 
 #endif
 

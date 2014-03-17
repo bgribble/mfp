@@ -21,6 +21,7 @@ mfp_init_all(char * sockname)
     mfp_comm_init(sockname);
     mfp_comm_io_start();
     mfp_rpc_init();
+    mfp_api_init();
     mfp_initialized = 1;
 
     printf("mfp_init_all: leave\n");

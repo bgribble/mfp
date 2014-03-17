@@ -50,7 +50,7 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     mfp_lv2_ttl_read(self, bundle_path);
 
     /* request that the MFP app build this patch */
-    mfp_context_load_patch(context, self->object_name);
+    mfp_api_load_patch(context, self->object_name);
 
     return (LV2_Handle)context;
 }
