@@ -159,8 +159,9 @@ class MFPCommand(RPCWrapper):
         obj.assign(obj.patch, scope, obj.name)
 
     @rpcwrap
-    def open_file(self, file_name):
+    def open_file(self, file_name, context=None):
         from .mfp_app import MFPApp
+        print "MFPCommand.open_file:", file_name, context
         MFPApp().open_file(file_name)
 
     @rpcwrap

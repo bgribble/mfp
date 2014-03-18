@@ -12,6 +12,7 @@
 #include <json-glib/json-glib.h>
 #include "mfp_dsp.h"
 
+int mfp_comm_nodeid = -1;
 static char * comm_sockname = NULL;
 static int comm_socket = -1;
 static int comm_procpid = -1;
@@ -25,8 +26,6 @@ mfp_comm_connect(char * sockname)
 {
     int socket_fd;
     struct sockaddr_un address; 
-
-    printf("mfp_comm_connect: enter\n");
 
     socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
     if (socket_fd < 0) {
@@ -79,6 +78,16 @@ mfp_comm_launch(char * sockname)
 
 }
 
+int 
+mfp_comm_quit_requested(void) 
+{
+    int quitreq; 
+    pthread_mutex_lock(&comm_io_lock);
+    quitreq = comm_io_quitreq;
+    pthread_mutex_unlock(&comm_io_lock);
+
+    return quitreq;
+}
 
 int
 mfp_comm_init(char * init_sockid) 
@@ -145,6 +154,7 @@ mfp_comm_io_reader_thread(void * tdata)
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
         if (bytesread > 0) { 
             errstat = 0;
+            printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
             mfp_rpc_json_dispatch_request(msgbuf, bytesread);
         }
         else {
@@ -153,10 +163,7 @@ mfp_comm_io_reader_thread(void * tdata)
                 errstat = 1;
             }
         }
-
-        pthread_mutex_lock(&comm_io_lock);
-        quitreq = comm_io_quitreq;
-        pthread_mutex_unlock(&comm_io_lock);
+        quitreq = mfp_comm_quit_requested();
     }
 }
 

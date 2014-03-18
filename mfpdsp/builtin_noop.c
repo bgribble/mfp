@@ -7,6 +7,21 @@
 static int 
 process(mfp_processor * proc) 
 {
+    if (proc == NULL) { 
+        printf("builtin_noop.c: proc is NULL!\n");
+        return -1;
+    }
+    else if (proc->outlet_buf == NULL) {
+        printf("builtin_noop.c: proc ID %d (%p) proc->outlet_buf is NULL\n",
+                proc->rpc_id, proc);
+        return -1;
+    }
+    else if (proc->outlet_buf[0] == NULL) {
+        printf("builtin_noop.c: proc ID %d (%p) proc->outlet_buf[0] is NULL\n",
+                proc->rpc_id, proc);
+        return -1;
+    }
+
     memcpy(proc->outlet_buf[0]->data, proc->inlet_buf[0]->data, 
            proc->outlet_buf[0]->blocksize * sizeof(mfp_sample));
         

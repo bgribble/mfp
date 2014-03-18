@@ -25,7 +25,8 @@ mfp_api_init(void)
 {
     const char method[] = "create";
     const char params[] = "{ \"type\": \"MFPCommand\" }";
-    mfp_rpc_send_request(method, params, api_create_callback, NULL);
+    int request_id = mfp_rpc_send_request(method, params, api_create_callback, NULL);
+    mfp_rpc_wait(request_id);
     return;
 }
 
@@ -33,11 +34,11 @@ int
 mfp_api_load_patch(mfp_context * context, char * patchfile)
 {
     const char method[] = "call";
-    const char params[] = "{ \"func\": \"open_file\", \"rpc_id\": %d, \"args\": "
-                          "[ %d, \"%s\" ]";
+    const char params[] = "{\"func\": \"open_file\", \"rpcid\": %d, \"args\": "
+                          "[\"%s\", %d ], \"kwargs\": {} }";
     char tbuf[MFP_MAX_MSGSIZE];
 
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, context->id, patchfile);
+    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, patchfile, context->id);
     mfp_rpc_send_request(method, tbuf, NULL, NULL);
 }
 

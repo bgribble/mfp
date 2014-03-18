@@ -114,7 +114,7 @@ class RPCHost (QuittableThread):
             # is someone waiting on this response? 
             if req.is_response() and req.request_id in self.pending:
                 oldreq = self.pending.get(req.request_id)
-                oldreq.response = req.response 
+                oldreq.result = req.result 
                 oldreq.state = req.state
                 oldreq.diagnostic = req.diagnostic
                 with self.lock:
@@ -190,35 +190,35 @@ class RPCHost (QuittableThread):
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
             if factory:
                 obj = factory(*args, **kwargs)
-                req.response = (True, obj.rpcid)
+                req.result = (True, obj.rpcid)
             else:
-                req.response = (RPCWrapper.NO_CLASS, None)
+                req.result = (RPCWrapper.NO_CLASS, None)
         elif method == 'delete':
             del RPCWrapper.objects[rpcid]
-            req.response = (True, None)
+            req.result = (True, None)
         elif method == 'call':
             obj = RPCWrapper.rpcobj.get(rpcid)
             try:
                 retval = obj.call_locally(rpcdata)
-                req.response = (RPCWrapper.METHOD_OK, retval)
+                req.result = (RPCWrapper.METHOD_OK, retval)
             except RPCWrapper.MethodNotFound, e:
-                req.response = (RPCWrapper.NO_METHOD, None)
+                req.result = (RPCWrapper.NO_METHOD, None)
             except RPCWrapper.MethodFailed, e:
-                req.response = (RPCWrapper.METHOD_FAILED, e.traceback)
+                req.result = (RPCWrapper.METHOD_FAILED, e.traceback)
             except Exception, e:
                 import traceback
                 einfo = ("Method call failed rpcid=%s node=%s\nobj=%s data=%s\n" % 
                          (rpcid, peer_id, obj, rpcdata))
-                req.response = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())
+                req.result = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())
         elif method == 'publish': 
             for clsname in req.params.get("classes"): 
                 cls = RPCWrapper.rpctype.get(clsname)
                 if cls is not None:
                     cls.publishers.append(peer_id)
-            req.response = (True, None) 
+            req.result = (True, None) 
         elif method == "node_id":
             self.node_id = req.params.get("node_id")
-            req.response = (True, None)
+            req.result = (True, None)
         elif method == "peer_exit": 
             # remove this peer as a publisher for any classes
             for clsname, cls in RPCWrapper.rpctype.items():

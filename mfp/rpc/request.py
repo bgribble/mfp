@@ -19,7 +19,7 @@ class Request(object):
         self.state = Request.CREATED
         self.method = method
         self.params = params 
-        self.response = None
+        self.result = None
         self.callback = callback
         self.request_id = Request._next_id
         self.diagnostic = {}
@@ -32,7 +32,7 @@ class Request(object):
             obj["method"] = self.method
             obj["params"] = self.params
         else: 
-            obj["result"] = self.response
+            obj["result"] = self.result
         obj["diagnostic"] = self.diagnostic
 
         return json.dumps(obj)
@@ -41,7 +41,7 @@ class Request(object):
         return (self.method is not None)
 
     def is_response(self):
-        return (self.response is not None)
+        return (self.result is not None)
 
     @classmethod
     def from_dict(cls, obj):
@@ -55,15 +55,15 @@ class Request(object):
 
         if obj.has_key("error"):
             # a response 
-            req.response = obj['error']
+            req.result = obj['error']
         elif obj.has_key("result"):
-            req.response = obj['result']
-            if req.response is not None:
+            req.result = obj['result']
+            if req.result is not None:
                 req.state = Request.RESPONSE_RCVD
             # a notification
         return req
 
     def __repr__(self):
         return "<Request %s %s %s %s>" % (self.request_id, self.method, self.params,
-                                          self.response)
+                                          self.result)
 

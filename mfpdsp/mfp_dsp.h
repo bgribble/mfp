@@ -173,6 +173,7 @@ extern int mfp_initialized;
 extern int mfp_max_blocksize; 
 extern float mfp_in_latency;
 extern float mfp_out_latency;
+extern int mfp_comm_nodeid;
 
 extern GHashTable * mfp_proc_registry;
 extern GHashTable * mfp_proc_objects;
@@ -255,6 +256,7 @@ extern void mfp_comm_io_wait(void);
 extern int mfp_comm_init(char * init_sockid); 
 extern int mfp_comm_connect(char * sockname);
 extern int mfp_comm_send(const char * msg);
+extern int mfp_comm_quit_requested(void);
 
 /* mfp_request.c */
 extern void mfp_dsp_push_request(mfp_reqdata rd);
@@ -262,9 +264,10 @@ extern void mfp_dsp_handle_requests(void);
 
 extern int mfp_rpc_json_dispatch_request(const char *, int);
 extern int mfp_rpc_json_dsp_response(mfp_respdata, char *);
-extern void mfp_rpc_send_request(const char * method, const char * params, 
+extern int mfp_rpc_send_request(const char * method, const char * params, 
                                 void (* callback)(JsonNode *, void *), void *);
 extern void mfp_rpc_send_response(int request_id, const char * result);
+extern void mfp_rpc_wait(int request_id); 
 extern void mfp_rpc_init(void);
 
 /* mfp_context.c */

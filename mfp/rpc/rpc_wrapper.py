@@ -76,10 +76,10 @@ class RPCWrapper (object):
 
             self.rpchost.put(r, self.peer_id)
             self.rpchost.wait(r)
-            if not r.response or r.response[0] == RPCWrapper.NO_CLASS:
+            if not r.result or r.result[0] == RPCWrapper.NO_CLASS:
                 raise RPCWrapper.ClassNotFound()
 
-            self.rpcid = r.response[1]
+            self.rpcid = r.result[1]
 
     def call_remotely(self, rpcdata):
         from datetime import datetime 
@@ -96,10 +96,10 @@ class RPCWrapper (object):
         #for key in sorted(r.diagnostic):
         #    print "   ", key, r.diagnostic[key]
 
-        status, retval = r.response 
+        status, retval = r.result 
         if status == RPCWrapper.METHOD_OK:
             return retval 
-        elif r.response == RPCWrapper.METHOD_FAILED:
+        elif r.result == RPCWrapper.METHOD_FAILED:
             raise RPCWrapper.MethodFailed(False, retval)
 
     def call_locally(self, rpcdata):

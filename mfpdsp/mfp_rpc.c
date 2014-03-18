@@ -3,11 +3,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
+#include <sys/time.h>
 #include <json-glib/json-glib.h>
 
 static int _next_reqid = 1;
 static GHashTable * request_callbacks = NULL;
+static GHashTable * request_data = NULL;
+static GHashTable * request_waiting = NULL;
 
+static pthread_mutex_t request_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t request_cond = PTHREAD_COND_INITIALIZER;
 
 static int
 json_notval(JsonNode * node)
@@ -190,11 +195,10 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
 {
     char * rval = NULL; 
 
-
     if(!strcmp(methodname, "call")) {
         JsonNode * funcname, * funcparams, * funcobj;
 
-       printf("dispatch_methodcall: handling call\n");
+        printf("dispatch_methodcall: handling call\n");
         funcname = json_object_get_member(params, "func");
         funcparams = json_object_get_member(params, "args");
         funcobj = json_object_get_member(params, "rpcid");
@@ -205,8 +209,8 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
         }
         else {
             rval = dispatch_object_methodcall((int)json_node_get_double(funcobj), 
-                                               json_node_get_string(funcname), 
-                                               json_node_get_array(funcparams));
+                    json_node_get_string(funcname), 
+                    json_node_get_array(funcparams));
         }
     }
     else if (!strcmp(methodname, "create")) {
@@ -228,6 +232,16 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
                 snprintf(ret, 31, "[true, %d]", proc->rpc_id);
                 rval = g_strdup(ret);
             }
+        }
+    }
+    else if (!strcmp(methodname, "node_id")) {
+        JsonNode * id = json_object_get_member(params, "node_id");
+        if (json_notval(id)) {
+            printf("dispatch_methodcall: couldn't parse my new node_id\n");
+        }
+        else {
+            mfp_comm_nodeid = (int)json_node_get_double(id);
+            printf("dispatch_methodcall: set C node_id to %d\n", mfp_comm_nodeid);
         }
     }
     else if (!strcmp(methodname, "peer_exit")) {
@@ -280,7 +294,7 @@ mfp_rpc_send_response(int req_id, const char * result)
 }
 
 
-void 
+int
 mfp_rpc_send_request(const char * method, const char * params, 
                      void (* callback)(JsonNode *, void *), void * cb_data) 
 {
@@ -293,10 +307,41 @@ mfp_rpc_send_request(const char * method, const char * params,
     if (callback != NULL) {
         g_hash_table_insert(request_callbacks, GINT_TO_POINTER(req_id), callback);
     }
+    if(cb_data != NULL) {
+        g_hash_table_insert(request_data, GINT_TO_POINTER(req_id), cb_data);
+    }
+
     mfp_comm_send(reqbuf);
+    return req_id; 
 }
 
+void 
+mfp_rpc_wait(int request_id) 
+{    
+    struct timespec alarmtime;
+    struct timeval nowtime;
+    gpointer reqwaiting;
 
+    pthread_mutex_lock(&request_lock);
+    g_hash_table_insert(request_waiting, GINT_TO_POINTER(request_id), GINT_TO_POINTER(1));
+
+    printf("mfp_rpc_wait: starting to wait for request %d\n", request_id);
+    
+    while(!mfp_comm_quit_requested()) {
+        gettimeofday(&nowtime, NULL);
+        alarmtime.tv_sec = nowtime.tv_sec; 
+        alarmtime.tv_nsec = nowtime.tv_usec*1000 + 10000000;
+        pthread_cond_timedwait(&request_cond, &request_lock, &alarmtime);
+
+        reqwaiting = g_hash_table_lookup(request_waiting, GINT_TO_POINTER(request_id));
+        if (reqwaiting == NULL) {
+            printf("mfp_rpc_wait: request %d completed\n", request_id);
+            break;
+        }
+    }
+
+    pthread_mutex_unlock(&request_lock);
+}
 
 int 
 mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen) 
@@ -313,7 +358,6 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
     int need_response = 0; 
 
     success = json_parser_load_from_data(parser, msgbuf, msglen, &err);
-    printf("parsing '%s'\n", msgbuf);
     if (!success) {
         printf("Error parsing JSON data: '%s'\n", msgbuf);
         return -1;
@@ -328,15 +372,24 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
 
     val = json_object_get_member(msgobj, "result");
     if ((val != NULL) && (reqid != -1)) {
+        printf("rpc_json_dispatch_request: got response for req %d\n", reqid);
+
         /* it's a response, is there a callback? */ 
         callback = g_hash_table_lookup(request_callbacks, GINT_TO_POINTER(reqid));
         if (callback != NULL) {
             void (* cbfunc)(JsonNode *, void *) = (void (*)(JsonNode *, void *))callback;
-            cbfunc(val, NULL);
-            /* FIXME : Remove callback from table */ 
+            void * cbdata = g_hash_table_lookup(request_data, GINT_TO_POINTER(reqid));
 
-            /* FIXME: callback data pointer */ 
+            g_hash_table_remove(request_callbacks, GINT_TO_POINTER(reqid));
+            g_hash_table_remove(request_data, GINT_TO_POINTER(reqid));
+            
+            cbfunc(val, cbdata);
         }
+
+        pthread_mutex_lock(&request_lock);
+        g_hash_table_remove(request_waiting, GINT_TO_POINTER(reqid));
+        pthread_cond_broadcast(&request_cond);
+        pthread_mutex_unlock(&request_lock);
     }
     else { 
         val = json_object_get_member(msgobj, "method");
@@ -345,7 +398,6 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
             methodname = json_node_get_string(val);
             params = json_object_get_member(msgobj, "params");
             if (methodname != NULL) {
-                printf("json_dispatch: got methodcall '%s'\n", methodname);
                 result = dispatch_methodcall(methodname, json_node_get_object(params));
             }
         }
@@ -373,7 +425,12 @@ mfp_rpc_init(void)
         "\"params\": { \"classes\": [\"DSPObject\"]}}";
 
     request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal); 
-    
+    request_data = g_hash_table_new(g_direct_hash, g_direct_equal); 
+    request_waiting = g_hash_table_new(g_direct_hash, g_direct_equal); 
+   
+    pthread_mutex_init(&request_lock, NULL);
+    pthread_cond_init(&request_cond, NULL); 
+
     printf("sending publish req: %s\n", req);
     mfp_comm_send(req);
 }
