@@ -147,7 +147,7 @@ dispatch_create(JsonArray * args, JsonObject * kwargs)
 {
     int num_inlets, num_outlets;
     int ctxt_id;
-    int rpc_id;
+    int rpc_id, patch_id;
     mfp_procinfo * pinfo;
     mfp_processor * proc;
     mfp_context * ctxt;
@@ -166,9 +166,10 @@ dispatch_create(JsonArray * args, JsonObject * kwargs)
         num_outlets = (int)json_node_get_double(json_array_get_element(args, 3));
         createprms = json_node_get_object(json_array_get_element(args, 4));
         ctxt_id =  (int)json_node_get_double(json_array_get_element(args, 5));
+        patch_id =  (int)json_node_get_double(json_array_get_element(args, 6));
 
-        printf("create: init '%s' inlets=%d outlets=%d context=%d\n", typename, num_inlets, 
-               num_outlets, ctxt_id);
+        printf("create: init '%s' inlets=%d outlets=%d context=%d patch=%d\n", 
+               typename, num_inlets, num_outlets, ctxt_id, patch_id);
         ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
         if (ctxt == NULL) {
             printf("create: cannot find context %d\n", ctxt_id);
@@ -179,7 +180,7 @@ dispatch_create(JsonArray * args, JsonObject * kwargs)
         printf("create: setting initial params\n");
         json_object_foreach_member(createprms, init_param_helper, (gpointer)proc);
         printf("create: calling proc_init\n");
-        mfp_proc_init(proc, rpc_id);
+        mfp_proc_init(proc, rpc_id, patch_id);
         return proc;
     }
 }

@@ -18,14 +18,14 @@ mfp_proc_lookup(int rpcid)
     return g_hash_table_lookup(mfp_proc_objects, GINT_TO_POINTER(rpcid));
 }
 
-
+/* Note: mfp_proc_create is a shortcut used by tests only */ 
 mfp_processor *
 mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
                 mfp_context * ctxt)
 {
     if (typeinfo == NULL) 
         return NULL;
-    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, ctxt), 0);
+    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, ctxt), 0, 0);
 }
 
 
@@ -127,9 +127,10 @@ mfp_proc_free_buffers(mfp_processor * self)
 
 
 mfp_processor *
-mfp_proc_init(mfp_processor * p, int rpc_id)
+mfp_proc_init(mfp_processor * p, int rpc_id, int patch_id)
 {
     p->rpc_id = rpc_id;
+    p->patch_id = patch_id;
 
     /* call type-specific initializer */
     if (p->typeinfo->init)
@@ -305,6 +306,8 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
     gpointer orig_val=NULL;
     gboolean found; 
 
+    printf("FIXME: setparam suffering from serious confuxion\n");
+
     found = g_hash_table_lookup_extended(self->params, (gpointer)rd->param_name, 
                                          &orig_key, &orig_val);
     g_hash_table_replace(self->params, (gpointer)(rd->param_name), 
@@ -328,6 +331,7 @@ mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
     gpointer orig_val=NULL;
     gboolean found=FALSE; 
 
+    printf("FIXME: setparam_req suffering from serious confuxion\n");
     found = g_hash_table_lookup_extended(self->params, (gpointer)param_name, 
                                          &orig_key, &orig_val);
     g_hash_table_replace(self->params, (gpointer)(param_name), (gpointer)(param_val));

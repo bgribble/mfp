@@ -30,6 +30,24 @@ mfp_api_init(void)
     return;
 }
 
+
+static void
+api_load_callback(JsonNode * response, void * data)
+{
+    int patch_objid;
+    mfp_context * context = (mfp_context *)data;
+
+    if (JSON_NODE_TYPE(response) == JSON_NODE_ARRAY) {
+        JsonArray * arry = json_node_get_array(response);
+        JsonNode * val = json_array_get_element(arry, 1);
+        if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
+            patch_objid = (int)json_node_get_double(val);
+            printf("api_load_callback: Got obj_id %d for loaded patch\n", patch_objid);
+            mfp_context_connect_default_io(context, patch_objid);
+        }
+    }
+}
+
 int 
 mfp_api_load_patch(mfp_context * context, char * patchfile)
 {
@@ -37,9 +55,11 @@ mfp_api_load_patch(mfp_context * context, char * patchfile)
     const char params[] = "{\"func\": \"open_file\", \"rpcid\": %d, \"args\": "
                           "[\"%s\", %d ], \"kwargs\": {} }";
     char tbuf[MFP_MAX_MSGSIZE];
+    int request_id;
 
     snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, patchfile, context->id);
-    mfp_rpc_send_request(method, tbuf, NULL, NULL);
+    request_id = mfp_rpc_send_request(method, tbuf, api_load_callback, (void *)context);
+    mfp_rpc_wait(request_id);
 }
 
 

@@ -371,7 +371,7 @@ class Processor (object):
         from .mfp_app import MFPApp
         print "FIXME: processor.py:dsp_init() needs to pass context ID, not 0"
         self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
-                                 len(self.dsp_outlets), params, 0)
+                                 len(self.dsp_outlets), params, 0, self.patch.obj_id)
         self.gui_params['dsp_inlets'] = self.dsp_inlets
         self.gui_params['dsp_outlets'] = self.dsp_outlets
         if self.gui_created:

@@ -22,6 +22,8 @@ struct mfp_context_struct;
 typedef struct {
     /* type, settable parameters, and internal state */
     int rpc_id;
+    int patch_id; 
+
     struct mfp_context_struct * context; 
     struct mfp_procinfo_struct * typeinfo;
     GHashTable * params; 
@@ -224,7 +226,7 @@ extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, mfp_context *);
 extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, mfp_context *);
 extern int mfp_proc_alloc_buffers(mfp_processor *, int, int, int);
 extern void mfp_proc_free_buffers(mfp_processor *);
-extern mfp_processor * mfp_proc_init(mfp_processor *, int rpc_id);
+extern mfp_processor * mfp_proc_init(mfp_processor *, int rpc_id, int patch_id);
 extern int mfp_proc_error(mfp_processor * self, const char * message);
 extern void mfp_proc_process(mfp_processor *);
 extern void mfp_proc_reset(mfp_processor *);
@@ -273,6 +275,7 @@ extern void mfp_rpc_init(void);
 /* mfp_context.c */
 extern mfp_context * mfp_context_new(int ctype);
 extern void mfp_context_destroy(mfp_context * context);
+extern int mfp_context_connect_default_io(mfp_context * context, int patch_id);
 
 /* mfp_api.c */
 extern void mfp_api_init(void);

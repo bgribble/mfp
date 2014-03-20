@@ -30,5 +30,27 @@ mfp_context_new(int ctxt_type)
 void
 mfp_context_destroy(mfp_context * context)
 {
+    printf("FICME: mfp_context_destroy not implemented\n");
+}
+
+int
+mfp_context_connect_default_io(mfp_context * context, int patch_id)
+{
+    mfp_procinfo * inlet_t; 
+    mfp_procinfo * outlet_t; 
+    mfp_processor ** p;
+    
+    inlet_t = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, "inlet~");
+    outlet_t = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, "outlet~");
+
+    printf("connect_default_io: finding inlet~ and outlet~\n");
+
+    for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
+        if (((*p)->patch_id == patch_id) && 
+            (((*p)->typeinfo == inlet_t) || ((*p)->typeinfo == outlet_t))) {
+            /* FIXME -- you were working here */
+            printf("  found %p (id %d)\n", (*p), (*p)->rpc_id);
+        }
+    }
 }
 

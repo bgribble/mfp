@@ -46,16 +46,36 @@ config(mfp_processor * proc)
     return 1;
 }
 
-mfp_procinfo *  
-init_builtin_noop(void) {
+static mfp_procinfo *  
+init_builtin_noop_wrapper(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
-    p->name = strdup("noop~");
     p->is_generator = 1;
     p->process = process;
     p->init = init;
     p->destroy = destroy;
     p->config = config;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+    return p;
+}
+
+mfp_procinfo *  
+init_builtin_outlet(void) {
+    mfp_procinfo * p = init_builtin_noop_wrapper();
+    p->name = strdup("outlet~");
+    return p;
+}
+
+mfp_procinfo *  
+init_builtin_inlet(void) {
+    mfp_procinfo * p = init_builtin_noop_wrapper();
+    p->name = strdup("inlet~");
+    return p;
+}
+
+mfp_procinfo *  
+init_builtin_noop(void) {
+    mfp_procinfo * p = init_builtin_noop_wrapper();
+    p->name = strdup("noop~");
     return p;
 }
 

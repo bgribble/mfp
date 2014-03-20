@@ -193,6 +193,7 @@ class MFPApp (Singleton):
         self.patches[patch.name] = patch 
         patch.create_gui()
         patch.mark_ready()
+        return patch
 
     def load_extension(self, libname):
         fullpath = utils.find_file_in_path(libname, self.extpath)

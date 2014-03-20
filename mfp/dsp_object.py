@@ -13,9 +13,10 @@ from . import log
 class DSPObject(RPCWrapper):
     objects = {}
 
-    def __init__(self, obj_id, name, inlets, outlets, params, context_id):
+    def __init__(self, obj_id, name, inlets, outlets, params, context_id, patch_id):
         self.obj_id = obj_id
-        RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params, context_id)
+        RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params, 
+                            context_id, patch_id)
 
     @rpcwrap
     def reset(self):
@@ -43,6 +44,8 @@ class DSPObject(RPCWrapper):
 
 
 class DSPCommand (RPCWrapper):
+    # FIXME: Implement DSPCommand services on C side 
+
     @rpcwrap
     def log_to_gui(self):
         pass
