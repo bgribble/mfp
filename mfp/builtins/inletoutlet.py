@@ -42,7 +42,7 @@ class SignalInlet(Inlet):
         Inlet.__init__(self, init_type, init_args, patch, scope, name)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0] 
-        self.dsp_init("inlet~") 
+        self.dsp_init("inlet~", io_channel=self.inletnum) 
 
 class Outlet(Processor):
     doc_tooltip_obj = "Message output from patch"
@@ -79,7 +79,7 @@ class SignalOutlet(Outlet):
         Outlet.__init__(self, init_type, init_args, patch, scope, name)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0] 
-        self.dsp_init("outlet~") 
+        self.dsp_init("outlet~", io_channel=self.outletnum) 
 
 def register():
     MFPApp().register("inlet", Inlet)

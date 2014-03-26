@@ -58,7 +58,7 @@ process(mfp_processor * proc)
     }
 
 
-    memcpy(outptr, inptr, blocksize);
+    memcpy(outptr, inptr, blocksize*sizeof(mfp_sample));
         
     return 0;
 }
@@ -86,6 +86,7 @@ config(mfp_processor * proc)
     builtin_noop_data * d = (builtin_noop_data *)(proc->data);
     gpointer ctxt_in = g_hash_table_lookup(proc->params, "use_context_input");
     gpointer ctxt_out = g_hash_table_lookup(proc->params, "use_context_output");
+    gpointer chan = g_hash_table_lookup(proc->params, "io_channel");
 
     printf("noop~: in config()\n");
 
@@ -96,6 +97,11 @@ config(mfp_processor * proc)
     if(ctxt_out != NULL) {
         d->use_context_output = (int)(*(float *)ctxt_out);
     }
+
+    if(chan != NULL) {
+        d->io_channel = (int)(*(float *)chan);
+    }
+
 
     return 1;
 }
@@ -109,7 +115,9 @@ init_builtin_noop_wrapper(void) {
     p->destroy = destroy;
     p->config = config;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-    g_hash_table_insert(p->params, "use_context_io", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "use_context_input", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "use_context_output", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "io_channel", (gpointer)PARAMTYPE_FLT);
     return p;
 }
 
