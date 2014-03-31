@@ -25,7 +25,6 @@ class BaseWorker (object):
         self.thread.start()
 
     def _thread_func(self):
-        from datetime import datetime
         while not self.quit_req:
             # get in line
             self.pool.worker_ready(self)
@@ -47,6 +46,7 @@ class BaseWorker (object):
             self.pool.worker_consuming(self)
             keepalive = self.perform_work(workunit)
             if not keepalive:
+                print "HA! perform_work returns", keepalive
                 break
         self.pool.worker_done(self)
 

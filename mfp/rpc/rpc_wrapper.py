@@ -8,7 +8,6 @@ Copyright (c) 2010-2014 Bill Gribble <grib@billgribble.com>
 
 from request import Request
 from mfp import log
-from mfp.utils import profile 
 
 def rpcwrap(worker_proc):
     def inner(self, *args, **kwargs):
@@ -59,7 +58,9 @@ class RPCWrapper (object):
     def __init__(self, *args, **kwargs):
         self.rpcid = None
         self.peer_id = None 
-        
+       
+        print "RPCWrapper.__init__", args, kwargs
+
         if self.local:
             self.rpcid = RPCWrapper._rpcid_seq
             RPCWrapper._rpcid_seq += 1
@@ -99,7 +100,7 @@ class RPCWrapper (object):
         status, retval = r.result 
         if status == RPCWrapper.METHOD_OK:
             return retval 
-        elif r.result == RPCWrapper.METHOD_FAILED:
+        elif status == RPCWrapper.METHOD_FAILED:
             raise RPCWrapper.MethodFailed(False, retval)
 
     def call_locally(self, rpcdata):

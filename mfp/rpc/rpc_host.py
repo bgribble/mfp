@@ -4,8 +4,20 @@ import threading
 
 from request import Request 
 from rpc_wrapper import RPCWrapper 
-from mfp.utils import QuittableThread, profile
+from mfp.utils import QuittableThread
 from worker_pool import WorkerPool 
+
+def blather(func):
+    from datetime import datetime
+    def inner(self, *args, **kwargs):
+        if self.node_id in (1, None):
+            print "%s DEBUG %s -- enter" % (datetime.now(), func.__name__)
+        rv = func(self, *args, **kwargs)
+        if self.node_id in (1, None):
+            print "%s DEBUG %s -- leave (%s)" % (datetime.now(), func.__name__,  rv)
+        return rv
+    return inner
+
 
 class RPCHost (QuittableThread): 
     '''
@@ -64,7 +76,13 @@ class RPCHost (QuittableThread):
         self.served_classes[cls.__name__] = cls 
         cls.local = True 
         self.notify_all()
-      
+     
+    def unpublish(self, cls):
+        cls.local = False 
+        cls.rpchost = None 
+        del self.served_classes[cls.__name__]
+        self.notify_all()
+
     def subscribe(self, cls):
         '''
         RPCHost.subscribe: Wait for a class to become available
@@ -78,7 +96,7 @@ class RPCHost (QuittableThread):
         if sock is None: 
             print self, "RPCHost.put: peer_id", peer_id, "has no mapped socket"
             raise Exception()
-
+    
         # is this a request?  if so, put it in the pending dict 
         if req.method is not None:
             self.pending[req.request_id] = req
@@ -105,7 +123,7 @@ class RPCHost (QuittableThread):
 
     def dispatch_rpcdata(self, rpc_worker, rpcdata):
         json_data, peer_id = rpcdata 
-        print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
+        #print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
 
         py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
         for obj in py_data: 
@@ -131,7 +149,6 @@ class RPCHost (QuittableThread):
         '''
         RPCHost.run: perform IO on managed sockets, dispatch data 
         '''
-        from datetime import datetime
         self.read_workers.start()
 
         if RPCWrapper.rpchost is None:
@@ -140,16 +157,24 @@ class RPCHost (QuittableThread):
         import select 
 
         self.fdsockets = {} 
-        errshown = False 
 
         while not self.join_req:
+            rdy = None 
             for s in self.managed_sockets.values(): 
                 if s.fileno() not in self.fdsockets: 
                     self.fdsockets[s.fileno()] = s  
             try: 
-                rdy, _w, _x = select.select(self.fdsockets.keys(), [], [], 0.1)
+                sockets = self.fdsockets.keys()
+                if sockets: 
+                    rdy, _w, _x = select.select(self.fdsockets.keys(), [], [], 0.1)
+                else: 
+                    print "RPCHost (%s) run: no sockets to read, sleeping" % self.node_id
+                    time.sleep(0.1)
             except Exception, e: 
                 print "select exception:", e
+
+            if not rdy: 
+                continue
 
             for rsock in rdy: 
                 sock = self.fdsockets.get(rsock)
@@ -162,15 +187,28 @@ class RPCHost (QuittableThread):
                 if len(jdata):
                     peer_id = self.peers_by_socket.get(sock)
                     self.read_workers.submit((jdata, peer_id))
-                    errshown = False 
             
-        if 0 in self.managed_sockets:
-            req = Request("peer_exit", {})
+        if self.node_id == 0: 
+            req = Request("node_exit_req", {})
+            for node in self.managed_sockets:
+                self.put(req, node)
+                self.wait(req)
+        elif 0 in self.managed_sockets:
+            req = Request("node_exit", {})
             self.put(req, 0)
             self.wait(req)
-        print "rpc_host: join_req received, quitting worker_pool..."
+
+
+        for clsname, cls in self.served_classes.items(): 
+            self.unpublish(cls)
+
+        for clsname, cls in RPCWrapper.rpctype.items():
+            cls.publishers = []
+
+        if RPCWrapper.rpchost == self: 
+            RPCWrapper.rpchost = None 
+
         self.read_workers.finish()
-        print "rpc_host: finished"
 
     def handle_request(self, req, peer_id):
         from datetime import datetime 
@@ -210,16 +248,19 @@ class RPCHost (QuittableThread):
                 einfo = ("Method call failed rpcid=%s node=%s\nobj=%s data=%s\n" % 
                          (rpcid, peer_id, obj, rpcdata))
                 req.result = (RPCWrapper.METHOD_FAILED, einfo + traceback.format_exc())
+
         elif method == 'publish': 
             for clsname in req.params.get("classes"): 
                 cls = RPCWrapper.rpctype.get(clsname)
                 if cls is not None:
                     cls.publishers.append(peer_id)
             req.result = (True, None) 
+
         elif method == "node_id":
             self.node_id = req.params.get("node_id")
             req.result = (True, None)
-        elif method == "peer_exit": 
+
+        elif method == "node_exit": 
             # remove this peer as a publisher for any classes
             for clsname, cls in RPCWrapper.rpctype.items():
                 if peer_id in cls.publishers:
@@ -227,8 +268,13 @@ class RPCHost (QuittableThread):
             self.unmanage(peer_id) 
             req.request_id = None
 
-        elif method == "peer_status":
+        elif method == "node_status":
             pass
+
+        elif method == "node_exit_req":
+            print "RPCHost (%s): got node_exit_req" % self.node_id
+            self.finish()
+            req.request_id = None
 
         else:
             print "rpc_wrapper: WARNING: no handler for method '%s'" % method

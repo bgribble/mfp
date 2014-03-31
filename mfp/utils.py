@@ -142,6 +142,7 @@ class QuittableThread(Thread):
         with QuittableThread._all_threads_lock:
             try:
                 QuittableThread._all_threads.remove(self)
+                print "Remaining threads:", QuittableThread._all_threads
             except ValueError:
                 print "QuittableThread error:", self, "not in _all_threads"
             except Exception, e: 

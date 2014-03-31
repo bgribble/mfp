@@ -1,17 +1,12 @@
 
 from unittest import TestCase
 
-import mfpdsp
-import mfp
-from ..mfp_app import MFPApp
+from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
 
 
 def setup():
     MFPApp().setup()
-    from mfp.dsp_slave import DSPObject
-    print "DSPObject pipe:", DSPObject.pipe
-
 
 def mkproc(case, init_type, init_args=None):
     return MFPApp().create(init_type, init_args, case.patch, None, init_type)

@@ -90,4 +90,29 @@ class RPCExecRemote (object):
         else: 
             return not self.process.poll()
 
-        
+class RPCMultiRemote (object):
+    '''
+    RPCMultiRemote -- launch a process with multiprocessing which will connect 
+    back to this process
+    ''' 
+    def __init__(self, thunk, *args):
+        self.thunk = thunk 
+        self.args = args
+        self.process = None 
+
+    def start(self):
+        from multiprocessing import Process 
+        self.process = Process(target=self.thunk, args=self.args)
+        self.process.start()
+
+    def finish(self):
+        self.process.terminate()
+        self.process.join()
+
+    def alive(self): 
+        if not self.process:
+            return False 
+        else: 
+            return not self.process.is_alive()
+
+
