@@ -329,7 +329,6 @@ mfp_rpc_json_dsp_response(mfp_respdata r, char * outbuf)
             break;
     }
     retlen = snprintf(outbuf, MFP_MAX_MSGSIZE, tmpl, r.dst_proc, r.response_type, tbuf);
-    printf("sending %s\n", outbuf);
     return retlen;
 }
 
@@ -339,7 +338,6 @@ mfp_rpc_send_response(int req_id, const char * result)
     char reqbuf[MFP_MAX_MSGSIZE];
     snprintf(reqbuf, MFP_MAX_MSGSIZE-1, 
             "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": %s}", req_id, result);
-    printf("Response: id %d\n",  req_id);
     mfp_comm_send(reqbuf);
 }
 

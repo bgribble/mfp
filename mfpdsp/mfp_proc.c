@@ -306,7 +306,7 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
     gpointer orig_val=NULL;
     gboolean found; 
 
-    printf("FIXME: setparam suffering from serious confuxion\n");
+    // FIXME: setparam suffering from serious confuxion
 
     found = g_hash_table_lookup_extended(self->params, (gpointer)rd->param_name, 
                                          &orig_key, &orig_val);
@@ -331,7 +331,8 @@ mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
     gpointer orig_val=NULL;
     gboolean found=FALSE; 
 
-    printf("FIXME: setparam_req suffering from serious confuxion\n");
+    // FIXME: setparam_req suffering from serious confuxion
+
     found = g_hash_table_lookup_extended(self->params, (gpointer)param_name, 
                                          &orig_key, &orig_val);
     g_hash_table_replace(self->params, (gpointer)(param_name), (gpointer)(param_val));
