@@ -13,7 +13,6 @@ class ReverseClass(RPCWrapper):
     @rpcwrap
     def reverse(self):
         global reverse_value
-        print "Reverse:", reverse_value
         return reverse_value
 
     @rpcwrap
@@ -39,7 +38,6 @@ class WrappedClass(RPCWrapper):
 
 def main():
     socketpath = sys.argv[1] 
-    print "RPC test helper: running", socketpath
     remote_host = RPCHost()
     remote_host.publish(WrappedClass)
     remote_host.publish(ReverseClass)

@@ -97,8 +97,6 @@ mfp_comm_init(char * init_sockid)
     char * conn_sockid = NULL;
     int connect_tries = 0;
 
-    printf("mfp_comm_init(): enter\n");
-
     if(init_sockid > 0) {
         conn_sockid = init_sockid;
     }
@@ -154,7 +152,7 @@ mfp_comm_io_reader_thread(void * tdata)
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
         if (bytesread > 0) { 
             errstat = 0;
-            printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
+            // printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
             mfp_rpc_json_dispatch_request(msgbuf, bytesread);
         }
         else {
@@ -178,7 +176,6 @@ mfp_comm_io_writer_thread(void * tdata)
     mfp_respdata r;
     char pbuff[32];
 
-    printf("mfp_comm_io_writer_thread: enter\n");
     rdata = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
 
     while(!quitreq) {
@@ -223,7 +220,6 @@ mfp_comm_io_writer_thread(void * tdata)
 void 
 mfp_comm_io_start(void) 
 {
-    printf("mfp_comm_start_io(): enter\n");
     pthread_create(&comm_io_reader_thread, NULL, mfp_comm_io_reader_thread, NULL);
     pthread_create(&comm_io_writer_thread, NULL, mfp_comm_io_writer_thread, NULL);
 }
@@ -231,7 +227,6 @@ mfp_comm_io_start(void)
 void 
 mfp_comm_io_wait(void) 
 {
-    printf("mfp_comm_io_wait(): enter\n");
     pthread_join(comm_io_reader_thread, NULL);
     pthread_join(comm_io_writer_thread, NULL);
 }

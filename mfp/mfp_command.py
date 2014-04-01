@@ -1,7 +1,7 @@
 from .bang import Bang
 from .patch import Patch
 from .method import MethodCall
-from .rpc import RPCWrapper, rpcwrap
+from .rpc import RPCWrapper, rpcwrap, rpcwrap_noresp
 from . import log
 
 class MFPCommand(RPCWrapper):
@@ -184,9 +184,10 @@ class MFPCommand(RPCWrapper):
         scope = patch.scopes.get(scope_name)
         return MFPApp().clipboard_paste(json_txt, patch, scope, mode)
 
-    @rpcwrap
+    @rpcwrap_noresp
     def quit(self):
         from .mfp_app import MFPApp
         MFPApp().finish()
+        return None
 
 

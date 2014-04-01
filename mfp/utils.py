@@ -138,15 +138,13 @@ class QuittableThread(Thread):
             Thread.__init__(self)
 
     def finish(self):
-        print "QuittableThread.finish():", self 
         with QuittableThread._all_threads_lock:
             try:
                 QuittableThread._all_threads.remove(self)
-                print "Remaining threads:", QuittableThread._all_threads
             except ValueError:
-                print "QuittableThread error:", self, "not in _all_threads"
+                print "QuittableThread.finish() error:", self, "not in _all_threads"
             except Exception, e: 
-                print "QuittableThread error:", self, e 
+                print "QuittableThread.finish() error:", self, e 
                 print "Remaining threads:", QuittableThread._all_threads
         self.join_req = True
         self.join()

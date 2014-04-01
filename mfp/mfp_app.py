@@ -79,6 +79,7 @@ class MFPApp (Singleton):
     def setup(self):
         from .mfp_command import MFPCommand 
         from .gui_command import GUICommand 
+        from .dsp_object import DSPObject
         from .mfp_main import version 
 
         log.debug("Main thread started, pid = %s" % os.getpid())
@@ -100,6 +101,7 @@ class MFPApp (Singleton):
             self.dsp_process.start()
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
+            self.rpc_host.subscribe(DSPObject)
 
         if not self.no_gui:
             self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path)
@@ -306,13 +308,23 @@ class MFPApp (Singleton):
         if self.console:
             self.console.write_cb = None
 
+        if self.rpc_host:
+            log.debug("MFPApp.finish: reaping RPC host...")
+            pp = self.rpc_host
+            self.rpc_host = None 
+            pp.finish()
+
         if self.dsp_process:
             log.debug("MFPApp.finish: reaping DSP slave...")
-            self.dsp_process.finish()
+            pp = self.dsp_process
+            self.dsp_process = None 
+            pp.finish()
 
         if self.gui_process:
             log.debug("MFPApp.finish: reaping GUI slave...")
-            self.gui_process.finish()
+            pp = self.gui_process
+            self.gui_process = None 
+            pp.finish()
 
         log.debug("MFPApp.finish: reaping threads...")
         QuittableThread.finish_all()

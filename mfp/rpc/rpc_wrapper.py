@@ -19,6 +19,15 @@ def rpcwrap(worker_proc):
             return self.call_remotely(rpcdata)
     return inner
 
+def rpcwrap_noresp(worker_proc):
+    def inner(self, *args, **kwargs):
+        if self.local:
+            return worker_proc(self, *args, **kwargs)
+        else:
+            rpcdata = dict(func=worker_proc.__name__, 
+                           rpcid=self.rpcid, args=args, kwargs=kwargs)
+            return self.call_remotely(rpcdata, response=False)
+    return inner
 
 class RPCMetaclass(type):
     def __init__(klass, name, bases, xdict):
@@ -59,8 +68,6 @@ class RPCWrapper (object):
         self.rpcid = None
         self.peer_id = None 
        
-        print "RPCWrapper.__init__", args, kwargs
-
         if self.local:
             self.rpcid = RPCWrapper._rpcid_seq
             RPCWrapper._rpcid_seq += 1
@@ -82,20 +89,26 @@ class RPCWrapper (object):
 
             self.rpcid = r.result[1]
 
-    def call_remotely(self, rpcdata):
+    def call_remotely(self, rpcdata, response=True):
         from datetime import datetime 
 
         r = Request("call", rpcdata)
         r.diagnostic["remote_call_start"] = str(datetime.now())
+        if not response: 
+            r.request_id = None
+
         self.rpchost.put(r, self.peer_id)
         puttime = str(datetime.now())
-        self.rpchost.wait(r, timeout=5)
+        if response: 
+            self.rpchost.wait(r, timeout=5)
         r.diagnostic["remote_call_complete"] = str(datetime.now())
         r.diagnostic["remote_call_put"] = puttime 
 
-        #print "Request %d <%s> %s" % (r.rpc_id, id(r), rpcdata)
-        #for key in sorted(r.diagnostic):
-        #    print "   ", key, r.diagnostic[key]
+        if not response:
+            return None 
+        elif not r.result: 
+            print "FIXME: no result should return a deferment"
+            return None 
 
         status, retval = r.result 
         if status == RPCWrapper.METHOD_OK:

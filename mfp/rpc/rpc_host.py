@@ -91,10 +91,14 @@ class RPCHost (QuittableThread):
             time.sleep(0.1)
 
     def put(self, req, peer_id):
+        from datetime import datetime
+
         # find the right socket 
         sock = self.managed_sockets.get(peer_id)
         if sock is None: 
-            print self, "RPCHost.put: peer_id", peer_id, "has no mapped socket"
+            print "[%s] RPCHost.put: peer_id %s has no mapped socket" % (datetime.now(),
+                                                                         peer_id)
+            print req.serialize()
             raise Exception()
     
         # is this a request?  if so, put it in the pending dict 
@@ -104,7 +108,12 @@ class RPCHost (QuittableThread):
 
         # write the data to the socket 
         jdata = req.serialize()
-        sock.send(jdata)
+        try:
+            sock.send(jdata)
+        except Exception, e:
+            print "[%s] RPCHost.put: SEND error: %s" % (datetime.now(), e)
+            print jdata 
+            raise Exception()
 
     def wait(self, req, timeout=None):
         import datetime
@@ -190,9 +199,12 @@ class RPCHost (QuittableThread):
             
         if self.node_id == 0: 
             req = Request("node_exit_req", {})
-            for node in self.managed_sockets:
+            peers = self.managed_sockets.keys()
+            for node in peers:
                 self.put(req, node)
                 self.wait(req)
+                del self.managed_sockets[node]
+
         elif 0 in self.managed_sockets:
             req = Request("node_exit", {})
             self.put(req, 0)
@@ -224,7 +236,6 @@ class RPCHost (QuittableThread):
         req.diagnostic['local_call_started'] = str(datetime.now())
 
         if method == 'create':
-            print "handle_request: got CREATE", rpcdata
             factory = RPCWrapper.rpctype.get(rpcdata.get('type'))
             if factory:
                 obj = factory(*args, **kwargs)
@@ -272,7 +283,6 @@ class RPCHost (QuittableThread):
             pass
 
         elif method == "node_exit_req":
-            print "RPCHost (%s): got node_exit_req" % self.node_id
             self.finish()
             req.request_id = None
 
