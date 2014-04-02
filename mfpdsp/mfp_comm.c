@@ -131,9 +131,6 @@ mfp_comm_init(char * init_sockid)
             return -1;
         }
     }
-    else {
-        printf("mfp_comm_init: comm_connect returned %d\n", connectfd);
-    }
 
     /* start the IO threads */ 
     mfp_comm_io_start();
@@ -152,7 +149,7 @@ mfp_comm_io_reader_thread(void * tdata)
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
         if (bytesread > 0) { 
             errstat = 0;
-            // printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
+            //printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
             mfp_rpc_json_dispatch_request(msgbuf, bytesread);
         }
         else {

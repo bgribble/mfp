@@ -80,12 +80,8 @@ void
 mfp_alloc_init(void)
 {
     pthread_attr_t attr;
-
     pthread_attr_init(&attr);
-
-    printf ("mfp_alloc_init() starting thread\n");
     pthread_create(&mfp_alloc_thread, NULL, &mfp_alloc_thread_func, NULL); 
-    printf("mfp_alloc_init() pthread_create returned\n");
 }
 
 void

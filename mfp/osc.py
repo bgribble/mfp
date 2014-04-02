@@ -19,7 +19,7 @@ class MFPOscManager(QuittableThread):
         try:
             self.server = liblo.Server(self.port)
         except Exception, err:
-            print str(err)
+            print type(err), str(err)
 
         self.server.add_method(None, None, self.default)
         QuittableThread.__init__(self)

@@ -12,10 +12,30 @@
 #include "mfp_dsp.h"
 
 
+
+static void
+sigsegv_handler(int sig, siginfo_t *si, void *unused)
+{
+    void * buffer[100];
+    char ** strings;
+    int nptrs, j;
+
+    printf("ERROR: SIGSEGV received\n");
+    nptrs = backtrace(buffer, 100);
+    strings = backtrace_symbols(buffer, nptrs);
+
+    for (j = 0; j < nptrs; j++)
+        printf("      %s\n", strings[j]);
+
+    free(strings);
+
+    exit(-11);
+}
+
+
 void
 mfp_init_all(char * sockname) 
 {
-    printf("mfp_init_all: enter\n");
     mfp_dsp_init();
     mfp_alloc_init();
     mfp_comm_init(sockname);
@@ -23,8 +43,6 @@ mfp_init_all(char * sockname)
     mfp_rpc_init();
     mfp_api_init();
     mfp_initialized = 1;
-
-    printf("mfp_init_all: leave\n");
     return;
 }
 
@@ -73,14 +91,22 @@ main(int argc, char ** argv)
         }
     }
 
-    printf("mfpdsp:main() Starting up as standalone JACK client\n");
+   /* install SIGSEGV handlers */
+    struct sigaction sa;
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = sigsegv_handler;
+    if (sigaction(SIGSEGV, &sa, NULL) == -1) {
+        printf("mfpdsp: ERROR: could not install SIGSEGV handler, exiting\n");
+        return -1;
+    }
+    
+
+    printf("mfpdsp: Starting up as standalone JACK client\n");
   
     /* set up global state */
     mfp_init_all(sockname);
-
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
-
-    printf("mfpdsp: Entering comm event loop, will not return to main()\n");
     mfp_comm_io_wait();
 
     printf("mfpdsp: Returned from comm event loop, will exit.\n"); 

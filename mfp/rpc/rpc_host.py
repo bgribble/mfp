@@ -177,7 +177,6 @@ class RPCHost (QuittableThread):
                 if sockets: 
                     rdy, _w, _x = select.select(self.fdsockets.keys(), [], [], 0.1)
                 else: 
-                    print "RPCHost (%s) run: no sockets to read, sleeping" % self.node_id
                     time.sleep(0.1)
             except Exception, e: 
                 print "select exception:", e

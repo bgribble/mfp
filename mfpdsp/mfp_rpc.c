@@ -82,7 +82,7 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
     int vtype = GPOINTER_TO_INT(g_hash_table_lookup(proc->typeinfo->params, param_name));
     JsonArray * jarray;
     void * rval = NULL;
-    double dval;
+    float dval;
     const char * strval;
     int i, endex;
 
@@ -92,9 +92,9 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
             break;
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
-            dval = json_node_get_double(param_val);
+            dval = (float)json_node_get_double(param_val);
             rval = (gpointer)g_malloc0(sizeof(float));
-            *(float *)rval = (float)dval;
+            *(float *)rval = dval;
             break;
 
         case PARAMTYPE_STRING:
@@ -106,8 +106,8 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
             jarray = json_node_get_array(param_val);
             endex = json_array_get_length(jarray);
             rval = (gpointer)g_array_sized_new(FALSE, FALSE, sizeof(float), endex);
-            dval = json_node_get_double(json_array_get_element(jarray, i));
             for (i=0; i < endex; i++) { 
+                dval = (float)json_node_get_double(json_array_get_element(jarray, i));
                 g_array_append_val((GArray *)rval, dval);
             }
             break;
@@ -291,7 +291,6 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
         }
         else {
             mfp_comm_nodeid = (int)json_node_get_double(id);
-            printf("dispatch_methodcall: set C node_id to %d\n", mfp_comm_nodeid);
         }
     }
     else if (!strcmp(methodname, "peer_exit")) {
@@ -373,8 +372,6 @@ mfp_rpc_wait(int request_id)
     pthread_mutex_lock(&request_lock);
     g_hash_table_insert(request_waiting, GINT_TO_POINTER(request_id), GINT_TO_POINTER(1));
 
-    printf("mfp_rpc_wait: starting to wait for request %d\n", request_id);
-    
     while(!mfp_comm_quit_requested()) {
         gettimeofday(&nowtime, NULL);
         alarmtime.tv_sec = nowtime.tv_sec; 
@@ -383,7 +380,6 @@ mfp_rpc_wait(int request_id)
 
         reqwaiting = g_hash_table_lookup(request_waiting, GINT_TO_POINTER(request_id));
         if (reqwaiting == NULL) {
-            printf("mfp_rpc_wait: request %d completed\n", request_id);
             break;
         }
     }
@@ -420,8 +416,6 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
 
     val = json_object_get_member(msgobj, "result");
     if ((val != NULL) && (reqid != -1)) {
-        printf("rpc_json_dispatch_request: got response for req %d\n", reqid);
-
         /* it's a response, is there a callback? */ 
         callback = g_hash_table_lookup(request_callbacks, GINT_TO_POINTER(reqid));
         if (callback != NULL) {
@@ -479,7 +473,6 @@ mfp_rpc_init(void)
     pthread_mutex_init(&request_lock, NULL);
     pthread_cond_init(&request_cond, NULL); 
 
-    printf("sending publish req: %s\n", req);
     mfp_comm_send(req);
 }
 

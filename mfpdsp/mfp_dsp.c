@@ -48,7 +48,7 @@ mfp_dsp_init(void) {
     pthread_mutex_init(&mfp_response_lock, NULL);
     pthread_mutex_init(&mfp_request_lock, NULL);
 
-    printf("mfp_dsp_init: initializing %d builtin DSP processors\n", num_initfuncs);
+    printf("mfpdsp: initializing %d builtin DSP processors\n", num_initfuncs);
 
     for(i = 0; i < num_initfuncs; i++) {
         pi = initfuncs[i]();
