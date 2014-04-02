@@ -11,31 +11,8 @@ from .patch import Patch
 from .utils import extends
 from .bang import BangType, UninitType, Bang, Uninit
 from . import log 
+from .rpc.request import ExtendedEncoder, extended_decoder_hook
 
-class ExtendedEncoder (json.JSONEncoder):
-    TYPES = { 'BangType': BangType, 'UninitType': UninitType }
-
-    def default(self, obj):
-        if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
-            key = "__%s__" % obj.__class__.__name__
-            return {key: obj.__dict__ }
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-
-def extended_decoder_hook (saved):
-    if (isinstance(saved, dict) and len(saved.keys()) == 1):
-        tname, tdict = saved.items()[0]
-        key = tname.strip("_")
-        if key == "BangType":
-            return Bang
-        elif key == "UninitType":
-            return Uninit
-        else: 
-            ctor = ExtendedEncoder.TYPES.get(key)
-            if ctor:
-                return ctor.load(tdict)
-    return saved 
 
 
 @extends(Patch)

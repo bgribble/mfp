@@ -1,6 +1,6 @@
 
 CC=gcc 
-CFLAGS=-std=gnu99 -fpic 
+CFLAGS=-std=gnu99 -fpic -g  
 PKGCONFPKG="glib-2.0 json-glib-1.0 serd-0"
 CFLAGS += $(shell pkg-config --cflags $(PKGCONFPKG))
 EXTLIBS := $(shell pkg-config --libs $(PKGCONFPKG)) -ljack -lrt

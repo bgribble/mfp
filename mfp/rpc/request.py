@@ -6,6 +6,34 @@ Request object for use with RequestPipe
 
 import simplejson as json
 
+class ExtendedEncoder (json.JSONEncoder):
+    from ..bang import BangType, UninitType
+    TYPES = { 'BangType': BangType, 'UninitType': UninitType }
+
+    def default(self, obj):
+        if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
+            key = "__%s__" % obj.__class__.__name__
+            return {key: obj.__dict__ }
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+
+def extended_decoder_hook (saved):
+    from ..bang import Bang, Uninit
+    if (isinstance(saved, dict) and len(saved.keys()) == 1):
+        tname, tdict = saved.items()[0]
+        key = tname.strip("_")
+        if key == "BangType":
+            return Bang
+        elif key == "UninitType":
+            return Uninit
+        else: 
+            ctor = ExtendedEncoder.TYPES.get(key)
+            if ctor:
+                return ctor.load(tdict)
+    return saved 
+
+
 class Request(object):
     _next_id = 0
 
@@ -35,7 +63,7 @@ class Request(object):
             obj["result"] = self.result
         obj["diagnostic"] = self.diagnostic
 
-        return json.dumps(obj)
+        return json.dumps(obj, indent=4, cls=ExtendedEncoder)
 
     def is_request(self):
         return (self.method is not None)

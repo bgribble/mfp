@@ -43,6 +43,9 @@ process(mfp_processor * proc)
     if ((in_sample == NULL) || (rms_sample == NULL) || (peak_sample == NULL)) {
         return 0;
     }
+    
+    sprintf(mfp_last_activity, "ampl~ process: %p %d %d\n", 
+            pdata->rms_buffer->data, pdata->rms_pointer, pdata->rms_buffer->blocksize);
 
     for(scount = 0; scount < proc->context->blocksize; scount++) {
         sample = *in_sample++;
