@@ -9,10 +9,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 import simplejson as json
 from .patch import Patch
 from .utils import extends
-from .bang import BangType, UninitType, Bang, Uninit
 from . import log 
 from .rpc.request import ExtendedEncoder, extended_decoder_hook
-
 
 
 @extends(Patch)

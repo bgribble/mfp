@@ -43,6 +43,8 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     self->port_symbol = g_array_new(FALSE, TRUE, sizeof(char *));
     self->port_name = g_array_new(FALSE, TRUE, sizeof(char *));
     self->port_data = g_array_new(FALSE, TRUE, sizeof(void *));
+    self->port_control_values = g_array_new(FALSE, TRUE, sizeof(float));
+
     self->input_ports = g_array_new(FALSE, TRUE, sizeof(int));
     self->output_ports = g_array_new(FALSE, TRUE, sizeof(int));
 
@@ -62,7 +64,7 @@ mfp_lv2_connect_port(LV2_Handle instance, uint32_t port, void * data)
     mfp_context * context = (mfp_context *)instance; 
     mfp_lv2_info * self = context->info.lv2;
 
-    g_array_insert_val(self->port_data, port, data);
+    g_array_index(self->port_data, void *, port) = data;
 }
 
 static void
@@ -74,13 +76,58 @@ mfp_lv2_activate(LV2_Handle instance)
 }
 
 static void
+mfp_lv2_send_control_input(mfp_context * context, int port, float val)
+{
+    mfp_lv2_info * self = context->info.lv2;
+    printf("mfpdsp LV2: send control input %f to port %d\n", val, port);  
+}
+
+static void
+mfp_lv2_send_control_output(mfp_context * context, int port, float val)
+{
+    mfp_lv2_info * self = context->info.lv2;
+    printf("mfpdsp LV2: send control value %f to port %d\n", val, port); 
+}
+
+
+static void
 mfp_lv2_run(LV2_Handle instance, uint32_t nframes) 
 {
     mfp_context * context = (mfp_context *)instance; 
     mfp_lv2_info * self = context->info.lv2;
+    int first_run=1;
 
     mfp_dsp_set_blocksize(context, nframes);
+
+    if (self->port_control_values->len > 0) {
+        first_run = 0;
+    }
+    else {
+        g_array_set_size(self->port_control_values, self->port_data->len);
+    }
+
+    for(int i=0; i < self->port_data->len; i++) {
+        if((self->port_input_mask & (1 << i)) &&  
+           (self->port_control_mask & (1 << i))) { 
+            int val_changed = 1;
+            void * pdata = mfp_lv2_get_port_data(self, i);
+            if (pdata != NULL) {
+                float val = *(float *)pdata;
+                if (!first_run && 
+                    (g_array_index(self->port_control_values, float, i) == val )) {
+                    val_changed = 0;
+                }
+
+                if (val_changed) { 
+                    g_array_index(self->port_control_values, float, i) = val;
+                    mfp_lv2_send_control_input(context, i, val);
+                }
+            }
+        }
+    }
+
     mfp_dsp_run(context);
+
 }
 
 static void

@@ -43,6 +43,7 @@ mfp_context_connect_default_io(mfp_context * context, int patch_id)
 
     inlet_t = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, "inlet~");
     outlet_t = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, "outlet~");
+    context->default_obj_id = patch_id;
 
     printf("connect_default_io: finding inlet~ and outlet~\n");
 

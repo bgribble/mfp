@@ -103,6 +103,7 @@ typedef struct {
 
     /* port_data is the LV2 data for each port */ 
     GArray * port_data;
+    GArray * port_control_values;
 
     /* input_ports and output_ports are vectors of the LV2 port 
      * numbers for input and output... i.e. port data for the first 
@@ -128,6 +129,8 @@ typedef struct mfp_context_struct {
     int proc_count;
     int dsp_enabled;
     int needs_reschedule;
+    int default_obj_id;
+
     union {
         mfp_jack_info * jack;
         mfp_lv2_info * lv2;
