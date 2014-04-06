@@ -1,4 +1,3 @@
-#! /usr/bin/env python2.6
 '''
 p_inletoutlet.py: inlet and outlet processors for patches
 
@@ -24,7 +23,6 @@ class Inlet(Processor):
         elif patch is not None:
             self.inletnum = len(patch.inlet_objects)
             init_args = str(self.inletnum)
-            print "setting inletnum to", self.inletnum
         else:
             self.inletnum = 0
             init_args = "0"

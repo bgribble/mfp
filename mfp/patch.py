@@ -152,7 +152,7 @@ class Patch(Processor):
 
             if obj.init_type == 'inlet~':
                 self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects) 
-                                    if p[1].init_type == 'inlet~' ]
+                                    if p[1] and p[1].init_type == 'inlet~' ]
                 self.gui_params['dsp_inlets'] = self.dsp_inlets 
 
         elif obj.init_type in ('outlet', 'outlet~'):
@@ -164,7 +164,7 @@ class Patch(Processor):
 
             if obj.init_type == 'outlet~':
                 self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects) 
-                                    if p[1].init_type == 'outlet~' ]
+                                    if p[1] and p[1].init_type == 'outlet~' ]
                 self.gui_params['dsp_outlets'] = self.dsp_outlets 
 
         elif obj.init_type == 'dispatch':

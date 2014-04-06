@@ -284,6 +284,8 @@ extern int mfp_context_connect_default_io(mfp_context * context, int patch_id);
 /* mfp_api.c */
 extern void mfp_api_init(void);
 extern int mfp_api_load_patch(mfp_context * ctxt, char * patchname);
+extern int mfp_api_send_to_inlet(mfp_context * ctxt, int port, float val);
+extern int mfp_api_send_to_outlet(mfp_context * ctxt, int port, float val);
 
 #endif
 

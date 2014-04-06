@@ -79,14 +79,28 @@ static void
 mfp_lv2_send_control_input(mfp_context * context, int port, float val)
 {
     mfp_lv2_info * self = context->info.lv2;
-    printf("mfpdsp LV2: send control input %f to port %d\n", val, port);  
+    int port_count = 0;
+
+    for(int i=0; i < port; i++) {
+        if(self->port_input_mask & (1 << i)) {
+            port_count ++;
+        }
+    }
+    mfp_api_send_to_inlet(context, port_count, val);
 }
 
 static void
 mfp_lv2_send_control_output(mfp_context * context, int port, float val)
 {
     mfp_lv2_info * self = context->info.lv2;
-    printf("mfpdsp LV2: send control value %f to port %d\n", val, port); 
+    int port_count = 0;
+
+    for(int i=0; i < port; i++) {
+        if(self->port_output_mask & (1 << i)) {
+            port_count ++;
+        }
+    }
+    mfp_api_send_to_outlet(context, port_count, val);
 }
 
 
@@ -106,7 +120,11 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
         g_array_set_size(self->port_control_values, self->port_data->len);
     }
 
-    for(int i=0; i < self->port_data->len; i++) {
+    /* send an event to control [inlet]/[outlet] on startup and any change 
+     * in value 
+     *
+     * FIXME: Ignore the last input, which is the Edit button. */ 
+    for(int i=0; i < (self->port_data->len - 1); i++) {
         if((self->port_input_mask & (1 << i)) &&  
            (self->port_control_mask & (1 << i))) { 
             int val_changed = 1;
@@ -128,6 +146,25 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
 
     mfp_dsp_run(context);
 
+    for(int i=0; i < self->port_data->len; i++) {
+        if((self->port_output_mask & (1 << i)) &&  
+           (self->port_control_mask & (1 << i))) { 
+            int val_changed = 1;
+            void * pdata = mfp_lv2_get_port_data(self, i);
+            if (pdata != NULL) {
+                float val = *(float *)pdata;
+                if (!first_run && 
+                    (g_array_index(self->port_control_values, float, i) == val )) {
+                    val_changed = 0;
+                }
+
+                if (val_changed) { 
+                    g_array_index(self->port_control_values, float, i) = val;
+                    mfp_lv2_send_control_output(context, i, val);
+                }
+            }
+        }
+    }
 }
 
 static void

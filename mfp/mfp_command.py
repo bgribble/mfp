@@ -166,6 +166,13 @@ class MFPCommand(RPCWrapper):
         return patch.obj_id
 
     @rpcwrap
+    def open_file_all_hot(self, file_name, context=None):
+        from .mfp_app import MFPApp
+        patch = MFPApp().open_file(file_name)
+        patch.hot_inlets = range(len(patch.inlets))
+        return patch.obj_id
+
+    @rpcwrap
     def save_file(self, patch_name, file_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
