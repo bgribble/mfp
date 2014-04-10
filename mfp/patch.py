@@ -22,7 +22,7 @@ class Patch(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         from .mfp_app import MFPApp
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
-
+        self.context_id = None 
         self.objects = {}
         self.scopes = {'__patch__': LexicalScope()}
         self.default_scope = self.scopes['__patch__']

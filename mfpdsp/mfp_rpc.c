@@ -168,7 +168,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
                                                        json_array_get_element(args, 1));
         mfp_dsp_push_request(rd);
     }
-    else if (!strcmp(methodname, "destroy")) {
+    else if (!strcmp(methodname, "delete")) {
         rd.reqtype = REQTYPE_DESTROY;
         rd.src_proc = mfp_proc_lookup(obj_id); 
         mfp_dsp_push_request(rd);

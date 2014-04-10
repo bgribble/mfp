@@ -157,6 +157,9 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
         fprintf (stderr, "cannot activate client");
         return NULL;
     }
+    else {
+        ctxt->activated = 1;
+    }
 
     return ctxt;
 

@@ -81,10 +81,10 @@ mfp_api_send_to_outlet(mfp_context * context, int port, float value)
 
 
 int 
-mfp_api_load_patch(mfp_context * context, char * patchfile)
+mfp_api_load_context(mfp_context * context, char * patchfile)
 {
     const char method[] = "call";
-    const char params[] = "{\"func\": \"open_file_all_hot\", \"rpcid\": %d, \"args\": "
+    const char params[] = "{\"func\": \"load_context\", \"rpcid\": %d, \"args\": "
                           "[\"%s\", %d ], \"kwargs\": {} }";
     char tbuf[MFP_MAX_MSGSIZE];
     int request_id;
@@ -94,4 +94,23 @@ mfp_api_load_patch(mfp_context * context, char * patchfile)
     mfp_rpc_wait(request_id);
 }
 
+int
+mfp_api_close_context(mfp_context * context)
+{
+    const char method[] = "call";
+    const char params[] = "{\"func\": \"close_context\", \"rpcid\": %d, "
+                          "\"args\": [ %d ], \"kwargs\": {} }";
+
+    char tbuf[MFP_MAX_MSGSIZE];
+    int request_id;
+
+    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, context->id);
+    request_id = mfp_rpc_send_request(method, tbuf, NULL, NULL);
+    printf("close_context: waiting for request_id %d\n", request_id);
+    mfp_rpc_wait(request_id);
+
+    /* handle any DSP config requests */
+    mfp_dsp_handle_requests();
+}
+    
 

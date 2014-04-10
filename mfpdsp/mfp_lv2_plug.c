@@ -52,7 +52,7 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     mfp_lv2_ttl_read(self, bundle_path);
 
     /* request that the MFP app build this patch */
-    mfp_api_load_patch(context, self->object_name);
+    mfp_api_load_context(context, self->object_name);
 
     return (LV2_Handle)context;
 }
@@ -72,7 +72,7 @@ mfp_lv2_activate(LV2_Handle instance)
 {
     mfp_context * context = (mfp_context *)instance; 
     mfp_lv2_info * self = context->info.lv2;
-    printf("mfp_lv2_activate\n");
+    context->activated = 1;
 }
 
 static void
@@ -108,6 +108,15 @@ static void
 mfp_lv2_run(LV2_Handle instance, uint32_t nframes) 
 {
     mfp_context * context = (mfp_context *)instance; 
+    if (context == NULL) {
+        printf("mfp_lv2_run: context is NULL\n");
+        return;
+    }
+    else if (!context->activated) {
+        printf("mfp_lv2_run: deactivated, skipping\n");
+        return;
+    }
+
     mfp_lv2_info * self = context->info.lv2;
     int first_run=1;
 
@@ -172,6 +181,7 @@ mfp_lv2_deactivate(LV2_Handle instance)
 { 
     mfp_context * context = (mfp_context *)instance; 
     mfp_lv2_info * self = context->info.lv2;
+    context->activated = 0;
     printf("mfp_lv2_deactivate\n");
 }
 
@@ -180,7 +190,8 @@ mfp_lv2_cleanup(LV2_Handle instance)
 {
     mfp_context * context = (mfp_context *)instance; 
     mfp_lv2_info * self = context->info.lv2;
-    printf("mfp_lv2_cleanup\n");
+
+    mfp_context_destroy(context);
 }
 
 static const void *

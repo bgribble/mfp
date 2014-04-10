@@ -127,7 +127,7 @@ typedef struct mfp_context_struct {
     int samplerate;
     int blocksize; 
     int proc_count;
-    int dsp_enabled;
+    int activated;
     int needs_reschedule;
     int default_obj_id;
 
@@ -198,6 +198,7 @@ extern mfp_respdata mfp_response_queue[REQ_BUFSIZE];
 
 /* main.c */
 extern void mfp_init_all(char * sockname);
+extern void mfp_finish_all(void);
 
 /* mfp_jack.c */
 extern mfp_context * mfp_jack_startup(char * client_name, int num_inputs, int num_outputs);
@@ -283,7 +284,8 @@ extern int mfp_context_connect_default_io(mfp_context * context, int patch_id);
 
 /* mfp_api.c */
 extern void mfp_api_init(void);
-extern int mfp_api_load_patch(mfp_context * ctxt, char * patchname);
+extern int mfp_api_load_context(mfp_context * ctxt, char * patchname);
+extern int mfp_api_close_context(mfp_context * ctxt);
 extern int mfp_api_send_to_inlet(mfp_context * ctxt, int port, float val);
 extern int mfp_api_send_to_outlet(mfp_context * ctxt, int port, float val);
 

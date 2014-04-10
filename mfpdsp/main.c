@@ -47,6 +47,12 @@ mfp_init_all(char * sockname)
     return;
 }
 
+void
+mfp_finish_all(void)
+{
+    mfp_comm_io_finish();
+    mfp_alloc_finish();
+}
 
 
 /* main() gets called only if this is a standalone JACK client 

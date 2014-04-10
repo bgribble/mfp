@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/socket.h> 
 #include <sys/time.h>
@@ -26,6 +27,10 @@ mfp_comm_connect(char * sockname)
 {
     int socket_fd;
     struct sockaddr_un address; 
+    struct timeval tv; 
+
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;
 
     socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
     if (socket_fd < 0) {
@@ -41,6 +46,8 @@ mfp_comm_connect(char * sockname)
         printf("mfp_comm_connect: connect() failed, is MFP running?\n");
         return -1;
     }
+
+    setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO,(char *)&tv,sizeof(struct timeval));
 
     comm_sockname = g_strdup(sockname);
     comm_socket = socket_fd; 
@@ -153,9 +160,11 @@ mfp_comm_io_reader_thread(void * tdata)
             mfp_rpc_json_dispatch_request(msgbuf, bytesread);
         }
         else {
-            if (errstat == 0) {
-                printf("comm IO reader: error reading from socket %d\n", comm_socket);
-                errstat = 1;
+            if (errno != EWOULDBLOCK && errno != EAGAIN) {
+                if (errstat == 0) {
+                    printf("comm IO reader: error reading from socket %d\n", comm_socket);
+                    errstat = 1;
+                }
             }
         }
         quitreq = mfp_comm_quit_requested();
@@ -233,6 +242,7 @@ mfp_comm_io_finish(void)
 {
     pthread_mutex_lock(&comm_io_lock);
     comm_io_quitreq = 1;
+    pthread_cond_broadcast(&mfp_response_cond);
     pthread_mutex_unlock(&comm_io_lock);
     mfp_comm_io_wait();
 }

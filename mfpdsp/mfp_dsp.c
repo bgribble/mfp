@@ -255,11 +255,8 @@ mfp_dsp_run(mfp_context * ctxt)
     int chan;
     int chancount = mfp_num_output_buffers(ctxt);
 
-    if (!ctxt->dsp_enabled) {
-        return;
-    }
-
     /* handle any DSP config requests */
+    /* FIXME only handle requests for this context */
     mfp_dsp_handle_requests();
 
     /* zero output buffers ... out~ will accumulate into them */ 

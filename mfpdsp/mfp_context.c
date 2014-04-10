@@ -14,7 +14,7 @@ mfp_context_new(int ctxt_type)
     ctxt->id = next_context_id;
     next_context_id ++;
     ctxt->ctype = ctxt_type; 
-    ctxt->dsp_enabled = 1;
+    ctxt->activated = 0;
 
     if (ctxt_type == CTYPE_JACK) {
         ctxt->info.jack = g_malloc0(sizeof(mfp_jack_info));
@@ -28,9 +28,23 @@ mfp_context_new(int ctxt_type)
 }
 
 void
-mfp_context_destroy(mfp_context * context)
+mfp_context_destroy(mfp_context * ctxt)
 {
-    printf("FIXME: mfp_context_destroy not implemented\n");
+    printf("mfp_context_destroy -- enter\n");
+    mfp_api_close_context(ctxt);
+
+    g_hash_table_remove(mfp_contexts, GINT_TO_POINTER(ctxt->id));
+
+    g_free((gpointer)ctxt->info.lv2);
+    ctxt->info.lv2 = NULL;
+    g_free(ctxt);
+
+    if(g_hash_table_size(mfp_contexts) == 0) {
+        printf("Last context destroyed, need to shut down library\n");
+        mfp_finish_all();
+    }
+
+    printf("mfp_context_destroy -- finished\n");
 }
 
 int

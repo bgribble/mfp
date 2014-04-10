@@ -166,13 +166,6 @@ class MFPCommand(RPCWrapper):
         return patch.obj_id
 
     @rpcwrap
-    def open_file_all_hot(self, file_name, context=None):
-        from .mfp_app import MFPApp
-        patch = MFPApp().open_file(file_name)
-        patch.hot_inlets = range(len(patch.inlets))
-        return patch.obj_id
-
-    @rpcwrap
     def save_file(self, patch_name, file_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
@@ -190,6 +183,22 @@ class MFPCommand(RPCWrapper):
         patch = MFPApp().recall(patch_id)
         scope = patch.scopes.get(scope_name)
         return MFPApp().clipboard_paste(json_txt, patch, scope, mode)
+
+    @rpcwrap
+    def load_context(self, file_name, context_id):
+        from .mfp_app import MFPApp
+        patch = MFPApp().open_file(file_name)
+        patch.context_id = context_id
+        patch.hot_inlets = range(len(patch.inlets))
+        return patch.obj_id
+
+    @rpcwrap
+    def close_context(self, context_id):
+        from .mfp_app import MFPApp
+        for patch in MFPApp().patches.values():
+            if patch.context_id == context_id:
+                print "Closing patch %s in context %s" % (patch.name, context_id)
+                patch.delete()
 
     @rpcwrap_noresp
     def quit(self):
