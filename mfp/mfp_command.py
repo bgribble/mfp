@@ -195,10 +195,14 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def close_context(self, context_id):
         from .mfp_app import MFPApp
-        for patch in MFPApp().patches.values():
+        for patch_id, patch in MFPApp().patches.items():
             if patch.context_id == context_id:
                 print "Closing patch %s in context %s" % (patch.name, context_id)
                 patch.delete()
+                del MFPApp().patches[patch_id]
+        if not len(MFPApp().patches):
+            MFPApp().finish_soon()
+            return None 
 
     @rpcwrap_noresp
     def quit(self):

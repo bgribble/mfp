@@ -66,14 +66,15 @@ mfp_comm_launch(char * sockname)
     char mfpcmd[MFP_EXEC_SHELLMAX];  
     char * const execargs[4] = {"/bin/bash", "-c", mfpcmd, NULL};
 
-    snprintf(mfpcmd, MFP_EXEC_SHELLMAX-1, "mfp --no-dsp -s %s", sockname);
+    snprintf(mfpcmd, MFP_EXEC_SHELLMAX-1, "mfp --no-dsp --no-default -s %s", sockname);
 
     printf("mfp_comm_launch: Launching main mfp process with '%s'\n", mfpcmd);
 
     if (comm_procpid = fork()) {
         printf("mfp_comm_launch (parent): got child PID %d\n", comm_procpid);
         printf("mfp_comm_launch (parent): waiting for child startup\n");
-        sleep(1);
+        /* FIXME need to get some positive confirmation that MFP is up */
+        sleep(2);
         return 0;
     }
     else {

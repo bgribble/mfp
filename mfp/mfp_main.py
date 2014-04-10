@@ -95,6 +95,8 @@ def main():
                         help="Do not launch the GUI engine")
     parser.add_argument("--no-dsp", action="store_true", 
                         help="Do not launch the DSP engine")
+    parser.add_argument("--no-default", action="store_true", 
+                        help="Do not create a default patch")
     parser.add_argument("--help-builtins", action="store_true", 
                         help="Display help on builtin objects and exit") 
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
@@ -107,6 +109,7 @@ def main():
     # configure some things from command line
     app.no_gui = args.get("no_gui") or args.get("help_builtins")
     app.no_dsp = args.get("no_dsp")
+    app.no_default = args.get("no_default")
     app.dsp_inputs = args.get("inputs")
     app.dsp_outputs = args.get("outputs")
     app.osc_port = args.get("osc_udp_port")
@@ -121,6 +124,9 @@ def main():
     if app.no_dsp: 
         log.debug("Not starting DSP engine")
 
+    if app.no_default: 
+        log.debug("Not creating default patch")
+
     # launch processes and threads 
     import signal
     signal.signal(signal.SIGTERM, exit_sighandler)
@@ -132,15 +138,12 @@ def main():
         app.finish()
         return 
 
-    log.debug("After setup, no_gui:", MFPApp().no_gui, app.no_gui)
-
     # ok, now start configuring the running system  
     add_evaluator_defaults() 
     builtins.register()
 
     for libname in args.get("init_lib"):
         app.load_extension(libname)
-
 
     evaluator = Evaluator()
 
@@ -186,7 +189,7 @@ def main():
         if len(patchfiles): 
             for p in patchfiles: 
                 app.open_file(p)
-        else: 
+        elif not app.no_default: 
             app.open_file(None)
 
         # allow session management 

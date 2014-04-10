@@ -332,6 +332,8 @@ class Patch(Processor):
             if obj.gui_created:
                 obj.delete_gui()
                 obj.delete()
+        if self.gui_created: 
+            self.delete_gui()
         Processor.delete(self)
 
 

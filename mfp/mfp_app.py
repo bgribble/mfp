@@ -335,6 +335,16 @@ class MFPApp (Singleton):
         log.debug("MFPApp.finish: all children reaped, good-bye!")
 
 
+    def finish_soon(self):
+        import threading
+        def wait_and_finish(*args, **kwargs):
+            import time
+            time.sleep(0.5)
+            self.finish()
+        qt = threading.Thread(target=wait_and_finish)
+        qt.start()
+        return None 
+
     def send(self, msg, port): 
         if isinstance(msg, MethodCall): 
             msg.call(self)

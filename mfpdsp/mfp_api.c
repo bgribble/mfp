@@ -106,11 +106,19 @@ mfp_api_close_context(mfp_context * context)
 
     snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, context->id);
     request_id = mfp_rpc_send_request(method, tbuf, NULL, NULL);
-    printf("close_context: waiting for request_id %d\n", request_id);
     mfp_rpc_wait(request_id);
 
     /* handle any DSP config requests */
     mfp_dsp_handle_requests();
+}
+    
+int
+mfp_api_node_exit(void)
+{
+    const char method[] = "node_exit";
+    const char params[] = "{}";
+
+    mfp_rpc_send_request(method, params, NULL, NULL);
 }
     
 

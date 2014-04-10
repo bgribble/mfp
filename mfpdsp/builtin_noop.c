@@ -88,8 +88,6 @@ config(mfp_processor * proc)
     gpointer ctxt_out = g_hash_table_lookup(proc->params, "use_context_output");
     gpointer chan = g_hash_table_lookup(proc->params, "io_channel");
 
-    printf("noop~: in config()\n");
-
     if (ctxt_in != NULL) {
         d->use_context_input = (int)(*(float *)ctxt_in);
     }

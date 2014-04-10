@@ -41,6 +41,7 @@ mfp_context_destroy(mfp_context * ctxt)
 
     if(g_hash_table_size(mfp_contexts) == 0) {
         printf("Last context destroyed, need to shut down library\n");
+        mfp_api_node_exit();
         mfp_finish_all();
     }
 

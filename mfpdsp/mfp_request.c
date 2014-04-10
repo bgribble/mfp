@@ -31,8 +31,6 @@ mfp_dsp_push_request(mfp_reqdata rd)
     struct timespec shorttime;
 
     shorttime.tv_sec = 0; shorttime.tv_nsec = 1000;
-
-    printf("  push_request entered\n");
     memcpy(newreq, &rd, sizeof(mfp_reqdata)); 
 
     /* note: this mutex just keeps a single writer thread with access 
@@ -102,7 +100,6 @@ mfp_dsp_handle_requests(void)
             break;
 
         case REQTYPE_DESTROY:
-            printf("destroy: id=%d\n", cmd->src_proc->rpc_id);
             mfp_proc_destroy(cmd->src_proc);
             break;
 
