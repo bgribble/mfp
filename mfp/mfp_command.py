@@ -185,19 +185,24 @@ class MFPCommand(RPCWrapper):
         return MFPApp().clipboard_paste(json_txt, patch, scope, mode)
 
     @rpcwrap
-    def load_context(self, file_name, context_id):
+    def load_context(self, file_name, node_id, context_id):
         from .mfp_app import MFPApp
-        patch = MFPApp().open_file(file_name)
-        patch.context_id = context_id
+        from .dsp_object import DSPContext 
+
+        ctxt = DSPContext(node_id, context_id)
+        patch = MFPApp().open_file(file_name, ctxt)
         patch.hot_inlets = range(len(patch.inlets))
         return patch.obj_id
 
     @rpcwrap
-    def close_context(self, context_id):
+    def close_context(self, node_id, context_id):
         from .mfp_app import MFPApp
+        from .dsp_object import DSPContext 
+        ctxt = DSPContext(node_id, context_id)
+
         for patch_id, patch in MFPApp().patches.items():
-            if patch.context_id == context_id:
-                print "Closing patch %s in context %s" % (patch.name, context_id)
+            if patch.context == ctxt:
+                print "Closing patch %s in context %s" % (patch.name, ctxt)
                 patch.delete()
                 del MFPApp().patches[patch_id]
         if not len(MFPApp().patches):

@@ -79,7 +79,7 @@ class MFPApp (Singleton):
     def setup(self):
         from .mfp_command import MFPCommand 
         from .gui_command import GUICommand 
-        from .dsp_object import DSPObject
+        from .dsp_object import DSPObject, DSPContext
         from .mfp_main import version 
 
         log.debug("Main thread started, pid = %s" % os.getpid())
@@ -105,6 +105,7 @@ class MFPApp (Singleton):
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
             self.rpc_host.subscribe(DSPObject)
+            Patch.default_context = DSPContext(DSPObject.publishers[0], 0)
 
         if not self.no_gui:
             self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path)
@@ -168,7 +169,7 @@ class MFPApp (Singleton):
     def register(self, name, ctor):
         self.registry[name] = ctor
 
-    def open_file(self, file_name):
+    def open_file(self, file_name, context=None):
         patch = None 
         factory = None 
         name = 'default'
@@ -189,10 +190,10 @@ class MFPApp (Singleton):
                 factory = None 
 
             if factory: 
-                patch = factory(name, "", None, self.app_scope, name)
+                patch = factory(name, "", None, self.app_scope, name, context)
 
         if patch is None:
-            patch = Patch(name, '', None, self.app_scope, name)
+            patch = Patch(name, '', None, self.app_scope, name, context)
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
         self.patches[patch.name] = patch 

@@ -10,13 +10,32 @@ from .rpc import RPCWrapper, rpcwrap
 from . import log
 
 
+class DSPContext(object):
+    def __init__(self, node_id, context_id):
+        self.node_id = node_id
+        self.context_id = context_id 
+
+    def __eq__(self, other):
+        if isinstance(other, DSPContext):
+            return (self.node_id == other.node_id) and (self.context_id == other.context_id)
+        else: 
+            return False 
+
+    def __ne__(self, other): 
+        if isinstance(other, DSPContext):
+            return (self.node_id != other.node_id) or (self.context_id != other.context_id)
+        else: 
+            return True
+
+
+
 class DSPObject(RPCWrapper):
     objects = {}
 
-    def __init__(self, obj_id, name, inlets, outlets, params, context_id, patch_id):
+    def __init__(self, obj_id, name, inlets, outlets, params, context, patch_id):
         self.obj_id = obj_id
         RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params, 
-                            context_id, patch_id)
+                            context, patch_id)
 
     @rpcwrap
     def reset(self):

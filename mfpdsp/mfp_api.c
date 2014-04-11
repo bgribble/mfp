@@ -85,11 +85,12 @@ mfp_api_load_context(mfp_context * context, char * patchfile)
 {
     const char method[] = "call";
     const char params[] = "{\"func\": \"load_context\", \"rpcid\": %d, \"args\": "
-                          "[\"%s\", %d ], \"kwargs\": {} }";
+                          "[\"%s\", %d, %d ], \"kwargs\": {} }";
     char tbuf[MFP_MAX_MSGSIZE];
     int request_id;
 
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, patchfile, context->id);
+    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, patchfile, 
+             mfp_comm_nodeid, context->id);
     request_id = mfp_rpc_send_request(method, tbuf, api_load_callback, (void *)context);
     mfp_rpc_wait(request_id);
 }
@@ -99,12 +100,12 @@ mfp_api_close_context(mfp_context * context)
 {
     const char method[] = "call";
     const char params[] = "{\"func\": \"close_context\", \"rpcid\": %d, "
-                          "\"args\": [ %d ], \"kwargs\": {} }";
+                          "\"args\": [ %d, %d ], \"kwargs\": {} }";
 
     char tbuf[MFP_MAX_MSGSIZE];
     int request_id;
 
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, context->id);
+    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, mfp_comm_nodeid, context->id);
     request_id = mfp_rpc_send_request(method, tbuf, NULL, NULL);
     mfp_rpc_wait(request_id);
 

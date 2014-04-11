@@ -18,11 +18,19 @@ from mfp import log
 class Patch(Processor):
     EXPORT_LAYER = "Interface"
     display_type = "patch"
+    default_context = None 
     
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, context=None):
         from .mfp_app import MFPApp
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
-        self.context_id = None 
+        if context is None:
+            if patch is None:
+                self.context = self.default_context
+            else:
+                self.context = patch.context 
+        else: 
+            self.context = context 
+
         self.objects = {}
         self.scopes = {'__patch__': LexicalScope()}
         self.default_scope = self.scopes['__patch__']
@@ -213,8 +221,8 @@ class Patch(Processor):
     def register_file(klass, filename):
         from .mfp_app import MFPApp
 
-        def factory(init_type, init_args, patch, scope, name):
-            p = Patch(init_type, init_args, patch, scope, name)
+        def factory(init_type, init_args, patch, scope, name, context=None):
+            p = Patch(init_type, init_args, patch, scope, name, context)
             p._load_file(filename)
             p.init_type = init_type
             return p
