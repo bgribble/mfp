@@ -459,7 +459,6 @@ ready_callback(JsonNode * response, void * data)
         JsonNode * val = json_array_get_element(arry, 1);
         if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
             mfp_comm_nodeid = (int)json_node_get_double(val);
-            printf("mfp_rpc_init: Got node_id %d for MFPCommand\n", mfp_comm_nodeid);
             return;
         }
     }

@@ -1,5 +1,6 @@
 
 from .rpc import RPCWrapper, rpcwrap 
+from . import log 
 
 class GUICommand (RPCWrapper):
     @rpcwrap

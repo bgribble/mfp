@@ -63,7 +63,6 @@ class RPCRemote (object):
         req = Request("ready", {})
         self.rpc_host.put(req, 0)
         self.rpc_host.wait(req)
-        print "RPCRemote: ready: got node_id=", req.result[1]
         self.rpc_host.node_id = req.result[1]
 
     def close(self): 

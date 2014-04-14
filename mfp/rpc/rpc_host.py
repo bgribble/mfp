@@ -197,7 +197,7 @@ class RPCHost (QuittableThread):
                     self.read_workers.submit((jdata, peer_id))
             
         if self.node_id == 0: 
-            req = Request("node_exit_req", {})
+            req = Request("exit_request", {})
             peers = self.managed_sockets.keys()
             for node in peers:
                 self.put(req, node)
@@ -205,7 +205,7 @@ class RPCHost (QuittableThread):
                 del self.managed_sockets[node]
 
         elif 0 in self.managed_sockets:
-            req = Request("node_exit", {})
+            req = Request("exit_notify", {})
             self.put(req, 0)
             self.wait(req)
 
@@ -269,7 +269,12 @@ class RPCHost (QuittableThread):
         elif method == "ready":
             req.result = (True, peer_id)
 
-        elif method == "node_exit": 
+        elif method == "exit_request":
+            if not self.join_req:
+                self.finish()
+            req.request_id = None
+
+        elif method == "exit_notify": 
             # remove this peer as a publisher for any classes
             for clsname, cls in RPCWrapper.rpctype.items():
                 if peer_id in cls.publishers:
@@ -279,10 +284,6 @@ class RPCHost (QuittableThread):
 
         elif method == "node_status":
             pass
-
-        elif method == "node_exit_req":
-            self.finish()
-            req.request_id = None
 
         else:
             print "rpc_wrapper: WARNING: no handler for method '%s'" % method

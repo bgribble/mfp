@@ -8,7 +8,9 @@ import simplejson as json
 
 class ExtendedEncoder (json.JSONEncoder):
     from ..bang import BangType, UninitType
-    TYPES = { 'BangType': BangType, 'UninitType': UninitType }
+    from ..gui.colordb import RGBAColor 
+
+    TYPES = { 'BangType': BangType, 'UninitType': UninitType, 'RGBAColor': RGBAColor}
 
     def default(self, obj):
         if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):

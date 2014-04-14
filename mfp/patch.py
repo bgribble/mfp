@@ -337,14 +337,11 @@ class Patch(Processor):
 
     def delete(self):
         for oid, obj in self.objects.items():
-            print "patch.delete: squishing object", obj
             if obj.gui_created:
                 obj.delete_gui()
             obj.delete()
         if self.gui_created: 
-            print "patch.delete: squishing my own GUI"
             self.delete_gui()
-        print "patch.delete: calling processor.delete"
         Processor.delete(self)
 
 

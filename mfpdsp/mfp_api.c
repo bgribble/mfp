@@ -14,7 +14,6 @@ api_create_callback(JsonNode * response, void * data)
         JsonNode * val = json_array_get_element(arry, 1);
         if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
             api_rpcid = (int)json_node_get_double(val);
-            printf("mfp_api_init: Got rpc_id %d for MFPCommand\n", api_rpcid);
             return;
         }
     }
@@ -114,9 +113,9 @@ mfp_api_close_context(mfp_context * context)
 }
     
 int
-mfp_api_node_exit(void)
+mfp_api_exit_notify(void)
 {
-    const char method[] = "node_exit";
+    const char method[] = "exit_notify";
     const char params[] = "{}";
 
     mfp_rpc_send_request(method, params, NULL, NULL);

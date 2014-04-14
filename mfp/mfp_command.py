@@ -200,24 +200,16 @@ class MFPCommand(RPCWrapper):
         from .dsp_object import DSPContext 
         ctxt = DSPContext(node_id, context_id)
 
-        print "close_context: patches on enter", MFPApp().patches 
-
         to_delete = [] 
         for patch_id, patch in MFPApp().patches.items():
-            print "close_context: looking at", patch_id, patch
             if patch.context == ctxt:
-                print " --> Closing patch %s in context %s" % (patch.name, ctxt)
                 patch.delete()
                 to_delete.append(patch_id)
-                print "     Patch deleted"
 
         for patch_id in to_delete: 
             del MFPApp().patches[patch_id] 
 
-        print "close_context: patches on leave", MFPApp().patches 
-
         if not len(MFPApp().patches):
-            print "close_context: no patches left, closing MFP app"
             MFPApp().finish_soon()
             return None 
 

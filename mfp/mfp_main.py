@@ -101,6 +101,8 @@ def main():
                         help="Display help on builtin objects and exit") 
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
                         help="Path to create Unix-domain socket for RPC")
+    parser.add_argument("-d", "--debug", action="store_true", 
+                        help="Enable debugging behaviors")
     args = vars(parser.parse_args())
 
     # create the app object 
@@ -117,6 +119,7 @@ def main():
     app.extpath = ':'.join(args.get("lib_path"))
     app.max_blocksize = args.get("max_bufsize") 
     app.socket_path = args.get("socket_path")
+    app.debug = args.get("debug")
 
     if app.no_gui:
         log.debug("Not starting GUI services")
