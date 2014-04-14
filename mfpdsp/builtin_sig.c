@@ -28,7 +28,7 @@ process(mfp_processor * proc)
     }
 
     /* iterate */ 
-    for(scount=0; scount < mfp_blocksize; scount++) {
+    for(scount=0; scount < proc->context->blocksize; scount++) {
         *sample++ = d->sample;
     }
 

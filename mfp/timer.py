@@ -4,7 +4,7 @@ timer.py
 Multi-timer implementation
 '''
 
-from quittable_thread import QuittableThread
+from .utils import QuittableThread
 from threading import Condition, Lock
 from datetime import datetime, timedelta
 

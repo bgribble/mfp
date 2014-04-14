@@ -68,7 +68,7 @@ ladspa_setup(mfp_processor * proc)
         d->plug_control = g_malloc0(portcount * sizeof(LADSPA_Data));
 
         /* actually instantiate the plugin */
-        d->plug_handle = d->plug_descrip->instantiate(d->plug_descrip, mfp_samplerate);
+        d->plug_handle = d->plug_descrip->instantiate(d->plug_descrip, proc->context->samplerate);
 
         /* count the signal inputs and outputs, and connect control ports */
         for(portnum=0; portnum < portcount; portnum++) {
@@ -89,7 +89,7 @@ ladspa_setup(mfp_processor * proc)
 
         /* reconfigure buffers in the processor object */ 
         mfp_proc_free_buffers(proc);
-        mfp_proc_alloc_buffers(proc, signal_ins, signal_outs, mfp_blocksize);
+        mfp_proc_alloc_buffers(proc, signal_ins, signal_outs, proc->context->blocksize);
 
         /* connect signal inputs and outputs to the new buffers */
         signal_ins = 0;
@@ -121,7 +121,7 @@ process(mfp_processor * proc)
 
     /* this is simple! */
     if (d->plug_descrip != NULL) {
-        d->plug_descrip->run(d->plug_handle, mfp_blocksize);
+        d->plug_descrip->run(d->plug_handle, proc->context->blocksize);
     }
     return 0;
 }

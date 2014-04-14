@@ -10,10 +10,8 @@ from threading import Thread
 from ..input_mode import InputMode
 from ..colordb import ColorDB 
 
-from mfp import log
-from mfp.gui_slave import clutter_do
+from mfp.gui_main import clutter_do
 
-from gi.repository import Clutter
 
 class Blinker (Thread):
     def __init__(self, txt, blink_time=0.5):

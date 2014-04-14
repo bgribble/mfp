@@ -18,10 +18,18 @@ from mfp import log
 class Patch(Processor):
     EXPORT_LAYER = "Interface"
     display_type = "patch"
+    default_context = None 
     
-    def __init__(self, init_type, init_args, patch, scope, name):
-        from .main import MFPApp
+    def __init__(self, init_type, init_args, patch, scope, name, context=None):
+        from .mfp_app import MFPApp
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
+        if context is None:
+            if patch is None:
+                self.context = self.default_context
+            else:
+                self.context = patch.context 
+        else: 
+            self.context = context 
 
         self.objects = {}
         self.scopes = {'__patch__': LexicalScope()}
@@ -79,7 +87,7 @@ class Patch(Processor):
         del self.scopes[name]
 
     def rename(self, new_name):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         oldname = self.name
         Processor.rename(self, new_name)
         del MFPApp().patches[oldname]
@@ -152,7 +160,7 @@ class Patch(Processor):
 
             if obj.init_type == 'inlet~':
                 self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects) 
-                                    if p[1].init_type == 'inlet~' ]
+                                    if p[1] and p[1].init_type == 'inlet~' ]
                 self.gui_params['dsp_inlets'] = self.dsp_inlets 
 
         elif obj.init_type in ('outlet', 'outlet~'):
@@ -164,7 +172,7 @@ class Patch(Processor):
 
             if obj.init_type == 'outlet~':
                 self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects) 
-                                    if p[1].init_type == 'outlet~' ]
+                                    if p[1] and p[1].init_type == 'outlet~' ]
                 self.gui_params['dsp_outlets'] = self.dsp_outlets 
 
         elif obj.init_type == 'dispatch':
@@ -211,10 +219,10 @@ class Patch(Processor):
 
     @classmethod
     def register_file(klass, filename):
-        from main import MFPApp
+        from .mfp_app import MFPApp
 
-        def factory(init_type, init_args, patch, scope, name):
-            p = Patch(init_type, init_args, patch, scope, name)
+        def factory(init_type, init_args, patch, scope, name, context=None):
+            p = Patch(init_type, init_args, patch, scope, name, context)
             p._load_file(filename)
             p.init_type = init_type
             return p
@@ -228,7 +236,8 @@ class Patch(Processor):
         return (parts[0], factory)
 
     def create_gui(self):
-        from main import MFPApp
+        from .mfp_app import MFPApp
+
         if MFPApp().no_gui:
             return False
 
@@ -260,7 +269,7 @@ class Patch(Processor):
         savefile.write(self.json_serialize())
 
     def _load_file(self, filename):
-        from .main import MFPApp
+        from .mfp_app import MFPApp
         from .utils import splitpath 
 
         searchpath = MFPApp().searchpath or ""
@@ -330,7 +339,9 @@ class Patch(Processor):
         for oid, obj in self.objects.items():
             if obj.gui_created:
                 obj.delete_gui()
-                obj.delete()
+            obj.delete()
+        if self.gui_created: 
+            self.delete_gui()
         Processor.delete(self)
 
 

@@ -6,7 +6,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import alsaseq
-from quittable_thread import QuittableThread
+from .utils import QuittableThread
 from threading import Lock 
 from datetime import datetime
 from . import appinfo

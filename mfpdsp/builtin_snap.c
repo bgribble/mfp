@@ -18,6 +18,10 @@ process(mfp_processor * proc)
     mfp_sample * sample = proc->inlet_buf[0]->data;
     int scount = 0;
 
+
+    sprintf(mfp_last_activity, "snap~: %p %d\n", 
+            proc->inlet_buf[0], proc->inlet_buf[0]->blocksize);
+
     /* iterate */ 
     for (;scount < proc->inlet_buf[0]->blocksize; scount++) {
         if(pdata->triggered == 1) {
@@ -72,7 +76,7 @@ config(mfp_processor * proc)
         pdata->triggered = (int)(*(float *)trigger_ptr);
     }
     if(retrigger_ptr != NULL) {
-        pdata->retrigger = (int)((*(float *)retrigger_ptr) * mfp_samplerate / 1000.0);
+        pdata->retrigger = (int)((*(float *)retrigger_ptr) * proc->context->samplerate / 1000.0);
         pdata->retrigger_count = 0;
     }
 

@@ -6,7 +6,7 @@ PatchInfo class capturing display information for a patch
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from ..gui_slave import MFPGUI
+from ..gui_main import MFPGUI
 from .layer import Layer
 
 

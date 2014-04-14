@@ -7,8 +7,8 @@ A patch element corresponding to an XY scatter or line plot
 from gi.repository import Clutter as clutter
 from patch_element import PatchElement
 from mfp import log
-from mfp.main import MFPApp
-from mfp.gui_slave import MFPGUI
+from mfp.mfp_app import MFPApp
+from mfp.gui_main import MFPGUI
 from .modes.label_edit import LabelEditMode
 from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot

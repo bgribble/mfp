@@ -20,7 +20,7 @@ typedef struct {
 
 
 static void
-iterate_div(mfp_sample * in_0, mfp_sample * in_1, 
+iterate_div(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1, 
             mfp_sample const_in_0, mfp_sample const_in_1, mfp_sample * outbuf)
 {
     int scount;
@@ -29,29 +29,29 @@ iterate_div(mfp_sample * in_0, mfp_sample * in_1,
 
     /* iterate */ 
     if (in_0_present && in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ / *in_1++;
         }
     }
     else if (in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 / *in_1++;
         }
     }
     else if (in_0_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ / const_in_1;
         }
     }
     else {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 / const_in_1;
         }
     }
 }
 
 static void
-iterate_mul(mfp_sample * in_0, mfp_sample * in_1, 
+iterate_mul(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1, 
             mfp_sample const_in_0, mfp_sample const_in_1, mfp_sample * outbuf)
 {
     int scount;
@@ -60,29 +60,29 @@ iterate_mul(mfp_sample * in_0, mfp_sample * in_1,
 
     /* iterate */ 
     if (in_0_present && in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ * *in_1++;
         }
     }
     else if (in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 * *in_1++;
         }
     }
     else if (in_0_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ * const_in_1;
         }
     }
     else {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 * const_in_1;
         }
     }
 }
 
 static void
-iterate_sub(mfp_sample * in_0, mfp_sample * in_1, 
+iterate_sub(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1, 
             mfp_sample const_in_0, mfp_sample const_in_1, mfp_sample * outbuf)
 {
     int scount;
@@ -91,29 +91,29 @@ iterate_sub(mfp_sample * in_0, mfp_sample * in_1,
 
     /* iterate */ 
     if (in_0_present && in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ - *in_1++;
         }
     }
     else if (in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 - *in_1++;
         }
     }
     else if (in_0_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ - const_in_1;
         }
     }
     else {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 - const_in_1;
         }
     }
 }
 
 static void
-iterate_add(mfp_sample * in_0, mfp_sample * in_1, 
+iterate_add(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1, 
             mfp_sample const_in_0, mfp_sample const_in_1, mfp_sample * outbuf)
 {
     int scount;
@@ -122,29 +122,29 @@ iterate_add(mfp_sample * in_0, mfp_sample * in_1,
 
     /* iterate */ 
     if (in_0_present && in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ + *in_1++;
         }
     }
     else if (in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 + *in_1++;
         }
     }
     else if (in_0_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  *in_0++ + const_in_1;
         }
     }
     else {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  const_in_0 + const_in_1;
         }
     }
 }
 
 static void
-iterate_gt(mfp_sample * in_0, mfp_sample * in_1, 
+iterate_gt(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1, 
            mfp_sample const_in_0, mfp_sample const_in_1, mfp_sample * outbuf)
 {
     int scount;
@@ -153,29 +153,29 @@ iterate_gt(mfp_sample * in_0, mfp_sample * in_1,
 
     /* iterate */ 
     if (in_0_present && in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ = (*in_0++ > *in_1++) ? 1.0 : 0.0; 
         }
     }
     else if (in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  (const_in_0 > *in_1++) ? 1.0 : 0.0;
         }
     }
     else if (in_0_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  (*in_0++ > const_in_1) ? 1.0 : 0.0;
         }
     }
     else {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  (const_in_0 > const_in_1) ? 1.0 : 0.0;
         }
     }
 }
 
 static void
-iterate_lt(mfp_sample * in_0, mfp_sample * in_1, 
+iterate_lt(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1, 
            mfp_sample const_in_0, mfp_sample const_in_1, mfp_sample * outbuf)
 {
     int scount;
@@ -184,22 +184,22 @@ iterate_lt(mfp_sample * in_0, mfp_sample * in_1,
 
     /* iterate */ 
     if (in_0_present && in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ = (*in_0++ < *in_1++) ? 1.0 : 0.0; 
         }
     }
     else if (in_1_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  (const_in_0 < *in_1++) ? 1.0 : 0.0;
         }
     }
     else if (in_0_present) {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  (*in_0++ < const_in_1) ? 1.0 : 0.0;
         }
     }
     else {
-        for(scount=0; scount < mfp_blocksize; scount++) {
+        for(scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ =  (const_in_0 < const_in_1) ? 1.0 : 0.0;
         }
     }
@@ -229,22 +229,22 @@ process(mfp_processor * proc)
 
     switch (d->op_type) {
         case ARITH_OP_ADD:
-            iterate_add(in_0, in_1, const_in_0, const_in_1, outbuf);
+            iterate_add(proc, in_0, in_1, const_in_0, const_in_1, outbuf);
             break;
         case ARITH_OP_SUB:
-            iterate_sub(in_0, in_1, const_in_0, const_in_1, outbuf);
+            iterate_sub(proc, in_0, in_1, const_in_0, const_in_1, outbuf);
             break;
         case ARITH_OP_MUL:
-            iterate_mul(in_0, in_1, const_in_0, const_in_1, outbuf);
+            iterate_mul(proc, in_0, in_1, const_in_0, const_in_1, outbuf);
             break;
         case ARITH_OP_DIV:
-            iterate_div(in_0, in_1, const_in_0, const_in_1, outbuf);
+            iterate_div(proc, in_0, in_1, const_in_0, const_in_1, outbuf);
             break;
         case ARITH_OP_GT:
-            iterate_gt(in_0, in_1, const_in_0, const_in_1, outbuf);
+            iterate_gt(proc, in_0, in_1, const_in_0, const_in_1, outbuf);
             break;
         case ARITH_OP_LT:
-            iterate_lt(in_0, in_1, const_in_0, const_in_1, outbuf);
+            iterate_lt(proc, in_0, in_1, const_in_0, const_in_1, outbuf);
             break;
     }
 

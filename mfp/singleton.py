@@ -14,11 +14,9 @@ class SingletonMeta (type):
         self._singleton = None
 
     def __new__(self, name, bases, dict):
-        #print "SingletonMeta.__new__(", self, name, bases, dict, ")"
         return type.__new__(self, name, bases, dict)
 
     def __call__(self, *args, **kwargs):
-        #print "SingletonMeta.__call__(", self, args, kwargs, ")"
         with self._singleton_lock:
             if self._singleton is None:
                 self._singleton = super(SingletonMeta, self).__call__(*args, **kwargs)
@@ -29,13 +27,11 @@ class Singleton (object):
 
     @classmethod
     def __new__(cls, *args):
-        #print "Singleton.__new__(", args, ")"
         with cls._singleton_lock:
             if cls._singleton is None:
-                #print "No singleton, returning new object"
-                return object.__new__(cls)
+                obj = object.__new__(cls)
+                return obj
             else:
-                #print "Singleton exists, returning it"
                 return cls._singleton
 
     def __getnewargs__(self):

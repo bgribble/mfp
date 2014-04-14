@@ -41,10 +41,11 @@ trial-and-error and is a bit of a mess.
 
 Main, GUI, and DSP node control: 
 
-    mfp/main.py           MFPApp singleton, which is The Application,
-                          and MFPCommand, which is the RPC-wrapped API 
+    mfp/mfp_app.py        MFPApp singleton, which is The Application,
 
-    mfp/gui_slave.py      MFPGUI singleton, which wraps the Clutter
+    mfp/mfp_command.py    MFPCommand, which is the RPC-wrapped API 
+
+    mfp/gui_main.py       MFPGUI singleton, which wraps the Clutter
                           main loop, and GUICommand, which is the
                           RPC-wrapped API 
 

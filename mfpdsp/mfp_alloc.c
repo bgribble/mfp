@@ -3,6 +3,7 @@
 #include <pthread.h>
 
 #include "mfp_dsp.h"
+#include <time.h>
 
 typedef struct {
     mfp_processor * proc;
@@ -59,6 +60,8 @@ static void *
 mfp_alloc_thread_func(void * data)
 {
     mfp_alloc_reqinfo req; 
+    struct timespec sleeptime;
+    sleeptime.tv_sec = 0; sleeptime.tv_nsec = 100000;
 
     while(mfp_alloc_quit == 0) {
         while(alloc_queue_read != alloc_queue_write) {
@@ -67,7 +70,7 @@ mfp_alloc_thread_func(void * data)
             *req.status = ALLOC_READY; 
             alloc_queue_read = (alloc_queue_read+1) % ALLOC_BUFSIZE;
         }
-        usleep(10000);
+        nanosleep(&sleeptime, NULL);
     }
     return NULL;
 }
@@ -77,12 +80,8 @@ void
 mfp_alloc_init(void)
 {
     pthread_attr_t attr;
-
     pthread_attr_init(&attr);
-
-    printf ("mfp_alloc_init() starting thread\n");
     pthread_create(&mfp_alloc_thread, NULL, &mfp_alloc_thread_func, NULL); 
-    printf("mfp_alloc_init() pthread_create returned\n");
 }
 
 void

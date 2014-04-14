@@ -11,8 +11,8 @@ import sys
 import select
 import time
 from mfp import log
-from mfp.main import MFPCommand
-from mfp.gui_slave import MFPGUI
+from mfp.mfp_command import MFPCommand
+from mfp.gui_main import MFPGUI
 from gi.repository import Gtk
 
 from .key_defs import *

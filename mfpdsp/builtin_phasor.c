@@ -28,7 +28,7 @@ process(mfp_processor * proc)
         mode_am = 1;
     }
 
-    phase_base = 1.0 / (double)mfp_samplerate;
+    phase_base = 1.0 / (double)proc->context->samplerate;
 
     if (proc->outlet_buf[0] == NULL) {
         mfp_proc_error(proc, "No output buffers allocated");

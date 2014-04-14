@@ -11,12 +11,13 @@ class BaseWorker (object):
     Each worker in the pool has a thread which waits for a signal on
     its condition variable.
 
-    Implementations of BaseWorker have to define the take_work()
-    and perform_work() methods
+    The thread calls self.take_work() to grab the next data chunk, 
+    then perform_work() to consume it. 
     '''
 
-    def __init__(self, pool):
+    def __init__(self, pool, thunk=None):
         self.pool = pool
+        self.thunk = thunk
         self.quit_req = False
         self.lock = threading.Lock()
         self.condition = threading.Condition(self.lock)
@@ -27,24 +28,25 @@ class BaseWorker (object):
         while not self.quit_req:
             # get in line
             self.pool.worker_ready(self)
-
             with self.lock:
-                while not self.quit_req and self.pool.active_worker != self:
-                    self.condition.wait()
+                self.condition.wait()
 
             if self.quit_req:
                 break
+            elif self.pool.active_worker != self: 
+                continue 
 
             # take_work a chunk of data
             try:
                 workunit = self.take_work()
             except WorkerPool.Empty, e:
-                continue
+                continue 
 
             # perform_work data
             self.pool.worker_consuming(self)
             keepalive = self.perform_work(workunit)
             if not keepalive:
+                print "HA! perform_work returns", keepalive
                 break
         self.pool.worker_done(self)
 
@@ -54,16 +56,29 @@ class BaseWorker (object):
                 self.pool.working_pool.remove(self)
 
     def take_work(self):
-        '''(virtual) Grab next available chunk of data'''
-        pass
+        '''Grab next available chunk of data'''
+        with self.pool.lock: 
+            if self.pool.submitted_data:
+                rd = self.pool.submitted_data[0]
+                self.pool.submitted_data = self.pool.submitted_data[1:] 
+                return rd 
+            else: 
+                raise WorkerPool.Empty()
 
     def perform_work(self, data):
-        '''(virtual) Process chunk of data'''
-        pass
-
+        '''Process chunk of data'''
+        try:
+            if callable(self.thunk): 
+                return self.thunk(self, data)
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
+            print e
+            return True
+        
     def go(self):
         with self.lock:
-            self.condition.notify()
+            self.condition.notify_all()
 
     def exit(self):
         self.quit_req = True
@@ -89,6 +104,7 @@ class WorkerPool (object):
         self.quit_req = False
 
         self.active_worker = None
+        self.submitted_data = []
         self.waiting_pool = []
         self.working_pool = []
         self.dead_pool = []
@@ -96,7 +112,11 @@ class WorkerPool (object):
     def start(self):
         self.reaper.start()
         for n in range(self.min_workers):
-            self.factory(self)
+            if isinstance(self.factory, type):
+                self.factory(self)
+            else: 
+                BaseWorker(self, self.factory)
+
 
     def worker_ready(self, worker):
         with self.lock:
@@ -118,6 +138,7 @@ class WorkerPool (object):
             self.condition.notify()
 
     def worker_consuming(self, worker):
+        from datetime import datetime 
         goworker = 0
         with self.lock:
             if worker == self.active_worker:
@@ -126,7 +147,10 @@ class WorkerPool (object):
                     self.active_worker = self.waiting_pool.pop()
                     goworker = 1
                 else:
-                    self.active_worker = self.factory(self)
+                    if isinstance(self.factory, type):
+                        self.active_worker = self.factory(self)
+                    else: 
+                        self.active_worker = BaseWorker(self, self.factory)
                     goworker = 1
             self.condition.notify()
         if goworker:
@@ -155,6 +179,11 @@ class WorkerPool (object):
                 for s in deadworkers:
                     s.thread.join()
                 deadworkers = []
+
+    def submit(self, job_data):
+        with self.lock:
+            self.submitted_data.append(job_data)
+            self.active_worker.go()
 
     def finish(self, wait=True):
         with self.lock:

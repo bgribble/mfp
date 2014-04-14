@@ -5,9 +5,9 @@ osc.py: OSC server for MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from quittable_thread import QuittableThread
+from .utils import QuittableThread
+from . import log
 import liblo
-from mfp import log
 
 
 class MFPOscManager(QuittableThread):
@@ -19,7 +19,7 @@ class MFPOscManager(QuittableThread):
         try:
             self.server = liblo.Server(self.port)
         except Exception, err:
-            print str(err)
+            print type(err), str(err)
 
         self.server.add_method(None, None, self.default)
         QuittableThread.__init__(self)
@@ -57,6 +57,7 @@ class MFPOscManager(QuittableThread):
         self.server.send(target, m)
 
     def run(self):
+        from datetime import datetime
         while not self.join_req and self.server is not None:
             self.server.recv(100)
         log.debug("OSC server exiting")

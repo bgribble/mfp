@@ -14,14 +14,14 @@ typedef struct {
 } builtin_osc_data;
 
 #define OSC_TABSIZE 2048
-#define OSC_TABRANGE (2.0 * M_PI)
+#define OSC_TABRANGE (2.0 * M_PI + 0.000001)
 #define OSC_TABSCALE (OSC_TABSIZE / OSC_TABRANGE)
 #define OSC_TABINCR (OSC_TABRANGE / OSC_TABSIZE) 
 
 double osc_table[OSC_TABSIZE + 1]; 
 
 static void 
-table_load() {
+table_load(void) {
     double phase = 0.0;
     double phase_incr = OSC_TABINCR;
     int sample;
@@ -70,7 +70,7 @@ process(mfp_processor * proc)
         mode_am = 1;
     }
 
-    phase_base = 2.0*M_PI / (double)mfp_samplerate;
+    phase_base = 2.0*M_PI / (double)proc->context->samplerate;
 
     if (proc->outlet_buf[0] == NULL) {
         mfp_proc_error(proc, "No output buffers allocated");
@@ -116,7 +116,7 @@ init(mfp_processor * proc)
     d->const_freq = 0.0;
     d->phase = 0;
     d->int_0 = mfp_block_new(mfp_max_blocksize);
-    mfp_block_resize(d->int_0, mfp_blocksize);
+    mfp_block_resize(d->int_0, proc->context->blocksize);
 
     proc->data = (void *)d;
 
@@ -142,8 +142,8 @@ config(mfp_processor * proc)
     gpointer phase_ptr = g_hash_table_lookup(proc->params, "phase");
 
     /* if blocksize has changed, resize internal buffer */ 
-    if (d->int_0->blocksize != mfp_blocksize) {
-        mfp_block_resize(d->int_0, mfp_blocksize);
+    if (d->int_0->blocksize != proc->context->blocksize) {
+        mfp_block_resize(d->int_0, proc->context->blocksize);
     }
 
     /* get parameters */ 

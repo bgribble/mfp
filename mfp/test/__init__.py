@@ -1,4 +1,4 @@
-from mfp.main import MFPApp
+from mfp.mfp_app import MFPApp
 from mfp import builtins
 
 

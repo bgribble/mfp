@@ -1,0 +1,59 @@
+MFP runtime processes 
+--------------------------------
+
+MFP runs as a main Python process (defined in mfp/mfp_main.py), a GUI
+process (also Python, defined in mfp/gui_main.py), zero or more
+JACK client DSP processes (mfpdsp/main.c), and zero or more LV2 plugin
+instances in their host processes.   All of these communicate with
+each other using a very simple JSON-RPC mechanism which talks over a
+Unix domain socket. 
+
+The main Python process is the "hub" of the network, and it's the only
+process that calls listen() on the Unix socket.  All other processes
+connect to it.  In the case of an LV2 plugin where the "spoke" may be
+created before the "hub", the plugin can launch the main process and
+then connect to it once it starts up. 
+
+RPC environment
+--------------------------------
+
+Communication between nodes is through a basic set of JSON-RPC
+"method" calls dispatched by the RPCHost.handle_request() method.
+This RPC API mostly manages an object-oriented RPC scheme implemented by the 
+RPCWrapper class. 
+
+Subclasses of rpc.RPCWrapper are created as a proxy stub on a "client"
+node, which triggers the creation of the actual object on a "server"
+node.  Any process can publish itself as a host/server of any class;
+look for calls to RPCHost.publish() for examples.    
+
+Hosted by main process 
+=========================
+
+MFPCommand (mfp_command.py): this is the API that allows the GUI to control 
+the main process.   For the most part it is a wrapper around calls to
+MFPApp methods.  
+
+Hosted by GUI process
+=========================
+
+GUICommand (gui_main.py): this is the API that allows the main process
+to act on the GUI.  For the most part it is a wrapper around calls to 
+MFPGUI methods.  
+
+Hosted by DSP processes 
+=========================
+
+DSPObject (dsp_object.py): JACK and LV2 backend processes publish "DSPObject" as an
+RPC type.  The methods in dsp_object.py are just stubs because the
+actual implementation is not a Python class but a set of C functions
+and structs defined in mfpdsp/mfp_rpc.c
+
+
+
+
+
+
+
+
+

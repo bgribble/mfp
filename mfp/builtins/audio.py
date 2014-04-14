@@ -5,9 +5,9 @@ audio.py:  Builtin AudioOut/AudioIn DSP objects
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from mfp.processor import Processor
-from mfp.main import MFPApp
-from mfp.bang import Uninit 
+from ..processor import Processor
+from ..mfp_app import MFPApp
+from ..bang import Uninit 
 
 class AudioOut(Processor):
     doc_tooltip_obj = "Output to JACK port"

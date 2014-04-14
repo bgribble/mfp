@@ -1,4 +1,3 @@
-#! /usr/bin/env python2.6
 '''
 p_inletoutlet.py: inlet and outlet processors for patches
 
@@ -6,7 +5,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..processor import Processor
-from ..main import MFPApp
+from ..mfp_app import MFPApp
 from .. import Uninit
 
 
@@ -24,7 +23,6 @@ class Inlet(Processor):
         elif patch is not None:
             self.inletnum = len(patch.inlet_objects)
             init_args = str(self.inletnum)
-            print "setting inletnum to", self.inletnum
         else:
             self.inletnum = 0
             init_args = "0"
@@ -42,7 +40,7 @@ class SignalInlet(Inlet):
         Inlet.__init__(self, init_type, init_args, patch, scope, name)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0] 
-        self.dsp_init("noop~") 
+        self.dsp_init("inlet~", io_channel=self.inletnum) 
 
 class Outlet(Processor):
     doc_tooltip_obj = "Message output from patch"
@@ -79,7 +77,7 @@ class SignalOutlet(Outlet):
         Outlet.__init__(self, init_type, init_args, patch, scope, name)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0] 
-        self.dsp_init("noop~") 
+        self.dsp_init("outlet~", io_channel=self.outletnum) 
 
 def register():
     MFPApp().register("inlet", Inlet)

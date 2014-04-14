@@ -11,7 +11,7 @@ from mfp import Bang, Uninit
 from mfp import log
 
 from mfp.processor import Processor
-from mfp.main import MFPApp
+from ..mfp_app import MFPApp
 from posix_ipc import SharedMemory
 
 

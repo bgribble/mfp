@@ -1,0 +1,45 @@
+mfp.rpc should wither away and die if I'm lucky. 
+
+I started building it to make a useful layer of rpc-like behavior around
+python multiprocessing.  I had to extend it numerous times to allow for
+the bidirectional recursive RPC calls that cropped up in MFP usage.
+Then finally extend it again to support plain C library interoperability 
+for mfpdsp. 
+
+Unfortunately I've by now reimplemented pieces of several json-rpc
+packages.  One day I am going to refactor and use one of those.  One
+day.
+
+For now, here's the summary of what's going on.  
+
+ - The network architecture concept is that there's a single "hub"
+   server that listens for connections on a Unix socket, and multiple
+   "remote" clients that connect to the socket.  In terms of classes,
+   that means there is one rpc_listener.RPCListener in the hub server,
+   and one rpc_listener.RPCRemote on each remote.  
+   
+ - At the RPC level, there are just peers (no distinction between client
+   and server).  There's an instance of RPCHost on each remote and the
+   hub that manages the socket IO and request/response cycles. 
+
+ - At the Python application level, you inform the RPCHost that you are
+   serving a class for remote-object RPC by calling RPCHost.publish(cls).
+   This means that you can create actual instances of the class on this
+   host.  Any connected peer can create proxy objects that will cause
+   the local creation of such local instances.  
+ 
+ - Classes served for remote-object RPC must be subclasses of
+   rpc_wrapper.RPCWrapper and have their API methods decorated with the 
+   @rpcwrap decorator.  When you create an instance of the wrapped class
+   on a peer that is not serving that class, it causes an instance of
+   the wrapped class to be created on either side of the RPC connection.
+   The instance on the proxy (remote) side just doesn't actually call
+   the body of any methods, it just marshals the arguments into a
+   request.Request object and sends them over the appropriate socket
+   connection. 
+
+ - If there are multiple peers who have published for a certain class, the 
+   first one gets used unless a peer_id argument is passed to the RPCWrapper 
+   constructor.  
+
+

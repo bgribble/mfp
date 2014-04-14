@@ -9,16 +9,23 @@
 
 GArray          * mfp_proc_list = NULL;       /* all mfp_processors */ 
 GHashTable      * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */ 
-GHashTable      * mfp_proc_objects = NULL;    /* hash of pointers to PyObject * */ 
+GHashTable      * mfp_proc_objects = NULL;    /* hash of int ID to mfp_processor * */ 
+GHashTable      * mfp_contexts = NULL;        /* hash of int ID to mfp_context */ 
 
+mfp_processor * 
+mfp_proc_lookup(int rpcid) 
+{
+    return g_hash_table_lookup(mfp_proc_objects, GINT_TO_POINTER(rpcid));
+}
 
+/* Note: mfp_proc_create is a shortcut used by tests only */ 
 mfp_processor *
 mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
-                int blocksize)
+                mfp_context * ctxt)
 {
     if (typeinfo == NULL) 
         return NULL;
-    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, blocksize));
+    return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, ctxt), 0, 0);
 }
 
 
@@ -26,7 +33,7 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
 mfp_processor *
 mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
-               int blocksize)
+               mfp_context * ctxt)
 {
     mfp_processor * p;
 
@@ -36,15 +43,15 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
     p = g_malloc0(sizeof(mfp_processor));
     p->typeinfo = typeinfo; 
+    p->context = ctxt;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-    p->pyparams = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     p->depth = -1;
     p->needs_config = 0;
     p->needs_reset = 0;
     p->inlet_conn = NULL;
     p->outlet_conn = NULL;
 
-    mfp_proc_alloc_buffers(p, num_inlets, num_outlets, blocksize);
+    mfp_proc_alloc_buffers(p, num_inlets, num_outlets, ctxt->blocksize);
 
     return p;
 }
@@ -120,8 +127,11 @@ mfp_proc_free_buffers(mfp_processor * self)
 
 
 mfp_processor *
-mfp_proc_init(mfp_processor * p)
+mfp_proc_init(mfp_processor * p, int rpc_id, int patch_id)
 {
+    p->rpc_id = rpc_id;
+    p->patch_id = patch_id;
+
     /* call type-specific initializer */
     if (p->typeinfo->init)
         p->typeinfo->init(p);
@@ -130,8 +140,9 @@ mfp_proc_init(mfp_processor * p)
 
     /* add proc to global list */
     g_array_append_val(mfp_proc_list, p); 
+    g_hash_table_insert(mfp_proc_objects, GINT_TO_POINTER(p->rpc_id), p); 
 
-    mfp_needs_reschedule = 1;
+    p->context->needs_reschedule = 1;
     return p;
 }
 
@@ -151,6 +162,8 @@ mfp_proc_process(mfp_processor * self)
 
     /* run config() if params have changed */
     if (self->needs_config) {
+        sprintf(mfp_last_activity, "PROCESS: config %d (%s)", 
+                self->rpc_id, self->typeinfo->name);
         config_rv = self->typeinfo->config(self);
         if (config_rv != 0) {
             self->needs_config = 0;
@@ -169,6 +182,8 @@ mfp_proc_process(mfp_processor * self)
     }
 
     /* accumulate all the inlet fan-ins to a single input buffer */ 
+    sprintf(mfp_last_activity, "PROCESS: accum %d (%s)", 
+            self->rpc_id, self->typeinfo->name);
     for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
         inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
         inlet_buf = self->inlet_buf[inlet_num];
@@ -182,7 +197,11 @@ mfp_proc_process(mfp_processor * self)
     }
 
     /* perform processing */ 
+    sprintf(mfp_last_activity, "PROCESS: process %d (%s)", 
+            self->rpc_id, self->typeinfo->name);
     self->typeinfo->process(self);    
+    sprintf(mfp_last_activity, "PROCESS: process complete %d (%s)", 
+            self->rpc_id, self->typeinfo->name);
 }
 
 
@@ -211,7 +230,7 @@ mfp_proc_destroy(mfp_processor * self)
 
     mfp_proc_free_buffers(self);
     g_free(self);
-    mfp_needs_reschedule = 1;
+    self->context->needs_reschedule = 1;
     return;
 }
 
@@ -236,7 +255,7 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
     xlets =  g_array_index(target->inlet_conn, GArray *, targ_inlet);
     g_array_append_val(xlets, targ_conn);
 
-    mfp_needs_reschedule = 1;
+    self->context->needs_reschedule = 1;
     return 0;
 }
 
@@ -284,7 +303,7 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
         }
     }
 
-    mfp_needs_reschedule = 1;
+    self->context->needs_reschedule = 1;
     return 0;
 }
 
@@ -294,6 +313,8 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
     gpointer orig_key=NULL;
     gpointer orig_val=NULL;
     gboolean found; 
+
+    // FIXME: setparam suffering from serious confuxion
 
     found = g_hash_table_lookup_extended(self->params, (gpointer)rd->param_name, 
                                          &orig_key, &orig_val);
@@ -308,6 +329,7 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd)
         rd->param_name = NULL;
         rd->param_value = NULL; 
     }
+    return 0;
 }
 
 int
@@ -316,6 +338,8 @@ mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
     gpointer orig_key=NULL;
     gpointer orig_val=NULL;
     gboolean found=FALSE; 
+
+    // FIXME: setparam_req suffering from serious confuxion
 
     found = g_hash_table_lookup_extended(self->params, (gpointer)param_name, 
                                          &orig_key, &orig_val);

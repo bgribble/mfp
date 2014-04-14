@@ -7,7 +7,7 @@ See http://non.tuxfamily.org/nsm/API.html for API details
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
-from .main import MFPApp
+from .mfp_app import MFPApp
 import os, os.path
 import sys 
 

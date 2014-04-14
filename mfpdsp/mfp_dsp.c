@@ -1,30 +1,116 @@
+#include "mfp_dsp.h"
+#include "builtin.h"
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <execinfo.h>
 #include <glib.h>
 #include <pthread.h>
 
-#include "mfp_dsp.h"
+#include <time.h>
+
+int mfp_initialized = 0;
+int mfp_max_blocksize = 32768; 
+
+float mfp_in_latency = 0.0;
+float mfp_out_latency = 0.0;
+
+#define ARRAY_LEN(arry, eltsize) (sizeof(arry) / eltsize)
+
+void
+mfp_dsp_init(void) {
+    int i;
+    mfp_procinfo * pi;
+    mfp_procinfo * (* initfuncs[])(void) = { 
+        init_builtin_osc, init_builtin_in, init_builtin_out, 
+        init_builtin_sig, init_builtin_snap, init_builtin_ampl, 
+        init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 
+        init_builtin_lt, init_builtin_gt,
+        init_builtin_line, init_builtin_noise, init_builtin_buffer,
+        init_builtin_biquad, init_builtin_phasor,
+        init_builtin_ladspa, init_builtin_delay, init_builtin_delblk, init_builtin_noop,
+        init_builtin_inlet, init_builtin_outlet
+    };
+    int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
+
+    /* init global vars */
+    mfp_proc_list = g_array_new(TRUE, TRUE, sizeof(mfp_processor *));
+    mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
+    mfp_proc_objects = g_hash_table_new(g_direct_hash, g_direct_equal);
+    mfp_contexts = g_hash_table_new(g_direct_hash, g_direct_equal);
+    mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal); 
+
+    mfp_request_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata *));
+
+    pthread_cond_init(&mfp_response_cond, NULL);
+    pthread_mutex_init(&mfp_response_lock, NULL);
+    pthread_mutex_init(&mfp_request_lock, NULL);
+
+    printf("mfpdsp: initializing %d builtin DSP processors\n", num_initfuncs);
+
+    for(i = 0; i < num_initfuncs; i++) {
+        pi = initfuncs[i]();
+        g_hash_table_insert(mfp_proc_registry, pi->name, pi);
+    }
+}
 
 
-GArray      * mfp_request_cleanup = NULL;
-mfp_reqdata * request_queue[REQ_BUFSIZE];
-int         request_queue_write = 0;
-int         request_queue_read = 0;
-pthread_mutex_t mfp_request_lock = PTHREAD_MUTEX_INITIALIZER;
+mfp_sample * 
+mfp_get_input_buffer(mfp_context * ctxt, int chan) {
+    if (ctxt->ctype == CTYPE_JACK) {
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack->input_ports, 
+                                    jack_port_t *, chan), ctxt->blocksize);
+    }
+    else {
+        return mfp_lv2_get_port_data(ctxt->info.lv2, 
+                                     g_array_index(ctxt->info.lv2->input_ports, 
+                                                   int, chan)); 
+    }
+}
 
-mfp_respdata mfp_response_queue[REQ_BUFSIZE];
-int          mfp_response_queue_write = 0;
-int          mfp_response_queue_read = 0;
+mfp_sample * 
+mfp_get_output_buffer(mfp_context * ctxt, int chan) {
+    if (ctxt->ctype == CTYPE_JACK) {
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack->output_ports, 
+                                    jack_port_t *, chan), ctxt->blocksize);
+    }
+    else {
+        return mfp_lv2_get_port_data(ctxt->info.lv2, 
+                                     g_array_index(ctxt->info.lv2->output_ports, 
+                                                   int, chan)); 
+    }
+}
 
-pthread_mutex_t mfp_response_lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t  mfp_response_cond = PTHREAD_COND_INITIALIZER;
+int 
+mfp_num_output_buffers(mfp_context * ctxt) {
+    GArray * ports = NULL;
 
-int mfp_dsp_enabled = 0;
-int mfp_needs_reschedule = 1;
-int mfp_max_blocksize = 2048; 
-int proc_count = 0; 
+    if (ctxt->ctype == CTYPE_JACK) {
+        ports = ctxt->info.jack->output_ports;
+    }
+    else {
+        ports = ctxt->info.lv2->output_ports;
+    }
+    if (ports != NULL) {
+        return ports->len;
+    }
+    else {
+        return 0;
+    }
+}
+
+int 
+mfp_num_input_buffers(mfp_context * ctxt) {
+    if (ctxt->ctype == CTYPE_JACK) {
+        return ctxt->info.jack->input_ports->len;
+    }
+    else {
+        return ctxt->info.lv2->input_ports->len;
+    }
+}
+
 
 static int 
 depth_cmp_func(const void * a, const void *b) 
@@ -97,7 +183,7 @@ ready_to_schedule(mfp_processor * p)
 }
 
 int 
-mfp_dsp_schedule(void) 
+mfp_dsp_schedule(mfp_context * ctxt) 
 {
     int pass = 0;
     int lastpass_unsched = -1;
@@ -109,20 +195,24 @@ mfp_dsp_schedule(void)
 
     /* unschedule everything */
     for (p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
-        (*p)->depth = -1;
-        proc_count ++;
+        if ((*p)->context == ctxt) {
+            (*p)->depth = -1;
+            proc_count ++;
+        }
     }
 
     /* calculate scheduling order */ 
     while (another_pass == 1) {
         for (p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
-            if ((*p)->depth < 0) {
-                depth = ready_to_schedule(*p);
-                if (depth >= 0) {
-                    (*p)->depth = depth;
-                }
-                else {
-                    thispass_unsched++;
+            if ((*p)->context == ctxt) {
+                if ((*p)->depth < 0) {
+                    depth = ready_to_schedule(*p);
+                    if (depth >= 0) {
+                        (*p)->depth = depth;
+                    }
+                    else {
+                        thispass_unsched++;
+                    }
                 }
             }
         }
@@ -151,145 +241,51 @@ mfp_dsp_schedule(void)
 }
 
 
-void 
-mfp_dsp_push_request(mfp_reqdata rd) 
-{
-    int count; 
-    int cleanup = 0; 
-    gpointer newreq = g_malloc0(sizeof(mfp_reqdata));
-
-    memcpy(newreq, &rd, sizeof(mfp_reqdata)); 
-
-    /* note: this mutex just keeps a single writer thread with access 
-     * to the requests data, it doesn't block the JACK callback thread */ 
-    pthread_mutex_lock(&mfp_request_lock);
-    if (request_queue_read == request_queue_write) {
-        cleanup = 1;
-    }
-    
-    while((request_queue_read == 0 && request_queue_write == REQ_LASTIND)
-        || (request_queue_write + 1 == request_queue_read)) {
-        usleep(100);
-    }
-
-    request_queue[request_queue_write] = newreq;
-    if(request_queue_write == REQ_LASTIND) {
-        request_queue_write = 0;
-    }
-    else {
-        request_queue_write += 1;
-    }
-
-    if (cleanup == 1) {
-        /* now that JACK has finished with the new data, we can clean up 
-         * the old data at our leisure.  mfp_dsp_handle_requests will 
-         * put any old values that need to be freed into cmd.param_value */ 
-        for(count=0; count < mfp_request_cleanup->len; count++) {
-            mfp_reqdata * cmd = g_array_index(mfp_request_cleanup, gpointer, count);
-            if (cmd->reqtype == REQTYPE_SETPARAM) {
-                if (cmd->param_value != NULL) {
-                    g_free(cmd->param_value);
-                    cmd->param_value = NULL;
-                }
-                if (cmd->param_name != NULL) {
-                    g_free(cmd->param_name);
-                    cmd->param_name = NULL;
-                }
-            }
-            g_free(cmd);
-        }
-
-        if (mfp_request_cleanup->len > 0)  {
-            g_array_set_size(mfp_request_cleanup, 0);
-        }
-    }
-
-    /* we will clean this one up at some time in the future */ 
-    g_array_append_val(mfp_request_cleanup, newreq);
-
-    pthread_mutex_unlock(&mfp_request_lock);
-}
-
-void
-mfp_dsp_handle_requests(void)
-{
-    while(request_queue_read != request_queue_write) {
-        mfp_reqdata * cmd = request_queue[request_queue_read];
-        int type = cmd->reqtype;
-
-        switch (type) {
-        case REQTYPE_CONNECT:
-            mfp_proc_connect(cmd->src_proc, cmd->src_port, cmd->dest_proc, cmd->dest_port);
-            break;
-
-        case REQTYPE_DISCONNECT:
-            mfp_proc_disconnect(cmd->src_proc, cmd->src_port, cmd->dest_proc, cmd->dest_port);
-            break;
-
-        case REQTYPE_DESTROY:
-            mfp_proc_destroy(cmd->src_proc);
-            break;
-
-        case REQTYPE_SETPARAM:
-            mfp_proc_setparam_req(cmd->src_proc, cmd);
-            cmd->src_proc->needs_config = 1;
-            break;
-
-        case REQTYPE_EXTLOAD:
-            mfp_ext_init((mfp_extinfo *)cmd->param_value);
-            break;
-
-        }
-        request_queue_read = (request_queue_read+1) % REQ_BUFSIZE;
-    }
-}
-
-
 /*
- * mfp_dsp_run is the bridge between JACK processing and the MFP DSP 
- * network.  It is called once per JACK block from the process() 
+ * mfp_dsp_run is the bridge between JACK/LV2 processing and the MFP DSP 
+ * network.  It is called once per JACK/LV2 block from the process() 
  * callback.
  */
 
 void
-mfp_dsp_run(int nsamples) 
+mfp_dsp_run(mfp_context * ctxt) 
 {
     mfp_processor ** p;
     mfp_sample * buf;
     int chan;
-
-    mfp_dsp_set_blocksize(nsamples);
+    int chancount = mfp_num_output_buffers(ctxt);
 
     /* handle any DSP config requests */
+    /* FIXME only handle requests for this context */
     mfp_dsp_handle_requests();
 
     /* zero output buffers ... out~ will accumulate into them */ 
-    if (mfp_output_ports != NULL) {
-        for(chan=0; chan < mfp_output_ports->len ; chan++) {
-            buf = mfp_get_output_buffer(chan);
-            if (buf != NULL) { 
-                memset(buf, 0, nsamples * sizeof(mfp_sample));
-            }
+    for(chan=0; chan < chancount; chan++) {
+        buf = mfp_get_output_buffer(ctxt, chan);
+        if (buf != NULL) { 
+            memset(buf, 0, ctxt->blocksize * sizeof(mfp_sample));
         }
     }
     
-    if (mfp_needs_reschedule == 1) {
-        if (!mfp_dsp_schedule()) {
+    if (ctxt->needs_reschedule == 1) {
+        if (!mfp_dsp_schedule(ctxt)) {
             printf("mfp_dsp_run: DSP Error: Some processors could not be scheduled\n");
         }
-        mfp_needs_reschedule = 0;
+        ctxt->needs_reschedule = 0;
     }
 
     /* the proclist is already scheduled, so iterating in order is OK */
     for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
-        mfp_proc_process(*p);
+        if ((*p)->context == ctxt) {
+            mfp_proc_process(*p);
+        }
     }
 
-    proc_count ++;
+    ctxt->proc_count ++;
 }
 
 void
-mfp_dsp_set_blocksize(int nsamples) 
+mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples) 
 {
     mfp_processor ** p;
     int count;
@@ -300,10 +296,9 @@ mfp_dsp_set_blocksize(int nsamples)
         nsamples = mfp_max_blocksize;
     }
 
-    if (nsamples != mfp_blocksize) {
-
+    if (nsamples != ctxt->blocksize) {
         printf("mfp_dsp_set_blocksize: size changed, updating processors (%d --> %d)\n",
-                mfp_blocksize, nsamples);
+                ctxt->blocksize, nsamples);
         for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
             /* i/o buffers are pre-allocated to mfp_max_blocksize */ 
             for (count = 0; count < (*p)->inlet_conn->len; count ++) {
@@ -318,7 +313,7 @@ mfp_dsp_set_blocksize(int nsamples)
         }
     }
 
-    mfp_blocksize = nsamples;
+    ctxt->blocksize = nsamples;
 }
 
 void
@@ -333,98 +328,3 @@ mfp_dsp_accum(mfp_sample * accum, mfp_sample * addend, int blocksize)
         accum[i] += addend[i];
     }
 }
-
-static int
-push_response(mfp_respdata rd) 
-{
-
-    if((mfp_response_queue_read == 0 && mfp_response_queue_write == REQ_LASTIND)
-        || (mfp_response_queue_write + 1 == mfp_response_queue_read)) {
-        return 0;
-    }
-
-    mfp_response_queue[mfp_response_queue_write] = rd;
-    if(mfp_response_queue_write == REQ_LASTIND) {
-        mfp_response_queue_write = 0;
-    }
-    else {
-        mfp_response_queue_write += 1;
-    }
-
-    return 1;
-}
-
-
-
-void
-mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response)
-{
-    mfp_respdata rd;
-    
-    rd.dst_proc = proc;
-    rd.msg_type = msg_type;
-    rd.response_type = PARAMTYPE_STRING;
-    rd.response.c = g_strdup(response);
-   
-    if(push_response(rd)) {
-        pthread_cond_broadcast(&mfp_response_cond);
-    }
-    else {
-        printf("DSP Response queue full, dropping response\n");
-    }
-}
-
-void
-mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int response)
-{
-    mfp_respdata rd;
-    
-    rd.dst_proc = proc;
-    rd.msg_type = msg_type;
-    rd.response_type = PARAMTYPE_BOOL;
-    rd.response.i = response;
-    
-    if(push_response(rd)) {
-        pthread_cond_broadcast(&mfp_response_cond);
-    }
-    else {
-        printf("DSP Response queue full, dropping response\n");
-    }
-}
-
-void
-mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response)
-{
-    mfp_respdata rd;
-    
-    rd.dst_proc = proc;
-    rd.msg_type = msg_type;
-    rd.response_type = PARAMTYPE_INT;
-    rd.response.i = response;
-    
-    if(push_response(rd)) {
-        pthread_cond_broadcast(&mfp_response_cond);
-    }
-    else {
-        printf("DSP Response queue full, dropping response\n");
-    }
-}
-
-void
-mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response)
-{
-    mfp_respdata rd;
-    
-    rd.dst_proc = proc;
-    rd.msg_type = msg_type;
-    rd.response_type = PARAMTYPE_FLT;
-    rd.response.f = response;
-    
-    if(push_response(rd)) {
-        pthread_cond_broadcast(&mfp_response_cond);
-    }
-    else {
-        printf("DSP Response queue full, dropping response\n");
-    }
-}
-
