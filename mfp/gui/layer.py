@@ -15,10 +15,11 @@ class Layer(object):
         self.group = Clutter.Group()
 
     def show(self):
-        self.stage.group.add_actor(self.group)
+        self.stage.group.add_child(self.group)
 
     def hide(self):
-        self.stage.group.remove_actor(self.group)
+        if self.group in self.stage.group.get_children():
+            self.stage.group.remove_child(self.group)
 
     def resort(self, obj):
         if obj in self.objects:

@@ -38,11 +38,10 @@ class RPCListener (QuittableThread):
         while not self.join_req: 
             try: 
                 sock, addr = self.socket.accept()
-                sock.settimeout(0.0)
+                sock.settimeout(0.1)
                 self._rpc_last_peer += 1
                 newpeer = self._rpc_last_peer
                 self.rpc_host.manage(newpeer, sock)
-                self.rpc_host.put(Request("node_id", dict(node_id=newpeer)), newpeer)  
             except socket.timeout:
                 pass
         
@@ -60,6 +59,12 @@ class RPCRemote (object):
         self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.socket.connect(self.socketpath)
         self.rpc_host.manage(0, self.socket)
+
+        req = Request("ready", {})
+        self.rpc_host.put(req, 0)
+        self.rpc_host.wait(req)
+        print "RPCRemote: ready: got node_id=", req.result[1]
+        self.rpc_host.node_id = req.result[1]
 
     def close(self): 
         self.rpc_host.unmanage(0)

@@ -284,15 +284,6 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
             }
         }
     }
-    else if (!strcmp(methodname, "node_id")) {
-        JsonNode * id = json_object_get_member(params, "node_id");
-        if (json_notval(id)) {
-            printf("dispatch_methodcall: couldn't parse my new node_id\n");
-        }
-        else {
-            mfp_comm_nodeid = (int)json_node_get_double(id);
-        }
-    }
     else if (!strcmp(methodname, "peer_exit")) {
         printf("FIXME: peer_exit unhandled\n");
     }
@@ -460,11 +451,28 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
 
 }
 
+static void
+ready_callback(JsonNode * response, void * data)
+{
+    if (JSON_NODE_TYPE(response) == JSON_NODE_ARRAY) {
+        JsonArray * arry = json_node_get_array(response);
+        JsonNode * val = json_array_get_element(arry, 1);
+        if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
+            mfp_comm_nodeid = (int)json_node_get_double(val);
+            printf("mfp_rpc_init: Got node_id %d for MFPCommand\n", mfp_comm_nodeid);
+            return;
+        }
+    }
+}
+
+
 void
 mfp_rpc_init(void) 
 {
-    const char req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"publish\", "
+    const char ready_req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"ready\", \"params\": {}}";
+    const char publish_req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"publish\", "
         "\"params\": { \"classes\": [\"DSPObject\"]}}";
+    int req_id;
 
     request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal); 
     request_data = g_hash_table_new(g_direct_hash, g_direct_equal); 
@@ -473,6 +481,9 @@ mfp_rpc_init(void)
     pthread_mutex_init(&request_lock, NULL);
     pthread_cond_init(&request_cond, NULL); 
 
-    mfp_comm_send(req);
+    req_id = mfp_rpc_send_request("ready", "{}", ready_callback, NULL);
+    mfp_rpc_wait(req_id);
+
+    mfp_rpc_send_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL);
 }
 

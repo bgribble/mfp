@@ -266,9 +266,8 @@ class RPCHost (QuittableThread):
                     cls.publishers.append(peer_id)
             req.result = (True, None) 
 
-        elif method == "node_id":
-            self.node_id = req.params.get("node_id")
-            req.result = (True, None)
+        elif method == "ready":
+            req.result = (True, peer_id)
 
         elif method == "node_exit": 
             # remove this peer as a publisher for any classes
