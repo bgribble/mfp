@@ -461,6 +461,7 @@ class MFPApp (Singleton):
             self.open_file(p)
        
     def clipboard_copy(self, pointer_pos, obj_ids):
+        from .mfp_main import version 
         toplevel = {} 
         objects = {} 
 
