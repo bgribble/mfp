@@ -30,6 +30,7 @@ class MFPApp (Singleton):
         self.osc_port = None 
         self.searchpath = None 
         self.extpath = None 
+        self.lv2_savepath = "lv2"
         self.dsp_inputs = 2
         self.dsp_outputs = 2
         self.samplerate = 44100

@@ -43,6 +43,7 @@ class GlobalMode (InputMode):
         self.bind('C-f', self.window.patch_new, "Create a new patch")
         self.bind('C-o', self.open_file, "Load file into new patch")
         self.bind('C-s', self.save_file, "Save patch to file")
+        self.bind('C-p', self.save_as_lv2, "Save patch as LV2 plugin")
         self.bind('C-w', self.window.patch_close, "Close current patch")
         self.bind('C-q', self.window.quit, "Quit")
 
@@ -112,6 +113,17 @@ class GlobalMode (InputMode):
                     self.window.refresh(patch)
                 MFPGUI().mfp.save_file(patch.obj_name, fname)
         self.window.get_prompted_input("File name to save: ", cb, default_filename)
+
+
+    def save_as_lv2(self):
+        patch = self.window.selected_patch
+        default_plugname = 'mfp_' + patch.obj_name
+
+        def cb(plugname):
+            if plugname:
+                MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
+        self.window.get_prompted_input("Plugin name to save: ", cb, default_plugname)
+
 
     def open_file(self):
         def cb(fname):

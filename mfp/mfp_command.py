@@ -173,6 +173,14 @@ class MFPCommand(RPCWrapper):
             patch.save_file(file_name)
 
     @rpcwrap
+    def save_lv2(self, patch_name, plugin_name):
+        from .mfp_app import MFPApp
+        patch = MFPApp().patches.get(patch_name)
+        file_name = patch_name + ".mfp"
+        if patch:
+            patch.save_lv2(plugin_name, file_name)
+
+    @rpcwrap
     def clipboard_copy(self, pointer_pos, objlist):
         from .mfp_app import MFPApp
         return MFPApp().clipboard_copy(pointer_pos, objlist)
