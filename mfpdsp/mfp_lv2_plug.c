@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <dlfcn.h>
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/atom/util.h"
@@ -52,7 +53,7 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     mfp_lv2_ttl_read(self, bundle_path);
 
     /* request that the MFP app build this patch */
-    mfp_api_load_context(context, self->object_name);
+    mfp_api_load_context(context, self->object_path);
 
     return (LV2_Handle)context;
 }
@@ -200,8 +201,8 @@ mfp_lv2_extension_data(const char * uri)
     return NULL;
 }
 
-static const LV2_Descriptor descriptor = {
-    MFP_LV2_URL,
+static LV2_Descriptor descriptor = {
+    NULL,
     mfp_lv2_instantiate,
     mfp_lv2_connect_port,
     mfp_lv2_activate,
@@ -211,10 +212,44 @@ static const LV2_Descriptor descriptor = {
     mfp_lv2_extension_data
 };
 
+
+static char * 
+find_lib_plugname(const char * fullpath)
+{
+    char * pdup = g_strdup(fullpath);
+    char * pname;
+    int plen = strlen(pdup);
+    
+    if (plen < 7) { 
+        return NULL;
+    }
+    
+    pdup[plen-3] = 0;
+    if (pdup[plen-7] == '_') {
+        pdup[plen-7] = '.';
+    }
+    pname = rindex(pdup, (int)'/') + 4;
+    printf("find_lib_plugname: got '%s'\n", pname);
+    return pname;
+}
+
+
 LV2_SYMBOL_EXPORT
 const LV2_Descriptor*
 lv2_descriptor(uint32_t index)
 {
+    Dl_info info;
+    char * uri = g_malloc0(2048);
+
+    dladdr(lv2_descriptor, &info);
+
+    printf("lv2_descriptor: fname = '%s'\n", info.dli_fname);
+    snprintf(uri, 2047, "http://www.billgribble.com/mfp/%s", 
+             find_lib_plugname(info.dli_fname));
+    printf("lv2_descriptor: URI = '%s'\n", uri);
+
+    descriptor.URI = uri;
+
     switch (index) {
         case 0:
             return &descriptor;

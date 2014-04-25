@@ -274,7 +274,7 @@ class Patch(Processor):
         log.debug("save_lv2: %s, %s" % (plugname, filename))
         plugpath = self.lv2_create_dir(plugname)
         ttlpath = os.path.join(plugpath, "manifest.ttl")
-        self.lv2_write_ttl(ttlpath, filename)
+        self.lv2_write_ttl(ttlpath, plugname, filename)
         patchpath = os.path.join(plugpath, filename)
         self.save_file(patchpath)
 

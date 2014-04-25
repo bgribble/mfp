@@ -161,7 +161,7 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def open_file(self, file_name, context=None):
         from .mfp_app import MFPApp
-        print "MFPCommand.open_file:", file_name, context
+        log.debug("MFPCommand.open_file:", file_name, context)
         patch = MFPApp().open_file(file_name)
         return patch.obj_id
 

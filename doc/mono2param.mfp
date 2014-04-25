@@ -79,7 +79,7 @@
             "midi_mode": null,
             "do_onload": true,
             "midi_filters": null,
-            "initargs": "2",
+            "initargs": "1",
             "type": "inlet",
             "osc_methods": []
         },
@@ -101,7 +101,7 @@
             "midi_mode": null,
             "do_onload": true,
             "midi_filters": null,
-            "initargs": "3",
+            "initargs": "2",
             "type": "inlet",
             "osc_methods": []
         },

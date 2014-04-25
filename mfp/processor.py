@@ -42,6 +42,7 @@ class Processor (object):
         self.status = Processor.CTOR
         self.tags = {} 
         self.name = None
+        self.description = None 
         self.patch = None
         self.scope = None
         self.osc_pathbase = None
