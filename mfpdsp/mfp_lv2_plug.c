@@ -40,7 +40,6 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     context->samplerate = rate;
     self = context->info.lv2;
 
-    printf("mfp_lv2_instantiate: context %d, %s\n", context->id, bundle_path);
     self->port_symbol = g_array_new(FALSE, TRUE, sizeof(char *));
     self->port_name = g_array_new(FALSE, TRUE, sizeof(char *));
     self->port_data = g_array_new(FALSE, TRUE, sizeof(void *));
@@ -183,7 +182,6 @@ mfp_lv2_deactivate(LV2_Handle instance)
     mfp_context * context = (mfp_context *)instance; 
     mfp_lv2_info * self = context->info.lv2;
     context->activated = 0;
-    printf("mfp_lv2_deactivate\n");
 }
 
 static void
@@ -201,6 +199,31 @@ mfp_lv2_extension_data(const char * uri)
     return NULL;
 }
 
+static char * 
+find_plugname(const char * fullpath)
+{
+    char * pdup = g_strdup(fullpath);
+    char * pname;
+    int plen = strlen(pdup);
+   
+    if (plen == 0) { 
+        return NULL;
+    }
+    if (pdup[plen-1] == '/') {
+        pdup[plen-1] = 0;
+        plen --;
+    }
+    
+    pname = rindex(pdup, (int)'/');
+    if (pname == NULL) {
+        return NULL;
+    }
+    else {
+        return pname+1;
+    }
+}
+
+
 static LV2_Descriptor descriptor = {
     NULL,
     mfp_lv2_instantiate,
@@ -212,41 +235,13 @@ static LV2_Descriptor descriptor = {
     mfp_lv2_extension_data
 };
 
-
-static char * 
-find_lib_plugname(const char * fullpath)
+static const LV2_Descriptor * 
+mfp_lv2_lib_get_plugin(LV2_Lib_Handle handle, uint32_t index)
 {
-    char * pdup = g_strdup(fullpath);
-    char * pname;
-    int plen = strlen(pdup);
-    
-    if (plen < 7) { 
-        return NULL;
-    }
-    
-    pdup[plen-3] = 0;
-    if (pdup[plen-7] == '_') {
-        pdup[plen-7] = '.';
-    }
-    pname = rindex(pdup, (int)'/') + 4;
-    printf("find_lib_plugname: got '%s'\n", pname);
-    return pname;
-}
-
-
-LV2_SYMBOL_EXPORT
-const LV2_Descriptor*
-lv2_descriptor(uint32_t index)
-{
-    Dl_info info;
     char * uri = g_malloc0(2048);
 
-    dladdr(lv2_descriptor, &info);
-
-    printf("lv2_descriptor: fname = '%s'\n", info.dli_fname);
     snprintf(uri, 2047, "http://www.billgribble.com/mfp/%s", 
-             find_lib_plugname(info.dli_fname));
-    printf("lv2_descriptor: URI = '%s'\n", uri);
+             find_plugname((const char *)handle));
 
     descriptor.URI = uri;
 
@@ -257,5 +252,22 @@ lv2_descriptor(uint32_t index)
             return NULL;
     }
 }
+static void
+mfp_lv2_lib_cleanup(LV2_Lib_Handle handle)
+{
+    return;
+}
+
+const LV2_Lib_Descriptor * 
+lv2_lib_descriptor(const char * bundle_path, const LV2_Feature * const * features)
+{
+    LV2_Lib_Descriptor * ld = g_malloc0(sizeof(LV2_Lib_Descriptor));
+    ld->handle = g_strdup(bundle_path);
+    ld->size = sizeof(LV2_Lib_Descriptor);
+    ld->cleanup = mfp_lv2_lib_cleanup;
+    ld->get_plugin = mfp_lv2_lib_get_plugin;
+    return ld; 
+}
+
 
 
