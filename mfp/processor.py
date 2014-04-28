@@ -41,8 +41,8 @@ class Processor (object):
         self.outlet_order = range(outlets)
         self.status = Processor.CTOR
         self.tags = {} 
+        self.properties = {} 
         self.name = None
-        self.description = None 
         self.patch = None
         self.scope = None
         self.osc_pathbase = None
@@ -136,6 +136,11 @@ class Processor (object):
                              % (self.count_in, self.count_out))
                 lines.append('          <b>Times triggered:</b> %s, <b>Errors:</b> %s'
                              % (self.count_trigger, self.count_errors))
+                if len(self.properties):
+                    lines.append('      <b>Properties:</b>')
+
+                    for k, v in self.properties.items():
+                        lines.append('          %s -> %s' % (k, v))
                 # class-provided extra details 
                 otherinfo = self.tooltip_extra()
                 if otherinfo:
@@ -591,7 +596,10 @@ class Processor (object):
 
     def method(self, message, inlet):
         '''Default method handler ignores which inlet the message was received on'''
-        message.call(self)
+        rv = message.call(self)
+        if rv is not None:
+            log.debug("method: '%s' on '%s' (id=%s) returns '%s'"
+                      % (message.method, self.name, self.obj_id, rv))
         self.inlets[inlet] = Uninit
 
     def reset_counts(self):
@@ -603,7 +611,6 @@ class Processor (object):
         self.set_tag("errorcount", self.count_errors)
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
-
 
     def error(self, tb=None):
         self.count_errors += 1
@@ -635,6 +642,21 @@ class Processor (object):
     def mark_ready(self):
         self.status = Processor.READY
 
+    def property(self, *args, **kwargs):
+        if len(kwargs):
+            for key, value in kwargs.items():
+                self.properties[key] = value
+            return None
+        elif len(args):
+            return [ self.properties.get(a) for a in args]
+        else:
+            return []
+
+    def property_delete(self, *args):
+        for a in args: 
+            if a in self.properties: 
+                del self.properties[a]
+
     # save/restore helper
     def save(self):
         '''
@@ -651,6 +673,7 @@ class Processor (object):
         oinfo['do_onload'] = self.do_onload
         oinfo['gui_params'] = {} 
 
+        oinfo['properties'] = self.properties
         oinfo['midi_filters'] = self.midi_filters
         oinfo['midi_mode'] = self.midi_mode 
 
@@ -697,6 +720,7 @@ class Processor (object):
         self.gui_params["num_outlets"] = len(self.outlets)
 
         self.do_onload = prms.get('do_onload', False)
+        self.properties = prms.get('properties', {})
 
         # set up saved OSC controllers 
         for path, types in prms.get("osc_methods", []):

@@ -177,13 +177,13 @@ class MFPApp (Singleton):
         factory = None 
         name = 'default'
 
-        loadpath = os.path.dirname(file_name)
-        loadfile = os.path.basename(file_name)
+        if file_name is not None:
+            loadpath = os.path.dirname(file_name)
+            loadfile = os.path.basename(file_name)
 
-        # FIXME: should not modify app search path, it should be just for this load 
-        self.searchpath += ':' + loadpath
+            # FIXME: should not modify app search path, it should be just for this load 
+            self.searchpath += ':' + loadpath
 
-        if loadfile is not None:
             log.debug("Opening patch", loadfile)
             filepath = utils.find_file_in_path(loadfile, self.searchpath)
 
