@@ -30,6 +30,7 @@ class MFPApp (Singleton):
         self.osc_port = None 
         self.searchpath = None 
         self.extpath = None 
+        self.lv2_savepath = "lv2"
         self.dsp_inputs = 2
         self.dsp_outputs = 2
         self.samplerate = 44100
@@ -177,18 +178,24 @@ class MFPApp (Singleton):
         name = 'default'
 
         if file_name is not None:
-            log.debug("Opening patch", file_name)
-            filepath = utils.find_file_in_path(file_name, self.searchpath)
+            loadpath = os.path.dirname(file_name)
+            loadfile = os.path.basename(file_name)
+
+            # FIXME: should not modify app search path, it should be just for this load 
+            self.searchpath += ':' + loadpath
+
+            log.debug("Opening patch", loadfile)
+            filepath = utils.find_file_in_path(loadfile, self.searchpath)
 
             if filepath: 
                 log.debug("Found file", filepath)
                 (name, factory) = Patch.register_file(filepath)
             else:
-                log.debug("No file '%s' in search path %s" % (file_name, MFPApp().searchpath))
-                if "." in file_name:
-                    name = '.'.join(file_name.split('.')[:-1])
+                log.debug("No file '%s' in search path %s" % (loadfile, MFPApp().searchpath))
+                if "." in loadfile:
+                    name = '.'.join(loadfile.split('.')[:-1])
                 else: 
-                    name = file_name
+                    name = loadfile
                 factory = None 
 
             if factory: 

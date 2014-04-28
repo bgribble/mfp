@@ -149,11 +149,12 @@ static void *
 mfp_comm_io_reader_thread(void * tdata) 
 {
     int quitreq = 0;
-    char msgbuf[MFP_MAX_MSGSIZE];
+    char msgbuf[MFP_MAX_MSGSIZE+1];
     int bytesread; 
     int errstat = 0; 
 
     while(!quitreq) {
+        bzero(msgbuf, MFP_MAX_MSGSIZE+1);
         bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
         if (bytesread > 0) { 
             errstat = 0;

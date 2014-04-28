@@ -44,6 +44,7 @@ typedef struct {
     const SerdNode * plugin_node;
     char * current_port_name; 
     int  current_port_num;
+    char * bundle_path;
     mfp_lv2_info * lv2;    
 } ttl_parse_info;
 
@@ -84,6 +85,10 @@ ttl_statement(void * data, SerdStatementFlags flags, const SerdNode * graph,
             }
             printf("  found mfp object name: '%s'\n", object->buf);
             pinfo->lv2->object_name = g_strdup(object->buf);  
+            pinfo->lv2->object_path = g_malloc0(strlen(object->buf) + 
+                                                strlen(pinfo->bundle_path) + 1);
+            sprintf(pinfo->lv2->object_path, "%s/%s", pinfo->bundle_path, 
+                    object->buf);
         }
 
         /* lv2:port starts a port definition */ 
@@ -191,6 +196,7 @@ mfp_lv2_ttl_read(mfp_lv2_info * self, const char * bundle_path)
     fp = fopen(combined_path, "rb");
     pinfo = g_malloc0(sizeof(ttl_parse_info));
     pinfo->current_port_num = -1;
+    pinfo->bundle_path = bundle_path;
     pinfo->lv2 = self;
 
     reader = serd_reader_new(SERD_TURTLE, (void *)pinfo, 
