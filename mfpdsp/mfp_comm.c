@@ -159,12 +159,13 @@ mfp_comm_io_reader_thread(void * tdata)
     int  mlen = 0;
     char syncbuf[]={0,0,0,0,0,0,0,0,0,0};
     char lenbuf[]={0,0,0,0,0,0,0,0,0,0};
-    char msgbuf[MFP_MAX_MSGSIZE];
+    char msgbuf[MFP_MAX_MSGSIZE+1];
     int bytesread; 
     int success = 0;
     int errstat = 0; 
 
     while(!quitreq) {
+        bzero(msgbuf, MFP_MAX_MSGSIZE+1);
         if (phase == 0) {
             bytesread = recv(comm_socket, syncbuf, 8, 0);  
             if (bytesread == 8) { 

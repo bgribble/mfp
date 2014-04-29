@@ -16,6 +16,7 @@ from mfp import log
 
 
 class Patch(Processor):
+
     EXPORT_LAYER = "Interface"
     display_type = "patch"
     default_context = None 
@@ -265,8 +266,17 @@ class Patch(Processor):
 
     def save_file(self, filename):
         self.update_export_bounds()
-        savefile = open(filename, "w")
-        savefile.write(self.json_serialize())
+        with open(filename, "w") as savefile:
+            savefile.write(self.json_serialize())
+
+    def save_lv2(self, plugname, filename):
+        import os.path
+        log.debug("save_lv2: %s, %s" % (plugname, filename))
+        plugpath = self.lv2_create_dir(plugname)
+        ttlpath = os.path.join(plugpath, "manifest.ttl")
+        self.lv2_write_ttl(ttlpath, plugname, filename)
+        patchpath = os.path.join(plugpath, filename)
+        self.save_file(patchpath)
 
     def _load_file(self, filename):
         from .mfp_app import MFPApp
@@ -347,3 +357,5 @@ class Patch(Processor):
 
 # load extension methods
 import patch_json
+import patch_lv2 
+

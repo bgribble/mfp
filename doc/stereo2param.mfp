@@ -1,0 +1,314 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "stereo2param",
+        "display_type": "patch"
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 481.0,
+                "value": "Edit this patch, then C-p to save as an LV2 plugin with a name you supply",
+                "position_x": 52.55316162109375,
+                "position_y": 66.68535232543945,
+                "layername": "Layer 0",
+                "display_type": "text"
+            },
+            "name": "text_001",
+            "midi_mode": null,
+            "value": "Edit this patch, then C-p to save as an LV2 plugin with a name you supply",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "2": {
+            "connections": [
+                [
+                    [
+                        9,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 64.0,
+                "display_type": "processor",
+                "position_x": 99.3983154296875,
+                "position_y": 154.62657165527344,
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "0",
+            "type": "inlet~",
+            "osc_methods": []
+        },
+        "5": {
+            "connections": [
+                [
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 64.0,
+                "display_type": "processor",
+                "position_x": 184.90060424804688,
+                "position_y": 155.63599395751953,
+                "layername": "Layer 0"
+            },
+            "name": "processor_007",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "1",
+            "type": "inlet~",
+            "osc_methods": []
+        },
+        "6": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 75.0,
+                "display_type": "processor",
+                "position_x": 184.901123046875,
+                "position_y": 364.61588287353516,
+                "layername": "Layer 0"
+            },
+            "name": "processor_008",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "1",
+            "type": "outlet~",
+            "osc_methods": []
+        },
+        "7": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "processor",
+                "position_x": 312.6775817871094,
+                "position_y": 156.55950164794922,
+                "layername": "Layer 0"
+            },
+            "name": "processor_003",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "2",
+            "type": "inlet",
+            "osc_methods": []
+        },
+        "8": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 56.0,
+                "display_type": "processor",
+                "position_x": 390.3603515625,
+                "position_y": 156.58048248291016,
+                "layername": "Layer 0"
+            },
+            "name": "processor_004",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "3",
+            "type": "inlet",
+            "osc_methods": []
+        },
+        "9": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 75.0,
+                "display_type": "processor",
+                "position_x": 99.39883422851562,
+                "position_y": 364.61419677734375,
+                "layername": "Layer 0"
+            },
+            "name": "processor_002",
+            "midi_mode": null,
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "0",
+            "type": "outlet~",
+            "osc_methods": []
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 29.0,
+                "width": 336.0,
+                "display_type": "text",
+                "position_x": 50.96987533569336,
+                "position_y": 34.94778060913086,
+                "layername": "Layer 0"
+            },
+            "name": "text_002",
+            "midi_mode": null,
+            "value": "<span size=\"large\"><b>Stereo LV2 template with 2 parameters</b></span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "11": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 88.0,
+                "width": 317.0,
+                "value": "By default, [inlet] will receive numbers\nfrom LV2 parameter controls, with the range\n0-1 and 0 as the default value.  Send messages \nto the [inlet] to change this before you save. ",
+                "position_x": 312.6675109863281,
+                "position_y": 216.634765625,
+                "layername": "Layer 0",
+                "display_type": "text"
+            },
+            "name": "text_003",
+            "midi_mode": null,
+            "value": "By default, [inlet] will receive numbers\nfrom LV2 parameter controls, with the range\n0-1 and 0 as the default value.  Send messages \nto the [inlet] to change this before you save. ",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "12": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 73.0,
+                "display_type": "text",
+                "position_x": 147.82735443115234,
+                "position_y": 126.80000305175781,
+                "layername": "Layer 0"
+            },
+            "name": "text_004",
+            "midi_mode": null,
+            "value": "<span size=\"small\">Audio inputs</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "13": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 82.0,
+                "display_type": "text",
+                "position_x": 135.84017944335938,
+                "position_y": 409.3392333984375,
+                "layername": "Layer 0"
+            },
+            "name": "text_005",
+            "midi_mode": null,
+            "value": "<span size=\"small\">Audio outputs</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        },
+        "14": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 21.0,
+                "width": 98.0,
+                "display_type": "text",
+                "position_x": 334.605712890625,
+                "position_y": 129.8911590576172,
+                "layername": "Layer 0"
+            },
+            "name": "text_006",
+            "midi_mode": null,
+            "value": "<span size=\"small\">Parameter inputs</span>",
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "osc_methods": []
+        }
+    },
+    "type": "empty2x2",
+    "scopes": {
+        "__patch__": {
+            "processor_008": 6,
+            "processor_004": 8,
+            "self": 0,
+            "processor_007": 5,
+            "processor_001": 2,
+            "processor_002": 9,
+            "processor_003": 7,
+            "text_001": 1,
+            "text_002": 10,
+            "text_003": 11,
+            "text_004": 12,
+            "text_005": 13,
+            "text_006": 14
+        }
+    }
+}

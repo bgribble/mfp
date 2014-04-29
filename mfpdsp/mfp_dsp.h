@@ -92,6 +92,7 @@ typedef struct {
 typedef struct {
     /* parsed from the TTL file */ 
     char * object_name;
+    char * object_path; 
     int port_count;
     GArray * port_symbol;
     GArray * port_name;
