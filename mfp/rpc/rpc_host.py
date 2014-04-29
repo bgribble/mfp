@@ -24,6 +24,10 @@ class RPCHost (QuittableThread):
     RPCHost -- create and manage connections and proxy objects.  Both client and 
     server need an RPCHost, one per process.   
     '''
+    SYNC_MAGIC = "[ SYNC ]"
+
+    class SyncError (Exception): 
+        pass
 
     def __init__(self):
         QuittableThread.__init__(self)
@@ -109,7 +113,10 @@ class RPCHost (QuittableThread):
         # write the data to the socket 
         jdata = req.serialize()
         try:
-            sock.send(jdata)
+            with self.lock: 
+                sock.send(self.SYNC_MAGIC)
+                sock.send("% 8d" % len(jdata))
+                sock.send(jdata)
         except Exception, e:
             print "[%s] RPCHost.put: SEND error: %s" % (datetime.now(), e)
             print jdata 
@@ -134,24 +141,24 @@ class RPCHost (QuittableThread):
         json_data, peer_id = rpcdata 
         #print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
 
-        py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
-        for obj in py_data: 
-            req = Request.from_dict(obj)
-        
-            # is someone waiting on this response? 
-            if req.is_response() and req.request_id in self.pending:
-                oldreq = self.pending.get(req.request_id)
-                oldreq.result = req.result 
-                oldreq.state = req.state
-                oldreq.diagnostic = req.diagnostic
-                with self.lock:
-                    self.condition.notify()
-            elif req.is_request():
-                # actually call the local handler
-                self.handle_request(req, peer_id)
-                # and send back the response                
-                if req.request_id is not None:
-                    self.put(req, peer_id)
+        #py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
+        obj = json.loads(json_data)
+        req = Request.from_dict(obj)
+    
+        # is someone waiting on this response? 
+        if req.is_response() and req.request_id in self.pending:
+            oldreq = self.pending.get(req.request_id)
+            oldreq.result = req.result 
+            oldreq.state = req.state
+            oldreq.diagnostic = req.diagnostic
+            with self.lock:
+                self.condition.notify()
+        elif req.is_request():
+            # actually call the local handler
+            self.handle_request(req, peer_id)
+            # and send back the response                
+            if req.request_id is not None:
+                self.put(req, peer_id)
         return True
 
     def run(self):
@@ -183,18 +190,37 @@ class RPCHost (QuittableThread):
 
             if not rdy: 
                 continue
-
+            jdata = None 
+            syncbytes = 8
+            sync = ''
+            retry = 1 
             for rsock in rdy: 
-                sock = self.fdsockets.get(rsock)
-                try: 
-                    jdata = sock.recv(4096)
-                except Exception, e: 
-                    print "RPCHost: caught exception", jdata 
-                    jdata = ""
+                while retry: 
+                    sock = self.fdsockets.get(rsock)
+                    try: 
+                        sync = sync[syncbytes:]
+                        sync += sock.recv(syncbytes)
+                        if sync != RPCHost.SYNC_MAGIC: 
+                            syncbytes = 1
+                            retry = 1
+                            raise self.SyncError()
+                        else:
+                            syncbytes = 8
+                            retry = 0
+                        jlen = sock.recv(8)
+                        jlen = int(jlen)
+                        jdata = sock.recv(jlen)
+                    except RPCHost.SyncError, e: 
+                        print "RpcHost: sync error, resyncing"
+                        pass
+                    except Exception, e: 
+                        print "RPCHost: caught exception",  e
+                        print jdata 
+                        jdata = ""
 
-                if len(jdata):
-                    peer_id = self.peers_by_socket.get(sock)
-                    self.read_workers.submit((jdata, peer_id))
+                    if len(jdata):
+                        peer_id = self.peers_by_socket.get(sock)
+                        self.read_workers.submit((jdata, peer_id))
             
         if self.node_id == 0: 
             req = Request("exit_request", {})

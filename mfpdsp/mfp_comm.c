@@ -57,7 +57,13 @@ mfp_comm_connect(char * sockname)
 int 
 mfp_comm_send(const char * msg)
 {
+    char pbuff[11];
+    snprintf(pbuff, 10, "% 8d", strlen(msg)); 
+    pthread_mutex_lock(&comm_io_lock);
+    send(comm_socket, "[ SYNC ]", 8, 0);
+    send(comm_socket, pbuff, 8, 0);
     send(comm_socket, msg, strlen(msg), 0);
+    pthread_mutex_unlock(&comm_io_lock);
 }
 
 static int
@@ -149,18 +155,52 @@ static void *
 mfp_comm_io_reader_thread(void * tdata) 
 {
     int quitreq = 0;
+    int  phase=0;
+    int  mlen = 0;
+    char syncbuf[]={0,0,0,0,0,0,0,0,0,0};
+    char lenbuf[]={0,0,0,0,0,0,0,0,0,0};
     char msgbuf[MFP_MAX_MSGSIZE];
     int bytesread; 
+    int success = 0;
     int errstat = 0; 
 
     while(!quitreq) {
-        bytesread = recv(comm_socket, msgbuf, MFP_MAX_MSGSIZE, 0);     
-        if (bytesread > 0) { 
-            errstat = 0;
-            //printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
-            mfp_rpc_json_dispatch_request(msgbuf, bytesread);
+        if (phase == 0) {
+            bytesread = recv(comm_socket, syncbuf, 8, 0);  
+            if (bytesread == 8) { 
+                errstat = 0;
+                success = 1;
+                phase = 1;
+            }
+            else 
+                success = 0;
         }
-        else {
+        else if (phase == 1) {
+            bytesread = recv(comm_socket, lenbuf, 8, 0);  
+            if (bytesread == 8) { 
+                errstat = 0;
+                mlen = atoi(lenbuf);
+                success = 1;
+                phase = 2;
+            }
+            else 
+                success = 0;
+        }
+        else if (phase == 2) {
+            bytesread = recv(comm_socket, msgbuf, mlen, 0);  
+            if (bytesread == mlen) { 
+                errstat = 0;
+                mlen = atoi(lenbuf);
+                phase = 0;
+                success = 1;
+                //printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
+                mfp_rpc_json_dispatch_request(msgbuf, bytesread);
+            }
+            else 
+                success = 0;
+        }
+
+        if (!success) {
             if (errno != EWOULDBLOCK && errno != EAGAIN) {
                 if (errstat == 0) {
                     printf("comm IO reader: error reading from socket %d\n", comm_socket);
@@ -210,7 +250,12 @@ mfp_comm_io_writer_thread(void * tdata)
 
         for(int reqno=0; reqno < rdata->len; reqno++) {
             mfp_rpc_json_dsp_response(g_array_index(rdata, mfp_respdata, reqno), msgbuf); 
+            pthread_mutex_lock(&comm_io_lock);
+            snprintf(pbuff, 10, "% 8d", strlen(msgbuf)); 
+            send(comm_socket, "[ SYNC ]", 8, 0);
+            send(comm_socket, pbuff, 8, 0);
             send(comm_socket, msgbuf, strlen(msgbuf), 0);
+            pthread_mutex_unlock(&comm_io_lock);
         }
         if (rdata->len > 0) { 
             g_array_remove_range(rdata, 0, rdata->len);
