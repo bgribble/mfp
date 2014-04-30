@@ -460,6 +460,9 @@ class PatchElement (Clutter.Group):
             self.layer.group.add_actor(self)
             self.container = self.layer.group
         self.send_params()
+        
+        for c in self.connections_out + self.connections_in:
+            c.move_to_layer(layer)
 
     def make_edit_mode(self):
         return None
