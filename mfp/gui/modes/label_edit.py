@@ -13,6 +13,16 @@ from ..colordb import ColorDB
 from mfp.gui_main import clutter_do
 
 
+def editpoint(s1, s2):
+    l1 = len(s1)
+    l2 = len(s2)
+    if s1 == s2: 
+        return None 
+    for ept in range(min(l1, l2)):
+        if s1[ept] != s2[ept]:
+            return ept
+    return min(l1, l2)
+
 class Blinker (Thread):
     def __init__(self, txt, blink_time=0.5):
         self.blink_time = 0.5
@@ -127,17 +137,25 @@ class LabelEditMode (InputMode):
         if new_text == self.text:
             return True
 
+        # FIXME - this can be wrong, for example editing fooooo to foooo the 
+        # edit point can't be known just from the text change
+        change_at = editpoint(self.text, new_text)
+        change_dir = len(new_text) - len(self.text)
         if self.undo_pos < -1:
             self.undo_stack[self.undo_pos:] = []
             self.undo_pos = -1
 
         self.undo_stack.append((self.text, self.editpos))
         self.text = new_text
+        
         editpos = self.widget.get_cursor_position()
         if editpos == -1:
             self.editpos = len(self.text)
-        else:
-            self.editpos = editpos + 1
+        elif change_dir > 0:
+            self.editpos = change_at + 1
+        else: 
+            self.editpos = change_at 
+
         return True
 
     def commit_edits(self):
@@ -155,33 +173,6 @@ class LabelEditMode (InputMode):
         self.update_label(raw=False)
         self.element.label_edit_finish(self.widget, None)
         self.element.end_edit()
-        return True
-
-    def erase_forward(self):
-        if self.editpos > (len(self.text) - 1):
-            return True
-
-        if self.undo_pos < -1:
-            self.undo_stack[self.undo_pos:] = []
-            self.undo_pos = -1
-        self.undo_stack.append(self.text)
-        self.text = self.text[:self.editpos] + self.text[self.editpos + 1:]
-        self.update_label(raw=True)
-        return True
-
-    def erase_backward(self):
-        if self.editpos <= 0:
-            self.editpos = 0
-            return True
-
-        if self.undo_pos < -1:
-            self.undo_stack[self.undo_pos:] = []
-            self.undo_pos = -1
-
-        self.undo_stack.append(self.text)
-        self.text = self.text[:self.editpos - 1] + self.text[self.editpos:]
-        self.editpos = max(self.editpos - 1, 0)
-        self.update_label(raw=True)
         return True
 
     def move_to_start(self):
