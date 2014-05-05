@@ -193,6 +193,20 @@ class GUICommand (RPCWrapper):
             obj.delete()
 
     @rpcwrap
+    def select(self, obj_id):
+        from .gui_main import MFPGUI
+        MFPGUI().clutter_do(lambda: self._select(obj_id))
+
+    def _select(self, obj_id):
+        from .gui_main import MFPGUI
+        from .gui.patch_info import PatchInfo
+        obj = MFPGUI().recall(obj_id)
+        if isinstance(obj, PatchInfo): 
+            MFPGUI().appwin.layer_select(obj.layers[0])
+        else: 
+            MFPGUI().appwin.select(obj)
+             
+    @rpcwrap
     def load_start(self):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._load_start())

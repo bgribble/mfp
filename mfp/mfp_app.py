@@ -209,6 +209,8 @@ class MFPApp (Singleton):
         self.patches[patch.name] = patch 
         patch.create_gui()
         patch.mark_ready()
+        if patch.gui_created:
+            MFPApp().gui_command.select(patch.obj_id)
         return patch
 
     def load_extension(self, libname):
