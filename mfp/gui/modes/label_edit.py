@@ -56,6 +56,7 @@ class LabelEditMode (InputMode):
         self.undo_pos = -1
         self.activate_handler_id = None
         self.text_changed_handler_id = None
+        self.key_focus_out_handler_id = None
         self.editpos = 0
         self.blinker = None
 
@@ -89,6 +90,10 @@ class LabelEditMode (InputMode):
 
 
     def start_editing(self):
+        def focus_out(*args): 
+            self.commit_edits()
+            return True
+
         def synth_ret(*args):
             self.manager.synthesize("RET")
 
@@ -97,14 +102,14 @@ class LabelEditMode (InputMode):
             self.activate_handler_id = self.widget.connect("activate", synth_ret)
         else:
             self.widget.set_single_line_mode(False)
-
+        
         self.text_changed_handler_id = self.widget.connect("text-changed", self.text_changed)
+        self.key_focus_out_handler_id = self.widget.connect("key-focus-out", focus_out)
 
         self.editpos = len(self.text)
         self.widget.set_editable(True)
         self.widget.set_cursor_color(self.cursor_color)
         self.widget.set_cursor_visible(True)
-        # self.widget.set_cursor_size(8)
         self.update_cursor()
 
         if self.blinker is not None:
@@ -123,6 +128,9 @@ class LabelEditMode (InputMode):
             self.widget.set_activatable(False)
             self.widget.set_single_line_mode(False)
             self.activate_handler_id = None
+        if self.key_focus_out_handler_id:
+            self.widget.disconnect(self.key_focus_out_handler_id)
+            self.key_focus_out_handler_id = None 
         if self.text_changed_handler_id:
             self.widget.disconnect(self.text_changed_handler_id)
             self.text_changed_handler_id = None 
@@ -156,7 +164,7 @@ class LabelEditMode (InputMode):
         else: 
             self.editpos = change_at 
 
-        return True
+        return 
 
     def commit_edits(self):
         self.text = self.widget.get_text()
@@ -168,10 +176,10 @@ class LabelEditMode (InputMode):
 
     def rollback_edits(self):
         txt, pos = self.undo_stack[0]
-        self.text = txt
+        self.text = txt or ''
         self.end_editing()
         self.update_label(raw=False)
-        self.element.label_edit_finish(self.widget, None)
+        self.element.label_edit_finish(self.widget, self.text)
         self.element.end_edit()
         return True
 
@@ -245,9 +253,11 @@ class LabelEditMode (InputMode):
 
     def update_label(self, raw=True):
         if raw or self.markup is False:
-            self.widget.set_use_markup = False
+            self.widget.set_use_markup(False)
             self.widget.set_text(self.text)
         else:
+            self.widget.set_use_markup(True)
             self.widget.set_markup(self.text)
         self.update_cursor()
         return True
+

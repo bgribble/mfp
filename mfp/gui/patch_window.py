@@ -216,7 +216,6 @@ class PatchWindow(object):
 
         tv = self.builder.get_object("key_bindings_text")
         buf = tv.get_buffer()
-        iterator = buf.get_end_iter()
         buf.delete(buf.get_start_iter(), buf.get_end_iter())
         buf.insert(buf.get_end_iter(), txt)
 

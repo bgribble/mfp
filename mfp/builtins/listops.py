@@ -109,4 +109,6 @@ def register():
     MFPApp().register("pack", Pack)
     MFPApp().register("unpack", Unpack)
     MFPApp().register("zip", Zip)
+    MFPApp().register("append", Append)
+
 

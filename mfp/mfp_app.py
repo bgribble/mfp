@@ -27,6 +27,7 @@ class MFPApp (Singleton):
         # configuration items -- should be populated before calling setup() 
         self.no_gui = False
         self.no_dsp = False
+        self.debug = False
         self.osc_port = None 
         self.searchpath = None 
         self.extpath = None 
