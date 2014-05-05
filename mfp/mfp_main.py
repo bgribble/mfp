@@ -89,6 +89,8 @@ def main():
                         help="Number of JACK audio output ports")
     parser.add_argument("-u", "--osc-udp-port", default=5555, type=int, 
                         help="UDP port to listen for OSC (default: 5555)")
+    parser.add_argument("-v", "--verbose", action="store_true", 
+                        help="Log all messages to console")
     parser.add_argument("--max-bufsize", default=2048,
                         help="Maximum JACK buffer size to support (default: 2048 frames)")
     parser.add_argument("--no-gui", action="store_true", 
@@ -120,6 +122,9 @@ def main():
     app.max_blocksize = args.get("max_bufsize") 
     app.socket_path = args.get("socket_path")
     app.debug = args.get("debug")
+
+    if args.get("verbose"):
+        log.log_force_console = True 
 
     if app.no_gui:
         log.debug("Not starting GUI services")
