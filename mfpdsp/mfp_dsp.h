@@ -289,6 +289,7 @@ extern int mfp_api_load_context(mfp_context * ctxt, char * patchname);
 extern int mfp_api_close_context(mfp_context * ctxt);
 extern int mfp_api_send_to_inlet(mfp_context * ctxt, int port, float val);
 extern int mfp_api_send_to_outlet(mfp_context * ctxt, int port, float val);
+extern int mfp_api_show_editor(mfp_context * ctxt, int show);
 extern int mfp_api_exit_notify(void);
 
 #endif

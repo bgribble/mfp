@@ -78,6 +78,20 @@ mfp_api_send_to_outlet(mfp_context * context, int port, float value)
     mfp_rpc_wait(request_id);
 }
 
+int
+mfp_api_show_editor(mfp_context * context, int show)
+{
+    const char method[] = "call";
+    const char params[] = "{\"func\": \"show_editor\", \"rpcid\": %d, \"args\": "
+                          "[ %d, %d ], \"kwargs\": {} }";
+    char tbuf[MFP_MAX_MSGSIZE];
+    int request_id;
+
+    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
+             context->default_obj_id, show); 
+    request_id = mfp_rpc_send_request(method, tbuf, NULL, NULL);
+    mfp_rpc_wait(request_id);
+}
 
 int 
 mfp_api_load_context(mfp_context * context, char * patchfile)

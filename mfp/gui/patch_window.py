@@ -262,8 +262,11 @@ class PatchWindow(object):
         self.input_mgr.event_sources[element] = element
 
         if element.container is None:
-            element.layer.group.add_actor(element)
-            element.container = element.layer.group
+            if element.layer is None:
+                print "WARNING: element has no layer", element, self
+            else: 
+                element.layer.group.add_actor(element)
+                element.container = element.layer.group
        
         if not isinstance(element, ConnectionElement):
             if isinstance(element.container, PatchElement):

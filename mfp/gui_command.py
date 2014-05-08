@@ -81,7 +81,7 @@ class GUICommand (RPCWrapper):
         from .gui.text_element import TextElement
         from .gui.enum_element import EnumElement
         from .gui.plot_element import PlotElement
-        from .gui.slidemeter_element import SlideMeterElement
+        from .gui.slidemeter_element import SlideMeterElement, DialElement
         from .gui.patch_info import PatchInfo
         from .gui.via_element import SendViaElement, ReceiveViaElement
         from .gui.via_element import SendSignalViaElement, ReceiveSignalViaElement
@@ -98,6 +98,7 @@ class GUICommand (RPCWrapper):
             'enum': EnumElement,
             'plot': PlotElement,
             'slidemeter': SlideMeterElement,
+            'dial': DialElement,
             'patch': PatchInfo,
             'sendvia': SendViaElement,
             'recvvia': ReceiveViaElement,

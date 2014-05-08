@@ -19,7 +19,8 @@ class TextElement (PatchElement):
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
-        self.text = ''
+        self.value = ''
+        self.param_list.append('value')
 
         # configure label
         self.label = clutter.Text()
@@ -44,17 +45,17 @@ class TextElement (PatchElement):
             PatchElement.draw_ports(self)
 
     def label_edit_start(self):
-        return self.text
+        return self.value
 
     def label_edit_finish(self, widget, new_text, aborted=False):
         if self.obj_id is None:
             self.create(self.proc_type, None)
         if self.obj_id is None:
             log.debug("TextElement: could not create obj")
-        elif new_text != self.text:
-            self.text = new_text
-            self.label.set_markup(self.text)
-            MFPGUI().mfp.send(self.obj_id, 0, self.text)
+        elif new_text != self.value:
+            self.value = new_text
+            self.label.set_markup(self.value)
+            MFPGUI().mfp.send(self.obj_id, 0, self.value)
         self.update()
 
     def text_changed_cb(self, *args):
@@ -77,8 +78,8 @@ class TextElement (PatchElement):
     def configure(self, params):
         if params.get('value') is not None:
             new_text = params.get('value')
-            if new_text != self.text:
-                self.text = new_text
-                self.label.set_markup(self.text)
-                self.update()
+            if new_text != self.value:
+                self.value = new_text
+                self.label.set_markup(self.value)
         PatchElement.configure(self, params)
+        self.update()

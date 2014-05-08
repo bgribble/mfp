@@ -241,6 +241,8 @@ class Patch(Processor):
 
         if MFPApp().no_gui:
             return False
+        elif self.gui_created:
+            return True 
 
         self.update_export_bounds()
 
@@ -263,6 +265,18 @@ class Patch(Processor):
             MFPApp().gui_command.load_complete()
         else:
             self.create_export_gui()
+        return True 
+
+    def delete_gui(self):
+        if not self.gui_created:
+            return True 
+
+        for oid, obj in self.objects.items():
+            obj.delete_gui()
+
+        Processor.delete_gui(self)
+        return True 
+
 
     def save_file(self, filename):
         self.update_export_bounds()

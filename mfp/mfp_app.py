@@ -173,7 +173,7 @@ class MFPApp (Singleton):
     def register(self, name, ctor):
         self.registry[name] = ctor
 
-    def open_file(self, file_name, context=None):
+    def open_file(self, file_name, context=None, show_gui=True):
         patch = None 
         factory = None 
         name = 'default'
@@ -207,9 +207,10 @@ class MFPApp (Singleton):
             patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
 
         self.patches[patch.name] = patch 
-        patch.create_gui()
+        if show_gui:
+            patch.create_gui()
         patch.mark_ready()
-        if patch.gui_created:
+        if show_gui and patch.gui_created:
             MFPApp().gui_command.select(patch.obj_id)
         return patch
 

@@ -34,6 +34,11 @@ class ConnectionElement(PatchElement):
         self.set_reactive(True)
         if obj_1.layer is not None:
             self.move_to_layer(obj_1.layer)
+        elif obj_2.layer is not None:
+            self.move_to_layer(obj_2.layer)
+        else:
+            print "WARNING: creating ConnectionElement with no layer"
+            print obj_1, obj_2
 
         self.draw()
 

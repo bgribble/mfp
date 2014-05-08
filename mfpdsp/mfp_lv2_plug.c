@@ -131,9 +131,9 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
 
     /* send an event to control [inlet]/[outlet] on startup and any change 
      * in value 
-     *
-     * FIXME: Ignore the last input, which is the Edit button. */ 
-    for(int i=0; i < (self->port_data->len - 1); i++) {
+     */
+
+    for(int i=0; i < (self->port_data->len ); i++) {
         if((self->port_input_mask & (1 << i)) &&  
            (self->port_control_mask & (1 << i))) { 
             int val_changed = 1;
@@ -147,11 +147,20 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
 
                 if (val_changed) { 
                     g_array_index(self->port_control_values, float, i) = val;
-                    mfp_lv2_send_control_input(context, i, val);
+                    if (i < self->port_data->len-1) {
+                        mfp_lv2_send_control_input(context, i, val);
+                    }
+                    else {
+                        mfp_api_show_editor(context, (int)val);
+                    }
                 }
             }
         }
     }
+
+    /* now look at the Edit field */ 
+    void * pdata = mfp_lv2_get_port_data(self, self->port_data->len-1);
+    float editval = *(float *)pdata;
 
     mfp_dsp_run(context);
 

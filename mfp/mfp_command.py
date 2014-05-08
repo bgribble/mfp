@@ -173,6 +173,17 @@ class MFPCommand(RPCWrapper):
             patch.save_file(file_name)
 
     @rpcwrap
+    def show_editor(self, obj_id, show):
+        from .mfp_app import MFPApp
+        patch = MFPApp().objects.get(obj_id)
+        if not isinstance(patch, Patch):
+            print "show_editor: error: obj_id=%s, obj=%s is not a patch" % (obj_id, patch)
+        elif show:
+            patch.create_gui()
+        else:
+            patch.delete_gui()
+
+    @rpcwrap
     def save_lv2(self, patch_name, plugin_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
@@ -198,7 +209,7 @@ class MFPCommand(RPCWrapper):
         from .dsp_object import DSPContext 
 
         ctxt = DSPContext(node_id, context_id)
-        patch = MFPApp().open_file(file_name, ctxt)
+        patch = MFPApp().open_file(file_name, ctxt, False)
         patch.hot_inlets = range(len(patch.inlets))
         return patch.obj_id
 
