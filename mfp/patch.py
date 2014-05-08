@@ -263,6 +263,7 @@ class Patch(Processor):
                             MFPApp().gui_command.connect(obj.obj_id, srcport, 
                                                          dstobj.obj_id, dstport)
             MFPApp().gui_command.load_complete()
+            MFPApp().gui_command.select(self.obj_id)
         else:
             self.create_export_gui()
         return True 
