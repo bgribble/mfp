@@ -89,7 +89,7 @@ class GUICommand (RPCWrapper):
         from .gui.button_element import ToggleIndicatorElement
         from .gui.button_element import BangButtonElement
 
-        elementtype = params.get('display_type')
+        elementtype = params.get('display_type', 'processor')
 
         ctors = {
             'processor': ProcessorElement,
@@ -108,7 +108,7 @@ class GUICommand (RPCWrapper):
             'button': BangButtonElement,
             'indicator': ToggleIndicatorElement
         }
-        ctor = ctors.get(elementtype)
+        ctor = ctors.get(elementtype, ProcessorElement)
         if ctor:
             o = ctor(MFPGUI().appwin, params.get('position_x', 0), params.get('position_y', 0))
             o.obj_id = obj_id
