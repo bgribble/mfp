@@ -1,4 +1,6 @@
 
+#include <sys/types.h>
+#include <unistd.h>
 #include <glib.h>
 #include <stdio.h>
 
@@ -15,6 +17,8 @@ mfp_context_new(int ctxt_type)
     next_context_id ++;
     ctxt->ctype = ctxt_type; 
     ctxt->activated = 0;
+
+    printf("mfp_context_new: PID=%d, PPID=%d\n", getpid(), getppid());
 
     if (ctxt_type == CTYPE_JACK) {
         ctxt->info.jack = g_malloc0(sizeof(mfp_jack_info));

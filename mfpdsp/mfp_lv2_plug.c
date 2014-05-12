@@ -47,9 +47,16 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
 
     self->input_ports = g_array_new(FALSE, TRUE, sizeof(int));
     self->output_ports = g_array_new(FALSE, TRUE, sizeof(int));
+    self->output_buffers = g_array_new(FALSE, TRUE, sizeof(mfp_block *));
 
     /* mfp_lv2_ttl_read populates self with info about this plugin */ 
     mfp_lv2_ttl_read(self, bundle_path);
+
+    /* create output buffers */ 
+    for(int i = 0; i < self->output_ports->len; i++) {
+        mfp_block * blk = mfp_block_new(mfp_max_blocksize);
+        g_array_append_val(self->output_buffers, blk);
+    }
 
     /* request that the MFP app build this patch */
     mfp_api_load_context(context, self->object_path);
@@ -163,6 +170,17 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
     float editval = *(float *)pdata;
 
     mfp_dsp_run(context);
+
+    /* copy the output buffers to the output ports */ 
+    for (int port = 0; port < context->info.lv2->output_ports->len; port ++) {
+        int lv2port = g_array_index(context->info.lv2->output_ports, int, port);
+        if (context->info.lv2->port_audio_mask && 
+            context->info.lv2->port_output_mask && (1 << lv2port)) {
+            mfp_sample * destptr = mfp_lv2_get_port_data(context->info.lv2, lv2port); 
+            mfp_sample * srcptr = mfp_get_output_buffer(context, port);
+            memcpy(destptr, srcptr, nframes*sizeof(mfp_sample));
+        }
+    }
 
     for(int i=0; i < self->port_data->len; i++) {
         if((self->port_output_mask & (1 << i)) &&  

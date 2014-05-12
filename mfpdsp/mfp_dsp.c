@@ -64,9 +64,9 @@ mfp_get_input_buffer(mfp_context * ctxt, int chan) {
                                     jack_port_t *, chan), ctxt->blocksize);
     }
     else {
-        return mfp_lv2_get_port_data(ctxt->info.lv2, 
-                                     g_array_index(ctxt->info.lv2->input_ports, 
-                                                   int, chan)); 
+        int port = g_array_index(ctxt->info.lv2->input_ports, int, chan);
+        mfp_sample * ptr = mfp_lv2_get_port_data(ctxt->info.lv2, port); 
+        return ptr;
     }
 }
 
@@ -77,9 +77,13 @@ mfp_get_output_buffer(mfp_context * ctxt, int chan) {
                                     jack_port_t *, chan), ctxt->blocksize);
     }
     else {
-        return mfp_lv2_get_port_data(ctxt->info.lv2, 
-                                     g_array_index(ctxt->info.lv2->output_ports, 
-                                                   int, chan)); 
+        mfp_block * blk = g_array_index(ctxt->info.lv2->output_buffers, mfp_block *, chan);
+        if (blk != NULL) {
+            return blk->data;
+        }
+        else{
+            return NULL;
+        }
     }
 }
 
@@ -280,7 +284,6 @@ mfp_dsp_run(mfp_context * ctxt)
             mfp_proc_process(*p);
         }
     }
-
     ctxt->proc_count ++;
 }
 
@@ -297,8 +300,6 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
     }
 
     if (nsamples != ctxt->blocksize) {
-        printf("mfp_dsp_set_blocksize: size changed, updating processors (%d --> %d)\n",
-                ctxt->blocksize, nsamples);
         for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
             /* i/o buffers are pre-allocated to mfp_max_blocksize */ 
             for (count = 0; count < (*p)->inlet_conn->len; count ++) {
@@ -314,6 +315,16 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
     }
 
     ctxt->blocksize = nsamples;
+    if (ctxt->ctype == CTYPE_JACK) {
+        return;
+    }
+    else if (ctxt->ctype == CTYPE_LV2) {
+        for (count = 0; count < ctxt->info.lv2->output_buffers->len; count ++) {
+            mfp_block_resize(g_array_index(ctxt->info.lv2->output_buffers, mfp_block *, 
+                                           count), 
+                             nsamples);
+        }    
+    }
 }
 
 void

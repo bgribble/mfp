@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
@@ -19,7 +20,6 @@ process(mfp_processor * proc)
     int blocksize = proc->context->blocksize;
 
     if (proc == NULL) { 
-        printf("builtin_noop.c: proc is NULL!\n");
         return -1;
     }
 
@@ -56,7 +56,6 @@ process(mfp_processor * proc)
         }
         outptr = proc->outlet_buf[0]->data;
     }
-
 
     memcpy(outptr, inptr, blocksize*sizeof(mfp_sample));
         

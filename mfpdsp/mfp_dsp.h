@@ -111,6 +111,7 @@ typedef struct {
      * output port is at port_data[output_ports[0]] */ 
     GArray * input_ports;
     GArray * output_ports; 
+    GArray * output_buffers;
 } mfp_lv2_info; 
 
 typedef struct {
