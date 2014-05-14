@@ -39,14 +39,23 @@ table_lookup(double phase) {
     int index = (int)(phase * OSC_TABSCALE);
     double rem, s1, s2;
 
-    rem = phase - index*OSC_TABINCR;
-    if((index < 0) || (index > OSC_TABSIZE-1)) {
-        printf("table_lookup: out-of-range phase %f (index %d) max is %d\n", phase, index,
-                OSC_TABSIZE);
-        return 0.0;
+    if(index < 0) {
+        index = 0;
+        s1 = osc_table[index];
+        s2 = osc_table[index];
+        rem = 0.0;
     }
-    s1 = osc_table[index];
-    s2 = osc_table[index+1];
+    else if (index > OSC_TABSIZE-2) {
+        index = OSC_TABSIZE-1;
+        s1 = osc_table[index];
+        s2 = osc_table[index];
+        rem = 0.0;
+    }
+    else {
+        s1 = osc_table[index];
+        s2 = osc_table[index+1];
+        rem = phase - index*OSC_TABINCR;
+    }
 
     return (mfp_sample)(s1 + (s2-s1)*(rem*OSC_TABSCALE));
 
@@ -77,6 +86,7 @@ process(mfp_processor * proc)
         return 0;
     }
 
+
     if(mode_fm == 1) {
         newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0); 
         newphase = fmod(newphase, 2.0*M_PI);
@@ -104,6 +114,7 @@ process(mfp_processor * proc)
     }
 
     d->phase = newphase;
+
     return 0;
 }
 
@@ -158,6 +169,7 @@ config(mfp_processor * proc)
     if (phase_ptr != NULL) {
         d->phase = *(float *)phase_ptr;-
         g_hash_table_remove(proc->params, "phase");
+        /* FIXME free in config() */ 
         g_free(phase_ptr);
     }
 

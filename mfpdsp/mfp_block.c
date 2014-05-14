@@ -232,11 +232,14 @@ mfp_block_fmod(mfp_block * in, mfp_sample modulus, mfp_block * out)
         int loc;
         int end = in->blocksize;
         double outv[2];
+        float inval[4] = { 0.0, 0.0, 0.0, 0.0} ;
         __v2df cval = (__v2df) { modulus, modulus };
         __v2df xmm0, xmm1;
         __v4si xmm2;
         for(loc = 0; loc < end; loc += 2) {
-            xmm0 = __builtin_ia32_cvtps2pd(*(__v4sf *)(in->data+loc));
+            inval[0] = in->data[loc];
+            inval[1] = in->data[loc+1];
+            xmm0 = __builtin_ia32_cvtps2pd(*(__v4sf *)inval);
             xmm1 = xmm0;
             xmm1 = xmm1 / cval;
             xmm2 = __builtin_ia32_cvttpd2dq(xmm1);
