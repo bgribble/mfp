@@ -92,11 +92,14 @@ mfp_num_output_buffers(mfp_context * ctxt) {
     GArray * ports = NULL;
 
     if (ctxt->ctype == CTYPE_JACK) {
-        ports = ctxt->info.jack->output_ports;
+        if (ctxt->info.jack != NULL) {
+            ports = ctxt->info.jack->output_ports;
+        }
     }
     else {
         ports = ctxt->info.lv2->output_ports;
     }
+
     if (ports != NULL) {
         return ports->len;
     }
@@ -312,18 +315,18 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
 
             (*p)->needs_config = 1;
         }
-    }
 
-    ctxt->blocksize = nsamples;
-    if (ctxt->ctype == CTYPE_JACK) {
-        return;
-    }
-    else if (ctxt->ctype == CTYPE_LV2) {
-        for (count = 0; count < ctxt->info.lv2->output_buffers->len; count ++) {
-            mfp_block_resize(g_array_index(ctxt->info.lv2->output_buffers, mfp_block *, 
-                                           count), 
-                             nsamples);
-        }    
+        ctxt->blocksize = nsamples;
+        if (ctxt->ctype == CTYPE_JACK) {
+            return;
+        }
+        else if (ctxt->ctype == CTYPE_LV2) {
+            for (count = 0; count < ctxt->info.lv2->output_buffers->len; count ++) {
+                mfp_block_resize(g_array_index(ctxt->info.lv2->output_buffers, mfp_block *, 
+                                               count), 
+                                 nsamples);
+            }    
+        }
     }
 }
 

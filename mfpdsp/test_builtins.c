@@ -211,7 +211,6 @@ test_line_2(void * data)
     GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
     GArray * env_2 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
 
-    printf("   test_line_2... ");
     for (snum=0; snum < 3; snum++) {
         g_array_append_val(env_1, tval_1[snum]);
     }
@@ -349,7 +348,6 @@ test_osc_1(void * data)
     setparam_float(osc, "_sig_1", 1000.0);
     setparam_float(osc, "_sig_2", 100.0);
 
-    printf("calling process()");
     mfp_proc_process(osc);
 
     for(i=0;i< ((mfp_context *)data)->blocksize;i++) {

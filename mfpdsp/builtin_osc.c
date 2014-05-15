@@ -45,8 +45,8 @@ table_lookup(double phase) {
         s2 = osc_table[index];
         rem = 0.0;
     }
-    else if (index > OSC_TABSIZE-2) {
-        index = OSC_TABSIZE-1;
+    else if (index > OSC_TABSIZE-1) {
+        index = OSC_TABSIZE;
         s1 = osc_table[index];
         s2 = osc_table[index];
         rem = 0.0;
