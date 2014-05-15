@@ -29,6 +29,9 @@ class RPCHost (QuittableThread):
     class SyncError (Exception): 
         pass
 
+    class RecvError (Exception):
+        pass 
+
     def __init__(self):
         QuittableThread.__init__(self)
 
@@ -63,6 +66,8 @@ class RPCHost (QuittableThread):
             oldsock = self.managed_sockets[peer_id]
             del self.managed_sockets[peer_id]
             del self.peers_by_socket[oldsock]
+            if oldsock.fileno() in self.fdsockets:
+                del self.fdsockets[oldsock.fileno()]
 
     def notify_peer(self, peer_id): 
         req = Request("publish", dict(classes=self.served_classes.keys()))
@@ -199,7 +204,10 @@ class RPCHost (QuittableThread):
                     sock = self.fdsockets.get(rsock)
                     try: 
                         sync = sync[syncbytes:]
-                        sync += sock.recv(syncbytes)
+                        syncbit = sock.recv(syncbytes)
+                        if not syncbit:
+                            raise self.RecvError()
+                        sync += syncbit  
                         if sync != RPCHost.SYNC_MAGIC: 
                             syncbytes = 1
                             retry = 1
@@ -213,12 +221,17 @@ class RPCHost (QuittableThread):
                     except RPCHost.SyncError, e: 
                         print "RpcHost: sync error, resyncing"
                         pass
+                    except RPCHost.RecvError, e: 
+                        print "RPCHost: recv() error, aborting"
+                        retry = 0 
+                        jdata = None 
                     except Exception, e: 
                         print "RPCHost: caught exception",  e
                         print jdata 
+                        retry = 0
                         jdata = ""
 
-                    if len(jdata):
+                    if jdata is not None and len(jdata):
                         peer_id = self.peers_by_socket.get(sock)
                         self.read_workers.submit((jdata, peer_id))
             
