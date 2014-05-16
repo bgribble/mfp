@@ -19,6 +19,7 @@ class PatchInfo (object):
         self.obj_type = None
         self.obj_args = None
         self.obj_name = None
+        self.deletable = True 
         self.last_filename = None 
         self.layers = []
         self.scopes = [] 
@@ -56,6 +57,7 @@ class PatchInfo (object):
         self.dsp_inlets = params.get("dsp_inlets")
         self.dsp_outlets = params.get("dsp_outlets")
         self.obj_name = params.get("name")
+        self.deletable = params.get("deletable", True)
 
         layers = params.get("layers", [])
         newlayers = [] 

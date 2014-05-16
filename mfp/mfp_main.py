@@ -52,7 +52,7 @@ mfp_banner = "MFP - Music For Programmers, version %s"
 mfp_footer = """
 To report bugs or download source: 
     
-    http://github.com/bgribble.mfp 
+    http://github.com/bgribble/mfp 
 
 Copyright (c) 2009-2014 Bill Gribble <grib@billgribble.com> 
 

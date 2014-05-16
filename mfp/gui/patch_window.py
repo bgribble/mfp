@@ -40,7 +40,7 @@ class PatchWindow(object):
         self.log_view = self.builder.get_object("log_text")
         self.object_view = self.init_object_view()
         self.layer_view = self.init_layer_view()
-        
+       
         # objects for stage -- self.group gets moved/scaled to adjust
         # the view, so anything not in it will be static on the stage
         self.group = Clutter.Group()
@@ -149,8 +149,6 @@ class PatchWindow(object):
             self.selected_patch = self.patches[0]
         if self.selected_layer is None and self.selected_patch is not None:
             self.layer_select(self.selected_patch.layers[0])
-
-
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
@@ -325,11 +323,26 @@ class PatchWindow(object):
         return True
 
     def quit(self, *rest):
-        log.debug("Quit command from GUI or WM, shutting down")
+        from .patch_info import PatchInfo
+        log.debug("Quit command from GUI or WM")
+
+        for p in self.patches:
+            if p.deletable:
+                p.delete()
+
+        allpatches = MFPGUI().mfp.open_patches()
+        guipatches = [ p.obj_id for p in self.objects if isinstance(p, PatchInfo) ]
+
+        for a in allpatches: 
+            if a not in guipatches:
+                log.debug("Some patches cannot be deleted, not quitting")
+                return False 
+
         if self.console_mgr:
             self.console_mgr.quitreq = True
             self.console_mgr.join()
             log.debug("Console thread reaped")
+            self.console_mgr = None 
 
         MFPGUI().mfp.quit()
         return True

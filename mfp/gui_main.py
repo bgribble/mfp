@@ -112,7 +112,7 @@ def main():
     remote.connect() 
 
     host.subscribe(MFPCommand)
-
+    log.log_module = "ui"
     gui = MFPGUI() 
 
     host.publish(GUICommand)

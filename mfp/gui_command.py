@@ -178,9 +178,11 @@ class GUICommand (RPCWrapper):
         from .gui.patch_info import PatchInfo
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchInfo): 
-            MFPGUI().appwin.patches.remove(obj)
+            log.debug("deleting gui patchinfo:", obj)
             obj.obj_id = None 
             obj.delete()
+            if obj in MFPGUI().appwin.patches: 
+                MFPGUI().appwin.patches.remove(obj)
         else: 
             for c in obj.connections_out:
                 MFPGUI().appwin.unregister(c)
@@ -225,6 +227,11 @@ class GUICommand (RPCWrapper):
     def _load_complete(self):
         from .gui_main import MFPGUI
         MFPGUI().appwin.load_complete()
+
+    @rpcwrap
+    def set_undeletable(self, val):
+        from .gui_main import MFPGUI
+        MFPGUI().appwin.deletable = val
 
     @rpcwrap
     def clear(self):

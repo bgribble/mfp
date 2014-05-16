@@ -211,6 +211,7 @@ class MFPCommand(RPCWrapper):
         ctxt = DSPContext(node_id, context_id)
         patch = MFPApp().open_file(file_name, ctxt, False)
         patch.hot_inlets = range(len(patch.inlets))
+        patch.gui_params['deletable'] = False
         return patch.obj_id
 
     @rpcwrap
@@ -222,15 +223,22 @@ class MFPCommand(RPCWrapper):
         to_delete = [] 
         for patch_id, patch in MFPApp().patches.items():
             if patch.context == ctxt:
-                patch.delete()
-                to_delete.append(patch_id)
+                to_delete.append(patch)
 
-        for patch_id in to_delete: 
-            del MFPApp().patches[patch_id] 
+        for patch in to_delete: 
+            pid = patch.obj_id
+            patch.delete()
+            if pid in MFPApp().patches:
+                del MFPApp().patches[patch_id] 
 
         if not len(MFPApp().patches):
             MFPApp().finish_soon()
             return None 
+
+    @rpcwrap
+    def open_patches(self):
+        from .mfp_app import MFPApp
+        return [ p.obj_id for p in MFPApp().patches.values()]
 
     @rpcwrap_noresp
     def quit(self):

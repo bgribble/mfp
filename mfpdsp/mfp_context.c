@@ -34,7 +34,6 @@ mfp_context_new(int ctxt_type)
 void
 mfp_context_destroy(mfp_context * ctxt)
 {
-    printf("mfp_context_destroy -- enter\n");
     mfp_api_close_context(ctxt);
 
     g_hash_table_remove(mfp_contexts, GINT_TO_POINTER(ctxt->id));
@@ -44,12 +43,9 @@ mfp_context_destroy(mfp_context * ctxt)
     g_free(ctxt);
 
     if(g_hash_table_size(mfp_contexts) == 0) {
-        printf("Last context destroyed, need to shut down library\n");
         mfp_api_exit_notify();
         mfp_finish_all();
     }
-
-    printf("mfp_context_destroy -- finished\n");
 }
 
 int

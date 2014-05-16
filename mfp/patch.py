@@ -361,12 +361,15 @@ class Patch(Processor):
                 obj.create_gui()
 
     def delete(self):
+        from .mfp_app import MFPApp
         for oid, obj in self.objects.items():
             if obj.gui_created:
                 obj.delete_gui()
             obj.delete()
         if self.gui_created: 
             self.delete_gui()
+        if MFPApp().patches[self.name] == self:
+            del MFPApp().patches[self.name]
         Processor.delete(self)
 
 

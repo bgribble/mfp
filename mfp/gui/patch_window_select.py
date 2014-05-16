@@ -35,12 +35,15 @@ def patch_select_next(self):
 
 @extends(PatchWindow)
 def patch_close(self):
-    if len(self.patches) > 1:
-        p = self.selected_patch
+    from mfp import log 
+    p = self.selected_patch
+    if p and p.deletable: 
         self.patch_select_next() 
         self.patches.remove(p)
         p.delete()
     else: 
+        log.debug("Cannot close window. Close UI via plugin host Edit button")
+    if not len(self.patches):
         self.quit()
 
 @extends(PatchWindow)

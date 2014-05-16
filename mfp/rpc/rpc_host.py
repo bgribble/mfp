@@ -198,10 +198,15 @@ class RPCHost (QuittableThread):
             jdata = None 
             syncbytes = 8
             sync = ''
-            retry = 1 
             for rsock in rdy: 
+                retry = 1 
                 while retry: 
                     sock = self.fdsockets.get(rsock)
+                    if sock is None: 
+                        retry = 0
+                        jdata = None 
+                        continue 
+
                     try: 
                         sync = sync[syncbytes:]
                         syncbit = sock.recv(syncbytes)
@@ -262,6 +267,7 @@ class RPCHost (QuittableThread):
 
     def handle_request(self, req, peer_id):
         from datetime import datetime 
+        from mfp import log 
 
         method = req.method 
         rpcdata = req.params
