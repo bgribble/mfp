@@ -368,7 +368,7 @@ class Patch(Processor):
             obj.delete()
         if self.gui_created: 
             self.delete_gui()
-        if MFPApp().patches[self.name] == self:
+        if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:
             del MFPApp().patches[self.name]
         Processor.delete(self)
 

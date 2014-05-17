@@ -165,9 +165,6 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
         }
     }
 
-    /* now look at the Edit field */ 
-    void * pdata = mfp_lv2_get_port_data(self, self->port_data->len-1);
-    float editval = *(float *)pdata;
 
     mfp_dsp_run(context);
 

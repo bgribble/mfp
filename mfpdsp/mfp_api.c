@@ -75,7 +75,7 @@ mfp_api_send_to_outlet(mfp_context * context, int port, float value)
     snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
              context->default_obj_id, port, value); 
     request_id = mfp_rpc_send_request(method, tbuf, NULL, NULL);
-    mfp_rpc_wait(request_id);
+    //mfp_rpc_wait(request_id);
 }
 
 int
@@ -90,7 +90,7 @@ mfp_api_show_editor(mfp_context * context, int show)
     snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
              context->default_obj_id, show); 
     request_id = mfp_rpc_send_request(method, tbuf, NULL, NULL);
-    mfp_rpc_wait(request_id);
+    //mfp_rpc_wait(request_id);
 }
 
 int 
@@ -105,7 +105,7 @@ mfp_api_load_context(mfp_context * context, char * patchfile)
     snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, patchfile, 
              mfp_comm_nodeid, context->id);
     request_id = mfp_rpc_send_request(method, tbuf, api_load_callback, (void *)context);
-    mfp_rpc_wait(request_id);
+    //mfp_rpc_wait(request_id);
 }
 
 int
