@@ -8,7 +8,6 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from .key_defs import *
 from mfp import log
 
-
 def get_key_unicode(ev):
     if ev.unicode_value:
         return ord(ev.unicode_value)
@@ -46,7 +45,6 @@ class KeySequencer (object):
                     self.mod_keys.add(code)
             else:
                 self.sequences.append(self.canonicalize(event))
-
         # KEY RELEASE
         elif event.type == Clutter.EventType.KEY_RELEASE:
             code = event.keyval

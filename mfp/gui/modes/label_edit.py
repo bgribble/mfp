@@ -12,7 +12,6 @@ from ..colordb import ColorDB
 
 from mfp.gui_main import clutter_do
 
-
 def editpoint(s1, s2):
     l1 = len(s1)
     l2 = len(s2)
@@ -45,6 +44,7 @@ class Blinker (Thread):
 class LabelEditMode (InputMode):
     def __init__(self, window, element, label, multiline=False, markup=False,
                  mode_desc="Edit text"):
+        self.window = window
         self.manager = window.input_mgr
         self.element = element
         self.widget = label
@@ -57,6 +57,7 @@ class LabelEditMode (InputMode):
         self.activate_handler_id = None
         self.text_changed_handler_id = None
         self.key_focus_out_handler_id = None
+        self.key_press_handler_id = None
         self.editpos = 0
         self.blinker = None
 
@@ -88,11 +89,20 @@ class LabelEditMode (InputMode):
         self.update_label(raw=False)
         pass
 
-
     def start_editing(self):
         def focus_out(*args): 
             self.commit_edits()
             return True
+
+        def key_press(widg, event):
+            from ..key_defs import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DN 
+            handlers = {KEY_LEFT: self.move_left, KEY_RIGHT: self.move_right, 
+                        KEY_UP: self.move_up, KEY_DN: self.move_down}
+            keysym = event.keyval
+            if keysym in handlers:
+                handlers[keysym]()
+                return True 
+            return False
 
         def synth_ret(*args):
             self.manager.synthesize("RET")
@@ -105,6 +115,7 @@ class LabelEditMode (InputMode):
         
         self.text_changed_handler_id = self.widget.connect("text-changed", self.text_changed)
         self.key_focus_out_handler_id = self.widget.connect("key-focus-out", focus_out)
+        self.key_press_handler_id = self.window.window.connect("key-press-event", key_press)
 
         self.editpos = len(self.text)
         self.widget.set_editable(True)
@@ -134,6 +145,9 @@ class LabelEditMode (InputMode):
         if self.text_changed_handler_id:
             self.widget.disconnect(self.text_changed_handler_id)
             self.text_changed_handler_id = None 
+        if self.key_press_handler_id:
+            self.window.window.disconnect(self.key_press_handler_id)
+            self.key_press_handler_id = None
 
         if self.blinker is not None:
             self.blinker.quitreq = True

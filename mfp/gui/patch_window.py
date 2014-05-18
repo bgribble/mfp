@@ -106,10 +106,10 @@ class PatchWindow(object):
         def grab_handler(stage, event):
             if not self.embed.has_focus():
                 self.embed.grab_focus()
-            self.input_mgr.handle_event(stage, event)
+            return self.input_mgr.handle_event(stage, event)
 
         def handler(stage, event):
-            self.input_mgr.handle_event(stage, event)
+            return self.input_mgr.handle_event(stage, event)
 
         self.embed.set_can_focus(True)
         self.embed.grab_focus()
