@@ -18,18 +18,22 @@ def make_log_entry(tag, *parts):
     return "[%8s %6s] %s\n" % (ts, tag, msg)
 
 
-def write_log_entry(msg):
+def write_log_entry(msg, level=0):
     global log_file
     global log_func
 
     logged = False 
     if log_func:
-        log_func(msg)
+        log_func(msg, level)
         logged = True 
 
     if log_file and ((not logged) or log_force_console):
         log_file.write(msg)
 
+
+def warn(* parts):
+    global log_module
+    write_log_entry(make_log_entry(log_module, *parts), level=1)
 
 def debug(* parts):
     global log_debug

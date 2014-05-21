@@ -18,8 +18,11 @@ class MFPOscManager(QuittableThread):
 
         try:
             self.server = liblo.Server(self.port)
-        except Exception, err:
-            print type(err), str(err)
+        except liblo.ServerError, err:
+            self.server = liblo.Server()
+            self.port = self.server.get_port()
+            log.warn("OSC: Unable to use requested port %s, using %s instead" 
+                     % (port, self.port))
 
         self.server.add_method(None, None, self.default)
         QuittableThread.__init__(self)

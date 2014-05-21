@@ -12,14 +12,14 @@ class GUICommand (RPCWrapper):
             return False
 
     @rpcwrap
-    def log_write(self, msg):
+    def log_write(self, msg, level):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._log_write(msg))
+        MFPGUI().clutter_do(lambda: self._log_write(msg, level))
         return True
 
-    def _log_write(self, msg):
+    def _log_write(self, msg, level):
         from .gui_main import MFPGUI
-        MFPGUI().appwin.log_write(msg)
+        MFPGUI().appwin.log_write(msg, level)
 
     @rpcwrap
     def console_write(self, msg):

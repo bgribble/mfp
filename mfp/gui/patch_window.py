@@ -360,18 +360,40 @@ class PatchWindow(object):
         buf.move_mark(mark, iterator)
         self.console_view.scroll_to_mark(mark, 0, True, 1.0, 0.9)
 
-    def log_write(self, msg):
+    def log_write(self, msg, level):
         # this is a bit complicated so that we ensure scrolling is
         # reliable... scroll_to_iter can act odd sometimes
+
         buf = self.log_view.get_buffer()
-        iterator = buf.get_end_iter()
+
+        # find or create tags 
+        tagtable = buf.get_tag_table()
+        monotag = tagtable.lookup("mono")
+        warntag = tagtable.lookup("warn")
+        if monotag is None: 
+            monotag = buf.create_tag("mono", family="Monospace")
+            warntag = buf.create_tag("warn", foreground="#330000")
+
+        start_it = buf.get_end_iter()
         mark = buf.get_mark("log_mark")
         if mark is None:
             mark = Gtk.TextMark.new("log_mark", False)
-            buf.add_mark(mark, iterator)
-        buf.insert(iterator, msg, -1)
-        iterator = buf.get_end_iter()
-        buf.move_mark(mark, iterator)
+            buf.add_mark(mark, start_it)
+        buf.insert(start_it, msg, -1)
+        
+        start_it = buf.get_iter_at_mark(mark)
+        leaderend_it = buf.get_iter_at_mark(mark)
+        leaderend_it.forward_chars(msg.index(']') + 1)
+        buf.apply_tag(monotag, start_it, leaderend_it)
+
+        if (level == 0): 
+            start_it = buf.get_iter_at_mark(mark)
+            leaderend_it = buf.get_iter_at_mark(mark)
+            leaderend_it.forward_chars(msg.index(']') + 1)
+            buf.apply_tag(monotag, start_it, leaderend_it)
+
+        end_it = buf.get_end_iter()
+        buf.move_mark(mark, end_it)
         self.log_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 
     def get_prompted_input(self, prompt, callback, default=''): 

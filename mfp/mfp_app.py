@@ -144,6 +144,7 @@ class MFPApp (Singleton):
         from . import osc
         self.osc_mgr = osc.MFPOscManager(self.osc_port)
         self.osc_mgr.start()
+        self.osc_port = self.osc_mgr.port 
         log.debug("OSC server started (UDP/%s)" % self.osc_port)
 
         # crawl plugins 

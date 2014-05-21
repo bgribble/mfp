@@ -200,10 +200,12 @@ class LabelEditMode (InputMode):
     def move_to_start(self):
         self.editpos = 0
         self.update_cursor()
+        return True 
 
     def move_to_end(self):
         self.editpos = len(self.text)
         self.update_cursor()
+        return True 
 
     def move_left(self):
         self.editpos = max(self.editpos - 1, 0)
