@@ -361,36 +361,47 @@ class PatchWindow(object):
         self.console_view.scroll_to_mark(mark, 0, True, 1.0, 0.9)
 
     def log_write(self, msg, level):
+        buf = self.log_view.get_buffer()
+        mark = buf.get_mark("log_mark")
+
+        def leader_iters(): 
+            start = buf.get_iter_at_mark(mark)
+            start.backward_line()
+            start.set_line_offset(0)
+            end = buf.get_iter_at_mark(mark)
+            end.backward_line()
+            end.set_line_offset(0)
+            end.forward_chars(msg.index(']') + 1)
+            return (start, end)
+
         # this is a bit complicated so that we ensure scrolling is
         # reliable... scroll_to_iter can act odd sometimes
-
-        buf = self.log_view.get_buffer()
 
         # find or create tags 
         tagtable = buf.get_tag_table()
         monotag = tagtable.lookup("mono")
         warntag = tagtable.lookup("warn")
+        errtag = tagtable.lookup("err")
         if monotag is None: 
             monotag = buf.create_tag("mono", family="Monospace")
-            warntag = buf.create_tag("warn", foreground="#330000")
+            warntag = buf.create_tag("warn", foreground="#ddaa00", weight=800)
+            errtag = buf.create_tag("err", foreground="#770000", weight=700)
 
         start_it = buf.get_end_iter()
-        mark = buf.get_mark("log_mark")
         if mark is None:
             mark = Gtk.TextMark.new("log_mark", False)
             buf.add_mark(mark, start_it)
         buf.insert(start_it, msg, -1)
         
-        start_it = buf.get_iter_at_mark(mark)
-        leaderend_it = buf.get_iter_at_mark(mark)
-        leaderend_it.forward_chars(msg.index(']') + 1)
-        buf.apply_tag(monotag, start_it, leaderend_it)
+        start_it, end_it = leader_iters()
+        buf.apply_tag(monotag, start_it, end_it)
 
-        if (level == 0): 
-            start_it = buf.get_iter_at_mark(mark)
-            leaderend_it = buf.get_iter_at_mark(mark)
-            leaderend_it.forward_chars(msg.index(']') + 1)
-            buf.apply_tag(monotag, start_it, leaderend_it)
+        if (level == 1): 
+            start_it, end_it = leader_iters()
+            buf.apply_tag(warntag, start_it, end_it)
+        elif (level == 2): 
+            start_it, end_it = leader_iters()
+            buf.apply_tag(errtag, start_it, end_it)
 
         end_it = buf.get_end_iter()
         buf.move_mark(mark, end_it)
