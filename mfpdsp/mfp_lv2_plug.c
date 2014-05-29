@@ -59,7 +59,10 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     }
 
     /* request that the MFP app build this patch */
-    mfp_api_load_context(context, self->object_path);
+    char * msgbuf = mfp_comm_get_buffer();
+    int msglen = 0;
+    int request_id = mfp_api_load_context(context, self->object_path, msgbuf, &msglen);
+    // mfp_rpc_wait(request_id);
 
     return (LV2_Handle)context;
 }
@@ -85,6 +88,8 @@ mfp_lv2_activate(LV2_Handle instance)
 static void
 mfp_lv2_send_control_input(mfp_context * context, int port, float val)
 {
+    int msglen = 0;
+    char * msgbuf = mfp_comm_get_buffer();
     mfp_lv2_info * self = context->info.lv2;
     int port_count = 0;
 
@@ -93,12 +98,15 @@ mfp_lv2_send_control_input(mfp_context * context, int port, float val)
             port_count ++;
         }
     }
-    mfp_api_send_to_inlet(context, port_count, val);
+    mfp_api_send_to_inlet(context, port_count, val, msgbuf, &msglen);
+    mfp_comm_submit_buffer(msgbuf, msglen);
 }
 
 static void
 mfp_lv2_send_control_output(mfp_context * context, int port, float val)
 {
+    int msglen = 0;
+    char * msgbuf = mfp_comm_get_buffer();
     mfp_lv2_info * self = context->info.lv2;
     int port_count = 0;
 
@@ -107,7 +115,17 @@ mfp_lv2_send_control_output(mfp_context * context, int port, float val)
             port_count ++;
         }
     }
-    mfp_api_send_to_outlet(context, port_count, val);
+    mfp_api_send_to_outlet(context, port_count, val, msgbuf, &msglen);
+    mfp_comm_submit_buffer(msgbuf, msglen);
+}
+
+static void 
+mfp_lv2_show_editor(mfp_context * context, int show)
+{
+    int msglen = 0;
+    char * msgbuf = mfp_comm_get_buffer();
+    mfp_api_show_editor(context, show, msgbuf, &msglen);
+    mfp_comm_submit_buffer(msgbuf, msglen);
 }
 
 
@@ -158,7 +176,7 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
                         mfp_lv2_send_control_input(context, i, val);
                     }
                     else {
-                        mfp_api_show_editor(context, (int)val);
+                        mfp_lv2_show_editor(context, (int)val);
                     }
                 }
             }

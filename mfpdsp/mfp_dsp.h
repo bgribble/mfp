@@ -52,7 +52,7 @@ typedef struct {
     int dest_port;
     gpointer param_name;
     gpointer param_value;
-} mfp_reqdata;
+} mfp_in_data;
 
 typedef struct mfp_procinfo_struct {
     char * name;
@@ -73,15 +73,9 @@ typedef struct {
 
 
 typedef struct {
-    mfp_processor * dst_proc;
-    int   msg_type;
-    int   response_type;
-    union {
-        double f;
-        int    i;
-        char   * c;
-    } response;
-} mfp_respdata;
+    char * msgbuf;
+    int msglen;
+} mfp_out_data;
 
 typedef struct {
     char * filename; 
@@ -174,6 +168,7 @@ typedef struct mfp_context_struct {
 #define MFP_EXEC_NAME "mfp"
 #define MFP_EXEC_SHELLMAX 2048
 #define MFP_MAX_MSGSIZE 2048 
+#define MFP_NUM_BUFFERS 256
 
 /* library global variables */ 
 extern int mfp_initialized;
@@ -189,14 +184,14 @@ extern GHashTable * mfp_contexts;
 extern GHashTable * mfp_extensions; 
 
 extern GArray * mfp_proc_list; 
-extern GArray * mfp_request_cleanup;
+extern GArray * incoming_cleanup;
 
-extern pthread_mutex_t mfp_request_lock;
-extern pthread_mutex_t mfp_response_lock;
-extern pthread_cond_t mfp_response_cond;
-extern int mfp_response_queue_read;
-extern int mfp_response_queue_write;
-extern mfp_respdata mfp_response_queue[REQ_BUFSIZE];
+extern pthread_mutex_t incoming_lock;
+extern pthread_mutex_t outgoing_lock;
+extern pthread_cond_t outgoing_cond;
+extern int outgoing_queue_read;
+extern int outgoing_queue_write;
+extern mfp_out_data outgoing_queue[REQ_BUFSIZE];
 
 /* main.c */
 extern void mfp_init_all(char * sockname);
@@ -217,7 +212,7 @@ extern int mfp_dsp_schedule(mfp_context * ctxt);
 extern void mfp_dsp_run(mfp_context * ctxt);
 extern void mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples);
 extern void mfp_dsp_accum(mfp_sample *, mfp_sample *, int count);
-extern void mfp_dsp_push_request(mfp_reqdata rd); 
+extern void mfp_dsp_push_request(mfp_in_data rd); 
 extern void mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char * response);
 extern void mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int response);
 extern void mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response);
@@ -243,7 +238,7 @@ extern int mfp_proc_disconnect(mfp_processor *, int, mfp_processor *, int);
 extern int mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val);
 
 extern int mfp_proc_has_input(mfp_processor * self, int inlet_num);
-extern int mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd) ;
+extern int mfp_proc_setparam_req(mfp_processor * self, mfp_in_data * rd) ;
 
 /* mfp_alloc.c */ 
 extern void mfp_alloc_init(void);
@@ -264,20 +259,27 @@ extern void mfp_comm_io_finish(void);
 extern void mfp_comm_io_wait(void); 
 extern int mfp_comm_init(char * init_sockid); 
 extern int mfp_comm_connect(char * sockname);
-extern int mfp_comm_send(const char * msg);
 extern int mfp_comm_quit_requested(void);
+extern char * mfp_comm_get_buffer(void);
+extern int mfp_comm_submit_buffer(char * msgbuf, int msglen);
+extern void mfp_comm_release_buffer(char * msgbuf);
+extern int mfp_comm_send_buffer(const char * msg, int msglen);
 
 /* mfp_request.c */
-extern void mfp_dsp_push_request(mfp_reqdata rd);
+extern void mfp_rpc_init(void);
+
+/* incoming data processing */ 
+extern void mfp_dsp_push_request(mfp_in_data rd);
 extern void mfp_dsp_handle_requests(void);
 
-extern int mfp_rpc_json_dispatch_request(const char *, int);
-extern int mfp_rpc_json_dsp_response(mfp_respdata, char *);
-extern int mfp_rpc_send_request(const char * method, const char * params, 
-                                void (* callback)(JsonNode *, void *), void *);
-extern void mfp_rpc_send_response(int request_id, const char * result);
+/* outgoing data processing */ 
+extern int mfp_rpc_request(const char * method, const char * params, 
+                           void (* callback)(JsonNode *, void *), void *, char *, int *);
+extern int mfp_rpc_response(int request_id, const char * result, char *, int *);
 extern void mfp_rpc_wait(int request_id); 
-extern void mfp_rpc_init(void);
+
+/* mfp_rpc.c */ 
+extern int mfp_rpc_dispatch_request(const char *, int);
 
 /* mfp_context.c */
 extern mfp_context * mfp_context_new(int ctype);
@@ -286,11 +288,12 @@ extern int mfp_context_connect_default_io(mfp_context * context, int patch_id);
 
 /* mfp_api.c */
 extern void mfp_api_init(void);
-extern int mfp_api_load_context(mfp_context * ctxt, char * patchname);
+extern int mfp_api_load_context(mfp_context * ctxt, char * patchname, char *, int *);
 extern int mfp_api_close_context(mfp_context * ctxt);
-extern int mfp_api_send_to_inlet(mfp_context * ctxt, int port, float val);
-extern int mfp_api_send_to_outlet(mfp_context * ctxt, int port, float val);
-extern int mfp_api_show_editor(mfp_context * ctxt, int show);
+extern int mfp_api_send_to_inlet(mfp_context * ctxt, int port, float val, char *, int *);
+extern int mfp_api_send_to_outlet(mfp_context * ctxt, int port, float val, char *, int *);
+extern int mfp_api_show_editor(mfp_context * ctxt, int show, char *, int *);
+extern int mfp_api_dsp_response(int proc_id, char * resp, int mtype, char * mbuf, int * mlen);
 extern int mfp_api_exit_notify(void);
 
 #endif

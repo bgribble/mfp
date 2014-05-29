@@ -124,7 +124,7 @@ static char *
 dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args)
 {
     JsonNode * val;
-    mfp_reqdata rd;
+    mfp_in_data rd;
     char * rval = NULL;
 
     if(!strcmp(methodname, "connect")) {
@@ -294,54 +294,38 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
 
 }
 
-int  
-mfp_rpc_json_dsp_response(mfp_respdata r, char * outbuf)
+int
+mfp_rpc_response(int req_id, const char * result, char * msgbuf, int * msglen) 
 {
-    const char tmpl[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"call\", "
-        "\"params\": { \"func\": \"dsp_response\", \"rpcid\": %d, "
-        "\"args\": { \"resp_type\": %d, \"resp_value\": %s }}}";
-    char tbuf[MFP_MAX_MSGSIZE];
-    int retlen;
-
-    switch(r.response_type) {
-        case PARAMTYPE_FLT:
-            snprintf(tbuf, MFP_MAX_MSGSIZE, "%f", r.response.f);
-            break;
-        case PARAMTYPE_BOOL:
-            snprintf(tbuf, MFP_MAX_MSGSIZE, "%d", r.response.i);
-            break;
-        case PARAMTYPE_INT:
-            snprintf(tbuf, MFP_MAX_MSGSIZE, "%d", r.response.i);
-            break;
-        case PARAMTYPE_STRING:
-            snprintf(tbuf, MFP_MAX_MSGSIZE, "\"%s\"", r.response.c);
-            g_free(r.response.c);
-            break;
+    if(msgbuf == NULL) {
+        printf("mfp_rpc_response: NULL buffer, aborting buffer send\n");
+        *msglen = 0;
+        return -1;
     }
-    retlen = snprintf(outbuf, MFP_MAX_MSGSIZE, tmpl, r.dst_proc, r.response_type, tbuf);
-    return retlen;
-}
 
-void
-mfp_rpc_send_response(int req_id, const char * result) 
-{
-    char reqbuf[MFP_MAX_MSGSIZE];
-    snprintf(reqbuf, MFP_MAX_MSGSIZE-1, 
-            "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": %s}", req_id, result);
-    mfp_comm_send(reqbuf);
+    * msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, 
+                        "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": %s}", 
+                        req_id, result);
+    return req_id;
 }
-
 
 int
-mfp_rpc_send_request(const char * method, const char * params, 
-                     void (* callback)(JsonNode *, void *), void * cb_data) 
+mfp_rpc_request(const char * method, const char * params, 
+                void (* callback)(JsonNode *, void *), void * cb_data,
+                char * msgbuf, int * msglen) 
 {
-    char reqbuf[MFP_MAX_MSGSIZE];
     int req_id = _next_reqid ++; 
+        
+    if(msgbuf == NULL) {
+        printf("mfp_rpc_request: NULL buffer, aborting buffer send\n");
+        *msglen = 0;
+        return -1;
+    }
 
-    snprintf(reqbuf, MFP_MAX_MSGSIZE-1, 
-            "{\"jsonrpc\": \"2.0\", \"id\": %d, \"method\": \"%s\", \"params\": %s}", 
-            req_id, method, params);
+    *msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, 
+                       "{\"jsonrpc\": \"2.0\", \"id\": %d, \"method\": \"%s\", "
+                       "\"params\": %s}", 
+                       req_id, method, params);
     if (callback != NULL) {
         g_hash_table_insert(request_callbacks, GINT_TO_POINTER(req_id), callback);
     }
@@ -349,7 +333,6 @@ mfp_rpc_send_request(const char * method, const char * params,
         g_hash_table_insert(request_data, GINT_TO_POINTER(req_id), cb_data);
     }
 
-    mfp_comm_send(reqbuf);
     return req_id; 
 }
 
@@ -359,6 +342,11 @@ mfp_rpc_wait(int request_id)
     struct timespec alarmtime;
     struct timeval nowtime;
     gpointer reqwaiting;
+
+    if (request_id < 0) {
+        printf("mfp_rpc_wait: BADREQUEST, not waiting\n");
+        return;
+    }
 
     pthread_mutex_lock(&request_lock);
     g_hash_table_insert(request_waiting, GINT_TO_POINTER(request_id), GINT_TO_POINTER(1));
@@ -379,7 +367,7 @@ mfp_rpc_wait(int request_id)
 }
 
 int 
-mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen) 
+mfp_rpc_dispatch_request(const char * msgbuf, int msglen) 
 {
     JsonParser * parser = json_parser_new();
     JsonNode * id, * root, * val, * params;
@@ -436,14 +424,17 @@ mfp_rpc_json_dispatch_request(const char * msgbuf, int msglen)
         }
 
         if (need_response && (reqid != -1)) {
-            char * respbuf;
+            char * msgbuf = mfp_comm_get_buffer();
+            int msglen = 0;
             if (result != NULL) {
-                mfp_rpc_send_response(reqid, result);
+                
+                mfp_rpc_response(reqid, result, msgbuf, &msglen);
                 g_free(result);
             }
             else {
-                mfp_rpc_send_response(reqid, "[ true, true]");
+                mfp_rpc_response(reqid, "[ true, true]", msgbuf, &msglen);
             }
+            mfp_comm_submit_buffer(msgbuf, msglen);
         }
     }
 
@@ -480,9 +471,14 @@ mfp_rpc_init(void)
     pthread_mutex_init(&request_lock, NULL);
     pthread_cond_init(&request_cond, NULL); 
 
-    req_id = mfp_rpc_send_request("ready", "{}", ready_callback, NULL);
+    char * msgbuf = mfp_comm_get_buffer();
+    int msglen = 0;
+    req_id = mfp_rpc_request("ready", "{}", ready_callback, NULL, msgbuf, & msglen);
+    mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(req_id);
 
-    mfp_rpc_send_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL);
+    msgbuf = mfp_comm_get_buffer();
+    mfp_rpc_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL, msgbuf, &msglen);
+    mfp_comm_submit_buffer(msgbuf, msglen);
 }
 

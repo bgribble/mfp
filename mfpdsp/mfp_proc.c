@@ -308,7 +308,7 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 }
 
 int 
-mfp_proc_setparam_req(mfp_processor * self, mfp_reqdata * rd) 
+mfp_proc_setparam_req(mfp_processor * self, mfp_in_data * rd) 
 {
     gpointer orig_key=NULL;
     gpointer orig_val=NULL;

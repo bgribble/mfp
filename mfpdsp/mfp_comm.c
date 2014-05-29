@@ -22,6 +22,13 @@ static pthread_t comm_io_writer_thread;
 static int comm_io_quitreq = 0;
 static pthread_mutex_t comm_io_lock = PTHREAD_MUTEX_INITIALIZER;
 
+typedef struct {
+    char bufdata[MFP_MAX_MSGSIZE];
+    int free;
+} comm_bufblock;
+
+static comm_bufblock comm_buffers[MFP_NUM_BUFFERS];
+
 int
 mfp_comm_connect(char * sockname) 
 {
@@ -54,16 +61,77 @@ mfp_comm_connect(char * sockname)
     return socket_fd;
 }
 
+
+char * 
+mfp_comm_get_buffer(void)
+{
+    /* FIXME mfp_comm_get_buffer implementation is naive */ 
+    for(int bufnum=0; bufnum < MFP_NUM_BUFFERS; bufnum++) {
+        if(comm_buffers[bufnum].free) {
+            comm_buffers[bufnum].free = 0;
+            return comm_buffers[bufnum].bufdata;
+        }
+    }
+
+    printf("mfp_comm_get_buffer: no buffers free!\n");
+    return NULL;
+}
+
+void
+mfp_comm_release_buffer(char * msgbuf)
+{
+    /* FIXME mfp_comm_get_buffer implementation is naive */ 
+    for(int bufnum=0; bufnum < MFP_NUM_BUFFERS; bufnum++) {
+        if(comm_buffers[bufnum].bufdata == msgbuf) {
+            comm_buffers[bufnum].free = 1;
+            return;
+        }
+    }
+
+    printf("mfp_comm_release_buffer: no matching buffer found!\n");
+    return;
+}
+
 int 
-mfp_comm_send(const char * msg)
+mfp_comm_submit_buffer(char * msgbuf, int msglen) 
+{
+    mfp_out_data rd;
+    rd.msgbuf = msgbuf;
+    rd.msglen = msglen;
+
+    if (msgbuf == NULL) {
+        printf("mfp_comm_submit_buffer: no buffer, skipping\n");
+        return 0;
+    }
+
+    if((outgoing_queue_read == 0 && outgoing_queue_write == REQ_LASTIND)
+        || (outgoing_queue_write + 1 == outgoing_queue_read)) {
+        return 0;
+    }
+
+    outgoing_queue[outgoing_queue_write] = rd;
+    if(outgoing_queue_write == REQ_LASTIND) {
+        outgoing_queue_write = 0;
+    }
+    else {
+        outgoing_queue_write += 1;
+    }
+
+    pthread_cond_broadcast(&outgoing_cond);
+    return 1;
+}
+
+int 
+mfp_comm_send_buffer(const char * msg, int msglen)
 {
     char pbuff[11];
-    snprintf(pbuff, 10, "% 8d", strlen(msg)); 
+    snprintf(pbuff, 10, "% 8d", msglen); 
     pthread_mutex_lock(&comm_io_lock);
     send(comm_socket, "[ SYNC ]", 8, 0);
     send(comm_socket, pbuff, 8, 0);
-    send(comm_socket, msg, strlen(msg), 0);
+    send(comm_socket, msg, msglen, 0);
     pthread_mutex_unlock(&comm_io_lock);
+    mfp_comm_release_buffer(msg);
 }
 
 static int
@@ -110,6 +178,12 @@ mfp_comm_init(char * init_sockid)
     int connectfd; 
     char * conn_sockid = NULL;
     int connect_tries = 0;
+
+    for(int bufno=0; bufno < MFP_NUM_BUFFERS; bufno++) {
+        comm_buffers[bufno].free = 1;
+        bzero(comm_buffers[bufno].bufdata, MFP_MAX_MSGSIZE);
+    }
+
 
     if(init_sockid > 0) {
         conn_sockid = init_sockid;
@@ -194,8 +268,8 @@ mfp_comm_io_reader_thread(void * tdata)
                 mlen = atoi(lenbuf);
                 phase = 0;
                 success = 1;
-                //printf("    [0 --> %d] %s\n", mfp_comm_nodeid, msgbuf);
-                mfp_rpc_json_dispatch_request(msgbuf, bytesread);
+                // printf("    [0 --> %d]\n%s\n", mfp_comm_nodeid, msgbuf);
+                mfp_rpc_dispatch_request(msgbuf, bytesread);
             }
             else 
                 success = 0;
@@ -221,42 +295,37 @@ mfp_comm_io_writer_thread(void * tdata)
     GArray * rdata;
     struct timespec alarmtime;
     struct timeval nowtime;
-    mfp_respdata r;
+    mfp_out_data r;
     char pbuff[32];
 
-    rdata = g_array_new(TRUE, TRUE, sizeof(mfp_respdata));
+    rdata = g_array_new(TRUE, TRUE, sizeof(mfp_out_data));
 
     while(!quitreq) {
         /* wait for a signal that there's data to write */ 
-        pthread_mutex_lock(&mfp_response_lock);
-        pthread_cond_wait(&mfp_response_cond, &mfp_response_lock);
+        pthread_mutex_lock(&outgoing_lock);
+        pthread_cond_wait(&outgoing_cond, &outgoing_lock);
 
         gettimeofday(&nowtime, NULL);
         alarmtime.tv_sec = nowtime.tv_sec; 
         alarmtime.tv_nsec = nowtime.tv_usec*1000 + 10000000;
 
-        if (mfp_response_queue_read == mfp_response_queue_write) { 
-            pthread_cond_timedwait(&mfp_response_cond, &mfp_response_lock, &alarmtime);
+        if (outgoing_queue_read == outgoing_queue_write) { 
+            pthread_cond_timedwait(&outgoing_cond, &outgoing_lock, &alarmtime);
         }
 
         /* copy/clear C response objects */
-        if(mfp_response_queue_read != mfp_response_queue_write) {
-            while(mfp_response_queue_read != mfp_response_queue_write) {
-                r = mfp_response_queue[mfp_response_queue_read];
+        if(outgoing_queue_read != outgoing_queue_write) {
+            while(outgoing_queue_read != outgoing_queue_write) {
+                r = outgoing_queue[outgoing_queue_read];
                 g_array_append_val(rdata, r);
-                mfp_response_queue_read = (mfp_response_queue_read+1) % REQ_BUFSIZE;
+                outgoing_queue_read = (outgoing_queue_read+1) % REQ_BUFSIZE;
             }
         }
-        pthread_mutex_unlock(&mfp_response_lock);
+        pthread_mutex_unlock(&outgoing_lock);
 
         for(int reqno=0; reqno < rdata->len; reqno++) {
-            mfp_rpc_json_dsp_response(g_array_index(rdata, mfp_respdata, reqno), msgbuf); 
-            pthread_mutex_lock(&comm_io_lock);
-            snprintf(pbuff, 10, "% 8d", strlen(msgbuf)); 
-            send(comm_socket, "[ SYNC ]", 8, 0);
-            send(comm_socket, pbuff, 8, 0);
-            send(comm_socket, msgbuf, strlen(msgbuf), 0);
-            pthread_mutex_unlock(&comm_io_lock);
+            r = g_array_index(rdata, mfp_out_data, reqno);
+            mfp_comm_send_buffer(r.msgbuf, r.msglen);
         }
         if (rdata->len > 0) { 
             g_array_remove_range(rdata, 0, rdata->len);
@@ -289,7 +358,7 @@ mfp_comm_io_finish(void)
 {
     pthread_mutex_lock(&comm_io_lock);
     comm_io_quitreq = 1;
-    pthread_cond_broadcast(&mfp_response_cond);
+    pthread_cond_broadcast(&outgoing_cond);
     pthread_mutex_unlock(&comm_io_lock);
     mfp_comm_io_wait();
 }

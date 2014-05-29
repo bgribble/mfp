@@ -42,11 +42,11 @@ mfp_dsp_init(void) {
     mfp_contexts = g_hash_table_new(g_direct_hash, g_direct_equal);
     mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal); 
 
-    mfp_request_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_reqdata *));
+    incoming_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_in_data *));
 
-    pthread_cond_init(&mfp_response_cond, NULL);
-    pthread_mutex_init(&mfp_response_lock, NULL);
-    pthread_mutex_init(&mfp_request_lock, NULL);
+    pthread_cond_init(&outgoing_cond, NULL);
+    pthread_mutex_init(&outgoing_lock, NULL);
+    pthread_mutex_init(&incoming_lock, NULL);
 
     printf("mfpdsp: initializing %d builtin DSP processors\n", num_initfuncs);
 
