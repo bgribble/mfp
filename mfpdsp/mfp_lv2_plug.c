@@ -62,7 +62,8 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
     int request_id = mfp_api_load_context(context, self->object_path, msgbuf, &msglen);
-    // mfp_rpc_wait(request_id);
+    mfp_comm_submit_buffer(msgbuf, msglen);
+    mfp_rpc_wait(request_id);
 
     return (LV2_Handle)context;
 }
