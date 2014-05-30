@@ -105,7 +105,7 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
         case PARAMTYPE_FLTARRAY:
             jarray = json_node_get_array(param_val);
             endex = json_array_get_length(jarray);
-            rval = (gpointer)g_array_sized_new(FALSE, FALSE, sizeof(float), endex);
+            rval = (gpointer)g_array_sized_new(TRUE, TRUE, sizeof(float), endex);
             for (i=0; i < endex; i++) { 
                 dval = (float)json_node_get_double(json_array_get_element(jarray, i));
                 g_array_append_val((GArray *)rval, dval);
@@ -164,6 +164,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
         rd.reqtype = REQTYPE_SETPARAM;
         rd.src_proc = mfp_proc_lookup(obj_id); 
         rd.param_name = (gpointer)json_node_get_string(json_array_get_element(args, 0));
+        rd.param_type = mfp_proc_param_type(rd.src_proc, rd.param_name);
         rd.param_value = (gpointer)extract_param_value(rd.src_proc, rd.param_name, 
                                                        json_array_get_element(args, 1));
         mfp_dsp_push_request(rd);
@@ -427,7 +428,6 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
             char * msgbuf = mfp_comm_get_buffer();
             int msglen = 0;
             if (result != NULL) {
-                
                 mfp_rpc_response(reqid, result, msgbuf, &msglen);
                 g_free(result);
             }
@@ -437,7 +437,6 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
             mfp_comm_submit_buffer(msgbuf, msglen);
         }
     }
-
     return 0;
 
 }

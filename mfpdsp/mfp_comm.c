@@ -122,7 +122,7 @@ mfp_comm_submit_buffer(char * msgbuf, int msglen)
 }
 
 int 
-mfp_comm_send_buffer(const char * msg, int msglen)
+mfp_comm_send_buffer(char * msg, int msglen)
 {
     char pbuff[11];
     snprintf(pbuff, 10, "% 8d", msglen); 

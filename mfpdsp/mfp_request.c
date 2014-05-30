@@ -61,7 +61,18 @@ mfp_dsp_push_request(mfp_in_data rd)
             mfp_in_data * cmd = g_array_index(incoming_cleanup, gpointer, count);
             if (cmd->reqtype == REQTYPE_SETPARAM) {
                 if (cmd->param_value != NULL) {
-                    g_free(cmd->param_value);
+                    /* FIXME g_free broken for fltarrays */ 
+                    switch(cmd->param_type) {
+                        case PARAMTYPE_INT:
+                        case PARAMTYPE_FLT:
+                        case PARAMTYPE_STRING:
+                        case PARAMTYPE_BOOL:
+                            g_free(cmd->param_value);
+                            break;
+                        case PARAMTYPE_FLTARRAY:
+                            g_array_free((GArray *)cmd->param_value, TRUE);
+                            break;
+                    }
                     cmd->param_value = NULL;
                 }
                 if (cmd->param_name != NULL) {

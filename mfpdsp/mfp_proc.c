@@ -323,13 +323,21 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_in_data * rd)
 
     if (found == TRUE) { 
         rd->param_name = orig_key;
+        rd->param_type = mfp_proc_param_type(self, orig_key);
         rd->param_value = orig_val;
     }
     else {
         rd->param_name = NULL;
+        rd->param_type = 0;
         rd->param_value = NULL; 
     }
     return 0;
+}
+
+int 
+mfp_proc_param_type(mfp_processor * self, char * param_name)
+{
+    return GPOINTER_TO_INT(g_hash_table_lookup(self->typeinfo->params, param_name));
 }
 
 int

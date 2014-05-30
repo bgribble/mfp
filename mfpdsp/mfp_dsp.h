@@ -51,6 +51,7 @@ typedef struct {
     mfp_processor * dest_proc;
     int dest_port;
     gpointer param_name;
+    int param_type;
     gpointer param_value;
 } mfp_in_data;
 
@@ -223,6 +224,7 @@ extern int mfp_num_output_buffers(mfp_context * ctxt);
 
 /* mfp_proc.c */
 extern mfp_processor * mfp_proc_lookup(int proc_id);
+extern int mfp_proc_param_type(mfp_processor * p, char * pname);
 extern int mfp_proc_ready_to_schedule(mfp_processor * p);
 extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, mfp_context *);
 extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, mfp_context *);
@@ -263,7 +265,7 @@ extern int mfp_comm_quit_requested(void);
 extern char * mfp_comm_get_buffer(void);
 extern int mfp_comm_submit_buffer(char * msgbuf, int msglen);
 extern void mfp_comm_release_buffer(char * msgbuf);
-extern int mfp_comm_send_buffer(const char * msg, int msglen);
+extern int mfp_comm_send_buffer(char * msg, int msglen);
 
 /* mfp_request.c */
 extern void mfp_rpc_init(void);
