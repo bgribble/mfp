@@ -227,9 +227,14 @@ class RPCHost (QuittableThread):
                         print "RpcHost: sync error, resyncing"
                         pass
                     except RPCHost.RecvError, e: 
-                        print "RPCHost: recv() error, aborting"
+                        print "RPCHost: recv() error, blacklisting", sock
                         retry = 0 
                         jdata = None 
+                        del self.fdsockets[rsock]
+                        for k, v in self.managed_sockets.items(): 
+                            if v == sock: 
+                                del self.managed_sockets[k]
+                                break
                     except Exception, e: 
                         print "RPCHost: caught exception",  e
                         print jdata 
