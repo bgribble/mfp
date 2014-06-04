@@ -23,4 +23,5 @@ extern mfp_procinfo * init_builtin_delblk(void);
 extern mfp_procinfo * init_builtin_noop(void);
 extern mfp_procinfo * init_builtin_inlet(void);
 extern mfp_procinfo * init_builtin_outlet(void);
+extern mfp_procinfo * init_builtin_errtest(void);
 

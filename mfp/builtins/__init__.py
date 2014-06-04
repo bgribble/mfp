@@ -67,4 +67,6 @@ def register():
     dispatch.register()
     from . import latency
     latency.register() 
+    from . import errtest
+    errtest.register()
 

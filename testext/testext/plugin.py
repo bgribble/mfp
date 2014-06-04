@@ -121,6 +121,8 @@ class TestExt(Plugin):
                         setup = tname
                     elif tname.endswith("TEARDOWN"):
                         teardown = tname
+                    elif "." in tname:
+                        continue
                     elif not tname.endswith("skip"):
                         testnames[tname] = True
         tt = testnames.keys()

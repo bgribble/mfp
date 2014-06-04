@@ -231,8 +231,10 @@ class RPCHost (QuittableThread):
                         retry = 0 
                         jdata = None 
                         del self.fdsockets[rsock]
+                        del self.peers_by_socket[sock] 
                         for k, v in self.managed_sockets.items(): 
                             if v == sock: 
+                                print "RPCHost: deleting", k
                                 del self.managed_sockets[k]
                                 break
                     except Exception, e: 
@@ -272,7 +274,6 @@ class RPCHost (QuittableThread):
 
     def handle_request(self, req, peer_id):
         from datetime import datetime 
-        from mfp import log 
 
         method = req.method 
         rpcdata = req.params
