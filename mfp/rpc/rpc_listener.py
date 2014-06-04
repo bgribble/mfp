@@ -70,23 +70,56 @@ class RPCRemote (object):
         self.socket.close()
         self.socket = None
 
-class RPCExecRemote (object):
+class RPCExecRemote (QuittableThread):
     '''
     RPCExecRemote -- launch a process which will connect back to this process
     '''
-    def __init__(self, exec_file, *args): 
+    
+    def __init__(self, exec_file, *args, **kwargs): 
+        from mfp import log 
+        QuittableThread.__init__(self)
         self.exec_file = exec_file 
         self.exec_args = list(args)
         self.process = None 
+        if kwargs.has_key("log_module"):
+            self.log_module = kwargs["log_module"]
+        else:
+            self.log_module = log.log_module
 
     def start(self):
         import subprocess 
         arglist = [self.exec_file] + self.exec_args
-        self.process = subprocess.Popen([str(a) for a in arglist])
+        self.process = subprocess.Popen([str(a) for a in arglist], bufsize=0,
+                                        stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+        QuittableThread.start(self)
+         
+    def run(self):
+        from mfp import log 
+        while not self.join_req: 
+            try: 
+                ll = self.process.stdout.readline()
+                if not ll: 
+                    self.join_req = True 
+                else:
+                    print "RPC:", ll.strip()
+                    if ll.startswith("[LOG] "):
+                        ll = ll[6:].strip()
+                        if ll.startswith("ERROR:"):
+                            log.error(ll[7:], module=self.log_module)
+                        elif ll.startswith("WARNING:"):
+                            log.warning(ll[9:], module=self.log_module)
+                        elif ll.startswith("INFO:"):
+                            log.info(ll[6:], module=self.log_module)
+                        elif ll.startswith("DEBUG:"):
+                            log.debug(ll[7:], module=self.log_module)
+            except Exception, e: 
+                print "RPCExecRemote caught error:", e 
 
     def finish(self):
+        self.join_req = True 
         self.process.terminate()
         self.process.wait()
+        QuittableThread.finish(self)
 
     def alive(self): 
         if not self.process:

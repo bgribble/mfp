@@ -20,14 +20,14 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
     char ** strings;
     int nptrs, j;
 
-    printf("ERROR: SIGSEGV received\n");
+    mfp_log_error("Segfault in C code, backend is dying");
     nptrs = backtrace(buffer, 100);
     strings = backtrace_symbols(buffer, nptrs);
 
     for (j = 0; j < nptrs; j++)
         printf("      %s\n", strings[j]);
 
-    printf("Last activity: %s\n", mfp_last_activity);
+    mfp_log_error("Last status before error: '%s' ", mfp_last_activity);
     free(strings);
 
     exit(-11);

@@ -135,11 +135,10 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
 {
     mfp_context * context = (mfp_context *)instance; 
     if (context == NULL) {
-        printf("mfp_lv2_run: context is NULL\n");
+        mfp_log_error("mfp_lv2_run: context is NULL");
         return;
     }
     else if (!context->activated) {
-        printf("mfp_lv2_run: deactivated, skipping\n");
         return;
     }
 

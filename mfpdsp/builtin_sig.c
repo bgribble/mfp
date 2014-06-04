@@ -46,7 +46,6 @@ static void
 destroy(mfp_processor * proc) 
 {
     builtin_sig_data * d = (builtin_sig_data *)(proc->data);
-    printf("sig~ destroy\n");
     proc->data = NULL;
     g_free(d);
 
@@ -61,7 +60,6 @@ config(mfp_processor * proc)
 
     if(val_ptr != NULL) {
         d->sample = *(float *)val_ptr;
-        printf("sig~ config: %f\n", d->sample);
     }
 
     return 1;

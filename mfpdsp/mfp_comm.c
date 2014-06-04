@@ -41,7 +41,7 @@ mfp_comm_connect(char * sockname)
 
     socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
     if (socket_fd < 0) {
-        printf("mfp_comm_connect: socket() failed\n");
+        mfp_log_error("mfp_comm_connect: socket() failed\n");
         return -1;
     }
 
@@ -50,7 +50,7 @@ mfp_comm_connect(char * sockname)
     strncpy(address.sun_path, sockname, UNIX_PATH_MAX);
 
     if (connect(socket_fd, (struct sockaddr *)&address, sizeof(struct sockaddr_un)) < 0) {
-        printf("mfp_comm_connect: connect() failed, is MFP running?\n");
+        mfp_log_error("mfp_comm_connect: connect() failed, is MFP running?\n");
         return -1;
     }
 
@@ -73,7 +73,7 @@ mfp_comm_get_buffer(void)
         }
     }
 
-    printf("mfp_comm_get_buffer: no buffers free!\n");
+    mfp_log_error("mfp_comm_get_buffer: no buffers free!\n");
     return NULL;
 }
 
@@ -88,7 +88,7 @@ mfp_comm_release_buffer(char * msgbuf)
         }
     }
 
-    printf("mfp_comm_release_buffer: no matching buffer found!\n");
+    mfp_log_error("mfp_comm_release_buffer: no matching buffer found!");
     return;
 }
 
@@ -100,7 +100,7 @@ mfp_comm_submit_buffer(char * msgbuf, int msglen)
     rd.msglen = msglen;
 
     if (msgbuf == NULL) {
-        printf("mfp_comm_submit_buffer: no buffer, skipping\n");
+        mfp_log_warning("mfp_comm_submit_buffer: no buffer, skipping");
         return 0;
     }
 
@@ -142,19 +142,19 @@ mfp_comm_launch(char * sockname)
 
     snprintf(mfpcmd, MFP_EXEC_SHELLMAX-1, "mfp --no-dsp --no-default -s %s", sockname);
 
-    printf("mfp_comm_launch: Launching main mfp process with '%s'\n", mfpcmd);
+    mfp_log_debug("mfp_comm_launch: Launching main mfp process with '%s'", mfpcmd);
 
     if (comm_procpid = fork()) {
-        printf("mfp_comm_launch (parent): got child PID %d\n", comm_procpid);
-        printf("mfp_comm_launch (parent): waiting for child startup\n");
+        mfp_log_debug("mfp_comm_launch (parent): got child PID %d", comm_procpid);
+        mfp_log_debug("mfp_comm_launch (parent): waiting for child startup");
         /* FIXME need to get some positive confirmation that MFP is up */
         sleep(2);
         return 0;
     }
     else {
-        printf("mfp_comm_launch (child): about to exec\n");
         execv("/bin/bash", execargs);
-        printf("mfp_comm_launch: exec failed\n");
+        mfp_log_error("mfp_comm_launch: exec failed\n");
+        printf("[LOG] ERROR:"); 
         perror("execve");
     }
 
@@ -198,7 +198,7 @@ mfp_comm_init(char * init_sockid)
     connectfd = mfp_comm_connect(conn_sockid);
 
     if (connectfd < 0) {
-        printf("mfp_comm_init: can't connect to MFP, trying to start\n");
+        mfp_log_debug("mfp_comm_init: can't connect to MFP, trying to start");
         mfp_comm_launch(conn_sockid);
 
         while(connect_tries < 10) {
@@ -206,7 +206,7 @@ mfp_comm_init(char * init_sockid)
             connectfd = mfp_comm_connect(conn_sockid);
 
             if (connectfd < 0) {
-                printf("mfp_comm_init: connect attempt %d failed\n", connect_tries);
+                mfp_log_debug("mfp_comm_init: connect attempt %d failed", connect_tries);
                 sleep(1);
                 connect_tries ++;
             }

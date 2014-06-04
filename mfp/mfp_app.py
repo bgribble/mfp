@@ -101,10 +101,12 @@ class MFPApp (Singleton):
             if self.debug:
                 self.dsp_process = RPCExecRemote("gdb", "-ex", "run", "--args", 
                                                  "mfpdsp", self.socket_path, self.max_blocksize, 
-                                                 self.dsp_inputs, self.dsp_outputs)
+                                                 self.dsp_inputs, self.dsp_outputs, 
+                                                 log_module="dsp")
             else: 
                 self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize, 
-                                                 self.dsp_inputs, self.dsp_outputs)
+                                                 self.dsp_inputs, self.dsp_outputs,
+                                                 log_module="dsp")
             self.dsp_process.start()
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
@@ -112,7 +114,8 @@ class MFPApp (Singleton):
             Patch.default_context = DSPContext(DSPObject.publishers[0], 0)
 
         if not self.no_gui:
-            self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path)
+            self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path, 
+                                             log_module="gui")
             self.gui_process.start()
             
             self.rpc_host.subscribe(GUICommand)

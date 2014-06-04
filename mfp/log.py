@@ -31,18 +31,46 @@ def write_log_entry(msg, level=0):
         log_file.write(msg)
 
 
-def warn(* parts):
+def error(* parts, **kwargs):
     global log_module
-    write_log_entry(make_log_entry(log_module, *parts), level=1)
+    if kwargs.has_key("module"):
+        module = kwargs["module"]
+    else: 
+        module = log_module 
 
-def debug(* parts):
+    write_log_entry(make_log_entry(module, *parts), level=2)
+
+def warn(* parts, **kwargs):
+    global log_module
+    if kwargs.has_key("module"):
+        module = kwargs["module"]
+    else: 
+        module = log_module 
+
+    write_log_entry(make_log_entry(module, *parts), level=1)
+
+def info(* parts, **kwargs):
+    global log_module
+    if kwargs.has_key("module"):
+        module = kwargs["module"]
+    else: 
+        module = log_module 
+
+    write_log_entry(make_log_entry(module, *parts), level=0)
+
+def debug(* parts, **kwargs):
     global log_debug
     global log_module
+
+    if kwargs.has_key("module"):
+        module = kwargs["module"]
+    else: 
+        module = log_module 
 
     if not log_debug:
         return
     else:
-        write_log_entry(make_log_entry(log_module, *parts))
+        write_log_entry(make_log_entry(module, *parts))
 
 
 def logprint(* parts):

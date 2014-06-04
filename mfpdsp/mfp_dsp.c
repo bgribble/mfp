@@ -49,7 +49,7 @@ mfp_dsp_init(void) {
     pthread_mutex_init(&outgoing_lock, NULL);
     pthread_mutex_init(&incoming_lock, NULL);
 
-    printf("mfpdsp: initializing %d builtin DSP processors\n", num_initfuncs);
+    mfp_log_info("mfpdsp: initializing %d builtin DSP processors\n", num_initfuncs);
 
     for(i = 0; i < num_initfuncs; i++) {
         pi = initfuncs[i]();
@@ -277,7 +277,7 @@ mfp_dsp_run(mfp_context * ctxt)
     
     if (ctxt->needs_reschedule == 1) {
         if (!mfp_dsp_schedule(ctxt)) {
-            printf("mfp_dsp_run: DSP Error: Some processors could not be scheduled\n");
+            mfp_log_error("Some processors could not be scheduled, check for cycles!");
         }
         ctxt->needs_reschedule = 0;
     }
@@ -298,8 +298,8 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
     int count;
 
     if (nsamples > mfp_max_blocksize) {
-        printf("WARNING: JACK requests blocksize larger than mfp_max_blocksize (%d)\n",
-                nsamples);
+        mfp_log_warning("JACK requests blocksize larger than mfp_max_blocksize (%d)",
+                     nsamples);
         nsamples = mfp_max_blocksize;
     }
 

@@ -28,13 +28,13 @@ process(mfp_processor * proc)
     }
     else {
         if (proc->inlet_buf == NULL) {
-            printf("builtin_noop.c: proc ID %d (%p) proc->inlet_buf is NULL\n",
-                    proc->rpc_id, proc);
+            mfp_log_error("proc ID %d (%p) proc->inlet_buf is NULL",
+                          proc->rpc_id, proc);
             return -1;
         }
         else if (proc->inlet_buf[0] == NULL) {
-            printf("builtin_noop.c: proc ID %d (%p) proc->inlet_buf[0] is NULL\n",
-                    proc->rpc_id, proc);
+            mfp_log_error("proc ID %d (%p) proc->inlet_buf[0] is NULL\n",
+                          proc->rpc_id, proc);
             return -1;
         }
         inptr = proc->inlet_buf[0]->data;

@@ -39,7 +39,7 @@ mfp_block_init(mfp_block * block, mfp_sample * data, int blocksize, int allocsiz
     block->allocsize = allocsize;
 
     if(data == NULL) {
-        printf("mfp_block_init: WARNING: data pointer NULL, blocksize=%d\n", blocksize);
+        mfp_log_debug("mfp_block_init: data pointer NULL, blocksize=%d", blocksize);
         block->blocksize = 0;
         block->allocsize = 0;
     }
@@ -48,7 +48,7 @@ mfp_block_init(mfp_block * block, mfp_sample * data, int blocksize, int allocsiz
         block->aligned = 1;
     }
     else {
-        printf("mfp_block_init: WARNING: data pointer unaligned, %p\n", data);
+        mfp_log_debug("mfp_block_init: data pointer unaligned, %p", data);
         block->aligned = 0;
     }
 }
@@ -116,7 +116,7 @@ mfp_block_const_mul(mfp_block * in, mfp_sample constant, mfp_block * out)
     else { 
         mfp_sample * iptr, * optr, *iend;
         if (mfp_block_use_sse) 
-            printf("WARNING: Compiled without SSE but trying to use it at runtime!\n");
+            mfp_log_warning("Compiled without SSE but trying to use it at runtime!");
         iptr = in->data;
         iend = in->data + in->blocksize;
         optr = out->data;
@@ -166,7 +166,7 @@ mfp_block_const_add(mfp_block * in, mfp_sample constant, mfp_block * out)
     else {
         mfp_sample * iptr, * optr, * iend;
         if (mfp_block_use_sse) 
-            printf("WARNING: Compiled without SSE but trying to use it at runtime!\n");
+            mfp_log_warning("Compiled without SSE but trying to use it at runtime!\n");
         iptr = in->data;
         iend = in->data + in->blocksize;
         optr = out->data;
@@ -214,7 +214,7 @@ mfp_block_fill(mfp_block * in, mfp_sample constant)
     else {
         mfp_sample * iptr, * iend;
         if (mfp_block_use_sse) 
-            printf("WARNING: Compiled without SSE but trying to use it at runtime!\n");
+            mfp_log_warning("Compiled without SSE but trying to use it at runtime!\n");
         iptr = in->data;
         iend = in->data + in->blocksize;
         for(; iptr < iend; iptr++) {
@@ -255,7 +255,7 @@ mfp_block_fmod(mfp_block * in, mfp_sample modulus, mfp_block * out)
     else {
         mfp_sample * iptr, * optr, * iend;
         if (mfp_block_use_sse) 
-            printf("WARNING: Compiled without SSE but trying to use it at runtime!\n");
+            mfp_log_warning("Compiled without SSE but trying to use it at runtime!\n");
         iptr = in->data;
         iend = in->data + in->blocksize;
         optr = out->data;

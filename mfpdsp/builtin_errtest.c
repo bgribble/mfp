@@ -20,9 +20,8 @@ process(mfp_processor * proc)
     errtest_data * d = (errtest_data *)proc->data;
 
     sprintf(mfp_last_activity, "errtest~ PROCESS: enter\n");
-    printf("mfpdsp: errtest~ process()\n");
     if (d->err_process) {
-        sprintf(mfp_last_activity, "errtest~ PROCESS: about to SIGSEGV\n");
+        sprintf(mfp_last_activity, "errtest~ PROCESS: about to SIGSEGV");
         printf("errtest~: About to segfault in process(), PID=%d\n", getpid());
         SEGFAULT();
     }
@@ -66,10 +65,10 @@ config(mfp_processor * proc)
 
     if (err_config != NULL) {
         if ((int)(*(float *)err_config)) { 
-            sprintf(mfp_last_activity, "errtest~ CONFIG: about to SIGSEGV\n");
+            sprintf(mfp_last_activity, "errtest~ CONFIG: about to SIGSEGV");
             printf("errtest~: About to segfault in config(), PID=%d\n", getpid());
             SEGFAULT();
-            sprintf(mfp_last_activity, "errtest~ CONFIG: failed to SIGSEGV\n");
+            sprintf(mfp_last_activity, "errtest~ CONFIG: failed to SIGSEGV");
         }
     }
 

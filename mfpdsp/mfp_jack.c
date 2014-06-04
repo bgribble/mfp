@@ -204,25 +204,4 @@ test_TEARDOWN(void)
 }
 
 
-static void
-sigsegv_handler(int sig, siginfo_t *si, void *unused)
-{
-    void * buffer[100];
-    char ** strings;
-    int nptrs, j;
-
-    printf("ERROR: SIGSEGV received\n");
-    nptrs = backtrace(buffer, 100);
-    strings = backtrace_symbols(buffer, nptrs);
-
-    for (j = 0; j < nptrs; j++)
-        printf("%s\n", strings[j]);
-
-    free(strings);
-
-    exit(-11);
-}
-
-
-
 

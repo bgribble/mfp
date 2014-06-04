@@ -171,6 +171,13 @@ typedef struct mfp_context_struct {
 #define MFP_MAX_MSGSIZE 2048 
 #define MFP_NUM_BUFFERS 256
 
+/* Logging helpers */ 
+#define mfp_log_info(...) _mfp_log("INFO", __FILE__, __LINE__, __VA_ARGS__) 
+#define mfp_log_debug(...) _mfp_log("DEBUG", __FILE__, __LINE__, __VA_ARGS__) 
+#define mfp_log_warning(...) _mfp_log("WARNING", __FILE__, __LINE__, __VA_ARGS__) 
+#define mfp_log_error(...) _mfp_log("ERROR", __FILE__, __LINE__, __VA_ARGS__) 
+
+
 /* library global variables */ 
 extern int mfp_initialized;
 extern int mfp_max_blocksize; 
@@ -298,5 +305,6 @@ extern int mfp_api_show_editor(mfp_context * ctxt, int show, char *, int *);
 extern int mfp_api_dsp_response(int proc_id, char * resp, int mtype, char * mbuf, int * mlen);
 extern int mfp_api_exit_notify(void);
 
+extern void _mfp_log(const char * , const char *, int, ...);
 #endif
 
