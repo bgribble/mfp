@@ -1,5 +1,5 @@
 
-from .rpc import RPCWrapper, rpcwrap 
+from .rpc import RPCWrapper, rpcwrap, rpcwrap_noresp
 from . import log 
 
 class GUICommand (RPCWrapper):
@@ -11,7 +11,7 @@ class GUICommand (RPCWrapper):
         else:
             return False
 
-    @rpcwrap
+    @rpcwrap_noresp
     def log_write(self, msg, level):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._log_write(msg, level))
@@ -178,7 +178,6 @@ class GUICommand (RPCWrapper):
         from .gui.patch_info import PatchInfo
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchInfo): 
-            log.debug("deleting gui patchinfo:", obj)
             obj.obj_id = None 
             obj.delete()
             if obj in MFPGUI().appwin.patches: 

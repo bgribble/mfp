@@ -19,7 +19,7 @@ process(mfp_processor * proc)
     int scount = 0;
 
 
-    sprintf(mfp_last_activity, "snap~: %p %d\n", 
+    sprintf(mfp_last_activity, "snap~: %p %d", 
             proc->inlet_buf[0], proc->inlet_buf[0]->blocksize);
 
     /* iterate */ 

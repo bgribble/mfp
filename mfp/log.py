@@ -40,7 +40,7 @@ def error(* parts, **kwargs):
 
     write_log_entry(make_log_entry(module, *parts), level=2)
 
-def warn(* parts, **kwargs):
+def warning(* parts, **kwargs):
     global log_module
     if kwargs.has_key("module"):
         module = kwargs["module"]

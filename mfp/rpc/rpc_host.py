@@ -5,6 +5,7 @@ import threading
 from request import Request 
 from rpc_wrapper import RPCWrapper 
 from mfp.utils import QuittableThread
+from mfp import log
 from worker_pool import WorkerPool 
 
 def blather(func):
@@ -32,7 +33,7 @@ class RPCHost (QuittableThread):
     class RecvError (Exception):
         pass 
 
-    def __init__(self):
+    def __init__(self, status_cb=None):
         QuittableThread.__init__(self)
 
         # FIXME -- one lock/condition per RPCHost means lots of 
@@ -44,11 +45,10 @@ class RPCHost (QuittableThread):
         self.node_id = None 
 
         self.fdsockets = {} 
-
+        self.status_cb = status_cb
         self.served_classes = {}
         self.managed_sockets = {}  
         self.peers_by_socket = {} 
-        self.managed_objects = {} 
 
         self.read_workers = WorkerPool(self.dispatch_rpcdata)
     
@@ -60,14 +60,24 @@ class RPCHost (QuittableThread):
             self.managed_sockets[peer_id] = sock
             self.peers_by_socket[sock] = peer_id
             self.notify_peer(peer_id)
+            if self.status_cb:
+                cbthread = QuittableThread(target=self.status_cb, args=(peer_id, "manage"))
+                cbthread.start()
 
     def unmanage(self, peer_id):
         if peer_id in self.managed_sockets: 
+            # remove this peer as a publisher for any classes
+            for clsname, cls in RPCWrapper.rpctype.items():
+                if peer_id in cls.publishers:
+                    cls.publishers.remove(peer_id)
             oldsock = self.managed_sockets[peer_id]
             del self.managed_sockets[peer_id]
             del self.peers_by_socket[oldsock]
             if oldsock.fileno() in self.fdsockets:
                 del self.fdsockets[oldsock.fileno()]
+            if self.status_cb:
+                cbthread = QuittableThread(target=self.status_cb, args=(peer_id, "unmanage"))
+                cbthread.start()
 
     def notify_peer(self, peer_id): 
         req = Request("publish", dict(classes=self.served_classes.keys()))
@@ -224,21 +234,17 @@ class RPCHost (QuittableThread):
                         jlen = int(jlen)
                         jdata = sock.recv(jlen)
                     except RPCHost.SyncError, e: 
-                        print "RpcHost: sync error, resyncing"
+                        print "RPCHost: sync error, resyncing"
                         pass
                     except RPCHost.RecvError, e: 
-                        print "RPCHost: recv() error, blacklisting", sock
+                        print "RPCHost: backend error, cleaning up", sock, rsock, self.peers_by_socket[sock]
                         retry = 0 
                         jdata = None 
-                        del self.fdsockets[rsock]
-                        del self.peers_by_socket[sock] 
-                        for k, v in self.managed_sockets.items(): 
-                            if v == sock: 
-                                print "RPCHost: deleting", k
-                                del self.managed_sockets[k]
-                                break
+                        deadpeer = self.peers_by_socket[sock]
+                        self.unmanage(deadpeer)
+
                     except Exception, e: 
-                        print "RPCHost: caught exception",  e
+                        print "RPCHost: unhandled exception",  e
                         print jdata 
                         retry = 0
                         jdata = ""
@@ -326,11 +332,8 @@ class RPCHost (QuittableThread):
             req.request_id = None
 
         elif method == "exit_notify": 
-            # remove this peer as a publisher for any classes
-            for clsname, cls in RPCWrapper.rpctype.items():
-                if peer_id in cls.publishers:
-                    cls.publishers.remove(peer_id)
             self.unmanage(peer_id) 
+            # FIXME: exit_notify should cause patches to be closed
             req.request_id = None
 
         elif method == "node_status":

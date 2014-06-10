@@ -123,7 +123,7 @@ class QuittableThread(Thread):
     _all_threads = []
     _all_threads_lock = None
 
-    def __init__(self, target=None):
+    def __init__(self, target=None, args=()):
         self.join_req = False
         self.target = target
 
@@ -133,7 +133,7 @@ class QuittableThread(Thread):
         with QuittableThread._all_threads_lock:
             QuittableThread._all_threads.append(self)
         if self.target is not None:
-            Thread.__init__(self, target=self.target, args=(self,))
+            Thread.__init__(self, target=self.target, args=tuple([self] + list(args)))
         else:
             Thread.__init__(self)
 

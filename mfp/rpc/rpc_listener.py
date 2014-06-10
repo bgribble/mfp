@@ -101,9 +101,10 @@ class RPCExecRemote (QuittableThread):
                 if not ll: 
                     self.join_req = True 
                 else:
+                    ll = ll.strip()
                     print "RPC:", ll.strip()
                     if ll.startswith("[LOG] "):
-                        ll = ll[6:].strip()
+                        ll = ll[6:]
                         if ll.startswith("ERROR:"):
                             log.error(ll[7:], module=self.log_module)
                         elif ll.startswith("WARNING:"):
@@ -112,6 +113,11 @@ class RPCExecRemote (QuittableThread):
                             log.info(ll[6:], module=self.log_module)
                         elif ll.startswith("DEBUG:"):
                             log.debug(ll[7:], module=self.log_module)
+                    elif ll.startswith("JackEngine::XRun"):
+                        log.warning("JACK: " + ll, module=self.log_module)
+                    elif ll.startswith("JackAudioDriver"):
+                        if "Process error" in ll:
+                            log.error("JACK: " + ll, module=self.log_module)
             except Exception, e: 
                 print "RPCExecRemote caught error:", e 
 

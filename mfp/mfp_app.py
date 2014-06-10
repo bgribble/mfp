@@ -81,13 +81,12 @@ class MFPApp (Singleton):
     def setup(self):
         from .mfp_command import MFPCommand 
         from .gui_command import GUICommand 
-        from .dsp_object import DSPObject, DSPContext
         from .mfp_main import version 
 
         log.debug("Main thread started, pid = %s" % os.getpid())
 
         # RPC service setup
-        self.rpc_host = RPCHost()
+        self.rpc_host = RPCHost(self.backend_status_cb)
         self.rpc_host.start()
 
         self.rpc_listener = RPCListener(self.socket_path, "MFP Master", self.rpc_host)
@@ -97,21 +96,7 @@ class MFPApp (Singleton):
         self.rpc_host.publish(MFPCommand)
 
         # dsp and gui processes
-        if not self.no_dsp:
-            if self.debug:
-                self.dsp_process = RPCExecRemote("gdb", "-ex", "run", "--args", 
-                                                 "mfpdsp", self.socket_path, self.max_blocksize, 
-                                                 self.dsp_inputs, self.dsp_outputs, 
-                                                 log_module="dsp")
-            else: 
-                self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize, 
-                                                 self.dsp_inputs, self.dsp_outputs,
-                                                 log_module="dsp")
-            self.dsp_process.start()
-            if not self.dsp_process.alive():
-                raise StartupError("DSP process died during startup")
-            self.rpc_host.subscribe(DSPObject)
-            Patch.default_context = DSPContext(DSPObject.publishers[0], 0)
+        self.start_dsp()
 
         if not self.no_gui:
             self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path, 
@@ -157,6 +142,31 @@ class MFPApp (Singleton):
         log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo), 
                                                            len(self.pluginfo.libinfo)))
 
+    def start_dsp(self):
+        from .dsp_object import DSPObject, DSPContext
+        if self.dsp_process is not None: 
+            log.debug("Terminating old DSP process...")
+            self.dsp_process.finish()
+            self.dsp_process = None 
+
+        if not self.no_dsp:
+            if self.debug:
+                self.dsp_process = RPCExecRemote("gdb", "-ex", "run", "--args", 
+                                                 "mfpdsp", self.socket_path, self.max_blocksize, 
+                                                 self.dsp_inputs, self.dsp_outputs, 
+                                                 log_module="dsp")
+            else: 
+                self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize, 
+                                                 self.dsp_inputs, self.dsp_outputs,
+                                                 log_module="dsp")
+            self.dsp_process.start()
+            if not self.dsp_process.alive():
+                raise StartupError("DSP process died during startup")
+            log.debug("Waiting for new backend...", DSPObject.publishers)
+            self.rpc_host.subscribe(DSPObject)
+            log.debug("New backend established connection", DSPObject.publishers)
+            Patch.default_context = DSPContext(DSPObject.publishers[0], 0)
+
     def remember(self, obj):
         oi = self.next_obj_id
         self.next_obj_id += 1
@@ -176,6 +186,39 @@ class MFPApp (Singleton):
 
     def register(self, name, ctor):
         self.registry[name] = ctor
+
+    def backend_status_cb(self, host, peer_id, status): 
+        if status == "manage":
+            log.info("New DSP backend connection id=%s" % peer_id)
+        elif status == "unmanage":
+            dead_patches = [ p for p in self.patches.values() 
+                            if p.context.node_id == peer_id ]
+            if (peer_id == Patch.default_context.node_id):
+                log.warning("Relaunching default backend (id=%s)" % peer_id)
+                patch_json = []
+                for p in dead_patches: 
+                    patch_json.append(p.json_serialize())
+                    p.delete_gui()
+                    p.context = None 
+                    p.delete()
+        
+                # FIXME backend restart here  
+                # delete and restart dsp backend 
+                self.start_dsp() 
+
+                # recreate patches 
+                for jdata in patch_json:
+                    jobj = json.loads(jdata)
+                    name = jobj.get("gui_params", {}).get("name")
+                    patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
+                    patch.json_deserialize(jdata)
+                    patch.create_gui()
+
+            else:
+                log.warning("Closing backend connection (id=%s)" % peer_id)
+                for p in dead_patches:
+                    p.delete()
+
 
     def open_file(self, file_name, context=None, show_gui=True):
         patch = None 
