@@ -57,10 +57,12 @@ class MessageElement (PatchElement):
     def set_size(self, width, height):
         PatchElement.set_size(self, width, height)
         self.texture.set_size(width, height)
-        self.texture.set_surface_size(width, height)
-        self.texture.invalidate()
+        self.texture.set_property('surface_height', height)
+        self.texture.set_property('surface_width', width)
+        self.update()
 
     def draw_cb(self, texture, ct):
+
         if self.clickstate:
             lw = 5.0
         else:
@@ -98,9 +100,11 @@ class MessageElement (PatchElement):
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.stroke()
 
+        return True
+
     def update(self):
-        self.draw_ports()
         self.texture.invalidate()
+        self.draw_ports()
 
     def clicked(self, *args):
         self.clickstate = True
@@ -140,21 +144,23 @@ class MessageElement (PatchElement):
 
         if new_w is not None:
             self.set_size(new_w, self.texture.get_height())
-            self.texture.set_size(new_w, self.texture.get_height())
-            self.texture.set_surface_size(int(new_w), 
-                                          self.texture.get_property('surface_height'))
             self.update()
 
     def configure(self, params):
         if params.get('value') is not None:
-            self.label.set_text(repr(params.get('value')))
+            self.message_text = repr(params.get('value'))
+            self.label.set_text(self.message_text)
+            params['width'] = None 
+            params['height'] = None 
         elif self.obj_args is not None:
+            self.message_text = self.obj_args
             self.label.set_text(self.obj_args)
+            params['width'] = None 
+            params['height'] = None 
 
         if self.obj_state != self.OBJ_COMPLETE and self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
             self.update()
-
         PatchElement.configure(self, params)
 
     def port_position(self, port_dir, port_num):
