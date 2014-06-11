@@ -203,8 +203,7 @@ class PyAutoWrap(Processor):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         else:
-            args = [i for i in self.inlets if i is not Uninit] 
-            args = args[:self.argcount]
+            args = self.inlets[:self.argcount]
             self.outlets[0] = self.thunk(*args)
 
 class PyBinary(Processor):
