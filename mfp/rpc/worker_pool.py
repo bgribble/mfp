@@ -19,34 +19,34 @@ class BaseWorker (object):
         self.pool = pool
         self.thunk = thunk
         self.quit_req = False
-        self.lock = threading.Lock()
-        self.condition = threading.Condition(self.lock)
+        #self.lock = threading.Lock()
+        #self.condition = threading.Condition(self.lock)
         self.thread = threading.Thread(target=self._thread_func)
         self.thread.start()
 
     def _thread_func(self):
+        workunit = None 
         while not self.quit_req:
             # get in line
-            self.pool.worker_ready(self)
-            with self.lock:
-                self.condition.wait()
+            with self.pool.lock:
+                if not self.pool.worker_ready(self):
+                    break
+                if not len(self.pool.submitted_data): 
+                    self.pool.data_condition.wait()
 
-            if self.quit_req:
-                break
-            elif self.pool.active_worker != self: 
-                continue 
+                if self.quit_req:
+                    break
 
-            # take_work a chunk of data
-            try:
-                workunit = self.take_work()
-            except WorkerPool.Empty, e:
-                continue 
+                # take_work a chunk of data
+                try:
+                    workunit = self.take_work()
+                except WorkerPool.Empty, e:
+                    continue 
 
-            # perform_work data
-            self.pool.worker_consuming(self)
+                # perform_work data
+                self.pool.worker_consuming(self)
             keepalive = self.perform_work(workunit)
             if not keepalive:
-                print "HA! perform_work returns", keepalive
                 break
         self.pool.worker_done(self)
 
@@ -76,18 +76,8 @@ class BaseWorker (object):
             print e
             return True
         
-    def go(self):
-        with self.lock:
-            self.condition.notify_all()
-
     def exit(self):
         self.quit_req = True
-
-    def finish(self):
-        with self.lock:
-            self.exit()
-            self.condition.notify_all()
-
 
 class WorkerPool (object):
     class Empty(Exception):
@@ -97,13 +87,13 @@ class WorkerPool (object):
         self.factory = factory
         self.min_workers = count
 
-        self.lock = threading.Lock()
-        self.condition = threading.Condition(self.lock)
+        self.lock = threading.RLock()
+        self.reaper_condition = threading.Condition(self.lock)
+        self.data_condition = threading.Condition(self.lock)
 
         self.reaper = threading.Thread(target=self._reaper_thread)
         self.quit_req = False
 
-        self.active_worker = None
         self.submitted_data = []
         self.waiting_pool = []
         self.working_pool = []
@@ -117,7 +107,6 @@ class WorkerPool (object):
             else: 
                 BaseWorker(self, self.factory)
 
-
     def worker_ready(self, worker):
         with self.lock:
             if worker in self.working_pool:
@@ -125,36 +114,28 @@ class WorkerPool (object):
             if worker in self.waiting_pool:
                 self.waiting_pool.remove(worker)
 
-            if self.active_worker is None:
-                self.active_worker = worker
-            elif self.active_worker == worker:
-                return
+            if len(self.waiting_pool) < self.min_workers:
+                self.waiting_pool.append(worker)
+                return True 
             else:
-                if len(self.waiting_pool) < self.min_workers:
-                    self.waiting_pool.append(worker)
-                else:
-                    worker.exit()
-                    self.dead_pool.append(worker)
-            self.condition.notify()
+                worker.exit()
+                self.dead_pool.append(worker)
+                self.reaper_condition.notify()
+                return False 
 
     def worker_consuming(self, worker):
-        from datetime import datetime 
-        goworker = 0
         with self.lock:
-            if worker == self.active_worker:
-                self.working_pool.append(worker)
-                if len(self.waiting_pool):
-                    self.active_worker = self.waiting_pool.pop()
-                    goworker = 1
-                else:
-                    if isinstance(self.factory, type):
-                        self.active_worker = self.factory(self)
-                    else: 
-                        self.active_worker = BaseWorker(self, self.factory)
-                    goworker = 1
-            self.condition.notify()
-        if goworker:
-            self.active_worker.go()
+            if worker in self.working_pool:
+                self.working_pool.remove(worker)
+            if worker in self.waiting_pool:
+                self.waiting_pool.remove(worker)
+
+            self.working_pool.append(worker)
+        if not self.quit_req and not len(self.waiting_pool):
+            if isinstance(self.factory, type):
+                self.factory(self)
+            else: 
+                BaseWorker(self, self.factory)
 
     def worker_done(self, worker):
         with self.lock:
@@ -165,14 +146,16 @@ class WorkerPool (object):
             if worker in self.dead_pool:
                 self.dead_pool.remove(worker)
             self.dead_pool.append(worker)
-            self.condition.notify()
+            self.reaper_condition.notify_all()
 
     def _reaper_thread(self):
         deadworkers = []
-        while not self.quit_req:
+        while self.dead_pool or not self.quit_req:
             with self.lock:
-                self.condition.wait()
-                if len(self.dead_pool):
+                deadworkers = [] 
+                if not self.dead_pool:
+                    self.reaper_condition.wait(0.1)
+                if self.dead_pool:
                     deadworkers = self.dead_pool
                     self.dead_pool = []
             if len(deadworkers):
@@ -180,19 +163,24 @@ class WorkerPool (object):
                     s.thread.join()
                 deadworkers = []
 
+
     def submit(self, job_data):
         with self.lock:
             self.submitted_data.append(job_data)
-            self.active_worker.go()
+            self.data_condition.notify()
 
     def finish(self, wait=True):
-        with self.lock:
-            liveworkers = self.waiting_pool + self.working_pool + [self.active_worker]
+        with self.lock: 
+            liveworkers = self.waiting_pool + self.working_pool 
+            for s in liveworkers:
+                s.exit()
+                if s not in self.dead_pool:
+                    self.dead_pool.append(s)
+            self.waiting_pool = [] 
+            self.working_pool = [] 
 
-        for s in liveworkers:
-            s.finish()
+            self.quit_req = True 
+            self.data_condition.notify_all()
+            self.reaper_condition.notify_all()
 
-        with self.lock:
-            self.quit_req = True
-            self.condition.notify_all()
         self.reaper.join()

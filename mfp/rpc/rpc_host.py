@@ -237,7 +237,6 @@ class RPCHost (QuittableThread):
                         print "RPCHost: sync error, resyncing"
                         pass
                     except RPCHost.RecvError, e: 
-                        print "RPCHost: backend error, cleaning up", sock, rsock, self.peers_by_socket[sock]
                         retry = 0 
                         jdata = None 
                         deadpeer = self.peers_by_socket[sock]
@@ -252,7 +251,6 @@ class RPCHost (QuittableThread):
                     if jdata is not None and len(jdata):
                         peer_id = self.peers_by_socket.get(sock)
                         self.read_workers.submit((jdata, peer_id))
-            
         if self.node_id == 0: 
             req = Request("exit_request", {})
             peers = self.managed_sockets.keys()
@@ -275,7 +273,6 @@ class RPCHost (QuittableThread):
 
         if RPCWrapper.rpchost == self: 
             RPCWrapper.rpchost = None 
-
         self.read_workers.finish()
 
     def handle_request(self, req, peer_id):

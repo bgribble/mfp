@@ -243,7 +243,8 @@ class MFPCommand(RPCWrapper):
     @rpcwrap_noresp
     def quit(self):
         from .mfp_app import MFPApp
-        MFPApp().finish()
+        from threading import Thread 
+        Thread(target=lambda *_: MFPApp().finish()).start()
         return None
 
 

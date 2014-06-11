@@ -402,8 +402,6 @@ class Processor (object):
         from .mfp_app import MFPApp
         from .patch import Patch
 
-        print "Processor.delete: enter"
-
         if hasattr(self, "patch") and self.patch is not None:
             self.patch.unbind(self.name, self.scope)
             self.patch.remove(self)

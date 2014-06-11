@@ -189,11 +189,11 @@ class MFPApp (Singleton):
 
     def backend_status_cb(self, host, peer_id, status): 
         if status == "manage":
-            log.info("New DSP backend connection id=%s" % peer_id)
+            log.info("New RPC host connection id=%s" % peer_id)
         elif status == "unmanage":
             dead_patches = [ p for p in self.patches.values() 
                             if p.context.node_id == peer_id ]
-            if (peer_id == Patch.default_context.node_id):
+            if Patch.default_context and (peer_id == Patch.default_context.node_id):
                 log.warning("Relaunching default backend (id=%s)" % peer_id)
                 patch_json = []
                 for p in dead_patches: 
@@ -215,7 +215,7 @@ class MFPApp (Singleton):
                     patch.create_gui()
 
             else:
-                log.warning("Closing backend connection (id=%s)" % peer_id)
+                log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
                 for p in dead_patches:
                     p.delete()
 
@@ -372,22 +372,23 @@ class MFPApp (Singleton):
         if self.console:
             self.console.write_cb = None
 
-        if self.rpc_host:
-            log.debug("MFPApp.finish: reaping RPC host...")
-            pp = self.rpc_host
-            self.rpc_host = None 
-            pp.finish()
-
+        Patch.default_context = None
         if self.dsp_process:
-            log.debug("MFPApp.finish: reaping DSP slave...")
+            log.debug("MFPApp.finish: reaping DSP process...")
             pp = self.dsp_process
             self.dsp_process = None 
             pp.finish()
 
         if self.gui_process:
-            log.debug("MFPApp.finish: reaping GUI slave...")
+            log.debug("MFPApp.finish: reaping GUI process...")
             pp = self.gui_process
             self.gui_process = None 
+            pp.finish()
+
+        if self.rpc_host:
+            log.debug("MFPApp.finish: reaping RPC host...")
+            pp = self.rpc_host
+            self.rpc_host = None 
             pp.finish()
 
         log.debug("MFPApp.finish: reaping threads...")
