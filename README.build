@@ -1,0 +1,51 @@
+
+
+TL;DR
+---------------------
+
+   $ ./waf configure build 
+     [...]
+   $ ./virtual/bin/activate 
+   (virtual)$ mfp 
+
+
+BEFORE YOU START 
+---------------------
+
+Waf: MFP uses 'waf', which you can think of as a replacement for
+autotools and make.  You do not need to install waf; the
+correct version is supplied in the MFP source tree.  That's the way
+waf is designed to work; more information can be found at
+https://code.google.com/p/waf/.
+
+virtualenv: At this phase of MFP's development you should probably
+build it in a "virtualenv" sandbox.  The waf scripts support this, but
+you have to install the "virtualenv" tool (packaged as
+'python-virtualenv' on Debian and Ubuntu).  
+
+setuptools: The build process depends on Python setuptools.  If you
+have virtualenv installed, you have setuptools also, but if you aren't
+using virtualenv you may need to install setuptools separately.  It's
+packaged as "python-setuptools" on Debian and Ubuntu. 
+
+gcc: The C components of mfp (mfpdsp and testext) are straightforward
+C but include some c99-isms.  I have been using gcc-4.8.3 but other
+versions should work. 
+
+CONFIGURING 
+-----------------------
+
+BUILDING 
+-----------------------
+
+
+LIBRARIES
+-----------------------
+
+Python development libs: Typically the Python development header files
+and other data are packaged separately from the runtime.  You will
+need 
+
+
+
+
