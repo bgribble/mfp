@@ -2,10 +2,10 @@
 
 APPNAME = "mfp" 
 VERSION = "0.05" 
+WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
 out = 'wafbuild'
-WAFTOOLS = "compiler_c gcc python glib2"
 pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack"]
 
 from waflib.Configure import conf
@@ -121,9 +121,12 @@ def options(opt):
 
 def configure(conf):
     conf.load(WAFTOOLS) 
+
+    # Python and dev files 
     conf.check_python_version((2,7))
     conf.check_python_headers()
 
+    # virtualenv and setuptools 
     installer = None 
     if conf.options.USE_VIRTUALENV: 
         conf.env.USE_VIRTUALENV = True 
@@ -141,6 +144,7 @@ def configure(conf):
             installer = "easy_install"
     conf.env.PYTHON_INSTALLER = installer 
 
+    # C libraries with pkg-config support (listed at top of file) 
     uselibs = [] 
 
     for l in pkgconf_libs: 
@@ -156,6 +160,7 @@ def configure(conf):
     pip_notfound = [] 
     bindings_notfound = [] 
 
+    # pip-installable libs we just mark them as not available 
     for l in pip_libs: 
         if isinstance(l, tuple):
             modulename, pipname = l 
@@ -169,14 +174,24 @@ def configure(conf):
 
     conf.env.PIPLIBS_NOTFOUND = pip_notfound 
 
+    # GObject bindings for libraries are mandatory 
     for l in gi_libs: 
-        if not conf.check_python_module('gi.repository.' + l):
-            bindings_notfound.append(l)
+        try:
+            conf.check_python_module('gi.repository.' + l)
+        except waflib.Errors.ConfigurationError, e: 
+            print 
+            print "FATAL: GObject language bindings for %s not installed" % l 
+            print "They are packaged like 'gir1.2-${libname}-${libver}' on Debian and Ubuntu" 
+            print "Try 'apt-cache search gir %s' to find the right package" % l.lower()
+            print 
+            raise 
 
     conf.env.GITVERSION = VERSION + "_" + git_version()
+    print 
     print "MFP version", conf.env.GITVERSION, "configured."
-
-
+    if conf.env.USE_VIRTUALENV:
+        print "Will install into virtualenv", out + "/virtual/"
+    print 
                
 def build(bld): 
     bld.add_pre_fun(ensure_virtualenv)
