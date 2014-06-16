@@ -162,9 +162,9 @@ class MFPApp (Singleton):
             self.dsp_process.start()
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
-            log.debug("Waiting for new backend...", DSPObject.publishers)
+            log.debug("Waiting for DSP process startup...")
             self.rpc_host.subscribe(DSPObject)
-            log.debug("New backend established connection", DSPObject.publishers)
+            log.debug("DSP process established connection")
             Patch.default_context = DSPContext(DSPObject.publishers[0], 0)
 
     def remember(self, obj):
@@ -189,7 +189,7 @@ class MFPApp (Singleton):
 
     def backend_status_cb(self, host, peer_id, status): 
         if status == "manage":
-            log.info("New RPC host connection id=%s" % peer_id)
+            log.info("New RPC remote connection id=%s" % peer_id)
         elif status == "unmanage":
             dead_patches = [ p for p in self.patches.values() 
                             if p.context.node_id == peer_id ]

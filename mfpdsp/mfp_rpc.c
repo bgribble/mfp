@@ -470,14 +470,19 @@ mfp_rpc_init(void)
     pthread_mutex_init(&request_lock, NULL);
     pthread_cond_init(&request_cond, NULL); 
 
+    mfp_log_info("Setting up RPC system");
+
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
     req_id = mfp_rpc_request("ready", "{}", ready_callback, NULL, msgbuf, & msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(req_id);
 
+    mfp_log_info("Got node_id=%d", mfp_comm_nodeid);
     msgbuf = mfp_comm_get_buffer();
-    mfp_rpc_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL, msgbuf, &msglen);
+    req_id = mfp_rpc_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL, msgbuf, &msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
+    mfp_rpc_wait(req_id);
+    mfp_log_info("Published DSPObject class");
 }
 

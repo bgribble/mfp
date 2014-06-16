@@ -10,7 +10,6 @@ class BangType (Singleton):
 
 
 class UninitType (Singleton):
-
     def __repr__(self):
         return "Uninit"
 

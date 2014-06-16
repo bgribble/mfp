@@ -219,6 +219,9 @@ mfp_comm_init(char * init_sockid)
             return -1;
         }
     }
+    else {
+        mfp_log_info("Established socket connection to MFP");
+    }
 
     /* start the IO threads */ 
     mfp_comm_io_start();
