@@ -7,6 +7,7 @@ setup(
     version='1.0',
     description='Nose plugin to find and run tests in C extensions',
     packages= ['testext'],
+    zip_safe = False,
     entry_points={
         'nose.plugins.0.10': [
             'testext = testext:TestExt'
