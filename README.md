@@ -1,4 +1,4 @@
-MFP -- music for programmers 
+## MFP -- music for programmers 
 
 MFP is an environment for visually composing computer programs, with
 an emphasis on music and real-time audio synthesis and analysis.  It's
@@ -15,32 +15,31 @@ a mostly-keyboard-controlled GUI app will work, and the infrastructure
 of the 3 separate processes (main, GUI, and DSP) that work together to
 make MFP happen. 
 
-BUILDING
-----------------------------
+## BUILDING
 
 See README.build 
 
-USAGE
-----------------------------
+## USAGE
 
 Try:  
+
     mfp -h for a command line arguments summary.  
     mfp --help-builtins lists the name and tooltip of every builtin object. 
 
 **Hello, world:** Follow these steps to create a helloworld patch
 using just the keyboard.  You do need a pointer to activate it. 
 
-You type		What happens
------------		------------------
-a			Autoplace mode.  A + appears where the next object will go
-m			Create message (literal data)
-"hello world" RET	Put the string "hello, world" in the message 
-c			Connect mode (will connect selected object to something)
-a			Autoplace mode again
-p			Create a processor
-print RET		Make it a [print] processor
-RET			Make the connection
-ESC			Enter Operate major mode 
+You type | What happens
+---------|----------------
+a | Autoplace mode.  A + appears where the next object will go
+m | Create message (literal data)
+"hello world" RET| Put the string "hello, world" in the message 
+c | Connect mode (will connect selected object to something)
+a | Autoplace mode again
+p | Create a processor
+print RET | Make it a [print] processor
+RET | Make the connection
+ESC | Enter Operate major mode 
 
 Now click on the message box to send the "hello, world" string.  
 
@@ -95,15 +94,13 @@ numpy and the buffer~ object.  A very basic oscilloscope.
 looper.mfp: A simple overdubbing loop sampler inspired by the Akai
 Headrush, also built around a [buffer~].  
 
-SAVING FILES
----------------------------
+## SAVING FILES
 
 There's no UI for saving yet, but there is a key mapping.
 C-s (control-s) will prompt for a file to save in.  There's no checking for
 overwrite, and the file is saved in the process working directory. 
 
-REPORTING PROBLEMS
----------------------------
+## REPORTING PROBLEMS
 
 I'm using the GitHub hosted issue tracker.  It seems to be pretty
 workable.  
