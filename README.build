@@ -1,13 +1,15 @@
+BUILDING AND INSTALLING MFP 
+===================================
 
+Version 0.05, 2014-06-20
 
 TL;DR
 ---------------------
 
-   $ ./waf configure build 
-     [...]
-   $ ./virtual/bin/activate 
+   $ ./waf configure --virtualenv build fetchdeps install 
+     [...] 
+   $ . ./wafbuild/virtual/activate  
    (virtual)$ mfp 
-
 
 BEFORE YOU START 
 ---------------------
@@ -21,10 +23,11 @@ https://code.google.com/p/waf/.
 virtualenv: At this phase of MFP's development you should probably
 build it in a "virtualenv" sandbox.  The waf scripts support this, but
 you have to install the "virtualenv" tool (packaged as
-'python-virtualenv' on Debian and Ubuntu).  
+'python-virtualenv' on Debian and Ubuntu). Then you configure with --virtualenv
+as in the TL;DR above and the build will go into the virtual environment. 
 
 setuptools: The build process depends on Python setuptools.  If you
-have virtualenv installed, you have setuptools also, but if you aren't
+have virtualenv installed, you have setuptools already, but if you aren't
 using virtualenv you may need to install setuptools separately.  It's
 packaged as "python-setuptools" on Debian and Ubuntu. 
 
@@ -35,16 +38,49 @@ versions should work.
 CONFIGURING 
 -----------------------
 
+The basic form: 
+
+    $ ./waf configure [options] 
+
+A full list of options is shown be ./waf --help, under "Configuration
+options".  --virtualenv is the only "custom" option. 
+
+
 BUILDING 
 -----------------------
 
+    $ ./waf build 
+
+This will build the project into ./wafbuild (or other directory as
+specified to "configure").  There may be some temporary stuff placed
+into ./build/ and ./dist/ by setuptools, so I wouldn't use those as
+names for the waf build directory. 
 
 LIBRARIES
 -----------------------
 
-Python development libs: Typically the Python development header files
-and other data are packaged separately from the runtime.  You will
-need 
+The "mfpdsp" C library/program needs a few C libraries with their
+development headers and pkg-config files installed:  
+
+ * glib-2.0       (GLib/GObject) 
+ * json-glib-2.0  (JSON serializing/deserializing)
+ * serd-0         (LV2 TTL parsing) 
+ * jack           (duh)
+
+You'll get errors in the "./waf configure" process if these aren't installed.  
+
+Python runtime dependencies are checked for in "configure" and can be
+automagically installed by "./waf fetchdeps" if you wish.  If you are
+using a virtualenv, the installed Python libraries will also be
+installed into the virtualenv. 
+
+INSTALLING
+--------------------------
+
+You need to run "./waf install" to handle some link shuffling even if
+you are installing to a virtualenv.  
+
+
 
 
 
