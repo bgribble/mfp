@@ -13,6 +13,8 @@ import waflib
 
 import os, os.path
 
+alleggs = [] 
+
 def eggname(pkgname, pkgver, pyver, arch): 
     print "eggname:", pkgname, pkgver, pyver, arch
     if arch:
@@ -30,6 +32,29 @@ def git_version():
     vers = shcall("git show --oneline").split('\n')[0].split(' ')[0]
     return 'git_' + vers.strip()
 
+def activate_virtualenv(ctxt):
+    activate = "%s/virtual/bin/activate_this.py" % ctxt.out_dir
+    execfile(activate, dict(__file__=activate))
+
+@conf
+def make_virtualenv(ctxt, *args, **kwargs):
+    
+    targetfile = ".waf-built-%s" % ctxt.env.VIRTUALENV_NAME 
+    vrule = ("cd %s && %s --system-site-packages %s && touch %s"
+             % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ctxt.env.VIRTUALENV_NAME, 
+               targetfile))
+    ctxt(rule = vrule, source = [], target = targetfile)
+
+@conf
+def relo_virtualenv(ctxt, *args, **kwargs):
+
+    targetfile = ".waf-relo-%s" % ctxt.env.VIRTUALENV_NAME 
+    vrule = ("cd %s && echo 'making virtualenv relocatable' && %s --relocatable %s && touch %s"
+             % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ctxt.env.VIRTUALENV_NAME, 
+               targetfile))
+    ctxt(rule = vrule, source = alleggs, target = targetfile)
+    ctxt.add_group()
+
 @conf
 def egg(ctxt, *args, **kwargs):
     setup_py = kwargs.get("setup", "setup.py")
@@ -41,63 +66,62 @@ def egg(ctxt, *args, **kwargs):
 
     pkglibdir = "lib/python%s/site-packages/" % ctxt.env.PYTHON_VERSION 
     if ctxt.env.USE_VIRTUALENV: 
-        pkglibdir = "virtual/" + pkglibdir
+        pkglibdir = "%s/%s" % (ctxt.env.VIRTUALENV_NAME, pkglibdir)
     abs_pkglibdir = os.path.abspath(ctxt.out_dir + "/" + pkglibdir)
 
     srcfiles = [] 
     if extname:
         srcfiles.extend(ctxt.path.ant_glob("%s/**/*.{c,h}" % (srcdir,)))
-        targetfile=pkglibdir + extname + ".so" 
-
+    
+    pkgeggname = srcdir.replace("/", "-")
     if pkgname: 
         srcfiles.extend(ctxt.path.ant_glob("%s/%s/**/*.py" % (srcdir, pkgname)))
-        targetfile = (pkglibdir 
-                      + eggname(pkgname, pkgversion, ctxt.env.PYTHON_VERSION, arch) 
-                      + "/EGG-INFO/PKG-INFO")
+        pkgeggname = eggname(pkgname, pkgversion, ctxt.env.PYTHON_VERSION, arch)
+    targetfile = ".waf-built-%s" % pkgeggname
 
     if ctxt.env.USE_VIRTUALENV:
         prefix = ""
     else: 
         prefix = "--prefix %s" %  os.path.abspath(ctxt.out_dir)
 
-    eggrule = "cd %s && python %s install %s" % (os.path.abspath(srcdir), setup_py, prefix)
-    #eggrule = "type -p python"
+    print "EGG RULE: will touch file",  ctxt.out_dir + "/" + targetfile
+    eggrule = ("cd %s && python %s install %s && touch %s" 
+               % (os.path.abspath(srcdir), setup_py, prefix, ctxt.out_dir + "/" + targetfile))
+
     if ctxt.env.USE_VIRTUALENV: 
-        eggrule = (". %s/virtual/bin/activate && %s" 
-                   % (os.path.abspath(ctxt.out_dir), eggrule))
+        srcfiles.append(".waf-built-%s" % ctxt.env.VIRTUALENV_NAME)
+        eggrule = (". %s/%s/bin/activate && %s" 
+                   % (os.path.abspath(ctxt.out_dir), ctxt.env.VIRTUALENV_NAME, eggrule))
+
     print "egg:", eggrule
     #print "egg: ctxt vars: run=%s, cwd=%s" % (ctxt.run_dir, os.getcwd())
     #print "egg: rule", eggrule
     #print "egg: target file ", targetfile   
     #print "egg: source files ", srcfiles 
-
+      
+    # ensure that eggs are build sequentially.  Updating the .pth files 
+    # gets racy otherwise 
+    ctxt.post_mode = waflib.Build.POST_LAZY
+    ctxt.add_group()
+    print "          targetfile = ", targetfile 
+    print "          srcfiles =", srcfiles 
     tgen = ctxt(rule = eggrule, source = srcfiles, target = targetfile)
     tgen.env.env = dict(os.environ)
+
+    if targetfile not in alleggs: 
+        alleggs.append(targetfile)
+
     if 'PYTHONPATH' in tgen.env.env:
         tgen.env.env['PYTHONPATH'] += ':' + abs_pkglibdir 
     else: 
         tgen.env.env['PYTHONPATH'] = abs_pkglibdir 
 
-def ensure_virtualenv(ctxt):
-    if ctxt.env.USE_VIRTUALENV: 
-        if not ctxt.env.VIRTUALENV_CREATED: 
-            print "Creating virtualenv for build in %s/virtual" % ctxt.out_dir
-            shcall("cd %s && %s --system-site-packages virtual" 
-                   % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ))
-            ctxt.env.VIRTUALENV_CREATED = True 
-        print "Activating virtualenv for build" 
-        activate = "%s/virtual/bin/activate_this.py" % ctxt.out_dir
-        execfile(activate, dict(__file__=activate))
-    else: 
-        print "*** no virtualenv in config"
-    
 def gitversion(ctxt):
     print "gitversion:", VERSION + "_" + git_version()
     ctxt.env.GITVERSION = VERSION + "_" + git_version()
 
 def fetchdeps(ctxt): 
     ctxt.load(WAFTOOLS) 
-    ensure_virtualenv(ctxt) 
     print "Fetching Python library dependencies..." 
     libs = ctxt.env.PIPLIBS_NOTFOUND 
     installer = ctxt.env.PYTHON_INSTALLER 
@@ -114,10 +138,17 @@ class MFPContext (BuildContext):
     cmd = 'fetchdeps' 
 
 def options(opt):
+    from waflib.Options import options 
     opt.load(WAFTOOLS)
     optgrp = opt.get_option_group('Configuration options')
     optgrp.add_option("--virtualenv", action="store_true", dest="USE_VIRTUALENV",
                    help="Install into a virtualenv")
+    optgrp.add_option("--virtualenv-name", dest="VIRTUALENV_NAME",
+                      default='virtual',
+                      help="Set name of virtualenv directory (default: 'virtual')")
+    options['jobs'] = 1
+    print "opt:", opt
+    print "options:", options 
 
 def configure(conf):
     conf.load(WAFTOOLS) 
@@ -130,6 +161,7 @@ def configure(conf):
     installer = None 
     if conf.options.USE_VIRTUALENV: 
         conf.env.USE_VIRTUALENV = True 
+        conf.env.VIRTUALENV_NAME = conf.options.VIRTUALENV_NAME
         conf.find_program("virtualenv")
         installer = "pip install"
     else: 
@@ -158,7 +190,6 @@ def configure(conf):
     gi_libs = [ "Clutter", "GObject", "Gtk", "Gdk", "GtkClutter", "Pango"]
     
     pip_notfound = [] 
-    bindings_notfound = [] 
 
     # pip-installable libs we just mark them as not available 
     for l in pip_libs: 
@@ -190,18 +221,24 @@ def configure(conf):
     print 
     print "MFP version", conf.env.GITVERSION, "configured."
     if conf.env.USE_VIRTUALENV:
-        print "Will install into virtualenv", out + "/virtual/"
+        print "Will build into virtualenv", out + "/" + conf.env.VIRTUALENV_NAME
     print 
                
 def build(bld): 
-    bld.add_pre_fun(ensure_virtualenv)
+    print "build:", bld, bld.is_install
+
+    # only gets built if USE_VIRTUALENV is set
+    bld.make_virtualenv()
 
     bld.egg(pkgname="mfp", version=bld.env.GITVERSION)
+    bld.egg(srcdir="pluginfo", pkgname="pluginfo", arch="linux-x86_64", version="1.0")
     bld.egg(srcdir="testext", pkgname="testext", arch="linux-x86_64", version="1.0")
     bld.egg(srcdir="lib/alsaseq-0.4.1", pkgname="alsaseq", 
             extname="alsaseq", arch="linux-x86_64", version="0.4.1")
     bld.egg(srcdir="lib/pyliblo-0.9.1", extname="liblo", arch="linux-x86_64", 
             version="0.9.1")
+
+    bld.relo_virtualenv() 
 
     bld.shlib(source=bld.path.ant_glob("mfpdsp/*.c"), 
               target="mfpdsp", 
@@ -212,5 +249,4 @@ def build(bld):
                 cflags=["-std=gnu99", "-fpic", "-g", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
                 uselib = bld.env.PKGCONF_LIBS,
                 use=['mfpdsp'])
-
 
