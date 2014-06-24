@@ -52,8 +52,23 @@ def relo_virtualenv(ctxt, *args, **kwargs):
     vrule = ("cd %s && echo 'making virtualenv relocatable' && %s --relocatable %s && touch %s"
              % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ctxt.env.VIRTUALENV_NAME, 
                targetfile))
-    ctxt(rule = vrule, source = alleggs, target = targetfile)
+    ctxt(rule=vrule, source=alleggs, target=targetfile)
     ctxt.add_group()
+
+@waflib.TaskGen.feature("install_eggfiles")
+def install_eggfiles(ctxt):
+    from waflib import Utils
+    bld = ctxt.bld
+
+    for targetfile in alleggs: 
+        prefix_len = len(os.path.abspath(top))+1
+        with open(os.path.abspath(out + "/" + targetfile), "r") as manifest: 
+            instfiles = [ l.strip()[prefix_len:] for l in manifest ] 
+            print "INSTALL TO '%s':" % ctxt.env.PREFIX, instfiles
+            for i in instfiles:
+                ifile = bld.path.find_resource(i)
+                ifile.sig = Utils.h_file(ifile.abspath())
+                bld.install_files(ctxt.env.PREFIX, i, relative_trick=True)
 
 @conf
 def egg(ctxt, *args, **kwargs):
@@ -84,8 +99,7 @@ def egg(ctxt, *args, **kwargs):
     else: 
         prefix = "--prefix %s" %  os.path.abspath(ctxt.out_dir)
 
-    print "EGG RULE: will touch file",  ctxt.out_dir + "/" + targetfile
-    eggrule = ("cd %s && python %s install %s && touch %s" 
+    eggrule = ("cd %s && python %s install %s --record %s" 
                % (os.path.abspath(srcdir), setup_py, prefix, ctxt.out_dir + "/" + targetfile))
 
     if ctxt.env.USE_VIRTUALENV: 
@@ -103,8 +117,6 @@ def egg(ctxt, *args, **kwargs):
     # gets racy otherwise 
     ctxt.post_mode = waflib.Build.POST_LAZY
     ctxt.add_group()
-    print "          targetfile = ", targetfile 
-    print "          srcfiles =", srcfiles 
     tgen = ctxt(rule = eggrule, source = srcfiles, target = targetfile)
     tgen.env.env = dict(os.environ)
 
@@ -115,6 +127,7 @@ def egg(ctxt, *args, **kwargs):
         tgen.env.env['PYTHONPATH'] += ':' + abs_pkglibdir 
     else: 
         tgen.env.env['PYTHONPATH'] = abs_pkglibdir 
+
 
 def gitversion(ctxt):
     print "gitversion:", VERSION + "_" + git_version()
@@ -250,3 +263,5 @@ def build(bld):
                 uselib = bld.env.PKGCONF_LIBS,
                 use=['mfpdsp'])
 
+    bld.add_group()
+    bld(features="install_eggfiles")

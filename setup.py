@@ -1,7 +1,7 @@
 
 
 # build with 'python ./setup.py install' 
-from setuptools import setup
+from distutils.core import setup
 
 def shcall(cmdline):
     from subprocess import Popen,PIPE
