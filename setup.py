@@ -1,7 +1,7 @@
 
 
 # build with 'python ./setup.py install' 
-from distutils.core import setup
+from setuptools import setup
 
 def shcall(cmdline):
     from subprocess import Popen,PIPE
@@ -13,7 +13,6 @@ def git_version():
 
 setup (name = 'mfp',
        version = '0.05_' + git_version(),
-       zip_safe=False,
        description = 'Music for programmers',
        packages = ['mfp', 'mfp.builtins', 'mfp.rpc', 
                    'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes' ],

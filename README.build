@@ -6,34 +6,42 @@ Version 0.05, 2014-06-20
 TL;DR
 ---------------------
 
-   $ ./waf configure --virtualenv build fetchdeps install 
+   $ ./waf configure --virtualenv --prefix ~/mfpvirt build install install_deps 
      [...] 
-   $ . ./wafbuild/virtual/activate  
+   $ . ~/mfpvirt/bin/activate  
    (virtual)$ mfp 
 
-BEFORE YOU START 
+THINGS TO KNOW 
 ---------------------
 
-Waf: MFP uses 'waf', which you can think of as a replacement for
-autotools and make.  You do not need to install waf; the
-correct version is supplied in the MFP source tree.  That's the way
-waf is designed to work; more information can be found at
-https://code.google.com/p/waf/.
+waf: MFP uses 'waf', which you can think of as a replacement for
+autotools and make.  You do not need to install waf; the correct
+version is supplied in the MFP source tree.  That's the way waf
+is designed to work; more information can be found at
+https://code.google.com/p/waf/.  MFP's "Makefile" or
+"configure.in" equivalent is the file "wscript", which is a plain
+Python file.  The entry points used by waf are the functions
+"configure" and "build", defined near the bottom of the file. 
 
-virtualenv: At this phase of MFP's development you should probably
-build it in a "virtualenv" sandbox.  The waf scripts support this, but
-you have to install the "virtualenv" tool (packaged as
-'python-virtualenv' on Debian and Ubuntu). Then you configure with --virtualenv
-as in the TL;DR above and the build will go into the virtual environment. 
+virtualenv: At this phase of MFP's development you should
+probably build it in a "virtualenv" sandbox.  The waf scripts
+support this, but you have to install the "virtualenv" tool
+(packaged as 'python-virtualenv' on Debian and Ubuntu). Then you
+configure with --virtualenv as in the TL;DR above and the build
+will go into the virtual environment.  When you specify
+--virtualenv, the install prefix (--prefix) is the path to the
+virtual environment, so you shouldn't let this default to
+/usr/local.  
 
-setuptools: The build process depends on Python setuptools.  If you
-have virtualenv installed, you have setuptools already, but if you aren't
-using virtualenv you may need to install setuptools separately.  It's
-packaged as "python-setuptools" on Debian and Ubuntu. 
+setuptools: The build process depends on Python setuptools.  If
+you have virtualenv installed, you have setuptools already, but
+if you aren't using virtualenv you may need to install setuptools
+separately.  It's packaged as "python-setuptools" on Debian and
+Ubuntu. 
 
-gcc: The C components of mfp (mfpdsp and testext) are straightforward
-C but include some c99-isms.  I have been using gcc-4.8.3 but other
-versions should work. 
+gcc: The C components of mfp (mfpdsp, pluginfo, and testext) are
+straightforward C but include some c99-isms.  I have been using
+gcc-4.8.3 but other versions should work. 
 
 CONFIGURING 
 -----------------------
@@ -42,8 +50,9 @@ The basic form:
 
     $ ./waf configure [options] 
 
-A full list of options is shown be ./waf --help, under "Configuration
-options".  --virtualenv is the only "custom" option. 
+A full list of options is shown by ./waf --help, under
+"Configuration options".  --virtualenv is the only "custom"
+option. 
 
 
 BUILDING 
@@ -69,19 +78,17 @@ development headers and pkg-config files installed:
 
 You'll get errors in the "./waf configure" process if these aren't installed.  
 
-Python runtime dependencies are checked for in "configure" and can be
-automagically installed by "./waf fetchdeps" if you wish.  If you are
-using a virtualenv, the installed Python libraries will also be
-installed into the virtualenv. 
+Python runtime dependencies are checked for in "configure" and
+can be automagically installed by "./waf install_deps" if you
+wish.  install_deps must be run after "./waf install".  If you
+are using a virtualenv, the installed Python libraries will also
+be installed into the virtualenv. 
 
 INSTALLING
 --------------------------
 
-You need to run "./waf install" to handle some link shuffling even if
-you are installing to a virtualenv.  
+    $ ./waf install 
 
-
-
-
-
+The installation root defaults to /usr/local and can be modified
+by passing in the --prefix argument to "./waf configure".
 

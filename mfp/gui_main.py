@@ -111,6 +111,8 @@ def main():
     remote = RPCRemote(socketpath, "MFP GUI", host)
     remote.connect() 
 
+    print "[LOG] debug: GUI process starting"
+
     log.log_module = "ui"
     host.subscribe(MFPCommand)
     gui = MFPGUI() 

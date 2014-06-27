@@ -87,8 +87,10 @@ class RPCExecRemote (QuittableThread):
             self.log_module = log.log_module
 
     def start(self):
+        from mfp import log 
         import subprocess 
         arglist = [self.exec_file] + self.exec_args
+        log.debug("RPCExecRemote: starting as ", arglist)
         self.process = subprocess.Popen([str(a) for a in arglist], bufsize=0,
                                         stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
         QuittableThread.start(self)
