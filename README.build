@@ -39,6 +39,12 @@ if you aren't using virtualenv you may need to install setuptools
 separately.  It's packaged as "python-setuptools" on Debian and
 Ubuntu. 
 
+pip:  The modern replacement for "easy_install" to install Python
+packages is called pip.  If (1) you are using Debian or Ubuntu, (2)
+you do not want to use a --virtualenv install, and (3) you want to use
+the './waf install_deps' feature to install some Python dependencies,
+you need the Debian package 'python-pip' installed.  
+
 gcc: The C components of mfp (mfpdsp, pluginfo, and testext) are
 straightforward C but include some c99-isms.  I have been using
 gcc-4.8.3 but other versions should work. 
@@ -55,16 +61,6 @@ A full list of options is shown by ./waf --help, under
 option. 
 
 
-BUILDING 
------------------------
-
-    $ ./waf build 
-
-This will build the project into ./wafbuild (or other directory as
-specified to "configure").  There may be some temporary stuff placed
-into ./build/ and ./dist/ by setuptools, so I wouldn't use those as
-names for the waf build directory. 
-
 LIBRARIES
 -----------------------
 
@@ -80,9 +76,21 @@ You'll get errors in the "./waf configure" process if these aren't installed.
 
 Python runtime dependencies are checked for in "configure" and
 can be automagically installed by "./waf install_deps" if you
-wish.  install_deps must be run after "./waf install".  If you
+wish. 
+
+install_deps must be run after "./waf install".  If you
 are using a virtualenv, the installed Python libraries will also
 be installed into the virtualenv. 
+
+BUILDING 
+-----------------------
+
+    $ ./waf build 
+
+This will build the project into ./wafbuild (or other directory as
+specified to "configure").  There may be some temporary stuff placed
+into ./build/ and ./dist/ by setuptools, so I wouldn't use those as
+names for the waf build directory. 
 
 INSTALLING
 --------------------------

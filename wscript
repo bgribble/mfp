@@ -16,7 +16,6 @@ import os, os.path
 alleggs = [] 
 
 def eggname(pkgname, pkgver, pyver, arch): 
-    print "eggname:", pkgname, pkgver, pyver, arch
     if arch:
         archstr = "-%s" % arch
     else:
@@ -120,9 +119,7 @@ def egg(ctxt, *args, **kwargs):
         for pprefix in py_prefixes: 
             if pdir.startswith(pprefix):
                 suffix = pdir[len(pprefix):]
-                print "suffix:", suffix
                 if suffix.startswith("/lib/"):
-                    print "setting pkglibdir = ", suffix[1:] 
                     pkglibdir = suffix[1:]
                     break
         if pkglibdir is not None:
@@ -152,7 +149,7 @@ def egg(ctxt, *args, **kwargs):
         ddir = os.path.abspath(ctxt.out_dir)
         prefix = "--prefix=%s" % ddir
 
-    if ctxt.env.DEBIAN_STYLE: 
+    if ctxt.env.DEBIAN_STYLE:
         style = "--install-layout deb"
     else:
         style = ""
@@ -160,6 +157,7 @@ def egg(ctxt, *args, **kwargs):
     manifestfile = ctxt.out_dir + "/" + targetfile
     actions = [
         "cd %s" % os.path.abspath(srcdir),
+        "mkdir -p %s" % abs_pkglibdir,
         "python %s install %s %s --record %s" % (setup_py, style, prefix, manifestfile),
         "echo ./%s >> %s/mfp.pth" % (pkgeggname, abs_pkglibdir), 
         "echo %s/mfp.pth >> %s" % (abs_pkglibdir, manifestfile)
@@ -222,13 +220,14 @@ def install_deps(ctxt):
     else: 
         env = ''
 
-        if installer == "pip":
+        if installer == "pip install":
             prefix = '--install-option="--prefix=%s"' % ctxt.env.PREFIX
         else:
+            print "INSTALLER = '%s'" % installer
             prefix = '--prefix=%s' % ctxt.env.PREFIX
 
     for l in libs: 
-        print "%s%s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, l)
+        print "%s %s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, l)
 
         ctxt.exec_command("%s %s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, l))
 

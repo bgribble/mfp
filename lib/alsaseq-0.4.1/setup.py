@@ -13,7 +13,6 @@ kwargs = dict()
 if has_setuptools:
 	kwargs = dict(
 			include_package_data = True,
-			install_requires = ['setuptools'],
 			zip_safe = False)
 
 setup(
