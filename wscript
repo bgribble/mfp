@@ -76,13 +76,11 @@ def install_eggfiles(ctxt):
         srcroot += "/virtual/"
     localroot = os.path.abspath(top) + '/'
 
-    print "install_eggfiles: srcroot = '%s', localroot='%s'" % (srcroot, localroot) 
     manifestfiles = alleggs 
     if ctxt.env.USE_VIRTUALENV: 
         manifestfiles.append('.waf-built-virtual')
 
     for targetfile in manifestfiles:
-
         with open(os.path.abspath(out + "/" + targetfile), "r") as manifest: 
             instfiles = [ l.strip()[len(localroot):] for l in manifest ] 
             for i in instfiles:
@@ -113,7 +111,27 @@ def egg(ctxt, *args, **kwargs):
     pkgversion = kwargs.get("version", "") 
     arch = kwargs.get("arch")
 
-    pkglibdir = "lib/python%s/site-packages/" % ctxt.env.PYTHON_VERSION 
+    import site
+    py_prefixes = site.PREFIXES 
+    py_sitepack = site.getsitepackages()
+    pkglibdir = None
+
+    for pdir in py_sitepack:
+        for pprefix in py_prefixes: 
+            if pdir.startswith(pprefix):
+                suffix = pdir[len(pprefix):]
+                print "suffix:", suffix
+                if suffix.startswith("/lib/"):
+                    print "setting pkglibdir = ", suffix[1:] 
+                    pkglibdir = suffix[1:]
+                    break
+        if pkglibdir is not None:
+            break
+
+    if pkglibdir is None:
+        # fallback 
+        pkglibdir = "lib/python%s/site-packages/" % ctxt.env.PYTHON_VERSION 
+
     if ctxt.env.USE_VIRTUALENV: 
         pkglibdir = "virtual/%s" % pkglibdir
     abs_pkglibdir = os.path.abspath(ctxt.out_dir + "/" + pkglibdir)
@@ -131,10 +149,23 @@ def egg(ctxt, *args, **kwargs):
     if ctxt.env.USE_VIRTUALENV:
         prefix = ""
     else: 
-        prefix = "--prefix %s" %  os.path.abspath(ctxt.out_dir)
+        ddir = os.path.abspath(ctxt.out_dir)
+        prefix = "--prefix=%s" % ddir
 
-    eggrule = ("cd %s && python %s install %s --record %s" 
-               % (os.path.abspath(srcdir), setup_py, prefix, ctxt.out_dir + "/" + targetfile))
+    if ctxt.env.DEBIAN_STYLE: 
+        style = "--install-layout deb"
+    else:
+        style = ""
+
+    manifestfile = ctxt.out_dir + "/" + targetfile
+    actions = [
+        "cd %s" % os.path.abspath(srcdir),
+        "python %s install %s %s --record %s" % (setup_py, style, prefix, manifestfile),
+        "echo ./%s >> %s/mfp.pth" % (pkgeggname, abs_pkglibdir), 
+        "echo %s/mfp.pth >> %s" % (abs_pkglibdir, manifestfile)
+    ]
+
+    eggrule = ' && '.join(actions)
 
     if ctxt.env.USE_VIRTUALENV: 
         srcfiles.append(".waf-built-virtual")
@@ -189,7 +220,7 @@ def install_deps(ctxt):
         env = ". %s/bin/activate && " % ctxt.env.PREFIX
         prefix = ""
     else: 
-        env = 'PYTHONPATH=%s/lib/python2.7/site-packages:${PYTHONPATH}' % ctxt.env.PREFIX
+        env = ''
 
         if installer == "pip":
             prefix = '--install-option="--prefix=%s"' % ctxt.env.PREFIX
@@ -197,7 +228,7 @@ def install_deps(ctxt):
             prefix = '--prefix=%s' % ctxt.env.PREFIX
 
     for l in libs: 
-        print "%s %s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, l)
+        print "%s%s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, l)
 
         ctxt.exec_command("%s %s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, l))
 
@@ -223,6 +254,21 @@ def configure(conf):
     conf.check_python_version((2,7))
     conf.check_python_headers()
 
+    # check for Debian style 
+    conf.start_msg("Checking for site-packages vs. dist-packages (Debian-style)")
+    debstyle = False 
+    import sys 
+    for d in sys.path: 
+        if "dist-packages" in d:
+            debstyle = True 
+            break
+
+    if debstyle: 
+        conf.end_msg("dist-packages")
+        conf.env.DEBIAN_STYLE = True 
+    else:
+        conf.end_msg("site-packages")
+    
     # virtualenv and setuptools 
     installer = None 
     if conf.options.USE_VIRTUALENV: 
