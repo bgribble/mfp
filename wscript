@@ -110,24 +110,7 @@ def egg(ctxt, *args, **kwargs):
     pkgversion = kwargs.get("version", "") 
     arch = kwargs.get("arch")
 
-    import site
-    py_prefixes = site.PREFIXES 
-    py_sitepack = site.getsitepackages()
-    pkglibdir = None
-
-    for pdir in py_sitepack:
-        for pprefix in py_prefixes: 
-            if pdir.startswith(pprefix):
-                suffix = pdir[len(pprefix):]
-                if suffix.startswith("/lib/"):
-                    pkglibdir = suffix[1:]
-                    break
-        if pkglibdir is not None:
-            break
-
-    if pkglibdir is None:
-        # fallback 
-        pkglibdir = "lib/python%s/site-packages/" % ctxt.env.PYTHON_VERSION 
+    pkglibdir = ctxt.env.PYTHON_PKGLIBDIR
 
     if ctxt.env.USE_VIRTUALENV: 
         pkglibdir = "virtual/%s" % pkglibdir
@@ -286,6 +269,28 @@ def configure(conf):
             installer = "easy_install"
     conf.env.PYTHON_INSTALLER = installer 
 
+    # python lib-install prefix
+    import site, sys
+    py_prefixes = site.PREFIXES 
+    py_sitepack = sys.path
+    pkglibdir = None
+    conf.start_msg("Finding package lib install path")
+    for pdir in py_sitepack:
+        for pprefix in py_prefixes: 
+            if pdir.startswith(pprefix):
+                suffix = pdir[len(pprefix):]
+                if suffix.startswith("/lib/"):
+                    pkglibdir = suffix[1:]
+                    break
+        if pkglibdir is not None:
+            break
+
+    if pkglibdir is None:
+        # fallback 
+        pkglibdir = "lib/python%s/site-packages/" % ctxt.env.PYTHON_VERSION 
+    conf.end_msg(pkglibdir)
+    conf.env.PYTHON_PKGLIBDIR = pkglibdir
+
     # C libraries with pkg-config support (listed at top of file) 
     uselibs = [] 
 
@@ -331,7 +336,7 @@ def configure(conf):
     print 
     print "MFP version", conf.env.GITVERSION, "configured."
     if conf.env.USE_VIRTUALENV:
-        print "Will build into virtualenv", out 
+        print "Will build into virtualenv", conf.env.PREFIX
     print 
                
 def build(bld): 
