@@ -4,7 +4,7 @@ text_element.py
 A text element (comment) in a patch
 '''
 
-from gi.repository import Clutter as clutter
+from gi.repository import Clutter
 from patch_element import PatchElement
 from mfp import MFPGUI
 from mfp import log
@@ -23,8 +23,7 @@ class TextElement (PatchElement):
         self.param_list.append('value')
 
         # configure label
-        self.label = clutter.Text()
-        self.label.set_use_markup(True)
+        self.label = Clutter.Text()
         self.label.set_color(window.color_unselected)
         self.add_actor(self.label)
 

@@ -115,7 +115,7 @@
             },
             "name": "text_007",
             "midi_mode": null,
-            "value": "Copyright (c) 2013 Bill Gribble <grib@billgribble.com>",
+            "value": "Copyright &#169; 2013 Bill Gribble &lt;grib@billgribble.com&gt;",
             "do_onload": false,
             "midi_filters": null,
             "initargs": null,

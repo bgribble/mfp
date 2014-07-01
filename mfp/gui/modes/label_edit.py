@@ -269,10 +269,9 @@ class LabelEditMode (InputMode):
 
     def update_label(self, raw=True):
         if raw or self.markup is False:
-            self.widget.set_use_markup(False)
             self.widget.set_text(self.text)
+            self.widget.set_use_markup(False)
         else:
-            self.widget.set_use_markup(True)
             self.widget.set_markup(self.text)
         self.update_cursor()
         return True
