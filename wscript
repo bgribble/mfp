@@ -61,7 +61,6 @@ def fix_virtualenv(ctxt, *args, **kwargs):
             "touch %s" % targetfile
         ]
         vrule = ' && '.join(cmds)
-        print "RELOCATE: ", vrule 
         ctxt.add_group()
         ctxt(rule=vrule, source=alleggs, target=targetfile)
 
@@ -79,6 +78,7 @@ def install_eggfiles(ctxt):
     if ctxt.env.USE_VIRTUALENV: 
         manifestfiles.append('.waf-built-virtual')
 
+    symlinks = [] 
     for targetfile in manifestfiles:
         with open(os.path.abspath(out + "/" + targetfile), "r") as manifest: 
             instfiles = [ l.strip()[len(localroot):] for l in manifest ] 
@@ -91,8 +91,18 @@ def install_eggfiles(ctxt):
                 else:
                     mode = 0644
                 if os.path.islink(i):
-                    bld.symlink_as(instfile , os.path.realpath(i))
-                else: 
+                    bld.symlink_as(instfile, os.path.realpath(i))
+                    symlinks.append(i)
+                else:
+                    file_symlinked = False
+                    for prepath in symlinks: 
+                        if os.path.dirname(i).startswith(prepath):
+                            print "File under symlink:", i, prepath
+                            file_symlinked = False
+                            break
+                    if file_symlinked: 
+                        continue 
+
                     ifile = bld.path.find_resource(i)
                     if not ifile:
                         print "Can't find resource", i
@@ -118,11 +128,11 @@ def egg(ctxt, *args, **kwargs):
 
     srcfiles = [] 
     if extname:
-        srcfiles.extend(ctxt.path.ant_glob("%s/**/*.{c,h}" % (srcdir,)))
+        srcfiles.extend(ctxt.path.ant_glob("%s/**/*.{c,h}" % (pkgname,)))
     
     pkgeggname = srcdir.replace("/", "-")
     if pkgname: 
-        srcfiles.extend(ctxt.path.ant_glob("%s/%s/**/*.py" % (srcdir, pkgname)))
+        srcfiles.extend(ctxt.path.ant_glob("%s/**/*.py" % pkgname))
         pkgeggname = eggname(pkgname, pkgversion, ctxt.env.PYTHON_VERSION, arch)
     targetfile = ".waf-built-%s" % pkgeggname
 
@@ -152,8 +162,6 @@ def egg(ctxt, *args, **kwargs):
         srcfiles.append(".waf-built-virtual")
         eggrule = (". %s/virtual/bin/activate && %s" 
                    % (os.path.abspath(ctxt.out_dir), eggrule))
-    else: 
-        eggrule = "mkdir -p %s && %s" % (abs_pkglibdir, eggrule)
 
     # ensure that eggs are build sequentially.  Updating the .pth files 
     # gets racy otherwise 
@@ -214,10 +222,59 @@ def install_deps(ctxt):
 
         ctxt.exec_command("%s %s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, l))
 
-from waflib.Build import BuildContext 
-class MFPContext (BuildContext):
+from waflib.Build import BuildContext, CleanContext, CFG_FILES  
+
+class MFPBuildContext (BuildContext):
     fun = 'install_deps'
     cmd = 'install_deps' 
+
+class MFPCleanContext (CleanContext):
+    cmd = 'clean'
+
+    def execute(self):
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+
+        self.recurse([self.run_dir])
+        try:
+            self.clean()
+        finally:
+            self.store()
+
+    def clean(self):
+        if self.bldnode != self.srcnode:
+            # would lead to a disaster if top == out
+            lst=[]
+            symlinks = [] 
+            for e in self.all_envs.values():
+                exclfiles = '.lock* *conf_check_*/** config.log c4che/*'
+                allfiles = self.bldnode.ant_glob('**/*', dir=True, excl=exclfiles, quiet=True)
+                allfiles.sort(key=lambda n: n.abspath())
+                lst.extend(self.root.find_or_declare(f) for f in e[CFG_FILES])
+
+                for n in allfiles:
+                    if n in lst:
+                        continue
+                    else: 
+                        is_symlinked = False 
+                        for link in symlinks: 
+                            if os.path.dirname(n.abspath()).startswith(link):
+                                is_symlinked = True 
+                                break 
+                        if is_symlinked: 
+                            continue 
+                    if os.path.islink(n.abspath()) and hasattr(n, 'children'):
+                        symlinks.append(n.abspath())
+                        delattr(n, "children")
+                    elif os.path.isdir(n.abspath()):
+                        continue
+                    n.delete()
+                    self.root.children = {}
+
+        for v in ['node_deps', 'task_sigs', 'raw_deps']:
+            setattr(self, v, {})
+
 
 def options(opt):
     from waflib.Options import options 
@@ -340,8 +397,6 @@ def configure(conf):
     print 
                
 def build(bld): 
-    print "build:", bld, bld.is_install
-
     # only gets built if USE_VIRTUALENV is set
     bld.make_virtualenv()
 
