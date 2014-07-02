@@ -65,6 +65,22 @@ def exit_sighandler(signum, frame):
     log.debug("Received terminating signal %s, exiting" % signum)
     sys.exit(-signum)
 
+
+def test_imports(): 
+    try: 
+        import simplejson
+        import numpy 
+        import nose 
+        from gi.repository import Clutter, GObject, Gtk, Gdk, GtkClutter, Pango
+        import posix_ipc 
+    except Exception as e: 
+        import traceback 
+        traceback.print_exc() 
+        print
+        print "FATAL: Required package not installed.  Please run 'waf install_deps'"
+        print 
+        sys.exit(-1)
+
 def main():
     description = mfp_banner % version() 
 
@@ -106,6 +122,9 @@ def main():
     parser.add_argument("-d", "--debug", action="store_true", 
                         help="Enable debugging behaviors")
     args = vars(parser.parse_args())
+
+    # test imports to make sure everything is installed properly 
+    test_imports() 
 
     # create the app object 
     app = MFPApp()

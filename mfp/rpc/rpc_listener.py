@@ -107,7 +107,10 @@ class RPCExecRemote (QuittableThread):
                     #print "RPC:", ll.strip()
                     if ll.startswith("[LOG] "):
                         ll = ll[6:]
-                        if ll.startswith("ERROR:"):
+                        if ll.startswith("FATAL:"):
+                            log.error(ll[7:], module=self.log_module)
+                            self.join_req = True 
+                        elif ll.startswith("ERROR:"):
                             log.error(ll[7:], module=self.log_module)
                         elif ll.startswith("WARNING:"):
                             log.warning(ll[9:], module=self.log_module)
@@ -122,11 +125,13 @@ class RPCExecRemote (QuittableThread):
                             log.error("JACK: " + ll, module=self.log_module)
             except Exception, e: 
                 print "RPCExecRemote caught error:", e 
+                log.debug("RPCExecRemote: exiting")
+        self.process.terminate()
+        self.process.wait()
+
 
     def finish(self):
         self.join_req = True 
-        self.process.terminate()
-        self.process.wait()
         QuittableThread.finish(self)
 
     def alive(self): 

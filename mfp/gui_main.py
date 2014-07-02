@@ -8,6 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 import threading
 import argparse 
+import sys
 from singleton import Singleton
 from mfp_command import MFPCommand
 from . import log
@@ -63,32 +64,39 @@ class MFPGUI (Singleton):
         GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
 
     def clutter_proc(self):
-        from gi.repository import Clutter, GObject, Gtk, GtkClutter
-
-        # explicit init seems to avoid strange thread sync/blocking issues
-        GObject.threads_init()
-        Clutter.threads_init()
-        GtkClutter.init([])
-
-        # load default color database 
-        add_color_defaults()
-
-        # create main window
-        from mfp.gui.patch_window import PatchWindow
-        self.appwin = PatchWindow()
-        self.mfp = MFPCommand()
-
-        # direct logging to GUI log console
-        log.log_func = self.appwin.log_write
-
         try:
+            from gi.repository import Clutter, GObject, Gtk, GtkClutter
+
+            # explicit init seems to avoid strange thread sync/blocking issues
+            GObject.threads_init()
+            Clutter.threads_init()
+            GtkClutter.init([])
+
+            # load default color database 
+            add_color_defaults()
+
+            # create main window
+            from mfp.gui.patch_window import PatchWindow
+            self.appwin = PatchWindow()
+            self.mfp = MFPCommand()
+
+        except Exception, e: 
+            import traceback
+            for l in traceback.format_exc().split("\n"):
+                print "[LOG] ERROR:", l
+            print "[LOG] FATAL: Error during GUI process launch"
+            sys.stdout.flush()
+            return 
+
+        try: 
+            # direct logging to GUI log console
+            log.log_func = self.appwin.log_write
             Gtk.main()
         except Exception, e:
             import traceback
-            traceback.print_exc()
-
-        # finish
-        log.debug("MFPGUI.clutter_proc: clutter main has quit. finishing up")
+            for l in traceback.format_exc().split("\n"):
+                print "[LOG] ERROR:", l
+            sys.stdout.flush()
 
     def finish(self):
         log.debug("MFPGUI.finish() called")

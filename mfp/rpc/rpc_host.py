@@ -1,6 +1,7 @@
 import time 
 import simplejson as json 
 import threading 
+import socket 
 
 from request import Request 
 from rpc_wrapper import RPCWrapper 
@@ -31,6 +32,9 @@ class RPCHost (QuittableThread):
         pass
 
     class RecvError (Exception):
+        pass 
+
+    class RPCError (Exception):
         pass 
 
     def __init__(self, status_cb=None):
@@ -144,13 +148,15 @@ class RPCHost (QuittableThread):
             endtime = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
 
         with self.lock:
-            while req.state != Request.RESPONSE_RCVD:
+            while req.state not in (Request.RESPONSE_RCVD, Request.RPC_ERROR):
                 self.condition.wait(0.1)
                 if self.join_req: 
                     return False 
                 elif timeout is not None and datetime.datetime.now() > endtime: 
                     print "RPCHost.wait(): Request timed out after %s sec -- %s" % (timeout, req)
                     raise Exception()
+            if req.state == Request.RPC_ERROR: 
+                raise RPCHost.RPCError()
 
     def dispatch_rpcdata(self, rpc_worker, rpcdata):
         json_data, peer_id = rpcdata 
@@ -234,16 +240,16 @@ class RPCHost (QuittableThread):
                         jlen = int(jlen)
                         jdata = sock.recv(jlen)
                     except RPCHost.SyncError, e: 
-                        print "RPCHost: sync error, resyncing"
+                        log.warning("RPCHost: sync error, resyncing")
                         pass
-                    except RPCHost.RecvError, e: 
+                    except (socket.error, RPCHost.RecvError) as e: 
+                        log.warning("RPCHost: communication error")
                         retry = 0 
                         jdata = None 
                         deadpeer = self.peers_by_socket[sock]
                         self.unmanage(deadpeer)
-
                     except Exception, e: 
-                        print "RPCHost: unhandled exception",  e
+                        print "RPCHost: unhandled exception", type(e), e
                         print jdata 
                         retry = 0
                         jdata = ""
