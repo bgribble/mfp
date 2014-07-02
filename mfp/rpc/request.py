@@ -44,6 +44,7 @@ class Request(object):
     RESPONSE_PEND = 2
     RESPONSE_DONE = 3
     RESPONSE_RCVD = 4
+    RPC_ERROR = 5
 
     def __init__(self, method, params, callback=None):
         self.state = Request.CREATED
