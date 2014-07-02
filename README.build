@@ -43,11 +43,12 @@ pip:  The modern replacement for "easy_install" to install Python
 packages is called pip.  If (1) you are using Debian or Ubuntu, (2)
 you do not want to use a --virtualenv install, and (3) you want to use
 the './waf install_deps' feature to install some Python dependencies,
-you need the Debian package 'python-pip' installed.  
+you need the Debian package 'python-pip', or your distro's equivalent,
+installed.  
 
 gcc: The C components of mfp (mfpdsp, pluginfo, and testext) are
-straightforward C but include some c99-isms.  I have been using
-gcc-4.8.3 but other versions should work. 
+straightforward C but include some c99-isms, mainly due to LV2.  I
+have been using gcc-4.8.3 but other versions should work. 
 
 CONFIGURING 
 -----------------------
