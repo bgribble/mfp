@@ -75,13 +75,27 @@ development headers and pkg-config files installed:
 
 You'll get errors in the "./waf configure" process if these aren't installed.  
 
-Python runtime dependencies are checked for in "configure" and
-can be automagically installed by "./waf install_deps" if you
+Python runtime dependencies are checked for in "configure" and many of
+them can be automagically installed by "./waf install_deps" if you
 wish. 
 
 install_deps must be run after "./waf install".  If you
 are using a virtualenv, the installed Python libraries will also
 be installed into the virtualenv. 
+
+Note that the Python language bindings for Gtk+/GLib and Clutter libraries
+CANNOT be automatically installed by this build process.  You need to
+install your OS package manager's package for the "GIR" (GObject
+Introspection Repository) data for Clutter, Glib, Gtk+, Gdk,
+GtkClutter, and Pango, and the Python infrastructure to use that data.
+In Debian, these are packaged as: 
+
+    gir1.2-clutter-1.0
+    gir1.2-gtkclutter-1.0 
+    gir1.2-pango-1.0
+    gir1.2-glib-2.0
+    gir1.2-gtk-3.0 
+    python-gi 
 
 BUILDING 
 -----------------------
