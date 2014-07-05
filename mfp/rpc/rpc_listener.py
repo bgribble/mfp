@@ -104,7 +104,7 @@ class RPCExecRemote (QuittableThread):
                     self.join_req = True 
                 else:
                     ll = ll.strip()
-                    print "RPC:", ll.strip()
+                    #print "RPC:", ll.strip()
                     if ll.startswith("[LOG] "):
                         ll = ll[6:]
                         if ll.startswith("FATAL:"):
@@ -126,6 +126,7 @@ class RPCExecRemote (QuittableThread):
             except Exception, e: 
                 print "RPCExecRemote caught error:", e 
                 log.debug("RPCExecRemote: exiting")
+                self.join_req = True 
 
         if self.process:
             self.process.terminate()
