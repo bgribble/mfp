@@ -399,6 +399,7 @@ class DialElement(SlideMeterElement):
     def __init__(self, window, x, y):
         self.dial_radius = self.DEFAULT_R 
         SlideMeterElement.__init__(self, window, x, y)
+        self.param_list.append('dial_radius')
 
     def set_orientation(self, orientation):
         pass 

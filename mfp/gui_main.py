@@ -51,8 +51,9 @@ class MFPGUI (Singleton):
             return thunk()
         except Exception, e: 
             import traceback 
-            traceback.print_exc()
+            tb = traceback.format_exc()
             log.debug("Exception in GUI operation:", e)
+            log.debug(tb)
             return False 
 
     def clutter_do_later(self, delay, thunk):

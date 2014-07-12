@@ -148,14 +148,17 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def set_scope(self, obj_id, scope_name):
         from .mfp_app import MFPApp
+        log.debug("Reassigning scope for obj", obj_id, "to", scope_name)
         obj = MFPApp().recall(obj_id)
-        if obj is None:
+        log.debug("Found object", obj)
+
+        if obj is None or isinstance(obj, MFPApp):
             log.debug("Cannot find object for %s to set scope to %s" % (obj_id, scope_name))
             return
 
         scope = obj.patch.scopes.get(scope_name)
-
-        log.debug("Reassigning scope for obj", obj_id, "to", scope_name)
+        if scope is None:
+            scope = obj.patch.add_scope(scope_name)
         obj.assign(obj.patch, scope, obj.name)
 
     @rpcwrap

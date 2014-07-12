@@ -101,7 +101,7 @@ def init_layer_view(self):
 
             self.selected_patch.send_params()
             for obj in self.objects:
-                if obj.layer == layer:
+                if obj.obj_id is not None and obj.layer == layer:
                     MFPCommand().set_scope(obj.obj_id, new_value)
                     self.refresh(obj)
         return True
