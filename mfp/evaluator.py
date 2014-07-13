@@ -7,9 +7,13 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 import tokenize
 from StringIO import StringIO
-from .method import MethodCall
-from .bang import Bang
-import sys 
+
+class LazyExpr(object): 
+    def __init__(self, thunk):
+        self.thunk = thunk 
+
+    def call(self): 
+        return self.thunk() 
 
 class Evaluator (object):
     global_names = {}
@@ -35,6 +39,13 @@ class Evaluator (object):
         if not len(str2eval):
             return None
 
+        # lazy evaluation special form 
+        #   ,expression 
+        # rewrites to: 
+        #   LazyEval(lambda: expression)
+        if str2eval[0] == ',':
+            str2eval = 'LazyExpr(lambda: %s)' % str2eval[1:]
+
         sio = StringIO(str2eval)
 
         tokens = [t for t in tokenize.generate_tokens(sio.read)
@@ -55,6 +66,7 @@ class Evaluator (object):
                     raise SyntaxError()
                 str2eval = ''.join(["MethodCall(", '"', methname, '",']
                                    + [t[1] for t in tokens[3:]])
+
         # setparam special form:
         #   foo='bar', bax='baz'
         # rewrites to

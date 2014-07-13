@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from .dsp_object import DSPObject
 from .method import MethodCall
+from .evaluator import LazyExpr
 from .bang import Uninit, Bang
 from .scope import LexicalScope
 
@@ -564,6 +565,10 @@ class Processor (object):
 
             for conns, val in [output_pairs[i] for i in self.outlet_order]:
                 if val is not Uninit:
+                    if isinstance(val, LazyExpr): 
+                        print "Found lazy expr, calling"
+                        val = val.call() 
+
                     self.count_out += 1
                     for target, tinlet in conns:
                         if target is not None:

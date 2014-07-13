@@ -9,8 +9,9 @@ import math
 import re 
 import sys, os 
 import argparse
+from datetime import datetime, timedelta
 
-from .evaluator import Evaluator
+from .evaluator import Evaluator, LazyExpr
 from .utils import QuittableThread 
 from .bang import Bang, Uninit
 from .method import MethodCall
@@ -33,10 +34,13 @@ def add_evaluator_defaults():
     Evaluator.bind_global("os", os)
     Evaluator.bind_global("sys", sys)
     Evaluator.bind_global("re", re)
+    Evaluator.bind_global("datetime", datetime)
+    Evaluator.bind_global("timedelta", timedelta)
 
     Evaluator.bind_global("Bang", Bang)
     Evaluator.bind_global("Uninit", Uninit)
     Evaluator.bind_global("MethodCall", MethodCall)
+    Evaluator.bind_global("LazyExpr", LazyExpr)
 
     Evaluator.bind_global("NoteOn", NoteOn)
     Evaluator.bind_global("NoteOff", NoteOff)
