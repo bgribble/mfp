@@ -43,8 +43,9 @@ class Evaluator (object):
         #   ,expression 
         # rewrites to: 
         #   LazyEval(lambda: expression)
-        if str2eval[0] == ',':
-            str2eval = 'LazyExpr(lambda: %s)' % str2eval[1:]
+        def lazyrecurse(evalstr): 
+            return ("LazyExpr(lambda: %s)" % lazyrecurse(evalstr[1:])) if evalstr[0] == ',' else evalstr
+        str2eval = lazyrecurse(str2eval) 
 
         sio = StringIO(str2eval)
 
@@ -79,7 +80,11 @@ class Evaluator (object):
             str2eval = "_eval_collect_args(%s)" % str2eval
             self.local_names['_eval_collect_args'] = _eval_collect_args
 
-        rv = eval(str2eval, self.global_names, self.local_names)
+        environ = { name: val 
+                    for name, val in self.global_names.items() + self.local_names.items()
+                  } 
+
+        rv = eval(str2eval, environ)
 
         if collect:
             del self.local_names['_eval_collect_args']
