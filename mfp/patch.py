@@ -46,14 +46,26 @@ class Patch(Processor):
         self.default_scope.bind("self", self)
         self.default_scope.bind("app", MFPApp())
 
-        initargs, kwargs = self.parse_args(init_args)
+        self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
         self.gui_params['layers'] = []
         if patch is None:
             self.gui_params['top_level'] = True
         else:
             self.gui_params['top_level'] = False 
 
+    def args(self, index=None):
+        if index is None: 
+            return self.parsed_initargs
+        elif index >= len(self.parsed_initargs):
+            return Uninit 
+        else: 
+            return self.parsed_initargs[index]
 
+    def kwargs(self, name=None): 
+        if name is None:
+            return self.parsed_kwargs
+        else:
+            return self.parsed_kwargs.get(name, Uninit)
     #############################
     # name management
     #############################
@@ -376,4 +388,5 @@ class Patch(Processor):
 # load extension methods
 import patch_json
 import patch_lv2 
+import patch_clonescope 
 

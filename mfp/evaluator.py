@@ -43,8 +43,15 @@ class Evaluator (object):
         #   ,expression 
         # rewrites to: 
         #   LazyEval(lambda: expression)
+        # this expression will be evaluated the first time the LazyExpr is 
+        # passed from one object to another. 
+        # 
+        # this can be nested (i.e. ,,,expr is a "3 times lazy" expression that 
+        # will go off after 3 links)
+        
         def lazyrecurse(evalstr): 
-            return ("LazyExpr(lambda: %s)" % lazyrecurse(evalstr[1:])) if evalstr[0] == ',' else evalstr
+            return (("LazyExpr(lambda: %s)" % lazyrecurse(evalstr[1:])) 
+                    if evalstr[0] == ',' else evalstr)
         str2eval = lazyrecurse(str2eval) 
 
         sio = StringIO(str2eval)

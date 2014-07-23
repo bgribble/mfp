@@ -520,7 +520,11 @@ class Processor (object):
             out_obj, out_outlet = self.dsp_outlet(outlet)
             in_obj, in_inlet = target.dsp_inlet(inlet)
 
-            out_obj.disconnect(out_outlet, in_obj.obj_id, in_inlet)
+            if out_obj is not None and in_obj is not None:
+                out_obj.disconnect(out_outlet, in_obj.obj_id, in_inlet)
+            else:
+                log.warning("disconnect having trouble,", outlet, target, inlet, in_obj,
+                            out_obj)
 
         existing = self.connections_out[outlet]
         if (target, inlet) in existing:
@@ -584,20 +588,25 @@ class Processor (object):
         return work
 
     def parse_args(self, pystr):
+        from .patch import Patch
         if self.patch:
             return self.patch.parse_args(pystr)
+        elif isinstance(self, Patch):
+            return self.parse_args(pystr)
         else:
             from .evaluator import Evaluator
             e = Evaluator()
-            return e.parse_args(pystr)
+            return e.eval_arglist(pystr)
 
     def parse_obj(self, pystr):
         if self.patch:
             return self.patch.parse_obj(pystr)
+        elif isinstance(self, Patch):
+            return self.parse_obj(pystr)
         else:
             from .evaluator import Evaluator
             e = Evaluator()
-            return e.parse_args(pystr)
+            return e.eval(pystr)
 
     def method(self, message, inlet):
         '''Default method handler ignores which inlet the message was received on'''
@@ -661,6 +670,16 @@ class Processor (object):
         for a in args: 
             if a in self.properties: 
                 del self.properties[a]
+
+    def clone(self, patch, scope, name):
+        from .mfp_app import MFPApp
+        from . import log 
+        log.debug("Cloning", self, "to name", name, "in scope", scope)
+        prms = self.save()
+        newobj = MFPApp().create(prms.get("type"), prms.get("initargs"), 
+                                 patch, scope, name)
+        newobj.load(prms)
+        return newobj
 
     # save/restore helper
     def save(self):
