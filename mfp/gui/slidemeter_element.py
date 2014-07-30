@@ -335,6 +335,10 @@ class SlideMeterElement (PatchElement):
                 changes = True 
                 self.value = v
 
+        dr = params.get("dial_radius")
+        if dr is not None:
+            self.dial_radius = dr
+
         PatchElement.configure(self, params)
         if changes:
             self.texture.clear()
