@@ -43,9 +43,10 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = []
         self.connections_out = []
         self.connections_in = []
+        self.is_export = False 
         self.param_list = ['position_x', 'position_y', 'width', 'height', 
                            'update_required', 'display_type', 'name', 'layername',
-                           'no_export', 'num_inlets', 'num_outlets', 'dsp_inlets', 
+                           'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets', 
                            'dsp_outlets' ]
 
         # Clutter objects
@@ -134,9 +135,9 @@ class PatchElement (Clutter.Group):
 
     def delete(self):
         self.stage.unregister(self)
-        if self.obj_id is not None:
+        if self.obj_id is not None and not self.is_export:
             MFPGUI().mfp.delete(self.obj_id)
-            self.obj_id = None
+        self.obj_id = None
         self.obj_state = self.OBJ_DELETED 
 
     def create(self, obj_type, init_args):
@@ -416,6 +417,7 @@ class PatchElement (Clutter.Group):
         self.dsp_outlets = params.get("dsp_outlets", [])
         self.obj_name = params.get("name")
         self.no_export = params.get("no_export", False)
+        self.is_export = params.get("is_export", False)
 
         if params.get("tags") is not None and self.tags != params.get("tags"):
             self.tags = params.get("tags")

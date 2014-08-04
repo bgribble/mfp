@@ -28,6 +28,7 @@ class MFPApp (Singleton):
         self.no_gui = False
         self.no_dsp = False
         self.debug = False
+        self.debug_remote = False 
         self.osc_port = None 
         self.searchpath = None 
         self.extpath = None 
@@ -100,7 +101,7 @@ class MFPApp (Singleton):
 
         if not self.no_gui:
             self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path, 
-                                             log_module="gui")
+                                             log_module="gui", log_raw=self.debug_remote)
             self.gui_process.start()
             
             self.rpc_host.subscribe(GUICommand)
@@ -151,14 +152,15 @@ class MFPApp (Singleton):
 
         if not self.no_dsp:
             if self.debug:
+                # FIXME need to change this to not capture stdin/out for debug to work
                 self.dsp_process = RPCExecRemote("gdb", "-ex", "run", "--args", 
                                                  "mfpdsp", self.socket_path, self.max_blocksize, 
                                                  self.dsp_inputs, self.dsp_outputs, 
-                                                 log_module="dsp")
+                                                 log_module="dsp", log_raw=self.debug_remote)
             else: 
                 self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize, 
                                                  self.dsp_inputs, self.dsp_outputs,
-                                                 log_module="dsp")
+                                                 log_module="dsp", log_raw=self.debug_remote)
             self.dsp_process.start()
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")
@@ -187,9 +189,11 @@ class MFPApp (Singleton):
     def register(self, name, ctor):
         self.registry[name] = ctor
 
-    def backend_status_cb(self, host, peer_id, status): 
+    def backend_status_cb(self, host, peer_id, status, *args): 
         if status == "manage":
             log.info("New RPC remote connection id=%s" % peer_id)
+        elif status == "publish":
+            log.info("Published classes", args[0])
         elif status == "unmanage":
             dead_patches = [ p for p in self.patches.values() 
                             if p.context.node_id == peer_id ]

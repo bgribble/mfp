@@ -91,7 +91,6 @@ class MFPGUI (Singleton):
 
         try: 
             # direct logging to GUI log console
-            log.log_func = self.appwin.log_write
             Gtk.main()
         except Exception, e:
             import traceback
@@ -120,9 +119,11 @@ def main():
     remote = RPCRemote(socketpath, "MFP GUI", host)
     remote.connect() 
 
-    print "[LOG] debug: GUI process starting"
+    print "[LOG] DEBUG: GUI process starting"
 
     log.log_module = "ui"
+    log.log_func = log.rpclog
+
     host.subscribe(MFPCommand)
     gui = MFPGUI() 
 

@@ -111,6 +111,8 @@ def main():
                         help="UDP port to listen for OSC (default: 5555)")
     parser.add_argument("-v", "--verbose", action="store_true", 
                         help="Log all messages to console")
+    parser.add_argument("--verbose-remote", action="store_true", 
+                        help="Log all child console output")
     parser.add_argument("--max-bufsize", default=2048,
                         help="Maximum JACK buffer size to support (default: 2048 frames)")
     parser.add_argument("--no-gui", action="store_true", 
@@ -148,6 +150,9 @@ def main():
 
     if args.get("verbose"):
         log.log_force_console = True 
+
+    if args.get("verbose_remote"):
+        app.debug_remote = True 
 
     if app.no_gui:
         log.debug("Not starting GUI services")

@@ -75,6 +75,7 @@ class MFPCommand(RPCWrapper):
     def delete(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
+        log.debug("delete: deleting obj_id", obj_id, obj.name) 
         obj.delete()
 
     @rpcwrap
@@ -116,6 +117,8 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def log_write(self, msg):
         from .mfp_app import MFPApp
+        if log.log_force_console:
+            print 'console:', msg 
         MFPApp().gui_command.log_write(msg)
 
     @rpcwrap

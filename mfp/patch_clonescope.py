@@ -12,7 +12,6 @@ from .bang import Uninit
 
 @extends(Patch)
 def clonescope(self, scopename, num_copies, **kwargs):
-    log.debug("clonescope:", scopename, num_copies)
     scope = self.scopes.get(scopename)
     parts = scopename.split('_')
     basename = scopename

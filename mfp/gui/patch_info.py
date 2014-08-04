@@ -84,7 +84,8 @@ class PatchInfo (object):
     def delete(self):
         # delete all the processor elements 
         for l in self.layers: 
-            for o in l.objects:
+            to_delete = [o for o in l.objects]
+            for o in to_delete:
                 o.delete()
             l.hide() 
             del l.group

@@ -419,14 +419,16 @@ class Processor (object):
         if hasattr(self, "connections_out"):
             outport = 0
             for c in self.connections_out:
-                for tobj, tport in c:
+                to_delete = [ pr for pr in c]
+                for tobj, tport in to_delete:
                     self.disconnect(outport, tobj, tport)
                 outport += 1
 
         if hasattr(self, "connections_in"):
             inport = 0
             for c in self.connections_in:
-                for tobj, tport in c:
+                to_delete = [pr for pr in c]
+                for tobj, tport in to_delete:
                     tobj.disconnect(tport, self, inport)
                 inport += 1
 
@@ -523,7 +525,7 @@ class Processor (object):
             if out_obj is not None and in_obj is not None:
                 out_obj.disconnect(out_outlet, in_obj.obj_id, in_inlet)
             else:
-                log.warning("disconnect having trouble,", outlet, target, inlet, in_obj,
+                log.warning("disconnect having trouble,", self, self.name, self.scope, outlet, target, inlet, in_obj,
                             out_obj)
 
         existing = self.connections_out[outlet]
@@ -634,12 +636,18 @@ class Processor (object):
         if tb:
             print tb
 
-    def create_gui(self):
+    def create_gui(self, **kwargs):
         from .mfp_app import MFPApp
         parent_id = self.patch.obj_id if self.patch is not None else None 
         MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
                                     parent_id, self.gui_params)
         self.gui_created = True
+        need_update = False 
+        for param, value in kwargs.items():
+            self.gui_params[param] = value
+            need_update = True 
+        if need_update: 
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def delete_gui(self):
         from .mfp_app import MFPApp
@@ -673,8 +681,6 @@ class Processor (object):
 
     def clone(self, patch, scope, name):
         from .mfp_app import MFPApp
-        from . import log 
-        log.debug("Cloning", self, "to name", name, "in scope", scope)
         prms = self.save()
         newobj = MFPApp().create(prms.get("type"), prms.get("initargs"), 
                                  patch, scope, name)

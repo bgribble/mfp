@@ -370,7 +370,7 @@ class Patch(Processor):
         # non-toplevel Patch means show the Export UI layer only 
         for oid, obj in self.objects.items():
             if self.obj_is_exportable(obj):
-                obj.create_gui()
+                obj.create_gui(is_export=True)
 
     def delete(self):
         from .mfp_app import MFPApp

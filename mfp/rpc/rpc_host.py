@@ -324,6 +324,12 @@ class RPCHost (QuittableThread):
                 cls = RPCWrapper.rpctype.get(clsname)
                 if cls is not None:
                     cls.publishers.append(peer_id)
+            if self.status_cb:
+                print "publish: calling back", req.params.get("classes")
+                cbthread = QuittableThread(target=self.status_cb, 
+                                           args=(peer_id, "publish", 
+                                                 req.params.get("classes")))
+                cbthread.start()
             req.result = (True, None) 
 
         elif method == "ready":

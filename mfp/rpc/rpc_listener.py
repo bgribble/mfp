@@ -86,6 +86,11 @@ class RPCExecRemote (QuittableThread):
         else:
             self.log_module = log.log_module
 
+        if kwargs.get("log_raw"): 
+            self.log_raw = True
+        else: 
+            self.log_raw = False 
+
     def start(self):
         from mfp import log 
         import subprocess 
@@ -104,7 +109,9 @@ class RPCExecRemote (QuittableThread):
                     self.join_req = True 
                 else:
                     ll = ll.strip()
-                    #print "RPC:", ll.strip()
+                    if self.log_raw:
+                        log.debug("%s:" % self.log_module, ll.strip())
+
                     if ll.startswith("[LOG] "):
                         ll = ll[6:]
                         if ll.startswith("FATAL:"):

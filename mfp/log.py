@@ -17,7 +17,6 @@ def make_log_entry(tag, *parts):
     ts = "%.3f" % dt
     return "[%8s %6s] %s\n" % (ts, tag, msg)
 
-
 def write_log_entry(msg, level=0):
     global log_file
     global log_func
@@ -30,6 +29,9 @@ def write_log_entry(msg, level=0):
     if log_file and ((not logged) or log_force_console):
         log_file.write(msg)
 
+def rpclog(msg, level):
+    levels = { 0: "DEBUG", 1: "WARN", 2: "ERROR", 3: "FATAL" }
+    print "[LOG] %s: %s" % (levels.get(level, "DEBUG"), msg)
 
 def error(* parts, **kwargs):
     global log_module

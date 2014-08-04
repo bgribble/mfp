@@ -325,10 +325,10 @@ class PatchWindow(object):
     def quit(self, *rest):
         from .patch_info import PatchInfo
         log.debug("Quit command from GUI or WM")
-
-        for p in self.patches:
-            if p.deletable:
-                p.delete()
+        
+        to_delete = [ p for p in self.patches if p.deletable ]
+        for p in to_delete:
+            p.delete()
 
         allpatches = MFPGUI().mfp.open_patches()
         guipatches = [ p.obj_id for p in self.objects if isinstance(p, PatchInfo) ]
