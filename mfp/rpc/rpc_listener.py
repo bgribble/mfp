@@ -104,7 +104,11 @@ class RPCExecRemote (QuittableThread):
         from mfp import log 
         while not self.join_req: 
             try: 
-                ll = self.process.stdout.readline()
+                if self.process: 
+                    ll = self.process.stdout.readline()
+                else: 
+                    ll = None 
+
                 if not ll: 
                     self.join_req = True 
                 else:

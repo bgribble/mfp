@@ -591,8 +591,12 @@ class Processor (object):
 
     def parse_args(self, pystr, **extra_bindings):
         from .patch import Patch
-        if not extra_bindings.has_key("scope"):
+        if "scope" not in extra_bindings:
             extra_bindings["scope"] = self.scope 
+
+        if "__self__" not in extra_bindings:
+            extra_bindings["__self__"] = self
+
         if isinstance(self, Patch):
             if not extra_bindings.has_key("patch"):
                 extra_bindings["patch"] = self

@@ -51,7 +51,7 @@ class Patch(Processor):
 
     def init_bindings(self): 
         from .mfp_app import MFPApp
-        self.evaluator.bind_local("self", self)
+        #self.evaluator.bind_local("self", self)
         self.evaluator.bind_local("patch", self)
         self.default_scope.bind("self", self)
         self.default_scope.bind("patch", self)

@@ -90,6 +90,8 @@ class Evaluator (object):
                     for name, val in (self.global_names.items() + self.local_names.items() 
                                       + extra_bindings.items())
                   } 
+        if "__self__" in environ:
+            environ["self"] = environ["__self__"]
 
         rv = eval(str2eval, environ)
 
