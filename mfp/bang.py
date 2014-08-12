@@ -17,5 +17,15 @@ class UninitType (Singleton):
     def load(klass, objdict):
         return Uninit
 
+class UnboundType (Singleton):
+    def __repr__(self):
+        return "Unbound"
+
+    @classmethod
+    def load(klass, objdict):
+        return Unbound
+
 Bang = BangType()
 Uninit = UninitType()
+Unbound = UnboundType()
+

@@ -12,6 +12,7 @@ from .processor import Processor
 from .method import MethodCall
 from .utils import QuittableThread 
 from .rpc import RPCListener, RPCHost, RPCExecRemote
+from .bang import Unbound 
 
 from pluginfo import PlugInfo 
 
@@ -343,33 +344,40 @@ class MFPApp (Singleton):
 
         parts = name.split('.')
         obj = None
-        root = None
+        root = Unbound 
 
         # first find the base. 
         # 1. Look in the queryobj's patch 
         if queryobj and queryobj.patch:
             root = queryobj.patch.resolve(parts[0], queryobj.scope)
+            
+            if root is Unbound:
+                root = queryobj.patch.resolve(parts[0], queryobj.patch.default_scope)
+
 
         # 2. Try the global scope 
-        if not root:
+        if root is Unbound:
             root = self.app_scope.resolve(parts[0]) 
 
         # 3. Check the patch-scope of all the loaded patches. 
         # (this is pretty suspect)
-        if not root:
+        if root is Unbound:
             for pname, pobj in self.patches.items():
                 root = pobj.resolve(parts[0])
 
-                if root:
+                if root is not Unbound:
                     break
 
         # now descend the path
-        if root:
+        if root is not Unbound:
             obj = root
             for p in parts[1:]:
                 obj = find_part(p, obj)
 
-        return obj
+        if obj is not Unbound:
+            return obj
+        else:
+            return None 
 
     def finish(self):
         log.log_func = None

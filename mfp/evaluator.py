@@ -19,7 +19,7 @@ class Evaluator (object):
     global_names = {}
 
     def __init__(self):
-        self.local_names = {'self': self}
+        self.local_names = {}
 
     @classmethod
     def bind_global(self, name, obj):
@@ -28,10 +28,10 @@ class Evaluator (object):
     def bind_local(self, name, obj):
         self.local_names[name] = obj
 
-    def eval_arglist(self, evalstr):
-        return self.eval(evalstr, True)
+    def eval_arglist(self, evalstr, **extra_bindings):
+        return self.eval(evalstr, True, **extra_bindings)
 
-    def eval(self, evalstr, collect=False):
+    def eval(self, evalstr, collect=False, **extra_bindings):
         def _eval_collect_args(*args, **kwargs):
             return (args, kwargs)
 
@@ -82,19 +82,16 @@ class Evaluator (object):
         if len(tokens) > 2 and tokens[1][1] == '=':
             str2eval = ''.join(["dict("] + [t[1] for t in tokens] + [')'])
 
-        # FIXME race
         if collect:
             str2eval = "_eval_collect_args(%s)" % str2eval
-            self.local_names['_eval_collect_args'] = _eval_collect_args
+            extra_bindings['_eval_collect_args'] = _eval_collect_args
 
         environ = { name: val 
-                    for name, val in self.global_names.items() + self.local_names.items()
+                    for name, val in (self.global_names.items() + self.local_names.items() 
+                                      + extra_bindings.items())
                   } 
 
         rv = eval(str2eval, environ)
-
-        if collect:
-            del self.local_names['_eval_collect_args']
 
         return rv
 

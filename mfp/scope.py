@@ -7,6 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import re 
+from .bang import Unbound 
 
 class LexicalScope (object):
     def __init__(self):
@@ -49,8 +50,7 @@ class LexicalScope (object):
             return (False, None)
 
     def resolve(self, name):
-        return self.bindings.get(name)
-
+        return self.bindings.get(name, Unbound)
 
 class NaiveScope (LexicalScope): 
     def bind(self, name, obj):

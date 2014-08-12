@@ -11,7 +11,7 @@ import os
 from .processor import Processor
 from .evaluator import Evaluator
 from .scope import LexicalScope
-from .bang import Uninit
+from .bang import Uninit, Unbound 
 from mfp import log
 
 
@@ -22,7 +22,6 @@ class Patch(Processor):
     default_context = None 
     
     def __init__(self, init_type, init_args, patch, scope, name, context=None):
-        from .mfp_app import MFPApp
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
         if context is None:
             if patch is None:
@@ -35,16 +34,13 @@ class Patch(Processor):
         self.objects = {}
         self.scopes = {'__patch__': LexicalScope()}
         self.default_scope = self.scopes['__patch__']
-
         self.evaluator = Evaluator()
+
+        self.init_bindings()
 
         self.inlet_objects = []
         self.outlet_objects = []
         self.dispatch_objects = [] 
-
-        self.evaluator.bind_local("self", self)
-        self.default_scope.bind("self", self)
-        self.default_scope.bind("app", MFPApp())
 
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
         self.gui_params['layers'] = []
@@ -52,6 +48,14 @@ class Patch(Processor):
             self.gui_params['top_level'] = True
         else:
             self.gui_params['top_level'] = False 
+
+    def init_bindings(self): 
+        from .mfp_app import MFPApp
+        self.evaluator.bind_local("self", self)
+        self.evaluator.bind_local("patch", self)
+        self.default_scope.bind("self", self)
+        self.default_scope.bind("patch", self)
+        self.default_scope.bind("app", MFPApp())
 
     def args(self, index=None):
         if index is None: 
@@ -78,19 +82,37 @@ class Patch(Processor):
             scope.unbind(name)
 
     def resolve(self, name, scope=None):
-        if scope is not None and scope in self.scopes:
+        found = False 
+        obj = False 
+
+        if isinstance(scope, LexicalScope):
+            found, obj = scope.query(name)
+
+        if not found and scope is not None and scope in self.scopes:
             s = self.scopes.get(scope)
-            exists, val = s.query(name)
-            if exists:
-                return val
-        elif name in self.scopes:
-            return self.scopes.get(name)
+            found, obj = s.query(name)
+            
+        if not found and name in self.scopes: 
+            found = True
+            obj = self.scopes.get(name)
 
-        exists, val = self.default_scope.query(name)
-        if exists:
-            return val
+        if not found: 
+            found, obj = self.default_scope.query(name)
 
-        return None
+        testpatch = self.patch
+
+        while not found and testpatch: 
+            testscope = self.scope
+            obj = testpatch.resolve(name, testscope)
+            if obj is not Unbound:
+                found = True 
+            else: 
+                testpatch = testpatch.patch
+        
+        if found: 
+            return obj 
+        else: 
+            return Unbound 
 
     def add_scope(self, name):
         self.scopes[name] = LexicalScope()
@@ -110,16 +132,16 @@ class Patch(Processor):
     # evaluator
     #############################
 
-    def parse_obj(self, argstring):
+    def parse_obj(self, argstring, **extra_bindings):
         '''
         Parse and evaluate a Python expression
         '''
         if argstring == '' or argstring is None:
             return None
 
-        return self.evaluator.eval(argstring)
+        return Processor.parse_obj(self, argstring, **extra_bindings)
 
-    def parse_args(self, argstring):
+    def parse_args(self, argstring, **extra_bindings):
         '''
         Parse and evaluate a Python expression representing
         a function/method argument list (returns tuple of positional
@@ -132,7 +154,7 @@ class Patch(Processor):
         if argstring == '' or argstring is None:
             return ((), {})
 
-        return self.evaluator.eval_arglist(argstring)
+        return Processor.parse_args(self, argstring, **extra_bindings)
 
     #############################
     # patch contents management

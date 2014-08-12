@@ -589,26 +589,39 @@ class Processor (object):
 
         return work
 
-    def parse_args(self, pystr):
+    def parse_args(self, pystr, **extra_bindings):
         from .patch import Patch
-        if self.patch:
-            return self.patch.parse_args(pystr)
-        elif isinstance(self, Patch):
-            return self.parse_args(pystr)
+        if not extra_bindings.has_key("scope"):
+            extra_bindings["scope"] = self.scope 
+        if isinstance(self, Patch):
+            if not extra_bindings.has_key("patch"):
+                extra_bindings["patch"] = self
+            return self.evaluator.eval_arglist(pystr, **extra_bindings)
+        elif self.patch:
+            if not extra_bindings.has_key("patch"):
+                extra_bindings["patch"] = self.patch
+            return self.patch.parse_args(pystr, **extra_bindings)
         else:
             from .evaluator import Evaluator
             e = Evaluator()
-            return e.eval_arglist(pystr)
+            return e.eval_arglist(pystr, **extra_bindings)
 
-    def parse_obj(self, pystr):
-        if self.patch:
-            return self.patch.parse_obj(pystr)
-        elif isinstance(self, Patch):
-            return self.parse_obj(pystr)
+    def parse_obj(self, pystr, **extra_bindings):
+        from .patch import Patch
+        if not extra_bindings.has_key("scope"):
+            extra_bindings["scope"] = self.scope 
+        if isinstance(self, Patch):
+            if not extra_bindings.has_key("patch"):
+                extra_bindings["patch"] = self
+            return self.evaluator.eval(pystr, **extra_bindings)
+        elif self.patch:
+            if not extra_bindings.has_key("patch"):
+                extra_bindings["patch"] = self.patch
+            return self.patch.parse_obj(pystr, **extra_bindings)
         else:
             from .evaluator import Evaluator
             e = Evaluator()
-            return e.eval(pystr)
+            return e.eval(pystr, **extra_bindings)
 
     def method(self, message, inlet):
         '''Default method handler ignores which inlet the message was received on'''

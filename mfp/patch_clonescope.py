@@ -97,6 +97,7 @@ def clonescope(self, scopename, num_copies, **kwargs):
                 newobj.gui_params["position_x"] += dx
                 newobj.gui_params["position_y"] += dy
 
+                # FIXME: template expansion in clonescope
                 if newobj.gui_params.get("display_type") == "text":
                     txtprms = dict(num=copynum+1, row=grid_row, col=grid_col)
                     newobj.value = newobj.value % txtprms

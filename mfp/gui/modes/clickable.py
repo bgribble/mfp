@@ -28,6 +28,8 @@ class ClickableControlMode (InputMode):
         self.bind("M1DOUBLEUP", self.unclick, "Send click up")
         self.bind("M1TRIPLEUP", self.unclick, "Send click up")
 
+        self.bind("RET", self.quick_click, "Send click")
+
     def disable(self):
         if self.clickstate:
             self.widget.unclicked()
@@ -45,3 +47,10 @@ class ClickableControlMode (InputMode):
         self.clickstate = False
         self.widget.unclicked()
         return False
+
+    def quick_click(self):
+        self.clickstate = True
+        self.widget.clicked()
+        self.clickstate = False 
+        self.widget.unclicked()
+
