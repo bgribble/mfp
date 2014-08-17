@@ -29,6 +29,15 @@ class Inlet(Processor):
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
+    def clone(self, patch, scope, name):
+        # for inlet and outlet, always clear initargs so an xlet number is 
+        # selected automatically 
+
+        prms = self.save()
+        newobj = MFPApp().create(prms.get("type"), None, patch, scope, name)
+        newobj.load(prms)
+        return newobj
+
     def trigger(self):
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit
@@ -56,12 +65,21 @@ class Outlet(Processor):
             self.outletnum = initargs[0]
         elif patch is not None:
             self.outletnum = len(patch.outlet_objects)
-            self.init_args = str(self.outletnum)
+            init_args = str(self.outletnum)
         else:
             self.outletnum = 0
             init_args = "0"
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+
+    def clone(self, patch, scope, name):
+        # for inlet and outlet, always clear initargs so an xlet number is 
+        # selected automatically 
+
+        prms = self.save()
+        newobj = MFPApp().create(prms.get("type"), None, patch, scope, name)
+        newobj.load(prms)
+        return newobj
 
     def trigger(self):
         if self.patch:
