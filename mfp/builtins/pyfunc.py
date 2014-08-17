@@ -165,6 +165,7 @@ class PyFunc(Processor):
             thunktxt = "lambda: None"
 
         self.thunk = patch.parse_obj(thunktxt)
+
         arguments = get_arglist(self.thunk)
 
         if arguments is not None:
@@ -172,14 +173,20 @@ class PyFunc(Processor):
             self.doc_tooltip_inlet = [] 
             for v in arguments:
                 self.doc_tooltip_inlet.append("Argument %s" % v)
+        else: 
+            self.argcount = None 
+            self.doc_tooltip_inlet = ["List or tuple of arguments"]
 
         Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
-        else:
-            self.outlets[0] = self.thunk(*[i for i in self.inlets if i is not Uninit]) 
+        elif self.argcount:
+            self.outlets[0] = self.thunk(*self.inlets[:self.argcount]) 
+        else: 
+            self.outlets[0] = self.thunk(*self.inlets[0]) 
+            
 
 class PyAutoWrap(Processor): 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -196,15 +203,21 @@ class PyAutoWrap(Processor):
             self.doc_tooltip_inlet = []
             for v in arguments:
                 self.doc_tooltip_inlet.append("Argument %s" % v)
-
+        else: 
+            self.argcount = None 
+            self.doc_tooltip_inlet = ["List or tuple of arguments"]
         Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
-        else:
+        elif self.argcount:
             args = self.inlets[:self.argcount]
             self.outlets[0] = self.thunk(*args)
+        else: 
+            args = self.inlets[0]
+            self.outlets[0] = self.thunk(*args)
+
 
 class PyBinary(Processor):
     doc_tooltip_inlet = ["Argument 1", "Argument 2 (default: initarg 0)"]
