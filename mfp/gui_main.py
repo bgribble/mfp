@@ -121,8 +121,9 @@ def main():
 
     print "[LOG] DEBUG: GUI process starting"
 
-    log.log_module = "ui"
+    log.log_module = "gui"
     log.log_func = log.rpclog
+    log.log_debug = True 
 
     host.subscribe(MFPCommand)
     gui = MFPGUI() 

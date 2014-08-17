@@ -10,8 +10,9 @@ import re
 from .bang import Unbound 
 
 class LexicalScope (object):
-    def __init__(self):
+    def __init__(self, clonenum=0):
         self.bindings = {}
+        self.clonenum = clonenum 
 
     def _mkunique(self, name):
         basename = name 

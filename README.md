@@ -94,6 +94,13 @@ numpy and the buffer~ object.  A very basic oscilloscope.
 looper.mfp: A simple overdubbing loop sampler inspired by the Akai
 Headrush, also built around a [buffer~].  
 
+monomix.mfp: A demonstration of how to make a vanilla user patch with
+variable numbers of inputs, determined by an init argument.  For
+example, [monomix 4] makes a mixer with 4 signal inputs, 4 sliders,
+and 1 signal output.  This makes use of the @clonescope method and the
+concept of hygienic layer copying. 
+
+
 ### SAVING FILES
 
 There's no UI for saving yet, but there is a key mapping.

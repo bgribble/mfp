@@ -73,6 +73,7 @@ def clonescope(self, scopename, num_copies, **kwargs):
 
         fmt = "%%s_%%0%dd" % cdigits 
         newscope = self.add_scope(fmt % (basename, copynum + ccount))
+        newscope.clonenum = copynum + 1
 
         if grid[0] and not grid[1]:
             grid_row += 1
@@ -125,6 +126,13 @@ def clonescope(self, scopename, num_copies, **kwargs):
                     if tobj.gui_created:
                         MFPApp().gui_command.connect(newobj.obj_id, port_num,
                                                      tobj_newid.obj_id, tport)
+
+
+        # make sure [loadbang] get triggered 
+        for phase in (0,1):
+            for obj_id, obj in obj_copied.items():
+                if obj.do_onload:
+                    obj.onload(phase)
 
     for name, srcobj in ui_items.items(): 
         # kludge -- change labels in the UI template objects 

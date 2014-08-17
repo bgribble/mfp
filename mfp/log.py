@@ -15,7 +15,12 @@ def make_log_entry(tag, *parts):
     msg = ' '.join([str(p) for p in parts])
     dt = (datetime.now() - log_time_base).total_seconds()
     ts = "%.3f" % dt
-    return "[%8s %6s] %s\n" % (ts, tag, msg)
+    if msg and (msg[0] == '['):
+        if msg[-1] != '\n':
+            msg = msg + '\n'
+        return msg 
+    else: 
+        return "[%8s %6s] %s\n" % (ts, tag, msg)
 
 def write_log_entry(msg, level=0):
     global log_file
@@ -32,6 +37,7 @@ def write_log_entry(msg, level=0):
 def rpclog(msg, level):
     levels = { 0: "DEBUG", 1: "WARN", 2: "ERROR", 3: "FATAL" }
     print "[LOG] %s: %s" % (levels.get(level, "DEBUG"), msg)
+    sys.stdout.flush()
 
 def error(* parts, **kwargs):
     global log_module
@@ -72,7 +78,7 @@ def debug(* parts, **kwargs):
     if not log_debug:
         return
     else:
-        write_log_entry(make_log_entry(module, *parts))
+        write_log_entry(make_log_entry(module, *parts), level=0)
 
 
 def logprint(* parts):

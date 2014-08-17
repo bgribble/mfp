@@ -1,0 +1,459 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Interface",
+                "__patch__"
+            ],
+            [
+                "Mix",
+                "__patch__"
+            ],
+            [
+                "Channel",
+                "chan_001"
+            ]
+        ],
+        "export_w": 25.0,
+        "name": "monomix",
+        "export_y": 153.97549438476562,
+        "export_x": 120.22052001953125,
+        "display_type": "patch",
+        "export_h": 130.93756103515625
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        12,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "zeropoint": null,
+                "scale_position": 0,
+                "min_value": 0.0,
+                "orientation": 0,
+                "max_value": 1.0,
+                "no_export": false,
+                "update_required": true,
+                "height": 100,
+                "width": 25,
+                "show_scale": false,
+                "display_type": "slidemeter",
+                "position_x": 120.22052001953125,
+                "position_y": 153.97549438476562,
+                "is_export": false,
+                "layername": "Interface",
+                "scale_type": 0
+            },
+            "name": "slidemeter_001",
+            "midi_mode": null,
+            "value": 0.0,
+            "osc_methods": [],
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "0.0",
+            "type": "slidemeter",
+            "properties": {}
+        },
+        "2": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "value": "1",
+                "height": 26.0,
+                "width": 19.0,
+                "update_required": true,
+                "position_x": 124.8177719116211,
+                "position_y": 258.9130554199219,
+                "is_export": false,
+                "layername": "Interface",
+                "display_type": "text"
+            },
+            "name": "chan_num",
+            "midi_mode": null,
+            "value": "1",
+            "osc_methods": [],
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "text",
+            "properties": {}
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 39.5,
+                "width": 22,
+                "display_type": "recvsignalvia",
+                "position_x": 99.5010986328125,
+                "position_y": 127.94303894042969,
+                "is_export": false,
+                "layername": "Mix"
+            },
+            "name": "recvsignalvia_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"mixbus\"",
+            "type": "recv~",
+            "properties": {}
+        },
+        "5": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 75.0,
+                "display_type": "processor",
+                "position_x": 102.0010986328125,
+                "position_y": 219.93734741210938,
+                "is_export": false,
+                "layername": "Mix"
+            },
+            "name": "processor_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "0",
+            "type": "outlet~",
+            "properties": {}
+        },
+        "6": {
+            "connections": [],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 37,
+                "width": 22,
+                "display_type": "sendsignalvia",
+                "position_x": 162.533203125,
+                "position_y": 246.74453735351562,
+                "is_export": false,
+                "layername": "Channel"
+            },
+            "name": "sendsignalvia_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"mixbus\"",
+            "type": "send~",
+            "properties": {}
+        },
+        "7": {
+            "connections": [
+                [
+                    [
+                        6,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25,
+                "width": 35,
+                "display_type": "processor",
+                "position_x": 164.9741668701172,
+                "position_y": 173.46824645996094,
+                "is_export": false,
+                "layername": "Channel"
+            },
+            "name": "processor_003",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "*~",
+            "properties": {}
+        },
+        "8": {
+            "connections": [
+                [
+                    [
+                        7,
+                        1
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 37.5,
+                "width": 20,
+                "display_type": "recvvia",
+                "position_x": 235.96673583984375,
+                "position_y": 115.69560241699219,
+                "is_export": false,
+                "layername": "Channel"
+            },
+            "name": "recvvia_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"gain\"",
+            "type": "recv",
+            "properties": {}
+        },
+        "9": {
+            "connections": [
+                [
+                    [
+                        10,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 244.9983367919922,
+                "position_y": 116.55223083496094,
+                "is_export": false,
+                "layername": "Mix"
+            },
+            "name": "processor_004",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "loadbang",
+            "properties": {}
+        },
+        "10": {
+            "connections": [
+                [
+                    [
+                        11,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 289.0,
+                "display_type": "message",
+                "position_x": 244.9983367919922,
+                "position_y": 164.55223083496094,
+                "is_export": false,
+                "layername": "Mix"
+            },
+            "name": "message_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "@clonescope(\"chan_001\", patch.args(0))",
+            "type": "message",
+            "properties": {}
+        },
+        "11": {
+            "connections": [],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 242.4983367919922,
+                "position_y": 212.55223083496094,
+                "is_export": false,
+                "layername": "Mix"
+            },
+            "name": "sendvia_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"patch\"",
+            "type": "send",
+            "properties": {}
+        },
+        "12": {
+            "connections": [],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 181.72361755371094,
+                "position_y": 252.18919372558594,
+                "is_export": false,
+                "layername": "Interface"
+            },
+            "name": "sendvia_002",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"gain\"",
+            "type": "send",
+            "properties": {}
+        },
+        "13": {
+            "connections": [
+                [
+                    [
+                        7,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 64.0,
+                "display_type": "processor",
+                "position_x": 165.03350830078125,
+                "position_y": 89.781494140625,
+                "is_export": false,
+                "layername": "Channel"
+            },
+            "name": "processor_002",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "0",
+            "type": "inlet~",
+            "properties": {}
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 72.0,
+                "display_type": "processor",
+                "position_x": 315.85614013671875,
+                "position_y": 88.76641845703125,
+                "is_export": false,
+                "layername": "Channel"
+            },
+            "name": "processor_005",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "loadbang",
+            "properties": {}
+        },
+        "16": {
+            "connections": [
+                [
+                    [
+                        17,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 180.0,
+                "display_type": "message",
+                "position_x": 315.85614013671875,
+                "position_y": 136.76641845703125,
+                "is_export": false,
+                "layername": "Channel"
+            },
+            "name": "message_002",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "str(scope.clonenum + 1)",
+            "type": "message",
+            "properties": {}
+        },
+        "17": {
+            "connections": [],
+            "gui_params": {
+                "layername": "Channel",
+                "no_export": false,
+                "update_required": false,
+                "height": 35,
+                "width": 20,
+                "display_type": "sendvia",
+                "position_x": 313.35614013671875,
+                "position_y": 184.76641845703125,
+                "is_export": false,
+                "label": "chan_num"
+            },
+            "name": "sendvia_003",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": "\"chan_num\"",
+            "type": "send",
+            "properties": {}
+        }
+    },
+    "type": "monomix",
+    "scopes": {
+        "foobar": {},
+        "chan_001": {
+            "message_002": 16,
+            "recvvia_001": 8,
+            "chan_num": 2,
+            "sendvia_003": 17,
+            "processor_002": 13,
+            "processor_003": 7,
+            "slidemeter_001": 1,
+            "processor_005": 15,
+            "sendsignalvia_001": 6
+        },
+        "__patch__": {
+            "recvsignalvia_001": 3,
+            "message_001": 10,
+            "processor_004": 9,
+            "sendvia_001": 11,
+            "sendvia_002": 12,
+            "processor_001": 5,
+            "patch": 0,
+            "self": 0
+        }
+    }
+}
