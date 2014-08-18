@@ -182,6 +182,10 @@ class Processor (object):
         pass 
 
     def assign(self, patch, scope, name):
+        # null case
+        if (self.patch == patch) and (self.scope == scope) and (self.name == name):
+            return 
+
         if self.patch is not None and self.scope is not None and self.name is not None:
             self.patch.unbind(self.name, self.scope)
         elif self.scope is not None and self.name is not None:

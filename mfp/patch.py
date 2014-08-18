@@ -123,10 +123,14 @@ class Patch(Processor):
 
     def rename(self, new_name):
         from .mfp_app import MFPApp
-        oldname = self.name
-        Processor.rename(self, new_name)
-        del MFPApp().patches[oldname]
-        MFPApp().patches[new_name] = self 
+        if new_name == self.name:
+            return 
+        else: 
+            oldname = self.name
+            Processor.rename(self, new_name)
+            if self.patch is None and oldname in MFPApp().patches: 
+                del MFPApp().patches[oldname]
+                MFPApp().patches[new_name] = self 
 
     #############################
     # evaluator
