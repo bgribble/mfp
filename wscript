@@ -52,6 +52,7 @@ def fix_virtualenv(ctxt, *args, **kwargs):
             "cd %s" % ctxt.out_dir,
             "echo 'Making virtualenv relocatable'", 
             "%s --relocatable virtual" % ctxt.env.VIRTUALENV[0], 
+            "rm -rf virtual/local", 
             (("cat virtual/bin/activate " 
               + "| sed -e 's/^VIRTUAL_ENV=.*$/VIRTUAL_ENV=\"%s\/\"/' "
               + "> activate.edited")
