@@ -151,9 +151,12 @@ class QuittableThread(Thread):
 
     @classmethod
     def finish_all(klass):
+        from . import log 
         with QuittableThread._all_threads_lock:
             work = [ t for t in QuittableThread._all_threads ]
+        log.debug("threads to quit:", work)
         for t in work:
+            log.debug("waiting for thread:", t)
             t.finish()
 
     @classmethod
