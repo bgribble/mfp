@@ -197,7 +197,7 @@ class MFPApp (Singleton):
             log.info("Published classes", args[0])
         elif status == "unmanage":
             dead_patches = [ p for p in self.patches.values() 
-                            if p.context.node_id == peer_id ]
+                             if p.context.node_id == peer_id ]
             if Patch.default_context and (peer_id == Patch.default_context.node_id):
                 log.warning("Relaunching default backend (id=%s)" % peer_id)
                 patch_json = []
@@ -207,7 +207,6 @@ class MFPApp (Singleton):
                     p.context = None 
                     p.delete()
         
-                # FIXME backend restart here  
                 # delete and restart dsp backend 
                 self.start_dsp() 
 
@@ -216,6 +215,7 @@ class MFPApp (Singleton):
                     jobj = json.loads(jdata)
                     name = jobj.get("gui_params", {}).get("name")
                     patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
+                    self.patches[patch.name] = patch 
                     patch.json_deserialize(jdata)
                     patch.create_gui()
 

@@ -19,6 +19,8 @@ static int comm_socket = -1;
 static int comm_procpid = -1;
 static pthread_t comm_io_reader_thread;
 static pthread_t comm_io_writer_thread;
+static int comm_io_reader_thread_ready = 0;
+static int comm_io_writer_thread_ready = 0;
 static int comm_io_quitreq = 0;
 static pthread_mutex_t comm_io_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -225,6 +227,7 @@ mfp_comm_init(char * init_sockid)
 
     /* start the IO threads */ 
     mfp_comm_io_start();
+
     return 0;
 }
 
@@ -240,6 +243,8 @@ mfp_comm_io_reader_thread(void * tdata)
     int bytesread; 
     int success = 0;
     int errstat = 0; 
+
+    comm_io_reader_thread_ready = 1;
 
     while(!quitreq) {
         bzero(msgbuf, MFP_MAX_MSGSIZE+1);
@@ -302,11 +307,14 @@ mfp_comm_io_writer_thread(void * tdata)
     char pbuff[32];
 
     rdata = g_array_new(TRUE, TRUE, sizeof(mfp_out_data));
+    comm_io_writer_thread_ready = 1; 
 
     while(!quitreq) {
         /* wait for a signal that there's data to write */ 
         pthread_mutex_lock(&outgoing_lock);
-        pthread_cond_wait(&outgoing_cond, &outgoing_lock);
+        if (outgoing_queue_read == outgoing_queue_write) { 
+            pthread_cond_wait(&outgoing_cond, &outgoing_lock);
+        }
 
         gettimeofday(&nowtime, NULL);
         alarmtime.tv_sec = nowtime.tv_sec; 
@@ -347,6 +355,11 @@ mfp_comm_io_start(void)
 {
     pthread_create(&comm_io_reader_thread, NULL, mfp_comm_io_reader_thread, NULL);
     pthread_create(&comm_io_writer_thread, NULL, mfp_comm_io_writer_thread, NULL);
+
+    while(! (comm_io_reader_thread_ready && comm_io_writer_thread_ready)) {
+        usleep(10000);
+    }
+
 }
 
 void 

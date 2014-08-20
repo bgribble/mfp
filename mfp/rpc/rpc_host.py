@@ -165,7 +165,7 @@ class RPCHost (QuittableThread):
         #py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
         obj = json.loads(json_data)
         req = Request.from_dict(obj)
-    
+
         # is someone waiting on this response? 
         if req.is_response() and req.request_id in self.pending:
             oldreq = self.pending.get(req.request_id)
@@ -324,8 +324,8 @@ class RPCHost (QuittableThread):
                 cls = RPCWrapper.rpctype.get(clsname)
                 if cls is not None:
                     cls.publishers.append(peer_id)
+
             if self.status_cb:
-                print "publish: calling back", req.params.get("classes")
                 cbthread = QuittableThread(target=self.status_cb, 
                                            args=(peer_id, "publish", 
                                                  req.params.get("classes")))

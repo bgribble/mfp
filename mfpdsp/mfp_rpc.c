@@ -345,11 +345,13 @@ mfp_rpc_wait(int request_id)
     gpointer reqwaiting;
 
     if (request_id < 0) {
-        printf("mfp_rpc_wait: BADREQUEST, not waiting\n");
+        mfp_log_debug("mfp_rpc: BADREQUEST, not waiting\n");
         return;
     }
 
     pthread_mutex_lock(&request_lock);
+    mfp_log_debug("mfp_rpc: waiting for %d", request_id);
+
     g_hash_table_insert(request_waiting, GINT_TO_POINTER(request_id), GINT_TO_POINTER(1));
 
     while(!mfp_comm_quit_requested()) {
@@ -407,7 +409,6 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
             
             cbfunc(val, cbdata);
         }
-
         pthread_mutex_lock(&request_lock);
         g_hash_table_remove(request_waiting, GINT_TO_POINTER(reqid));
         pthread_cond_broadcast(&request_cond);
@@ -478,11 +479,9 @@ mfp_rpc_init(void)
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(req_id);
 
-    mfp_log_info("Got node_id=%d", mfp_comm_nodeid);
     msgbuf = mfp_comm_get_buffer();
     req_id = mfp_rpc_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL, msgbuf, &msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(req_id);
-    mfp_log_info("Published DSPObject class");
 }
 

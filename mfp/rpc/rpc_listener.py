@@ -21,6 +21,7 @@ class RPCListener (QuittableThread):
         self.rpc_host.node_id = 0
 
     def run(self): 
+        from mfp import log 
         # create socket 
         try:
             os.unlink(self.socketpath)
