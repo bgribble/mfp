@@ -159,10 +159,14 @@ class PatchElement (Clutter.Group):
             self.connections_out = [] 
             connections_in = self.connections_in
             self.connections_in = []
+            MFPGUI().mfp.set_gui_created(self.obj_id, False)
             MFPGUI().mfp.delete(self.obj_id)
             self.obj_id = None 
 
         objinfo = MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name)
+        if self.layer is not None and objinfo:
+            objinfo["layername"] = self.layer.name
+
         if objinfo is None:
             self.stage.hud_write("ERROR: Could not create, see log for details")
             return None
@@ -178,6 +182,7 @@ class PatchElement (Clutter.Group):
 
         if self.obj_id is not None:
             self.configure(objinfo)
+
             # rebuild connections if necessary 
             for c in connections_in:
                 if c.obj_2 is self and c.port_2 >= self.num_inlets:

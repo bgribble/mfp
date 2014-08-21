@@ -116,6 +116,7 @@ class GUICommand (RPCWrapper):
             o.obj_type = obj_type
             o.obj_args = obj_args
             o.obj_state = PatchElement.OBJ_COMPLETE
+
             if isinstance(o, PatchElement):
                 parent = MFPGUI().recall(o.parent_id)
                 layer = None 
@@ -133,7 +134,6 @@ class GUICommand (RPCWrapper):
                     ypos = params.get("position_y", 0) - parent.export_y + 20
                     o.move(xpos, ypos)
                     o.editable = False 
-
                     parent.layer.add(o)
                     parent.add_actor(o)    
                     o.container = parent 

@@ -113,7 +113,6 @@ class ProcessorElement (PatchElement):
         self.update()
 
     def label_edit_finish(self, widget, text=None):
-        
         if text is not None and text != self.label_text:
             parts = text.split(' ', 1)
             obj_type = parts[0]
