@@ -389,8 +389,8 @@ class Patch(Processor):
         else:
             self.gui_params["export_x"] = min_x
             self.gui_params["export_y"] = min_y
-            self.gui_params["export_w"] = max_x - min_x
-            self.gui_params["export_h"] = max_y - min_y
+            self.gui_params["export_w"] = max_x - min_x + 2
+            self.gui_params["export_h"] = max_y - min_y + 2
 
     def create_export_gui(self): 
         # non-toplevel Patch means show the Export UI layer only 
