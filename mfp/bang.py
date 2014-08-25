@@ -13,9 +13,27 @@ class UninitType (Singleton):
     def __repr__(self):
         return "Uninit"
 
+
+    def __add__(self, other):
+        return self 
+
+    def __mul__(self, other):
+        return self 
+
+    def __sub__(self, other):
+        return self 
+
+    def __div__(self, other):
+        return self 
+
+    def __pow__(self, other):
+        return self 
+
     @classmethod
     def load(klass, objdict):
         return Uninit
+
+
 
 class UnboundType (Singleton):
     def __repr__(self):
