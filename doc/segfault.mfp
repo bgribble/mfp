@@ -1,0 +1,76 @@
+{
+    "gui_params": {
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "ticket159",
+        "display_type": "patch"
+    },
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": true,
+                "height": 25.0,
+                "width": 241.0,
+                "display_type": "message",
+                "position_x": 145.92999267578125,
+                "position_y": 121.29838562011719,
+                "is_export": false,
+                "layername": "Layer 0"
+            },
+            "name": "message_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": false,
+            "midi_filters": null,
+            "initargs": "@dsp_setparam(\"err_process\", 1)",
+            "type": "message",
+            "properties": {}
+        },
+        "2": {
+            "connections": [
+                []
+            ],
+            "gui_params": {
+                "no_export": false,
+                "update_required": false,
+                "height": 25.0,
+                "width": 67.0,
+                "display_type": "processor",
+                "position_x": 145.92999267578125,
+                "position_y": 169.2983856201172,
+                "is_export": false,
+                "layername": "Layer 0"
+            },
+            "name": "processor_001",
+            "midi_mode": null,
+            "osc_methods": [],
+            "do_onload": true,
+            "midi_filters": null,
+            "initargs": null,
+            "type": "errtest~",
+            "properties": {}
+        }
+    },
+    "type": "default",
+    "scopes": {
+        "__patch__": {
+            "self": 0,
+            "message_001": 1,
+            "processor_001": 2,
+            "patch": 0
+        }
+    }
+}
