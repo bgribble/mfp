@@ -10,14 +10,15 @@ from .. import Uninit
 
 
 class Inlet(Processor):
-    doc_tooltip_obj = "Message input to patch"
+    doc_tooltip_cold = "Message input to patch"
+    doc_tooltip_hot = "Message input to patch (hot)"
 
     def __init__(self, init_type, init_args, patch, scope, name):
         if patch:
             initargs, kwargs = patch.parse_args(init_args)
         else:
             initargs = []
-
+        
         if len(initargs):
             self.inletnum = initargs[0]
         elif patch is not None:
@@ -28,6 +29,11 @@ class Inlet(Processor):
             init_args = "0"
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        if self.inletnum in patch.hot_inlets:
+            self.doc_tooltip_obj = self.doc_tooltip_hot
+        else:
+            self.doc_tooltip_obj = self.doc_tooltip_cold
+
 
     def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is 
@@ -47,10 +53,12 @@ class Inlet(Processor):
     def hot(self):
         if self.inletnum not in self.patch.hot_inlets:
             self.patch.hot_inlets.append(self.inletnum)
+            self.doc_tooltip_obj = self.doc_tooltip_hot
 
     def cold(self):
         if self.inletnum in self.patch.hot_inlets:
             self.patch.hot_inlets.remove(self.inletnum)
+            self.doc_tooltip_obj = self.doc_tooltip_cold
 
     def trigger(self):
         self.outlets[0] = self.inlets[0]
