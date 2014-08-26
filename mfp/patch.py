@@ -316,9 +316,13 @@ class Patch(Processor):
         Processor.delete_gui(self)
         return True 
 
-
     def save_file(self, filename):
+        basefile = os.path.basename(filename)
+        parts = os.path.splitext(basefile)
+        
         self.update_export_bounds()
+        self.init_type = parts[0]
+        
         with open(filename, "w") as savefile:
             savefile.write(self.json_serialize())
 
