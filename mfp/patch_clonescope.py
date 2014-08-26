@@ -47,7 +47,8 @@ def clonescope(self, scopename, num_copies, **kwargs):
     ui_items = {} 
 
     for name, srcobj in scope.bindings.items():
-        if srcobj.gui_params.get("layername") == "Interface":
+        if (srcobj.gui_params.get("layername") == "Interface"
+            and self.obj_is_exportable(srcobj)): 
             ui_items[name] = srcobj
             xpos = srcobj.gui_params.get("position_x")
             ypos = srcobj.gui_params.get("position_y")
