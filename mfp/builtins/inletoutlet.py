@@ -32,11 +32,25 @@ class Inlet(Processor):
     def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is 
         # selected automatically 
-
         prms = self.save()
+        if self.inletnum in patch.hot_inlets: 
+            hot = True 
+        else: 
+            hot = False 
+
         newobj = MFPApp().create(prms.get("type"), None, patch, scope, name)
         newobj.load(prms)
+        if hot: 
+            newobj.hot()
         return newobj
+
+    def hot(self):
+        if self.inletnum not in self.patch.hot_inlets:
+            self.patch.hot_inlets.append(self.inletnum)
+
+    def cold(self):
+        if self.inletnum in self.patch.hot_inlets:
+            self.patch.hot_inlets.remove(self.inletnum)
 
     def trigger(self):
         self.outlets[0] = self.inlets[0]

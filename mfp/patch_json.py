@@ -86,6 +86,10 @@ def json_deserialize(self, json_data):
         inlets = 1
     self.resize(inlets, len(self.outlet_objects))
 
+    hot = f.get('hot_inlets')
+    if hot is not None:
+        self.hot_inlets = hot
+
 @extends(Patch)
 def json_unpack_connections(self, data, idmap):
     from .mfp_app import MFPApp
@@ -138,6 +142,7 @@ def json_serialize(self):
     f = {}
     f['type'] = self.init_type
     f['gui_params'] = self.gui_params
+    f['hot_inlets'] = self.hot_inlets 
 
     allobj = {}
     keys = self.objects.keys()

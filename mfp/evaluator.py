@@ -75,16 +75,16 @@ class Evaluator (object):
                 str2eval = ''.join(["MethodCall(", '"', methname, '",']
                                    + [t[1] for t in tokens[3:]])
 
-        # setparam special form:
-        #   foo='bar', bax='baz'
-        # rewrites to
-        #   dict(foo='bar', bax='baz')
-        if len(tokens) > 2 and tokens[1][1] == '=':
-            str2eval = ''.join(["dict("] + [t[1] for t in tokens] + [')'])
-
         if collect:
             str2eval = "_eval_collect_args(%s)" % str2eval
             extra_bindings['_eval_collect_args'] = _eval_collect_args
+        elif len(tokens) > 2 and tokens[1][1] == '=':
+            # setparam special form:
+            #   foo='bar', bax='baz'
+            # rewrites to
+            #   dict(foo='bar', bax='baz')
+            str2eval = ''.join(["dict("] + [t[1] for t in tokens] + [')'])
+
 
         environ = { name: val 
                     for name, val in (self.global_names.items() + self.local_names.items() 

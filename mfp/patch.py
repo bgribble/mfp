@@ -382,6 +382,7 @@ class Patch(Processor):
                     max_x = x+w
                 if max_y is None or (y+h > max_y):
                     max_y = y+h
+
         if None in (min_x, min_y, max_x, max_y):
             for p in ("export_x", "export_y", "export_w", "export_h"):
                 if p in self.gui_params:
