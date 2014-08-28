@@ -336,10 +336,10 @@ class Patch(Processor):
                 print dline
 
             if oldjson != newjson: 
-                log.debug("Unsaved changes in", self.name, "(%s)" % self.file_origin)
+                log.warning("Unsaved changes in '%s'" % self.name, "(%s)" % self.file_origin)
                 return True 
         elif len(self.objects):
-            log.debug("Unsaved changes in new patch", self.name)
+            log.warning("Unsaved changes in new patch '%s'" % self.name)
             return True
         return False 
             
@@ -352,6 +352,7 @@ class Patch(Processor):
         
         with open(filename, "w") as savefile:
             savefile.write(self.json_serialize())
+        self.file_origin = filename 
 
     def save_lv2(self, plugname, filename):
         import os.path

@@ -44,8 +44,8 @@ class GlobalMode (InputMode):
         self.bind('C-o', self.open_file, "Load file into new patch")
         self.bind('C-s', self.save_file, "Save patch to file")
         self.bind('C-p', self.save_as_lv2, "Save patch as LV2 plugin")
-        self.bind('C-w', self.window.patch_close, "Close current patch")
-        self.bind('C-q', self.window.quit, "Quit")
+        self.bind('C-w', self.patch_close, "Close current patch")
+        self.bind('C-q', self.quit, "Quit")
 
         self.bind("M1DOWN", lambda: self.selbox_start(None), "Start selection box")
         self.bind("M1-MOTION", lambda: self.selbox_motion(True), "Drag selection box")
@@ -250,4 +250,40 @@ class GlobalMode (InputMode):
         self.selbox_changed = [] 
         self.window.hide_selection_box()
         return True
+
+    def patch_close(self): 
+        def close_confirm(answer): 
+            if answer is not None:
+                aa = answer.strip().lower()
+                if aa in ['y', 'yes']:
+                    self.window.patch_close()
+
+        from mfp import log 
+        p = self.window.selected_patch
+        log.debug("patch_close: checking for unsaved changes")
+        if MFPGUI().mfp.has_unsaved_changes(p.obj_id):
+            self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]", 
+                                           close_confirm, '')
+        else:
+            self.window.patch_close()
+
+    def quit(self): 
+        def quit_confirm(answer): 
+            if answer is not None:
+                aa = answer.strip().lower()
+                if aa in ['y', 'yes']:
+                    self.window.quit()
+
+        allpatches = MFPGUI().mfp.open_patches()
+        clean = True 
+        for p in allpatches: 
+            if MFPGUI().mfp.has_unsaved_changes(p):
+                clean = False 
+        if not clean: 
+            self.window.get_prompted_input("There are patches with unsaved changes. Quit anyway? [yN]", 
+                                           quit_confirm, '')
+        else:
+            self.window.quit()
+
+
 

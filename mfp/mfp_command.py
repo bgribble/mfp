@@ -244,6 +244,12 @@ class MFPCommand(RPCWrapper):
         from .mfp_app import MFPApp
         return [ p.obj_id for p in MFPApp().patches.values()]
 
+    @rpcwrap
+    def has_unsaved_changes(self, obj_id): 
+        from .mfp_app import MFPApp
+        patch = MFPApp().recall(obj_id)
+        return patch.has_unsaved_changes()
+
     @rpcwrap_noresp
     def quit(self):
         from .mfp_app import MFPApp
