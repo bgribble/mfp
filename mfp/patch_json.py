@@ -150,7 +150,6 @@ def json_serialize(self):
     for oid in keys:
         o = self.objects.get(oid)
         if o and (isinstance(o, MFPApp) or not o.save_to_patch):
-            print "json_serialize: skipping object", oid, o
             continue
         oinfo = o.save()
         allobj[oid] = oinfo
@@ -162,11 +161,10 @@ def json_serialize(self):
         bindings = {}
         for objname, obj in scope.bindings.items():
             if obj and (isinstance(obj, MFPApp) or not obj.save_to_patch):
-                print "json_serialize: skipping object", objname, obj
                 continue
             bindings[objname] = obj.obj_id
 
         scopes[scopename] = bindings
 
     f['scopes'] = scopes
-    return json.dumps(f, indent=4, cls=ExtendedEncoder)
+    return json.dumps(f, sort_keys=True, indent=4, cls=ExtendedEncoder)

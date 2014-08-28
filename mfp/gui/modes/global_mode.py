@@ -96,6 +96,7 @@ class GlobalMode (InputMode):
         return False 
 
     def save_file(self):
+        import os.path 
         patch = self.window.selected_patch
         if patch.last_filename is None: 
             default_filename = patch.obj_name + '.mfp'
@@ -106,7 +107,9 @@ class GlobalMode (InputMode):
             if fname:
                 patch.last_filename = fname 
                 if fname != default_filename:
-                    newname ='.'.join(fname.split(".")[:-1]) 
+                    basefile = os.path.basename(fname)
+                    parts = os.path.splitext(basefile)
+                    newname = parts[0]
                     patch.obj_name = newname
                     MFPGUI().mfp.rename_obj(patch.obj_id, newname)
                     patch.send_params()

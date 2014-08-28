@@ -244,7 +244,7 @@ class MFPApp (Singleton):
                 log.debug("Found file", filepath)
                 (name, factory) = Patch.register_file(filepath)
             else:
-                log.debug("No file '%s' in search path %s" % (loadfile, MFPApp().searchpath))
+                log.error("No file '%s' in search path %s" % (loadfile, MFPApp().searchpath))
                 if "." in loadfile:
                     name = '.'.join(loadfile.split('.')[:-1])
                 else: 
@@ -284,7 +284,7 @@ class MFPApp (Singleton):
                 log.debug("Found file", filepath)
                 (typename, ctor) = Patch.register_file(filepath)
             else:
-                log.debug("No file '%s' in search path %s" % (filename, MFPApp().searchpath))
+                log.error("No file '%s' in search path %s" % (filename, MFPApp().searchpath))
 
         # third try: can we autowrap a python function? 
         if ctor is None: 
@@ -293,7 +293,7 @@ class MFPApp (Singleton):
                 if callable(thunk): 
                    ctor = builtins.pyfunc.PyAutoWrap
             except Exception, e: 
-                log.debug("Cannot autowrap %s as a Python callable" % init_type)
+                log.error("Cannot autowrap %s as a Python callable" % init_type)
                 print e
 
         if ctor is None: 
@@ -306,7 +306,7 @@ class MFPApp (Singleton):
                 obj.mark_ready()
             return obj
         except Exception, e:
-            log.debug("Caught exception while trying to create %s (%s)"
+            log.error("Caught exception while trying to create %s (%s)"
                       % (init_type, init_args))
             log.debug(e)
             import traceback

@@ -31,6 +31,8 @@ class Patch(Processor):
         else: 
             self.context = context 
 
+        self.file_origin = None
+
         self.objects = {}
         self.scopes = {'__patch__': LexicalScope()}
         self.default_scope = self.scopes['__patch__']
@@ -316,6 +318,31 @@ class Patch(Processor):
         Processor.delete_gui(self)
         return True 
 
+    def has_unsaved_changes(self): 
+        import difflib 
+        import copy
+        if self.file_origin:
+            oldjson = open(self.file_origin, 'r').read()
+            saved_gui = copy.copy(self.gui_params)
+            for k in ['num_inlets', 'num_outlets', 'obj_id', 'top_level']:
+                if k in self.gui_params:
+                    del self.gui_params[k]
+
+            newjson = self.json_serialize()
+            self.gui_params = saved_gui
+
+            cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
+            for dline in cdiff: 
+                print dline
+
+            if oldjson != newjson: 
+                log.debug("Unsaved changes in", self.name, "(%s)" % self.file_origin)
+                return True 
+        elif len(self.objects):
+            log.debug("Unsaved changes in new patch", self.name)
+            return True
+        return False 
+            
     def save_file(self, filename):
         basefile = os.path.basename(filename)
         parts = os.path.splitext(basefile)
@@ -342,17 +369,20 @@ class Patch(Processor):
         searchpath = MFPApp().searchpath or ""
         searchdirs = splitpath(searchpath)
         jsdata = None 
+        filepath = None 
 
         for d in searchdirs:
             path = os.path.join(d, filename)
             try: 
                 os.stat(path)
                 jsdata = open(path, 'r').read()
+                filepath = path 
             except OSError:
                 pass 
 
         if jsdata is not None:
             self.json_deserialize(jsdata)
+            self.file_origin = filepath 
             for phase in (0,1):
                 for obj_id, obj in self.objects.items():
                     if obj.do_onload:
