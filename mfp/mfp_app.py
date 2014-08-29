@@ -570,3 +570,10 @@ class MFPApp (Singleton):
         patch.json_unpack_connections(jdata, idmap)
         return [ o.obj_id for o in idmap.values() ]
 
+
+    def toggle_pause(self): 
+        if Processor.paused:
+            Processor.paused = False 
+        else: 
+            Processor.paused = True 
+        return Processor.paused

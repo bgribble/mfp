@@ -26,6 +26,8 @@ class Processor (object):
     save_to_patch = True 
     hot_inlets = [0]
 
+    paused = False 
+
     doc_tooltip_obj = "No documentation found"
     doc_tooltip_inlet = []
     doc_tooltip_outlet = [] 
@@ -542,6 +544,9 @@ class Processor (object):
         return True
 
     def send(self, value, inlet=0):
+        if self.paused:
+            return 
+
         try:
             work = self._send(value, inlet)
             while len(work):
@@ -556,6 +561,9 @@ class Processor (object):
             self.error(tb)
 
     def _send(self, value, inlet=0):
+        if self.paused: 
+            return [] 
+
         work = []
         if inlet >= 0:
             self.inlets[inlet] = value

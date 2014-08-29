@@ -47,6 +47,8 @@ class GlobalMode (InputMode):
         self.bind('C-w', self.patch_close, "Close current patch")
         self.bind('C-q', self.quit, "Quit")
 
+        self.bind('C-A-.', self.toggle_pause, "Pause/unpause execution")
+
         self.bind("M1DOWN", lambda: self.selbox_start(None), "Start selection box")
         self.bind("M1-MOTION", lambda: self.selbox_motion(True), "Drag selection box")
         self.bind("M1UP", self.selbox_end, "End selection box")
@@ -284,6 +286,16 @@ class GlobalMode (InputMode):
                                            quit_confirm, '')
         else:
             self.window.quit()
-
+    
+    def toggle_pause(self): 
+        from mfp import log
+        try: 
+            paused = MFPGUI().mfp.toggle_pause()
+            if paused: 
+                log.warning("Execution of all patches paused")
+            else: 
+                log.warning("Execution of all patches resumed")
+        except Exception, e: 
+            print "Caught exception", e
 
 

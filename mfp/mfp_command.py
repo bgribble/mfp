@@ -258,3 +258,9 @@ class MFPCommand(RPCWrapper):
         return None
 
 
+    @rpcwrap
+    def toggle_pause(self): 
+        from .mfp_app import MFPApp
+        return MFPApp().toggle_pause()
+
+

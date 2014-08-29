@@ -35,7 +35,7 @@ def write_log_entry(msg, level=0):
         log_file.write(msg)
 
 def rpclog(msg, level):
-    levels = { 0: "DEBUG", 1: "WARN", 2: "ERROR", 3: "FATAL" }
+    levels = { 0: "DEBUG", 1: "WARNING", 2: "ERROR", 3: "FATAL" }
     print "[LOG] %s: %s" % (levels.get(level, "DEBUG"), msg)
     sys.stdout.flush()
 
