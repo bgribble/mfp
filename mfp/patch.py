@@ -349,9 +349,13 @@ class Patch(Processor):
         
         self.update_export_bounds()
         self.init_type = parts[0]
-        
+       
+        if os.path.isfile(filename): 
+            os.rename(filename, filename+'~')
+
         with open(filename, "w") as savefile:
             savefile.write(self.json_serialize())
+
         self.file_origin = filename 
 
     def save_lv2(self, plugname, filename):
