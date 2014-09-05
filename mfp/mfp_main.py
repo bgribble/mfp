@@ -121,6 +121,8 @@ def main():
                         help="Do not launch the DSP engine")
     parser.add_argument("--no-default", action="store_true", 
                         help="Do not create a default patch")
+    parser.add_argument("--no-restart", action="store_true", 
+                        help="Do not restart DSP engine if it crashes")
     parser.add_argument("--help-builtins", action="store_true", 
                         help="Display help on builtin objects and exit") 
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
@@ -139,6 +141,7 @@ def main():
     app.no_gui = args.get("no_gui") or args.get("help_builtins")
     app.no_dsp = args.get("no_dsp")
     app.no_default = args.get("no_default")
+    app.no_restart = args.get("no_restart")
     app.dsp_inputs = args.get("inputs")
     app.dsp_outputs = args.get("outputs")
     app.osc_port = args.get("osc_udp_port")

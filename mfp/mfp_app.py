@@ -28,6 +28,7 @@ class MFPApp (Singleton):
         # configuration items -- should be populated before calling setup() 
         self.no_gui = False
         self.no_dsp = False
+        self.no_restart = False 
         self.debug = False
         self.debug_remote = False 
         self.osc_port = None 
@@ -101,7 +102,9 @@ class MFPApp (Singleton):
         self.start_dsp()
 
         if not self.no_gui:
+            logstart = log.log_time_base.strftime("%Y-%m-%dT%H:%M:%S.%f")
             self.gui_process = RPCExecRemote("mfpgui", "-s", self.socket_path, 
+                                             "-l", logstart,
                                              log_module="gui", log_raw=self.debug_remote)
             self.gui_process.start()
             
@@ -198,15 +201,20 @@ class MFPApp (Singleton):
         elif status == "unmanage":
             dead_patches = [ p for p in self.patches.values() 
                              if p.context.node_id == peer_id ]
-            if Patch.default_context and (peer_id == Patch.default_context.node_id):
+            if (Patch.default_context and (peer_id == Patch.default_context.node_id) 
+               and not self.no_restart):
                 log.warning("Relaunching default backend (id=%s)" % peer_id)
                 patch_json = []
+
                 for p in dead_patches: 
                     patch_json.append(p.json_serialize())
                     p.delete_gui()
                     p.context = None 
                     p.delete()
-        
+       
+                if self.no_restart:
+                    return 
+
                 # delete and restart dsp backend 
                 self.start_dsp() 
 
@@ -221,11 +229,15 @@ class MFPApp (Singleton):
 
             else:
                 log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
+                log.warning("DSP backend died but --no-restart in place")
                 for p in dead_patches:
                     p.delete()
 
 
     def open_file(self, file_name, context=None, show_gui=True):
+        from datetime import datetime
+       
+        starttime = datetime.now()
         patch = None 
         factory = None 
         name = 'default'
@@ -262,6 +274,9 @@ class MFPApp (Singleton):
         if show_gui:
             patch.create_gui()
         patch.mark_ready()
+
+        loadtime = datetime.now() - starttime
+        log.debug("Patch loaded, elapsed time %s" % loadtime) 
         if show_gui and patch.gui_created:
             MFPApp().gui_command.select(patch.obj_id)
         return patch

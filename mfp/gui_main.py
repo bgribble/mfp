@@ -9,6 +9,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 import threading
 import argparse 
 import sys
+from datetime import datetime 
 from singleton import Singleton
 from mfp_command import MFPCommand
 from . import log
@@ -107,6 +108,8 @@ class MFPGUI (Singleton):
 
 def main(): 
     parser = argparse.ArgumentParser()
+    parser.add_argument("-l", "--logstart", default=None,
+                        help="Reference time for log messages")
     parser.add_argument("-s", "--socketpath", default="/tmp/mfp_rpcsock",
                         help="Path to Unix-domain socket for RPC") 
 
@@ -120,6 +123,11 @@ def main():
     remote.connect() 
 
     print "[LOG] DEBUG: GUI process starting"
+
+    if args.get("logstart"):
+        st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f" )
+        if st:
+            log.log_time_base = st
 
     log.log_module = "gui"
     log.log_func = log.rpclog
