@@ -13,6 +13,7 @@ from datetime import datetime
 from singleton import Singleton
 from mfp_command import MFPCommand
 from . import log
+from mfp.utils import profile 
 
 from .gui_command import GUICommand
 from .rpc import RPCRemote, RPCHost
@@ -35,6 +36,7 @@ def add_color_defaults():
 
 class MFPGUI (Singleton):
     def __init__(self):
+        self.call_stats = {} 
         self.objects = {}
         self.mfp = None
         self.appwin = None
@@ -59,10 +61,14 @@ class MFPGUI (Singleton):
 
     def clutter_do_later(self, delay, thunk):
         from gi.repository import GObject
+        count = self.call_stats.get("clutter_later", 0) + 1
+        self.call_stats['clutter_later'] = count
         GObject.timeout_add(int(delay), self._callback_wrapper, thunk)
 
     def clutter_do(self, thunk):
         from gi.repository import GObject
+        count = self.call_stats.get("clutter_now", 0) + 1
+        self.call_stats['clutter_now'] = count
         GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
 
     def clutter_proc(self):
@@ -97,14 +103,16 @@ class MFPGUI (Singleton):
             import traceback
             for l in traceback.format_exc().split("\n"):
                 print "[LOG] ERROR:", l
-            sys.stdout.flush()
+                sys.stdout.flush()
 
     def finish(self):
+        from gi.repository import Gtk
         log.debug("MFPGUI.finish() called")
+        log.log_func = None
         if self.appwin:
-            log.log_func = None
             self.appwin.quit()
             self.appwin = None
+        Gtk.main_quit()
 
 def main(): 
     parser = argparse.ArgumentParser()

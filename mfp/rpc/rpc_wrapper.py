@@ -93,7 +93,8 @@ class RPCWrapper (object):
         from datetime import datetime 
 
         r = Request("call", rpcdata)
-        r.diagnostic["remote_call_start"] = str(datetime.now())
+        call_started = datetime.now()
+        r.diagnostic["remote_call_start"] = str(call_started)
         if not response: 
             r.request_id = None
 
@@ -101,8 +102,22 @@ class RPCWrapper (object):
         puttime = str(datetime.now())
         if response: 
             self.rpchost.wait(r, timeout=5)
-        r.diagnostic["remote_call_complete"] = str(datetime.now())
+        call_complete = datetime.now()
+        call_elapsed = call_complete - call_started
+        r.diagnostic["remote_call_complete"] = call_complete 
         r.diagnostic["remote_call_put"] = puttime 
+
+        callinfo = self.call_stats.setdefault(rpcdata.get('func'), {})
+        total = callinfo.get("total")
+        if total:
+            total += call_elapsed 
+        else: 
+            total = call_elapsed 
+        callinfo["total"] = total 
+        count = callinfo.get("count", 0) + 1
+        callinfo["count"] = count 
+        callinfo["avgtime"] = total / count 
+
 
         if not response:
             return None 
@@ -117,8 +132,9 @@ class RPCWrapper (object):
             raise RPCWrapper.MethodFailed(False, retval)
 
     def call_locally(self, rpcdata):
-        count = self.call_stats.get(rpcdata.get('func'), 0)
-        self.call_stats[rpcdata.get('func')] = count + 1 
+        callinfo = self.call_stats.setdefault(rpcdata.get('func'), {})
+        count = callinfo.get("local", 0) + 1 
+        callinfo["local"] = count
 
         methname = rpcdata.get('func')
         args = rpcdata.get('args')

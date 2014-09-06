@@ -136,7 +136,7 @@ class TreeDisplay (object):
                 path = Gtk.TreePath.new_from_string(pathstr)
                 self.selection.unselect_path(path)
 
-    def insert(self, obj, parent):
+    def insert(self, obj, parent, update=True):
         piter = None 
         if parent is not None:
             ppath = self.object_paths.get(parent)
@@ -146,9 +146,13 @@ class TreeDisplay (object):
         iter = self.treestore.append(piter)
         self.treestore.set_value(iter, 0, obj)
         self.object_parents[obj] = parent 
-        self._update_paths() 
-        self.treeview.expand_all()
+        if update:
+            self.refresh() 
+            self.treeview.expand_all()
         return iter 
+
+    def refresh(self): 
+        self._update_paths()
 
     def move_before(self, obj, target):
         path = self.object_paths.get(obj)
@@ -156,7 +160,7 @@ class TreeDisplay (object):
         path = self.object_paths.get(target)
         iter_new = self.treestore.get_iter_from_string(path) 
         self.treestore.move_before(iter_old, iter_new)
-        self._update_paths()
+        self.refresh()
 
     def move_after(self, obj, target):
         path = self.object_paths.get(obj)
@@ -164,14 +168,15 @@ class TreeDisplay (object):
         path = self.object_paths.get(target)
         iter_new = self.treestore.get_iter_from_string(path) 
         self.treestore.move_after(iter_old, iter_new)
-        self._update_paths()
+        self.refresh()
 
-    def remove(self, obj):
+    def remove(self, obj, update=True):
         path = self.object_paths.get(obj)
         if path: 
             iter = self.treestore.get_iter_from_string(path)
             self.treestore.remove(iter)
-            self._update_paths()
+        if update:
+            self.refresh()
 
     def update(self, obj, parent):
         need_select = False 
@@ -192,7 +197,7 @@ class TreeDisplay (object):
 
         # restore signal handler 
         self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)
-        self._update_paths()
+        self.refresh()
 
         if need_select:
             pathstr = self.object_paths.get(obj)

@@ -72,6 +72,7 @@ class PatchWindow(object):
         self.selected = []
 
         self.load_in_progress = False 
+        self.close_in_progress = False 
 
         self.input_mgr = InputManager(self)
         self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view)
@@ -142,6 +143,7 @@ class PatchWindow(object):
 
     def load_start(self):
         self.load_in_progress = True 
+        log.debug("Load starting on GUI side")
 
     def load_complete(self):
         self.load_in_progress = False 
@@ -149,6 +151,9 @@ class PatchWindow(object):
             self.selected_patch = self.patches[0]
         if self.selected_layer is None and self.selected_patch is not None:
             self.layer_select(self.selected_patch.layers[0])
+        self.object_view.refresh()
+        self.layer_view.refresh()
+        log.debug("Patch GUI completed")
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
@@ -265,12 +270,18 @@ class PatchWindow(object):
             else: 
                 element.layer.group.add_actor(element)
                 element.container = element.layer.group
-       
+      
         if not isinstance(element, ConnectionElement):
-            if isinstance(element.container, PatchElement):
-                self.object_view.insert(element, element.container)
+            if self.load_in_progress: 
+                update = False 
             else: 
-                self.object_view.insert(element, (element.layer.scope, element.layer.patch))
+                update = True
+
+            if isinstance(element.container, PatchElement):
+                self.object_view.insert(element, element.container, update=update)
+            else: 
+                self.object_view.insert(element, (element.layer.scope, element.layer.patch),
+                                        update=update)
         if element.obj_id is not None:
             element.send_params()
 
@@ -291,7 +302,6 @@ class PatchWindow(object):
             element.container = None 
 
         self.object_view.remove(element)
-
         self.emit_signal("remove", element)
 
     def refresh(self, element):
@@ -325,11 +335,14 @@ class PatchWindow(object):
     def quit(self, *rest):
         from .patch_info import PatchInfo
         log.debug("Quit command from GUI or WM")
-        
+
+        self.close_in_progress = True  
         to_delete = [ p for p in self.patches if p.deletable ]
         for p in to_delete:
             p.delete()
-
+        self.close_in_progress = False 
+        self.object_view.refresh()
+        
         allpatches = MFPGUI().mfp.open_patches()
         guipatches = [ p.obj_id for p in self.objects if isinstance(p, PatchInfo) ]
 
@@ -343,7 +356,8 @@ class PatchWindow(object):
             self.console_mgr.join()
             log.debug("Console thread reaped")
             self.console_mgr = None 
-
+        MFPGUI().appwin = False
+        MFPGUI().finish()
         MFPGUI().mfp.quit()
         return True
 
