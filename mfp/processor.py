@@ -4,7 +4,7 @@ processor.py: Parent class of all processors
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-
+import threading 
 from .dsp_object import DSPObject
 from .method import MethodCall
 from .evaluator import LazyExpr
@@ -12,6 +12,11 @@ from .bang import Uninit, Bang
 from .scope import LexicalScope
 
 from . import log
+
+class AsyncOutput (object): 
+    def __init__(self, value, outlet):
+        self.outlet_num = outlet 
+        self.value = value 
 
 class Processor (object):
     PORT_IN = 0 
@@ -58,6 +63,8 @@ class Processor (object):
         self.midi_filters = None 
         self.midi_cbid = None 
         self.midi_learn_cbid = None 
+
+        self.trigger_lock = threading.RLock()
 
         self.gui_created = False
         self.do_onload = True 
@@ -571,15 +578,18 @@ class Processor (object):
         self.count_in += 1 
 
         if inlet in self.hot_inlets or inlet == -1:
-            self.outlets = [Uninit] * len(self.outlets)
-            if inlet == -1:
-                self.dsp_response(value[0], value[1])
-            elif isinstance(value, MethodCall):
-                self.method(value, inlet)
-            else:
-                self.trigger()
-                self.count_trigger += 1
-            output_pairs = zip(self.connections_out, self.outlets)
+            with self.trigger_lock:
+                self.outlets = [Uninit] * len(self.outlets)
+                if inlet == -1:
+                    self.dsp_response(value[0], value[1])
+                elif isinstance(value, MethodCall):
+                    self.method(value, inlet)
+                elif isinstance(value, AsyncOutput):
+                    self.outlets[value.outlet_num] = value.value
+                else:
+                    self.trigger()
+                    self.count_trigger += 1
+                output_pairs = zip(self.connections_out, self.outlets)
 
             for conns, val in [output_pairs[i] for i in self.outlet_order]:
                 if val is not Uninit:

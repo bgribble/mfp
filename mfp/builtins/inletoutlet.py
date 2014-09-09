@@ -4,7 +4,7 @@ p_inletoutlet.py: inlet and outlet processors for patches
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from ..processor import Processor
+from ..processor import Processor, AsyncOutput
 from ..mfp_app import MFPApp
 from .. import Uninit
 
@@ -105,7 +105,11 @@ class Outlet(Processor):
 
     def trigger(self):
         if self.patch:
-            self.patch.outlets[self.outletnum] = self.inlets[0]
+            if not self.patch.trigger_lock.acquire(False):
+                self.patch.outlets[self.outletnum] = self.inlets[0]
+            else:
+                self.patch.trigger_lock.release()
+                self.patch.send(AsyncOutput(self.inlets[0], self.outletnum))
 
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit
