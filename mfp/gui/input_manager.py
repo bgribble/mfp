@@ -96,7 +96,6 @@ class InputManager (object):
                 hdesc = handler[1]
             if hdesc: 
                 self.window.hud_write("%s: %s (%s)" % (keysym, hdesc, mdesc))
-
         if keysym is not None:
             # check minor modes first
             for minor in self.minor_modes:
@@ -177,7 +176,14 @@ class InputManager (object):
                 if retry_count < 5:
                     continue
                 else:
-                    return False 
+                    return False
+            except Exception, e:
+                from mfp import log
+                import traceback
+                log.error("Exception while handling key command", keysym)
+                for l in traceback.format_exc().split("\n"):
+                    log.debug(l)
+                log.debug(e)
             return rv 
 
     def rezoom(self): 

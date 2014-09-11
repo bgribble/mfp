@@ -105,9 +105,16 @@ class PatchWindow(object):
 
     def init_input(self):
         def grab_handler(stage, event):
-            if not self.embed.has_focus():
-                self.embed.grab_focus()
-            return self.input_mgr.handle_event(stage, event)
+            try: 
+                if not self.embed.has_focus():
+                    self.embed.grab_focus()
+                return self.input_mgr.handle_event(stage, event)
+            except Exception, e:
+                import traceback 
+                log.error("Error handling UI event", event) 
+                log.debug(e)
+                traceback.print_exc()
+                return False
 
         def handler(stage, event):
             return self.input_mgr.handle_event(stage, event)
