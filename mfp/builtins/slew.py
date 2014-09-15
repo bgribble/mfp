@@ -7,7 +7,7 @@ Copyright (c) 2014 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
-
+from ..bang import Uninit 
 
 class Slew(Processor):
     doc_tooltip_obj = "Limit the slew rate of a signal"
@@ -27,6 +27,7 @@ class Slew(Processor):
         else:
             rise = fall = 10000
 
+        self.hot_inlets = [0, 1, 2]
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
         self.dsp_init("slew~")
@@ -34,8 +35,16 @@ class Slew(Processor):
         self.dsp_obj.setparam("fall", fall)
 
     def trigger(self):
-        val = float(self.inlets[0])
-        self.dsp_obj.setparam("value", val)
+        if self.inlets[0] is not Uninit: 
+            val = float(self.inlets[0])
+            self.dsp_obj.setparam("_sig_0", val)
+        if self.inlets[1] is not Uninit: 
+            val = float(self.inlets[1])
+            self.dsp_obj.setparam("rise", val)
+        if self.inlets[2] is not Uninit: 
+            val = float(self.inlets[2])
+            self.dsp_obj.setparam("fall", val)
+
 
 
 def register():

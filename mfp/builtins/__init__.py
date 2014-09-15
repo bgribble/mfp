@@ -69,4 +69,5 @@ def register():
     latency.register() 
     from . import errtest
     errtest.register()
-
+    from . import slew 
+    slew.register()
