@@ -8,7 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 import os
 
-from .processor import Processor
+from .processor import Processor, AsyncOutput
 from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit, Unbound 
@@ -38,13 +38,13 @@ class Patch(Processor):
         self.default_scope = self.scopes['__patch__']
         self.evaluator = Evaluator()
 
-        self.init_bindings()
-
         self.inlet_objects = []
         self.outlet_objects = []
         self.dispatch_objects = [] 
 
+        self.init_bindings()
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
+
         self.gui_params['layers'] = []
         if patch is None:
             self.gui_params['top_level'] = True
@@ -53,8 +53,6 @@ class Patch(Processor):
 
     def init_bindings(self): 
         from .mfp_app import MFPApp
-        #self.evaluator.bind_local("self", self)
-        self.evaluator.bind_local("patch", self)
         self.default_scope.bind("self", self)
         self.default_scope.bind("patch", self)
         self.default_scope.bind("app", MFPApp())
@@ -62,7 +60,7 @@ class Patch(Processor):
     def args(self, index=None):
         if index is None: 
             return self.parsed_initargs
-        elif index >= len(self.parsed_initargs):
+        elif self.parsed_initargs is None or index >= len(self.parsed_initargs):
             return Uninit 
         else: 
             return self.parsed_initargs[index]
@@ -171,11 +169,15 @@ class Patch(Processor):
 
         for i in inlist:
             if self.inlets[i] is not Uninit:
-                self.inlet_objects[i].send(self.inlets[i])
+                if isinstance(self.inlets[i], AsyncOutput):
+                    self.send(self.inlets[i])
+                else:
+                    self.inlet_objects[i].send(self.inlets[i])
                 self.inlets[i] = Uninit
 
         for o in range(len(self.outlets)):
-            self.outlets[i] = self.outlet_objects[i].outlets[0]
+            self.outlets[o] = self.outlet_objects[o].outlets[0]
+            self.outlet_objects[o].outlets[0] = Uninit
 
     def method(self, message, inlet=0):
         if len(self.dispatch_objects): 
@@ -183,6 +185,10 @@ class Patch(Processor):
                 d.send(message)
         else:
             self.baseclass_method(message, inlet)
+
+        for o in range(len(self.outlets)):
+            self.outlets[o] = self.outlet_objects[o].outlets[0]
+            self.outlet_objects[o].outlets[0] = Uninit
 
     def baseclass_method(self, message, inlet=0):
         Processor.method(self, message, inlet) 

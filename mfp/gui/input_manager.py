@@ -169,6 +169,7 @@ class InputManager (object):
 
         retry_count = 0
         while True:
+            rv = None 
             try: 
                 retry_count += 1
                 rv = self.handle_keysym(keysym)

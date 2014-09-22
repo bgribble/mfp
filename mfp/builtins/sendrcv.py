@@ -16,6 +16,8 @@ class Send (Processor):
     doc_tooltip_obj = "Send messages to a named receiver (create with 'via' GUI object)"
     doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
 
+    do_onload = False 
+    
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 0, init_type, init_args, patch, scope, name)
 
@@ -96,6 +98,7 @@ class SendSignal (Send):
 class MessageBus (Processor): 
     display_type = "hidden"
     save_to_patch = False 
+    do_onload = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
@@ -113,6 +116,7 @@ class MessageBus (Processor):
 class SignalBus (Processor): 
     display_type = "hidden"
     save_to_patch = False 
+    do_onload = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
@@ -131,6 +135,7 @@ class Recv (Processor):
     doc_tooltip_outlet = [ "Passthru output" ]
 
     bus_type = "bus" 
+    do_onload = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)

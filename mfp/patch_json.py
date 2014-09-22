@@ -160,6 +160,9 @@ def json_serialize(self):
     for scopename, scope in self.scopes.items():
         bindings = {}
         for objname, obj in scope.bindings.items():
+            if not obj: 
+                log.warning("json_serialize: name", objname, "has no bound object")
+                continue
             if obj and (isinstance(obj, MFPApp) or not obj.save_to_patch):
                 continue
             bindings[objname] = obj.obj_id

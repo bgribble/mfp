@@ -328,9 +328,13 @@ class PatchWindow(object):
             x = self.input_mgr.pointer_x
         if y is None:
             y = self.input_mgr.pointer_y
-
-        b = factory(self, x, y)
-
+        
+        try: 
+            b = factory(self, x, y)
+        except Exception, e:
+            log.warning("add_element: Error while creating with factory", factory)
+            return True
+        
         self.active_layer().add(b)
         self.register(b) 
         self.refresh(b)

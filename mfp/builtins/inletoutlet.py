@@ -12,6 +12,8 @@ from .. import Uninit
 class Inlet(Processor):
     doc_tooltip_cold = "Message input to patch"
     doc_tooltip_hot = "Message input to patch (hot)"
+    
+    do_onload = False
 
     def __init__(self, init_type, init_args, patch, scope, name):
         if patch:
@@ -76,6 +78,7 @@ class SignalInlet(Inlet):
 class Outlet(Processor):
     doc_tooltip_obj = "Message output from patch"
 
+    do_onload = False 
     def __init__(self, init_type, init_args, patch, scope, name):
         if patch:
             initargs, kwargs = patch.parse_args(init_args)

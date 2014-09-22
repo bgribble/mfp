@@ -52,14 +52,13 @@ def patch_new(self):
 
 @extends(PatchWindow)
 def _select(self, obj): 
-    if obj is None or not isinstance(obj, PatchElement) or obj in self.selected:
+    if (obj is None) or (not isinstance(obj, PatchElement)) or (obj in self.selected):
         return 
     
     self.selected[:0] = [obj]
     obj.select()
 
     self.emit_signal("select", obj)
-
 
 @extends(PatchWindow)
 def select(self, obj):

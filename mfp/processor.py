@@ -64,7 +64,7 @@ class Processor (object):
         self.midi_cbid = None 
         self.midi_learn_cbid = None 
 
-        self.trigger_lock = threading.RLock()
+        self.trigger_lock = threading.Lock()
 
         self.gui_created = False
         self.do_onload = True 
@@ -578,6 +578,7 @@ class Processor (object):
         self.count_in += 1 
 
         if inlet in self.hot_inlets or inlet == -1:
+            log.debug("processor._send:", self, value, inlet)
             with self.trigger_lock:
                 self.outlets = [Uninit] * len(self.outlets)
                 if inlet == -1:
@@ -585,7 +586,12 @@ class Processor (object):
                 elif isinstance(value, MethodCall):
                     self.method(value, inlet)
                 elif isinstance(value, AsyncOutput):
-                    self.outlets[value.outlet_num] = value.value
+                    if value.outlet_num not in range(len(self.outlets)):
+                        log.error("_send: object %s has no outlet '%s'" % (self.name, 
+                                                                           value.outlet_num))
+                    else:
+                        self.outlets[value.outlet_num] = value.value
+                        self.inlets[inlet] = Uninit
                 else:
                     self.trigger()
                     self.count_trigger += 1
@@ -615,17 +621,14 @@ class Processor (object):
         from .patch import Patch
         if "scope" not in extra_bindings:
             extra_bindings["scope"] = self.scope 
-
         if "__self__" not in extra_bindings:
             extra_bindings["__self__"] = self
+        if "__patch__" not in extra_bindings: 
+            extra_bindings["__patch__"] = self.patch
 
         if isinstance(self, Patch):
-            if not extra_bindings.has_key("patch"):
-                extra_bindings["patch"] = self
             return self.evaluator.eval_arglist(pystr, **extra_bindings)
         elif self.patch:
-            if not extra_bindings.has_key("patch"):
-                extra_bindings["patch"] = self.patch
             return self.patch.parse_args(pystr, **extra_bindings)
         else:
             from .evaluator import Evaluator
@@ -634,15 +637,16 @@ class Processor (object):
 
     def parse_obj(self, pystr, **extra_bindings):
         from .patch import Patch
-        if not extra_bindings.has_key("scope"):
+        if "scope" not in extra_bindings:
             extra_bindings["scope"] = self.scope 
+        if "__self__" not in extra_bindings:
+            extra_bindings["__self__"] = self
+        if "__patch__" not in extra_bindings: 
+            extra_bindings["__patch__"] = self.patch
+
         if isinstance(self, Patch):
-            if not extra_bindings.has_key("patch"):
-                extra_bindings["patch"] = self
             return self.evaluator.eval(pystr, **extra_bindings)
         elif self.patch:
-            if not extra_bindings.has_key("patch"):
-                extra_bindings["patch"] = self.patch
             return self.patch.parse_obj(pystr, **extra_bindings)
         else:
             from .evaluator import Evaluator

@@ -34,7 +34,6 @@ class Var (Processor):
         self.value = Uninit
         self.do_onload = False 
 
-
         if len(initargs):
             self.value = initargs[0]
         elif len(kwargs):

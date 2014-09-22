@@ -92,6 +92,8 @@ class Evaluator (object):
                   } 
         if "__self__" in environ:
             environ["self"] = environ["__self__"]
+        if "__patch__" in environ:
+            environ["patch"] = environ["__patch__"]
 
         rv = eval(str2eval, environ)
 
