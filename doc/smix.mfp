@@ -1,0 +1,470 @@
+{
+    "gui_params": {
+        "display_type": "patch",
+        "export_h": 281.5440368652344,
+        "export_w": 194.0,
+        "export_x": 66.69287109375,
+        "export_y": 100.73564147949219,
+        "layers": [
+            [
+                "Interface",
+                "__patch__"
+            ],
+            [
+                "Stereo bus",
+                "__patch__"
+            ],
+            [
+                "Load aux",
+                "__patch__"
+            ],
+            [
+                "Aux bus",
+                "aux_001"
+            ],
+            [
+                "Channel",
+                "chan_001"
+            ]
+        ],
+        "name": "smix"
+    },
+    "hot_inlets": [
+        0
+    ],
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        52,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        53,
+                        0
+                    ]
+                ],
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 279.5440368652344,
+                "is_export": false,
+                "layername": "Interface",
+                "no_export": false,
+                "position_x": 66.69287109375,
+                "position_y": 100.73564147949219,
+                "update_required": false,
+                "width": 192.0
+            },
+            "initargs": "patch.args(1)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "channel_strip",
+            "osc_methods": [],
+            "properties": {},
+            "type": "smix_channel"
+        },
+        "43": {
+            "connections": [
+                [
+                    [
+                        45,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "recvsignalvia",
+                "height": 39.5,
+                "is_export": false,
+                "layername": "Aux bus",
+                "no_export": false,
+                "position_x": 137.04110717773438,
+                "position_y": 84.91059875488281,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"bus_aux\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvsignalvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv~"
+        },
+        "45": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Aux bus",
+                "no_export": false,
+                "position_x": 140.54110717773438,
+                "position_y": 135.9105987548828,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
+        },
+        "46": {
+            "connections": [
+                [
+                    [
+                        48,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "recvsignalvia",
+                "height": 39.5,
+                "is_export": false,
+                "layername": "Stereo bus",
+                "no_export": false,
+                "position_x": 125.44317626953125,
+                "position_y": 116.27632141113281,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"bus_l\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvsignalvia_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv~"
+        },
+        "48": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Stereo bus",
+                "no_export": false,
+                "position_x": 128.94317626953125,
+                "position_y": 167.2763214111328,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "1",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
+        },
+        "49": {
+            "connections": [
+                [
+                    [
+                        51,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "recvsignalvia",
+                "height": 39.5,
+                "is_export": false,
+                "layername": "Stereo bus",
+                "no_export": false,
+                "position_x": 225.89837646484375,
+                "position_y": 118.82893371582031,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"bus_r\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvsignalvia_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv~"
+        },
+        "51": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Stereo bus",
+                "no_export": false,
+                "position_x": 229.39797973632812,
+                "position_y": 167.3242645263672,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "2",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
+        },
+        "52": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendsignalvia",
+                "height": 37,
+                "is_export": false,
+                "layername": "Interface",
+                "no_export": false,
+                "position_x": 63.19287109375,
+                "position_y": 403.27964782714844,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"bus_l\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendsignalvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send~"
+        },
+        "53": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendsignalvia",
+                "height": 37,
+                "is_export": false,
+                "layername": "Interface",
+                "no_export": false,
+                "position_x": 153.93573760986328,
+                "position_y": 403.27259826660156,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"bus_r\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendsignalvia_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send~"
+        },
+        "54": {
+            "connections": [
+                [
+                    [
+                        56,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Load aux",
+                "no_export": false,
+                "position_x": 103.43841552734375,
+                "position_y": 76.48046875,
+                "update_required": false,
+                "width": 72.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "loadbang"
+        },
+        "55": {
+            "connections": [
+                [
+                    [
+                        58,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Load aux",
+                "no_export": false,
+                "position_x": 163.42852783203125,
+                "position_y": 159.1278533935547,
+                "update_required": true,
+                "width": 276.0
+            },
+            "initargs": "@clonescope('aux_001', patch.args(1))",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "56": {
+            "connections": [
+                [
+                    [
+                        57,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        55,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Load aux",
+                "no_export": false,
+                "position_x": 103.43841552734375,
+                "position_y": 118.48046875,
+                "update_required": false,
+                "width": 70.0
+            },
+            "initargs": "2",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_007",
+            "osc_methods": [],
+            "properties": {},
+            "type": "trigger"
+        },
+        "57": {
+            "connections": [
+                [
+                    [
+                        58,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Load aux",
+                "no_export": false,
+                "position_x": 102.43940734863281,
+                "position_y": 194.47630310058594,
+                "update_required": true,
+                "width": 283.0
+            },
+            "initargs": "@clonescope('chan_001', patch.args(0))",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "58": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "layername": "Load aux",
+                "no_export": false,
+                "position_x": 99.93940734863281,
+                "position_y": 242.47630310058594,
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"patch\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "59": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Channel",
+                "no_export": false,
+                "position_x": 103.97100830078125,
+                "position_y": 86.67669677734375,
+                "update_required": false,
+                "width": 72.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "loadbang"
+        }
+    },
+    "scopes": {
+        "__patch__": {
+            "channel_strip": 1,
+            "message_001": 55,
+            "message_002": 57,
+            "patch": 0,
+            "processor_003": 48,
+            "processor_004": 51,
+            "processor_006": 54,
+            "processor_007": 56,
+            "recvsignalvia_002": 46,
+            "recvsignalvia_003": 49,
+            "self": 0,
+            "sendsignalvia_001": 52,
+            "sendsignalvia_002": 53,
+            "sendvia_001": 58
+        },
+        "aux_001": {
+            "processor_002": 45,
+            "recvsignalvia_001": 43
+        },
+        "chan_001": {
+            "processor_008": 59
+        }
+    },
+    "type": "smix"
+}
