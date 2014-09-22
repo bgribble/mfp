@@ -578,7 +578,6 @@ class Processor (object):
         self.count_in += 1 
 
         if inlet in self.hot_inlets or inlet == -1:
-            log.debug("processor._send:", self, value, inlet)
             with self.trigger_lock:
                 self.outlets = [Uninit] * len(self.outlets)
                 if inlet == -1:
