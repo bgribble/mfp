@@ -90,7 +90,9 @@ class SendSignal (Send):
     def reconnect(self): 
         # FIXME should not have to know about Patch guts here but #197  
         self.dest_obj = MFPApp().resolve(self.dest_name, self)
-        if self.dest_obj and self.dest_inlet not in self.dest_obj.dsp_inlets:
+        if not self.dest_obj: 
+            return 
+        elif self.dest_inlet not in self.dest_obj.dsp_inlets:
             self.dest_obj = None
             return 
 
