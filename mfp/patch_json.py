@@ -57,7 +57,7 @@ def json_deserialize(self, json_data):
     for scopename, bindings in scopes.items():
         s = self.add_scope(scopename)
         for name, oid in bindings.items():
-            if name == "self":
+            if name in ("self", "patch"):
                 continue
 
             obj = idmap.get(oid)

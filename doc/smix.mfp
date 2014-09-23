@@ -1,6 +1,14 @@
 {
     "gui_params": {
         "display_type": "patch",
+        "dsp_inlets": [
+            0
+        ],
+        "dsp_outlets": [
+            0,
+            1,
+            2
+        ],
         "export_h": 281.5440368652344,
         "export_w": 194.0,
         "export_x": 66.69287109375,
@@ -27,23 +35,27 @@
                 "chan_001"
             ]
         ],
-        "name": "smix"
+        "name": "smix",
+        "num_inlets": 1,
+        "num_outlets": 3,
+        "obj_id": 1,
+        "top_level": true
     },
     "hot_inlets": [
         0
     ],
     "objects": {
-        "1": {
+        "2": {
             "connections": [
                 [
                     [
-                        52,
+                        53,
                         0
                     ]
                 ],
                 [
                     [
-                        53,
+                        54,
                         0
                     ]
                 ],
@@ -69,11 +81,11 @@
             "properties": {},
             "type": "smix_channel"
         },
-        "43": {
+        "44": {
             "connections": [
                 [
                     [
-                        45,
+                        46,
                         0
                     ]
                 ]
@@ -98,7 +110,7 @@
             "properties": {},
             "type": "recv~"
         },
-        "45": {
+        "46": {
             "connections": [
                 []
             ],
@@ -122,11 +134,11 @@
             "properties": {},
             "type": "outlet~"
         },
-        "46": {
+        "47": {
             "connections": [
                 [
                     [
-                        48,
+                        49,
                         0
                     ]
                 ]
@@ -151,7 +163,7 @@
             "properties": {},
             "type": "recv~"
         },
-        "48": {
+        "49": {
             "connections": [
                 []
             ],
@@ -175,11 +187,11 @@
             "properties": {},
             "type": "outlet~"
         },
-        "49": {
+        "50": {
             "connections": [
                 [
                     [
-                        51,
+                        52,
                         0
                     ]
                 ]
@@ -204,7 +216,7 @@
             "properties": {},
             "type": "recv~"
         },
-        "51": {
+        "52": {
             "connections": [
                 []
             ],
@@ -228,7 +240,7 @@
             "properties": {},
             "type": "outlet~"
         },
-        "52": {
+        "53": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
@@ -250,7 +262,7 @@
             "properties": {},
             "type": "send~"
         },
-        "53": {
+        "54": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
@@ -272,11 +284,11 @@
             "properties": {},
             "type": "send~"
         },
-        "54": {
+        "55": {
             "connections": [
                 [
                     [
-                        56,
+                        57,
                         0
                     ]
                 ]
@@ -301,11 +313,11 @@
             "properties": {},
             "type": "loadbang"
         },
-        "55": {
+        "56": {
             "connections": [
                 [
                     [
-                        58,
+                        59,
                         0
                     ]
                 ]
@@ -330,17 +342,17 @@
             "properties": {},
             "type": "message"
         },
-        "56": {
+        "57": {
             "connections": [
                 [
                     [
-                        57,
+                        58,
                         0
                     ]
                 ],
                 [
                     [
-                        55,
+                        56,
                         0
                     ]
                 ]
@@ -365,11 +377,11 @@
             "properties": {},
             "type": "trigger"
         },
-        "57": {
+        "58": {
             "connections": [
                 [
                     [
-                        58,
+                        59,
                         0
                     ]
                 ]
@@ -394,7 +406,7 @@
             "properties": {},
             "type": "message"
         },
-        "58": {
+        "59": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
@@ -416,7 +428,7 @@
             "properties": {},
             "type": "send"
         },
-        "59": {
+        "60": {
             "connections": [
                 []
             ],
@@ -427,8 +439,8 @@
                 "is_export": false,
                 "layername": "Channel",
                 "no_export": false,
-                "position_x": 103.97100830078125,
-                "position_y": 86.67669677734375,
+                "position_x": 182.91522216796875,
+                "position_y": 86.67670440673828,
                 "update_required": false,
                 "width": 72.0
             },
@@ -439,31 +451,115 @@
             "osc_methods": [],
             "properties": {},
             "type": "loadbang"
+        },
+        "61": {
+            "connections": [
+                [
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "recvsignalvia",
+                "height": 39.5,
+                "is_export": false,
+                "layername": "Interface",
+                "no_export": false,
+                "position_x": 62.812522888183594,
+                "position_y": 52.96628189086914,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"bus_channel\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvsignalvia_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv~"
+        },
+        "63": {
+            "connections": [
+                [
+                    [
+                        64,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Channel",
+                "no_export": false,
+                "position_x": 47.827667236328125,
+                "position_y": 91.44249725341797,
+                "update_required": false,
+                "width": 64.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "inlet~"
+        },
+        "64": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendsignalvia",
+                "height": 37,
+                "is_export": false,
+                "label": "bus_channel",
+                "layername": "Channel",
+                "no_export": false,
+                "position_x": 45.327667236328125,
+                "position_y": 139.44249725341797,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"bus_channel\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendsignalvia_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send~"
         }
     },
     "scopes": {
         "__patch__": {
-            "channel_strip": 1,
-            "message_001": 55,
-            "message_002": 57,
-            "patch": 0,
-            "processor_003": 48,
-            "processor_004": 51,
-            "processor_006": 54,
-            "processor_007": 56,
-            "recvsignalvia_002": 46,
-            "recvsignalvia_003": 49,
-            "self": 0,
-            "sendsignalvia_001": 52,
-            "sendsignalvia_002": 53,
-            "sendvia_001": 58
+            "message_001": 56,
+            "message_002": 58,
+            "patch": 1,
+            "processor_003": 49,
+            "processor_004": 52,
+            "processor_006": 55,
+            "processor_007": 57,
+            "recvsignalvia_002": 47,
+            "recvsignalvia_003": 50,
+            "self": 1,
+            "sendsignalvia_001": 53,
+            "sendsignalvia_002": 54,
+            "sendvia_001": 59
         },
         "aux_001": {
-            "processor_002": 45,
-            "recvsignalvia_001": 43
+            "processor_002": 46,
+            "recvsignalvia_001": 44
         },
         "chan_001": {
-            "processor_008": 59
+            "channel_strip": 2,
+            "processor_002": 63,
+            "processor_008": 60,
+            "recvsignalvia_004": 61,
+            "sendsignalvia_003": 64
         }
     },
     "type": "smix"

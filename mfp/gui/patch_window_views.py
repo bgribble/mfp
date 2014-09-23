@@ -93,12 +93,14 @@ def init_layer_view(self):
         return True
 
     def layer_scope_edited(layer, new_value):
+        from mfp import log
         if isinstance(layer, Layer):
             p = self.selected_patch
-            layer.scope = new_value
             if not p.has_scope(new_value):
+                log.debug("Adding scope", new_value, "to patch", self.selected_patch)
                 MFPCommand().add_scope(self.selected_patch.obj_id, new_value)
 
+            layer.scope = new_value
             self.selected_patch.send_params()
             for obj in self.objects:
                 if obj.obj_id is not None and obj.layer == layer:

@@ -282,7 +282,7 @@ class Patch(Processor):
         MFPApp().register(parts[0], factory)
         return (parts[0], factory)
 
-    def create_gui(self):
+    def create_gui(self, **kwargs):
         from .mfp_app import MFPApp
 
         if MFPApp().no_gui:
@@ -293,7 +293,7 @@ class Patch(Processor):
         self.update_export_bounds()
 
         # create the basic element info 
-        Processor.create_gui(self)
+        Processor.create_gui(self, **kwargs)
 
         if self.gui_params.get("top_level"):
             MFPApp().gui_command.load_start()

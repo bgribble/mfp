@@ -463,6 +463,7 @@ class Processor (object):
 
     def resize(self, inlets, outlets):
         from .mfp_app import MFPApp
+        inlets = max(inlets, 1)
         if inlets > len(self.inlets):
             newin = inlets - len(self.inlets)
             self.inlets += [Uninit] * newin
@@ -517,7 +518,6 @@ class Processor (object):
 
             out_obj, out_outlet = self.dsp_outlet(outlet)
             in_obj, in_inlet = target.dsp_inlet(inlet)
-
             out_obj.connect(out_outlet, in_obj.obj_id, in_inlet)
 
         existing = self.connections_out[outlet]
