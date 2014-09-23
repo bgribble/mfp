@@ -94,11 +94,12 @@ class SendSignal (Send):
             self.dest_obj = None
             return 
 
-        dsp_inlet_num = self.dest_obj.dsp_inlets.index(self.dest_inlet)
         if isinstance(self.dest_obj, Patch): 
-            self.dest_obj = self.dest_obj.inlet_objects[dsp_inlet_num] 
+            self.dest_obj = self.dest_obj.inlet_objects[self.dest_inlet] 
             self.dest_inlet = 0  
             dsp_inlet_num = 0
+        else:
+            dsp_inlet_num = self.dest_obj.dsp_inlets.index(self.dest_inlet)
 
         self.dsp_obj.connect(0, self.dest_obj.obj_id, dsp_inlet_num);
 
