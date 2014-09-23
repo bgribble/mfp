@@ -9,6 +9,7 @@ import time
 from ..utils import QuittableThread 
 from ..processor import Processor
 from ..mfp_app import MFPApp
+from ..patch import Patch
 from .. import Uninit
 
 
@@ -87,13 +88,19 @@ class SendSignal (Send):
             time.sleep(0.5)
 
     def reconnect(self): 
+        # FIXME should not have to know about Patch guts here but #197  
         self.dest_obj = MFPApp().resolve(self.dest_name, self)
         if self.dest_obj and self.dest_inlet not in self.dest_obj.dsp_inlets:
             self.dest_obj = None
+            return 
 
-        if self.dest_obj is not None:
-            self.dsp_obj.connect(0, self.dest_obj.obj_id, 
-                                 self.dest_obj.dsp_inlets.index(self.dest_inlet))
+        dsp_inlet_num = self.dest_obj.dsp_inlets.index(self.dest_inlet)
+        if isinstance(self.dest_obj, Patch): 
+            self.dest_obj = self.dest_obj.inlet_objects[dsp_inlet_num] 
+            self.dest_inlet = 0  
+            dsp_inlet_num = 0
+
+        self.dsp_obj.connect(0, self.dest_obj.obj_id, dsp_inlet_num);
 
 class MessageBus (Processor): 
     display_type = "hidden"

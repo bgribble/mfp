@@ -240,7 +240,24 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
                  mfp_processor * target, int targ_inlet)
 {
     GArray * xlets;
-    
+   
+    if ((self == NULL) || (target == NULL)) {
+        mfp_log_error("connect: bad endpoint, self=%p, target=%p", self, target);
+        return -1;
+    }
+
+    if (my_outlet >= self->outlet_conn->len) { 
+        mfp_log_error("connect: asked for outlet %d but only have %d\n",
+                      my_outlet, self->outlet_conn->len);
+        return -1;
+    }
+
+    if (targ_inlet >= target->inlet_conn->len) { 
+        mfp_log_error("connect: asked for inlet %d but only have %d\n",
+                      targ_inlet, target->inlet_conn->len);
+        return -1;
+    }
+
     mfp_connection * my_conn = g_malloc(sizeof(mfp_connection));
     mfp_connection * targ_conn = g_malloc(sizeof(mfp_connection));
     
