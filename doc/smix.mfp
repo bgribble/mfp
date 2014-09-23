@@ -85,7 +85,7 @@
             "connections": [
                 [
                     [
-                        46,
+                        67,
                         0
                     ]
                 ]
@@ -110,35 +110,11 @@
             "properties": {},
             "type": "recv~"
         },
-        "46": {
-            "connections": [
-                []
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
-                "is_export": false,
-                "layername": "Aux bus",
-                "no_export": false,
-                "position_x": 140.54110717773438,
-                "position_y": 135.9105987548828,
-                "update_required": false,
-                "width": 75.0
-            },
-            "initargs": "0",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "outlet~"
-        },
         "47": {
             "connections": [
                 [
                     [
-                        49,
+                        65,
                         0
                     ]
                 ]
@@ -163,35 +139,11 @@
             "properties": {},
             "type": "recv~"
         },
-        "49": {
-            "connections": [
-                []
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
-                "is_export": false,
-                "layername": "Stereo bus",
-                "no_export": false,
-                "position_x": 128.94317626953125,
-                "position_y": 167.2763214111328,
-                "update_required": false,
-                "width": 75.0
-            },
-            "initargs": "1",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_003",
-            "osc_methods": [],
-            "properties": {},
-            "type": "outlet~"
-        },
         "50": {
             "connections": [
                 [
                     [
-                        52,
+                        66,
                         0
                     ]
                 ]
@@ -215,30 +167,6 @@
             "osc_methods": [],
             "properties": {},
             "type": "recv~"
-        },
-        "52": {
-            "connections": [
-                []
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
-                "is_export": false,
-                "layername": "Stereo bus",
-                "no_export": false,
-                "position_x": 229.39797973632812,
-                "position_y": 167.3242645263672,
-                "update_required": false,
-                "width": 75.0
-            },
-            "initargs": "2",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_004",
-            "osc_methods": [],
-            "properties": {},
-            "type": "outlet~"
         },
         "53": {
             "connections": [],
@@ -452,35 +380,6 @@
             "properties": {},
             "type": "loadbang"
         },
-        "61": {
-            "connections": [
-                [
-                    [
-                        2,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "recvsignalvia",
-                "height": 39.5,
-                "is_export": false,
-                "layername": "Interface",
-                "no_export": false,
-                "position_x": 62.812522888183594,
-                "position_y": 52.96628189086914,
-                "update_required": false,
-                "width": 22
-            },
-            "initargs": "\"bus_channel\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "recvsignalvia_004",
-            "osc_methods": [],
-            "properties": {},
-            "type": "recv~"
-        },
         "63": {
             "connections": [
                 [
@@ -517,7 +416,7 @@
                 "display_type": "sendsignalvia",
                 "height": 37,
                 "is_export": false,
-                "label": "bus_channel",
+                "label": "channel_strip",
                 "layername": "Channel",
                 "no_export": false,
                 "position_x": 45.327667236328125,
@@ -525,13 +424,85 @@
                 "update_required": false,
                 "width": 22
             },
-            "initargs": "\"bus_channel\"",
+            "initargs": "\"channel_strip\"",
             "midi_filters": null,
             "midi_mode": null,
             "name": "sendsignalvia_003",
             "osc_methods": [],
             "properties": {},
             "type": "send~"
+        },
+        "65": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Stereo bus",
+                "no_export": false,
+                "position_x": 128.94317626953125,
+                "position_y": 167.2763214111328,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
+        },
+        "66": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Stereo bus",
+                "no_export": false,
+                "position_x": 229.39797973632812,
+                "position_y": 167.3242645263672,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "1",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
+        },
+        "67": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Aux bus",
+                "no_export": false,
+                "position_x": 140.54110717773438,
+                "position_y": 135.9105987548828,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "2",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
         }
     },
     "scopes": {
@@ -539,8 +510,8 @@
             "message_001": 56,
             "message_002": 58,
             "patch": 1,
-            "processor_003": 49,
-            "processor_004": 52,
+            "processor_003": 65,
+            "processor_004": 66,
             "processor_006": 55,
             "processor_007": 57,
             "recvsignalvia_002": 47,
@@ -551,14 +522,13 @@
             "sendvia_001": 59
         },
         "aux_001": {
-            "processor_002": 46,
+            "processor_002": 67,
             "recvsignalvia_001": 44
         },
         "chan_001": {
             "channel_strip": 2,
             "processor_002": 63,
             "processor_008": 60,
-            "recvsignalvia_004": 61,
             "sendsignalvia_003": 64
         }
     },
