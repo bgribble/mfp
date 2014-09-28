@@ -46,9 +46,9 @@ typedef struct {
 
 typedef struct {
     int reqtype;
-    mfp_processor * src_proc;
+    int src_proc;
     int src_port;
-    mfp_processor * dest_proc;
+    int dest_proc;
     int dest_port;
     gpointer param_name;
     int param_type;

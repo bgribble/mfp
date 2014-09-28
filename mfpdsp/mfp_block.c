@@ -470,6 +470,11 @@ mfp_block_mul(mfp_block * in_1, mfp_block * in_2, mfp_block * out)
 int
 mfp_block_add(mfp_block * in_1, mfp_block * in_2, mfp_block * out)
 {
+    if ((in_1->blocksize != out->blocksize) || (in_2->blocksize != out->blocksize)) {
+        mfp_log_error("mfp_block_add: sizes not the same. in_1=%d, in_2=%d, out=%d", 
+                      in_1->blocksize, in_2->blocksize, out->blocksize);
+        return -1;
+    }
     if (mfp_block_use_sse && mfp_block_compiled_with_sse) { 
 #ifdef MFP_USE_SSE
         int loc = 0;

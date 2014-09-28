@@ -99,24 +99,36 @@ mfp_dsp_handle_requests(void)
 {
     while(incoming_queue_read != incoming_queue_write) {
         mfp_in_data * cmd = incoming_queue[incoming_queue_read];
+        mfp_processor * src_proc, * dest_proc;
         int type = cmd->reqtype;
 
         switch (type) {
         case REQTYPE_CONNECT:
-            mfp_proc_connect(cmd->src_proc, cmd->src_port, cmd->dest_proc, cmd->dest_port);
+            src_proc = mfp_proc_lookup(cmd->src_proc);
+            dest_proc = mfp_proc_lookup(cmd->dest_proc);
+            if (src_proc != NULL && dest_proc != NULL) 
+                mfp_proc_connect(src_proc, cmd->src_port, dest_proc, cmd->dest_port);
             break;
 
         case REQTYPE_DISCONNECT:
-            mfp_proc_disconnect(cmd->src_proc, cmd->src_port, cmd->dest_proc, cmd->dest_port);
+            src_proc = mfp_proc_lookup(cmd->src_proc);
+            dest_proc = mfp_proc_lookup(cmd->dest_proc);
+            if (src_proc != NULL && dest_proc != NULL) 
+                mfp_proc_disconnect(src_proc, cmd->src_port, dest_proc, cmd->dest_port);
             break;
 
         case REQTYPE_DESTROY:
-            mfp_proc_destroy(cmd->src_proc);
+            src_proc = mfp_proc_lookup(cmd->src_proc);
+            if (src_proc != NULL)
+                mfp_proc_destroy(src_proc);
             break;
 
         case REQTYPE_SETPARAM:
-            mfp_proc_setparam_req(cmd->src_proc, cmd);
-            cmd->src_proc->needs_config = 1;
+            src_proc = mfp_proc_lookup(cmd->src_proc);
+            if (src_proc != NULL) { 
+                mfp_proc_setparam_req(src_proc, cmd);
+                src_proc->needs_config = 1;
+            }
             break;
 
         case REQTYPE_GETPARAM:

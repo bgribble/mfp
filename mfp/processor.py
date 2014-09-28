@@ -435,6 +435,7 @@ class Processor (object):
                 to_delete = [ pr for pr in c]
                 for tobj, tport in to_delete:
                     self.disconnect(outport, tobj, tport)
+
                 outport += 1
 
         if hasattr(self, "connections_in"):

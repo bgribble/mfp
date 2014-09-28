@@ -12,7 +12,6 @@ from ..mfp_app import MFPApp
 from ..patch import Patch
 from .. import Uninit
 
-
 class Send (Processor):
     doc_tooltip_obj = "Send messages to a named receiver (create with 'via' GUI object)"
     doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
@@ -86,6 +85,18 @@ class SendSignal (Send):
                 self.reconnect()
                     
             time.sleep(0.5)
+
+    def delete(self):
+        #self.monitor_thread.finish()
+        if self.dest_obj is not None:
+            if isinstance(self.dest_obj, Patch): 
+                dest_obj = self.dest_obj.inlet_objects[self.dest_inlet] 
+                dest_inlet = 0  
+            else:
+                dest_obj = self.dest_obj
+                dest_inlet = self.dest_obj.dsp_inlets.index(self.dest_inlet)
+            self.dsp_obj.disconnect(0, dest_obj.obj_id, dest_inlet)
+        Processor.delete(self)
 
     def reconnect(self): 
         # FIXME should not have to know about Patch guts here but #197  
@@ -195,7 +206,7 @@ class Recv (Processor):
                                            self.scope, self.bus_name)
             self.bus_name = self.bus_obj.name
             
-        if self.bus_obj and (self not in self.bus_obj.connections_out[0]):
+        if self.bus_obj and ((self, 0) not in self.bus_obj.connections_out[0]):
             self.bus_obj.connect(0, self, 0)
 
         self.init_args = '"%s"' % self.bus_name 
@@ -228,7 +239,6 @@ class RecvSignal (Recv):
 
         if len(initargs):
             self.bus_connect(initargs[0])
-
 
 def register():
     MFPApp().register("send", Send)

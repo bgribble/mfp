@@ -150,7 +150,7 @@ void
 mfp_proc_process(mfp_processor * self) 
 {
     GArray * inlet_conn;
-    mfp_connection ** curr_inlet; 
+    mfp_connection * curr_inlet; 
     mfp_block * inlet_buf;
     
     mfp_processor * upstream_proc;
@@ -159,6 +159,7 @@ mfp_proc_process(mfp_processor * self)
 
     int config_rv;
     int inlet_num;
+    int connect_num;
 
     /* run config() if params have changed */
     if (self->needs_config) {
@@ -184,14 +185,21 @@ mfp_proc_process(mfp_processor * self)
     /* accumulate all the inlet fan-ins to a single input buffer */ 
     sprintf(mfp_last_activity, "PROCESS: accum %d (%s)", 
             self->rpc_id, self->typeinfo->name);
-    for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
+
+    for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {    
         inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
         inlet_buf = self->inlet_buf[inlet_num];
         mfp_block_fill(inlet_buf, 0);
-        for(curr_inlet = (mfp_connection **)inlet_conn->data; *curr_inlet != NULL; curr_inlet++) {
-            upstream_proc = (*curr_inlet)->dest_proc;
-            upstream_outlet_num = (*curr_inlet)->dest_port;    
+
+        for(connect_num = 0; connect_num < inlet_conn->len; connect_num++) {
+            curr_inlet = g_array_index(inlet_conn, mfp_connection *, connect_num);
+            upstream_proc = curr_inlet->dest_proc;
+            upstream_outlet_num = curr_inlet->dest_port;    
             upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];    
+            if (upstream_outlet_buf->blocksize == 0) {
+                mfp_log_debug("ERROR: connection %p, upstream outlet buffer gone, type=%s, proc=%p, self=%d.%d, upstream=%d.%d",
+                              curr_inlet, self->typeinfo->name, upstream_proc, self->rpc_id, inlet_num, upstream_proc->rpc_id, upstream_outlet_num);
+            }
             mfp_block_add(inlet_buf, upstream_outlet_buf, inlet_buf);
         }
     }
@@ -216,7 +224,30 @@ void
 mfp_proc_destroy(mfp_processor * self) 
 {
     int procpos;
-    
+    int xlet_num;
+    int conn_num;
+    GArray * xlet_connlist; 
+    mfp_connection * conn;
+
+    /* remove any remaining connections */ 
+    for(xlet_num = 0; xlet_num < self->inlet_conn->len; xlet_num++) {
+        xlet_connlist = g_array_index(self->inlet_conn, GArray *, xlet_num);
+        while (xlet_connlist->len) {
+            conn = g_array_index(xlet_connlist, mfp_connection *, 0);
+            mfp_log_warning("Programming error: leftover connection at delete time (handled)");
+            mfp_proc_disconnect(conn->dest_proc, conn->dest_port, self, xlet_num);            
+        }
+    }
+
+    for(xlet_num = 0; xlet_num < self->outlet_conn->len; xlet_num++) {
+        xlet_connlist = g_array_index(self->outlet_conn, GArray *, xlet_num);
+        while (xlet_connlist->len) {
+            conn = g_array_index(xlet_connlist, mfp_connection *, 0);
+            mfp_log_warning("Programming error: leftover connection at delete time (handled)");
+            mfp_proc_disconnect(self, xlet_num, conn->dest_proc, conn->dest_port);            
+        }
+    }
+
     /* remove from global processor list */
     for(procpos=0; procpos < mfp_proc_list->len; procpos++) {
         if (g_array_index(mfp_proc_list, mfp_processor *, procpos) == self) {
@@ -224,13 +255,14 @@ mfp_proc_destroy(mfp_processor * self)
             break;
         }
     }
+    g_hash_table_remove(mfp_proc_objects, self->rpc_id);
 
     self->typeinfo->destroy(self);
     g_hash_table_destroy(self->params);
 
     mfp_proc_free_buffers(self);
-    g_free(self);
     self->context->needs_reschedule = 1;
+    g_free(self);
     return;
 }
 
@@ -247,15 +279,26 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
     }
 
     if (my_outlet >= self->outlet_conn->len) { 
-        mfp_log_error("connect: asked for outlet %d but only have %d\n",
+        mfp_log_error("connect: asked for outlet %d but only have %d",
                       my_outlet, self->outlet_conn->len);
         return -1;
     }
 
     if (targ_inlet >= target->inlet_conn->len) { 
-        mfp_log_error("connect: asked for inlet %d but only have %d\n",
+        mfp_log_error("connect: asked for inlet %d but only have %d",
                       targ_inlet, target->inlet_conn->len);
         return -1;
+    }
+    
+    mfp_connection * conn;
+
+    xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
+    for(int i=0; i < xlets->len; i++) {
+        conn = g_array_index(xlets, mfp_connection *, i);
+        if ((conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
+            mfp_log_warning("Programming error: asked to make an existing DSP connect again (handled)");
+            return -1;
+        }
     }
 
     mfp_connection * my_conn = g_malloc(sizeof(mfp_connection));
@@ -283,14 +326,17 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
     GArray * xlets;
     mfp_connection * conn;
     int c;
-
+    int found_out=0;
+    int found_in=0;
 
     /* find the connection(s) between the specified ports */
     xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
+
     for(c=0; c < xlets->len; c++) {
         conn = g_array_index(xlets, mfp_connection *, c);
         if ((conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
             conn->dest_proc = NULL;
+            found_out++;
         }
     }
 
@@ -305,10 +351,12 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 
     /* delete connection and object from dest */
     xlets = g_array_index(target->inlet_conn, GArray *, targ_inlet);
+
     for(c=0; c < xlets->len; c++) {
         conn = g_array_index(xlets, mfp_connection *, c);
         if ((conn->dest_proc == self) && (conn->dest_port == my_outlet)) {
             conn->dest_proc = NULL;
+            found_in++;
         }
     }
 
@@ -319,6 +367,7 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
             g_free(conn);
         }
     }
+
 
     self->context->needs_reschedule = 1;
     return 0;

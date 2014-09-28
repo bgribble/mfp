@@ -129,20 +129,19 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
 
     if(!strcmp(methodname, "connect")) {
         rd.reqtype = REQTYPE_CONNECT;
-        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.src_proc = obj_id; 
         rd.src_port = (int)(json_node_get_double(json_array_get_element(args, 0)));
-        rd.dest_proc = mfp_proc_lookup((int)(json_node_get_double(
-                        json_array_get_element(args, 1))));
+        rd.dest_proc = (int)(json_node_get_double(json_array_get_element(args, 1)));
         rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "disconnect")) {
         rd.reqtype = REQTYPE_DISCONNECT;
-        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.src_proc = obj_id; 
         rd.src_port = (int)(json_node_get_double(json_array_get_element(args, 0)));
-        rd.dest_proc = mfp_proc_lookup((int)(json_node_get_double(
-                        json_array_get_element(args, 1))));
+        rd.dest_proc = (int)(json_node_get_double(json_array_get_element(args, 1)));
         rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
+
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "getparam")) {
@@ -161,22 +160,23 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
         rval = json_generator_to_data(gen, NULL);
     }
     else if (!strcmp(methodname, "setparam")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
         rd.reqtype = REQTYPE_SETPARAM;
-        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.src_proc = obj_id; 
         rd.param_name = (gpointer)json_node_get_string(json_array_get_element(args, 0));
-        rd.param_type = mfp_proc_param_type(rd.src_proc, rd.param_name);
-        rd.param_value = (gpointer)extract_param_value(rd.src_proc, rd.param_name, 
+        rd.param_type = mfp_proc_param_type(src_proc, rd.param_name);
+        rd.param_value = (gpointer)extract_param_value(src_proc, rd.param_name, 
                                                        json_array_get_element(args, 1));
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "delete")) {
         rd.reqtype = REQTYPE_DESTROY;
-        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.src_proc = obj_id; 
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "reset")) {
         rd.reqtype = REQTYPE_RESET;
-        rd.src_proc = mfp_proc_lookup(obj_id); 
+        rd.src_proc = obj_id; 
         mfp_dsp_push_request(rd);
     }
     else {
@@ -350,7 +350,6 @@ mfp_rpc_wait(int request_id)
     }
 
     pthread_mutex_lock(&request_lock);
-    mfp_log_debug("mfp_rpc: waiting for %d", request_id);
 
     g_hash_table_insert(request_waiting, GINT_TO_POINTER(request_id), GINT_TO_POINTER(1));
 

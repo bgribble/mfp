@@ -237,11 +237,17 @@ class Patch(Processor):
 
         try:
             self.inlet_objects.remove(obj)
+            self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects) 
+                               if p[1] and p[1].init_type == 'inlet~' ]
+            self.gui_params['dsp_inlets'] = self.dsp_inlets 
         except ValueError:
             pass
 
         try:
             self.outlet_objects.remove(obj)
+            self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects) 
+                                if p[1] and p[1].init_type == 'outlet~' ]
+            self.gui_params['dsp_outlets'] = self.dsp_outlets 
         except ValueError:
             pass
 

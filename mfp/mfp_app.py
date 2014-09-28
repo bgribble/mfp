@@ -200,7 +200,7 @@ class MFPApp (Singleton):
             log.info("Published classes", args[0])
         elif status == "unmanage":
             dead_patches = [ p for p in self.patches.values() 
-                             if p.context.node_id == peer_id ]
+                             if p.context is None or p.context.node_id == peer_id ]
             if (Patch.default_context and (peer_id == Patch.default_context.node_id) 
                and not self.no_restart):
                 log.warning("Relaunching default backend (id=%s)" % peer_id)

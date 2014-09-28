@@ -182,7 +182,7 @@ class GUICommand (RPCWrapper):
             obj.delete()
             if obj in MFPGUI().appwin.patches: 
                 MFPGUI().appwin.patches.remove(obj)
-        else: 
+        elif obj is not None: 
             for c in obj.connections_out:
                 MFPGUI().appwin.unregister(c)
                 del c
@@ -193,6 +193,8 @@ class GUICommand (RPCWrapper):
 
             obj.obj_id = None
             obj.delete()
+        else:
+            log.debug("delete: object ID", obj_id, "not found (already deleted?)")
 
     @rpcwrap
     def select(self, obj_id):
