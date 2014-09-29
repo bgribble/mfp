@@ -145,11 +145,11 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
     
     /* find out sample rate */ 
     ctxt->samplerate = jack_get_sample_rate(ctxt->info.jack->client);
-    ctxt->blocksize = jack_get_buffer_size(ctxt->info.jack->client);
+    mfp_dsp_set_blocksize(ctxt, jack_get_buffer_size(ctxt->info.jack->client));
     mfp_in_latency = 3000.0 * ctxt->blocksize / ctxt->samplerate; 
     mfp_out_latency = 3000.0 * ctxt->blocksize / ctxt->samplerate; 
 
-    printf("jack_startup: samplerate=%d, blocksize=%d, in_latency=%.1f, out_latency = %.1f\n", 
+    mfp_log_debug("jack_startup: samplerate=%d, blocksize=%d, in_latency=%.1f, out_latency = %.1f\n", 
             ctxt->samplerate, ctxt->blocksize, mfp_in_latency, mfp_out_latency); 
 
     /* tell the JACK server that we are ready to roll */

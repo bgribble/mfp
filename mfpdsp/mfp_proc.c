@@ -197,8 +197,10 @@ mfp_proc_process(mfp_processor * self)
             upstream_outlet_num = curr_inlet->dest_port;    
             upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];    
             if (upstream_outlet_buf->blocksize == 0) {
-                mfp_log_debug("ERROR: connection %p, upstream outlet buffer gone, type=%s, proc=%p, self=%d.%d, upstream=%d.%d",
-                              curr_inlet, self->typeinfo->name, upstream_proc, self->rpc_id, inlet_num, upstream_proc->rpc_id, upstream_outlet_num);
+                mfp_log_debug("ERROR: connection %p, upstream outlet buffer gone, type=%s, self=%d.%d, upstream=%d.%d",
+                              curr_inlet, self->typeinfo->name, self->rpc_id, inlet_num, upstream_proc->rpc_id, upstream_outlet_num);
+                mfp_log_debug("ERROR: self=%p, other=%p", self, upstream_proc);
+
             }
             mfp_block_add(inlet_buf, upstream_outlet_buf, inlet_buf);
         }
@@ -234,7 +236,7 @@ mfp_proc_destroy(mfp_processor * self)
         xlet_connlist = g_array_index(self->inlet_conn, GArray *, xlet_num);
         while (xlet_connlist->len) {
             conn = g_array_index(xlet_connlist, mfp_connection *, 0);
-            mfp_log_warning("Programming error: leftover connection at delete time (handled)");
+            mfp_log_warning("Programming error #179: leftover connection at delete time (handled)");
             mfp_proc_disconnect(conn->dest_proc, conn->dest_port, self, xlet_num);            
         }
     }
@@ -243,7 +245,7 @@ mfp_proc_destroy(mfp_processor * self)
         xlet_connlist = g_array_index(self->outlet_conn, GArray *, xlet_num);
         while (xlet_connlist->len) {
             conn = g_array_index(xlet_connlist, mfp_connection *, 0);
-            mfp_log_warning("Programming error: leftover connection at delete time (handled)");
+            mfp_log_warning("Programming error #179: leftover connection at delete time (handled)");
             mfp_proc_disconnect(self, xlet_num, conn->dest_proc, conn->dest_port);            
         }
     }
@@ -296,7 +298,7 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
     for(int i=0; i < xlets->len; i++) {
         conn = g_array_index(xlets, mfp_connection *, i);
         if ((conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
-            mfp_log_warning("Programming error: asked to make an existing DSP connect again (handled)");
+            mfp_log_warning("Programming error #179: asked to make an existing DSP connect again (handled)");
             return -1;
         }
     }
