@@ -697,6 +697,13 @@ class Processor (object):
         MFPApp().gui_command.delete(self.obj_id)
         self.gui_created = False
 
+    def conf(self, **kwargs):
+        from .mfp_app import MFPApp
+        for k, v in kwargs.items():
+            self.gui_params[k] = v
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
     def set_tag(self, tag, value): 
         from .mfp_app import MFPApp
         self.tags[tag] = value 

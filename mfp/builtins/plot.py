@@ -161,12 +161,6 @@ class Scatter (Processor):
             del self.points[inlet]
         return self._chartconf('clear', inlet)
 
-    def conf(self, **kwargs):
-        for k, v in kwargs.items():
-            self.gui_params[k] = v
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
-
     def style(self, **kwargs):
         '''Set style parameters for a curve'''
         inlet = str(kwargs.get('inlet', 0))

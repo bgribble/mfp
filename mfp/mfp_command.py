@@ -1,6 +1,7 @@
 from .bang import Bang
 from .patch import Patch
 from .method import MethodCall
+from .processor import Processor
 from .rpc import RPCWrapper, rpcwrap, rpcwrap_noresp
 from . import log
 
@@ -31,8 +32,10 @@ class MFPCommand(RPCWrapper):
         from .mfp_app import MFPApp
         obj_1 = MFPApp().recall(obj_1_id)
         obj_2 = MFPApp().recall(obj_2_id)
-        r = obj_1.connect(obj_1_port, obj_2, obj_2_port)
-        return r
+        if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
+            return obj_1.connect(obj_1_port, obj_2, obj_2_port)
+        else: 
+            return None 
 
     @rpcwrap
     def disconnect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
@@ -40,28 +43,33 @@ class MFPCommand(RPCWrapper):
         obj_1 = MFPApp().recall(obj_1_id)
         obj_2 = MFPApp().recall(obj_2_id)
 
-        r = obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
-        return r
+        if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
+            return obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
+        else:
+            return None 
 
     @rpcwrap
     def send_bang(self, obj_id, port):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        obj.send(Bang, port)
+        if isinstance(obj, Processor):
+            obj.send(Bang, port)
         return True
 
     @rpcwrap
     def send(self, obj_id, port, data):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        obj.send(data, port)
+        if isinstance(obj, Processor):
+            obj.send(data, port)
         return True
 
     @rpcwrap
     def eval_and_send(self, obj_id, port, message):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        obj.send(obj.parse_obj(message), port)
+        if isinstance(obj, Processor):
+            obj.send(obj.parse_obj(message), port)
         return True
 
     @rpcwrap
@@ -69,49 +77,57 @@ class MFPCommand(RPCWrapper):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         m = MethodCall(method, *args, **kwargs)
-        obj.send(m, port)
+        if isinstance(obj, Processor):
+            obj.send(m, port)
 
     @rpcwrap
     def delete(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        obj.delete()
+        if isinstance(obj, Processor):
+            obj.delete()
 
     @rpcwrap
     def set_params(self, obj_id, params):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        obj.gui_params = params
+        if isinstance(obj, Processor):
+            obj.gui_params = params
 
     @rpcwrap
     def set_gui_created(self, obj_id, value):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        obj.gui_created = value
+        if isinstance(obj, Processor):
+            obj.gui_created = value
 
     @rpcwrap
     def set_do_onload(self, obj_id, value):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        obj.do_onload = value 
+        if isinstance(obj, Processor):
+            obj.do_onload = value 
 
     @rpcwrap
     def get_info(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        return dict(num_inlets=len(obj.inlets),
+        if isinstance(obj, Processor):
+            return dict(num_inlets=len(obj.inlets),
                     num_outlets=len(obj.outlets),
                     dsp_inlets=obj.dsp_inlets,
                     dsp_outlets=obj.dsp_outlets)
+        else: 
+            return {}
     
     @rpcwrap
     def get_tooltip(self, obj_id, direction=None, portno=None, details=False):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        if not obj or isinstance(obj, MFPApp):
-            # FIXME: this is to wallpaper over bad behavior when deleting, #110 
+        if isinstance(obj, Processor):
+            return obj.tooltip(direction, portno, details)
+        else:
             return ''
-        return obj.tooltip(direction, portno, details)
 
     @rpcwrap
     def log_write(self, msg):

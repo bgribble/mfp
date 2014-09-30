@@ -21,6 +21,9 @@ class ProcessorElement (PatchElement):
 
     def __init__(self, window, x, y, params={}):
         PatchElement.__init__(self, window, x, y)
+    
+        self.param_list.append("show_label")
+        self.show_label = params.get("show_label", True)
 
         # display elements
         self.texture = None
@@ -54,11 +57,16 @@ class ProcessorElement (PatchElement):
         self.label.set_reactive(False)
 
         self.add_actor(self.texture)
-        self.add_actor(self.label)
+        if self.show_label:
+            self.add_actor(self.label)
         self.set_reactive(True)
 
     def update(self):
-        label_width = self.label.get_property('width') + 14 
+        if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
+            label_width = self.label.get_property('width') + 14 
+        else: 
+            label_width = 0
+
         box_width = self.export_w or 0
 
         new_w = None
@@ -67,15 +75,12 @@ class ProcessorElement (PatchElement):
         
         new_w = max(35, port_width, label_width, box_width)
 
-        if new_w != box_width: 
-            self.set_size(new_w, self.texture.get_property('height'))
-
-        self.draw_ports()
-        self.texture.invalidate()
+        self.set_size(new_w, self.texture.get_property('height'))
 
     def draw_cb(self, texture, ct):
         w = self.texture.get_property('surface_width') - 1
         h = self.texture.get_property('surface_height') - 1
+
         self.texture.clear()
 
         ct.set_line_width(2.0)
@@ -160,14 +165,27 @@ class ProcessorElement (PatchElement):
         return LabelEditMode(self.stage, self, self.label)
 
     def configure(self, params):
+        from mfp import log 
         if self.obj_args is None:
             self.label.set_text("%s" % (self.obj_type,))
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
+        
+        need_update = False 
+
+        labelheight = 20
+        if "show_label" in params: 
+            oldval = self.show_label
+            self.show_label = params.get("show_label")
+            if oldval ^ self.show_label:
+                log.debug("configure: setting show_label to", self.show_label)
+                need_update = True 
+                if self.show_label:
+                    self.add_actor(self.label)
+                else:
+                    self.remove_actor(self.label)
 
         if "export_w" in params and "export_h" in params:
-            params["width"] = max(self.width, params.get("export_w"))
-            params["height"] = max(self.height, params.get("export_h") + 20)
             self.export_x = params.get("export_x")
             self.export_y = params.get("export_y")
             self.export_w = params.get("export_w")
@@ -179,7 +197,11 @@ class ProcessorElement (PatchElement):
             self.obj_state = self.OBJ_COMPLETE
             if self.export_created:
                 MFPGUI().mfp.create_export_gui(self.obj_id)
-            self.draw_ports()
-            self.texture.invalidate()
+            need_update = True 
 
+        if need_update:
+            self.update()
+
+        params["width"] = max(self.width, params.get("export_w") or 0)
+        params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight) 
         PatchElement.configure(self, params)
