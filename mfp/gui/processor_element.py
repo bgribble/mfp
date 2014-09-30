@@ -115,6 +115,7 @@ class ProcessorElement (PatchElement):
 
     def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
+        self.add_actor(self.label)
         self.update()
 
     def label_edit_finish(self, widget, text=None):
@@ -134,6 +135,9 @@ class ProcessorElement (PatchElement):
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
+
+        if not self.show_label:
+            self.remove_actor(self.label)
 
         self.update()
 
@@ -165,7 +169,6 @@ class ProcessorElement (PatchElement):
         return LabelEditMode(self.stage, self, self.label)
 
     def configure(self, params):
-        from mfp import log 
         if self.obj_args is None:
             self.label.set_text("%s" % (self.obj_type,))
         else:
@@ -178,7 +181,6 @@ class ProcessorElement (PatchElement):
             oldval = self.show_label
             self.show_label = params.get("show_label")
             if oldval ^ self.show_label:
-                log.debug("configure: setting show_label to", self.show_label)
                 need_update = True 
                 if self.show_label:
                     self.add_actor(self.label)
