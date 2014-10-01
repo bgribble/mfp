@@ -342,7 +342,7 @@ class MFPApp (Singleton):
 
             obj.delete()
 
-    def resolve(self, name, queryobj=None):
+    def resolve(self, name, queryobj=None, quiet=False):
         '''
         Attempt to identify an object matching name
 
@@ -358,12 +358,17 @@ class MFPApp (Singleton):
             return None
 
         parts = name.split('.')
-        obj = None
+        obj = Unbound
         root = Unbound 
 
         # first find the base. 
+
+        # 0. is the queryobj a patch? if so, resolve directly 
+        if queryobj and isinstance(queryobj, Patch):
+            root = queryobj.resolve(parts[0])
+
         # 1. Look in the queryobj's patch 
-        if queryobj and queryobj.patch:
+        if root is Unbound and queryobj and queryobj.patch:
             root = queryobj.patch.resolve(parts[0], queryobj.scope)
             
             if root is Unbound:
@@ -392,6 +397,9 @@ class MFPApp (Singleton):
         if obj is not Unbound:
             return obj
         else:
+            if not quiet:
+                log.warning("resolve: can't resolve name '%s' in context %s"
+                            % (name, queryobj))
             return None 
 
     def finish(self):

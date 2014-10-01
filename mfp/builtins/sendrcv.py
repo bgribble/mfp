@@ -53,7 +53,7 @@ class Send (Processor):
                 MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
         if self.dest_obj is None:
-            self.dest_obj = MFPApp().resolve(self.dest_name, self)
+            self.dest_obj = MFPApp().resolve(self.dest_name, self, True)
 
         if self.inlets[0] is not Uninit and self.dest_obj is not None:
             self.dest_obj.send(self.inlets[0], self.dest_inlet)
@@ -100,7 +100,7 @@ class SendSignal (Send):
 
     def reconnect(self): 
         # FIXME should not have to know about Patch guts here but #197  
-        self.dest_obj = MFPApp().resolve(self.dest_name, self)
+        self.dest_obj = MFPApp().resolve(self.dest_name, self, True)
         if not self.dest_obj: 
             return 
         elif self.dest_inlet not in self.dest_obj.dsp_inlets:
@@ -114,11 +114,11 @@ class SendSignal (Send):
         else:
             dsp_inlet_num = self.dest_obj.dsp_inlets.index(self.dest_inlet)
 
-        self.dsp_obj.connect(0, self.dest_obj.obj_id, dsp_inlet_num);
+        if self.dsp_obj:
+            self.dsp_obj.connect(0, self.dest_obj.obj_id, dsp_inlet_num);
 
 class MessageBus (Processor): 
     display_type = "hidden"
-    save_to_patch = False 
     do_onload = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -136,7 +136,6 @@ class MessageBus (Processor):
 
 class SignalBus (Processor): 
     display_type = "hidden"
-    save_to_patch = False 
     do_onload = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -189,7 +188,7 @@ class Recv (Processor):
             self.inlets[0] = Uninit 
 
     def onload(self, phase):
-        if phase == 0:
+        if phase == 1:
             self.bus_connect(self.bus_name)
 
     def bus_connect(self, bus_name):
@@ -198,7 +197,7 @@ class Recv (Processor):
             self.bus_obj = None 
         self.bus_name = bus_name 
 
-        obj = MFPApp().resolve(self.bus_name, self)
+        obj = MFPApp().resolve(self.bus_name, self, True)
         if obj is not None and isinstance(obj, (MessageBus, SignalBus)):
             self.bus_obj = obj 
         else: 
