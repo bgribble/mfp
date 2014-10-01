@@ -193,8 +193,6 @@ class GUICommand (RPCWrapper):
 
             obj.obj_id = None
             obj.delete()
-        else:
-            log.debug("delete: object ID", obj_id, "not found (already deleted?)")
 
     @rpcwrap
     def select(self, obj_id):

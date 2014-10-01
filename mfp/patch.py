@@ -88,11 +88,11 @@ class Patch(Processor):
         if isinstance(scope, LexicalScope):
             found, obj = scope.query(name)
 
-        if not found and scope is not None and scope in self.scopes:
+        if (not found) and scope is not None and scope in self.scopes:
             s = self.scopes.get(scope)
             found, obj = s.query(name)
             
-        if not found and name in self.scopes: 
+        if (not found) and name in self.scopes: 
             found = True
             obj = self.scopes.get(name)
 
@@ -261,10 +261,21 @@ class Patch(Processor):
     # DSP inlet/outlet access 
     ############################
     def dsp_inlet(self, inlet):
-        return (self.inlet_objects[inlet].dsp_obj, 0)
+        try: 
+            return (self.inlet_objects[inlet].dsp_obj, 0)
+        except IndexError: 
+            log.error("Programming error: asked for inlet '%d' in patch %s but it has %d"
+                      % (inlet, self.name, len(self.inlet_objects)))
+            return (None, 0) 
+
         
     def dsp_outlet(self, outlet):
-        return (self.outlet_objects[outlet].dsp_obj, 0)
+        try: 
+            return (self.outlet_objects[outlet].dsp_obj, 0)
+        except IndexError: 
+            log.error("Programming error: asked for outlet '%d' in patch %s but it has %d"
+                      % (outlet, self.name, len(self.outlet_objects)))
+            return (None, 0) 
 
     ############################
     # load/save
