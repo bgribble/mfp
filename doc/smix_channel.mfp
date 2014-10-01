@@ -30,18 +30,238 @@
         "name": "smix_channel",
         "num_inlets": 1,
         "num_outlets": 3,
-        "obj_id": 1,
+        "obj_id": 263,
         "top_level": true
     },
     "hot_inlets": [
         0
     ],
     "objects": {
-        "10": {
+        "264": {
             "connections": [
                 [
                     [
-                        13,
+                        268,
+                        0
+                    ],
+                    [
+                        271,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 103.5652084350586,
+                "position_y": 83.20873260498047,
+                "show_label": true,
+                "update_required": false,
+                "width": 64.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "inlet~"
+        },
+        "265": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 104.7644271850586,
+                "position_y": 49.9058952331543,
+                "update_required": true,
+                "value": "<small>Signal in</small>",
+                "width": 64.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<small>Signal in</small>"
+        },
+        "266": {
+            "connections": [
+                [
+                    [
+                        268,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "recvvia",
+                "height": 37.5,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 171.33230590820312,
+                "position_y": 119.81614685058594,
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"gain\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv"
+        },
+        "267": {
+            "connections": [
+                [
+                    [
+                        288,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "recvvia",
+                "height": 37.5,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 98.73048400878906,
+                "position_y": 175.57769012451172,
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"pan\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvvia_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv"
+        },
+        "268": {
+            "connections": [
+                [
+                    [
+                        288,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 148.67083740234375,
+                "position_y": 169.5099639892578,
+                "show_label": true,
+                "update_required": false,
+                "width": 35
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_019",
+            "osc_methods": [],
+            "properties": {},
+            "type": "*~"
+        },
+        "269": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 78.7459487915039,
+                "position_y": 297.2287902832031,
+                "show_label": true,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_020",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
+        },
+        "270": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 167.7459487915039,
+                "position_y": 297.2287902832031,
+                "show_label": true,
+                "update_required": false,
+                "width": 75.0
+            },
+            "initargs": "1",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet~"
+        },
+        "271": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendsignalvia",
+                "height": 37,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 100.0652084350586,
+                "position_y": 134.20873260498047,
+                "update_required": false,
+                "width": 22
+            },
+            "initargs": "\"signal\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendsignalvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send~"
+        },
+        "272": {
+            "connections": [
+                [
+                    [
+                        275,
                         0
                     ]
                 ]
@@ -66,11 +286,33 @@
             "properties": {},
             "type": "recv~"
         },
-        "12": {
+        "273": {
             "connections": [
                 [
                     [
-                        13,
+                        272,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "hidden",
+                "initargs": ""
+            },
+            "initargs": "",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "signal",
+            "osc_methods": [],
+            "properties": {},
+            "type": "bus~"
+        },
+        "274": {
+            "connections": [
+                [
+                    [
+                        275,
                         1
                     ]
                 ]
@@ -95,11 +337,11 @@
             "properties": {},
             "type": "recv"
         },
-        "13": {
+        "275": {
             "connections": [
                 [
                     [
-                        14,
+                        276,
                         0
                     ]
                 ]
@@ -113,6 +355,7 @@
                 "no_export": false,
                 "position_x": 150.98046875,
                 "position_y": 135.5719757080078,
+                "show_label": true,
                 "update_required": false,
                 "width": 35
             },
@@ -124,7 +367,7 @@
             "properties": {},
             "type": "*~"
         },
-        "14": {
+        "276": {
             "connections": [
                 []
             ],
@@ -137,6 +380,7 @@
                 "no_export": false,
                 "position_x": 150.98046875,
                 "position_y": 211.5719757080078,
+                "show_label": true,
                 "update_required": false,
                 "width": 75.0
             },
@@ -148,11 +392,11 @@
             "properties": {},
             "type": "outlet~"
         },
-        "15": {
+        "277": {
             "connections": [
                 [
                     [
-                        18,
+                        280,
                         0
                     ]
                 ]
@@ -185,11 +429,11 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "16": {
+        "278": {
             "connections": [
                 [
                     [
-                        19,
+                        281,
                         0
                     ]
                 ]
@@ -223,9 +467,14 @@
             "type": "slidemeter",
             "value": 0.5
         },
-        "17": {
+        "279": {
             "connections": [
-                []
+                [
+                    [
+                        305,
+                        0
+                    ]
+                ]
             ],
             "do_onload": false,
             "gui_params": {
@@ -256,7 +505,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "18": {
+        "280": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
@@ -278,7 +527,7 @@
             "properties": {},
             "type": "send"
         },
-        "19": {
+        "281": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
@@ -300,40 +549,7 @@
             "properties": {},
             "type": "send"
         },
-        "2": {
-            "connections": [
-                [
-                    [
-                        6,
-                        0
-                    ],
-                    [
-                        9,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 103.5652084350586,
-                "position_y": 83.20873260498047,
-                "update_required": false,
-                "width": 64.0
-            },
-            "initargs": "0",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_016",
-            "osc_methods": [],
-            "properties": {},
-            "type": "inlet~"
-        },
-        "20": {
+        "282": {
             "connections": [
                 []
             ],
@@ -359,7 +575,7 @@
             "type": "text",
             "value": "<small>PAN</small>"
         },
-        "21": {
+        "283": {
             "connections": [
                 []
             ],
@@ -385,7 +601,7 @@
             "type": "text",
             "value": "<small>GAIN</small>"
         },
-        "22": {
+        "284": {
             "connections": [
                 []
             ],
@@ -411,11 +627,11 @@
             "type": "text",
             "value": "<small>AUX 1</small>"
         },
-        "23": {
+        "285": {
             "connections": [
                 [
                     [
-                        25,
+                        287,
                         0
                     ]
                 ]
@@ -429,6 +645,7 @@
                 "no_export": false,
                 "position_x": 251.4425048828125,
                 "position_y": 111.93723678588867,
+                "show_label": true,
                 "update_required": false,
                 "width": 72.0
             },
@@ -440,7 +657,7 @@
             "properties": {},
             "type": "loadbang"
         },
-        "24": {
+        "286": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
@@ -462,11 +679,11 @@
             "properties": {},
             "type": "send"
         },
-        "25": {
+        "287": {
             "connections": [
                 [
                     [
-                        24,
+                        286,
                         0
                     ]
                 ]
@@ -491,17 +708,17 @@
             "properties": {},
             "type": "message"
         },
-        "26": {
+        "288": {
             "connections": [
                 [
                     [
-                        7,
+                        269,
                         0
                     ]
                 ],
                 [
                     [
-                        8,
+                        270,
                         0
                     ]
                 ]
@@ -515,6 +732,7 @@
                 "no_export": false,
                 "position_x": 100.69917297363281,
                 "position_y": 224.50498962402344,
+                "show_label": true,
                 "update_required": false,
                 "width": 58.0
             },
@@ -526,37 +744,11 @@
             "properties": {},
             "type": "panner"
         },
-        "3": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 26.0,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 104.7644271850586,
-                "position_y": 49.9058952331543,
-                "update_required": true,
-                "value": "<small>Signal in</small>",
-                "width": 64.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<small>Signal in</small>"
-        },
-        "37": {
+        "299": {
             "connections": [
                 [
                     [
-                        38,
+                        300,
                         0
                     ]
                 ]
@@ -570,6 +762,7 @@
                 "no_export": false,
                 "position_x": 288.6861572265625,
                 "position_y": 73.82103729248047,
+                "show_label": true,
                 "update_required": false,
                 "width": 72.0
             },
@@ -581,11 +774,11 @@
             "properties": {},
             "type": "loadbang"
         },
-        "38": {
+        "300": {
             "connections": [
                 [
                     [
-                        39,
+                        301,
                         0
                     ]
                 ]
@@ -610,7 +803,7 @@
             "properties": {},
             "type": "message"
         },
-        "39": {
+        "301": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
@@ -632,197 +825,133 @@
             "properties": {},
             "type": "send"
         },
-        "4": {
+        "302": {
             "connections": [
                 [
                     [
-                        6,
-                        1
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "recvvia",
-                "height": 37.5,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 171.33230590820312,
-                "position_y": 119.81614685058594,
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"gain\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "recvvia_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "recv"
-        },
-        "5": {
-            "connections": [
-                [
-                    [
-                        26,
+                        266,
                         0
                     ]
                 ]
             ],
             "do_onload": true,
             "gui_params": {
-                "display_type": "recvvia",
-                "height": 37.5,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 98.73048400878906,
-                "position_y": 175.57769012451172,
-                "update_required": false,
-                "width": 20
+                "display_type": "hidden",
+                "initargs": ""
             },
-            "initargs": "\"pan\"",
+            "initargs": "",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "recvvia_002",
+            "name": "gain",
             "osc_methods": [],
             "properties": {},
-            "type": "recv"
+            "type": "bus"
         },
-        "6": {
+        "303": {
             "connections": [
                 [
                     [
-                        26,
-                        1
+                        267,
+                        0
                     ]
                 ]
             ],
             "do_onload": true,
             "gui_params": {
-                "display_type": "processor",
-                "height": 25,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 148.67083740234375,
-                "position_y": 169.5099639892578,
-                "update_required": false,
-                "width": 35
+                "display_type": "hidden",
+                "initargs": ""
             },
-            "initargs": null,
+            "initargs": "",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "processor_019",
+            "name": "pan",
             "osc_methods": [],
             "properties": {},
-            "type": "*~"
+            "type": "bus"
         },
-        "7": {
+        "304": {
             "connections": [
-                []
+                [
+                    [
+                        274,
+                        0
+                    ]
+                ]
             ],
             "do_onload": true,
             "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 78.7459487915039,
-                "position_y": 297.2287902832031,
-                "update_required": false,
-                "width": 75.0
+                "display_type": "hidden",
+                "initargs": ""
             },
-            "initargs": "0",
+            "initargs": "",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "processor_020",
+            "name": "aux_level",
             "osc_methods": [],
             "properties": {},
-            "type": "outlet~"
+            "type": "bus"
         },
-        "8": {
-            "connections": [
-                []
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 167.7459487915039,
-                "position_y": 297.2287902832031,
-                "update_required": false,
-                "width": 75.0
-            },
-            "initargs": "1",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "outlet~"
-        },
-        "9": {
+        "305": {
             "connections": [],
             "do_onload": true,
             "gui_params": {
-                "display_type": "sendsignalvia",
-                "height": 37,
+                "display_type": "sendvia",
+                "height": 35,
                 "is_export": false,
-                "layername": "Pan-Gain",
+                "layername": "Interface",
                 "no_export": false,
-                "position_x": 100.0652084350586,
-                "position_y": 134.20873260498047,
+                "position_x": 231.46336364746094,
+                "position_y": 132.95481872558594,
                 "update_required": false,
-                "width": 22
+                "width": 20
             },
-            "initargs": "\"signal\"",
+            "initargs": "\"aux_level\"",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "sendsignalvia_001",
+            "name": "sendvia_008",
             "osc_methods": [],
             "properties": {},
-            "type": "send~"
+            "type": "send"
         }
     },
     "scopes": {
         "__patch__": {
-            "dial_001": 16,
-            "message_003": 25,
-            "patch": 1,
-            "processor_002": 8,
-            "processor_007": 23,
-            "processor_010": 26,
-            "processor_016": 2,
-            "processor_019": 6,
-            "processor_020": 7,
-            "recvvia_001": 4,
-            "recvvia_002": 5,
-            "self": 1,
-            "sendsignalvia_001": 9,
-            "sendvia_001": 18,
-            "sendvia_002": 19,
-            "sendvia_003": 24,
-            "slidemeter_001": 15,
-            "text_001": 3,
-            "text_004": 20,
-            "text_005": 21
+            "dial_001": 278,
+            "gain": 302,
+            "message_003": 287,
+            "pan": 303,
+            "patch": 263,
+            "processor_002": 270,
+            "processor_007": 285,
+            "processor_010": 288,
+            "processor_016": 264,
+            "processor_019": 268,
+            "processor_020": 269,
+            "recvvia_001": 266,
+            "recvvia_002": 267,
+            "self": 263,
+            "sendsignalvia_001": 271,
+            "sendvia_001": 280,
+            "sendvia_002": 281,
+            "sendvia_003": 286,
+            "signal": 273,
+            "slidemeter_001": 277,
+            "text_001": 265,
+            "text_004": 282,
+            "text_005": 283
         },
         "aux_001": {
-            "aux_dial": 17,
-            "aux_label": 22,
-            "message_002": 38,
-            "processor_009": 37,
-            "processor_024": 13,
-            "processor_025": 14,
-            "recvsignalvia_002": 10,
-            "recvvia_003": 12,
-            "sendvia_004": 39
+            "aux_dial": 279,
+            "aux_label": 284,
+            "aux_level": 304,
+            "message_002": 300,
+            "processor_009": 299,
+            "processor_024": 275,
+            "processor_025": 276,
+            "recvsignalvia_002": 272,
+            "recvvia_003": 274,
+            "sendvia_004": 301,
+            "sendvia_008": 305
         }
     },
     "type": "smix_channel"
