@@ -433,6 +433,9 @@ class DialElement(SlideMeterElement):
         return (r, theta)
 
     def point_in_slider(self, x, y):
+        orig_x, orig_y = self.get_stage_position()
+        x -= orig_x
+        y -= orig_y
         r, theta = self.r2p(x, y)
         if theta > self.THETA_MAX and theta < self.THETA_MIN:
             return False 
@@ -440,6 +443,9 @@ class DialElement(SlideMeterElement):
             return True 
 
     def pixpos2value(self, x, y):
+        orig_x, orig_y = self.get_stage_position()
+        x -= orig_x
+        y -= orig_y
         r, theta = self.r2p(x, y)
         if theta > self.THETA_MAX and theta < self.THETA_MIN:
             return None 

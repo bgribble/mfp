@@ -36,8 +36,7 @@ class SliderControlMode (InputMode):
         self.bind("C-M1UP", self.drag_end)
 
     def set_value(self):
-        new_value = self.slider.pixpos2value(self.manager.pointer_x-self.slider.position_x, 
-                                             self.manager.pointer_y-self.slider.position_y)
+        new_value = self.slider.pixpos2value(self.manager.pointer_x, self.manager.pointer_y)
         self.slider.update_value(new_value)
 
     def drag_start(self):
@@ -45,7 +44,9 @@ class SliderControlMode (InputMode):
             if self.slider not in self.window.selected:
                 self.window.select(self.slider)
 
-            if self.slider.slider_enable and self.slider.point_in_slider(self.manager.pointer_x, self.manager.pointer_y):
+            if (self.slider.slider_enable 
+                and self.slider.point_in_slider(self.manager.pointer_x, 
+                                                self.manager.pointer_y)):
                 self.drag_started = True
                 self.drag_start_x = self.manager.pointer_x
                 self.drag_start_y = self.manager.pointer_y
