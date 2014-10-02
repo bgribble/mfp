@@ -195,7 +195,7 @@ class TransientMessageElement (MessageElement):
     ELBOW_ROOM = 50
 
     def __init__(self, window, x, y):
-        self.target_obj = window.selected
+        self.target_obj = [t for t in window.selected if t is not self]
         self.target_port = None
         
         pos_x, pos_y = self.target_obj[0].get_stage_position()
@@ -217,7 +217,7 @@ class TransientMessageElement (MessageElement):
             c.delete()
 
         self.target_port = portnum
-        for to in self.target_obj: 
+        for to in self.target_obj:
             c = ConnectionElement(self.stage, self, 0, to, self.target_port)
             self.stage.active_layer().add(c)
             self.stage.register(c)
