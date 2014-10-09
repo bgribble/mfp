@@ -59,6 +59,8 @@ mfp_lv2_instantiate(const LV2_Descriptor * descriptor, double rate,
     }
 
     /* request that the MFP app build this patch */
+    mfp_context_init(context);
+
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
     int request_id = mfp_api_load_context(context, self->object_path, msgbuf, &msglen);
@@ -233,6 +235,7 @@ mfp_lv2_cleanup(LV2_Handle instance)
     mfp_lv2_info * self = context->info.lv2;
 
     mfp_context_destroy(context);
+    mfp_log_debug("lv2_cleanup: finished with cleanup");
 }
 
 static const void *

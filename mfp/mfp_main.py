@@ -241,3 +241,8 @@ def main():
             log.debug("Quit request received, exiting")
             app.finish()
 
+        for thread in app.leftover_threads:
+            log.debug("Waiting for thread", thread)
+            thread.join()
+            log.debug("Joined thread", thread)
+

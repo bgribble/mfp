@@ -1,0 +1,69 @@
+Beginning with version 0.05, an MFP patch can be saved as an LV2
+plugin.  Note that MFP can still not *host* LV2 plugins, only
+LADSPA at this time (via the [plugin~ object)Note that as of this
+release the scope is not included, so there may be a problem with
+.  But it can act as a plugin in other hosts.
+
+The support is pretty rudimentary, and is mainly intended to
+allow some exploration of "Max for Live" type interactions with
+Linux DAWs.  So -- there are definitely rough edges. 
+
+SAVING AS A LV2 PLUGIN
+------------------------------
+
+In Edit major mode, the keybinding C-p (control-P) will save the
+current patch as an LV2 plugin.  
+
+You will be prompted for a plugin name.  The default name is
+'mfp_' plus the current patch name; the 'mfp_' prefix will let
+you quickly find MFP patches in your host's (sorted) list of
+plugins, but it's not required.  Whatever name you pick doesn't
+need any extension; just enter the bare plugin name.
+
+The plugin will be saved in ./lv2/<plugin>.  ./lv2 is suitable
+for adding to your LV2_PATH.  You will see that the plugin
+directory contains 3 things: 
+
+ * a manifest.ttl file 
+ * a copy of the MFP patch file 
+ * a symlink to a shared library named similarly to the plugin
+
+The shared library is just a link to libmfpdsp.so, the shared
+library that MFP always uses to implement its DSP engine.  It
+implements the LV2 API, and figures out from the manifest.ttl
+which patch to open.  The symlink should point to the installed
+version of the library that was in use when you saved the plugin.  
+
+The plugin's ports are the patch's [inlet]/[inlet~] and
+[outlet]/[outlet~] objects, plus one more called "Edit".  "Edit"
+is a toggle controlling whether the patch appears in the MFP
+editor GUI. 
+
+For each port, the range of values allowed, default value, and
+port name can be set by the sending the inlet the @property
+method with the following property names: 
+
+   bounds_minimum: port minimum value (float) 
+   bounds_maximum: port maximum value (float) 
+   bounds_default: port default value (float) 
+   description: port name (string) 
+
+So, for example, to set the default value for an [inlet] object to
+0.5, click to select it, then type: 
+
+  ! @property(bounds_default=0.5)
+
+The "lv2:symbol" (short name of the port) is the MFP object name,
+which is editable in the Objects tab.  See ticket #203 for an
+edge case that might (but probably won't) trip you up. 
+
+The URL for the plugin is saved as
+http://www.billgribble.com/mfp/<plugin_name>.  The doap:name 
+saved in the manifest must be the name of the MFP patch file to
+open. 
+
+LOADING THE PLUGIN IN A HOST
+------------------------------
+
+As you might expect, you need to have your LV2_PATH pointing to
+the directory where your LV2 plugin was created.  

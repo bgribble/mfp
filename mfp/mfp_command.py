@@ -223,11 +223,24 @@ class MFPCommand(RPCWrapper):
         return MFPApp().clipboard_paste(json_txt, patch, scope, mode)
 
     @rpcwrap
+    def open_context(self, node_id, context_id, owner_pid):
+        from .dsp_object import DSPContext 
+        try: 
+            ctxt_name = open("/proc/%d/cmdline" % owner_pid, "r").read().split("\x00")[0]
+            log.debug("open_context: new context, name=%s" % ctxt_name)
+        except: 
+            ctxt_name = ""
+
+        if DSPContext.create(node_id, context_id, ctxt_name):
+            return True
+        else:
+            return False
+
+    @rpcwrap
     def load_context(self, file_name, node_id, context_id):
         from .mfp_app import MFPApp
         from .dsp_object import DSPContext 
-
-        ctxt = DSPContext(node_id, context_id)
+        ctxt = DSPContext.lookup(node_id, context_id)
         patch = MFPApp().open_file(file_name, ctxt, False)
         patch.hot_inlets = range(len(patch.inlets))
         patch.gui_params['deletable'] = False
@@ -237,7 +250,7 @@ class MFPCommand(RPCWrapper):
     def close_context(self, node_id, context_id):
         from .mfp_app import MFPApp
         from .dsp_object import DSPContext 
-        ctxt = DSPContext(node_id, context_id)
+        ctxt = DSPContext.lookup(node_id, context_id)
 
         to_delete = [] 
         for patch_id, patch in MFPApp().patches.items():
@@ -251,6 +264,7 @@ class MFPCommand(RPCWrapper):
                 del MFPApp().patches[patch_id] 
 
         if not len(MFPApp().patches):
+            log.debug("close_context: calling finish_soon")
             MFPApp().finish_soon()
             return None 
 

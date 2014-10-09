@@ -68,6 +68,7 @@ class MFPApp (Singleton):
         # app callbacks 
         self.callbacks = {}
         self.callbacks_last_id = 0
+        self.leftover_threads = []
 
         # processor class registry
         self.registry = {}
@@ -171,7 +172,8 @@ class MFPApp (Singleton):
             log.debug("Waiting for DSP process startup...")
             self.rpc_host.subscribe(DSPObject)
             log.debug("DSP process established connection")
-            Patch.default_context = DSPContext(DSPObject.publishers[0], 0)
+            Patch.default_context = DSPContext.lookup(DSPObject.publishers[0], 0)
+            log.debug("Default DSP context:", Patch.default_context)
 
     def remember(self, obj):
         oi = self.next_obj_id
@@ -199,6 +201,7 @@ class MFPApp (Singleton):
         elif status == "publish":
             log.info("Published classes", args[0])
         elif status == "unmanage":
+            log.debug("Got unmanage callback for %s %s" % (host, peer_id))
             dead_patches = [ p for p in self.patches.values() 
                              if p.context is None or p.context.node_id == peer_id ]
             if (Patch.default_context and (peer_id == Patch.default_context.node_id) 
@@ -229,9 +232,10 @@ class MFPApp (Singleton):
 
             else:
                 log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
-                log.warning("DSP backend died but --no-restart in place")
+                log.warning("DSP backend exited but --no-restart in place")
                 for p in dead_patches:
                     p.delete()
+                log.debug("finished cleaning up patches")
 
 
     def open_file(self, file_name, context=None, show_gui=True):
@@ -438,8 +442,11 @@ class MFPApp (Singleton):
             import time
             time.sleep(0.5)
             self.finish()
+            log.debug("MFPApp.finish_soon: done with app.finish", threading._active)
+            return True  
         qt = threading.Thread(target=wait_and_finish)
         qt.start()
+        self.leftover_threads.append(qt)
         return None 
 
     def send(self, msg, port): 

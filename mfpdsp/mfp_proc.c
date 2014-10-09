@@ -257,7 +257,7 @@ mfp_proc_destroy(mfp_processor * self)
             break;
         }
     }
-    g_hash_table_remove(mfp_proc_objects, self->rpc_id);
+    g_hash_table_remove(mfp_proc_objects, GINT_TO_POINTER(self->rpc_id));
 
     self->typeinfo->destroy(self);
     g_hash_table_destroy(self->params);

@@ -7,13 +7,24 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from .rpc import RPCWrapper, rpcwrap
-from . import log
-
 
 class DSPContext(object):
-    def __init__(self, node_id, context_id):
+    registry = {}  
+
+    def __init__(self, node_id, context_id, context_name=""):
         self.node_id = node_id
         self.context_id = context_id 
+        self.context_name = context_name
+
+    @classmethod
+    def create(cls, node_id, context_id, context_name):
+        ctxt = DSPContext(node_id, context_id, context_name)
+        cls.registry[(node_id, context_id)] = ctxt
+        return ctxt 
+
+    @classmethod
+    def lookup(cls, node_id, context_id):
+        return cls.registry.get((node_id, context_id))
 
     def __eq__(self, other):
         if isinstance(other, DSPContext):

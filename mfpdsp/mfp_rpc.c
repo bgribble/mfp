@@ -459,8 +459,6 @@ void
 mfp_rpc_init(void) 
 {
     const char ready_req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"ready\", \"params\": {}}";
-    const char publish_req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"publish\", "
-        "\"params\": { \"classes\": [\"DSPObject\"]}}";
     int req_id;
 
     request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal); 
@@ -475,11 +473,6 @@ mfp_rpc_init(void)
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
     req_id = mfp_rpc_request("ready", "{}", ready_callback, NULL, msgbuf, & msglen);
-    mfp_comm_submit_buffer(msgbuf, msglen);
-    mfp_rpc_wait(req_id);
-
-    msgbuf = mfp_comm_get_buffer();
-    req_id = mfp_rpc_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL, msgbuf, &msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(req_id);
 }

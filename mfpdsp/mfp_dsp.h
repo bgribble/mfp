@@ -121,6 +121,7 @@ typedef struct {
 typedef struct mfp_context_struct { 
     int ctype; 
     int id;
+    int owner;
     int samplerate;
     int blocksize; 
     int proc_count;
@@ -292,11 +293,13 @@ extern int mfp_rpc_dispatch_request(const char *, int);
 
 /* mfp_context.c */
 extern mfp_context * mfp_context_new(int ctype);
+extern int mfp_context_init(mfp_context * context);
 extern void mfp_context_destroy(mfp_context * context);
 extern int mfp_context_connect_default_io(mfp_context * context, int patch_id);
 
 /* mfp_api.c */
 extern void mfp_api_init(void);
+extern int mfp_api_open_context(mfp_context * ctxt, char *, int *);
 extern int mfp_api_load_context(mfp_context * ctxt, char * patchname, char *, int *);
 extern int mfp_api_close_context(mfp_context * ctxt);
 extern int mfp_api_send_to_inlet(mfp_context * ctxt, int port, float val, char *, int *);

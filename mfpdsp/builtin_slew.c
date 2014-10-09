@@ -1,3 +1,4 @@
+#include <string.h>
 #include "mfp_dsp.h" 
 
 typedef struct { 

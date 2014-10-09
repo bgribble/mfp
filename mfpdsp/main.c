@@ -108,14 +108,17 @@ main(int argc, char ** argv)
     }
     
 
-    printf("mfpdsp: Starting up as standalone JACK client\n");
+    mfp_log_debug("mfpdsp: Starting up as standalone JACK client");
   
     /* set up global state */
     mfp_init_all(sockname);
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
+
+    mfp_context_init(ctxt);
+    mfp_log_debug("mfpdsp: context initialized, waiting for app exit");
     mfp_comm_io_wait();
 
-    printf("mfpdsp: Returned from comm event loop, will exit.\n"); 
+    mfp_log_debug("mfpdsp: Returned from comm event loop, will exit."); 
     return 0;
 
 }

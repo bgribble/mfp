@@ -95,6 +95,20 @@ mfp_api_show_editor(mfp_context * context, int show, char * msgbuf, int * msglen
 }
 
 int 
+mfp_api_open_context(mfp_context * context, char * msgbuf, int * msglen)
+{
+    const char method[] = "call";
+    const char params[] = "{\"func\": \"open_context\", \"rpcid\": %d, \"args\": "
+                          "[%d, %d, %d ], \"kwargs\": {} }";
+    char tbuf[MFP_MAX_MSGSIZE];
+    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
+             mfp_comm_nodeid, context->id, context->owner);
+    int request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, msglen); 
+    return request_id;
+}
+
+/* FIXME call back the load_callback */ 
+int 
 mfp_api_load_context(mfp_context * context, char * patchfile, 
                      char * msgbuf, int * msglen)
 {
@@ -154,7 +168,7 @@ mfp_api_exit_notify(void)
 
     int request_id = mfp_rpc_request(method, params, NULL, NULL, msgbuf, &msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
-    mfp_rpc_wait(request_id);
+    //mfp_rpc_wait(request_id);
 }
 
 
