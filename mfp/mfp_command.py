@@ -195,8 +195,11 @@ class MFPCommand(RPCWrapper):
     def show_editor(self, obj_id, show):
         from .mfp_app import MFPApp
         patch = MFPApp().objects.get(obj_id)
+        log.debug("show_editor: obj_id=%s, patch=%s"
+                  % (obj_id, patch))
         if not isinstance(patch, Patch):
-            print "show_editor: error: obj_id=%s, obj=%s is not a patch" % (obj_id, patch)
+            log.warning("show_editor: error: obj_id=%s, obj=%s is not a patch" 
+                        % (obj_id, patch))
         elif show:
             patch.create_gui()
         else:
@@ -206,7 +209,7 @@ class MFPCommand(RPCWrapper):
     def save_lv2(self, patch_name, plugin_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
-        file_name = patch_name + ".mfp"
+        file_name = plugin_name + ".mfp"
         if patch:
             patch.save_lv2(plugin_name, file_name)
 

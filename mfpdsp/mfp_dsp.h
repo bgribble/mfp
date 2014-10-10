@@ -295,7 +295,7 @@ extern int mfp_rpc_dispatch_request(const char *, int);
 extern mfp_context * mfp_context_new(int ctype);
 extern int mfp_context_init(mfp_context * context);
 extern void mfp_context_destroy(mfp_context * context);
-extern int mfp_context_connect_default_io(mfp_context * context, int patch_id);
+extern int mfp_context_default_io(mfp_context * context, int obj_id);
 
 /* mfp_api.c */
 extern void mfp_api_init(void);

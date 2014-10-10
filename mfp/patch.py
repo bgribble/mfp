@@ -413,6 +413,7 @@ class Patch(Processor):
         if jsdata is not None:
             self.json_deserialize(jsdata)
             self.file_origin = filepath 
+            self.gui_params["dsp_context"] = self.context.context_name
             for phase in (0,1):
                 for obj_id, obj in self.objects.items():
                     if obj.do_onload:

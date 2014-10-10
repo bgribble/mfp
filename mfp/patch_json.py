@@ -141,7 +141,10 @@ def json_serialize(self):
     from .mfp_app import MFPApp
     f = {}
     f['type'] = self.init_type
-    f['gui_params'] = self.gui_params
+    gprms = { k: v for k, v in self.gui_params.items() 
+              if k not in ['dsp_context'] } 
+    gprms['name'] = self.init_type
+    f['gui_params'] = gprms
     f['hot_inlets'] = self.hot_inlets 
 
     allobj = {}

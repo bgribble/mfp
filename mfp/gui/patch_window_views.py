@@ -10,8 +10,10 @@ from .layer import Layer
 @extends(PatchWindow)
 def init_object_view(self):
     def get_obj_name(o): 
-        if isinstance(o, (PatchElement, PatchInfo)):
+        if isinstance(o, PatchElement):
             return o.obj_name
+        elif isinstance(o, PatchInfo):
+            return "%s (%s)" % (o.obj_name, o.context_name)
         elif isinstance(o, tuple):
             return o[0]
 
@@ -65,13 +67,13 @@ def init_layer_view(self):
         if isinstance(o, Layer):
             return o.patch.obj_name + ':%s' % o.patch.layers.index(o) 
         elif isinstance(o, PatchInfo):
-            return o.obj_name 
+            return "%s (%s)" % (o.obj_name, o.context_name) 
 
     def get_layer_name(o):
         if isinstance(o, Layer):
             return o.name
         elif isinstance(o, PatchInfo):
-            return o.obj_name 
+            return "%s (%s)" % (o.obj_name, o.context_name) 
 
     def get_layer_scopename(o):
         if isinstance(o, Layer):

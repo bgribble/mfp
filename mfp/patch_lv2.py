@@ -104,7 +104,6 @@ bounds_template = """
 
 @extends(Patch)
 def lv2_write_ttl(self, ttlpath, plugname, filename):
-    print "Patch.lv2_write_ttl()"
     port_list = []
     libname = "lib%s_lv2.so" % plugname
     ttl_params = dict(ttl_plugname=plugname, ttl_filename=filename, 
@@ -157,13 +156,11 @@ def lv2_write_ttl(self, ttlpath, plugname, filename):
     import os, os.path
     ttldir = os.path.dirname(ttlpath)
     mfplib_path = os.path.relpath(find_mfplib(), ttldir)
-    print "Patch.lv2_create_dir: found mfplib at '%s'" % mfplib_path
     if not mfplib_path: 
         return None 
     else:
         linkpath = os.path.join(ttldir, libname)
         if not os.path.exists(linkpath):
-            print "symlinking", mfplib_path, linkpath
             os.symlink(mfplib_path, linkpath)
 
 @extends(Patch)

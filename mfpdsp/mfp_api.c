@@ -45,7 +45,7 @@ api_load_callback(JsonNode * response, void * data)
         JsonNode * val = json_array_get_element(arry, 1);
         if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
             patch_objid = (int)json_node_get_double(val);
-            mfp_context_connect_default_io(context, patch_objid);
+            mfp_context_default_io(context, patch_objid);
         }
     }
 }
@@ -107,7 +107,6 @@ mfp_api_open_context(mfp_context * context, char * msgbuf, int * msglen)
     return request_id;
 }
 
-/* FIXME call back the load_callback */ 
 int 
 mfp_api_load_context(mfp_context * context, char * patchfile, 
                      char * msgbuf, int * msglen)
@@ -118,7 +117,8 @@ mfp_api_load_context(mfp_context * context, char * patchfile,
     char tbuf[MFP_MAX_MSGSIZE];
     snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, patchfile, 
              mfp_comm_nodeid, context->id);
-    int request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, msglen); 
+    int request_id = mfp_rpc_request(method, tbuf, api_load_callback, (void *)context, 
+                                     msgbuf, msglen); 
     return request_id;
 }
 

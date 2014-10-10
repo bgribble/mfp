@@ -48,7 +48,7 @@ class PatchElement (Clutter.Group):
         self.param_list = ['position_x', 'position_y', 'width', 'height', 
                            'update_required', 'display_type', 'name', 'layername',
                            'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets', 
-                           'dsp_outlets', 'dsp_context' ]
+                           'dsp_outlets' ]
 
         # Clutter objects
         self.stage = window
