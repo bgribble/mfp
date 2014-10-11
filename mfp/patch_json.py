@@ -107,9 +107,6 @@ def json_unpack_connections(self, data, idmap):
                     print prms 
                 else: 
                     srcobj.connect(outlet, dstobj, inlet)
-                    if srcobj.gui_created:
-                        MFPApp().gui_command.connect(srcobj.obj_id, outlet, 
-                                                     dstobj.obj_id, inlet)
 
 @extends(Patch)
 def json_unpack_objects(self, data, scope):

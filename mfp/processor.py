@@ -76,6 +76,7 @@ class Processor (object):
 
         defaults = dict(obj_id=self.obj_id, 
                         initargs=self.init_args, display_type=self.display_type,
+                        scope=scope.name, 
                         num_inlets=inlets, num_outlets=outlets)
 
         for k, v in defaults.items():
@@ -225,6 +226,7 @@ class Processor (object):
             self.patch = None 
 
         self.gui_params["name"] = self.name 
+        self.gui_params["scope"] = self.scope.name
         self.osc_init()
         return self.name
 
@@ -494,6 +496,8 @@ class Processor (object):
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def connect(self, outlet, target, inlet):
+        from .mfp_app import MFPApp
+
         # make sure this is a possibility 
         if not isinstance(target, Processor):
             log.debug("Error: Can't connect '%s' (obj_id %d) to %s inlet %d"
@@ -528,6 +532,10 @@ class Processor (object):
         existing = target.connections_in[inlet]
         if (self, outlet) not in existing:
             existing.append((self, outlet))
+
+        if self.gui_created:
+            MFPApp().gui_command.connect(self.obj_id, outlet, 
+                                         target.obj_id, inlet)
         return True
 
     def disconnect(self, outlet, target, inlet):

@@ -79,7 +79,7 @@ class MFPApp (Singleton):
 
         # plugin info database
         self.pluginfo = PlugInfo()
-        self.app_scope = LexicalScope()
+        self.app_scope = LexicalScope("__app__")
         self.patches = {}
 
     def setup(self):

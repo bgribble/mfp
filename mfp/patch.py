@@ -34,7 +34,7 @@ class Patch(Processor):
         self.file_origin = None
 
         self.objects = {}
-        self.scopes = {'__patch__': LexicalScope()}
+        self.scopes = {'__patch__': LexicalScope('__patch__')}
         self.default_scope = self.scopes['__patch__']
         self.evaluator = Evaluator()
 
@@ -117,7 +117,7 @@ class Patch(Processor):
             return Unbound 
 
     def add_scope(self, name):
-        self.scopes[name] = LexicalScope()
+        self.scopes[name] = LexicalScope(name)
         return self.scopes[name]
 
     def del_scope(self, name):
