@@ -15,12 +15,13 @@ def make_log_entry(tag, *parts):
     msg = ' '.join([str(p) for p in parts])
     dt = (datetime.now() - log_time_base).total_seconds()
     ts = "%.3f" % dt
-    if msg and (msg[0] == '['):
+    leader = "[%8s %6s]" % (ts, tag)
+    if msg.startswith(leader[:7]):
         if msg[-1] != '\n':
             msg = msg + '\n'
         return msg 
     else: 
-        return "[%8s %6s] %s\n" % (ts, tag, msg)
+        return "%s %s\n" % (leader, msg)
 
 def write_log_entry(msg, level=0):
     global log_file
