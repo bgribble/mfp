@@ -61,7 +61,6 @@ class TreeDisplay (object):
         else:
             return default(obj) 
 
-
     def _edited_cb(self, renderer, path, new_value):
         iter = self.treestore.get_iter_from_string(path)
         obj = self.treestore.get_value(iter, 0)
@@ -137,6 +136,8 @@ class TreeDisplay (object):
                 self.selection.unselect_path(path)
 
     def insert(self, obj, parent, update=True):
+        if obj in self.object_paths: 
+            return None 
         piter = None 
         if parent is not None:
             ppath = self.object_paths.get(parent)
@@ -175,6 +176,9 @@ class TreeDisplay (object):
         if path: 
             iter = self.treestore.get_iter_from_string(path)
             self.treestore.remove(iter)
+            del self.object_paths[obj]
+            del self.object_parents[obj]
+            self._update_paths()
         if update:
             self.refresh()
 
@@ -185,15 +189,20 @@ class TreeDisplay (object):
 
         # temporarily disconnect signal handler  
         self.selection.disconnect(self.glib_select_cb_id)
-        
-        pathstr = self.object_paths.get(obj)
        
-        if pathstr: 
-            path = Gtk.TreePath.new_from_string(pathstr)
-            iter = self.treestore.get_iter_from_string(pathstr)
+        oldparent = self.object_parents.get(obj)
 
-            # re-sort the object (and all its children, unfortunately)
-            self.treestore.set(iter, 0, obj)
+        if parent != oldparent: 
+            self.remove(obj)
+            self.insert(obj, parent)
+        else: 
+            pathstr = self.object_paths.get(obj)
+       
+            if pathstr: 
+                iter = self.treestore.get_iter_from_string(pathstr)
+
+                # re-sort the object (and all its children, unfortunately)
+                self.treestore.set(iter, 0, obj)
 
         # restore signal handler 
         self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)

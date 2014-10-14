@@ -9,7 +9,6 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from ..gui_main import MFPGUI
 from .layer import Layer
 
-
 class PatchInfo (object):
     display_type = "patch"
 
@@ -33,6 +32,7 @@ class PatchInfo (object):
         pass
 
     def has_scope(self, scope_name):
+        # FIXME - needs scopes for objects in scopes-not-default-for-layers
         return scope_name in [l.scope for l in self.layers]
 
     def send_params(self, **extras):

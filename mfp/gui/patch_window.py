@@ -150,7 +150,7 @@ class PatchWindow(object):
 
     def load_start(self):
         self.load_in_progress = True 
-        log.debug("Load starting on GUI side")
+        log.debug("Load of GUI starting")
 
     def load_complete(self):
         self.load_in_progress = False 
@@ -160,7 +160,7 @@ class PatchWindow(object):
             self.layer_select(self.selected_patch.layers[0])
         self.object_view.refresh()
         self.layer_view.refresh()
-        log.debug("Patch GUI completed")
+        log.debug("Load of GUI completed")
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
@@ -286,7 +286,10 @@ class PatchWindow(object):
 
             if isinstance(element.container, PatchElement):
                 self.object_view.insert(element, element.container, update=update)
-            else: 
+            elif element.scope: 
+                self.object_view.insert(element, (element.scope, element.layer.patch),
+                                        update=update)
+            else:
                 self.object_view.insert(element, (element.layer.scope, element.layer.patch),
                                         update=update)
         if element.obj_id is not None:
@@ -318,10 +321,12 @@ class PatchWindow(object):
             self.layer_view.update(element, None)
             return 
 
-        if element.layer is not None:
+        if element.layer is not None and element.scope is not None:
+            self.object_view.update(element, (element.scope, element.layer.patch))
+        elif element.layer is not None:
             self.object_view.update(element, (element.layer.scope, element.layer.patch))
         else:
-            print "WARNING: element has no layer,", element 
+            log.warning("refresh: WARNING: element has no layer,", element)
 
     def add_element(self, factory, x=None, y=None):
         if x is None:
@@ -334,7 +339,7 @@ class PatchWindow(object):
         except Exception, e:
             log.warning("add_element: Error while creating with factory", factory)
             return True
-        
+
         self.active_layer().add(b)
         self.register(b) 
         self.refresh(b)

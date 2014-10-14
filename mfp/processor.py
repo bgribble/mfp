@@ -192,6 +192,7 @@ class Processor (object):
         pass 
 
     def assign(self, patch, scope, name):
+        from mfp_app import MFPApp
         # null case
         if (self.patch == patch) and (self.scope == scope) and (self.name == name):
             return 
@@ -228,6 +229,8 @@ class Processor (object):
         self.gui_params["name"] = self.name 
         self.gui_params["scope"] = self.scope.name
         self.osc_init()
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
         return self.name
 
     def rename(self, new_name):

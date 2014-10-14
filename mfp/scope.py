@@ -55,6 +55,9 @@ class LexicalScope (object):
         return self.bindings.get(name, Unbound)
 
 class NaiveScope (LexicalScope): 
+    def __init__(self): 
+        LexicalScope.__init__(self, "")
+
     def bind(self, name, obj):
         self.bindings[name] = obj 
         return name 

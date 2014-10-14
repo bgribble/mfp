@@ -177,6 +177,7 @@ class PatchElement (Clutter.Group):
         self.obj_name = objinfo.get('name')
         self.obj_args = objinfo.get('initargs')
         self.obj_type = obj_type
+        self.scope = objinfo.get('scope')
         self.num_inlets = objinfo.get("num_inlets")
         self.num_outlets = objinfo.get("num_outlets")
         self.dsp_inlets = objinfo.get("dsp_inlets", [])
@@ -425,7 +426,9 @@ class PatchElement (Clutter.Group):
         self.obj_name = params.get("name")
         self.no_export = params.get("no_export", False)
         self.is_export = params.get("is_export", False)
-        self.scope = params.get("scope", None)
+        newscope = params.get("scope", "__patch__")
+        if (not self.scope) or newscope != self.scope: 
+            self.scope = newscope
 
         if params.get("tags") is not None and self.tags != params.get("tags"):
             self.tags = params.get("tags")
