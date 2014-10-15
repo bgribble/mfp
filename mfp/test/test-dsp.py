@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
-
+from mfp.scope import NaiveScope
 
 def setup():
     MFPApp().setup()
@@ -14,7 +14,7 @@ def mkproc(case, init_type, init_args=None):
 
 class DSPObjectTests (TestCase):
     def setUp(self):
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
 
     def tearDown(self):
         import time

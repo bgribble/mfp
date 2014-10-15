@@ -74,9 +74,11 @@ class Processor (object):
         if not hasattr(self, "gui_params"):
             self.gui_params = {}
 
+        scopename = scope.name if scope else "__patch__"
+
         defaults = dict(obj_id=self.obj_id, 
                         initargs=self.init_args, display_type=self.display_type,
-                        scope=scope.name, 
+                        scope=scopename, 
                         num_inlets=inlets, num_outlets=outlets)
 
         for k, v in defaults.items():

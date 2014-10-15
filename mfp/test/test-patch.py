@@ -1,6 +1,7 @@
 
 from unittest import TestCase
 from mfp.patch import Patch
+from mfp.scope import NaiveScope
 from ..mfp_app import MFPApp
 
 import simplejson as json
@@ -14,7 +15,7 @@ class PatchTests (TestCase):
         MFPApp().no_gui = True
         MFPApp().next_obj_id = 0
         MFPApp().objects = {}
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
         pass
 
     def test_loadsave(self):
@@ -25,7 +26,7 @@ class PatchTests (TestCase):
         self.patch.delete()
 
         MFPApp().next_obj_id = 0 
-        p2 = Patch('default', '', None, None, 'default')
+        p2 = Patch('default', '', None, NaiveScope(), 'default')
         p2.json_deserialize(json_1)
 
         json_2 = p2.json_serialize()
@@ -49,7 +50,7 @@ class PatchTests (TestCase):
         o2 = mkproc(self, "outlet")
         o1.connect(0, o2, 0)
         
-        p2 = Patch('default', '', None, None, 'default')
+        p2 = Patch('default', '', None, NaiveScope(), 'default')
         o3 = MFPApp().create("inlet", None, p2, None, "inlet")
         o4 = MFPApp().create("outlet", None, p2, None, "outlet")
         o3.connect(0, o4, 0)

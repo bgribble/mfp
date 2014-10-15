@@ -46,7 +46,7 @@ class Patch(Processor):
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
 
         self.gui_params['layers'] = []
-        self.gui_params['dsp_context'] = self.context.context_name
+        self.gui_params['dsp_context'] = self.context.context_name if self.context else ""
 
         if patch is None:
             self.gui_params['top_level'] = True

@@ -2,6 +2,7 @@
 from unittest import TestCase
 from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
+from mfp.scope import NaiveScope
 from mfp.bang import Bang, Uninit
 
 
@@ -11,7 +12,7 @@ def mkproc(case, init_type, init_args=None):
 
 class PlusTest(TestCase):
     def setUp(self):
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
         self.plus = mkproc(self, "+", None, )
         self.out = mkproc(self, "var")
         self.plus.connect(0, self.out, 0)
@@ -49,7 +50,7 @@ class PlusTest(TestCase):
 
 class PrintTest(TestCase):
     def setUp(self):
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
         self.pr = mkproc(self, "print")
         self.out = mkproc(self, "var")
         self.pr.connect(0, self.out, 0)
@@ -85,7 +86,7 @@ class PrintTest(TestCase):
 
 class RouteTest (TestCase):
     def setUp(self):
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
         self.r = mkproc(self, "route", 'False, 1, "hello"')
 
     def test_basic_routing(self):

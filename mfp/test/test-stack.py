@@ -2,6 +2,7 @@
 from unittest import TestCase
 from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
+from mfp.scope import NaiveScope
 from mfp import Bang
 from mfp.processor import Processor
 
@@ -26,7 +27,7 @@ class FanOut (Processor):
     trail = []
 
     def __init__(self, patch, tag):
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
         self.tag = tag
         Processor.__init__(self, 1, 4, "fanout", '', patch, None, None)
 
@@ -37,7 +38,7 @@ class FanOut (Processor):
 
 class StackDepthTest(TestCase):
     def setUp(self):
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
         self.var = mkproc(self, "var", "0")
         self.inc = LimitedIncr(self.patch)
         self.var.connect(0, self.inc, 0)
@@ -78,7 +79,7 @@ class StackDepthTest(TestCase):
 
 class DepthFirstTest(TestCase):
     def setUp(self):
-        self.patch = Patch('default', '', None, None, 'default')
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
         FanOut.trail = []
         self.procs = [FanOut(self.patch, i) for i in range(0, 10)]
         for i in range(1, 5):
