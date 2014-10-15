@@ -17,8 +17,6 @@ here so you don't tear your hair out looking for them.
 
  * File dialogs for load/save. 
 
- * Close confirmation if there are unsaved changes 
-
 There are many other things to do, but these ones are especially
 egregious.  Sorry! I just wanted to get the code out there as soon as
 possible to let people get involved. 
