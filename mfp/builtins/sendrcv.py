@@ -59,6 +59,39 @@ class Send (Processor):
             self.dest_obj.send(self.inlets[0], self.dest_inlet)
             self.inlets[0] = Uninit 
 
+    def _send(self, value, inlet=0):
+        from mfp.method import MethodCall
+        if self.paused: 
+            return [] 
+
+        work = []
+        if inlet >= 0:
+            self.inlets[inlet] = value
+
+        self.count_in += 1 
+
+        if self.dest_obj is None:
+            self.dest_obj = MFPApp().resolve(self.dest_name, self, True)
+
+        with self.trigger_lock:
+            if isinstance(value, MethodCall):
+                self.method(value, inlet)
+            elif inlet == 0:
+                if self.dest_obj: 
+                    work.append((self.dest_obj, value, self.dest_inlet))
+            else:
+                self.trigger()
+                self.count_trigger += 1
+
+        try:
+            if ((inlet in self.dsp_inlets) 
+                and not isinstance(value, bool) and isinstance(value, (float, int))):
+                self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
+        except (TypeError, ValueError):
+            pass
+
+        return work
+
     def tooltip_extra(self):
         return "<b>Connected to:</b> %s" % self.dest_name
 

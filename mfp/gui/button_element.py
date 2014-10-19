@@ -206,7 +206,6 @@ class ToggleButtonElement (ButtonElement):
             self.on_message = params.get("on_message")
         if "off_message" in params:
             self.off_message = params.get("off_message")
-
         ButtonElement.configure(self, params)
         self.texture.invalidate()
 

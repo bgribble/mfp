@@ -8,7 +8,6 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from .. import Bang, Uninit
-from mfp import log
 
 
 class Var (Processor):
@@ -73,12 +72,13 @@ class Var (Processor):
                 do_update = True
             self.outlets[0] = self.value
             self.inlets[0] = Uninit
-
-        if do_update and self.gui_params.get("update_required"):
+        if (do_update and self.gui_params.get("update_required")
+            and ('value' not in self.gui_params or self.gui_params['value'] != self.value)):
             self.gui_params['value'] = self.value
 
             if self.gui_created:
                 MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        return True
 
     def conf(self, **kwargs):
         for k, v in kwargs.items():

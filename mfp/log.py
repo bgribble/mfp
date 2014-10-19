@@ -1,4 +1,5 @@
 import sys
+import string
 from datetime import datetime
 
 log_time_base = datetime.now()
@@ -9,6 +10,8 @@ log_func = None
 log_debug = True
 log_force_console = False 
 
+ts_trans = string.maketrans("0123456789", "xxxxxxxxxx")
+
 def make_log_entry(tag, *parts):
     global log_time_base
 
@@ -16,7 +19,8 @@ def make_log_entry(tag, *parts):
     dt = (datetime.now() - log_time_base).total_seconds()
     ts = "%.3f" % dt
     leader = "[%8s %6s]" % (ts, tag)
-    if msg.startswith(leader[:7]):
+
+    if (leader[:12].translate(ts_trans) == msg[:12].translate(ts_trans)):
         if msg[-1] != '\n':
             msg = msg + '\n'
         return msg 

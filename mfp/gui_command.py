@@ -1,6 +1,5 @@
 
 from .rpc import RPCWrapper, rpcwrap, rpcwrap_noresp
-from . import log 
 
 class GUICommand (RPCWrapper):
     @rpcwrap
@@ -154,6 +153,7 @@ class GUICommand (RPCWrapper):
     def _connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI
         from .gui.connection_element import ConnectionElement
+        from mfp import log
 
         obj_1 = MFPGUI().recall(obj_1_id)
         obj_2 = MFPGUI().recall(obj_2_id)

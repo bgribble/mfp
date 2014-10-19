@@ -16,6 +16,13 @@ class RGBAColor(object):
         self.blue = b
         self.alpha = a 
 
+    @classmethod
+    def load(self, propdict):
+        return RGBAColor(propdict.get('red', 0),
+                         propdict.get('green', 0), 
+                         propdict.get('blue', 0),
+                         propdict.get('alpha', 0))
+
 
 class ColorDB (Singleton): 
     named_colors = {} 

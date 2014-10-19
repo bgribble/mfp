@@ -123,8 +123,8 @@ class Processor (object):
             else: 
                 hottip = ''
 
-            return (('<b>[%s] inlet %d:</b> ' + dsptip + hottip + tip)
-                    % (self.init_type, port_num))
+            return (('<b>[%(init_type)s] inlet %(port_num)d:</b> ' + dsptip + hottip + tip)
+                    % dict(init_type=self.init_type, port_num=port_num))
 
         elif port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
             if port_num < len(self.doc_tooltip_outlet):
@@ -136,7 +136,8 @@ class Processor (object):
             else: 
                 dsptip = ''
 
-            return (('<b>[%s] outlet %d:</b> ' + dsptip + tip) % (self.init_type, port_num))
+            return (('<b>[%(init_type)s] outlet %(port_num)d:</b> ' + dsptip + tip) 
+                    % dict(init_type=self.init_type, port_num=port_num))
         else: 
             # basic one-liner 
             lines = [ ('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type ]

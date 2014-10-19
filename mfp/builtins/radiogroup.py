@@ -9,7 +9,6 @@ from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..bang import Uninit
 
-
 class RGForceFalse (object):
     pass 
 
@@ -40,8 +39,8 @@ class RadioGroup (Processor):
         self.doc_tooltip_outlet = [] 
 
         for i in range(num_inlets):
-            self.doc_tooltip_inlet.append("Button %d input")
-            self.doc_tooltip_outlet.append("Button %d output")
+            self.doc_tooltip_inlet.append("Button %(port_num) input")
+            self.doc_tooltip_outlet.append("Button %(port_num)d output")
 
         Processor.__init__(self, num_inlets, num_inlets+1, 
                            init_type, init_args, patch, scope, name)

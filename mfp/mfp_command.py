@@ -3,7 +3,7 @@ from .patch import Patch
 from .method import MethodCall
 from .processor import Processor
 from .rpc import RPCWrapper, rpcwrap, rpcwrap_noresp
-from . import log
+from mfp import log
 
 class MFPCommand(RPCWrapper):
     @rpcwrap
@@ -180,7 +180,6 @@ class MFPCommand(RPCWrapper):
     @rpcwrap
     def open_file(self, file_name, context=None):
         from .mfp_app import MFPApp
-        log.debug("MFPCommand.open_file:", file_name, context)
         patch = MFPApp().open_file(file_name)
         return patch.obj_id
 
@@ -195,8 +194,6 @@ class MFPCommand(RPCWrapper):
     def show_editor(self, obj_id, show):
         from .mfp_app import MFPApp
         patch = MFPApp().objects.get(obj_id)
-        log.debug("show_editor: obj_id=%s, patch=%s"
-                  % (obj_id, patch))
         if not isinstance(patch, Patch):
             log.warning("show_editor: error: obj_id=%s, obj=%s is not a patch" 
                         % (obj_id, patch))
@@ -267,7 +264,6 @@ class MFPCommand(RPCWrapper):
                 del MFPApp().patches[patch_id] 
 
         if not len(MFPApp().patches):
-            log.debug("close_context: calling finish_soon")
             MFPApp().finish_soon()
             return None 
 

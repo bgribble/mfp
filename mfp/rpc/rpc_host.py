@@ -257,6 +257,7 @@ class RPCHost (QuittableThread):
                     if jdata is not None and len(jdata):
                         peer_id = self.peers_by_socket.get(sock)
                         self.read_workers.submit((jdata, peer_id))
+
         if self.node_id == 0: 
             req = Request("exit_request", {})
             peers = self.managed_sockets.keys()
