@@ -3,7 +3,7 @@ import simplejson as json
 import threading 
 import socket 
 
-from request import Request 
+from request import Request, extended_decoder_hook 
 from rpc_wrapper import RPCWrapper 
 from mfp.utils import QuittableThread
 from mfp import log
@@ -163,7 +163,7 @@ class RPCHost (QuittableThread):
         #print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
 
         #py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
-        obj = json.loads(json_data)
+        obj = json.loads(json_data, object_hook=extended_decoder_hook)
         req = Request.from_dict(obj)
 
         # is someone waiting on this response? 
