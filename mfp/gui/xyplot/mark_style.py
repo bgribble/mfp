@@ -6,7 +6,7 @@ Helper class to save style info and render a styled mark/stroke
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from  ..colordb import ColorDB
+from  ..colordb import ColorDB, RGBAColor
 import math
 
 
@@ -27,7 +27,10 @@ class MarkStyle (object):
         self.alpha_elt = None
 
     def set_color(self, newcolor):
-        c = ColorDB().find_cairo(newcolor)
+        if isinstance(newcolor, str):
+            c = ColorDB().find_cairo(newcolor)
+        elif isinstance(newcolor, RGBAColor): 
+            c = newcolor 
         self.col_r = c.red
         self.col_g = c.green
         self.col_b = c.blue

@@ -55,8 +55,10 @@ class ScatterPlot (XYPlot):
             self._recalc_y_scale()
        
         for curve in self.points:
+            curve = int(curve)
             styler = self.style.get(curve)
             if styler is None:
+                log.warning("[scatterplot]: no style for curve", curve)
                 styler = self.style[curve] = MarkStyle()
 
             tile_id = self.plot.tile_reverse.get(texture)
@@ -86,6 +88,7 @@ class ScatterPlot (XYPlot):
         self.plot.set_viewport_scroll(px[0], px[1])
 
     def append(self, point, curve=0):
+        curve = int(curve)
         pts = self.points.setdefault(curve, [])
         ptnum = len(pts)
         pts.append([ptnum, point])
@@ -107,6 +110,8 @@ class ScatterPlot (XYPlot):
         if px is None:
             # point is not legal, usually on log charts 
             return []
+
+        curve = int(curve)
 
         tiles = []
         pts = self.points.setdefault(curve, {})
