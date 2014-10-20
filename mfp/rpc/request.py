@@ -10,7 +10,9 @@ class ExtendedEncoder (json.JSONEncoder):
     from ..bang import BangType, UninitType
     from ..gui.colordb import RGBAColor 
 
-    TYPES = { 'BangType': BangType, 'UninitType': UninitType, 'RGBAColor': RGBAColor}
+    TYPES = { '__BangType__': BangType, 
+             '__UninitType__': UninitType, 
+             '__RGBAColor__': RGBAColor}
 
     def default(self, obj):
         if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
@@ -24,13 +26,12 @@ def extended_decoder_hook (saved):
     from ..bang import Bang, Uninit
     if (isinstance(saved, dict) and len(saved.keys()) == 1):
         tname, tdict = saved.items()[0]
-        key = tname.strip("_")
-        if key == "BangType":
+        if tname == "__BangType__":
             return Bang
-        elif key == "UninitType":
+        elif tname == "__UninitType__":
             return Uninit
         else: 
-            ctor = ExtendedEncoder.TYPES.get(key)
+            ctor = ExtendedEncoder.TYPES.get(tname)
             if ctor:
                 return ctor.load(tdict)
     return saved 
