@@ -26,6 +26,7 @@ Try:
     mfp -h for a command line arguments summary.  
     mfp --help-builtins lists the name and tooltip of every builtin object. 
 
+
 **Hello, world:** Follow these steps to create a helloworld patch
 using just the keyboard.  You do need a pointer to activate it. 
 
@@ -56,10 +57,27 @@ documentation will appear at the top of the canvas area.  Hold down
 SHIFT to expand the tooltip to show current information about the
 object, including assigned MIDI and OSC controllers. 
 
+## DOCUMENTATION 
+
+There's some documentation in the doc/ directory of this
+repository.  
+
+**LAC 2013 paper:** This paper (doc/lac2013/lac2013.pdf) gives a
+high-level overview of what MFP is all about and a bit of
+discussion about what it can do. 
+
+**README files:** There are some READMEs in doc which may be
+useful if you want to know more about how MFP works.  Especially
+note README.lv2 which describes how MFP patches can be saved as
+LV2 plugins and loaded into an LV2 host. 
+
 **Tutorial:**  The file "tutorial.mfp" is a basic intro to
 getting around the program.  
 
     $ mfp doc/tutorial.mfp 
+
+It's not very complete, but it does cover a few basics about how
+to create, close, and open files and make simple patches. 
 
 **Demo patches:** There are a few demo patches in doc/.
 
@@ -77,6 +95,11 @@ directory,
 
 hello_world.mfp:  The classic 
 
+simple_synth.mfp: A very basic MIDI-controlled synthesizer showing how to 
+use MIDI note data and convert it to signal output.  Requires an external 
+source of MIDI events, such as a keyboard or virtual keyboard, connected to the 
+MFP app on its ALSA sequencer input. 
+
 biquad_designer.mfp:  Click the "calculate" button to compute
 biquad coefficients and audition them with a noise input source
 (I run this into JAAA to check my calculations).  PGDN to shift
@@ -87,7 +110,7 @@ holding this README:
 
     $ mfp -p doc doc/biquad_designer.mfp
 
-oscope.mfp: Simple demo of the signal<-->control level bridge provided by
+oscope.mfp: Demo of the signal<-->control level bridge provided by
 numpy and the buffer~ object.  A very basic oscilloscope. 
 
 looper.mfp: A simple overdubbing loop sampler inspired by the Akai
@@ -99,6 +122,18 @@ example, [monomix 4] makes a mixer with 4 signal inputs, 4 sliders,
 and 1 signal output.  This makes use of the @clonescope method and the
 concept of hygienic layer copying. 
 
+togglegrid.mfp: Another demonstration of dynamic patch creation,
+this time featuring the "grid=" argument to @clonescope which
+allows dynamically-generated user interface elements to be
+created with some level of control over placement.   
+
+smix.mfp: A multichannel stereo mixer with panning and variable numbers of 
+channels and aux sends per channel.  A more sophisticated version of monomix, 
+using dynamic connections between objects as well as scope cloning
+
+roll_test.mfp: Demonstrates the "roll" mode of the XY scatter
+plotter, a smooth-scrolling capture mode useful for monitoring values
+that are changing slowly over time
 
 ### SAVING FILES
 
