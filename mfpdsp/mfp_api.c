@@ -99,10 +99,10 @@ mfp_api_open_context(mfp_context * context, char * msgbuf, int * msglen)
 {
     const char method[] = "call";
     const char params[] = "{\"func\": \"open_context\", \"rpcid\": %d, \"args\": "
-                          "[%d, %d, %d ], \"kwargs\": {} }";
+                          "[%d, %d, %d, %d ], \"kwargs\": {} }";
     char tbuf[MFP_MAX_MSGSIZE];
     snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
-             mfp_comm_nodeid, context->id, context->owner);
+             mfp_comm_nodeid, context->id, context->owner, context->samplerate);
     int request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, msglen); 
     return request_id;
 }

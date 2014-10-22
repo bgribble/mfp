@@ -114,9 +114,9 @@ class MFPCommand(RPCWrapper):
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
             return dict(num_inlets=len(obj.inlets),
-                    num_outlets=len(obj.outlets),
-                    dsp_inlets=obj.dsp_inlets,
-                    dsp_outlets=obj.dsp_outlets)
+                        num_outlets=len(obj.outlets),
+                        dsp_inlets=obj.dsp_inlets,
+                        dsp_outlets=obj.dsp_outlets)
         else: 
             return {}
     
@@ -223,13 +223,20 @@ class MFPCommand(RPCWrapper):
         return MFPApp().clipboard_paste(json_txt, patch, scope, mode)
 
     @rpcwrap
-    def open_context(self, node_id, context_id, owner_pid):
+    def open_context(self, node_id, context_id, owner_pid, samplerate):
         from .dsp_object import DSPContext 
+        from .mfp_app import MFPApp
         try: 
             ctxt_name = open("/proc/%d/cmdline" % owner_pid, "r").read().split("\x00")[0]
             log.debug("open_context: new context, name=%s" % ctxt_name)
         except: 
             ctxt_name = ""
+
+        if MFPApp().samplerate != samplerate: 
+            log.debug("open_context: samplerate changing from %d to %d" % 
+                      (MFPApp().samplerate, samplerate))
+            MFPApp().samplerate = samplerate 
+
 
         if DSPContext.create(node_id, context_id, ctxt_name):
             return True
@@ -284,7 +291,6 @@ class MFPCommand(RPCWrapper):
         from threading import Thread 
         Thread(target=lambda *_: MFPApp().finish()).start()
         return None
-
 
     @rpcwrap
     def toggle_pause(self): 
