@@ -61,8 +61,7 @@ getting around the program.
 
     $ mfp doc/tutorial.mfp 
 
-**Demo patches:** There are a few demo patches in doc/ which are really all the
-documentation there is right now. 
+**Demo patches:** There are a few demo patches in doc/.
 
 If your $PWD is in the doc/ directory, just run the demo patch by putting
 the file name on the command line, i.e. 
@@ -78,13 +77,13 @@ directory,
 
 hello_world.mfp:  The classic 
 
-biquad_designer.mfp:  Not complete!  But at least partly working.  Click
-the "calculate" button to compute biquad coefficients and audition them
-with a noise input source (I run this into JAAA to check my calculations).
-PGDN to shift to the Graphs layer with pole/zero and analytical frequency
-response.  You need to add doc/ to the patch search path for this to load 
-(it uses the "quadratic.mfp" patch).  From the directory holding this 
-README: 
+biquad_designer.mfp:  Click the "calculate" button to compute
+biquad coefficients and audition them with a noise input source
+(I run this into JAAA to check my calculations).  PGDN to shift
+to the Graphs layer with pole/zero and analytical frequency
+response.  You need to add doc/ to the patch search path for this
+to load (it uses the "quadratic.mfp" patch).  From the directory
+holding this README: 
 
     $ mfp -p doc doc/biquad_designer.mfp
 
