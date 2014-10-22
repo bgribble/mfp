@@ -1,40 +1,49 @@
 {
     "gui_params": {
+        "display_type": "patch",
+        "initargs": "",
         "layers": [
             [
                 "Layer 0",
                 "__patch__"
             ]
         ],
-        "name": "default",
-        "obj_id": 0,
-        "top_level": true,
+        "name": "hello_world",
+        "num_inlets": 1,
         "num_outlets": 0,
-        "display_type": "patch",
-        "num_inlets": 0,
-        "initargs": ""
+        "obj_id": 0,
+        "top_level": true
     },
+    "hot_inlets": [
+        0
+    ],
     "objects": {
         "1": {
-            "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 41.0,
-                "name": "comment_title",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "text",
-                "num_inlets": 2,
-                "position_y": 23.0,
-                "dsp_outlets": null
-            },
-            "name": "comment_title",
-            "value": "<span size=\"x-large\">hello_world.mfp</span>\nPrint a familiar message to stdout",
             "connections": [
                 []
             ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 41.0,
+                "position_y": 23.0,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\">hello_world.mfp</span>\nPrint a familiar message to stdout",
+                "width": 228.0
+            },
             "initargs": null,
-            "type": "var"
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "comment_title",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": "<span size=\"x-large\">hello_world.mfp</span>\nPrint a familiar message to stdout"
         },
         "2": {
             "connections": [
@@ -45,133 +54,174 @@
                     ]
                 ]
             ],
-            "initargs": "\"hello, world!\"",
+            "do_onload": false,
             "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 42.0,
-                "name": "hello_msg",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
                 "display_type": "message",
-                "num_inlets": 2,
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 42.0,
                 "position_y": 107.0,
-                "dsp_outlets": null
+                "scope": "",
+                "update_required": true,
+                "width": 114.0
             },
-            "type": "message",
-            "name": "hello_msg"
+            "initargs": "\"hello, world!\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "hello_msg",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
         },
         "3": {
             "connections": [
                 []
             ],
-            "initargs": null,
+            "do_onload": false,
             "gui_params": {
-                "position_x": 42.0,
-                "name": "print_3",
-                "obj_id": 3,
-                "dsp_outlets": null,
-                "update_required": false,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "element_type": "processor",
                 "display_type": "processor",
-                "num_inlets": 2,
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 42.0,
                 "position_y": 332.0,
-                "initargs": null
+                "scope": "",
+                "show_label": true,
+                "update_required": false,
+                "width": 44.0
             },
-            "type": "print",
-            "name": "print_3"
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "print_3",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
         },
         "4": {
-            "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 184.0,
-                "name": "comment_1",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "text",
-                "num_inlets": 2,
-                "position_y": 92.0,
-                "dsp_outlets": null
-            },
-            "name": "comment_1",
-            "value": "Flag-shaped elements are <i>messages</i>,\nwhich are constant data in Python syntax\n(with a few exceptions). Click to send the message\nfrom the outlet at the lower left.",
             "connections": [
                 []
             ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 184.0,
+                "position_y": 92.0,
+                "scope": "",
+                "update_required": true,
+                "value": "Flag-shaped elements are <i>messages</i>,\nwhich are constant data in Python syntax\n(with a few exceptions). Click to send the message\nfrom the outlet at the lower left.",
+                "width": 343.0
+            },
             "initargs": null,
-            "type": "var"
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "comment_1",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": "Flag-shaped elements are <i>messages</i>,\nwhich are constant data in Python syntax\n(with a few exceptions). Click to send the message\nfrom the outlet at the lower left."
         },
         "5": {
-            "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 184.0,
-                "name": "comment_3",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "text",
-                "num_inlets": 2,
-                "position_y": 284.0,
-                "dsp_outlets": null
-            },
-            "name": "comment_3",
-            "value": "Plain boxes are <i>processors</i> which perform some \noperation on data entering via inlets in the top of the \nbox. <tt>print</tt> prints the message to standard \noutput.",
             "connections": [
                 []
             ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 184.0,
+                "position_y": 284.0,
+                "scope": "",
+                "update_required": true,
+                "value": "Plain boxes are <i>processors</i> which perform some \noperation on data entering via inlets in the top of the \nbox. <tt>print</tt> prints the message to the \"Log\" \ntab below.",
+                "width": 356.0
+            },
             "initargs": null,
-            "type": "var"
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "comment_3",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": "Plain boxes are <i>processors</i> which perform some \noperation on data entering via inlets in the top of the \nbox. <tt>print</tt> prints the message to the \"Log\" \ntab below."
         },
         "6": {
-            "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 184.0,
-                "name": "comment_2",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "text",
-                "num_inlets": 2,
-                "position_y": 200.0,
-                "dsp_outlets": null
-            },
-            "name": "comment_2",
-            "value": "Lines between elements are <i>connections</i> which \ncan carry either Python messages or audio data (but not\nboth on one connection).",
             "connections": [
                 []
             ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 68.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 184.0,
+                "position_y": 200.0,
+                "scope": "",
+                "update_required": true,
+                "value": "Lines between elements are <i>connections</i> which \ncan carry either Python messages or audio data (but not\nboth on one connection).",
+                "width": 373.0
+            },
             "initargs": null,
-            "type": "var"
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "comment_2",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": "Lines between elements are <i>connections</i> which \ncan carry either Python messages or audio data (but not\nboth on one connection)."
         },
         "7": {
-            "gui_params": {
-                "layer": "Layer 0",
-                "position_x": 62.0,
-                "name": "comment_arrow",
-                "update_required": true,
-                "num_outlets": 1,
-                "dsp_inlets": null,
-                "display_type": "text",
-                "num_inlets": 2,
-                "position_y": 222.0,
-                "dsp_outlets": null
-            },
-            "name": "comment_arrow",
-            "value": "&lt;-----------------",
             "connections": [
                 []
             ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 62.0,
+                "position_y": 222.0,
+                "scope": "",
+                "update_required": true,
+                "value": "&lt;-----------------",
+                "width": 120.0
+            },
             "initargs": null,
-            "type": "var"
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "comment_arrow",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": "&lt;-----------------"
         }
     },
-    "type": "hello",
     "scopes": {
         "__patch__": {
+            "comment_1": 4,
+            "comment_2": 6,
+            "comment_3": 5,
+            "comment_arrow": 7,
+            "comment_title": 1,
+            "hello_msg": 2,
+            "patch": 0,
+            "print_3": 3,
             "self": 0
         }
-    }
+    },
+    "type": "hello_world"
 }

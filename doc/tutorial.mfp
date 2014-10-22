@@ -1,5 +1,6 @@
 {
     "gui_params": {
+        "display_type": "patch",
         "layers": [
             [
                 "0. Introduction",
@@ -27,133 +28,1547 @@
             ]
         ],
         "name": "tutorial",
-        "obj_id": 0,
-        "top_level": true,
+        "num_inlets": 1,
         "num_outlets": 0,
-        "display_type": "patch",
-        "num_inlets": 1
+        "obj_id": 0,
+        "top_level": true
     },
+    "hot_inlets": [
+        0
+    ],
     "objects": {
         "1": {
             "connections": [
                 []
             ],
+            "do_onload": false,
             "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>",
+                "display_type": "text",
                 "height": 26.0,
-                "width": 92.0,
-                "update_required": true,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
                 "position_x": 35.56041717529297,
                 "position_y": 25.977832794189453,
-                "layername": "0. Introduction",
-                "display_type": "text"
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>",
+                "width": 92.0
             },
-            "name": "text_002",
-            "midi_mode": null,
-            "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
             "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_002",
+            "osc_methods": [],
+            "properties": {},
             "type": "text",
-            "properties": {}
+            "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>"
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 48.982669830322266,
+                "position_y": 434.5323486328125,
+                "scope": "",
+                "update_required": true,
+                "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. ",
+                "width": 459.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_010",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. "
+        },
+        "11": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Creating a patch</b></span>",
+                "width": 116.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_011",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Creating a patch</b></span>"
+        },
+        "12": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "scope": "",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"self\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "13": {
+            "connections": [
+                [
+                    [
+                        12,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "14": {
+            "connections": [
+                [
+                    [
+                        12,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "15": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">NEXT</span>",
+                "width": 46.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_012",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">NEXT</span>"
+        },
+        "16": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">PREV</span>",
+                "width": 45.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">PREV</span>"
+        },
+        "17": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 62.976043701171875,
+                "position_y": 83.92110443115234,
+                "scope": "",
+                "update_required": true,
+                "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key.  ",
+                "width": 562.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_014",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key.  "
+        },
+        "18": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 257.0,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 63.97566223144531,
+                "position_y": 181.81930541992188,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab.",
+                "width": 582.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_015",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab."
+        },
+        "19": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "layername": "1. Command line",
+                "no_export": false,
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "scope": "",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"self\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
         },
         "2": {
             "connections": [
                 []
             ],
+            "do_onload": false,
             "gui_params": {
-                "no_export": false,
-                "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>",
+                "display_type": "text",
                 "height": 47.0,
-                "width": 355.0,
-                "update_required": true,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
                 "position_x": 370.79770278930664,
                 "position_y": 32.94720458984375,
-                "layername": "0. Introduction",
-                "display_type": "text"
+                "scope": "",
+                "update_required": true,
+                "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>",
+                "width": 355.0
             },
-            "name": "text_003",
-            "midi_mode": null,
-            "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
             "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_003",
+            "osc_methods": [],
+            "properties": {},
             "type": "text",
-            "properties": {}
+            "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>"
+        },
+        "20": {
+            "connections": [
+                [
+                    [
+                        19,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "1. Command line",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "21": {
+            "connections": [
+                [
+                    [
+                        19,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "1. Command line",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "22": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "1. Command line",
+                "no_export": false,
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">NEXT</span>",
+                "width": 46.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">NEXT</span>"
+        },
+        "23": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "1. Command line",
+                "no_export": false,
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">PREV</span>",
+                "width": 45.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_017",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">PREV</span>"
+        },
+        "24": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 194.0,
+                "is_export": false,
+                "layername": "1. Command line",
+                "no_export": false,
+                "position_x": 57.91237258911133,
+                "position_y": 80.91848754882812,
+                "scope": "",
+                "update_required": true,
+                "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>",
+                "width": 548.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_018",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>"
+        },
+        "25": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "1. Command line",
+                "no_export": false,
+                "position_x": 35.56041717529297,
+                "position_y": 25.977832794189453,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Command line</b></span>",
+                "width": 102.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_019",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Command line</b></span>"
+        },
+        "26": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 48.98456954956055,
+                "position_y": 94.84783172607422,
+                "scope": "",
+                "update_required": true,
+                "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  ",
+                "width": 571.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_020",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  "
+        },
+        "27": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "1. Command line",
+                "no_export": false,
+                "position_x": 58.97983169555664,
+                "position_y": 288.694580078125,
+                "scope": "",
+                "update_required": true,
+                "value": "Note especially the -v option, which copies all log messages to the console.  \nThis may be helpful if a problem is causing MFP to crash and take log messages \nwith it.  Usually, after startup all log messages will go to the \"Log\" tab below, but \nwill not be printed to stdout.",
+                "width": 546.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_021",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Note especially the -v option, which copies all log messages to the console.  \nThis may be helpful if a problem is causing MFP to crash and take log messages \nwith it.  Usually, after startup all log messages will go to the \"Log\" tab below, but \nwill not be printed to stdout."
+        },
+        "28": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>File operations</b></span>",
+                "width": 105.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>File operations</b></span>"
+        },
+        "29": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 67.84106063842773,
+                "position_y": 75.05355834960938,
+                "scope": "",
+                "update_required": true,
+                "value": "<b>C-f</b>, as we have seen, creates an empty new patch.  ",
+                "width": 351.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_022",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<b>C-f</b>, as we have seen, creates an empty new patch.  "
         },
         "3": {
             "connections": [
                 []
             ],
+            "do_onload": false,
             "gui_params": {
-                "no_export": false,
-                "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page.  Instructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Click the \"Next\" button now to get started.</i> \n\nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started.\n\nYou can also use PGUP and PGDN (Page Up and Page Down) keys to move to the previous \nand next layers, or click on the layer name you want to visit in the Layers tab to the left.  To\nre-enter Edit mode, type C-SPC (Control-Space).",
+                "display_type": "text",
                 "height": 278.0,
-                "width": 608.0,
-                "update_required": true,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
                 "position_x": 48.830448150634766,
                 "position_y": 150.14801025390625,
-                "layername": "0. Introduction",
-                "display_type": "text"
+                "scope": "",
+                "update_required": true,
+                "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page.  Instructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Click the \"Next\" button now to get started.</i> \n\nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started.\n\nYou can also use PGUP and PGDN (Page Up and Page Down) keys to move to the previous \nand next layers, or click on the layer name you want to visit in the Layers tab to the left.  To\nre-enter Edit mode, type C-SPC (Control-Space).",
+                "width": 608.0
             },
-            "name": "text_005",
-            "midi_mode": null,
-            "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page.  Instructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Click the \"Next\" button now to get started.</i> \n\nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started.\n\nYou can also use PGUP and PGDN (Page Up and Page Down) keys to move to the previous \nand next layers, or click on the layer name you want to visit in the Layers tab to the left.  To\nre-enter Edit mode, type C-SPC (Control-Space).",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
             "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_005",
+            "osc_methods": [],
+            "properties": {},
             "type": "text",
-            "properties": {}
+            "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  Each page will have a \"Next\" and/or \"Prev\" button which you can click to go to \nthe indicated page.  Instructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Click the \"Next\" button now to get started.</i> \n\nA-ha! That does nothing. First, you need to be in \"Operate\" mode to operate the patch.  \nHit the Escape key (ESC from here on) [note that the label in the lower right of this canvas \nchanges from \"Edit\" to \"Operate\"], <i>then</i> click the \"Next\" button to get started.\n\nYou can also use PGUP and PGDN (Page Up and Page Down) keys to move to the previous \nand next layers, or click on the layer name you want to visit in the Layers tab to the left.  To\nre-enter Edit mode, type C-SPC (Control-Space)."
+        },
+        "30": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 68.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 67.85282516479492,
+                "position_y": 111.92745971679688,
+                "scope": "",
+                "update_required": true,
+                "value": "<b>C-s</b> saves the current patch.  A prompt for a filename will appear at the bottom\nof the canvas.  As of this release, MFP always saves the file into the process working directory \n(if running standalone) or the session data directory (if run from the NSM session manager).",
+                "width": 625.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_023",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<b>C-s</b> saves the current patch.  A prompt for a filename will appear at the bottom\nof the canvas.  As of this release, MFP always saves the file into the process working directory \n(if running standalone) or the session data directory (if run from the NSM session manager)."
+        },
+        "31": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 70.89670944213867,
+                "position_y": 311.03700256347656,
+                "scope": "",
+                "update_required": true,
+                "value": "<b>C-o</b> opens a previously-saved patch.  A prompt for a filename will appear at \nthe bottom of the canvas.  The file will be searched for on the <i>patch path</i>, which is \nthe process working directory or session data directory plus any directories specified with \nthe <b>-p</b> option at startup time. ",
+                "width": 593.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_024",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<b>C-o</b> opens a previously-saved patch.  A prompt for a filename will appear at \nthe bottom of the canvas.  The file will be searched for on the <i>patch path</i>, which is \nthe process working directory or session data directory plus any directories specified with \nthe <b>-p</b> option at startup time. "
+        },
+        "32": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 102.87378692626953,
+                "position_y": 186.0366973876953,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Select your working patch by C-PGDN and type C-s to save it.  Type a filename\nand RET to complete the file save.</i>",
+                "width": 549.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_025",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Select your working patch by C-PGDN and type C-s to save it.  Type a filename\nand RET to complete the file save.</i>"
+        },
+        "33": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 70.90933990478516,
+                "position_y": 241.0341339111328,
+                "scope": "",
+                "update_required": true,
+                "value": "<b>C-w</b> closes the current patch.  ",
+                "width": 212.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_026",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<b>C-w</b> closes the current patch.  "
+        },
+        "34": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 102.86031341552734,
+                "position_y": 277.0379943847656,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Select your just-saved working patch by C-PGDN and type C-w to close it.</i>",
+                "width": 521.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_027",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Select your just-saved working patch by C-PGDN and type C-w to close it.</i>"
+        },
+        "35": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 103.86155700683594,
+                "position_y": 409.27880859375,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Open your working patch again by C-o &lt;filename&gt; RET</i>",
+                "width": 385.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_028",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Open your working patch again by C-o &lt;filename&gt; RET</i>"
+        },
+        "36": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "scope": "",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"self\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "37": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "3. File operations",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_007",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "38": {
+            "connections": [
+                [
+                    [
+                        36,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "3. File operations",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "39": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">NEXT</span>",
+                "width": 46.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_029",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">NEXT</span>"
         },
         "4": {
             "connections": [
                 []
             ],
+            "do_onload": false,
             "gui_params": {
-                "no_export": false,
-                "value": "Copyright &#169; 2013 Bill Gribble &lt;grib@billgribble.com&gt;",
+                "display_type": "text",
                 "height": 26.0,
-                "width": 358.0,
-                "update_required": true,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
                 "position_x": 44.9422492980957,
                 "position_y": 489.1565856933594,
-                "layername": "0. Introduction",
-                "display_type": "text"
+                "scope": "",
+                "update_required": true,
+                "value": "Copyright &#169; 2013 Bill Gribble &lt;grib@billgribble.com&gt;",
+                "width": 358.0
             },
-            "name": "text_007",
-            "midi_mode": null,
-            "value": "Copyright &#169; 2013 Bill Gribble &lt;grib@billgribble.com&gt;",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
             "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_007",
+            "osc_methods": [],
+            "properties": {},
             "type": "text",
-            "properties": {}
+            "value": "Copyright &#169; 2013 Bill Gribble &lt;grib@billgribble.com&gt;"
+        },
+        "40": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. File operations",
+                "no_export": false,
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">PREV</span>",
+                "width": 45.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_030",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">PREV</span>"
+        },
+        "41": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Hello, World</b></span>",
+                "width": 92.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_031",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Hello, World</b></span>"
+        },
+        "42": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 43.82478332519531,
+                "position_y": 72.19137573242188,
+                "scope": "",
+                "update_required": true,
+                "value": "To build a simple patch, you need to know how to create the elements and \nhow to use Connection mode to hook them up.  In your working patch:",
+                "width": 500.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_032",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "To build a simple patch, you need to know how to create the elements and \nhow to use Connection mode to hook them up.  In your working patch:"
+        },
+        "43": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 59.90829086303711,
+                "position_y": 129.77536010742188,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Type the following to create a message box:</i>",
+                "width": 323.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_033",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Type the following to create a message box:</i>"
+        },
+        "44": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 86.8471908569336,
+                "position_y": 156.15927124023438,
+                "scope": "",
+                "update_required": true,
+                "value": "m \"hello, world\" RET",
+                "width": 144.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_034",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "m \"hello, world\" RET"
+        },
+        "45": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 65.89913177490234,
+                "position_y": 195.82044982910156,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Type the following to create a print processor:</i>\n      ap print RET",
+                "width": 335.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_035",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Type the following to create a print processor:</i>\n      ap print RET"
+        },
+        "46": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 67.89301300048828,
+                "position_y": 252.06478881835938,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Hit TAB to select the message box</i>",
+                "width": 261.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_036",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Hit TAB to select the message box</i>"
+        },
+        "47": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 110.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 68.89801025390625,
+                "position_y": 286.9288024902344,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Type the following to connect the message box to the print processor:</i>\n     c             <i>(to enter Connection mode with the message as the start of connection)</i>\n     TAB        <i>(to select the print processor as the other end of connection)</i>\n     RET        <i>(to create the connection)</i>\n     Your patch should look like the one to the right",
+                "width": 561.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_037",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Type the following to connect the message box to the print processor:</i>\n     c             <i>(to enter Connection mode with the message as the start of connection)</i>\n     TAB        <i>(to select the print processor as the other end of connection)</i>\n     RET        <i>(to create the connection)</i>\n     Your patch should look like the one to the right"
+        },
+        "48": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 68.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 70.89775085449219,
+                "position_y": 405.02801513671875,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. ",
+                "width": 471.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_038",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. "
+        },
+        "49": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "scope": "",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"self\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
         },
         "5": {
             "connections": [],
+            "do_onload": true,
             "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 35,
-                "width": 20,
                 "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
                 "position_x": 673.2089233398438,
                 "position_y": 471.5054931640625,
-                "layername": "0. Introduction"
+                "scope": "",
+                "update_required": false,
+                "width": 20
             },
-            "name": "sendvia_001",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
             "initargs": "\"self\"",
-            "type": "send",
-            "properties": {}
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "50": {
+            "connections": [
+                [
+                    [
+                        49,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_009",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "51": {
+            "connections": [
+                [
+                    [
+                        49,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_010",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "52": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">NEXT</span>",
+                "width": 46.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_039",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">NEXT</span>"
+        },
+        "53": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">PREV</span>",
+                "width": 45.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_040",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">PREV</span>"
+        },
+        "54": {
+            "connections": [
+                [
+                    [
+                        55,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 454.8407897949219,
+                "position_y": 167.82728576660156,
+                "scope": "",
+                "update_required": true,
+                "width": 109.0
+            },
+            "initargs": "\"hello, world\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "55": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "4. Hello, world",
+                "no_export": false,
+                "position_x": 454.841796875,
+                "position_y": 215.8342742919922,
+                "scope": "",
+                "show_label": true,
+                "update_required": false,
+                "width": 44.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "56": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
+                "width": 130.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_041",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Creating elements</b></span>"
+        },
+        "57": {
+            "connections": [],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 673.2089233398438,
+                "position_y": 471.5054931640625,
+                "scope": "",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"self\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "58": {
+            "connections": [
+                [
+                    [
+                        57,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_011",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
+        },
+        "59": {
+            "connections": [
+                [
+                    [
+                        57,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 30,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_012",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
         },
         "6": {
             "connections": [
@@ -164,28 +1579,300 @@
                     ]
                 ]
             ],
+            "do_onload": false,
             "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
                 "display_type": "button",
-                "position_x": 619.2289428710938,
-                "position_y": 434.8694763183594,
+                "height": 30,
+                "is_export": false,
+                "layername": "0. Introduction",
                 "message": {
                     "__BangType__": {}
                 },
-                "layername": "0. Introduction"
+                "no_export": false,
+                "position_x": 619.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
             },
-            "name": "button_001",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
             "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_001",
+            "osc_methods": [],
+            "properties": {},
             "type": "var",
-            "properties": {}
+            "value": false
+        },
+        "60": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">NEXT</span>",
+                "width": 46.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_042",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">NEXT</span>"
+        },
+        "61": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">PREV</span>",
+                "width": 45.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_043",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">PREV</span>"
+        },
+        "62": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 404.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 53.99140548706055,
+                "position_y": 69.88384246826172,
+                "scope": "",
+                "update_required": true,
+                "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  ",
+                "width": 566.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_044",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  "
+        },
+        "63": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 506.82916259765625,
+                "position_y": 128.84127807617188,
+                "scope": "",
+                "update_required": true,
+                "width": 64.0
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "64": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 507.82879638671875,
+                "position_y": 161.81533813476562,
+                "scope": "",
+                "show_label": true,
+                "update_required": false,
+                "width": 44.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "65": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "digits": 1,
+                "display_type": "enum",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "max_value": null,
+                "min_value": null,
+                "no_export": false,
+                "position_x": 507.82879638671875,
+                "position_y": 194.77142333984375,
+                "scientific": false,
+                "scope": "",
+                "update_required": true,
+                "width": 42.0
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "enum_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "enum",
+            "value": 0.0
+        },
+        "66": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 588.8088989257812,
+                "position_y": 129.85923767089844,
+                "scope": "",
+                "update_required": true,
+                "value": "Message",
+                "width": 67.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_045",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Message"
+        },
+        "67": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 589.8108520507812,
+                "position_y": 164.81732177734375,
+                "scope": "",
+                "update_required": true,
+                "value": "Processor",
+                "width": 74.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_046",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Processor"
+        },
+        "68": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 589.8136596679688,
+                "position_y": 196.79537963867188,
+                "scope": "",
+                "update_required": true,
+                "value": "Number",
+                "width": 62.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_047",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Number"
+        },
+        "69": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 507.83953857421875,
+                "position_y": 229.7684326171875,
+                "scope": "",
+                "update_required": true,
+                "value": "Hello!",
+                "width": 50.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_048",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Hello!"
         },
         "7": {
             "connections": [
@@ -196,1952 +1883,428 @@
                     ]
                 ]
             ],
+            "do_onload": false,
             "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
                 "display_type": "button",
-                "position_x": 675.2289428710938,
-                "position_y": 434.8694763183594,
+                "height": 30,
+                "is_export": false,
+                "layername": "0. Introduction",
                 "message": {
                     "__BangType__": {}
                 },
-                "layername": "0. Introduction"
+                "no_export": false,
+                "position_x": 675.2289428710938,
+                "position_y": 434.8694763183594,
+                "scope": "",
+                "update_required": true,
+                "width": 50
             },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
             "name": "button_002",
-            "midi_mode": null,
-            "value": false,
             "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
+            "properties": {},
             "type": "var",
-            "properties": {}
-        },
-        "8": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">NEXT</span>",
-                "height": 26.0,
-                "width": 46.0,
-                "update_required": true,
-                "position_x": 683.7633361816406,
-                "position_y": 439.8682861328125,
-                "layername": "0. Introduction",
-                "display_type": "text"
-            },
-            "name": "text_006",
-            "midi_mode": null,
-            "value": "<span size=\"small\">NEXT</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "9": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">PREV</span>",
-                "height": 26.0,
-                "width": 45.0,
-                "update_required": true,
-                "position_x": 626.8020629882812,
-                "position_y": 440.8680419921875,
-                "layername": "0. Introduction",
-                "display_type": "text"
-            },
-            "name": "text_008",
-            "midi_mode": null,
-            "value": "<span size=\"small\">PREV</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "11": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. ",
-                "height": 26.0,
-                "width": 459.0,
-                "update_required": true,
-                "position_x": 48.982669830322266,
-                "position_y": 434.5323486328125,
-                "layername": "0. Introduction",
-                "display_type": "text"
-            },
-            "name": "text_010",
-            "midi_mode": null,
-            "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "12": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"x-large\"><b>Creating a patch</b></span>",
-                "height": 26.0,
-                "width": 116.0,
-                "update_required": true,
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "layername": "2. Creating a patch",
-                "display_type": "text"
-            },
-            "name": "text_011",
-            "midi_mode": null,
-            "value": "<span size=\"x-large\"><b>Creating a patch</b></span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "13": {
-            "connections": [],
-            "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 673.2089233398438,
-                "position_y": 471.5054931640625,
-                "layername": "2. Creating a patch"
-            },
-            "name": "sendvia_002",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": "\"self\"",
-            "type": "send",
-            "properties": {}
-        },
-        "14": {
-            "connections": [
-                [
-                    [
-                        13,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 619.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "2. Creating a patch"
-            },
-            "name": "button_003",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "15": {
-            "connections": [
-                [
-                    [
-                        13,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 675.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "2. Creating a patch"
-            },
-            "name": "button_004",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "16": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">NEXT</span>",
-                "height": 26.0,
-                "width": 46.0,
-                "update_required": true,
-                "position_x": 683.7633361816406,
-                "position_y": 439.8682861328125,
-                "layername": "2. Creating a patch",
-                "display_type": "text"
-            },
-            "name": "text_012",
-            "midi_mode": null,
-            "value": "<span size=\"small\">NEXT</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "17": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">PREV</span>",
-                "height": 26.0,
-                "width": 45.0,
-                "update_required": true,
-                "position_x": 626.8020629882812,
-                "position_y": 440.8680419921875,
-                "layername": "2. Creating a patch",
-                "display_type": "text"
-            },
-            "name": "text_013",
-            "midi_mode": null,
-            "value": "<span size=\"small\">PREV</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "18": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key.  ",
-                "height": 89.0,
-                "width": 562.0,
-                "update_required": true,
-                "position_x": 62.976043701171875,
-                "position_y": 83.92110443115234,
-                "layername": "2. Creating a patch",
-                "display_type": "text"
-            },
-            "name": "text_014",
-            "midi_mode": null,
-            "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key.  ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "19": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab.",
-                "height": 257.0,
-                "width": 582.0,
-                "update_required": true,
-                "position_x": 63.97566223144531,
-                "position_y": 181.81930541992188,
-                "layername": "2. Creating a patch",
-                "display_type": "text"
-            },
-            "name": "text_015",
-            "midi_mode": null,
-            "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab.",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "20": {
-            "connections": [],
-            "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 673.2089233398438,
-                "position_y": 471.5054931640625,
-                "layername": "1. Command line"
-            },
-            "name": "sendvia_003",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": "\"self\"",
-            "type": "send",
-            "properties": {}
-        },
-        "21": {
-            "connections": [
-                [
-                    [
-                        20,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 619.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "1. Command line"
-            },
-            "name": "button_005",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "22": {
-            "connections": [
-                [
-                    [
-                        20,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 675.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "1. Command line"
-            },
-            "name": "button_006",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "23": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">NEXT</span>",
-                "height": 26.0,
-                "width": 46.0,
-                "update_required": true,
-                "position_x": 683.7633361816406,
-                "position_y": 439.8682861328125,
-                "layername": "1. Command line",
-                "display_type": "text"
-            },
-            "name": "text_016",
-            "midi_mode": null,
-            "value": "<span size=\"small\">NEXT</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "24": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">PREV</span>",
-                "height": 26.0,
-                "width": 45.0,
-                "update_required": true,
-                "position_x": 626.8020629882812,
-                "position_y": 440.8680419921875,
-                "layername": "1. Command line",
-                "display_type": "text"
-            },
-            "name": "text_017",
-            "midi_mode": null,
-            "value": "<span size=\"small\">PREV</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "25": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>",
-                "height": 194.0,
-                "width": 548.0,
-                "update_required": true,
-                "position_x": 57.91237258911133,
-                "position_y": 80.91848754882812,
-                "layername": "1. Command line",
-                "display_type": "text"
-            },
-            "name": "text_018",
-            "midi_mode": null,
-            "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "26": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"x-large\"><b>Command line</b></span>",
-                "height": 26.0,
-                "width": 102.0,
-                "update_required": true,
-                "position_x": 35.56041717529297,
-                "position_y": 25.977832794189453,
-                "layername": "1. Command line",
-                "display_type": "text"
-            },
-            "name": "text_019",
-            "midi_mode": null,
-            "value": "<span size=\"x-large\"><b>Command line</b></span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "27": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  ",
-                "height": 47.0,
-                "width": 571.0,
-                "update_required": true,
-                "position_x": 48.98456954956055,
-                "position_y": 94.84783172607422,
-                "layername": "0. Introduction",
-                "display_type": "text"
-            },
-            "name": "text_020",
-            "midi_mode": null,
-            "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "28": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Note especially the -v option, which copies all log messages to the console.  \nThis may be helpful if a problem is causing MFP to crash and take log messages \nwith it.  Usually, after startup all log messages will go to the \"Log\" tab below, but \nwill not be printed to stdout.",
-                "height": 89.0,
-                "width": 546.0,
-                "update_required": true,
-                "position_x": 58.97983169555664,
-                "position_y": 288.694580078125,
-                "layername": "1. Command line",
-                "display_type": "text"
-            },
-            "name": "text_021",
-            "midi_mode": null,
-            "value": "Note especially the -v option, which copies all log messages to the console.  \nThis may be helpful if a problem is causing MFP to crash and take log messages \nwith it.  Usually, after startup all log messages will go to the \"Log\" tab below, but \nwill not be printed to stdout.",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "29": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"x-large\"><b>File operations</b></span>",
-                "height": 26.0,
-                "width": 105.0,
-                "update_required": true,
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_004",
-            "midi_mode": null,
-            "value": "<span size=\"x-large\"><b>File operations</b></span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "30": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<b>C-f</b>, as we have seen, creates an empty new patch.  ",
-                "height": 26.0,
-                "width": 351.0,
-                "update_required": true,
-                "position_x": 67.84106063842773,
-                "position_y": 75.05355834960938,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_022",
-            "midi_mode": null,
-            "value": "<b>C-f</b>, as we have seen, creates an empty new patch.  ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "31": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<b>C-s</b> saves the current patch.  A prompt for a filename will appear at the bottom\nof the canvas.  As of this release, MFP always saves the file into the process working directory \n(if running standalone) or the session data directory (if run from the NSM session manager).",
-                "height": 68.0,
-                "width": 625.0,
-                "update_required": true,
-                "position_x": 67.85282516479492,
-                "position_y": 111.92745971679688,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_023",
-            "midi_mode": null,
-            "value": "<b>C-s</b> saves the current patch.  A prompt for a filename will appear at the bottom\nof the canvas.  As of this release, MFP always saves the file into the process working directory \n(if running standalone) or the session data directory (if run from the NSM session manager).",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "32": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<b>C-o</b> opens a previously-saved patch.  A prompt for a filename will appear at \nthe bottom of the canvas.  The file will be searched for on the <i>patch path</i>, which is \nthe process working directory or session data directory plus any directories specified with \nthe <b>-p</b> option at startup time. ",
-                "height": 89.0,
-                "width": 593.0,
-                "update_required": true,
-                "position_x": 70.89670944213867,
-                "position_y": 311.03700256347656,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_024",
-            "midi_mode": null,
-            "value": "<b>C-o</b> opens a previously-saved patch.  A prompt for a filename will appear at \nthe bottom of the canvas.  The file will be searched for on the <i>patch path</i>, which is \nthe process working directory or session data directory plus any directories specified with \nthe <b>-p</b> option at startup time. ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "33": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Select your working patch by C-PGDN and type C-s to save it.  Type a filename\nand RET to complete the file save.</i>",
-                "height": 47.0,
-                "width": 549.0,
-                "update_required": true,
-                "position_x": 102.87378692626953,
-                "position_y": 186.0366973876953,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_025",
-            "midi_mode": null,
-            "value": "<i>--> Select your working patch by C-PGDN and type C-s to save it.  Type a filename\nand RET to complete the file save.</i>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "34": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<b>C-w</b> closes the current patch.  ",
-                "height": 26.0,
-                "width": 212.0,
-                "update_required": true,
-                "position_x": 70.90933990478516,
-                "position_y": 241.0341339111328,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_026",
-            "midi_mode": null,
-            "value": "<b>C-w</b> closes the current patch.  ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "35": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Select your just-saved working patch by C-PGDN and type C-w to close it.</i>",
-                "height": 26.0,
-                "width": 521.0,
-                "update_required": true,
-                "position_x": 102.86031341552734,
-                "position_y": 277.0379943847656,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_027",
-            "midi_mode": null,
-            "value": "<i>--> Select your just-saved working patch by C-PGDN and type C-w to close it.</i>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "36": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Open your working patch again by C-o &lt;filename&gt; RET</i>",
-                "height": 26.0,
-                "width": 385.0,
-                "update_required": true,
-                "position_x": 103.86155700683594,
-                "position_y": 409.27880859375,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_028",
-            "midi_mode": null,
-            "value": "<i>--> Open your working patch again by C-o &lt;filename&gt; RET</i>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "37": {
-            "connections": [],
-            "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 673.2089233398438,
-                "position_y": 471.5054931640625,
-                "layername": "3. File operations"
-            },
-            "name": "sendvia_004",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": "\"self\"",
-            "type": "send",
-            "properties": {}
-        },
-        "38": {
-            "connections": [
-                [
-                    [
-                        37,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 619.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "3. File operations"
-            },
-            "name": "button_007",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "39": {
-            "connections": [
-                [
-                    [
-                        37,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 675.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "3. File operations"
-            },
-            "name": "button_008",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "40": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">NEXT</span>",
-                "height": 26.0,
-                "width": 46.0,
-                "update_required": true,
-                "position_x": 683.7633361816406,
-                "position_y": 439.8682861328125,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_029",
-            "midi_mode": null,
-            "value": "<span size=\"small\">NEXT</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "41": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">PREV</span>",
-                "height": 26.0,
-                "width": 45.0,
-                "update_required": true,
-                "position_x": 626.8020629882812,
-                "position_y": 440.8680419921875,
-                "layername": "3. File operations",
-                "display_type": "text"
-            },
-            "name": "text_030",
-            "midi_mode": null,
-            "value": "<span size=\"small\">PREV</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "42": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"x-large\"><b>Hello, World</b></span>",
-                "height": 26.0,
-                "width": 92.0,
-                "update_required": true,
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_031",
-            "midi_mode": null,
-            "value": "<span size=\"x-large\"><b>Hello, World</b></span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "43": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "To build a simple patch, you need to know how to create the elements and \nhow to use Connection mode to hook them up.  In your working patch:",
-                "height": 47.0,
-                "width": 500.0,
-                "update_required": true,
-                "position_x": 43.82478332519531,
-                "position_y": 72.19137573242188,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_032",
-            "midi_mode": null,
-            "value": "To build a simple patch, you need to know how to create the elements and \nhow to use Connection mode to hook them up.  In your working patch:",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "44": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Type the following to create a message box:</i>",
-                "height": 26.0,
-                "width": 323.0,
-                "update_required": true,
-                "position_x": 59.90829086303711,
-                "position_y": 129.77536010742188,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_033",
-            "midi_mode": null,
-            "value": "<i>--> Type the following to create a message box:</i>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "45": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "m \"hello, world\" RET",
-                "height": 26.0,
-                "width": 144.0,
-                "update_required": true,
-                "position_x": 86.8471908569336,
-                "position_y": 156.15927124023438,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_034",
-            "midi_mode": null,
-            "value": "m \"hello, world\" RET",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "46": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Type the following to create a print processor:</i>\n      ap print RET",
-                "height": 47.0,
-                "width": 335.0,
-                "update_required": true,
-                "position_x": 65.89913177490234,
-                "position_y": 195.82044982910156,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_035",
-            "midi_mode": null,
-            "value": "<i>--> Type the following to create a print processor:</i>\n      ap print RET",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "47": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Hit TAB to select the message box</i>",
-                "height": 26.0,
-                "width": 261.0,
-                "update_required": true,
-                "position_x": 67.89301300048828,
-                "position_y": 252.06478881835938,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_036",
-            "midi_mode": null,
-            "value": "<i>--> Hit TAB to select the message box</i>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "48": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Type the following to connect the message box to the print processor:</i>\n     c             <i>(to enter Connection mode with the message as the start of connection)</i>\n     TAB        <i>(to select the print processor as the other end of connection)</i>\n     RET        <i>(to create the connection)</i>\n     Your patch should look like the one to the right",
-                "height": 110.0,
-                "width": 561.0,
-                "update_required": true,
-                "position_x": 68.89801025390625,
-                "position_y": 286.9288024902344,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_037",
-            "midi_mode": null,
-            "value": "<i>--> Type the following to connect the message box to the print processor:</i>\n     c             <i>(to enter Connection mode with the message as the start of connection)</i>\n     TAB        <i>(to select the print processor as the other end of connection)</i>\n     RET        <i>(to create the connection)</i>\n     Your patch should look like the one to the right",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "49": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. ",
-                "height": 68.0,
-                "width": 471.0,
-                "update_required": true,
-                "position_x": 70.89775085449219,
-                "position_y": 405.02801513671875,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_038",
-            "midi_mode": null,
-            "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "50": {
-            "connections": [],
-            "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 673.2089233398438,
-                "position_y": 471.5054931640625,
-                "layername": "4. Hello, world"
-            },
-            "name": "sendvia_005",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": "\"self\"",
-            "type": "send",
-            "properties": {}
-        },
-        "51": {
-            "connections": [
-                [
-                    [
-                        50,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 619.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "4. Hello, world"
-            },
-            "name": "button_009",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "52": {
-            "connections": [
-                [
-                    [
-                        50,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 675.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "4. Hello, world"
-            },
-            "name": "button_010",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "53": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">NEXT</span>",
-                "height": 26.0,
-                "width": 46.0,
-                "update_required": true,
-                "position_x": 683.7633361816406,
-                "position_y": 439.8682861328125,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_039",
-            "midi_mode": null,
-            "value": "<span size=\"small\">NEXT</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "54": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">PREV</span>",
-                "height": 26.0,
-                "width": 45.0,
-                "update_required": true,
-                "position_x": 626.8020629882812,
-                "position_y": 440.8680419921875,
-                "layername": "4. Hello, world",
-                "display_type": "text"
-            },
-            "name": "text_040",
-            "midi_mode": null,
-            "value": "<span size=\"small\">PREV</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "55": {
-            "connections": [
-                [
-                    [
-                        56,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 25.0,
-                "width": 109.0,
-                "display_type": "message",
-                "position_x": 454.8407897949219,
-                "position_y": 167.82728576660156,
-                "layername": "4. Hello, world"
-            },
-            "name": "message_001",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "\"hello, world\"",
-            "type": "message",
-            "properties": {}
-        },
-        "56": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 25.0,
-                "width": 44.0,
-                "display_type": "processor",
-                "position_x": 454.841796875,
-                "position_y": 215.8342742919922,
-                "layername": "4. Hello, world"
-            },
-            "name": "processor_001",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "print",
-            "properties": {}
-        },
-        "57": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
-                "height": 26.0,
-                "width": 130.0,
-                "update_required": true,
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_041",
-            "midi_mode": null,
-            "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "58": {
-            "connections": [],
-            "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 35,
-                "width": 20,
-                "display_type": "sendvia",
-                "position_x": 673.2089233398438,
-                "position_y": 471.5054931640625,
-                "layername": "5. Creating elements"
-            },
-            "name": "sendvia_006",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": "\"self\"",
-            "type": "send",
-            "properties": {}
-        },
-        "59": {
-            "connections": [
-                [
-                    [
-                        58,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 619.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "5. Creating elements"
-            },
-            "name": "button_011",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "60": {
-            "connections": [
-                [
-                    [
-                        58,
-                        0
-                    ]
-                ]
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 30,
-                "width": 50,
-                "display_type": "button",
-                "position_x": 675.2289428710938,
-                "position_y": 434.8694763183594,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "5. Creating elements"
-            },
-            "name": "button_012",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
-        },
-        "61": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">NEXT</span>",
-                "height": 26.0,
-                "width": 46.0,
-                "update_required": true,
-                "position_x": 683.7633361816406,
-                "position_y": 439.8682861328125,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_042",
-            "midi_mode": null,
-            "value": "<span size=\"small\">NEXT</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "62": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "<span size=\"small\">PREV</span>",
-                "height": 26.0,
-                "width": 45.0,
-                "update_required": true,
-                "position_x": 626.8020629882812,
-                "position_y": 440.8680419921875,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_043",
-            "midi_mode": null,
-            "value": "<span size=\"small\">PREV</span>",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "63": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  ",
-                "height": 404.0,
-                "width": 566.0,
-                "update_required": true,
-                "position_x": 53.99140548706055,
-                "position_y": 69.88384246826172,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_044",
-            "midi_mode": null,
-            "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  ",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "64": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 25.0,
-                "width": 64.0,
-                "display_type": "message",
-                "position_x": 506.82916259765625,
-                "position_y": 128.84127807617188,
-                "layername": "5. Creating elements"
-            },
-            "name": "message_002",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": "\"hello\"",
-            "type": "message",
-            "properties": {}
-        },
-        "65": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": false,
-                "height": 25.0,
-                "width": 44.0,
-                "display_type": "processor",
-                "position_x": 507.82879638671875,
-                "position_y": 161.81533813476562,
-                "layername": "5. Creating elements"
-            },
-            "name": "processor_002",
-            "midi_mode": null,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "print",
-            "properties": {}
-        },
-        "66": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "digits": 1,
-                "no_export": false,
-                "scientific": false,
-                "max_value": null,
-                "min_value": null,
-                "update_required": true,
-                "height": 25.0,
-                "width": 42.0,
-                "display_type": "enum",
-                "position_x": 507.82879638671875,
-                "position_y": 194.77142333984375,
-                "layername": "5. Creating elements"
-            },
-            "name": "enum_001",
-            "midi_mode": null,
-            "value": 0.0,
-            "osc_methods": [],
-            "do_onload": true,
-            "midi_filters": null,
-            "initargs": "0.0",
-            "type": "enum",
-            "properties": {}
-        },
-        "67": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Message",
-                "height": 26.0,
-                "width": 67.0,
-                "update_required": true,
-                "position_x": 588.8088989257812,
-                "position_y": 129.85923767089844,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_045",
-            "midi_mode": null,
-            "value": "Message",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "68": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Processor",
-                "height": 26.0,
-                "width": 74.0,
-                "update_required": true,
-                "position_x": 589.8108520507812,
-                "position_y": 164.81732177734375,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_046",
-            "midi_mode": null,
-            "value": "Processor",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
-        },
-        "69": {
-            "connections": [
-                []
-            ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Number",
-                "height": 26.0,
-                "width": 62.0,
-                "update_required": true,
-                "position_x": 589.8136596679688,
-                "position_y": 196.79537963867188,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_047",
-            "midi_mode": null,
-            "value": "Number",
-            "osc_methods": [],
-            "do_onload": false,
-            "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
+            "value": false
         },
         "70": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Hello!",
-                "height": 26.0,
-                "width": 50.0,
-                "update_required": true,
-                "position_x": 507.83953857421875,
-                "position_y": 229.7684326171875,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_048",
-            "midi_mode": null,
-            "value": "Hello!",
-            "osc_methods": [],
             "do_onload": false,
-            "midi_filters": null,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 587.8133544921875,
+                "position_y": 228.77142333984375,
+                "scope": "",
+                "update_required": true,
+                "value": "Comment",
+                "width": 74.0
+            },
             "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_049",
+            "osc_methods": [],
+            "properties": {},
             "type": "text",
-            "properties": {}
+            "value": "Comment"
         },
         "71": {
             "connections": [
                 []
             ],
+            "do_onload": true,
             "gui_params": {
-                "no_export": false,
-                "value": "Comment",
-                "height": 26.0,
-                "width": 74.0,
-                "update_required": true,
-                "position_x": 587.8133544921875,
-                "position_y": 228.77142333984375,
+                "display_type": "toggle",
+                "height": 20,
+                "is_export": false,
                 "layername": "5. Creating elements",
-                "display_type": "text"
+                "no_export": false,
+                "off_message": false,
+                "on_message": true,
+                "position_x": 518.8341674804688,
+                "position_y": 258.73150634765625,
+                "scope": "",
+                "update_required": true,
+                "width": 20
             },
-            "name": "text_049",
-            "midi_mode": null,
-            "value": "Comment",
-            "osc_methods": [],
-            "do_onload": false,
+            "initargs": "False",
             "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
+            "midi_mode": null,
+            "name": "toggle_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
         },
         "72": {
             "connections": [
                 []
             ],
+            "do_onload": false,
             "gui_params": {
-                "on_message": true,
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
                 "no_export": false,
+                "position_x": 589.8136596679688,
+                "position_y": 259.7294921875,
+                "scope": "",
                 "update_required": true,
-                "height": 20,
-                "width": 20,
-                "off_message": false,
-                "display_type": "toggle",
-                "position_x": 518.8341674804688,
-                "position_y": 258.73150634765625,
-                "layername": "5. Creating elements"
+                "value": "Toggle",
+                "width": 54.0
             },
-            "name": "toggle_001",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
-            "do_onload": true,
+            "initargs": null,
             "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
+            "midi_mode": null,
+            "name": "text_050",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Toggle"
         },
         "73": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Toggle",
-                "height": 26.0,
-                "width": 54.0,
-                "update_required": true,
-                "position_x": 589.8136596679688,
-                "position_y": 259.7294921875,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_050",
-            "midi_mode": null,
-            "value": "Toggle",
-            "osc_methods": [],
             "do_onload": false,
+            "gui_params": {
+                "display_type": "button",
+                "height": 20,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "message": {
+                    "__BangType__": {}
+                },
+                "no_export": false,
+                "position_x": 518.8341674804688,
+                "position_y": 290.6846008300781,
+                "scope": "",
+                "update_required": true,
+                "width": 20
+            },
+            "initargs": "False",
             "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
+            "midi_mode": null,
+            "name": "button_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var",
+            "value": false
         },
         "74": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "no_export": false,
-                "update_required": true,
-                "height": 20,
-                "width": 20,
-                "display_type": "button",
-                "position_x": 518.8341674804688,
-                "position_y": 290.6846008300781,
-                "message": {
-                    "__BangType__": {}
-                },
-                "layername": "5. Creating elements"
-            },
-            "name": "button_013",
-            "midi_mode": null,
-            "value": false,
-            "osc_methods": [],
             "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 590.8133544921875,
+                "position_y": 290.67962646484375,
+                "scope": "",
+                "update_required": true,
+                "value": "Bang",
+                "width": 42.0
+            },
+            "initargs": null,
             "midi_filters": null,
-            "initargs": "False",
-            "type": "var",
-            "properties": {}
+            "midi_mode": null,
+            "name": "text_051",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Bang"
         },
         "75": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Bang",
-                "height": 26.0,
-                "width": 42.0,
-                "update_required": true,
-                "position_x": 590.8133544921875,
-                "position_y": 290.67962646484375,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_051",
-            "midi_mode": null,
-            "value": "Bang",
-            "osc_methods": [],
             "do_onload": false,
+            "gui_params": {
+                "display_type": "slidemeter",
+                "height": 25,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "max_value": 1.0,
+                "min_value": 0.0,
+                "no_export": false,
+                "orientation": 1,
+                "position_x": 478.8487548828125,
+                "position_y": 324.6755676269531,
+                "scale_position": 0,
+                "scale_type": 0,
+                "scope": "",
+                "show_scale": false,
+                "update_required": true,
+                "width": 100,
+                "zeropoint": null
+            },
+            "initargs": "0.0",
             "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
+            "midi_mode": null,
+            "name": "slidemeter_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "slidemeter",
+            "value": 0.0
         },
         "76": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "zeropoint": null,
-                "scale_position": 0,
-                "min_value": 0.0,
-                "orientation": 1,
-                "max_value": 1.0,
-                "no_export": false,
-                "update_required": true,
-                "height": 25,
-                "width": 100,
-                "show_scale": false,
-                "display_type": "slidemeter",
-                "position_x": 478.8487548828125,
-                "position_y": 324.6755676269531,
-                "layername": "5. Creating elements",
-                "scale_type": 0
-            },
-            "name": "slidemeter_001",
-            "midi_mode": null,
-            "value": 0.0,
-            "osc_methods": [],
             "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 589.812744140625,
+                "position_y": 325.67462158203125,
+                "scope": "",
+                "update_required": true,
+                "value": "Slider",
+                "width": 47.0
+            },
+            "initargs": null,
             "midi_filters": null,
-            "initargs": "0.0",
-            "type": "slidemeter",
-            "properties": {}
+            "midi_mode": null,
+            "name": "text_052",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Slider"
         },
         "77": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Slider",
-                "height": 26.0,
-                "width": 47.0,
-                "update_required": true,
-                "position_x": 589.812744140625,
-                "position_y": 325.67462158203125,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_052",
-            "midi_mode": null,
-            "value": "Slider",
-            "osc_methods": [],
             "do_onload": false,
+            "gui_params": {
+                "dial_radius": 24,
+                "display_type": "dial",
+                "height": 50,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "max_value": 1.0,
+                "min_value": 0.0,
+                "no_export": false,
+                "orientation": 0,
+                "position_x": 501.83795166015625,
+                "position_y": 359.6197204589844,
+                "scale_position": 0,
+                "scale_type": 0,
+                "scope": "",
+                "show_scale": false,
+                "update_required": true,
+                "width": 50,
+                "zeropoint": null
+            },
+            "initargs": "0.0",
             "midi_filters": null,
-            "initargs": null,
-            "type": "text",
-            "properties": {}
+            "midi_mode": null,
+            "name": "dial_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "slidemeter",
+            "value": 0.0
         },
         "78": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "zeropoint": null,
-                "scale_position": 0,
-                "min_value": 0.0,
-                "orientation": 0,
-                "max_value": 1.0,
-                "no_export": false,
-                "update_required": true,
-                "height": 50,
-                "width": 50,
-                "show_scale": false,
-                "display_type": "dial",
-                "position_x": 501.83795166015625,
-                "position_y": 359.6197204589844,
-                "layername": "5. Creating elements",
-                "scale_type": 0
-            },
-            "name": "dial_001",
-            "midi_mode": null,
-            "value": 0.0,
-            "osc_methods": [],
             "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "5. Creating elements",
+                "no_export": false,
+                "position_x": 590.812744140625,
+                "position_y": 369.6336975097656,
+                "scope": "",
+                "update_required": true,
+                "value": "Dial",
+                "width": 34.0
+            },
+            "initargs": null,
             "midi_filters": null,
-            "initargs": "0.0",
-            "type": "slidemeter",
-            "properties": {}
+            "midi_mode": null,
+            "name": "text_053",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Dial"
         },
-        "79": {
+        "8": {
             "connections": [
                 []
             ],
-            "gui_params": {
-                "no_export": false,
-                "value": "Dial",
-                "height": 26.0,
-                "width": 34.0,
-                "update_required": true,
-                "position_x": 590.812744140625,
-                "position_y": 369.6336975097656,
-                "layername": "5. Creating elements",
-                "display_type": "text"
-            },
-            "name": "text_053",
-            "midi_mode": null,
-            "value": "Dial",
-            "osc_methods": [],
             "do_onload": false,
-            "midi_filters": null,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 683.7633361816406,
+                "position_y": 439.8682861328125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">NEXT</span>",
+                "width": 46.0
+            },
             "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_006",
+            "osc_methods": [],
+            "properties": {},
             "type": "text",
-            "properties": {}
+            "value": "<span size=\"small\">NEXT</span>"
+        },
+        "9": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 626.8020629882812,
+                "position_y": 440.8680419921875,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"small\">PREV</span>",
+                "width": 45.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"small\">PREV</span>"
         }
     },
-    "type": "tutorial",
     "scopes": {
         "__patch__": {
-            "text_039": 53,
-            "text_038": 49,
-            "text_020": 27,
-            "sendvia_005": 50,
-            "text_031": 42,
-            "text_030": 41,
-            "text_033": 44,
-            "text_032": 43,
-            "text_035": 46,
-            "text_034": 45,
-            "text_037": 48,
-            "text_036": 47,
-            "text_013": 17,
-            "text_012": 16,
-            "text_011": 12,
-            "text_010": 11,
-            "text_017": 24,
-            "text_016": 23,
-            "text_015": 19,
-            "text_014": 18,
-            "text_050": 73,
-            "text_048": 70,
-            "text_019": 26,
-            "text_018": 25,
-            "text_023": 31,
-            "button_006": 22,
-            "message_002": 64,
-            "message_001": 55,
-            "dial_001": 78,
-            "self": 0,
-            "processor_001": 56,
-            "processor_002": 65,
-            "text_045": 67,
-            "text_046": 68,
-            "enum_001": 66,
-            "button_003": 14,
-            "button_002": 7,
             "button_001": 6,
-            "text_047": 69,
-            "button_007": 38,
-            "text_049": 71,
-            "button_005": 21,
-            "button_004": 15,
-            "text_044": 63,
-            "text_053": 79,
-            "button_009": 51,
-            "button_008": 39,
-            "text_040": 54,
-            "text_041": 57,
-            "text_042": 61,
-            "button_011": 59,
-            "text_026": 34,
-            "text_027": 35,
+            "button_002": 7,
+            "button_003": 13,
+            "button_004": 14,
+            "button_005": 20,
+            "button_006": 21,
+            "button_007": 37,
+            "button_008": 38,
+            "button_009": 50,
+            "button_010": 51,
+            "button_011": 58,
+            "button_012": 59,
+            "button_013": 73,
+            "dial_001": 77,
+            "enum_001": 65,
+            "message_001": 54,
+            "message_002": 63,
+            "patch": 0,
+            "processor_001": 55,
+            "processor_002": 64,
+            "self": 0,
+            "sendvia_001": 5,
+            "sendvia_002": 12,
+            "sendvia_003": 19,
+            "sendvia_004": 36,
+            "sendvia_005": 49,
+            "sendvia_006": 57,
+            "slidemeter_001": 75,
             "text_002": 1,
             "text_003": 2,
-            "text_004": 29,
-            "button_012": 60,
-            "text_006": 8,
-            "text_021": 28,
-            "text_008": 9,
-            "text_043": 62,
-            "text_052": 77,
-            "text_028": 36,
-            "text_029": 40,
-            "slidemeter_001": 76,
-            "button_013": 74,
-            "sendvia_001": 5,
-            "sendvia_002": 13,
-            "sendvia_003": 20,
-            "sendvia_004": 37,
-            "text_024": 32,
-            "sendvia_006": 58,
+            "text_004": 28,
             "text_005": 3,
-            "text_025": 33,
-            "toggle_001": 72,
-            "button_010": 52,
-            "text_022": 30,
-            "text_051": 75,
-            "text_007": 4
+            "text_006": 8,
+            "text_007": 4,
+            "text_008": 9,
+            "text_010": 10,
+            "text_011": 11,
+            "text_012": 15,
+            "text_013": 16,
+            "text_014": 17,
+            "text_015": 18,
+            "text_016": 22,
+            "text_017": 23,
+            "text_018": 24,
+            "text_019": 25,
+            "text_020": 26,
+            "text_021": 27,
+            "text_022": 29,
+            "text_023": 30,
+            "text_024": 31,
+            "text_025": 32,
+            "text_026": 33,
+            "text_027": 34,
+            "text_028": 35,
+            "text_029": 39,
+            "text_030": 40,
+            "text_031": 41,
+            "text_032": 42,
+            "text_033": 43,
+            "text_034": 44,
+            "text_035": 45,
+            "text_036": 46,
+            "text_037": 47,
+            "text_038": 48,
+            "text_039": 52,
+            "text_040": 53,
+            "text_041": 56,
+            "text_042": 60,
+            "text_043": 61,
+            "text_044": 62,
+            "text_045": 66,
+            "text_046": 67,
+            "text_047": 68,
+            "text_048": 69,
+            "text_049": 70,
+            "text_050": 72,
+            "text_051": 74,
+            "text_052": 76,
+            "text_053": 78,
+            "toggle_001": 71
         }
-    }
+    },
+    "type": "tutorial"
 }
