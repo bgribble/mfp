@@ -72,9 +72,11 @@ class Patch(Processor):
             return self.parsed_kwargs
         else:
             return self.parsed_kwargs.get(name, Uninit)
+
     #############################
     # name management
     #############################
+
     def bind(self, name, scope, obj):
         return scope.bind(name, obj)
 
@@ -262,6 +264,7 @@ class Patch(Processor):
     ############################
     # DSP inlet/outlet access 
     ############################
+
     def dsp_inlet(self, inlet):
         try: 
             return (self.inlet_objects[inlet].dsp_obj, 0)
