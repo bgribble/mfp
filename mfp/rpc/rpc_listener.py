@@ -114,9 +114,6 @@ class RPCExecRemote (QuittableThread):
                     self.join_req = True 
                 else:
                     ll = ll.strip()
-                    if self.log_raw:
-                        log.debug("%s:" % self.log_module, ll.strip())
-
                     if ll.startswith("[LOG] "):
                         ll = ll[6:]
                         if ll.startswith("FATAL:"):
@@ -135,6 +132,9 @@ class RPCExecRemote (QuittableThread):
                     elif ll.startswith("JackAudioDriver"):
                         if "Process error" in ll:
                             log.error("JACK: " + ll, module=self.log_module)
+                    elif self.log_raw and len(ll):
+                        log.debug("%s:" % self.log_module, ll)
+
             except Exception, e: 
                 print "RPCExecRemote caught error:", e 
                 log.debug("RPCExecRemote: exiting")
