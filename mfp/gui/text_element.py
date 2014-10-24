@@ -50,7 +50,7 @@ class TextElement (PatchElement):
         if self.obj_id is None:
             self.create(self.proc_type, None)
         if self.obj_id is None:
-            log.debug("TextElement: could not create obj")
+            log.warning("TextElement: could not create obj")
         elif new_text != self.value:
             self.value = new_text
             self.label.set_markup(self.value)
@@ -72,7 +72,8 @@ class TextElement (PatchElement):
         self.hide_ports()
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label, multiline=True, markup=True)
+        return LabelEditMode(self.stage, self, self.label, 
+                             multiline=True, markup=True, initial=self.value)
 
     def configure(self, params):
         if params.get('value') is not None:

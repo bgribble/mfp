@@ -43,14 +43,14 @@ class Blinker (Thread):
 
 class LabelEditMode (InputMode):
     def __init__(self, window, element, label, multiline=False, markup=False,
-                 mode_desc="Edit text"):
+                 mode_desc="Edit text", initial=None):
         self.window = window
         self.manager = window.input_mgr
         self.element = element
         self.widget = label
         self.multiline = multiline
         self.markup = markup
-        self.text = self.widget.get_text()
+        self.text = initial if initial else self.widget.get_text()
         self.cursor_color = ColorDB().find("default_txtcursor") 
         self.undo_stack = [(self.text, len(self.text))]
         self.undo_pos = -1
@@ -91,6 +91,8 @@ class LabelEditMode (InputMode):
 
     def start_editing(self):
         def focus_out(*args): 
+            from mfp import log
+            log.debug("label-edit: got key-focus-out")
             self.commit_edits()
             return True
 
