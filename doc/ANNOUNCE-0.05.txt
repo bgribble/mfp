@@ -17,7 +17,7 @@ Significant changes since release v0.04
 ----------------------------------------
 
   * MFP patches can be saved as LV2 plugins that can be
-    live-edited within a host (see doc/README.lv2) 
+    live-edited while loaded in a host (see doc/README.lv2)
 
   * New build system using 'waf' for one-line build and install
     (see doc/README.build)

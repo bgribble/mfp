@@ -86,3 +86,19 @@ If mfp was not running, a new instance will be launched with the
 patch loaded.  Note that an instance of MFP launched from an LV2
 host will not have the default JACK DSP context that you get from
 launching at the command line. 
+
+USER INTERFACE
+-------------------------------
+
+At this stage, I didn't try to implement the standard LV2 UI
+approach.  The GUIs and Python parts of every plugin are hosted 
+in a single instance of the MFP app, connected to different LV2
+DSP backends.  
+
+MFP's LV2 plugins don't load their user interfaces by default when
+created.  This is the default so that loading (for example) a
+saved Ardour session with MFP patches on every channel doesn't
+open a million tabs in your MFP session at startup.  The "Edit"
+toggle on each instance in your host will cause the MFP GUI to
+show or hide the plugin patch UI. 
+
