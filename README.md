@@ -57,6 +57,23 @@ documentation will appear at the top of the canvas area.  Hold down
 SHIFT to expand the tooltip to show current information about the
 object, including assigned MIDI and OSC controllers. 
 
+## KNOWN BROKEN 
+
+There are a number of bugs that I hoped to get fixed by this
+release (0.05) but have not.  Here are some that I will just have
+to ask for your patience with: 
+
+Ticket | Description 
+-------| --------------
+165 | Markup in comments does not render when patch is loaded
+88 | Patch loading is slow 
+204 | Logging is broken when loaded as LV2 plugin 
+98 | Selecting connections with click or box doesn't work well
+212 | Rendering of smooth curves on XY plot shows gaps  
+
+See the tickets in GitHub for detail on what I know about these problems, and for 
+potential workarounds.  
+
 ## DOCUMENTATION 
 
 There's some documentation in the doc/ directory of this
