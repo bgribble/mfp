@@ -63,6 +63,16 @@ def prepend_path(newpath, searchpath):
     searchdirs[:0] = [newpath]
     return joinpath(searchdirs)
 
+
+def logcall(func):
+    def wrapper(*args, **kwargs):
+        from mfp import log 
+        if "log" not in func.__name__:
+            log.debug("called: %s.%s (%s)" % (type(args[0]).__name__, func.__name__, args[0]))
+        return func(*args, **kwargs)
+
+    return wrapper 
+
 def profile(func):
     '''
     Decorator to profile the decorated function using cProfile

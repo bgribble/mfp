@@ -10,7 +10,6 @@ from mfp import MFPGUI
 from mfp import log
 from .modes.label_edit import LabelEditMode
 
-
 class TextElement (PatchElement):
     display_type = "text"
     proc_type = "text"

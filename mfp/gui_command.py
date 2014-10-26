@@ -134,7 +134,7 @@ class GUICommand (RPCWrapper):
                     o.move(xpos, ypos)
                     o.editable = False 
                     parent.layer.add(o)
-                    parent.add_actor(o)    
+                    parent.add_actor(o)
                     o.container = parent 
                     
                 o.configure(params)
@@ -143,6 +143,7 @@ class GUICommand (RPCWrapper):
                 o.configure(params)
 
             MFPGUI().remember(o)
+            MFPGUI().appwin.refresh(o)
             o.update()
 
     @rpcwrap
