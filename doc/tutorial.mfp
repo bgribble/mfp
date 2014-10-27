@@ -57,6 +57,14 @@
             [
                 "13. Pattern: Conditionals 3",
                 "__patch__"
+            ],
+            [
+                "14: Pattern: Metronome",
+                "__patch__"
+            ],
+            [
+                "15. Pattern: Functions",
+                "__patch__"
             ]
         ],
         "name": "tutorial"
@@ -65,33 +73,6 @@
         0
     ],
     "objects": {
-        "1": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 26.0,
-                "is_export": false,
-                "layername": "0. Introduction",
-                "no_export": false,
-                "position_x": 35.56041717529297,
-                "position_y": 25.977832794189453,
-                "scope": "",
-                "update_required": true,
-                "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>",
-                "width": 92.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>"
-        },
         "10": {
             "connections": [
                 []
@@ -99,25 +80,25 @@
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 26.0,
+                "height": 194.0,
                 "is_export": false,
                 "layername": "1. Command line",
                 "no_export": false,
-                "position_x": 35.56041717529297,
-                "position_y": 25.977832794189453,
+                "position_x": 57.91237258911133,
+                "position_y": 80.91848754882812,
                 "scope": "",
                 "update_required": true,
-                "value": "<span size=\"x-large\"><b>Command line</b></span>",
-                "width": 102.0
+                "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>",
+                "width": 548.0
             },
             "initargs": null,
             "midi_filters": null,
             "midi_mode": null,
-            "name": "text_019",
+            "name": "text_018",
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "<span size=\"x-large\"><b>Command line</b></span>"
+            "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>"
         },
         "100": {
             "connections": [
@@ -428,25 +409,25 @@
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 47.0,
+                "height": 26.0,
                 "is_export": false,
-                "layername": "0. Introduction",
+                "layername": "1. Command line",
                 "no_export": false,
-                "position_x": 48.98456954956055,
-                "position_y": 94.84783172607422,
+                "position_x": 35.56041717529297,
+                "position_y": 25.977832794189453,
                 "scope": "",
                 "update_required": true,
-                "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  ",
-                "width": 571.0
+                "value": "<span size=\"x-large\"><b>Command line</b></span>",
+                "width": 102.0
             },
             "initargs": null,
             "midi_filters": null,
             "midi_mode": null,
-            "name": "text_020",
+            "name": "text_019",
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  "
+            "value": "<span size=\"x-large\"><b>Command line</b></span>"
         },
         "110": {
             "connections": [
@@ -508,7 +489,563 @@
             "properties": {},
             "type": "message"
         },
+        "112": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Metronome</b></span>",
+                "width": 142.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_059",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Metronome</b></span>"
+        },
+        "113": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 110.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 60.35821533203125,
+                "position_y": 91.02922058105469,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "If you want things to happen in a rhythm, you can use a <b>[metro]</b> \nto do it.  <b>[metro]</b> outputs a Bang periodically.  The interval between \nBangs is specified either in the init args or on the right inlet, in milliseconds \nin either case.  The metronome is started with a True or Bang on its left inlet\nand stopped with a False.",
+                "width": 506.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_060",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "If you want things to happen in a rhythm, you can use a <b>[metro]</b> \nto do it.  <b>[metro]</b> outputs a Bang periodically.  The interval between \nBangs is specified either in the init args or on the right inlet, in milliseconds \nin either case.  The metronome is started with a True or Bang on its left inlet\nand stopped with a False."
+        },
+        "114": {
+            "connections": [
+                [
+                    [
+                        116,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 155.76284790039062,
+                "position_y": 232.83914184570312,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 49.0
+            },
+            "initargs": "True",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_023",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "115": {
+            "connections": [
+                [
+                    [
+                        116,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 168.66433715820312,
+                "position_y": 266.80804443359375,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 54.0
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_024",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "116": {
+            "connections": [
+                [
+                    [
+                        117,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 155.7628631591797,
+                "position_y": 324.6950378417969,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 93.0
+            },
+            "initargs": "1000",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_027",
+            "osc_methods": [],
+            "properties": {},
+            "type": "metro"
+        },
+        "117": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 155.7628631591797,
+                "position_y": 372.6950378417969,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 44.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_028",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "118": {
+            "connections": [
+                [
+                    [
+                        119,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "digits": 1,
+                "display_type": "enum",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "max_value": null,
+                "min_value": null,
+                "no_export": false,
+                "position_x": 239.68123535156235,
+                "position_y": 236.4311981201172,
+                "scientific": false,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 69.0
+            },
+            "initargs": "1000.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "enum_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "enum",
+            "value": 1000
+        },
+        "119": {
+            "connections": [
+                [
+                    [
+                        116,
+                        1
+                    ]
+                ],
+                [
+                    [
+                        120,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 239.68123535156235,
+                "position_y": 284.43121337890625,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 70.0
+            },
+            "initargs": "2",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_029",
+            "osc_methods": [],
+            "properties": {},
+            "type": "trigger"
+        },
         "12": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 48.98456954956055,
+                "position_y": 94.84783172607422,
+                "scope": "",
+                "update_required": true,
+                "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  ",
+                "width": 571.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_020",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  "
+        },
+        "120": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "14: Pattern: Metronome",
+                "no_export": false,
+                "position_x": 300.1900434570311,
+                "position_y": 324.50067138671875,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 263.0
+            },
+            "initargs": "\"setting metro interval to %s ms\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_030",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "121": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 35.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Functions</b></span>",
+                "width": 191.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_061",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Functions</b></span>"
+        },
+        "122": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 215.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 55.81477355957031,
+                "position_y": 76.21011352539062,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "Mathematical functions can be defined in dataflow style or using the <b>[func]</b> \nbuiltin.  <b>[func]</b> will be slightly more efficient and may be clearer to read, but \nboth work fine.\n\nSay we have a number coming in and need to take that value <i>x</i> and compute the \nfunction: \n\n  y = 3*x^2 + 4*x + 5\n\nTwo ways to do it: ",
+                "width": 533.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_062",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Mathematical functions can be defined in dataflow style or using the <b>[func]</b> \nbuiltin.  <b>[func]</b> will be slightly more efficient and may be clearer to read, but \nboth work fine.\n\nSay we have a number coming in and need to take that value <i>x</i> and compute the \nfunction: \n\n  y = 3*x^2 + 4*x + 5\n\nTwo ways to do it: "
+        },
+        "123": {
+            "connections": [
+                [
+                    [
+                        124,
+                        0
+                    ],
+                    [
+                        131,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "digits": 1,
+                "display_type": "enum",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "max_value": null,
+                "min_value": null,
+                "no_export": false,
+                "position_x": 341.5330810546875,
+                "position_y": 262.64605712890625,
+                "scientific": false,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 42.0
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "enum_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "enum",
+            "value": 0
+        },
+        "124": {
+            "connections": [
+                [
+                    [
+                        128,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        128,
+                        1
+                    ]
+                ],
+                [
+                    [
+                        126,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 404.4472351074219,
+                "position_y": 295.7294616699219,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 70.0
+            },
+            "initargs": "3",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_031",
+            "osc_methods": [],
+            "properties": {},
+            "type": "trigger"
+        },
+        "126": {
+            "connections": [
+                [
+                    [
+                        127,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 465.3640441894531,
+                "position_y": 335.4204406738281,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 36.0
+            },
+            "initargs": "4",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_033",
+            "osc_methods": [],
+            "properties": {},
+            "type": "*"
+        },
+        "127": {
+            "connections": [
+                [
+                    [
+                        130,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 465.3668212890625,
+                "position_y": 374.3493957519531,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 37.0
+            },
+            "initargs": "5",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_032",
+            "osc_methods": [],
+            "properties": {},
+            "type": "+"
+        },
+        "128": {
+            "connections": [
+                [
+                    [
+                        129,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 405.4444885253906,
+                "position_y": 334.4338684082031,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 35
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_034",
+            "osc_methods": [],
+            "properties": {},
+            "type": "*"
+        },
+        "129": {
+            "connections": [
+                [
+                    [
+                        130,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 405.44451904296875,
+                "position_y": 374.4471740722656,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 36.0
+            },
+            "initargs": "3",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_035",
+            "osc_methods": [],
+            "properties": {},
+            "type": "*"
+        },
+        "13": {
             "connections": [
                 []
             ],
@@ -535,7 +1072,121 @@
             "type": "text",
             "value": "Note especially the -v option, which copies all log messages to the console.  \nThis may be helpful if a problem is causing MFP to crash and take log messages \nwith it.  Usually, after startup all log messages will go to the \"Log\" tab below, but \nwill not be printed to stdout."
         },
-        "13": {
+        "130": {
+            "connections": [
+                [
+                    [
+                        133,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 405.4403991699219,
+                "position_y": 411.25360107421875,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 35
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_036",
+            "osc_methods": [],
+            "properties": {},
+            "type": "+"
+        },
+        "131": {
+            "connections": [
+                [
+                    [
+                        132,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 180.75213623046875,
+                "position_y": 324.56939697265625,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 172.0
+            },
+            "initargs": "x: 3*x*x + 4*x +5",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_037",
+            "osc_methods": [],
+            "properties": {},
+            "type": "func"
+        },
+        "132": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 180.75213623046875,
+                "position_y": 372.56939697265625,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 160.0
+            },
+            "initargs": "\"func says y=%s\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_038",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "133": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "15. Pattern: Functions",
+                "no_export": false,
+                "position_x": 405.4403991699219,
+                "position_y": 459.25360107421875,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 189.0
+            },
+            "initargs": "\"dataflow says y=%s\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_039",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "14": {
             "connections": [
                 []
             ],
@@ -562,7 +1213,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>File operations</b></span>"
         },
-        "14": {
+        "15": {
             "connections": [
                 []
             ],
@@ -589,7 +1240,7 @@
             "type": "text",
             "value": "<b>C-f</b>, as we have seen, creates an empty new patch.  "
         },
-        "15": {
+        "16": {
             "connections": [
                 []
             ],
@@ -616,7 +1267,7 @@
             "type": "text",
             "value": "<b>C-s</b> saves the current patch.  A prompt for a filename will appear at the bottom\nof the canvas.  As of this release, MFP always saves the file into the process working directory \n(if running standalone) or the session data directory (if run from the NSM session manager)."
         },
-        "16": {
+        "17": {
             "connections": [
                 []
             ],
@@ -643,7 +1294,7 @@
             "type": "text",
             "value": "<b>C-o</b> opens a previously-saved patch.  A prompt for a filename will appear at \nthe bottom of the canvas.  The file will be searched for on the <i>patch path</i>, which is \nthe process working directory or session data directory plus any directories specified with \nthe <b>-p</b> option at startup time. "
         },
-        "17": {
+        "18": {
             "connections": [
                 []
             ],
@@ -670,7 +1321,7 @@
             "type": "text",
             "value": "<i>--> Select your working patch by C-PGDN and type C-s to save it.  Type a filename\nand RET to complete the file save.</i>"
         },
-        "18": {
+        "19": {
             "connections": [
                 []
             ],
@@ -697,7 +1348,34 @@
             "type": "text",
             "value": "<b>C-w</b> closes the current patch.  "
         },
-        "19": {
+        "2": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 35.56041717529297,
+                "position_y": 25.977832794189453,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>",
+                "width": 92.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"xx-large\"><b>MFP Tutorial</b></span>"
+        },
+        "20": {
             "connections": [
                 []
             ],
@@ -724,34 +1402,7 @@
             "type": "text",
             "value": "<i>--> Select your just-saved working patch by C-PGDN and type C-w to close it.</i>"
         },
-        "2": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 47.0,
-                "is_export": false,
-                "layername": "0. Introduction",
-                "no_export": false,
-                "position_x": 370.79770278930664,
-                "position_y": 32.94720458984375,
-                "scope": "",
-                "update_required": true,
-                "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>",
-                "width": 355.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_003",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>"
-        },
-        "20": {
+        "21": {
             "connections": [
                 []
             ],
@@ -778,7 +1429,7 @@
             "type": "text",
             "value": "<i>--> Open your working patch again by C-o &lt;filename&gt; RET</i>"
         },
-        "21": {
+        "22": {
             "connections": [
                 []
             ],
@@ -805,7 +1456,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Hello, World</b></span>"
         },
-        "22": {
+        "23": {
             "connections": [
                 []
             ],
@@ -832,7 +1483,7 @@
             "type": "text",
             "value": "To build a simple patch, you need to know how to create the elements and \nhow to use Connection mode to hook them up.  In your working patch:"
         },
-        "23": {
+        "24": {
             "connections": [
                 []
             ],
@@ -859,7 +1510,7 @@
             "type": "text",
             "value": "<i>--> Type the following to create a message box:</i>"
         },
-        "24": {
+        "25": {
             "connections": [
                 []
             ],
@@ -886,7 +1537,7 @@
             "type": "text",
             "value": "m \"hello, world\" RET"
         },
-        "25": {
+        "26": {
             "connections": [
                 []
             ],
@@ -913,7 +1564,7 @@
             "type": "text",
             "value": "<i>--> Type the following to create a print processor:</i>\n      ap print RET"
         },
-        "26": {
+        "27": {
             "connections": [
                 []
             ],
@@ -940,7 +1591,7 @@
             "type": "text",
             "value": "<i>--> Hit TAB to select the message box</i>"
         },
-        "27": {
+        "28": {
             "connections": [
                 []
             ],
@@ -967,7 +1618,7 @@
             "type": "text",
             "value": "<i>--> Type the following to connect the message box to the print processor:</i>\n     c             <i>(to enter Connection mode with the message as the start of connection)</i>\n     TAB        <i>(to select the print processor as the other end of connection)</i>\n     RET        <i>(to create the connection)</i>\n     Your patch should look like the one to the right"
         },
-        "28": {
+        "29": {
             "connections": [
                 []
             ],
@@ -994,11 +1645,38 @@
             "type": "text",
             "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. "
         },
-        "29": {
+        "3": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 370.79770278930664,
+                "position_y": 32.94720458984375,
+                "scope": "",
+                "update_required": true,
+                "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>",
+                "width": 355.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>A (hopefully) gentle introduction to patching in MFP\nand a temporary substitute for proper documentation</i>"
+        },
+        "30": {
             "connections": [
                 [
                     [
-                        30,
+                        31,
                         0
                     ]
                 ]
@@ -1024,34 +1702,7 @@
             "properties": {},
             "type": "message"
         },
-        "3": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 257.0,
-                "is_export": false,
-                "layername": "0. Introduction",
-                "no_export": false,
-                "position_x": 48.830509185791016,
-                "position_y": 155.14028930664062,
-                "scope": "",
-                "update_required": true,
-                "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  To advance through the tutorial, you can either click on the desired page in the\nLayers tab, or use the Page Down/Page Up keys to move to the next/previous page.  \n\nNote that some instructions in the tutorial will \"jump\" away from the tutorial, requiring\nyou to navigate back by clicking on the appropriate page in the Layers tab.  Do not be \nalarmed. \n\nInstructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Press the Page Down key now to get started.</i> \n",
-                "width": 598.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_005",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  To advance through the tutorial, you can either click on the desired page in the\nLayers tab, or use the Page Down/Page Up keys to move to the next/previous page.  \n\nNote that some instructions in the tutorial will \"jump\" away from the tutorial, requiring\nyou to navigate back by clicking on the appropriate page in the Layers tab.  Do not be \nalarmed. \n\nInstructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Press the Page Down key now to get started.</i> \n"
-        },
-        "30": {
+        "31": {
             "connections": [
                 []
             ],
@@ -1077,7 +1728,7 @@
             "properties": {},
             "type": "print"
         },
-        "31": {
+        "32": {
             "connections": [
                 []
             ],
@@ -1104,7 +1755,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Creating elements</b></span>"
         },
-        "32": {
+        "33": {
             "connections": [
                 []
             ],
@@ -1131,7 +1782,7 @@
             "type": "text",
             "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  "
         },
-        "33": {
+        "34": {
             "connections": [
                 []
             ],
@@ -1156,7 +1807,7 @@
             "properties": {},
             "type": "message"
         },
-        "34": {
+        "35": {
             "connections": [
                 []
             ],
@@ -1182,7 +1833,7 @@
             "properties": {},
             "type": "print"
         },
-        "35": {
+        "36": {
             "connections": [
                 []
             ],
@@ -1212,7 +1863,7 @@
             "type": "enum",
             "value": 0.0
         },
-        "36": {
+        "37": {
             "connections": [
                 []
             ],
@@ -1239,7 +1890,7 @@
             "type": "text",
             "value": "Message"
         },
-        "37": {
+        "38": {
             "connections": [
                 []
             ],
@@ -1266,7 +1917,7 @@
             "type": "text",
             "value": "Processor"
         },
-        "38": {
+        "39": {
             "connections": [
                 []
             ],
@@ -1293,7 +1944,34 @@
             "type": "text",
             "value": "Number"
         },
-        "39": {
+        "4": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 257.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 48.830509185791016,
+                "position_y": 155.14028930664062,
+                "scope": "",
+                "update_required": true,
+                "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  To advance through the tutorial, you can either click on the desired page in the\nLayers tab, or use the Page Down/Page Up keys to move to the next/previous page.  \n\nNote that some instructions in the tutorial will \"jump\" away from the tutorial, requiring\nyou to navigate back by clicking on the appropriate page in the Layers tab.  Do not be \nalarmed. \n\nInstructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Press the Page Down key now to get started.</i> \n",
+                "width": 598.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "This tutorial uses MFP \"layers\" as pages.  You should see a list of them in the \"Layers\" tab \nto the left.  To advance through the tutorial, you can either click on the desired page in the\nLayers tab, or use the Page Down/Page Up keys to move to the next/previous page.  \n\nNote that some instructions in the tutorial will \"jump\" away from the tutorial, requiring\nyou to navigate back by clicking on the appropriate page in the Layers tab.  Do not be \nalarmed. \n\nInstructions in <i>italics</i> with --> before them are your tutorial steps. \n\n<i>--> Press the Page Down key now to get started.</i> \n"
+        },
+        "40": {
             "connections": [
                 []
             ],
@@ -1320,34 +1998,7 @@
             "type": "text",
             "value": "Hello!"
         },
-        "4": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 26.0,
-                "is_export": false,
-                "layername": "0. Introduction",
-                "no_export": false,
-                "position_x": 46.9422492980957,
-                "position_y": 467.1565856933594,
-                "scope": "",
-                "update_required": true,
-                "value": "Copyright &#169; 2010-2014 Bill Gribble &lt;grib@billgribble.com&gt;",
-                "width": 400.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_007",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Copyright &#169; 2010-2014 Bill Gribble &lt;grib@billgribble.com&gt;"
-        },
-        "40": {
+        "41": {
             "connections": [
                 []
             ],
@@ -1374,7 +2025,7 @@
             "type": "text",
             "value": "Comment"
         },
-        "41": {
+        "42": {
             "connections": [
                 []
             ],
@@ -1402,7 +2053,7 @@
             "type": "var",
             "value": false
         },
-        "42": {
+        "43": {
             "connections": [
                 []
             ],
@@ -1429,7 +2080,7 @@
             "type": "text",
             "value": "Toggle"
         },
-        "43": {
+        "44": {
             "connections": [
                 []
             ],
@@ -1458,7 +2109,7 @@
             "type": "var",
             "value": false
         },
-        "44": {
+        "45": {
             "connections": [
                 []
             ],
@@ -1485,7 +2136,7 @@
             "type": "text",
             "value": "Bang"
         },
-        "45": {
+        "46": {
             "connections": [
                 []
             ],
@@ -1518,7 +2169,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "46": {
+        "47": {
             "connections": [
                 []
             ],
@@ -1545,7 +2196,7 @@
             "type": "text",
             "value": "Slider"
         },
-        "47": {
+        "48": {
             "connections": [
                 []
             ],
@@ -1579,7 +2230,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "48": {
+        "49": {
             "connections": [
                 []
             ],
@@ -1606,7 +2257,34 @@
             "type": "text",
             "value": "Dial"
         },
-        "49": {
+        "5": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 46.9422492980957,
+                "position_y": 467.1565856933594,
+                "scope": "",
+                "update_required": true,
+                "value": "Copyright &#169; 2010-2014 Bill Gribble &lt;grib@billgribble.com&gt;",
+                "width": 400.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_007",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Copyright &#169; 2010-2014 Bill Gribble &lt;grib@billgribble.com&gt;"
+        },
+        "50": {
             "connections": [
                 []
             ],
@@ -1633,34 +2311,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Edit and Operate modes</b></span>"
         },
-        "5": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 26.0,
-                "is_export": false,
-                "layername": "0. Introduction",
-                "no_export": false,
-                "position_x": 49.98160171508789,
-                "position_y": 401.56463623046875,
-                "scope": "",
-                "update_required": true,
-                "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. ",
-                "width": 459.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_010",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. "
-        },
-        "50": {
+        "51": {
             "connections": [
                 []
             ],
@@ -1687,7 +2338,7 @@
             "type": "text",
             "value": "In the lower right corner of the canvas, find the <b>mode indicator</b>.  It will say either \n<b>Edit</b> or <b>Operate</b>.   This is the \"major mode\" that MFP uses to interpret \nyour key presses and mouse activity.  \n\n<b>Edit</b> mode allows you to create, move, and edit objects in the patch.  Your key\npresses and mouse activity are interpreted as editing operations.  MFP starts in <b>Edit</b>\nmode.  To re-enter <b>Edit</b> mode, type C-SPC (control-space). \n\n<b>Operate</b> mode allows you to operate the patch.  Your inputs are interpreted as\ncontrol operations, and will not alter the patch.  You need to be in <b>Operate</b> mode \nto click buttons or messages, drag sliders, etc.  To enter <b>Operate</b> mode, hit \nESC (escape). \n\n<i>--> Hit ESC to enter <b>Operate</b> mode.  Note the change in the Mode Indicator</i>\n\n<i>--> Hit C-SPC to return to <b>Edit</b> mode.</i>"
         },
-        "51": {
+        "52": {
             "connections": [
                 []
             ],
@@ -1714,7 +2365,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Zoom and Scroll</b></span>"
         },
-        "52": {
+        "53": {
             "connections": [
                 []
             ],
@@ -1741,7 +2392,7 @@
             "type": "text",
             "value": "Zoom and scroll on the canvas are handled without scrollbars, using a \"drag\nto scroll and scroll to zoom\" model something like Google Maps.  \n\n<b>C-S-M1MOTION</b> is the keybinding to drag the canvas.  That is, hold \ndown the Control and Shift keys while clicking mouse button 1 (usually left) \nand dragging.  \n\n  <i>--> Use <b>C-S-M1MOTION</b> to drag the canvas around.</i> \n\nThe scroll wheel zooms in and out.\n\n  <i>--> Zoom!</i>  \n\n<b>C-0</b> (control-zero) resets the zoom to 1, and the position of the canvas \nto its starting point. "
         },
-        "53": {
+        "54": {
             "connections": [
                 []
             ],
@@ -1768,7 +2419,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Sequencing</b></span>"
         },
-        "54": {
+        "55": {
             "connections": [
                 []
             ],
@@ -1795,11 +2446,11 @@
             "type": "text",
             "value": "Think of a patch as a graph where messages are passed between nodes \n<i>depth first</i> and outputs of a processor (generally) occur \nin <i>right to left</i> order.   The <b>[trigger]</b> object does nothing \nexcept repeat its input to multiple outputs in right-to-left order."
         },
-        "55": {
+        "56": {
             "connections": [
                 [
                     [
-                        56,
+                        57,
                         0
                     ]
                 ]
@@ -1825,14 +2476,8 @@
             "properties": {},
             "type": "message"
         },
-        "56": {
+        "57": {
             "connections": [
-                [
-                    [
-                        57,
-                        0
-                    ]
-                ],
                 [
                     [
                         58,
@@ -1842,6 +2487,12 @@
                 [
                     [
                         59,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        60,
                         0
                     ]
                 ]
@@ -1868,7 +2519,7 @@
             "properties": {},
             "type": "trigger"
         },
-        "57": {
+        "58": {
             "connections": [
                 []
             ],
@@ -1894,7 +2545,7 @@
             "properties": {},
             "type": "print"
         },
-        "58": {
+        "59": {
             "connections": [
                 []
             ],
@@ -1920,7 +2571,34 @@
             "properties": {},
             "type": "print"
         },
-        "59": {
+        "6": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "0. Introduction",
+                "no_export": false,
+                "position_x": 49.98160171508789,
+                "position_y": 401.56463623046875,
+                "scope": "",
+                "update_required": true,
+                "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. ",
+                "width": 459.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_010",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. "
+        },
+        "60": {
             "connections": [
                 []
             ],
@@ -1946,34 +2624,7 @@
             "properties": {},
             "type": "print"
         },
-        "6": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 26.0,
-                "is_export": false,
-                "layername": "2. Creating a patch",
-                "no_export": false,
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "scope": "",
-                "update_required": true,
-                "value": "<span size=\"x-large\"><b>Creating a patch</b></span>",
-                "width": 116.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_011",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"x-large\"><b>Creating a patch</b></span>"
-        },
-        "60": {
+        "61": {
             "connections": [
                 []
             ],
@@ -2000,7 +2651,7 @@
             "type": "text",
             "value": "This is the essential pattern to use when you need to execute steps \nin a certain order."
         },
-        "61": {
+        "62": {
             "connections": [
                 []
             ],
@@ -2027,7 +2678,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Hot and Cold</b></span>"
         },
-        "62": {
+        "63": {
             "connections": [
                 []
             ],
@@ -2054,7 +2705,7 @@
             "type": "text",
             "value": "Data coming into a processor only trigger the processor if the inlet is \"hot\". Usually,\nonly the leftmost inlet is \"hot\".  To marshal a set of inputs (arguments) to the \nprocessor, send to all the other inlets first, then to the leftmost inlet."
         },
-        "63": {
+        "64": {
             "connections": [
                 []
             ],
@@ -2081,11 +2732,11 @@
             "type": "text",
             "value": "In the example below, <b>[pack]</b> builds a Python array from its inputs.  \nClick in different orders and see what comes out and when it comes out.  "
         },
-        "64": {
+        "65": {
             "connections": [
                 [
                     [
-                        68,
+                        69,
                         0
                     ]
                 ]
@@ -2111,11 +2762,11 @@
             "properties": {},
             "type": "message"
         },
-        "65": {
+        "66": {
             "connections": [
                 [
                     [
-                        68,
+                        69,
                         1
                     ]
                 ]
@@ -2141,11 +2792,11 @@
             "properties": {},
             "type": "message"
         },
-        "66": {
+        "67": {
             "connections": [
                 [
                     [
-                        68,
+                        69,
                         2
                     ]
                 ]
@@ -2171,11 +2822,11 @@
             "properties": {},
             "type": "message"
         },
-        "67": {
+        "68": {
             "connections": [
                 [
                     [
-                        68,
+                        69,
                         3
                     ]
                 ]
@@ -2201,11 +2852,11 @@
             "properties": {},
             "type": "message"
         },
-        "68": {
+        "69": {
             "connections": [
                 [
                     [
-                        69,
+                        70,
                         0
                     ]
                 ]
@@ -2232,7 +2883,34 @@
             "properties": {},
             "type": "pack"
         },
-        "69": {
+        "7": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Creating a patch</b></span>",
+                "width": 116.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_011",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Creating a patch</b></span>"
+        },
+        "70": {
             "connections": [
                 []
             ],
@@ -2258,41 +2936,14 @@
             "properties": {},
             "type": "print"
         },
-        "7": {
+        "71": {
             "connections": [
                 []
             ],
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 89.0,
-                "is_export": false,
-                "layername": "2. Creating a patch",
-                "no_export": false,
-                "position_x": 62.976043701171875,
-                "position_y": 83.92110443115234,
-                "scope": "",
-                "update_required": true,
-                "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key, M1 means first mouse button.  ",
-                "width": 581.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_014",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key, M1 means first mouse button.  "
-        },
-        "70": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 35.0,
+                "height": 26.0,
                 "is_export": false,
                 "layername": "10. Pattern: Iteration",
                 "no_export": false,
@@ -2301,7 +2952,7 @@
                 "scope": "",
                 "update_required": true,
                 "value": "<span size=\"x-large\"><b>Pattern: Iteration</b></span>",
-                "width": 181.0
+                "width": 122.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -2312,7 +2963,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Iteration</b></span>"
         },
-        "71": {
+        "72": {
             "connections": [
                 []
             ],
@@ -2339,11 +2990,11 @@
             "type": "text",
             "value": "The <b>[for]</b> object is key to iteration.  It splits a list of inputs into \nits elements and outputs them one at a time.  The items to iterate over \ncan be either init args (in the processor box) or received either inlet.\n\nIteration starts when a Bang, True, or an iterable is received on the left (hot) inlet.\n\nIteration will stop when the current list is traversed or a False is receved on\nthe left inlet. "
         },
-        "72": {
+        "73": {
             "connections": [
                 [
                     [
-                        73,
+                        74,
                         0
                     ]
                 ]
@@ -2369,11 +3020,11 @@
             "properties": {},
             "type": "message"
         },
-        "73": {
+        "74": {
             "connections": [
                 [
                     [
-                        74,
+                        75,
                         0
                     ]
                 ]
@@ -2400,7 +3051,7 @@
             "properties": {},
             "type": "for"
         },
-        "74": {
+        "75": {
             "connections": [
                 []
             ],
@@ -2426,11 +3077,11 @@
             "properties": {},
             "type": "print"
         },
-        "75": {
+        "76": {
             "connections": [
                 [
                     [
-                        73,
+                        74,
                         1
                     ]
                 ]
@@ -2456,11 +3107,11 @@
             "properties": {},
             "type": "message"
         },
-        "76": {
+        "77": {
             "connections": [
                 [
                     [
-                        73,
+                        74,
                         0
                     ]
                 ]
@@ -2486,14 +3137,14 @@
             "properties": {},
             "type": "message"
         },
-        "77": {
+        "78": {
             "connections": [
                 []
             ],
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 35.0,
+                "height": 26.0,
                 "is_export": false,
                 "layername": "11. Pattern: Conditionals 1",
                 "no_export": false,
@@ -2502,7 +3153,7 @@
                 "scope": "",
                 "update_required": true,
                 "value": "<span size=\"x-large\"><b>Pattern: Conditionals 1</b></span>",
-                "width": 236.0
+                "width": 160.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -2513,7 +3164,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Conditionals 1</b></span>"
         },
-        "78": {
+        "79": {
             "connections": [
                 []
             ],
@@ -2540,11 +3191,38 @@
             "type": "text",
             "value": "The <b>[case]</b> and <b>[route]</b> objects are the building blocks of \nconditional code.  <b>[case]</b> tests its left inlet for equality against a \nseries of values and repeats the input value on the corresponding positional \noutput.   If no test matches, the value is repeated on the rightmost outlet. "
         },
-        "79": {
+        "8": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "2. Creating a patch",
+                "no_export": false,
+                "position_x": 62.976043701171875,
+                "position_y": 83.92110443115234,
+                "scope": "",
+                "update_required": true,
+                "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key, M1 means first mouse button.  ",
+                "width": 581.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_014",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key, M1 means first mouse button.  "
+        },
+        "80": {
             "connections": [
                 [
                     [
-                        83,
+                        84,
                         0
                     ]
                 ]
@@ -2570,38 +3248,11 @@
             "properties": {},
             "type": "message"
         },
-        "8": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 257.0,
-                "is_export": false,
-                "layername": "2. Creating a patch",
-                "no_export": false,
-                "position_x": 61.95268249511719,
-                "position_y": 186.816650390625,
-                "scope": "",
-                "update_required": true,
-                "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab.",
-                "width": 582.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_015",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab."
-        },
-        "80": {
+        "81": {
             "connections": [
                 [
                     [
-                        83,
+                        84,
                         0
                     ]
                 ]
@@ -2627,11 +3278,11 @@
             "properties": {},
             "type": "message"
         },
-        "81": {
+        "82": {
             "connections": [
                 [
                     [
-                        83,
+                        84,
                         0
                     ]
                 ]
@@ -2657,11 +3308,11 @@
             "properties": {},
             "type": "message"
         },
-        "82": {
+        "83": {
             "connections": [
                 [
                     [
-                        83,
+                        84,
                         0
                     ]
                 ]
@@ -2687,7 +3338,7 @@
             "properties": {},
             "type": "message"
         },
-        "83": {
+        "84": {
             "connections": [
                 [
                     [
@@ -2847,7 +3498,7 @@
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 35.0,
+                "height": 26.0,
                 "is_export": false,
                 "layername": "12. Pattern: Conditionals 2",
                 "no_export": false,
@@ -2856,7 +3507,7 @@
                 "scope": "",
                 "update_required": true,
                 "value": "<span size=\"x-large\"><b>Pattern: Conditionals 2</b></span>",
-                "width": 236.0
+                "width": 160.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -2874,25 +3525,25 @@
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 194.0,
+                "height": 257.0,
                 "is_export": false,
-                "layername": "1. Command line",
+                "layername": "2. Creating a patch",
                 "no_export": false,
-                "position_x": 57.91237258911133,
-                "position_y": 80.91848754882812,
+                "position_x": 61.95268249511719,
+                "position_y": 186.816650390625,
                 "scope": "",
                 "update_required": true,
-                "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>",
-                "width": 548.0
+                "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab.",
+                "width": 582.0
             },
             "initargs": null,
             "midi_filters": null,
             "midi_mode": null,
-            "name": "text_018",
+            "name": "text_015",
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>"
+            "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab."
         },
         "90": {
             "connections": [
@@ -3171,7 +3822,7 @@
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 35.0,
+                "height": 26.0,
                 "is_export": false,
                 "layername": "13. Pattern: Conditionals 3",
                 "no_export": false,
@@ -3180,7 +3831,7 @@
                 "scope": "",
                 "update_required": true,
                 "value": "<span size=\"x-large\"><b>Pattern: Conditionals 3</b></span>",
-                "width": 236.0
+                "width": 160.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -3194,23 +3845,25 @@
     },
     "scopes": {
         "__patch__": {
-            "button_013": 43,
-            "dial_001": 47,
-            "enum_001": 35,
-            "message_001": 29,
-            "message_002": 33,
-            "message_003": 55,
-            "message_004": 64,
-            "message_005": 65,
-            "message_006": 66,
-            "message_007": 67,
-            "message_008": 72,
-            "message_009": 75,
-            "message_010": 76,
-            "message_011": 79,
-            "message_012": 80,
-            "message_013": 81,
-            "message_014": 82,
+            "button_013": 44,
+            "dial_001": 48,
+            "enum_001": 36,
+            "enum_002": 118,
+            "enum_003": 123,
+            "message_001": 30,
+            "message_002": 34,
+            "message_003": 56,
+            "message_004": 65,
+            "message_005": 66,
+            "message_006": 67,
+            "message_007": 68,
+            "message_008": 73,
+            "message_009": 76,
+            "message_010": 77,
+            "message_011": 80,
+            "message_012": 81,
+            "message_013": 82,
+            "message_014": 83,
             "message_015": 91,
             "message_016": 92,
             "message_017": 93,
@@ -3219,18 +3872,20 @@
             "message_020": 103,
             "message_021": 110,
             "message_022": 111,
-            "patch": 0,
-            "processor_001": 30,
-            "processor_002": 34,
-            "processor_003": 56,
-            "processor_004": 73,
-            "processor_005": 57,
-            "processor_006": 58,
-            "processor_007": 59,
-            "processor_008": 68,
-            "processor_009": 69,
-            "processor_010": 74,
-            "processor_011": 83,
+            "message_023": 114,
+            "message_024": 115,
+            "patch": 1,
+            "processor_001": 31,
+            "processor_002": 35,
+            "processor_003": 57,
+            "processor_004": 74,
+            "processor_005": 58,
+            "processor_006": 59,
+            "processor_007": 60,
+            "processor_008": 69,
+            "processor_009": 70,
+            "processor_010": 75,
+            "processor_011": 84,
             "processor_012": 88,
             "processor_013": 85,
             "processor_014": 86,
@@ -3246,66 +3901,83 @@
             "processor_024": 107,
             "processor_025": 108,
             "processor_026": 109,
-            "self": 0,
-            "slidemeter_001": 45,
-            "text_002": 1,
-            "text_003": 2,
-            "text_004": 13,
-            "text_005": 3,
-            "text_006": 49,
-            "text_007": 4,
-            "text_008": 51,
-            "text_009": 53,
-            "text_010": 5,
-            "text_011": 6,
-            "text_012": 54,
-            "text_013": 60,
-            "text_014": 7,
-            "text_015": 8,
-            "text_016": 61,
-            "text_017": 62,
-            "text_018": 9,
-            "text_019": 10,
-            "text_020": 11,
-            "text_021": 12,
-            "text_022": 14,
-            "text_023": 15,
-            "text_024": 16,
-            "text_025": 17,
-            "text_026": 18,
-            "text_027": 19,
-            "text_028": 20,
-            "text_029": 63,
-            "text_030": 70,
-            "text_031": 21,
-            "text_032": 22,
-            "text_033": 23,
-            "text_034": 24,
-            "text_035": 25,
-            "text_036": 26,
-            "text_037": 27,
-            "text_038": 28,
-            "text_039": 71,
-            "text_040": 77,
-            "text_041": 31,
-            "text_042": 50,
-            "text_043": 52,
-            "text_044": 32,
-            "text_045": 36,
-            "text_046": 37,
-            "text_047": 38,
-            "text_048": 39,
-            "text_049": 40,
-            "text_050": 42,
-            "text_051": 44,
-            "text_052": 46,
-            "text_053": 48,
-            "text_054": 78,
+            "processor_027": 116,
+            "processor_028": 117,
+            "processor_029": 119,
+            "processor_030": 120,
+            "processor_031": 124,
+            "processor_032": 127,
+            "processor_033": 126,
+            "processor_034": 128,
+            "processor_035": 129,
+            "processor_036": 130,
+            "processor_037": 131,
+            "processor_038": 132,
+            "processor_039": 133,
+            "self": 1,
+            "slidemeter_001": 46,
+            "text_002": 2,
+            "text_003": 3,
+            "text_004": 14,
+            "text_005": 4,
+            "text_006": 50,
+            "text_007": 5,
+            "text_008": 52,
+            "text_009": 54,
+            "text_010": 6,
+            "text_011": 7,
+            "text_012": 55,
+            "text_013": 61,
+            "text_014": 8,
+            "text_015": 9,
+            "text_016": 62,
+            "text_017": 63,
+            "text_018": 10,
+            "text_019": 11,
+            "text_020": 12,
+            "text_021": 13,
+            "text_022": 15,
+            "text_023": 16,
+            "text_024": 17,
+            "text_025": 18,
+            "text_026": 19,
+            "text_027": 20,
+            "text_028": 21,
+            "text_029": 64,
+            "text_030": 71,
+            "text_031": 22,
+            "text_032": 23,
+            "text_033": 24,
+            "text_034": 25,
+            "text_035": 26,
+            "text_036": 27,
+            "text_037": 28,
+            "text_038": 29,
+            "text_039": 72,
+            "text_040": 78,
+            "text_041": 32,
+            "text_042": 51,
+            "text_043": 53,
+            "text_044": 33,
+            "text_045": 37,
+            "text_046": 38,
+            "text_047": 39,
+            "text_048": 40,
+            "text_049": 41,
+            "text_050": 43,
+            "text_051": 45,
+            "text_052": 47,
+            "text_053": 49,
+            "text_054": 79,
             "text_055": 89,
             "text_056": 90,
             "text_057": 99,
             "text_058": 100,
-            "toggle_001": 41
+            "text_059": 112,
+            "text_060": 113,
+            "text_061": 121,
+            "text_062": 122,
+            "toggle_001": 42
         }
     },
     "type": "tutorial"
