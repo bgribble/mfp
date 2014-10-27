@@ -131,6 +131,9 @@ class Metro (Processor):
         if self.inlets[1] is not Uninit:
             self.interval = timedelta(milliseconds=int(self.inlets[1]))
             self.inlets[1] = Uninit
+            if self.started: 
+                self.started = datetime.now()
+                self.count = 0
 
         if isinstance(self.inlets[0], TimerTick):
             if self.started:
