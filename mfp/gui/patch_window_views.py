@@ -65,7 +65,7 @@ def init_object_view(self):
 def init_layer_view(self):
     def get_sortname(o): 
         if isinstance(o, Layer):
-            return o.patch.obj_name + ':%s' % o.patch.layers.index(o) 
+            return o.patch.obj_name + ':%04d' % o.patch.layers.index(o) 
         elif isinstance(o, PatchInfo):
             return "%s (%s)" % (o.obj_name, o.context_name) 
 
