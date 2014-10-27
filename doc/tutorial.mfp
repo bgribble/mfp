@@ -29,6 +29,34 @@
             [
                 "6. Creating elements",
                 "__patch__"
+            ],
+            [
+                "7. Zoom and scroll",
+                "__patch__"
+            ],
+            [
+                "8. Hot and Cold",
+                "__patch__"
+            ],
+            [
+                "9. Pattern: Sequencing",
+                "__patch__"
+            ],
+            [
+                "10. Pattern: Iteration",
+                "__patch__"
+            ],
+            [
+                "11. Pattern: Conditionals 1",
+                "__patch__"
+            ],
+            [
+                "12. Pattern: Conditionals 2",
+                "__patch__"
+            ],
+            [
+                "13. Pattern: Conditionals 3",
+                "__patch__"
             ]
         ],
         "name": "tutorial"
@@ -91,6 +119,308 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Command line</b></span>"
         },
+        "100": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 43.88772201538086,
+                "position_y": 81.19505310058594,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "One last important thing: in both <b>[route]</b> and <b>[case]</b>, if the objects \nto test against are Python <i>type</i> objects, any object of the indicated type \nwill match.  Tests are done in left-to-right order with the first successful match\naccepted.  ",
+                "width": 525.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_058",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "One last important thing: in both <b>[route]</b> and <b>[case]</b>, if the objects \nto test against are Python <i>type</i> objects, any object of the indicated type \nwill match.  Tests are done in left-to-right order with the first successful match\naccepted.  "
+        },
+        "101": {
+            "connections": [
+                [
+                    [
+                        104,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 68.892333984375,
+                "position_y": 197.7730712890625,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 69.0
+            },
+            "initargs": "12.345",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_018",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "102": {
+            "connections": [
+                [
+                    [
+                        104,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 146.7159881591797,
+                "position_y": 199.30589294433594,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 64.0
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_019",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "103": {
+            "connections": [
+                [
+                    [
+                        104,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 278.56463623046875,
+                "position_y": 201.72451782226562,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 65.0
+            },
+            "initargs": "(1,2,3)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_020",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "104": {
+            "connections": [
+                [
+                    [
+                        105,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        106,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        107,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        108,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        109,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 105.8345718383789,
+                "position_y": 266.13958740234375,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 197.0
+            },
+            "initargs": "\"hello\", str, tuple, float",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_021",
+            "osc_methods": [],
+            "properties": {},
+            "type": "case"
+        },
+        "105": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 105.8345718383789,
+                "position_y": 314.13958740234375,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 139.0
+            },
+            "initargs": "\"it was hello:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_022",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "106": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 150.8345718383789,
+                "position_y": 344.13958740234375,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 243.0
+            },
+            "initargs": "\"it was a string but not hello:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_023",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "107": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 198.8345718383789,
+                "position_y": 374.13958740234375,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 152.0
+            },
+            "initargs": "\"it was a tuple:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_024",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "108": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 245.8345718383789,
+                "position_y": 404.13958740234375,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 148.0
+            },
+            "initargs": "\"it was a float:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_025",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "109": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 292.8345718383789,
+                "position_y": 434.13958740234375,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 206.0
+            },
+            "initargs": "\"it was something else:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_026",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
         "11": {
             "connections": [
                 []
@@ -117,6 +447,66 @@
             "properties": {},
             "type": "text",
             "value": "Welcome to MFP, Music For Programmers.  This tutorial should give you enough basics\nto begin to create and use your own patches.  "
+        },
+        "110": {
+            "connections": [
+                [
+                    [
+                        104,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 220.6551513671875,
+                "position_y": 200.89918518066406,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 53.0
+            },
+            "initargs": "\"foo\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_021",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "111": {
+            "connections": [
+                [
+                    [
+                        104,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 353.4476013183594,
+                "position_y": 203.89767456054688,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 49.0
+            },
+            "initargs": "True",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_022",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
         },
         "12": {
             "connections": [
@@ -694,7 +1084,7 @@
             "do_onload": false,
             "gui_params": {
                 "display_type": "text",
-                "height": 35.0,
+                "height": 26.0,
                 "is_export": false,
                 "layername": "6. Creating elements",
                 "no_export": false,
@@ -703,7 +1093,7 @@
                 "scope": "",
                 "update_required": true,
                 "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
-                "width": 191.0
+                "width": 130.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1216,6 +1606,33 @@
             "type": "text",
             "value": "Dial"
         },
+        "49": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "3. Edit and Operate",
+                "no_export": false,
+                "position_x": 37.627967834472656,
+                "position_y": 26.559978485107422,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Edit and Operate modes</b></span>",
+                "width": 166.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Edit and Operate modes</b></span>"
+        },
         "5": {
             "connections": [
                 []
@@ -1243,34 +1660,7 @@
             "type": "text",
             "value": "If you are here by mistake, or are bored, type C-q (control-q) to quit. "
         },
-        "51": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "display_type": "text",
-                "height": 35.0,
-                "is_export": false,
-                "layername": "3. Edit and Operate",
-                "no_export": false,
-                "position_x": 37.627967834472656,
-                "position_y": 26.559978485107422,
-                "scope": "__patch__",
-                "update_required": true,
-                "value": "<span size=\"x-large\"><b>Edit and Operate modes</b></span>",
-                "width": 247.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_006",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"x-large\"><b>Edit and Operate modes</b></span>"
-        },
-        "52": {
+        "50": {
             "connections": [
                 []
             ],
@@ -1286,7 +1676,7 @@
                 "scope": "__patch__",
                 "update_required": true,
                 "value": "In the lower right corner of the canvas, find the <b>mode indicator</b>.  It will say either \n<b>Edit</b> or <b>Operate</b>.   This is the \"major mode\" that MFP uses to interpret \nyour key presses and mouse activity.  \n\n<b>Edit</b> mode allows you to create, move, and edit objects in the patch.  Your key\npresses and mouse activity are interpreted as editing operations.  MFP starts in <b>Edit</b>\nmode.  To re-enter <b>Edit</b> mode, type C-SPC (control-space). \n\n<b>Operate</b> mode allows you to operate the patch.  Your inputs are interpreted as\ncontrol operations, and will not alter the patch.  You need to be in <b>Operate</b> mode \nto click buttons or messages, drag sliders, etc.  To enter <b>Operate</b> mode, hit \nESC (escape). \n\n<i>--> Hit ESC to enter <b>Operate</b> mode.  Note the change in the Mode Indicator</i>\n\n<i>--> Hit C-SPC to return to <b>Edit</b> mode.</i>",
-                "width": 553.0
+                "width": 551.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1296,6 +1686,265 @@
             "properties": {},
             "type": "text",
             "value": "In the lower right corner of the canvas, find the <b>mode indicator</b>.  It will say either \n<b>Edit</b> or <b>Operate</b>.   This is the \"major mode\" that MFP uses to interpret \nyour key presses and mouse activity.  \n\n<b>Edit</b> mode allows you to create, move, and edit objects in the patch.  Your key\npresses and mouse activity are interpreted as editing operations.  MFP starts in <b>Edit</b>\nmode.  To re-enter <b>Edit</b> mode, type C-SPC (control-space). \n\n<b>Operate</b> mode allows you to operate the patch.  Your inputs are interpreted as\ncontrol operations, and will not alter the patch.  You need to be in <b>Operate</b> mode \nto click buttons or messages, drag sliders, etc.  To enter <b>Operate</b> mode, hit \nESC (escape). \n\n<i>--> Hit ESC to enter <b>Operate</b> mode.  Note the change in the Mode Indicator</i>\n\n<i>--> Hit C-SPC to return to <b>Edit</b> mode.</i>"
+        },
+        "51": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "7. Zoom and scroll",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Zoom and Scroll</b></span>",
+                "width": 114.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Zoom and Scroll</b></span>"
+        },
+        "52": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 320.0,
+                "is_export": false,
+                "layername": "7. Zoom and scroll",
+                "no_export": false,
+                "position_x": 66.5006103515625,
+                "position_y": 88.23711395263672,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "Zoom and scroll on the canvas are handled without scrollbars, using a \"drag\nto scroll and scroll to zoom\" model something like Google Maps.  \n\n<b>C-S-M1MOTION</b> is the keybinding to drag the canvas.  That is, hold \ndown the Control and Shift keys while clicking mouse button 1 (usually left) \nand dragging.  \n\n  <i>--> Use <b>C-S-M1MOTION</b> to drag the canvas around.</i> \n\nThe scroll wheel zooms in and out.\n\n  <i>--> Zoom!</i>  \n\n<b>C-0</b> (control-zero) resets the zoom to 1, and the position of the canvas \nto its starting point. ",
+                "width": 510.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_043",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Zoom and scroll on the canvas are handled without scrollbars, using a \"drag\nto scroll and scroll to zoom\" model something like Google Maps.  \n\n<b>C-S-M1MOTION</b> is the keybinding to drag the canvas.  That is, hold \ndown the Control and Shift keys while clicking mouse button 1 (usually left) \nand dragging.  \n\n  <i>--> Use <b>C-S-M1MOTION</b> to drag the canvas around.</i> \n\nThe scroll wheel zooms in and out.\n\n  <i>--> Zoom!</i>  \n\n<b>C-0</b> (control-zero) resets the zoom to 1, and the position of the canvas \nto its starting point. "
+        },
+        "53": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Sequencing</b></span>",
+                "width": 142.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_009",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Sequencing</b></span>"
+        },
+        "54": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 65.81330871582031,
+                "position_y": 76.09557342529297,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "Think of a patch as a graph where messages are passed between nodes \n<i>depth first</i> and outputs of a processor (generally) occur \nin <i>right to left</i> order.   The <b>[trigger]</b> object does nothing \nexcept repeat its input to multiple outputs in right-to-left order.",
+                "width": 476.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_012",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Think of a patch as a graph where messages are passed between nodes \n<i>depth first</i> and outputs of a processor (generally) occur \nin <i>right to left</i> order.   The <b>[trigger]</b> object does nothing \nexcept repeat its input to multiple outputs in right-to-left order."
+        },
+        "55": {
+            "connections": [
+                [
+                    [
+                        56,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 170.74330139160156,
+                "position_y": 179.89581298828125,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 64.0
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "56": {
+            "connections": [
+                [
+                    [
+                        57,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        58,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        59,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 170.74330139160156,
+                "position_y": 227.89581298828125,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 70.0
+            },
+            "initargs": "3",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "trigger"
+        },
+        "57": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 170.74330139160156,
+                "position_y": 265.89581298828125,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 73.0
+            },
+            "initargs": "\"3:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "58": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 200.70127868652344,
+                "position_y": 298.9131774902344,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 73.0
+            },
+            "initargs": "\"2:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "59": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 231.74330139160156,
+                "position_y": 335.89581298828125,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 73.0
+            },
+            "initargs": "\"1:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_007",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
         },
         "6": {
             "connections": [
@@ -1324,6 +1973,291 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Creating a patch</b></span>"
         },
+        "60": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "9. Pattern: Sequencing",
+                "no_export": false,
+                "position_x": 63.903926849365234,
+                "position_y": 385.02447509765625,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "This is the essential pattern to use when you need to execute steps \nin a certain order.",
+                "width": 458.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "This is the essential pattern to use when you need to execute steps \nin a certain order."
+        },
+        "61": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 26.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Hot and Cold</b></span>",
+                "width": 96.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Hot and Cold</b></span>"
+        },
+        "62": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 68.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 65.73871612548828,
+                "position_y": 80.26740264892578,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "Data coming into a processor only trigger the processor if the inlet is \"hot\". Usually,\nonly the leftmost inlet is \"hot\".  To marshal a set of inputs (arguments) to the \nprocessor, send to all the other inlets first, then to the leftmost inlet.",
+                "width": 552.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_017",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Data coming into a processor only trigger the processor if the inlet is \"hot\". Usually,\nonly the leftmost inlet is \"hot\".  To marshal a set of inputs (arguments) to the \nprocessor, send to all the other inlets first, then to the leftmost inlet."
+        },
+        "63": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 47.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 67.91510009765625,
+                "position_y": 165.6861572265625,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "In the example below, <b>[pack]</b> builds a Python array from its inputs.  \nClick in different orders and see what comes out and when it comes out.  ",
+                "width": 488.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_029",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "In the example below, <b>[pack]</b> builds a Python array from its inputs.  \nClick in different orders and see what comes out and when it comes out.  "
+        },
+        "64": {
+            "connections": [
+                [
+                    [
+                        68,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 148.82178497314453,
+                "position_y": 270.15228271484375,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 64.0
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "65": {
+            "connections": [
+                [
+                    [
+                        68,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 231.72256469726562,
+                "position_y": 267.80377197265625,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 69.0
+            },
+            "initargs": "123.45",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "66": {
+            "connections": [
+                [
+                    [
+                        68,
+                        2
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 318.6184844970703,
+                "position_y": 264.6605224609375,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 65.0
+            },
+            "initargs": "[1,2,3]",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "67": {
+            "connections": [
+                [
+                    [
+                        68,
+                        3
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 403.51683044433594,
+                "position_y": 265.2290802001953,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 49.0
+            },
+            "initargs": "True",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_007",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "68": {
+            "connections": [
+                [
+                    [
+                        69,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 250.69983673095703,
+                "position_y": 330.7385559082031,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 56.0
+            },
+            "initargs": "4",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "pack"
+        },
+        "69": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "8. Hot and Cold",
+                "no_export": false,
+                "position_x": 250.69983673095703,
+                "position_y": 382.7312316894531,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 44.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_009",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
         "7": {
             "connections": [
                 []
@@ -1350,6 +2284,291 @@
             "properties": {},
             "type": "text",
             "value": "To work through the rest of this tutorial, it will be helpful to have an empty patch\nto work with.  If you click on the \"Keybindings\" tab to the left and scroll down a bit, \nyou will see the entry \"C-f  Create a new patch\".  C-f means Control-f.  Similarly, A- \nmeans Alt, S- means Shift, W- means the Windows key, M1 means first mouse button.  "
+        },
+        "70": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 35.0,
+                "is_export": false,
+                "layername": "10. Pattern: Iteration",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Iteration</b></span>",
+                "width": 181.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_030",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Iteration</b></span>"
+        },
+        "71": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 173.0,
+                "is_export": false,
+                "layername": "10. Pattern: Iteration",
+                "no_export": false,
+                "position_x": 62.799190521240234,
+                "position_y": 82.15888214111328,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "The <b>[for]</b> object is key to iteration.  It splits a list of inputs into \nits elements and outputs them one at a time.  The items to iterate over \ncan be either init args (in the processor box) or received either inlet.\n\nIteration starts when a Bang, True, or an iterable is received on the left (hot) inlet.\n\nIteration will stop when the current list is traversed or a False is receved on\nthe left inlet. ",
+                "width": 542.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_039",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "The <b>[for]</b> object is key to iteration.  It splits a list of inputs into \nits elements and outputs them one at a time.  The items to iterate over \ncan be either init args (in the processor box) or received either inlet.\n\nIteration starts when a Bang, True, or an iterable is received on the left (hot) inlet.\n\nIteration will stop when the current list is traversed or a False is receved on\nthe left inlet. "
+        },
+        "72": {
+            "connections": [
+                [
+                    [
+                        73,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "10. Pattern: Iteration",
+                "no_export": false,
+                "position_x": 127.87886810302734,
+                "position_y": 271.86598205566406,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 52.0
+            },
+            "initargs": "Bang",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "73": {
+            "connections": [
+                [
+                    [
+                        74,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "10. Pattern: Iteration",
+                "no_export": false,
+                "position_x": 192.7921371459961,
+                "position_y": 345.80487060546875,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 113.0
+            },
+            "initargs": "range(3,10)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "for"
+        },
+        "74": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "10. Pattern: Iteration",
+                "no_export": false,
+                "position_x": 192.7921371459961,
+                "position_y": 393.80487060546875,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 44.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_010",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "75": {
+            "connections": [
+                [
+                    [
+                        73,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "10. Pattern: Iteration",
+                "no_export": false,
+                "position_x": 329.6121368408203,
+                "position_y": 276.49725341796875,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 231.0
+            },
+            "initargs": "[\"hello\", \"goodbye\", \"foo\", \"bar\"]",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_009",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "76": {
+            "connections": [
+                [
+                    [
+                        73,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "10. Pattern: Iteration",
+                "no_export": false,
+                "position_x": 215.77423095703125,
+                "position_y": 274.49891662597656,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 91.0
+            },
+            "initargs": "[1,2,3,4,5]",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_010",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "77": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 35.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Conditionals 1</b></span>",
+                "width": 236.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_040",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Conditionals 1</b></span>"
+        },
+        "78": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 89.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 55.8459358215332,
+                "position_y": 66.17697143554688,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "The <b>[case]</b> and <b>[route]</b> objects are the building blocks of \nconditional code.  <b>[case]</b> tests its left inlet for equality against a \nseries of values and repeats the input value on the corresponding positional \noutput.   If no test matches, the value is repeated on the rightmost outlet. ",
+                "width": 502.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_054",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "The <b>[case]</b> and <b>[route]</b> objects are the building blocks of \nconditional code.  <b>[case]</b> tests its left inlet for equality against a \nseries of values and repeats the input value on the corresponding positional \noutput.   If no test matches, the value is repeated on the rightmost outlet. "
+        },
+        "79": {
+            "connections": [
+                [
+                    [
+                        83,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 62.90447998046875,
+                "position_y": 171.78334045410156,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 49.0
+            },
+            "initargs": "True",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_011",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
         },
         "8": {
             "connections": [
@@ -1378,6 +2597,276 @@
             "type": "text",
             "value": "<i>--> Type C-f now to create a new patch.</i>  \n\nThis will only work if your pointer is over the \"canvas\", the main patch area where \nthis text appears.  Observe that a message appears at the bottom of the canvas, then \nfades out after a few seconds, to let you know that this action was taken. \n\nClick on the Layers tab to see that there's a new top-level item called \"default\".  This is \nyour working patch.\n\nThe PGUP and PGDN keys only cycle through layers in the current patch; to cycle \nthrough patches, C-PGUP and C-PGDN.  You can also click on a layer of the other \npatch in the Layers tab."
         },
+        "80": {
+            "connections": [
+                [
+                    [
+                        83,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 128.8043975830078,
+                "position_y": 175.2103729248047,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 54.0
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_012",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "81": {
+            "connections": [
+                [
+                    [
+                        83,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 198.69825744628906,
+                "position_y": 174.77963256835938,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 64.0
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "82": {
+            "connections": [
+                [
+                    [
+                        83,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 276.5798645019531,
+                "position_y": 176.2264862060547,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 88.0
+            },
+            "initargs": "\"goodbye\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_014",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "83": {
+            "connections": [
+                [
+                    [
+                        88,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        85,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        86,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        87,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 98.849853515625,
+                "position_y": 265.6834716796875,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 170.0
+            },
+            "initargs": "True, False, \"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_011",
+            "osc_methods": [],
+            "properties": {},
+            "type": "case"
+        },
+        "85": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 151.7755584716797,
+                "position_y": 338.682861328125,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 138.0
+            },
+            "initargs": "\"it was false:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "86": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 205.69515991210938,
+                "position_y": 371.6820068359375,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 139.0
+            },
+            "initargs": "\"it was hello:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_014",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "87": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 259.61932373046875,
+                "position_y": 404.4490051269531,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 206.0
+            },
+            "initargs": "\"it was something else:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_015",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "88": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "11. Pattern: Conditionals 1",
+                "no_export": false,
+                "position_x": 98.849853515625,
+                "position_y": 303.6834716796875,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 134.0
+            },
+            "initargs": "\"it was true:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_012",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "89": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 35.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Conditionals 2</b></span>",
+                "width": 236.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_055",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Conditionals 2</b></span>"
+        },
         "9": {
             "connections": [
                 []
@@ -1404,6 +2893,303 @@
             "properties": {},
             "type": "text",
             "value": "You have gotten this far, which is good news!  You know how to open a patch file.  \nIn case you forgot already: \n          <tt>mfp [options] [filename ...]</tt>   \n\nTo see a complete list of command-line options:\n          <tt>mfp --help</tt>\n\nTo see a list of all builtin objects with a brief description: \n          <tt>mfp --help-builtins</tt>"
+        },
+        "90": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 68.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 52.8647575378418,
+                "position_y": 83.16792297363281,
+                "scope": "__patch__",
+                "update_required": true,
+                "value": "<b>[route]</b> interprets input as a sequence where the first element is\nthe \"address\" that the rest of the sequence is to be delivered to.  Items with\nunmatched addresses are passed through whole. ",
+                "width": 509.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_056",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<b>[route]</b> interprets input as a sequence where the first element is\nthe \"address\" that the rest of the sequence is to be delivered to.  Items with\nunmatched addresses are passed through whole. "
+        },
+        "91": {
+            "connections": [
+                [
+                    [
+                        94,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 108.83223342895508,
+                "position_y": 177.79473876953125,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 91.0
+            },
+            "initargs": "(2, \"hello\")",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_015",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "92": {
+            "connections": [
+                [
+                    [
+                        94,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 226.650634765625,
+                "position_y": 184.2687530517578,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 114.0
+            },
+            "initargs": "(\"foo\", 1, 2, 3)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "93": {
+            "connections": [
+                [
+                    [
+                        94,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "message",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 371.427490234375,
+                "position_y": 187.7554931640625,
+                "scope": "__patch__",
+                "update_required": true,
+                "width": 79.0
+            },
+            "initargs": "[\"bar\", 4]",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_017",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "94": {
+            "connections": [
+                [
+                    [
+                        95,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        96,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        97,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        98,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 135.79067993164062,
+                "position_y": 251.06820678710938,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 120.0
+            },
+            "initargs": "1, 2, \"foo\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "route"
+        },
+        "95": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 135.79067993164062,
+                "position_y": 299.0682067871094,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 116.0
+            },
+            "initargs": "\"it was 1:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_017",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "96": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 171.79067993164062,
+                "position_y": 329.0682067871094,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 116.0
+            },
+            "initargs": "\"it was 2:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_018",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "97": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 208.79067993164062,
+                "position_y": 359.0682067871094,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 128.0
+            },
+            "initargs": "\"it was foo:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_019",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "98": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "12. Pattern: Conditionals 2",
+                "no_export": false,
+                "position_x": 245.79067993164062,
+                "position_y": 389.0682067871094,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 206.0
+            },
+            "initargs": "\"it was something else:\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_020",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "99": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "text",
+                "height": 35.0,
+                "is_export": false,
+                "layername": "13. Pattern: Conditionals 3",
+                "no_export": false,
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "scope": "",
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Conditionals 3</b></span>",
+                "width": 236.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_057",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Conditionals 3</b></span>"
         }
     },
     "scopes": {
@@ -1413,21 +3199,71 @@
             "enum_001": 35,
             "message_001": 29,
             "message_002": 33,
+            "message_003": 55,
+            "message_004": 64,
+            "message_005": 65,
+            "message_006": 66,
+            "message_007": 67,
+            "message_008": 72,
+            "message_009": 75,
+            "message_010": 76,
+            "message_011": 79,
+            "message_012": 80,
+            "message_013": 81,
+            "message_014": 82,
+            "message_015": 91,
+            "message_016": 92,
+            "message_017": 93,
+            "message_018": 101,
+            "message_019": 102,
+            "message_020": 103,
+            "message_021": 110,
+            "message_022": 111,
             "patch": 0,
             "processor_001": 30,
             "processor_002": 34,
+            "processor_003": 56,
+            "processor_004": 73,
+            "processor_005": 57,
+            "processor_006": 58,
+            "processor_007": 59,
+            "processor_008": 68,
+            "processor_009": 69,
+            "processor_010": 74,
+            "processor_011": 83,
+            "processor_012": 88,
+            "processor_013": 85,
+            "processor_014": 86,
+            "processor_015": 87,
+            "processor_016": 94,
+            "processor_017": 95,
+            "processor_018": 96,
+            "processor_019": 97,
+            "processor_020": 98,
+            "processor_021": 104,
+            "processor_022": 105,
+            "processor_023": 106,
+            "processor_024": 107,
+            "processor_025": 108,
+            "processor_026": 109,
             "self": 0,
             "slidemeter_001": 45,
             "text_002": 1,
             "text_003": 2,
             "text_004": 13,
             "text_005": 3,
-            "text_006": 51,
+            "text_006": 49,
             "text_007": 4,
+            "text_008": 51,
+            "text_009": 53,
             "text_010": 5,
             "text_011": 6,
+            "text_012": 54,
+            "text_013": 60,
             "text_014": 7,
             "text_015": 8,
+            "text_016": 61,
+            "text_017": 62,
             "text_018": 9,
             "text_019": 10,
             "text_020": 11,
@@ -1439,6 +3275,8 @@
             "text_026": 18,
             "text_027": 19,
             "text_028": 20,
+            "text_029": 63,
+            "text_030": 70,
             "text_031": 21,
             "text_032": 22,
             "text_033": 23,
@@ -1447,8 +3285,11 @@
             "text_036": 26,
             "text_037": 27,
             "text_038": 28,
+            "text_039": 71,
+            "text_040": 77,
             "text_041": 31,
-            "text_042": 52,
+            "text_042": 50,
+            "text_043": 52,
             "text_044": 32,
             "text_045": 36,
             "text_046": 37,
@@ -1459,6 +3300,11 @@
             "text_051": 44,
             "text_052": 46,
             "text_053": 48,
+            "text_054": 78,
+            "text_055": 89,
+            "text_056": 90,
+            "text_057": 99,
+            "text_058": 100,
             "toggle_001": 41
         }
     },
