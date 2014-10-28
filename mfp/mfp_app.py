@@ -232,10 +232,10 @@ class MFPApp (Singleton):
 
             else:
                 log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
-                log.warning("DSP backend exited but --no-restart in place")
+                log.warning("DSP backend exited with no-restart flag, not restarting")
                 for p in dead_patches:
                     p.delete()
-                log.debug("finished cleaning up patches")
+                log.debug("Finished cleaning up patches")
 
 
     def open_file(self, file_name, context=None, show_gui=True):

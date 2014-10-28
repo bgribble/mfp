@@ -10,6 +10,7 @@ from .. import Uninit
 
 
 class Inlet(Processor):
+    doc_tooltip_obj = "Message input to patch"
     doc_tooltip_cold = "Message input to patch"
     doc_tooltip_hot = "Message input to patch (hot)"
     

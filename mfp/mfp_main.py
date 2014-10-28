@@ -139,7 +139,7 @@ def main():
    
     # configure some things from command line
     app.no_gui = args.get("no_gui") or args.get("help_builtins")
-    app.no_dsp = args.get("no_dsp")
+    app.no_dsp = args.get("no_dsp") or args.get("help_builtins")
     app.no_default = args.get("no_default")
     app.no_restart = args.get("no_restart")
     app.dsp_inputs = args.get("inputs")

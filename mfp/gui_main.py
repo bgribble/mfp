@@ -107,7 +107,6 @@ class MFPGUI (Singleton):
 
     def finish(self):
         from gi.repository import Gtk
-        log.debug("MFPGUI.finish() called")
         log.log_func = None
         if self.appwin:
             self.appwin.quit()

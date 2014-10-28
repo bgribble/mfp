@@ -98,7 +98,11 @@ class RPCWrapper (object):
         if not response: 
             r.request_id = None
 
-        self.rpchost.put(r, self.peer_id)
+        try: 
+            self.rpchost.put(r, self.peer_id)
+        except Exception as e: 
+            return None 
+
         puttime = str(datetime.now())
         if response: 
             self.rpchost.wait(r, timeout=5)
