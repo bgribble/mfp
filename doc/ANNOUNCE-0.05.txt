@@ -1,4 +1,3 @@
-
 MFP -- Music For Programmers 
 Release 0.05, "Mighty Fine Patching" 
 
@@ -83,6 +82,10 @@ pretty similar but differs in a few key ways:
  * There is fairly deep integration of Open Sound Control (OSC), with 
    every patch element having an OSC address and the ability to learn
    any other desired address.  
+
+ * MFP has just a fraction of the builtin and addon functionality
+   provided by PD.  It's not up to being a replacement except in
+   very limited cases! 
 
 The code and issue tracker are hosted on GitHub: 
 

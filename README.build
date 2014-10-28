@@ -1,7 +1,7 @@
 BUILDING AND INSTALLING MFP 
 ===================================
 
-Version 0.05, 2014-06-20
+Version 0.05, 2014-10-28
 
 TL;DR
 ---------------------
@@ -9,10 +9,17 @@ TL;DR
    $ ./waf configure --virtualenv --prefix ~/mfpvirt build install install_deps 
      [...] 
    $ . ~/mfpvirt/bin/activate  
-   (virtual)$ mfp 
+   (mfpvirt)$ mfp -v 
 
 THINGS TO KNOW 
 ---------------------
+
+OS platform: I have only tested MFP on 64-bit Linux.  
+
+python: MFP requires Python 2.7.x at this time.  I'm planning to
+migrate to Python 3 but haven't yet.  Thanks to a patch from
+GitHub user wrl, the build script itself is python3.x compatible but
+you need Python 2.7 installed to build and run MFP. 
 
 waf: MFP uses 'waf', which you can think of as a replacement for
 autotools and make.  You do not need to install waf; the correct
@@ -114,4 +121,5 @@ INSTALLING
 
 The installation root defaults to /usr/local and can be modified
 by passing in the --prefix argument to "./waf configure".
+
 
