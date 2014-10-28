@@ -65,14 +65,14 @@ to ask for your patience with:
 
 Ticket | Description 
 -------| --------------
-165 | Markup in comments does not render when patch is loaded
-88 | Patch loading is slow 
+165 | Markup in comments does not render when patch is loaded.  Workaround: Click in another window. 
+88 | Patch loading is slow.  Workaround: be patient.  
 204 | Logging is broken when loaded as LV2 plugin 
-98 | Selecting connections with click or box doesn't work well
+98 | Selecting connections with click or box doesn't work well.  Workaround: Zoom in and click right on the line. 
 212 | Rendering of smooth curves on XY plot shows gaps  
 
 See the tickets in GitHub for detail on what I know about these problems, and for 
-potential workarounds.  
+other potential workarounds.  
 
 ## DOCUMENTATION 
 
@@ -94,7 +94,8 @@ getting around the program.
     $ mfp doc/tutorial.mfp 
 
 It's not very complete, but it does cover a few basics about how
-to create, close, and open files and make simple patches. 
+to create, close, and open files and make simple patches.  It also covers 
+"patching patterns" for things like iteration, conditionals, etc. 
 
 **Demo patches:** There are a few demo patches in doc/.
 
