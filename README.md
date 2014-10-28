@@ -65,11 +65,13 @@ to ask for your patience with:
 
 Ticket | Description 
 -------| --------------
-165 | Markup in comments does not render when patch is loaded.  Workaround: Click in another window. 
-88 | Patch loading is slow.  Workaround: be patient.  
-204 | Logging is broken when loaded as LV2 plugin 
+ #165 | Markup in comments does not render when patch is loaded.  Workaround: Click in another window. 
+ #88 | Patch loading is slow.  Workaround: be patient.  
+ #217 | MFP must be stopped with `kill -9` in (hopefully rare) error conditions. Workaround: ^Z
+to stop the process from the shell, then `kill -9 %1` 
+ #204 | Logging is broken when loaded as LV2 plugin 
 98 | Selecting connections with click or box doesn't work well.  Workaround: Zoom in and click right on the line. 
-212 | Rendering of smooth curves on XY plot shows gaps  
+ #212 | Rendering of smooth curves on XY plot shows gaps  
 
 See the tickets in GitHub for detail on what I know about these problems, and for 
 other potential workarounds.  

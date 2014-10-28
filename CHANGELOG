@@ -1,4 +1,28 @@
-mfp v0.04
+mfp v0.05, 2014-Oct-28 
+
+  * #134: Add -v/--verbose to log console messages to stdout 
+
+  * #137: Support for MFP being loaded as an LV2 plugin 
+
+  * #139: Save MFP patches as LV2 plugins 
+
+  * #147: Find another OSC port if the requested one is busy 
+
+  * #159: Attempt to restart DSP backend and reload patch if backend crashes 
+
+  * #163: New build system using waf 
+
+  * #167: Ask for confirmation on quit if patches have been edited 
+
+  * #171: "Hygienic" layer duplication for dynamic patch building 
+
+  * #193: Demo patch: mixer with panning and configurable aux sends 
+
+  * #211: Tutorial patch 
+
+  * Many other bugfixes and improvements 
+
+mfp v0.04, 2013-May-16
 
   * #31: Support exported UIs from user patches ("graph-on-parent") 
 

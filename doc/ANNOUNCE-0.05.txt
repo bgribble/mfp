@@ -26,7 +26,7 @@ Significant changes since release v0.04
     (see doc/README.build)
 
   * Support for user patches with dynamic creation of
-    inlets/outlets and other objects at creation time (with
+    inlets/outlets and other objects at instantiation time (with
     examples) using the "@clonescope" method  
 
   * Lazy evaluation of expressions using a leading "," syntactic
@@ -34,7 +34,11 @@ Significant changes since release v0.04
     "datetime.now()" is a constant, but ",datetime.now()" is
     evaluated each time the message is emitted)
 
-  * Many improvements to stability and error handling
+  * More sample patches, including a basic tutorial covering app
+    interaction, "hello, world", and patterns for things like 
+    iteration, conditionals, etc
+
+  * Improvements to stability and error handling
 
   * Many other bugfixes and improvements.  The complete list of
     60+ tickets closed since the 0.04 release is in the 0.05
@@ -43,7 +47,7 @@ Significant changes since release v0.04
     http://github.com/bgribble/mfp/issues?q=milestone%3A%22mfp+0.05%22+is%3Aclosed
 
 
-About MFP:
+About MFP
 ----------------------------------------
 
 MFP is an environment for visually composing computer programs,
@@ -52,7 +56,7 @@ analysis.  It's very much inspired by Miller Puckette's Pure Data
 (pd) and Max/MSP, with a bit of LabView and TouchOSC for good
 measure.  It is targeted at musicians, recording engineers, and
 software developers who like the "patching" dataflow metaphor for
-constructing audio synthesis, processing, and analysis networks. 
+coding up audio synthesis, processing, and analysis. 
 
 MFP is a completely new code base, written in Python and C, with
 a Clutter UI.  It has been under development by a solo developer
@@ -91,6 +95,6 @@ level of the source tree contain dependency, build, and
 getting-started information.
 
 Thanks,
-Bill Gribble 
+Bill Gribble <grib@billgribble.com>
 
 
