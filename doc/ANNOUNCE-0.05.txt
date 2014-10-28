@@ -4,14 +4,17 @@ Release 0.05, "Mighty Fine Patching"
 
 I'm pleased to announce a new version of MFP, containing many new
 features, fixes and improvements.  This is still a very early
-release that is missing a lot of expected functionality, but is a
-significant step forward from 0.04 in every way and may be of
-interest to the community. 
+release that is missing a lot of expected functionality, but it's
+a significant step forward from 0.04 in every way and I thought
+it might be of interest to the wider community. 
 
 A summary of changes is below.  Please see the GitHub issue tracker
 for complete details: 
 
   http://github.com/bgribble/mfp 
+
+This version is still source-code-only, but the new build system
+should make it a bit easier for those who would like to try it.
 
 Significant changes since release v0.04
 ----------------------------------------
@@ -84,7 +87,7 @@ The code and issue tracker are hosted on GitHub:
 You can find the LAC-2013 paper and accompanying screenshots,
 some sample patches, and a few other bits of documentation in the
 doc directory of the GitHub repo.  The README files at the top
-level of the source tree contains dependency, build, and
+level of the source tree contain dependency, build, and
 getting-started information.
 
 Thanks,
