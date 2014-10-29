@@ -1,3 +1,12 @@
+mfp v0.05.1, 2014-Oct-29 
+
+  * #219: Solve wscript errors with Python 2.x 
+
+  * #221: Fix LD_LIBRARY_PATH pollution 
+
+  * #220: (not closed) Add notes to README.md and README.build about potential 
+    errors on 'waf install' 
+
 mfp v0.05, 2014-Oct-28 
 
   * #134: Add -v/--verbose to log console messages to stdout 

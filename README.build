@@ -122,4 +122,14 @@ INSTALLING
 The installation root defaults to /usr/local and can be modified
 by passing in the --prefix argument to "./waf configure".
 
+If you get errors on the install step to the effect of os.symlink 
+failing to make a link because the file already exists -- see GitHub 
+issue #220 and please add a comment indicating your Linux distribution
+and that you are having this problem.  
+
+Note that the instances of #220 I have seen are failing at the
+very tail end of the install process, and are trying to install
+files that are already there... which means that you can probably
+ignore this error.  Try activating the virtualenv and running
+mfp.  If it launches, you are good to go. 
 

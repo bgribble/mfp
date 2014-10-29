@@ -70,6 +70,7 @@ Ticket | Description
  #217 | MFP must be stopped with `kill -9` in (hopefully rare) error conditions. Workaround: ^Z to stop the process from the shell, then `kill -9 %1` 
  #204 | Logging is broken when loaded as LV2 plugin 98 | Selecting connections with click or box doesn't work well.  Workaround: Zoom in and click right on the line. 
  #212 | Rendering of smooth curves on XY plot shows gaps  
+ #220 | 'waf install' can give error messages. Workaround: See the bottom of README.build; possibly no action is required. 
 
 See the tickets in GitHub for detail on what I know about these problems, and for 
 other potential workarounds.  
