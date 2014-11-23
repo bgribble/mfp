@@ -13,13 +13,14 @@ from ..patch import Patch
 from .. import Uninit
 
 class Send (Processor):
-    doc_tooltip_obj = "Send messages to a named receiver (create with 'via' GUI object)"
+    doc_tooltip_obj = "Send messages to a named receiver (create with 'send via' GUI object)"
     doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
 
     do_onload = False 
+    bus_type = "bus"
     
     def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 0, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
         self.dest_name = None
         self.dest_inlet = 0
@@ -35,6 +36,7 @@ class Send (Processor):
             self.dest_name = initargs[0]
 
         self.gui_params["label"] = self.dest_name
+        self._connect(self.dest_name)
 
     def method(self, message, inlet=0):
         if inlet == 0:
@@ -42,21 +44,40 @@ class Send (Processor):
         else: 
             message.call(self)
 
+    def onload(self, phase):
+        if phase == 1:
+            self._connect(self.dest_name)
+
+    def _connect(self, dest_name):
+        if self.dest_obj is not None and self.dest_name != dest_name:
+            self.dest_obj.disconnect(0, self, 0)
+            self.dest_obj = None 
+        self.dest_name = dest_name 
+
+        obj = MFPApp().resolve(self.dest_name, self, True)
+        if obj is not None:
+            self.dest_obj = obj 
+        else: 
+            self.dest_obj = MFPApp().create(self.bus_type, "", self.patch, 
+                                            self.scope, self.dest_name)
+            self.dest_name = self.dest_obj.name
+            
+        if self.dest_obj and ((self, 0) not in self.dest_obj.connections_in[0]):
+            self.connect(0, self.dest_obj, 0)
+
+        self.init_args = '"%s"' % self.dest_name 
+        self.gui_params["label"] = self.dest_name
+
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
     def trigger(self):
-        if self.inlets[1] is not Uninit:
-            self.dest_name = self.inlets[1]
-            self.init_args = '"%s"' % self.dest_name 
-            self.gui_params["label"] = self.dest_name
-            self.dest_obj = None
-            self.inlets[1] = Uninit
-            if self.gui_created:
-                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        if self.inlets[1] is not Uninit: 
+            self._connect(self.inlets[1])
+            self.inlets[1] = Uninit 
 
-        if self.dest_obj is None:
-            self.dest_obj = MFPApp().resolve(self.dest_name, self, True)
-
-        if self.inlets[0] is not Uninit and self.dest_obj is not None:
-            self.dest_obj.send(self.inlets[0], self.dest_inlet)
+        if self.inlets[0] is not Uninit:
+            self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
 
     def _send(self, value, inlet=0):
@@ -97,30 +118,32 @@ class Send (Processor):
 
 class SendSignal (Send):
     doc_tooltip_obj = "Send signals to the specified name"
+    bus_type = "bus~"
 
     def __init__(self, init_type, init_args, patch, scope, name): 
-        Send.__init__(self, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         
         self.dsp_inlets = [0]
         self.dsp_outlets = [0] 
         self.dsp_init("noop~")
 
-        self.monitor_thread = QuittableThread(target=self._monitor)
-        self.monitor_thread.start()
+        self.dest_name = None
+        self.dest_inlet = 0
+        self.dest_obj = None
 
-    def _monitor(self, threadobj): 
-        # FIXME race between monitor and trigger method 
-        while not threadobj.join_req:
-            if self.dest_obj is not None and self.dest_obj.status == Processor.DELETED:
-                self.dest_obj = None 
+        # needed so that name changes happen timely 
+        self.hot_inlets = [0, 1]
 
-            if self.dest_obj is None and self.dest_name is not None:
-                self.reconnect()
-                    
-            time.sleep(0.5)
+        initargs, kwargs = self.parse_args(init_args)
+        if len(initargs) > 1:
+            self.dest_inlet = initargs[1]
+        if len(initargs):
+            self.dest_name = initargs[0]
+
+        self.gui_params["label"] = self.dest_name
+        self._connect(self.dest_name)
 
     def delete(self):
-        #self.monitor_thread.finish()
         if self.dest_obj is not None:
             if isinstance(self.dest_obj, Patch): 
                 dest_obj = self.dest_obj.inlet_objects[self.dest_inlet] 
@@ -130,25 +153,6 @@ class SendSignal (Send):
                 dest_inlet = self.dest_obj.dsp_inlets.index(self.dest_inlet)
             self.dsp_obj.disconnect(0, dest_obj.obj_id, dest_inlet)
         Processor.delete(self)
-
-    def reconnect(self): 
-        # FIXME should not have to know about Patch guts here but #197  
-        self.dest_obj = MFPApp().resolve(self.dest_name, self, True)
-        if not self.dest_obj: 
-            return 
-        elif self.dest_inlet not in self.dest_obj.dsp_inlets:
-            self.dest_obj = None
-            return 
-
-        if isinstance(self.dest_obj, Patch): 
-            self.dest_obj = self.dest_obj.inlet_objects[self.dest_inlet] 
-            self.dest_inlet = 0  
-            dsp_inlet_num = 0
-        else:
-            dsp_inlet_num = self.dest_obj.dsp_inlets.index(self.dest_inlet)
-
-        if self.dsp_obj:
-            self.dsp_obj.connect(0, self.dest_obj.obj_id, dsp_inlet_num);
 
 class MessageBus (Processor): 
     display_type = "hidden"
@@ -187,23 +191,37 @@ class Recv (Processor):
     doc_tooltip_inlet = [ "Passthru input" ]
     doc_tooltip_outlet = [ "Passthru output" ]
 
-    bus_type = "bus" 
     do_onload = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        self.bus_name = self.name 
+        self.src_name = self.name 
+        self.src_obj = None 
         if len(initargs):
-            self.bus_name = initargs[0]
+            self.src_name = initargs[0]
+        else: 
+            self.src_name = self.name
 
-        self.gui_params["label"] = self.bus_name
-        self.bus_obj = None 
+        self.gui_params["label"] = self.src_name
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
 
+        self.monitor_thread = QuittableThread(target=self._monitor)
+        self.monitor_thread.start()
+
+    def _monitor(self, threadobj): 
+        # FIXME race between monitor and trigger method 
+        while not threadobj.join_req:
+            if self.src_obj is not None and self.src_obj.status == Processor.DELETED:
+                self.src_obj.disconnect(0, self, 0)
+                self.src_obj = None 
+            if self.src_obj is None and self.src_name is not None:
+                self._connect(self.src_name)
+                    
+            time.sleep(0.25)
 
     def method(self, message, inlet):
         if inlet == 0:
@@ -211,56 +229,51 @@ class Recv (Processor):
         else:
             message.call(self)
 
+    def _connect(self, src_name):
+        src_obj = MFPApp().resolve(src_name, self, True)
+        if src_obj:
+            self.src_obj = src_obj
+            self.init_args = '"%s"' % src_name 
+            self.gui_params["label"] = src_name
+            self.src_name = src_name 
+            self.src_obj.connect(0, self, 0)
+
+            if self.gui_created:
+                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
     def trigger(self):
-        if self.inlets[1] is not Uninit: 
-            self.bus_connect(self.inlets[1])
-            self.inlets[1] = Uninit 
+        if self.inlets[1] is not Uninit:
+            if self.inlets[1] != self.src_name:
+                if self.src_obj:
+                    self.src_obj = None 
+                self._connect(self.inlets[1])
+            self.inlets[1] = Uninit
+
+        if self.src_name and self.src_obj is None:
+            self._connect(self.src_name)
 
         if self.inlets[0] is not Uninit:
             self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
 
-    def onload(self, phase):
-        if phase == 1:
-            self.bus_connect(self.bus_name)
-
-    def bus_connect(self, bus_name):
-        if self.bus_obj is not None and self.bus_name != bus_name:
-            self.bus_obj.disconnect(0, self, 0)
-            self.bus_obj = None 
-        self.bus_name = bus_name 
-
-        obj = MFPApp().resolve(self.bus_name, self, True)
-        if obj is not None and isinstance(obj, (MessageBus, SignalBus)):
-            self.bus_obj = obj 
-        else: 
-            self.bus_obj = MFPApp().create(self.bus_type, "", self.patch, 
-                                           self.scope, self.bus_name)
-            self.bus_name = self.bus_obj.name
-            
-        if self.bus_obj and ((self, 0) not in self.bus_obj.connections_out[0]):
-            self.bus_obj.connect(0, self, 0)
-
-        self.init_args = '"%s"' % self.bus_name 
-        self.gui_params["label"] = self.bus_name
-
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
-
     def tooltip_extra(self):
-        return "<b>Connected to:</b> %s" % self.bus_name
+        return "<b>Connected to:</b> %s" % self.src_name
 
 class RecvSignal (Recv): 
     doc_tooltip_obj = "Receive signals to the specified name"
-    bus_type = "bus~"
     
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        self.gui_params["label"] = self.name
-        self.bus_name = None 
-        self.bus_obj = None 
+        self.src_name = None 
+        self.src_obj = None 
+        if len(initargs): 
+            self.src_name = initargs[0]
+        else: 
+            self.src_name = self.name 
+
+        self.gui_params["label"] = self.src_name
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
@@ -270,8 +283,21 @@ class RecvSignal (Recv):
         self.dsp_init("noop~")
 
         if len(initargs):
-            self.bus_connect(initargs[0])
+            self._connect(initargs[0])
 
+        self.monitor_thread = QuittableThread(target=self._monitor)
+        self.monitor_thread.start()
+
+    def _monitor(self, threadobj): 
+        # FIXME race between monitor and trigger method 
+        while not threadobj.join_req:
+            if self.src_obj is not None and self.src_obj.status == Processor.DELETED:
+                self.src_obj = None 
+
+            if self.src_obj is None and self.src_name is not None:
+                self._connect(self.src_name)
+                    
+            time.sleep(0.25)
 def register():
     MFPApp().register("send", Send)
     MFPApp().register("recv", Recv)
