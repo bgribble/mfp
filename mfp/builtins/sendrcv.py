@@ -55,7 +55,7 @@ class Send (Processor):
         self.dest_name = dest_name 
 
         obj = MFPApp().resolve(self.dest_name, self, True)
-        if obj is not None:
+        if obj is not None and (obj.scope == self.scope or "." in self.dest_name):
             self.dest_obj = obj 
         else: 
             self.dest_obj = MFPApp().create(self.bus_type, "", self.patch, 

@@ -78,6 +78,8 @@ class Patch(Processor):
     #############################
 
     def bind(self, name, scope, obj):
+        if isinstance(scope, Patch): 
+            scope = scope.scopes['__patch__']
         return scope.bind(name, obj)
 
     def unbind(self, name, scope):
