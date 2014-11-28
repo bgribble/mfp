@@ -14,7 +14,16 @@ from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
 from ..gui_main import MFPGUI
 from ..bang import Bang
+import math
 
+
+def circle(ctx, xorig, yorig, w, h):
+    w = w-1.0
+    h = h-1.0
+    ctx.set_antialias(cairo.ANTIALIAS_DEFAULT)
+    ctx.translate(xorig, yorig)
+    ctx.arc(w/2.0, h/2.0, w/2.0, 0, 2*math.pi)
+    ctx.close_path()
 
 def rounded_box(ctx, xorig, yorig, w, h, rad):
     seg_h = h - 2 * rad
@@ -222,4 +231,36 @@ class ToggleIndicatorElement (ButtonElement):
     def make_control_mode(self):
         return PatchElement.make_control_mode(self)
 
+    def draw_cb(self, texture, ct):
+        w = self.texture.get_property('surface_width') - 2
+        h = self.texture.get_property('surface_height') - 2
+
+        c = ColorDB.to_cairo(self.color_fg)
+        texture.clear()
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
+
+        ct.set_line_width(1.5)
+        ct.set_antialias(cairo.ANTIALIAS_NONE)
+
+        # draw the box
+        circle(ct, 1, 1, w, h)
+        ct.stroke()
+
+        if self.color_indicator is not None:
+            c = self.color_indicator 
+        else: 
+            c = ColorDB.to_cairo(self.color_fg)
+
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
+
+        # draw the indicator
+        ioff = max(3, 0.075*min(w,h))
+        iw = w - 2 * ioff
+        ih = h - 2 * ioff
+        circle(ct, ioff, ioff, iw, ih)
+
+        if self.indicator:
+            ct.fill()
+        else:
+            ct.stroke()
 
