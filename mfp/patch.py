@@ -73,6 +73,9 @@ class Patch(Processor):
         else:
             return self.parsed_kwargs.get(name, Uninit)
 
+    def ping(self):
+        log.debug("ping:", self.name)
+
     #############################
     # name management
     #############################

@@ -55,7 +55,10 @@ class Send (Processor):
         self.dest_name = dest_name 
 
         obj = MFPApp().resolve(self.dest_name, self, True)
-        if obj is not None and (obj.scope == self.scope or "." in self.dest_name):
+        if (obj is not None 
+            and ((isinstance(obj, Patch) and self.scope == obj.default_scope) 
+                 or obj.scope == self.scope 
+                 or "." in self.dest_name)):
             self.dest_obj = obj 
         else: 
             self.dest_obj = MFPApp().create(self.bus_type, "", self.patch, 
@@ -79,39 +82,6 @@ class Send (Processor):
         if self.inlets[0] is not Uninit:
             self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
-
-    def _send(self, value, inlet=0):
-        from mfp.method import MethodCall
-        if self.paused: 
-            return [] 
-
-        work = []
-        if inlet >= 0:
-            self.inlets[inlet] = value
-
-        self.count_in += 1 
-
-        if self.dest_obj is None:
-            self.dest_obj = MFPApp().resolve(self.dest_name, self, True)
-
-        with self.trigger_lock:
-            if isinstance(value, MethodCall):
-                self.method(value, inlet)
-            elif inlet == 0:
-                if self.dest_obj: 
-                    work.append((self.dest_obj, value, self.dest_inlet))
-            else:
-                self.trigger()
-                self.count_trigger += 1
-
-        try:
-            if ((inlet in self.dsp_inlets) 
-                and not isinstance(value, bool) and isinstance(value, (float, int))):
-                self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
-        except (TypeError, ValueError):
-            pass
-
-        return work
 
     def tooltip_extra(self):
         return "<b>Connected to:</b> %s" % self.dest_name
