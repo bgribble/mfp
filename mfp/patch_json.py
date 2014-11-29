@@ -131,6 +131,11 @@ def json_unpack_objects(self, data, scope):
 
         idmap[int(oid)] = newobj
 
+    # find mapping for self to catch vias 
+    defscope = data.get('scopes').get('__patch__')
+    selfid = int(defscope.get("self") or "0")
+    idmap[selfid] = self
+
     return idmap
 
 @extends(Patch)
