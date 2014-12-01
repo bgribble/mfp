@@ -30,7 +30,7 @@ class ViaElement (PatchElement):
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
-
+        self.param_list.append("label")
         self.connections_out = []
         self.connections_in = []
 

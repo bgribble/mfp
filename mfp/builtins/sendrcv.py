@@ -20,11 +20,13 @@ class Send (Processor):
     bus_type = "bus"
     
     def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-
         self.dest_name = None
         self.dest_inlet = 0
         self.dest_obj = None
+        self.dest_obj_owned = False 
+
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
@@ -42,6 +44,7 @@ class Send (Processor):
         if inlet == 0:
             self.trigger()
         else: 
+            self.inlets[inlet] = Uninit
             message.call(self)
 
     def onload(self, phase):
@@ -49,9 +52,13 @@ class Send (Processor):
             self._connect(self.dest_name)
 
     def _connect(self, dest_name):
+        if self.dest_name == dest_name and self.dest_obj is not None: 
+            return 
+
         if self.dest_obj is not None and self.dest_name != dest_name:
             self.dest_obj.disconnect(0, self, 0)
             self.dest_obj = None 
+            self.dest_obj_owned = False 
         self.dest_name = dest_name 
 
         obj = MFPApp().resolve(self.dest_name, self, True)
@@ -60,9 +67,11 @@ class Send (Processor):
                  or obj.scope == self.scope 
                  or "." in self.dest_name)):
             self.dest_obj = obj 
+            self.dest_obj_owned = False 
         else: 
             self.dest_obj = MFPApp().create(self.bus_type, "", self.patch, 
                                             self.scope, self.dest_name)
+            self.dest_obj_owned = True 
             self.dest_name = self.dest_obj.name
             
         if self.dest_obj and ((self, 0) not in self.dest_obj.connections_in[0]):
@@ -70,7 +79,6 @@ class Send (Processor):
 
         self.init_args = '"%s"' % self.dest_name 
         self.gui_params["label"] = self.dest_name
-
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
@@ -82,6 +90,15 @@ class Send (Processor):
         if self.inlets[0] is not Uninit:
             self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
+
+    def assign(self, patch, scope, name):
+        pret = Processor.assign(self, patch, scope, name)
+        if self.dest_obj_owned and self.dest_obj: 
+            buscon = self.dest_obj.connections_out[0]
+            self.dest_obj.assign(patch, scope, self.dest_obj.name)
+            for obj, port in buscon: 
+                self.dest_obj.disconnect(0, obj, 0)
+        return pret
 
     def tooltip_extra(self):
         return "<b>Connected to:</b> %s" % self.dest_name
@@ -139,6 +156,7 @@ class MessageBus (Processor):
         if inlet == 0:
             self.trigger()
         else: 
+            self.inlets[inlet] = Uninit
             message.call(self)
 
 class SignalBus (Processor): 
@@ -188,15 +206,24 @@ class Recv (Processor):
             if self.src_obj is not None and self.src_obj.status == Processor.DELETED:
                 self.src_obj.disconnect(0, self, 0)
                 self.src_obj = None 
+
+            if not len(self.connections_in[0]): 
+                self.src_obj = None 
+
             if self.src_obj is None and self.src_name is not None:
                 self._connect(self.src_name)
                     
             time.sleep(0.25)
 
+    def delete(self):
+        self.monitor_thread.finish()
+        Processor.delete(self)
+
     def method(self, message, inlet):
         if inlet == 0:
             self.trigger()
         else:
+            self.inlets[inlet] = Uninit
             message.call(self)
 
     def _connect(self, src_name):
