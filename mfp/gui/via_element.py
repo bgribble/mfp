@@ -30,7 +30,7 @@ class ViaElement (PatchElement):
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
-        self.param_list.append("label")
+        self.param_list.append("label_text")
         self.connections_out = []
         self.connections_in = []
 
@@ -42,6 +42,7 @@ class ViaElement (PatchElement):
 
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_position(0, self.TEXTURE_Y)
+        self.label_text = None 
         self.label = Clutter.Text()
         self.label.set_position(0, self.LABEL_Y)
         self.set_reactive(True)
@@ -115,12 +116,13 @@ class ViaElement (PatchElement):
     def label_edit_finish(self, *args):
         # called by labeleditmode
         t = self.label.get_text()
+        self.label_text = t
         if self.obj_id is None:
             self.create_obj(t)
         self.recenter_label()
 
     def configure(self, params):
-        self.label.set_text(params.get("label", ""))
+        self.label.set_text(params.get("label_text", ""))
         self.recenter_label()
         PatchElement.configure(self, params)
 

@@ -37,7 +37,7 @@ class Send (Processor):
         if len(initargs):
             self.dest_name = initargs[0]
 
-        self.gui_params["label"] = self.dest_name
+        self.gui_params["label_text"] = self.dest_name
         self._connect(self.dest_name)
 
     def method(self, message, inlet=0):
@@ -78,7 +78,7 @@ class Send (Processor):
             self.connect(0, self.dest_obj, 0)
 
         self.init_args = '"%s"' % self.dest_name 
-        self.gui_params["label"] = self.dest_name
+        self.gui_params["label_text"] = self.dest_name
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
@@ -127,7 +127,7 @@ class SendSignal (Send):
         if len(initargs):
             self.dest_name = initargs[0]
 
-        self.gui_params["label"] = self.dest_name
+        self.gui_params["label_text"] = self.dest_name
         self._connect(self.dest_name)
 
     def delete(self):
@@ -192,7 +192,7 @@ class Recv (Processor):
         else: 
             self.src_name = self.name
 
-        self.gui_params["label"] = self.src_name
+        self.gui_params["label_text"] = self.src_name
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
@@ -231,7 +231,7 @@ class Recv (Processor):
         if src_obj:
             self.src_obj = src_obj
             self.init_args = '"%s"' % src_name 
-            self.gui_params["label"] = src_name
+            self.gui_params["label_text"] = src_name
             self.src_name = src_name 
             self.src_obj.connect(0, self, 0)
 
@@ -270,7 +270,7 @@ class RecvSignal (Recv):
         else: 
             self.src_name = self.name 
 
-        self.gui_params["label"] = self.src_name
+        self.gui_params["label_text"] = self.src_name
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
