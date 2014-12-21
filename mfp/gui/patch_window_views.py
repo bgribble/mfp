@@ -101,6 +101,7 @@ def init_layer_view(self):
             if not p.has_scope(new_value):
                 log.debug("Adding scope", new_value, "to patch", self.selected_patch)
                 MFPCommand().add_scope(self.selected_patch.obj_id, new_value)
+                self.object_view.insert((new_value, self.selected_patch), self.selected_patch)
 
             layer.scope = new_value
             self.selected_patch.send_params()

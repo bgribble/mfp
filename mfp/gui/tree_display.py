@@ -134,15 +134,24 @@ class TreeDisplay (object):
             if pathstr: 
                 path = Gtk.TreePath.new_from_string(pathstr)
                 self.selection.unselect_path(path)
+    
+    def _ensure_path(self, obj): 
+        ppath = self.object_paths.get(obj)
+        if ppath is not None:
+            return ppath
+        else: 
+            iter = self.treestore.append(None)
+            self.treestore.set_value(iter, 0, obj)
+            self._update_paths()
+            return self.object_paths.get(obj)
 
     def insert(self, obj, parent, update=True):
         if obj in self.object_paths: 
             return None 
         piter = None 
         if parent is not None:
-            ppath = self.object_paths.get(parent)
-            if ppath is not None:
-                piter = self.treestore.get_iter_from_string(ppath)
+            ppath = self._ensure_path(parent)
+            piter = self.treestore.get_iter_from_string(ppath)
 
         iter = self.treestore.append(piter)
         self.treestore.set_value(iter, 0, obj)
