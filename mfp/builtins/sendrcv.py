@@ -27,7 +27,6 @@ class Send (Processor):
 
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
-
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
 
@@ -108,15 +107,16 @@ class SendSignal (Send):
     bus_type = "bus~"
 
     def __init__(self, init_type, init_args, patch, scope, name): 
+        self.dest_name = None
+        self.dest_inlet = 0
+        self.dest_obj = None
+        self.dest_obj_owned = False 
+
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         
         self.dsp_inlets = [0]
         self.dsp_outlets = [0] 
         self.dsp_init("noop~")
-
-        self.dest_name = None
-        self.dest_inlet = 0
-        self.dest_obj = None
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
