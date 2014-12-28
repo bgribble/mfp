@@ -67,6 +67,7 @@ def json_deserialize(self, json_data):
                 dumb_scope.unbind(obj.name)
                 self.bind(name, s, obj)
                 obj.scope = s
+                obj.gui_params['scope'] = obj.scope.name
 
     self.default_scope = self.scopes.get('__patch__') or self.add_scope("__patch__")
     self.init_bindings()

@@ -285,7 +285,7 @@ class PatchWindow(object):
                 update = True
 
             if isinstance(element.container, PatchElement):
-                self.object_view.insert(element, element.container, update=update)
+                self.object_view.insert(element, (element.scope, element.container), update=update)
             elif element.scope: 
                 self.object_view.insert(element, (element.scope, element.layer.patch),
                                         update=update)
@@ -321,7 +321,9 @@ class PatchWindow(object):
             self.layer_view.update(element, None)
             return 
 
-        if element.layer is not None and element.scope is not None:
+        if isinstance(element.container, PatchElement):
+            self.object_view.update(element, (element.scope, element.container))
+        elif element.layer is not None and element.scope is not None:
             self.object_view.update(element, (element.scope, element.layer.patch))
         elif element.layer is not None:
             self.object_view.update(element, (element.layer.scope, element.layer.patch))

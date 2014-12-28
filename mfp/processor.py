@@ -781,7 +781,7 @@ class Processor (object):
 
         for k, v in self.gui_params.items():
             if k not in [ 'name', 'obj_id', 'dsp_inlets', 'dsp_outlets', 'num_inlets', 
-                         'num_outlets']:
+                          'num_outlets']:
                 oinfo['gui_params'][k] = v 
 
         conn = []
@@ -805,6 +805,7 @@ class Processor (object):
 
         for k, v in gp.items():
             self.gui_params[k] = v
+        self.gui_params['scope'] = self.scope.name 
 
         # these are needed at runtime but don't get saved 
         self.gui_params["obj_id"] = self.obj_id

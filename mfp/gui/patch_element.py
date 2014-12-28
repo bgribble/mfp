@@ -82,6 +82,9 @@ class PatchElement (Clutter.Group):
         # create placeholder group and add to stage
         Clutter.Group.__init__(self)
 
+    def __repr__(self):
+        return "<%s %s>" % (type(self).__name__, id(self))
+
     @property
     def layername(self):
         return self.layer.name 

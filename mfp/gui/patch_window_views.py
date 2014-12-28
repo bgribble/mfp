@@ -31,11 +31,11 @@ def init_object_view(self):
             self.selected_patch.send_params()
 
         if isinstance(obj, PatchElement):
-            parent = (obj.layer.scope, obj.layer.patch) 
+            parent = (obj.scope or obj.layer.scope, obj.layer.patch) 
         elif isinstance(obj, PatchInfo): 
             parent = None 
         else: 
-            parent = (self.selected_layer,)
+            parent = (self.selected_patch,)
 
         self.object_view.update(obj, parent)
 

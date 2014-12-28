@@ -140,7 +140,14 @@ class TreeDisplay (object):
         if ppath is not None:
             return ppath
         else: 
-            iter = self.treestore.append(None)
+            parent_iter = None 
+            if isinstance(obj, tuple):
+                parent = obj[1]
+                parent_path = self.object_paths.get(parent)
+                if parent_path: 
+                    parent_iter = self.treestore.get_iter_from_string(parent_path)
+
+            iter = self.treestore.append(parent_iter)
             self.treestore.set_value(iter, 0, obj)
             self._update_paths()
             return self.object_paths.get(obj)
