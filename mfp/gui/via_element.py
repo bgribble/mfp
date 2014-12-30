@@ -122,7 +122,8 @@ class ViaElement (PatchElement):
         self.recenter_label()
 
     def configure(self, params):
-        self.label.set_text(params.get("label_text", ""))
+        self.label_text = params.get("label_text", "")
+        self.label.set_text(self.label_text)
         self.recenter_label()
         PatchElement.configure(self, params)
 

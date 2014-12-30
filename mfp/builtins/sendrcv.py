@@ -50,6 +50,11 @@ class Send (Processor):
         if phase == 1:
             self._connect(self.dest_name)
 
+    def load(self, params):
+        Processor.load(self, params)
+        gp = params.get('gui_params', {})
+        self.gui_params['label_text'] = gp.get("label_text") or self.dest_name
+
     def _connect(self, dest_name):
         if self.dest_name == dest_name and self.dest_obj is not None: 
             return 

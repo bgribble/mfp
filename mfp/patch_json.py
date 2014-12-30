@@ -124,9 +124,7 @@ def json_unpack_objects(self, data, scope):
         
         newobj = MFPApp().create(otype, oargs, self, scope, oname)
         newobj.patch = self
-
         newobj.load(prms)
-
         if self.gui_created:
             newobj.create_gui()
 
