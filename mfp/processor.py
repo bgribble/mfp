@@ -502,7 +502,7 @@ class Processor (object):
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
-    def connect(self, outlet, target, inlet):
+    def connect(self, outlet, target, inlet, show_gui=True):
         from .mfp_app import MFPApp
 
         # make sure this is a possibility 
@@ -540,9 +540,8 @@ class Processor (object):
         if (self, outlet) not in existing:
             existing.append((self, outlet))
 
-        if self.gui_created:
-            MFPApp().gui_command.connect(self.obj_id, outlet, 
-                                         target.obj_id, inlet)
+        if self.gui_created and show_gui:
+            MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet)
         return True
 
     def disconnect(self, outlet, target, inlet):

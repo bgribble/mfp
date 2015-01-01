@@ -13,6 +13,7 @@ from ..patch import Patch
 from .. import Uninit
 
 class Send (Processor):
+    display_type = "sendvia" 
     doc_tooltip_obj = "Send messages to a named receiver (create with 'send via' GUI object)"
     doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
 
@@ -55,6 +56,18 @@ class Send (Processor):
         gp = params.get('gui_params', {})
         self.gui_params['label_text'] = gp.get("label_text") or self.dest_name
 
+    def save(self): 
+        prms = Processor.save(self)
+        conns = prms['connections']
+        if conns and self.dest_obj: 
+            pruned = [] 
+            for objid, port in conns[0]:
+                if objid != self.dest_obj.obj_id:
+                    pruned.append([objid, port])
+            conns[0] = pruned
+            
+        return prms
+
     def _connect(self, dest_name):
         if self.dest_name == dest_name and self.dest_obj is not None: 
             return 
@@ -69,6 +82,7 @@ class Send (Processor):
         if (obj is not None 
             and ((isinstance(obj, Patch) and self.scope == obj.default_scope) 
                  or obj.scope == self.scope 
+                 or self.dest_name in ("patch", "app")
                  or "." in self.dest_name)):
             self.dest_obj = obj 
             self.dest_obj_owned = False 
@@ -79,7 +93,7 @@ class Send (Processor):
             self.dest_name = self.dest_obj.name
             
         if self.dest_obj and ((self, 0) not in self.dest_obj.connections_in[0]):
-            self.connect(0, self.dest_obj, 0)
+            self.connect(0, self.dest_obj, 0, False)
 
         self.init_args = '"%s"' % self.dest_name 
         self.gui_params["label_text"] = self.dest_name
@@ -109,6 +123,7 @@ class Send (Processor):
 
 class SendSignal (Send):
     doc_tooltip_obj = "Send signals to the specified name"
+    display_type = "sendsignalvia"
     bus_type = "bus~"
 
     def __init__(self, init_type, init_args, patch, scope, name): 
@@ -238,7 +253,7 @@ class Recv (Processor):
             self.init_args = '"%s"' % src_name 
             self.gui_params["label_text"] = src_name
             self.src_name = src_name 
-            self.src_obj.connect(0, self, 0)
+            self.src_obj.connect(0, self, 0, False)
 
             if self.gui_created:
                 MFPApp().gui_command.configure(self.obj_id, self.gui_params)

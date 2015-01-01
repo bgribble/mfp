@@ -111,19 +111,12 @@ def clonescope(self, scopename, num_copies, **kwargs):
                     tobj_newid = obj_idmap.get(tobj.obj_id, tobj)
                     if (newobj, port_num) not in tobj_newid.connections_out[tport]:
                         tobj_newid.connect(tport, newobj, port_num)
-                        if tobj.gui_created:
-                            MFPApp().gui_command.connect(tobj_newid.obj_id, tport, 
-                                                         newobj.obj_id, port_num)
 
             for port_num, port_conn in enumerate(srcobj.connections_out):
                 for tobj, tport in port_conn:
                     tobj_newid = obj_idmap.get(tobj.obj_id, tobj)
                     if (tobj_newid, tport) not in newobj.connections_out[port_num]:
                         newobj.connect(port_num, tobj_newid, tport)
-                        if tobj.gui_created:
-                            MFPApp().gui_command.connect(newobj.obj_id, port_num,
-                                                         tobj_newid.obj_id, tport)
-
 
         # make sure [loadbang] get triggered 
         for phase in (0,1):

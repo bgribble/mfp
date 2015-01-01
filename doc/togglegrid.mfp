@@ -3,15 +3,15 @@
         "display_type": "patch",
         "export_h": 22.0,
         "export_w": 22.0,
-        "export_x": 151.09263610839844,
-        "export_y": 144.12872314453125,
+        "export_x": 169.97003173828125,
+        "export_y": 152.25906372070312,
         "layers": [
             [
                 "Interface",
                 "__patch__"
             ],
             [
-                "Setup",
+                "Main",
                 "__patch__"
             ],
             [
@@ -27,9 +27,185 @@
     "objects": {
         "1": {
             "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "hidden",
+                "initargs": "",
+                "scope": "toggle_001"
+            },
+            "initargs": "",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "toggle_in",
+            "osc_methods": [],
+            "properties": {},
+            "type": "bus"
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "label_text": "patch",
+                "layername": "Main",
+                "no_export": false,
+                "position_x": 95.49053955078125,
+                "position_y": 203.5467529296875,
+                "scope": "__patch__",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"patch\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "11": {
+            "connections": [
                 [
                     [
-                        3,
+                        12,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Toggle",
+                "no_export": false,
+                "position_x": 96.442626953125,
+                "position_y": 96.95013427734375,
+                "scope": "toggle_001",
+                "show_label": true,
+                "update_required": false,
+                "width": 56.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "inlet"
+        },
+        "12": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "sendvia",
+                "height": 35,
+                "is_export": false,
+                "label_text": "toggle_button",
+                "layername": "Toggle",
+                "no_export": false,
+                "position_x": 93.942626953125,
+                "position_y": 144.95013427734375,
+                "scope": "toggle_001",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"toggle_button\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "13": {
+            "connections": [
+                [
+                    [
+                        14,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "recvvia",
+                "height": 37.5,
+                "is_export": false,
+                "label_text": "toggle_out",
+                "layername": "Toggle",
+                "no_export": false,
+                "position_x": 99.68256378173828,
+                "position_y": 198.94398498535156,
+                "scope": "toggle_001",
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"toggle_out\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv"
+        },
+        "14": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Toggle",
+                "no_export": false,
+                "position_x": 102.18256378173828,
+                "position_y": 248.94398498535156,
+                "scope": "toggle_001",
+                "show_label": true,
+                "update_required": false,
+                "width": 67.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet"
+        },
+        "2": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "hidden",
+                "initargs": "",
+                "scope": "toggle_001"
+            },
+            "initargs": "",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "bus_6",
+            "osc_methods": [],
+            "properties": {},
+            "type": "bus"
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        4,
                         0
                     ]
                 ]
@@ -43,50 +219,112 @@
                 "no_export": false,
                 "off_message": false,
                 "on_message": true,
-                "position_x": 151.09263610839844,
-                "position_y": 144.12872314453125,
+                "position_x": 169.97003173828125,
+                "position_y": 152.25906372070312,
+                "scope": "toggle_001",
                 "update_required": true,
                 "width": 20
             },
             "initargs": "False",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "toggle_001",
+            "name": "toggle_button",
             "osc_methods": [],
             "properties": {},
             "type": "var",
             "value": false
         },
-        "10": {
+        "4": {
             "connections": [
                 [
                     [
-                        8,
+                        7,
                         0
                     ]
                 ]
             ],
             "do_onload": true,
             "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
+                "display_type": "sendvia",
+                "height": 35,
                 "is_export": false,
-                "layername": "Toggle",
+                "label_text": "toggle_out",
+                "layername": "Interface",
                 "no_export": false,
-                "position_x": 209.19715881347656,
-                "position_y": 88.98069763183594,
+                "position_x": 168.47003173828125,
+                "position_y": 196.25906372070312,
+                "scope": "toggle_001",
                 "update_required": false,
-                "width": 56.0
+                "width": 20
             },
-            "initargs": "0",
+            "initargs": "\"toggle_out\"",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "processor_003",
+            "name": "sendvia_003",
             "osc_methods": [],
             "properties": {},
-            "type": "inlet"
+            "type": "send"
         },
-        "2": {
+        "5": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "hidden",
+                "initargs": "",
+                "scope": ""
+            },
+            "initargs": "",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "toggle_out",
+            "osc_methods": [],
+            "properties": {},
+            "type": "bus"
+        },
+        "6": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "hidden",
+                "initargs": "",
+                "scope": "__patch__"
+            },
+            "initargs": "",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "toggle_out",
+            "osc_methods": [],
+            "properties": {},
+            "type": "bus"
+        },
+        "7": {
+            "connections": [
+                [
+                    [
+                        13,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "hidden",
+                "initargs": "",
+                "scope": "toggle_001"
+            },
+            "initargs": "",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "toggle_out",
+            "osc_methods": [],
+            "properties": {},
+            "type": "bus"
+        },
+        "8": {
             "connections": [
                 [
                     [
@@ -97,102 +335,31 @@
             ],
             "do_onload": true,
             "gui_params": {
-                "display_type": "recvvia",
-                "height": 37.5,
-                "is_export": false,
-                "layername": "Toggle",
-                "no_export": false,
-                "position_x": 206.64663696289062,
-                "position_y": 188.03070068359375,
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"tgl\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "recvvia_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "recv"
-        },
-        "3": {
-            "connections": [],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "sendvia",
-                "height": 35,
-                "is_export": false,
-                "layername": "Interface",
-                "no_export": false,
-                "position_x": 149.59263610839844,
-                "position_y": 188.12872314453125,
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"tgl\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "sendvia_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "send"
-        },
-        "4": {
-            "connections": [
-                [
-                    [
-                        6,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
                 "display_type": "processor",
                 "height": 25.0,
                 "is_export": false,
-                "layername": "Setup",
+                "layername": "Main",
                 "no_export": false,
-                "position_x": 37.22987365722656,
-                "position_y": 93.97552490234375,
+                "position_x": 97.99053955078125,
+                "position_y": 107.5467529296875,
+                "scope": "__patch__",
+                "show_label": true,
                 "update_required": false,
                 "width": 72.0
             },
             "initargs": null,
             "midi_filters": null,
             "midi_mode": null,
-            "name": "processor_002",
+            "name": "processor_003",
             "osc_methods": [],
             "properties": {},
             "type": "loadbang"
         },
-        "5": {
-            "connections": [],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "sendvia",
-                "height": 35,
-                "is_export": false,
-                "layername": "Setup",
-                "no_export": false,
-                "position_x": 34.72987365722656,
-                "position_y": 189.97552490234375,
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"patch\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "sendvia_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "send"
-        },
-        "6": {
+        "9": {
             "connections": [
                 [
                     [
-                        5,
+                        10,
                         0
                     ]
                 ]
@@ -202,113 +369,43 @@
                 "display_type": "message",
                 "height": 25.0,
                 "is_export": false,
-                "layername": "Setup",
+                "layername": "Main",
                 "no_export": false,
-                "position_x": 37.22987365722656,
-                "position_y": 141.97552490234375,
+                "position_x": 97.99053955078125,
+                "position_y": 155.5467529296875,
+                "scope": "__patch__",
                 "update_required": true,
                 "width": 622.0
             },
             "initargs": "@clonescope('toggle_001', patch.args(0)*patch.args(1), grid=(patch.args(0), patch.args(1)))",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "message_001",
+            "name": "message_003",
             "osc_methods": [],
             "properties": {},
             "type": "message"
-        },
-        "7": {
-            "connections": [
-                [
-                    [
-                        1,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "recvvia",
-                "height": 37.5,
-                "is_export": false,
-                "layername": "Interface",
-                "no_export": false,
-                "position_x": 149.91822814941406,
-                "position_y": 86.9428482055664,
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"tglin\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "recvvia_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "recv"
-        },
-        "8": {
-            "connections": [],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "sendvia",
-                "height": 35,
-                "is_export": false,
-                "layername": "Toggle",
-                "no_export": false,
-                "position_x": 206.69715881347656,
-                "position_y": 136.98069763183594,
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"tglin\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "sendvia_003",
-            "osc_methods": [],
-            "properties": {},
-            "type": "send"
-        },
-        "9": {
-            "connections": [
-                []
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "processor",
-                "height": 25.0,
-                "is_export": false,
-                "layername": "Toggle",
-                "no_export": false,
-                "position_x": 209.14663696289062,
-                "position_y": 238.03070068359375,
-                "update_required": false,
-                "width": 67.0
-            },
-            "initargs": "0",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "outlet"
         }
     },
     "scopes": {
         "__patch__": {
-            "message_001": 6,
+            "message_003": 9,
             "patch": 0,
-            "processor_002": 4,
+            "processor_003": 8,
             "self": 0,
-            "sendvia_002": 5
+            "sendvia_004": 10,
+            "toggle_out": 6,
+            "toggle_out_002": 5
         },
         "toggle_001": {
-            "processor_001": 9,
-            "processor_003": 10,
-            "recvvia_001": 2,
-            "recvvia_002": 7,
-            "sendvia_001": 3,
-            "sendvia_003": 8,
-            "toggle_001": 1
+            "bus_6": 2,
+            "processor_004": 11,
+            "processor_005": 14,
+            "recvvia_001": 13,
+            "sendvia_003": 4,
+            "sendvia_005": 12,
+            "toggle_button": 3,
+            "toggle_in": 1,
+            "toggle_out": 7
         }
     },
     "type": "togglegrid"

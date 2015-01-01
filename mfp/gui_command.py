@@ -154,6 +154,7 @@ class GUICommand (RPCWrapper):
     def _connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI
         from .gui.connection_element import ConnectionElement
+        from .gui.patch_info import PatchInfo
         from mfp import log
 
         obj_1 = MFPGUI().recall(obj_1_id)
@@ -162,6 +163,10 @@ class GUICommand (RPCWrapper):
         if obj_1 is None or obj_2 is None: 
             log.debug("ERROR: connect: obj_1 (id=%s) --> %s, obj_2 (id=%s) --> %s"
                       % (obj_1_id, obj_1, obj_2_id, obj_2))
+            return None
+        elif isinstance(obj_1, PatchInfo) or isinstance(obj_2, PatchInfo):
+            log.debug("Trying to connect a PatchInfo (%s [%s] --> %s [%s])" 
+                      % (obj_1.obj_name, obj_1_id, obj_2.obj_name, obj_2_id))
             return None
 
         c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
