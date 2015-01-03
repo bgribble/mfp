@@ -30,22 +30,22 @@
         "name": "smix_channel",
         "num_inlets": 1,
         "num_outlets": 3,
-        "obj_id": 263,
+        "obj_id": 683,
         "top_level": true
     },
     "hot_inlets": [
         0
     ],
     "objects": {
-        "264": {
+        "684": {
             "connections": [
                 [
                     [
-                        268,
+                        690,
                         0
                     ],
                     [
-                        271,
+                        723,
                         0
                     ]
                 ]
@@ -59,6 +59,7 @@
                 "no_export": false,
                 "position_x": 103.5652084350586,
                 "position_y": 83.20873260498047,
+                "scope": "__patch__",
                 "show_label": true,
                 "update_required": false,
                 "width": 64.0
@@ -71,7 +72,7 @@
             "properties": {},
             "type": "inlet~"
         },
-        "265": {
+        "685": {
             "connections": [
                 []
             ],
@@ -84,6 +85,7 @@
                 "no_export": false,
                 "position_x": 104.7644271850586,
                 "position_y": 49.9058952331543,
+                "scope": "__patch__",
                 "update_required": true,
                 "value": "<small>Signal in</small>",
                 "width": 64.0
@@ -97,12 +99,12 @@
             "type": "text",
             "value": "<small>Signal in</small>"
         },
-        "266": {
+        "686": {
             "connections": [
                 [
                     [
-                        268,
-                        1
+                        728,
+                        0
                     ]
                 ]
             ],
@@ -111,10 +113,12 @@
                 "display_type": "recvvia",
                 "height": 37.5,
                 "is_export": false,
+                "label_text": "gain",
                 "layername": "Pan-Gain",
                 "no_export": false,
-                "position_x": 171.33230590820312,
-                "position_y": 119.81614685058594,
+                "position_x": 180.3241424560547,
+                "position_y": 78.84526062011719,
+                "scope": "__patch__",
                 "update_required": false,
                 "width": 20
             },
@@ -126,11 +130,11 @@
             "properties": {},
             "type": "recv"
         },
-        "267": {
+        "687": {
             "connections": [
                 [
                     [
-                        288,
+                        706,
                         0
                     ]
                 ]
@@ -140,10 +144,12 @@
                 "display_type": "recvvia",
                 "height": 37.5,
                 "is_export": false,
+                "label_text": "pan",
                 "layername": "Pan-Gain",
                 "no_export": false,
                 "position_x": 98.73048400878906,
                 "position_y": 175.57769012451172,
+                "scope": "__patch__",
                 "update_required": false,
                 "width": 20
             },
@@ -155,37 +161,7 @@
             "properties": {},
             "type": "recv"
         },
-        "268": {
-            "connections": [
-                [
-                    [
-                        288,
-                        1
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "processor",
-                "height": 25,
-                "is_export": false,
-                "layername": "Pan-Gain",
-                "no_export": false,
-                "position_x": 148.67083740234375,
-                "position_y": 169.5099639892578,
-                "show_label": true,
-                "update_required": false,
-                "width": 35
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_019",
-            "osc_methods": [],
-            "properties": {},
-            "type": "*~"
-        },
-        "269": {
+        "688": {
             "connections": [
                 []
             ],
@@ -198,6 +174,7 @@
                 "no_export": false,
                 "position_x": 78.7459487915039,
                 "position_y": 297.2287902832031,
+                "scope": "__patch__",
                 "show_label": true,
                 "update_required": false,
                 "width": 75.0
@@ -210,7 +187,7 @@
             "properties": {},
             "type": "outlet~"
         },
-        "270": {
+        "689": {
             "connections": [
                 []
             ],
@@ -223,6 +200,7 @@
                 "no_export": false,
                 "position_x": 167.7459487915039,
                 "position_y": 297.2287902832031,
+                "scope": "__patch__",
                 "show_label": true,
                 "update_required": false,
                 "width": 75.0
@@ -235,17 +213,21 @@
             "properties": {},
             "type": "outlet~"
         },
-        "271": {
-            "connections": [],
+        "690": {
+            "connections": [
+                []
+            ],
             "do_onload": true,
             "gui_params": {
                 "display_type": "sendsignalvia",
                 "height": 37,
                 "is_export": false,
+                "label_text": "signal",
                 "layername": "Pan-Gain",
                 "no_export": false,
                 "position_x": 100.0652084350586,
                 "position_y": 134.20873260498047,
+                "scope": "__patch__",
                 "update_required": false,
                 "width": 22
             },
@@ -257,11 +239,11 @@
             "properties": {},
             "type": "send~"
         },
-        "272": {
+        "691": {
             "connections": [
                 [
                     [
-                        275,
+                        693,
                         0
                     ]
                 ]
@@ -271,10 +253,12 @@
                 "display_type": "recvsignalvia",
                 "height": 39.5,
                 "is_export": false,
+                "label_text": "signal",
                 "layername": "Aux send",
                 "no_export": false,
                 "position_x": 118.7413330078125,
                 "position_y": 58.790130615234375,
+                "scope": "aux_001",
                 "update_required": false,
                 "width": 22
             },
@@ -286,33 +270,11 @@
             "properties": {},
             "type": "recv~"
         },
-        "273": {
+        "692": {
             "connections": [
                 [
                     [
-                        272,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "hidden",
-                "initargs": ""
-            },
-            "initargs": "",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "signal",
-            "osc_methods": [],
-            "properties": {},
-            "type": "bus~"
-        },
-        "274": {
-            "connections": [
-                [
-                    [
-                        275,
+                        693,
                         1
                     ]
                 ]
@@ -322,10 +284,12 @@
                 "display_type": "recvvia",
                 "height": 37.5,
                 "is_export": false,
+                "label_text": "aux_level",
                 "layername": "Aux send",
                 "no_export": false,
                 "position_x": 196.03079223632812,
                 "position_y": 59.75791931152344,
+                "scope": "aux_001",
                 "update_required": false,
                 "width": 20
             },
@@ -337,11 +301,11 @@
             "properties": {},
             "type": "recv"
         },
-        "275": {
+        "693": {
             "connections": [
                 [
                     [
-                        276,
+                        694,
                         0
                     ]
                 ]
@@ -355,6 +319,7 @@
                 "no_export": false,
                 "position_x": 150.98046875,
                 "position_y": 135.5719757080078,
+                "scope": "aux_001",
                 "show_label": true,
                 "update_required": false,
                 "width": 35
@@ -367,7 +332,7 @@
             "properties": {},
             "type": "*~"
         },
-        "276": {
+        "694": {
             "connections": [
                 []
             ],
@@ -380,6 +345,7 @@
                 "no_export": false,
                 "position_x": 150.98046875,
                 "position_y": 211.5719757080078,
+                "scope": "aux_001",
                 "show_label": true,
                 "update_required": false,
                 "width": 75.0
@@ -392,11 +358,11 @@
             "properties": {},
             "type": "outlet~"
         },
-        "277": {
+        "695": {
             "connections": [
                 [
                     [
-                        280,
+                        698,
                         0
                     ]
                 ]
@@ -415,6 +381,7 @@
                 "position_y": 106.87269592285156,
                 "scale_position": 0,
                 "scale_type": 0,
+                "scope": "__patch__",
                 "show_scale": false,
                 "update_required": true,
                 "width": 25,
@@ -429,11 +396,11 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "278": {
+        "696": {
             "connections": [
                 [
                     [
-                        281,
+                        699,
                         0
                     ]
                 ]
@@ -453,6 +420,7 @@
                 "position_y": 279.30316162109375,
                 "scale_position": 0,
                 "scale_type": 0,
+                "scope": "__patch__",
                 "show_scale": false,
                 "update_required": true,
                 "width": 50,
@@ -467,11 +435,11 @@
             "type": "slidemeter",
             "value": 0.5
         },
-        "279": {
+        "697": {
             "connections": [
                 [
                     [
-                        305,
+                        722,
                         0
                     ]
                 ]
@@ -491,6 +459,7 @@
                 "position_y": 102.572021484375,
                 "scale_position": 0,
                 "scale_type": 0,
+                "scope": "aux_001",
                 "show_scale": false,
                 "update_required": true,
                 "width": 40,
@@ -505,17 +474,21 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "280": {
-            "connections": [],
+        "698": {
+            "connections": [
+                []
+            ],
             "do_onload": true,
             "gui_params": {
                 "display_type": "sendvia",
                 "height": 35,
                 "is_export": false,
+                "label_text": "gain",
                 "layername": "Interface",
                 "no_export": false,
                 "position_x": 84.77985382080078,
                 "position_y": 247.37078857421875,
+                "scope": "__patch__",
                 "update_required": false,
                 "width": 20
             },
@@ -527,17 +500,21 @@
             "properties": {},
             "type": "send"
         },
-        "281": {
-            "connections": [],
+        "699": {
+            "connections": [
+                []
+            ],
             "do_onload": true,
             "gui_params": {
                 "display_type": "sendvia",
                 "height": 35,
                 "is_export": false,
+                "label_text": "pan",
                 "layername": "Interface",
                 "no_export": false,
                 "position_x": 84.93791961669922,
                 "position_y": 321.9864501953125,
+                "scope": "__patch__",
                 "update_required": false,
                 "width": 20
             },
@@ -549,7 +526,7 @@
             "properties": {},
             "type": "send"
         },
-        "282": {
+        "700": {
             "connections": [
                 []
             ],
@@ -562,6 +539,7 @@
                 "no_export": false,
                 "position_x": 124.67664337158203,
                 "position_y": 334.1160583496094,
+                "scope": "__patch__",
                 "update_required": true,
                 "value": "<small>PAN</small>",
                 "width": 39.0
@@ -575,7 +553,7 @@
             "type": "text",
             "value": "<small>PAN</small>"
         },
-        "283": {
+        "701": {
             "connections": [
                 []
             ],
@@ -588,6 +566,7 @@
                 "no_export": false,
                 "position_x": 121.67922973632812,
                 "position_y": 260.3414306640625,
+                "scope": "__patch__",
                 "update_required": true,
                 "value": "<small>GAIN</small>",
                 "width": 44.0
@@ -601,7 +580,7 @@
             "type": "text",
             "value": "<small>GAIN</small>"
         },
-        "284": {
+        "702": {
             "connections": [
                 []
             ],
@@ -614,6 +593,7 @@
                 "no_export": false,
                 "position_x": 158.51107788085938,
                 "position_y": 136.59681701660156,
+                "scope": "aux_001",
                 "update_required": true,
                 "value": "<small>AUX 1</small>",
                 "width": 51.0
@@ -627,11 +607,11 @@
             "type": "text",
             "value": "<small>AUX 1</small>"
         },
-        "285": {
+        "703": {
             "connections": [
                 [
                     [
-                        287,
+                        705,
                         0
                     ]
                 ]
@@ -643,8 +623,9 @@
                 "is_export": false,
                 "layername": "Pan-Gain",
                 "no_export": false,
-                "position_x": 251.4425048828125,
-                "position_y": 111.93723678588867,
+                "position_x": 289.4425048828125,
+                "position_y": 192.93723678588867,
+                "scope": "__patch__",
                 "show_label": true,
                 "update_required": false,
                 "width": 72.0
@@ -657,17 +638,21 @@
             "properties": {},
             "type": "loadbang"
         },
-        "286": {
-            "connections": [],
+        "704": {
+            "connections": [
+                []
+            ],
             "do_onload": true,
             "gui_params": {
                 "display_type": "sendvia",
                 "height": 35,
                 "is_export": false,
+                "label_text": "patch",
                 "layername": "Pan-Gain",
                 "no_export": false,
-                "position_x": 247.63140869140625,
-                "position_y": 202.75912475585938,
+                "position_x": 285.63140869140625,
+                "position_y": 283.7591247558594,
+                "scope": "__patch__",
                 "update_required": false,
                 "width": 20
             },
@@ -679,11 +664,11 @@
             "properties": {},
             "type": "send"
         },
-        "287": {
+        "705": {
             "connections": [
                 [
                     [
-                        286,
+                        704,
                         0
                     ]
                 ]
@@ -695,8 +680,9 @@
                 "is_export": false,
                 "layername": "Pan-Gain",
                 "no_export": false,
-                "position_x": 250.47525024414062,
-                "position_y": 160.8643341064453,
+                "position_x": 288.4752502441406,
+                "position_y": 241.8643341064453,
+                "scope": "__patch__",
                 "update_required": true,
                 "width": 350.0
             },
@@ -708,17 +694,17 @@
             "properties": {},
             "type": "message"
         },
-        "288": {
+        "706": {
             "connections": [
                 [
                     [
-                        269,
+                        688,
                         0
                     ]
                 ],
                 [
                     [
-                        270,
+                        689,
                         0
                     ]
                 ]
@@ -732,6 +718,7 @@
                 "no_export": false,
                 "position_x": 100.69917297363281,
                 "position_y": 224.50498962402344,
+                "scope": "__patch__",
                 "show_label": true,
                 "update_required": false,
                 "width": 58.0
@@ -744,11 +731,11 @@
             "properties": {},
             "type": "panner"
         },
-        "299": {
+        "719": {
             "connections": [
                 [
                     [
-                        300,
+                        720,
                         0
                     ]
                 ]
@@ -762,6 +749,7 @@
                 "no_export": false,
                 "position_x": 288.6861572265625,
                 "position_y": 73.82103729248047,
+                "scope": "aux_001",
                 "show_label": true,
                 "update_required": false,
                 "width": 72.0
@@ -774,11 +762,11 @@
             "properties": {},
             "type": "loadbang"
         },
-        "300": {
+        "720": {
             "connections": [
                 [
                     [
-                        301,
+                        721,
                         0
                     ]
                 ]
@@ -792,6 +780,7 @@
                 "no_export": false,
                 "position_x": 288.6861572265625,
                 "position_y": 121.82103729248047,
+                "scope": "aux_001",
                 "update_required": true,
                 "width": 346.0
             },
@@ -803,17 +792,21 @@
             "properties": {},
             "type": "message"
         },
-        "301": {
-            "connections": [],
+        "721": {
+            "connections": [
+                []
+            ],
             "do_onload": true,
             "gui_params": {
                 "display_type": "sendvia",
                 "height": 35,
                 "is_export": false,
+                "label_text": "aux_label",
                 "layername": "Aux send",
                 "no_export": false,
                 "position_x": 286.1861572265625,
                 "position_y": 169.821044921875,
+                "scope": "aux_001",
                 "update_required": false,
                 "width": 20
             },
@@ -825,83 +818,21 @@
             "properties": {},
             "type": "send"
         },
-        "302": {
+        "722": {
             "connections": [
-                [
-                    [
-                        266,
-                        0
-                    ]
-                ]
+                []
             ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "hidden",
-                "initargs": ""
-            },
-            "initargs": "",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "gain",
-            "osc_methods": [],
-            "properties": {},
-            "type": "bus"
-        },
-        "303": {
-            "connections": [
-                [
-                    [
-                        267,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "hidden",
-                "initargs": ""
-            },
-            "initargs": "",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "pan",
-            "osc_methods": [],
-            "properties": {},
-            "type": "bus"
-        },
-        "304": {
-            "connections": [
-                [
-                    [
-                        274,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "display_type": "hidden",
-                "initargs": ""
-            },
-            "initargs": "",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "aux_level",
-            "osc_methods": [],
-            "properties": {},
-            "type": "bus"
-        },
-        "305": {
-            "connections": [],
             "do_onload": true,
             "gui_params": {
                 "display_type": "sendvia",
                 "height": 35,
                 "is_export": false,
+                "label_text": "aux_level",
                 "layername": "Interface",
                 "no_export": false,
                 "position_x": 231.46336364746094,
                 "position_y": 132.95481872558594,
+                "scope": "aux_001",
                 "update_required": false,
                 "width": 20
             },
@@ -912,46 +843,105 @@
             "osc_methods": [],
             "properties": {},
             "type": "send"
+        },
+        "723": {
+            "connections": [
+                [
+                    [
+                        706,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 148.6712646484375,
+                "position_y": 188.49647521972656,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 44.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_019",
+            "osc_methods": [],
+            "properties": {},
+            "type": "*~"
+        },
+        "728": {
+            "connections": [
+                [
+                    [
+                        723,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Pan-Gain",
+                "no_export": false,
+                "position_x": 182.8241424560547,
+                "position_y": 139.8452606201172,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 84.0
+            },
+            "initargs": "100",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_034",
+            "osc_methods": [],
+            "properties": {},
+            "type": "slew~"
         }
     },
     "scopes": {
         "__patch__": {
-            "dial_001": 278,
-            "gain": 302,
-            "message_003": 287,
-            "pan": 303,
-            "patch": 263,
-            "processor_002": 270,
-            "processor_007": 285,
-            "processor_010": 288,
-            "processor_016": 264,
-            "processor_019": 268,
-            "processor_020": 269,
-            "recvvia_001": 266,
-            "recvvia_002": 267,
-            "self": 263,
-            "sendsignalvia_001": 271,
-            "sendvia_001": 280,
-            "sendvia_002": 281,
-            "sendvia_003": 286,
-            "signal": 273,
-            "slidemeter_001": 277,
-            "text_001": 265,
-            "text_004": 282,
-            "text_005": 283
+            "dial_001": 696,
+            "message_003": 705,
+            "patch": 683,
+            "processor_002": 689,
+            "processor_007": 703,
+            "processor_010": 706,
+            "processor_016": 684,
+            "processor_019": 723,
+            "processor_020": 688,
+            "processor_034": 728,
+            "recvvia_001": 686,
+            "recvvia_002": 687,
+            "self": 683,
+            "sendsignalvia_001": 690,
+            "sendvia_001": 698,
+            "sendvia_002": 699,
+            "sendvia_003": 704,
+            "slidemeter_001": 695,
+            "text_001": 685,
+            "text_004": 700,
+            "text_005": 701
         },
         "aux_001": {
-            "aux_dial": 279,
-            "aux_label": 284,
-            "aux_level": 304,
-            "message_002": 300,
-            "processor_009": 299,
-            "processor_024": 275,
-            "processor_025": 276,
-            "recvsignalvia_002": 272,
-            "recvvia_003": 274,
-            "sendvia_004": 301,
-            "sendvia_008": 305
+            "aux_dial": 697,
+            "aux_label": 702,
+            "message_002": 720,
+            "processor_009": 719,
+            "processor_024": 693,
+            "processor_025": 694,
+            "recvsignalvia_002": 691,
+            "recvvia_003": 692,
+            "sendvia_004": 721,
+            "sendvia_008": 722
         }
     },
     "type": "smix_channel"

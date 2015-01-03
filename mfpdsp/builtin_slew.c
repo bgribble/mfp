@@ -2,10 +2,10 @@
 #include "mfp_dsp.h" 
 
 typedef struct { 
-    double rise_rate;
-    double fall_rate; 
+    double rise_time;
+    double fall_time; 
     double const_signal;
-    mfp_sample last_val; 
+    double last_val; 
 } builtin_slew_data;
 
 static int 
@@ -14,10 +14,12 @@ process(mfp_processor * proc)
     builtin_slew_data * pdata = (builtin_slew_data *)proc->data; 
     mfp_sample * in_sample = proc->inlet_buf[0]->data;
     mfp_sample * out_sample = proc->outlet_buf[0]->data;
-    mfp_sample before = pdata->last_val;
-    mfp_sample after; 
+    double before = pdata->last_val;
+    double after; 
+    double delta;
+    double rise_rate = .001 * pdata->rise_time * proc->context->samplerate;
+    double fall_rate = .001 * pdata->fall_time * proc->context->samplerate;
     int use_const = 1;
-    float delta;
 
     if (mfp_proc_has_input(proc, 0)) {
         use_const = 0;
@@ -25,20 +27,21 @@ process(mfp_processor * proc)
 
     for (int scount=0; scount < proc->outlet_buf[0]->blocksize; scount++) {
         if (use_const) {
-            after = pdata->const_signal;
+            after = (double)pdata->const_signal;
         }
         else {
-            after = *in_sample++;
+            after = (double)*in_sample++;
         }
         delta = after - before; 
-        if ((delta > 0) && (delta > pdata->rise_rate)) { 
-            delta = pdata->rise_rate;
+        if (delta > 0) {
+            delta = delta / rise_rate;
         }
-        if ((delta < 0) && (delta < (-1.0*pdata->fall_rate))) { 
-            delta = -1.0 * pdata->fall_rate;
+        else if (delta < 0) { 
+            delta = delta / fall_rate;
         }
-        after = (float)(before + delta); 
-        *out_sample++ = after;
+
+        after = (before + delta); 
+        *out_sample++ = (mfp_sample)after;
         before = after;
     }
     pdata->last_val = after;
@@ -49,8 +52,8 @@ init(mfp_processor * proc)
 {
     builtin_slew_data * p = g_malloc(sizeof(builtin_slew_data));
     proc->data = p; 
-    p->rise_rate = 10000.0;
-    p->fall_rate = 10000.0;
+    p->rise_time = 100.0;
+    p->fall_time = 100.0;
     p->last_val = 0.0;
     p->const_signal = 0.0;
 }
@@ -78,10 +81,10 @@ config(mfp_processor * proc)
         p->const_signal = (double)(*(float *)const_ptr);
     }
     if (rise_ptr != NULL) {
-        p->rise_rate = (double)(*(float *)rise_ptr) * proc->context->samplerate / 1000.0;
+        p->rise_time = (double)(*(float *)rise_ptr);
     }
     if (fall_ptr != NULL) {
-        p->fall_rate = (double)(*(float *)fall_ptr) * proc->context->samplerate / 1000.0;
+        p->fall_time = (double)(*(float *)fall_ptr);
     }
 
     return 1;
