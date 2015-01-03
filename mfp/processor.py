@@ -30,6 +30,7 @@ class Processor (object):
     display_type = 'processor'
     save_to_patch = True 
     hot_inlets = [0]
+    do_onload = True 
 
     paused = False 
 
@@ -67,7 +68,6 @@ class Processor (object):
         self.trigger_lock = threading.Lock()
 
         self.gui_created = False
-        self.do_onload = True 
 
         # gui_params are passed back and forth to the UI process
         # if previously-initialized by the child class, leave alone
@@ -424,7 +424,6 @@ class Processor (object):
     def delete(self):
         from .mfp_app import MFPApp
         from .patch import Patch
-
         if hasattr(self, "patch") and self.patch is not None:
             self.patch.unbind(self.name, self.scope)
             self.patch.remove(self)
@@ -507,30 +506,34 @@ class Processor (object):
 
         # make sure this is a possibility 
         if not isinstance(target, Processor):
-            log.debug("Error: Can't connect '%s' (obj_id %d) to %s inlet %d"
+            log.warning("Error: Can't connect '%s' (obj_id %d) to %s inlet %d"
                       % (self.name, self.obj_id, target, inlet))
             return False 
 
         if outlet > len(self.outlets):
-            log.debug("Error: Can't connect '%s' (obj_id %d) outlet %d (only %d outlets)"
+            log.warning("Error: Can't connect '%s' (obj_id %d) outlet %d (only %d outlets)"
                       % (self.name, self.obj_id, outlet, len(self.outlets)))
             return False 
         
         if inlet > len(target.inlets):
-            log.debug("Error: Can't connect to '%s' (obj_id %d) inlet %d (only %d inlets)"
+            log.warning("Error: Can't connect to '%s' (obj_id %d) inlet %d (only %d inlets)"
                       % (target.name, target.obj_id, inlet, len(target.inlets)))
             return False 
 
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             if inlet not in target.dsp_inlets: 
-                log.debug("Error: Can't connect DSP outlet %s of '%s' to non-DSP inlet %s of '%s'" 
+                log.warning("Error: Can't connect DSP outlet %s of '%s' to non-DSP inlet %s of '%s'" 
                           % (outlet, self.name, inlet, target.name))
                 return False 
 
             out_obj, out_outlet = self.dsp_outlet(outlet)
             in_obj, in_inlet = target.dsp_inlet(inlet)
-            out_obj.connect(out_outlet, in_obj.obj_id, in_inlet)
+            if out_obj and in_obj: 
+                out_obj.connect(out_outlet, in_obj.obj_id, in_inlet)
+            else: 
+                log.warning("Trying to find DSP objects, failed", 
+                            inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
 
         existing = self.connections_out[outlet]
         if (target, inlet) not in existing:
@@ -669,10 +672,7 @@ class Processor (object):
 
     def method(self, message, inlet):
         '''Default method handler ignores which inlet the message was received on'''
-        rv = message.call(self)
-        if rv is not None:
-            log.debug("method: '%s' on '%s' (id=%s) returns '%s'"
-                      % (message.method, self.name, self.obj_id, rv))
+        message.call(self)
         self.inlets[inlet] = Uninit
 
     def reset_counts(self):

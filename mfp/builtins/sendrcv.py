@@ -12,12 +12,12 @@ from ..mfp_app import MFPApp
 from ..patch import Patch
 from .. import Uninit
 
+from mfp import log 
 class Send (Processor):
     display_type = "sendvia" 
     doc_tooltip_obj = "Send messages to a named receiver (create with 'send via' GUI object)"
     doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
 
-    do_onload = False 
     bus_type = "bus"
     
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -38,7 +38,6 @@ class Send (Processor):
             self.dest_name = initargs[0]
 
         self.gui_params["label_text"] = self.dest_name
-        self._connect(self.dest_name)
 
     def method(self, message, inlet=0):
         if inlet == 0:
@@ -48,8 +47,7 @@ class Send (Processor):
             message.call(self)
 
     def onload(self, phase):
-        if phase == 1:
-            self._connect(self.dest_name)
+        self._connect(self.dest_name)
 
     def load(self, params):
         Processor.load(self, params)
@@ -148,22 +146,12 @@ class SendSignal (Send):
             self.dest_name = initargs[0]
 
         self.gui_params["label_text"] = self.dest_name
-        self._connect(self.dest_name)
 
-    def delete(self):
-        if self.dest_obj is not None:
-            if isinstance(self.dest_obj, Patch): 
-                dest_obj = self.dest_obj.inlet_objects[self.dest_inlet] 
-                dest_inlet = 0  
-            else:
-                dest_obj = self.dest_obj
-                dest_inlet = self.dest_obj.dsp_inlets.index(self.dest_inlet)
-            self.dsp_obj.disconnect(0, dest_obj.obj_id, dest_inlet)
-        Processor.delete(self)
 
 class MessageBus (Processor): 
     display_type = "hidden"
     do_onload = False 
+    save_to_patch = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
@@ -182,6 +170,7 @@ class MessageBus (Processor):
 class SignalBus (Processor): 
     display_type = "hidden"
     do_onload = False 
+    save_to_patch = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
@@ -191,8 +180,6 @@ class SignalBus (Processor):
 
     def trigger(self):
         self.outlets[0] = self.inlets[0]
-
-
 
 class Recv (Processor):
     doc_tooltip_obj = "Receive messages to the specified name" 
@@ -236,7 +223,7 @@ class Recv (Processor):
             time.sleep(0.25)
 
     def delete(self):
-        self.monitor_thread.finish()
+        self.monitor_thread.join_req = True
         Processor.delete(self)
 
     def method(self, message, inlet):

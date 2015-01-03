@@ -153,7 +153,8 @@ class RPCHost (QuittableThread):
                 if self.join_req: 
                     return False 
                 elif timeout is not None and datetime.datetime.now() > endtime: 
-                    print "RPCHost.wait(): Request timed out after %s sec -- %s" % (timeout, req)
+                    log.warning("rpc_host: Request timed out after %s sec -- %s" %
+                                (timeout, req))
                     raise Exception()
             if req.state == Request.RPC_ERROR: 
                 raise RPCHost.RPCError()

@@ -13,7 +13,7 @@ from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit, Unbound 
 from mfp import log
-
+from .utils import profile 
 
 class Patch(Processor):
 
@@ -347,7 +347,8 @@ class Patch(Processor):
             return True 
 
         for oid, obj in self.objects.items():
-            obj.delete_gui()
+            obj.gui_created = False 
+            #obj.delete_gui()
 
         Processor.delete_gui(self)
         return True 
@@ -475,16 +476,19 @@ class Patch(Processor):
 
     def delete(self):
         from .mfp_app import MFPApp
-        for oid, obj in self.objects.items():
-            if obj.gui_created:
-                obj.delete_gui()
-            obj.delete()
+
         if self.gui_created: 
             self.delete_gui()
-        if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:
-            del MFPApp().patches[self.name]
+
         Processor.delete(self)
 
+        # first pass: everything but inlets/outlets 
+        to_delete = self.objects.values()
+        for obj in to_delete:
+            obj.delete()
+
+        if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:
+            del MFPApp().patches[self.name]
 
 # load extension methods
 import patch_json

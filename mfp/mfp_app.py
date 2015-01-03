@@ -227,6 +227,7 @@ class MFPApp (Singleton):
                     name = jobj.get("gui_params", {}).get("name")
                     patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
                     self.patches[patch.name] = patch 
+                    # FIXME -- need to call onload
                     patch.json_deserialize(jdata)
                     patch.create_gui()
 

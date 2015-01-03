@@ -91,6 +91,9 @@ def json_deserialize(self, json_data):
     if hot is not None:
         self.hot_inlets = hot
 
+    for oid, obj in self.objects.items():
+        obj.onload(-1) 
+
 @extends(Patch)
 def json_unpack_connections(self, data, idmap):
     from .mfp_app import MFPApp

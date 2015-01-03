@@ -85,11 +85,18 @@ def profile(func):
     '''
 
     def wrapper(*args, **kwargs):
+        if not hasattr(func, 'profinfo'):
+            setattr(func, 'profinfo', cProfile.Profile())
+
+        p = getattr(func, 'profinfo')
+
         # Name the data file sensibly
+        p.enable()
+        retval = func(*args, **kwargs)
+        p.disable()
+
         datafn = func.__name__ + ".profile"
-        prof = cProfile.Profile()
-        retval = prof.runcall(func, *args, **kwargs)
-        prof.dump_stats(datafn)
+        p.dump_stats(datafn)
         return retval
 
     return wrapper
