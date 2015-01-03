@@ -29,6 +29,9 @@ class UninitType (Singleton):
     def __pow__(self, other):
         return self 
 
+    def __nonzero__ (self):
+        return False 
+
     @classmethod
     def load(klass, objdict):
         return Uninit
