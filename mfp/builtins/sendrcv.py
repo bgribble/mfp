@@ -233,6 +233,11 @@ class Recv (Processor):
             self.inlets[inlet] = Uninit
             message.call(self)
 
+    def load(self, params):
+        Processor.load(self, params)
+        gp = params.get('gui_params', {})
+        self.gui_params['label_text'] = gp.get("label_text") or self.src_name
+
     def _connect(self, src_name):
         src_obj = MFPApp().resolve(src_name, self, True)
         if src_obj:
