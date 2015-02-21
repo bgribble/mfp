@@ -22,7 +22,7 @@ class Snap(Processor):
 
         initargs, kwargs = self.parse_args(init_args)
         if len(initargs):
-            self.retrigger = initargs[0]
+            self.retrigger = max(initargs[0], 1.0)
         else:
             self.retrigger = 0
 

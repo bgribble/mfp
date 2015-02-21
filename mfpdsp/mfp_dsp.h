@@ -170,7 +170,7 @@ typedef struct mfp_context_struct {
 #define MFP_EXEC_NAME "mfp"
 #define MFP_EXEC_SHELLMAX 2048
 #define MFP_MAX_MSGSIZE 2048 
-#define MFP_NUM_BUFFERS 256
+#define MFP_NUM_BUFFERS 8192
 
 /* Logging helpers */ 
 #define mfp_log_info(...) _mfp_log("INFO", __FILE__, __LINE__, __VA_ARGS__) 
