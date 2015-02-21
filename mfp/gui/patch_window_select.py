@@ -273,6 +273,8 @@ def show_selection_box(self, x0, y0, x1, y1):
 
     enclosed = [] 
     for obj in self.selected_layer.objects: 
+        if obj.parent_id:
+            continue
         if boxes_overlap((x0, y0, x1, y1),
                          (obj.position_x, obj.position_y, 
                           obj.position_x + obj.width, obj.position_y + obj.height)):
