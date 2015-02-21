@@ -308,6 +308,7 @@ class RPCHost (QuittableThread):
             req.result = (True, None)
         elif method == 'call':
             obj = RPCWrapper.rpcobj.get(rpcid)
+
             try:
                 retval = obj.call_locally(rpcdata)
                 req.result = (RPCWrapper.METHOD_OK, retval)

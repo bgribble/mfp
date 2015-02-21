@@ -23,7 +23,7 @@ process(mfp_processor * proc)
             proc->inlet_buf[0], proc->inlet_buf[0]->blocksize);
 
     /* iterate */ 
-    for (;scount < proc->inlet_buf[0]->blocksize; scount++) {
+    for (int scount = 0; scount < proc->inlet_buf[0]->blocksize; scount++) {
         if(pdata->triggered == 1) {
             mfp_dsp_send_response_float(proc, 0, proc->inlet_buf[0]->data[scount]);
             pdata->triggered = 0;

@@ -47,6 +47,12 @@ class MFPCommand(RPCWrapper):
             return obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
         else:
             return None 
+    @rpcwrap
+    def dsp_response(self, obj_id, resp_type, resp_value):
+        from .mfp_app import MFPApp
+        obj = MFPApp().recall(obj_id)
+        if isinstance(obj, Processor): 
+            obj.send((resp_type, resp_value), -1)
 
     @rpcwrap
     def send_bang(self, obj_id, port):

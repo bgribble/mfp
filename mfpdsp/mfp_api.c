@@ -127,10 +127,10 @@ mfp_api_dsp_response(int proc_id, char * resp, int resp_type, char * msgbuf, int
 {
     const char method[] = "call";
     const char params[] = "{ \"func\": \"dsp_response\", \"rpcid\": %d, "
-        "\"args\": [ %d, %s ], \"kwargs\": {} }";
+        "\"args\": [ %d, %d, %s ], \"kwargs\": {} }";
     char outbuf[MFP_MAX_MSGSIZE];
 
-    snprintf(outbuf, MFP_MAX_MSGSIZE, params, proc_id, resp_type, resp);
+    snprintf(outbuf, MFP_MAX_MSGSIZE, params, api_rpcid, proc_id, resp_type, resp);
     int request_id = mfp_rpc_request(method, outbuf, NULL, NULL, msgbuf, msglen); 
     return request_id;
 }

@@ -30,6 +30,9 @@ class Snap(Processor):
         self.dsp_init("snap~")
         self.dsp_setparam("retrigger", self.retrigger)
 
+        if (self.retrigger): 
+            self.dsp_setparam("trigger", 1);
+
     def trigger(self):
         if isinstance(self.inlets[1], (float, int)):
             self.retrigger = float(self.inlets[1])
@@ -54,7 +57,6 @@ class Snap(Processor):
 
     def dsp_response(self, resp_type, resp_value):
         self.outlets[0] = resp_value
-
 
 def register():
     MFPApp().register("snap~", Snap)
