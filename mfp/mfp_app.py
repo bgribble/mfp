@@ -566,6 +566,7 @@ class MFPApp (Singleton):
         from .mfp_main import version 
         toplevel = {} 
         objects = {} 
+        scopes = {}
 
         free_conn_in = [] 
         free_conn_out = [] 
@@ -575,6 +576,8 @@ class MFPApp (Singleton):
             srcobj = self.recall(o)
 
             objects[srcobj.obj_id] = srcobj.save()
+            objscope = scopes.setdefault(srcobj.scope.name, {})
+            objscope[srcobj.name] = srcobj.obj_id 
 
             for port_num, port_conn in enumerate(srcobj.connections_in):
                 for tobj, tport in port_conn:
@@ -592,6 +595,8 @@ class MFPApp (Singleton):
         toplevel['pointer'] = pointer_pos
         toplevel['objects'] = objects 
         toplevel['mfp_version'] = version()
+        toplevel['scopes'] = scopes
+
         js = json.dumps(toplevel, indent=4, cls=ExtendedEncoder)
         return js 
 

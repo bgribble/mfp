@@ -9,6 +9,7 @@ Copyright (c) 2012-2013 Bill Gribble <grib@billgribble.com>
 from ..utils import extends
 from .patch_window import PatchWindow
 from .patch_element import PatchElement
+from .patch_info import PatchInfo
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
 from ..gui_main import MFPGUI
@@ -325,7 +326,8 @@ def clipboard_paste(self, pointer_pos=None):
             obj = MFPGUI().recall(o)
             if obj is None:
                 return True 
-            obj.move_to_layer(self.selected_layer)
+            if not isinstance(obj, PatchInfo):
+                obj.move_to_layer(self.selected_layer)
             if obj not in self.selected: 
                 self.select(MFPGUI().recall(o))
         return False 
