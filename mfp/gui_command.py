@@ -168,6 +168,10 @@ class GUICommand (RPCWrapper):
             log.debug("Trying to connect a PatchInfo (%s [%s] --> %s [%s])" 
                       % (obj_1.obj_name, obj_1_id, obj_2.obj_name, obj_2_id))
             return None
+        
+        for conn in obj_1.connections_out: 
+            if conn.obj_2 == obj_2 and conn.port_2 == obj_2_port:
+                return 
 
         c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
         MFPGUI().appwin.register(c)
