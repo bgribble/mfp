@@ -146,6 +146,11 @@ class Processor (object):
             if details: 
                 # name and ID 
                 lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
+                scopename = ('' if self.scope == self.patch.default_scope 
+                             else self.scope.name + '.')
+                scopedname = '%s%s' % (scopename, self.name)
+
+                lines.append('      <b>Path:</b> %s.%s' % (self.patch.name, scopedname))
                 lines.append('          <b>Messages in:</b> %s, <b>Messages out:</b> %s'
                              % (self.count_in, self.count_out))
                 lines.append('          <b>Times triggered:</b> %s, <b>Errors:</b> %s'

@@ -566,7 +566,7 @@ class MFPApp (Singleton):
         from .mfp_main import version 
         toplevel = {} 
         objects = {} 
-        scopes = {}
+        scopes = { '__patch__': {}}
 
         free_conn_in = [] 
         free_conn_out = [] 

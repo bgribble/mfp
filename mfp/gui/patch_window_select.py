@@ -13,7 +13,7 @@ from .patch_info import PatchInfo
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
 from ..gui_main import MFPGUI
-
+from mfp import log 
 from gi.repository import Gtk, Gdk
 
 @extends(PatchWindow)
@@ -328,8 +328,8 @@ def clipboard_paste(self, pointer_pos=None):
                 return True 
             if not isinstance(obj, PatchInfo):
                 obj.move_to_layer(self.selected_layer)
-            if obj not in self.selected: 
-                self.select(MFPGUI().recall(o))
+                if obj not in self.selected: 
+                    self.select(MFPGUI().recall(o))
         return False 
 
     if newobj is not None:
