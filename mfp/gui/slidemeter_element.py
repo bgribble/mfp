@@ -202,13 +202,13 @@ class SlideMeterElement (PatchElement):
 
     def pixpos2value(self, xpos, ypos):
         if self.orientation == self.VERTICAL:
-            delta = self.hot_y_max - ypos    
+            delta = ypos - self.position_y - self.hot_y_min
             total = self.hot_y_max - self.hot_y_min
         else: 
-            delta = xpos - self.hot_x_min
+            delta = self.hot_x_max - (xpos - self.position_x - self.hot_x_min)
             total = self.hot_x_max - self.hot_x_min
 
-        rv = (float(delta) / total) * (self.max_value - self.min_value)
+        rv = (self.max_value - (float(delta) / total) * (self.max_value - self.min_value))
         return rv
 
     def pixdelta2value(self, dx, dy):
