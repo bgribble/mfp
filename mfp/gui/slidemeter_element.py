@@ -200,12 +200,15 @@ class SlideMeterElement (PatchElement):
         else:
             return False
 
-    def pixpos2value(self, xpos, ypos):
+    def pixpos2value(self, x, y):
+        orig_x, orig_y = self.get_stage_position()
+        x -= orig_x
+        y -= orig_y
         if self.orientation == self.VERTICAL:
-            delta = ypos - self.position_y - self.hot_y_min
+            delta = y - self.hot_y_min
             total = self.hot_y_max - self.hot_y_min
         else: 
-            delta = self.hot_x_max - (xpos - self.position_x - self.hot_x_min)
+            delta = self.hot_x_max - (x - self.hot_x_min)
             total = self.hot_x_max - self.hot_x_min
 
         rv = (self.max_value - (float(delta) / total) * (self.max_value - self.min_value))
