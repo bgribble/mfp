@@ -132,6 +132,7 @@ class PatchWindow(object):
         self.stage.connect('enter-event', handler)
         self.stage.connect('leave-event', handler)
         self.stage.connect('scroll-event', grab_handler)
+        self.embed.connect('size-allocate', self._resize_cb)
 
         # set initial major mode
         self.input_mgr.global_mode = GlobalMode(self)
@@ -148,6 +149,17 @@ class PatchWindow(object):
         # show keybindings
         self.display_bindings()
 
+    def _resize_cb(self, widget, rect):
+        if self.hud_mode_txt: 
+            self.hud_mode_txt.set_position(self.stage.get_width()-80,
+                                           self.stage.get_height()-25)
+
+        if self.hud_prompt:
+            self.hud_prompt.set_position(10, self.stage.get_height() - 25)
+
+        if self.hud_prompt_input:
+            self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
+                                               self.stage.get_height() - 25)
     def load_start(self):
         self.load_in_progress = True 
         log.debug("Load of GUI starting")
@@ -461,8 +473,6 @@ class PatchWindow(object):
             self.hud_prompt.set_position(10, self.stage.get_height() - 25)
             self.hud_prompt.set_property("opacity", 255)
             self.stage.add_actor(self.hud_prompt_input)
-            self.hud_prompt.set_position(10, self.stage.get_height() - 25)
-            self.hud_prompt.set_property("opacity", 255)
         else:
             self.hud_prompt.show()
             self.hud_prompt_input.show()
