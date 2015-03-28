@@ -9,6 +9,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from ..patch_element import PatchElement
 from ..connection_element import ConnectionElement
 from ..input_mode import InputMode
+from .connection import ConnectionMode
 from mfp import log
 
 
@@ -24,6 +25,7 @@ class AutoplaceMode (InputMode):
 
     def __init__(self, window, callback=None, initially_below=True):
         self.window = window
+        self.manager = window.input_mgr
         self.callback = callback
         self.key_widget = None
         self.layer = None
@@ -42,6 +44,17 @@ class AutoplaceMode (InputMode):
             self.layer = self.key_widget.layer
         else:
             self.layer = window.active_layer()
+
+        cm = [ m for m in self.manager.minor_modes if type(m) is ConnectionMode ]
+        for c in cm:
+            if c.source_obj == self.key_widget: 
+                initially_below = True 
+                self.placement = c.source_port
+                break
+            elif c.dest_obj == self.key_widget:
+                initially_below = False 
+                self.placement = c.dest_port
+                break
 
         if initially_below:
             self.autoplace_below()
