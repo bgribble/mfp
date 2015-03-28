@@ -74,9 +74,13 @@ class InputMode (object):
 
     def enable(self):
         self.enabled = True 
+        for ext in self.extensions: 
+            ext.enable()
 
     def disable(self):
         self.enabled = False 
+        for ext in self.extensions: 
+            ext.disable()
 
     def __repr__(self):
         return "<InputMode %s>" % self.description

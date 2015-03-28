@@ -226,6 +226,11 @@ class TransientMessageElement (MessageElement):
 
         return True
 
+    def end_edit(self): 
+        PatchElement.end_edit(self)
+        if self.obj_state == self.OBJ_COMPLETE: 
+            self.delete()
+
     def label_edit_start(self):
         self.label.set_text(self.message_text)
         self.label.set_selection(0, len(self.message_text))
@@ -240,6 +245,7 @@ class TransientMessageElement (MessageElement):
                                                self.message_text)
         for to in self.target_obj:
             self.stage.select(to)
+        self.message_text = None 
         self.delete()
 
     def make_edit_mode(self):

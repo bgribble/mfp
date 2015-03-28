@@ -29,5 +29,9 @@ class TransientMessageEditMode (InputMode):
         self.bind("C-7", lambda: self.message.set_port(7), "Send to inlet 7")
         self.bind("C-8", lambda: self.message.set_port(8), "Send to inlet 8")
         self.bind("C-9", lambda: self.message.set_port(9), "Send to inlet 9")
+        self.bind("ESC", self.cancel, "Cancel message")
 
         self.extend(LabelEditMode(window, message, label))
+
+    def cancel(self):
+        self.message.label_edit_finish(self.label, None) 

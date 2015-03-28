@@ -87,7 +87,6 @@ class LabelEditMode (InputMode):
     def disable(self):
         self.end_editing()
         self.update_label(raw=False)
-        pass
 
     def start_editing(self):
         def focus_out(*args): 
