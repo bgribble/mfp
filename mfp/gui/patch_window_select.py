@@ -36,7 +36,6 @@ def patch_select_next(self):
 
 @extends(PatchWindow)
 def patch_close(self):
-    from mfp import log 
     p = self.selected_patch
     if p and p.deletable: 
         self.patch_select_next() 

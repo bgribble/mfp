@@ -72,6 +72,7 @@ class MFPGUI (Singleton):
         GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
 
     def clutter_proc(self):
+        
         try:
             from gi.repository import Clutter, GObject, Gtk, GtkClutter
 

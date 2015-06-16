@@ -4,7 +4,7 @@ patch_window.py
 The main MFP window and associated code
 '''
 
-from gi.repository import Gtk, Clutter, GtkClutter, Pango
+from gi.repository import Gtk, Gdk, Clutter, GtkClutter, Pango
 
 from mfp import MFPGUI
 from mfp import log
@@ -18,6 +18,8 @@ from .colordb import ColorDB
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
+from .key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT 
+
 import pkgutil
 
 class PatchWindow(object):
@@ -51,6 +53,7 @@ class PatchWindow(object):
         self.hud_banner_text = None 
         self.hud_banner_anim = None 
         self.hud_prompt = None 
+        self.hud_prompt_input = None
         self.hud_prompt_mgr = Prompter(self)
         self.hud_mode_txt = None 
 
@@ -106,9 +109,11 @@ class PatchWindow(object):
     def init_input(self):
         def grab_handler(stage, event):
             try: 
+                r = self.input_mgr.handle_event(stage, event)
                 if not self.embed.has_focus():
-                    self.embed.grab_focus()
-                return self.input_mgr.handle_event(stage, event)
+                    log.debug("grab_handler: lost focus")
+                    log.debug("keyval was", event.keyval)
+                return r 
             except Exception, e:
                 import traceback 
                 log.error("Error handling UI event", event) 
@@ -119,6 +124,17 @@ class PatchWindow(object):
         def handler(stage, event):
             return self.input_mgr.handle_event(stage, event)
 
+        def steal_focuskeys(target, event):
+            badkeys = [ KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT ]
+            if isinstance(event, Gdk.EventKey) and event.keyval in badkeys:
+                e = Clutter.KeyEvent()
+                e.keyval = event.keyval
+                e.type = Clutter.EventType.KEY_PRESS
+                
+                return self.input_mgr.handle_event(self.stage, e)
+            else: 
+                return False
+
         self.embed.set_can_focus(True)
         self.embed.grab_focus()
 
@@ -126,6 +142,7 @@ class PatchWindow(object):
         self.stage.connect('button-press-event', grab_handler)
         self.stage.connect('button-release-event', grab_handler)
         self.stage.connect('key-press-event', grab_handler)
+        self.window.connect('key-press-event', steal_focuskeys)
         self.stage.connect('key-release-event', grab_handler)
         self.stage.connect('destroy', self.quit)
         self.stage.connect('motion-event', handler)

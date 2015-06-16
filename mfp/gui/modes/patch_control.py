@@ -14,9 +14,9 @@ class PatchControlMode (InputMode):
         InputMode.__init__(self, "Operate patch", "Operate")
         
         self.bind("C- ", self.window.edit_major_mode, "Enter edit mode")
-        self.bind("TAB", self.window.select_next, "Select next element")
-        self.bind("S-TAB", self.window.select_prev, "Select previous element")
-        self.bind("C-TAB", self.window.select_mru, "Select most-recent element")
+        self.bind("TAB", self.select_next, "Select next element")
+        self.bind("S-TAB", self.select_prev, "Select previous element")
+        self.bind("C-TAB", self.select_mru, "Select most-recent element")
 
         self.window.add_callback("select", self.begin_control)
         self.window.add_callback("unselect", self.end_control)
@@ -39,3 +39,14 @@ class PatchControlMode (InputMode):
         if obj is not None:
             obj.end_control()
 
+    def select_next(self):
+        self.window.select_next()
+        return True
+
+    def select_prev(self):
+        self.window.select_prev()
+        return True
+
+    def select_mru(self):
+        self.window.select_mru()
+        return True
