@@ -12,6 +12,7 @@ from input_mode import InputMode
 from key_sequencer import KeySequencer
 from ..utils import QuittableThread
 from ..gui_main import MFPGUI
+from mfp import log 
 
 class InputManager (object):
     class InputNeedsRequeue (Exception):
@@ -128,7 +129,8 @@ class InputManager (object):
         from gi.repository import Clutter
         keysym = None
         if event.type in (
-            Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE, Clutter.EventType.BUTTON_PRESS,
+                Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE, 
+                Clutter.EventType.BUTTON_PRESS,
                 Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL):
             self.keyseq.process(event)
             if len(self.keyseq.sequences):
@@ -151,7 +153,7 @@ class InputManager (object):
             if (self.pointer_leave_time is not None 
                 and (now - self.pointer_leave_time) > timedelta(milliseconds=100)):
                 self.keyseq.mod_keys = set()
-                self.window.embed.grab_focus()
+                self.window.grab_focus()
 
             if src and self.window.object_visible(src):
                 self.pointer_obj = src
@@ -165,6 +167,7 @@ class InputManager (object):
                 self.pointer_obj = None
                 self.pointer_obj_time = None 
         else:
+            log.debug("event type not matched:", event.type)
             return False
 
         retry_count = 0

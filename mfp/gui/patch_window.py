@@ -4,7 +4,7 @@ patch_window.py
 The main MFP window and associated code
 '''
 
-from gi.repository import Gtk, Gdk, Clutter, GtkClutter, Pango
+from gi.repository import Gtk, Gdk, GObject, Clutter, GtkClutter, Pango
 
 from mfp import MFPGUI
 from mfp import log
@@ -106,13 +106,23 @@ class PatchWindow(object):
         # set up key and mouse handling
         self.init_input()
 
+    def grab_focus(self):
+        def cb(*args): 
+            self.embed.grab_focus()
+        GObject.timeout_add(10, cb)
+
     def init_input(self):
         def grab_handler(stage, event):
             try: 
                 r = self.input_mgr.handle_event(stage, event)
                 if not self.embed.has_focus():
-                    log.debug("grab_handler: lost focus")
-                    log.debug("keyval was", event.keyval)
+                    log.debug("event handler: do not have focus")
+                    if hasattr(event, 'keyval'):
+                        log.debug("keyval was", event.keyval)
+                    else: 
+                        log.debug("event was:", event.type)
+                    self.grab_focus()
+                    return False 
                 return r 
             except Exception, e:
                 import traceback 
@@ -135,14 +145,14 @@ class PatchWindow(object):
             else: 
                 return False
 
-        self.embed.set_can_focus(True)
-        self.embed.grab_focus()
+        self.grab_focus()
 
         # hook up signals
+        self.window.connect('key-press-event', steal_focuskeys)
+
         self.stage.connect('button-press-event', grab_handler)
         self.stage.connect('button-release-event', grab_handler)
         self.stage.connect('key-press-event', grab_handler)
-        self.window.connect('key-press-event', steal_focuskeys)
         self.stage.connect('key-release-event', grab_handler)
         self.stage.connect('destroy', self.quit)
         self.stage.connect('motion-event', handler)
