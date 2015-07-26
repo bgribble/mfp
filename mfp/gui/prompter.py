@@ -19,7 +19,7 @@ class Prompter (object):
         if self.mode is None:
             self._begin(prompt, callback, default)
         else: 
-            self.queue.append([prompt, callback])
+            self.queue.append([prompt, callback, default])
 
     def _begin(self, prompt, callback, default): 
         self.current_prompt = prompt
@@ -48,4 +48,6 @@ class Prompter (object):
         if len(self.queue): 
             nextitem = self.queue[0]
             self.queue = self.queue[1:]
-            self._begin(nextitem[0], nextitem[1])
+            self._begin(nextitem[0], nextitem[1], nextitem[2])
+
+

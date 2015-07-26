@@ -12,7 +12,7 @@ from mfp import log
 
 
 class ClickableControlMode (InputMode):
-    def __init__(self, window, element, descrip):
+    def __init__(self, window, element, descrip, mod=''):
         self.manager = window.input_mgr
         self.window = window
         self.widget = element
@@ -20,13 +20,13 @@ class ClickableControlMode (InputMode):
 
         InputMode.__init__(self, descrip)
 
-        self.bind("M1DOWN", self.click, "Send click down")
-        self.bind("M1DOUBLEDOWN", self.click, "Send click down")
-        self.bind("M1TRIPLEDOWN", self.click, "Send click down")
+        self.bind(mod + "M1DOWN", self.click, "Send click down")
+        self.bind(mod + "M1DOUBLEDOWN", self.click, "Send click down")
+        self.bind(mod + "M1TRIPLEDOWN", self.click, "Send click down")
 
-        self.bind("M1UP", self.unclick, "Send click up")
-        self.bind("M1DOUBLEUP", self.unclick, "Send click up")
-        self.bind("M1TRIPLEUP", self.unclick, "Send click up")
+        self.bind(mod + "M1UP", self.unclick, "Send click up")
+        self.bind(mod + "M1DOUBLEUP", self.unclick, "Send click up")
+        self.bind(mod + "M1TRIPLEUP", self.unclick, "Send click up")
 
         self.bind("RET", self.quick_click, "Send click")
 
