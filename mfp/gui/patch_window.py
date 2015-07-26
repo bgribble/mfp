@@ -377,8 +377,9 @@ class PatchWindow(object):
         
         try: 
             b = factory(self, x, y)
-        except Exception, e:
+        except Exception as e:
             log.warning("add_element: Error while creating with factory", factory)
+            log.warning(e)
             return True
 
         self.active_layer().add(b)

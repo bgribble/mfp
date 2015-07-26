@@ -12,9 +12,11 @@ import cairo
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
+from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 from ..bang import Bang
 import math
+from mfp import log 
 
 
 def circle(ctx, xorig, yorig, w, h):
@@ -63,21 +65,69 @@ class ButtonElement (PatchElement):
         self.texture = Clutter.CairoTexture.new(20, 20)
         self.texture.connect("draw", self.draw_cb)
 
+        self.label = Clutter.Text()
+        self.label.set_color(self.stage.color_unselected)
+        self.label.connect('text-changed', self.label_changed_cb)
+        self.label.set_reactive(False)
+        self.label.set_use_markup(True)
+        self.label_text = None 
         
         self.set_reactive(True)
         self.add_actor(self.texture)
+        self.add_actor(self.label)
 
         self.set_size(20, 20)
         self.move(x, y)
 
+        self.param_list.append('label_text')
         # request update when value changes
         self.update_required = True
+
+    def redraw(self):
+        self.texture.invalidate()
+        if self.indicator:
+            self.label.set_color(self.stage.color_bg)
+        elif self.selected:
+            self.label.set_color(self.stage.color_selected)
+        else:
+            self.label.set_color(self.stage.color_unselected)
+
+    def center_label(self):
+        label_halfwidth = self.label.get_property('width')/2.0
+        label_halfheight = self.label.get_property('height')/2.0
+        
+        if label_halfwidth > 1:
+            nwidth = max(self.width, 2*label_halfwidth + 10)
+            nheight = max(self.height, 2*label_halfheight + 6)
+            if nwidth != self.width or nheight != self.height:
+                self.set_size(nwidth, nheight)
+
+        if self.width and self.height:
+            self.label.set_position(self.width/2.0-label_halfwidth, 
+                                    self.height/2.0-label_halfheight)
+            
+    def label_changed_cb(self, *args):
+       self.center_label()
+
+    def label_edit_start(self):
+        return self.label_text
+
+    def label_edit_finish(self, widget, new_text, aborted=False):
+        if not aborted:
+            self.label_text = new_text
+            self.send_params()
+            if self.indicator:
+                self.label.set_markup("<b>%s</b>" % self.label_text)
+            else:
+                self.label.set_markup(self.label_text)
+
+            self.redraw()
 
     def set_size(self, width, height):
         PatchElement.set_size(self, width, height)
         self.texture.set_size(width, height)
         self.texture.set_surface_size(width, height)
-        self.texture.invalidate()
+        self.redraw()
 
     def draw_cb(self, texture, ct):
         w = self.texture.get_property('surface_width') - 2
@@ -114,20 +164,34 @@ class ButtonElement (PatchElement):
             ct.stroke()
 
     def configure(self, params):
+        set_text = False 
+
         if "value" in params:
             self.message = params.get("value")
             self.indicator = self.message 
+            set_text = True 
+
+        if "label_text" in params:
+            self.label_text = params.get("label_text")
+            set_text = True
+
+        if set_text:
+            if self.indicator:
+                self.label.set_markup("<b>%s</b>" % self.label_text)
+            else:
+                self.label.set_markup(self.label_text)
+            self.center_label()
 
         PatchElement.configure(self, params)
-        self.texture.invalidate()
+        self.redraw()
 
     def select(self):
         PatchElement.select(self)
-        self.texture.invalidate()
+        self.redraw()
 
     def unselect(self):
         PatchElement.unselect(self)
-        self.texture.invalidate()
+        self.redraw()
 
     def delete(self):
         for c in self.connections_out + self.connections_in:
@@ -144,9 +208,9 @@ class ButtonElement (PatchElement):
                 return None 
             else:
                 self.draw_ports()
-                self.texture.invalidate()
+        self.redraw()
 
-        return None 
+        return LabelEditMode(self.stage, self, self.label)
 
     def make_control_mode(self):
         return ClickableControlMode(self.stage, self, "Button control")
@@ -168,13 +232,13 @@ class BangButtonElement (ButtonElement):
             else:
                 MFPGUI().mfp.send(self.obj_id, 0, self.message)
         self.indicator = True
-        self.texture.invalidate()
+        self.redraw()
 
         return False
 
     def unclicked(self):
         self.indicator = False
-        self.texture.invalidate()
+        self.redraw()
 
         return False
 
@@ -183,7 +247,7 @@ class BangButtonElement (ButtonElement):
             self.message = params.get("message")
 
         PatchElement.configure(self, params)
-        self.texture.invalidate()
+        self.redraw()
 
 
 class ToggleButtonElement (ButtonElement):
@@ -207,7 +271,7 @@ class ToggleButtonElement (ButtonElement):
 
         if self.obj_id is not None:
             MFPGUI().mfp.send(self.obj_id, 0, message)
-        self.texture.invalidate()
+        self.redraw()
         return False
 
     def configure(self, params):
@@ -216,7 +280,7 @@ class ToggleButtonElement (ButtonElement):
         if "off_message" in params:
             self.off_message = params.get("off_message")
         ButtonElement.configure(self, params)
-        self.texture.invalidate()
+        self.redraw()
 
     def create(self, init_type, init_args):
         ButtonElement.create(self, init_type, init_args)
