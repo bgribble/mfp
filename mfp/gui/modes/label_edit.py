@@ -80,6 +80,7 @@ class LabelEditMode (InputMode):
         if inittxt:
             self.text = inittxt
 
+        
         self.update_label(raw=True)
         self.start_editing()
         self.widget.set_selection(0, len(self.text))
@@ -90,8 +91,6 @@ class LabelEditMode (InputMode):
 
     def start_editing(self):
         def focus_out(*args): 
-            from mfp import log
-            log.debug("label-edit: got key-focus-out")
             self.commit_edits()
             return True
 

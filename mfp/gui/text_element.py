@@ -21,7 +21,8 @@ class TextElement (PatchElement):
         PatchElement.__init__(self, window, x, y)
         self.value = ''
         self.clickchange = False 
-        self.param_list.extend(['value', 'clickchange'])
+        self.default = ''
+        self.param_list.extend(['value', 'clickchange', 'default'])
 
         # configure label
         self.label = Clutter.Text()
@@ -48,15 +49,20 @@ class TextElement (PatchElement):
         return self.value
 
     def label_edit_finish(self, widget, new_text, aborted=False):
+        log.debug("text.label_edit_finish:", new_text)
         if self.obj_id is None:
             self.create(self.proc_type, None)
         if self.obj_id is None:
             log.warning("TextElement: could not create obj")
-        elif new_text != self.value:
+        elif new_text != self.value and not aborted:
             self.value = new_text
-            self.label.set_markup(self.value)
+            self.set_text()
             MFPGUI().mfp.send(self.obj_id, 0, self.value)
         self.update()
+
+    def end_edit(self):
+        PatchElement.end_edit(self)
+        self.set_text()
 
     def text_changed_cb(self, *args):
         self.update()
@@ -64,12 +70,18 @@ class TextElement (PatchElement):
 
     def clicked(self):
         def newtext(txt):
-            if txt is not None and txt != self.value:
-                self.value = txt
-                self.label.set_markup(self.value)
+            self.value = txt or ''
+            self.set_text()
         if self.selected and self.clickchange: 
-            self.stage.get_prompted_input("New text:", newtext)
+            self.stage.get_prompted_input("New text:", newtext, self.value)
         return True
+
+    def set_text(self):
+        if len(self.value):
+            self.label.set_markup(self.value)
+        else: 
+            self.value = self.default or '...'
+            self.label.set_markup(self.value)
 
     def unclicked(self):
         return True
@@ -96,9 +108,12 @@ class TextElement (PatchElement):
             new_text = params.get('value')
             if new_text != self.value:
                 self.value = new_text
-                self.label.set_markup(self.value)
+                self.set_text()
+
         if params.get('clickchange') is not None:
             self.clickchange = params['clickchange']
 
+        if params.get('default') is not None:
+            self.default = params['default']
         PatchElement.configure(self, params)
         self.update()
