@@ -33,7 +33,7 @@ class Prompter (object):
         pass
 
     def label_edit_finish(self, widget, text):
-        if self.current_callback and text:
+        if self.current_callback:
             try: 
                 self.current_callback(text)
             except Exception, e: 
