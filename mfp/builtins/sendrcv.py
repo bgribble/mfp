@@ -242,20 +242,20 @@ class Recv (Processor):
         src_obj = MFPApp().resolve(src_name, self, True)
         if src_obj:
             self.src_obj = src_obj
-            self.init_args = '"%s"' % src_name 
-            self.gui_params["label_text"] = src_name
-            self.src_name = src_name 
             self.src_obj.connect(0, self, 0, False)
-
-            if self.gui_created:
-                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def trigger(self):
         if self.inlets[1] is not Uninit:
             if self.inlets[1] != self.src_name:
                 if self.src_obj:
                     self.src_obj = None 
-                self._connect(self.inlets[1])
+                self.init_args = '"%s"' % self.inlets[1]
+                self.gui_params["label_text"] = self.inlets[1]
+                self.src_name = self.inlets[1] 
+
+                self._connect(self.src_name)
+                if self.gui_created:
+                    MFPApp().gui_command.configure(self.obj_id, self.gui_params)
             self.inlets[1] = Uninit
 
         if self.src_name and self.src_obj is None:
