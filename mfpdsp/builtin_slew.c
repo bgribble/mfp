@@ -17,8 +17,8 @@ process(mfp_processor * proc)
     double before = pdata->last_val;
     double after; 
     double delta;
-    double rise_rate = .001 * pdata->rise_time * proc->context->samplerate;
-    double fall_rate = .001 * pdata->fall_time * proc->context->samplerate;
+    double rise_rate = 1.0 / (.001 * pdata->rise_time * proc->context->samplerate);
+    double fall_rate = 1.0 / (.001 * pdata->fall_time * proc->context->samplerate);
     int use_const = 1;
 
     if (mfp_proc_has_input(proc, 0)) {
@@ -34,10 +34,10 @@ process(mfp_processor * proc)
         }
         delta = after - before; 
         if (delta > 0) {
-            delta = delta / rise_rate;
+            delta = delta * rise_rate;
         }
         else if (delta < 0) { 
-            delta = delta / fall_rate;
+            delta = delta * fall_rate;
         }
 
         after = (before + delta); 
