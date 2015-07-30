@@ -164,7 +164,12 @@ class RPCHost (QuittableThread):
         #print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
 
         #py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
-        obj = json.loads(json_data, object_hook=extended_decoder_hook)
+        try: 
+            obj = json.loads(json_data, object_hook=extended_decoder_hook)
+        except Exception as e: 
+            log.error("Can't parse JSON:", json_data)
+            return True 
+
         req = Request.from_dict(obj)
 
         # is someone waiting on this response? 
