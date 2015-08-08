@@ -35,8 +35,6 @@ class SlideMeterElement (PatchElement):
 
     VERTICAL = 0x00
     HORIZONTAL = 0x01 
-    LINEAR = 0x00
-    LOG = 0x01 
     LEFT = 0x00
     RIGHT = 0x01
 
@@ -52,7 +50,7 @@ class SlideMeterElement (PatchElement):
         self.scale_font_size = 8
         self.show_scale = False
         self.slider_enable = True
-        self.scale_type = self.LINEAR 
+        self.scale = ticks.LinearScale()
         self.scale_position = self.LEFT 
         self.orientation = self.VERTICAL
         self.zeropoint = None 
@@ -82,6 +80,10 @@ class SlideMeterElement (PatchElement):
 
         # request update when value changes
         self.update_required = True
+
+    @property
+    def scale_type(self):
+        return self.scale.scale_type if self.scale else 0
 
     def draw_cb(self, texture, ct):
         c = ColorDB.to_cairo(self.color_fg)
@@ -133,14 +135,11 @@ class SlideMeterElement (PatchElement):
 
             if self.scale_ticks is None:
                 num_ticks = bar_h / self.TICK_SPACE
-                if self.scale_type == self.LINEAR:
-                    self.scale_ticks = ticks.linear(self.min_value, self.max_value, num_ticks)
-                else: 
-                    self.scale_ticks = ticks.decade(self.min_value, self.max_value, num_ticks)
+                self.scale_ticks = self.scale.ticks(self.min_value, self.max_value, num_ticks)
 
             for tick in self.scale_ticks:
                 tick_y = y_max - (bar_h*(tick - self.min_value)
-                                           /(self.max_value-self.min_value))
+                                  /(self.max_value-self.min_value))
                 if self.scale_position == self.LEFT: 
                     tick_x = x_min
                     txt_x = 5
@@ -205,24 +204,23 @@ class SlideMeterElement (PatchElement):
         x -= orig_x
         y -= orig_y
         if self.orientation == self.VERTICAL:
-            delta = y - self.hot_y_min
+            delta = self.hot_y_max - y
             total = self.hot_y_max - self.hot_y_min
         else: 
-            delta = self.hot_x_max - (x - self.hot_x_min)
+            delta = x - self.hot_x_min
             total = self.hot_x_max - self.hot_x_min
 
-        rv = (self.max_value - (float(delta) / total) * (self.max_value - self.min_value))
-        return rv
+        fraction = delta / float(total)
+        return self.scale.value(fraction)
 
-    def pixdelta2value(self, dx, dy):
+    def add_pixdelta(self, dx, dy):
         if self.orientation == self.VERTICAL:
-            delta = dy 
-            total = self.hot_y_max - self.hot_y_min
+            delta = dy / float(self.hot_y_max - self.hot_y_min)
         else: 
-            delta = -dx 
-            total = self.hot_x_max - self.hot_x_min
+            delta = dx / float(self.hot_x_max - self.hot_x_min) 
 
-        return (float(delta) / total) * (self.max_value - self.min_value)
+        scalepos = self.scale.fraction(self.value) + delta
+        return self.scale.value(scalepos)
 
     def update_value(self, value):
         if value >= self.max_value:
@@ -238,6 +236,7 @@ class SlideMeterElement (PatchElement):
 
     def update(self):
         self.texture.invalidate()
+
 
     def set_orientation(self, orient): 
         if orient != self.orientation:
@@ -275,6 +274,8 @@ class SlideMeterElement (PatchElement):
             newval = True 
 
         if newval: 
+            self.scale.min_value = self.min_value
+            self.scale.max_value = self.max_value
             MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
         self.scale_ticks = None 
@@ -305,12 +306,14 @@ class SlideMeterElement (PatchElement):
             changes = True 
 
         v = params.get("scale")
-        if (v == "linear" and self.scale_type != self.LINEAR): 
-            self.scale_type = self.LINEAR
+        if v == "linear" and not isinstance(self.scale, ticks.LinearScale):
+            self.scale = ticks.LinearScale(self.min_value, self.max_value) 
             changes = True 
-        elif (v in ("log", "log10", "decade") and self.scale_type != self.LOG):
-            self.scale_type = self.LOG
+        elif v in ("log", "log10", "decade") and not isinstance(self.scale, ticks.LogScale):
+            self.scale = ticks.LogScale(self.min_value, self.max_value) 
             changes = True 
+        elif v == 'audio' and not isinstance(self.scale, ticks.AudioScale):
+            self.scale = ticks.AudioScale(self.min_value, self.max_value)
 
         v = params.get("scale_position")
         if (v is not None and v in (1, "r", "R", "right") and self.scale_position != self.RIGHT): 
@@ -320,13 +323,23 @@ class SlideMeterElement (PatchElement):
             self.scale_position = self.LEFT 
             changes = True 
         
-        for p in ("show_scale", "slider_enable", "min_value", "max_value", "scale_ticks"):
+        for p in ("show_scale", "slider_enable", "scale_ticks"):
             v = params.get(p)
             if v is not None and hasattr(self, p):
                 changes = True
                 setattr(self, p, v)
-                if p in ("min_value", "max_value"):
-                    self.scale_ticks = None
+
+        if 'min_value' in params:
+            v = params['min_value']
+            changes = True
+            self.scale.min_value = v
+            self.min_value = v
+
+        if 'max_value' in params:
+            v = params['max_value']
+            changes = True
+            self.scale.max_value = v
+            self.max_value = v
 
         v = params.get("value")
         if v is not None:
@@ -459,8 +472,11 @@ class DialElement(SlideMeterElement):
         scale_fraction = theta / (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
         return self.min_value + scale_fraction * (self.max_value - self.min_value)
             
-    def pixdelta2value(self, dx, dy): 
-        return dy * self.DRAG_SCALE * (self.max_value - self.min_value)
+    def add_pixdelta(self, dx, dy):
+        delta = 0.01 * dy
+
+        scalepos = self.scale.fraction(self.value) + delta
+        return self.scale.value(scalepos)
 
     def val2theta(self, value):
         scale_fraction = abs((value - self.min_value) / (self.max_value - self.min_value))

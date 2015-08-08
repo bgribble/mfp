@@ -64,13 +64,13 @@ class SliderControlMode (InputMode):
 
         dx = self.manager.pointer_x - self.drag_last_x
         dy = self.manager.pointer_y - self.drag_last_y
+        
+        new_value = self.slider.add_pixdelta(delta * dx, -1.0 * delta * dy)
 
         self.drag_last_x = self.manager.pointer_x
         self.drag_last_y = self.manager.pointer_y
 
-        value_change = self.slider.pixdelta2value(delta * dx, delta * dy)
-
-        self.slider.update_value(self.slider.value - value_change)
+        self.slider.update_value(new_value)
         return True
 
     def drag_end(self):
