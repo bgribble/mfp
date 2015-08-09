@@ -138,8 +138,7 @@ class SlideMeterElement (PatchElement):
                 self.scale_ticks = self.scale.ticks(self.min_value, self.max_value, num_ticks)
 
             for tick in self.scale_ticks:
-                tick_y = y_max - (bar_h*(tick - self.min_value)
-                                  /(self.max_value-self.min_value))
+                tick_y = y_max - bar_h*self.scale.fraction(tick)
                 if self.scale_position == self.LEFT: 
                     tick_x = x_min
                     txt_x = 5
@@ -156,7 +155,7 @@ class SlideMeterElement (PatchElement):
                 ct.show_text("%.3g" % tick)
 
         def val2pixels(val):
-            scale_fraction = abs((val - self.min_value) / (self.max_value - self.min_value))
+            scale_fraction = self.scale.fraction(val)
             return scale_fraction*bar_h 
 
         # box 
@@ -502,7 +501,7 @@ class DialElement(SlideMeterElement):
                 num_ticks = int(self.dial_radius / 10)
                 if not num_ticks % 2:
                     num_ticks += 1
-                self.scale_ticks = ticks.linear(self.min_value, self.max_value, num_ticks)
+                self.scale_ticks = self.scale.ticks(num_ticks)
 
             for tick in self.scale_ticks:
                 tick_theta = self.val2theta(tick)
