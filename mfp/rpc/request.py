@@ -9,15 +9,20 @@ import simplejson as json
 class ExtendedEncoder (json.JSONEncoder):
     from ..bang import BangType, UninitType
     from ..gui.colordb import RGBAColor 
+    from ..gui.ticks import ScaleType 
 
     TYPES = { '__BangType__': BangType, 
              '__UninitType__': UninitType, 
              '__RGBAColor__': RGBAColor}
 
+    DUMBTYPES = (ScaleType,)
+
     def default(self, obj):
         if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
             key = "__%s__" % obj.__class__.__name__
             return {key: obj.__dict__ }
+        elif isinstance(obj, self.DUMBTYPES):
+            return str(obj)
         else:
             return json.JSONEncoder.default(self, obj)
 

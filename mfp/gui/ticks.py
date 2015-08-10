@@ -8,11 +8,16 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 import math
 
-class LinearScale (object):
-    scale_type = 0
+class ScaleType (object):
+    pass
+
+class LinearScale (ScaleType):
     def __init__(self, min_value=0.0, max_value=1.0):
         self.max_value = max_value
         self.min_value = min_value
+
+    def __repr__(self):
+        return "linear"
 
     def set_bounds(self, minv, maxv):
         self.min_value = minv
@@ -56,11 +61,13 @@ class LinearScale (object):
         return filtered 
 
 
-class DecadeScale (object): 
-    scale_type = 1
+class DecadeScale (ScaleType): 
     def __init__(self, min_value=-40, max_value=0):
         self.min_value = min_value
         self.max_value = max_value
+
+    def __repr__(self):
+        return "decade"
 
     def fraction(self, value):
         pass
@@ -85,7 +92,7 @@ class DecadeScale (object):
         return filtered 
 
 
-class AudioScale (object):
+class AudioScale (ScaleType):
     '''
     The audio scale is modeled on large-console mixer faders.  
     Scale increments are dB, with basically 3 different slopes: 
@@ -95,8 +102,6 @@ class AudioScale (object):
     ticks would be evenly spaced, at 5dB intervals on the top and 
     10 db on the bottom
     '''
-
-    scale_type = 2
 
     def __init__(self, min_value=-1000, max_value=10):
         self.min_value = min_value
@@ -109,6 +114,8 @@ class AudioScale (object):
         self.value_low = -50
         pass 
 
+    def __repr__(self):
+        return "audio"
 
     def set_bounds(self, minv, maxv):
         self.min_value = minv

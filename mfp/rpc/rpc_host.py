@@ -130,15 +130,15 @@ class RPCHost (QuittableThread):
             req.state = Request.SUBMITTED 
 
         # write the data to the socket 
-        jdata = req.serialize()
         try:
+            jdata = req.serialize()
             with self.lock: 
                 sock.send(self.SYNC_MAGIC)
                 sock.send("% 8d" % len(jdata))
                 sock.send(jdata)
         except Exception, e:
             print "[%s] RPCHost.put: SEND error: %s" % (datetime.now(), e)
-            print jdata 
+            print req
             raise Exception()
 
     def wait(self, req, timeout=None):
@@ -160,16 +160,16 @@ class RPCHost (QuittableThread):
                 raise RPCHost.RPCError()
 
     def dispatch_rpcdata(self, rpc_worker, rpcdata):
-        json_data, peer_id = rpcdata 
         #print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
 
         #py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
         try: 
+            json_data, peer_id = rpcdata 
             obj = json.loads(json_data, object_hook=extended_decoder_hook)
         except Exception as e: 
             log.error("Can't parse JSON:", json_data)
             return True 
-
+        
         req = Request.from_dict(obj)
 
         # is someone waiting on this response? 

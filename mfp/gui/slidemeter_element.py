@@ -40,7 +40,7 @@ class SlideMeterElement (PatchElement):
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
-        self.param_list.extend(['min_value', 'max_value', 'show_scale', 'scale_type',
+        self.param_list.extend(['min_value', 'max_value', 'show_scale', 'scale',
                                 'scale_position', 'orientation', 'zeropoint'])
         # parameters controlling display
         self.value = 0.0

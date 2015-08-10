@@ -101,6 +101,7 @@ class RPCWrapper (object):
         try: 
             self.rpchost.put(r, self.peer_id)
         except Exception as e: 
+            log.debug("[call_remotely] Error in RPC operation:", e)
             return None 
 
         puttime = str(datetime.now())
