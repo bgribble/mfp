@@ -14,6 +14,10 @@ class LinearScale (object):
         self.max_value = max_value
         self.min_value = min_value
 
+    def set_bounds(self, minv, maxv):
+        self.min_value = minv
+        self.max_value = maxv
+
     # given a linear fraction of the scale (pixel pos as a fraction of size)), 
     # return the value 
     def value(self, fraction):
@@ -103,13 +107,50 @@ class AudioScale (object):
         self.value_hi = 10
         self.value_med = -10
         self.value_low = -50
-        self.value_inf = min_value
         pass 
+
+
+    def set_bounds(self, minv, maxv):
+        self.min_value = minv
+        self.max_value = maxv
+        self._calibrate()
+
+    def _calibrate(self):
+        from mfp import log
+        split_range = 0.90
+        self.thresh_inf = 0.1
+        if self.min_value > -50:
+            split_range = 1.0
+            self.thresh_inf = 0
+
+        nunits = 0
+        top = self.max_value
+        if top > self.value_hi:
+            nunits += top - max(self.value_hi, self.min_value)
+            top = self.value_hi
+        if top > self.value_med and top > self.min_value:
+            nunits += 2*(top - max(self.value_med, self.min_value))
+            top = self.value_med
+        if top > self.value_low and top > self.min_value:
+            nunits += top - max(self.value_low, self.min_value)
+            
+        unitsize = split_range / nunits
+        if self.max_value > self.value_hi:
+            self.thresh_hi = 1.0 - unitsize*(self.max_value-self.value_hi)
+        else:
+            self.thresh_hi = 1.0 - 2*unitsize*(self.max_value-self.value_hi)
+        self.thresh_low = self.thresh_hi - 2*unitsize*(self.value_hi - self.value_med)
+        log.debug("[calibrate] hi={}, low={}, inf={}, ax={}, min={}".format(
+            self.thresh_hi, self.thresh_low, self.thresh_inf, self.max_value,
+            self.min_value))
+        log.debug("[calibrate] unitsize={}, nunits={}, splitrange={}".format(
+            unitsize, nunits, split_range))
+        
 
     def value(self, fraction):
         if fraction < self.thresh_inf: 
-            return (self.value_inf 
-                    + fraction * (self.value_low - self.value_inf)/self.thresh_inf)
+            return (self.min_value 
+                    + fraction * (self.value_low - self.min_value)/self.thresh_inf)
         elif fraction < self.thresh_low: 
             delta = fraction - self.thresh_inf
             return (self.value_low
@@ -126,11 +167,11 @@ class AudioScale (object):
                     /(self.thresh_low - self.thresh_inf)) 
 
     def fraction(self, value):
-        if value < self.value_inf:
+        if value < self.min_value:
             return 0 
         elif value < self.value_low:
-            delta = value - self.value_inf
-            return self.thresh_inf * delta / (self.value_low - self.value_inf)
+            delta = value - self.min_value
+            return self.thresh_inf * delta / (self.value_low - self.min_value)
         elif value < self.value_med:
             delta = value - self.value_low 
             return (self.thresh_inf + (self.thresh_low - self.thresh_inf) 
@@ -145,5 +186,6 @@ class AudioScale (object):
                     * delta / (self.value_med - self.value_low))
 
     def ticks(self, numticks, tick_min=None, tick_max=None):
-        allticks = [-50, -40, -30, -20, -10, -5, 0, 5, 10]
-        return allticks
+        allticks = [-50, -40, -30, -20, -10, -5, 0, 5, 10, 20]
+        
+        return [t for t in allticks if t >= self.min_value and t <= self.max_value]

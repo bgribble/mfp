@@ -135,7 +135,7 @@ class SlideMeterElement (PatchElement):
 
             if self.scale_ticks is None:
                 num_ticks = bar_h / self.TICK_SPACE
-                self.scale_ticks = self.scale.ticks(self.min_value, self.max_value, num_ticks)
+                self.scale_ticks = self.scale.ticks(num_ticks)
 
             for tick in self.scale_ticks:
                 tick_y = y_max - bar_h*self.scale.fraction(tick)
@@ -262,6 +262,7 @@ class SlideMeterElement (PatchElement):
     def set_bounds(self, min_val, max_val):
         self.max_value = max_val
         self.min_value = min_val
+        self.scale.set_bounds(self.min_value, self.max_value)
        
         newval = False 
         if self.value > self.max_value:
@@ -273,8 +274,6 @@ class SlideMeterElement (PatchElement):
             newval = True 
 
         if newval: 
-            self.scale.min_value = self.min_value
-            self.scale.max_value = self.max_value
             MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
         self.scale_ticks = None 
@@ -313,6 +312,7 @@ class SlideMeterElement (PatchElement):
             changes = True 
         elif v == 'audio' and not isinstance(self.scale, ticks.AudioScale):
             self.scale = ticks.AudioScale(self.min_value, self.max_value)
+            changes = True 
 
         v = params.get("scale_position")
         if (v is not None and v in (1, "r", "R", "right") and self.scale_position != self.RIGHT): 
@@ -328,17 +328,26 @@ class SlideMeterElement (PatchElement):
                 changes = True
                 setattr(self, p, v)
 
+        rescale = False 
         if 'min_value' in params:
             v = params['min_value']
-            changes = True
-            self.scale.min_value = v
-            self.min_value = v
+            if v != self.min_value:
+                changes = True
+                rescale = True
+                self.min_value = v
 
         if 'max_value' in params:
             v = params['max_value']
-            changes = True
-            self.scale.max_value = v
-            self.max_value = v
+            if v != self.max_value:
+                changes = True
+                rescale = True 
+                self.max_value = v
+
+        if rescale:
+            self.scale.set_bounds(self.min_value, self.max_value)
+            self.scale_ticks = None
+            self.update()
+
 
         v = params.get("value")
         if v is not None:
