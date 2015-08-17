@@ -5,21 +5,20 @@ sendrcv.py: Bus/virtual wire objects.
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-import time 
-from ..utils import QuittableThread 
+from ..utils import TaskNibbler
 from ..processor import Processor
 from ..mfp_app import MFPApp
-from ..patch import Patch
 from .. import Uninit
 
-from mfp import log 
 class Send (Processor):
     display_type = "sendvia" 
     doc_tooltip_obj = "Send messages to a named receiver (create with 'send via' GUI object)"
     doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
 
     bus_type = "bus"
-    
+
+    task_nibbler = TaskNibbler()
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.dest_name = None
         self.dest_inlet = 0
@@ -66,29 +65,40 @@ class Send (Processor):
             
         return prms
 
-    def _connect(self, dest_name):
-        if self.dest_name == dest_name and self.dest_obj is not None: 
-            return 
+    def _wait_connect(self):
+        def recheck():
+            return self._connect(self.dest_name, False)
+        Send.task_nibbler.add_task(recheck)
 
+    def _connect(self, dest_name, wait=True):
+        # short-circuit if already conected 
+        if self.dest_name == dest_name and self.dest_obj is not None: 
+            return True 
+
+        # disconnect existing if needed 
         if self.dest_obj is not None and self.dest_name != dest_name:
             self.dest_obj.disconnect(0, self, 0)
             self.dest_obj = None 
             self.dest_obj_owned = False 
         self.dest_name = dest_name 
 
+        # find the new endpoint
         obj = MFPApp().resolve(self.dest_name, self, True)
-        if (obj is not None 
-            and ((isinstance(obj, Patch) and self.scope == obj.default_scope) 
-                 or obj.scope == self.scope 
-                 or self.dest_name in ("patch", "app")
-                 or "." in self.dest_name)):
+
+        if obj is None:
+            # usually we create a bus if needed.  but if it's a reference to 
+            # another top-level patch, no. 
+            if ':' in self.dest_name:
+                if wait:
+                    self._wait_connect()
+                return False
+            else:
+                self.dest_obj = MFPApp().create(self.bus_type, "", self.patch, 
+                                                self.scope, self.dest_name)
+                self.dest_obj_owned = True 
+        else:
             self.dest_obj = obj 
             self.dest_obj_owned = False 
-        else: 
-            self.dest_obj = MFPApp().create(self.bus_type, "", self.patch, 
-                                            self.scope, self.dest_name)
-            self.dest_obj_owned = True 
-            self.dest_name = self.dest_obj.name
             
         if self.dest_obj and ((self, 0) not in self.dest_obj.connections_in[0]):
             self.connect(0, self.dest_obj, 0, False)
@@ -97,6 +107,7 @@ class Send (Processor):
         self.gui_params["label_text"] = self.dest_name
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        return True 
 
     def trigger(self):
         if self.inlets[1] is not Uninit: 
@@ -187,6 +198,7 @@ class Recv (Processor):
     doc_tooltip_outlet = [ "Passthru output" ]
 
     do_onload = False 
+    task_nibbler = TaskNibbler()
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
@@ -204,26 +216,7 @@ class Recv (Processor):
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
 
-        self.monitor_thread = QuittableThread(target=self._monitor)
-        self.monitor_thread.start()
-
-    def _monitor(self, threadobj): 
-        # FIXME race between monitor and trigger method 
-        while not threadobj.join_req:
-            if self.src_obj is not None and self.src_obj.status == Processor.DELETED:
-                self.src_obj.disconnect(0, self, 0)
-                self.src_obj = None 
-
-            if not len(self.connections_in[0]): 
-                self.src_obj = None 
-
-            if self.src_obj is None and self.src_name is not None:
-                self._connect(self.src_name)
-                    
-            time.sleep(0.25)
-
     def delete(self):
-        self.monitor_thread.join_req = True
         Processor.delete(self)
 
     def method(self, message, inlet):
@@ -238,11 +231,21 @@ class Recv (Processor):
         gp = params.get('gui_params', {})
         self.gui_params['label_text'] = gp.get("label_text") or self.src_name
 
-    def _connect(self, src_name):
+    def _wait_connect(self):
+        def recheck():
+            return self._connect(self.src_name, False)
+        Recv.task_nibbler.add_task(recheck)
+
+    def _connect(self, src_name, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)
         if src_obj:
             self.src_obj = src_obj
             self.src_obj.connect(0, self, 0, False)
+            return True 
+        else: 
+            if wait:
+                self._wait_connect()
+            return False 
 
     def trigger(self):
         if self.inlets[1] is not Uninit:
@@ -294,19 +297,6 @@ class RecvSignal (Recv):
         if len(initargs):
             self._connect(initargs[0])
 
-        self.monitor_thread = QuittableThread(target=self._monitor)
-        self.monitor_thread.start()
-
-    def _monitor(self, threadobj): 
-        # FIXME race between monitor and trigger method 
-        while not threadobj.join_req:
-            if self.src_obj is not None and self.src_obj.status == Processor.DELETED:
-                self.src_obj = None 
-
-            if self.src_obj is None and self.src_name is not None:
-                self._connect(self.src_name)
-                    
-            time.sleep(0.25)
 def register():
     MFPApp().register("send", Send)
     MFPApp().register("recv", Recv)

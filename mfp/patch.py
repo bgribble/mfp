@@ -124,7 +124,8 @@ class Patch(Processor):
             return Unbound 
 
     def add_scope(self, name):
-        self.scopes[name] = LexicalScope(name)
+        if name not in self.scopes:
+            self.scopes[name] = LexicalScope(name)
         return self.scopes[name]
 
     def del_scope(self, name):

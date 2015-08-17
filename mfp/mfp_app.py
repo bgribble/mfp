@@ -319,6 +319,33 @@ class MFPApp (Singleton):
         if ctor is None: 
             return None
 
+        # create intervening scope if needed
+        if '.' in name: 
+            parts = name.split('.')
+            if len(parts) > 2: 
+                log.error("Cannot deep-create name {}".format(name))
+                return None 
+
+            testobj = self.resolve(parts[0], patch, True) 
+            if testobj:
+                if testobj is patch:
+                    scope = None 
+                elif isinstance(testobj, Patch):
+                    log.error("Cannot deep-create object {} in patch {}".format(
+                        name, testobj))
+                    return None 
+                elif not isinstance(scope, LexicalScope):
+                    log.error("Cannot deep-create object {} in another object {}".format(
+                        name, testobj))
+                    return None 
+                else:
+                    scope = testobj
+            else: 
+                log.debug("Creating new scope {} in {}".format(parts[0], patch.name))
+                newscope = patch.add_scope(parts[0])
+                scope = newscope
+            name = parts[1]
+
         # factory found, use it
         try:
             obj = ctor(init_type, init_args, patch, scope, name)
@@ -362,9 +389,19 @@ class MFPApp (Singleton):
                 return base.resolve(part)
             return None
 
-        parts = name.split('.')
         obj = Unbound
         root = Unbound 
+        if ':' in name:
+            parts = name.split(':')
+            if len(parts) > 2:
+                return None
+            else: 
+                queryobj = self.patches.get(parts[0])
+                name = parts[1]
+                if not queryobj:
+                    return None
+
+        parts = name.split('.')
 
         # first find the base. 
 

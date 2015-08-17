@@ -7,6 +7,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import cProfile
+from threading import Thread, Lock
+import time 
 
 def homepath(fn):
     import os.path
@@ -134,7 +136,6 @@ def isiterable(obj):
 
     return False 
 
-from threading import Thread, Lock
 
 class QuittableThread(Thread):
     _all_threads = []
@@ -185,3 +186,36 @@ class QuittableThread(Thread):
                     next_victim = QuittableThread._all_threads[0]
                 else:
                     next_victim = False  
+
+
+class TaskNibbler (QuittableThread): 
+    def __init__(self):
+        self.lock = Lock()
+        self.queue = [] 
+        QuittableThread.__init__(self)
+        self.start()
+
+    def run(self): 
+        work = [] 
+        retry = [] 
+
+        while not self.join_req: 
+            with self.lock:
+                work = self.queue
+                self.queue = [] 
+                retry = []
+
+            for unit in work:
+                done = unit()
+                if not done:
+                    retry.append(unit)
+
+            with self.lock:
+                self.queue.extend(retry)
+
+            time.sleep(0.25)
+
+    def add_task(self, task):
+        with self.lock:
+            self.queue.append(task)
+
