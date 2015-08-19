@@ -24,6 +24,8 @@ class Var (Processor):
                          "Save input but do not emit (default: initarg 0)" ]
     doc_tooltip_outlet = ["Value output"]
 
+    do_onload = False 
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.gui_type = init_type
 
@@ -31,7 +33,6 @@ class Var (Processor):
         initargs, kwargs = self.parse_args(init_args)
 
         self.value = Uninit
-        self.do_onload = False 
 
         if len(initargs):
             self.value = initargs[0]
@@ -169,6 +170,7 @@ class Enum (Var):
 
 class SlideMeter (Var):
     doc_tooltip_obj = "Display/control a number with a slider"
+    do_onload = True 
 
     def tooltip_extra(self):
         minv = self.gui_params.get("min_value")

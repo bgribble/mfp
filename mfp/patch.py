@@ -108,16 +108,6 @@ class Patch(Processor):
         if not found: 
             found, obj = self.default_scope.query(name)
 
-        testpatch = self.patch
-
-        while not found and testpatch: 
-            testscope = self.scope
-            obj = testpatch.resolve(name, testscope)
-            if obj is not Unbound:
-                found = True 
-            else: 
-                testpatch = testpatch.patch
-        
         if found: 
             return obj 
         else: 

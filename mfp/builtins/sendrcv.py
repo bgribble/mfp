@@ -10,6 +10,8 @@ from ..processor import Processor
 from ..mfp_app import MFPApp
 from .. import Uninit
 
+from mfp import log
+
 class Send (Processor):
     display_type = "sendvia" 
     doc_tooltip_obj = "Send messages to a named receiver (create with 'send via' GUI object)"
@@ -38,15 +40,15 @@ class Send (Processor):
 
         self.gui_params["label_text"] = self.dest_name
 
+    def onload(self, phase):
+        self._connect(self.dest_name)
+
     def method(self, message, inlet=0):
         if inlet == 0:
             self.trigger()
         else: 
             self.inlets[inlet] = Uninit
             message.call(self)
-
-    def onload(self, phase):
-        self._connect(self.dest_name)
 
     def load(self, params):
         Processor.load(self, params)
@@ -107,6 +109,10 @@ class Send (Processor):
         self.gui_params["label_text"] = self.dest_name
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
+        if self.inlets[0] is not Uninit:
+            self.trigger()
+
         return True 
 
     def trigger(self):
@@ -114,7 +120,7 @@ class Send (Processor):
             self._connect(self.inlets[1])
             self.inlets[1] = Uninit 
 
-        if self.inlets[0] is not Uninit:
+        if self.inlets[0] is not Uninit and self.dest_obj:
             self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
 
@@ -128,7 +134,8 @@ class Send (Processor):
         return pret
 
     def tooltip_extra(self):
-        return "<b>Connected to:</b> %s" % self.dest_name
+        return "<b>Connected to:</b> %s (%s)" % (
+            self.dest_name, self.dest_obj.obj_id if self.dest_obj else "none") 
 
 class SendSignal (Send):
     doc_tooltip_obj = "Send signals to the specified name"
@@ -166,10 +173,17 @@ class MessageBus (Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        self.last_value = Uninit
 
     def trigger(self):
-        self.outlets[0] = self.inlets[0]
+        self.outlets[0] = self.last_value = self.inlets[0]
         self.inlets[0] = Uninit 
+ 
+    def connect(self, outlet, target, inlet, show_gui=True):
+        rv = Processor.connect(self, outlet, target, inlet, show_gui)
+        if self.last_value is not Uninit:
+            target.send(self.last_value, inlet)
+        return rv
 
     def method(self, message, inlet=0):
         if inlet == 0:
@@ -197,7 +211,6 @@ class Recv (Processor):
     doc_tooltip_inlet = [ "Passthru input" ]
     doc_tooltip_outlet = [ "Passthru output" ]
 
-    do_onload = False 
     task_nibbler = TaskNibbler()
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -216,6 +229,9 @@ class Recv (Processor):
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
 
+        if len(initargs):
+            self._connect(initargs[0])
+
     def delete(self):
         Processor.delete(self)
 
@@ -233,7 +249,8 @@ class Recv (Processor):
 
     def _wait_connect(self):
         def recheck():
-            return self._connect(self.src_name, False)
+            ready = self._connect(self.src_name, False)
+            return ready
         Recv.task_nibbler.add_task(recheck)
 
     def _connect(self, src_name, wait=True):
@@ -269,7 +286,8 @@ class Recv (Processor):
             self.inlets[0] = Uninit 
 
     def tooltip_extra(self):
-        return "<b>Connected to:</b> %s" % self.src_name
+        return "<b>Connected to:</b> %s (%s)" % (
+            self.src_name, self.src_obj.obj_id if self.src_obj else "none") 
 
 class RecvSignal (Recv): 
     doc_tooltip_obj = "Receive signals to the specified name"

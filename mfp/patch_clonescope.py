@@ -30,6 +30,7 @@ def clonescope(self, scopename, num_copies, **kwargs):
         log.warning("clonescope: no number of copies provided")
         return 
 
+    # num_copies is the total number desired, including the template
     num_copies = num_copies - 1
 
     if len(parts) > 1:
@@ -89,6 +90,9 @@ def clonescope(self, scopename, num_copies, **kwargs):
 
         # remake objects 
         for name, srcobj in scope.bindings.items():
+            if not srcobj.save_to_patch: 
+                log.debug("clonescope: skipping", name, type(srcobj))
+                continue
             newobj = srcobj.clone(self, newscope, name)
             obj_copied[name] = newobj 
             obj_idmap[srcobj.obj_id] = newobj
@@ -104,6 +108,8 @@ def clonescope(self, scopename, num_copies, **kwargs):
 
         # remake connections 
         for name, srcobj in scope.bindings.items():
+            if not srcobj.save_to_patch: 
+                continue
             newobj = obj_copied[name] 
 
             for port_num, port_conn in enumerate(srcobj.connections_in):

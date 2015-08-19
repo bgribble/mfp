@@ -405,30 +405,18 @@ class MFPApp (Singleton):
 
         # first find the base. 
 
-        # 0. is the queryobj a patch? if so, resolve directly 
+        # is the queryobj a patch? if so, resolve directly 
         if queryobj and isinstance(queryobj, Patch):
             root = queryobj.resolve(parts[0])
 
-        # 1. Look in the queryobj's patch 
-        if root is Unbound and queryobj and queryobj.patch:
+        # Look in the queryobj's patch, if it's not a patch itself 
+        if (root is Unbound 
+            and queryobj and not isinstance(queryobj, Patch)
+            and queryobj.patch):
             root = queryobj.patch.resolve(parts[0], queryobj.scope)
             
             if root is Unbound:
                 root = queryobj.patch.resolve(parts[0], queryobj.patch.default_scope)
-
-
-        # 2. Try the global scope 
-        if root is Unbound:
-            root = self.app_scope.resolve(parts[0]) 
-
-        # 3. Check the patch-scope of all the loaded patches. 
-        # (this is pretty suspect)
-        if root is Unbound:
-            for pname, pobj in self.patches.items():
-                root = pobj.resolve(parts[0])
-
-                if root is not Unbound:
-                    break
 
         # now descend the path
         if root is not Unbound:

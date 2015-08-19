@@ -147,12 +147,6 @@ class AudioScale (ScaleType):
         else:
             self.thresh_hi = 1.0 - 2*unitsize*(self.max_value-self.value_hi)
         self.thresh_low = self.thresh_hi - 2*unitsize*(self.value_hi - self.value_med)
-        log.debug("[calibrate] hi={}, low={}, inf={}, ax={}, min={}".format(
-            self.thresh_hi, self.thresh_low, self.thresh_inf, self.max_value,
-            self.min_value))
-        log.debug("[calibrate] unitsize={}, nunits={}, splitrange={}".format(
-            unitsize, nunits, split_range))
-        
 
     def value(self, fraction):
         if fraction < self.thresh_inf: 
