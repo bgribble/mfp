@@ -537,7 +537,8 @@ class Processor (object):
             if out_obj and in_obj: 
                 out_obj.connect(out_outlet, in_obj.obj_id, in_inlet)
             else: 
-                log.warning("Trying to find DSP objects, failed", 
+                log.warning("Trying to find DSP objects, failed", type(self), self.name,
+                            type(target), target.name, 
                             inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
 
         existing = self.connections_out[outlet]
