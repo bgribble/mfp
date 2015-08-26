@@ -478,7 +478,7 @@ class DialElement(SlideMeterElement):
 
         theta -= self.THETA_MIN
         scale_fraction = theta / (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
-        return self.min_value + scale_fraction * (self.max_value - self.min_value)
+        return self.scale.value(scale_fraction)
             
     def add_pixdelta(self, dx, dy):
         delta = 0.01 * dy
@@ -487,7 +487,7 @@ class DialElement(SlideMeterElement):
         return self.scale.value(scalepos)
 
     def val2theta(self, value):
-        scale_fraction = abs((value - self.min_value) / (self.max_value - self.min_value))
+        scale_fraction = self.scale.fraction(value)
         if scale_fraction > 1.0:
             scale_fraction = 1.0
         elif scale_fraction < 0:
@@ -499,7 +499,6 @@ class DialElement(SlideMeterElement):
         c = ColorDB.to_cairo(self.color_fg)
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
-        theta = self.val2theta(self.value)
         texture.clear()
 
         # draw the scale if required
