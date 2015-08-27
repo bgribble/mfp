@@ -38,10 +38,16 @@ class Send (Processor):
         if len(initargs):
             self.dest_name = initargs[0]
 
-        self.gui_params["label_text"] = self.dest_name
+        self.gui_params["label_text"] = self._mkdispname()
+
+    def _mkdispname(self):
+        nm = self.dest_name
+        if self.dest_inlet:
+            nm += '/{}'.format(self.dest_inlet)
+        return nm
 
     def onload(self, phase):
-        self._connect(self.dest_name)
+        self._connect(self.dest_name, self.dest_inlet)
 
     def method(self, message, inlet=0):
         if inlet == 0:
@@ -69,20 +75,22 @@ class Send (Processor):
 
     def _wait_connect(self):
         def recheck():
-            return self._connect(self.dest_name, False)
+            return self._connect(self.dest_name, self.dest_inlet, False)
         Send.task_nibbler.add_task(recheck)
 
-    def _connect(self, dest_name, wait=True):
+    def _connect(self, dest_name, dest_inlet, wait=True):
         # short-circuit if already conected 
-        if self.dest_name == dest_name and self.dest_obj is not None: 
+        if (self.dest_name == dest_name and self.dest_inlet == dest_inlet
+            and self.dest_obj is not None): 
             return True 
 
         # disconnect existing if needed 
-        if self.dest_obj is not None and self.dest_name != dest_name:
-            self.dest_obj.disconnect(0, self, 0)
+        if self.dest_obj is not None:
+            self.disconnect(0, self.dest_obj, self.dest_inlet)
             self.dest_obj = None 
             self.dest_obj_owned = False 
         self.dest_name = dest_name 
+        self.dest_inlet = dest_inlet
 
         # find the new endpoint
         obj = MFPApp().resolve(self.dest_name, self, True)
@@ -90,7 +98,7 @@ class Send (Processor):
         if obj is None:
             # usually we create a bus if needed.  but if it's a reference to 
             # another top-level patch, no. 
-            if ':' in self.dest_name:
+            if ':' in self.dest_name or self.dest_inlet != 0:
                 if wait:
                     self._wait_connect()
                 return False
@@ -102,11 +110,13 @@ class Send (Processor):
             self.dest_obj = obj 
             self.dest_obj_owned = False 
             
-        if self.dest_obj and ((self, 0) not in self.dest_obj.connections_in[0]):
-            self.connect(0, self.dest_obj, 0, False)
+        if self.dest_obj:
+            if (len(self.dest_obj.connections_in) < self.dest_inlet+1
+                or [self, 0] not in self.dest_obj.connections_in[self.dest_inlet]):
+                self.connect(0, self.dest_obj, self.dest_inlet, False)
 
-        self.init_args = '"%s"' % self.dest_name 
-        self.gui_params["label_text"] = self.dest_name
+        self.init_args = '"%s",%s' % (self.dest_name, self.dest_inlet) 
+        self.gui_params["label_text"] = self._mkdispname()
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
@@ -117,7 +127,13 @@ class Send (Processor):
 
     def trigger(self):
         if self.inlets[1] is not Uninit: 
-            self._connect(self.inlets[1])
+            port = 0
+            if isinstance(self.inlets[1], (list,tuple)):
+                (name, port) = self.inlets[1]
+            else:
+                name = self.inlets[1]
+
+            self._connect(name, port)
             self.inlets[1] = Uninit 
 
         if self.inlets[0] is not Uninit and self.dest_obj:
@@ -134,8 +150,9 @@ class Send (Processor):
         return pret
 
     def tooltip_extra(self):
-        return "<b>Connected to:</b> %s (%s)" % (
-            self.dest_name, self.dest_obj.obj_id if self.dest_obj else "none") 
+        return "<b>Connected to:</b> %s/%s (%s)" % (
+            self.dest_name, self.dest_inlet, 
+            self.dest_obj.obj_id if self.dest_obj else "none") 
 
 class SendSignal (Send):
     doc_tooltip_obj = "Send signals to the specified name"
@@ -219,18 +236,29 @@ class Recv (Processor):
 
         self.src_name = self.name 
         self.src_obj = None 
+        self.src_outlet = 0
+
+        if len(initargs) > 1:
+            self.src_outlet = initargs[1]
+
         if len(initargs):
             self.src_name = initargs[0]
         else: 
             self.src_name = self.name
 
-        self.gui_params["label_text"] = self.src_name
+        self.gui_params["label_text"] = self._mkdispname()
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
 
         if len(initargs):
-            self._connect(initargs[0])
+            self._connect(self.src_name, self.src_outlet)
+
+    def _mkdispname(self):
+        nm = self.src_name
+        if self.src_outlet:
+            nm += '/{}'.format(self.src_outlet)
+        return nm
 
     def delete(self):
         Processor.delete(self)
@@ -245,19 +273,19 @@ class Recv (Processor):
     def load(self, params):
         Processor.load(self, params)
         gp = params.get('gui_params', {})
-        self.gui_params['label_text'] = gp.get("label_text") or self.src_name
+        self.gui_params['label_text'] = gp.get("label_text") or self._mkdispname()
 
     def _wait_connect(self):
         def recheck():
-            ready = self._connect(self.src_name, False)
+            ready = self._connect(self.src_name, self.src_outlet, False)
             return ready
         Recv.task_nibbler.add_task(recheck)
 
-    def _connect(self, src_name, wait=True):
+    def _connect(self, src_name, src_outlet, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)
         if src_obj:
             self.src_obj = src_obj
-            self.src_obj.connect(0, self, 0, False)
+            self.src_obj.connect(self.src_outlet, self, 0, False)
             return True 
         else: 
             if wait:
@@ -266,28 +294,36 @@ class Recv (Processor):
 
     def trigger(self):
         if self.inlets[1] is not Uninit:
-            if self.inlets[1] != self.src_name:
+            port = 0
+            if isinstance(self.inlets[1], (tuple,list)):
+                (name, port) = self.inlets[1]
+            else:
+                name = self.inlets[1]
+
+            if name != self.src_name or port != self.src_outlet:
                 if self.src_obj:
                     self.src_obj = None 
-                self.init_args = '"%s"' % self.inlets[1]
-                self.gui_params["label_text"] = self.inlets[1]
-                self.src_name = self.inlets[1] 
+                self.init_args = '"%s",%s' % (name, port)
+                self.src_name = name
+                self.src_outlet = port
+                self.gui_params["label_text"] = self._mkdispname()
 
-                self._connect(self.src_name)
+                self._connect(self.src_name, self.src_outlet)
                 if self.gui_created:
                     MFPApp().gui_command.configure(self.obj_id, self.gui_params)
             self.inlets[1] = Uninit
 
         if self.src_name and self.src_obj is None:
-            self._connect(self.src_name)
+            self._connect(self.src_name, self.src_outlet)
 
         if self.inlets[0] is not Uninit:
             self.outlets[0] = self.inlets[0]
             self.inlets[0] = Uninit 
 
     def tooltip_extra(self):
-        return "<b>Connected to:</b> %s (%s)" % (
-            self.src_name, self.src_obj.obj_id if self.src_obj else "none") 
+        return "<b>Connected to:</b> %s/%s (%s)" % (
+            self.src_name, self.src_outlet, 
+            self.src_obj.obj_id if self.src_obj else "none") 
 
 class RecvSignal (Recv): 
     doc_tooltip_obj = "Receive signals to the specified name"
@@ -298,12 +334,15 @@ class RecvSignal (Recv):
 
         self.src_name = None 
         self.src_obj = None 
+        if len(initargs) > 1:
+            self.src_outlet = initargs[1]
+
         if len(initargs): 
             self.src_name = initargs[0]
         else: 
             self.src_name = self.name 
 
-        self.gui_params["label_text"] = self.src_name
+        self.gui_params["label_text"] = self._mkdispname()
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
@@ -313,7 +352,7 @@ class RecvSignal (Recv):
         self.dsp_init("noop~")
 
         if len(initargs):
-            self._connect(initargs[0])
+            self._connect(self.src_name, self.src_outlet)
 
 def register():
     MFPApp().register("send", Send)

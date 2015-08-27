@@ -95,9 +95,23 @@ class ViaElement (PatchElement):
     def text_changed_cb(self, *args):
         self.recenter_label()
 
+    def parse_label(self, txt):
+        parts = txt.split('/')
+        port = 0
+        name = txt
+        if len(parts) == 2:
+            try: 
+                port = int(parts[1])
+                name = parts[0]
+            except: 
+                pass
+        return (name, port)
+        
+
     def create_obj(self, label_text):
         if self.obj_id is None:
-            self.create(self.proc_type, '"%s"' % label_text)
+            (name, port) = self.parse_label(label_text)
+            self.create(self.proc_type, '"%s",%s' % (name, port))
 
     def move(self, x, y):
         self.position_x = x
@@ -158,7 +172,7 @@ class SendViaElement (ViaElement):
 
     def label_edit_finish(self, *args):
         ViaElement.label_edit_finish(self, *args)
-        MFPGUI().mfp.send(self.obj_id, 1, self.label.get_text())
+        MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
 class SendSignalViaElement (SendViaElement): 
     VIA_SIZE = 12 
@@ -177,7 +191,7 @@ class ReceiveViaElement (ViaElement):
 
     def label_edit_finish(self, *args):
         ViaElement.label_edit_finish(self, *args)
-        MFPGUI().mfp.send(self.obj_id, 1, self.label.get_text())
+        MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
 class ReceiveSignalViaElement (ReceiveViaElement):
     VIA_SIZE = 12 
