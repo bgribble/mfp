@@ -8,7 +8,7 @@ WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
 out = 'wafbuild'
-pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack"]
+pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo"]
 
 from waflib.Configure import conf
 import waflib
@@ -369,6 +369,9 @@ def configure(conf):
     gi_libs = [ "Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
     pip_notfound = []
+
+    # LADSPA header 
+    conf.check_cc(header_name="ladspa.h")
 
     # pip-installable libs we just mark them as not available
     for l in pip_libs:

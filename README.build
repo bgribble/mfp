@@ -74,11 +74,13 @@ LIBRARIES
 
 The "mfpdsp" C library/program needs a few C libraries with their
 development headers and pkg-config files installed:  
-
+ 
+ * ladspa.h       (LADSPA plugins)
  * glib-2.0       (GLib/GObject) 
  * json-glib-2.0  (JSON serializing/deserializing)
  * serd-0         (LV2 TTL parsing) 
  * jack           (duh)
+ * liblo          (OSC library, needed by pyliblo)
 
 You'll get errors in the "./waf configure" process if these aren't installed.  
 
