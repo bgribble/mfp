@@ -30,12 +30,12 @@ class PatchWindow(object):
 
         # install Clutter stage in Gtk window
         self.window = self.builder.get_object("main_window")
+        box = self.builder.get_object("stage_box")
         self.embed = GtkClutter.Embed.new()
+        box.pack_start(self.embed, True, True, 0)
         self.embed.set_sensitive(True)
         self.embed.set_size_request(600, 400)
         self.stage = self.embed.get_stage()
-        box = self.builder.get_object("stage_box")
-        box.pack_start(self.embed, True, True, 0)
 
         # significant widgets we will be dealing with later
         self.console_view = self.builder.get_object("console_text")
@@ -100,7 +100,6 @@ class PatchWindow(object):
         self.view_y = 0
 
         # show top-level window
-        self.stage.show()
         self.window.show_all()
 
         # set up key and mouse handling
