@@ -51,10 +51,12 @@ class XYPlot (Clutter.Group):
         self.plot_border = None
         self.x_axis = None
         self.x_axis_mode = self.LINEAR 
+        self.x_axis_scale = ticks.LinearScale(self.x_min, self.x_max)
         self.x_scale = 1.0
 
         self.y_axis = None
         self.y_axis_mode = self.LINEAR 
+        self.y_axis_scale = ticks.LinearScale(self.y_min, self.y_max)
         self.y_scale = 1.0
 
         self.plot = None
@@ -132,6 +134,7 @@ class XYPlot (Clutter.Group):
                 self.x_min = min(abs(self.x_max / 100.0), 0.1) 
             self.x_scale = float(self.plot_w) / (math.log(self.x_max / float(self.x_min)))
 
+        self.x_axis_scale.set_bounds(self.x_min, self.x_max)
         if self.x_axis:
             self.x_axis.clear()
 
@@ -143,6 +146,7 @@ class XYPlot (Clutter.Group):
                 self.y_min = min(abs(self.y_max / 100.0), 0.1) 
             self.y_scale = -1.0 * float(self.plot_h) / (math.log(self.y_max / float(self.y_min)))
 
+        self.y_axis_scale.set_bounds(self.y_min, self.y_max)
         if self.y_axis:
             self.y_axis.clear()
 
@@ -242,8 +246,6 @@ class XYPlot (Clutter.Group):
         return [x_pt, y_pt ]
 
     def draw_xaxis_cb(self, texture, ctx, px_min, px_max):
-        tickfuncs = { self.LINEAR: ticks.linear, self.LOG_DECADE: ticks.decade,
-                      self.LOG_OCTAVE: ticks.octave }
         texture.clear()
         pt_min = self.px2pt(px_min)
         pt_max = self.px2pt(px_max)
@@ -253,9 +255,8 @@ class XYPlot (Clutter.Group):
         tick_max = pt_max[0] + tick_pad
 
         # X axis
-        tick_gen = tickfuncs.get(self.x_axis_mode)
-        xticks = tick_gen(self.x_min, self.x_max, self.plot_w / self.TICK_SIZE,
-                          tick_min, tick_max)
+        xticks = self.x_axis_scale.ticks(self.plot_w / self.TICK_SIZE,
+                                         tick_min, tick_max)
         ctx.set_source_rgba(self.color_axes.red, self.color_axes.green,
                            self.color_axes.blue, self.color_axes.alpha)
         ctx.set_font_size(self.axis_font_size)
@@ -278,8 +279,6 @@ class XYPlot (Clutter.Group):
             ctx.show_text("%.5g" % tick)
 
     def draw_yaxis_cb(self, texture, ctx, px_min, px_max):
-        tickfuncs = { self.LINEAR: ticks.linear, self.LOG_DECADE: ticks.decade,
-                      self.LOG_OCTAVE: ticks.octave }
         pt_min = self.px2pt(px_min)
         pt_max = self.px2pt(px_max)
 
@@ -288,9 +287,8 @@ class XYPlot (Clutter.Group):
         tick_max = pt_min[1] + tick_pad
 
         # Y axis ticks
-        tick_gen = tickfuncs.get(self.y_axis_mode)
-        yticks = tick_gen(self.y_min, self.y_max, float(self.plot_h) / self.TICK_SIZE,
-                           tick_min, tick_max)
+        yticks = self.y_axis_scale.ticks(float(self.plot_h) / self.TICK_SIZE,
+                                         tick_min, tick_max)
         ctx.set_source_rgba(self.color_axes.red, self.color_axes.blue, 
                             self.color_axes.green, self.color_axes.alpha)
         ctx.set_font_size(self.axis_font_size)
