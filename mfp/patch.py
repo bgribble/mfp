@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 '''
 patch.py
-Patch class and methods 
+Patch class and methods
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
@@ -11,25 +11,25 @@ import os
 from .processor import Processor, AsyncOutput
 from .evaluator import Evaluator
 from .scope import LexicalScope
-from .bang import Uninit, Unbound 
+from .bang import Uninit, Unbound
 from mfp import log
-from .utils import profile 
+from .utils import profile
 
 class Patch(Processor):
 
     EXPORT_LAYER = "Interface"
     display_type = "patch"
-    default_context = None 
-    
+    default_context = None
+
     def __init__(self, init_type, init_args, patch, scope, name, context=None):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
         if context is None:
             if patch is None:
                 self.context = self.default_context
             else:
-                self.context = patch.context 
-        else: 
-            self.context = context 
+                self.context = patch.context
+        else:
+            self.context = context
 
         self.file_origin = None
 
@@ -40,7 +40,7 @@ class Patch(Processor):
 
         self.inlet_objects = []
         self.outlet_objects = []
-        self.dispatch_objects = [] 
+        self.dispatch_objects = []
 
         self.init_bindings()
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
@@ -51,23 +51,23 @@ class Patch(Processor):
         if patch is None:
             self.gui_params['top_level'] = True
         else:
-            self.gui_params['top_level'] = False 
+            self.gui_params['top_level'] = False
 
-    def init_bindings(self): 
+    def init_bindings(self):
         from .mfp_app import MFPApp
         self.default_scope.bind("self", self)
         self.default_scope.bind("patch", self)
         self.default_scope.bind("app", MFPApp())
 
     def args(self, index=None):
-        if index is None: 
+        if index is None:
             return self.parsed_initargs
         elif self.parsed_initargs is None or index >= len(self.parsed_initargs):
-            return Uninit 
-        else: 
+            return Uninit
+        else:
             return self.parsed_initargs[index]
 
-    def kwargs(self, name=None): 
+    def kwargs(self, name=None):
         if name is None:
             return self.parsed_kwargs
         else:
@@ -81,7 +81,7 @@ class Patch(Processor):
     #############################
 
     def bind(self, name, scope, obj):
-        if isinstance(scope, Patch): 
+        if isinstance(scope, Patch):
             scope = scope.scopes['__patch__']
         return scope.bind(name, obj)
 
@@ -91,8 +91,8 @@ class Patch(Processor):
             scope.unbind(name)
 
     def resolve(self, name, scope=None):
-        found = False 
-        obj = False 
+        found = False
+        obj = False
 
         if isinstance(scope, LexicalScope):
             found, obj = scope.query(name)
@@ -100,18 +100,18 @@ class Patch(Processor):
         if (not found) and scope is not None and scope in self.scopes:
             s = self.scopes.get(scope)
             found, obj = s.query(name)
-            
-        if (not found) and name in self.scopes: 
+
+        if (not found) and name in self.scopes:
             found = True
             obj = self.scopes.get(name)
 
-        if not found: 
+        if not found:
             found, obj = self.default_scope.query(name)
 
-        if found: 
-            return obj 
-        else: 
-            return Unbound 
+        if found:
+            return obj
+        else:
+            return Unbound
 
     def add_scope(self, name):
         if name not in self.scopes:
@@ -124,13 +124,13 @@ class Patch(Processor):
     def rename(self, new_name):
         from .mfp_app import MFPApp
         if new_name == self.name:
-            return 
-        else: 
+            return
+        else:
             oldname = self.name
             Processor.rename(self, new_name)
-            if self.patch is None and oldname in MFPApp().patches: 
+            if self.patch is None and oldname in MFPApp().patches:
                 del MFPApp().patches[oldname]
-                MFPApp().patches[new_name] = self 
+                MFPApp().patches[new_name] = self
 
     #############################
     # evaluator
@@ -180,7 +180,7 @@ class Patch(Processor):
             self.outlet_objects[o].outlets[0] = Uninit
 
     def method(self, message, inlet=0):
-        if len(self.dispatch_objects): 
+        if len(self.dispatch_objects):
             for d in self.dispatch_objects:
                 d.send(message)
         else:
@@ -191,11 +191,11 @@ class Patch(Processor):
             self.outlet_objects[o].outlets[0] = Uninit
 
     def baseclass_method(self, message, inlet=0):
-        Processor.method(self, message, inlet) 
+        Processor.method(self, message, inlet)
 
     def add(self, obj):
         if self.objects.has_key(obj.obj_id):
-            return 
+            return
 
         self.objects[obj.obj_id] = obj
         if obj.init_type in ('inlet', 'inlet~'):
@@ -206,9 +206,9 @@ class Patch(Processor):
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
             if obj.init_type == 'inlet~':
-                self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects) 
+                self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects)
                                     if p[1] and p[1].init_type == 'inlet~' ]
-                self.gui_params['dsp_inlets'] = self.dsp_inlets 
+                self.gui_params['dsp_inlets'] = self.dsp_inlets
 
         elif obj.init_type in ('outlet', 'outlet~'):
             num = obj.outletnum
@@ -218,9 +218,9 @@ class Patch(Processor):
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
             if obj.init_type == 'outlet~':
-                self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects) 
+                self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects)
                                     if p[1] and p[1].init_type == 'outlet~' ]
-                self.gui_params['dsp_outlets'] = self.dsp_outlets 
+                self.gui_params['dsp_outlets'] = self.dsp_outlets
 
         elif obj.init_type == 'dispatch':
             self.dispatch_objects.append(obj)
@@ -230,24 +230,24 @@ class Patch(Processor):
             if obj.scope is not None and obj.name is not None:
                 self.unbind(obj.name, obj.scope)
             del self.objects[obj.obj_id]
-        except KeyError: 
+        except KeyError:
             print "Error deleting obj", obj, "can't find key", obj.obj_id
             import traceback
             traceback.print_exc()
 
         try:
             self.inlet_objects.remove(obj)
-            self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects) 
+            self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects)
                                if p[1] and p[1].init_type == 'inlet~' ]
-            self.gui_params['dsp_inlets'] = self.dsp_inlets 
+            self.gui_params['dsp_inlets'] = self.dsp_inlets
         except ValueError:
             pass
 
         try:
             self.outlet_objects.remove(obj)
-            self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects) 
+            self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects)
                                 if p[1] and p[1].init_type == 'outlet~' ]
-            self.gui_params['dsp_outlets'] = self.dsp_outlets 
+            self.gui_params['dsp_outlets'] = self.dsp_outlets
         except ValueError:
             pass
 
@@ -258,25 +258,25 @@ class Patch(Processor):
 
 
     ############################
-    # DSP inlet/outlet access 
+    # DSP inlet/outlet access
     ############################
 
     def dsp_inlet(self, inlet):
-        try: 
+        try:
             return (self.inlet_objects[inlet].dsp_obj, 0)
-        except IndexError: 
+        except IndexError:
             log.error("Programming error: asked for inlet '%d' in patch %s but it has %d"
                       % (inlet, self.name, len(self.inlet_objects)))
-            return (None, 0) 
+            return (None, 0)
 
-        
+
     def dsp_outlet(self, outlet):
-        try: 
+        try:
             return (self.outlet_objects[outlet].dsp_obj, 0)
-        except IndexError: 
+        except IndexError:
             log.error("Programming error: asked for outlet '%d' in patch %s but it has %d"
                       % (outlet, self.name, len(self.outlet_objects)))
-            return (None, 0) 
+            return (None, 0)
 
     ############################
     # load/save
@@ -294,7 +294,7 @@ class Patch(Processor):
 
         basefile = os.path.basename(filename)
         parts = os.path.splitext(basefile)
-        
+
         log.debug("Patch.register_file: registering type '%s' from file '%s'"
                   % (parts[0], filename))
         MFPApp().register(parts[0], factory)
@@ -306,11 +306,11 @@ class Patch(Processor):
         if MFPApp().no_gui:
             return False
         elif self.gui_created:
-            return True 
+            return True
 
         self.update_export_bounds()
 
-        # create the basic element info 
+        # create the basic element info
         Processor.create_gui(self, **kwargs)
 
         if self.gui_params.get("top_level"):
@@ -323,29 +323,29 @@ class Patch(Processor):
             for oid, obj in self.objects.items():
                 for srcport, connections in enumerate(obj.connections_out):
                     for dstobj, dstport in connections:
-                        if (obj.display_type not in ("hidden", "sendvia", "sendsignalvia")  
+                        if (obj.display_type not in ("hidden", "sendvia", "sendsignalvia")
                             and dstobj.display_type != "hidden"):
-                            MFPApp().gui_command.connect(obj.obj_id, srcport, 
+                            MFPApp().gui_command.connect(obj.obj_id, srcport,
                                                          dstobj.obj_id, dstport)
             MFPApp().gui_command.load_complete()
             MFPApp().gui_command.select(self.obj_id)
         else:
             self.create_export_gui()
-        return True 
+        return True
 
     def delete_gui(self):
         if not self.gui_created:
-            return True 
+            return True
 
         for oid, obj in self.objects.items():
-            obj.gui_created = False 
+            obj.gui_created = False
             #obj.delete_gui()
 
         Processor.delete_gui(self)
-        return True 
+        return True
 
-    def has_unsaved_changes(self): 
-        import difflib 
+    def has_unsaved_changes(self):
+        import difflib
         import copy
         if self.file_origin:
             oldjson = open(self.file_origin, 'r').read()
@@ -358,31 +358,31 @@ class Patch(Processor):
             self.gui_params = saved_gui
 
             cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
-            for dline in cdiff: 
+            for dline in cdiff:
                 print dline
 
-            if oldjson != newjson: 
+            if oldjson != newjson:
                 log.warning("Unsaved changes in '%s'" % self.name, "(%s)" % self.file_origin)
-                return True 
+                return True
         elif len(self.objects):
             log.warning("Unsaved changes in new patch '%s'" % self.name)
             return True
-        return False 
-            
+        return False
+
     def save_file(self, filename):
         basefile = os.path.basename(filename)
         parts = os.path.splitext(basefile)
-        
+
         self.update_export_bounds()
         self.init_type = parts[0]
-       
-        if os.path.isfile(filename): 
+
+        if os.path.isfile(filename):
             os.rename(filename, filename+'~')
 
         with open(filename, "w") as savefile:
             savefile.write(self.json_serialize())
 
-        self.file_origin = filename 
+        self.file_origin = filename
 
     def save_lv2(self, plugname, filename):
         import os.path
@@ -395,43 +395,47 @@ class Patch(Processor):
 
     def _load_file(self, filename):
         from .mfp_app import MFPApp
-        from .utils import splitpath 
+        from .utils import splitpath
 
         searchpath = MFPApp().searchpath or ""
         searchdirs = splitpath(searchpath)
-        jsdata = None 
-        filepath = None 
+        jsdata = None
+        filepath = None
 
         for d in searchdirs:
             path = os.path.join(d, filename)
-            try: 
+            try:
                 os.stat(path)
                 jsdata = open(path, 'r').read()
-                filepath = path 
+                filepath = path
             except OSError:
-                pass 
+                pass
 
         if jsdata is not None:
             self.json_deserialize(jsdata)
-            self.file_origin = filepath 
+            self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
             for phase in (0,1):
+                log.debug("onload phase", phase, "starting..")
                 for obj_id, obj in self.objects.items():
                     if obj.do_onload:
+                        log.debug("about to call onload for", obj, obj.name)
                         obj.onload(phase)
+                        log.debug("done")
+                log.debug("onload phase", phase, "done")
 
-    def obj_is_exportable(self, obj): 
+    def obj_is_exportable(self, obj):
         if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
             and obj.gui_params.get("no_export", False) is not True
-            and "display_type" in obj.gui_params 
-            and (obj.gui_params.get("display_type") not in 
+            and "display_type" in obj.gui_params
+            and (obj.gui_params.get("display_type") not in
                  ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
             return True
-        else: 
-            return False 
+        else:
+            return False
 
     def update_export_bounds(self):
-        min_x = min_y = max_x = max_y = None 
+        min_x = min_y = max_x = max_y = None
 
         for obj_id, obj in self.objects.items():
             if self.obj_is_exportable(obj):
@@ -459,8 +463,8 @@ class Patch(Processor):
             self.gui_params["export_w"] = max_x - min_x + 2
             self.gui_params["export_h"] = max_y - min_y + 2
 
-    def create_export_gui(self): 
-        # non-toplevel Patch means show the Export UI layer only 
+    def create_export_gui(self):
+        # non-toplevel Patch means show the Export UI layer only
         for oid, obj in self.objects.items():
             if self.obj_is_exportable(obj):
                 obj.create_gui(is_export=True)
@@ -468,12 +472,12 @@ class Patch(Processor):
     def delete(self):
         from .mfp_app import MFPApp
 
-        if self.gui_created: 
+        if self.gui_created:
             self.delete_gui()
 
         Processor.delete(self)
 
-        # first pass: everything but inlets/outlets 
+        # first pass: everything but inlets/outlets
         to_delete = self.objects.values()
         for obj in to_delete:
             obj.delete()
@@ -483,6 +487,6 @@ class Patch(Processor):
 
 # load extension methods
 import patch_json
-import patch_lv2 
-import patch_clonescope 
+import patch_lv2
+import patch_clonescope
 
