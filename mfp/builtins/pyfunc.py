@@ -216,7 +216,7 @@ class PyAutoWrap(Processor):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         elif self.argcount:
-            args = self.inlets[:self.argcount]
+            args = [ x for x in self.inlets[:self.argcount] if x is not Uninit]
             self.outlets[0] = self.thunk(*args)
         else: 
             args = self.inlets[0]

@@ -1,8 +1,7 @@
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
-from ..method import MethodCall
-
+from ..bang import Uninit
 
 class FileIO(Processor):
     doc_tooltip_obj = "File I/O processor"
@@ -31,11 +30,13 @@ class FileIO(Processor):
                 self.open()
 
     def trigger(self):
-        cmd = self.inlets[0]
-        if isinstance(cmd, MethodCall):
-            self.outlets[0] = cmd.call(self)
-        else:
-            self.fileobj.write(cmd)
+        self.fileobj.write(self.inlets[0])
+        self.inlets[0] = Uninit
+
+    def method(self, message, inlet):
+        rv = message.call(self)
+        self.inlets[inlet] = Uninit
+        self.outlets[0] = rv
 
     def read(self, size=None):
         if size is None:
