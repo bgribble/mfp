@@ -7,6 +7,7 @@ Copyright (c) 2010-2012 Bill Gribble <grib@billgribble.com>
 
 import math 
 import re 
+import string
 import sys, os 
 import argparse
 from datetime import datetime, timedelta
@@ -34,6 +35,8 @@ def add_evaluator_defaults():
     Evaluator.bind_global("os", os)
     Evaluator.bind_global("sys", sys)
     Evaluator.bind_global("re", re)
+    Evaluator.bind_global("string", string)
+
     Evaluator.bind_global("datetime", datetime)
     Evaluator.bind_global("timedelta", timedelta)
 

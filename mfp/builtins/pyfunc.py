@@ -208,6 +208,10 @@ class PyAutoWrap(Processor):
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
         Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name)
 
+        for index, arg in enumerate(initargs):
+            if index < len(self.inlets):
+                self.inlets[index+1] = arg
+
     def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)

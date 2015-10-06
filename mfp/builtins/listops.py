@@ -97,6 +97,24 @@ class Zip (Processor):
         else: 
             self.outlets[0] = zip(*self.inlets)
 
+class Map (Processor):
+    doc_tooltip_obj = "Apply a function to each list element"
+    doc_tooltip_inlet = [ "List", "Function to apply (default: initarg 1)"]
+    doc_tooltip_outlet = [ "List output" ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = patch.parse_args(init_args)
+        
+        self.func = lambda x: x 
+        if len(initargs):
+            self.inlets[1] =  initargs[0]
+
+
+    def trigger(self):
+        self.outlets[0] = map(self.inlets[1], self.inlets[0])
+
+
 def list_car(ll):
     return ll[0]
 
@@ -110,5 +128,7 @@ def register():
     MFPApp().register("unpack", Unpack)
     MFPApp().register("zip", Zip)
     MFPApp().register("append", Append)
+    MFPApp().register("map", Map)
+
 
 
