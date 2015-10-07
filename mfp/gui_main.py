@@ -28,8 +28,8 @@ def clutter_do(func):
 def add_color_defaults(): 
     from .gui.colordb import ColorDB
     ColorDB().insert("default_field", ColorDB().find(255, 255, 255, 255))
-    ColorDB().insert("default_bg", ColorDB().find(255, 255, 255, 128))
-    ColorDB().insert("default_bg_edit", ColorDB().find(200, 200, 255, 128))
+    ColorDB().insert("default_bg", ColorDB().find(255, 255, 255, 255))
+    ColorDB().insert("default_bg_edit", ColorDB().find(200, 200, 255, 255))
     ColorDB().insert("default_fg_unsel", ColorDB().find(0, 0, 0, 255))
     ColorDB().insert("default_fg_sel", ColorDB().find(255, 0, 0, 255))
     ColorDB().insert("default_txtcursor", ColorDB().find(0, 0, 0, 64))
