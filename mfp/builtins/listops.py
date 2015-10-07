@@ -4,9 +4,10 @@ p_listops.py: Wrappers for common list operations
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
-
+from mfp import log
 from ..processor import Processor
 from ..mfp_app import MFPApp
+from ..bang import Uninit
 
 class Pack (Processor):
     doc_tooltip_obj = "Collect inputs into a list" 
@@ -115,12 +116,33 @@ class Map (Processor):
         self.outlets[0] = map(self.inlets[1], self.inlets[0])
 
 
-def list_car(ll):
-    return ll[0]
+class Slice (Processor):
+    doc_tooltip_obj = "Extract a slice of an iterable"
+    doc_tooltip_inlet = ["List", "Start element (default: initarg 0)", 
+                         "End element (default: initarg 1)", 
+                         "Stride (default: initarg 2)"]
+    doc_tooltip_outlet = [ "List output" ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = patch.parse_args(init_args)
+        
+        self.func = lambda x: x 
+        if len(initargs) > 2:
+            self.inlets[3] = initargs[2]
+        if len(initargs) > 1:
+            self.inlets[2] = initargs[1]
+        if len(initargs) > 0:
+            self.inlets[1] = initargs[0]
+
+    def trigger(self):
+        start = self.inlets[1] if self.inlets[1] is not Uninit else None
+        stop = self.inlets[2] if self.inlets[2] is not Uninit else None
+        stride  = self.inlets[3] if self.inlets[3] is not Uninit else 1
+        slicer = slice(start, stop, stride)
+        self.outlets[0] = self.inlets[0][slicer]
 
 
-def list_cdr(ll):
-    return ll[1:]
 
 
 def register():
@@ -129,6 +151,7 @@ def register():
     MFPApp().register("zip", Zip)
     MFPApp().register("append", Append)
     MFPApp().register("map", Map)
+    MFPApp().register("slice", Slice)
 
 
 

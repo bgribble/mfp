@@ -319,6 +319,9 @@ def register():
     MFPApp().register("apply", ApplyMethod)
     MFPApp().register("func", PyFunc)
 
+    mk_unary(lambda l: l[0], "first")
+    mk_unary(lambda l: l[1:], "rest")
+
     mk_binary(operator.add, "+", "Add")
     mk_binary(operator.sub, "-", "Subtract")
     mk_binary(operator.mul, "*", "Multiply")
