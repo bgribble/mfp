@@ -415,14 +415,11 @@ class Patch(Processor):
             self.json_deserialize(jsdata)
             self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
-            for phase in (0,1):
-                log.debug("onload phase", phase, "starting..")
-                for obj_id, obj in self.objects.items():
-                    if obj.do_onload:
-                        log.debug("about to call onload for", obj, obj.name)
-                        obj.onload(phase)
-                        log.debug("done")
-                log.debug("onload phase", phase, "done")
+            if not MFPApp().no_onload:
+                for phase in (0,1):
+                    for obj_id, obj in self.objects.items():
+                        if obj.do_onload:
+                            obj.onload(phase)
 
     def obj_is_exportable(self, obj):
         if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER

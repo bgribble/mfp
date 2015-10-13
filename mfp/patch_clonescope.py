@@ -135,10 +135,11 @@ def clonescope(self, scopename, num_copies, **kwargs):
                         newobj.connect(port_num, tobj_newid, tport)
 
         # make sure [loadbang] get triggered
-        for phase in (0,1):
-            for obj_id, obj in obj_copied.items():
-                if obj.do_onload:
-                    obj.onload(phase)
+        if not MFPApp().no_onload:
+            for phase in (0,1):
+                for obj_id, obj in obj_copied.items():
+                    if obj.do_onload:
+                        obj.onload(phase)
 
     for name, srcobj in ui_items.items():
         # kludge -- change labels in the UI template objects

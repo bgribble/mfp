@@ -29,6 +29,7 @@ class MFPApp (Singleton):
         self.no_gui = False
         self.no_dsp = False
         self.no_restart = False 
+        self.no_onload = False 
         self.debug = False
         self.debug_remote = False 
         self.osc_port = None 

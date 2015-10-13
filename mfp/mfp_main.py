@@ -145,6 +145,7 @@ def main():
     app.no_dsp = args.get("no_dsp") or args.get("help_builtins")
     app.no_default = args.get("no_default")
     app.no_restart = args.get("no_restart")
+    app.no_onload = args.get("no_onload")
     app.dsp_inputs = args.get("inputs")
     app.dsp_outputs = args.get("outputs")
     app.osc_port = args.get("osc_udp_port")
