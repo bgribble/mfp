@@ -126,6 +126,8 @@ def main():
                         help="Do not create a default patch")
     parser.add_argument("--no-restart", action="store_true", 
                         help="Do not restart DSP engine if it crashes")
+    parser.add_argument("--no-onload", action="store_true", 
+                        help="Do not run onload/loadbang functions")
     parser.add_argument("--help-builtins", action="store_true", 
                         help="Display help on builtin objects and exit") 
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
