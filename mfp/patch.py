@@ -323,8 +323,10 @@ class Patch(Processor):
             for oid, obj in self.objects.items():
                 for srcport, connections in enumerate(obj.connections_out):
                     for dstobj, dstport in connections:
-                        if (obj.display_type not in ("hidden", "sendvia", "sendsignalvia")
-                            and dstobj.display_type != "hidden"):
+                        if (obj.display_type not in (
+                                "hidden", "sendvia", "sendsignalvia")
+                            and dstobj.display_type not in (
+                                "hidden", "recvvia", "recvsignalvia")):
                             MFPApp().gui_command.connect(obj.obj_id, srcport,
                                                          dstobj.obj_id, dstport)
             MFPApp().gui_command.load_complete()

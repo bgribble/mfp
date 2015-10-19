@@ -1,8 +1,8 @@
 #! /usr/bin/env python2.6
 '''
-p_var.py: Variable holder
+var.py: Variable holder
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2010-2015 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..processor import Processor

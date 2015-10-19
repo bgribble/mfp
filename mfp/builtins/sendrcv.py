@@ -2,7 +2,7 @@
 '''
 sendrcv.py: Bus/virtual wire objects.
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2012-2015 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..utils import TaskNibbler
@@ -224,6 +224,8 @@ class SignalBus (Processor):
         self.outlets[0] = self.inlets[0]
 
 class Recv (Processor):
+    display_type = "recvvia" 
+
     doc_tooltip_obj = "Receive messages to the specified name" 
     doc_tooltip_inlet = [ "Passthru input" ]
     doc_tooltip_outlet = [ "Passthru output" ]
@@ -326,6 +328,7 @@ class Recv (Processor):
             self.src_obj.obj_id if self.src_obj else "none") 
 
 class RecvSignal (Recv): 
+    display_type = "recvsignalvia" 
     doc_tooltip_obj = "Receive signals to the specified name"
     
     def __init__(self, init_type, init_args, patch, scope, name):

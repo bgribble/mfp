@@ -508,6 +508,7 @@ class Processor (object):
 
     def connect(self, outlet, target, inlet, show_gui=True):
         from .mfp_app import MFPApp
+        from .builtins.sendrcv import Recv
 
         # make sure this is a possibility 
         if not isinstance(target, Processor):
@@ -549,7 +550,11 @@ class Processor (object):
         if (self, outlet) not in existing:
             existing.append((self, outlet))
 
-        if self.gui_created and show_gui:
+        if (self.gui_created and show_gui and 
+            self.display_type not in (
+                "hidden", "sendvia", "sendsignalvia")
+            and target.display_type not in (
+                "hidden", "recvvia", "recvsignalvia")):
             MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet)
         return True
 
