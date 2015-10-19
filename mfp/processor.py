@@ -508,7 +508,6 @@ class Processor (object):
 
     def connect(self, outlet, target, inlet, show_gui=True):
         from .mfp_app import MFPApp
-        from .builtins.sendrcv import Recv
 
         # make sure this is a possibility 
         if not isinstance(target, Processor):
