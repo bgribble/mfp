@@ -16,8 +16,6 @@ from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 from ..bang import Bang
 import math
-from mfp import log 
-
 
 def circle(ctx, xorig, yorig, w, h):
     w = w-1.0
@@ -70,7 +68,7 @@ class ButtonElement (PatchElement):
         self.label.connect('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
         self.label.set_use_markup(True)
-        self.label_text = None 
+        self.label_text = ''
         
         self.set_reactive(True)
         self.add_actor(self.texture)
@@ -327,4 +325,7 @@ class ToggleIndicatorElement (ButtonElement):
             ct.fill()
         else:
             ct.stroke()
+
+
+
 
