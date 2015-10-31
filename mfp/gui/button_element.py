@@ -170,14 +170,14 @@ class ButtonElement (PatchElement):
             set_text = True 
 
         if "label_text" in params:
-            self.label_text = params.get("label_text")
+            self.label_text = params.get("label_text", '')
             set_text = True
 
         if set_text:
             if self.indicator:
-                self.label.set_markup("<b>%s</b>" % self.label_text)
+                self.label.set_markup("<b>%s</b>" % (self.label_text or ''))
             else:
-                self.label.set_markup(self.label_text)
+                self.label.set_markup(self.label_text or '')
             self.center_label()
 
         PatchElement.configure(self, params)
@@ -244,8 +244,7 @@ class BangButtonElement (ButtonElement):
         if "message" in params:
             self.message = params.get("message")
 
-        PatchElement.configure(self, params)
-        self.redraw()
+        ButtonElement.configure(self, params)
 
 
 class ToggleButtonElement (ButtonElement):
@@ -278,7 +277,6 @@ class ToggleButtonElement (ButtonElement):
         if "off_message" in params:
             self.off_message = params.get("off_message")
         ButtonElement.configure(self, params)
-        self.redraw()
 
     def create(self, init_type, init_args):
         ButtonElement.create(self, init_type, init_args)
