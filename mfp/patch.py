@@ -13,7 +13,7 @@ from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit, Unbound
 from mfp import log
-from .utils import profile
+
 
 class Patch(Processor):
 
@@ -308,8 +308,6 @@ class Patch(Processor):
         elif self.gui_created:
             return True
 
-        self.update_export_bounds()
-
         # create the basic element info
         Processor.create_gui(self, **kwargs)
 
@@ -329,9 +327,11 @@ class Patch(Processor):
                                 "hidden", "recvvia", "recvsignalvia")):
                             MFPApp().gui_command.connect(obj.obj_id, srcport,
                                                          dstobj.obj_id, dstport)
+            self.update_export_bounds()
             MFPApp().gui_command.load_complete()
             MFPApp().gui_command.select(self.obj_id)
         else:
+            self.update_export_bounds()
             self.create_export_gui()
         return True
 
@@ -462,11 +462,20 @@ class Patch(Processor):
             self.gui_params["export_w"] = max_x - min_x + 2
             self.gui_params["export_h"] = max_y - min_y + 2
 
+        # kludge
+        self.gui_params["width"] = max(self.gui_params.get('width'),
+                                       self.gui_params.get('export_w') or 0)
+        self.gui_params["height"] = max(self.gui_params.get('height'), 
+                                        (self.gui_params.get('export_h') or 0) + 20)
+
     def create_export_gui(self):
+        from .mfp_app import MFPApp
         # non-toplevel Patch means show the Export UI layer only
         for oid, obj in self.objects.items():
             if self.obj_is_exportable(obj):
                 obj.create_gui(is_export=True)
+        self.update_export_bounds()
+        MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def delete(self):
         from .mfp_app import MFPApp
