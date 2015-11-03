@@ -189,8 +189,8 @@ class MessageBus (Processor):
     save_to_patch = False 
 
     def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         self.last_value = Uninit
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         self.outlets[0] = self.last_value = self.inlets[0]
