@@ -146,7 +146,7 @@ class PyEval(Processor):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         else:
-            self.outlets[0] = self.patch.eval(self.inlets[0], self.bindings)
+            self.outlets[0] = self.patch.parse_obj(self.inlets[0], **self.bindings)
 
     def clear(self):
         self.bindings = {}

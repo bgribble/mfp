@@ -44,6 +44,10 @@ class MFPApp (Singleton):
         self.in_latency = 0
         self.out_latency = 0
         self.socket_path = "/tmp/mfp_rpcsock"
+        self.batch_mode = False
+        self.batch_obj = None
+        self.batch_args = None 
+        self.batch_input_file = None 
 
         # RPC host 
         self.rpc_listener = None 
@@ -148,6 +152,30 @@ class MFPApp (Singleton):
         self.pluginfo.index_ladspa()
         log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo), 
                                                            len(self.pluginfo.libinfo)))
+    def exec_batch(self):
+        # configure logging
+        log.log_raw = True 
+        log.log_debug = False
+
+        self.open_file(None)
+        p = self.patches.get('default')
+
+        reader = self.create("file", self.batch_input_file or "sys.stdin",
+                             p, p.default_scope, "reader")
+        looper = self.create("for", None, p, p.default_scope, "looper")
+        evaluator = self.create("eval", None, p, p.default_scope, "evaluator")
+        batch = self.create(self.batch_obj, self.batch_args, 
+                            p, p.default_scope, "batch")
+        printer = self.create("print", None, p, p.default_scope, "printer") 
+       
+        reader.connect(0, looper, 0)
+        looper.connect(0, evaluator, 0)
+        evaluator.connect(0, batch, 0)
+        batch.connect(0, printer, 0)
+
+        # start the reader
+        reader.send(MethodCall("readlines"))
+
 
     def start_dsp(self):
         from .dsp_object import DSPObject, DSPContext

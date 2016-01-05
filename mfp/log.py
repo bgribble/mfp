@@ -6,6 +6,7 @@ log_time_base = datetime.now()
 log_module = "main"
 
 log_file = sys.stdout
+log_raw = False 
 log_func = None
 log_debug = True
 log_force_console = False 
@@ -14,8 +15,12 @@ ts_trans = string.maketrans("0123456789", "xxxxxxxxxx")
 
 def make_log_entry(tag, *parts):
     global log_time_base
+    global log_raw 
 
     msg = ' '.join([str(p) for p in parts])
+    if log_raw: 
+        return msg + '\n'
+
     dt = (datetime.now() - log_time_base).total_seconds()
     ts = "%.3f" % dt
     leader = "[%8s %6s]" % (ts, tag)

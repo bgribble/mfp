@@ -134,6 +134,12 @@ def main():
                         help="Path to create Unix-domain socket for RPC")
     parser.add_argument("-d", "--debug", action="store_true", 
                         help="Enable debugging behaviors")
+    parser.add_argument("-b", "--batch", action="store_true",
+                        help="Run in batch mode")
+    parser.add_argument("-a", "--args", default='', 
+                        help="Batch mode patch arguments")
+    parser.add_argument("-I", "--batch-input", default=None, 
+                        help="Batch mode input file")
     args = vars(parser.parse_args())
 
     # test imports to make sure everything is installed properly 
@@ -156,6 +162,13 @@ def main():
     app.max_blocksize = args.get("max_bufsize") 
     app.socket_path = args.get("socket_path")
     app.debug = args.get("debug")
+
+    if args.get('batch'):
+        app.batch_mode = True 
+        app.batch_args = args.get("args")
+        app.batch_input_file = args.get("batch_input")
+        app.no_gui = True 
+        log.debug("Starting in batch mode")
 
     if args.get("verbose"):
         log.log_force_console = True 
@@ -229,26 +242,31 @@ def main():
                     print "%-12s : No documentation found" % ("[%s]" % name,)
         app.finish()
     else: 
-        # create initial patch
         patchfiles = args.get("patchfile")
-        if len(patchfiles): 
-            for p in patchfiles: 
-                app.open_file(p)
-        elif not app.no_default: 
-            app.open_file(None)
+        if app.batch_mode: 
+            if len(patchfiles) == 1:
+                app.batch_obj = patchfiles[0]
+                app.exec_batch()
+            else:
+                log.debug("Batch mode requires exactly one input file")
+                app.finish()
+        else:
+            # create initial patch
+            if len(patchfiles): 
+                for p in patchfiles: 
+                    app.open_file(p)
+            elif not app.no_default: 
+                app.open_file(None)
+            # allow session management 
+            app.session_management_setup()
 
-        # allow session management 
-        app.session_management_setup()
-
+        log.debug("Quitting in main()")
         try: 
             QuittableThread.wait_for_all()
         except (KeyboardInterrupt, SystemExit):
             log.log_force_console = True 
-            log.debug("Quit request received, exiting")
             app.finish()
 
         for thread in app.leftover_threads:
-            log.debug("Waiting for thread", thread)
             thread.join()
-            log.debug("Joined thread", thread)
 
