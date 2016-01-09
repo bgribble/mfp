@@ -134,12 +134,17 @@ def main():
                         help="Path to create Unix-domain socket for RPC")
     parser.add_argument("-d", "--debug", action="store_true", 
                         help="Enable debugging behaviors")
+
+    # batch mode options
     parser.add_argument("-b", "--batch", action="store_true",
                         help="Run in batch mode")
     parser.add_argument("-a", "--args", default='', 
                         help="Batch mode patch arguments")
     parser.add_argument("-I", "--batch-input", default=None, 
                         help="Batch mode input file")
+    parser.add_argument("-e", "--batch-eval", action="store_true",
+                        help="Call eval() on input before sending")
+
     args = vars(parser.parse_args())
 
     # test imports to make sure everything is installed properly 
@@ -167,8 +172,10 @@ def main():
         app.batch_mode = True 
         app.batch_args = args.get("args")
         app.batch_input_file = args.get("batch_input")
+        app.batch_eval = args.get("batch_eval", False)
         app.no_gui = True 
-        log.debug("Starting in batch mode")
+        log.log_raw = True
+        log.log_quiet = True 
 
     if args.get("verbose"):
         log.log_force_console = True 
@@ -247,6 +254,7 @@ def main():
             if len(patchfiles) == 1:
                 app.batch_obj = patchfiles[0]
                 app.exec_batch()
+                app.finish()
             else:
                 log.debug("Batch mode requires exactly one input file")
                 app.finish()

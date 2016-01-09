@@ -6,6 +6,7 @@ log_time_base = datetime.now()
 log_module = "main"
 
 log_file = sys.stdout
+log_quiet = False
 log_raw = False 
 log_func = None
 log_debug = True
@@ -16,10 +17,14 @@ ts_trans = string.maketrans("0123456789", "xxxxxxxxxx")
 def make_log_entry(tag, *parts):
     global log_time_base
     global log_raw 
+    global log_quiet
 
     msg = ' '.join([str(p) for p in parts])
-    if log_raw: 
-        return msg + '\n'
+    if log_raw:
+        if (not log_quiet or tag == "print"): 
+            return msg + '\n'
+        else: 
+            return None
 
     dt = (datetime.now() - log_time_base).total_seconds()
     ts = "%.3f" % dt
@@ -37,17 +42,18 @@ def write_log_entry(msg, level=0):
     global log_func
 
     logged = False 
-    if log_func:
+    if msg and log_func:
         log_func(msg, level)
         logged = True 
 
-    if log_file and ((not logged) or log_force_console):
+    if log_file and msg and ((not logged) or log_force_console):
         log_file.write(msg)
 
 def rpclog(msg, level):
     levels = { 0: "DEBUG", 1: "WARNING", 2: "ERROR", 3: "FATAL" }
-    print "[LOG] %s: %s" % (levels.get(level, "DEBUG"), msg)
-    sys.stdout.flush()
+    if msg:
+        print "[LOG] %s: %s" % (levels.get(level, "DEBUG"), msg)
+        sys.stdout.flush()
 
 def error(* parts, **kwargs):
     global log_module
