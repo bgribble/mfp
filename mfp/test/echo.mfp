@@ -1,0 +1,91 @@
+{
+    "gui_params": {
+        "display_type": "patch",
+        "height": 20,
+        "initargs": "",
+        "layers": [
+            [
+                "Layer 0",
+                "__patch__"
+            ]
+        ],
+        "name": "echo",
+        "num_inlets": 1,
+        "num_outlets": 1,
+        "obj_id": 0,
+        "scope": "__app__",
+        "top_level": true,
+        "width": 0
+    },
+    "hot_inlets": [
+        0
+    ],
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        5,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 153.2911376953125,
+                "position_y": 128.2281494140625,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 60.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "inlet"
+        },
+        "5": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "display_type": "processor",
+                "height": 25.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "no_export": false,
+                "position_x": 153.2911376953125,
+                "position_y": 224.2281494140625,
+                "scope": "__patch__",
+                "show_label": true,
+                "update_required": false,
+                "width": 71.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_005",
+            "osc_methods": [],
+            "properties": {},
+            "type": "outlet"
+        }
+    },
+    "scopes": {
+        "__patch__": {
+            "patch": 0,
+            "processor_001": 1,
+            "processor_005": 5,
+            "self": 0
+        }
+    },
+    "type": "echo"
+}

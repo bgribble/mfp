@@ -156,6 +156,7 @@ class MFPApp (Singleton):
         # configure logging
         log.log_raw = True 
         log.log_debug = False
+        log.log_force_console = False
 
         self.open_file(None)
         p = self.patches.get('default')
