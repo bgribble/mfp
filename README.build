@@ -135,3 +135,20 @@ files that are already there... which means that you can probably
 ignore this error.  Try activating the virtualenv and running
 mfp.  If it launches, you are good to go. 
 
+RUNNING TESTS
+--------------------------
+
+There are some tests, though not as many as I would like.  What's
+there basically comes in three flavors, all of which can be run
+with various incantations of the `nosetests` test runner:  
+
+ * Python test cases in mfp/test: run with plain `nosetests` 
+
+ * C test cases in mfpdsp/test_*: run with the `testext` plugin
+   to nosetests, `python /usr/bin/nosetests --with-testext --exe` 
+
+ * end-to-end MFP patch tests, not run unless you point to them 
+   specifically: `python /usr/bin/nosetests -m e2e -w mfp/test`
+
+
+
