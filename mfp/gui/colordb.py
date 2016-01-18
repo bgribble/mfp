@@ -6,8 +6,6 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..singleton import Singleton
-from gi.repository import Clutter 
-
 
 class RGBAColor(object):
     def __init__(self, r, g, b, a):
@@ -29,6 +27,7 @@ class ColorDB (Singleton):
     rgba_colors = {}  
 
     def find(self, *colorinfo):
+        from gi.repository import Clutter 
         ll = len(colorinfo)
         if ll > 2:
             # RGB or RGBA color values 

@@ -75,6 +75,10 @@ def exit_sighandler(signum, frame):
 
 def test_imports(): 
     try: 
+        import gi 
+        gi.require_version('Gtk', '3.0')
+        gi.require_version('GtkClutter', '1.0')
+        gi.require_version('Clutter', '1.0')
         import simplejson
         import numpy 
         import nose 

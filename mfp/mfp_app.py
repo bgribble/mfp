@@ -47,6 +47,7 @@ class MFPApp (Singleton):
         self.batch_mode = False
         self.batch_obj = None
         self.batch_args = None 
+        self.batch_eval = False
         self.batch_input_file = None 
 
         # RPC host 
@@ -163,19 +164,30 @@ class MFPApp (Singleton):
 
         reader = self.create("file", self.batch_input_file or "sys.stdin",
                              p, p.default_scope, "reader")
-        looper = self.create("for", None, p, p.default_scope, "looper")
-        evaluator = self.create("eval", None, p, p.default_scope, "evaluator")
+        eoftest = self.create("case", "''", p, p.default_scope, "eoftest")
+        trig = self.create("trigger", "2", p, p.default_scope, "trig")
+        stripper = self.create("string.strip", None, p, p.default_scope, "strip")
+        if self.batch_eval:
+            evaluator = self.create("eval", None, p, p.default_scope, "evaluator")
         batch = self.create(self.batch_obj, self.batch_args, 
                             p, p.default_scope, "batch")
         printer = self.create("print", None, p, p.default_scope, "printer") 
-       
-        reader.connect(0, looper, 0)
-        looper.connect(0, evaluator, 0)
-        evaluator.connect(0, batch, 0)
+        msg = self.create("message", "@readline", p, p.default_scope, "nextline")
+
+        reader.connect(0, eoftest, 0)
+        eoftest.connect(1, trig, 0)
+        trig.connect(1, stripper, 0)
+        if self.batch_eval:
+            stripper.connect(0, evaluator, 0)
+            evaluator.connect(0, batch, 0)
+        else: 
+            stripper.connect(0, batch, 0)
+        trig.connect(0, msg, 0)
         batch.connect(0, printer, 0)
+        msg.connect(0, reader, 0)
 
         # start the reader
-        reader.send(MethodCall("readlines"))
+        reader.send(MethodCall("readline"))
 
 
     def start_dsp(self):
