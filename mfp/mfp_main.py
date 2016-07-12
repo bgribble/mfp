@@ -255,13 +255,15 @@ def main():
     else: 
         patchfiles = args.get("patchfile")
         if app.batch_mode: 
-            if len(patchfiles) == 1:
-                app.batch_obj = patchfiles[0]
-                app.exec_batch()
+            try: 
+                if len(patchfiles) == 1:
+                    app.batch_obj = patchfiles[0]
+                    app.exec_batch()
+                else:
+                    log.debug("Batch mode requires exactly one input file")
+            finally:
                 app.finish()
-            else:
-                log.debug("Batch mode requires exactly one input file")
-                app.finish()
+
         else:
             # create initial patch
             if len(patchfiles): 
