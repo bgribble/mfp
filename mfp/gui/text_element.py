@@ -5,11 +5,14 @@ A text element (comment) in a patch
 '''
 
 from gi.repository import Clutter
+import cairo
+
 from patch_element import PatchElement
 from mfp import MFPGUI
 from mfp import log
 from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
+from .colordb import ColorDB
 
 class TextElement (PatchElement):
     display_type = "text"
@@ -24,9 +27,13 @@ class TextElement (PatchElement):
         self.default = ''
         self.param_list.extend(['value', 'clickchange', 'default'])
 
-        # configure label
+        self.texture = Clutter.CairoTexture.new(12, 12)
+        self.texture.connect("draw", self.draw_cb)
+        self.add_actor(self.texture)
+
         self.label = Clutter.Text()
         self.label.set_color(window.color_unselected)
+        self.label.set_position(3, 3)
         self.add_actor(self.label)
 
         self.update_required = True
@@ -40,6 +47,40 @@ class TextElement (PatchElement):
         self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM, 
                       self.label.get_height() + self.ELBOW_ROOM)
         self.draw_ports()
+
+    def draw_cb(self, texture, ct):
+        w = self.texture.get_property('surface_width') - 1
+        h = self.texture.get_property('surface_height') - 1
+
+        self.texture.clear()
+
+        # fill to paint the background 
+        color = ColorDB.to_cairo(self.color_bg)
+        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
+        ct.fill_preserve()
+
+        if self.clickchange:
+            ct.set_line_width(1.0)
+            ct.set_antialias(cairo.ANTIALIAS_NONE)
+            ct.translate(0.5, 0.5)
+            ct.move_to(1, 1)
+            ct.line_to(1, h)
+            ct.line_to(w, h)
+            ct.line_to(w, 1)
+            ct.line_to(1, 1)
+            ct.close_path()
+
+            # stroke to draw the outline 
+            color = ColorDB.to_cairo(self.color_fg)
+            ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
+            ct.stroke()
+
+    def set_size(self, w, h):
+        PatchElement.set_size(self, w, h)
+
+        self.texture.set_size(w, h)
+        self.texture.set_surface_size(w, h)
+        self.texture.invalidate()
 
     def draw_ports(self):
         if self.selected:
