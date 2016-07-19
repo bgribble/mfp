@@ -14,16 +14,17 @@ from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
 from .colordb import ColorDB
 
+
 class TextElement (PatchElement):
     display_type = "text"
     proc_type = "text"
 
-    ELBOW_ROOM = 5 
+    ELBOW_ROOM = 5
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
         self.value = ''
-        self.clickchange = False 
+        self.clickchange = False
         self.default = ''
         self.param_list.extend(['value', 'clickchange', 'default'])
 
@@ -42,9 +43,8 @@ class TextElement (PatchElement):
         self.set_reactive(True)
         self.label_changed_cb = self.label.connect('text-changed', self.text_changed_cb)
 
-
     def update(self):
-        self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM, 
+        self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM,
                       self.label.get_height() + self.ELBOW_ROOM)
         self.draw_ports()
 
@@ -54,7 +54,7 @@ class TextElement (PatchElement):
 
         self.texture.clear()
 
-        # fill to paint the background 
+        # fill to paint the background
         color = ColorDB.to_cairo(self.color_bg)
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ct.fill_preserve()
@@ -70,7 +70,7 @@ class TextElement (PatchElement):
             ct.line_to(1, 1)
             ct.close_path()
 
-            # stroke to draw the outline 
+            # stroke to draw the outline
             color = ColorDB.to_cairo(self.color_fg)
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
@@ -106,20 +106,20 @@ class TextElement (PatchElement):
 
     def text_changed_cb(self, *args):
         self.update()
-        return 
+        return
 
     def clicked(self):
         def newtext(txt):
             self.value = txt or ''
             self.set_text()
-        if self.selected and self.clickchange: 
+        if self.selected and self.clickchange:
             self.stage.get_prompted_input("New text:", newtext, self.value)
         return True
 
     def set_text(self):
         if len(self.value):
             self.label.set_markup(self.value)
-        else: 
+        else:
             self.value = self.default or '...'
             self.label.set_markup(self.value)
 
@@ -137,7 +137,7 @@ class TextElement (PatchElement):
         self.hide_ports()
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label, 
+        return LabelEditMode(self.stage, self, self.label,
                              multiline=True, markup=True, initial=self.value)
 
     def make_control_mode(self):
