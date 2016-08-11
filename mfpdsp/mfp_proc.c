@@ -81,10 +81,11 @@ mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int b
     
     /* create input and output buffers (will be reallocated if blocksize changes */
     p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));
+    p->inlet_buf_alloc = g_malloc0(num_inlets * sizeof(mfp_block *));
 
     for (count = 0; count < num_inlets; count ++) {
-        p->inlet_buf[count] = mfp_block_new(mfp_max_blocksize); 
-        mfp_block_resize(p->inlet_buf[count], blocksize);
+        p->inlet_buf_alloc[count] = mfp_block_new(mfp_max_blocksize); 
+        mfp_block_resize(p->inlet_buf_alloc[count], blocksize);
     }
 
     p->outlet_buf = g_malloc(num_outlets * sizeof(mfp_sample *));
@@ -115,9 +116,10 @@ mfp_proc_free_buffers(mfp_processor * self)
     g_array_free(self->outlet_conn, TRUE);
 
     for (b=0; b < num_inlets; b++) {
-        mfp_block_free(self->inlet_buf[b]);
+        mfp_block_free(self->inlet_buf_alloc[b]);
     }
     g_free(self->inlet_buf);
+    g_free(self->inlet_buf_alloc);
 
     for (b=0; b < num_outlets; b++) {
         mfp_block_free(self->outlet_buf[b]);
@@ -186,11 +188,33 @@ mfp_proc_process(mfp_processor * self)
     sprintf(mfp_last_activity, "PROCESS: accum %d (%s)", 
             self->rpc_id, self->typeinfo->name);
 
+    /* if there's exactly one output connected to an input, use that
+     * output buffer as the input and don't clear it */
+    for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {    
+        inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
+        if (inlet_conn->len == 1) {
+            curr_inlet = g_array_index(inlet_conn, mfp_connection *, 0);
+            upstream_proc = curr_inlet->dest_proc;
+            upstream_outlet_num = curr_inlet->dest_port;    
+            upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];    
+            self->inlet_buf[inlet_num] = upstream_outlet_buf; 
+        }
+        else { 
+            inlet_buf = self->inlet_buf_alloc[inlet_num];
+            self->inlet_buf[inlet_num] = inlet_buf;
+            mfp_block_fill(inlet_buf, 0);
+        }
+
+    }
+
+    /* now self->inlet_buf points to the right buffer for each inlet, 
+     * zeroed if needed.  Get inputs into the buffers that need it. */
     for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {    
         inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
         inlet_buf = self->inlet_buf[inlet_num];
-        mfp_block_fill(inlet_buf, 0);
-
+        if (inlet_buf != self->inlet_buf_alloc[inlet_num]) { 
+            continue;
+        }
         for(connect_num = 0; connect_num < inlet_conn->len; connect_num++) {
             curr_inlet = g_array_index(inlet_conn, mfp_connection *, connect_num);
             upstream_proc = curr_inlet->dest_proc;

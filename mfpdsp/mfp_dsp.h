@@ -37,6 +37,7 @@ typedef struct {
 
     /* input/output buffers */ 
     mfp_block ** inlet_buf;
+    mfp_block ** inlet_buf_alloc;
     mfp_block ** outlet_buf;
 
     /* scheduling information */ 

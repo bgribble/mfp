@@ -339,6 +339,8 @@ class RecvSignal (Recv):
         self.src_obj = None 
         if len(initargs) > 1:
             self.src_outlet = initargs[1]
+        else: 
+            self.src_outlet = 0
 
         if len(initargs): 
             self.src_name = initargs[0]
