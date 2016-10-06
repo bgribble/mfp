@@ -46,6 +46,7 @@ class RPCListener (QuittableThread):
             except socket.timeout:
                 pass
         
+
 class RPCRemote (object):
     '''
     RPCRemote -- connect to a RPCListener
@@ -70,6 +71,7 @@ class RPCRemote (object):
         self.rpc_host.unmanage(0)
         self.socket.close()
         self.socket = None
+
 
 class RPCExecRemote (QuittableThread):
     '''

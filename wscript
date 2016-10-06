@@ -295,11 +295,9 @@ def options(opt):
 
 def configure(conf):
     conf.load(WAFTOOLS)
-
     # Python and dev files
     conf.check_python_version((2,7))
     conf.check_python_headers()
-
     # check for Debian style
     conf.start_msg("Checking for site-packages vs. dist-packages (Debian-style)")
     debstyle = False
@@ -400,6 +398,7 @@ def configure(conf):
             raise
 
     conf.env.GITVERSION = VERSION + "_" + git_version()
+
     print()
     print("MFP version", conf.env.GITVERSION, "configured.")
     if conf.env.USE_VIRTUALENV:

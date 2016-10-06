@@ -49,10 +49,10 @@ Main, GUI, and DSP node control:
                           main loop, and GUICommand, which is the
                           RPC-wrapped API 
 
-    mfp/dsp_slave.py      DSPObject, which is an RPC-wrapped handle to
+    mfp/dsp_object.py     DSPObject, which is an RPC-wrapped handle to
                           a C DSP object from the mfpdsp extension, and
-                          DSPCommand, which is an API to control the DSP
-                          process 
+                          DSPContext, which is a handle to a DSP
+                          process
 
 Patch and Processor:  These are the heart of the code base and are where
 most of the action is.  There has been a lot of churn in these files and

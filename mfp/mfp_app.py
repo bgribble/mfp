@@ -56,7 +56,6 @@ class MFPApp (Singleton):
 
         # multiprocessing targets and RPC links
         self.dsp_process = None
-        self.dsp_command = None 
 
         self.gui_process = None
         self.gui_command = None
@@ -128,8 +127,6 @@ class MFPApp (Singleton):
             log.log_func = self.gui_command.log_write
 
             log.debug("Started logging to GUI")
-            if self.dsp_command:
-                self.dsp_command.log_to_gui()
 
             self.console = Interpreter(self.gui_command.console_write, dict(app=self))
             self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
@@ -330,7 +327,7 @@ class MFPApp (Singleton):
 
     def load_extension(self, libname):
         fullpath = utils.find_file_in_path(libname, self.extpath)
-        self.dsp_command.ext_load(fullpath)
+        log.warning("mfp_app.load_extension: not implemented completely")
 
     def create(self, init_type, init_args, patch, scope, name):
         # first try: is a factory registered? 
@@ -480,6 +477,12 @@ class MFPApp (Singleton):
             self.console.write_cb = None
 
         Patch.default_context = None
+        if self.rpc_host:
+            log.debug("MFPApp.finish: reaping RPC host...")
+            pp = self.rpc_host
+            self.rpc_host = None 
+            pp.finish()
+
         if self.dsp_process:
             log.debug("MFPApp.finish: reaping DSP process...")
             pp = self.dsp_process
@@ -490,12 +493,6 @@ class MFPApp (Singleton):
             log.debug("MFPApp.finish: reaping GUI process...")
             pp = self.gui_process
             self.gui_process = None 
-            pp.finish()
-
-        if self.rpc_host:
-            log.debug("MFPApp.finish: reaping RPC host...")
-            pp = self.rpc_host
-            self.rpc_host = None 
             pp.finish()
 
         log.debug("MFPApp.finish: reaping threads...")
@@ -561,11 +558,6 @@ class MFPApp (Singleton):
         self.session_id = session_id 
         self.session_save()
 
-        # reinitialize JACK 
-        if self.dsp_command:
-            self.dsp_command.reinit(self.session_id, self.max_blocksize, 
-                                    self.dsp_inputs, self.dsp_outputs)
-
     def session_save(self):
         import os.path
 
@@ -609,11 +601,6 @@ class MFPApp (Singleton):
             if not val: 
                 val = "''"
             setattr(self, attr, eval(val))
-
-        # reinitialize JACK 
-        if self.dsp_command:
-            self.dsp_command.reinit(self.session_id, self.max_blocksize, 
-                                    self.dsp_inputs, self.dsp_outputs)
 
         patches = eval(cp.get("mfp", "patches")) 
 

@@ -165,13 +165,21 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
 
 }
 
+
 void
-mfp_jack_shutdown(mfp_context * ctxt) 
+mfp_jack_shutdown(void) 
 {
-    printf("jack_shutdown: closing client, good-bye!\n");
-    jack_deactivate(ctxt->info.jack->client);
-    jack_client_close(ctxt->info.jack->client);
-    ctxt->info.jack->client = NULL;
+    int cctr=0;
+    mfp_context * ctxt;
+
+    while (ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cctr))) {
+        mfp_log_debug("jack_shutdown: closing client %d, good-bye!\n", cctr);
+        jack_deactivate(ctxt->info.jack->client);
+        jack_client_close(ctxt->info.jack->client);
+        ctxt->info.jack->client = NULL;
+        cctr ++;
+    }
+    mfp_log_debug("jack_shutdown: done closing clients\n");
 }
 
 void * 

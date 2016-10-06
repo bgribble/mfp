@@ -103,22 +103,17 @@ main(int argc, char ** argv)
     sigemptyset(&sa.sa_mask);
     sa.sa_sigaction = sigsegv_handler;
     if (sigaction(SIGSEGV, &sa, NULL) == -1) {
-        printf("mfpdsp: ERROR: could not install SIGSEGV handler, exiting\n");
+        mfp_log_error("mfpdsp: ERROR: could not install SIGSEGV handler, exiting\n");
         return -1;
     }
     
-
-    mfp_log_debug("mfpdsp: Starting up as standalone JACK client");
-  
     /* set up global state */
     mfp_init_all(sockname);
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
 
     mfp_context_init(ctxt);
-    mfp_log_debug("mfpdsp: context initialized, waiting for app exit");
     mfp_comm_io_wait();
-
-    mfp_log_debug("mfpdsp: Returned from comm event loop, will exit."); 
+    mfp_jack_shutdown();
     return 0;
 
 }

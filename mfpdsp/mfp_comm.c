@@ -217,7 +217,7 @@ mfp_comm_init(char * init_sockid)
             }
         }
         if (connect_tries == 10) {
-            printf("mfp_comm_init: can't connect after 10 tries, giving up\n");
+            mfp_log_debug("mfp_comm_init: can't connect after 10 tries, giving up");
             return -1;
         }
     }
@@ -276,7 +276,6 @@ mfp_comm_io_reader_thread(void * tdata)
                 mlen = atoi(lenbuf);
                 phase = 0;
                 success = 1;
-                // printf("    [0 --> %d]\n%s\n", mfp_comm_nodeid, msgbuf);
                 mfp_rpc_dispatch_request(msgbuf, bytesread);
             }
             else 
@@ -293,6 +292,8 @@ mfp_comm_io_reader_thread(void * tdata)
         }
         quitreq = mfp_comm_quit_requested();
     }
+    mfp_log_debug("comm IO reader: quitting");
+    return NULL;
 }
 
 static void * 
@@ -342,12 +343,11 @@ mfp_comm_io_writer_thread(void * tdata)
             g_array_remove_range(rdata, 0, rdata->len);
         }
 
-        pthread_mutex_lock(&comm_io_lock);
-        quitreq = comm_io_quitreq;
-        pthread_mutex_unlock(&comm_io_lock);
+        quitreq = mfp_comm_quit_requested();
     }
 
-
+    mfp_log_debug("comm IO writer: quitting");
+    return NULL;
 }
 
 void 
@@ -373,6 +373,7 @@ void
 mfp_comm_io_finish(void) 
 {
     pthread_mutex_lock(&comm_io_lock);
+    mfp_log_debug("mfp_comm_io_finish: requesting comm IO threads to exit");
     comm_io_quitreq = 1;
     pthread_cond_broadcast(&outgoing_cond);
     pthread_mutex_unlock(&comm_io_lock);

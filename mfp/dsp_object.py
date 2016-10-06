@@ -75,26 +75,3 @@ class DSPObject(RPCWrapper):
         pass
 
 
-class DSPCommand (RPCWrapper):
-    # FIXME: Implement DSPCommand services on C side 
-
-    @rpcwrap
-    def log_to_gui(self):
-        pass
-
-    @rpcwrap
-    def get_dsp_params(self):
-        pass
-
-    @rpcwrap
-    def get_latency(self):
-        pass
-
-    @rpcwrap
-    def ext_load(self, extension_path):
-        pass
-
-    @rpcwrap
-    def reinit(self, client_name, max_bufsize, num_inputs, num_outputs):
-        pass
-

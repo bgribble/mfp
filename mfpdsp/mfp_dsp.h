@@ -209,7 +209,7 @@ extern void mfp_finish_all(void);
 
 /* mfp_jack.c */
 extern mfp_context * mfp_jack_startup(char * client_name, int num_inputs, int num_outputs);
-extern void mfp_jack_shutdown(mfp_context * ctxt);
+extern void mfp_jack_shutdown(void);
 extern mfp_sample * mfp_get_input_buffer(mfp_context *, int);
 extern mfp_sample * mfp_get_output_buffer(mfp_context *, int);
 extern int mfp_num_output_buffers(mfp_context * ctxt);

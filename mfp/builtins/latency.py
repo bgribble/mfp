@@ -28,7 +28,7 @@ class Latency(Processor):
         Processor.delete(self)
 
     def trigger(self):
-        in_latency, out_latency = MFPApp().dsp_command.get_latency() 
+        in_latency, out_latency = self.patch.context.get_latency()
         self.outlets[0] = in_latency
         self.outlets[1] = out_latency  
 

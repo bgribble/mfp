@@ -285,6 +285,10 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
             }
         }
     }
+    else if (!strcmp(methodname, "exit_request")) {
+        mfp_log_debug("[RPCHost] Got exit_request\n");
+        mfp_comm_io_finish();
+    }
     else if (!strcmp(methodname, "peer_exit")) {
         printf("FIXME: peer_exit unhandled\n");
     }

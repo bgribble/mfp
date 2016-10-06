@@ -56,8 +56,6 @@ mfp_context_destroy(mfp_context * ctxt)
 int
 mfp_context_init(mfp_context * context) 
 {
-    const char publish_req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"publish\", "
-        "\"params\": { \"classes\": [\"DSPObject\"]}}";
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
     int request_id = mfp_api_open_context(context, msgbuf, &msglen);
