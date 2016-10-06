@@ -44,9 +44,6 @@ process(mfp_processor * proc)
         return 0;
     }
     
-    sprintf(mfp_last_activity, "ampl~ process: %p %d %d\n", 
-            pdata->rms_buffer->data, pdata->rms_pointer, pdata->rms_buffer->blocksize);
-
     for(scount = 0; scount < proc->context->blocksize; scount++) {
         sample = *in_sample++;
 

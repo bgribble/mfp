@@ -11,8 +11,6 @@
 
 #include "mfp_dsp.h"
 
-char mfp_last_activity[5000];
-
 static void
 sigsegv_handler(int sig, siginfo_t *si, void *unused)
 {
@@ -27,7 +25,6 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
     for (j = 0; j < nptrs; j++)
         printf("      %s\n", strings[j]);
 
-    mfp_log_error("Last status before error: '%s' ", mfp_last_activity);
     free(strings);
 
     exit(-11);

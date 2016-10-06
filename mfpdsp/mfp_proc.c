@@ -165,8 +165,6 @@ mfp_proc_process(mfp_processor * self)
 
     /* run config() if params have changed */
     if (self->needs_config) {
-        sprintf(mfp_last_activity, "PROCESS: config %d (%s)", 
-                self->rpc_id, self->typeinfo->name);
         config_rv = self->typeinfo->config(self);
         if (config_rv != 0) {
             self->needs_config = 0;
@@ -185,8 +183,6 @@ mfp_proc_process(mfp_processor * self)
     }
 
     /* accumulate all the inlet fan-ins to a single input buffer */ 
-    sprintf(mfp_last_activity, "PROCESS: accum %d (%s)", 
-            self->rpc_id, self->typeinfo->name);
 
     /* if there's exactly one output connected to an input, use that
      * output buffer as the input and don't clear it */
@@ -231,11 +227,7 @@ mfp_proc_process(mfp_processor * self)
     }
 
     /* perform processing */ 
-    sprintf(mfp_last_activity, "PROCESS: process %d (%s)", 
-            self->rpc_id, self->typeinfo->name);
     self->typeinfo->process(self);    
-    sprintf(mfp_last_activity, "PROCESS: process complete %d (%s)", 
-            self->rpc_id, self->typeinfo->name);
 }
 
 

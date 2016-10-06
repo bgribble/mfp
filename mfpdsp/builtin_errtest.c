@@ -19,9 +19,7 @@ process(mfp_processor * proc)
 {
     errtest_data * d = (errtest_data *)proc->data;
 
-    sprintf(mfp_last_activity, "errtest~ PROCESS: enter\n");
     if (d->err_process) {
-        sprintf(mfp_last_activity, "errtest~ PROCESS: about to SIGSEGV");
         printf("errtest~: About to segfault in process(), PID=%d\n", getpid());
         SEGFAULT();
     }
@@ -32,7 +30,6 @@ static void
 init(mfp_processor * proc) 
 {
     errtest_data * d = (errtest_data *)g_malloc0(sizeof(errtest_data));
-    sprintf(mfp_last_activity, "errtest~ INIT\n");
     proc->data = (void *)d; 
     
     return;
@@ -44,7 +41,6 @@ destroy(mfp_processor * proc)
     errtest_data * d = (errtest_data *)proc->data;
 
     if (d->err_destroy) {
-        sprintf(mfp_last_activity, "errtest~ DESTROY: about to SIGSEGV\n");
         printf("errtest~: About to segfault in destroy(), PID=%d\n", getpid());
         SEGFAULT();
     }
@@ -61,14 +57,10 @@ config(mfp_processor * proc)
     gpointer err_destroy = g_hash_table_lookup(proc->params, "err_destroy");
     int errconf;
 
-    sprintf(mfp_last_activity, "errtest~ CONFIG: enter\n");
-
     if (err_config != NULL) {
         if ((int)(*(float *)err_config)) { 
-            sprintf(mfp_last_activity, "errtest~ CONFIG: about to SIGSEGV");
             printf("errtest~: About to segfault in config(), PID=%d\n", getpid());
             SEGFAULT();
-            sprintf(mfp_last_activity, "errtest~ CONFIG: failed to SIGSEGV");
         }
     }
 

@@ -186,7 +186,6 @@ extern int mfp_max_blocksize;
 extern float mfp_in_latency;
 extern float mfp_out_latency;
 extern int mfp_comm_nodeid;
-extern char mfp_last_activity[]; 
 
 extern GHashTable * mfp_proc_registry;
 extern GHashTable * mfp_proc_objects;
