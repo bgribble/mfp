@@ -11,7 +11,7 @@ typedef struct {
 
 
 static int 
-process(mfp_processor * proc) 
+process_sig(mfp_processor * proc) 
 {
     builtin_sig_data * d = (builtin_sig_data *)(proc->data);
     mfp_sample * sample; 
@@ -70,7 +70,7 @@ init_builtin_sig(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("sig~");
     p->is_generator = 1;
-    p->process = process;
+    p->process = process_sig;
     p->init = init;
     p->destroy = destroy;
     p->config = config;

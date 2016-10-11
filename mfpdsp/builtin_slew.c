@@ -9,7 +9,7 @@ typedef struct {
 } builtin_slew_data;
 
 static int 
-process(mfp_processor * proc) 
+process_slew(mfp_processor * proc) 
 { 
     builtin_slew_data * pdata = (builtin_slew_data *)proc->data; 
     mfp_sample * in_sample = proc->inlet_buf[0]->data;
@@ -96,7 +96,7 @@ init_builtin_slew(void)
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("slew~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_slew;
     p->init = init;
     p->destroy = destroy;
     p->config = config;

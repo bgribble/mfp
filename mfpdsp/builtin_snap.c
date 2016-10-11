@@ -12,7 +12,7 @@ typedef struct {
 } builtin_snap_data;
 
 static int 
-process(mfp_processor * proc) 
+process_snap(mfp_processor * proc) 
 {
     builtin_snap_data * pdata = (builtin_snap_data *)proc->data;
     mfp_sample * sample = proc->inlet_buf[0]->data;
@@ -86,7 +86,7 @@ init_builtin_snap(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("snap~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_snap;
     p->init = init;
     p->destroy = destroy;
     p->config = config;

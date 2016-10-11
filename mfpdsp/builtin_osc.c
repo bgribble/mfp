@@ -62,7 +62,7 @@ table_lookup(double phase) {
 }
 
 static int 
-process(mfp_processor * proc) 
+process_osc(mfp_processor * proc) 
 {
     builtin_osc_data * d = (builtin_osc_data *)(proc->data);
     int mode_am = 0, mode_fm = 0;
@@ -183,7 +183,7 @@ init_builtin_osc(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("osc~");
     p->is_generator = GENERATOR_CONDITIONAL;
-    p->process = process;
+    p->process = process_osc;
     p->init = init;
     p->destroy = destroy;
     p->config = config;

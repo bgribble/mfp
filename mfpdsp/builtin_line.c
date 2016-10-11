@@ -95,7 +95,7 @@ config(mfp_processor * proc)
 }
 
 static int 
-process(mfp_processor * proc) 
+process_line(mfp_processor * proc) 
 {
     builtin_line_data * data = ((builtin_line_data *)(proc->data));
     segment * cseg = data->segv + data->cur_segment;
@@ -181,7 +181,7 @@ init_builtin_line(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("line~");
     p->is_generator = GENERATOR_ALWAYS;
-    p->process = process;
+    p->process = process_line;
     p->init = init;
     p->destroy = destroy;
     p->config = config;

@@ -6,7 +6,7 @@
 #include "mfp_block.h"
 
 static int 
-in_process(mfp_processor * proc) 
+process_in(mfp_processor * proc) 
 {
     gpointer chan_ptr = g_hash_table_lookup(proc->params, "channel");
     int channel = 0;
@@ -31,7 +31,7 @@ in_process(mfp_processor * proc)
 }
 
 static int
-out_process(mfp_processor * proc) 
+process_out(mfp_processor * proc) 
 {
     gpointer chan_ptr = g_hash_table_lookup(proc->params, "channel");
     int channel = 0;
@@ -78,7 +78,7 @@ init_builtin_in(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("in~");
     p->is_generator = 1;
-    p->process = in_process;
+    p->process = process_in;
     p->init = init;
     p->destroy = destroy;
     p->config = config;
@@ -93,7 +93,7 @@ init_builtin_out(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("out~");
     p->is_generator = 0;
-    p->process = out_process;
+    p->process = process_out;
     p->init = init;
     p->destroy = destroy;
     p->config = config;

@@ -23,7 +23,7 @@ typedef struct {
 } builtin_ampl_data;
 
 static int 
-process(mfp_processor * proc) 
+process_ampl(mfp_processor * proc) 
 {
     builtin_ampl_data * pdata = (builtin_ampl_data *)proc->data;
     mfp_sample * in_sample = proc->inlet_buf[0]->data;
@@ -171,7 +171,7 @@ init_builtin_ampl(void) {
 
     p->name = strdup("ampl~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_ampl;
     p->init = init;
     p->destroy = destroy;
     p->config = config;

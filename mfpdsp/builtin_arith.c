@@ -206,7 +206,7 @@ iterate_lt(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1,
 }
 
 static int 
-process(mfp_processor * proc) 
+process_arith(mfp_processor * proc) 
 {
     builtin_arith_data * d = (builtin_arith_data *)(proc->data);
     mfp_sample const_in_1 = d->const_in_1;
@@ -351,7 +351,7 @@ init_builtin_add(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("+~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_arith;
     p->init = init_add;
     p->config = config;
     p->destroy = destroy;
@@ -366,7 +366,7 @@ init_builtin_sub(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("-~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_arith;
     p->init = init_sub;
     p->config = config;
     p->destroy = destroy;
@@ -381,7 +381,7 @@ init_builtin_mul(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("*~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_arith;
     p->init = init_mul;
     p->config = config;
     p->destroy = destroy;
@@ -396,7 +396,7 @@ init_builtin_div(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("/~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_arith;
     p->init = init_div;
     p->config = config;
     p->destroy = destroy;
@@ -411,7 +411,7 @@ init_builtin_lt(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("<~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_arith;
     p->init = init_lt;
     p->config = config;
     p->destroy = destroy;
@@ -426,7 +426,7 @@ init_builtin_gt(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup(">~");
     p->is_generator = 0;
-    p->process = process;
+    p->process = process_arith;
     p->init = init_gt;
     p->config = config;
     p->destroy = destroy;
