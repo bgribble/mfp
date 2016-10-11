@@ -8,6 +8,8 @@ typedef struct {
     double last_val; 
 } builtin_slew_data;
 
+#define DELTA_FUDGE 0.000001
+
 static int 
 process_slew(mfp_processor * proc) 
 { 
@@ -23,6 +25,11 @@ process_slew(mfp_processor * proc)
 
     if (mfp_proc_has_input(proc, 0)) {
         use_const = 0;
+    }
+    else if (fabs(pdata->last_val - pdata->const_signal) < DELTA_FUDGE){
+        /* shortcut! */
+        mfp_block_fill(proc->outlet_buf[0], pdata->const_signal);
+        return;
     }
 
     for (int scount=0; scount < proc->outlet_buf[0]->blocksize; scount++) {
