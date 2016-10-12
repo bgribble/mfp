@@ -274,7 +274,6 @@ def main():
             # allow session management 
             app.session_management_setup()
 
-        log.debug("Quitting in main()")
         try: 
             QuittableThread.wait_for_all()
         except (KeyboardInterrupt, SystemExit):
