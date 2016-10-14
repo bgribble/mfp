@@ -422,11 +422,11 @@ def build(bld):
 
     bld.shlib(source=bld.path.ant_glob("mfpdsp/*.c"),
               target="mfpdsp",
-              cflags=["-std=gnu99", "-fpic", "-g", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
+              cflags=["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
               uselib = bld.env.PKGCONF_LIBS)
 
     bld.program(source="mfpdsp/main.c", target="mfpdsp/mfpdsp",
-                cflags=["-std=gnu99", "-fpic", "-g", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
+                cflags=["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
                 uselib = bld.env.PKGCONF_LIBS,
                 use=['mfpdsp'])
 
