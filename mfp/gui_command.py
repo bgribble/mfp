@@ -18,7 +18,11 @@ class GUICommand (RPCWrapper):
 
     def _log_write(self, msg, level):
         from .gui_main import MFPGUI
-        MFPGUI().appwin.log_write(msg, level)
+        window = MFPGUI().appwin
+        if window:
+            MFPGUI().appwin.log_write(msg, level)
+        else: 
+            print msg
 
     @rpcwrap
     def console_write(self, msg):

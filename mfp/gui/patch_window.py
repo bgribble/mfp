@@ -74,7 +74,7 @@ class PatchWindow(object):
         self.selected_layer = None
         self.selected = []
 
-        self.load_in_progress = False 
+        self.load_in_progress = 0
         self.close_in_progress = False 
 
         self.input_mgr = InputManager(self)
@@ -187,18 +187,19 @@ class PatchWindow(object):
             self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
                                                self.stage.get_height() - 25)
     def load_start(self):
-        self.load_in_progress = True 
-        log.debug("Load of GUI starting")
+        log.debug("Load of GUI starting ({})".format(self.load_in_progress))
+        self.load_in_progress += 1
 
     def load_complete(self):
-        self.load_in_progress = False 
-        if self.selected_patch is None and len(self.patches):
-            self.selected_patch = self.patches[0]
-        if self.selected_layer is None and self.selected_patch is not None:
-            self.layer_select(self.selected_patch.layers[0])
-        self.object_view.refresh()
-        self.layer_view.refresh()
-        log.debug("Load of GUI completed")
+        self.load_in_progress -= 1
+        if (self.load_in_progress <= 0):
+            if self.selected_patch is None and len(self.patches):
+                self.selected_patch = self.patches[0]
+            if self.selected_layer is None and self.selected_patch is not None:
+                self.layer_select(self.selected_patch.layers[0])
+            self.object_view.refresh()
+            self.layer_view.refresh()
+        log.debug("Load of GUI completed ({})".format(self.load_in_progress))
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)
@@ -358,6 +359,9 @@ class PatchWindow(object):
             self.object_view.update(element, None)
             self.layer_view.update(element, None)
             return 
+
+        if self.load_in_progress:
+            return
 
         if isinstance(element.container, PatchElement):
             self.object_view.update(element, (element.scope, element.container))
