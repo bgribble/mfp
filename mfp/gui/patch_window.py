@@ -187,7 +187,6 @@ class PatchWindow(object):
             self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
                                                self.stage.get_height() - 25)
     def load_start(self):
-        log.debug("Load of GUI starting ({})".format(self.load_in_progress))
         self.load_in_progress += 1
 
     def load_complete(self):
@@ -199,7 +198,6 @@ class PatchWindow(object):
                 self.layer_select(self.selected_patch.layers[0])
             self.object_view.refresh()
             self.layer_view.refresh()
-        log.debug("Load of GUI completed ({})".format(self.load_in_progress))
 
     def add_patch(self, patch_info):
         self.patches.append(patch_info)

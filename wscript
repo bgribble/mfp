@@ -368,7 +368,7 @@ def configure(conf):
 
     pip_notfound = []
 
-    # LADSPA header 
+    # LADSPA header
     conf.check_cc(header_name="ladspa.h")
 
     # pip-installable libs we just mark them as not available
