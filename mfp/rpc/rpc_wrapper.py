@@ -106,7 +106,7 @@ class RPCWrapper (object):
 
         puttime = str(datetime.now())
         if response: 
-            self.rpchost.wait(r, timeout=5)
+            self.rpchost.wait(r, timeout=10)
         call_complete = datetime.now()
         call_elapsed = call_complete - call_started
         r.diagnostic["remote_call_complete"] = call_complete 

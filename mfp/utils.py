@@ -179,11 +179,15 @@ class QuittableThread(Thread):
         next_victim = True 
 
         while next_victim:
-            if isinstance(next_victim, Thread):
-                next_victim.join(timeout=0.2)
+            if isinstance(next_victim, Thread) and next_victim.isAlive():
+                next_victim.join(.2)
             with QuittableThread._all_threads_lock:
-                if len(QuittableThread._all_threads) > 0:
-                    next_victim = QuittableThread._all_threads[0]
+                living_threads = [
+                    t for t in QuittableThread._all_threads
+                    if t.isAlive()
+                ]
+                if len(living_threads) > 0:
+                    next_victim = living_threads[0]
                 else:
                     next_victim = False  
 

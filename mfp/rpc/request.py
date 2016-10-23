@@ -70,9 +70,9 @@ class Request(object):
             obj["params"] = self.params
         else: 
             obj["result"] = self.result
-        obj["diagnostic"] = self.diagnostic
+        #obj["diagnostic"] = self.diagnostic
 
-        return json.dumps(obj, indent=4, cls=ExtendedEncoder)
+        return json.dumps(obj, cls=ExtendedEncoder)
 
     def is_request(self):
         return (self.method is not None)
