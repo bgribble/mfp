@@ -40,6 +40,7 @@ class MFPGUI (Singleton):
         self.objects = {}
         self.mfp = None
         self.appwin = None
+        self.debug = False
         self.clutter_thread = threading.Thread(target=self.clutter_proc)
         self.clutter_thread.start()
 
@@ -108,6 +109,12 @@ class MFPGUI (Singleton):
 
     def finish(self):
         from gi.repository import Gtk
+        if self.debug:
+            import yappi
+            yappi.stop()
+            yappi.convert2pstats(yappi.get_func_stats()).dump_stats(
+                'mfp-gui-funcstats.pstats')
+
         log.log_func = None
         if self.appwin:
             self.appwin.quit()
@@ -120,9 +127,13 @@ def main():
                         help="Reference time for log messages")
     parser.add_argument("-s", "--socketpath", default="/tmp/mfp_rpcsock",
                         help="Path to Unix-domain socket for RPC") 
+    parser.add_argument("-d", "--debug", action="store_true",
+                        help="Enable debugging behaviors") 
+
 
     args = vars(parser.parse_args())
     socketpath = args.get("socketpath")
+    debug = args.get('debug')
 
     host = RPCHost()
     host.start()
@@ -143,6 +154,11 @@ def main():
 
     host.subscribe(MFPCommand)
     gui = MFPGUI() 
+    gui.debug = debug
+
+    if debug:
+        import yappi
+        yappi.start()
 
     host.publish(GUICommand)
 

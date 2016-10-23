@@ -235,6 +235,10 @@ def main():
             log.debug("initfile: Exception while loading initfile", f) 
             log.debug(e)
 
+    if app.debug:
+        import yappi
+        yappi.start()
+
     if args.get("help_builtins"):
         log.log_debug = None
         log.log_file = None 
@@ -282,4 +286,10 @@ def main():
 
         for thread in app.leftover_threads:
             thread.join()
+
+    if app.debug:
+        import yappi
+        yappi.stop()
+        yappi.convert2pstats(yappi.get_func_stats()).dump_stats('mfp-main-funcstats.pstats')
+
 

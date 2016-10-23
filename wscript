@@ -363,7 +363,7 @@ def configure(conf):
         uselibs.append(uname)
     conf.env.PKGCONF_LIBS = uselibs
 
-    pip_libs = [ "posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy", "nose" ]
+    pip_libs = [ "posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy", "nose", "yappi" ]
     gi_libs = [ "Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
     pip_notfound = []
