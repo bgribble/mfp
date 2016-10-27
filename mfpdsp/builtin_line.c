@@ -89,7 +89,6 @@ config(mfp_processor * proc)
                 pdata->cur_segment = scount;
             }
         }
-
     }
     return 1;
 }

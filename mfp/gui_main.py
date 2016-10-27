@@ -122,6 +122,11 @@ class MFPGUI (Singleton):
         Gtk.main_quit()
 
 def main(): 
+    import gi 
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('GtkClutter', '1.0')
+    gi.require_version('Clutter', '1.0')
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--logstart", default=None,
                         help="Reference time for log messages")
