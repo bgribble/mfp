@@ -20,6 +20,8 @@ typedef struct {
     int nsegs;
 } builtin_line_data;
 
+#define MAX_LINE_SEGMENTS 1024
+
 static int
 config(mfp_processor * proc) 
 {
@@ -44,11 +46,12 @@ config(mfp_processor * proc)
         }
         else {
             numsegs = (segments_raw->len)/3; 
-            segments = g_malloc0(numsegs * sizeof(segment));
         }
+        numsegs = (numsegs > MAX_LINE_SEGMENTS ? MAX_LINE_SEGMENTS : numsegs);
 
         rawpos = 0;
         framebase = 0;
+        segments = pdata->segv;
         for (scount=0; scount < numsegs; scount++) {
             delay_ms = g_array_index(segments_raw, float, rawpos++);
             end_val = g_array_index(segments_raw, float, rawpos++);
@@ -69,15 +72,12 @@ config(mfp_processor * proc)
             
             framebase = segments[scount].end_frame + 1;
         }
-        if (pdata->segv != NULL) 
-            g_free(pdata->segv);
 
-        pdata->segv = segments;
         pdata->nsegs = numsegs;
         pdata->cur_frame = 0;
         pdata->cur_segment = 0;
         pdata->start_val = pdata->cur_val;
-        g_hash_table_replace(proc->params, g_strdup("segments"), NULL);
+        g_hash_table_remove(proc->params, "segments");
     }
 
     /* position */
@@ -152,7 +152,7 @@ init(mfp_processor * proc)
 
     proc->data = p; 
     
-    p->segv = NULL;
+    p->segv = g_malloc0(MAX_LINE_SEGMENTS * sizeof(segment)); 
     p->nsegs = 0;
     p->cur_frame = 0;
     p->cur_segment = 0;
