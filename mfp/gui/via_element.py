@@ -17,9 +17,12 @@ from .colordb import ColorDB
 class ViaElement (PatchElement):
     display_type = None
     proc_type = None
-    porthole_width = 0
-    porthole_height = 0
-    autoplace_dx = -2.5
+
+    style_defaults = {
+        'porthole-width': 0,
+        'porthole-height': 0,
+        'autoplace-dx': -2.5
+    }
 
     VIA_SIZE = 10
     VIA_FUDGE = 5

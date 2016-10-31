@@ -41,6 +41,15 @@ class MFPGUI (Singleton):
         self.mfp = None
         self.appwin = None
         self.debug = False
+
+        self.style_defaults = {
+            'font-face': 'Cantarell,Sans',
+            'font-size': 12,
+            'text-color': [0, 0, 0, 0],
+            'canvas-color': [255, 255, 255, 0],
+            'outline-color': []
+        }
+
         self.clutter_thread = threading.Thread(target=self.clutter_proc)
         self.clutter_thread.start()
 

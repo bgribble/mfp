@@ -101,11 +101,11 @@ class PatchEditMode (InputMode):
             self.window.add_element(factory)
         else:
             dx = dy = 0
-            if hasattr(factory, "autoplace_dx"):
-                dx = factory.autoplace_dx
+            if factory.get_style("autoplace-dx"):
+                dx = factory.get_style('autoplace-dx')
 
-            if hasattr(factory, "autoplace_dy"):
-                dy = factory.autoplace_dy
+            if factory.get_style("autoplace-dy"):
+                dy = factory.get_style('autoplace-dy')
 
             self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
             self.manager.disable_minor_mode(self.autoplace_mode)

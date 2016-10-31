@@ -90,12 +90,13 @@ class AutoplaceMode (InputMode):
 
         # there is a key widget.  Placements are above the inlets,
         # offset by SPACING
-        if self.placement == self.key_widget.num_inlets:
+        kw = self.key_widget
+        if self.placement == kw.num_inlets:
             self.placement = 0
 
-        if self.placement < self.key_widget.num_inlets:
-            x, y = self.key_widget.port_center(PatchElement.PORT_IN, self.placement)
-            x -= (PatchElement.porthole_border + PatchElement.porthole_width / 2.0)
+        if self.placement < kw.num_inlets:
+            x, y = kw.port_center(PatchElement.PORT_IN, self.placement)
+            x -= kw.get_style('porthole-border') + kw.get_style('porthole-width') / 2.0
             y = self.find_free_space_up(x, y - self.ABOVE_SPACING)
 
         self._set_autoplace(x, y)
@@ -113,11 +114,12 @@ class AutoplaceMode (InputMode):
 
         # there is a key widget.  Placements are below the outlets,
         # offset by SPACING
-        if self.placement >= self.key_widget.num_outlets:
+        kw = self.key_widget
+        if self.placement >= kw.num_outlets:
             self.placement = 0
 
-        x, y = self.key_widget.port_center(PatchElement.PORT_OUT, self.placement)
-        x -= (PatchElement.porthole_border + PatchElement.porthole_width / 2.0)
+        x, y = kw.port_center(PatchElement.PORT_OUT, self.placement)
+        x -= kw.get_style('porthole-border') + kw.get_style('porthole_width') / 2.0
         y = self.find_free_space_down(x, y + self.BELOW_SPACING)
 
         self._set_autoplace(x, y)

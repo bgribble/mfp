@@ -8,14 +8,14 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import cairo
-from mfp import MFPGUI
+from mfp import MFPGUI, log
 
 from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
 from .modes.clickable import ClickableControlMode
-from .colordb import ColorDB 
+from .colordb import ColorDB
 
 class MessageElement (PatchElement):
     display_type = "message"
@@ -46,7 +46,8 @@ class MessageElement (PatchElement):
 
         # configure label
         self.label.set_position(4, 1)
-        self.label.set_color(window.color_unselected)
+        self.label.set_color(this.get_color('text-color'))
+        self.label.set_font_name(this.get_fontdesc())
         self.label.connect('text-changed', self.text_changed_cb)
 
         self.move(x, y)
@@ -90,13 +91,13 @@ class MessageElement (PatchElement):
         ct.line_to(0, 0)
         ct.close_path()
 
-        # fill to paint the background 
-        c = ColorDB.to_cairo(self.color_bg)
+        # fill to paint the background
+        c = ColorDB.to_cairo(self.get_color('background-color')
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.fill_preserve()
 
-        # stroke to draw the outline 
-        c = ColorDB.to_cairo(self.color_fg)
+        # stroke to draw the outline
+        c = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.stroke()
 
@@ -150,13 +151,13 @@ class MessageElement (PatchElement):
         if params.get('value') is not None:
             self.message_text = repr(params.get('value'))
             self.label.set_text(self.message_text)
-            params['width'] = None 
-            params['height'] = None 
+            params['width'] = None
+            params['height'] = None
         elif self.obj_args is not None:
             self.message_text = self.obj_args
             self.label.set_text(self.obj_args)
-            params['width'] = None 
-            params['height'] = None 
+            params['width'] = None
+            params['height'] = None
 
         if self.obj_state != self.OBJ_COMPLETE and self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
@@ -197,15 +198,15 @@ class TransientMessageElement (MessageElement):
     def __init__(self, window, x, y):
         self.target_obj = [t for t in window.selected if t is not self]
         self.target_port = None
-        
+
         pos_x, pos_y = self.target_obj[0].get_stage_position()
         MessageElement.__init__(self, window, pos_x, pos_y - self.ELBOW_ROOM)
 
         self.message_text = "Bang"
         self.num_inlets = 0
-        self.num_outlets = 1 
+        self.num_outlets = 1
         self.label.set_text(self.message_text)
-        self.obj_state = self.OBJ_COMPLETE 
+        self.obj_state = self.OBJ_COMPLETE
         self.draw_ports()
         self.set_port(0)
 
@@ -226,9 +227,9 @@ class TransientMessageElement (MessageElement):
 
         return True
 
-    def end_edit(self): 
+    def end_edit(self):
         PatchElement.end_edit(self)
-        if self.obj_state == self.OBJ_COMPLETE: 
+        if self.obj_state == self.OBJ_COMPLETE:
             self.delete()
 
     def label_edit_start(self):
@@ -238,14 +239,14 @@ class TransientMessageElement (MessageElement):
 
     def label_edit_finish(self, widget=None, text=None):
         if text is not None:
-            self.message_text = text 
+            self.message_text = text
             for to in self.target_obj:
                 if to is not self:
                     MFPGUI().mfp.eval_and_send(to.obj_id, self.target_port,
                                                self.message_text)
         for to in self.target_obj:
             self.stage.select(to)
-        self.message_text = None 
+        self.message_text = None
         self.delete()
 
     def make_edit_mode(self):
