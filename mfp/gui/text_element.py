@@ -22,7 +22,7 @@ class TextElement (PatchElement):
     ELBOW_ROOM = 5
 
     style_defaults = {
-        'text-color:selected': [0x7d, 0x82, 0xb8]
+        'text-color:selected': [0x7d, 0x82, 0xb8, 0xff]
     }
 
     def __init__(self, window, x, y):
