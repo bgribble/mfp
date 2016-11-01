@@ -136,6 +136,8 @@ class SlideMeterElement (PatchElement):
         # draw the scale if required
         if self.show_scale:
             fontsize = self.get_style('font-size-scale')
+            c = ColorDB.to_cairo(self.get_color('text-color'))
+            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
             ct.set_font_size(fontsize)
 
             if self.scale_ticks is None:
@@ -174,6 +176,8 @@ class SlideMeterElement (PatchElement):
         if self.zeropoint is not None and h < self.MIN_BARSIZE:
             h = self.MIN_BARSIZE 
 
+        c = ColorDB.to_cairo(self.get_color('fill-color'))
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.rectangle(x_min, y_max - val2pixels(max_fillval), bar_w, h)
         ct.fill()
 
