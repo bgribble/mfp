@@ -7,9 +7,10 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter
-from mfp import MFPGUI
+from mfp import MFPGUI, log
 from .colordb import ColorDB
 import math
+
 
 class PatchElement (Clutter.Group):
     '''
@@ -22,6 +23,9 @@ class PatchElement (Clutter.Group):
         'porthole_border': 1,
         'porthole_minspace': 11,
         'badge_size': 15,
+        'badge-edit-color': [0x74, 0x4b, 0x94, 0xff],
+        'badge-learn-color': [0xb7, 0xe3, 0xcc, 0xff],
+        'badge-error-color': [0xff, 0x1b, 0x1c, 0xff]
     }
 
     PORT_IN = 0
@@ -53,7 +57,7 @@ class PatchElement (Clutter.Group):
         self.param_list = ['position_x', 'position_y', 'width', 'height',
                            'update_required', 'display_type', 'name', 'layername',
                            'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
-                           'dsp_outlets', 'scope', 'style' ]
+                           'dsp_outlets', 'scope', 'style']
 
         # Clutter objects
         self.stage = window
@@ -79,7 +83,7 @@ class PatchElement (Clutter.Group):
         self.edit_mode = None
         self.control_mode = None
         self.style = {}
-        self._all_styles = {}
+        self._all_styles = self.combine_styles()
 
         # create placeholder group and add to stage
         Clutter.Group.__init__(self)
@@ -99,17 +103,25 @@ class PatchElement (Clutter.Group):
         return self._all_styles.get(propname)
 
     def get_fontspec(self):
-        return '{} {}'.format(self.get_style('font-name'), self.get_style('font-size'))
+        fs = '{} {}px'.format(self.get_style('font-face'), self.get_style('font-size'))
+        log.debug('%s: setting font to "%s"' % (type(self), fs))
+        return fs
+
 
     def get_color(self, colorspec):
         rgba = None
-        if this.selected: 
-            rgba = this.get_style(colorspec + '-selected')
-        if not rgb:
-            rgba = this.get_style(colorspec)
-
+        if self.selected:
+            rgba = self.get_style(colorspec + ':selected')
+        if not rgba:
+            rgba = self.get_style(colorspec)
         if not rgba: 
-            return None
+            rgba = self.get_style(colorspec.split(':')[0])
+
+        if not rgba:
+            log.error('Could not find color %s in %s' % (colorspec, self._all_styles))
+            return ColorDB().find(64, 64, 64, 255)
+        elif isinstance(rgba, str):
+            return ColorDB().find(rgba)
         else:
             return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
 
@@ -119,7 +131,6 @@ class PatchElement (Clutter.Group):
                          type(self).style_defaults, self.style):
             styles.update(styleset)
         return styles
-
 
     def update(self):
         pass
@@ -274,8 +285,8 @@ class PatchElement (Clutter.Group):
         ppos = self.port_position(port_dir, port_num)
         pos_x, pos_y = self.get_stage_position()
 
-        return (pos_x + ppos[0] + 0.5 * self.porthole_width,
-                pos_y + ppos[1] + 0.5 * self.porthole_height)
+        return (pos_x + ppos[0] + 0.5 * self.get_style('porthole_width'),
+                pos_y + ppos[1] + 0.5 * self.get_style('porthole_height'))
 
     def port_position(self, port_dir, port_num):
         w = self.get_width()
@@ -284,31 +295,34 @@ class PatchElement (Clutter.Group):
             if self.num_inlets < 2:
                 spc = 0
             else:
-                spc = max(self.porthole_minspace,
-                          ((w - self.porthole_width - 2.0 * self.porthole_border)
+                spc = max(self.get_style('porthole_minspace'),
+                          ((w - self.get_style('porthole_width')
+                            - 2.0 * self.get_style('porthole_border'))
                            / (self.num_inlets - 1.0)))
-            return (self.porthole_border + spc * port_num, 0)
+            return (self.get_style('porthole_border') + spc * port_num, 0)
 
         elif port_dir == PatchElement.PORT_OUT:
             if self.num_outlets < 2:
                 spc = 0
             else:
-                spc = max(self.porthole_minspace,
-                          ((w - self.porthole_width - 2.0 * self.porthole_border)
+                spc = max(self.get_style('porthole_minspace'),
+                          ((w - self.get_style('porthole_width')
+                            - 2.0 * self.get_style('porthole_border'))
                            / (self.num_outlets - 1.0)))
-            return (self.porthole_border + spc * port_num, h - self.porthole_height)
+            return (self.get_style('porthole_border') + spc * port_num,
+                    h - self.get_style('porthole_height'))
 
     def draw_badge_cb(self, tex, ctx):
         tex.clear()
         if self.badge_current is None:
             return
         btext, bcolor = self.badge_current
+        halfbadge = self.get_style('badge_size') / 2.0
 
         color = ColorDB.to_cairo(bcolor)
         ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ctx.move_to(self.badge_size/2.0, self.badge_size/2.0)
-        ctx.arc(self.badge_size / 2.0, self.badge_size/2.0, self.badge_size/2.0,
-                0, 2*math.pi)
+        ctx.move_to(halfbadge, halfbadge)
+        ctx.arc(halfbadge, halfbadge, halfbadge, 0, 2*math.pi)
         ctx.fill()
 
         extents = ctx.text_extents(btext)
@@ -317,37 +331,37 @@ class PatchElement (Clutter.Group):
         twidth = extents[4]
         theight = extents[3]
 
-        ctx.move_to(self.badge_size/2.0 - twidth/2.0,
-                    self.badge_size/2.0 + theight/2.0)
+        ctx.move_to(halfbadge - twidth/2.0, halfbadge + theight/2.0)
         ctx.show_text(btext)
 
     def update_badge(self):
+        badgesize = self.get_style('badge_size')
         if self.badge is None:
-            self.badge = Clutter.CairoTexture.new(self.badge_size, self.badge_size)
+            self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
             self.add_actor(self.badge)
             self.badge.connect("draw", self.draw_badge_cb)
 
-        ypos = min(self.porthole_height + self.porthole_border,
-                   self.height - self.badge_size / 2)
-        self.badge.set_position(self.width - self.badge_size/2.0, ypos)
+        ypos = min(self.get_style('porthole_height') + self.get_style('porthole_border'),
+                   self.height - badgesize / 2.0)
+        self.badge.set_position(self.width - badgesize/2.0, ypos)
         tagged = False
 
         if self.edit_mode:
-            self.badge_current = ("E", ColorDB().find(255, 0, 255))
+            self.badge_current = ("E", self.get_color('badge-edit-color'))
             tagged = True
         else:
             self.badge_current = None
 
         if not tagged and "midi" in self.tags:
             if self.tags["midi"] == "learning":
-                self.badge_current = ("M", ColorDB().find(128, 255, 128))
+                self.badge_current = ("M", self.get_color('badge-learn-color'))
                 tagged = True
             else:
                 self.badge_current = None
 
         if not tagged and "osc" in self.tags:
             if self.tags["osc"] == "learning":
-                self.badge_current = ("O", ColorDB().find(128, 255, 128))
+                self.badge_current = ("O", self.get_color('badge-learn-color'))
                 tagged = True
             else:
                 self.badge_current = None
@@ -359,7 +373,7 @@ class PatchElement (Clutter.Group):
             elif ec > 0:
                 ec = "%d" % ec
             if ec:
-                self.badge_current = (ec, ColorDB().find(255, 0, 0))
+                self.badge_current = (ec, self.get_color('badge-error-color'))
                 tagged = True
 
         self.badge.invalidate()
@@ -384,10 +398,11 @@ class PatchElement (Clutter.Group):
                 if dsp_port:
                     pobj.set_border_width(1.5)
                     pobj.set_color(self.stage.color_bg)
-                    pobj.set_border_color(self.stage.color_unselected)
+                    pobj.set_border_color(self.get_color('stroke-color'))
                 else:
-                    pobj.set_color(self.stage.color_unselected)
-                pobj.set_size(self.porthole_width, self.porthole_height)
+                    pobj.set_color(self.get_color('stroke-color'))
+                pobj.set_size(self.get_style('porthole_width'),
+                              self.get_style('porthole_height'))
                 self.add_actor(pobj)
                 self.port_elements[pid] = pobj
 
@@ -484,6 +499,9 @@ class PatchElement (Clutter.Group):
         self.draw_ports()
         self.stage.refresh(self)
 
+        if 'style' in params:
+            self.style = params.get('style')
+
         self._all_styles = self.combine_styles()
 
     def move_to_layer(self, layer):
@@ -525,7 +543,6 @@ class PatchElement (Clutter.Group):
             self.stage.input_mgr.enable_minor_mode(self.edit_mode)
         self.update_badge()
 
-
     def end_edit(self):
         if self.edit_mode:
             self.stage.input_mgr.disable_minor_mode(self.edit_mode)
@@ -565,4 +582,3 @@ class PatchElement (Clutter.Group):
             tiptxt = MFPGUI().mfp.get_tooltip(self.obj_id, None, None, details)
         self.stage.hud_banner(tiptxt)
         return True
-

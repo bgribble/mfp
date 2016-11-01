@@ -25,15 +25,6 @@ def clutter_do(func):
 
     return wrapped 
 
-def add_color_defaults(): 
-    from .gui.colordb import ColorDB
-    ColorDB().insert("default_field", ColorDB().find(255, 255, 255, 255))
-    ColorDB().insert("default_bg", ColorDB().find(255, 255, 255, 255))
-    ColorDB().insert("default_bg_edit", ColorDB().find(200, 200, 255, 255))
-    ColorDB().insert("default_fg_unsel", ColorDB().find(0, 0, 0, 255))
-    ColorDB().insert("default_fg_sel", ColorDB().find(255, 0, 0, 255))
-    ColorDB().insert("default_txtcursor", ColorDB().find(0, 0, 0, 64))
-
 class MFPGUI (Singleton):
     def __init__(self):
         self.call_stats = {} 
@@ -44,10 +35,13 @@ class MFPGUI (Singleton):
 
         self.style_defaults = {
             'font-face': 'Cantarell,Sans',
-            'font-size': 12,
-            'text-color': [0, 0, 0, 0],
-            'canvas-color': [255, 255, 255, 0],
-            'outline-color': []
+            'font-size': 16,
+            'canvas-color': [0xf7, 0xf9, 0xf9, 0],
+            'stroke-color': [0x7d, 0x82, 0xb8, 0xff],
+            'stroke-color:selected': [0x7b, 0x4b, 0x94, 0xff],
+            'fill-color': [0xb7, 0xe3, 0xcc, 0xff],
+            'text-color': [0x37, 0x54, 0x50, 0xff],
+            'text-cursor-color': [0x0, 0x0, 0x0, 0x40]
         }
 
         self.clutter_thread = threading.Thread(target=self.clutter_proc)
@@ -90,9 +84,6 @@ class MFPGUI (Singleton):
             GObject.threads_init()
             Clutter.threads_init()
             GtkClutter.init([])
-
-            # load default color database 
-            add_color_defaults()
 
             # create main window
             from mfp.gui.patch_window import PatchWindow

@@ -51,20 +51,24 @@ class ButtonElement (PatchElement):
     porthole_border = 3
     proc_type = "var"
 
+    style_defaults = {
+        'fill-color-lit': [0x7d, 0x82, 0xb8]
+    }
+    
     PORT_TWEAK = 5
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
 
         self.indicator = False
-        self.color_indicator = None 
 
         # create elements
         self.texture = Clutter.CairoTexture.new(20, 20)
         self.texture.connect("draw", self.draw_cb)
 
         self.label = Clutter.Text()
-        self.label.set_color(self.stage.color_unselected)
+        self.label.set_color(self.get_color('text-color'))
+        self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
         self.label.set_use_markup(True)
@@ -84,11 +88,9 @@ class ButtonElement (PatchElement):
     def redraw(self):
         self.texture.invalidate()
         if self.indicator:
-            self.label.set_color(self.stage.color_bg)
-        elif self.selected:
-            self.label.set_color(self.stage.color_selected)
+            self.label.set_color(self.get_color('text-color:lit'))
         else:
-            self.label.set_color(self.stage.color_unselected)
+            self.label.set_color(self.get_color('text-color'))
 
     def center_label(self):
         label_halfwidth = self.label.get_property('width')/2.0
@@ -131,7 +133,7 @@ class ButtonElement (PatchElement):
         w = self.texture.get_property('surface_width') - 2
         h = self.texture.get_property('surface_height') - 2
 
-        c = ColorDB.to_cairo(self.color_fg)
+        c = ColorDB.to_cairo(self.get_color('stroke-color'))
         texture.clear()
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
 
@@ -143,12 +145,6 @@ class ButtonElement (PatchElement):
         rounded_box(ct, 1, 1, w, h, corner)
         ct.stroke()
 
-        if self.color_indicator is not None:
-            c = self.color_indicator 
-        else: 
-            c = ColorDB.to_cairo(self.color_fg)
-
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
 
         # draw the indicator
         ioff = max(3, 0.075*min(w,h))
@@ -157,8 +153,12 @@ class ButtonElement (PatchElement):
         rounded_box(ct, ioff, ioff, iw, ih, corner-1)
 
         if self.indicator:
+            c = ColorDB.to_cairo(self.get_color('fill-color-lit'))
+            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.fill()
         else:
+            c = ColorDB.to_cairo(self.get_color('stroke-color'))
+            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.stroke()
 
     def configure(self, params):
@@ -295,7 +295,7 @@ class ToggleIndicatorElement (ButtonElement):
         w = self.texture.get_property('surface_width') - 2
         h = self.texture.get_property('surface_height') - 2
 
-        c = ColorDB.to_cairo(self.color_fg)
+        c = ColorDB.to_cairo(self.get_color('stroke-color'))
         texture.clear()
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
 
@@ -306,13 +306,6 @@ class ToggleIndicatorElement (ButtonElement):
         circle(ct, 1, 1, w, h)
         ct.stroke()
 
-        if self.color_indicator is not None:
-            c = self.color_indicator 
-        else: 
-            c = ColorDB.to_cairo(self.color_fg)
-
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
-
         # draw the indicator
         ioff = max(3, 0.075*min(w,h))
         iw = w - 2 * ioff
@@ -320,8 +313,12 @@ class ToggleIndicatorElement (ButtonElement):
         circle(ct, ioff, ioff, iw, ih)
 
         if self.indicator:
+            c = ColorDB.to_cairo(self.get_color('fill-color-lit'))
+            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.fill()
         else:
+            c = ColorDB.to_cairo(self.get_color('stroke-color'))
+            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.stroke()
 
 

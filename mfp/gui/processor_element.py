@@ -52,7 +52,8 @@ class ProcessorElement (PatchElement):
         # label
         self.label = clutter.Text()
         self.label.set_position(self.label_off_x, self.label_off_y)
-        self.label.set_color(self.stage.color_unselected)
+        self.label.set_color(self.get_color('text-color'))
+        self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
 
@@ -71,7 +72,8 @@ class ProcessorElement (PatchElement):
 
         new_w = None
         num_ports = max(self.num_inlets, self.num_outlets)
-        port_width = (num_ports * self.porthole_minspace) + 2*self.porthole_border
+        port_width = (num_ports * self.get_style('porthole_minspace') 
+                      + 2*self.get_style('porthole_border'))
         
         new_w = max(35, port_width, label_width, box_width)
 
@@ -94,12 +96,12 @@ class ProcessorElement (PatchElement):
         ct.close_path()
 
         # fill to paint the background 
-        color = ColorDB.to_cairo(self.color_bg)
+        color = ColorDB.to_cairo(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ct.fill_preserve()
 
         # stroke to draw the outline 
-        color = ColorDB.to_cairo(self.color_fg)
+        color = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
         if self.obj_state == self.OBJ_COMPLETE:

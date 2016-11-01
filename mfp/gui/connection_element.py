@@ -97,7 +97,7 @@ class ConnectionElement(PatchElement):
         texture.clear()
         ctx.set_antialias(cairo.ANTIALIAS_NONE)
 
-        c = ColorDB.to_cairo(self.color_fg)
+        c = ColorDB.to_cairo(self.get_color('stroke-color'))
         ctx.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         if self.dsp_connect:
             ctx.set_line_width(2.0 * self.LINE_WIDTH)

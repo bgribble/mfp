@@ -13,7 +13,7 @@ from .modes.label_edit import LabelEditMode
 from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
 
-from datetime import datetime 
+from datetime import datetime
 
 class PlotElement (PatchElement):
 
@@ -25,14 +25,15 @@ class PlotElement (PatchElement):
     INIT_HEIGHT = 240
     LABEL_SPACE = 25
     WIDTH_PAD = 6
-    HEIGHT_PAD = 4 
+    HEIGHT_PAD = 4
     label_off_x = 6
     label_off_y = 0
 
     def __init__(self, window, x, y, params={}):
         PatchElement.__init__(self, window, x, y)
 
-        self.param_list.extend(['x_min', 'x_max', 'y_min', 'y_max', 'style', 'plot_type'])
+        self.param_list.extend(['x_min', 'x_max', 'y_min', 'y_max',
+                                'plot_style', 'plot_type'])
 
         # display elements
         self.rect = None
@@ -46,8 +47,8 @@ class PlotElement (PatchElement):
         self.y_min = -1.0
         self.y_max = 1.0
 
-        self.min_interval = 75 
-        self.last_draw = None 
+        self.min_interval = 75
+        self.last_draw = None
 
         # create display
         width = self.INIT_WIDTH + self.WIDTH_PAD
@@ -58,11 +59,11 @@ class PlotElement (PatchElement):
         self.update()
 
     @property
-    def style(self):
-        if self.xyplot: 
+    def plot_style(self):
+        if self.xyplot:
             return self.xyplot.save_style()
-        else: 
-            return {} 
+        else:
+            return {}
 
     @property
     def plot_type(self):
@@ -73,7 +74,7 @@ class PlotElement (PatchElement):
         else:
             return "none"
 
-    def set_size(self, width, height): 
+    def set_size(self, width, height):
         PatchElement.set_size(self, width, height)
         self.rect.set_size(width, height)
         if self.xyplot:
@@ -88,7 +89,7 @@ class PlotElement (PatchElement):
 
         # rectangle box
         self.rect.set_border_width(2)
-        self.rect.set_border_color(self.stage.color_unselected)
+        self.rect.set_border_color(self.get_color('stroke-color'))
         self.rect.set_position(0, 0)
         self.rect.set_size(width, height)
         self.rect.set_depth(-1)
@@ -96,7 +97,8 @@ class PlotElement (PatchElement):
 
         # label
         self.label.set_position(self.label_off_x, self.label_off_y)
-        self.label.set_color(self.stage.color_unselected)
+        self.label.set_color(self.get_color('text-color'))
+        self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
 
@@ -109,26 +111,26 @@ class PlotElement (PatchElement):
 
     # methods useful for interaction
     def set_bounds(self, x_min, y_min, x_max, y_max):
-        update = False 
+        update = False
 
         if x_min != self.x_min:
             self.x_min = x_min
-            update = True 
-        if x_max != self.x_max: 
+            update = True
+        if x_max != self.x_max:
             self.x_max = x_max
-            update = True 
-        if y_min != self.y_min: 
+            update = True
+        if y_min != self.y_min:
             self.y_min = y_min
-            update = True 
-        if y_max != self.y_max: 
+            update = True
+        if y_max != self.y_max:
             self.y_max = y_max
-            update = True 
+            update = True
 
-        if update: 
+        if update:
             self.xyplot.set_bounds(x_min, y_min, x_max, y_max)
             self.send_params()
 
-    def draw_complete_cb(self): 
+    def draw_complete_cb(self):
         def thunk():
             self.last_draw = datetime.now()
             MFPGUI().mfp.send_methodcall(self.obj_id, 0, "draw_complete")
@@ -138,9 +140,9 @@ class PlotElement (PatchElement):
             delta_msec = time_since_last.total_seconds() * 1000.0
             if (delta_msec > self.min_interval):
                 thunk()
-            else: 
+            else:
                 MFPGUI().clutter_do_later(self.min_interval-delta_msec, thunk)
-        else: 
+        else:
             thunk()
 
     def update(self):
@@ -163,7 +165,7 @@ class PlotElement (PatchElement):
                 self.obj_args = parts[1]
 
             log.debug("PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args))
-            self.proc_type = self.obj_type 
+            self.proc_type = self.obj_type
             self.create(self.proc_type, self.obj_args)
 
             if self.obj_id is None:
@@ -226,7 +228,7 @@ class PlotElement (PatchElement):
                 self.xyplot = ScatterPlot(self.INIT_WIDTH, self.INIT_HEIGHT)
             elif params["plot_type"] == "scope":
                 self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT, MFPApp().samplerate)
-                self.xyplot.draw_complete_cb = self.draw_complete_cb 
+                self.xyplot.draw_complete_cb = self.draw_complete_cb
             if self.xyplot:
                 self.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)

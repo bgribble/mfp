@@ -26,6 +26,11 @@ class SlideMeterElement (PatchElement):
     display_type = "slidemeter"
     proc_type = "slidemeter"
 
+    style_defaults = {
+        'font-size-scale': 8
+    }
+
+
     DEFAULT_W = 25
     DEFAULT_H = 100
     SCALE_SPACE = 30
@@ -47,7 +52,6 @@ class SlideMeterElement (PatchElement):
         self.min_value = 0.0
         self.max_value = 1.0
         self.scale_ticks = None
-        self.scale_font_size = 8
         self.show_scale = False
         self.slider_enable = True
         self.scale = ticks.LinearScale()
@@ -86,7 +90,7 @@ class SlideMeterElement (PatchElement):
         return self.scale.scale_type if self.scale else 0
 
     def draw_cb(self, texture, ct):
-        c = ColorDB.to_cairo(self.color_fg)
+        c = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
 
         if self.orientation == self.HORIZONTAL: 
@@ -131,7 +135,8 @@ class SlideMeterElement (PatchElement):
 
         # draw the scale if required
         if self.show_scale:
-            ct.set_font_size(self.scale_font_size)
+            fontsize = self.get_style('font-size-scale')
+            ct.set_font_size(fontsize)
 
             if self.scale_ticks is None:
                 num_ticks = bar_h / self.TICK_SPACE
@@ -150,7 +155,7 @@ class SlideMeterElement (PatchElement):
                 ct.line_to(tick_x, tick_y)
                 ct.stroke()
 
-                txt_y = self.scale_font_size + (tick_y / bar_h)*(bar_h - self.scale_font_size)
+                txt_y = fontsize + (tick_y / bar_h)*(bar_h - fontsize)
                 ct.move_to(txt_x, txt_y)
                 ct.show_text("%.3g" % tick)
 
@@ -496,7 +501,7 @@ class DialElement(SlideMeterElement):
         return theta
 
     def draw_cb(self, texture, ct): 
-        c = ColorDB.to_cairo(self.color_fg)
+        c = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
         texture.clear()
@@ -537,6 +542,8 @@ class DialElement(SlideMeterElement):
         ct.stroke()
 
         # and the tasty filling 
+        c = ColorDB.to_cairo(self.get_color('fill-color'))
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         min_val, max_val = self.fill_interval()
         min_theta = self.val2theta(min_val)
         max_theta = self.val2theta(max_val)

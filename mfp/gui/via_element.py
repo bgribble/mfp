@@ -53,7 +53,8 @@ class ViaElement (PatchElement):
         self.add_actor(self.label)
 
         # configure label
-        self.label.set_color(window.color_unselected)
+        self.label.set_color(self.get_color('text-color'))
+        self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.text_changed_cb)
 
         self.move(x, y)
@@ -65,8 +66,6 @@ class ViaElement (PatchElement):
 
     def draw_cb(self, texture, ct):
         self.texture.clear()
-        color = ColorDB.to_cairo(self.color_fg)
-        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
         if self.STYLE in ("empty_circled", "filled_circled"):
             arcsize = self.VIA_SIZE / 3.5
@@ -80,11 +79,17 @@ class ViaElement (PatchElement):
         cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
         ct.arc(cent, cent, arcsize, 0, 2 * math.pi)
         if self.STYLE[:5] == "empty":
+            color = ColorDB.to_cairo(self.get_color('stroke-color'))
+            ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
         else:
+            color = ColorDB.to_cairo(self.get_color('fill-color'))
+            ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.fill()
 
         if self.STYLE[-7:] == "circled":
+            color = ColorDB.to_cairo(self.get_color('stroke-color'))
+            ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.set_line_width(1)
             cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
             ct.arc(cent, cent, self.VIA_SIZE/2.0, 0, 2 * math.pi)

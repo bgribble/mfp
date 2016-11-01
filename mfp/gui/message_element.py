@@ -46,8 +46,8 @@ class MessageElement (PatchElement):
 
         # configure label
         self.label.set_position(4, 1)
-        self.label.set_color(this.get_color('text-color'))
-        self.label.set_font_name(this.get_fontdesc())
+        self.label.set_color(self.get_color('text-color'))
+        self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.text_changed_cb)
 
         self.move(x, y)
@@ -63,7 +63,6 @@ class MessageElement (PatchElement):
         self.update()
 
     def draw_cb(self, texture, ct):
-
         if self.clickstate:
             lw = 5.0
         else:
@@ -92,7 +91,7 @@ class MessageElement (PatchElement):
         ct.close_path()
 
         # fill to paint the background
-        c = ColorDB.to_cairo(self.get_color('background-color')
+        c = ColorDB.to_cairo(self.get_color('fill-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.fill_preserve()
 

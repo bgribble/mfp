@@ -82,10 +82,10 @@ class PatchWindow(object):
         self.console_mgr.start()
 
         # dumb colors
-        self.color_unselected = ColorDB().find("default_fg_unsel")
+        self.color_unselected = self.get_color('stroke-color') 
         self.color_transparent = ColorDB().find(255, 255, 255, 0)
-        self.color_selected = ColorDB().find("default_fg_sel")
-        self.color_bg = ColorDB().find("default_bg")
+        self.color_selected = self.get_color('stroke-color:selected')
+        self.color_bg = self.get_color('canvas-color')
 
         # callbacks facility... not yet too much used, but "select" and 
         # "add" are in use 
@@ -104,6 +104,17 @@ class PatchWindow(object):
 
         # set up key and mouse handling
         self.init_input()
+
+
+    def get_color(self, colorspec):
+        rgba = MFPGUI().style_defaults.get(colorspec)
+
+        if not rgba: 
+            return None
+        elif isinstance(rgba, str):
+            return ColorDB().find(rgba)
+        else:
+            return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
 
     def grab_focus(self):
         def cb(*args): 
@@ -379,8 +390,11 @@ class PatchWindow(object):
         try: 
             b = factory(self, x, y)
         except Exception as e:
+            import traceback
             log.warning("add_element: Error while creating with factory", factory)
             log.warning(e)
+            for l in traceback.format_exc().split("\n"):
+                log.debug(l)
             return True
 
         self.active_layer().add(b)

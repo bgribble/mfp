@@ -21,6 +21,10 @@ class TextElement (PatchElement):
 
     ELBOW_ROOM = 5
 
+    style_defaults = {
+        'text-color:selected': [0x7d, 0x82, 0xb8]
+    }
+
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
         self.value = ''
@@ -33,7 +37,8 @@ class TextElement (PatchElement):
         self.add_actor(self.texture)
 
         self.label = Clutter.Text()
-        self.label.set_color(window.color_unselected)
+        self.label.set_color(self.get_color('text-color'))
+        self.label.set_font_name(self.get_fontspec())
         self.label.set_position(3, 3)
         self.add_actor(self.label)
 
@@ -128,12 +133,12 @@ class TextElement (PatchElement):
 
     def select(self, *args):
         PatchElement.select(self)
-        self.label.set_color(self.stage.color_selected)
+        self.label.set_color(self.get_color('text-color'))
         self.draw_ports()
 
     def unselect(self, *args):
         PatchElement.unselect(self)
-        self.label.set_color(self.stage.color_unselected)
+        self.label.set_color(self.get_color('text-color'))
         self.hide_ports()
 
     def make_edit_mode(self):

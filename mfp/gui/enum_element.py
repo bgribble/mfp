@@ -49,7 +49,7 @@ class EnumElement (PatchElement):
 
         # configure label
         self.label.set_position(4, 1)
-        self.label.set_color(window.color_unselected)
+        self.label.set_color(self.get_color('text-color'))
         self.label.connect('text-changed', self.text_changed_cb)
         self.label.set_text(self.format_value(self.value))
 
@@ -94,11 +94,11 @@ class EnumElement (PatchElement):
         ct.line_to(1, 1)
         ct.close_path()
 
-        color = ColorDB.to_cairo(self.color_bg)
+        color = ColorDB.to_cairo(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.fill_preserve()
 
-        color = ColorDB.to_cairo(self.color_fg)
+        color = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.stroke()
 
