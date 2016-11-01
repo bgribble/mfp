@@ -750,6 +750,12 @@ class Processor (object):
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
+    def set_style(self, tag, value):
+        from .mfp_app import MFPApp
+        self.gui_params["style"][tag] = value
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
     def mark_ready(self):
         self.status = Processor.READY
 
