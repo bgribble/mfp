@@ -27,7 +27,8 @@ class SlideMeterElement (PatchElement):
     proc_type = "slidemeter"
 
     style_defaults = {
-        'font-size-scale': 8
+        'font-size-scale': 8,
+        'meter-color': 'default-alt-fill-color'
     }
 
 
@@ -176,7 +177,7 @@ class SlideMeterElement (PatchElement):
         if self.zeropoint is not None and h < self.MIN_BARSIZE:
             h = self.MIN_BARSIZE 
 
-        c = ColorDB.to_cairo(self.get_color('fill-color'))
+        c = ColorDB.to_cairo(self.get_color('meter-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.rectangle(x_min, y_max - val2pixels(max_fillval), bar_w, h)
         ct.fill()
@@ -546,7 +547,7 @@ class DialElement(SlideMeterElement):
         ct.stroke()
 
         # and the tasty filling 
-        c = ColorDB.to_cairo(self.get_color('fill-color'))
+        c = ColorDB.to_cairo(self.get_color('meter-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         min_val, max_val = self.fill_interval()
         min_theta = self.val2theta(min_val)

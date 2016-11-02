@@ -7,13 +7,13 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 import threading
-import argparse 
+import argparse
 import sys
-from datetime import datetime 
+from datetime import datetime
 from singleton import Singleton
 from mfp_command import MFPCommand
 from . import log
-from mfp.utils import profile 
+from mfp.utils import profile
 
 from .gui_command import GUICommand
 from .rpc import RPCRemote, RPCHost
@@ -23,11 +23,11 @@ def clutter_do(func):
         from mfp.gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: func(*args, **kwargs))
 
-    return wrapped 
+    return wrapped
 
 class MFPGUI (Singleton):
     def __init__(self):
-        self.call_stats = {} 
+        self.call_stats = {}
         self.objects = {}
         self.mfp = None
         self.appwin = None
@@ -36,12 +36,12 @@ class MFPGUI (Singleton):
         self.style_defaults = {
             'font-face': 'Cantarell,Sans',
             'font-size': 16,
-            'canvas-color': [0xf7, 0xf9, 0xf9, 0],
-            'stroke-color': [0x7d, 0x82, 0xb8, 0xff],
-            'stroke-color:selected': [0x7b, 0x4b, 0x94, 0xff],
-            'fill-color': [0xb7, 0xe3, 0xcc, 0xff],
-            'text-color': [0x37, 0x54, 0x50, 0xff],
-            'text-cursor-color': [0x0, 0x0, 0x0, 0x40]
+            'canvas-color': 'default-canvas-color',
+            'stroke-color': 'default-stroke-color',
+            'stroke-color:selected': 'default-stroke-color-selected',
+            'fill-color': 'default-fill-color',
+            'text-color': 'default-text-color',
+            'text-cursor-color': 'default-text-cursor-color'
         }
 
         self.clutter_thread = threading.Thread(target=self.clutter_proc)
@@ -56,12 +56,12 @@ class MFPGUI (Singleton):
     def _callback_wrapper(self, thunk):
         try:
             return thunk()
-        except Exception, e: 
-            import traceback 
+        except Exception, e:
+            import traceback
             log.debug("Exception in GUI operation:", e)
             for l in traceback.format_exc().split("\n"):
                 log.debug(l)
-            return False 
+            return False
 
     def clutter_do_later(self, delay, thunk):
         from gi.repository import GObject
@@ -76,7 +76,7 @@ class MFPGUI (Singleton):
         GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
 
     def clutter_proc(self):
-        
+
         try:
             from gi.repository import Clutter, GObject, Gtk, GtkClutter
 
@@ -90,15 +90,15 @@ class MFPGUI (Singleton):
             self.appwin = PatchWindow()
             self.mfp = MFPCommand()
 
-        except Exception, e: 
+        except Exception, e:
             import traceback
             for l in traceback.format_exc().split("\n"):
                 print "[LOG] ERROR:", l
             print "[LOG] FATAL: Error during GUI process launch"
             sys.stdout.flush()
-            return 
+            return
 
-        try: 
+        try:
             # direct logging to GUI log console
             Gtk.main()
         except Exception, e:
@@ -121,8 +121,35 @@ class MFPGUI (Singleton):
             self.appwin = None
         Gtk.main_quit()
 
-def main(): 
-    import gi 
+
+def setup_default_colors():
+    from .gui.colordb import ColorDB
+    ColorDB().insert('default-canvas-color',
+                     ColorDB().find(0xf7, 0xf9, 0xf9, 0))
+    ColorDB().insert('default-stroke-color',
+                     ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
+    ColorDB().insert('default-stroke-color-selected',
+                     ColorDB().find(0x00, 0x7f, 0xff, 0xff))
+    ColorDB().insert('default-fill-color',
+                     ColorDB().find(0xd4, 0xdc, 0xff, 0xff))
+    ColorDB().insert('default-alt-fill-color',
+                     ColorDB().find(0x7d, 0x83, 0xff, 0xff))
+    ColorDB().insert('default-text-color',
+                     ColorDB().find(0x37, 0x54, 0x50, 0xff))
+    ColorDB().insert('default-edit-badge-color',
+                     ColorDB().find(0x74, 0x4b, 0x94, 0xff))
+    ColorDB().insert('default-learn-badge-color',
+                     ColorDB().find(0x19, 0xff, 0x90, 0xff))
+    ColorDB().insert('default-error-badge-color',
+                     ColorDB().find(0xb7, 0x21, 0x21, 0xff))
+    ColorDB().insert('default-text-cursor-color',
+                     ColorDB().find(0x0, 0x0, 0x0, 0x40))
+    ColorDB().insert('transparent', 
+                     ColorDB().find(0x00, 0x00, 0x00, 0x00))
+
+
+def main():
+    import gi
     gi.require_version('Gtk', '3.0')
     gi.require_version('GtkClutter', '1.0')
     gi.require_version('Clutter', '1.0')
@@ -131,9 +158,9 @@ def main():
     parser.add_argument("-l", "--logstart", default=None,
                         help="Reference time for log messages")
     parser.add_argument("-s", "--socketpath", default="/tmp/mfp_rpcsock",
-                        help="Path to Unix-domain socket for RPC") 
+                        help="Path to Unix-domain socket for RPC")
     parser.add_argument("-d", "--debug", action="store_true",
-                        help="Enable debugging behaviors") 
+                        help="Enable debugging behaviors")
 
 
     args = vars(parser.parse_args())
@@ -144,7 +171,7 @@ def main():
     host.start()
 
     remote = RPCRemote(socketpath, "MFP GUI", host)
-    remote.connect() 
+    remote.connect()
 
     print "[LOG] DEBUG: GUI process starting"
 
@@ -155,10 +182,12 @@ def main():
 
     log.log_module = "gui"
     log.log_func = log.rpclog
-    log.log_debug = True 
+    log.log_debug = True
+
+    setup_default_colors()
 
     host.subscribe(MFPCommand)
-    gui = MFPGUI() 
+    gui = MFPGUI()
     gui.debug = debug
 
     if debug:

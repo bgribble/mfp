@@ -83,7 +83,7 @@ class PatchWindow(object):
 
         # dumb colors
         self.color_unselected = self.get_color('stroke-color') 
-        self.color_transparent = ColorDB().find(255, 255, 255, 0)
+        self.color_transparent = ColorDB().find('transparent')
         self.color_selected = self.get_color('stroke-color:selected')
         self.color_bg = self.get_color('canvas-color')
 
@@ -108,7 +108,6 @@ class PatchWindow(object):
 
     def get_color(self, colorspec):
         rgba = MFPGUI().style_defaults.get(colorspec)
-
         if not rgba: 
             return None
         elif isinstance(rgba, str):

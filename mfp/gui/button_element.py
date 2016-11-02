@@ -52,7 +52,7 @@ class ButtonElement (PatchElement):
     proc_type = "var"
 
     style_defaults = {
-        'fill-color-lit': [0x7d, 0x82, 0xb8]
+        'fill-color:lit': 'default-alt-fill-color'
     }
     
     PORT_TWEAK = 5
@@ -153,7 +153,7 @@ class ButtonElement (PatchElement):
         rounded_box(ct, ioff, ioff, iw, ih, corner-1)
 
         if self.indicator:
-            c = ColorDB.to_cairo(self.get_color('fill-color-lit'))
+            c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
             ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.fill()
         else:

@@ -22,7 +22,8 @@ class TextElement (PatchElement):
     ELBOW_ROOM = 5
 
     style_defaults = {
-        'text-color:selected': [0x7d, 0x82, 0xb8, 0xff]
+        'text-color:selected': 'default-stroke-color-selected',
+        'fill-color': 'transparent'
     }
 
     def __init__(self, window, x, y):
@@ -60,7 +61,7 @@ class TextElement (PatchElement):
         self.texture.clear()
 
         # fill to paint the background
-        color = ColorDB.to_cairo(self.color_bg)
+        color = ColorDB.to_cairo(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ct.fill_preserve()
 

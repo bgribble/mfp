@@ -23,9 +23,9 @@ class PatchElement (Clutter.Group):
         'porthole_border': 1,
         'porthole_minspace': 11,
         'badge_size': 15,
-        'badge-edit-color': [0x74, 0x4b, 0x94, 0xff],
-        'badge-learn-color': [0xb7, 0xe3, 0xcc, 0xff],
-        'badge-error-color': [0xff, 0x1b, 0x1c, 0xff]
+        'badge-edit-color': 'default-edit-badge-color',
+        'badge-learn-color': 'default-learn-badge-color',
+        'badge-error-color': 'default-error-badge-color'
     }
 
     PORT_IN = 0
@@ -103,10 +103,7 @@ class PatchElement (Clutter.Group):
         return self._all_styles.get(propname)
 
     def get_fontspec(self):
-        fs = '{} {}px'.format(self.get_style('font-face'), self.get_style('font-size'))
-        log.debug('%s: setting font to "%s"' % (type(self), fs))
-        return fs
-
+        return '{} {}px'.format(self.get_style('font-face'), self.get_style('font-size'))
 
     def get_color(self, colorspec):
         rgba = None
@@ -114,7 +111,7 @@ class PatchElement (Clutter.Group):
             rgba = self.get_style(colorspec + ':selected')
         if not rgba:
             rgba = self.get_style(colorspec)
-        if not rgba: 
+        if not rgba:
             rgba = self.get_style(colorspec.split(':')[0])
 
         if not rgba:
