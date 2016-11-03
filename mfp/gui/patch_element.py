@@ -138,9 +138,11 @@ class PatchElement (Clutter.Group):
     def select(self):
         self.selected = True
         self.move_to_top()
+        self.draw_ports()
 
     def unselect(self):
         self.selected = False
+        self.draw_ports()
 
     def move_to_top(self):
         def bump(actor):
@@ -394,14 +396,16 @@ class PatchElement (Clutter.Group):
                 pobj = Clutter.Rectangle()
                 if dsp_port:
                     pobj.set_border_width(1.5)
-                    pobj.set_color(self.stage.color_bg)
-                    pobj.set_border_color(self.get_color('stroke-color'))
-                else:
-                    pobj.set_color(self.get_color('stroke-color'))
                 pobj.set_size(self.get_style('porthole_width'),
                               self.get_style('porthole_height'))
                 self.add_actor(pobj)
                 self.port_elements[pid] = pobj
+
+            if dsp_port:
+                pobj.set_color(self.stage.color_bg)
+                pobj.set_border_color(self.get_color('stroke-color'))
+            else:
+                pobj.set_color(self.get_color('stroke-color'))
 
             pobj.set_position(px, py)
             pobj.show()
