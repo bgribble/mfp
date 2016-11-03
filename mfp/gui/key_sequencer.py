@@ -156,8 +156,20 @@ class KeySequencer (object):
                 if b in self.mouse_buttons:
                     key += 'M%d-' % b
             key += 'SCROLL'
-            if event.direction == Clutter.ScrollDirection.DOWN:
+            direction = event.direction
+            if direction == Clutter.ScrollDirection.SMOOTH:
+                key += 'SMOOTH'
+                delta = Clutter.Event.get_scroll_delta(event)
+                if abs(delta.dy) < 0.05:
+                    pass
+                elif delta.dy < 0:
+                    direction = Clutter.ScrollDirection.UP
+                else: 
+                    direction = Clutter.ScrollDirection.DOWN
+
+            if direction == Clutter.ScrollDirection.DOWN:
                 key += 'DOWN'
-            elif event.direction == Clutter.ScrollDirection.UP:
+            elif direction == Clutter.ScrollDirection.UP:
                 key += 'UP'
+
         return key

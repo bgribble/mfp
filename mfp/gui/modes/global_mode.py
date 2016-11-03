@@ -70,6 +70,8 @@ class GlobalMode (InputMode):
         self.bind('-', lambda: self.window.zoom_out(0.8), "Zoom view out")
         self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
         self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
+        self.bind('SCROLLSMOOTHUP', lambda: self.window.zoom_in(1.015), "Zoom view in")
+        self.bind('SCROLLSMOOTHDOWN', lambda: self.window.zoom_in(0.985), "Zoom view out")
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
         self.bind("HOVER", lambda: self.hover(False))
         self.bind("S-HOVER", lambda: self.hover(True))
