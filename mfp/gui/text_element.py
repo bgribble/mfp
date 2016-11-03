@@ -22,7 +22,6 @@ class TextElement (PatchElement):
     ELBOW_ROOM = 5
 
     style_defaults = {
-        'text-color:selected': 'default-stroke-color-selected',
         'fill-color': 'transparent'
     }
 

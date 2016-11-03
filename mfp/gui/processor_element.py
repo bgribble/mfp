@@ -155,10 +155,12 @@ class ProcessorElement (PatchElement):
 
     def select(self):
         PatchElement.select(self) 
+        self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def unselect(self):
         PatchElement.unselect(self) 
+        self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def delete(self):

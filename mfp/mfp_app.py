@@ -198,16 +198,9 @@ class MFPApp (Singleton):
             self.dsp_process = None
 
         if not self.no_dsp:
-            if self.debug:
-                # FIXME need to change this to not capture stdin/out for debug to work
-                self.dsp_process = RPCExecRemote("gdb", "-ex", "run", "--args",
-                                                 "mfpdsp", self.socket_path, self.max_blocksize,
-                                                 self.dsp_inputs, self.dsp_outputs,
-                                                 log_module="dsp", log_raw=self.debug_remote)
-            else:
-                self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize,
-                                                 self.dsp_inputs, self.dsp_outputs,
-                                                 log_module="dsp", log_raw=self.debug_remote)
+            self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize,
+                                             self.dsp_inputs, self.dsp_outputs,
+                                             log_module="dsp", log_raw=self.debug_remote)
             self.dsp_process.start()
             if not self.dsp_process.alive():
                 raise StartupError("DSP process died during startup")

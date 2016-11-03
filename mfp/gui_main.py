@@ -38,9 +38,11 @@ class MFPGUI (Singleton):
             'font-size': 16,
             'canvas-color': 'default-canvas-color',
             'stroke-color': 'default-stroke-color',
-            'stroke-color:selected': 'default-stroke-color-selected',
             'fill-color': 'default-fill-color',
             'text-color': 'default-text-color',
+            'stroke-color:selected': 'default-stroke-color-selected',
+            'fill-color:selected': 'default-fill-color-selected',
+            'text-color:selected': 'default-text-color-selected',
             'text-cursor-color': 'default-text-cursor-color'
         }
 
@@ -132,10 +134,14 @@ def setup_default_colors():
                      ColorDB().find(0x00, 0x7f, 0xff, 0xff))
     ColorDB().insert('default-fill-color',
                      ColorDB().find(0xd4, 0xdc, 0xff, 0xff))
+    ColorDB().insert('default-fill-color-selected',
+                     ColorDB().find(0xe4, 0xec, 0xff, 0xff))
     ColorDB().insert('default-alt-fill-color',
                      ColorDB().find(0x7d, 0x83, 0xff, 0xff))
     ColorDB().insert('default-text-color',
-                     ColorDB().find(0x37, 0x54, 0x50, 0xff))
+                     ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
+    ColorDB().insert('default-text-color-selected',
+                     ColorDB().find(0x00, 0x7f, 0xff, 0xff))
     ColorDB().insert('default-edit-badge-color',
                      ColorDB().find(0x74, 0x4b, 0x94, 0xff))
     ColorDB().insert('default-learn-badge-color',
