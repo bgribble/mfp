@@ -6,7 +6,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from mfp import log
-from gi.repository import Clutter 
+from gi.repository import Clutter
 
 def get_key_unicode(ev):
     if ev.unicode_value:
@@ -39,7 +39,7 @@ class KeySequencer (object):
         if event.type == Clutter.EventType.KEY_PRESS:
             code = event.keyval
             if code in MOD_ALL:
-                if code in (MOD_SHIFTALT, MOD_SHIFTRALT): 
+                if code in (MOD_SHIFTALT, MOD_SHIFTRALT):
                     self.mod_keys.add(MOD_SHIFT)
                     self.mod_keys.add(MOD_ALT)
                 else:
@@ -51,7 +51,7 @@ class KeySequencer (object):
             code = event.keyval
             if code in MOD_ALL:
                 try:
-                    if code in (MOD_SHIFTALT, MOD_SHIFTRALT): 
+                    if code in (MOD_SHIFTALT, MOD_SHIFTRALT):
                         self.mod_keys.remove(MOD_SHIFT)
                         self.mod_keys.remove(MOD_ALT)
                     else:
@@ -79,7 +79,7 @@ class KeySequencer (object):
             if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
                 key = 'S-' + key
 
-            return key + event 
+            return key + event
 
         if event.type in (Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE):
             ks = event.keyval
@@ -158,13 +158,15 @@ class KeySequencer (object):
             key += 'SCROLL'
             direction = event.direction
             if direction == Clutter.ScrollDirection.SMOOTH:
-                key += 'SMOOTH'
                 delta = Clutter.Event.get_scroll_delta(event)
-                if abs(delta.dy) < 0.05:
+                if abs(delta.dy) > 0.001 and abs(delta.dy) < 0.2:
+                    key += 'SMOOTH'
+
+                if abs(delta.dy) <= .001:
                     pass
                 elif delta.dy < 0:
                     direction = Clutter.ScrollDirection.UP
-                else: 
+                else:
                     direction = Clutter.ScrollDirection.DOWN
 
             if direction == Clutter.ScrollDirection.DOWN:
