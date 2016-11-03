@@ -19,8 +19,8 @@ class ViaElement (PatchElement):
     proc_type = None
 
     style_defaults = {
-        'porthole-width': 0,
-        'porthole-height': 0,
+        'porthole_width': 0,
+        'porthole_height': 0,
         'autoplace-dx': -2.5
     }
 
