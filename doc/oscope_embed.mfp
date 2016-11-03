@@ -40,7 +40,7 @@
             ],
             "gui_params": {
                 "plot_type": "scope",
-                "style": {},
+                "plot_style": {},
                 "position_x": 208.48890686035156,
                 "y_max": 1.0,
                 "update_required": false,
