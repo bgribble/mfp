@@ -45,7 +45,7 @@ class XYPlot (Clutter.Group):
         # colors
         self.color_fg = self.element.get_color('stroke-color')
         self.color_bg = self.element.get_color('canvas-color')
-        self.color_axes = ColorDB().to_cairo(self.element.get_color('stroke-color:selected'))
+        self.color_axes = ColorDB().to_cairo(self.element.get_color('axis-color'))
 
         # initialized by create() call
         self.border = None

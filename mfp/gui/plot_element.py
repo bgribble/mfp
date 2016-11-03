@@ -29,6 +29,11 @@ class PlotElement (PatchElement):
     label_off_x = 6
     label_off_y = 0
 
+    style_defaults = {
+        'axis-color': 'default-alt-fill-color'
+    }
+
+
     def __init__(self, window, x, y, params={}):
         PatchElement.__init__(self, window, x, y)
 
