@@ -599,9 +599,9 @@ class Processor (object):
                 w_target, w_val, w_inlet = work[0]
                 work[:1] = w_target._send(w_val, w_inlet)
         except Exception, e:
-            log.debug("Exception: " + e.message)
-            log.debug("%s %s: send to inlet %d failed: %s" %
-                      (self.init_type, self.name, inlet, value))
+            log.error("%s (%s): send to inlet %d failed: %s" %
+                      (w_target.name, w_target.init_type, inlet, value))
+            log.error("Exception: " + e.message)
             import traceback
             tb = traceback.format_exc()
             w_target.error(e.message, tb)
@@ -708,15 +708,16 @@ class Processor (object):
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def error(self, msg=None, tb=None):
+        from .mfp_app import MFPApp
         self.count_errors += 1
         self.set_tag("errorcount", self.count_errors)
 
         if msg:
             self.error_info[msg] = self.error_info.get(msg, 0) + 1
 
-        print "Error:", self
-        if tb:
-            print tb
+        if MFPApp().debug:
+            for tbline in tb.strip().split('\n'):
+                log.debug(tbline)
 
     def create_gui(self, **kwargs):
         from .mfp_app import MFPApp
