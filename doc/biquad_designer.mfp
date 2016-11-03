@@ -2457,7 +2457,7 @@
                 "position_x": 381.7375793457031,
                 "position_y": 122.862548828125,
                 "scope": "__patch__",
-                "style": {
+                "plot_style": {
                     "0": {
                         "color": {
                             "__RGBAColor__": {
@@ -2972,7 +2972,7 @@
                 "position_x": 30.963523864746094,
                 "position_y": 124.37521362304688,
                 "scope": "__patch__",
-                "style": {
+                "plot_style": {
                     "0": {
                         "color": {
                             "__RGBAColor__": {

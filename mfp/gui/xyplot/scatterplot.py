@@ -14,7 +14,7 @@ from mfp import log
 
 
 class ScatterPlot (XYPlot):
-    def __init__(self, width, height):
+    def __init__(self, element, width, height):
         # data points
         self.points = {}
         self.points_by_tile = {}
@@ -23,7 +23,7 @@ class ScatterPlot (XYPlot):
         self.x_scroll = 0
         self.y_scroll = 0
 
-        XYPlot.__init__(self, width, height)
+        XYPlot.__init__(self, element, width, height)
 
     def draw_field_cb(self, texture, ctxt, px_min, px_max):
         def stroke_to(styler, curve, px, ptnum, delta):
@@ -188,7 +188,7 @@ class ScatterPlot (XYPlot):
 
     def configure(self, params):
         modes = dict(LINEAR=0, LOG=1, LOG_10=1, LOG_2=2)
-        s = params.get("style")
+        s = params.get("plot_style")
         if s:
             self.set_style(s)
         

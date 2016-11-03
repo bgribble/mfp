@@ -10,7 +10,7 @@ from gi.repository import Clutter
 import math
 from .quilt import Quilt
 from .. import ticks
-from ..colordb import ColorDB 
+from ..colordb import ColorDB
 
 class XYPlot (Clutter.Group):
     '''
@@ -26,9 +26,10 @@ class XYPlot (Clutter.Group):
     LOG_DECADE = 1
     LOG_OCTAVE = 2
 
-    def __init__(self, width, height):
+    def __init__(self, element, width, height):
         Clutter.Group.__init__(self)
 
+        self.element = element
         self.width = width
         self.height = height
 
@@ -41,21 +42,21 @@ class XYPlot (Clutter.Group):
         self.y_max = 1
         self.axis_font_size = 8
 
-        # colors 
-        self.color_fg = ColorDB().find("default_fg_unsel")
-        self.color_bg = ColorDB().find("default_bg")
-        self.color_axes = ColorDB().find_cairo("default_fg_unsel")
+        # colors
+        self.color_fg = self.element.get_color('stroke-color')
+        self.color_bg = self.element.get_color('canvas-color')
+        self.color_axes = ColorDB().to_cairo(self.element.get_color('stroke-color:selected'))
 
         # initialized by create() call
         self.border = None
         self.plot_border = None
         self.x_axis = None
-        self.x_axis_mode = self.LINEAR 
+        self.x_axis_mode = self.LINEAR
         self.x_axis_scale = ticks.LinearScale(self.x_min, self.x_max)
         self.x_scale = 1.0
 
         self.y_axis = None
-        self.y_axis_mode = self.LINEAR 
+        self.y_axis_mode = self.LINEAR
         self.y_axis_scale = ticks.LinearScale(self.y_min, self.y_max)
         self.y_scale = 1.0
 
@@ -100,11 +101,11 @@ class XYPlot (Clutter.Group):
         self.plot_border.set_position(self.MARGIN_LEFT, 0)
         self.add_actor(self.plot_border)
 
-        self.create_plot()  
+        self.create_plot()
         self.plot.set_position(self.MARGIN_LEFT, 0)
         self.add_actor(self.plot)
 
-    def create_plot(self): 
+    def create_plot(self):
         self.plot = Quilt(self.plot_w, self.plot_h)
         self.plot.set_render_cb(self.draw_field_cb)
         self.plot.set_viewport_origin(0, -self.plot_h / 2.0)
@@ -131,7 +132,7 @@ class XYPlot (Clutter.Group):
             self.x_scale = float(self.plot_w) / (self.x_max - self.x_min)
         elif self.x_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
             if self.x_min <= 0.0:
-                self.x_min = min(abs(self.x_max / 100.0), 0.1) 
+                self.x_min = min(abs(self.x_max / 100.0), 0.1)
             self.x_scale = float(self.plot_w) / (math.log(self.x_max / float(self.x_min)))
 
         self.x_axis_scale.set_bounds(self.x_min, self.x_max)
@@ -143,7 +144,7 @@ class XYPlot (Clutter.Group):
             self.y_scale = -1.0 * float(self.plot_h) / (self.y_max - self.y_min)
         elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
             if self.y_min <= 0.0:
-                self.y_min = min(abs(self.y_max / 100.0), 0.1) 
+                self.y_min = min(abs(self.y_max / 100.0), 0.1)
             self.y_scale = -1.0 * float(self.plot_h) / (math.log(self.y_max / float(self.y_min)))
 
         self.y_axis_scale.set_bounds(self.y_min, self.y_max)
@@ -208,40 +209,40 @@ class XYPlot (Clutter.Group):
         self.set_field_origin(origin[0], origin[1], need_x_flush or need_y_flush)
 
     def set_field_origin(self, x_orig, y_orig, redraw):
-        pass 
+        pass
 
     def reindex(self):
-        pass 
+        pass
 
     def pt2px(self, p):
-        if self.x_axis_mode == self.LINEAR: 
+        if self.x_axis_mode == self.LINEAR:
             x_pix = p[0] * self.x_scale
-        elif self.x_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE): 
+        elif self.x_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
             if p[0] > 0.0:
-                x_pix = math.log(p[0] / float(self.x_min)) * self.x_scale 
-            else: 
-                return None 
+                x_pix = math.log(p[0] / float(self.x_min)) * self.x_scale
+            else:
+                return None
 
-        if self.y_axis_mode == self.LINEAR: 
-            y_pix = p[1] * self.y_scale 
-        elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE): 
-            if p[1] > 0.0: 
+        if self.y_axis_mode == self.LINEAR:
+            y_pix = p[1] * self.y_scale
+        elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
+            if p[1] > 0.0:
                 y_pix = math.log(p[1] / float(self.y_min)) * self.y_scale
-            else: 
-                return None 
+            else:
+                return None
 
         return [x_pix, y_pix]
 
     def px2pt(self, p):
         if self.x_axis_mode == self.LINEAR:
-            x_pt = p[0] / self.x_scale 
+            x_pt = p[0] / self.x_scale
         elif self.x_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
-            x_pt = math.exp(p[0] / self.x_scale) * self.x_min 
+            x_pt = math.exp(p[0] / self.x_scale) * self.x_min
 
-        if self.y_axis_mode == self.LINEAR: 
-            y_pt = p[1] / self.y_scale 
+        if self.y_axis_mode == self.LINEAR:
+            y_pt = p[1] / self.y_scale
         elif self.y_axis_mode in (self.LOG_DECADE, self.LOG_OCTAVE):
-            y_pt = math.exp(p[1] / self.y_scale) * self.y_min 
+            y_pt = math.exp(p[1] / self.y_scale) * self.y_min
 
         return [x_pt, y_pt ]
 
@@ -258,9 +259,9 @@ class XYPlot (Clutter.Group):
         xticks = self.x_axis_scale.ticks(self.plot_w / self.TICK_SIZE,
                                          tick_min, tick_max)
         ctx.set_source_rgba(self.color_axes.red, self.color_axes.green,
-                           self.color_axes.blue, self.color_axes.alpha)
+                            self.color_axes.blue, self.color_axes.alpha)
         ctx.set_font_size(self.axis_font_size)
-        
+
         # the axis line
         ctx.move_to(0, self.AXIS_PAD)
         ctx.line_to(texture.get_width(), self.AXIS_PAD)
@@ -270,7 +271,7 @@ class XYPlot (Clutter.Group):
         for tick in xticks:
             tick_px = self.pt2px((tick, self.y_min))
             if tick_px is None:
-                continue 
+                continue
 
             ctx.move_to(tick_px[0] - px_min[0], self.AXIS_PAD)
             ctx.line_to(tick_px[0] - px_min[0], 3 * self.AXIS_PAD)
@@ -289,8 +290,8 @@ class XYPlot (Clutter.Group):
         # Y axis ticks
         yticks = self.y_axis_scale.ticks(float(self.plot_h) / self.TICK_SIZE,
                                          tick_min, tick_max)
-        ctx.set_source_rgba(self.color_axes.red, self.color_axes.blue, 
-                            self.color_axes.green, self.color_axes.alpha)
+        ctx.set_source_rgba(self.color_axes.red, self.color_axes.green,
+                            self.color_axes.blue, self.color_axes.alpha)
         ctx.set_font_size(self.axis_font_size)
 
         # the axis line
@@ -314,4 +315,4 @@ class XYPlot (Clutter.Group):
             ctx.restore()
 
     def configure(self, params):
-        pass 
+        pass

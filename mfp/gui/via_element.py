@@ -78,17 +78,15 @@ class ViaElement (PatchElement):
         ct.set_line_width(linewidth)
         cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
         ct.arc(cent, cent, arcsize, 0, 2 * math.pi)
+        color = ColorDB.to_cairo(self.get_color('stroke-color'))
         if self.STYLE[:5] == "empty":
-            color = ColorDB.to_cairo(self.get_color('stroke-color'))
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
         else:
-            color = ColorDB.to_cairo(self.get_color('fill-color'))
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.fill()
 
         if self.STYLE[-7:] == "circled":
-            color = ColorDB.to_cairo(self.get_color('stroke-color'))
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.set_line_width(1)
             cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
