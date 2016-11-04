@@ -97,5 +97,11 @@ def debug(* parts, **kwargs):
         write_log_entry(make_log_entry(module, *parts), level=0)
 
 
+def debug_traceback():
+    import traceback
+    tb = traceback.format_exc()
+    for l in tb.strip().split('\n'):
+        debug(l)
+
 def logprint(* parts):
     write_log_entry(make_log_entry("print", * parts))
