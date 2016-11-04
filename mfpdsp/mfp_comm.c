@@ -147,7 +147,6 @@ mfp_comm_launch(char * sockname)
     mfp_log_debug("mfp_comm_launch: Launching main mfp process with '%s'", mfpcmd);
 
     if (comm_procpid = fork()) {
-        mfp_log_debug("mfp_comm_launch (parent): got child PID %d", comm_procpid);
         mfp_log_debug("mfp_comm_launch (parent): waiting for child startup");
         /* FIXME need to get some positive confirmation that MFP is up */
         sleep(2);
@@ -292,7 +291,6 @@ mfp_comm_io_reader_thread(void * tdata)
         }
         quitreq = mfp_comm_quit_requested();
     }
-    mfp_log_debug("comm IO reader: quitting");
     return NULL;
 }
 
@@ -346,7 +344,6 @@ mfp_comm_io_writer_thread(void * tdata)
         quitreq = mfp_comm_quit_requested();
     }
 
-    mfp_log_debug("comm IO writer: quitting");
     return NULL;
 }
 
@@ -373,7 +370,6 @@ void
 mfp_comm_io_finish(void) 
 {
     pthread_mutex_lock(&comm_io_lock);
-    mfp_log_debug("mfp_comm_io_finish: requesting comm IO threads to exit");
     comm_io_quitreq = 1;
     pthread_cond_broadcast(&outgoing_cond);
     pthread_mutex_unlock(&comm_io_lock);

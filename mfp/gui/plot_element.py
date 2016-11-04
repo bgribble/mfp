@@ -16,7 +16,6 @@ from .xyplot.scopeplot import ScopePlot
 from datetime import datetime
 
 class PlotElement (PatchElement):
-
     display_type = "plot"
     proc_type = "plot"
 

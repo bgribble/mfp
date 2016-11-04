@@ -264,12 +264,9 @@ class RPCHost (QuittableThread):
                         peer_id = self.peers_by_socket.get(sock)
                         self.read_workers.submit((jdata, peer_id))
 
-        log.debug("RPCHost: run method existed")
         if self.node_id == 0: 
-            log.debug("RPCHost: I'm the master. starting to quit others")
             peers = self.managed_sockets.keys()
             for node in peers:
-                log.debug("sending exit request to peer", node)
                 req = Request("exit_request", {})
                 self.put(req, node)
                 self.wait(req)

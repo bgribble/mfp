@@ -146,7 +146,6 @@ class RPCExecRemote (QuittableThread):
             self.process.terminate()
             self.process.wait()
 
-
     def finish(self):
         from mfp import log
         p = self.process 
@@ -156,7 +155,7 @@ class RPCExecRemote (QuittableThread):
                 p.terminate()
                 p.wait()
             except OSError, e: 
-                log.warning("RPCExecRemote: caught error in terminate(), continuing")
+                pass
 
         self.quit_req = True 
         QuittableThread.finish(self)
