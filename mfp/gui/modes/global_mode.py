@@ -6,11 +6,11 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode
-from .label_edit import LabelEditMode 
+from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
-from .enum_control import EnumEditMode 
+from .enum_control import EnumEditMode
 from ..message_element import TransientMessageElement
-from ..patch_element import PatchElement 
+from ..patch_element import PatchElement
 
 from mfp import MFPGUI
 
@@ -18,12 +18,12 @@ class GlobalMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
         self.window = window
-        
-        self.allow_selection_drag = True 
-        self.selection_drag_started = False 
+
+        self.allow_selection_drag = True
+        self.selection_drag_started = False
         self.drag_started = False
-        self.selbox_started = False 
-        self.selbox_changed = [] 
+        self.selbox_started = False
+        self.selbox_changed = []
         self.drag_start_x = None
         self.drag_start_y = None
         self.drag_last_x = None
@@ -77,7 +77,7 @@ class GlobalMode (InputMode):
         self.bind("S-HOVER", lambda: self.hover(True))
 
     def transient_msg(self):
-        if self.window.selected is not None:
+        if self.window.selected:
             return self.window.add_element(TransientMessageElement)
         else:
             return False
@@ -86,30 +86,30 @@ class GlobalMode (InputMode):
         for m in self.manager.minor_modes:
             if m.enabled and isinstance(m, (TransientMessageEditMode, LabelEditMode,
                                            EnumEditMode)):
-                details = False 
+                details = False
 
-        o = self.manager.pointer_obj 
-        try: 
-            if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE: 
+        o = self.manager.pointer_obj
+        try:
+            if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE:
                 o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
         except Exception, e:
             print "oops! exception in hover"
             import traceback
             traceback.print_exc()
-            pass 
-        return False 
+            pass
+        return False
 
     def save_file(self):
-        import os.path 
+        import os.path
         patch = self.window.selected_patch
-        if patch.last_filename is None: 
+        if patch.last_filename is None:
             default_filename = patch.obj_name + '.mfp'
         else:
-            default_filename = patch.last_filename 
+            default_filename = patch.last_filename
 
         def cb(fname):
             if fname:
-                patch.last_filename = fname 
+                patch.last_filename = fname
                 if fname != default_filename:
                     basefile = os.path.basename(fname)
                     parts = os.path.splitext(basefile)
@@ -139,7 +139,7 @@ class GlobalMode (InputMode):
 
 
     def drag_start(self):
-        self.drag_started = True 
+        self.drag_started = True
         px = self.manager.pointer_ev_x
         py = self.manager.pointer_ev_y
 
@@ -149,7 +149,7 @@ class GlobalMode (InputMode):
 
     def drag_motion(self):
         if self.drag_started is False:
-            return False 
+            return False
 
         px = self.manager.pointer_ev_x
         py = self.manager.pointer_ev_y
@@ -170,25 +170,25 @@ class GlobalMode (InputMode):
     def selbox_start(self, select_mode):
         if select_mode is None:
             if self.manager.pointer_obj is not None:
-                if self.manager.pointer_obj not in self.window.selected: 
+                if self.manager.pointer_obj not in self.window.selected:
                     self.window.unselect_all()
                     self.window.select(self.manager.pointer_obj)
                     raise self.manager.InputNeedsRequeue()
 
                 if self.allow_selection_drag:
-                    self.selection_drag_started = True 
-            else: 
+                    self.selection_drag_started = True
+            else:
                 self.window.unselect_all()
-                self.selbox_started = True 
-        elif select_mode is True: 
+                self.selbox_started = True
+        elif select_mode is True:
             if (self.manager.pointer_obj
                 and self.manager.pointer_obj not in self.window.selected):
                 self.window.select(self.manager.pointer_obj)
-            self.selbox_started = True 
-        else: 
+            self.selbox_started = True
+        else:
             if self.manager.pointer_obj in self.window.selected:
                 self.window.unselect(self.manager.pointer_obj)
-            self.selbox_started = True 
+            self.selbox_started = True
 
         px = self.manager.pointer_x
         py = self.manager.pointer_y
@@ -199,24 +199,24 @@ class GlobalMode (InputMode):
         self.drag_last_y = py
         return True
 
-    def selbox_motion(self, select_mode): 
+    def selbox_motion(self, select_mode):
         if not (self.selbox_started or self.selection_drag_started):
-            return False 
+            return False
 
         px = self.manager.pointer_x
         py = self.manager.pointer_y
         dx = px - self.drag_last_x
-        dy = py - self.drag_last_y 
+        dy = py - self.drag_last_y
         self.drag_last_x = px
         self.drag_last_y = py
 
-        if self.selection_drag_started: 
+        if self.selection_drag_started:
             for obj in self.window.selected:
                 if obj.editable:
                     obj.drag(dx, dy)
-            return True 
+            return True
 
-        enclosed = self.window.show_selection_box(self.drag_start_x, self.drag_start_y, 
+        enclosed = self.window.show_selection_box(self.drag_start_x, self.drag_start_y,
                                                   self.drag_last_x, self.drag_last_y)
 
         for obj in enclosed:
@@ -230,74 +230,74 @@ class GlobalMode (InputMode):
                     self.selbox_changed.append(obj)
                     if obj in self.window.selected:
                         self.window.unselect(obj)
-                    else: 
+                    else:
                         self.window.select(obj)
         new_changed = []
-        for obj in self.selbox_changed: 
+        for obj in self.selbox_changed:
             if obj not in enclosed:
                 if obj in self.window.selected:
                     self.window.unselect(obj)
-                else: 
+                else:
                     self.window.select(obj)
             else:
                 new_changed.append(obj)
-        self.selbox_changed = new_changed 
+        self.selbox_changed = new_changed
 
         return True
 
     def selbox_end(self):
-        if self.selection_drag_started: 
+        if self.selection_drag_started:
             for obj in self.window.selected:
                 obj.send_params()
         self.selbox_started = False
-        self.selection_drag_started = False 
-        self.selbox_changed = [] 
+        self.selection_drag_started = False
+        self.selbox_changed = []
         self.window.hide_selection_box()
         return True
 
-    def patch_close(self): 
-        def close_confirm(answer): 
+    def patch_close(self):
+        def close_confirm(answer):
             if answer is not None:
                 aa = answer.strip().lower()
                 if aa in ['y', 'yes']:
                     self.window.patch_close()
 
-        from mfp import log 
+        from mfp import log
         p = self.window.selected_patch
         log.debug("patch_close: checking for unsaved changes")
         if MFPGUI().mfp.has_unsaved_changes(p.obj_id):
-            self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]", 
+            self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]",
                                            close_confirm, '')
         else:
             self.window.patch_close()
 
-    def quit(self): 
-        def quit_confirm(answer): 
+    def quit(self):
+        def quit_confirm(answer):
             if answer is not None:
                 aa = answer.strip().lower()
                 if aa in ['y', 'yes']:
                     self.window.quit()
 
         allpatches = MFPGUI().mfp.open_patches()
-        clean = True 
-        for p in allpatches: 
+        clean = True
+        for p in allpatches:
             if MFPGUI().mfp.has_unsaved_changes(p):
-                clean = False 
-        if not clean: 
-            self.window.get_prompted_input("There are patches with unsaved changes. Quit anyway? [yN]", 
+                clean = False
+        if not clean:
+            self.window.get_prompted_input("There are patches with unsaved changes. Quit anyway? [yN]",
                                            quit_confirm, '')
         else:
             self.window.quit()
-    
-    def toggle_pause(self): 
+
+    def toggle_pause(self):
         from mfp import log
-        try: 
+        try:
             paused = MFPGUI().mfp.toggle_pause()
-            if paused: 
+            if paused:
                 log.warning("Execution of all patches paused")
-            else: 
+            else:
                 log.warning("Execution of all patches resumed")
-        except Exception, e: 
+        except Exception, e:
             print "Caught exception", e
 
 
