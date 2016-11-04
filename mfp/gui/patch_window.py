@@ -570,12 +570,15 @@ class PatchWindow(object):
         self.hud_banner_text.add_actor(txt)
 
         bg.set_color(ColorDB().find(255, 255, 255, 200))
+        bg.set_border_width(1)
+        bg.set_border_color(ColorDB().find(0x37, 0x54, 0x50, 0x80))
 
         self.stage.add_actor(self.hud_banner_text)
         self.hud_banner_text.set_position(12, 4)
         self.hud_banner_text.set_property("opacity", 255)
         txt.set_markup(msg)
-        bg.set_size(self.hud_banner_text.get_width(), self.hud_banner_text.get_height())
+        txt.set_position(20, 10)
+        bg.set_size(txt.get_width() + 40, txt.get_height() + 20)
 
         anim = self.hud_banner_text.animatev(Clutter.AnimationMode.EASE_IN_CUBIC,
                                              disp_time * 1000.0, ['opacity'], [0])
