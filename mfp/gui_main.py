@@ -140,6 +140,8 @@ def setup_default_colors():
                      ColorDB().find(0x7d, 0x83, 0xff, 0xff))
     ColorDB().insert('default-text-color',
                      ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
+    ColorDB().insert('default-light-text-color',
+                     ColorDB().find(0xf7, 0xf9, 0xf9, 0xff))
     ColorDB().insert('default-text-color-selected',
                      ColorDB().find(0x00, 0x7f, 0xff, 0xff))
     ColorDB().insert('default-edit-badge-color',
