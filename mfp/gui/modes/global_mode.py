@@ -30,10 +30,13 @@ class GlobalMode (InputMode):
         self.drag_last_y = None
         self.drag_target = None
 
+        self.next_console_position = 0
+
         InputMode.__init__(self, "Global input bindings")
 
         # global keybindings
         self.bind("!", self.transient_msg, "Send message to selection")
+        self.bind("~", self.toggle_console, "Show/hide log and console")
 
         self.bind("PGUP", self.window.layer_select_up, "Select higher layer")
         self.bind("PGDN", self.window.layer_select_down, "Select lower layer")
@@ -75,6 +78,21 @@ class GlobalMode (InputMode):
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
         self.bind("HOVER", lambda: self.hover(False))
         self.bind("S-HOVER", lambda: self.hover(True))
+
+
+    def toggle_console(self):
+        from mfp import log 
+        log.debug("toggle:", self, self.window, self.window.content_console_pane)
+
+        alloc = self.window.content_console_pane.get_allocation()  
+        oldpos = self.window.content_console_pane.get_position()
+
+        log.debug("before move:", alloc.height, oldpos, self.next_console_position)
+
+        self.window.content_console_pane.set_position(
+            alloc.height - self.next_console_position)
+        self.next_console_position = alloc.height - oldpos
+
 
     def transient_msg(self):
         if self.window.selected:

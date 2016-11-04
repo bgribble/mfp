@@ -31,6 +31,10 @@ class PatchWindow(object):
         # install Clutter stage in Gtk window
         self.window = self.builder.get_object("main_window")
         box = self.builder.get_object("stage_box")
+
+        self.content_console_pane = self.builder.get_object("content_console_pane")
+        self.tree_canvas_pane = self.builder.get_object("tree_canvas_pane")
+
         self.embed = GtkClutter.Embed.new()
         box.pack_start(self.embed, True, True, 0)
         self.embed.set_sensitive(True)
@@ -38,6 +42,7 @@ class PatchWindow(object):
         self.stage = self.embed.get_stage()
 
         # significant widgets we will be dealing with later
+        self.bottom_notebook = self.builder.get_object("bottom_notebook")
         self.console_view = self.builder.get_object("console_text")
         self.log_view = self.builder.get_object("log_text")
         self.object_view = self.init_object_view()
@@ -137,7 +142,7 @@ class PatchWindow(object):
                 import traceback 
                 log.error("Error handling UI event", event) 
                 log.debug(e)
-                traceback.print_exc()
+                log.debug_traceback()
                 return False
 
         def handler(stage, event):
@@ -186,6 +191,7 @@ class PatchWindow(object):
         self.display_bindings()
 
     def _resize_cb(self, widget, rect):
+        self.stage.set_size(rect.width, rect.height)
         if self.hud_mode_txt: 
             self.hud_mode_txt.set_position(self.stage.get_width()-80,
                                            self.stage.get_height()-25)
@@ -196,6 +202,8 @@ class PatchWindow(object):
         if self.hud_prompt_input:
             self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
                                                self.stage.get_height() - 25)
+        return True
+
     def load_start(self):
         self.load_in_progress += 1
 
