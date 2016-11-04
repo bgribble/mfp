@@ -45,14 +45,15 @@ def rounded_box(ctx, xorig, yorig, w, h, rad):
 
 
 class ButtonElement (PatchElement):
-    porthole_height = 2
-    porthole_width = 6
-    porthole_minspace = 8
-    porthole_border = 3
     proc_type = "var"
 
     style_defaults = {
-        'fill-color:lit': 'default-alt-fill-color'
+        'porthole_height': 2,
+        'porthole_width': 6,
+        'porthole_minspace': 8,
+        'porthole_border': 3,
+        'fill-color:lit': 'default-alt-fill-color',
+        'text-color:lit': 'default-light-text-color'
     }
     
     PORT_TWEAK = 5
@@ -98,13 +99,13 @@ class ButtonElement (PatchElement):
         
         if label_halfwidth > 1:
             nwidth = max(self.width, 2*label_halfwidth + 10)
-            nheight = max(self.height, 2*label_halfheight + 6)
+            nheight = max(self.height, 2*label_halfheight + 10)
             if nwidth != self.width or nheight != self.height:
                 self.set_size(nwidth, nheight)
 
         if self.width and self.height:
             self.label.set_position(self.width/2.0-label_halfwidth, 
-                                    self.height/2.0-label_halfheight)
+                                    self.height/2.0-label_halfheight-2)
             
     def label_changed_cb(self, *args):
        self.center_label()
@@ -145,20 +146,17 @@ class ButtonElement (PatchElement):
         rounded_box(ct, 1, 1, w, h, corner)
         ct.stroke()
 
-
         # draw the indicator
         ioff = max(3, 0.075*min(w,h))
         iw = w - 2 * ioff
         ih = h - 2 * ioff
         rounded_box(ct, ioff, ioff, iw, ih, corner-1)
 
+        c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
         if self.indicator:
-            c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
-            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.fill()
         else:
-            c = ColorDB.to_cairo(self.get_color('stroke-color'))
-            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.stroke()
 
     def configure(self, params):
@@ -288,8 +286,23 @@ class ToggleButtonElement (ButtonElement):
 
 class ToggleIndicatorElement (ButtonElement): 
     display_type = "indicator"
+
     def make_control_mode(self):
         return PatchElement.make_control_mode(self)
+
+    def select(self, *args):
+        PatchElement.select(self)
+        self.draw_ports()
+        self.redraw()
+
+    def unselect(self, *args):
+        PatchElement.unselect(self)
+        self.hide_ports()
+        self.redraw()
+
+    def draw_ports(self):
+        if self.selected:
+            PatchElement.draw_ports(self)
 
     def draw_cb(self, texture, ct):
         w = self.texture.get_property('surface_width') - 2
@@ -312,13 +325,11 @@ class ToggleIndicatorElement (ButtonElement):
         ih = h - 2 * ioff
         circle(ct, ioff, ioff, iw, ih)
 
+        c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
         if self.indicator:
-            c = ColorDB.to_cairo(self.get_color('fill-color-lit'))
-            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.fill()
         else:
-            c = ColorDB.to_cairo(self.get_color('stroke-color'))
-            ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
             ct.stroke()
 
 
