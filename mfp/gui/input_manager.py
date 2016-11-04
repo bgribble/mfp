@@ -89,20 +89,11 @@ class InputManager (object):
         self.keyseq.sequences.append(key)
 
     def handle_keysym(self, keysym):
-        def show_on_hud(keysym, mode, handler):
-            mdesc = hdesc = ""
-            if mode and mode.description:
-                mdesc = mode.description
-            if handler and handler[1]:
-                hdesc = handler[1]
-            if hdesc: 
-                self.window.hud_write("%s: %s (%s)" % (keysym, hdesc, mdesc))
         if keysym is not None:
             # check minor modes first
             for minor in self.minor_modes:
                 handler = minor.lookup(keysym)
                 if handler is not None:
-                    show_on_hud(keysym, minor, handler)
                     handled = handler[0]()
                     if handled:
                         return True
@@ -111,7 +102,6 @@ class InputManager (object):
             if self.major_mode is not None:
                 handler = self.major_mode.lookup(keysym)
                 if handler is not None:
-                    show_on_hud(keysym, self.major_mode, handler)
                     handled = handler[0]()
                     if handled:
                         return True
@@ -119,7 +109,6 @@ class InputManager (object):
             # then global
             handler = self.global_mode.lookup(keysym)
             if handler is not None:
-                show_on_hud(keysym, self.global_mode, handler)
                 handled = handler[0]()
                 if handled:
                     return True
