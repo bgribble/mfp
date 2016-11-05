@@ -38,7 +38,6 @@ class PatchWindow(object):
         self.embed = GtkClutter.Embed.new()
         box.pack_start(self.embed, True, True, 0)
         self.embed.set_sensitive(True)
-        self.embed.set_size_request(600, 400)
         self.stage = self.embed.get_stage()
 
         # significant widgets we will be dealing with later
@@ -191,6 +190,7 @@ class PatchWindow(object):
         self.display_bindings()
 
     def _resize_cb(self, widget, rect):
+        log.debug("GtkClutterEmbed resize:", rect.width, rect.height)
         self.stage.set_size(rect.width, rect.height)
         if self.hud_mode_txt: 
             self.hud_mode_txt.set_position(self.stage.get_width()-80,
@@ -202,7 +202,7 @@ class PatchWindow(object):
         if self.hud_prompt_input:
             self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
                                                self.stage.get_height() - 25)
-        return True
+        return False
 
     def load_start(self):
         self.load_in_progress += 1

@@ -31,12 +31,14 @@ class GlobalMode (InputMode):
         self.drag_target = None
 
         self.next_console_position = 0
+        self.next_tree_position = 0
 
         InputMode.__init__(self, "Global input bindings")
 
         # global keybindings
         self.bind("!", self.transient_msg, "Send message to selection")
         self.bind("~", self.toggle_console, "Show/hide log and console")
+        self.bind("`", self.toggle_tree, "Show/hide left side info")
 
         self.bind("PGUP", self.window.layer_select_up, "Select higher layer")
         self.bind("PGDN", self.window.layer_select_down, "Select lower layer")
@@ -81,18 +83,21 @@ class GlobalMode (InputMode):
 
 
     def toggle_console(self):
-        from mfp import log 
-        log.debug("toggle:", self, self.window, self.window.content_console_pane)
-
         alloc = self.window.content_console_pane.get_allocation()  
         oldpos = self.window.content_console_pane.get_position()
-
-        log.debug("before move:", alloc.height, oldpos, self.next_console_position)
 
         self.window.content_console_pane.set_position(
             alloc.height - self.next_console_position)
         self.next_console_position = alloc.height - oldpos
+        return False
 
+    def toggle_tree(self):
+        alloc = self.window.tree_canvas_pane.get_allocation()  
+        oldpos = self.window.tree_canvas_pane.get_position()
+
+        self.window.tree_canvas_pane.set_position(self.next_tree_position)
+        self.next_tree_position = oldpos
+        return False
 
     def transient_msg(self):
         if self.window.selected:
