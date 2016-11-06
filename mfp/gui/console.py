@@ -51,7 +51,6 @@ class ConsoleMgr (Thread):
         return True
 
     def key_pressed(self, widget, event):
-
         if event.keyval == KEY_ENTER:
             self.append("\n")
             stripped_buf = self.linebuf.strip()
@@ -137,7 +136,7 @@ class ConsoleMgr (Thread):
         self.textview.scroll_to_mark(mark, 0, True, 1.0, 0.9)
 
     def redisplay(self):
-        lastline = self.textbuffer.get_line_count()
+        lastline = self.textbuffer.get_line_count()-1
         start_iter = self.textbuffer.get_iter_at_line_offset(lastline, len(self.last_ps))
         end_iter = self.textbuffer.get_end_iter()
         self.textbuffer.delete(start_iter, end_iter)
