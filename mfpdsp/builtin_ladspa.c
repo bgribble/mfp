@@ -91,18 +91,12 @@ ladspa_setup(mfp_processor * proc)
         mfp_proc_free_buffers(proc);
         mfp_proc_alloc_buffers(proc, signal_ins, signal_outs, proc->context->blocksize);
 
-        /* connect signal inputs and outputs to the new buffers */
-        signal_ins = 0;
+        /* connect signal outputs to the new buffers, inputs wait until process() */
         signal_outs = 0;
         for(portnum=0; portnum < portcount; portnum++) {
             portdesc = d->plug_descrip->PortDescriptors[portnum];
             if (portdesc & LADSPA_PORT_AUDIO) {
-                if (portdesc & LADSPA_PORT_INPUT) {
-                    d->plug_descrip->connect_port(d->plug_handle, portnum, 
-                            proc->inlet_buf[signal_ins]->data);
-                    signal_ins++;
-                }
-                else if (portdesc & LADSPA_PORT_OUTPUT) {
+                if (portdesc & LADSPA_PORT_OUTPUT) {
                     d->plug_descrip->connect_port(d->plug_handle, portnum, 
                             proc->outlet_buf[signal_outs]->data);
                     signal_outs++;
@@ -118,9 +112,23 @@ static int
 process(mfp_processor * proc) 
 {
     builtin_ladspa_data * d = (builtin_ladspa_data *)(proc->data);
+    int portnum;
+    int portcount;
+    int portdesc;
+    int signal_in = 0;
 
-    /* this is simple! */
     if (d->plug_descrip != NULL) {
+        /* signal inputs may be pointing a different place each run */
+        portcount = d->plug_descrip->PortCount;
+        for(portnum=0; portnum < portcount; portnum++) {
+            portdesc = d->plug_descrip->PortDescriptors[portnum];
+
+            if (portdesc & LADSPA_PORT_AUDIO && portdesc & LADSPA_PORT_INPUT) {
+                d->plug_descrip->connect_port(d->plug_handle, portnum, 
+                        proc->inlet_buf[signal_in]->data);
+                signal_in++;
+            }
+        }
         d->plug_descrip->run(d->plug_handle, proc->context->blocksize);
     }
     return 0;
@@ -194,6 +202,7 @@ config(mfp_processor * proc)
             d->plug_descrip->activate(d->plug_handle);
         d->plug_activated = 1;
     }
+    
     return 1;
 }
 
