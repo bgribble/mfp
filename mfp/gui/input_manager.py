@@ -6,17 +6,17 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from datetime import datetime, timedelta
-import time 
+import time
 
 from input_mode import InputMode
 from key_sequencer import KeySequencer
 from ..utils import QuittableThread
 from ..gui_main import MFPGUI
-from mfp import log 
+from mfp import log
 
 class InputManager (object):
     class InputNeedsRequeue (Exception):
-        pass 
+        pass
 
     def __init__(self, window):
         self.window = window
@@ -32,8 +32,8 @@ class InputManager (object):
         self.pointer_ev_x = None
         self.pointer_ev_y = None
         self.pointer_obj = None
-        self.pointer_obj_time = None 
-        self.pointer_leave_time = None 
+        self.pointer_obj_time = None
+        self.pointer_leave_time = None
         self.pointer_lastobj = None
 
         self.hover_thresh=timedelta(microseconds=750000)
@@ -50,8 +50,8 @@ class InputManager (object):
 
     def _hover_handler(self):
         self.handle_keysym(self.keyseq.canonicalize("HOVER"))
-        return False 
-    
+        return False
+
     def global_binding(self, key, action, helptext=''):
         self.global_mode.bind(key, action, helptext)
 
@@ -66,17 +66,17 @@ class InputManager (object):
         def modecmp(a, b):
             return cmp(b.affinity, a.affinity) or cmp(b.seqno, a.seqno)
 
-        do_enable = True 
+        do_enable = True
         if mode in self.minor_modes:
             self.minor_modes.remove(mode)
-            do_enable = False 
-        
+            do_enable = False
+
         mode.seqno = self.minor_seqno
         self.minor_seqno += 1
         self.minor_modes[:0] = [mode]
         self.minor_modes.sort(cmp=modecmp)
         self.window.display_bindings()
-        
+
         if do_enable:
             mode.enable()
 
@@ -116,17 +116,19 @@ class InputManager (object):
 
     def handle_event(self, stage, event):
         from gi.repository import Clutter
+        from mfp import log
+
         keysym = None
         if event.type in (
-                Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE, 
+                Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE,
                 Clutter.EventType.BUTTON_PRESS,
                 Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL):
             self.keyseq.process(event)
             if len(self.keyseq.sequences):
                 keysym = self.keyseq.pop()
         elif event.type == Clutter.EventType.MOTION:
-            # FIXME: if the scaling changes so that window.stage_pos would return a 
-            # different value, that should generate a MOTION event.  Currently we are 
+            # FIXME: if the scaling changes so that window.stage_pos would return a
+            # different value, that should generate a MOTION event.  Currently we are
             # just kludging pointer_x and pointer_y from the scale callback.
             self.pointer_ev_x = event.x
             self.pointer_ev_y = event.y
@@ -139,7 +141,7 @@ class InputManager (object):
             src = self.event_sources.get(event.source)
 
             now = datetime.now()
-            if (self.pointer_leave_time is not None 
+            if (self.pointer_leave_time is not None
                 and (now - self.pointer_leave_time) > timedelta(milliseconds=100)):
                 self.keyseq.mod_keys = set()
                 self.window.grab_focus()
@@ -154,15 +156,18 @@ class InputManager (object):
             if src == self.pointer_obj:
                 self.pointer_lastobj = self.pointer_obj
                 self.pointer_obj = None
-                self.pointer_obj_time = None 
+                self.pointer_obj_time = None
         else:
             log.debug("event type not matched:", event.type)
             return False
 
+        if not keysym:
+            return True
+
         retry_count = 0
         while True:
-            rv = None 
-            try: 
+            rv = None
+            try:
                 retry_count += 1
                 rv = self.handle_keysym(keysym)
             except self.InputNeedsRequeue, e:
@@ -171,14 +176,11 @@ class InputManager (object):
                 else:
                     return False
             except Exception, e:
-                from mfp import log
-                import traceback
                 log.error("Exception while handling key command", keysym)
-                for l in traceback.format_exc().split("\n"):
-                    log.debug(l)
                 log.debug(e)
-            return rv 
+                log.debug_traceback()
+            return rv
 
-    def rezoom(self): 
-        self.pointer_x, self.pointer_y = self.window.stage_pos(self.pointer_ev_x, 
+    def rezoom(self):
+        self.pointer_x, self.pointer_y = self.window.stage_pos(self.pointer_ev_x,
                                                                self.pointer_ev_y)
