@@ -30,8 +30,8 @@ class GlobalMode (InputMode):
         self.drag_last_y = None
         self.drag_target = None
 
-        self.next_console_position = 0
-        self.next_tree_position = 0
+        self.next_console_position = 1
+        self.next_tree_position = 1
 
         InputMode.__init__(self, "Global input bindings")
 
@@ -83,12 +83,17 @@ class GlobalMode (InputMode):
 
 
     def toggle_console(self):
+        from gi.repository import Gdk
         alloc = self.window.content_console_pane.get_allocation()  
         oldpos = self.window.content_console_pane.get_position()
 
         self.window.content_console_pane.set_position(
             alloc.height - self.next_console_position)
         self.next_console_position = alloc.height - oldpos
+
+        # KLUDGE!
+        MFPGUI().clutter_do_later(100, self._refresh)
+
         return False
 
     def toggle_tree(self):
@@ -97,7 +102,17 @@ class GlobalMode (InputMode):
 
         self.window.tree_canvas_pane.set_position(self.next_tree_position)
         self.next_tree_position = oldpos
+
+        # KLUDGE!
+        MFPGUI().clutter_do_later(100, self._refresh)
+
         return False
+
+    def _refresh(self):
+        oldpos = self.window.content_console_pane.get_position()
+        self.window.content_console_pane.set_position(oldpos - 1)
+        return False
+
 
     def transient_msg(self):
         if self.window.selected:

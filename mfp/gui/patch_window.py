@@ -13,12 +13,12 @@ from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .input_manager import InputManager
 from .console import ConsoleMgr
-from .prompter import Prompter 
+from .prompter import Prompter
 from .colordb import ColorDB
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
-from .key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT 
+from .key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT
 
 import pkgutil
 
@@ -46,25 +46,25 @@ class PatchWindow(object):
         self.log_view = self.builder.get_object("log_text")
         self.object_view = self.init_object_view()
         self.layer_view = self.init_layer_view()
-       
+
         # objects for stage -- self.group gets moved/scaled to adjust
         # the view, so anything not in it will be static on the stage
         self.group = Clutter.Group()
 
-        # The HUD is the text overlay at the bottom/top of the window that 
+        # The HUD is the text overlay at the bottom/top of the window that
         # fades after a short display
         self.hud_history = []
-        self.hud_banner_text = None 
-        self.hud_banner_anim = None 
-        self.hud_prompt = None 
+        self.hud_banner_text = None
+        self.hud_banner_anim = None
+        self.hud_prompt = None
         self.hud_prompt_input = None
         self.hud_prompt_mgr = Prompter(self)
-        self.hud_mode_txt = None 
+        self.hud_mode_txt = None
 
         self.autoplace_marker = None
         self.autoplace_layer = None
-        self.selection_box = None 
-        self.selection_box_layer = None 
+        self.selection_box = None
+        self.selection_box_layer = None
 
         self.stage.add_actor(self.group)
 
@@ -79,21 +79,21 @@ class PatchWindow(object):
         self.selected = []
 
         self.load_in_progress = 0
-        self.close_in_progress = False 
+        self.close_in_progress = False
 
         self.input_mgr = InputManager(self)
         self.console_mgr = ConsoleMgr("MFP interactive console", self.console_view)
         self.console_mgr.start()
 
         # dumb colors
-        self.color_unselected = self.get_color('stroke-color') 
+        self.color_unselected = self.get_color('stroke-color')
         self.color_transparent = ColorDB().find('transparent')
         self.color_selected = self.get_color('stroke-color:selected')
         self.color_bg = self.get_color('canvas-color')
 
-        # callbacks facility... not yet too much used, but "select" and 
-        # "add" are in use 
-        self.callbacks = {} 
+        # callbacks facility... not yet too much used, but "select" and
+        # "add" are in use
+        self.callbacks = {}
         self.callbacks_last_id = 0
 
         # configure Clutter stage
@@ -112,7 +112,7 @@ class PatchWindow(object):
 
     def get_color(self, colorspec):
         rgba = MFPGUI().style_defaults.get(colorspec)
-        if not rgba: 
+        if not rgba:
             return None
         elif isinstance(rgba, str):
             return ColorDB().find(rgba)
@@ -120,32 +120,39 @@ class PatchWindow(object):
             return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
 
     def grab_focus(self):
-        def cb(*args): 
+        def cb(*args):
             self.embed.grab_focus()
         GObject.timeout_add(10, cb)
 
     def init_input(self):
         def grab_handler(stage, event):
-            try: 
+            try:
                 r = self.input_mgr.handle_event(stage, event)
                 if not self.embed.has_focus():
                     log.debug("event handler: do not have focus")
                     if hasattr(event, 'keyval'):
                         log.debug("keyval was", event.keyval)
-                    else: 
+                    else:
                         log.debug("event was:", event.type)
                     self.grab_focus()
-                    return False 
-                return r 
+                    return False
+                return r
             except Exception, e:
-                import traceback 
-                log.error("Error handling UI event", event) 
+                import traceback
+                log.error("Error handling UI event", event)
                 log.debug(e)
                 log.debug_traceback()
                 return False
 
         def handler(stage, event):
-            return self.input_mgr.handle_event(stage, event)
+            try:
+                return self.input_mgr.handle_event(stage, event)
+            except Exception as e:
+                log.error("Error handling UI event", event)
+                log.debug(e)
+                log.debug_traceback()
+                return False
+
 
         def steal_focuskeys(target, event):
             badkeys = [ KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT ]
@@ -153,9 +160,9 @@ class PatchWindow(object):
                 e = Clutter.KeyEvent()
                 e.keyval = event.keyval
                 e.type = Clutter.EventType.KEY_PRESS
-                
+
                 return self.input_mgr.handle_event(self.stage, e)
-            else: 
+            else:
                 return False
 
         self.grab_focus()
@@ -190,18 +197,24 @@ class PatchWindow(object):
         self.display_bindings()
 
     def _resize_cb(self, widget, rect):
-        log.debug("GtkClutterEmbed resize:", rect.width, rect.height)
-        self.stage.set_size(rect.width, rect.height)
-        if self.hud_mode_txt: 
-            self.hud_mode_txt.set_position(self.stage.get_width()-80,
-                                           self.stage.get_height()-25)
+        try:
+            self.stage.set_size(rect.width, rect.height)
+            if self.hud_mode_txt:
+                self.hud_mode_txt.set_position(self.stage.get_width()-80,
+                                               self.stage.get_height()-25)
 
-        if self.hud_prompt:
-            self.hud_prompt.set_position(10, self.stage.get_height() - 25)
+            if self.hud_prompt:
+                self.hud_prompt.set_position(10, self.stage.get_height() - 25)
 
-        if self.hud_prompt_input:
-            self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
-                                               self.stage.get_height() - 25)
+            if self.hud_prompt_input:
+                self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
+                                                   self.stage.get_height() - 25)
+            self.stage.invalidate()
+        except Exception as e:
+            log.error("Error handling UI event", event)
+            log.debug(e)
+            log.debug_traceback()
+
         return False
 
     def load_start(self):
@@ -264,7 +277,7 @@ class PatchWindow(object):
         if self.hud_mode_txt is None:
             self.hud_mode_txt = Clutter.Text.new()
             self.stage.add_actor(self.hud_mode_txt)
-            
+
         self.hud_mode_txt.set_position(self.stage.get_width()-80,
                                        self.stage.get_height()-25)
         self.hud_mode_txt.set_markup("<b>%s</b>" % m.short_description)
@@ -329,19 +342,19 @@ class PatchWindow(object):
         if element.container is None:
             if element.layer is None:
                 print "WARNING: element has no layer", element, self
-            else: 
+            else:
                 element.layer.group.add_actor(element)
                 element.container = element.layer.group
-      
+
         if not isinstance(element, ConnectionElement):
-            if self.load_in_progress: 
-                update = False 
-            else: 
+            if self.load_in_progress:
+                update = False
+            else:
                 update = True
 
             if isinstance(element.container, PatchElement):
                 self.object_view.insert(element, (element.scope, element.container), update=update)
-            elif element.scope: 
+            elif element.scope:
                 self.object_view.insert(element, (element.scope, element.layer.patch),
                                         update=update)
             else:
@@ -359,22 +372,22 @@ class PatchWindow(object):
             element.layer.remove(element)
         if element in self.objects:
             self.objects.remove(element)
-        if element in self.input_mgr.event_sources: 
+        if element in self.input_mgr.event_sources:
             del self.input_mgr.event_sources[element]
 
-        if element.container: 
+        if element.container:
             element.container.remove_actor(element)
-            element.container = None 
+            element.container = None
 
         self.object_view.remove(element)
         self.emit_signal("remove", element)
 
     def refresh(self, element):
         from .patch_info import PatchInfo
-        if isinstance(element, PatchInfo): 
+        if isinstance(element, PatchInfo):
             self.object_view.update(element, None)
             self.layer_view.update(element, None)
-            return 
+            return
 
         if self.load_in_progress:
             return
@@ -393,8 +406,8 @@ class PatchWindow(object):
             x = self.input_mgr.pointer_x
         if y is None:
             y = self.input_mgr.pointer_y
-        
-        try: 
+
+        try:
             b = factory(self, x, y)
         except Exception as e:
             import traceback
@@ -405,7 +418,7 @@ class PatchWindow(object):
             return True
 
         self.active_layer().add(b)
-        self.register(b) 
+        self.register(b)
         self.refresh(b)
         self.select(b)
 
@@ -416,26 +429,26 @@ class PatchWindow(object):
         from .patch_info import PatchInfo
         log.debug("Quit command from GUI or WM")
 
-        self.close_in_progress = True  
+        self.close_in_progress = True
         to_delete = [ p for p in self.patches if p.deletable ]
         for p in to_delete:
             p.delete()
-        self.close_in_progress = False 
+        self.close_in_progress = False
         self.object_view.refresh()
-        
+
         allpatches = MFPGUI().mfp.open_patches()
         guipatches = [ p.obj_id for p in self.objects if isinstance(p, PatchInfo) ]
 
-        for a in allpatches: 
+        for a in allpatches:
             if a not in guipatches:
                 log.debug("Some patches cannot be deleted, not quitting")
-                return False 
+                return False
 
         if self.console_mgr:
             self.console_mgr.quitreq = True
             self.console_mgr.join()
             log.debug("Console thread reaped")
-            self.console_mgr = None 
+            self.console_mgr = None
         MFPGUI().appwin = False
         MFPGUI().finish()
         MFPGUI().mfp.quit()
@@ -458,7 +471,7 @@ class PatchWindow(object):
         buf = self.log_view.get_buffer()
         mark = buf.get_mark("log_mark")
 
-        def leader_iters(): 
+        def leader_iters():
             start = buf.get_iter_at_mark(mark)
             start.backward_line()
             start.set_line_offset(0)
@@ -471,12 +484,12 @@ class PatchWindow(object):
         # this is a bit complicated so that we ensure scrolling is
         # reliable... scroll_to_iter can act odd sometimes
 
-        # find or create tags 
+        # find or create tags
         tagtable = buf.get_tag_table()
         monotag = tagtable.lookup("mono")
         warntag = tagtable.lookup("warn")
         errtag = tagtable.lookup("err")
-        if monotag is None: 
+        if monotag is None:
             monotag = buf.create_tag("mono", family="Monospace")
             warntag = buf.create_tag("warn", foreground="#ddaa00", weight=800)
             errtag = buf.create_tag("err", foreground="#770000", weight=700)
@@ -486,14 +499,14 @@ class PatchWindow(object):
             mark = Gtk.TextMark.new("log_mark", False)
             buf.add_mark(mark, start_it)
         buf.insert(start_it, msg, -1)
-        
+
         start_it, end_it = leader_iters()
         buf.apply_tag(monotag, start_it, end_it)
 
-        if (level == 1): 
+        if (level == 1):
             start_it, end_it = leader_iters()
             buf.apply_tag(warntag, start_it, end_it)
-        elif (level == 2): 
+        elif (level == 2):
             start_it, end_it = leader_iters()
             buf.apply_tag(errtag, start_it, end_it)
 
@@ -501,7 +514,7 @@ class PatchWindow(object):
         buf.move_mark(mark, end_it)
         self.log_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 
-    def get_prompted_input(self, prompt, callback, default=''): 
+    def get_prompted_input(self, prompt, callback, default=''):
         self.hud_prompt_mgr.get_input(prompt, callback, default)
 
     def hud_set_prompt(self, prompt, default=''):
@@ -509,9 +522,9 @@ class PatchWindow(object):
             htxt = self.hud_prompt_input.get_text()
             self.hud_prompt.hide()
             self.hud_prompt_input.hide()
-            if htxt: 
+            if htxt:
                 self.hud_write(htxt)
-            return 
+            return
 
         if self.hud_prompt is None:
             for actor, anim, oldmsg in self.hud_history:
@@ -528,7 +541,7 @@ class PatchWindow(object):
             self.hud_prompt_input.show()
         self.hud_prompt.set_markup(prompt)
         self.hud_prompt_input.set_text(default)
-        self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(), 
+        self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
                                            self.stage.get_height() - 25)
 
     def hud_write(self, msg, disp_time=3.0):
@@ -552,9 +565,9 @@ class PatchWindow(object):
 
         actor = Clutter.Text()
         self.stage.add_actor(actor)
-        if self.hud_prompt is None: 
+        if self.hud_prompt is None:
             actor.set_position(10, self.stage.get_height() - 25)
-        else: 
+        else:
             actor.set_position(10, self.stage.get_height() - 45)
         actor.set_property("opacity", 255)
         actor.set_markup(msg)
@@ -568,7 +581,7 @@ class PatchWindow(object):
         def anim_complete(anim, actor):
             actor.destroy()
 
-        if self.hud_banner_anim is not None: 
+        if self.hud_banner_anim is not None:
             self.hud_banner_anim.completed()
 
         self.hud_banner_text = Clutter.Group()
@@ -597,7 +610,7 @@ class PatchWindow(object):
     # callbacks
     #####################
 
-    def add_callback(self, signal_name, callback): 
+    def add_callback(self, signal_name, callback):
         cbid = self.callbacks_last_id
         self.callbacks_last_id += 1
 
@@ -610,8 +623,8 @@ class PatchWindow(object):
         for signal, hlist in self.callbacks.items():
             for num, cbinfo in enumerate(hlist):
                 if cbinfo[0] == cb_id:
-                    hlist[num:num+1] = [] 
-                    return True 
+                    hlist[num:num+1] = []
+                    return True
         return False
 
     def emit_signal(self, signal_name, *args):
@@ -619,9 +632,9 @@ class PatchWindow(object):
             cbinfo[1](*args)
 
 
-        
+
 # additional methods in @extends wrappers
 import patch_window_layer
-import patch_window_views 
-import patch_window_select 
+import patch_window_views
+import patch_window_select
 

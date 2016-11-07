@@ -12,7 +12,7 @@ import sys
 from datetime import datetime
 from singleton import Singleton
 from mfp_command import MFPCommand
-from . import log
+from mfp import log
 from mfp.utils import profile
 
 from .gui_command import GUICommand
@@ -61,8 +61,7 @@ class MFPGUI (Singleton):
         except Exception, e:
             import traceback
             log.debug("Exception in GUI operation:", e)
-            for l in traceback.format_exc().split("\n"):
-                log.debug(l)
+            log.debug_traceback()
             return False
 
     def clutter_do_later(self, delay, thunk):
@@ -78,13 +77,11 @@ class MFPGUI (Singleton):
         GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
 
     def clutter_proc(self):
-
         try:
             from gi.repository import Clutter, GObject, Gtk, GtkClutter
 
             # explicit init seems to avoid strange thread sync/blocking issues
             GObject.threads_init()
-            Clutter.threads_init()
             GtkClutter.init([])
 
             # create main window
@@ -93,18 +90,15 @@ class MFPGUI (Singleton):
             self.mfp = MFPCommand()
 
         except Exception, e:
-            import traceback
-            for l in traceback.format_exc().split("\n"):
-                print "[LOG] ERROR:", l
-            print "[LOG] FATAL: Error during GUI process launch"
-            sys.stdout.flush()
+            log.error("Fatal error during GUI startup")
+            log.debug_traceback()
             return
 
         try:
             # direct logging to GUI log console
             Gtk.main()
         except Exception, e:
-            import traceback
+            log.debug_traceback()
             for l in traceback.format_exc().split("\n"):
                 print "[LOG] ERROR:", l
                 sys.stdout.flush()
