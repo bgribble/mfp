@@ -73,6 +73,12 @@ class Send (Processor):
             
         return prms
 
+    def connect(self, outlet, target, inlet, show_gui=True):
+        Processor.connect(self, outlet, target, inlet, show_gui)
+        if outlet == 0:
+            self.dest_obj = target
+            self.dest_inlet = inlet
+
     def _wait_connect(self):
         def recheck():
             return self._connect(self.dest_name, self.dest_inlet, False)
@@ -81,11 +87,12 @@ class Send (Processor):
     def _connect(self, dest_name, dest_inlet, wait=True):
         # short-circuit if already conected 
         if (self.dest_name == dest_name and self.dest_inlet == dest_inlet
-            and self.dest_obj is not None): 
+                and self.dest_obj is not None): 
             return True 
 
         # disconnect existing if needed 
         if self.dest_obj is not None:
+            log.debug("[send] calling disconnect", self.obj_id, self.dest_obj.obj_id)
             self.disconnect(0, self.dest_obj, self.dest_inlet)
             self.dest_obj = None 
             self.dest_obj_owned = False 
