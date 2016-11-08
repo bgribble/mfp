@@ -88,7 +88,7 @@ main(int argc, char ** argv)
                            num_outputs);
                 }
                 else {
-                    num_outputs = strtod(argv[3], NULL);
+                    num_outputs = strtod(argv[4], NULL);
                 }
             }
         }
