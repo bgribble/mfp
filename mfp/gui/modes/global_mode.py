@@ -14,6 +14,7 @@ from ..patch_element import PatchElement
 
 from mfp import MFPGUI
 
+
 class GlobalMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
@@ -62,8 +63,10 @@ class GlobalMode (InputMode):
         self.bind("S-M1-MOTION", lambda: self.selbox_motion(True), "Drag add-to-selection box")
         self.bind("S-M1UP", self.selbox_end, "End selection box")
 
-        self.bind("C-M1DOWN", lambda: self.selbox_start(False), "Start toggle-selection box")
-        self.bind("C-M1-MOTION", lambda: self.selbox_motion(False), "Drag toggle-selection box")
+        self.bind("C-M1DOWN", lambda: self.selbox_start(False),
+                  "Start toggle-selection box")
+        self.bind("C-M1-MOTION", lambda: self.selbox_motion(False),
+                  "Drag toggle-selection box")
         self.bind("C-M1UP", self.selbox_end, "End toggle-selection box")
 
         self.bind("S-C-M1DOWN", self.drag_start, "Begin dragging viewport")
@@ -81,10 +84,9 @@ class GlobalMode (InputMode):
         self.bind("HOVER", lambda: self.hover(False))
         self.bind("S-HOVER", lambda: self.hover(True))
 
-
     def toggle_console(self):
         from gi.repository import Gdk
-        alloc = self.window.content_console_pane.get_allocation()  
+        alloc = self.window.content_console_pane.get_allocation()
         oldpos = self.window.content_console_pane.get_position()
 
         self.window.content_console_pane.set_position(
@@ -97,7 +99,7 @@ class GlobalMode (InputMode):
         return False
 
     def toggle_tree(self):
-        alloc = self.window.tree_canvas_pane.get_allocation()  
+        alloc = self.window.tree_canvas_pane.get_allocation()
         oldpos = self.window.tree_canvas_pane.get_position()
 
         self.window.tree_canvas_pane.set_position(self.next_tree_position)
@@ -113,7 +115,6 @@ class GlobalMode (InputMode):
         self.window.content_console_pane.set_position(oldpos - 1)
         return False
 
-
     def transient_msg(self):
         if self.window.selected:
             return self.window.add_element(TransientMessageElement)
@@ -123,7 +124,7 @@ class GlobalMode (InputMode):
     def hover(self, details):
         for m in self.manager.minor_modes:
             if m.enabled and isinstance(m, (TransientMessageEditMode, LabelEditMode,
-                                           EnumEditMode)):
+                                            EnumEditMode)):
                 details = False
 
         o = self.manager.pointer_obj
@@ -159,7 +160,6 @@ class GlobalMode (InputMode):
                 MFPGUI().mfp.save_file(patch.obj_name, fname)
         self.window.get_prompted_input("File name to save: ", cb, default_filename)
 
-
     def save_as_lv2(self):
         patch = self.window.selected_patch
         default_plugname = 'mfp_' + patch.obj_name
@@ -169,12 +169,10 @@ class GlobalMode (InputMode):
                 MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
         self.window.get_prompted_input("Plugin name to save: ", cb, default_plugname)
 
-
     def open_file(self):
         def cb(fname):
             MFPGUI().mfp.open_file(fname)
         self.window.get_prompted_input("File name to load: ", cb)
-
 
     def drag_start(self):
         self.drag_started = True
@@ -220,7 +218,7 @@ class GlobalMode (InputMode):
                 self.selbox_started = True
         elif select_mode is True:
             if (self.manager.pointer_obj
-                and self.manager.pointer_obj not in self.window.selected):
+                    and self.manager.pointer_obj not in self.window.selected):
                 self.window.select(self.manager.pointer_obj)
             self.selbox_started = True
         else:
@@ -322,8 +320,9 @@ class GlobalMode (InputMode):
             if MFPGUI().mfp.has_unsaved_changes(p):
                 clean = False
         if not clean:
-            self.window.get_prompted_input("There are patches with unsaved changes. Quit anyway? [yN]",
-                                           quit_confirm, '')
+            self.window.get_prompted_input(
+                "There are patches with unsaved changes. Quit anyway? [yN]",
+                quit_confirm, '')
         else:
             self.window.quit()
 
@@ -337,5 +336,3 @@ class GlobalMode (InputMode):
                 log.warning("Execution of all patches resumed")
         except Exception, e:
             print "Caught exception", e
-
-
