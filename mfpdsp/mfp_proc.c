@@ -315,6 +315,9 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
         conn = g_array_index(xlets, mfp_connection *, i);
         if ((conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
             mfp_log_warning("Programming error #179: asked to make an existing DSP connect again (handled)");
+            mfp_log_warning("From %s %d:%d to %s %d:%d", 
+                    self->typeinfo->name, self->rpc_id, my_outlet, 
+                    target->typeinfo->name, target->rpc_id, targ_inlet);
             return -1;
         }
     }

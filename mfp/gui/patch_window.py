@@ -209,7 +209,6 @@ class PatchWindow(object):
             if self.hud_prompt_input:
                 self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
                                                    self.stage.get_height() - 25)
-            self.stage.invalidate()
         except Exception as e:
             log.error("Error handling UI event", event)
             log.debug(e)

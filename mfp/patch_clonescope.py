@@ -91,7 +91,6 @@ def clonescope(self, scopename, num_copies, **kwargs):
         # remake objects
         for name, srcobj in scope.bindings.items():
             if not srcobj.save_to_patch:
-                log.debug("clonescope: skipping", name, type(srcobj))
                 continue
             newobj = srcobj.clone(self, newscope, name)
             obj_copied[name] = newobj
