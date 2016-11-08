@@ -349,7 +349,7 @@ class MFPApp (Singleton):
                    ctor = builtins.pyfunc.PyAutoWrap
             except Exception, e:
                 log.error("Cannot autowrap %s as a Python callable" % init_type)
-                print e
+                log.error(e)
 
         if ctor is None:
             return None

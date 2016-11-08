@@ -178,14 +178,23 @@ class PatchElement (Clutter.Group):
         self.stage.unregister(self)
         if self.obj_id is not None and not self.is_export:
             MFPGUI().mfp.delete(self.obj_id)
+        elif self.obj_id is None:
+            for conn in [c for c in self.connections_out]:
+                conn.delete()
+            for conn in [c for c in self.connections_in]:
+                conn.delete()
+
+
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED
 
     def create(self, obj_type, init_args):
         scopename = self.layer.scope
         patchname = self.layer.patch.obj_name
-        connections_out = []
-        connections_in = []
+        connections_out = self.connections_out
+        connections_in = self.connections_in
+        self.connections_out = []
+        self.connections_in = []
 
         # FIXME: optional name-root argument?  Need to pass the number at all,
         # with the scope handling it?
@@ -196,10 +205,6 @@ class PatchElement (Clutter.Group):
             name = "%s_%03d" % (self.display_type, name_index)
 
         if self.obj_id is not None:
-            connections_out = self.connections_out
-            self.connections_out = []
-            connections_in = self.connections_in
-            self.connections_in = []
             MFPGUI().mfp.set_gui_created(self.obj_id, False)
             MFPGUI().mfp.delete(self.obj_id)
             self.obj_id = None
@@ -210,6 +215,8 @@ class PatchElement (Clutter.Group):
 
         if objinfo is None:
             self.stage.hud_write("ERROR: Could not create, see log for details")
+            self.connections_out = connections_out
+            self.connections_in = connections_in
             return None
 
         self.obj_id = objinfo.get('obj_id')
