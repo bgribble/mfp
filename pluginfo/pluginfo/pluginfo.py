@@ -80,6 +80,11 @@ class PlugInfo (object):
                 return 1
             else:
                 return 0 
+        elif htype & self.LADSPA_HINT_DEFAULT_MIDDLE == self.LADSPA_HINT_DEFAULT_MIDDLE:
+            if htype & self.LADSPA_HINT_LOGARITHMIC: 
+                return math.exp(math.log(hlower) * 0.5 + math.log(hupper) * 0.5) * multiplier
+            else: 
+                return (hlower * 0.5 + hupper * 0.5) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_MINIMUM: 
             return hlower * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_LOW:
@@ -87,11 +92,6 @@ class PlugInfo (object):
                 return math.exp(math.log(hlower) * 0.75 + math.log(hupper) * 0.25) * multiplier
             else: 
                 return (hlower * 0.75 + hupper * 0.25) * multiplier
-        elif htype & self.LADSPA_HINT_DEFAULT_MIDDLE:
-            if htype & self.LADSPA_HINT_LOGARITHMIC: 
-                return math.exp(math.log(hlower) * 0.5 + math.log(hupper) * 0.5) * multiplier
-            else: 
-                return (hlower * 0.5 + hupper * 0.5) * multiplier
         elif htype & self.LADSPA_HINT_DEFAULT_HIGH:
             if htype & self.LADSPA_HINT_LOGARITHMIC: 
                 return math.exp(math.log(hlower) * 0.25 + math.log(hupper) * 0.75) * multiplier

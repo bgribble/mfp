@@ -26,6 +26,7 @@ class Plugin(Processor):
         self.plug_control = []
         self.dsp_inlets = []
         self.dsp_outlets = []
+        self.inlet_map = {}
 
         if len(initargs):
             self.init_plugin(initargs[0])
@@ -43,6 +44,10 @@ class Plugin(Processor):
         self.lib_name = pinfo.get("lib_name")
         self.lib_index = pinfo.get("lib_index")
         self.plug_name = pinfo.get("label")
+        self.plug_inlets = 0
+        self.plug_outlets = 0
+        self.plug_control = []
+        self.inlet_map = {}
 
         self.doc_tooltip_obj = MFPApp().pluginfo.plugin_docstring(pinfo)
         self.doc_tooltip_inlet = []
@@ -52,7 +57,6 @@ class Plugin(Processor):
 
         for portnum, port in enumerate(portinfo):
             self.plug_control.append(0)
-
             d = port.get("descriptor", 0)
             if d & MFPApp().pluginfo.LADSPA_PORT_INPUT:
                 self.doc_tooltip_inlet.append(MFPApp().pluginfo.port_docstring(port))
@@ -60,6 +64,7 @@ class Plugin(Processor):
                     self.dsp_inlets.extend([self.plug_inlets])
                 else:
                     self.plug_control[portnum] = MFPApp().pluginfo.port_default(port)
+                self.inlet_map[self.plug_inlets] = portnum
                 self.plug_inlets += 1
 
             elif d & MFPApp().pluginfo.LADSPA_PORT_OUTPUT:
@@ -73,7 +78,7 @@ class Plugin(Processor):
     def trigger(self):
         for portnum, value in enumerate(self.inlets):
             if value is not Uninit:
-                self.plug_control[portnum] = float(value)
+                self.plug_control[self.inlet_map.get(portnum, 0)] = float(value)
         self.dsp_setparam("plug_control", self.plug_control)
 
 
