@@ -84,6 +84,24 @@ class EnumControlMode (InputMode):
         self.bind("C-M1-MOTION", lambda: self.drag_selected(100.0),
                   "Change value (100x speed)")
         self.bind("M1UP", self.drag_end)
+        self.bind("UP", lambda: self.changeval(1.0))
+        self.bind("DOWN", lambda: self.changeval(-1.0))
+
+    def changeval(self, delta):
+        if self.enum.scientific:
+            try:
+                logdigits = int(math.log10(self.enum.value))
+            except ValueError:
+                logdigits = 0
+
+            base_incr = 10 ** (logdigits - self.enum.digits)
+        else:
+            base_incr = 10 ** (-self.enum.digits)
+
+        self.value = self.enum.value + delta * base_incr
+        self.enum.update_value(self.value)
+        return True
+
 
     def drag_start(self):
         if self.manager.pointer_obj == self.enum:
@@ -109,19 +127,8 @@ class EnumControlMode (InputMode):
 
         self.drag_last_x = self.manager.pointer_x
         self.drag_last_y = self.manager.pointer_y
+        self.changeval(-1.0*delta*dy)
 
-        if self.enum.scientific:
-            try:
-                logdigits = int(math.log10(self.enum.value))
-            except ValueError:
-                logdigits = 0
-
-            base_incr = 10 ** (logdigits - self.enum.digits)
-        else:
-            base_incr = 10 ** (-self.enum.digits)
-
-        self.value -= delta * base_incr * float(dy)
-        self.enum.update_value(self.value)
         return True
 
     def drag_end(self):
