@@ -72,6 +72,7 @@ class PatchElement (Clutter.Group):
         # UI state
         self.position_x = x
         self.position_y = y
+        self.position_z = 0
         self.width = None
         self.height = None
         self.drag_x = None
@@ -163,6 +164,7 @@ class PatchElement (Clutter.Group):
     def move(self, x, y):
         self.position_x = x
         self.position_y = y
+
         self.set_position(x, y)
 
         for c in self.connections_out:
@@ -170,6 +172,10 @@ class PatchElement (Clutter.Group):
 
         for c in self.connections_in:
             c.draw()
+    
+    def move_z (self, z):
+        self.position_z = z
+        self.set_z_position(z)
 
     def drag(self, dx, dy):
         self.move(self.position_x + dx, self.position_y + dy)
@@ -183,7 +189,6 @@ class PatchElement (Clutter.Group):
                 conn.delete()
             for conn in [c for c in self.connections_in]:
                 conn.delete()
-
 
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED
@@ -506,6 +511,9 @@ class PatchElement (Clutter.Group):
 
         w = params.get("width") or w_orig
         h = params.get("height") or h_orig
+
+        if "z_index" in params:
+            self.move_z(params.get("z_index"))
 
         if (w != w_orig) or (h != h_orig):
             self.set_size(w, h)
