@@ -53,4 +53,4 @@ class ClickableControlMode (InputMode):
         self.widget.clicked()
         self.clickstate = False 
         self.widget.unclicked()
-
+        return True

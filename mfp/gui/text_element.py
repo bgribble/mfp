@@ -22,7 +22,11 @@ class TextElement (PatchElement):
     ELBOW_ROOM = 5
 
     style_defaults = {
-        'fill-color': 'transparent'
+        'fill-color': 'transparent',
+        'fill-color:selected': 'transparent',
+        'border': False,
+        'border-color': 'default-stroke-color',
+        'canvas-size': None
     }
 
     def __init__(self, window, x, y):
@@ -30,6 +34,7 @@ class TextElement (PatchElement):
         self.value = ''
         self.clickchange = False
         self.default = ''
+
         self.param_list.extend(['value', 'clickchange', 'default'])
 
         self.texture = Clutter.CairoTexture.new(12, 12)
@@ -49,34 +54,29 @@ class TextElement (PatchElement):
         self.label_changed_cb = self.label.connect('text-changed', self.text_changed_cb)
 
     def update(self):
-        self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM,
-                      self.label.get_height() + self.ELBOW_ROOM)
+        if not self.get_style('canvas-size'):
+            self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM,
+                          self.label.get_height() + self.ELBOW_ROOM)
+        self.texture.invalidate()
         self.draw_ports()
 
     def draw_cb(self, texture, ct):
-        w = self.texture.get_property('surface_width') - 1
-        h = self.texture.get_property('surface_height') - 1
+        w = self.texture.get_property('surface_width')
+        h = self.texture.get_property('surface_height')
 
         self.texture.clear()
 
         # fill to paint the background
         color = ColorDB.to_cairo(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ct.fill_preserve()
+        ct.rectangle(1, 1, w-2, h-2)
+        ct.fill()
 
-        if self.clickchange:
+        if self.clickchange or self.get_style('border'):
             ct.set_line_width(1.0)
             ct.set_antialias(cairo.ANTIALIAS_NONE)
-            ct.translate(0.5, 0.5)
-            ct.move_to(1, 1)
-            ct.line_to(1, h)
-            ct.line_to(w, h)
-            ct.line_to(w, 1)
-            ct.line_to(1, 1)
-            ct.close_path()
-
-            # stroke to draw the outline
-            color = ColorDB.to_cairo(self.color_fg)
+            ct.rectangle(1, 1, w-2, h-2)
+            color = ColorDB.to_cairo(self.get_color('border-color'))
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
 
@@ -125,7 +125,8 @@ class TextElement (PatchElement):
         if len(self.value):
             self.label.set_markup(self.value)
         else:
-            self.value = self.default or '...'
+            size_set = self.get_style('canvas-size')
+            self.value = self.default or (not size_set and '...') or ''
             self.label.set_markup(self.value)
 
     def unclicked(self):
@@ -134,11 +135,13 @@ class TextElement (PatchElement):
     def select(self, *args):
         PatchElement.select(self)
         self.label.set_color(self.get_color('text-color'))
+        self.texture.invalidate()
         self.draw_ports()
 
     def unselect(self, *args):
         PatchElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
+        self.texture.invalidate()
         self.hide_ports()
 
     def make_edit_mode(self):
@@ -160,5 +163,20 @@ class TextElement (PatchElement):
 
         if params.get('default') is not None:
             self.default = params['default']
+
+        newsize = None
+        if params.get('style') is not None:
+            newstyle = params.get('style')
+            if newstyle.get('canvas-size') is not None:
+                newsize = newstyle.get('canvas-size')
+                params['width'] = newsize[0]
+                params['height'] = newsize[1]
+
+        if params.get('border') is not None:
+            self.border = params.get('border')
+
         PatchElement.configure(self, params)
+        if newsize: 
+            self.set_size(*newsize)
+
         self.update()

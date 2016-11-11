@@ -497,6 +497,11 @@ class PatchElement (Clutter.Group):
         if layer and self.layer != layer:
             self.move_to_layer(layer)
 
+        if 'style' in params:
+            self.style.update(params.get('style'))
+
+        self._all_styles = self.combine_styles()
+
         w_orig, h_orig = self.get_size()
 
         w = params.get("width") or w_orig
@@ -504,13 +509,10 @@ class PatchElement (Clutter.Group):
 
         if (w != w_orig) or (h != h_orig):
             self.set_size(w, h)
+
         self.draw_ports()
         self.stage.refresh(self)
 
-        if 'style' in params:
-            self.style = params.get('style')
-
-        self._all_styles = self.combine_styles()
 
     def move_to_layer(self, layer):
         layer_child = False
