@@ -244,7 +244,8 @@ class PatchElement (Clutter.Group):
                     c.delete()
                 else:
                     self.connections_in.append(c)
-                    MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
+                    if not c.dashed:
+                        MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
 
             for c in connections_out:
                 if c.obj_1 is self and c.port_1 >= self.num_outlets:
@@ -252,7 +253,8 @@ class PatchElement (Clutter.Group):
                     c.delete()
                 else:
                     self.connections_out.append(c)
-                    MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
+                    if not c.dashed:
+                        MFPGUI().mfp.connect(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
 
             MFPGUI().remember(self)
             self.send_params()

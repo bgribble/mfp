@@ -49,7 +49,8 @@ class Plugin(Processor):
         self.plug_control = []
         self.inlet_map = {}
 
-        self.doc_tooltip_obj = MFPApp().pluginfo.plugin_docstring(pinfo)
+        self.doc_tooltip_obj = (
+            MFPApp().pluginfo.plugin_docstring(pinfo) or self.doc_tooltip_obj)
         self.doc_tooltip_inlet = []
         self.doc_tooltip_outlet = []
 
