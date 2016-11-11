@@ -51,7 +51,7 @@ class LabelEditMode (InputMode):
         self.multiline = multiline
         self.markup = markup
         self.text = initial if initial else self.widget.get_text()
-        self.cursor_color = ColorDB().find("default_txtcursor") 
+        self.cursor_color = ColorDB().find("default-text-cursor-color") 
         self.undo_stack = [(self.text, len(self.text))]
         self.undo_pos = -1
         self.activate_handler_id = None
