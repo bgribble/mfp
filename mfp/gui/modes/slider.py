@@ -34,10 +34,20 @@ class SliderControlMode (InputMode):
         self.bind("M1UP", self.drag_end, "Release fader")
         self.bind("S-M1UP", self.drag_end)
         self.bind("C-M1UP", self.drag_end)
+        self.bind("UP", lambda: self.change_value(0.01))
+        self.bind("DOWN", lambda: self.change_value(-0.01))
+        self.bind("S-UP", lambda: self.change_value(0.001))
+        self.bind("S-DOWN", lambda: self.change_value(-0.001))
 
     def set_value(self):
         new_value = self.slider.pixpos2value(self.manager.pointer_x, self.manager.pointer_y)
         self.slider.update_value(new_value)
+
+    def change_value(self, fraction):
+        dv = fraction * abs(self.slider.max_value - self.slider.min_value)
+
+        self.slider.update_value(self.slider.value + dv)
+        return True
 
     def drag_start(self):
         if self.manager.pointer_obj == self.slider:
