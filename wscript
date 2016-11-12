@@ -363,7 +363,8 @@ def configure(conf):
         uselibs.append(uname)
     conf.env.PKGCONF_LIBS = uselibs
 
-    pip_libs = [ "posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy", "nose", "yappi" ]
+    pip_libs = ["posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy", 
+                "nose", "yappi", "pyliblo" ]
     gi_libs = [ "Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
     pip_notfound = []
@@ -414,8 +415,6 @@ def build(bld):
     bld.egg(srcdir="testext", pkgname="testext", arch="linux-x86_64", version="1.0")
     bld.egg(srcdir="lib/alsaseq-0.4.1", pkgname="alsaseq",
             extname="alsaseq", arch="linux-x86_64", version="0.4.1")
-    bld.egg(srcdir="lib/pyliblo-0.9.1", extname="liblo", arch="linux-x86_64",
-            version="0.9.1")
 
     # must make virtualenv "relocatable" after all packages added
     bld.fix_virtualenv()
