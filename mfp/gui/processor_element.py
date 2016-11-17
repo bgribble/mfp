@@ -7,9 +7,10 @@ A patch element corresponding to a signal or control processor
 from gi.repository import Clutter as clutter
 import cairo
 from .patch_element import PatchElement
-from .colordb import ColorDB 
+from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
-from ..gui_main import MFPGUI 
+from ..gui_main import MFPGUI
+from mfp import log
 
 class ProcessorElement (PatchElement):
     display_type = "processor"
@@ -21,8 +22,9 @@ class ProcessorElement (PatchElement):
 
     def __init__(self, window, x, y, params={}):
         PatchElement.__init__(self, window, x, y)
-    
-        self.param_list.append("show_label")
+
+        self.param_list.extend(["show_label", "export_x", "export_y",
+                                "export_w", "export_h"])
         self.show_label = params.get("show_label", True)
 
         # display elements
@@ -30,10 +32,10 @@ class ProcessorElement (PatchElement):
         self.label = None
         self.label_text = None
         self.export_x = None
-        self.export_y = None 
-        self.export_w = None 
-        self.export_h = None 
-        self.export_created = False 
+        self.export_y = None
+        self.export_w = None
+        self.export_h = None
+        self.export_created = False
 
         # create display
         self.create_display()
@@ -64,17 +66,17 @@ class ProcessorElement (PatchElement):
 
     def update(self):
         if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
-            label_width = self.label.get_property('width') + 14 
-        else: 
+            label_width = self.label.get_property('width') + 14
+        else:
             label_width = 0
 
         box_width = self.export_w or 0
 
         new_w = None
         num_ports = max(self.num_inlets, self.num_outlets)
-        port_width = (num_ports * self.get_style('porthole_minspace') 
+        port_width = (num_ports * self.get_style('porthole_minspace')
                       + 2*self.get_style('porthole_border'))
-        
+
         new_w = max(35, port_width, label_width, box_width)
 
         self.set_size(new_w, self.texture.get_property('height'))
@@ -95,12 +97,12 @@ class ProcessorElement (PatchElement):
         ct.line_to(1, 1)
         ct.close_path()
 
-        # fill to paint the background 
+        # fill to paint the background
         color = ColorDB.to_cairo(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ct.fill_preserve()
 
-        # stroke to draw the outline 
+        # stroke to draw the outline
         color = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
@@ -127,7 +129,7 @@ class ProcessorElement (PatchElement):
             if len(parts) > 1:
                 obj_args = parts[1]
             else:
-                obj_args = None 
+                obj_args = None
 
             self.create(obj_type, obj_args)
 
@@ -154,12 +156,12 @@ class ProcessorElement (PatchElement):
         self.texture.invalidate()
 
     def select(self):
-        PatchElement.select(self) 
+        PatchElement.select(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def unselect(self):
-        PatchElement.unselect(self) 
+        PatchElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
@@ -177,15 +179,15 @@ class ProcessorElement (PatchElement):
             self.label.set_text("%s" % (self.obj_type,))
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
-        
-        need_update = False 
+
+        need_update = False
 
         labelheight = 20
-        if "show_label" in params: 
+        if "show_label" in params:
             oldval = self.show_label
             self.show_label = params.get("show_label")
             if oldval ^ self.show_label:
-                need_update = True 
+                need_update = True
                 if self.show_label:
                     self.add_actor(self.label)
                 else:
@@ -197,17 +199,17 @@ class ProcessorElement (PatchElement):
             self.export_w = params.get("export_w")
             self.export_h = params.get("export_h")
             if self.export_x is not None and self.export_y is not None:
-                self.export_created = True 
-            
+                self.export_created = True
+
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
             if self.export_created:
                 MFPGUI().mfp.create_export_gui(self.obj_id)
-            need_update = True 
+            need_update = True
 
         if need_update:
             self.update()
 
         params["width"] = max(self.width, params.get("export_w") or 0)
-        params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight) 
+        params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight)
         PatchElement.configure(self, params)

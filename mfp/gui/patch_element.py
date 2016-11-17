@@ -172,7 +172,7 @@ class PatchElement (Clutter.Group):
 
         for c in self.connections_in:
             c.draw()
-    
+
     def move_z (self, z):
         self.position_z = z
         self.set_z_position(z)
@@ -475,7 +475,9 @@ class PatchElement (Clutter.Group):
         Clutter.Group.set_size(self, self.width, self.height)
         self.update_badge()
         self.draw_ports()
-        self.send_params()
+
+        if self.obj_id and self.name:
+            self.send_params()
 
     def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
@@ -513,6 +515,12 @@ class PatchElement (Clutter.Group):
 
         w = params.get("width") or w_orig
         h = params.get("height") or h_orig
+
+        if "position_x" in params and "position_y" in params:
+            xpos = params['position_x']
+            ypos = params['position_y']
+
+            self.move(xpos, ypos)
 
         if "z_index" in params:
             self.move_z(params.get("z_index"))

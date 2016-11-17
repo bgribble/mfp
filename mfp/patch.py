@@ -12,6 +12,8 @@ from .processor import Processor, AsyncOutput
 from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit, Unbound
+from .utils import TaskNibbler
+
 from mfp import log
 
 
@@ -20,6 +22,8 @@ class Patch(Processor):
     EXPORT_LAYER = "Interface"
     display_type = "patch"
     default_context = None
+
+    task_nibbler = TaskNibbler()
 
     def __init__(self, init_type, init_args, patch, scope, name, context=None):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
@@ -231,9 +235,8 @@ class Patch(Processor):
                 self.unbind(obj.name, obj.scope)
             del self.objects[obj.obj_id]
         except KeyError:
-            print "Error deleting obj", obj, "can't find key", obj.obj_id
-            import traceback
-            traceback.print_exc()
+            log.error("Error deleting obj", obj, "can't find key", obj.obj_id)
+            log.debug_traceback()
 
         try:
             self.inlet_objects.remove(obj)
@@ -418,17 +421,37 @@ class Patch(Processor):
             self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
             if not MFPApp().no_onload:
-                for phase in (0,1):
-                    for obj_id, obj in self.objects.items():
-                        if obj.do_onload:
-                            obj.onload(phase)
+                self.task_nibbler.add_task(
+                    lambda (objects): self._run_onload(objects), False, 
+                    [obj for obj in self.objects.values()]
+                )
+
+    def _run_onload(self, objects):
+        from .mfp_app import MFPApp
+        for phase in (0,1):
+            for obj in objects:
+                try: 
+                    if obj.do_onload:
+                        obj.onload(phase)
+                except Exception as e:
+                    log.error("Problem initializing %s.%s" % (obj.scope.name, obj.name))
+                    log.debug_traceback()
+
+        self.update_export_bounds()
+        if self.gui_created:
+            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
+        if MFPApp().gui_command:
+            MFPApp().gui_command.load_complete()
+            return True
 
     def obj_is_exportable(self, obj):
-        if (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
-            and obj.gui_params.get("no_export", False) is not True
-            and "display_type" in obj.gui_params
-            and (obj.gui_params.get("display_type") not in
-                 ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia"))):
+        if (obj.gui_params.get('is_export') 
+            or (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
+                and obj.gui_params.get("no_export", False) is not True
+                and "display_type" in obj.gui_params
+                and (obj.gui_params.get("display_type") not in
+                     ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia")))):
             return True
         else:
             return False
@@ -472,10 +495,10 @@ class Patch(Processor):
         from .mfp_app import MFPApp
         # non-toplevel Patch means show the Export UI layer only
         MFPApp().gui_command.load_start()
+        self.update_export_bounds()
         for oid, obj in self.objects.items():
             if self.obj_is_exportable(obj):
                 obj.create_gui(is_export=True)
-        self.update_export_bounds()
         MFPApp().gui_command.configure(self.obj_id, self.gui_params)
         MFPApp().gui_command.load_complete()
 

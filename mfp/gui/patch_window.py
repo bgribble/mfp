@@ -412,8 +412,7 @@ class PatchWindow(object):
             import traceback
             log.warning("add_element: Error while creating with factory", factory)
             log.warning(e)
-            for l in traceback.format_exc().split("\n"):
-                log.debug(l)
+            log.debug_traceback()
             return True
 
         self.active_layer().add(b)

@@ -8,6 +8,7 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor 
 from ..bang import Bang, Uninit 
 from ..mfp_app import MFPApp
+from mfp import log
 
 class LoadBang (Processor):
     doc_tooltip_obj = "Emit a Bang message on patch load"

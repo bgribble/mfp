@@ -39,17 +39,15 @@ def clonescope(self, scopename, num_copies, **kwargs):
             cdigits = len(parts[-1])
             basename = '_'.join(parts[:-1])
         except Exception, e:
-            import traceback
-            traceback.print_exc()
-            pass
+            log.error("clonescope: caught exception", e)
+            log.debug_traceback()
 
     # find bounding box of any interface elements
     bbox_min_x = bbox_max_x = bbox_min_y = bbox_max_y = bbox_w = bbox_h = None
     ui_items = {}
 
     for name, srcobj in scope.bindings.items():
-        if (srcobj.gui_params.get("layername") == "Interface"
-            and self.obj_is_exportable(srcobj)):
+        if self.obj_is_exportable(srcobj):
             ui_items[name] = srcobj
             xpos = srcobj.gui_params.get("position_x")
             ypos = srcobj.gui_params.get("position_y")
@@ -67,6 +65,12 @@ def clonescope(self, scopename, num_copies, **kwargs):
     if bbox_min_x is not None:
         bbox_w = bbox_max_x - bbox_min_x
         bbox_h = bbox_max_y - bbox_min_y
+
+    if MFPApp().gui_command:
+        MFPApp().gui_command.load_start()
+
+    need_gui = []
+    all_clones = []
 
     # make copies of elements in scope
     for copynum in range(num_copies):
@@ -93,6 +97,7 @@ def clonescope(self, scopename, num_copies, **kwargs):
             if not srcobj.save_to_patch:
                 continue
             newobj = srcobj.clone(self, newscope, name)
+            all_clones.append(newobj)
             obj_copied[name] = newobj
             obj_idmap[srcobj.obj_id] = newobj
 
@@ -103,7 +108,7 @@ def clonescope(self, scopename, num_copies, **kwargs):
                 newobj.gui_params["position_y"] += dy
 
             if srcobj.gui_created:
-                newobj.create_gui()
+                need_gui.append(newobj)
 
         # remake connections
         for name, srcobj in scope.bindings.items():
@@ -115,30 +120,24 @@ def clonescope(self, scopename, num_copies, **kwargs):
                 for tobj, tport in port_conn:
                     tobj_newid = obj_idmap.get(tobj.obj_id)
                     if not tobj_newid:
-                        if tobj.scope != scope: 
+                        if tobj.scope != scope:
                             tobj_newid = tobj
-                        else: 
-                            continue 
+                        else:
+                            continue
                     if (newobj, port_num) not in tobj_newid.connections_out[tport]:
                         tobj_newid.connect(tport, newobj, port_num)
 
             for port_num, port_conn in enumerate(srcobj.connections_out):
                 for tobj, tport in port_conn:
+                    tobj_newid = obj_idmap.get(tobj.obj_id)
                     if not tobj_newid:
-                        if tobj.scope != scope: 
+                        if tobj.scope != scope:
                             tobj_newid = tobj
-                        else: 
-                            continue 
-                    tobj_newid = obj_idmap.get(tobj.obj_id, tobj)
+                        else:
+                            continue
                     if (tobj_newid, tport) not in newobj.connections_out[port_num]:
                         newobj.connect(port_num, tobj_newid, tport)
 
-        # make sure [loadbang] get triggered
-        if not MFPApp().no_onload:
-            for phase in (0,1):
-                for obj_id, obj in obj_copied.items():
-                    if obj.do_onload:
-                        obj.onload(phase)
 
     for name, srcobj in ui_items.items():
         # kludge -- change labels in the UI template objects
@@ -150,3 +149,12 @@ def clonescope(self, scopename, num_copies, **kwargs):
     self.update_export_bounds()
     if self.gui_created:
         MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+
+    for obj in need_gui:
+        obj.create_gui()
+
+    # make sure [loadbang] get triggered
+    if not MFPApp().no_onload:
+        self.task_nibbler.add_task(
+            lambda (newobjs): self._run_onload(newobjs), False,
+            [obj for obj in all_clones])

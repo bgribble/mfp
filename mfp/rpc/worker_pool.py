@@ -19,8 +19,6 @@ class BaseWorker (object):
         self.pool = pool
         self.thunk = thunk
         self.quit_req = False
-        #self.lock = threading.Lock()
-        #self.condition = threading.Condition(self.lock)
         self.thread = threading.Thread(target=self._thread_func)
         self.thread.start()
 

@@ -722,15 +722,22 @@ class Processor (object):
     def create_gui(self, **kwargs):
         from .mfp_app import MFPApp
         parent_id = self.patch.obj_id if self.patch is not None else None
+        for param, value in kwargs.items():
+            self.gui_params[param] = value
+
+        if 'is_export' in kwargs: 
+            self.gui_params['position_x'] += (
+                self.patch.gui_params.get('export_frame_xoff', 2) 
+                - (self.patch.gui_params.get('export_x') or 0)
+            )
+            self.gui_params['position_y'] += (
+                self.gui_params.get('export_frame_yoff', 20)
+                - (self.patch.gui_params.get('export_y') or 0)
+            )
+
         MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
                                     parent_id, self.gui_params)
         self.gui_created = True
-        need_update = False
-        for param, value in kwargs.items():
-            self.gui_params[param] = value
-            need_update = True
-        if need_update:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def delete_gui(self):
         from .mfp_app import MFPApp
@@ -777,7 +784,9 @@ class Processor (object):
 
     def clone(self, patch, scope, name):
         from .mfp_app import MFPApp
+        from .patch import Patch
         prms = self.save()
+
         newobj = MFPApp().create(prms.get("type"), prms.get("initargs"),
                                  patch, scope, name)
         newobj.load(prms)

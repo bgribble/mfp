@@ -47,7 +47,8 @@ class Send (Processor):
         return nm
 
     def onload(self, phase):
-        self._connect(self.dest_name, self.dest_inlet)
+        if phase == 0:
+            self._connect(self.dest_name, self.dest_inlet)
 
     def method(self, message, inlet=0):
         if inlet == 0:
@@ -80,9 +81,9 @@ class Send (Processor):
             self.dest_inlet = inlet
 
     def _wait_connect(self):
-        def recheck():
+        def send_recheck():
             return self._connect(self.dest_name, self.dest_inlet, False)
-        Send.task_nibbler.add_task(recheck)
+        Send.task_nibbler.add_task(send_recheck, True)
 
     def _connect(self, dest_name, dest_inlet, wait=True):
         # short-circuit if already conected 
@@ -92,7 +93,6 @@ class Send (Processor):
 
         # disconnect existing if needed 
         if self.dest_obj is not None:
-            log.debug("[send] calling disconnect", self.obj_id, self.dest_obj.obj_id)
             self.disconnect(0, self.dest_obj, self.dest_inlet)
             self.dest_obj = None 
             self.dest_obj_owned = False 
@@ -121,6 +121,8 @@ class Send (Processor):
             if (len(self.dest_obj.connections_in) < self.dest_inlet+1
                 or [self, 0] not in self.dest_obj.connections_in[self.dest_inlet]):
                 self.connect(0, self.dest_obj, self.dest_inlet, False)
+        else:
+            log.warning("[send] can't find dest object and not still looking")
 
         self.init_args = '"%s",%s' % (self.dest_name, self.dest_inlet) 
         self.gui_params["label_text"] = self._mkdispname()
@@ -285,10 +287,9 @@ class Recv (Processor):
         self.gui_params['label_text'] = gp.get("label_text") or self._mkdispname()
 
     def _wait_connect(self):
-        def recheck():
-            ready = self._connect(self.src_name, self.src_outlet, False)
-            return ready
-        Recv.task_nibbler.add_task(recheck)
+        def recv_recheck():
+            return self._connect(self.src_name, self.src_outlet, False)
+        Recv.task_nibbler.add_task(recv_recheck, True)
 
     def _connect(self, src_name, src_outlet, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)

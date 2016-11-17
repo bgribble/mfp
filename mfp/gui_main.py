@@ -98,10 +98,9 @@ class MFPGUI (Singleton):
             # direct logging to GUI log console
             Gtk.main()
         except Exception, e:
+            log.error("Caught GUI exception:", e)
             log.debug_traceback()
-            for l in traceback.format_exc().split("\n"):
-                print "[LOG] ERROR:", l
-                sys.stdout.flush()
+            sys.stdout.flush()
 
     def finish(self):
         from gi.repository import Gtk

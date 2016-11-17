@@ -39,16 +39,17 @@ class MethodCall(object):
         if callable(m):
             try:
                 return m(*self.args, **self.kwargs)
-            except Exception, e:
-                print "Error calling", self.method, "on", target
-                print "args=%s, kwargs=%s" % (self.args, self.kwargs)
-                raise MethodCallError("Method '%s' for type '%s' raised exception %s"
-                                      % (self.method, target.init_type, e))
+            except Exception as e:
+                log.debug("Error calling", self.method, "on", target)
+                log.debug( "args=%s, kwargs=%s" % (self.args, self.kwargs))
+                log.debug_traceback()
+                raise MethodCallError("Method '%s' for type '%s' raised exception '%s' %s"
+                                      % (self.method, target.init_type, e, type(e)))
         elif self.fallback:
             try:
                 return self.fallback([self] + self.args, **self.kwargs)
-            except Exception, e:
-                raise MethodCallError("Method '%s' for type '%s' raised exception %s"
+            except Exception as e:
+                raise MethodCallError("Method fallback '%s' for type '%s' raised exception '%s'"
                                       % (self.method, target.init_type, e))
         else:
             log.debug("MethodCall.call():", target, self.method, m, type(m))

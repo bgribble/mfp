@@ -391,8 +391,7 @@ class MFPApp (Singleton):
             log.error("Caught exception while trying to create %s (%s)"
                       % (init_type, init_args))
             log.debug(e)
-            import traceback
-            traceback.print_exc()
+            log.debug_traceback()
             self.cleanup()
             return None
 

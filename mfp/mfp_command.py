@@ -97,6 +97,7 @@ class MFPCommand(RPCWrapper):
     def set_params(self, obj_id, params):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
+
         if isinstance(obj, Processor):
             obj.gui_params = params
 

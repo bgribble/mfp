@@ -1,4 +1,3 @@
-
 from .rpc import RPCWrapper, rpcwrap, rpcwrap_noresp
 
 class GUICommand (RPCWrapper):

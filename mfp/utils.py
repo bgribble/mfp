@@ -7,8 +7,9 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import cProfile
-from threading import Thread, Lock
-import time 
+from threading import Thread, Lock, Condition
+import time
+from mfp import log
 
 def homepath(fn):
     import os.path
@@ -19,48 +20,48 @@ def splitpath(p):
     if not p:
         return []
     parts = p.split(":")
-    unescaped = [] 
-    prefix = None 
-    for p in parts: 
+    unescaped = []
+    prefix = None
+    for p in parts:
         if not p:
-            continue 
+            continue
         if p[-1] == '\\':
             newpart = p[:-1] + ':'
             if prefix is not None:
                 prefix = prefix + newpart
             else:
-                prefix = newpart 
+                prefix = newpart
         elif prefix is None:
             unescaped.append(p)
         else:
             unescaped.append(prefix + p)
-            prefix = None 
-    return unescaped 
+            prefix = None
+    return unescaped
 
 def joinpath(elts):
-    parts = [] 
-    for e in elts: 
+    parts = []
+    for e in elts:
         parts.append(e.replace(':', '\\:'))
-            
+
     return ':'.join(parts)
 
 def find_file_in_path(filename, pathspec):
-    import os.path 
-    import os 
+    import os.path
+    import os
     searchdirs = splitpath(pathspec)
-    for d in searchdirs: 
+    for d in searchdirs:
         path = os.path.join(d, filename)
-        try: 
+        try:
             s = os.stat(path)
-            if s: 
-                return path 
-        except: 
-            continue 
-    return None 
+            if s:
+                return path
+        except:
+            continue
+    return None
 
 def prepend_path(newpath, searchpath):
     searchdirs = splitpath(searchpath)
-    if newpath in searchdirs: 
+    if newpath in searchdirs:
         searchdirs.remove(newpath)
     searchdirs[:0] = [newpath]
     return joinpath(searchdirs)
@@ -68,12 +69,12 @@ def prepend_path(newpath, searchpath):
 
 def logcall(func):
     def wrapper(*args, **kwargs):
-        from mfp import log 
+        from mfp import log
         if "log" not in func.__name__:
             log.debug("called: %s.%s (%s)" % (type(args[0]).__name__, func.__name__, args[0]))
         return func(*args, **kwargs)
 
-    return wrapper 
+    return wrapper
 
 def profile(func):
     '''
@@ -130,11 +131,11 @@ def extends(klass):
 def isiterable(obj):
     try:
         if hasattr(obj, '__iter__'):
-            return True 
+            return True
     except:
-        pass 
+        pass
 
-    return False 
+    return False
 
 
 class QuittableThread(Thread):
@@ -161,8 +162,8 @@ class QuittableThread(Thread):
                 QuittableThread._all_threads.remove(self)
             except ValueError:
                 print "QuittableThread.finish() error:", self, "not in _all_threads"
-            except Exception, e: 
-                print "QuittableThread.finish() error:", self, e 
+            except Exception, e:
+                print "QuittableThread.finish() error:", self, e
                 print "Remaining threads:", QuittableThread._all_threads
         self.join_req = True
         self.join()
@@ -176,7 +177,7 @@ class QuittableThread(Thread):
 
     @classmethod
     def wait_for_all(klass):
-        next_victim = True 
+        next_victim = True
 
         while next_victim:
             if isinstance(next_victim, Thread) and next_victim.isAlive():
@@ -189,37 +190,46 @@ class QuittableThread(Thread):
                 if len(living_threads) > 0:
                     next_victim = living_threads[0]
                 else:
-                    next_victim = False  
+                    next_victim = False
 
 
-class TaskNibbler (QuittableThread): 
+
+class TaskNibbler (QuittableThread):
+    class NoData (object):
+        pass
+    NODATA = NoData()
+
     def __init__(self):
         self.lock = Lock()
-        self.queue = [] 
+        self.cv = Condition(self.lock)
+        self.queue = []
         QuittableThread.__init__(self)
         self.start()
 
-    def run(self): 
-        work = [] 
-        retry = [] 
+    def run(self):
+        work = []
+        retry = []
 
-        while not self.join_req: 
+        while not self.join_req:
             with self.lock:
-                work = self.queue
-                self.queue = [] 
-                retry = []
+                self.cv.wait(0.25)
+                if self.queue:
+                    work = self.queue
+                    self.queue = []
+                    retry = []
+                else:
+                    continue
 
-            for unit in work:
-                done = unit()
-                if not done:
-                    retry.append(unit)
+            for unit, retry_if_fail, data in work:
+                done = unit(*data)
+                if not done and retry_if_fail:
+                    retry.append((unit, retry_if_fail, data))
 
-            with self.lock:
-                self.queue.extend(retry)
+            if retry:
+                with self.lock:
+                    self.queue.extend(retry)
 
-            time.sleep(0.25)
-
-    def add_task(self, task):
+    def add_task(self, task, retry, *data):
         with self.lock:
-            self.queue.append(task)
-
+            self.queue.append((task, retry, data))
+            self.cv.notify()

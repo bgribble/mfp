@@ -113,7 +113,7 @@ def json_unpack_connections(self, data, idmap):
                     srcobj.connect(outlet, dstobj, inlet)
 
 @extends(Patch)
-def json_unpack_objects(self, data, scope):
+def json_unpack_objects(self, data, scope, create_gui=True):
     from .mfp_app import MFPApp
     idmap = {}
     idlist = data.get('objects').keys()
@@ -128,7 +128,7 @@ def json_unpack_objects(self, data, scope):
         newobj = MFPApp().create(otype, oargs, self, scope, oname)
         newobj.patch = self
         newobj.load(prms)
-        if self.gui_created:
+        if create_gui and self.gui_created:
             newobj.create_gui()
 
         idmap[int(oid)] = newobj
