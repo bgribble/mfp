@@ -212,4 +212,5 @@ class ProcessorElement (PatchElement):
 
         params["width"] = max(self.width, params.get("export_w") or 0)
         params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight)
+
         PatchElement.configure(self, params)

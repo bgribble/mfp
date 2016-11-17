@@ -438,12 +438,13 @@ class Patch(Processor):
                     log.debug_traceback()
 
         self.update_export_bounds()
+
         if self.gui_created:
             MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
         if MFPApp().gui_command:
             MFPApp().gui_command.load_complete()
-            return True
+        return True
 
     def obj_is_exportable(self, obj):
         if (obj.gui_params.get('is_export') 
