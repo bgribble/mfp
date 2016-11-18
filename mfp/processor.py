@@ -725,15 +725,21 @@ class Processor (object):
         for param, value in kwargs.items():
             self.gui_params[param] = value
 
-        if 'is_export' in kwargs: 
-            self.gui_params['position_x'] += (
-                self.patch.gui_params.get('export_frame_xoff', 2) 
+        if kwargs.get('is_export'):
+            xoff = (
+                self.patch.gui_params.get('export_frame_xoff', 2)
                 - (self.patch.gui_params.get('export_x') or 0)
             )
-            self.gui_params['position_y'] += (
+
+            self.gui_params['export_offset_x'] = xoff
+            self.gui_params['position_x'] += xoff
+            yoff = (
                 self.gui_params.get('export_frame_yoff', 20)
                 - (self.patch.gui_params.get('export_y') or 0)
             )
+
+            self.gui_params['export_offset_y'] = yoff
+            self.gui_params['position_y'] += yoff
 
         MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
                                     parent_id, self.gui_params)

@@ -123,7 +123,7 @@ class ProcessorElement (PatchElement):
         self.update()
 
     def label_edit_finish(self, widget, text=None):
-        if text is not None and text != self.label_text:
+        if text is not None:
             parts = text.split(' ', 1)
             obj_type = parts[0]
             if len(parts) > 1:
@@ -146,7 +146,10 @@ class ProcessorElement (PatchElement):
         self.update()
 
     def label_changed_cb(self, *args):
-        self.update()
+        newtext = self.label.get_text()
+        if newtext != self.label_text:
+            self.label_text = newtext
+            self.update()
 
     def set_size(self, w, h):
         PatchElement.set_size(self, w, h)
@@ -193,24 +196,24 @@ class ProcessorElement (PatchElement):
                 else:
                     self.remove_actor(self.label)
 
-        if "export_w" in params and "export_h" in params:
-            self.export_x = params.get("export_x")
-            self.export_y = params.get("export_y")
-            self.export_w = params.get("export_w")
-            self.export_h = params.get("export_h")
-            if self.export_x is not None and self.export_y is not None:
-                self.export_created = True
-
-        if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
-            self.obj_state = self.OBJ_COMPLETE
-            if self.export_created:
-                MFPGUI().mfp.create_export_gui(self.obj_id)
-            need_update = True
-
-        if need_update:
-            self.update()
+        self.export_x = params.get("export_x")
+        self.export_y = params.get("export_y")
+        self.export_w = params.get("export_w")
+        self.export_h = params.get("export_h")
+        if self.export_x is not None and self.export_y is not None:
+            self.export_created = True
 
         params["width"] = max(self.width, params.get("export_w") or 0)
         params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight)
 
         PatchElement.configure(self, params)
+
+        if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
+            self.obj_state = self.OBJ_COMPLETE
+            if self.export_created:
+                MFPGUI().mfp.create_export_gui(self.obj_id)
+                need_update = True
+
+        if need_update:
+            self.update()
+

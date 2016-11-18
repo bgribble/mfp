@@ -138,7 +138,6 @@ def clonescope(self, scopename, num_copies, **kwargs):
                     if (tobj_newid, tport) not in newobj.connections_out[port_num]:
                         newobj.connect(port_num, tobj_newid, tport)
 
-
     for name, srcobj in ui_items.items():
         # kludge -- change labels in the UI template objects
         if srcobj.gui_params.get("display_type") == "text":
@@ -152,9 +151,3 @@ def clonescope(self, scopename, num_copies, **kwargs):
 
     for obj in need_gui:
         obj.create_gui()
-
-    # make sure [loadbang] get triggered
-    if not MFPApp().no_onload:
-        self.task_nibbler.add_task(
-            lambda (newobjs): self._run_onload(newobjs), False,
-            [obj for obj in all_clones])

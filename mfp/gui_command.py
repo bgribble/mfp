@@ -132,6 +132,9 @@ class GUICommand (RPCWrapper):
                     o.container = layer.group
                 elif isinstance(parent, PatchElement): 
                     # FIXME: don't hardcode GOP offsets 
+                    if not parent.export_x:
+                        log.debug("_create: parent %s.%s has no export_x"
+                                  % (parent.scope.name, parent,name))
                     xpos = params.get("position_x", 0) - parent.export_x + 2
                     ypos = params.get("position_y", 0) - parent.export_y + 20
                     o.move(xpos, ypos)

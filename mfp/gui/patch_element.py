@@ -36,6 +36,7 @@ class PatchElement (Clutter.Group):
     OBJ_ERROR = 2
     OBJ_COMPLETE = 3
     OBJ_DELETED = 4
+    TINY_DELTA = .0001
 
     def __init__(self, window, x, y):
         # MFP object and UI descriptors
@@ -57,7 +58,8 @@ class PatchElement (Clutter.Group):
         self.param_list = ['position_x', 'position_y', 'width', 'height',
                            'update_required', 'display_type', 'name', 'layername',
                            'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
-                           'dsp_outlets', 'scope', 'style']
+                           'dsp_outlets', 'scope', 'style', 'export_offset_x',
+                           'export_offset_y']
 
         # Clutter objects
         self.stage = window
@@ -73,6 +75,8 @@ class PatchElement (Clutter.Group):
         self.position_x = x
         self.position_y = y
         self.position_z = 0
+        self.export_offset_x = 0
+        self.export_offset_y = 0
         self.width = None
         self.height = None
         self.drag_x = None
@@ -261,6 +265,7 @@ class PatchElement (Clutter.Group):
             MFPGUI().mfp.set_gui_created(self.obj_id, True)
 
         self.stage.refresh(self)
+
         return self.obj_id
 
     def send_params(self, **extras):
@@ -467,7 +472,9 @@ class PatchElement (Clutter.Group):
         pass
 
     def set_size(self, width, height):
-        if width == self.width and height == self.height:
+        if (self.width and self.height
+                and abs(width - self.width) < self.TINY_DELTA
+                and abs(height - self.height) < self.TINY_DELTA):
             return
 
         self.width = width
@@ -487,6 +494,9 @@ class PatchElement (Clutter.Group):
         self.obj_name = params.get("name")
         self.no_export = params.get("no_export", False)
         self.is_export = params.get("is_export", False)
+        self.export_offset_x = params.get("export_offset_x", 0)
+        self.export_offset_y = params.get("export_offset_y", 0)
+
         newscope = params.get("scope", "__patch__")
         if (not self.scope) or newscope != self.scope:
             self.scope = newscope
@@ -534,7 +544,9 @@ class PatchElement (Clutter.Group):
 
     def move_to_layer(self, layer):
         layer_child = False
-        if self.layer:
+        if layer and layer == self.layer:
+            return
+        elif self.layer:
             if self.get_parent() == self.layer.group:
                 self.layer.group.remove_actor(self)
                 self.container = None

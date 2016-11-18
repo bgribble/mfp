@@ -312,6 +312,7 @@ class Patch(Processor):
             return True
 
         # create the basic element info
+        self.update_export_bounds()
         Processor.create_gui(self, **kwargs)
 
         if self.gui_params.get("top_level"):
@@ -330,11 +331,9 @@ class Patch(Processor):
                                 "hidden", "recvvia", "recvsignalvia")):
                             MFPApp().gui_command.connect(obj.obj_id, srcport,
                                                          dstobj.obj_id, dstport)
-            self.update_export_bounds()
             MFPApp().gui_command.load_complete()
             MFPApp().gui_command.select(self.obj_id)
         else:
-            self.update_export_bounds()
             self.create_export_gui()
         return True
 
@@ -422,7 +421,7 @@ class Patch(Processor):
             self.gui_params["dsp_context"] = self.context.context_name
             if not MFPApp().no_onload:
                 self.task_nibbler.add_task(
-                    lambda (objects): self._run_onload(objects), False, 
+                    lambda (objects): self._run_onload(objects), False,
                     [obj for obj in self.objects.values()]
                 )
 
@@ -430,7 +429,7 @@ class Patch(Processor):
         from .mfp_app import MFPApp
         for phase in (0,1):
             for obj in objects:
-                try: 
+                try:
                     if obj.do_onload:
                         obj.onload(phase)
                 except Exception as e:
@@ -447,7 +446,7 @@ class Patch(Processor):
         return True
 
     def obj_is_exportable(self, obj):
-        if (obj.gui_params.get('is_export') 
+        if (obj.gui_params.get('is_export')
             or (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
                 and obj.gui_params.get("no_export", False) is not True
                 and "display_type" in obj.gui_params
@@ -462,8 +461,10 @@ class Patch(Processor):
 
         for obj_id, obj in self.objects.items():
             if self.obj_is_exportable(obj):
-                x = obj.gui_params.get("position_x")
-                y = obj.gui_params.get("position_y")
+                x = (obj.gui_params.get("position_x")
+                     - obj.gui_params.get('export_offset_x', 0))
+                y = (obj.gui_params.get("position_y")
+                     - obj.gui_params.get('export_offset_y', 0))
                 w = obj.gui_params.get("width")
                 h = obj.gui_params.get("height")
 
@@ -489,18 +490,16 @@ class Patch(Processor):
         # kludge
         self.gui_params["width"] = max(self.gui_params.get('width'),
                                        self.gui_params.get('export_w') or 0)
-        self.gui_params["height"] = max(self.gui_params.get('height'), 
+        self.gui_params["height"] = max(self.gui_params.get('height'),
                                         (self.gui_params.get('export_h') or 0) + 20)
 
     def create_export_gui(self):
         from .mfp_app import MFPApp
         # non-toplevel Patch means show the Export UI layer only
         MFPApp().gui_command.load_start()
-        self.update_export_bounds()
         for oid, obj in self.objects.items():
             if self.obj_is_exportable(obj):
                 obj.create_gui(is_export=True)
-        MFPApp().gui_command.configure(self.obj_id, self.gui_params)
         MFPApp().gui_command.load_complete()
 
     def delete(self):
