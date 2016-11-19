@@ -71,7 +71,6 @@ class Send (Processor):
                 if objid != self.dest_obj.obj_id:
                     pruned.append([objid, port])
             conns[0] = pruned
-            
         return prms
 
     def connect(self, outlet, target, inlet, show_gui=True):
@@ -288,7 +287,8 @@ class Recv (Processor):
 
     def _wait_connect(self):
         def recv_recheck():
-            return self._connect(self.src_name, self.src_outlet, False)
+            conn = self._connect(self.src_name, self.src_outlet, False)
+            return conn
         Recv.task_nibbler.add_task(recv_recheck, True)
 
     def _connect(self, src_name, src_outlet, wait=True):
@@ -297,10 +297,11 @@ class Recv (Processor):
             self.src_obj = src_obj
             self.src_obj.connect(self.src_outlet, self, 0, False)
             return True 
-        else: 
-            if wait:
-                self._wait_connect()
-            return False 
+        elif wait:
+            self._wait_connect()
+
+        parent = self.patch.name if self.patch else '(top)'
+        return False 
 
     def trigger(self):
         if self.inlets[1] is not Uninit:

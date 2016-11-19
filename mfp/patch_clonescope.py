@@ -149,5 +149,11 @@ def clonescope(self, scopename, num_copies, **kwargs):
     if self.gui_created:
         MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
+    if not MFPApp().no_onload:
+        self.task_nibbler.add_task(
+            lambda (objects): self._run_onload(objects), False,
+            [obj for obj in all_clones]
+        )
+
     for obj in need_gui:
         obj.create_gui()

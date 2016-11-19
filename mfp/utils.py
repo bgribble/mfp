@@ -10,6 +10,7 @@ import cProfile
 from threading import Thread, Lock, Condition
 import time
 from mfp import log
+from datetime import datetime, timedelta
 
 def homepath(fn):
     import os.path
@@ -203,6 +204,7 @@ class TaskNibbler (QuittableThread):
         self.lock = Lock()
         self.cv = Condition(self.lock)
         self.queue = []
+        self.failed = []
         QuittableThread.__init__(self)
         self.start()
 
@@ -213,21 +215,34 @@ class TaskNibbler (QuittableThread):
         while not self.join_req:
             with self.lock:
                 self.cv.wait(0.25)
+                work = []
                 if self.queue:
-                    work = self.queue
+                    work.extend(self.queue)
                     self.queue = []
-                    retry = []
-                else:
-                    continue
 
+                if self.failed:
+                    toonew = []
+                    newest = datetime.utcnow() - timedelta(milliseconds=250)
+                    for jobs, timestamp in self.failed:
+                        if timestamp < newest:
+                            work.extend(jobs)
+                        else:
+                            toonew.append((jobs, timestamp))
+                    self.failed = toonew
+            retry = []
             for unit, retry_if_fail, data in work:
-                done = unit(*data)
+                try:
+                    done = unit(*data)
+                except Exception as e:
+                    log.debug("Exception while running", unit)
+                    log.debug_traceback()
+
                 if not done and retry_if_fail:
                     retry.append((unit, retry_if_fail, data))
 
             if retry:
                 with self.lock:
-                    self.queue.extend(retry)
+                    self.failed.append((retry, datetime.utcnow()))
 
     def add_task(self, task, retry, *data):
         with self.lock:
