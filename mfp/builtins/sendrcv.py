@@ -300,7 +300,6 @@ class Recv (Processor):
         elif wait:
             self._wait_connect()
 
-        parent = self.patch.name if self.patch else '(top)'
         return False 
 
     def trigger(self):
@@ -368,6 +367,16 @@ class RecvSignal (Recv):
         if len(initargs):
             self._connect(self.src_name, self.src_outlet)
 
+    def _connect(self, src_name, src_outlet, wait=True):
+        src_obj = MFPApp().resolve(src_name, self, True)
+        if src_obj and src_obj.dsp_obj and self.dsp_obj:
+            self.src_obj = src_obj
+            self.src_obj.connect(self.src_outlet, self, 0, False)
+            return True 
+        elif wait:
+            self._wait_connect()
+
+        return False 
 def register():
     MFPApp().register("send", Send)
     MFPApp().register("recv", Recv)
