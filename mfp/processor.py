@@ -554,9 +554,14 @@ class Processor (object):
                             type(target), target.name,
                             inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
 
-        existing = self.connections_out[outlet]
-        if (target, inlet) not in existing:
-            existing.append((target, inlet))
+        try:
+            existing = self.connections_out[outlet]
+            if (target, inlet) not in existing:
+                existing.append((target, inlet))
+        except Exception as e:
+            # this can happen normally in a creation race, don't
+            # flag it (Patch.connect wil retry)
+            return False
 
         existing = target.connections_in[inlet]
         if (self, outlet) not in existing:

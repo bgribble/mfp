@@ -230,15 +230,22 @@ class TaskNibbler (QuittableThread):
                             toonew.append((jobs, timestamp))
                     self.failed = toonew
             retry = []
-            for unit, retry_if_fail, data in work:
+            for unit, retry_count, data in work:
                 try:
                     done = unit(*data)
                 except Exception as e:
                     log.debug("Exception while running", unit)
                     log.debug_traceback()
 
-                if not done and retry_if_fail:
-                    retry.append((unit, retry_if_fail, data))
+                if not done and retry_count:
+                    if isinstance(retry_count, int):
+                        if retry_count > 1:
+                            log.debug("Retrying counted... %s left for %s"
+                                      % (retry_count, unit))
+                            retry_count -= 1
+                        else:
+                            retry_count = False
+                    retry.append((unit, retry_count, data))
 
             if retry:
                 with self.lock:
