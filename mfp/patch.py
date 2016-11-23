@@ -261,10 +261,7 @@ class Patch(Processor):
 
     def connect(self, outlet, target, inlet, show_gui=True):
         def _patch_connect_retry(args):
-            log.debug("Patch.connect retrying: %s in %s"
-                      % (args, self.connections_out))
             rv = Processor.connect(*args)
-            log.debug("Patch.connect got", rv)
             return rv
 
         # we may have to retry this if some outlets are made in

@@ -238,10 +238,8 @@ class TaskNibbler (QuittableThread):
                     log.debug_traceback()
 
                 if not done and retry_count:
-                    if isinstance(retry_count, int):
+                    if isinstance(retry_count, (int, float)):
                         if retry_count > 1:
-                            log.debug("Retrying counted... %s left for %s"
-                                      % (retry_count, unit))
                             retry_count -= 1
                         else:
                             retry_count = False

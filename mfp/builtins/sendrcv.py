@@ -82,7 +82,7 @@ class Send (Processor):
     def _wait_connect(self):
         def send_recheck():
             return self._connect(self.dest_name, self.dest_inlet, False)
-        Send.task_nibbler.add_task(send_recheck, True)
+        Send.task_nibbler.add_task(send_recheck, 20)
 
     def _connect(self, dest_name, dest_inlet, wait=True):
         # short-circuit if already conected 
@@ -289,7 +289,7 @@ class Recv (Processor):
         def recv_recheck():
             conn = self._connect(self.src_name, self.src_outlet, False)
             return conn
-        Recv.task_nibbler.add_task(recv_recheck, True)
+        Recv.task_nibbler.add_task(recv_recheck, 20)
 
     def _connect(self, src_name, src_outlet, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)
