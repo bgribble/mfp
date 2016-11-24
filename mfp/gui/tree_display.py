@@ -8,6 +8,7 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Gtk, GObject
+from mfp import log
 
 class TreeDisplay (object): 
     def __init__(self, treeview, multisel, *columns):
@@ -163,6 +164,7 @@ class TreeDisplay (object):
         iter = self.treestore.append(piter)
         self.treestore.set_value(iter, 0, obj)
         self.object_parents[obj] = parent 
+        self._update_paths()
         if update:
             self.refresh() 
             self.treeview.expand_all()

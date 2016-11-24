@@ -6,6 +6,7 @@ from .patch_window import PatchWindow
 from .patch_element import PatchElement 
 from .patch_info import PatchInfo 
 from .layer import Layer 
+from mfp import log
 
 @extends(PatchWindow)
 def init_object_view(self):
@@ -48,11 +49,16 @@ def init_object_view(self):
         elif isinstance(obj, tuple):
             scope = obj[0]
             patch = obj[1] 
-            for l in patch.layers:
-                if l.scope == scope:
-                    self.layer_select(l)
-                    return 
-            self.layer_select(patch.layers[0])
+            if isinstance(patch, PatchInfo):
+                for l in patch.layers:
+                    if l.scope == scope:
+                        self.layer_select(l)
+                        return 
+                self.layer_select(patch.layers[0])
+            else:
+                log.debug("[obj_selected] Got tuple", obj)
+                self.layer_select(patch.layer)
+
 
     obj_cols = [ ("Name", get_obj_name, True, obj_name_edited, True) ] 
     object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
