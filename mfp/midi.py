@@ -13,8 +13,9 @@ from . import appinfo
 
 from . import log
 from .utils import isiterable 
+from .rpc.request import ext_encode
 
-
+@ext_encode
 class SeqEvent(object):
     def __init__(self, etype, flags, tag, queue, timestamp, src, dst, data):
         self.etype = etype
@@ -46,6 +47,7 @@ def mk_raw(event, port=0):
     return tuple(raw) 
 
 
+@ext_encode
 class MidiEvent (object): 
     def seq_type(self): 
         if self.seqevent is not None:
@@ -60,6 +62,7 @@ class MidiEvent (object):
             return () 
 
 
+@ext_encode
 class MidiUndef (MidiEvent):
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
@@ -72,6 +75,7 @@ class MidiUndef (MidiEvent):
         return "<MidiUndef %s>" % self.seqevent
 
 
+@ext_encode
 class Note (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTE
 
@@ -79,6 +83,7 @@ class Note (MidiEvent):
         return (self.channel, self.key, self.velocity, 0, 0)
 
 
+@ext_encode
 class NoteOn (Note):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTEON
 
@@ -100,6 +105,7 @@ class NoteOn (Note):
         return "<NoteOn %s %s %s>" % (self.channel, self.key, self.velocity)
 
 
+@ext_encode
 class NoteOff (Note):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTEOFF
 
@@ -123,6 +129,7 @@ class NoteOff (Note):
     def __repr__(self):
         return "<NoteOff %s %s %s>" % (self.channel, self.key, self.velocity)
 
+@ext_encode
 class NotePress (Note): 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
@@ -145,6 +152,7 @@ class NotePress (Note):
     def __repr__(self):
         return "<NotePress %s %s %s>" % (self.channel, self.key, self.velocity)
 
+@ext_encode
 class MidiPgmChange (MidiEvent): 
     alsa_type = alsaseq.SND_SEQ_EVENT_PGMCHANGE 
 
@@ -167,6 +175,7 @@ class MidiPgmChange (MidiEvent):
         return "<MidiPgmChange %s %s>" % (self.channel, self.program)
 
 
+@ext_encode
 class MidiCC (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_CONTROLLER 
 
@@ -190,6 +199,7 @@ class MidiCC (MidiEvent):
     def __repr__(self):
         return "<MidiCC %s %s %s>" % (self.channel, self.controller, self.value)
 
+@ext_encode
 class MidiPitchbend (MidiCC):
     alsa_type = alsaseq.SND_SEQ_EVENT_PITCHBEND
 

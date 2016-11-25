@@ -6,6 +6,17 @@ Request object for use with RequestPipe
 
 import simplejson as json
 
+
+def _dumb_load(ctor, values):
+    initobj = ctor()
+    for attr, value in values.items():
+        setattr(initobj, attr, value)
+    return initobj
+
+def ext_encode (klass):
+    ExtendedEncoder.TYPES['__' + klass.__name__ + '__'] = klass
+    return klass
+
 class ExtendedEncoder (json.JSONEncoder):
     from ..bang import BangType, UninitType
     from ..gui.colordb import RGBAColor 
@@ -38,7 +49,10 @@ def extended_decoder_hook (saved):
         else: 
             ctor = ExtendedEncoder.TYPES.get(tname)
             if ctor:
-                return ctor.load(tdict)
+                if hasattr(ctor, 'load'):
+                    return ctor.load(tdict)
+                else:
+                    return _dumb_load(ctor, tdict)
     return saved 
 
 
