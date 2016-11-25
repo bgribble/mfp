@@ -96,7 +96,8 @@ def main():
     description = mfp_banner % version() 
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description=description, epilog=mfp_footer)
+                                     description=description, epilog=mfp_footer,
+                                     add_help=False)
     
     parser.add_argument("patchfile", nargs='*', 
                         help="Patch files to load")
@@ -132,6 +133,8 @@ def main():
                         help="Do not restart DSP engine if it crashes")
     parser.add_argument("--no-onload", action="store_true", 
                         help="Do not run onload/loadbang functions")
+    parser.add_argument("-h", "--help", action="store_true", 
+                        help="Display help and exit") 
     parser.add_argument("--help-builtins", action="store_true", 
                         help="Display help on builtin objects and exit") 
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
@@ -158,8 +161,9 @@ def main():
     app = MFPApp()
    
     # configure some things from command line
-    app.no_gui = args.get("no_gui") or args.get("help_builtins")
-    app.no_dsp = args.get("no_dsp") or args.get("help_builtins")
+    app.no_gui = args.get("no_gui") or args.get("help_builtins") or args.get("help")
+    app.no_dsp = args.get("no_dsp") or args.get("help_builtins") or args.get("help")
+
     app.no_default = args.get("no_default")
     app.no_restart = args.get("no_restart")
     app.no_onload = args.get("no_onload")
@@ -239,7 +243,14 @@ def main():
         import yappi
         yappi.start()
 
-    if args.get("help_builtins"):
+    if args.get("help"):
+        log.log_debug = None
+        log.log_file = None 
+        log.debug("printing help and exiting")
+        parser.print_help()
+        log.debug("done with print_help(), quitting")
+        app.finish()
+    elif args.get("help_builtins"):
         log.log_debug = None
         log.log_file = None 
         app.open_file(None)
