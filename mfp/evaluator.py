@@ -13,7 +13,7 @@ class LazyExpr(object):
         self.thunk = thunk 
 
     def call(self): 
-        return self.thunk() 
+        return self.thunk()
 
 class Evaluator (object):
     global_names = {}

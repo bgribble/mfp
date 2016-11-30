@@ -16,7 +16,7 @@ from .evaluator import Evaluator, LazyExpr
 from .utils import QuittableThread 
 from .bang import Bang, Uninit
 from .method import MethodCall
-from .midi import NoteOn, NoteOff, NotePress, MidiCC, MidiPgmChange
+from .midi import NoteOn, NoteOff, NotePress, MidiCC, MidiUndef, MidiPitchbend, MidiPgmChange
 
 from .mfp_app import MFPApp, StartupError 
 
@@ -50,6 +50,8 @@ def add_evaluator_defaults():
     Evaluator.bind_global("NotePress", NotePress)
     Evaluator.bind_global("MidiCC", MidiCC)
     Evaluator.bind_global("MidiPgmChange", MidiPgmChange)
+    Evaluator.bind_global("MidiPitchbend", MidiPitchbend)
+    Evaluator.bind_global("MidiUndef", MidiUndef)
 
     Evaluator.bind_global("builtins", builtins)
     Evaluator.bind_global("app", MFPApp())

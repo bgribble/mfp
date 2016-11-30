@@ -18,11 +18,10 @@ process_snap(mfp_processor * proc)
     mfp_sample * sample = proc->inlet_buf[0]->data;
     int scount = 0;
 
-
     /* iterate */ 
     for (int scount = 0; scount < proc->inlet_buf[0]->blocksize; scount++) {
         if(pdata->triggered == 1) {
-            mfp_dsp_send_response_float(proc, 0, proc->inlet_buf[0]->data[scount]);
+            mfp_dsp_send_response_float(proc, 0, sample[scount]);
             pdata->triggered = 0;
             if (pdata->retrigger > 0) {
                 pdata->retrigger_count = pdata->retrigger;

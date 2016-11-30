@@ -5,15 +5,11 @@ an emphasis on music and real-time audio synthesis and analysis.  It's
 very much inspired by Miller Puckette's Pure Data (pd) and MAX/MSP,
 with a bit of LabView and TouchOSC for good measure.  
 
-MFP is in its early development phases.  Large pieces of core functionality
-are not implemented yet, including:  undo, JACK MIDI, i18n, audio file
-reading, etc etc etc.
-
-What IS there is the basic program window and patch editor, enough
-message and DSP processors to build some useful patches, a model for how
-a mostly-keyboard-controlled GUI app will work, and the infrastructure
-of the 3 separate processes (main, GUI, and DSP) that work together to
-make MFP happen. 
+Development of MFP has been ambling along at a part-time pace for
+several years now.  It's by no means "1.0" but definitely there's
+enough there that I use it in my own music-making.  As of now
+it's pretty much a solo project but I welcome any feedback,
+questions, or pull requests. 
 
 ### BUILDING
 
@@ -68,7 +64,8 @@ Ticket | Description
  #165 | Markup in comments does not render when patch is loaded.  Workaround: Click in another window. 
  #88 | Patch loading is slow.  Workaround: be patient.  
  #217 | MFP must be stopped with `kill -9` in (hopefully rare) error conditions. Workaround: ^Z to stop the process from the shell, then `kill -9 %1` 
- #204 | Logging is broken when loaded as LV2 plugin 98 | Selecting connections with click or box doesn't work well.  Workaround: Zoom in and click right on the line. 
+ #204 | Logging is broken when loaded as LV2 plugin 
+ #98 | Selecting connections with click or box doesn't work well.  Workaround: Zoom in and click right on the line. 
  #212 | Rendering of smooth curves on XY plot shows gaps  
  #220 | 'waf install' can give error messages. Workaround: See the bottom of README.build; possibly no action is required. 
 
@@ -153,6 +150,17 @@ using dynamic connections between objects as well as scope cloning
 roll_test.mfp: Demonstrates the "roll" mode of the XY scatter
 plotter, a smooth-scrolling capture mode useful for monitoring values
 that are changing slowly over time
+
+**My patches:** There is a growing collection of patches that I
+use in the repository bgribble/mfp-patches including: 
+
+ * 8 bus, 4 aux audio mixer
+ * Step sequencer 
+ * Wrappers around LADSPA reverb plugins
+ * Simple delay
+ * Utility for communicatng with the KMI
+   [QuNexus](https://www.keithmcmillen.com/products/qunexus/)
+   keyboard controller
 
 ### SAVING FILES
 
