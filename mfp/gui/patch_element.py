@@ -96,6 +96,12 @@ class PatchElement (Clutter.Group):
     def __repr__(self):
         return "<%s %s>" % (type(self).__name__, id(self))
 
+    def corners(self):
+        return [(self.position_x, self.position_y),
+                (self.position_x + self.width, self.position_y),
+                (self.position_x + self.width, self.position_y + self.height),
+                (self.position_x, self.position_y + self.height)]
+
     @property
     def layername(self):
         return self.layer.name

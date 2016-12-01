@@ -12,6 +12,7 @@ from .patch_element import PatchElement
 from .patch_info import PatchInfo
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
+from .collision import collision_check
 from ..gui_main import MFPGUI
 from mfp import log 
 from gi.repository import Gtk, Gdk
@@ -233,22 +234,6 @@ def move_view(self, dx, dy):
 
 @extends(PatchWindow)
 def show_selection_box(self, x0, y0, x1, y1): 
-    def boxes_overlap(b1, b2): 
-        if ((b1[0] >= b2[0]) and (b1[0] <= b2[2])
-            or (b2[0] >= b1[0]) and (b2[0] <= b1[2])
-            or (b1[2] >= b2[0]) and (b1[2] <= b2[2])
-            or (b2[2] >= b1[0]) and (b2[2] <= b1[2])):
-            pass
-        else:
-            return False 
-        if ((b1[1] >= b2[1]) and (b1[1] <= b2[3])
-            or (b2[1] >= b1[1]) and (b2[1] <= b1[3])
-            or (b1[3] >= b2[1]) and (b1[3] <= b2[3])
-            or (b2[3] >= b1[1]) and (b2[3] <= b1[3])):
-            return True 
-        else:
-            return False 
-
     if x0 > x1:
         t = x1; x1 = x0; x0 = t
 
@@ -272,12 +257,13 @@ def show_selection_box(self, x0, y0, x1, y1):
     self.selection_box.show()
 
     enclosed = [] 
+    selection_corners = [(x0, y0), (x1, y0), 
+                         (x0, y1), (x1, y1)]
     for obj in self.selected_layer.objects: 
         if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
             continue
-        if boxes_overlap((x0, y0, x1, y1),
-                         (obj.position_x, obj.position_y, 
-                          obj.position_x + obj.width, obj.position_y + obj.height)):
+
+        if collision_check(selection_corners, obj.corners()):
             enclosed.append(obj)
 
     return enclosed 
