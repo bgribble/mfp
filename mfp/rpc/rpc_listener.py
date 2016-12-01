@@ -1,6 +1,7 @@
 import socket 
 import sys
 import os 
+import select
 
 from mfp.utils import QuittableThread 
 from request import Request 
@@ -108,7 +109,12 @@ class RPCExecRemote (QuittableThread):
         while not self.join_req: 
             try: 
                 if self.process: 
-                    ll = self.process.stdout.readline()
+                    fileobj = self.process.stdout
+                    r, w, e = select.select([fileobj], [], [], 0.25)
+                    if fileobj in r:
+                        ll = fileobj.readline()
+                    else: 
+                        continue
                 else: 
                     ll = None 
 
@@ -138,8 +144,7 @@ class RPCExecRemote (QuittableThread):
                         log.debug("%s:" % self.log_module, ll)
 
             except Exception, e: 
-                print "RPCExecRemote caught error:", e 
-                log.debug("RPCExecRemote: exiting")
+                log.debug("RPCExecRemote: exiting with error", e)
                 self.join_req = True 
 
         if self.process:
