@@ -248,7 +248,7 @@ class GlobalMode (InputMode):
 
         if self.selection_drag_started:
             for obj in self.window.selected:
-                if obj.editable:
+                if obj.editable and obj.display_type != 'connection':
                     obj.drag(dx, dy)
             return True
 

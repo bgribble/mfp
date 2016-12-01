@@ -174,7 +174,7 @@ def select_mru(self):
 @extends(PatchWindow)
 def move_selected(self, dx, dy):
     for obj in self.selected:
-        if obj.editable:
+        if obj.editable and obj.display_type != 'connection':
             obj.move(max(0, obj.position_x + dx * self.zoom),
                      max(0, obj.position_y + dy * self.zoom))
             if obj.obj_id is not None:
