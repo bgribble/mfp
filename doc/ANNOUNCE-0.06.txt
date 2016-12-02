@@ -1,9 +1,9 @@
-
 MFP -- Music For Programmers 
 Release 0.06
 
 I'm pleased to announce a new version of MFP, mostly consisting
-of bug fixes and improvements.  
+of bug fixes and improvements.  It's been about 2 years since the
+0.05 release, but lately I have been pretty energized! 
 
 A summary of changes is below.  Please see the GitHub issue tracker
 for complete details: 
@@ -27,7 +27,13 @@ Significant changes since release v0.05
 
   * New demo patches and fixes to old ones 
 
-  * Improvements to stability and error handling
+  * Improvements to performance, stability and error handling
+
+  * Left-side tabs and bottom-edge console/log can be toggled
+    with `\'` and `~` respectively
+
+  * Better default color selections, and the ability to set 
+    per-object style (colors, fonts) in your patches
 
   * Many other bugfixes and improvements.  The complete list of
     tickets closed since the 0.05 release is in the 0.06
