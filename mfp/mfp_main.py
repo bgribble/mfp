@@ -2,7 +2,7 @@
 '''
 main.py: main routine for mfp
 
-Copyright (c) 2010-2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2010-2016 Bill Gribble <grib@billgribble.com>
 '''
 
 import math 
@@ -65,7 +65,7 @@ To report bugs or download source:
     
     http://github.com/bgribble/mfp 
 
-Copyright (c) 2009-2014 Bill Gribble <grib@billgribble.com> 
+Copyright (c) 2009-2016 Bill Gribble <grib@billgribble.com> 
 
 MFP is free software, and you are welcome to redistribute it 
 under certain conditions.  See the file COPYING for details.
@@ -100,8 +100,7 @@ def main():
     description = mfp_banner % version() 
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description=description, epilog=mfp_footer,
-                                     add_help=False)
+                                     description=description, epilog=mfp_footer)
     
     parser.add_argument("patchfile", nargs='*', 
                         help="Patch files to load")
@@ -137,8 +136,6 @@ def main():
                         help="Do not restart DSP engine if it crashes")
     parser.add_argument("--no-onload", action="store_true", 
                         help="Do not run onload/loadbang functions")
-    parser.add_argument("-h", "--help", action="store_true", 
-                        help="Display help and exit") 
     parser.add_argument("--help-builtins", action="store_true", 
                         help="Display help on builtin objects and exit") 
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
