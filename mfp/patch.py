@@ -23,7 +23,7 @@ class Patch(Processor):
     display_type = "patch"
     default_context = None
 
-    task_nibbler = TaskNibbler()
+    task_nibbler = None
 
     def __init__(self, init_type, init_args, patch, scope, name, context=None):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
@@ -34,6 +34,9 @@ class Patch(Processor):
                 self.context = patch.context
         else:
             self.context = context
+
+        if not Patch.task_nibbler:
+            Patch.task_nibbler = TaskNibbler()
 
         self.file_origin = None
 

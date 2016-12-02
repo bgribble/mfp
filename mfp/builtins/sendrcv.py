@@ -19,9 +19,13 @@ class Send (Processor):
 
     bus_type = "bus"
 
-    task_nibbler = TaskNibbler()
+    task_nibbler = None
 
     def __init__(self, init_type, init_args, patch, scope, name):
+
+        if not Send.task_nibbler:
+            Send.task_nibbler = TaskNibbler()
+
         self.dest_name = None
         self.dest_inlet = 0
         self.dest_obj = None
@@ -238,9 +242,12 @@ class Recv (Processor):
     doc_tooltip_inlet = [ "Passthru input" ]
     doc_tooltip_outlet = [ "Passthru output" ]
 
-    task_nibbler = TaskNibbler()
+    task_nibbler = None
 
     def __init__(self, init_type, init_args, patch, scope, name):
+        if not Recv.task_nibbler:
+            Recv.task_nibbler = TaskNibbler()
+
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
