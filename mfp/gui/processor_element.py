@@ -119,7 +119,8 @@ class ProcessorElement (PatchElement):
 
     def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
-        self.add_actor(self.label)
+        if not self.show_label:
+            self.add_actor(self.label)
         self.update()
 
     def label_edit_finish(self, widget, text=None):
