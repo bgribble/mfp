@@ -146,8 +146,6 @@ def clonescope(self, scopename, num_copies, **kwargs):
             srcobj.gui_params["value"] = srcobj.value
 
     self.update_export_bounds()
-    if self.gui_created:
-        MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     if not MFPApp().no_onload:
         self.task_nibbler.add_task(

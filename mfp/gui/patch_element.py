@@ -274,14 +274,17 @@ class PatchElement (Clutter.Group):
 
         return self.obj_id
 
+    def synced_params(self):
+        prms = {}
+        for k in self.param_list:
+            prms[k] = getattr(self, k)
+        return prms
+
     def send_params(self, **extras):
         if self.obj_id is None:
             return
 
-        prms = {}
-        for k in self.param_list:
-            prms[k] = getattr(self, k)
-
+        prms = self.synced_params()
         for k, v in extras.items():
             prms[k] = v
 

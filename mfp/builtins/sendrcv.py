@@ -128,9 +128,7 @@ class Send (Processor):
             log.warning("[send] can't find dest object and not still looking")
 
         self.init_args = '"%s",%s' % (self.dest_name, self.dest_inlet) 
-        self.gui_params["label_text"] = self._mkdispname()
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        self.conf(label_text=self._mkdispname())
 
         if self.inlets[0] is not Uninit:
             self.trigger()
@@ -323,11 +321,8 @@ class Recv (Processor):
                 self.init_args = '"%s",%s' % (name, port)
                 self.src_name = name
                 self.src_outlet = port
-                self.gui_params["label_text"] = self._mkdispname()
-
+                self.conf(label_text = self._mkdispname())
                 self._connect(self.src_name, self.src_outlet)
-                if self.gui_created:
-                    MFPApp().gui_command.configure(self.obj_id, self.gui_params)
             self.inlets[1] = Uninit
 
         if self.src_name and self.src_obj is None:

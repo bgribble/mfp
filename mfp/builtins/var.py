@@ -75,17 +75,8 @@ class Var (Processor):
             self.inlets[0] = Uninit
         if (do_update and self.gui_params.get("update_required")
             and ('value' not in self.gui_params or self.gui_params['value'] != self.value)):
-            self.gui_params['value'] = self.value
-
-            if self.gui_created:
-                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+            self.conf(value=self.value)
         return True
-
-    def conf(self, **kwargs):
-        for k, v in kwargs.items():
-            self.gui_params[k] = v
-            if self.gui_created and self.gui_params.get("update_required"):
-                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def save(self):
         base_dict = Processor.save(self)
@@ -134,8 +125,7 @@ class Message (Var):
 
         if do_update and self.gui_params.get("update_required"):
             self.gui_params['value'] = self.value
-            if self.gui_created:
-                MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+            self.conf(value=self.value)
 
     def save(self):
         return Processor.save(self)

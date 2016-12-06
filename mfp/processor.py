@@ -242,11 +242,8 @@ class Processor (object):
             self.name = name
             self.patch = None
 
-        self.gui_params["name"] = self.name
-        self.gui_params["scope"] = self.scope.name
+        self.conf(name=self.name, scope=self.scope.name)
         self.osc_init()
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
         return self.name
 
     def rename(self, new_name):
@@ -417,11 +414,7 @@ class Processor (object):
         else:
             log.warning("[dsp_init] No DSP context in %s (%s)",
                         self.name, proc_name)
-
-        self.gui_params['dsp_inlets'] = self.dsp_inlets
-        self.gui_params['dsp_outlets'] = self.dsp_outlets
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 
     def dsp_inlet(self, inlet):
         return (self.dsp_obj, self.dsp_inlets.index(inlet))
@@ -512,11 +505,7 @@ class Processor (object):
             self.connections_out[outlets:] = []
         self.outlet_order = range(len(self.outlets))
 
-        self.gui_params['num_inlets'] = inlets
-        self.gui_params['num_outlets'] = outlets
-
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        self.conf(num_inlets=inlets, num_outlets=outlets)
 
     def connect(self, outlet, target, inlet, show_gui=True):
         from .mfp_app import MFPApp
@@ -713,8 +702,6 @@ class Processor (object):
         self.error_info = {}
         self.count_trigger = 0
         self.set_tag("errorcount", self.count_errors)
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
     def error(self, msg=None, tb=None):
         from .mfp_app import MFPApp
@@ -764,20 +751,16 @@ class Processor (object):
         for k, v in kwargs.items():
             self.gui_params[k] = v
         if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+            MFPApp().gui_command.configure(self.obj_id, **kwargs)
 
     def set_tag(self, tag, value):
-        from .mfp_app import MFPApp
         self.tags[tag] = value
-        self.gui_params["tags"] = self.tags
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        self.conf(tags=self.tags)
 
     def set_style(self, tag, value):
-        from .mfp_app import MFPApp
-        self.gui_params["style"][tag] = value
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        oldstyle = self.gui_params.get('style', {})
+        oldstyle[tag] = value
+        self.conf(style=oldstyle)
 
     def mark_ready(self):
         self.status = Processor.READY

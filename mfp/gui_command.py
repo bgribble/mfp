@@ -60,15 +60,21 @@ class GUICommand (RPCWrapper):
         obj.command(action, args)
 
     @rpcwrap
-    def configure(self, obj_id, params):
+    def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._configure(obj_id, params))
+        MFPGUI().clutter_do(lambda: self._configure(obj_id, params, kwparams))
         return True
 
-    def _configure(self, obj_id, params):
+    def _configure(self, obj_id, params, kwparams):
         from .gui_main import MFPGUI
         obj = MFPGUI().recall(obj_id)
-        obj.configure(params)
+        if params is not None:
+            obj.configure(params)
+        else:
+            prms = obj.synced_params() 
+            for k, v in kwparams.items():
+                prms[k] = v
+            obj.configure(prms)
 
     @rpcwrap
     def create(self, obj_type, obj_args, obj_id, parent_id, params):

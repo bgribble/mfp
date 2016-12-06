@@ -455,9 +455,6 @@ class Patch(Processor):
 
         self.update_export_bounds()
 
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
-
         if MFPApp().gui_command:
             MFPApp().gui_command.load_complete()
         return True
@@ -494,21 +491,18 @@ class Patch(Processor):
                 if max_y is None or (y+h > max_y):
                     max_y = y+h
 
-        if None in (min_x, min_y, max_x, max_y):
-            for p in ("export_x", "export_y", "export_w", "export_h"):
-                if p in self.gui_params:
-                    del self.gui_params[p]
-        else:
-            self.gui_params["export_x"] = min_x
-            self.gui_params["export_y"] = min_y
-            self.gui_params["export_w"] = max_x - min_x + 2
-            self.gui_params["export_h"] = max_y - min_y + 2
+        x = y = w = h = None
+        if None not in (min_x, min_y, max_x, max_y):
+            x = min_x
+            y = min_y
+            w = max_x - min_x + 2
+            h = max_y - min_y + 2
 
-        # kludge
-        self.gui_params["width"] = max(self.gui_params.get('width'),
-                                       self.gui_params.get('export_w') or 0)
-        self.gui_params["height"] = max(self.gui_params.get('height'),
-                                        (self.gui_params.get('export_h') or 0) + 20)
+        self.conf(export_x=x, export_y=y, export_w=w, export_h=h,
+                  width=max(self.gui_params.get('width'),
+                            self.gui_params.get('export_w') or 0),
+                  height=max(self.gui_params.get('height'),
+                             (self.gui_params.get('export_h') or 0) + 20))
 
     def create_export_gui(self):
         from .mfp_app import MFPApp

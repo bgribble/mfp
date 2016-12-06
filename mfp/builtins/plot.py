@@ -66,11 +66,6 @@ class Scope (Processor):
     def grab(self):
         MFPApp().gui_command.command(self.obj_id, "grab", None)
 
-    def conf(self, **kwargs):
-        for k, v in kwargs.items():
-            self.gui_params[k] = v
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
 
 class Scatter (Processor):
     doc_tooltip_obj = "Scatter plot for non-signal data points"
@@ -164,13 +159,12 @@ class Scatter (Processor):
     def style(self, **kwargs):
         '''Set style parameters for a curve'''
         inlet = str(kwargs.get('inlet', 0))
-        style = self.gui_params.setdefault('style', {})
+        style = self.gui_params.get('style', {})
         instyle = style.setdefault(inlet, {})
         for k, v in kwargs.items():
             if k != 'inlet':
                 instyle[k] = v
-        if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, self.gui_params)
+        self.conf(style=style)
         return True
 
     def bounds(self, x_min, y_min, x_max, y_max):

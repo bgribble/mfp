@@ -35,9 +35,12 @@ class PatchInfo (object):
         # FIXME - needs scopes for objects in scopes-not-default-for-layers
         return scope_name in [l.scope for l in self.layers]
 
-    def send_params(self, **extras):
-        prms = dict(display_type=self.display_type, name=self.obj_name,
+    def synced_params(self):
+        return dict(display_type=self.display_type, name=self.obj_name,
                     layers=[(l.name, l.scope) for l in self.layers])
+
+    def send_params(self, **extras):
+        prms = self.synced_params()
         for k, v in extras.items():
             prms[k] = v
         if self.obj_id is not None:
