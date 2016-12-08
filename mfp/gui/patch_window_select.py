@@ -262,8 +262,9 @@ def show_selection_box(self, x0, y0, x1, y1):
     for obj in self.selected_layer.objects: 
         if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
             continue
+        corners = obj.corners()
 
-        if collision_check(selection_corners, obj.corners()):
+        if corners and collision_check(selection_corners, corners):
             enclosed.append(obj)
 
     return enclosed 

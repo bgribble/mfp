@@ -68,9 +68,12 @@ class ConnectionElement(PatchElement):
         pass 
 
     def corners(self):
-        p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
-        p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
-        return [p1, p2]
+        if self.obj_1 and self.obj_2:
+            p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
+            p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
+            return [p1, p2]
+        else:
+            return None
 
     def draw(self):
         if self.obj_1 is None or self.obj_2 is None:
