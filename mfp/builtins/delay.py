@@ -18,6 +18,8 @@ class DelaySig (Processor):
     doc_tooltip_outlet = ["Signal output" ]
     dsp_type = "del~"
 
+    DEFAULT_BUFSIZE=1000
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
@@ -27,9 +29,14 @@ class DelaySig (Processor):
         else: 
             size = 0
 
+        if len(initargs) > 1:
+            bufsize = initargs[1]
+        else:
+            bufsize = max(size, self.DEFAULT_BUFSIZE)
+
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
-        self.dsp_init(self.dsp_type, bufsize=size, _sig_1=size)
+        self.dsp_init(self.dsp_type, bufsize=bufsize, _sig_1=size)
 
     def trigger(self):
         if isinstance(self.inlets[0], dict):
