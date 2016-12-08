@@ -597,12 +597,14 @@ class Processor (object):
                 w_target, w_val, w_inlet = work[0]
                 work[:1] = w_target._send(w_val, w_inlet)
         except Exception, e:
-            log.error("%s (%s): send to inlet %d failed: %s" %
-                      (w_target.name, w_target.init_type, inlet, value))
-            log.error("Exception: " + e.message)
             import traceback
             tb = traceback.format_exc()
-            w_target.error(e.message, tb)
+            log.error("%s (%s): send to inlet %d failed: %s" %
+                      (self.name, self.init_type, inlet, value))
+            log.error("Exception: " + e.message)
+            log.debug_traceback()
+            if w_target:
+                w_target.error(e.message, tb)
 
     def _send(self, value, inlet=0):
         if self.paused:
