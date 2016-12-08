@@ -231,10 +231,16 @@ class MFPApp (Singleton):
         self.registry[name] = ctor
 
     def backend_status_cb(self, host, peer_id, status, *args):
+        from .dsp_object import DSPContext
         if status == "manage":
             log.info("New RPC remote connection id=%s" % peer_id)
         elif status == "publish":
             log.info("Published classes", args[0])
+            if "DSPObject" in args[0]:
+                context = DSPContext.lookup(peer_id, 0)
+                context.input_latency, context.output_latency = args[1]
+
+
         elif status == "unmanage":
             log.debug("Got unmanage callback for %s %s" % (host, peer_id))
             dead_patches = [ p for p in self.patches.values()

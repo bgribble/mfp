@@ -336,7 +336,8 @@ class RPCHost (QuittableThread):
             if self.status_cb:
                 cbthread = QuittableThread(target=self.status_cb, 
                                            args=(peer_id, "publish", 
-                                                 req.params.get("classes")))
+                                                 req.params.get("classes"),
+                                                 req.params.get("pubdata")))
                 cbthread.start()
             req.result = (True, None) 
 

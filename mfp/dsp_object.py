@@ -15,6 +15,8 @@ class DSPContext(object):
         self.node_id = node_id
         self.context_id = context_id 
         self.context_name = context_name
+        self.input_latency = 0
+        self.output_latency = 0
 
     @classmethod
     def create(cls, node_id, context_id, context_name):
@@ -25,6 +27,9 @@ class DSPContext(object):
     @classmethod
     def lookup(cls, node_id, context_id):
         return cls.registry.get((node_id, context_id))
+
+    def get_latency(self):
+        return (self.input_latency, self.output_latency)
 
     def __eq__(self, other):
         if isinstance(other, DSPContext):

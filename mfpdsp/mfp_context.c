@@ -8,14 +8,14 @@
 
 int next_context_id = 0;
 
-mfp_context * 
+mfp_context *
 mfp_context_new(int ctxt_type)
 {
     mfp_context * ctxt = g_malloc0(sizeof(mfp_context));
 
     ctxt->id = next_context_id;
     next_context_id ++;
-    ctxt->ctype = ctxt_type; 
+    ctxt->ctype = ctxt_type;
     ctxt->activated = 0;
     ctxt->owner = getpid();
 
@@ -54,7 +54,7 @@ mfp_context_destroy(mfp_context * ctxt)
 }
 
 int
-mfp_context_init(mfp_context * context) 
+mfp_context_init(mfp_context * context)
 {
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
@@ -62,8 +62,13 @@ mfp_context_init(mfp_context * context)
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(request_id);
 
+    char reqbuf[512];
+    snprintf(reqbuf, 511, "{ \"classes\": [\"DSPObject\"], \"pubdata\": [ %f, %f ] }",
+            mfp_in_latency, mfp_out_latency);
+
+
     msgbuf = mfp_comm_get_buffer();
-    request_id = mfp_rpc_request("publish",  "{ \"classes\": [\"DSPObject\"]}", NULL, NULL, msgbuf, &msglen);
+    request_id = mfp_rpc_request("publish", reqbuf, NULL, NULL, msgbuf, &msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(request_id);
     return 0;
@@ -72,8 +77,8 @@ mfp_context_init(mfp_context * context)
 int
 mfp_context_default_io(mfp_context * context, int patch_id)
 {
-    mfp_procinfo * inlet_t; 
-    mfp_procinfo * outlet_t; 
+    mfp_procinfo * inlet_t;
+    mfp_procinfo * outlet_t;
     mfp_processor ** p;
     void * newval;
 

@@ -90,7 +90,6 @@ reorder_cb (void * ctxt_arg)
 
     mfp_out_latency = 1000.0 * maxval / ctxt->samplerate;
 
-    /* mfp_dsp_send_response_float(NULL, 1, 0.0); */
     return 0;
 }
 
