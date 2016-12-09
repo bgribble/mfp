@@ -33,15 +33,15 @@ class SeqEvent(object):
 def mk_raw(event, port=0): 
     raw = [0, 0, 0, 0, (0, 0), (0, port), (0, 0)]
     if event.seqevent is not None:
-        raw[0] = event.seqevent.ev_type 
-        raw[1] = event.seqevent.flags
-        raw[2] = event.seqevent.tag
-        raw[3] = event.seqevent.queue
-        raw[4] = (event.seqevent.timestamp.tv_sec, event.seqevent.timestamp.tv_nsec)
-        raw[5] = (event.seqevent.src.client, event.seqevent.src.port)
-        raw[6] = (event.dest.client, event.dest.port)
+        raw[0] = int(event.seqevent.etype)
+        raw[1] = int(event.seqevent.flags)
+        raw[2] = int(event.seqevent.tag)
+        raw[3] = int(event.seqevent.queue)
+        raw[4] = event.seqevent.timestamp
+        raw[5] = event.seqevent.src
+        raw[6] = event.seqevent.dst
     else: 
-        raw[0] = event.seq_type()
+        raw[0] = int(event.seq_type())
 
     raw.append(event.seq_data())
     return tuple(raw) 
@@ -51,7 +51,7 @@ def mk_raw(event, port=0):
 class MidiEvent (object): 
     def seq_type(self): 
         if self.seqevent is not None:
-            return self.seqevent.ev_type 
+            return self.seqevent.etype 
         else:
             return self.alsa_type
 
@@ -181,9 +181,9 @@ class MidiCC (MidiEvent):
 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
-        self.channel = None
-        self.controller = None
-        self.value = None
+        self.channel = 0
+        self.controller = 0
+        self.value = 0
 
         if self.seqevent is not None:
             self.channel = seqevent.data[0]
@@ -205,10 +205,10 @@ class MidiPitchbend (MidiCC):
 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
-        self.channel = None
-        self.controller = None
-        self.note = None 
-        self.value = None
+        self.channel = 0
+        self.controller = 0
+        self.note = 0
+        self.value = 0
 
         if self.seqevent is not None:
             self.channel = seqevent.data[0]
@@ -444,7 +444,12 @@ class MFPMidiManager(QuittableThread):
         starttime = datetime.now()
 
         raw_tuple = mk_raw(event, port)
-        alsaseq.output(raw_tuple)
+        try:
+            alsaseq.output(raw_tuple)
+        except Exception as e:
+            log.debug("alsaseq: error on output of", raw_tuple, e)
+            log.debug_traceback()
+
         
         elapsed = datetime.now() - starttime
 
