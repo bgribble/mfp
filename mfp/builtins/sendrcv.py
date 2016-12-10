@@ -294,7 +294,7 @@ class Recv (Processor):
         def recv_recheck():
             conn = self._connect(self.src_name, self.src_outlet, False)
             return conn
-        Recv.task_nibbler.add_task(recv_recheck, 20)
+        Recv.task_nibbler.add_task(recv_recheck, 100)
 
     def _connect(self, src_name, src_outlet, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)
@@ -342,6 +342,8 @@ class RecvSignal (Recv):
     doc_tooltip_obj = "Receive signals to the specified name"
     
     def __init__(self, init_type, init_args, patch, scope, name):
+        if not Recv.task_nibbler:
+            Recv.task_nibbler = TaskNibbler()
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 

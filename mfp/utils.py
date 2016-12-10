@@ -242,6 +242,7 @@ class TaskNibbler (QuittableThread):
                         if retry_count > 1:
                             retry_count -= 1
                         else:
+                            log.warning("[TaskNibbler] ran out of retries for", unit, data)
                             retry_count = False
                     retry.append((unit, retry_count, data))
 

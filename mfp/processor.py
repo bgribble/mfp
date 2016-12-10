@@ -509,6 +509,7 @@ class Processor (object):
 
     def connect(self, outlet, target, inlet, show_gui=True):
         from .mfp_app import MFPApp
+        from .patch import Patch
 
         # make sure this is a possibility
         if not isinstance(target, Processor):
@@ -522,13 +523,28 @@ class Processor (object):
             return False
 
         if inlet > len(target.inlets):
-            log.warning("Error: Can't connect to '%s' (obj_id %d) inlet %d (only %d inlets)"
-                        % (target.name, target.obj_id, inlet, len(target.inlets)))
-            return False
+            if isinstance(target, Patch):
+                Patch.task_nibbler.add_task(
+                    lambda (args): Processor.connect(*args), 20, 
+                    [self, outlet, target, inlet, show_gui])
+                log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
+                            % (target.name, target.obj_id, len(target.inlets), inlet))
+                return True
+            else:
+                log.warning("Error: Can't connect to '%s' (obj_id %d) inlet %d (only %d inlets)"
+                            % (target.name, target.obj_id, inlet, len(target.inlets)))
+                return False
 
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             if inlet not in target.dsp_inlets:
+                if isinstance(target, Patch):
+                    Patch.task_nibbler.add_task(
+                        lambda (args): Processor.connect(*args), 20, 
+                        [self, outlet, target, inlet, show_gui])
+                    log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
+                                % (target.name, target.obj_id))
+                    return True
                 log.warning(
                     "Error: Can't connect DSP out %s of '%s' to non-DSP in %s of '%s'"
                     % (outlet, self.name, inlet, target.name))

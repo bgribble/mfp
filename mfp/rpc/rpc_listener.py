@@ -4,6 +4,7 @@ import os
 import select
 
 from mfp.utils import QuittableThread 
+from mfp import log
 from request import Request 
 
 class RPCListener (QuittableThread): 
@@ -40,7 +41,8 @@ class RPCListener (QuittableThread):
         while not self.join_req: 
             try: 
                 sock, addr = self.socket.accept()
-                sock.settimeout(0.1)
+                log.debug("accept: got", sock, addr)
+                sock.settimeout(0.25)
                 self._rpc_last_peer += 1
                 newpeer = self._rpc_last_peer
                 self.rpc_host.manage(newpeer, sock)
