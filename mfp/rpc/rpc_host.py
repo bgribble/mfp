@@ -37,6 +37,9 @@ class RPCHost (QuittableThread):
     class RPCError (Exception):
         pass
 
+    class RequestError (Exception):
+        pass
+
     def __init__(self, status_cb=None):
         QuittableThread.__init__(self)
 
@@ -54,7 +57,7 @@ class RPCHost (QuittableThread):
         self.managed_sockets = {}
         self.peers_by_socket = {}
 
-        self.read_workers = WorkerPool(self.dispatch_rpcdata)
+        self.read_workers = WorkerPool(self.dispatch_rpcdata, 15)
 
     def __repr__(self):
         return "<RPCHost node=%s>" % self.node_id
@@ -126,8 +129,9 @@ class RPCHost (QuittableThread):
 
         # is this a request?  if so, put it in the pending dict
         if req.method is not None:
-            self.pending[req.request_id] = req
-            req.state = Request.SUBMITTED
+            if req.request_id is not None:
+                self.pending[req.request_id] = req
+                req.state = Request.SUBMITTED
 
         # write the data to the socket
         try:
@@ -138,7 +142,7 @@ class RPCHost (QuittableThread):
                 sock.send(jdata)
         except Exception, e:
             print "[%s] RPCHost.put: SEND error: %s" % (datetime.now(), e)
-            print req
+            print req.serialize()
             raise Exception()
 
     def wait(self, req, timeout=None):
@@ -160,9 +164,6 @@ class RPCHost (QuittableThread):
                 raise RPCHost.RPCError()
 
     def dispatch_rpcdata(self, rpc_worker, rpcdata):
-        #print '    [%s --> %s] %s' % (peer_id, self.node_id, json_data)
-
-        #py_data = json.loads("[" + json_data.replace("}{", "}, {") + "]")
         try:
             json_data, peer_id = rpcdata
             obj = json.loads(json_data, object_hook=extended_decoder_hook)
@@ -174,19 +175,25 @@ class RPCHost (QuittableThread):
         req = Request.from_dict(obj)
 
         # is someone waiting on this response?
+        rpc_worker.data = "Request %s started" % req.request_id
         if req.is_response() and req.request_id in self.pending:
+            rpc_worker.data = "Request %s processing response" % req.request_id
             oldreq = self.pending.get(req.request_id)
+            del self.pending[req.request_id]
             oldreq.result = req.result
             oldreq.state = req.state
             oldreq.diagnostic = req.diagnostic
             with self.lock:
                 self.condition.notify()
         elif req.is_request():
+            rpc_worker.data = "Request %s calling local %s (%s)" % (req.request_id, req.method, req.params)
             # actually call the local handler
             self.handle_request(req, peer_id)
             # and send back the response
+            rpc_worker.data = "Request %s sending response" % req.request_id
             if req.request_id is not None:
                 self.put(req, peer_id)
+        rpc_worker.data = "Request %s done (%s)" % (req.request_id, req.method)
         return True
 
     def run(self):

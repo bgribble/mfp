@@ -14,7 +14,7 @@ def rpcwrap(worker_proc):
         if self.local:
             return worker_proc(self, *args, **kwargs)
         else:
-            rpcdata = dict(func=worker_proc.__name__, 
+            rpcdata = dict(func=worker_proc.__name__,
                            rpcid=self.rpcid, args=args, kwargs=kwargs)
             return self.call_remotely(rpcdata)
     return inner
@@ -24,7 +24,7 @@ def rpcwrap_noresp(worker_proc):
         if self.local:
             return worker_proc(self, *args, **kwargs)
         else:
-            rpcdata = dict(func=worker_proc.__name__, 
+            rpcdata = dict(func=worker_proc.__name__,
                            rpcid=self.rpcid, args=args, kwargs=kwargs)
             return self.call_remotely(rpcdata, response=False)
     return inner
@@ -62,22 +62,22 @@ class RPCWrapper (object):
     rpctype = {}
     local = False
     rpchost = None
-    call_stats = {} 
+    call_stats = {}
 
     def __init__(self, *args, **kwargs):
         self.rpcid = None
-        self.peer_id = None 
-       
+        self.peer_id = None
+
         if self.local:
             self.rpcid = RPCWrapper._rpcid_seq
             RPCWrapper._rpcid_seq += 1
             RPCWrapper.rpcobj[self.rpcid] = self
         else:
-            r = Request("create", dict(type=type(self).__name__, 
+            r = Request("create", dict(type=type(self).__name__,
                                        args=args, kwargs=kwargs))
             self.peer_id = kwargs.get("peer_id")
             if self.peer_id is None:
-                if self.publishers: 
+                if self.publishers:
                     self.peer_id = self.publishers[0]
                 else:
                     self.peer_id = 0
@@ -90,58 +90,61 @@ class RPCWrapper (object):
             self.rpcid = r.result[1]
 
     def call_remotely(self, rpcdata, response=True):
-        from datetime import datetime 
+        from datetime import datetime
 
         r = Request("call", rpcdata)
         call_started = datetime.now()
         r.diagnostic["remote_call_start"] = str(call_started)
-        if not response: 
+        if not response:
             r.request_id = None
 
-        try: 
+        try:
             self.rpchost.put(r, self.peer_id)
-        except Exception as e: 
+        except Exception as e:
             if self.rpchost:
                 log.debug("[call_remotely] Error in RPC operation:", e)
                 log.debug_traceback()
-            return None 
+            return None
 
         puttime = str(datetime.now())
-        if response: 
+        if response:
             self.rpchost.wait(r, timeout=10)
         call_complete = datetime.now()
         call_elapsed = call_complete - call_started
-        r.diagnostic["remote_call_complete"] = call_complete 
-        r.diagnostic["remote_call_put"] = puttime 
+        r.diagnostic["remote_call_complete"] = call_complete
+        r.diagnostic["remote_call_put"] = puttime
 
         callinfo = self.call_stats.setdefault(rpcdata.get('func'), {})
         total = callinfo.get("total")
         if total:
-            total += call_elapsed 
-        else: 
-            total = call_elapsed 
-        callinfo["total"] = total 
+            total += call_elapsed
+        else:
+            total = call_elapsed
+        callinfo["total"] = total
         count = callinfo.get("count", 0) + 1
-        callinfo["count"] = count 
-        callinfo["avgtime"] = total / count 
+        callinfo["count"] = count
+        callinfo["avgtime"] = total / count
 
 
         if not response:
-            return None 
-        elif not r.result: 
+            return None
+        elif not r.result:
             print "FIXME: no result should return a deferment"
-            return None 
+            return None
 
-        status, retval = r.result 
+        status, retval = r.result
         if status == RPCWrapper.METHOD_OK:
-            return retval 
+            return retval
         elif status == RPCWrapper.METHOD_FAILED:
             raise RPCWrapper.MethodFailed(False, retval)
 
     def call_locally(self, rpcdata):
         callinfo = self.call_stats.setdefault(rpcdata.get('func'), {})
-        count = callinfo.get("local", 0) + 1 
+        count = callinfo.get("local", 0) + 1
         callinfo["local"] = count
+
+        working = callinfo.get("working", 0) + 1
+        callinfo["working"] = working
 
         methname = rpcdata.get('func')
         args = rpcdata.get('args')
@@ -151,6 +154,8 @@ class RPCWrapper (object):
         if meth:
             try:
                 rv = meth(*args, **kwargs)
+                working = callinfo.get("working", 1) - 1
+                callinfo["working"] = working
                 return rv
             except Exception, e:
                 import traceback

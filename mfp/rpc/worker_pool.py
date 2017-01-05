@@ -5,6 +5,9 @@ Thread pool for processing units of work
 '''
 
 import threading
+import sys
+import traceback
+
 
 class BaseWorker (object):
     '''
@@ -21,6 +24,7 @@ class BaseWorker (object):
         self.quit_req = False
         self.thread = threading.Thread(target=self._thread_func)
         self.thread.start()
+        self.data = None
 
     def _thread_func(self):
         workunit = None 
@@ -68,10 +72,10 @@ class BaseWorker (object):
         try:
             if callable(self.thunk): 
                 return self.thunk(self, data)
+            else:
+                return True
         except Exception, e:
-            import traceback
-            traceback.print_exc()
-            print e
+            print "[worker] Exception while performing work:", data
             return True
         
     def exit(self):
@@ -81,9 +85,13 @@ class WorkerPool (object):
     class Empty(Exception):
         pass
 
-    def __init__(self, factory, count=5):
+    class PoolSize (Exception):
+        pass
+
+    def __init__(self, factory, min_workers=5, max_workers=20):
         self.factory = factory
-        self.min_workers = count
+        self.min_workers = min_workers
+        self.max_workers = max_workers
 
         self.lock = threading.RLock()
         self.reaper_condition = threading.Condition(self.lock)
@@ -96,6 +104,7 @@ class WorkerPool (object):
         self.waiting_pool = []
         self.working_pool = []
         self.dead_pool = []
+        self.reap_count = 0
 
     def start(self):
         self.reaper.start()
@@ -122,6 +131,8 @@ class WorkerPool (object):
                 return False 
 
     def worker_consuming(self, worker):
+        from rpc_wrapper import RPCWrapper
+
         with self.lock:
             if worker in self.working_pool:
                 self.working_pool.remove(worker)
@@ -132,8 +143,10 @@ class WorkerPool (object):
         if not self.quit_req and not len(self.waiting_pool):
             if isinstance(self.factory, type):
                 self.factory(self)
-            else: 
+            elif len(self.working_pool) <= self.max_workers: 
                 BaseWorker(self, self.factory)
+            else:
+                raise WorkerPool.PoolSize()
 
     def worker_done(self, worker):
         with self.lock:
@@ -159,6 +172,7 @@ class WorkerPool (object):
             if len(deadworkers):
                 for s in deadworkers:
                     s.thread.join()
+                    self.reap_count += 1
                 deadworkers = []
 
 

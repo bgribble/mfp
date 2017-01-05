@@ -12,10 +12,12 @@ import time
 from mfp import log
 from datetime import datetime, timedelta
 
+
 def homepath(fn):
     import os.path
     import os
     return os.path.join(os.environ.get("HOME", "~"), fn)
+
 
 def splitpath(p):
     if not p:
@@ -39,12 +41,14 @@ def splitpath(p):
             prefix = None
     return unescaped
 
+
 def joinpath(elts):
     parts = []
     for e in elts:
         parts.append(e.replace(':', '\\:'))
 
     return ':'.join(parts)
+
 
 def find_file_in_path(filename, pathspec):
     import os.path
@@ -59,6 +63,7 @@ def find_file_in_path(filename, pathspec):
         except:
             continue
     return None
+
 
 def prepend_path(newpath, searchpath):
     searchdirs = splitpath(searchpath)
@@ -76,6 +81,7 @@ def logcall(func):
         return func(*args, **kwargs)
 
     return wrapper
+
 
 def profile(func):
     '''
@@ -172,7 +178,7 @@ class QuittableThread(Thread):
     @classmethod
     def finish_all(klass):
         with QuittableThread._all_threads_lock:
-            work = [ t for t in QuittableThread._all_threads ]
+            work = [t for t in QuittableThread._all_threads]
         for t in work:
             t.finish()
 
@@ -192,7 +198,6 @@ class QuittableThread(Thread):
                     next_victim = living_threads[0]
                 else:
                     next_victim = False
-
 
 
 class TaskNibbler (QuittableThread):

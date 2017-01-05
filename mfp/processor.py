@@ -605,13 +605,16 @@ class Processor (object):
     def send(self, value, inlet=0):
         if self.paused:
             return
+
         w_target = None
 
         try:
-            work = self._send(value, inlet)
+            with self.trigger_lock:
+                work = self._send(value, inlet)
             while len(work):
                 w_target, w_val, w_inlet = work[0]
-                work[:1] = w_target._send(w_val, w_inlet)
+                with w_target.trigger_lock:
+                    work[:1] = w_target._send(w_val, w_inlet)
         except Exception, e:
             import traceback
             tb = traceback.format_exc()
@@ -633,23 +636,22 @@ class Processor (object):
         self.count_in += 1
 
         if inlet in self.hot_inlets or inlet == -1:
-            with self.trigger_lock:
-                self.outlets = [Uninit] * len(self.outlets)
-                if inlet == -1:
-                    self.dsp_response(value[0], value[1])
-                elif isinstance(value, MethodCall):
-                    self.method(value, inlet)
-                elif isinstance(value, AsyncOutput):
-                    if value.outlet_num not in range(len(self.outlets)):
-                        log.error("_send: object %s has no outlet '%s'" % (self.name,
-                                                                           value.outlet_num))
-                    else:
-                        self.outlets[value.outlet_num] = value.value
-                        self.inlets[inlet] = Uninit
+            self.outlets = [Uninit] * len(self.outlets)
+            if inlet == -1:
+                self.dsp_response(value[0], value[1])
+            elif isinstance(value, MethodCall):
+                self.method(value, inlet)
+            elif isinstance(value, AsyncOutput):
+                if value.outlet_num not in range(len(self.outlets)):
+                    log.error("_send: object %s has no outlet '%s'" % (self.name,
+                                                                       value.outlet_num))
                 else:
-                    self.trigger()
-                    self.count_trigger += 1
-                output_pairs = zip(self.connections_out, self.outlets)
+                    self.outlets[value.outlet_num] = value.value
+                    self.inlets[inlet] = Uninit
+            else:
+                self.trigger()
+                self.count_trigger += 1
+            output_pairs = zip(self.connections_out, self.outlets)
 
             for conns, val in [output_pairs[i] for i in self.outlet_order]:
                 if val is not Uninit:

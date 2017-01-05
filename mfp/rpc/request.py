@@ -5,6 +5,7 @@ Request object for use with RequestPipe
 '''
 
 import simplejson as json
+import threading
 
 
 def _dumb_load(ctor, values):
@@ -57,6 +58,7 @@ def extended_decoder_hook (saved):
 
 
 class Request(object):
+    _next_id_lock = threading.Lock()
     _next_id = 0
 
     CREATED = 0
@@ -72,9 +74,10 @@ class Request(object):
         self.params = params 
         self.result = None
         self.callback = callback
-        self.request_id = Request._next_id
         self.diagnostic = {}
-        Request._next_id += 1
+        with Request._next_id_lock:
+            self.request_id = Request._next_id
+            Request._next_id += 1
 
     def serialize(self):
         obj = dict(jsonrpc="2.0", id=self.request_id)
