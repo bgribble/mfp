@@ -28,7 +28,7 @@ json_notval(JsonNode * node)
     }
 }
 
-static JsonNode * 
+static JsonNode *
 encode_param_value(mfp_processor * proc, const char * param_name, const void * param_value)
 {
     int vtype = GPOINTER_TO_INT(g_hash_table_lookup(proc->typeinfo->params, param_name));
@@ -36,7 +36,7 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
     JsonNode * rval;
     GValue gval = G_VALUE_INIT;
     GArray * ga;
-    float dval; 
+    float dval;
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
@@ -45,15 +45,15 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
 
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
-            dval = *(float *)param_value; 
-            rval = json_node_new(JSON_NODE_VALUE); 
+            dval = *(float *)param_value;
+            rval = json_node_new(JSON_NODE_VALUE);
             g_value_init(&gval, G_TYPE_FLOAT);
             g_value_set_float(&gval, dval);
             json_node_set_value(rval, &gval);
             break;
 
         case PARAMTYPE_STRING:
-            rval = json_node_new(JSON_NODE_VALUE); 
+            rval = json_node_new(JSON_NODE_VALUE);
             g_value_init(&gval, G_TYPE_STRING);
             g_value_set_string(&gval, (const char *)param_value);
             json_node_set_value(rval, &gval);
@@ -61,22 +61,23 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
             break;
 
         case PARAMTYPE_FLTARRAY:
-            rval = json_node_new(JSON_NODE_ARRAY); 
+            rval = json_node_new(JSON_NODE_ARRAY);
             ga = (GArray *)param_value;
             jarray = json_array_new();
 
-            for (int i=0; i < ga->len; i++) { 
-                dval = g_array_index(ga, float, i); 
+            for (int i=0; i < ga->len; i++) {
+                dval = g_array_index(ga, float, i);
                 json_array_add_double_element(jarray, dval);
             }
-            json_node_set_array(rval, jarray); 
+            json_node_set_array(rval, jarray);
+            json_array_unref(jarray);
             break;
     }
     return rval;
 
 }
 
-static gpointer 
+static gpointer
 extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * param_val)
 {
     int vtype = GPOINTER_TO_INT(g_hash_table_lookup(proc->typeinfo->params, param_name));
@@ -106,7 +107,7 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
             jarray = json_node_get_array(param_val);
             endex = json_array_get_length(jarray);
             rval = (gpointer)g_array_sized_new(TRUE, TRUE, sizeof(float), endex);
-            for (i=0; i < endex; i++) { 
+            for (i=0; i < endex; i++) {
                 dval = (float)json_node_get_double(json_array_get_element(jarray, i));
                 g_array_append_val((GArray *)rval, dval);
             }
@@ -116,11 +117,11 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
 }
 
 /*
- * dispatch_object_methodcall implments the API of the Python DSPObject class 
+ * dispatch_object_methodcall implments the API of the Python DSPObject class
  * (see dsp_object.py)
  */
 
-static char *  
+static char *
 dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args)
 {
     JsonNode * val;
@@ -129,7 +130,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
 
     if(!strcmp(methodname, "connect")) {
         rd.reqtype = REQTYPE_CONNECT;
-        rd.src_proc = obj_id; 
+        rd.src_proc = obj_id;
         rd.src_port = (int)(json_node_get_double(json_array_get_element(args, 0)));
         rd.dest_proc = (int)(json_node_get_double(json_array_get_element(args, 1)));
         rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
@@ -137,7 +138,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
     }
     else if (!strcmp(methodname, "disconnect")) {
         rd.reqtype = REQTYPE_DISCONNECT;
-        rd.src_proc = obj_id; 
+        rd.src_proc = obj_id;
         rd.src_port = (int)(json_node_get_double(json_array_get_element(args, 0)));
         rd.dest_proc = (int)(json_node_get_double(json_array_get_element(args, 1)));
         rd.dest_port = (int)(json_node_get_double(json_array_get_element(args, 2)));
@@ -146,37 +147,40 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
     }
     else if (!strcmp(methodname, "getparam")) {
         mfp_processor * src_proc = mfp_proc_lookup(obj_id);
-        const char * param_name = json_node_get_string(json_array_get_element(args, 0));
+        const char * param_name = json_node_dup_string(json_array_get_element(args, 0));
         const void * param_value = g_hash_table_lookup(src_proc->params, param_name);
         JsonNode * to_encode = json_node_new(JSON_NODE_ARRAY);
         JsonArray * retpair = json_array_new();
         json_array_add_double_element(retpair, -4.0);
 
-        json_array_add_element(retpair, 
-                               encode_param_value(src_proc, param_name, param_value)); 
-        json_node_set_array(to_encode, retpair); 
+        json_array_add_element(retpair,
+                               encode_param_value(src_proc, param_name, param_value));
+        json_node_set_array(to_encode, retpair);
         JsonGenerator * gen = json_generator_new();
         json_generator_set_root(gen, to_encode);
         rval = json_generator_to_data(gen, NULL);
+        json_array_unref(retpair);
+        json_node_free(to_encode);
+        g_object_unref(gen);
     }
     else if (!strcmp(methodname, "setparam")) {
         mfp_processor * src_proc = mfp_proc_lookup(obj_id);
         rd.reqtype = REQTYPE_SETPARAM;
-        rd.src_proc = obj_id; 
-        rd.param_name = (gpointer)json_node_get_string(json_array_get_element(args, 0));
+        rd.src_proc = obj_id;
+        rd.param_name = (gpointer)json_node_dup_string(json_array_get_element(args, 0));
         rd.param_type = mfp_proc_param_type(src_proc, rd.param_name);
-        rd.param_value = (gpointer)extract_param_value(src_proc, rd.param_name, 
+        rd.param_value = (gpointer)extract_param_value(src_proc, rd.param_name,
                                                        json_array_get_element(args, 1));
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "delete")) {
         rd.reqtype = REQTYPE_DESTROY;
-        rd.src_proc = obj_id; 
+        rd.src_proc = obj_id;
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(methodname, "reset")) {
         rd.reqtype = REQTYPE_RESET;
-        rd.src_proc = obj_id; 
+        rd.src_proc = obj_id;
         mfp_dsp_push_request(rd);
     }
     else {
@@ -193,12 +197,12 @@ init_param_helper(JsonObject * obj, const gchar * key, JsonNode * val, gpointer 
     mfp_processor * proc = (mfp_processor *)udata;
     void * c_value = extract_param_value(proc, key, val);
 
-    if (c_value != NULL) { 
+    if (c_value != NULL) {
         mfp_proc_setparam(proc, g_strdup(key), c_value);
     }
 }
 
-static mfp_processor * 
+static mfp_processor *
 dispatch_create(JsonArray * args, JsonObject * kwargs)
 {
     int num_inlets, num_outlets;
@@ -227,7 +231,7 @@ dispatch_create(JsonArray * args, JsonObject * kwargs)
         ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
         if (ctxt == NULL) {
             printf("create: cannot find context %d\n", ctxt_id);
-            return NULL; 
+            return NULL;
         }
 
         proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, ctxt);
@@ -238,15 +242,15 @@ dispatch_create(JsonArray * args, JsonObject * kwargs)
 }
 
 
-/* 
- * dispatch_methodcall implements the API of the Python RPCHost class 
+/*
+ * dispatch_methodcall implements the API of the Python RPCHost class
  * (see RPCHost.py:RPCHost.handle_request).
- */ 
+ */
 
-static char * 
-dispatch_methodcall(const char * methodname, JsonObject * params) 
+static char *
+dispatch_methodcall(const char * methodname, JsonObject * params)
 {
-    char * rval = NULL; 
+    char * rval = NULL;
 
     if(!strcmp(methodname, "call")) {
         JsonNode * funcname, * funcparams, * funcobj;
@@ -260,8 +264,8 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
             printf("dispatch_methodcall: problem with func, args, or rpcid\n");
         }
         else {
-            rval = dispatch_object_methodcall((int)json_node_get_double(funcobj), 
-                    json_node_get_string(funcname), 
+            rval = dispatch_object_methodcall((int)json_node_get_double(funcobj),
+                    json_node_get_string(funcname),
                     json_node_get_array(funcparams));
         }
     }
@@ -277,7 +281,7 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
             printf("dispatch_methodcall: couldn't parse one of type, args, kwargs\n");
         }
         else {
-            proc = dispatch_create(json_node_get_array(args), 
+            proc = dispatch_create(json_node_get_array(args),
                                    json_node_get_object(kwargs));
             if (proc != NULL) {
                 snprintf(ret, 31, "[true, %d]", proc->rpc_id);
@@ -299,7 +303,7 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
 }
 
 int
-mfp_rpc_response(int req_id, const char * result, char * msgbuf, int * msglen) 
+mfp_rpc_response(int req_id, const char * result, char * msgbuf, int * msglen)
 {
     if(msgbuf == NULL) {
         printf("mfp_rpc_response: NULL buffer, aborting buffer send\n");
@@ -307,28 +311,28 @@ mfp_rpc_response(int req_id, const char * result, char * msgbuf, int * msglen)
         return -1;
     }
 
-    * msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, 
-                        "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": %s}", 
+    * msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1,
+                        "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": %s}",
                         req_id, result);
     return req_id;
 }
 
 int
-mfp_rpc_request(const char * method, const char * params, 
+mfp_rpc_request(const char * method, const char * params,
                 void (* callback)(JsonNode *, void *), void * cb_data,
-                char * msgbuf, int * msglen) 
+                char * msgbuf, int * msglen)
 {
-    int req_id = _next_reqid ++; 
-        
+    int req_id = _next_reqid ++;
+
     if(msgbuf == NULL) {
         printf("mfp_rpc_request: NULL buffer, aborting buffer send\n");
         *msglen = 0;
         return -1;
     }
 
-    *msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, 
+    *msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1,
                        "{\"jsonrpc\": \"2.0\", \"id\": %d, \"method\": \"%s\", "
-                       "\"params\": %s}", 
+                       "\"params\": %s}",
                        req_id, method, params);
     if (callback != NULL) {
         g_hash_table_insert(request_callbacks, GINT_TO_POINTER(req_id), callback);
@@ -337,12 +341,12 @@ mfp_rpc_request(const char * method, const char * params,
         g_hash_table_insert(request_data, GINT_TO_POINTER(req_id), cb_data);
     }
 
-    return req_id; 
+    return req_id;
 }
 
-void 
-mfp_rpc_wait(int request_id) 
-{    
+void
+mfp_rpc_wait(int request_id)
+{
     struct timespec alarmtime;
     struct timeval nowtime;
     gpointer reqwaiting;
@@ -358,7 +362,7 @@ mfp_rpc_wait(int request_id)
 
     while(!mfp_comm_quit_requested()) {
         gettimeofday(&nowtime, NULL);
-        alarmtime.tv_sec = nowtime.tv_sec; 
+        alarmtime.tv_sec = nowtime.tv_sec;
         alarmtime.tv_nsec = nowtime.tv_usec*1000 + 10000000;
         pthread_cond_timedwait(&request_cond, &request_lock, &alarmtime);
 
@@ -371,8 +375,8 @@ mfp_rpc_wait(int request_id)
     pthread_mutex_unlock(&request_lock);
 }
 
-int 
-mfp_rpc_dispatch_request(const char * msgbuf, int msglen) 
+int
+mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
 {
     JsonParser * parser = json_parser_new();
     JsonNode * id, * root, * val, * params;
@@ -383,7 +387,7 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
     void * callback;
     int success;
     int reqid = -1;
-    int need_response = 0; 
+    int need_response = 0;
 
     success = json_parser_load_from_data(parser, msgbuf, msglen, &err);
     if (!success) {
@@ -400,7 +404,7 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
 
     val = json_object_get_member(msgobj, "result");
     if ((val != NULL) && (reqid != -1)) {
-        /* it's a response, is there a callback? */ 
+        /* it's a response, is there a callback? */
         callback = g_hash_table_lookup(request_callbacks, GINT_TO_POINTER(reqid));
         if (callback != NULL) {
             void (* cbfunc)(JsonNode *, void *) = (void (*)(JsonNode *, void *))callback;
@@ -408,7 +412,7 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
 
             g_hash_table_remove(request_callbacks, GINT_TO_POINTER(reqid));
             g_hash_table_remove(request_data, GINT_TO_POINTER(reqid));
-            
+
             cbfunc(val, cbdata);
         }
         pthread_mutex_lock(&request_lock);
@@ -416,9 +420,9 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
         pthread_cond_broadcast(&request_cond);
         pthread_mutex_unlock(&request_lock);
     }
-    else { 
+    else {
         val = json_object_get_member(msgobj, "method");
-        if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) { 
+        if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) {
             need_response = 1;
             methodname = json_node_get_string(val);
             params = json_object_get_member(msgobj, "params");
@@ -440,6 +444,8 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
             mfp_comm_submit_buffer(msgbuf, msglen);
         }
     }
+
+    g_object_unref(parser);
     return 0;
 
 }
@@ -459,17 +465,17 @@ ready_callback(JsonNode * response, void * data)
 
 
 void
-mfp_rpc_init(void) 
+mfp_rpc_init(void)
 {
     const char ready_req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"ready\", \"params\": {}}";
     int req_id;
 
-    request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal); 
-    request_data = g_hash_table_new(g_direct_hash, g_direct_equal); 
-    request_waiting = g_hash_table_new(g_direct_hash, g_direct_equal); 
-   
+    request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal);
+    request_data = g_hash_table_new(g_direct_hash, g_direct_equal);
+    request_waiting = g_hash_table_new(g_direct_hash, g_direct_equal);
+
     pthread_mutex_init(&request_lock, NULL);
-    pthread_cond_init(&request_cond, NULL); 
+    pthread_cond_init(&request_cond, NULL);
 
     mfp_log_info("Setting up RPC system");
 
