@@ -3,7 +3,7 @@
 from __future__ import print_function
 
 APPNAME = "mfp"
-VERSION = "0.05"
+VERSION = "0.06"
 WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'

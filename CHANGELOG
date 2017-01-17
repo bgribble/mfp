@@ -1,3 +1,25 @@
+mfp v0.06, 2017-Jan-18
+
+  * #88: Improve load times 
+  
+  * #98: Use Separating Axis Test for rubberband boxing
+
+  * #209: Attribute errors to the processor where they happened
+
+  * #224: Fixes to send/receive vias in multi-scoped patches
+
+  * #270: Add @style method to change display properties
+
+  * #271: Make left-side and console/log displays hideable
+
+  * #277: Arrow keys change values in sliders, dials
+
+  * #279: Don't time out when loading large patches
+
+  * #284, #285: Fix leaks to allow long runtimes
+
+  * Many other bugfixes and improvements 
+
 mfp v0.05.1, 2014-Oct-29 
 
   * #219: Solve wscript errors with Python 2.x 

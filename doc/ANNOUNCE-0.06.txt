@@ -1,14 +1,14 @@
-MFP -- Music For Programmers 
+MFP -- Music For Programmers
 Release 0.06
 
 I'm pleased to announce a new version of MFP, mostly consisting
 of bug fixes and improvements.  It's been about 2 years since the
-0.05 release, but lately I have been pretty energized! 
+0.05 release, but lately I have been pretty energized!
 
 A summary of changes is below.  Please see the GitHub issue tracker
-for complete details: 
+for complete details:
 
-  http://github.com/bgribble/mfp 
+  http://github.com/bgribble/mfp
 
 This version is still source-code-only, but the new build system
 should make it a bit easier for those who would like to try it.
@@ -16,28 +16,28 @@ should make it a bit easier for those who would like to try it.
 Significant changes since release v0.05
 ----------------------------------------
 
-  * Build issues reported for the 0.05 release have been 
-    fixed or mitigated 
+  * Build issues reported for the 0.05 release have been
+    fixed or mitigated
 
   * Clarification of semantics around names and namespaces
     (scopes)
 
-  * A change to send/receive semantics may break patches saved with 
-    earlier versions of mfp, if they make use of vias and scopes 
+  * A change to send/receive semantics may break patches saved with
+    earlier versions of mfp, if they make use of vias and scopes
 
-  * New demo patches and fixes to old ones 
+  * New demo patches and fixes to old ones
 
   * Improvements to performance, stability and error handling
 
   * Left-side tabs and bottom-edge console/log can be toggled
     with `\'` and `~` respectively
 
-  * Better default color selections, and the ability to set 
+  * Better default color selections, and the ability to set
     per-object style (colors, fonts) in your patches
 
   * Many other bugfixes and improvements.  The complete list of
     tickets closed since the 0.05 release is in the 0.06
-    milestone: 
+    milestone:
 
     http://github.com/bgribble/mfp/issues?q=milestone%3A%22mfp+0.06%22+is%3Aclosed
 
@@ -51,39 +51,43 @@ analysis.  It's very much inspired by Miller Puckette's Pure Data
 (pd) and Max/MSP, with a bit of LabView and TouchOSC for good
 measure.  It is targeted at musicians, recording engineers, and
 software developers who like the "patching" dataflow metaphor for
-coding up audio synthesis, processing, and analysis. 
+coding up audio synthesis, processing, and analysis.
 
 MFP is a completely new code base, written in Python and C, with
 a Clutter UI.  It has been under development by a solo developer
-(me!), as a spare-time project for several years. 
+(me!), as a spare-time project for several years.
 
 Compared to Pure Data, its nearest relative, MFP is superficially
-pretty similar but differs in a few key ways: 
+pretty similar but differs in a few key ways:
 
- * MFP uses Python data natively.  Any literal data entered in the 
-   UI is parsed by the Python evaluator, and any Python value is a 
-   legitimate "message" on the dataflow network 
- 
- * MFP provides fairly raw access to Python constructs if desired.  
+ * MFP uses Python data natively.  Any literal data entered in the
+   UI is parsed by the Python evaluator, and any Python value is a
+   legitimate "message" on the dataflow network. This makes it much
+   easier to make patches that work like conventional "programs".
+
+ * MFP provides fairly raw access to Python constructs if desired.
    For example, the built-in Python console allows live coding of
-   Python functions as patch elements at runtime. 
+   Python functions as patch elements at runtime.
 
- * Name resolution and namespacing are addressed more robustly, 
-   with explicit support for lexical scoping 
+ * Name resolution and namespacing are addressed more robustly,
+   with explicit support for lexical scoping.  This allows patches
+   to have a dynamic number of inputs and outputs, with hygienic
+   layer copying preserving the lexical structure of each "voice"
 
- * The UI is largely keyboard-driven, with a modal input system 
+ * The UI is largely keyboard-driven, with a modal input system
    that feels a bit like vim.  The graphical presentation is a
-   single-window style with layers rather than multiple windows.   
+   single-window style with layers rather than multiple windows.
 
- * There is fairly deep integration of Open Sound Control (OSC), with 
+ * There is fairly deep integration of Open Sound Control (OSC), with
    every patch element having an OSC address and the ability to learn
-   any other desired address.  
+   any other desired address.  MIDI controller learning is also robustly
+   supported.
 
  * MFP has just a fraction of the builtin and addon functionality
    provided by PD.  It's not up to being a replacement except in
-   very limited cases! 
+   very limited cases!
 
-The code and issue tracker are hosted on GitHub: 
+The code and issue tracker are hosted on GitHub:
 
     https://github.com/bgribble/mfp
 
@@ -92,6 +96,10 @@ some sample patches, and a few other bits of documentation in the
 doc directory of the GitHub repo.  The README files at the top
 level of the source tree contain dependency, build, and
 getting-started information.
+
+More sample patches are in my personal patch repo: 
+
+    https://github.com/bgribble/mfp-patches
 
 Thanks,
 Bill Gribble <grib@billgribble.com>
