@@ -43,7 +43,7 @@ def activate_virtualenv(ctxt):
 def make_virtualenv(ctxt, *args, **kwargs):
     if ctxt.env.USE_VIRTUALENV:
         targetfile = ".waf-built-virtual"
-        vrule = ("cd %s && %s --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s)"
+        vrule = ("cd %s && %s --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s) && cp virtual/bin/activate virtual/bin/activate.orig"
                  % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ctxt.out_dir, targetfile))
         ctxt(rule = vrule, target = targetfile, shell = True)
 
@@ -76,6 +76,7 @@ def install_eggfiles(ctxt):
     from waflib import Utils
     bld = ctxt.bld
     srcroot = os.path.abspath(out)
+
     if ctxt.env.USE_VIRTUALENV:
         srcroot += "/virtual/"
     localroot = os.path.abspath(top) + '/'
@@ -166,7 +167,7 @@ def egg(ctxt, *args, **kwargs):
 
     if ctxt.env.USE_VIRTUALENV:
         srcfiles.append(".waf-built-virtual")
-        eggrule = (". %s/virtual/bin/activate && %s"
+        eggrule = (". %s/virtual/bin/activate.orig && %s"
                    % (os.path.abspath(ctxt.out_dir), eggrule))
 
     # ensure that eggs are build sequentially.  Updating the .pth files
@@ -270,14 +271,18 @@ class MFPCleanContext (CleanContext):
                                 break
                         if is_symlinked:
                             continue
-                    if os.path.islink(n.abspath()) and hasattr(n, 'children'):
+                    if os.path.islink(n.abspath()):
                         symlinks.append(n.abspath())
-                        delattr(n, "children")
+                        if hasattr(n, 'children'):
+                            delattr(n, "children")
+                        continue
+                    elif os.path.islink(n.abspath()):
+                        continue
                     elif os.path.isdir(n.abspath()):
                         continue
                     n.delete()
                     self.root.children = {}
-
+            print ("clean: left with symlinks", symlinks)
         for v in ['node_deps', 'task_sigs', 'raw_deps']:
             setattr(self, v, {})
 
@@ -415,9 +420,6 @@ def build(bld):
     bld.egg(srcdir="lib/alsaseq-0.4.1", pkgname="alsaseq",
             extname="alsaseq", arch="linux-x86_64", version="0.4.1")
 
-    # must make virtualenv "relocatable" after all packages added
-    bld.fix_virtualenv()
-
     bld.shlib(source=bld.path.ant_glob("mfpdsp/*.c"),
               target="mfpdsp",
               cflags=["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
@@ -427,6 +429,10 @@ def build(bld):
                 cflags=["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
                 uselib = bld.env.PKGCONF_LIBS,
                 use=['mfpdsp'])
-
     bld.add_group()
+
     bld(features="install_eggfiles")
+    bld.add_group()
+
+    # must make virtualenv "relocatable" after all packages added
+    bld.fix_virtualenv()
