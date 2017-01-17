@@ -35,19 +35,17 @@ def git_version():
 
     return 'git_' + format(vers)
 
-@conf
 def activate_virtualenv(ctxt):
     activate = "%s/virtual/bin/activate_this.py" % ctxt.out_dir
     execfile(activate, dict(__file__=activate))
 
 @conf
 def make_virtualenv(ctxt, *args, **kwargs):
-
     if ctxt.env.USE_VIRTUALENV:
         targetfile = ".waf-built-virtual"
         vrule = ("cd %s && %s --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s)"
                  % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ctxt.out_dir, targetfile))
-        ctxt(rule = vrule, source = [], target = targetfile)
+        ctxt(rule = vrule, target = targetfile, shell = True)
 
 @conf
 def fix_virtualenv(ctxt, *args, **kwargs):
@@ -410,7 +408,6 @@ def configure(conf):
 def build(bld):
     # only gets built if USE_VIRTUALENV is set
     bld.make_virtualenv()
-    bld.activate_virtualenv()
 
     bld.egg(pkgname="mfp", version=bld.env.GITVERSION)
     bld.egg(srcdir="pluginfo", pkgname="pluginfo", arch="linux-x86_64", version="1.0")
