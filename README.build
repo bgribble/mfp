@@ -139,16 +139,10 @@ RUNNING TESTS
 --------------------------
 
 There are some tests, though not as many as I would like.  What's
-there basically comes in three flavors, all of which can be run
+there basically comes in two flavors, all of which can be run
 with various incantations of the `nosetests` test runner:  
 
- * Python test cases in mfp/test: run with plain `python /usr/bin/nosetests mfp/` 
+ * Python test cases in mfp/test: run with plain `python /usr/bin/nosetests -v mfp/` 
 
  * C test cases in mfpdsp/test_*: run with the `testext` plugin
-   to nosetests, `python /usr/bin/nosetests --with-testext --exe`
-
- * end-to-end MFP patch tests, not run unless you point to them 
-   specifically: `python /usr/bin/nosetests -m e2e -w mfp/test`
-
-
-
+   to nosetests, `python /usr/bin/nosetests -v --with-testext --exe wafbuild/libmfpdsp.so`

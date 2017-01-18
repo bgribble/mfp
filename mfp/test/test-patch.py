@@ -22,6 +22,7 @@ class PatchTests (TestCase):
         o1 = mkproc(self, "message", "'hello, world'")
         o2 = mkproc(self, "print")
         o1.connect(0, o2, 0)
+
         json_1 = self.patch.json_serialize()
         self.patch.delete()
 
@@ -33,6 +34,12 @@ class PatchTests (TestCase):
 
         dict_1 = json.loads(json_1)
         dict_2 = json.loads(json_2)
+
+        for k in ['export_x', 'export_y', 'export_w', 'export_h', 
+                  'height', 'width']:
+            if k in dict_2['gui_params']:
+                del dict_2['gui_params'][k]
+
         fail = False 
 
         for elt in [ 'gui_params', 'objects', 'type', 'scopes' ]:

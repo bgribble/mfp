@@ -132,6 +132,10 @@ class TestExt(Plugin):
             
     def loadTestsFromFile(self, filename):
         info = self.fileinfo.get(filename)
+        if not info:
+            info = self.find_fileinfo(filename)
+            self.fileinfo[filename] = info
+
         if info:
             setup = info['setup']
             teardown = info['teardown']
