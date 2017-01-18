@@ -101,7 +101,18 @@ More sample patches are in my personal patch repo:
 
     https://github.com/bgribble/mfp-patches
 
+
+Where's it going? 
+----------------------------------------
+
+I've been working on MFP as a spare time project for almost 7
+years now.  The likelihood that it will ever have more than a few
+users is low.  Luckily, that doesn't bother me much; MFP is a
+tool I am building mainly for my own use and education. 
+
+That being said, if there's something about it that appeals to
+you, I welcome your interest and participation. 
+
 Thanks,
 Bill Gribble <grib@billgribble.com>
-
 
