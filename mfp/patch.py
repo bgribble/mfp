@@ -523,7 +523,7 @@ class Patch(Processor):
 
         # first pass: everything but inlets/outlets
         to_delete = self.objects.values()
-        for obj in to_delete:
+        for obj in list(to_delete):
             obj.delete()
 
         if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:

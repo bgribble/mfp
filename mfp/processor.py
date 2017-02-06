@@ -620,10 +620,10 @@ class Processor (object):
             tb = traceback.format_exc()
             log.error("%s (%s): send to inlet %d failed: %s" %
                       (self.name, self.init_type, inlet, value))
-            log.error("Exception: " + e.message)
+            log.error("Exception: %s" % e.args)
             log.debug_traceback()
             if w_target:
-                w_target.error(e.message, tb)
+                w_target.error("%s" % e.args, tb)
 
     def _send(self, value, inlet=0):
         if self.paused:
