@@ -131,8 +131,8 @@ class GlobalMode (InputMode):
         try:
             if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE:
                 o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
-        except Exception, e:
-            print "oops! exception in hover"
+        except Exception as e:
+            print("oops! exception in hover")
             import traceback
             traceback.print_exc()
             pass
@@ -334,5 +334,5 @@ class GlobalMode (InputMode):
                 log.warning("Execution of all patches paused")
             else:
                 log.warning("Execution of all patches resumed")
-        except Exception, e:
-            print "Caught exception", e
+        except Exception as e:
+            print("Caught exception", e)

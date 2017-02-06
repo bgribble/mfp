@@ -37,7 +37,7 @@ class ColorDB (Singleton):
             elif ll == 3: 
                 key = (int(colorinfo[0]), int(colorinfo[1]), int(colorinfo[2]), 255)
 
-            if not self.rgba_colors.has_key(key):
+            if key not in self.rgba_colors:
                 nc = Clutter.Color.new(*key)
                 self.rgba_colors[key] = nc
             else: 
@@ -62,7 +62,7 @@ class ColorDB (Singleton):
         if tmp is not None:
             rv = RGBAColor(tmp.red / 255.0, tmp.green / 255.0, tmp.blue/255.0, tmp.alpha/255.0)
         else: 
-            print "ColorDB(): did not find color", colorinfo
+            print("ColorDB(): did not find color", colorinfo)
             rv = RGBAColor(0, 0, 0, 255)
         return rv 
         

@@ -16,9 +16,9 @@ def layer_select_up(self):
         l = p.layers.index(self.selected_layer)
         self.layer_select(p.layers[l - 1])
     else:
-        print "WARNING: selected layer not in selected patch!"
-        print self.selected_layer
-        print self.selected_patch
+        print("WARNING: selected layer not in selected patch!")
+        print(self.selected_layer)
+        print(self.selected_patch)
 
 
 @extends(PatchWindow)
@@ -28,9 +28,9 @@ def layer_select_down(self):
         l = p.layers.index(self.selected_layer)
         self.layer_select(p.layers[(l + 1) % len(p.layers)])
     else:
-        print "WARNING: selected layer not in selected patch!"
-        print self.selected_layer
-        print self.selected_patch
+        print("WARNING: selected layer not in selected patch!")
+        print(self.selected_layer)
+        print(self.selected_patch)
 
 
 @extends(PatchWindow)

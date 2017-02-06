@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 gui_app.py
 GTK/clutter gui for MFP -- main thread
@@ -10,8 +10,8 @@ import threading
 import argparse
 import sys
 from datetime import datetime
-from singleton import Singleton
-from mfp_command import MFPCommand
+from .singleton import Singleton
+from .mfp_command import MFPCommand
 from mfp import log
 from mfp.utils import profile
 
@@ -58,7 +58,7 @@ class MFPGUI (Singleton):
     def _callback_wrapper(self, thunk):
         try:
             return thunk()
-        except Exception, e:
+        except Exception as e:
             import traceback
             log.debug("Exception in GUI operation:", e)
             log.debug_traceback()
@@ -89,7 +89,7 @@ class MFPGUI (Singleton):
             self.appwin = PatchWindow()
             self.mfp = MFPCommand()
 
-        except Exception, e:
+        except Exception as e:
             log.error("Fatal error during GUI startup")
             log.debug_traceback()
             return
@@ -97,7 +97,7 @@ class MFPGUI (Singleton):
         try:
             # direct logging to GUI log console
             Gtk.main()
-        except Exception, e:
+        except Exception as e:
             log.error("Caught GUI exception:", e)
             log.debug_traceback()
             sys.stdout.flush()
@@ -174,7 +174,7 @@ def main():
     remote = RPCRemote(socketpath, "MFP GUI", host)
     remote.connect()
 
-    print "[LOG] DEBUG: GUI process starting"
+    print("[LOG] DEBUG: GUI process starting")
 
     if args.get("logstart"):
         st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f" )

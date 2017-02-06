@@ -145,7 +145,7 @@ class ScopePlot (XYPlot):
                 slc = os.read(self.shm_obj.fd, int(self.buf_info.size * self.FLOAT_SIZE))
                 self.data.append(list(numpy.fromstring(slc, dtype=numpy.float32)))
                 self.set_bounds(0, None, len(self.data[0])*1000/self.samplerate, None)
-        except Exception, e:
+        except Exception as e:
             log.debug("scopeplot: error grabbing data", e)
             import traceback
             traceback.print_exc()

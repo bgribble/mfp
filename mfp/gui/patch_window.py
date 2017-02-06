@@ -26,7 +26,7 @@ class PatchWindow(object):
     def __init__(self):
         # load Glade ui
         self.builder = Gtk.Builder()
-        self.builder.add_from_string(pkgutil.get_data("mfp.gui", "mfp.glade"))
+        self.builder.add_from_string(pkgutil.get_data("mfp.gui", "mfp.glade").decode())
 
         # install Clutter stage in Gtk window
         self.window = self.builder.get_object("main_window")
@@ -137,7 +137,7 @@ class PatchWindow(object):
                     self.grab_focus()
                     return False
                 return r
-            except Exception, e:
+            except Exception as e:
                 import traceback
                 log.error("Error handling UI event", event)
                 log.debug(e)
@@ -340,7 +340,7 @@ class PatchWindow(object):
 
         if element.container is None:
             if element.layer is None:
-                print "WARNING: element has no layer", element, self
+                print("WARNING: element has no layer", element, self)
             else:
                 element.layer.group.add_actor(element)
                 element.container = element.layer.group
@@ -632,7 +632,7 @@ class PatchWindow(object):
 
 
 # additional methods in @extends wrappers
-import patch_window_layer
-import patch_window_views
-import patch_window_select
+from . import patch_window_layer
+from . import patch_window_views
+from . import patch_window_select
 

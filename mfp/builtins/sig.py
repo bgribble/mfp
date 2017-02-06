@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 p_sig.py:  Builtin constant signal
 

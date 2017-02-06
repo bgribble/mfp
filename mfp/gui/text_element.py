@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 text_element.py
 A text element (comment) in a patch
@@ -7,7 +7,7 @@ A text element (comment) in a patch
 from gi.repository import Clutter
 import cairo
 
-from patch_element import PatchElement
+from .patch_element import PatchElement
 from mfp import MFPGUI
 from mfp import log
 from .modes.label_edit import LabelEditMode

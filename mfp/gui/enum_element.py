@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 enum_element.py
 A patch element corresponding to a number box or enum selector
@@ -124,7 +124,7 @@ class EnumElement (PatchElement):
         if self.obj_id is None:
             self.create(self.proc_type, str(self.value))
         if self.obj_id is None:
-            print "MessageElement: could not create message obj"
+            print("MessageElement: could not create message obj")
         else:
             MFPGUI().mfp.set_do_onload(self.obj_id, True)
             self.obj_state = self.OBJ_COMPLETE

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 input_manager.py: Handle keyboard and mouse input and route through input modes
 
@@ -8,8 +8,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from datetime import datetime, timedelta
 import time
 
-from input_mode import InputMode
-from key_sequencer import KeySequencer
+from .input_mode import InputMode
+from .key_sequencer import KeySequencer
 from ..utils import QuittableThread
 from ..gui_main import MFPGUI
 from mfp import log
@@ -63,8 +63,8 @@ class InputManager (object):
         self.window.display_bindings()
 
     def enable_minor_mode(self, mode):
-        def modecmp(a, b):
-            return cmp(b.affinity, a.affinity) or cmp(b.seqno, a.seqno)
+        def modekey(a):
+            return -a.affinity, -a.seqno
 
         do_enable = True
         if mode in self.minor_modes:
@@ -74,7 +74,7 @@ class InputManager (object):
         mode.seqno = self.minor_seqno
         self.minor_seqno += 1
         self.minor_modes[:0] = [mode]
-        self.minor_modes.sort(cmp=modecmp)
+        self.minor_modes.sort(key=modekey)
         self.window.display_bindings()
 
         if do_enable:
@@ -170,12 +170,12 @@ class InputManager (object):
             try:
                 retry_count += 1
                 rv = self.handle_keysym(keysym)
-            except self.InputNeedsRequeue, e:
+            except self.InputNeedsRequeue as e:
                 if retry_count < 5:
                     continue
                 else:
                     return False
-            except Exception, e:
+            except Exception as e:
                 log.error("Exception while handling key command", keysym)
                 log.debug(e)
                 log.debug_traceback()

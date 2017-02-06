@@ -127,7 +127,7 @@ class Buffer(Processor):
             os.lseek(self.shm_obj.fd, self.offset(channel, start), os.SEEK_SET)
             slc = os.read(self.shm_obj.fd, (end - start) * self.FLOAT_SIZE)
             self.outlets[1] = list(numpy.fromstring(slc, dtype=numpy.float32))
-        except Exception, e:
+        except Exception as e:
             import traceback 
             tb = traceback.format_exc()
             log.debug("buffer~: slice error '%s" % e)

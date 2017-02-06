@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 input_mode.py: InputMode parent class for managing key/mouse bindings and interaction
 
@@ -35,7 +35,7 @@ class InputMode (object):
 
     def directory(self):
         listing = []
-        items = self.bindings.items()
+        items = list(self.bindings.items())
         items.sort(key=lambda e: e[1][2])
         for keysym, value in items:
             if value[1] is not None:

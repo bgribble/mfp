@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 slider.py: SliderEdit and SliderControl minor modes
 

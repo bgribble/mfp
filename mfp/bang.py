@@ -29,7 +29,7 @@ class UninitType (Singleton):
     def __pow__(self, other):
         return self 
 
-    def __nonzero__ (self):
+    def __bool__ (self):
         return False 
 
     @classmethod

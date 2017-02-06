@@ -22,7 +22,7 @@ class PlusTest(TestCase):
         self.plus = mkproc(self, "+", "12")
         self.plus.connect(0, self.out, 0)
         self.plus.send(13, 0)
-        print "outlets:", self.out.outlets
+        print("outlets:", self.out.outlets)
         assert self.out.outlets[0] == 25
 
         self.plus.send(99, 0)
@@ -153,6 +153,6 @@ class RouteTest (TestCase):
         self.r.connect(0, v, 0)
         self.r.send([4], 1)
         self.r.send([4, 'hello'], 0)
-        print self.r.addresses
-        print v.outlets
+        print(self.r.addresses)
+        print(v.outlets)
         assert v.outlets[0] == ['hello']

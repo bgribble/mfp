@@ -44,10 +44,10 @@ class PatchTests (TestCase):
 
         for elt in [ 'gui_params', 'objects', 'type', 'scopes' ]:
             if dict_1.get(elt) != dict_2.get(elt):
-                print "=======", elt, "========"
-                print dict_1.get(elt)
-                print "====================="
-                print dict_2.get(elt)
+                print("=======", elt, "========")
+                print(dict_1.get(elt))
+                print("=====================")
+                print(dict_2.get(elt))
                 fail = True 
 
         self.assertEqual(fail, False)

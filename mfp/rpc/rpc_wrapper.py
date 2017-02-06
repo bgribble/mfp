@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 rpc_wrapper.py:
 Simple RPC-able class wrapper working with RPCHost
@@ -6,7 +6,7 @@ Simple RPC-able class wrapper working with RPCHost
 Copyright (c) 2010-2014 Bill Gribble <grib@billgribble.com>
 '''
 
-from request import Request
+from .request import Request
 from mfp import log
 
 def rpcwrap(worker_proc):
@@ -36,9 +36,7 @@ class RPCMetaclass(type):
         klass.publishers = []
 
 
-class RPCWrapper (object):
-    __metaclass__ = RPCMetaclass
-
+class RPCWrapper (object, metaclass=RPCMetaclass):
     NO_CLASS = -1
     NO_METHOD = -2
     METHOD_FAILED = -3
@@ -129,7 +127,7 @@ class RPCWrapper (object):
         if not response:
             return None
         elif not r.result:
-            print "FIXME: no result should return a deferment"
+            print("FIXME: no result should return a deferment")
             return None
 
         status, retval = r.result
@@ -157,7 +155,7 @@ class RPCWrapper (object):
                 working = callinfo.get("working", 1) - 1
                 callinfo["working"] = working
                 return rv
-            except Exception, e:
+            except Exception as e:
                 import traceback
                 raise RPCWrapper.MethodFailed(True, traceback.format_exc())
         else:

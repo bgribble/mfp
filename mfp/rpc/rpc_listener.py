@@ -5,7 +5,7 @@ import select
 
 from mfp.utils import QuittableThread 
 from mfp import log
-from request import Request 
+from .request import Request 
 
 class RPCListener (QuittableThread): 
     '''
@@ -87,7 +87,7 @@ class RPCExecRemote (QuittableThread):
         self.exec_file = exec_file 
         self.exec_args = list(args)
         self.process = None 
-        if kwargs.has_key("log_module"):
+        if "log_module" in kwargs:
             self.log_module = kwargs["log_module"]
         else:
             self.log_module = log.log_module
@@ -114,7 +114,7 @@ class RPCExecRemote (QuittableThread):
                     fileobj = self.process.stdout
                     r, w, e = select.select([fileobj], [], [], 0.25)
                     if fileobj in r:
-                        ll = fileobj.readline()
+                        ll = fileobj.readline().decode()
                     else: 
                         continue
                 else: 
@@ -143,9 +143,9 @@ class RPCExecRemote (QuittableThread):
                         if "Process error" in ll:
                             log.error("JACK: " + ll, module=self.log_module)
                     elif self.log_raw and len(ll):
-                        log.debug("%s:" % self.log_module, ll)
+                        log.debug("%s " % self.log_module, ll)
 
-            except Exception, e: 
+            except Exception as e: 
                 log.debug("RPCExecRemote: exiting with error", e)
                 self.join_req = True 
 
@@ -161,7 +161,7 @@ class RPCExecRemote (QuittableThread):
             try: 
                 p.terminate()
                 p.wait()
-            except OSError, e: 
+            except OSError as e: 
                 pass
 
         self.quit_req = True 

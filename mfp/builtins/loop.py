@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 loop.py:  Builtin iteration constructs
 
@@ -14,7 +14,7 @@ def iterable(o):
     try:
         getattr(o, '__getitem__')
         return True
-    except AttributeError, e:
+    except AttributeError as e:
         return False
 
 class For(Processor):

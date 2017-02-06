@@ -49,11 +49,11 @@ class DynLibTestCase (TestCase):
         stdout, stderr = p.communicate()
         p.wait()
         
-        print stdout
+        print(stdout)
         if stderr is not None:
-            print "---- stderr start ----"
-            print stderr
-            print "---- stderr end ----"
+            print("---- stderr start ----")
+            print(stderr)
+            print("---- stderr end ----")
         if p.returncode > 2:
             p.returncode = 2
 
@@ -125,7 +125,7 @@ class TestExt(Plugin):
                         continue
                     elif not tname.endswith("skip"):
                         testnames[tname] = True
-        tt = testnames.keys()
+        tt = list(testnames.keys())
         tt.sort()
         if len(tt) > 0:
             return { 'tests': tt, 'setup': setup, 'teardown': teardown }

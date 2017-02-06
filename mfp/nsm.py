@@ -34,13 +34,13 @@ def nsm_reply_handler(path, args, types, src, data):
     if args[0] == "/nsm/server/announce":
         log.debug("Under session management. Server says:", args[1])
     else: 
-        print "mfp.nsm: Unhandled /reply message:", args
+        print("mfp.nsm: Unhandled /reply message:", args)
 
 def nsm_error_handler(path, args, types, src, data):
     log.debug("Session manager reports error:", args)
 
 def nsm_open_handler(path, args, types, src, data):
-    print "mfp.nsm open:", path, args, types, src, data 
+    print("mfp.nsm open:", path, args, types, src, data) 
 
     projectpath = args[0]
     client_id = args[2]

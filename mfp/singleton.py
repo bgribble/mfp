@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 singleton.py
 Singleton metaclass
@@ -22,9 +22,7 @@ class SingletonMeta (type):
                 self._singleton = super(SingletonMeta, self).__call__(*args, **kwargs)
             return self._singleton
 
-class Singleton (object):
-    __metaclass__ = SingletonMeta
-
+class Singleton (object, metaclass=SingletonMeta):
     @classmethod
     def __new__(cls, *args):
         with cls._singleton_lock:

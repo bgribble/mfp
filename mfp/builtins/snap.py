@@ -48,7 +48,7 @@ class Snap(Processor):
             for param, val in self.inlets[1].items():
                 try:
                     self.dsp_setparam(param, float(val))
-                except Exception, e:
+                except Exception as e:
                     import traceback 
                     tb = traceback.format_exc()
                     log.debug("snap~: Error setting param", param, "to", type(val), str(val))

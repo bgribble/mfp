@@ -1,5 +1,5 @@
 
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 errtest.py: Error test helper (not of use unless you want to crash MFP)
 

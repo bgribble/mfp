@@ -3,20 +3,20 @@ import simplejson as json
 import threading
 import socket
 
-from request import Request, extended_decoder_hook
-from rpc_wrapper import RPCWrapper
+from .request import Request, extended_decoder_hook
+from .rpc_wrapper import RPCWrapper
 from mfp.utils import QuittableThread
 from mfp import log
-from worker_pool import WorkerPool
+from .worker_pool import WorkerPool
 
 def blather(func):
     from datetime import datetime
     def inner(self, *args, **kwargs):
         if self.node_id in (1, None):
-            print "%s DEBUG %s -- enter" % (datetime.now(), func.__name__)
+            print("%s DEBUG %s -- enter" % (datetime.now(), func.__name__))
         rv = func(self, *args, **kwargs)
         if self.node_id in (1, None):
-            print "%s DEBUG %s -- leave (%s)" % (datetime.now(), func.__name__,  rv)
+            print("%s DEBUG %s -- leave (%s)" % (datetime.now(), func.__name__,  rv))
         return rv
     return inner
 
@@ -26,7 +26,7 @@ class RPCHost (QuittableThread):
     RPCHost -- create and manage connections and proxy objects.  Both client and
     server need an RPCHost, one per process.
     '''
-    SYNC_MAGIC = "[ SYNC ]"
+    SYNC_MAGIC = b"[ SYNC ]"
 
     class SyncError (Exception):
         pass
@@ -87,7 +87,7 @@ class RPCHost (QuittableThread):
                 cbthread.start()
 
     def notify_peer(self, peer_id):
-        req = Request("publish", dict(classes=self.served_classes.keys()))
+        req = Request("publish", dict(classes=list(self.served_classes.keys())))
         self.put(req, peer_id)
         self.wait(req)
 
@@ -122,9 +122,9 @@ class RPCHost (QuittableThread):
         # find the right socket
         sock = self.managed_sockets.get(peer_id)
         if sock is None:
-            print "[%s] RPCHost.put: peer_id %s has no mapped socket" % (datetime.now(),
-                                                                         peer_id)
-            print req.serialize()
+            print("[%s] RPCHost.put: peer_id %s has no mapped socket" % (datetime.now(),
+                                                                         peer_id))
+            print(req.serialize())
             raise Exception()
 
         # is this a request?  if so, put it in the pending dict
@@ -138,11 +138,11 @@ class RPCHost (QuittableThread):
             jdata = req.serialize()
             with self.lock:
                 sock.send(self.SYNC_MAGIC)
-                sock.send("% 8d" % len(jdata))
-                sock.send(jdata)
-        except Exception, e:
-            print "[%s] RPCHost.put: SEND error: %s" % (datetime.now(), e)
-            print req.serialize()
+                sock.send(b"% 8d" % len(jdata))
+                sock.send(jdata.encode())
+        except Exception as e:
+            print("[%s] RPCHost.put: SEND error: %s" % (datetime.now(), e))
+            print(req.serialize())
             raise Exception()
 
     def wait(self, req, timeout=None):
@@ -215,20 +215,20 @@ class RPCHost (QuittableThread):
                 if s.fileno() not in self.fdsockets:
                     self.fdsockets[s.fileno()] = s
             try:
-                sockets = self.fdsockets.keys()
+                sockets = list(self.fdsockets.keys())
                 if sockets:
-                    rdy, _w, _x = select.select(self.fdsockets.keys(), [], [], 0.1)
+                    rdy, _w, _x = select.select(list(self.fdsockets.keys()), [], [], 0.1)
                 else:
                     time.sleep(0.1)
-            except Exception, e:
-                print "select exception:", e
+            except Exception as e:
+                print("select exception:", e)
 
             if not rdy:
                 continue
             syncbytes = 8
-            sync = ''
+            sync = b''
             for rsock in rdy:
-                jdata = ''
+                jdata = b''
                 retry = 1
                 while retry:
                     sock = self.fdsockets.get(rsock)
@@ -260,7 +260,7 @@ class RPCHost (QuittableThread):
                             if recvlen < jlen:
                                 log.warning("RPCHost: got short packet (%d of %d)"
                                             % (recvlen, jlen))
-                    except RPCHost.SyncError, e:
+                    except RPCHost.SyncError as e:
                         log.warning("RPCHost: sync error, resyncing")
                         pass
                     except (socket.error, RPCHost.RecvError) as e:
@@ -269,19 +269,19 @@ class RPCHost (QuittableThread):
                         jdata = None
                         deadpeer = self.peers_by_socket[sock]
                         self.unmanage(deadpeer)
-                    except Exception, e:
+                    except Exception as e:
                         log.error("RPCHost: unhandled exception", type(e), e)
                         log.debug(jdata)
                         log.debug_traceback()
                         retry = 0
-                        jdata = ""
+                        jdata = b""
 
                     if jdata is not None and len(jdata) >=  jlen:
                         peer_id = self.peers_by_socket.get(sock)
                         self.read_workers.submit((jdata, peer_id))
 
         if self.node_id == 0:
-            peers = self.managed_sockets.keys()
+            peers = list(self.managed_sockets.keys())
             for node in peers:
                 req = Request("exit_request", {})
                 self.put(req, node)
@@ -294,7 +294,7 @@ class RPCHost (QuittableThread):
             self.wait(req)
 
 
-        for clsname, cls in self.served_classes.items():
+        for clsname, cls in list(self.served_classes.items()):
             self.unpublish(cls)
 
         for clsname, cls in RPCWrapper.rpctype.items():
@@ -333,11 +333,11 @@ class RPCHost (QuittableThread):
             try:
                 retval = obj.call_locally(rpcdata)
                 req.result = (RPCWrapper.METHOD_OK, retval)
-            except RPCWrapper.MethodNotFound, e:
+            except RPCWrapper.MethodNotFound as e:
                 req.result = (RPCWrapper.NO_METHOD, None)
-            except RPCWrapper.MethodFailed, e:
+            except RPCWrapper.MethodFailed as e:
                 req.result = (RPCWrapper.METHOD_FAILED, e.traceback)
-            except Exception, e:
+            except Exception as e:
                 import traceback
                 einfo = ("Method call failed rpcid=%s node=%s\nobj=%s data=%s\n" %
                          (rpcid, peer_id, obj, rpcdata))
@@ -374,8 +374,8 @@ class RPCHost (QuittableThread):
             pass
 
         else:
-            print "rpc_wrapper: WARNING: no handler for method '%s'" % method
-            print "call data:", rpcid, method, rpcdata
+            print("rpc_wrapper: WARNING: no handler for method '%s'" % method)
+            print("call data:", rpcid, method, rpcdata)
 
         req.method = None
         req.params = None

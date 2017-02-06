@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 biquad.py: Biquad filter implementation
 
@@ -29,7 +29,7 @@ class Biquad(Processor):
             for param, val in self.inlets[0].items():
                 try:
                     self.dsp_setparam(param, float(val))
-                except Exception, e:
+                except Exception as e:
                     import traceback
                     tb = traceback.format_exc()
                     log.debug("biquad~: Error setting param", param, "to", type(val), str(val))

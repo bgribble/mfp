@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 method.py: MethodCall wrapper for passing messages to objects
 
@@ -33,7 +33,7 @@ class MethodCall(object):
     def call(self, target):
         try:
             m = getattr(target, self.method)
-        except AttributeError, e:
+        except AttributeError as e:
             raise MethodCallError("Method '%s' not found for type '%s'" % (self.method, target.init_type))
 
         if callable(m):

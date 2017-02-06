@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python
 '''
 midi.py: MIDI handling for MFP
 
@@ -340,7 +340,7 @@ class MFPMidiManager(QuittableThread):
 
     def register(self, callback, data=None, filters=None):
         import copy 
-        from utils import isiterable 
+        from .utils import isiterable 
         if filters == None:
             filters = {} 
 
@@ -436,7 +436,7 @@ class MFPMidiManager(QuittableThread):
                 cb_id, callback, filters, data = cbinfo
                 try:
                     callback(event, data)
-                except Exception, e: 
+                except Exception as e: 
                     log.debug("Error in MIDI event handler:", e)
 
     def send(self, port, event):
@@ -454,6 +454,6 @@ class MFPMidiManager(QuittableThread):
         elapsed = datetime.now() - starttime
 
         if elapsed > timedelta(microseconds=1000):
-            print "MIDI send took %s milliseconds" % timedelta.total_seconds() * 1000
+            print("MIDI send took %s milliseconds" % timedelta.total_seconds() * 1000)
 
 

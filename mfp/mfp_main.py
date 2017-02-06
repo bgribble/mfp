@@ -91,9 +91,9 @@ def test_imports():
     except Exception as e: 
         import traceback 
         traceback.print_exc() 
-        print
-        print "FATAL: Required package not installed.  Please run 'waf install_deps'"
-        print 
+        print()
+        print("FATAL: Required package not installed.  Please run 'waf install_deps'")
+        print() 
         sys.exit(-1)
 
 def main():
@@ -236,7 +236,7 @@ def main():
             continue
         try: 
             evaluator.exec_file(fullpath)
-        except Exception, e: 
+        except Exception as e: 
             log.debug("initfile: Exception while loading initfile", f) 
             log.debug(e)
 
@@ -257,16 +257,16 @@ def main():
         app.open_file(None)
         for name, factory in sorted(app.registry.items()): 
             if hasattr(factory, 'doc_tooltip_obj'):
-                print "%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj) 
+                print("%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj)) 
             else: 
                 try: 
                     o = factory(name, None, app.patches['default'], None, "")
-                    print "%-12s : %s" % ("[%s]" % name, o.doc_tooltip_obj) 
-                except Exception, e:
+                    print("%-12s : %s" % ("[%s]" % name, o.doc_tooltip_obj)) 
+                except Exception as e:
                     import traceback
-                    print "(caught exception trying to create %s)" % name, e
+                    print("(caught exception trying to create %s)" % name, e)
                     traceback.print_exc()
-                    print "%-12s : No documentation found" % ("[%s]" % name,)
+                    print("%-12s : No documentation found" % ("[%s]" % name,))
         app.finish()
     else: 
         patchfiles = args.get("patchfile")

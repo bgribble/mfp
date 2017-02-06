@@ -12,7 +12,7 @@ log_func = None
 log_debug = True
 log_force_console = False 
 
-ts_trans = string.maketrans("0123456789", "xxxxxxxxxx")
+ts_trans = str.maketrans("0123456789", "xxxxxxxxxx")
 
 def make_log_entry(tag, *parts):
     global log_time_base
@@ -52,12 +52,12 @@ def write_log_entry(msg, level=0):
 def rpclog(msg, level):
     levels = { 0: "DEBUG", 1: "WARNING", 2: "ERROR", 3: "FATAL" }
     if msg:
-        print "[LOG] %s: %s" % (levels.get(level, "DEBUG"), msg)
+        print("[LOG] %s: %s" % (levels.get(level, "DEBUG"), msg))
         sys.stdout.flush()
 
 def error(* parts, **kwargs):
     global log_module
-    if kwargs.has_key("module"):
+    if "module" in kwargs:
         module = kwargs["module"]
     else: 
         module = log_module 
@@ -66,7 +66,7 @@ def error(* parts, **kwargs):
 
 def warning(* parts, **kwargs):
     global log_module
-    if kwargs.has_key("module"):
+    if "module" in kwargs:
         module = kwargs["module"]
     else: 
         module = log_module 
@@ -75,7 +75,7 @@ def warning(* parts, **kwargs):
 
 def info(* parts, **kwargs):
     global log_module
-    if kwargs.has_key("module"):
+    if "module" in kwargs:
         module = kwargs["module"]
     else: 
         module = log_module 
@@ -86,7 +86,7 @@ def debug(* parts, **kwargs):
     global log_debug
     global log_module
 
-    if kwargs.has_key("module"):
+    if "module" in kwargs:
         module = kwargs["module"]
     else: 
         module = log_module 

@@ -1,6 +1,6 @@
 import os
 import time
-import ConfigParser
+import configparser
 import simplejson as json
 
 from .patch import Patch
@@ -353,7 +353,7 @@ class MFPApp (Singleton):
                 thunk = patch.parse_obj(init_type)
                 if callable(thunk):
                    ctor = builtins.pyfunc.PyAutoWrap
-            except Exception, e:
+            except Exception as e:
                 log.error("Cannot autowrap %s as a Python callable" % init_type)
                 log.error(e)
 
@@ -393,7 +393,7 @@ class MFPApp (Singleton):
             if obj and obj.obj_id:
                 obj.mark_ready()
             return obj
-        except Exception, e:
+        except Exception as e:
             log.error("Caught exception while trying to create %s (%s)"
                       % (init_type, init_args))
             log.debug(e)
@@ -566,7 +566,7 @@ class MFPApp (Singleton):
         if sessfile is None:
             return None
 
-        cp = ConfigParser.SafeConfigParser(allow_no_value=True)
+        cp = configparser.SafeConfigParser(allow_no_value=True)
         cp.add_section("mfp")
 
         for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs",
@@ -590,7 +590,7 @@ class MFPApp (Singleton):
     def session_load(self, session_path, session_id):
         self.session_dir = session_path
         self.session_id = session_id
-        cp = ConfigParser.SafeConfigParser(allow_no_value=True)
+        cp = configparser.SafeConfigParser(allow_no_value=True)
 
         log.debug("Loading saved session", session_path, session_id)
 

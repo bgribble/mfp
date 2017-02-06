@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 key_sequencer.py: Collect modifiers and key/mouse clicks into Emacs-like strings
 
@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from mfp import log
 from gi.repository import Clutter
+from .key_defs import *
 
 def get_key_unicode(ev):
     if ev.unicode_value:
@@ -33,7 +34,6 @@ class KeySequencer (object):
 
     def process(self, event):
         from gi.repository import Clutter
-        from .key_defs import *
 
         # KEY PRESS
         if event.type == Clutter.EventType.KEY_PRESS:
@@ -65,7 +65,6 @@ class KeySequencer (object):
             self.sequences.append(self.canonicalize(event))
 
     def canonicalize(self, event):
-        from .key_defs import *
         key = ''
 
         if (MOD_CTRL in self.mod_keys) or (MOD_RCTRL in self.mod_keys):

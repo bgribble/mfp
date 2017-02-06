@@ -139,6 +139,6 @@ class CubicEstimator(object):
 e = CubicEstimator([0, math.pi * 2], 9, math.sin)
 
 for x in frange(0, math.pi * 2, 441):
-    print x, math.sin(x), e.est(x), e.est(x) - math.sin(x)
+    print(x, math.sin(x), e.est(x), e.est(x) - math.sin(x))
 
-print e.cubic_coeffs
+print(e.cubic_coeffs)

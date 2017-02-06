@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 label_edit.py: Minor mode for editing contents of a clutter.Text label
 

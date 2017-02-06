@@ -25,7 +25,7 @@ class LexicalScope (object):
         if m:
             basename = name[:-4]
 
-        while self.bindings.has_key(testname):
+        while testname in self.bindings:
             counter += 1
             if counter > 999:
                 fmt = "_%d"

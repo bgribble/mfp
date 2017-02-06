@@ -27,37 +27,37 @@ class DSPObjectTests (TestCase):
     def test_read(self):
         '''test_read: [dsp] can read back a creation parameter'''
         o = mkproc(self, "osc~", "500")
-        print "test_read: objid = ", o, o.dsp_obj
+        print("test_read: objid = ", o, o.dsp_obj)
         f = o.dsp_obj.getparam("_sig_1")
-        print f
+        print(f)
         assert f == 500
 
     def test_connect_disconnect(self):
         '''test_connect_disconnect: [dsp] make/break connections'''
-        print "============= Creating in~"
+        print("============= Creating in~")
         inp = mkproc(self, "in~", "0")
-        print "============= Creating out~"
+        print("============= Creating out~")
         outp = mkproc(self, "out~", "0")
 
-        print "============= Created objects"
+        print("============= Created objects")
         inp.connect(0, outp, 0)
-        print "============= Called connect"
+        print("============= Called connect")
         inp.disconnect(0, outp, 0)
-        print "============== disconnected"
+        print("============== disconnected")
 
     def test_delete(self):
         '''test_destroy: [dsp] destroy dsp object'''
-        print "Creating"
+        print("Creating")
         inp = mkproc(self, "in~", "0")
         outp = mkproc(self, "out~", "0")
-        print "connecting"
+        print("connecting")
         inp.connect(0, outp, 0)
-        print "deleting"
+        print("deleting")
         outp.delete()
         inp.delete()
-        print "done"
+        print("done")
 
 
 def teardown():
     MFPApp().finish()
-    print "test-dsp.py: MFPApp finish done"
+    print("test-dsp.py: MFPApp finish done")

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 p_listops.py: Wrappers for common list operations
 
@@ -94,9 +94,9 @@ class Zip (Processor):
 
     def trigger(self):
         if len(self.inlets) == 1:
-            self.outlets[0] = zip(*self.inlets[0])
+            self.outlets[0] = list(zip(*self.inlets[0]))
         else: 
-            self.outlets[0] = zip(*self.inlets)
+            self.outlets[0] = list(zip(*self.inlets))
 
 class Map (Processor):
     doc_tooltip_obj = "Apply a function to each list element"
@@ -113,7 +113,7 @@ class Map (Processor):
 
 
     def trigger(self):
-        self.outlets[0] = map(self.inlets[1], self.inlets[0])
+        self.outlets[0] = list(map(self.inlets[1], self.inlets[0]))
 
 
 class Slice (Processor):

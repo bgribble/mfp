@@ -140,7 +140,7 @@ class MFPCommand(RPCWrapper):
     def log_write(self, msg):
         from .mfp_app import MFPApp
         if log.log_force_console:
-            print 'console:', msg 
+            print('console:', msg) 
         MFPApp().gui_command.log_write(msg)
 
     @rpcwrap
@@ -256,7 +256,7 @@ class MFPCommand(RPCWrapper):
         from .dsp_object import DSPContext 
         ctxt = DSPContext.lookup(node_id, context_id)
         patch = MFPApp().open_file(file_name, ctxt, False)
-        patch.hot_inlets = range(len(patch.inlets))
+        patch.hot_inlets = list(range(len(patch.inlets)))
         patch.gui_params['deletable'] = False
         return patch.obj_id
 

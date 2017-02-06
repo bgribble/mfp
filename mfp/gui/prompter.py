@@ -36,8 +36,8 @@ class Prompter (object):
         if self.current_callback:
             try: 
                 self.current_callback(text)
-            except Exception, e: 
-                print "Prompter exception in callback:", e
+            except Exception as e: 
+                print("Prompter exception in callback:", e)
                 pass 
 
     def end_edit(self):

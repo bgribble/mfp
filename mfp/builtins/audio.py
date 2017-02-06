@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 audio.py:  Builtin AudioOut/AudioIn DSP objects
 

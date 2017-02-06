@@ -35,7 +35,7 @@ class Print (Processor):
             elif '%' in self.format_string:
                 try:
                     out = self.format_string % self.inlets[0]
-                except TypeError, e:
+                except TypeError as e:
                     pass
             if out is None:
                 if not self.format_string:

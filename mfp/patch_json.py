@@ -107,8 +107,8 @@ def json_unpack_connections(self, data, idmap):
                 dstobj = idmap.get(c[0])
                 inlet = c[1]
                 if dstobj is None:
-                    print "Deserializing problem: can't make connection to", c[0]
-                    print prms 
+                    print("Deserializing problem: can't make connection to", c[0])
+                    print(prms) 
                 else: 
                     srcobj.connect(outlet, dstobj, inlet)
 
@@ -116,7 +116,7 @@ def json_unpack_connections(self, data, idmap):
 def json_unpack_objects(self, data, scope):
     from .mfp_app import MFPApp
     idmap = {}
-    idlist = data.get('objects').keys()
+    idlist = list(data.get('objects').keys())
     idlist.sort(key=lambda x: int(x))
     need_gui = []
 
@@ -158,7 +158,7 @@ def json_serialize(self):
     f['hot_inlets'] = self.hot_inlets 
 
     allobj = {}
-    keys = self.objects.keys()
+    keys = list(self.objects.keys())
     keys.sort()
     for oid in keys:
         o = self.objects.get(oid)

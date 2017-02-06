@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 worker_pool.py
 Thread pool for processing units of work
@@ -42,7 +42,7 @@ class BaseWorker (object):
                 # take_work a chunk of data
                 try:
                     workunit = self.take_work()
-                except WorkerPool.Empty, e:
+                except WorkerPool.Empty as e:
                     continue 
 
                 # perform_work data
@@ -74,8 +74,8 @@ class BaseWorker (object):
                 return self.thunk(self, data)
             else:
                 return True
-        except Exception, e:
-            print "[worker] Exception while performing work:", data
+        except Exception as e:
+            print("[worker] Exception while performing work:", data)
             return True
         
     def exit(self):
@@ -131,7 +131,7 @@ class WorkerPool (object):
                 return False 
 
     def worker_consuming(self, worker):
-        from rpc_wrapper import RPCWrapper
+        from .rpc_wrapper import RPCWrapper
 
         with self.lock:
             if worker in self.working_pool:

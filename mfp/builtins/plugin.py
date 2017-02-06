@@ -33,7 +33,7 @@ class Plugin(Processor):
 
         Processor.__init__(self, self.plug_inlets, self.plug_outlets, init_type, init_args,
                            patch, scope, name)
-        self.hot_inlets = range(self.plug_inlets)
+        self.hot_inlets = list(range(self.plug_inlets))
         self.dsp_init("ladspa~", lib_name=self.lib_name, lib_index=self.lib_index,
                       plug_control=self.plug_control)
 

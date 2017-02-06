@@ -33,7 +33,7 @@ class RadioGroup (Processor):
 
         self.init_selection = init_selection 
         self.selection = None
-        self.hot_inlets = range(num_inlets)
+        self.hot_inlets = list(range(num_inlets))
 
         self.doc_tooltip_inlet = [] 
         self.doc_tooltip_outlet = [] 

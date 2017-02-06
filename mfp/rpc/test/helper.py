@@ -47,8 +47,8 @@ def main():
 
     try: 
         QuittableThread.wait_for_all()
-    except Exception, e:
-        print "wait_for_all caught error"
+    except Exception as e:
+        print("wait_for_all caught error")
 
 if __name__ == "__main__":
     main()

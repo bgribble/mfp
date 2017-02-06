@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 request.py
 Request object for use with RequestPipe
@@ -42,7 +42,7 @@ class ExtendedEncoder (json.JSONEncoder):
 def extended_decoder_hook (saved):
     from ..bang import Bang, Uninit
     if (isinstance(saved, dict) and len(saved.keys()) == 1):
-        tname, tdict = saved.items()[0]
+        tname, tdict = list(saved.items())[0]
         if tname == "__BangType__":
             return Bang
         elif tname == "__UninitType__":
@@ -101,16 +101,16 @@ class Request(object):
     def from_dict(cls, obj):
         req = Request(obj.get("method"), obj.get("params"))
 
-        if obj.has_key("id"):
+        if "id" in obj:
             req.request_id = obj['id']
 
-        if obj.has_key("diagnostic"):
+        if "diagnostic" in obj:
             req.diagnostic = obj['diagnostic']
 
-        if obj.has_key("error"):
+        if "error" in obj:
             # a response 
             req.result = obj['error']
-        elif obj.has_key("result"):
+        elif "result" in obj:
             req.result = obj['result']
             if req.result is not None:
                 req.state = Request.RESPONSE_RCVD

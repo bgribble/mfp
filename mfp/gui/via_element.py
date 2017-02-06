@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 via_element.py
 A patch element corresponding to a send or receive box

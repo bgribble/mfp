@@ -38,7 +38,7 @@ def clonescope(self, scopename, num_copies, **kwargs):
             ccount = int(parts[-1]) + 1
             cdigits = len(parts[-1])
             basename = '_'.join(parts[:-1])
-        except Exception, e:
+        except Exception as e:
             log.error("clonescope: caught exception", e)
             log.debug_traceback()
 
@@ -149,7 +149,7 @@ def clonescope(self, scopename, num_copies, **kwargs):
 
     if not MFPApp().no_onload:
         self.task_nibbler.add_task(
-            lambda (objects): self._run_onload(objects), False,
+            lambda objects: self._run_onload(objects), False,
             [obj for obj in all_clones]
         )
 

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 p_pyfunc.py: Wrappers for common unary and binary Python functions
 
@@ -13,9 +13,9 @@ from ..bang import Bang, Uninit
 
 def get_arglist(thunk): 
     if hasattr(thunk, 'func_code'): 
-        return thunk.func_code.co_varnames
+        return thunk.__code__.co_varnames
     elif hasattr(thunk, '__func__'):
-        return thunk.__func__.func_code.co_varnames 
+        return thunk.__func__.__code__.co_varnames 
     else:
         return None
 
@@ -325,7 +325,7 @@ def register():
     mk_binary(operator.add, "+", "Add")
     mk_binary(operator.sub, "-", "Subtract")
     mk_binary(operator.mul, "*", "Multiply")
-    mk_binary(operator.div, "/", "Divide")
+    mk_binary(operator.truediv, "/", "Divide")
     mk_binary(operator.mod, "%", "Modulo")
     mk_binary(operator.pow, "^", "Raise to a power")
     mk_binary(operator.pow, "**", "Raise to a power")

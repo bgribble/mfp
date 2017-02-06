@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 arith.py:  Builtin arithmetic DSP ops
 

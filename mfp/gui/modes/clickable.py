@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 clickable.py: Control mode for clickable items (message, bang, toggle)
 

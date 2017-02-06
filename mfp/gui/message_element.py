@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 message_element.py
 A patch element corresponding to a clickable message

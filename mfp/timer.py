@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 timer.py
 Multi-timer implementation
@@ -56,14 +56,14 @@ class MultiTimer(QuittableThread):
 
 def ptime(sched):
     t = datetime.now()
-    print "Scheduled: %s, actual: %s, diff: %s" % (sched, t, t - sched)
+    print("Scheduled: %s, actual: %s, diff: %s" % (sched, t, t - sched))
 
 
 if __name__ == "__main__":
     t = MultiTimer()
     t.start()
 
-    print "Scheduling pings."
+    print("Scheduling pings.")
     starttime = datetime.now()
     t.schedule(starttime + timedelta(milliseconds=1100), ptime,
                [starttime + timedelta(milliseconds=1100)])

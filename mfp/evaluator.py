@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 evaluator.py:  Augmented Python eval for strings in user interface
 
@@ -6,7 +6,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 import tokenize
-from StringIO import StringIO
+from io import StringIO
 
 class LazyExpr(object): 
     def __init__(self, thunk):
@@ -87,8 +87,8 @@ class Evaluator (object):
 
 
         environ = { name: val 
-                    for name, val in (self.global_names.items() + self.local_names.items() 
-                                      + extra_bindings.items())
+                    for name, val in (list(self.global_names.items()) + list(self.local_names.items()) 
+                                      + list(extra_bindings.items()))
                   } 
         if "__self__" in environ:
             environ["self"] = environ["__self__"]

@@ -48,7 +48,7 @@ class StackDepthTest(TestCase):
         '''test_100: 100 recursions doesn't overflow stack'''
         self.inc.limit = 100
         self.var.send(0, 0)
-        print "Last value:", self.inc.lastval
+        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100)
 
@@ -56,7 +56,7 @@ class StackDepthTest(TestCase):
         '''test_1000: 1000 recursions doesn't overflow stack'''
         self.inc.limit = 1000
         self.var.send(0, 0)
-        print "Last value:", self.inc.lastval
+        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 1000)
 
@@ -64,7 +64,7 @@ class StackDepthTest(TestCase):
         '''test_10000: 10000 recursions doesn't overflow stack'''
         self.inc.limit = 10000
         self.var.send(0, 0)
-        print "Last value:", self.inc.lastval
+        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 10000)
 
@@ -72,7 +72,7 @@ class StackDepthTest(TestCase):
         '''test_100000: 100000 recursions doesn't overflow stack'''
         self.inc.limit = 100000
         self.var.send(0, 0)
-        print "Last value:", self.inc.lastval
+        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100000)
 
@@ -91,5 +91,5 @@ class DepthFirstTest(TestCase):
     def test_depthfirst(self):
         '''test_depthfirst: depth-first execution order is preserved'''
         self.procs[0].send(Bang, 0)
-        print FanOut.trail
+        print(FanOut.trail)
         self.assertEqual(FanOut.trail, [0, 1, 5, 6, 7, 8, 2, 3, 9, 4])

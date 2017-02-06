@@ -49,7 +49,7 @@ class Processor (object):
 
         self.inlets = [Uninit] * inlets
         self.outlets = [Uninit] * outlets
-        self.outlet_order = range(outlets)
+        self.outlet_order = list(range(outlets))
         self.status = Processor.CTOR
         self.tags = {}
         self.properties = {}
@@ -208,7 +208,7 @@ class Processor (object):
         pass
 
     def assign(self, patch, scope, name):
-        from mfp_app import MFPApp
+        from .mfp_app import MFPApp
         # null case
         if (self.patch == patch) and (self.scope == scope) and (self.name == name):
             return
@@ -503,7 +503,7 @@ class Processor (object):
                     self.disconnect(outlet, tobj, tport)
             self.outlets[outlets:] = []
             self.connections_out[outlets:] = []
-        self.outlet_order = range(len(self.outlets))
+        self.outlet_order = list(range(len(self.outlets)))
 
         self.conf(num_inlets=inlets, num_outlets=outlets)
 
@@ -525,7 +525,7 @@ class Processor (object):
         if inlet > len(target.inlets):
             if isinstance(target, Patch):
                 Patch.task_nibbler.add_task(
-                    lambda (args): Processor.connect(*args), 20, 
+                    lambda args: Processor.connect(*args), 20, 
                     [self, outlet, target, inlet, show_gui])
                 log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
                             % (target.name, target.obj_id, len(target.inlets), inlet))
@@ -540,7 +540,7 @@ class Processor (object):
             if inlet not in target.dsp_inlets:
                 if isinstance(target, Patch):
                     Patch.task_nibbler.add_task(
-                        lambda (args): Processor.connect(*args), 20, 
+                        lambda args: Processor.connect(*args), 20, 
                         [self, outlet, target, inlet, show_gui])
                     log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
                                 % (target.name, target.obj_id))
@@ -615,7 +615,7 @@ class Processor (object):
                 w_target, w_val, w_inlet = work[0]
                 with w_target.trigger_lock:
                     work[:1] = w_target._send(w_val, w_inlet)
-        except Exception, e:
+        except Exception as e:
             import traceback
             tb = traceback.format_exc()
             log.error("%s (%s): send to inlet %d failed: %s" %
@@ -651,7 +651,7 @@ class Processor (object):
             else:
                 self.trigger()
                 self.count_trigger += 1
-            output_pairs = zip(self.connections_out, self.outlets)
+            output_pairs = list(zip(self.connections_out, self.outlets))
 
             for conns, val in [output_pairs[i] for i in self.outlet_order]:
                 if val is not Uninit:

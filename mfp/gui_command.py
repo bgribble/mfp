@@ -21,7 +21,7 @@ class GUICommand (RPCWrapper):
         if window:
             MFPGUI().appwin.log_write(msg, level)
         else: 
-            print msg
+            print(msg)
 
     @rpcwrap
     def console_write(self, msg):

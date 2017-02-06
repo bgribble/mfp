@@ -171,7 +171,7 @@ class Patch(Processor):
     # patch contents management
     #############################
     def trigger(self):
-        inlist = range(len(self.inlets))
+        inlist = list(range(len(self.inlets)))
         inlist.reverse()
 
         for i in inlist:
@@ -201,7 +201,7 @@ class Patch(Processor):
         Processor.method(self, message, inlet)
 
     def add(self, obj):
-        if self.objects.has_key(obj.obj_id):
+        if obj.obj_id in self.objects:
             return
 
         self.objects[obj.obj_id] = obj
@@ -272,7 +272,7 @@ class Patch(Processor):
         initial = Processor.connect(self, outlet, target, inlet, show_gui)
         if not initial:
             self.task_nibbler.add_task(
-                lambda (args): _patch_connect_retry(args), 20,
+                lambda args: _patch_connect_retry(args), 20,
                 [self, outlet, target, inlet, show_gui]
             )
         return True
@@ -380,7 +380,7 @@ class Patch(Processor):
 
             cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
             for dline in cdiff:
-                print dline
+                print(dline)
 
             if oldjson != newjson:
                 log.warning("Unsaved changes in '%s'" % self.name, "(%s)" % self.file_origin)
@@ -438,7 +438,7 @@ class Patch(Processor):
             self.gui_params["dsp_context"] = self.context.context_name
             if not MFPApp().no_onload:
                 self.task_nibbler.add_task(
-                    lambda (objects): self._run_onload(objects), False,
+                    lambda objects: self._run_onload(objects), False,
                     [obj for obj in self.objects.values()]
                 )
 
@@ -499,9 +499,9 @@ class Patch(Processor):
             h = max_y - min_y + 2
 
         self.conf(export_x=x, export_y=y, export_w=w, export_h=h,
-                  width=max(self.gui_params.get('width'),
+                  width=max(self.gui_params.get('width') or 0,
                             self.gui_params.get('export_w') or 0),
-                  height=max(self.gui_params.get('height'),
+                  height=max(self.gui_params.get('height') or 0,
                              (self.gui_params.get('export_h') or 0) + 20))
 
     def create_export_gui(self):
@@ -530,7 +530,7 @@ class Patch(Processor):
             del MFPApp().patches[self.name]
 
 # load extension methods
-import patch_json
-import patch_lv2
-import patch_clonescope
+from . import patch_json
+from . import patch_lv2
+from . import patch_clonescope
 

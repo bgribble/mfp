@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.7
+#! /usr/bin/env python
 '''
 osc.py: OSC server for MFP
 
@@ -18,7 +18,7 @@ class MFPOscManager(QuittableThread):
 
         try:
             self.server = liblo.Server(self.port)
-        except liblo.ServerError, err:
+        except liblo.ServerError as err:
             self.server = liblo.Server()
             self.port = self.server.get_port()
             log.warning("OSC: Unable to use requested port %s, using %s instead" 
@@ -42,7 +42,7 @@ class MFPOscManager(QuittableThread):
         self.server.del_method(path, args)
 
     def default(self, path, args, types, src):
-        print "Received unmatched OSC data:", path, args, types
+        print("Received unmatched OSC data:", path, args, types)
         for handler, data in self.default_handlers: 
             handler(path, args, types, src, data)
         return True

@@ -43,7 +43,7 @@ def activate_virtualenv(ctxt):
 def make_virtualenv(ctxt, *args, **kwargs):
     if ctxt.env.USE_VIRTUALENV:
         targetfile = ".waf-built-virtual"
-        vrule = ("cd %s && %s --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s) && cp virtual/bin/activate virtual/bin/activate.orig"
+        vrule = ("cd %s && %s -p python3 --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s) && cp virtual/bin/activate virtual/bin/activate.orig"
                  % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ctxt.out_dir, targetfile))
         ctxt(rule = vrule, target = targetfile, shell = True)
 
@@ -54,7 +54,7 @@ def fix_virtualenv(ctxt, *args, **kwargs):
         cmds = [
             "cd %s" % ctxt.out_dir,
             "echo 'Making virtualenv relocatable'",
-            "%s --relocatable virtual" % ctxt.env.VIRTUALENV[0],
+            "%s -p python3 --relocatable virtual" % ctxt.env.VIRTUALENV[0],
             "rm -rf virtual/local",
             (("cat virtual/bin/activate "
               + "| sed -e 's/^VIRTUAL_ENV=.*$/VIRTUAL_ENV=\"%s\/\"/' "
@@ -300,7 +300,7 @@ def options(opt):
 def configure(conf):
     conf.load(WAFTOOLS)
     # Python and dev files
-    conf.check_python_version((2,7))
+    conf.check_python_version((3,5))
     conf.check_python_headers()
     # check for Debian style
     conf.start_msg("Checking for site-packages vs. dist-packages (Debian-style)")
@@ -368,7 +368,7 @@ def configure(conf):
     conf.env.PKGCONF_LIBS = uselibs
 
     pip_libs = ["posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy", 
-                "nose", "yappi", "pyliblo" ]
+                "nose", "yappi", "cython", "pyliblo" ]
     gi_libs = [ "Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
     pip_notfound = []

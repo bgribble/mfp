@@ -102,7 +102,8 @@ class Route (Processor):
             else:
                 direct_addr = self.addresses.get(k)
                 type_addr = None
-                type_matches = [self.type_addresses.get(t) for t in self.type_addresses.keys()
+                type_matches = [self.type_addresses.get(t) 
+                                for t in self.type_addresses.keys()
                                 if isinstance(k, t)]
                 if type_matches:
                     type_addr = min(type_matches)

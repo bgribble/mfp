@@ -59,7 +59,7 @@ def lv2_create_dir(self, plugname):
     if not dir_ok:
         return None
 
-    print "Patch.lv2_create_dir: made lv2 plugin dir '%s'" % fullpath
+    print("Patch.lv2_create_dir: made lv2 plugin dir '%s'" % fullpath)
     return fullpath
 
 

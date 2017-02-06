@@ -5,10 +5,10 @@ from setuptools import setup
 
 def shcall(cmdline):
     from subprocess import Popen,PIPE
-    return Popen(cmdline.split(), stdout=PIPE).communicate()[0]
+    return str(Popen(cmdline.split(), stdout=PIPE).communicate()[0])
 
 def git_version(): 
-    vers = shcall("git show --oneline").split('\n')[0].split(' ')[0]
+    vers = shcall(b"git show --oneline").split('\n')[0].split(' ')[0]
     return 'git_' + vers.strip()
 
 setup (name = 'mfp',
@@ -19,4 +19,3 @@ setup (name = 'mfp',
        entry_points = { 'console_scripts': ['mfp=mfp.mfp_main:main',
                                             'mfpgui=mfp.gui_main:main'] },
        package_data = { 'mfp.gui': ['mfp.glade'] })
-

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2.6
+#! /usr/bin/env python
 '''
 plot.py: Stub for graphical plot I/O
 
@@ -83,7 +83,7 @@ class Scatter (Processor):
             channels = initargs[0]
         else:
             channels = 1
-        self.hot_inlets = range(channels)
+        self.hot_inlets = list(range(channels))
         self.gui_params = dict(plot_type="scatter")
 
         self.doc_tooltip_inlet = [] 

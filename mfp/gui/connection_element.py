@@ -37,8 +37,8 @@ class ConnectionElement(PatchElement):
         elif obj_2.layer is not None:
             self.move_to_layer(obj_2.layer)
         else:
-            print "WARNING: creating ConnectionElement with no layer"
-            print obj_1, obj_2
+            print("WARNING: creating ConnectionElement with no layer")
+            print(obj_1, obj_2)
 
         self.draw()
 
