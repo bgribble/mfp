@@ -40,6 +40,6 @@ class Chromatic (Scale):
 
     def midinote(self, keynum):
         note = keynum + self.transpose_semis
-        octave = int(note) / 12 - 2
+        octave = int(note) // 12 - 2
         tone = int(note) % 12
         return (octave, tone)
