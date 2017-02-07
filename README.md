@@ -11,6 +11,16 @@ enough there that I use it in my own music-making.  As of now
 it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests. 
 
+### PYTHON VERSION
+
+Note that porting to Python 3 is the first "deliverable" of the 0.07 
+development cycle and it has been merged into master if you can see this
+message.
+
+This is a migration, not a "compatibility" port.  I'm not going to maintain 
+Python 2 compatibility.   I doubt anyone will be inconvenienced by this, but 
+just in case you are, the 0.06 release is there for you :) 
+
 ### BUILDING
 
 See README.build 
