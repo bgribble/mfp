@@ -326,6 +326,7 @@ def register():
     mk_binary(operator.sub, "-", "Subtract")
     mk_binary(operator.mul, "*", "Multiply")
     mk_binary(operator.truediv, "/", "Divide")
+    mk_binary(operator.ifloordiv, "//", "Integer divide")
     mk_binary(operator.mod, "%", "Modulo")
     mk_binary(operator.pow, "^", "Raise to a power")
     mk_binary(operator.pow, "**", "Raise to a power")
