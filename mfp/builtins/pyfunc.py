@@ -177,7 +177,7 @@ class PyFunc(Processor):
             self.argcount = None 
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
 
-        Processor.__init__(self, self.argcount, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, self.argcount or 1, 1, init_type, init_args, patch, scope, name)
 
     def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
@@ -185,7 +185,7 @@ class PyFunc(Processor):
         elif self.argcount:
             self.outlets[0] = self.thunk(*self.inlets[:self.argcount]) 
         else: 
-            self.outlets[0] = self.thunk(*self.inlets[0]) 
+            self.outlets[0] = self.thunk(self.inlets[0]) 
             
 
 class PyAutoWrap(Processor): 
