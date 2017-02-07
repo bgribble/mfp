@@ -107,7 +107,8 @@ class TestExt(Plugin):
         import subprocess
         p = subprocess.Popen(['readelf', '-W', '-s', filename], stdout=subprocess.PIPE)
         syms, stderr = p.communicate()
-    
+   
+        syms = syms.decode()
         testnames = {}
         setup = None
         teardown = None

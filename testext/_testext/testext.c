@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <execinfo.h>
 #include <dlfcn.h>
+#include <bytesobject.h>
 
 int error_happened = 0;
 
@@ -138,14 +139,85 @@ run_dl_test(PyObject * mod, PyObject * args)
 
 }
 
-static PyMethodDef TestExtExtMethods[] = {
+static PyMethodDef TestExtMethods[] = {
     {"run_dl_test", run_dl_test, METH_VARARGS, "Run a named test from a named dynamic library" },
     { NULL, NULL, 0, NULL }
 };
 
-PyMODINIT_FUNC
-init_testext(void) 
-{
 
-    Py_InitModule("_testext", TestExtExtMethods);
+/* the following init code mostly copied from 
+ * https://docs.python.org/2/howto/cporting.html */
+
+struct module_state {
+    PyObject *error;
+};
+
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif
+
+
+
+#if PY_MAJOR_VERSION >= 3
+
+static int TestExtTraverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
 }
+
+static int TestExtClear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "_testext",
+        NULL,
+        sizeof(struct module_state),
+        TestExtMethods,
+        NULL,
+        TestExtTraverse,
+        TestExtClear,
+        NULL
+};
+
+#define INITERROR return NULL
+PyMODINIT_FUNC
+PyInit__testext(void)
+
+#else  /* PY_MAJOR_VERSION < 3 */
+#define INITERROR return
+PyMODINIT_FUNC
+init_testext(void)
+#endif
+
+{
+#if PY_MAJOR_VERSION >= 3
+    PyObject *module = PyModule_Create(&moduledef);
+#else
+    PYObject *module = Py_InitModule("_testext", TestExtMethods);
+#endif
+
+    if (module == NULL)
+        INITERROR;
+    struct module_state *st = GETSTATE(module);
+
+    st->error = PyErr_NewException("_testext.Error", NULL, NULL);
+    if (st->error == NULL) {
+        Py_DECREF(module);
+        INITERROR;
+    }
+
+#if PY_MAJOR_VERSION >= 3
+    return module;
+#endif
+}
+
+
+
+
