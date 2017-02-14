@@ -93,8 +93,15 @@ class TreeDisplay (object):
     def _sort_func(self, model, iter_a, iter_b, data):
         obj_a = model.get_value(iter_a, 0)
         obj_b = model.get_value(iter_b, 0)
+        txt_a = self._obj_column_sorttext(obj_a, 0) 
+        txt_b = self._obj_column_sorttext(obj_b, 0)
 
-        return cmp(self._obj_column_sorttext(obj_a, 0), self._obj_column_sorttext(obj_b, 0))
+        if txt_a == txt_b: 
+            return 0
+        elif txt_a > txt_b:
+            return 1
+        else: 
+            return -1
 
     def _update_paths(self):
         p = {} 
