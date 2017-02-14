@@ -144,6 +144,18 @@ def isiterable(obj):
 
     return False
 
+def catchall(thunk):
+    from functools import wraps
+    @wraps(thunk)
+    def handled(*args, **kwargs):
+        try:
+            thunk(*args, **kwargs)
+        except Exception as e:
+            log.debug("Error in", thunk.__name__, e)
+            log.debug_traceback()
+    return handled 
+
+
 
 class QuittableThread(Thread):
     _all_threads = []
