@@ -9,7 +9,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import cairo
 from mfp import MFPGUI, log
-
+from mfp.utils import catchall
 from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .modes.label_edit import LabelEditMode
@@ -30,14 +30,14 @@ class MessageElement (PatchElement):
         self.clickstate = False
 
         # create elements
-        self.texture = Clutter.CairoTexture.new(35, 25)
+        self.texture = Clutter.Canvas.new()
+        self.set_content(self.texture)
+        self.texture.connect("draw", self.draw_cb)
+        self.texture.set_size(35, 25)
+
         self.label = Clutter.Text()
 
-        self.texture.set_size(35, 25)
-        self.texture.connect("draw", self.draw_cb)
-
         self.set_reactive(True)
-        self.add_actor(self.texture)
         self.add_actor(self.label)
 
         self.set_size(35, 25)
@@ -58,20 +58,25 @@ class MessageElement (PatchElement):
     def set_size(self, width, height):
         PatchElement.set_size(self, width, height)
         self.texture.set_size(width, height)
-        self.texture.set_property('surface_height', height)
-        self.texture.set_property('surface_width', width)
         self.update()
 
-    def draw_cb(self, texture, ct):
+    @catchall
+    def draw_cb(self, texture, ct, width, height):
         if self.clickstate:
             lw = 5.0
         else:
             lw = 2.0
 
-        w = self.texture.get_property('surface_width') - lw
-        h = self.texture.get_property('surface_height') - lw
+        w = width - lw
+        h = height - lw
         c = None
-        texture.clear()
+
+        # clear the drawing area
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
+
 
         if self.obj_state == self.OBJ_COMPLETE:
             ct.set_dash([])
@@ -82,7 +87,6 @@ class MessageElement (PatchElement):
 
         ct.set_antialias(cairo.ANTIALIAS_NONE)
         ct.translate(lw / 2.0, lw / 2.0)
-        # ct.set_line_width(1.25)
         ct.move_to(0, 0)
         ct.line_to(0, h)
         ct.line_to(w, h)
@@ -132,9 +136,10 @@ class MessageElement (PatchElement):
             self.send_params()
             self.update()
 
+    @catchall
     def text_changed_cb(self, *args):
         lwidth = self.label.get_property('width')
-        bwidth = self.texture.get_property('surface_width')
+        bwidth = self.texture.get_property('width')
 
         new_w = None
         if (lwidth > (bwidth - 20)):
@@ -143,7 +148,7 @@ class MessageElement (PatchElement):
             new_w = max(35, lwidth + 20)
 
         if new_w is not None:
-            self.set_size(new_w, self.texture.get_height())
+            self.set_size(new_w, self.texture.get_property('height'))
             self.update()
 
     def configure(self, params):

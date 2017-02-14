@@ -9,6 +9,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import cairo
 
+from mfp.utils import catchall
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
@@ -17,6 +18,7 @@ from ..gui_main import MFPGUI
 from ..bang import Bang
 import math
 
+
 def circle(ctx, xorig, yorig, w, h):
     w = w-1.0
     h = h-1.0
@@ -24,6 +26,7 @@ def circle(ctx, xorig, yorig, w, h):
     ctx.translate(xorig, yorig)
     ctx.arc(w/2.0, h/2.0, w/2.0, 0, 2*math.pi)
     ctx.close_path()
+
 
 def rounded_box(ctx, xorig, yorig, w, h, rad):
     seg_h = h - 2 * rad
@@ -55,7 +58,7 @@ class ButtonElement (PatchElement):
         'fill-color:lit': 'default-alt-fill-color',
         'text-color:lit': 'default-light-text-color'
     }
-    
+
     PORT_TWEAK = 5
 
     def __init__(self, window, x, y):
@@ -64,7 +67,9 @@ class ButtonElement (PatchElement):
         self.indicator = False
 
         # create elements
-        self.texture = Clutter.CairoTexture.new(20, 20)
+        self.texture = Clutter.Canvas.new()
+        self.texture.set_size(20, 20)
+        self.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
         self.label = Clutter.Text()
@@ -74,9 +79,8 @@ class ButtonElement (PatchElement):
         self.label.set_reactive(False)
         self.label.set_use_markup(True)
         self.label_text = ''
-        
+
         self.set_reactive(True)
-        self.add_actor(self.texture)
         self.add_actor(self.label)
 
         self.set_size(20, 20)
@@ -96,7 +100,7 @@ class ButtonElement (PatchElement):
     def center_label(self):
         label_halfwidth = self.label.get_property('width')/2.0
         label_halfheight = self.label.get_property('height')/2.0
-        
+
         if label_halfwidth > 1:
             nwidth = max(self.width, 2*label_halfwidth + 10)
             nheight = max(self.height, 2*label_halfheight + 10)
@@ -104,11 +108,12 @@ class ButtonElement (PatchElement):
                 self.set_size(nwidth, nheight)
 
         if self.width and self.height:
-            self.label.set_position(self.width/2.0-label_halfwidth, 
+            self.label.set_position(self.width/2.0-label_halfwidth,
                                     self.height/2.0-label_halfheight-2)
-            
+
+    @catchall
     def label_changed_cb(self, *args):
-       self.center_label()
+        self.center_label()
 
     def label_edit_start(self):
         return self.label_text
@@ -127,16 +132,22 @@ class ButtonElement (PatchElement):
     def set_size(self, width, height):
         PatchElement.set_size(self, width, height)
         self.texture.set_size(width, height)
-        self.texture.set_surface_size(width, height)
         self.redraw()
 
-    def draw_cb(self, texture, ct):
-        w = self.texture.get_property('surface_width') - 2
-        h = self.texture.get_property('surface_height') - 2
+    @catchall
+    def draw_cb(self, texture, ct, width, height):
+        w = width - 2
+        h = height - 2
 
         c = ColorDB.to_cairo(self.get_color('stroke-color'))
-        texture.clear()
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
+
+        # Clear texture
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
+
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
 
         ct.set_line_width(1.5)
         ct.set_antialias(cairo.ANTIALIAS_NONE)
@@ -147,25 +158,25 @@ class ButtonElement (PatchElement):
         ct.stroke()
 
         # draw the indicator
-        ioff = max(3, 0.075*min(w,h))
+        ioff = max(3, 0.075*min(w, h))
         iw = w - 2 * ioff
         ih = h - 2 * ioff
         rounded_box(ct, ioff, ioff, iw, ih, corner-1)
 
         c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         if self.indicator:
             ct.fill()
         else:
             ct.stroke()
 
     def configure(self, params):
-        set_text = False 
+        set_text = False
 
         if "value" in params:
             self.message = params.get("value")
-            self.indicator = self.message 
-            set_text = True 
+            self.indicator = self.message
+            set_text = True
 
         if "label_text" in params:
             self.label_text = params.get("label_text", '')
@@ -201,7 +212,7 @@ class ButtonElement (PatchElement):
 
             # complete drawing
             if self.obj_id is None:
-                return None 
+                return None
             else:
                 self.draw_ports()
         self.redraw()
@@ -249,20 +260,20 @@ class ToggleButtonElement (ButtonElement):
     display_type = "toggle"
 
     def __init__(self, window, x, y):
-        self.off_message = False 
-        self.on_message = True 
+        self.off_message = False
+        self.on_message = True
         ButtonElement.__init__(self, window, x, y)
 
         self.param_list.extend(['on_message', 'off_message'])
 
     def clicked(self):
-        message = None 
+        message = None
         if self.indicator:
-            message = self.off_message 
-            self.indicator = False 
+            message = self.off_message
+            self.indicator = False
         else:
-            message = self.on_message 
-            self.indicator = True 
+            message = self.on_message
+            self.indicator = True
 
         if self.obj_id is not None:
             MFPGUI().mfp.send(self.obj_id, 0, message)
@@ -280,11 +291,12 @@ class ToggleButtonElement (ButtonElement):
         ButtonElement.create(self, init_type, init_args)
         if self.obj_id:
             MFPGUI().mfp.set_do_onload(self.obj_id, True)
-        
+
     def unclicked(self):
         return False
 
-class ToggleIndicatorElement (ButtonElement): 
+
+class ToggleIndicatorElement (ButtonElement):
     display_type = "indicator"
 
     def make_control_mode(self):
@@ -304,13 +316,19 @@ class ToggleIndicatorElement (ButtonElement):
         if self.selected:
             PatchElement.draw_ports(self)
 
-    def draw_cb(self, texture, ct):
-        w = self.texture.get_property('surface_width') - 2
-        h = self.texture.get_property('surface_height') - 2
+    @catchall
+    def draw_cb(self, texture, ct, width, height):
+        w = width - 2
+        h = height - 2
+
+        # clear texture
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
 
         c = ColorDB.to_cairo(self.get_color('stroke-color'))
-        texture.clear()
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
 
         ct.set_line_width(1.5)
         ct.set_antialias(cairo.ANTIALIAS_NONE)
@@ -320,18 +338,14 @@ class ToggleIndicatorElement (ButtonElement):
         ct.stroke()
 
         # draw the indicator
-        ioff = max(3, 0.075*min(w,h))
+        ioff = max(3, 0.075*min(w, h))
         iw = w - 2 * ioff
         ih = h - 2 * ioff
         circle(ct, ioff, ioff, iw, ih)
 
         c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha) 
+        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         if self.indicator:
             ct.fill()
         else:
             ct.stroke()
-
-
-
-
