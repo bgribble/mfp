@@ -8,7 +8,7 @@ WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
 out = 'wafbuild'
-pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo"]
+pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2"]
 
 from waflib.Configure import conf
 import waflib
@@ -356,6 +356,12 @@ def configure(conf):
         pkglibdir = "lib/python%s/site-packages/" % ctxt.env.PYTHON_VERSION
     conf.end_msg(pkglibdir)
     conf.env.PYTHON_PKGLIBDIR = pkglibdir
+
+    # Git (needed during build)
+    conf.find_program("git")
+
+    # Need jackd installed!
+    conf.find_program("jackd")
 
     # C libraries with pkg-config support (listed at top of file)
     uselibs = []

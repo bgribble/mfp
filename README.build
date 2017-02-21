@@ -81,6 +81,7 @@ development headers and pkg-config files installed:
  * serd-0         (LV2 TTL parsing) 
  * jack           (duh)
  * liblo          (OSC library, needed by pyliblo)
+ * lv2 headers    (LV2 load/save)
 
 You'll get errors in the "./waf configure" process if these aren't installed.  
 
