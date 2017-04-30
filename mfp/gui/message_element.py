@@ -77,7 +77,6 @@ class MessageElement (PatchElement):
         ct.paint()
         ct.restore()
 
-
         if self.obj_state == self.OBJ_COMPLETE:
             ct.set_dash([])
         else:

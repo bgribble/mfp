@@ -4,13 +4,14 @@ processor_element.py
 A patch element corresponding to a signal or control processor
 '''
 
-from gi.repository import Clutter as clutter
+from gi.repository import Clutter
 import cairo
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 from mfp import log
+from mfp.utils import catchall
 
 class ProcessorElement (PatchElement):
     display_type = "processor"
@@ -48,18 +49,19 @@ class ProcessorElement (PatchElement):
 
     def create_display(self):
         # box
-        self.texture = clutter.CairoTexture.new(35, 25)
+        self.texture = Clutter.Canvas.new()
+        self.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
+        self.texture.set_size(35, 25)
 
         # label
-        self.label = clutter.Text()
+        self.label = Clutter.Text()
         self.label.set_position(self.label_off_x, self.label_off_y)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
 
-        self.add_actor(self.texture)
         if self.show_label:
             self.add_actor(self.label)
         self.set_reactive(True)
@@ -81,20 +83,27 @@ class ProcessorElement (PatchElement):
 
         self.set_size(new_w, self.texture.get_property('height'))
 
-    def draw_cb(self, texture, ct):
-        w = self.texture.get_property('surface_width') - 1
-        h = self.texture.get_property('surface_height') - 1
+    @catchall
+    def draw_cb(self, texture, ct, width, height):
+        lw = 2.0
 
-        self.texture.clear()
+        w = width - lw
+        h = height - lw
 
-        ct.set_line_width(2.0)
+        # clear the drawing area
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
+
+        ct.set_line_width(lw)
         ct.set_antialias(cairo.ANTIALIAS_NONE)
-        ct.translate(0.5, 0.5)
-        ct.move_to(1, 1)
-        ct.line_to(1, h)
+        ct.translate(lw/2.0, lw/2.0)
+        ct.move_to(0, 0)
+        ct.line_to(0, h)
         ct.line_to(w, h)
-        ct.line_to(w, 1)
-        ct.line_to(1, 1)
+        ct.line_to(w, 0)
+        ct.line_to(0, 0)
         ct.close_path()
 
         # fill to paint the background
@@ -110,9 +119,9 @@ class ProcessorElement (PatchElement):
             ct.set_dash([])
         else:
             ct.set_dash([8, 4])
-
+        ct.set_line_width(lw)
         ct.stroke()
-
+        return True
 
     def get_label(self):
         return self.label
@@ -156,7 +165,6 @@ class ProcessorElement (PatchElement):
         PatchElement.set_size(self, w, h)
 
         self.texture.set_size(w, h)
-        self.texture.set_surface_size(w, h)
         self.texture.invalidate()
 
     def select(self):

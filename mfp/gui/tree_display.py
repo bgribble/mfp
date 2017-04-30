@@ -98,6 +98,10 @@ class TreeDisplay (object):
 
         if txt_a == txt_b: 
             return 0
+        elif not txt_a:
+            return -1
+        elif not txt_b: 
+            return 1
         elif txt_a > txt_b:
             return 1
         else: 

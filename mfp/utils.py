@@ -149,7 +149,7 @@ def catchall(thunk):
     @wraps(thunk)
     def handled(*args, **kwargs):
         try:
-            thunk(*args, **kwargs)
+            return thunk(*args, **kwargs)
         except Exception as e:
             log.debug("Error in", thunk.__name__, e)
             log.debug_traceback()
