@@ -10,6 +10,8 @@ import cairo
 from .patch_element import PatchElement
 from mfp import MFPGUI
 from mfp import log
+from mfp.utils import catchall
+
 from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
 from .colordb import ColorDB
@@ -37,9 +39,9 @@ class TextElement (PatchElement):
 
         self.param_list.extend(['value', 'clickchange', 'default'])
 
-        self.texture = Clutter.CairoTexture.new(12, 12)
+        self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
-        self.add_actor(self.texture)
+        self.set_content(self.texture)
 
         self.label = Clutter.Text()
         self.label.set_color(self.get_color('text-color'))
@@ -48,8 +50,8 @@ class TextElement (PatchElement):
         self.add_actor(self.label)
 
         self.update_required = True
-        self.set_size(12, 12)
         self.move(x, y)
+        self.set_size(12, 12)
         self.set_reactive(True)
         self.label_changed_cb = self.label.connect('text-changed', self.text_changed_cb)
 
@@ -60,31 +62,34 @@ class TextElement (PatchElement):
         self.texture.invalidate()
         self.draw_ports()
 
-    def draw_cb(self, texture, ct):
-        w = self.texture.get_property('surface_width')
-        h = self.texture.get_property('surface_height')
-
-        self.texture.clear()
+    @catchall
+    def draw_cb(self, texture, ct, width, height):
+        # clear the drawing area
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
 
         # fill to paint the background
         color = ColorDB.to_cairo(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ct.rectangle(1, 1, w-2, h-2)
+        ct.rectangle(0, 0, width, height)
         ct.fill()
 
         if self.clickchange or self.get_style('border'):
             ct.set_line_width(1.0)
+            ct.translate(0.5, 0.5)
             ct.set_antialias(cairo.ANTIALIAS_NONE)
-            ct.rectangle(1, 1, w-2, h-2)
+            ct.rectangle(0, 0, width-1, height-1)
             color = ColorDB.to_cairo(self.get_color('border-color'))
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
+        return True
 
     def set_size(self, w, h):
         PatchElement.set_size(self, w, h)
 
         self.texture.set_size(w, h)
-        self.texture.set_surface_size(w, h)
         self.texture.invalidate()
 
     def draw_ports(self):
