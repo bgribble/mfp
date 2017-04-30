@@ -39,12 +39,13 @@ class EnumElement (PatchElement):
         self.obj_state = self.OBJ_HALFCREATED
 
         # create elements
-        self.texture = Clutter.CairoTexture.new(35, 25)
+        self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
+        self.set_content(self.texture)
+
         self.label = Clutter.Text()
 
         self.set_reactive(True)
-        self.add_actor(self.texture)
         self.add_actor(self.label)
 
         # configure label
@@ -58,6 +59,7 @@ class EnumElement (PatchElement):
         # self.actor.connect('button-press-event', self.button_press_cb)
 
         self.move(x, y)
+        self.set_size(35, 25)
         self.texture.invalidate()
 
     def format_update(self):
@@ -74,25 +76,31 @@ class EnumElement (PatchElement):
             value = self.max_value 
         return self.format_str % value
 
-    def draw_cb(self, texture, ct):
-        w = self.texture.get_property('surface_width') - 1
-        h = self.texture.get_property('surface_height') - 1
-        self.texture.clear()
+    def draw_cb(self, texture, ct, width, height):
+        lw = 2
+        w = width - lw
+        h = height - lw
 
+        # clear the drawing area
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
+
+        ct.set_line_width(lw)
+        ct.set_antialias(cairo.ANTIALIAS_NONE)
         if self.obj_state == self.OBJ_COMPLETE:
             ct.set_dash([])
         else:
             ct.set_dash([8, 4])
         
-        ct.set_line_width(2.0)
-        ct.set_antialias(cairo.ANTIALIAS_NONE)
-        ct.translate(0.5, 0.5)
-        ct.move_to(1, 1)
-        ct.line_to(1, h)
+        ct.translate(lw/2.0, lw/2.0)
+        ct.move_to(0, 0)
+        ct.line_to(0, h)
         ct.line_to(w, h)
-        ct.line_to(w, h / 3.0 + 1)
-        ct.line_to(w - h / 3.0, 1)
-        ct.line_to(1, 1)
+        ct.line_to(w, h / 3.0 )
+        ct.line_to(w - h / 3.0, 0)
+        ct.line_to(0, 0)
         ct.close_path()
 
         color = ColorDB.to_cairo(self.get_color('fill-color'))
@@ -103,9 +111,15 @@ class EnumElement (PatchElement):
         ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.stroke()
 
+    def set_size(self, w, h):
+        PatchElement.set_size(self, w, h)
+
+        self.texture.set_size(w, h)
+        self.texture.invalidate()
+
     def text_changed_cb(self, *args):
         lwidth = self.label.get_property('width')
-        bwidth = self.texture.get_property('surface_width')
+        bwidth = self.width
 
         new_w = None
         if (lwidth > (bwidth - 20)):
@@ -114,17 +128,13 @@ class EnumElement (PatchElement):
             new_w = max(35, lwidth + 20)
 
         if new_w is not None:
-            self.set_size(new_w, self.texture.get_height())
-            self.texture.set_size(new_w, self.texture.get_height())
-            self.texture.set_surface_size(
-                int(new_w), self.texture.get_property('surface_height'))
-            self.texture.invalidate()
+            self.set_size(new_w, self.height)
 
     def create_obj(self):
         if self.obj_id is None:
             self.create(self.proc_type, str(self.value))
         if self.obj_id is None:
-            print("MessageElement: could not create message obj")
+            print("EnumElement: could not create var obj")
         else:
             MFPGUI().mfp.set_do_onload(self.obj_id, True)
             self.obj_state = self.OBJ_COMPLETE
