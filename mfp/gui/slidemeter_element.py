@@ -7,11 +7,13 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter
+import cairo
 import math
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.slider import SliderEditMode, SliderControlMode, DialEditMode, DialControlMode
 from mfp import MFPGUI
+from mfp.utils import catchall
 from . import ticks
 
 
@@ -71,16 +73,13 @@ class SlideMeterElement (PatchElement):
         self.hot_y_max = None
 
         # create the texture
-        self.texture = Clutter.CairoTexture.new(self.DEFAULT_W, self.DEFAULT_H)
-
-        # configure
-        self.add_actor(self.texture)
+        self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
+        self.set_content(self.texture)
 
         self.set_reactive(True)
 
         self.set_size(self.DEFAULT_W, self.DEFAULT_H)
-        self.texture.invalidate()
         self.move(x, y)
 
         # request update when value changes
@@ -90,34 +89,40 @@ class SlideMeterElement (PatchElement):
     def scale_type(self):
         return self.scale.scale_type if self.scale else 0
 
-    def draw_cb(self, texture, ct):
+    @catchall
+    def draw_cb(self, texture, ct, width, height):
         c = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
+        lw = 1
 
         if self.orientation == self.HORIZONTAL: 
-            h = self.texture.get_property('surface_width') - 2
-            w = self.texture.get_property('surface_height') - 2
+            h = width - lw
+            w = height - lw
         else: 
-            w = self.texture.get_property('surface_width') - 2
-            h = self.texture.get_property('surface_height') - 2
+            w = width - lw
+            h = height - lw
 
         y_max = h
-        y_min = 1
+        y_min = 0
 
         if not self.show_scale:
-            x_min = 1 
+            x_min = 0
             x_max = w
         elif self.scale_position == self.LEFT: 
             x_min = self.SCALE_SPACE
             x_max = w
         elif self.scale_position == self.RIGHT: 
-            x_min = 1
+            x_min = 0
             x_max = w - self.SCALE_SPACE 
 
         bar_h = y_max - y_min
         bar_w = x_max - x_min
 
-        texture.clear()
+        # clear the drawing area
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
 
         # rotate if we are drawing horizontally 
         if self.orientation == self.HORIZONTAL:
@@ -127,12 +132,13 @@ class SlideMeterElement (PatchElement):
             self.hot_y_max = x_max
             ct.save()
             ct.rotate(math.pi / 2.0)
-            ct.translate(0, -h)
+            ct.translate(lw/2, -h)
         else:
             self.hot_x_min = x_min 
             self.hot_x_max = x_max
             self.hot_y_min = y_min
             self.hot_y_max = y_max
+            ct.translate(lw/2, lw/2)
 
         # draw the scale if required
         if self.show_scale:
@@ -179,12 +185,11 @@ class SlideMeterElement (PatchElement):
 
         c = ColorDB.to_cairo(self.get_color('meter-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
-        ct.rectangle(x_min, y_max - val2pixels(max_fillval), bar_w, h)
+        ct.rectangle(x_min+lw/2, y_max + lw/2 - val2pixels(max_fillval), bar_w-lw, h-lw)
         ct.fill()
 
         if self.orientation == self.HORIZONTAL:
             ct.restore()
-
 
     def fill_interval(self): 
         if self.zeropoint is None:
@@ -375,13 +380,11 @@ class SlideMeterElement (PatchElement):
 
         PatchElement.configure(self, params)
         if changes:
-            self.texture.clear()
             self.texture.invalidate()
 
     def set_size(self, width, height):
         PatchElement.set_size(self, width, height)
         self.texture.set_size(width, height)
-        self.texture.set_surface_size(width, height)
         self.texture.invalidate()
 
     def select(self):
