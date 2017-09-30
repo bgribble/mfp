@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 '''
-p_pyfunc.py: Wrappers for common unary and binary Python functions
+pyfunc.py: Wrappers for common unary and binary Python functions
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2010-2017 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..processor import Processor
@@ -19,6 +19,26 @@ def get_arglist(thunk):
     else:
         return None
 
+class CallFunction(Processor):
+    doc_tooltip_obj = "Call a n-ary function"
+    doc_tooltip_inlet = ["Callable to set and call or Bang to call"]
+    doc_tooltip_outlet = ["Call result"]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+        self.arity = 0
+        self.thunk = lambda: None
+
+        if len(initargs):
+            self.arity = initargs[0]
+            self.resize(arity + 1, 1)
+
+    def trigger(self):
+        if self.inlets[0] is not Bang:
+            self.thunk = self.inlets[0]
+
+        self.outlets[0] = self.thunk(*self.inlets[1:])
 
 class ApplyMethod(Processor):
     doc_tooltip_obj = "Create a method call object"
@@ -204,7 +224,7 @@ class PyAutoWrap(Processor):
             for v in arguments:
                 self.doc_tooltip_inlet.append("Argument %s" % v)
         else: 
-            self.argcount = None 
+            self.argcount = 0
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
         Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name)
 
@@ -317,6 +337,8 @@ def register():
     MFPApp().register("set", SetElement)
     MFPApp().register("eval", PyEval)
     MFPApp().register("apply", ApplyMethod)
+    MFPApp().register("call", CallFunction)
+
     MFPApp().register("func", PyFunc)
 
     mk_unary(lambda l: l[0], "first")

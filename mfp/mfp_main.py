@@ -5,35 +5,36 @@ main.py: main routine for mfp
 Copyright (c) 2010-2016 Bill Gribble <grib@billgribble.com>
 '''
 
-import math 
-import re 
+import math, random
+import re
 import string
-import sys, os 
+import sys, os
 import argparse
 import threading
 
 from datetime import datetime, timedelta
 
 from .evaluator import Evaluator, LazyExpr
-from .utils import QuittableThread 
+from .utils import QuittableThread
 from .bang import Bang, Uninit
 from .method import MethodCall
 from .midi import NoteOn, NoteOff, NotePress, MidiCC, MidiUndef, MidiPitchbend, MidiPgmChange
 
-from .mfp_app import MFPApp, StartupError 
+from .mfp_app import MFPApp, StartupError
 
 from . import log
-from . import builtins 
+from . import builtins
 from . import utils
 
 def version():
-    import pkg_resources 
+    import pkg_resources
     vers = pkg_resources.require("mfp")[0].version
     return vers
 
-def add_evaluator_defaults(): 
+def add_evaluator_defaults():
     # default names known to the evaluator
     Evaluator.bind_global("math", math)
+    Evaluator.bind_global("random", random)
     Evaluator.bind_global("os", os)
     Evaluator.bind_global("sys", sys)
     Evaluator.bind_global("re", re)
@@ -61,48 +62,48 @@ def add_evaluator_defaults():
 mfp_banner = "MFP - Music For Programmers, version %s"
 
 mfp_footer = """
-To report bugs or download source: 
-    
-    http://github.com/bgribble/mfp 
+To report bugs or download source:
 
-Copyright (c) 2009-2016 Bill Gribble <grib@billgribble.com> 
+    http://github.com/bgribble/mfp
 
-MFP is free software, and you are welcome to redistribute it 
+Copyright (c) 2009-2016 Bill Gribble <grib@billgribble.com>
+
+MFP is free software, and you are welcome to redistribute it
 under certain conditions.  See the file COPYING for details.
 """
 
 def exit_sighandler(signum, frame):
-    log.log_force_console = True 
+    log.log_force_console = True
     log.debug("Received terminating signal %s, exiting" % signum)
     sys.exit(-signum)
 
 
-def test_imports(): 
-    try: 
-        import gi 
+def test_imports():
+    try:
+        import gi
         gi.require_version('Gtk', '3.0')
         gi.require_version('GtkClutter', '1.0')
         gi.require_version('Clutter', '1.0')
         import simplejson
-        import numpy 
-        import nose 
+        import numpy
+        import nose
         from gi.repository import Clutter, GObject, Gtk, Gdk, GtkClutter, Pango
-        import posix_ipc 
-    except Exception as e: 
-        import traceback 
-        traceback.print_exc() 
+        import posix_ipc
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         print()
         print("FATAL: Required package not installed.  Please run 'waf install_deps'")
-        print() 
+        print()
         sys.exit(-1)
 
 def main():
-    description = mfp_banner % version() 
+    description = mfp_banner % version()
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description=description, epilog=mfp_footer)
-    
-    parser.add_argument("patchfile", nargs='*', 
+
+    parser.add_argument("patchfile", nargs='*',
                         help="Patch files to load")
     parser.add_argument("-f", "--init-file", action="append",
                         default=[utils.homepath(".mfp/mfprc.py")],
@@ -118,49 +119,49 @@ def main():
                         help="Number of JACK audio input ports")
     parser.add_argument("-o", "--outputs", default=2, type=int,
                         help="Number of JACK audio output ports")
-    parser.add_argument("-u", "--osc-udp-port", default=5555, type=int, 
+    parser.add_argument("-u", "--osc-udp-port", default=5555, type=int,
                         help="UDP port to listen for OSC (default: 5555)")
-    parser.add_argument("-v", "--verbose", action="store_true", 
+    parser.add_argument("-v", "--verbose", action="store_true",
                         help="Log all messages to console")
-    parser.add_argument("--verbose-remote", action="store_true", 
+    parser.add_argument("--verbose-remote", action="store_true",
                         help="Log all child console output")
     parser.add_argument("--max-bufsize", default=2048,
                         help="Maximum JACK buffer size to support (default: 2048 frames)")
-    parser.add_argument("--no-gui", action="store_true", 
+    parser.add_argument("--no-gui", action="store_true",
                         help="Do not launch the GUI engine")
-    parser.add_argument("--no-dsp", action="store_true", 
+    parser.add_argument("--no-dsp", action="store_true",
                         help="Do not launch the DSP engine")
-    parser.add_argument("--no-default", action="store_true", 
+    parser.add_argument("--no-default", action="store_true",
                         help="Do not create a default patch")
-    parser.add_argument("--no-restart", action="store_true", 
+    parser.add_argument("--no-restart", action="store_true",
                         help="Do not restart DSP engine if it crashes")
-    parser.add_argument("--no-onload", action="store_true", 
+    parser.add_argument("--no-onload", action="store_true",
                         help="Do not run onload/loadbang functions")
-    parser.add_argument("--help-builtins", action="store_true", 
-                        help="Display help on builtin objects and exit") 
+    parser.add_argument("--help-builtins", action="store_true",
+                        help="Display help on builtin objects and exit")
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
                         help="Path to create Unix-domain socket for RPC")
-    parser.add_argument("-d", "--debug", action="store_true", 
+    parser.add_argument("-d", "--debug", action="store_true",
                         help="Enable debugging behaviors")
 
     # batch mode options
     parser.add_argument("-b", "--batch", action="store_true",
                         help="Run in batch mode")
-    parser.add_argument("-a", "--args", default='', 
+    parser.add_argument("-a", "--args", default='',
                         help="Batch mode patch arguments")
-    parser.add_argument("-I", "--batch-input", default=None, 
+    parser.add_argument("-I", "--batch-input", default=None,
                         help="Batch mode input file")
     parser.add_argument("-e", "--batch-eval", action="store_true",
                         help="Call eval() on input before sending")
 
     args = vars(parser.parse_args())
 
-    # test imports to make sure everything is installed properly 
-    test_imports() 
+    # test imports to make sure everything is installed properly
+    test_imports()
 
-    # create the app object 
+    # create the app object
     app = MFPApp()
-   
+
     # configure some things from command line
     app.no_gui = args.get("no_gui") or args.get("help_builtins") or args.get("help")
     app.no_dsp = args.get("no_dsp") or args.get("help_builtins") or args.get("help")
@@ -173,47 +174,47 @@ def main():
     app.osc_port = args.get("osc_udp_port")
     app.searchpath = ':'.join(args.get("patch_path"))
     app.extpath = ':'.join(args.get("lib_path"))
-    app.max_blocksize = args.get("max_bufsize") 
+    app.max_blocksize = args.get("max_bufsize")
     app.socket_path = args.get("socket_path")
     app.debug = args.get("debug")
 
     if args.get('batch'):
-        app.batch_mode = True 
+        app.batch_mode = True
         app.batch_args = args.get("args")
         app.batch_input_file = args.get("batch_input")
         app.batch_eval = args.get("batch_eval", False)
-        app.no_gui = True 
+        app.no_gui = True
         log.log_raw = True
-        log.log_quiet = True 
+        log.log_quiet = True
 
     if args.get("verbose"):
-        log.log_force_console = True 
+        log.log_force_console = True
 
     if args.get("verbose_remote"):
-        app.debug_remote = True 
+        app.debug_remote = True
 
     if app.no_gui:
         log.debug("Not starting GUI services")
 
-    if app.no_dsp: 
+    if app.no_dsp:
         log.debug("Not starting DSP engine")
 
-    if app.no_default: 
+    if app.no_default:
         log.debug("Not creating default patch")
 
-    # launch processes and threads 
+    # launch processes and threads
     import signal
     signal.signal(signal.SIGTERM, exit_sighandler)
 
-    try: 
+    try:
         app.setup()
     except (StartupError, KeyboardInterrupt, SystemExit):
         log.debug("Setup did not complete properly, exiting")
         app.finish()
-        return 
+        return
 
-    # ok, now start configuring the running system  
-    add_evaluator_defaults() 
+    # ok, now start configuring the running system
+    add_evaluator_defaults()
     builtins.register()
 
     for libname in args.get("init_lib"):
@@ -222,22 +223,22 @@ def main():
     evaluator = Evaluator()
 
     pyfiles = args.get("init_file", [])
-    for f in pyfiles: 
+    for f in pyfiles:
         fullpath = utils.find_file_in_path(f, app.searchpath)
         log.debug("initfile: Looking for", f)
-        if not fullpath: 
-            log.debug("initfile: Cannot find file %s, skipping" % f) 
+        if not fullpath:
+            log.debug("initfile: Cannot find file %s, skipping" % f)
             continue
 
-        try: 
+        try:
             os.stat(fullpath)
-        except OSError: 
-            log.debug("initfile: Error accessing file", fullpath) 
+        except OSError:
+            log.debug("initfile: Error accessing file", fullpath)
             continue
-        try: 
+        try:
             evaluator.exec_file(fullpath)
-        except Exception as e: 
-            log.debug("initfile: Exception while loading initfile", f) 
+        except Exception as e:
+            log.debug("initfile: Exception while loading initfile", f)
             log.debug(e)
 
     if app.debug:
@@ -246,32 +247,32 @@ def main():
 
     if args.get("help"):
         log.log_debug = None
-        log.log_file = None 
+        log.log_file = None
         log.debug("printing help and exiting")
         parser.print_help()
         log.debug("done with print_help(), quitting")
         app.finish()
     elif args.get("help_builtins"):
         log.log_debug = None
-        log.log_file = None 
+        log.log_file = None
         app.open_file(None)
-        for name, factory in sorted(app.registry.items()): 
+        for name, factory in sorted(app.registry.items()):
             if hasattr(factory, 'doc_tooltip_obj'):
-                print("%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj)) 
-            else: 
-                try: 
+                print("%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj))
+            else:
+                try:
                     o = factory(name, None, app.patches['default'], None, "")
-                    print("%-12s : %s" % ("[%s]" % name, o.doc_tooltip_obj)) 
+                    print("%-12s : %s" % ("[%s]" % name, o.doc_tooltip_obj))
                 except Exception as e:
                     import traceback
                     print("(caught exception trying to create %s)" % name, e)
                     traceback.print_exc()
                     print("%-12s : No documentation found" % ("[%s]" % name,))
         app.finish()
-    else: 
+    else:
         patchfiles = args.get("patchfile")
-        if app.batch_mode: 
-            try: 
+        if app.batch_mode:
+            try:
                 if len(patchfiles) == 1:
                     app.batch_obj = patchfiles[0]
                     app.exec_batch()
@@ -282,18 +283,18 @@ def main():
 
         else:
             # create initial patch
-            if len(patchfiles): 
-                for p in patchfiles: 
+            if len(patchfiles):
+                for p in patchfiles:
                     app.open_file(p)
-            elif not app.no_default: 
+            elif not app.no_default:
                 app.open_file(None)
-            # allow session management 
+            # allow session management
             app.session_management_setup()
 
-        try: 
+        try:
             QuittableThread.wait_for_all()
         except (KeyboardInterrupt, SystemExit):
-            log.log_force_console = True 
+            log.log_force_console = True
             app.finish()
 
         for thread in app.leftover_threads:

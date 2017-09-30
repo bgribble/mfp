@@ -1,5 +1,4 @@
 
-
 def register():
     from . import var
     var.register()
@@ -54,11 +53,11 @@ def register():
     from . import radiogroup
     radiogroup.register()
     from . import dbmath
-    dbmath.register() 
+    dbmath.register()
     from . import plugin
     plugin.register()
-    from . import loadbang 
-    loadbang.register() 
+    from . import loadbang
+    loadbang.register()
     from . import oscutils
     oscutils.register()
     from . import delay
@@ -66,8 +65,10 @@ def register():
     from . import dispatch
     dispatch.register()
     from . import latency
-    latency.register() 
+    latency.register()
     from . import errtest
     errtest.register()
-    from . import slew 
+    from . import slew
     slew.register()
+    from . import bitcombine
+    bitcombine.register()
