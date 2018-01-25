@@ -137,6 +137,22 @@ alsaseq_stop(PyObject *self /* Not used */, PyObject *args)
 	return Py_None;
 }
 
+static char alsaseq_close__doc__[] =
+"Close the sequencer."
+;
+
+static PyObject *
+alsaseq_close(PyObject *self /* Not used */, PyObject *args)
+{
+	if (!PyArg_ParseTuple(args, "" ))
+		return NULL;
+
+        snd_seq_close(seq_handle);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
 static char alsaseq_status__doc__[] =
 "Return ( status, time, events ) of queue.\n\n"
 "Status: 0 if stopped, 1 if running.\n"
@@ -396,6 +412,7 @@ static struct PyMethodDef alsaseq_methods[] = {
 	{"client",	(PyCFunction)alsaseq_client,	METH_VARARGS,	alsaseq_client__doc__},
  {"start",	(PyCFunction)alsaseq_start,	METH_VARARGS,	alsaseq_start__doc__},
  {"stop",	(PyCFunction)alsaseq_stop,	METH_VARARGS,	alsaseq_stop__doc__},
+ {"close",	(PyCFunction)alsaseq_close,	METH_VARARGS,	alsaseq_close__doc__},
  {"status",	(PyCFunction)alsaseq_status,	METH_VARARGS,	alsaseq_status__doc__},
  {"output",	(PyCFunction)alsaseq_output,	METH_VARARGS,	alsaseq_output__doc__},
  {"syncoutput",	(PyCFunction)alsaseq_syncoutput,	METH_VARARGS,	alsaseq_syncoutput__doc__},

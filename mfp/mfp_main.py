@@ -119,6 +119,10 @@ def main():
                         help="Number of JACK audio input ports")
     parser.add_argument("-o", "--outputs", default=2, type=int,
                         help="Number of JACK audio output ports")
+    parser.add_argument("--midi-ins", default=1, type=int,
+                        help="Number of MIDI input ports")
+    parser.add_argument("--midi-outs", default=1, type=int,
+                        help="Number of MIDI output ports")
     parser.add_argument("-u", "--osc-udp-port", default=5555, type=int,
                         help="UDP port to listen for OSC (default: 5555)")
     parser.add_argument("-v", "--verbose", action="store_true",
@@ -171,6 +175,8 @@ def main():
     app.no_onload = args.get("no_onload")
     app.dsp_inputs = args.get("inputs")
     app.dsp_outputs = args.get("outputs")
+    app.midi_inputs = args.get("midi_ins")
+    app.midi_outputs = args.get("midi_outs")
     app.osc_port = args.get("osc_udp_port")
     app.searchpath = ':'.join(args.get("patch_path"))
     app.extpath = ':'.join(args.get("lib_path"))

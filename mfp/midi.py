@@ -385,6 +385,9 @@ class MFPMidiManager(QuittableThread):
                 raw_event = alsaseq.input()
                 new_event = self.create_event(raw_event)
                 self.dispatch_event(new_event)
+        alsaseq.stop()
+        alsaseq.close()
+
 
     def create_event(self, raw_event):
         ctor = self.etypemap.get(raw_event[0])

@@ -38,6 +38,8 @@ class MFPApp (Singleton):
         self.lv2_savepath = "lv2"
         self.dsp_inputs = 2
         self.dsp_outputs = 2
+        self.midi_inputs = 1
+        self.midi_outputs = 1
         self.samplerate = 44100
         self.blocksize = 256
         self.max_blocksize = 2048
@@ -135,10 +137,7 @@ class MFPApp (Singleton):
             self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
 
         # midi manager
-        from . import midi
-        self.midi_mgr = midi.MFPMidiManager(1, 1)
-        self.midi_mgr.start()
-        log.debug("MIDI started (ALSA Sequencer)")
+        self.start_midi()
 
         # OSC manager
         from . import osc
@@ -189,6 +188,13 @@ class MFPApp (Singleton):
         # start the reader
         reader.send(MethodCall("readline"))
 
+    def start_midi(self):
+        from . import midi
+        if self.midi_mgr:
+            self.midi_mgr.finish()
+        self.midi_mgr = midi.MFPMidiManager(self.midi_inputs, self.midi_outputs)
+        self.midi_mgr.start()
+        log.debug("MIDI started (ALSA Sequencer)")
 
     def start_dsp(self):
         from .dsp_object import DSPObject, DSPContext
@@ -570,6 +576,7 @@ class MFPApp (Singleton):
         cp.add_section("mfp")
 
         for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs",
+                     "midi_inputs", "midi_outputs",
                      "osc_port", "searchpath", "extpath", "max_blocksize"):
             val = getattr(self, attr)
             if isinstance(val, str):
@@ -597,16 +604,18 @@ class MFPApp (Singleton):
         cp.read(os.path.join(self.session_dir, "session_data"))
 
         for attr in ("no_gui", "no_dsp", "dsp_inputs", "dsp_outputs",
+                     "midi_inputs", "midi_outputs",
                      "osc_port", "searchpath", "extpath", "max_blocksize"):
-            val = cp.get("mfp", attr)
-            if not val:
-                val = "''"
-            setattr(self, attr, eval(val))
+            try:
+                val = cp.get("mfp", attr)
+                setattr(self, attr, eval(val))
+            except KeyError as e:
+                pass
 
         patches = eval(cp.get("mfp", "patches"))
 
         # if we made it this far, clean up the existing session and go
-        for obj_id, patch in self.patches.items():
+        for obj_id, patch in list(self.patches.items()):
             patch.delete_gui()
             patch.delete()
         self.patches = {}
@@ -614,6 +623,9 @@ class MFPApp (Singleton):
         self.searchpath = utils.prepend_path(session_path, self.searchpath)
         self.extpath = utils.prepend_path(session_path, self.extpath)
 
+        self.no_restart = True
+        self.start_dsp()
+        self.start_midi()
         for p in patches:
             self.open_file(p)
 
