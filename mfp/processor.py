@@ -335,6 +335,7 @@ class Processor (object):
 
         filters = {}
         port, etype, channel, unit = event.source()
+        port = port[1]
 
         if mode.startswith("note"):
             if not isinstance(event, NoteOn):

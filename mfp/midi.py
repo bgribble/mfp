@@ -49,6 +49,20 @@ def mk_raw(event, port=0):
 
 @ext_encode
 class MidiEvent (object): 
+    def __init__(self, seqevent=None):
+        self.seqevent = seqevent
+        if self.seqevent:
+            if self.seqevent.dst:
+                self.client = self.seqevent.dst[0]
+                self.port = self.seqevent.dst[1]
+            else:
+                self.client = None
+                self.port = 0
+            self.channel = seqevent.data[0] + 1
+
+    def source(self):
+        return (self.seqevent.dst, self.seqevent.etype, self.channel, None)
+
     def seq_type(self): 
         if self.seqevent is not None:
             return self.seqevent.etype 
@@ -64,13 +78,6 @@ class MidiEvent (object):
 
 @ext_encode
 class MidiUndef (MidiEvent):
-    def __init__(self, seqevent=None):
-        self.seqevent = seqevent
-        self.channel = seqevent.data[0] 
-
-    def source(self):
-        return (self.seqevent.dst, self.seqevent.etype, self.channel, None)
-
     def __repr__(self):
         return "<MidiUndef %s>" % self.seqevent
 
@@ -80,7 +87,7 @@ class Note (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTE
 
     def seq_data(self): 
-        return (self.channel, self.key, self.velocity, 0, 0)
+        return (self.channel-1, self.key, self.velocity, 0, 0)
 
 
 @ext_encode
@@ -88,13 +95,11 @@ class NoteOn (Note):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTEON
 
     def __init__(self, seqevent=None):
-        self.seqevent = seqevent
-        self.channel = 0
+        super().__init__(seqevent)
         self.key = 0
         self.velocity = 0
 
         if self.seqevent is not None:
-            self.channel = seqevent.data[0]
             self.key = seqevent.data[1]
             self.velocity = seqevent.data[2]
 
@@ -110,18 +115,16 @@ class NoteOff (Note):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTEOFF
 
     def __init__(self, seqevent=None):
-        self.seqevent = seqevent
-        self.channel = 0
+        super().__init__(seqevent)
         self.key = 0
         self.velocity = 0
 
         if self.seqevent is not None:
-            self.channel = seqevent.data[0]
             self.key = seqevent.data[1]
             self.velocity = seqevent.data[2]
 
     def seq_data(self): 
-        return (self.channel, self.key, 0, self.velocity, 0)
+        return (self.channel-1, self.key, 0, self.velocity, 0)
 
     def source(self):
         return (self.seqevent.dst, NoteOff.__name__, self.channel, self.key)
@@ -132,18 +135,15 @@ class NoteOff (Note):
 @ext_encode
 class NotePress (Note): 
     def __init__(self, seqevent=None):
-        self.seqevent = seqevent
-        self.channel = 0
+        super().__init__(seqevent)
         self.key = 0
         self.velocity = 0
 
         if self.seqevent is not None:
             if self.seqevent.etype == alsaseq.SND_SEQ_EVENT_KEYPRESS:
-                self.channel = seqevent.data[0]
                 self.key = seqevent.data[1]
                 self.velocity = seqevent.data[2]
             elif self.seqevent.etype == alsaseq.SND_SEQ_EVENT_CHANPRESS:
-                self.channel = seqevent.data[0]
                 self.velocity = seqevent.data[2]
 
     def source(self):
@@ -157,16 +157,14 @@ class MidiPgmChange (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_PGMCHANGE 
 
     def __init__(self, seqevent=None):
-        self.seqevent = seqevent
-        self.channel = None 
+        super().__init__(seqevent)
         self.program = None 
 
         if self.seqevent is not None:
-            self.channel = seqevent.data[0]
             self.program = seqevent.data[5]
 
     def seq_data(self):
-        return (self.channel, 0, 0, 0, 0, self.program)
+        return (self.channel-1, 0, 0, 0, 0, self.program)
 
     def source(self):
         return (self.seqevent.dst, MidiPgmChange.__name__, self.channel, None)
@@ -180,18 +178,16 @@ class MidiCC (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_CONTROLLER 
 
     def __init__(self, seqevent=None):
-        self.seqevent = seqevent
-        self.channel = 0
+        super().__init__(seqevent)
         self.controller = 0
         self.value = 0
 
         if self.seqevent is not None:
-            self.channel = seqevent.data[0]
             self.controller = seqevent.data[4]
             self.value = seqevent.data[5]
         
     def seq_data(self):
-        return (self.channel, 0, 0, 0, self.controller, self.value)
+        return (self.channel-1, 0, 0, 0, self.controller, self.value)
 
     def source(self):
         return (self.seqevent.dst, MidiCC.__name__, self.channel, self.controller)
@@ -204,19 +200,16 @@ class MidiPitchbend (MidiCC):
     alsa_type = alsaseq.SND_SEQ_EVENT_PITCHBEND
 
     def __init__(self, seqevent=None):
-        self.seqevent = seqevent
-        self.channel = 0
-        self.controller = 0
+        super().__init__(seqevent)
         self.note = 0
         self.value = 0
 
         if self.seqevent is not None:
-            self.channel = seqevent.data[0]
             self.note = seqevent.data[1]
             self.value = seqevent.data[5]
         
     def seq_data(self):
-        return (self.channel, self.note, 0, 0, 1, self.value)
+        return (self.channel-1, self.note, 0, 0, 1, self.value)
 
     def source(self):
         return (self.seqevent.dst, MidiPitchbend.__name__, self.channel, self.note)
@@ -404,6 +397,7 @@ class MFPMidiManager(QuittableThread):
 
     def dispatch_event(self, event):
         port, typeinfo, channel, unit = event.source()  
+        port = port[1]
 
         handlers = [] 
         port_by_name = None if port is None else self.handlers_by_filter.get(port) 
