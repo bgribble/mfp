@@ -51,13 +51,14 @@ def mk_raw(event, port=0):
 class MidiEvent (object): 
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
+        self.channel = 1
+        self.client = None
+        self.port = 0
+
         if self.seqevent:
             if self.seqevent.dst:
                 self.client = self.seqevent.dst[0]
                 self.port = self.seqevent.dst[1]
-            else:
-                self.client = None
-                self.port = 0
             self.channel = seqevent.data[0] + 1
 
     def source(self):
@@ -447,10 +448,9 @@ class MFPMidiManager(QuittableThread):
             log.debug("alsaseq: error on output of", raw_tuple, e)
             log.debug_traceback()
 
-        
         elapsed = datetime.now() - starttime
 
-        if elapsed > timedelta(microseconds=1000):
-            print("MIDI send took %s milliseconds" % timedelta.total_seconds() * 1000)
+        if elapsed > timedelta(microseconds=2000):
+            log.debug("MIDI send took %s milliseconds" % elapsed.total_seconds() * 1000)
 
 

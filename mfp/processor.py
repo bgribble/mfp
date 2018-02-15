@@ -10,7 +10,7 @@ from .method import MethodCall
 from .evaluator import LazyExpr
 from .bang import Uninit, Bang
 from .scope import LexicalScope
-
+from .utils import isiterable
 from . import log
 
 
@@ -886,7 +886,10 @@ class Processor (object):
         self.midi_mode = prms.get("midi_mode", None)
         self.midi_filters = prms.get("midi_filters", None)
         if self.midi_filters is not None:
-            ports = self.midi_filters.get("port")
+            ports = self.midi_filters.get("port", [])
+            if not isiterable(ports):
+                ports = [ports]
+
             self.midi_filters["port"] = [tuple(p) for p in ports]
             self.midi_cbid = MFPApp().midi_mgr.register(self._midi_handler,
                                                         filters=self.midi_filters)

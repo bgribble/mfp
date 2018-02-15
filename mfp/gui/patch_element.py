@@ -451,7 +451,7 @@ class PatchElement (Clutter.Group):
 
         # clean up -- ports may need to be deleted if
         # the object resizes smaller
-        for pid, port in self.port_elements.items():
+        for pid, port in list(self.port_elements.items()):
             if port not in ports_done:
                 del self.port_elements[pid]
                 self.remove_actor(port)
