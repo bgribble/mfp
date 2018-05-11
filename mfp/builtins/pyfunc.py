@@ -89,21 +89,30 @@ class GetElement(Processor):
         Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
         if len(initargs):
-            self.element = initargs[0]
+            self.elements = initargs
 
     def trigger(self):
         if self.inlets[1] is not Uninit:
-            self.element = self.inlets[1]
+            self.elements = self.inlets[1]
+            self.inlets[1] = Uninit
 
-        if self.element is None:
+        if self.elements is None:
             return
 
-        if isinstance(self.element, (int, float)):
-            self.outlets[0] = self.inlets[0][int(self.element)]
-        elif isinstance(self.inlets[0], dict):
-            self.outlets[0] = self.inlets[0].get(self.element)
+        values = []
+
+        for element in self.elements:
+            if isinstance(element, (int, float)):
+                values.append(self.inlets[0][int(element)])
+            elif isinstance(self.inlets[0], dict):
+                values.append(self.inlets[0].get(element))
+            else:
+                values.append(getattr(self.inlets[0], element))
+
+        if len(values) == 1:
+            self.outlets[0] = values[0]
         else:
-            self.outlets[0] = getattr(self.inlets[0], self.element)
+            self.outlets[0] = values
 
         self.outlets[1] = self.inlets[0]
 

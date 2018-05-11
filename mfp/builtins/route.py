@@ -19,22 +19,29 @@ class Route (Processor):
     [route= 1, 2, (3,1), 4]
     [case 1, 2, [3,4,5], 6]
 
-    [route] takes as input a pair of (address, data) and routes the data part to
-    one of its outputs, where the output is determined by which of the creation
-    args the address matches.
+    [route] takes as input an iterable, [address, ...rest] and
+    routes the rest part to one of its outputs, where the output
+    is determined by which of the creation args the address
+    matches.
 
-    [case] assumes that its input data is the address, and routes the data to
-    the selected output unaltered.
+    [routecar] takes as input a pair of (address, data) and
+    routes the data part to one of its outputs
+
+    [case] assumes that its input data is the address, and routes
+    the data to the selected output unaltered.
 
     if multiple addresses match, the leftmost is used.
 
-    Default behaviors, disabled when created as [route=] or [case=]: If the test
-    arguments are type objects, they match if the input is that type.  If test
-    args are lists, they match if the input matches any item in the list.
+    Default behaviors, disabled when created as [route=] or
+    [routecar=] or [case=]: If the test arguments are type
+    objects, they match if the input is that type.  If test args
+    are lists, they match if the input matches any item in the
+    list.
 
-    The route processor has n+1 outlets, where n is the number of creation args.
-    The last outlet is for unmatched inputs.
+    The route processor has n+1 outlets, where n is the number of
+    creation args.  The last outlet is for unmatched inputs.
     '''
+
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
@@ -43,10 +50,13 @@ class Route (Processor):
         else:
             self.strict = False
 
-        if init_type[:4] == 'case':
+        if init_type.startswith('case'):
             self.addressed_data = False
         else:
             self.addressed_data = True
+
+        if init_type.startswith("routecar"):
+            self.output_car = True
 
         self.addresses = {}
         self.type_addresses = {}
@@ -92,7 +102,10 @@ class Route (Processor):
                 d = k
             elif isinstance(self.inlets[0], list) or isinstance(self.inlets[0], tuple):
                 k = self.inlets[0][0]
-                d = self.inlets[0][1:]
+                if self.output_car:
+                    d = self.inlets[0][1]
+                else:
+                    d = self.inlets[0][1:]
             else:
                 k = self.inlets[0]
                 d = Bang
@@ -124,5 +137,7 @@ class Route (Processor):
 def register():
     MFPApp().register("route", Route)
     MFPApp().register("route=", Route)
+    MFPApp().register("routecar", Route)
+    MFPApp().register("routecar=", Route)
     MFPApp().register("case", Route)
     MFPApp().register("case=", Route)

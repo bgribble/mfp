@@ -9,10 +9,22 @@ import threading
 
 
 def _dumb_load(ctor, values):
-    initobj = ctor()
-    for attr, value in values.items():
-        setattr(initobj, attr, value)
-    return initobj
+    # try a couple of strategies
+    try:
+        initobj = ctor()
+        for attr, value in values.items():
+            setattr(initobj, attr, value)
+        return initobj
+    except Exception as e:
+        pass
+
+    try:
+        initobj = ctor(**values)
+        return initobj
+    except Exception as e:
+        pass
+
+    return None
 
 def ext_encode (klass):
     ExtendedEncoder.TYPES['__' + klass.__name__ + '__'] = klass
