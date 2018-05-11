@@ -508,11 +508,17 @@ class DialElement(SlideMeterElement):
         theta = self.THETA_MIN + scale_fraction * (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
         return theta
 
-    def draw_cb(self, texture, ct): 
+    @catchall
+    def draw_cb(self, texture, ct, width, height): 
         c = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
-        texture.clear()
+
+        # clear the drawing area
+        ct.save()
+        ct.set_operator(cairo.OPERATOR_CLEAR)
+        ct.paint()
+        ct.restore()
 
         # draw the scale if required
         if self.show_scale:
