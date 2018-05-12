@@ -25,4 +25,5 @@ extern mfp_procinfo * init_builtin_inlet(void);
 extern mfp_procinfo * init_builtin_outlet(void);
 extern mfp_procinfo * init_builtin_errtest(void);
 extern mfp_procinfo * init_builtin_slew(void);
+extern mfp_procinfo * init_builtin_pulse(void);
 

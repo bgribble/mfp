@@ -72,3 +72,5 @@ def register():
     slew.register()
     from . import bitcombine
     bitcombine.register()
+    from . import pulse
+    pulse.register()

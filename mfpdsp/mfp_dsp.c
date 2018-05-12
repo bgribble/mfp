@@ -32,7 +32,7 @@ mfp_dsp_init(void) {
         init_builtin_biquad, init_builtin_phasor,
         init_builtin_ladspa, init_builtin_delay, init_builtin_delblk, init_builtin_noop,
         init_builtin_inlet, init_builtin_outlet,
-        init_builtin_errtest, init_builtin_slew
+        init_builtin_errtest, init_builtin_slew, init_builtin_pulse
     };
     int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
 
