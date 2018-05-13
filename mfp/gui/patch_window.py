@@ -476,7 +476,8 @@ class PatchWindow(object):
             end = buf.get_iter_at_mark(mark)
             end.backward_line()
             end.set_line_offset(0)
-            end.forward_chars(msg.index(']') + 1)
+            if ']' in msg:
+                end.forward_chars(msg.index(']') + 1)
             return (start, end)
 
         # this is a bit complicated so that we ensure scrolling is

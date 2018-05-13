@@ -140,11 +140,14 @@ class Quilt (clutter.Group):
 
     def gc_tiles(self, marked):
         garbage = []
+        to_delete = []
         for pos, tile in self.tile_by_pos.items():
             if marked.get(pos) is None:
                 garbage.append(tile)
-                del self.tile_by_pos[pos]
+                to_delete.append(pos)
                 del self.tile_reverse[tile]
+        for target in to_delete:
+            del self.tile_by_pos[target]
         return garbage
 
     def new_tile(self, pos):

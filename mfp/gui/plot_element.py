@@ -231,7 +231,7 @@ class PlotElement (PatchElement):
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self, self.INIT_WIDTH, self.INIT_HEIGHT)
             elif params["plot_type"] == "scope":
-                self.xyplot = ScopePlot(self, self.INIT_WIDTH, self.INIT_HEIGHT, 
+                self.xyplot = ScopePlot(self.INIT_WIDTH, self.INIT_HEIGHT,
                                         MFPApp().samplerate)
                 self.xyplot.draw_complete_cb = self.draw_complete_cb
             if self.xyplot:

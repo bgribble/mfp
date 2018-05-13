@@ -34,10 +34,13 @@ class ExtendedEncoder (json.JSONEncoder):
     from ..bang import BangType, UninitType
     from ..gui.colordb import RGBAColor 
     from ..gui.ticks import ScaleType 
+    from ..buffer_info import BufferInfo
 
     TYPES = { '__BangType__': BangType, 
              '__UninitType__': UninitType, 
-             '__RGBAColor__': RGBAColor}
+             '__RGBAColor__': RGBAColor,
+             '__BufferInfo__': BufferInfo,
+            }
 
     DUMBTYPES = (ScaleType,)
 

@@ -335,7 +335,7 @@ class Patch(Processor):
         if self.gui_params.get("top_level"):
             MFPApp().gui_command.load_start()
 
-            for oid, obj in self.objects.items():
+            for oid, obj in list(self.objects.items()):
                 if obj.display_type != "hidden":
                     obj.create_gui()
 

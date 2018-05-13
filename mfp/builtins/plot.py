@@ -40,9 +40,9 @@ class Scope (Processor):
                 MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
             else: 
                 self.need_buffer_send = True 
-        elif self.inlets[0] is True:
+        elif self.inlets[0] == 1:
             pass
-        elif self.inlets[0] is False:
+        elif self.inlets[0] == 0:
             if self.gui_created:
                 self.grab()
         if self.buffer is None:

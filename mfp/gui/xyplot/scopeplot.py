@@ -10,6 +10,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter 
 from .xyplot import XYPlot
 from mfp import log
+from mfp.utils import catchall
 from posix_ipc import SharedMemory
 from mfp.gui_main import MFPGUI
 
@@ -21,7 +22,7 @@ class ScopePlot (XYPlot):
     
     FLOAT_SIZE = 4
 
-    def __init__(self, width, height, samplerate):
+    def __init__(self, element, width, height, samplerate):
         self.orig_x = 0
         self.orig_y = 1
 
@@ -35,7 +36,7 @@ class ScopePlot (XYPlot):
         self.data_end = -1
         self.draw_complete_cb = None 
 
-        XYPlot.__init__(self, width, height)
+        XYPlot.__init__(self, element, width, height)
 
     def set_field_origin(self, orig_x, orig_y, redraw=False):
         self.orig_x = orig_x
@@ -43,10 +44,12 @@ class ScopePlot (XYPlot):
         if redraw: 
             self.plot.invalidate() 
 
+    @catchall
     def create_plot(self): 
         self.plot = Clutter.CairoTexture.new(self.plot_w, self.plot_h)
         self.plot.connect("draw", self.draw_field_cb)
         self.plot.show()
+        self.plot.invalidate()
 
 
     def draw_curve_simple(self, ctx, curve):
@@ -112,6 +115,7 @@ class ScopePlot (XYPlot):
             ctx.line_to(*pmax)
         ctx.stroke()
 
+    @catchall
     def draw_field_cb(self, texture, ctx, *rest):
         if not self.data:
             return 
@@ -153,9 +157,9 @@ class ScopePlot (XYPlot):
 
     def command(self, action, data):
         if action == "buffer":
-            log.debug("scopeplot: got buffer info", data)
             self.buf_info = data
             self.shm_obj = None 
+            self.plot.invalidate()
         elif action == "grab":
             self._grab()
             self.plot.invalidate()
