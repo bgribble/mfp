@@ -5,15 +5,15 @@ from .colordb import ColorDB
 from gi.repository import Clutter
 import math
 from mfp import MFPGUI
+from mfp import log
 
 
 class ConnectionElement(PatchElement):
     display_type = "connection"
-    LINE_WIDTH = 1.25
+    LINE_WIDTH = 1.5
 
     def __init__(self, window, obj_1, port_1, obj_2, port_2, dashed=False):
 
-        self.texture = Clutter.CairoTexture.new(10, 10)
         self.obj_1 = obj_1
         self.port_1 = port_1
         self.obj_2 = obj_2
@@ -21,16 +21,18 @@ class ConnectionElement(PatchElement):
         self.width = None
         self.height = None
         self.rotation = 0.0
-        self.dashed = dashed 
-        self.dsp_connect = False 
+        self.dashed = dashed
+        self.dsp_connect = False
 
         if port_1 in obj_1.dsp_outlets:
-            self.dsp_connect = True 
+            self.dsp_connect = True
         px, py = obj_1.get_stage_position()
         PatchElement.__init__(self, window, px, py)
 
+        self.texture = Clutter.Canvas.new()
+        self.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
-        self.add_actor(self.texture)
+
         self.set_reactive(True)
         if obj_1.layer is not None:
             self.move_to_layer(obj_1.layer)
@@ -40,6 +42,8 @@ class ConnectionElement(PatchElement):
             print("WARNING: creating ConnectionElement with no layer")
             print(obj_1, obj_2)
 
+        self.set_size(15, 15)
+        self.move(px, py)
         self.draw()
 
     def select(self):
@@ -51,9 +55,9 @@ class ConnectionElement(PatchElement):
         self.draw()
 
     def delete(self):
-        if (not self.dashed and self.obj_1 and self.obj_2 and 
-            self.obj_1.obj_id is not None and self.obj_2.obj_id is not None):
-            MFPGUI().mfp.disconnect(self.obj_1.obj_id, self.port_1, 
+        if (not self.dashed and self.obj_1 and self.obj_2 and
+                self.obj_1.obj_id is not None and self.obj_2.obj_id is not None):
+            MFPGUI().mfp.disconnect(self.obj_1.obj_id, self.port_1,
                                     self.obj_2.obj_id, self.port_2)
         if self.obj_1 and self in self.obj_1.connections_out:
             self.obj_1.connections_out.remove(self)
@@ -65,7 +69,12 @@ class ConnectionElement(PatchElement):
         PatchElement.delete(self)
 
     def draw_ports(self):
-        pass 
+        pass
+
+    def set_size(self, width, height):
+        PatchElement.set_size(self, width, height)
+        self.texture.set_size(width, height)
+        self.texture.invalidate()
 
     def corners(self):
         if self.obj_1 and self.obj_2:
@@ -82,7 +91,7 @@ class ConnectionElement(PatchElement):
         p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
         p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
 
-        if self.dsp_connect == True:
+        if self.dsp_connect is True:
             self.width = 2.5 * self.LINE_WIDTH
         else:
             self.width = 1.5 * self.LINE_WIDTH
@@ -92,31 +101,38 @@ class ConnectionElement(PatchElement):
         self.position_x = p1[0] - math.cos(theta) * self.width / 2.0
         self.position_y = p1[1] - math.sin(theta) * self.width / 2.0
 
-        self.set_size(self.width, self.height)
         self.set_position(self.position_x, self.position_y)
         self.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
 
-        self.texture.set_position(0, 0)
-        self.texture.set_size(self.width, self.height)
-        self.texture.set_surface_size(self.width, self.height)
-        self.texture.invalidate()
+        self.set_size(math.ceil(self.width), math.ceil(self.height))
 
-    def draw_cb(self, texture, ctx):
-        texture.clear()
+    def draw_cb(self, texture, ctx, width, height):
+        # clear the drawing area
+        ctx.save()
+        ctx.set_operator(cairo.OPERATOR_CLEAR)
+        ctx.paint()
+        ctx.restore()
+
+        ctx.set_operator(cairo.OPERATOR_OVER)
         ctx.set_antialias(cairo.ANTIALIAS_NONE)
 
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
-        ctx.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         if self.dsp_connect:
-            ctx.set_line_width(2.0 * self.LINE_WIDTH)
+            lw = 2.0 * self.LINE_WIDTH
         else:
-            ctx.set_line_width(self.LINE_WIDTH)
+            lw = self.LINE_WIDTH
+        ctx.set_line_width(lw)
 
-        if self.dashed: 
-            ctx.set_dash([8, 4])
+        if self.dashed:
+            ctx.set_dash([4, 4])
         else:
             ctx.set_dash([])
 
-        ctx.move_to(self.width / 2.0, 0)
-        ctx.line_to(self.width / 2.0, self.height)
+        ctx.translate(width/2.0, lw/2.0)
+        ctx.move_to(0, 0)
+        ctx.line_to(0, height)
+        ctx.close_path()
+
+        c = ColorDB.to_cairo(self.get_color('stroke-color'))
+        ctx.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ctx.stroke()
+        return True
