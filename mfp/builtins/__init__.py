@@ -74,3 +74,5 @@ def register():
     bitcombine.register()
     from . import pulse
     pulse.register()
+    from . import pulsesel
+    pulsesel.register()

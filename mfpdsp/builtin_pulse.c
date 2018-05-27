@@ -195,7 +195,6 @@ config(mfp_processor * proc)
 
     if (pw_mode_ptr != NULL) {
         d->pw_mode = (int)(*(float *)pw_mode_ptr);
-        printf("SET PW_MODE TO %d", d->pw_mode);
     }
 
     if (phase_ptr != NULL) {
