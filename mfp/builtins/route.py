@@ -57,6 +57,8 @@ class Route (Processor):
 
         if init_type.startswith("routecar"):
             self.output_car = True
+        else:
+            self.output_car = False
 
         self.addresses = {}
         self.type_addresses = {}
