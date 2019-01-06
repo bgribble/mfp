@@ -76,3 +76,5 @@ def register():
     pulse.register()
     from . import pulsesel
     pulsesel.register()
+    from . import stepseq
+    stepseq.register()

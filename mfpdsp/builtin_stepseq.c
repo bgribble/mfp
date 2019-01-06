@@ -47,7 +47,6 @@ config(mfp_processor * proc)
     gpointer position_ptr = g_hash_table_lookup(proc->params, "position");
     gpointer threshold_ptr = g_hash_table_lookup(proc->params, "threshold");
     gpointer trig_ms_ptr = g_hash_table_lookup(proc->params, "trig_ms");
-    gpointer threshold_ptr = g_hash_table_lookup(proc->params, "threshold");
 
     float step_slur, step_value, frames_per_ms;
     int step_slur_frames;
@@ -72,9 +71,9 @@ config(mfp_processor * proc)
         rawpos = 0;
         steps = pdata->steps;
         for (scount=0; scount < num_steps; scount++) {
-            step_slur = g_array_index(steps_raw, float, rawpos++);
             step_value = g_array_index(steps_raw, float, rawpos++);
             step_trigger = (int)(g_array_index(steps_raw, float, rawpos++));
+            step_slur = g_array_index(steps_raw, float, rawpos++);
 
             step_slur_frames = (int)(step_slur * frames_per_ms + 0.5);
 
@@ -82,12 +81,13 @@ config(mfp_processor * proc)
             steps[scount].value = step_value;
             steps[scount].trigger = step_trigger;
         }
-
-        if (pdata->cur_step >= num_steps) {
+        if (num_steps < 2) {
+            pdata->cur_step = 0;
+        }
+        else if (pdata->cur_step >= num_steps) {
             pdata->cur_step = pdata->cur_step % num_steps;
         }
         pdata->num_steps = num_steps;
-        g_hash_table_remove(proc->params, "steps");
     }
 
     /* position */
@@ -107,7 +107,7 @@ config(mfp_processor * proc)
 
     /* incoming clock transition threshold */
     if(threshold_ptr != NULL) {
-        pdata->clock_thresh = *(float *)threshold_ptr;
+        pdata->clock_threshold = *(float *)threshold_ptr;
     }
 
     return 1;
@@ -125,19 +125,21 @@ process_stepseq(mfp_processor * proc)
     int block_frame;
     mfp_sample clock_thresh = data->clock_threshold;
     mfp_sample cur_cv, cur_trig;
-    double slur_slope;
+    double slur_slope=0.0;
     mfp_sample * in_clk = proc->inlet_buf[0]->data;
     mfp_sample * out_cv = proc->outlet_buf[0]->data;
     mfp_sample * out_trig = proc->outlet_buf[1]->data;
 
-    if (!out_cv && !out_trig) {
+    if (!out_cv && !out_trig || !data->num_steps) {
         mfp_block_zero(proc->outlet_buf[0]);
         mfp_block_zero(proc->outlet_buf[1]);
         return 0;
     }
 
     cur_cv = data->cv_current_val;
-    slur_slope = (cstep->value - data->cv_slur_start_val) / cstep->slur_frames;
+    if (cstep->slur_frames > 0) {
+        slur_slope = (cstep->value - data->cv_slur_start_val) / cstep->slur_frames;
+    }
 
     /* iterate */
     for(block_frame=0; block_frame < proc->context->blocksize; block_frame++) {
@@ -148,7 +150,10 @@ process_stepseq(mfp_processor * proc)
             data->cv_slur_start_val = cur_cv;
             step_frame = 0;
             cstep = data->steps + data->cur_step;
-            slur_slope = (cstep->value - cur_cv) / cstep->slur_frames;
+            if (cstep->slur_frames > 0) {
+                slur_slope = (cstep->value - cur_cv) / cstep->slur_frames;
+            }
+
             if (cstep->trigger) {
                 trigger_active = 1;
             }
@@ -159,7 +164,7 @@ process_stepseq(mfp_processor * proc)
 
         /* update value to output on CV out */
         if (out_cv) {
-            if (step_frame >= cstep->slur_frames) {
+            if (step_frame >= cstep->slur_frames || cstep->slur_frames == 0) {
                 cur_cv = cstep->value;
             }
             else {
@@ -200,7 +205,6 @@ static void
 init(mfp_processor * proc)
 {
     builtin_stepseq_data * p = g_malloc0(sizeof(builtin_stepseq_data));
-
     proc->data = p;
 
     p->steps = g_malloc0(MAX_STEPS * sizeof(step));
