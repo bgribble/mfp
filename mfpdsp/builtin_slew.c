@@ -1,3 +1,4 @@
+#include <math.h>
 #include <string.h>
 #include "mfp_dsp.h" 
 
@@ -29,7 +30,7 @@ process_slew(mfp_processor * proc)
     else if (fabs(pdata->last_val - pdata->const_signal) < DELTA_FUDGE){
         /* shortcut! */
         mfp_block_fill(proc->outlet_buf[0], pdata->const_signal);
-        return;
+        return 1;
     }
 
     for (int scount=0; scount < proc->outlet_buf[0]->blocksize; scount++) {
@@ -52,6 +53,7 @@ process_slew(mfp_processor * proc)
         before = after;
     }
     pdata->last_val = after;
+    return 1;
 }
 
 static void

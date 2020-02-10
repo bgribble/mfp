@@ -78,3 +78,5 @@ def register():
     pulsesel.register()
     from . import stepseq
     stepseq.register()
+    from . import vcq12
+    vcq12.register()

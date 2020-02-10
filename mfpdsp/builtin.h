@@ -28,3 +28,5 @@ extern mfp_procinfo * init_builtin_slew(void);
 extern mfp_procinfo * init_builtin_pulse(void);
 extern mfp_procinfo * init_builtin_pulsesel(void);
 extern mfp_procinfo * init_builtin_stepseq(void);
+extern mfp_procinfo * init_builtin_vc_quantize12(void);
+extern mfp_procinfo * init_builtin_vc_freq(void);
