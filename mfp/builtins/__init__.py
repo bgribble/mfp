@@ -80,3 +80,5 @@ def register():
     stepseq.register()
     from . import vcq12
     vcq12.register()
+    from . import vcfreq
+    vcfreq.register()
