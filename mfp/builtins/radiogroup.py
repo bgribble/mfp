@@ -39,7 +39,7 @@ class RadioGroup (Processor):
         self.doc_tooltip_outlet = [] 
 
         for i in range(num_inlets):
-            self.doc_tooltip_inlet.append("Button %(port_num) input")
+            self.doc_tooltip_inlet.append("Button %(port_num)d input")
             self.doc_tooltip_outlet.append("Button %(port_num)d output")
 
         Processor.__init__(self, num_inlets, num_inlets+1, 

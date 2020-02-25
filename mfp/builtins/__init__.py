@@ -82,3 +82,5 @@ def register():
     vcq12.register()
     from . import vcfreq
     vcfreq.register()
+    from . import hold
+    hold.register()

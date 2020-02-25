@@ -34,7 +34,8 @@ mfp_dsp_init(void) {
         init_builtin_inlet, init_builtin_outlet,
         init_builtin_errtest, init_builtin_slew, init_builtin_pulse, 
         init_builtin_pulsesel, init_builtin_stepseq,
-        init_builtin_vc_quantize12, init_builtin_vc_freq
+        init_builtin_vc_quantize12, init_builtin_vc_freq,
+        init_builtin_hold
     };
     int num_initfuncs = ARRAY_LEN(initfuncs, sizeof(mfp_procinfo *(*)(void)));
 
