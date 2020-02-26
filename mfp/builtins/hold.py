@@ -18,7 +18,7 @@ class Hold(Processor):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
         initargs, kwargs = self.parse_args(init_args)
-        self.hot_inlets = [0]
+        self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
         self.dsp_init("hold~")

@@ -386,6 +386,7 @@ def register():
     mk_unary(cmath.phase, "phase", "Angle (radians) of complex number")
 
     # logical/bit ops 
+    mk_unary(operator.not_, "not", "Logical negate")
     mk_binary(operator.and_, "and", "Logical and")
     mk_binary(operator.or_, "or", "Logical or")
     mk_binary(operator.xor, "xor", "Logical xor")
