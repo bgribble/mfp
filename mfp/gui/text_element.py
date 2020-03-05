@@ -170,9 +170,9 @@ class TextElement (PatchElement):
             self.default = params['default']
 
         newsize = None
-        if params.get('style') is not None:
+        if 'style' in params:
             newstyle = params.get('style')
-            if newstyle.get('canvas-size') is not None:
+            if 'canvas-size' in newstyle:
                 newsize = newstyle.get('canvas-size')
                 params['width'] = newsize[0]
                 params['height'] = newsize[1]
@@ -181,7 +181,12 @@ class TextElement (PatchElement):
             self.border = params.get('border')
 
         PatchElement.configure(self, params)
-        if newsize: 
+        if newsize:
             self.set_size(*newsize)
+
+        if 'style' in params:
+            newstyle = params['style']
+            if 'font-face' in newstyle or 'font-size' in newstyle:
+                self.label.set_font_name(self.get_fontspec())
 
         self.update()

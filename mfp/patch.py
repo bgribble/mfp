@@ -183,7 +183,7 @@ class Patch(Processor):
                 self.inlets[i] = Uninit
 
         for o in range(len(self.outlets)):
-            self.outlets[o] = self.outlet_objects[o].outlets[0]
+            self.add_output(o, self.outlet_objects[o].outlets[0])
             self.outlet_objects[o].outlets[0] = Uninit
 
     def method(self, message, inlet=0):
@@ -194,7 +194,7 @@ class Patch(Processor):
             self.baseclass_method(message, inlet)
 
         for o in range(len(self.outlets)):
-            self.outlets[o] = self.outlet_objects[o].outlets[0]
+            self.add_output(o, self.outlet_objects[o].outlets[0])
             self.outlet_objects[o].outlets[0] = Uninit
 
     def baseclass_method(self, message, inlet=0):

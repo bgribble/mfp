@@ -19,6 +19,9 @@ class AsyncOutput (object):
         self.outlet_num = outlet
         self.value = value
 
+class MultiOutput (object):
+    def __init__(self):
+        self.values = []
 
 class Processor (object):
     PORT_IN = 0
@@ -33,6 +36,7 @@ class Processor (object):
     save_to_patch = True
     hot_inlets = [0]
     do_onload = True
+    clear_outlets = True
 
     paused = False
 
@@ -603,6 +607,19 @@ class Processor (object):
             existing.remove((self, outlet))
         return True
 
+    def add_output(self, outlet_num, value):
+        if value is Uninit:
+            self.outlets[outlet_num] = Uninit
+            return
+
+        if self.outlets[outlet_num] is Uninit:
+            self.outlets[outlet_num] = value
+        else:
+            mv = MultiOutput()
+            mv.values.append(self.outlets[outlet_num])
+            mv.values.append(value)
+            self.outlets[outlet_num] = mv
+
     def send(self, value, inlet=0):
         if self.paused:
             return
@@ -637,7 +654,8 @@ class Processor (object):
         self.count_in += 1
 
         if inlet in self.hot_inlets or inlet == -1:
-            self.outlets = [Uninit] * len(self.outlets)
+            if self.clear_outlets:
+                self.outlets = [Uninit] * len(self.outlets)
             if inlet == -1:
                 self.dsp_response(value[0], value[1])
             elif isinstance(value, MethodCall):
@@ -647,7 +665,7 @@ class Processor (object):
                     log.error("_send: object %s has no outlet '%s'" % (self.name,
                                                                        value.outlet_num))
                 else:
-                    self.outlets[value.outlet_num] = value.value
+                    self.add_output(value.outlet_num, value.value)
                     self.inlets[inlet] = Uninit
             else:
                 self.trigger()
@@ -655,16 +673,23 @@ class Processor (object):
             output_pairs = list(zip(self.connections_out, self.outlets))
 
             for conns, val in [output_pairs[i] for i in self.outlet_order]:
-                if val is not Uninit:
-                    if isinstance(val, LazyExpr):
-                        val = val.call()
+                if val is Uninit:
+                    continue
 
+                if isinstance(val, LazyExpr):
+                    val = val.call()
+                if isinstance(val, MultiOutput):
+                    values = val.values
+                else:
+                    values = [val]
+
+                for val in values:
                     self.count_out += 1
                     for target, tinlet in conns:
                         if target is not None:
                             work.append((target, val, tinlet))
                         else:
-                            log.debug("Bad output connection: obj_id=%s" % self.obj_id)
+                            log.warning("Bad output connection: obj_id=%s" % self.obj_id)
         try:
             if ((inlet in self.dsp_inlets)
                     and not isinstance(value, bool) and isinstance(value, (float, int))):

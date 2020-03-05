@@ -8,6 +8,7 @@ from ..processor import Processor, AsyncOutput
 from ..mfp_app import MFPApp
 from .. import Uninit
 
+from mfp import log
 
 class Inlet(Processor):
     doc_tooltip_obj = "Message input to patch"
@@ -80,6 +81,8 @@ class Outlet(Processor):
     doc_tooltip_obj = "Message output from patch"
 
     do_onload = False 
+    clear_outlets = False
+
     def __init__(self, init_type, init_args, patch, scope, name):
         if patch:
             initargs, kwargs = patch.parse_args(init_args)
@@ -108,15 +111,13 @@ class Outlet(Processor):
         return newobj
 
     def trigger(self):
-        if self.patch:
-            if not self.patch.trigger_lock.acquire(False):
-                self.patch.outlets[self.outletnum] = self.inlets[0]
-            else:
-                self.patch.trigger_lock.release()
-                self.patch.send(AsyncOutput(self.inlets[0], self.outletnum))
-
-        self.outlets[0] = self.inlets[0]
+        in_value = self.inlets[0]
         self.inlets[0] = Uninit
+
+        if self.patch and self.patch.trigger_lock.acquire(False):
+            self.patch.trigger_lock.release()
+            self.patch.send(AsyncOutput(in_value, self.outletnum))
+        self.add_output(0, in_value)
 
 class SignalOutlet(Outlet): 
     doc_tooltip_obj = "Signal output from patch"
