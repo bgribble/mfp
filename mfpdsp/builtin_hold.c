@@ -4,9 +4,12 @@
 
 #include "mfp_dsp.h"
 
-#define HOLD_THRESH ((mfp_sample)0.01)
+#define SAMPLE_THRESH ((mfp_sample)0.01)
 
 typedef struct {
+    int param_response;
+    int param_track;
+    int sample_phase;
     mfp_sample hold_value;
     mfp_sample const_in_0;
     mfp_sample const_in_1;
@@ -18,10 +21,12 @@ process(mfp_processor * proc)
     builtin_hold_data * d = (builtin_hold_data *)(proc->data);
     mfp_sample const_in_1 = d->const_in_1;
     mfp_sample const_in_0 = d->const_in_0;
-
+    
     mfp_sample * outbuf = proc->outlet_buf[0]->data;
     mfp_sample * in_0 = proc->inlet_buf[0]->data;
     mfp_sample * in_1 = proc->inlet_buf[1]->data;
+    
+    d->const_in_1 = 0;
 
     if ((outbuf == NULL) || (in_0 == NULL) || (in_1 == NULL))  {
         return 0;
@@ -40,29 +45,80 @@ process(mfp_processor * proc)
     /* iterate */ 
     if (in_0_present && in_1_present) {
         for(int scount=0; scount < proc->context->blocksize; scount++) {
-            if (*in_1++ < HOLD_THRESH) {
-                d->hold_value = *in_0++;
+            if (*in_1++ < SAMPLE_THRESH) {
+                d->sample_phase = 0;
+                if (d->param_track) {
+                    *outbuf++ = *in_0;
+                }
+                else {
+                    *outbuf++ = d->hold_value;
+                }
             }
             else {
-                in_0++;
+                if (d->sample_phase == 0) {
+                    d->hold_value = *in_0;
+                    if (d->param_response) {
+                        mfp_dsp_send_response_float(proc, 0, d->hold_value);
+                    }
+                }
+                d->sample_phase = 1;
+                *outbuf++ = d->hold_value;
             }
-            *outbuf++ = d->hold_value;
+            in_0++;
         }
     }
     else if (in_0_present) {
+        if (d->sample_phase == 0 && const_in_1) {
+            d->hold_value = *in_0;
+            d->sample_phase = 1;
+            if (d->param_response) {
+                mfp_dsp_send_response_float(proc, 0, d->hold_value);
+            }
+        }
+        else if (d->sample_phase == 1 && !const_in_1) {
+            d->sample_phase = 0;
+        }
+
         for(int scount=0; scount < proc->context->blocksize; scount++) {
-            if (!const_in_1) {
-                d->hold_value = *in_0++;
+            if (!const_in_1 && d->param_track) {
+                *outbuf++ = *in_0;
             }
-            else {
-                in_0++;
+            else  {
+                *outbuf++ = d->hold_value;
             }
-            *outbuf++ = d->hold_value;
+            in_0++;
         }
     }
+    else if (in_1_present) {
+        for(int scount=0; scount < proc->context->blocksize; scount++) {
+            if (*in_1++ < SAMPLE_THRESH) {
+                d->sample_phase = 0;
+                if (d->param_track) {
+                    *outbuf++ = const_in_0;
+                }
+                else {
+                    *outbuf++ = d->hold_value;
+                }
+            }
+            else {
+                if (d->sample_phase == 0) {
+                    d->hold_value = const_in_0;
+                    if (d->param_response) {
+                        mfp_dsp_send_response_float(proc, 0, d->hold_value);
+                    }
+                }
+                d->sample_phase = 1;
+                *outbuf++ = d->hold_value;
+            }
+        }
+
+    }
     else {
-        if (!const_in_1) {
+        if (const_in_1) {
             d->hold_value = const_in_0;
+            if (d->param_response) {
+                mfp_dsp_send_response_float(proc, 0, d->hold_value);
+            }
         }
         for(int scount=0; scount < proc->context->blocksize; scount++) {
             *outbuf++ = d->hold_value;
@@ -79,6 +135,8 @@ init(mfp_processor * proc)
     proc->data = d;
     
     d->hold_value = 0.0;
+    d->param_track = FALSE;
+    d->param_response = FALSE;
     d->const_in_0 = (mfp_sample)0.0;
     d->const_in_1 = (mfp_sample)0.0;
     return;
@@ -93,16 +151,28 @@ destroy(mfp_processor * proc)
 static int
 config(mfp_processor * proc) 
 {
+    gpointer track_ptr = g_hash_table_lookup(proc->params, "track");
+    gpointer response_ptr = g_hash_table_lookup(proc->params, "response");
     gpointer sig_0_ptr = g_hash_table_lookup(proc->params, "_sig_0");
     gpointer sig_1_ptr = g_hash_table_lookup(proc->params, "_sig_1");
 
     builtin_hold_data * d = (builtin_hold_data *)(proc->data);
 
+    if (track_ptr != NULL) {
+        d->param_track = (int)(*(float *)track_ptr);
+    }
+    if (response_ptr != NULL) {
+        d->param_response = (int)(*(float *)response_ptr);
+    }
     if (sig_0_ptr != NULL) {
         d->const_in_0 = (mfp_sample)(*(float *)sig_0_ptr);
     }
     if (sig_1_ptr != NULL) {
         d->const_in_1 = (mfp_sample)(*(float *)sig_1_ptr);
+        g_hash_table_remove(proc->params, "_sig_1");
+    }
+    else {
+        d->const_in_1 = 0;
     }
     return 1;
 }
@@ -117,6 +187,8 @@ init_builtin_hold(void) {
     p->config = config;
     p->destroy = destroy;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+    g_hash_table_insert(p->params, "track", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "response", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "_sig_0", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "_sig_1", (gpointer)PARAMTYPE_FLT);
     return p;

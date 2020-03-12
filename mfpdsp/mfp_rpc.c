@@ -45,6 +45,7 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
 
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
+        case PARAMTYPE_BOOL:
             dval = *(float *)param_value;
             rval = json_node_new(JSON_NODE_VALUE);
             g_value_init(&gval, G_TYPE_FLOAT);
@@ -93,6 +94,7 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
             break;
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
+        case PARAMTYPE_BOOL:
             dval = (float)json_node_get_double(param_val);
             rval = (gpointer)g_malloc0(sizeof(float));
             *(float *)rval = dval;
