@@ -4,7 +4,7 @@
 
 #include "mfp_dsp.h"
 
-#define SAMPLE_THRESH ((mfp_sample)0.01)
+#define SAMPLE_THRESH ((mfp_sample)0.05)
 
 typedef struct {
     int param_response;
@@ -91,7 +91,7 @@ process(mfp_processor * proc)
     }
     else if (in_1_present) {
         for(int scount=0; scount < proc->context->blocksize; scount++) {
-            if (*in_1++ < SAMPLE_THRESH) {
+            if (*in_1 < SAMPLE_THRESH) {
                 d->sample_phase = 0;
                 if (d->param_track) {
                     *outbuf++ = const_in_0;
@@ -110,6 +110,7 @@ process(mfp_processor * proc)
                 d->sample_phase = 1;
                 *outbuf++ = d->hold_value;
             }
+            in_1++;
         }
 
     }
