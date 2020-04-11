@@ -5,11 +5,13 @@ from setuptools import setup
 
 def shcall(cmdline):
     from subprocess import Popen,PIPE
-    return str(Popen(cmdline.split(), stdout=PIPE).communicate()[0])
+    return Popen(cmdline.split(), stdout=PIPE).communicate()[0].decode()
 
 def git_version(): 
     vers = shcall(b"git show --oneline").split('\n')[0].split(' ')[0]
-    return 'git_' + vers.strip()
+    if not isinstance(vers, str):
+        vers = vers.decode()
+    return 'git_' + str(vers.strip())
 
 setup (name = 'mfp',
        version = '0.06_' + git_version(),

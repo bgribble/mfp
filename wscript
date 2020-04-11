@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 from __future__ import print_function
 
@@ -42,19 +42,29 @@ def activate_virtualenv(ctxt):
 @conf
 def make_virtualenv(ctxt, *args, **kwargs):
     if ctxt.env.USE_VIRTUALENV:
+        python_name = ctxt.env.PYTHON[0].split('/')[-1]
         targetfile = ".waf-built-virtual"
-        vrule = ("cd %s && %s -p python3 --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s) && cp virtual/bin/activate virtual/bin/activate.orig"
-                 % (ctxt.out_dir, ctxt.env.VIRTUALENV[0], ctxt.out_dir, targetfile))
+        vrule = ("cd %s && %s -p %s --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s) && cp virtual/bin/activate virtual/bin/activate.orig"
+                 % (
+                     ctxt.out_dir, 
+                     ctxt.env.VIRTUALENV[0], 
+                     python_name,
+                     ctxt.out_dir, 
+                     targetfile
+                 ))
         ctxt(rule = vrule, target = targetfile, shell = True)
 
 @conf
 def fix_virtualenv(ctxt, *args, **kwargs):
     if ctxt.env.USE_VIRTUALENV:
         targetfile = ".waf-relo-virtual"
+        python_name = ctxt.env.PYTHON[0].split('/')[-1]
         cmds = [
             "cd %s" % ctxt.out_dir,
             "echo 'Making virtualenv relocatable'",
-            "%s -p python3 --relocatable virtual" % ctxt.env.VIRTUALENV[0],
+            "%s -p %s --system-site-packages virtual" % (
+                ctxt.env.VIRTUALENV[0], python_name
+            ),
             "rm -rf virtual/local",
             (("cat virtual/bin/activate "
               + "| sed -e 's/^VIRTUAL_ENV=.*$/VIRTUAL_ENV=\"%s\/\"/' "
@@ -151,14 +161,17 @@ def egg(ctxt, *args, **kwargs):
 
     if ctxt.env.DEBIAN_STYLE:
         style = "--install-layout deb"
+        pkg_path = "dist-packages"
     else:
         style = ""
+        pkg_path = "site-packages"
 
     manifestfile = ctxt.out_dir + "/" + targetfile
+    python_name = ctxt.env.PYTHON[0].split('/')[-1]
     actions = [
         "cd %s" % os.path.abspath(srcdir),
-        "mkdir -p %s" % abs_pkglibdir,
-        "python %s install %s %s --record %s" % (setup_py, style, prefix, manifestfile),
+        "mkdir -p %s/%s" % (abs_pkglibdir, pkg_path),
+        "%s %s install %s %s --record %s" % (python_name, setup_py, style, prefix, manifestfile),
         "echo ./%s >> %s/mfp.pth" % (pkgeggname, abs_pkglibdir),
         "echo %s/mfp.pth >> %s" % (abs_pkglibdir, manifestfile)
     ]
@@ -288,14 +301,13 @@ class MFPCleanContext (CleanContext):
 
 
 def options(opt):
-    from waflib.Options import options
     opt.load(WAFTOOLS)
     optgrp = opt.get_option_group('Configuration options')
     optgrp.add_option("--virtualenv", action="store_true", dest="USE_VIRTUALENV",
                    help="Install into a virtualenv")
 
     # "egg" targets race to update the .pth file.  Must build them one at a time.
-    options['jobs'] = 1
+    opt.parser.set_defaults(jobs=1)
 
 def configure(conf):
     conf.load(WAFTOOLS)
@@ -336,24 +348,9 @@ def configure(conf):
     conf.env.PYTHON_INSTALLER = installer
 
     # python lib-install prefix
-    import site, sys
-    py_prefixes = site.PREFIXES
-    py_sitepack = sys.path
-    pkglibdir = None
-    conf.start_msg("Finding package lib install path")
-    for pdir in py_sitepack:
-        for pprefix in py_prefixes:
-            if pdir.startswith(pprefix):
-                suffix = pdir[len(pprefix):]
-                if suffix.startswith("/lib/"):
-                    pkglibdir = suffix[1:]
-                    break
-        if pkglibdir is not None:
-            break
-
-    if pkglibdir is None:
-        # fallback
-        pkglibdir = "lib/python%s/site-packages/" % ctxt.env.PYTHON_VERSION
+    conf.start_msg("Finding Python lib install prefix...")
+    py_major = conf.env.PYTHON_VERSION.split(".")[0]
+    pkglibdir = f"lib/python{py_major}"
     conf.end_msg(pkglibdir)
     conf.env.PYTHON_PKGLIBDIR = pkglibdir
 
