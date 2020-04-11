@@ -380,6 +380,8 @@ def register():
     mk_binary(operator.le, "<=", "Less than or equal comparison")
     mk_binary(operator.eq, "==", "Equality comparison")
     mk_binary(operator.ne, "!=", "Not-equal comparison")
+    mk_binary(max, "max", "Maximum of 2 inputs")
+    mk_binary(min, "min", "Minimum of 2 inputs")
 
     mk_unary(abs, "abs", "Absolute value/magnitude")
     mk_unary(operator.neg, "neg", "Negate value")
