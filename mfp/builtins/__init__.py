@@ -84,3 +84,6 @@ def register():
     vcfreq.register()
     from . import hold
     hold.register()
+    from . import replay
+    replay.register()
+

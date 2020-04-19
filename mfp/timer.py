@@ -16,7 +16,8 @@ def tdmag(td):
 class MultiTimer(QuittableThread):
     def __init__(self):
         QuittableThread.__init__(self)
-
+        
+        self.next_id = 0
         self.scheduled = []
         self.lock = Lock()
         self.cv = Condition(self.lock)
@@ -24,11 +25,22 @@ class MultiTimer(QuittableThread):
 
     def schedule(self, deadline, callback, data=[]):
         with self.lock:
+            item_id = self.next_id
+            self.next_id += 1
             if not self.scheduled:
-                self.scheduled.append((deadline, callback, data))
+                self.scheduled.append((deadline, callback, data, item_id))
             else:
-                self.scheduled.append((deadline, callback, data))
+                self.scheduled.append((deadline, callback, data, item_id))
                 self.scheduled.sort(key=lambda x: x[0])
+            self.cv.notify()
+            return item_id
+
+    def cancel(self, item_id):
+        with self.lock:
+            self.scheduled = list(filter(
+                lambda item: item[3] != item_id,
+                self.scheduled
+            ))
             self.cv.notify()
 
     def run(self):
@@ -44,7 +56,7 @@ class MultiTimer(QuittableThread):
                         timedout.append(self.scheduled[0])
                         self.scheduled[:1] = []
 
-            for deadline, callback, data in timedout:
+            for deadline, callback, data, item_id in timedout:
                 callback(*data)
 
             looptime = datetime.now()

@@ -35,10 +35,7 @@ configure with --virtualenv as in the TL;DR above and the build
 will go into the virtual environment.  When you specify
 --virtualenv, the install prefix (--prefix) is the path to the
 virtual environment, so you shouldn't let this default to
-/usr/local.   Note that python 3 virtualenv is a bit more
-particular about some things.  If you are going to reinstall over
-your active virtual environment, you need to `deactivate` first,
-then `activate` afterwards.
+/usr/local.  
 
 setuptools: The build process depends on Python setuptools.  If
 you have virtualenv installed, you have setuptools already, but
@@ -55,7 +52,7 @@ installed.
 
 gcc: The C components of mfp (mfpdsp, pluginfo, and testext) are
 straightforward C but include some c99-isms, mainly due to LV2.  I
-have been using gcc-4.8.3 but other versions should work. 
+have been using versions from gcc-4.8.3 to 9.3.0 with no trouble.
 
 CONFIGURING 
 -----------------------
