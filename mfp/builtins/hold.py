@@ -50,6 +50,7 @@ class SampleHold(Processor):
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
+
         if "response" in kwargs:
             self.dsp_init("hold~", response=True)
         else:

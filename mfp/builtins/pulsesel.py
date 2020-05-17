@@ -32,9 +32,10 @@ class PulseSel(Processor):
         if len(initargs) > 1:
             bitmask = initargs[1]
         if len(initargs) > 2:
-           thresh = initargs[2]
+            thresh = initargs[2]
 
         self.dsp_inlets = [0]
+        self.hot_inlets = [0, 1, 2, 3]
         self.dsp_outlets = [0]
         self.dsp_init(
             "pulsesel~",
@@ -46,7 +47,18 @@ class PulseSel(Processor):
             self.dsp_setparam("phase", float(0))
         elif self.inlets[0] is not Uninit:
             self.dsp_setparam("phase", phase)
+        
+        if self.inlets[1] is not Uninit:
+            self.dsp_setparam("period", self.inlets[1])
+            self.inlets[1] = Uninit
 
+        if self.inlets[2] is not Uninit:
+            self.dsp_setparam("bitmask", self.inlets[2])
+            self.inlets[2] = Uninit
+
+        if self.inlets[3] is not Uninit:
+            self.dsp_setparam("threshold", self.inlets[3])
+            self.inlets[3] = Uninit
 
 def register():
     MFPApp().register("pulsesel~", PulseSel)

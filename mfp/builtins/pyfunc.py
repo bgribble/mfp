@@ -157,6 +157,47 @@ class SetElement(Processor):
 
         self.outlets[0] = target 
 
+class GetSlice(Processor):
+    doc_tooltip_obj = "Get a slice of list elements" 
+    doc_tooltip_inlet = ["Object to get from",
+                         "Start of slice (default: initarg 0)",
+                         "End of slice (default: end of input)"]
+    doc_tooltip_outlet = ["Slice output"]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+        self.slice_end = None
+        self.slice_start = 0
+        self.stride = 1
+
+        if len(initargs) > 2:
+            self.stride = initargs[2]
+        if len(initargs) > 1:
+            self.slice_end = initargs[1]
+        if len(initargs): 
+            self.slice_start = initargs[0]
+
+    def trigger(self):
+        if self.inlets[1] is not Uninit:
+            self.slice_start = self.inlets[1]
+            self.inlets[1] = Uninit
+
+        if self.inlets[2] is not Uninit:
+            self.slice_end = self.inlets[2]
+            self.inlets[2] = Uninit
+
+        if self.inlets[3] is not Uninit:
+            self.stride = self.inlets[3]
+            self.inlets[3] = Uninit
+
+        if self.slice_end is not None:
+            self.outlets[0] = self.inlets[0][
+                self.slice_start:self.slice_end:self.stride
+            ]
+        else:
+            self.outlets[0] = self.inlets[0][self.slice_start::self.stride]
+
 
 class PyEval(Processor):
     doc_tooltip_obj = "Evaluate Python expression"
@@ -344,6 +385,7 @@ def applyargs(func):
 def register():
     MFPApp().register("get", GetElement)
     MFPApp().register("set", SetElement)
+    MFPApp().register("slice", GetSlice)
     MFPApp().register("eval", PyEval)
     MFPApp().register("apply", ApplyMethod)
     MFPApp().register("call", CallFunction)

@@ -28,14 +28,18 @@ class BitCombine (Processor):
             self.doc_tooltip_inlet.append("Bit %d (%s) input" % (i, 2**i)) 
 
     def trigger(self):
-        bits = [i and 1 or 0 for i in self.inlets]
+        if len(self.inlets) == 1 and isinstance(self.inlets[0], (list, tuple)):
+            bits = self.inlets[0]
+        else:
+            bits = [i and 1 or 0 for i in self.inlets]
+
         self.outlets[0] = sum(
             val * 2**ind
             for ind, val in enumerate(bits)
         )
 
 class BitSplit(Processor):
-    doc_tooltip_obj = "Combine bits into a numeric value" 
+    doc_tooltip_obj = "Extract bits from a numeric value" 
     doc_tooltip_outlet = [ "Combined" ]
 
     def __init__(self, init_type, init_args, patch, scope, name):
