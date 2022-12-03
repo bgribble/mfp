@@ -66,7 +66,7 @@ To report bugs or download source:
 
     http://github.com/bgribble/mfp
 
-Copyright (c) 2009-2016 Bill Gribble <grib@billgribble.com>
+Copyright (c) 2009-2023 Bill Gribble <grib@billgribble.com>
 
 MFP is free software, and you are welcome to redistribute it
 under certain conditions.  See the file COPYING for details.
