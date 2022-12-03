@@ -11,7 +11,7 @@ from .interpreter import Interpreter
 from .processor import Processor
 from .method import MethodCall
 from .utils import QuittableThread
-from .rpc import RPCListener, RPCHost, RPCExecRemote
+from .rpc import RPCExecRemote
 from .bang import Unbound
 
 from pluginfo import PlugInfo
@@ -20,8 +20,10 @@ from . import log
 from . import builtins
 from . import utils
 
+
 class StartupError(Exception):
     pass
+
 
 class MFPApp (Singleton):
     def __init__(self):
@@ -89,22 +91,28 @@ class MFPApp (Singleton):
         self.app_scope = LexicalScope("__app__")
         self.patches = {}
 
-    def setup(self):
+    async def setup(self):
         from .mfp_command import MFPCommand
         from .gui_command import GUICommand
         from .mfp_main import version
+        from carp.channel import UnixSocketChannel
+        from carp.host import Host
 
         log.debug("Main thread started, pid = %s" % os.getpid())
 
         # RPC service setup
-        self.rpc_host = RPCHost(self.backend_status_cb)
-        self.rpc_host.start()
+        self.rpc_channel = UnixSocketChannel(socket_path=self.socket_path)
+        self.rpc_host = Host(
+            label="MFP Master",
+        )
+        self.rpc_host.on("exports", self.on_host_exports)
+        self.rpc_host.on("accept", self.on_host_accept)
+        self.rpc_host.on("disconnect", self.on_host_disconnect)
 
-        self.rpc_listener = RPCListener(self.socket_path, "MFP Master", self.rpc_host)
-        self.rpc_listener.start()
+        await self.rpc_host.start(self.rpc_channel)
 
         # classes served by this RPC host:
-        self.rpc_host.publish(MFPCommand)
+        await self.rpc_host.export(MFPCommand)
 
         # dsp and gui processes
         self.start_dsp()
@@ -119,8 +127,8 @@ class MFPApp (Singleton):
                                              log_raw=self.debug_remote)
             self.gui_process.start()
 
-            self.rpc_host.subscribe(GUICommand)
-            self.gui_command = GUICommand()
+            GUICommandFactory = await self.rpc_host.require(GUICommand)
+            self.gui_command = GUICommandFactory()
 
             while self.gui_process.alive() and not self.gui_command.ready():
                 time.sleep(0.2)
@@ -133,7 +141,9 @@ class MFPApp (Singleton):
 
             log.debug("Started logging to GUI")
 
-            self.console = Interpreter(self.gui_command.console_write, dict(app=self))
+            self.console = Interpreter(
+                self.gui_command.console_write, dict(app=self)
+            )
             self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
 
         # midi manager
@@ -152,6 +162,7 @@ class MFPApp (Singleton):
         self.pluginfo.index_ladspa()
         log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo),
                                                            len(self.pluginfo.libinfo)))
+
     def exec_batch(self):
         # configure logging
         log.log_raw = True
@@ -236,55 +247,58 @@ class MFPApp (Singleton):
     def register(self, name, ctor):
         self.registry[name] = ctor
 
-    def backend_status_cb(self, host, peer_id, status, *args):
+    async def on_host_exports(self, peer_id, exports, metadata):
         from .dsp_object import DSPContext
-        if status == "manage":
-            log.info("New RPC remote connection id=%s" % peer_id)
-        elif status == "publish":
-            log.info("Published classes", args[0])
-            if "DSPObject" in args[0]:
-                context = DSPContext.lookup(peer_id, 0)
-                context.input_latency, context.output_latency = args[1]
+        if "DSPObject" in exports:
+            context = DSPContext.lookup(peer_id, 0)
+            context.input_latency, context.output_latency = metadata.get("latency", (0, 0))
 
+    async def on_host_accept(self, peer_id):
+        log.info(f"New RPC remote connection id={peer_id}")
 
-        elif status == "unmanage":
-            log.debug("Got unmanage callback for %s %s" % (host, peer_id))
-            dead_patches = [ p for p in self.patches.values()
-                             if p.context is None or p.context.node_id == peer_id ]
-            if (Patch.default_context and (peer_id == Patch.default_context.node_id)
-               and not self.no_restart):
-                log.warning("Relaunching default backend (id=%s)" % peer_id)
-                patch_json = []
+    async def on_host_disconnect(self, peer_id):
+        # FIXME not called from anywhere
+        # if we lost a DSP host, try to restart
+        log.debug(f"Got unmanage callback for {peer_id}")
+        dead_patches = [
+            p for p in self.patches.values()
+            if p.context is None or p.context.node_id == peer_id
+        ]
+        if (
+            Patch.default_context and (peer_id == Patch.default_context.node_id)
+            and not self.no_restart
+        ):
+            log.warning("Relaunching default backend (id=%s)" % peer_id)
+            patch_json = []
 
-                for p in dead_patches:
-                    patch_json.append(p.json_serialize())
-                    p.delete_gui()
-                    p.context = None
-                    p.delete()
+            for p in dead_patches:
+                patch_json.append(p.json_serialize())
+                p.delete_gui()
+                p.context = None
+                p.delete()
 
-                if self.no_restart:
-                    return
+            if self.no_restart:
+                return
 
-                # delete and restart dsp backend
-                self.start_dsp()
+            # delete and restart dsp backend
+            self.start_dsp()
 
-                # recreate patches
-                for jdata in patch_json:
-                    jobj = json.loads(jdata)
-                    name = jobj.get("gui_params", {}).get("name")
-                    patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
-                    self.patches[patch.name] = patch
-                    # FIXME -- need to call onload
-                    patch.json_deserialize(jdata)
-                    patch.create_gui()
+            # recreate patches
+            for jdata in patch_json:
+                jobj = json.loads(jdata)
+                name = jobj.get("gui_params", {}).get("name")
+                patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
+                self.patches[patch.name] = patch
+                # FIXME -- need to call onload
+                patch.json_deserialize(jdata)
+                patch.create_gui()
 
-            else:
-                log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
-                log.warning("DSP backend exited with no-restart flag, not restarting")
-                for p in dead_patches:
-                    p.delete()
-                log.debug("Finished cleaning up patches")
-
+        else:
+            log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
+            log.warning("DSP backend exited with no-restart flag, not restarting")
+            for p in dead_patches:
+                p.delete()
+            log.debug("Finished cleaning up patches")
 
     def open_file(self, file_name, context=None, show_gui=True):
         from datetime import datetime
@@ -320,7 +334,7 @@ class MFPApp (Singleton):
 
         if patch is None:
             patch = Patch(name, '', None, self.app_scope, name, context)
-            patch.gui_params['layers'] = [ ('Layer 0', '__patch__') ]
+            patch.gui_params['layers'] = [('Layer 0', '__patch__')]
 
         self.patches[patch.name] = patch
         if show_gui:
@@ -358,7 +372,7 @@ class MFPApp (Singleton):
             try:
                 thunk = patch.parse_obj(init_type)
                 if callable(thunk):
-                   ctor = builtins.pyfunc.PyAutoWrap
+                    ctor = builtins.pyfunc.PyAutoWrap
             except Exception as e:
                 log.error("Cannot autowrap %s as a Python callable" % init_type)
                 log.error(e)
@@ -456,9 +470,11 @@ class MFPApp (Singleton):
             root = queryobj.resolve(parts[0])
 
         # Look in the queryobj's patch, if it's not a patch itself
-        if (root is Unbound
+        if (
+            root is Unbound
             and queryobj and not isinstance(queryobj, Patch)
-            and queryobj.patch):
+            and queryobj.patch
+        ):
             root = queryobj.patch.resolve(parts[0], queryobj.scope)
 
             if root is Unbound:
@@ -478,7 +494,7 @@ class MFPApp (Singleton):
                             % (name, queryobj))
             return None
 
-    def finish(self):
+    async def finish(self):
         log.log_func = None
         if self.console:
             self.console.write_cb = None
@@ -488,7 +504,7 @@ class MFPApp (Singleton):
             log.debug("MFPApp.finish: reaping RPC host...")
             pp = self.rpc_host
             self.rpc_host = None
-            pp.finish()
+            await pp.stop()
 
         if self.dsp_process:
             log.debug("MFPApp.finish: reaping DSP process...")
@@ -507,16 +523,17 @@ class MFPApp (Singleton):
 
         log.debug("MFPApp.finish: all children reaped, good-bye!")
 
-
     def finish_soon(self):
         import threading
-        def wait_and_finish(*args, **kwargs):
+        import asyncio
+
+        async def wait_and_finish(*args, **kwargs):
             import time
             time.sleep(0.5)
-            self.finish()
+            await self.finish()
             log.debug("MFPApp.finish_soon: done with app.finish", threading._active)
             return True
-        qt = threading.Thread(target=wait_and_finish)
+        qt = threading.Thread(target=lambda *args, **kwargs: asyncio.run(wait_and_finish()))
         qt.start()
         self.leftover_threads.append(qt)
         return None
@@ -526,7 +543,8 @@ class MFPApp (Singleton):
             msg.call(self)
         elif isinstance(msg, (list, tuple)):
             msgid, msgval = msg
-            if msgid == 1: # latency changed
+            # latency changed
+            if msgid == 1:
                 self.emit_signal("latency")
 
     #####################
@@ -609,7 +627,7 @@ class MFPApp (Singleton):
             try:
                 val = cp.get("mfp", attr)
                 setattr(self, attr, eval(val))
-            except KeyError as e:
+            except KeyError:
                 pass
 
         patches = eval(cp.get("mfp", "patches"))
@@ -633,7 +651,7 @@ class MFPApp (Singleton):
         from .mfp_main import version
         toplevel = {}
         objects = {}
-        scopes = { '__patch__': {}}
+        scopes = {'__patch__': {}}
 
         free_conn_in = []
         free_conn_out = []
@@ -671,8 +689,7 @@ class MFPApp (Singleton):
         jdata = json.loads(json_text, object_hook=extended_decoder_hook)
         idmap = patch.json_unpack_objects(jdata, scope)
         patch.json_unpack_connections(jdata, idmap)
-        return [ o.obj_id for o in idmap.values() ]
-
+        return [o.obj_id for o in idmap.values()]
 
     def toggle_pause(self):
         if Processor.paused:

@@ -145,7 +145,7 @@ def setup_default_colors():
                      ColorDB().find(0xb7, 0x21, 0x21, 0xff))
     ColorDB().insert('default-text-cursor-color',
                      ColorDB().find(0x0, 0x0, 0x0, 0x40))
-    ColorDB().insert('transparent', 
+    ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
 

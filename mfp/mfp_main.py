@@ -97,7 +97,7 @@ def test_imports():
         print()
         sys.exit(-1)
 
-def main():
+async def main():
     description = mfp_banner % version()
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -213,10 +213,10 @@ def main():
     signal.signal(signal.SIGTERM, exit_sighandler)
 
     try:
-        app.setup()
+        await app.setup()
     except (StartupError, KeyboardInterrupt, SystemExit):
         log.debug("Setup did not complete properly, exiting")
-        app.finish()
+        await app.finish()
         return
 
     # ok, now start configuring the running system
@@ -257,7 +257,7 @@ def main():
         log.debug("printing help and exiting")
         parser.print_help()
         log.debug("done with print_help(), quitting")
-        app.finish()
+        await app.finish()
     elif args.get("help_builtins"):
         log.log_debug = None
         log.log_file = None
@@ -274,7 +274,7 @@ def main():
                     print("(caught exception trying to create %s)" % name, e)
                     traceback.print_exc()
                     print("%-12s : No documentation found" % ("[%s]" % name,))
-        app.finish()
+        await app.finish()
     else:
         patchfiles = args.get("patchfile")
         if app.batch_mode:
@@ -301,7 +301,7 @@ def main():
             QuittableThread.wait_for_all()
         except (KeyboardInterrupt, SystemExit):
             log.log_force_console = True
-            app.finish()
+            await app.finish()
 
         for thread in app.leftover_threads:
             thread.join()
@@ -311,4 +311,7 @@ def main():
         yappi.stop()
         yappi.convert2pstats(yappi.get_func_stats()).dump_stats('mfp-main-funcstats.pstats')
 
+def main_sync_wrapper():
+    import asyncio
+    asyncio.run(main())
 

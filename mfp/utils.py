@@ -153,7 +153,7 @@ def catchall(thunk):
         except Exception as e:
             log.debug("Error in", thunk.__name__, e)
             log.debug_traceback()
-    return handled 
+    return handled
 
 
 
@@ -199,12 +199,12 @@ class QuittableThread(Thread):
         next_victim = True
 
         while next_victim:
-            if isinstance(next_victim, Thread) and next_victim.isAlive():
+            if isinstance(next_victim, Thread) and next_victim.is_alive():
                 next_victim.join(.2)
             with QuittableThread._all_threads_lock:
                 living_threads = [
                     t for t in QuittableThread._all_threads
-                    if t.isAlive()
+                    if t.is_alive()
                 ]
                 if len(living_threads) > 0:
                     next_victim = living_threads[0]
