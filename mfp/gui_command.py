@@ -1,7 +1,7 @@
-from .rpc import RPCWrapper, rpcwrap, rpcwrap_noresp
+from carp.service import apiclass, noresp
 
-class GUICommand (RPCWrapper):
-    @rpcwrap
+@apiclass
+class GUICommand:
     def ready(self):
         from .gui_main import MFPGUI
         if MFPGUI().appwin is not None and MFPGUI().appwin.ready():
@@ -9,7 +9,7 @@ class GUICommand (RPCWrapper):
         else:
             return False
 
-    @rpcwrap_noresp
+    @noresp
     def log_write(self, msg, level):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._log_write(msg, level))
@@ -20,10 +20,9 @@ class GUICommand (RPCWrapper):
         window = MFPGUI().appwin
         if window:
             MFPGUI().appwin.log_write(msg, level)
-        else: 
+        else:
             print(msg)
 
-    @rpcwrap
     def console_write(self, msg):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._console_write(msg))
@@ -33,7 +32,6 @@ class GUICommand (RPCWrapper):
         from .gui_main import MFPGUI
         MFPGUI().appwin.console_write(msg)
 
-    @rpcwrap
     def hud_write(self, msg):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._hud_write(msg))
@@ -43,12 +41,10 @@ class GUICommand (RPCWrapper):
         from .gui_main import MFPGUI
         MFPGUI().appwin.hud_write(msg)
 
-    @rpcwrap
     def finish(self):
         from .gui_main import MFPGUI
         MFPGUI().finish()
 
-    @rpcwrap
     def command(self, obj_id, action, args):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._command(obj_id, action, args))
@@ -59,7 +55,6 @@ class GUICommand (RPCWrapper):
         obj = MFPGUI().recall(obj_id)
         obj.command(action, args)
 
-    @rpcwrap
     def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._configure(obj_id, params, kwparams))
@@ -71,15 +66,14 @@ class GUICommand (RPCWrapper):
         if params is not None:
             obj.configure(params)
         else:
-            prms = obj.synced_params() 
+            prms = obj.synced_params()
             for k, v in kwparams.items():
                 prms[k] = v
             obj.configure(prms)
 
-    @rpcwrap
     def create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, parent_id, 
+        MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, parent_id,
                                                  params))
     def _create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui_main import MFPGUI
@@ -127,17 +121,17 @@ class GUICommand (RPCWrapper):
 
             if isinstance(o, PatchElement):
                 parent = MFPGUI().recall(o.parent_id)
-                layer = None 
+                layer = None
                 if isinstance(parent, PatchInfo):
                     if "layername" in params:
                         layer = parent.find_layer(params["layername"])
-                    if not layer: 
+                    if not layer:
                         layer = MFPGUI().appwin.active_layer()
                     layer.add(o)
                     layer.group.add_actor(o)
                     o.container = layer.group
-                elif isinstance(parent, PatchElement): 
-                    # FIXME: don't hardcode GOP offsets 
+                elif isinstance(parent, PatchElement):
+                    # FIXME: don't hardcode GOP offsets
                     if not parent.export_x:
                         self._log_write(
                             "_create: parent %s.%s has no export_x"
@@ -145,21 +139,21 @@ class GUICommand (RPCWrapper):
                     xpos = params.get("position_x", 0) - parent.export_x + 2
                     ypos = params.get("position_y", 0) - parent.export_y + 20
                     o.move(xpos, ypos)
-                    o.editable = False 
+                    o.editable = False
                     parent.layer.add(o)
                     parent.add_actor(o)
-                    o.container = parent 
-                    
+                    o.container = parent
+
                 o.configure(params)
                 MFPGUI().appwin.register(o)
-            else: 
+            else:
                 o.configure(params)
 
             MFPGUI().remember(o)
             MFPGUI().appwin.refresh(o)
             o.update()
 
-    @rpcwrap
+
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._connect(obj_1_id, obj_1_port, obj_2_id, obj_2_port))
@@ -173,25 +167,25 @@ class GUICommand (RPCWrapper):
         obj_1 = MFPGUI().recall(obj_1_id)
         obj_2 = MFPGUI().recall(obj_2_id)
 
-        if obj_1 is None or obj_2 is None: 
+        if obj_1 is None or obj_2 is None:
             log.debug("ERROR: connect: obj_1 (id=%s) --> %s, obj_2 (id=%s) --> %s"
                       % (obj_1_id, obj_1, obj_2_id, obj_2))
             return None
         elif isinstance(obj_1, PatchInfo) or isinstance(obj_2, PatchInfo):
-            log.debug("Trying to connect a PatchInfo (%s [%s] --> %s [%s])" 
+            log.debug("Trying to connect a PatchInfo (%s [%s] --> %s [%s])"
                       % (obj_1.obj_name, obj_1_id, obj_2.obj_name, obj_2_id))
             return None
-        
-        for conn in obj_1.connections_out: 
+
+        for conn in obj_1.connections_out:
             if conn.obj_2 == obj_2 and conn.port_2 == obj_2_port:
-                return 
+                return
 
         c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
         MFPGUI().appwin.register(c)
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)
 
-    @rpcwrap
+
     def delete(self, obj_id):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._delete(obj_id))
@@ -200,12 +194,12 @@ class GUICommand (RPCWrapper):
         from .gui_main import MFPGUI
         from .gui.patch_info import PatchInfo
         obj = MFPGUI().recall(obj_id)
-        if isinstance(obj, PatchInfo): 
-            obj.obj_id = None 
+        if isinstance(obj, PatchInfo):
+            obj.obj_id = None
             obj.delete()
-            if obj in MFPGUI().appwin.patches: 
+            if obj in MFPGUI().appwin.patches:
                 MFPGUI().appwin.patches.remove(obj)
-        elif obj is not None: 
+        elif obj is not None:
             for c in obj.connections_out:
                 MFPGUI().appwin.unregister(c)
                 del c
@@ -217,7 +211,7 @@ class GUICommand (RPCWrapper):
             obj.obj_id = None
             obj.delete()
 
-    @rpcwrap
+
     def select(self, obj_id):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._select(obj_id))
@@ -226,12 +220,12 @@ class GUICommand (RPCWrapper):
         from .gui_main import MFPGUI
         from .gui.patch_info import PatchInfo
         obj = MFPGUI().recall(obj_id)
-        if isinstance(obj, PatchInfo): 
+        if isinstance(obj, PatchInfo):
             MFPGUI().appwin.layer_select(obj.layers[0])
-        else: 
+        else:
             MFPGUI().appwin.select(obj)
-             
-    @rpcwrap
+
+
     def load_start(self):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._load_start())
@@ -240,8 +234,6 @@ class GUICommand (RPCWrapper):
         from .gui_main import MFPGUI
         MFPGUI().appwin.load_start()
 
-
-    @rpcwrap
     def load_complete(self):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._load_complete())
@@ -250,11 +242,9 @@ class GUICommand (RPCWrapper):
         from .gui_main import MFPGUI
         MFPGUI().appwin.load_complete()
 
-    @rpcwrap
     def set_undeletable(self, val):
         from .gui_main import MFPGUI
         MFPGUI().appwin.deletable = val
 
-    @rpcwrap
     def clear(self):
         pass

@@ -19,5 +19,5 @@ setup (name = 'mfp',
        packages = ['mfp', 'mfp.builtins', 'mfp.rpc', 
                    'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes' ],
        entry_points = { 'console_scripts': ['mfp=mfp.mfp_main:main_sync_wrapper',
-                                            'mfpgui=mfp.gui_main:main'] },
+                                            'mfpgui=mfp.gui_main:main_sync_wrapper'] },
        package_data = { 'mfp.gui': ['mfp.glade'] })

@@ -10,13 +10,17 @@ import threading
 import argparse
 import sys
 from datetime import datetime
-from .singleton import Singleton
-from .mfp_command import MFPCommand
+
+from carp.channel import UnixSocketChannel
+from carp.host import Host
+
 from mfp import log
 from mfp.utils import profile
 
+from .singleton import Singleton
+from .mfp_command import MFPCommand
 from .gui_command import GUICommand
-from .rpc import RPCRemote, RPCHost
+
 
 def clutter_do(func):
     def wrapped(*args, **kwargs):
@@ -25,10 +29,12 @@ def clutter_do(func):
 
     return wrapped
 
+
 class MFPGUI (Singleton):
-    def __init__(self):
+    def __init__(self, mfp_factory):
         self.call_stats = {}
         self.objects = {}
+        self.mfp_factory = mfp_factory
         self.mfp = None
         self.appwin = None
         self.debug = False
@@ -59,7 +65,6 @@ class MFPGUI (Singleton):
         try:
             return thunk()
         except Exception as e:
-            import traceback
             log.debug("Exception in GUI operation:", e)
             log.debug_traceback()
             return False
@@ -78,7 +83,7 @@ class MFPGUI (Singleton):
 
     def clutter_proc(self):
         try:
-            from gi.repository import Clutter, GObject, Gtk, GtkClutter
+            from gi.repository import GObject, Gtk, GtkClutter
 
             # explicit init seems to avoid strange thread sync/blocking issues
             GObject.threads_init()
@@ -87,9 +92,9 @@ class MFPGUI (Singleton):
             # create main window
             from mfp.gui.patch_window import PatchWindow
             self.appwin = PatchWindow()
-            self.mfp = MFPCommand()
+            self.mfp = self.mfp_factory()
 
-        except Exception as e:
+        except Exception:
             log.error("Fatal error during GUI startup")
             log.debug_traceback()
             return
@@ -149,7 +154,7 @@ def setup_default_colors():
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
 
-def main():
+async def main():
     import gi
     gi.require_version('Gtk', '3.0')
     gi.require_version('GtkClutter', '1.0')
@@ -163,21 +168,20 @@ def main():
     parser.add_argument("-d", "--debug", action="store_true",
                         help="Enable debugging behaviors")
 
-
     args = vars(parser.parse_args())
     socketpath = args.get("socketpath")
     debug = args.get('debug')
 
-    host = RPCHost()
-    host.start()
-
-    remote = RPCRemote(socketpath, "MFP GUI", host)
-    remote.connect()
+    channel = UnixSocketChannel(socket_path=socketpath)
+    host = Host(
+        label="MFP GUI",
+    )
+    await host.connect(channel)
 
     print("[LOG] DEBUG: GUI process starting")
 
     if args.get("logstart"):
-        st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f" )
+        st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f")
         if st:
             log.log_time_base = st
 
@@ -187,13 +191,20 @@ def main():
 
     setup_default_colors()
 
-    host.subscribe(MFPCommand)
-    gui = MFPGUI()
+    mfp_factory = await host.require(MFPCommand)
+    print("[LOG] DEBUG: Got MFPCommand factory")
+    gui = MFPGUI(mfp_factory)
     gui.debug = debug
 
     if debug:
         import yappi
         yappi.start()
 
-    host.publish(GUICommand)
+    await host.export(GUICommand)
+    print("[LOG] DEBUG: exported GUICommand factory")
+
+
+def main_sync_wrapper():
+    import asyncio
+    asyncio.run(main())
 
