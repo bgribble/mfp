@@ -298,7 +298,7 @@ async def main():
             app.session_management_setup()
 
         try:
-            QuittableThread.wait_for_all()
+            await QuittableThread.await_all()
         except (KeyboardInterrupt, SystemExit):
             log.log_force_console = True
             await app.finish()

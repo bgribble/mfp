@@ -10,8 +10,7 @@ from .singleton import Singleton
 from .interpreter import Interpreter
 from .processor import Processor
 from .method import MethodCall
-from .utils import QuittableThread
-from .rpc import RPCExecRemote
+from .utils import QuittableThread, AsyncExecMonitor
 from .bang import Unbound
 
 from pluginfo import PlugInfo
@@ -91,6 +90,9 @@ class MFPApp (Singleton):
         self.app_scope = LexicalScope("__app__")
         self.patches = {}
 
+    async def loggo(self, *args, **kwargs):
+        log.debug(f"[loggo] {args} {kwargs}")
+
     async def setup(self):
         from .mfp_command import MFPCommand
         from .gui_command import GUICommand
@@ -105,8 +107,7 @@ class MFPApp (Singleton):
         self.rpc_host = Host(
             label="MFP Master",
         )
-        self.rpc_host.on("exports", self.on_host_exports)
-        self.rpc_host.on("accept", self.on_host_accept)
+        self.rpc_host.on("exports", self.loggo)
         self.rpc_host.on("disconnect", self.on_host_disconnect)
 
         await self.rpc_host.start(self.rpc_channel)
@@ -123,18 +124,17 @@ class MFPApp (Singleton):
             if self.debug:
                 guicmd.append('--debug')
 
-            self.gui_process = RPCExecRemote(*guicmd, log_module="gui",
-                                             log_raw=self.debug_remote)
-            self.gui_process.start()
+            self.gui_process = AsyncExecMonitor(
+                *guicmd,
+                log_module="gui",
+                log_raw=self.debug_remote
+            )
+            await self.gui_process.start()
 
             GUICommandFactory = await self.rpc_host.require(GUICommand)
-            self.gui_command = GUICommandFactory()
+            log.debug("Got GUICommandFactory", GUICommandFactory)
 
-            while self.gui_process.alive() and not self.gui_command.ready():
-                time.sleep(0.2)
-
-            if not self.gui_process.alive():
-                raise StartupError("GUI process died during setup")
+            self.gui_command = await GUICommandFactory()
 
             log.debug("GUI is ready, switching logging to GUI")
             log.log_func = self.gui_command.log_write
@@ -144,24 +144,24 @@ class MFPApp (Singleton):
             self.console = Interpreter(
                 self.gui_command.console_write, dict(app=self)
             )
-            self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
+            await self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
 
-        # midi manager
-        self.start_midi()
+            # midi manager
+            self.start_midi()
 
-        # OSC manager
-        from . import osc
-        self.osc_mgr = osc.MFPOscManager(self.osc_port)
-        self.osc_mgr.start()
-        self.osc_port = self.osc_mgr.port
-        log.debug("OSC server started (UDP/%s)" % self.osc_port)
+            # OSC manager
+            from . import osc
+            self.osc_mgr = osc.MFPOscManager(self.osc_port)
+            self.osc_mgr.start()
+            self.osc_port = self.osc_mgr.port
+            log.debug("OSC server started (UDP/%s)" % self.osc_port)
 
-        # crawl plugins
-        log.debug("Collecting information about installed plugins...")
-        self.pluginfo.samplerate = self.samplerate
-        self.pluginfo.index_ladspa()
-        log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo),
-                                                           len(self.pluginfo.libinfo)))
+            # crawl plugins
+            log.debug("Collecting information about installed plugins...")
+            self.pluginfo.samplerate = self.samplerate
+            self.pluginfo.index_ladspa()
+            log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo),
+                                                               len(self.pluginfo.libinfo)))
 
     def exec_batch(self):
         # configure logging
@@ -247,16 +247,13 @@ class MFPApp (Singleton):
     def register(self, name, ctor):
         self.registry[name] = ctor
 
-    async def on_host_exports(self, peer_id, exports, metadata):
+    async def on_host_exports(self, event, peer_id, exports, metadata):
         from .dsp_object import DSPContext
         if "DSPObject" in exports:
             context = DSPContext.lookup(peer_id, 0)
             context.input_latency, context.output_latency = metadata.get("latency", (0, 0))
 
-    async def on_host_accept(self, peer_id):
-        log.info(f"New RPC remote connection id={peer_id}")
-
-    async def on_host_disconnect(self, peer_id):
+    async def on_host_disconnect(self, event, peer_id):
         # FIXME not called from anywhere
         # if we lost a DSP host, try to restart
         log.debug(f"Got unmanage callback for {peer_id}")
@@ -516,7 +513,7 @@ class MFPApp (Singleton):
             log.debug("MFPApp.finish: reaping GUI process...")
             pp = self.gui_process
             self.gui_process = None
-            pp.finish()
+            await pp.cancel()
 
         log.debug("MFPApp.finish: reaping threads...")
         QuittableThread.finish_all()
@@ -529,7 +526,7 @@ class MFPApp (Singleton):
 
         async def wait_and_finish(*args, **kwargs):
             import time
-            time.sleep(0.5)
+            asyncio.sleep(0.5)
             await self.finish()
             log.debug("MFPApp.finish_soon: done with app.finish", threading._active)
             return True

@@ -6,9 +6,10 @@ Various utility routines not specific to MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import asyncio
+import inspect
 import cProfile
 from threading import Thread, Lock, Condition
-import time
 from mfp import log
 from datetime import datetime, timedelta
 
@@ -60,7 +61,7 @@ def find_file_in_path(filename, pathspec):
             s = os.stat(path)
             if s:
                 return path
-        except:
+        except Exception:
             continue
     return None
 
@@ -139,13 +140,15 @@ def isiterable(obj):
     try:
         if hasattr(obj, '__iter__'):
             return True
-    except:
+    except Exception:
         pass
 
     return False
 
+
 def catchall(thunk):
     from functools import wraps
+
     @wraps(thunk)
     def handled(*args, **kwargs):
         try:
@@ -154,7 +157,6 @@ def catchall(thunk):
             log.debug("Error in", thunk.__name__, e)
             log.debug_traceback()
     return handled
-
 
 
 class QuittableThread(Thread):
@@ -211,6 +213,19 @@ class QuittableThread(Thread):
                 else:
                     next_victim = False
 
+    @classmethod
+    async def await_all(klass):
+        all_dead = asyncio.Event()
+
+        def _killer_thread():
+            klass.wait_for_all()
+            all_dead.set()
+
+        t = Thread(target=_killer_thread)
+        t.start()
+        await all_dead.wait()
+        t.join()
+
 
 class TaskNibbler (QuittableThread):
     class NoData (object):
@@ -250,7 +265,7 @@ class TaskNibbler (QuittableThread):
             for unit, retry_count, data in work:
                 try:
                     done = unit(*data)
-                except Exception as e:
+                except Exception:
                     log.debug("Exception while running", unit)
                     log.debug_traceback()
 
@@ -271,3 +286,93 @@ class TaskNibbler (QuittableThread):
         with self.lock:
             self.queue.append((task, retry, data))
             self.cv.notify()
+
+
+def log_monitor(message, log_module, debug=False):
+    message = message.strip()
+    if message.startswith("[LOG] "):
+        message = message[6:]
+        if message.startswith("FATAL:"):
+            log.error(message[7:], module=log_module)
+        elif message.startswith("ERROR:"):
+            log.error(message[7:], module=log_module)
+        elif message.startswith("WARNING:"):
+            log.warning(message[9:], module=log_module)
+        elif message.startswith("INFO:"):
+            log.info(message[6:], module=log_module)
+        elif message.startswith("DEBUG:"):
+            log.debug(message[7:], module=log_module)
+    elif message.startswith("JackEngine::XRun"):
+        log.warning("JACK: " + message, module=log_module)
+    elif message.startswith("JackAudioDriver"):
+        if "Process error" in message:
+            log.error("JACK: " + message, module=log_module)
+    elif debug and len(message):
+        log.debug("%s " % log_module, message)
+
+
+class AsyncExecMonitor:
+    '''
+    AsyncExecMonitor -- launch a process which will connect back to this process
+    and listen to its output
+    '''
+
+    def __init__(self, command, *args, **kwargs):
+        from mfp import log
+        self.exec_file = command
+        self.exec_args = list(args)
+        self.process = None
+        self.monitor_task = None
+
+        if "log_module" in kwargs:
+            self.log_module = kwargs["log_module"]
+        else:
+            self.log_module = log.log_module
+
+        if kwargs.get("log_raw"):
+            self.log_raw = True
+        else:
+            self.log_raw = False
+
+    async def start(self):
+        from mfp import log
+        import shutil
+
+        execfile = shutil.which(self.exec_file)
+        self.callback = log_monitor
+        self.process = await asyncio.create_subprocess_exec(
+            execfile, *[str(a) for a in self.exec_args],
+            stdin=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+        )
+        self.monitor_task = asyncio.create_task(self.monitor())
+
+    async def monitor(self):
+        while True:
+            try:
+                nextline = await self.process.stdout.readline()
+                nextline = nextline.decode().strip()
+
+                if not nextline:
+                    await asyncio.sleep(0.1)
+                    continue
+
+                cb_return = self.callback(nextline, self.log_module, self.log_raw)
+                if inspect.isawaitable(cb_return):
+                    await cb_return
+
+            except asyncio.CancelledError:
+                log.debug("AsyncExecMonitor: task cancelled")
+                break
+
+            except Exception as e:
+                log.debug("AsyncExecMonitor: exiting with error", e)
+                break
+
+
+    async def cancel(self):
+        self.process.terminate()
+        self.monitor_task.cancel()
+        await self.process.wait()
+        await self.monitor_task

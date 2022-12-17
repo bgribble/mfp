@@ -1,3 +1,5 @@
+import asyncio
+import inspect
 import sys
 import string
 from datetime import datetime
@@ -43,7 +45,9 @@ def write_log_entry(msg, level=0):
 
     logged = False 
     if msg and log_func:
-        log_func(msg, level)
+        rv = log_func(msg, level)
+        if inspect.isawaitable(rv):
+            asyncio.create_task(rv)
         logged = True 
 
     if log_file and msg and ((not logged) or log_force_console):

@@ -1,45 +1,45 @@
-import socket 
+import socket
 import sys
-import os 
+import os
 import select
 
-from mfp.utils import QuittableThread 
+from mfp.utils import QuittableThread
 from mfp import log
-from .request import Request 
+from .request import Request
 
-class RPCListener (QuittableThread): 
+
+class RPCListener (QuittableThread):
     '''
-    RPCListener -- listen for incoming connections on a UNIX socket, 
-    hand off to an RPCHost 
+    RPCListener -- listen for incoming connections on a UNIX socket,
+    hand off to an RPCHost
     '''
-    _rpc_last_peer = 0 
+    _rpc_last_peer = 0
 
     def __init__(self, socketpath, name, rpc_host):
         QuittableThread.__init__(self)
         self.socketpath = socketpath
-        self.socket = None 
-        self.name = name 
-        self.rpc_host = rpc_host 
+        self.socket = None
+        self.name = name
+        self.rpc_host = rpc_host
         self.rpc_host.node_id = 0
 
-    def run(self): 
-        from mfp import log 
-        # create socket 
+    def run(self):
+        # create socket
         try:
             os.unlink(self.socketpath)
         except OSError:
             if os.path.exists(self.socketpath):
-                raise                
-        self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) 
+                raise
+        self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
-        # set up to accept connections 
+        # set up to accept connections
         self.socket.bind(self.socketpath)
         self.socket.listen(5)
         self.socket.settimeout(1)
-        
-        # accept connections until told to stop  
-        while not self.join_req: 
-            try: 
+
+        # accept connections until told to stop
+        while not self.join_req:
+            try:
                 sock, addr = self.socket.accept()
                 log.debug("accept: got", sock, addr)
                 sock.settimeout(0.25)
@@ -48,17 +48,17 @@ class RPCListener (QuittableThread):
                 self.rpc_host.manage(newpeer, sock)
             except socket.timeout:
                 pass
-        
+
 
 class RPCRemote (object):
     '''
     RPCRemote -- connect to a RPCListener
     '''
     def __init__(self, socketpath, name, rpc_host):
-        self.socketpath = socketpath 
-        self.socket = None 
-        self.name = name 
-        self.rpc_host = rpc_host 
+        self.socketpath = socketpath
+        self.socket = None
+        self.name = name
+        self.rpc_host = rpc_host
 
     def connect(self):
         self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -70,7 +70,7 @@ class RPCRemote (object):
         self.rpc_host.wait(req)
         self.rpc_host.node_id = req.result[1]
 
-    def close(self): 
+    def close(self):
         self.rpc_host.unmanage(0)
         self.socket.close()
         self.socket = None
@@ -80,55 +80,63 @@ class RPCExecRemote (QuittableThread):
     '''
     RPCExecRemote -- launch a process which will connect back to this process
     '''
-    
-    def __init__(self, exec_file, *args, **kwargs): 
-        from mfp import log 
+
+    def __init__(self, exec_file, *args, **kwargs):
+        from mfp import log
         QuittableThread.__init__(self)
-        self.exec_file = exec_file 
+        self.exec_file = exec_file
         self.exec_args = list(args)
-        self.process = None 
+        self.process = None
         if "log_module" in kwargs:
             self.log_module = kwargs["log_module"]
         else:
             self.log_module = log.log_module
 
-        if kwargs.get("log_raw"): 
+        if kwargs.get("log_raw"):
             self.log_raw = True
-        else: 
-            self.log_raw = False 
+        else:
+            self.log_raw = False
 
-    def start(self):
-        from mfp import log 
-        import subprocess 
-        arglist = [self.exec_file] + self.exec_args
-        log.debug("RPCExecRemote: starting as ", arglist)
-        self.process = subprocess.Popen([str(a) for a in arglist], bufsize=0,
-                                        stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-        QuittableThread.start(self)
-         
     def run(self):
-        from mfp import log 
-        while not self.join_req: 
-            try: 
-                if self.process: 
+        from mfp import log
+        import subprocess
+        import shutil
+
+        execfile = shutil.which(self.exec_file)
+        arglist = [execfile] + self.exec_args
+        log.debug("RPCExecRemote: starting as ", arglist)
+        self.process = subprocess.Popen(
+            [str(a) for a in arglist],
+            #bufsize=0,
+            #close_fds=True,
+            stderr=subprocess.STDOUT,
+            stdout=subprocess.PIPE,
+        )
+
+        log.debug(f"RPCExecRemote monitor thread started, pid={os.getpid()}")
+        while not self.join_req:
+            log.debug("RPCExecRemote: top of subprocess loop (server side)")
+            try:
+                if self.process:
                     fileobj = self.process.stdout
                     r, w, e = select.select([fileobj], [], [], 0.25)
                     if fileobj in r:
+                        log.debug("RPCExecRemote: got some input from remote")
                         ll = fileobj.readline().decode()
-                    else: 
+                    else:
                         continue
-                else: 
-                    ll = None 
+                else:
+                    ll = None
 
-                if not ll: 
-                    self.join_req = True 
+                if not ll:
+                    self.join_req = True
                 else:
                     ll = ll.strip()
                     if ll.startswith("[LOG] "):
                         ll = ll[6:]
                         if ll.startswith("FATAL:"):
                             log.error(ll[7:], module=self.log_module)
-                            self.join_req = True 
+                            self.join_req = True
                         elif ll.startswith("ERROR:"):
                             log.error(ll[7:], module=self.log_module)
                         elif ll.startswith("WARNING:"):
@@ -145,9 +153,9 @@ class RPCExecRemote (QuittableThread):
                     elif self.log_raw and len(ll):
                         log.debug("%s " % self.log_module, ll)
 
-            except Exception as e: 
+            except Exception as e:
                 log.debug("RPCExecRemote: exiting with error", e)
-                self.join_req = True 
+                self.join_req = True
 
         if self.process:
             self.process.terminate()
@@ -155,36 +163,36 @@ class RPCExecRemote (QuittableThread):
 
     def finish(self):
         from mfp import log
-        p = self.process 
-        self.process = None 
+        p = self.process
+        self.process = None
         if p is not None:
-            try: 
+            try:
                 p.terminate()
                 p.wait()
-            except OSError as e: 
+            except OSError as e:
                 pass
 
-        self.quit_req = True 
+        self.quit_req = True
         QuittableThread.finish(self)
 
-    def alive(self): 
+    def alive(self):
         if not self.process:
-            return False 
-        else: 
+            return False
+        else:
             return not self.process.poll()
 
 class RPCMultiRemote (object):
     '''
-    RPCMultiRemote -- launch a process with multiprocessing which will connect 
+    RPCMultiRemote -- launch a process with multiprocessing which will connect
     back to this process
-    ''' 
+    '''
     def __init__(self, thunk, *args):
-        self.thunk = thunk 
+        self.thunk = thunk
         self.args = args
-        self.process = None 
+        self.process = None
 
     def start(self):
-        from multiprocessing import Process 
+        from multiprocessing import Process
         self.process = Process(target=self.thunk, args=self.args)
         self.process.start()
 
@@ -192,10 +200,10 @@ class RPCMultiRemote (object):
         self.process.terminate()
         self.process.join()
 
-    def alive(self): 
+    def alive(self):
         if not self.process:
-            return False 
-        else: 
+            return False
+        else:
             return not self.process.is_alive()
 
 

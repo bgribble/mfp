@@ -6,6 +6,7 @@ GTK/clutter gui for MFP -- main thread
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
+import asyncio
 import threading
 import argparse
 import sys
@@ -31,11 +32,10 @@ def clutter_do(func):
 
 
 class MFPGUI (Singleton):
-    def __init__(self, mfp_factory):
+    def __init__(self, mfp_proxy):
         self.call_stats = {}
         self.objects = {}
-        self.mfp_factory = mfp_factory
-        self.mfp = None
+        self.mfp = mfp_proxy
         self.appwin = None
         self.debug = False
 
@@ -92,7 +92,6 @@ class MFPGUI (Singleton):
             # create main window
             from mfp.gui.patch_window import PatchWindow
             self.appwin = PatchWindow()
-            self.mfp = self.mfp_factory()
 
         except Exception:
             log.error("Fatal error during GUI startup")
@@ -153,6 +152,8 @@ def setup_default_colors():
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
+async def loggo(*args, **kwargs):
+    print(f"[loggo] {args} {kwargs}")
 
 async def main():
     import gi
@@ -172,13 +173,20 @@ async def main():
     socketpath = args.get("socketpath")
     debug = args.get('debug')
 
+    print("[LOG] DEBUG: GUI process starting")
+
     channel = UnixSocketChannel(socket_path=socketpath)
     host = Host(
         label="MFP GUI",
     )
-    await host.connect(channel)
+    host.on("status", loggo)
+    host.on("connect", loggo)
+    host.on("message", loggo)
+    host.on("exports", loggo)
+    host.on("disconnect", loggo)
+    host.on("call", loggo)
 
-    print("[LOG] DEBUG: GUI process starting")
+    await host.connect(channel)
 
     if args.get("logstart"):
         st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f")
@@ -191,9 +199,10 @@ async def main():
 
     setup_default_colors()
 
-    mfp_factory = await host.require(MFPCommand)
-    print("[LOG] DEBUG: Got MFPCommand factory")
-    gui = MFPGUI(mfp_factory)
+    MFPCommandFactory = await host.require(MFPCommand)
+    mfp_connection = await MFPCommandFactory()
+
+    gui = MFPGUI(mfp_connection)
     gui.debug = debug
 
     if debug:
@@ -201,7 +210,7 @@ async def main():
         yappi.start()
 
     await host.export(GUICommand)
-    print("[LOG] DEBUG: exported GUICommand factory")
+    await asyncio.wait(host.tasks)
 
 
 def main_sync_wrapper():
