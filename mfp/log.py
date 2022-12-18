@@ -2,11 +2,14 @@ import asyncio
 import inspect
 import sys
 import string
+import threading
 from datetime import datetime
 
 log_time_base = datetime.now()
 log_module = "main"
 
+log_thread = None
+log_loop = None
 log_file = sys.stdout
 log_quiet = False
 log_raw = False 
@@ -42,12 +45,19 @@ def make_log_entry(tag, *parts):
 def write_log_entry(msg, level=0):
     global log_file
     global log_func
+    global log_thread
+    global log_loop
 
     logged = False 
     if msg and log_func:
         rv = log_func(msg, level)
         if inspect.isawaitable(rv):
-            asyncio.create_task(rv)
+            current_thread = threading.get_ident()
+            if current_thread == log_thread:
+                asyncio.create_task(rv)
+            else:
+                asyncio.run_coroutine_threadsafe(rv, log_loop)
+
         logged = True 
 
     if log_file and msg and ((not logged) or log_force_console):

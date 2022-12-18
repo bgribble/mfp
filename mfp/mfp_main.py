@@ -5,10 +5,13 @@ main.py: main routine for mfp
 Copyright (c) 2010-2016 Bill Gribble <grib@billgribble.com>
 '''
 
-import math, random
+import asyncio
+import math
+import random
 import re
 import string
-import sys, os
+import sys
+import os
 import argparse
 import threading
 
@@ -26,10 +29,26 @@ from . import log
 from . import builtins
 from . import utils
 
+
+mfp_banner = "MFP - Music For Programmers, version %s"
+
+mfp_footer = """
+To report bugs or download source:
+
+    http://github.com/bgribble/mfp
+
+Copyright (c) 2009-2023 Bill Gribble <grib@billgribble.com>
+
+MFP is free software, and you are welcome to redistribute it
+under certain conditions.  See the file COPYING for details.
+"""
+
+
 def version():
     import pkg_resources
     vers = pkg_resources.require("mfp")[0].version
     return vers
+
 
 def add_evaluator_defaults():
     # default names known to the evaluator
@@ -59,18 +78,6 @@ def add_evaluator_defaults():
     Evaluator.bind_global("builtins", builtins)
     Evaluator.bind_global("app", MFPApp())
 
-mfp_banner = "MFP - Music For Programmers, version %s"
-
-mfp_footer = """
-To report bugs or download source:
-
-    http://github.com/bgribble/mfp
-
-Copyright (c) 2009-2023 Bill Gribble <grib@billgribble.com>
-
-MFP is free software, and you are welcome to redistribute it
-under certain conditions.  See the file COPYING for details.
-"""
 
 def exit_sighandler(signum, frame):
     log.log_force_console = True
@@ -84,18 +91,19 @@ def test_imports():
         gi.require_version('Gtk', '3.0')
         gi.require_version('GtkClutter', '1.0')
         gi.require_version('Clutter', '1.0')
-        import simplejson
-        import numpy
-        import nose
-        from gi.repository import Clutter, GObject, Gtk, Gdk, GtkClutter, Pango
-        import posix_ipc
-    except Exception as e:
+        import simplejson  # noqa: F401
+        import numpy  # noqa: F401
+        import nose  # noqa: F401
+        from gi.repository import Clutter, GObject, Gtk, Gdk, GtkClutter, Pango  # noqa: F401
+        import posix_ipc  # noqa: F401
+    except Exception:
         import traceback
         traceback.print_exc()
         print()
         print("FATAL: Required package not installed.  Please run 'waf install_deps'")
         print()
         sys.exit(-1)
+
 
 async def main():
     description = mfp_banner % version()
@@ -183,6 +191,9 @@ async def main():
     app.max_blocksize = args.get("max_bufsize")
     app.socket_path = args.get("socket_path")
     app.debug = args.get("debug")
+
+    log.log_thread = threading.get_ident()
+    log.log_loop = asyncio.get_event_loop()
 
     if args.get('batch'):
         app.batch_mode = True
@@ -311,7 +322,7 @@ async def main():
         yappi.stop()
         yappi.convert2pstats(yappi.get_func_stats()).dump_stats('mfp-main-funcstats.pstats')
 
+
 def main_sync_wrapper():
     import asyncio
     asyncio.run(main())
-
