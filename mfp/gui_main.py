@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 import asyncio
+import inspect
 import threading
 import argparse
 import sys
@@ -16,7 +17,6 @@ from carp.channel import UnixSocketChannel
 from carp.host import Host
 
 from mfp import log
-from mfp.utils import profile
 
 from .singleton import Singleton
 from .mfp_command import MFPCommand
@@ -38,6 +38,8 @@ class MFPGUI (Singleton):
         self.mfp = mfp_proxy
         self.appwin = None
         self.debug = False
+        self.asyncio_loop = asyncio.get_event_loop()
+        self.asyncio_thread = threading.get_ident()
 
         self.style_defaults = {
             'font-face': 'Cantarell,Sans',
@@ -60,6 +62,19 @@ class MFPGUI (Singleton):
 
     def recall(self, obj_id):
         return self.objects.get(obj_id)
+
+    def async_task(self, call_result, wait=False):
+        if inspect.isawaitable(call_result):
+            current_thread = threading.get_ident()
+            if current_thread == self.asyncio_thread:
+                task = asyncio.create_task(call_result)
+            else:
+                task = asyncio.run_coroutine_threadsafe(call_result, self.asyncio_loop)
+                if wait:
+                    return task.result()
+            return task
+        else:
+            return call_result
 
     def _callback_wrapper(self, thunk):
         try:
@@ -152,8 +167,10 @@ def setup_default_colors():
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
+
 async def loggo(*args, **kwargs):
     print(f"[loggo] {args} {kwargs}")
+
 
 async def main():
     import gi

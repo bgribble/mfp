@@ -10,7 +10,7 @@ from .singleton import Singleton
 from .interpreter import Interpreter
 from .processor import Processor
 from .method import MethodCall
-from .utils import QuittableThread, AsyncExecMonitor
+from .utils import QuittableThread, AsyncExecMonitor, task
 from .bang import Unbound
 
 from pluginfo import PlugInfo
@@ -90,9 +90,6 @@ class MFPApp (Singleton):
         self.app_scope = LexicalScope("__app__")
         self.patches = {}
 
-    async def loggo(self, *args, **kwargs):
-        log.debug(f"[loggo] {args} {kwargs}")
-
     async def setup(self):
         from .mfp_command import MFPCommand
         from .gui_command import GUICommand
@@ -107,7 +104,6 @@ class MFPApp (Singleton):
         self.rpc_host = Host(
             label="MFP Master",
         )
-        self.rpc_host.on("exports", self.loggo)
         self.rpc_host.on("disconnect", self.on_host_disconnect)
 
         await self.rpc_host.start(self.rpc_channel)
@@ -341,7 +337,7 @@ class MFPApp (Singleton):
         loadtime = datetime.now() - starttime
         log.debug("Patch loaded, elapsed time %s" % loadtime)
         if show_gui and patch.gui_created:
-            MFPApp().gui_command.select(patch.obj_id)
+            task(MFPApp().gui_command.select(patch.obj_id))
         return patch
 
     def load_extension(self, libname):

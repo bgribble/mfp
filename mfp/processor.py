@@ -10,7 +10,7 @@ from .method import MethodCall
 from .evaluator import LazyExpr
 from .bang import Uninit, Bang
 from .scope import LexicalScope
-from .utils import isiterable
+from .utils import isiterable, task
 from . import log
 
 
@@ -486,7 +486,6 @@ class Processor (object):
         self.status = self.DELETED
 
     def resize(self, inlets, outlets):
-        from .mfp_app import MFPApp
         inlets = max(inlets, 1)
         if inlets > len(self.inlets):
             newin = inlets - len(self.inlets)
@@ -530,7 +529,7 @@ class Processor (object):
         if inlet > len(target.inlets):
             if isinstance(target, Patch):
                 Patch.task_nibbler.add_task(
-                    lambda args: Processor.connect(*args), 20, 
+                    lambda args: Processor.connect(*args), 20,
                     [self, outlet, target, inlet, show_gui])
                 log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
                             % (target.name, target.obj_id, len(target.inlets), inlet))
@@ -545,7 +544,7 @@ class Processor (object):
             if inlet not in target.dsp_inlets:
                 if isinstance(target, Patch):
                     Patch.task_nibbler.add_task(
-                        lambda args: Processor.connect(*args), 20, 
+                        lambda args: Processor.connect(*args), 20,
                         [self, outlet, target, inlet, show_gui])
                     log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
                                 % (target.name, target.obj_id))
@@ -582,7 +581,7 @@ class Processor (object):
                 "hidden", "sendvia", "sendsignalvia")
             and target.display_type not in (
                 "hidden", "recvvia", "recvsignalvia")):
-            MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet)
+            task(MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet))
         return True
 
     def disconnect(self, outlet, target, inlet):
@@ -741,7 +740,6 @@ class Processor (object):
         self.inlets[inlet] = Uninit
 
     def reset_counts(self):
-        from .mfp_app import MFPApp
         self.count_in = 0
         self.count_out = 0
         self.count_errors = 0
@@ -783,13 +781,15 @@ class Processor (object):
             self.gui_params['export_offset_y'] = yoff
             self.gui_params['position_y'] += yoff
 
-        MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
-                                    parent_id, self.gui_params)
+        task(
+            MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
+                                        parent_id, self.gui_params)
+        )
         self.gui_created = True
 
     def delete_gui(self):
         from .mfp_app import MFPApp
-        MFPApp().gui_command.delete(self.obj_id)
+        task(MFPApp().gui_command.delete(self.obj_id))
         self.gui_created = False
 
     def conf(self, **kwargs):
@@ -797,7 +797,7 @@ class Processor (object):
         for k, v in kwargs.items():
             self.gui_params[k] = v
         if self.gui_created:
-            MFPApp().gui_command.configure(self.obj_id, **kwargs)
+            task(MFPApp().gui_command.configure(self.obj_id, **kwargs))
 
     def set_tag(self, tag, value):
         self.tags[tag] = value

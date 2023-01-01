@@ -1,5 +1,6 @@
 from carp.service import apiclass, noresp
 
+
 @apiclass
 class GUICommand:
     def ready(self):
@@ -75,6 +76,7 @@ class GUICommand:
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, parent_id,
                                                  params))
+
     def _create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui_main import MFPGUI
         from .gui.patch_element import PatchElement
@@ -90,7 +92,9 @@ class GUICommand:
         from .gui.button_element import ToggleButtonElement
         from .gui.button_element import ToggleIndicatorElement
         from .gui.button_element import BangButtonElement
+        from mfp import log
 
+        log.debug(f"_create: {params}")
         elementtype = params.get('display_type', 'processor')
 
         ctors = {
@@ -119,6 +123,7 @@ class GUICommand:
             o.obj_args = obj_args
             o.obj_state = PatchElement.OBJ_COMPLETE
 
+            log.debug(f"_create: found ctor {o} {isinstance(o, PatchElement)}\n")
             if isinstance(o, PatchElement):
                 parent = MFPGUI().recall(o.parent_id)
                 layer = None
@@ -133,9 +138,9 @@ class GUICommand:
                 elif isinstance(parent, PatchElement):
                     # FIXME: don't hardcode GOP offsets
                     if not parent.export_x:
-                        self._log_write(
-                            "_create: parent %s.%s has no export_x"
-                            % (parent.scope.name, parent,name), "debug")
+                        log.debug(
+                            f"_create: parent {parent.scope.name}.{parent.name} has no export_x\n",
+                        )
                     xpos = params.get("position_x", 0) - parent.export_x + 2
                     ypos = params.get("position_y", 0) - parent.export_y + 20
                     o.move(xpos, ypos)
@@ -144,15 +149,17 @@ class GUICommand:
                     parent.add_actor(o)
                     o.container = parent
 
+                log.debug(f"_create: new obj {params}")
                 o.configure(params)
                 MFPGUI().appwin.register(o)
             else:
+                log.debug(f"_create: configuring obj {params}")
                 o.configure(params)
 
             MFPGUI().remember(o)
             MFPGUI().appwin.refresh(o)
             o.update()
-
+        log.debug("_create: out")
 
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI

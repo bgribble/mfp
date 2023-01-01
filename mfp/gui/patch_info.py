@@ -44,7 +44,7 @@ class PatchInfo (object):
         for k, v in extras.items():
             prms[k] = v
         if self.obj_id is not None:
-            MFPGUI().mfp.set_params(self.obj_id, prms)
+            MFPGUI().async_task(MFPGUI().mfp.set_params(self.obj_id, prms))
 
     def find_layer(self, layer):
         for l in self.layers:
@@ -86,7 +86,7 @@ class PatchInfo (object):
 
         self.stage.refresh(self)
 
-    def delete(self):
+    async def delete(self):
         # delete all the processor elements 
         for l in self.layers: 
             to_delete = [o for o in l.objects]
@@ -102,7 +102,7 @@ class PatchInfo (object):
 
         # last, delete the patch on the control side 
         if self.obj_id is not None:
-            MFPGUI().mfp.delete(self.obj_id)
+            await MFPGUI().async_task(MFPGUI().mfp.delete(self.obj_id))
             self.obj_id = None 
 
     def command(self, action, data):

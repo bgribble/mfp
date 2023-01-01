@@ -22,6 +22,7 @@ from .key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT
 
 import pkgutil
 
+
 class PatchWindow(object):
     def __init__(self):
         # load Glade ui
@@ -109,7 +110,6 @@ class PatchWindow(object):
         # set up key and mouse handling
         self.init_input()
 
-
     def get_color(self, colorspec):
         rgba = MFPGUI().style_defaults.get(colorspec)
         if not rgba:
@@ -127,18 +127,12 @@ class PatchWindow(object):
     def init_input(self):
         def grab_handler(stage, event):
             try:
-                r = self.input_mgr.handle_event(stage, event)
+                r = MFPGUI().async_task(self.input_mgr.handle_event(stage, event), 1)
                 if not self.embed.has_focus():
-                    log.debug("event handler: do not have focus")
-                    if hasattr(event, 'keyval'):
-                        log.debug("keyval was", event.keyval)
-                    else:
-                        log.debug("event was:", event.type)
                     self.grab_focus()
                     return False
                 return r
             except Exception as e:
-                import traceback
                 log.error("Error handling UI event", event)
                 log.debug(e)
                 log.debug_traceback()
@@ -146,22 +140,21 @@ class PatchWindow(object):
 
         def handler(stage, event):
             try:
-                return self.input_mgr.handle_event(stage, event)
+                return MFPGUI().async_task(self.input_mgr.handle_event(stage, event), 1)
             except Exception as e:
                 log.error("Error handling UI event", event)
                 log.debug(e)
                 log.debug_traceback()
                 return False
 
-
         def steal_focuskeys(target, event):
-            badkeys = [ KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT ]
+            badkeys = [KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT]
             if isinstance(event, Gdk.EventKey) and event.keyval in badkeys:
                 e = Clutter.KeyEvent()
                 e.keyval = event.keyval
                 e.type = Clutter.EventType.KEY_PRESS
 
-                return self.input_mgr.handle_event(self.stage, e)
+                return MFPGUI().async_task(self.input_mgr.handle_event(self.stage, e), 1)
             else:
                 return False
 
@@ -210,7 +203,7 @@ class PatchWindow(object):
                 self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
                                                    self.stage.get_height() - 25)
         except Exception as e:
-            log.error("Error handling UI event", event)
+            log.error("Error handling UI event", e)
             log.debug(e)
             log.debug_traceback()
 
@@ -423,18 +416,18 @@ class PatchWindow(object):
         b.begin_edit()
         return True
 
-    def quit(self, *rest):
+    async def quit(self, *rest):
         from .patch_info import PatchInfo
         log.debug("Quit command from GUI or WM")
 
         self.close_in_progress = True
         to_delete = [ p for p in self.patches if p.deletable ]
         for p in to_delete:
-            p.delete()
+            await p.delete()
         self.close_in_progress = False
         self.object_view.refresh()
 
-        allpatches = MFPGUI().mfp.open_patches()
+        allpatches = await MFPGUI().async_task(MFPGUI().mfp.open_patches())
         guipatches = [ p.obj_id for p in self.objects if isinstance(p, PatchInfo) ]
 
         for a in allpatches:
@@ -448,8 +441,11 @@ class PatchWindow(object):
             log.debug("Console thread reaped")
             self.console_mgr = None
         MFPGUI().appwin = False
+        log.debug("Calling finish()")
         MFPGUI().finish()
-        MFPGUI().mfp.quit()
+        log.debug("Calling quit()")
+        await MFPGUI().async_task(MFPGUI().mfp.quit())
+        log.debug("All done")
         return True
 
     def console_write(self, msg):

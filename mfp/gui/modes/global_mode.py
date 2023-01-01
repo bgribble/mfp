@@ -138,7 +138,7 @@ class GlobalMode (InputMode):
             pass
         return False
 
-    def save_file(self):
+    async def save_file(self):
         import os.path
         patch = self.window.selected_patch
         if patch.last_filename is None:
@@ -146,7 +146,7 @@ class GlobalMode (InputMode):
         else:
             default_filename = patch.last_filename
 
-        def cb(fname):
+        async def cb(fname):
             if fname:
                 patch.last_filename = fname
                 if fname != default_filename:
@@ -154,24 +154,24 @@ class GlobalMode (InputMode):
                     parts = os.path.splitext(basefile)
                     newname = parts[0]
                     patch.obj_name = newname
-                    MFPGUI().mfp.rename_obj(patch.obj_id, newname)
+                    await MFPGUI().mfp.rename_obj(patch.obj_id, newname)
                     patch.send_params()
                     self.window.refresh(patch)
-                MFPGUI().mfp.save_file(patch.obj_name, fname)
+                await MFPGUI().mfp.save_file(patch.obj_name, fname)
         self.window.get_prompted_input("File name to save: ", cb, default_filename)
 
-    def save_as_lv2(self):
+    async def save_as_lv2(self):
         patch = self.window.selected_patch
         default_plugname = 'mfp_' + patch.obj_name
 
-        def cb(plugname):
+        async def cb(plugname):
             if plugname:
-                MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
+                await MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
         self.window.get_prompted_input("Plugin name to save: ", cb, default_plugname)
 
     def open_file(self):
-        def cb(fname):
-            MFPGUI().mfp.open_file(fname)
+        async def cb(fname):
+            await MFPGUI().mfp.open_file(fname)
         self.window.get_prompted_input("File name to load: ", cb)
 
     def drag_start(self):
@@ -291,45 +291,46 @@ class GlobalMode (InputMode):
         self.window.hide_selection_box()
         return True
 
-    def patch_close(self):
+    async def patch_close(self):
         def close_confirm(answer):
             if answer is not None:
                 aa = answer.strip().lower()
                 if aa in ['y', 'yes']:
                     self.window.patch_close()
 
-        from mfp import log
         p = self.window.selected_patch
-        log.debug("patch_close: checking for unsaved changes")
-        if MFPGUI().mfp.has_unsaved_changes(p.obj_id):
+        if await MFPGUI().mfp.has_unsaved_changes(p.obj_id):
             self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]",
                                            close_confirm, '')
         else:
             self.window.patch_close()
 
-    def quit(self):
-        def quit_confirm(answer):
+    async def quit(self):
+        async def quit_confirm(answer):
             if answer is not None:
+                log.debug("Got quit-confirm callback")
                 aa = answer.strip().lower()
                 if aa in ['y', 'yes']:
-                    self.window.quit()
+                    await self.window.quit()
 
-        allpatches = MFPGUI().mfp.open_patches()
+        from mfp import log
+        log.debug("Got quit keysequence")
+        allpatches = await MFPGUI().mfp.open_patches()
         clean = True
         for p in allpatches:
-            if MFPGUI().mfp.has_unsaved_changes(p):
+            if await MFPGUI().mfp.has_unsaved_changes(p):
                 clean = False
         if not clean:
             self.window.get_prompted_input(
                 "There are patches with unsaved changes. Quit anyway? [yN]",
                 quit_confirm, '')
         else:
-            self.window.quit()
+            await self.window.quit()
 
-    def toggle_pause(self):
+    async def toggle_pause(self):
         from mfp import log
         try:
-            paused = MFPGUI().mfp.toggle_pause()
+            paused = await MFPGUI().mfp.toggle_pause()
             if paused:
                 log.warning("Execution of all patches paused")
             else:

@@ -12,7 +12,7 @@ from .processor import Processor, AsyncOutput
 from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit, Unbound
-from .utils import TaskNibbler
+from .utils import TaskNibbler, task
 
 from mfp import log
 
@@ -333,7 +333,7 @@ class Patch(Processor):
         Processor.create_gui(self, **kwargs)
 
         if self.gui_params.get("top_level"):
-            MFPApp().gui_command.load_start()
+            task(MFPApp().gui_command.load_start())
 
             for oid, obj in list(self.objects.items()):
                 if obj.display_type != "hidden":
@@ -346,10 +346,10 @@ class Patch(Processor):
                                 "hidden", "sendvia", "sendsignalvia")
                             and dstobj.display_type not in (
                                 "hidden", "recvvia", "recvsignalvia")):
-                            MFPApp().gui_command.connect(obj.obj_id, srcport,
-                                                         dstobj.obj_id, dstport)
-            MFPApp().gui_command.load_complete()
-            MFPApp().gui_command.select(self.obj_id)
+                            task(MFPApp().gui_command.connect(obj.obj_id, srcport,
+                                                              dstobj.obj_id, dstport))
+            task(MFPApp().gui_command.load_complete())
+            task(MFPApp().gui_command.select(self.obj_id))
         else:
             self.create_export_gui()
         return True
@@ -456,7 +456,7 @@ class Patch(Processor):
         self.update_export_bounds()
 
         if MFPApp().gui_command:
-            MFPApp().gui_command.load_complete()
+            task(MFPApp().gui_command.load_complete())
         return True
 
     def obj_is_exportable(self, obj):
@@ -507,11 +507,11 @@ class Patch(Processor):
     def create_export_gui(self):
         from .mfp_app import MFPApp
         # non-toplevel Patch means show the Export UI layer only
-        MFPApp().gui_command.load_start()
+        task(MFPApp().gui_command.load_start())
         for oid, obj in list(self.objects.items()):
             if self.obj_is_exportable(obj):
                 obj.create_gui(is_export=True)
-        MFPApp().gui_command.load_complete()
+        task(MFPApp().gui_command.load_complete())
 
     def delete(self):
         from .mfp_app import MFPApp

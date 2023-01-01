@@ -13,6 +13,8 @@ from threading import Thread, Lock, Condition
 from mfp import log
 from datetime import datetime, timedelta
 
+def task(coro):
+    asyncio.create_task(coro)
 
 def homepath(fn):
     import os.path
