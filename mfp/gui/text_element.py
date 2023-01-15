@@ -107,7 +107,7 @@ class TextElement (PatchElement):
         elif new_text != self.value and not aborted:
             self.value = new_text
             self.set_text()
-            MFPGUI().mfp.send(self.obj_id, 0, self.value)
+            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
         self.update()
 
     def end_edit(self):

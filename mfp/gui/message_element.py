@@ -112,7 +112,7 @@ class MessageElement (PatchElement):
     def clicked(self, *args):
         self.clickstate = True
         if self.obj_id is not None:
-            MFPGUI().mfp.send_bang(self.obj_id, 0)
+            MFPGUI().mfp.send_bang.sync(self.obj_id, 0)
         self.texture.invalidate()
         return False
 
@@ -247,8 +247,8 @@ class TransientMessageElement (MessageElement):
             self.message_text = text
             for to in self.target_obj:
                 if to is not self:
-                    MFPGUI().mfp.eval_and_send(to.obj_id, self.target_port,
-                                               self.message_text)
+                    MFPGUI().mfp.eval_and_send.sync(to.obj_id, self.target_port,
+                                                    self.message_text)
         for to in self.target_obj:
             self.stage.select(to)
         self.message_text = None

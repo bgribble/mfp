@@ -42,7 +42,7 @@ class SlideMeterElement (PatchElement):
     MIN_BARSIZE = 2.0
 
     VERTICAL = 0x00
-    HORIZONTAL = 0x01 
+    HORIZONTAL = 0x01
     LEFT = 0x00
     RIGHT = 0x01
 
@@ -58,9 +58,9 @@ class SlideMeterElement (PatchElement):
         self.show_scale = False
         self.slider_enable = True
         self.scale = ticks.LinearScale()
-        self.scale_position = self.LEFT 
+        self.scale_position = self.LEFT
         self.orientation = self.VERTICAL
-        self.zeropoint = None 
+        self.zeropoint = None
 
         # value to emit when at bottom of scale, useful for dB scales
         self.slider_zero = None
@@ -95,10 +95,10 @@ class SlideMeterElement (PatchElement):
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         lw = 1
 
-        if self.orientation == self.HORIZONTAL: 
+        if self.orientation == self.HORIZONTAL:
             h = width - lw
             w = height - lw
-        else: 
+        else:
             w = width - lw
             h = height - lw
 
@@ -108,12 +108,12 @@ class SlideMeterElement (PatchElement):
         if not self.show_scale:
             x_min = 0
             x_max = w
-        elif self.scale_position == self.LEFT: 
+        elif self.scale_position == self.LEFT:
             x_min = self.SCALE_SPACE
             x_max = w
-        elif self.scale_position == self.RIGHT: 
+        elif self.scale_position == self.RIGHT:
             x_min = 0
-            x_max = w - self.SCALE_SPACE 
+            x_max = w - self.SCALE_SPACE
 
         bar_h = y_max - y_min
         bar_w = x_max - x_min
@@ -124,9 +124,9 @@ class SlideMeterElement (PatchElement):
         ct.paint()
         ct.restore()
 
-        # rotate if we are drawing horizontally 
+        # rotate if we are drawing horizontally
         if self.orientation == self.HORIZONTAL:
-            self.hot_x_min = y_min 
+            self.hot_x_min = y_min
             self.hot_x_max = y_max
             self.hot_y_min = x_min
             self.hot_y_max = x_max
@@ -134,7 +134,7 @@ class SlideMeterElement (PatchElement):
             ct.rotate(math.pi / 2.0)
             ct.translate(lw/2, -h)
         else:
-            self.hot_x_min = x_min 
+            self.hot_x_min = x_min
             self.hot_x_max = x_max
             self.hot_y_min = y_min
             self.hot_y_max = y_max
@@ -153,13 +153,13 @@ class SlideMeterElement (PatchElement):
 
             for tick in self.scale_ticks:
                 tick_y = y_max - bar_h*self.scale.fraction(tick)
-                if self.scale_position == self.LEFT: 
+                if self.scale_position == self.LEFT:
                     tick_x = x_min
                     txt_x = 5
                 else:
                     tick_x = x_max + self.TICK_LEN
                     txt_x = x_max + self.TICK_LEN + 5
-                        
+
                 ct.move_to(tick_x - self.TICK_LEN, tick_y)
                 ct.line_to(tick_x, tick_y)
                 ct.stroke()
@@ -170,18 +170,18 @@ class SlideMeterElement (PatchElement):
 
         def val2pixels(val):
             scale_fraction = self.scale.fraction(val)
-            return scale_fraction*bar_h 
+            return scale_fraction*bar_h
 
-        # box 
+        # box
         ct.rectangle(x_min, y_min, bar_w, bar_h)
         ct.stroke()
 
-        # filling 
-        min_fillval, max_fillval = self.fill_interval() 
+        # filling
+        min_fillval, max_fillval = self.fill_interval()
 
         h = val2pixels(max_fillval) - val2pixels(min_fillval)
         if self.zeropoint is not None and h < self.MIN_BARSIZE:
-            h = self.MIN_BARSIZE 
+            h = self.MIN_BARSIZE
 
         c = ColorDB.to_cairo(self.get_color('meter-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
@@ -191,16 +191,16 @@ class SlideMeterElement (PatchElement):
         if self.orientation == self.HORIZONTAL:
             ct.restore()
 
-    def fill_interval(self): 
+    def fill_interval(self):
         if self.zeropoint is None:
             return (self.min_value, self.value)
         else:
-            if self.value > self.zeropoint: 
+            if self.value > self.zeropoint:
                 pmin = self.zeropoint
-                pmax = self.value 
-            else: 
-                pmin = self.value 
-                pmax = self.zeropoint 
+                pmax = self.value
+            else:
+                pmin = self.value
+                pmax = self.zeropoint
             return (pmin, pmax)
 
     def point_in_slider(self, x, y):
@@ -220,7 +220,7 @@ class SlideMeterElement (PatchElement):
         if self.orientation == self.VERTICAL:
             delta = self.hot_y_max - y
             total = self.hot_y_max - self.hot_y_min
-        else: 
+        else:
             delta = x - self.hot_x_min
             total = self.hot_x_max - self.hot_x_min
 
@@ -230,8 +230,8 @@ class SlideMeterElement (PatchElement):
     def add_pixdelta(self, dx, dy):
         if self.orientation == self.VERTICAL:
             delta = dy / float(self.hot_y_max - self.hot_y_min)
-        else: 
-            delta = dx / float(self.hot_x_max - self.hot_x_min) 
+        else:
+            delta = dx / float(self.hot_x_max - self.hot_x_min)
 
         scalepos = self.scale.fraction(self.value) + delta
         return self.scale.value(scalepos)
@@ -246,30 +246,30 @@ class SlideMeterElement (PatchElement):
         if value != self.value:
             self.value = value
             self.texture.invalidate()
-            MFPGUI().mfp.send(self.obj_id, 0, self.value)
+            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
 
     def update(self):
         self.texture.invalidate()
 
 
-    def set_orientation(self, orient): 
+    def set_orientation(self, orient):
         if orient != self.orientation:
             self.set_size(self.height, self.width)
-        self.orientation = orient  
+        self.orientation = orient
 
     def set_show_scale(self, show_scale):
-        if show_scale == self.show_scale: 
-            return 
+        if show_scale == self.show_scale:
+            return
 
         if show_scale:
             self.show_scale = True
-            if self.orientation & self.HORIZONTAL:  
+            if self.orientation & self.HORIZONTAL:
                 self.set_size(self.get_width(), self.get_height() + self.SCALE_SPACE)
             else:
                 self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
         else:
             self.show_scale = False
-            if self.orientation & self.HORIZONTAL:  
+            if self.orientation & self.HORIZONTAL:
                 self.set_size(self.get_width(), self.get_height() - self.SCALE_SPACE)
             else:
                 self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
@@ -278,20 +278,20 @@ class SlideMeterElement (PatchElement):
         self.max_value = max_val
         self.min_value = min_val
         self.scale.set_bounds(self.min_value, self.max_value)
-       
-        newval = False 
+
+        newval = False
         if self.value > self.max_value:
             self.value = self.max_value
             newval = True
 
         if self.value < self.min_value:
             self.value = self.min_value
-            newval = True 
+            newval = True
 
-        if newval: 
-            MFPGUI().mfp.send(self.obj_id, 0, self.value)
+        if newval:
+            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
 
-        self.scale_ticks = None 
+        self.scale_ticks = None
         self.update()
         self.send_params()
 
@@ -304,46 +304,46 @@ class SlideMeterElement (PatchElement):
         changes = False
 
         v = params.get("orientation")
-        if (v is not None and v in (1, "h", "horiz", "horizontal") 
+        if (v is not None and v in (1, "h", "horiz", "horizontal")
             and not (self.orientation & self.HORIZONTAL)):
             self.set_orientation(self.HORIZONTAL)
-            changes = True 
-        elif (v is not None and v in (0, "v", "vert", "vertical") 
+            changes = True
+        elif (v is not None and v in (0, "v", "vert", "vertical")
               and (self.orientation & self.HORIZONTAL)):
             self.set_orientation(self.VERTICAL)
-            changes = True 
+            changes = True
 
         v = params.get("zeropoint")
-        if v != self.zeropoint: 
+        if v != self.zeropoint:
             self.zeropoint = v
-            changes = True 
+            changes = True
 
         v = params.get("scale")
         if v == "linear" and not isinstance(self.scale, ticks.LinearScale):
-            self.scale = ticks.LinearScale(self.min_value, self.max_value) 
-            changes = True 
+            self.scale = ticks.LinearScale(self.min_value, self.max_value)
+            changes = True
         elif v in ("log", "log10", "decade") and not isinstance(self.scale, ticks.LogScale):
-            self.scale = ticks.LogScale(self.min_value, self.max_value) 
-            changes = True 
+            self.scale = ticks.LogScale(self.min_value, self.max_value)
+            changes = True
         elif v == 'audio' and not isinstance(self.scale, ticks.AudioScale):
             self.scale = ticks.AudioScale(self.min_value, self.max_value)
-            changes = True 
+            changes = True
 
         v = params.get("scale_position")
-        if (v is not None and v in (1, "r", "R", "right") and self.scale_position != self.RIGHT): 
-            self.scale_position = self.RIGHT 
-            changes = True 
+        if (v is not None and v in (1, "r", "R", "right") and self.scale_position != self.RIGHT):
+            self.scale_position = self.RIGHT
+            changes = True
         elif (v is not None and v in (0, "l", "L", "left") and self.scale_position != self.LEFT):
-            self.scale_position = self.LEFT 
-            changes = True 
-        
+            self.scale_position = self.LEFT
+            changes = True
+
         for p in ("show_scale", "slider_enable", "scale_ticks"):
             v = params.get(p)
             if v is not None and hasattr(self, p):
                 changes = True
                 setattr(self, p, v)
 
-        rescale = False 
+        rescale = False
         if 'min_value' in params:
             v = params['min_value']
             if v != self.min_value:
@@ -355,7 +355,7 @@ class SlideMeterElement (PatchElement):
             v = params['max_value']
             if v != self.max_value:
                 changes = True
-                rescale = True 
+                rescale = True
                 self.max_value = v
 
         if rescale:
@@ -370,8 +370,8 @@ class SlideMeterElement (PatchElement):
                 v = self.min_value
             if v > self.max_value:
                 v = self.max_value
-            if self.value != v: 
-                changes = True 
+            if self.value != v:
+                changes = True
                 self.value = v
 
         dr = params.get("dial_radius")
@@ -405,7 +405,7 @@ class SlideMeterElement (PatchElement):
             # create the underlying var
             self.create(self.proc_type, str(self.value))
             if self.obj_id is None:
-                return None 
+                return None
             else:
                 self.draw_ports()
         return SliderEditMode(self.stage, self, "Fader/meter edit")
@@ -424,34 +424,34 @@ class BarMeterElement(SlideMeterElement):
 
         self.slider_enable = False
 
-class DialElement(SlideMeterElement): 
-    display_type = "dial" 
-    proc_type = "slidemeter" 
+class DialElement(SlideMeterElement):
+    display_type = "dial"
+    proc_type = "slidemeter"
 
-    DEFAULT_W = 50 
-    DEFAULT_H = 50 
+    DEFAULT_W = 50
+    DEFAULT_H = 50
     DEFAULT_R = 24
     BAR_WIDTH = 0.7
     THETA_MIN = 0.65*math.pi
-    THETA_MAX = 0.35*math.pi 
+    THETA_MAX = 0.35*math.pi
     DRAG_SCALE = 0.01
     MIN_WEDGE = 0.1
 
     def __init__(self, window, x, y):
-        self.dial_radius = self.DEFAULT_R 
+        self.dial_radius = self.DEFAULT_R
         SlideMeterElement.__init__(self, window, x, y)
         self.param_list.append('dial_radius')
 
     def set_orientation(self, orientation):
-        pass 
+        pass
 
     def set_show_scale(self, show_scale):
-        if show_scale == self.show_scale: 
-            return 
+        if show_scale == self.show_scale:
+            return
 
         if show_scale:
             self.show_scale = True
-            self.set_size(2*self.dial_radius + 2.0 + 7*self.scale_font_size, 
+            self.set_size(2*self.dial_radius + 2.0 + 7*self.scale_font_size,
                           2*self.dial_radius + 2.0 + 3*self.scale_font_size)
         else:
             self.show_scale = False
@@ -475,9 +475,9 @@ class DialElement(SlideMeterElement):
         y -= orig_y
         r, theta = self.r2p(x, y)
         if theta > self.THETA_MAX and theta < self.THETA_MIN:
-            return False 
-        else: 
-            return True 
+            return False
+        else:
+            return True
 
     def pixpos2value(self, x, y):
         orig_x, orig_y = self.get_stage_position()
@@ -485,14 +485,14 @@ class DialElement(SlideMeterElement):
         y -= orig_y
         r, theta = self.r2p(x, y)
         if theta > self.THETA_MAX and theta < self.THETA_MIN:
-            return None 
+            return None
         elif theta < self.THETA_MIN:
             theta += 2*math.pi
 
         theta -= self.THETA_MIN
         scale_fraction = theta / (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
         return self.scale.value(scale_fraction)
-            
+
     def add_pixdelta(self, dx, dy):
         delta = 0.01 * dy
 
@@ -509,7 +509,7 @@ class DialElement(SlideMeterElement):
         return theta
 
     @catchall
-    def draw_cb(self, texture, ct, width, height): 
+    def draw_cb(self, texture, ct, width, height):
         c = ColorDB.to_cairo(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
@@ -537,7 +537,7 @@ class DialElement(SlideMeterElement):
                 ct.move_to(tick_x0, tick_y0)
                 ct.line_to(tick_x1, tick_y1)
                 ct.stroke()
-                
+
                 txt_x, txt_y = self.p2r(self.dial_radius + self.TICK_LEN + 1, tick_theta)
 
                 txt_x -= 2*self.scale_font_size * math.sin(tick_theta/2.0)
@@ -545,7 +545,7 @@ class DialElement(SlideMeterElement):
                 ct.move_to(txt_x, txt_y)
                 ct.show_text("%.3g" % tick)
 
-        # Draw the outline of the dial 
+        # Draw the outline of the dial
         ct.move_to(*self.p2r(self.dial_radius, self.THETA_MIN))
         ct.arc(self.width/2.0, self.height/2.0, self.dial_radius, self.THETA_MIN, self.THETA_MAX)
 
@@ -555,7 +555,7 @@ class DialElement(SlideMeterElement):
         ct.close_path()
         ct.stroke()
 
-        # and the tasty filling 
+        # and the tasty filling
         c = ColorDB.to_cairo(self.get_color('meter-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         min_val, max_val = self.fill_interval()
@@ -580,7 +580,7 @@ class DialElement(SlideMeterElement):
             # create the underlying var
             self.create(self.proc_type, str(self.value))
             if self.obj_id is None:
-                return None 
+                return None
             else:
                 self.draw_ports()
         return DialEditMode(self.stage, self, "Dial edit")

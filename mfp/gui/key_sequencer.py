@@ -7,7 +7,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from mfp import log
 from gi.repository import Clutter
-from .key_defs import *
+from . import key_defs
+
 
 def get_key_unicode(ev):
     if ev.unicode_value:
@@ -33,27 +34,26 @@ class KeySequencer (object):
             return None
 
     def process(self, event):
-        from gi.repository import Clutter
-
         # KEY PRESS
         if event.type == Clutter.EventType.KEY_PRESS:
             code = event.keyval
-            if code in MOD_ALL:
-                if code in (MOD_SHIFTALT, MOD_SHIFTRALT):
-                    self.mod_keys.add(MOD_SHIFT)
-                    self.mod_keys.add(MOD_ALT)
+            if code in key_defs.MOD_ALL:
+                if code in (key_defs.MOD_SHIFTALT, key_defs.MOD_SHIFTRALT):
+                    self.mod_keys.add(key_defs.MOD_SHIFT)
+                    self.mod_keys.add(key_defs.MOD_ALT)
                 else:
                     self.mod_keys.add(code)
             else:
                 self.sequences.append(self.canonicalize(event))
+
         # KEY RELEASE
         elif event.type == Clutter.EventType.KEY_RELEASE:
             code = event.keyval
-            if code in MOD_ALL:
+            if code in key_defs.MOD_ALL:
                 try:
-                    if code in (MOD_SHIFTALT, MOD_SHIFTRALT):
-                        self.mod_keys.remove(MOD_SHIFT)
-                        self.mod_keys.remove(MOD_ALT)
+                    if code in (key_defs.MOD_SHIFTALT, key_defs.MOD_SHIFTRALT):
+                        self.mod_keys.remove(key_defs.MOD_SHIFT)
+                        self.mod_keys.remove(key_defs.MOD_ALT)
                     else:
                         self.mod_keys.remove(code)
                 except KeyError:
@@ -67,53 +67,53 @@ class KeySequencer (object):
     def canonicalize(self, event):
         key = ''
 
-        if (MOD_CTRL in self.mod_keys) or (MOD_RCTRL in self.mod_keys):
+        if (key_defs.MOD_CTRL in self.mod_keys) or (key_defs.MOD_RCTRL in self.mod_keys):
             key += 'C-'
-        if (MOD_ALT in self.mod_keys) or (MOD_RALT in self.mod_keys):
+        if (key_defs.MOD_ALT in self.mod_keys) or (key_defs.MOD_RALT in self.mod_keys):
             key += 'A-'
-        if (MOD_WIN in self.mod_keys) or (MOD_RWIN in self.mod_keys):
+        if (key_defs.MOD_WIN in self.mod_keys) or (key_defs.MOD_RWIN in self.mod_keys):
             key += 'W-'
 
         if isinstance(event, str):
-            if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
+            if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
                 key = 'S-' + key
 
             return key + event
 
         if event.type in (Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE):
             ks = event.keyval
-            if ks >= 256 and ((MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys)):
+            if ks >= 256 and ((key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys)):
                 key = 'S-' + key
 
-            if ks in (KEY_TAB, KEY_SHIFTTAB):
+            if ks in (key_defs.KEY_TAB, key_defs.KEY_SHIFTTAB):
                 key += 'TAB'
-            elif ks == KEY_UP:
+            elif ks == key_defs.KEY_UP:
                 key += 'UP'
-            elif ks == KEY_DN:
+            elif ks == key_defs.KEY_DN:
                 key += 'DOWN'
-            elif ks == KEY_LEFT:
+            elif ks == key_defs.KEY_LEFT:
                 key += 'LEFT'
-            elif ks == KEY_RIGHT:
+            elif ks == key_defs.KEY_RIGHT:
                 key += 'RIGHT'
-            elif ks == KEY_ENTER:
+            elif ks == key_defs.KEY_ENTER:
                 key += 'RET'
-            elif ks == KEY_ESC:
+            elif ks == key_defs.KEY_ESC:
                 key += 'ESC'
-            elif ks == KEY_DEL:
+            elif ks == key_defs.KEY_DEL:
                 key += 'DEL'
-            elif ks == KEY_BKSP:
+            elif ks == key_defs.KEY_BKSP:
                 key += 'BS'
-            elif ks == KEY_INS:
+            elif ks == key_defs.KEY_INS:
                 key += 'INS'
-            elif ks == KEY_PGUP:
+            elif ks == key_defs.KEY_PGUP:
                 key += 'PGUP'
-            elif ks == KEY_PGDN:
+            elif ks == key_defs.KEY_PGDN:
                 key += 'PGDN'
             elif ks < 256:
                 kuni = get_key_unicode(event)
                 if kuni < 32:
                     ks = chr(event.keyval)
-                    if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
+                    if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
                         log.debug("SHIFT in modifiers but below 256 (%s)" % kuni)
                         ks = ks.upper()
                     key += ks
@@ -124,7 +124,7 @@ class KeySequencer (object):
                 key += "%d" % ks
             return key
 
-        if (MOD_SHIFT in self.mod_keys) or (MOD_RSHIFT in self.mod_keys):
+        if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
             key = 'S-' + key
 
         if event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE):

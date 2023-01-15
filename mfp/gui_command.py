@@ -94,7 +94,6 @@ class GUICommand:
         from .gui.button_element import BangButtonElement
         from mfp import log
 
-        log.debug(f"_create: {params}")
         elementtype = params.get('display_type', 'processor')
 
         ctors = {
@@ -123,7 +122,6 @@ class GUICommand:
             o.obj_args = obj_args
             o.obj_state = PatchElement.OBJ_COMPLETE
 
-            log.debug(f"_create: found ctor {o} {isinstance(o, PatchElement)}\n")
             if isinstance(o, PatchElement):
                 parent = MFPGUI().recall(o.parent_id)
                 layer = None
@@ -149,17 +147,14 @@ class GUICommand:
                     parent.add_actor(o)
                     o.container = parent
 
-                log.debug(f"_create: new obj {params}")
                 o.configure(params)
                 MFPGUI().appwin.register(o)
             else:
-                log.debug(f"_create: configuring obj {params}")
                 o.configure(params)
 
             MFPGUI().remember(o)
             MFPGUI().appwin.refresh(o)
             o.update()
-        log.debug("_create: out")
 
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI

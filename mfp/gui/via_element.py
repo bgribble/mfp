@@ -180,7 +180,7 @@ class SendViaElement (ViaElement):
 
     def label_edit_finish(self, *args):
         ViaElement.label_edit_finish(self, *args)
-        MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
+        MFPGUI().mfp.send.sync(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
 class SendSignalViaElement (SendViaElement): 
     VIA_SIZE = 12 
@@ -199,7 +199,7 @@ class ReceiveViaElement (ViaElement):
 
     def label_edit_finish(self, *args):
         ViaElement.label_edit_finish(self, *args)
-        MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
+        MFPGUI().mfp.send.sync(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
 class ReceiveSignalViaElement (ReceiveViaElement):
     VIA_SIZE = 12 

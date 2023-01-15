@@ -18,11 +18,11 @@ class PatchInfo (object):
         self.obj_type = None
         self.obj_args = None
         self.obj_name = None
-        self.context_name = None 
-        self.deletable = True 
-        self.last_filename = None 
+        self.context_name = None
+        self.deletable = True
+        self.last_filename = None
         self.layers = []
-        self.scopes = [] 
+        self.scopes = []
 
         self.stage.add_patch(self)
         self.stage.layer_view.insert(self, None)
@@ -44,7 +44,7 @@ class PatchInfo (object):
         for k, v in extras.items():
             prms[k] = v
         if self.obj_id is not None:
-            MFPGUI().async_task(MFPGUI().mfp.set_params(self.obj_id, prms))
+            MFPGUI().mfp.set_params.sync(self.obj_id, prms)
 
     def find_layer(self, layer):
         for l in self.layers:
@@ -53,7 +53,7 @@ class PatchInfo (object):
         return None
 
     def get_params(self):
-        return MFPGUI().mfp.get_params(self.obj_id)
+        return MFPGUI().mfp.get_params.sync(self.obj_id)
 
     def configure(self, params):
         self.num_inlets = params.get("num_inlets")
@@ -65,45 +65,45 @@ class PatchInfo (object):
         self.deletable = params.get("deletable", True)
 
         layers = params.get("layers", [])
-        newlayers = [] 
+        newlayers = []
         for name, scope in layers:
-            l = self.find_layer(name)
-            if l is None: 
-                l = Layer(self.stage, self, name, scope)
-            newlayers.append(l)
-        self.layers = newlayers 
+            layer = self.find_layer(name)
+            if layer is None:
+                layer = Layer(self.stage, self, name, scope)
+            newlayers.append(layer)
+        self.layers = newlayers
 
-        self.scopes = [] 
-        for l in self.layers:
-            if not self.stage.layer_view.in_tree(l): 
-                self.stage.layer_view.insert(l, self)
-            if l.scope not in self.scopes:
-                self.scopes.append(l.scope)
-        
-        for s in self.scopes: 
+        self.scopes = []
+        for layer in self.layers:
+            if not self.stage.layer_view.in_tree(layer):
+                self.stage.layer_view.insert(layer, self)
+            if layer.scope not in self.scopes:
+                self.scopes.append(layer.scope)
+
+        for s in self.scopes:
             if not self.stage.object_view.in_tree((s, self)):
                 self.stage.object_view.insert((s, self), self)
 
         self.stage.refresh(self)
 
-    async def delete(self):
-        # delete all the processor elements 
-        for l in self.layers: 
-            to_delete = [o for o in l.objects]
+    def delete(self):
+        # delete all the processor elements
+        for layer in self.layers:
+            to_delete = [o for o in layer.objects]
             for o in to_delete:
                 o.delete()
-            l.hide() 
-            del l.group
-            l.group = None 
+            layer.hide()
+            del layer.group
+            layer.group = None
 
-        # remove the patch from layers and objects lists 
+        # remove the patch from layers and objects lists
         self.stage.object_view.remove(self)
         self.stage.layer_view.remove(self)
 
-        # last, delete the patch on the control side 
+        # last, delete the patch on the control side
         if self.obj_id is not None:
-            await MFPGUI().async_task(MFPGUI().mfp.delete(self.obj_id))
-            self.obj_id = None 
+            MFPGUI().mfp.delete.sync(self.obj_id)
+            self.obj_id = None
 
     def command(self, action, data):
         pass

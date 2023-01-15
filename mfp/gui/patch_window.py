@@ -127,7 +127,7 @@ class PatchWindow(object):
     def init_input(self):
         def grab_handler(stage, event):
             try:
-                r = MFPGUI().async_task(self.input_mgr.handle_event(stage, event), 1)
+                r = self.input_mgr.handle_event(stage, event)
                 if not self.embed.has_focus():
                     self.grab_focus()
                     return False
@@ -140,7 +140,7 @@ class PatchWindow(object):
 
         def handler(stage, event):
             try:
-                return MFPGUI().async_task(self.input_mgr.handle_event(stage, event), 1)
+                return self.input_mgr.handle_event(stage, event)
             except Exception as e:
                 log.error("Error handling UI event", event)
                 log.debug(e)
@@ -154,7 +154,7 @@ class PatchWindow(object):
                 e.keyval = event.keyval
                 e.type = Clutter.EventType.KEY_PRESS
 
-                return MFPGUI().async_task(self.input_mgr.handle_event(self.stage, e), 1)
+                return self.input_mgr.handle_event(self.stage, e)
             else:
                 return False
 
@@ -416,18 +416,18 @@ class PatchWindow(object):
         b.begin_edit()
         return True
 
-    async def quit(self, *rest):
+    def quit(self, *rest):
         from .patch_info import PatchInfo
         log.debug("Quit command from GUI or WM")
 
         self.close_in_progress = True
         to_delete = [ p for p in self.patches if p.deletable ]
         for p in to_delete:
-            await p.delete()
+            p.delete()
         self.close_in_progress = False
         self.object_view.refresh()
 
-        allpatches = await MFPGUI().async_task(MFPGUI().mfp.open_patches())
+        allpatches = MFPGUI().mfp.open_patches.sync()
         guipatches = [ p.obj_id for p in self.objects if isinstance(p, PatchInfo) ]
 
         for a in allpatches:
@@ -444,7 +444,7 @@ class PatchWindow(object):
         log.debug("Calling finish()")
         MFPGUI().finish()
         log.debug("Calling quit()")
-        await MFPGUI().async_task(MFPGUI().mfp.quit())
+        MFPGUI().mfp.quit.sync()
         log.debug("All done")
         return True
 

@@ -137,7 +137,7 @@ class PlotElement (PatchElement):
     def draw_complete_cb(self):
         def thunk():
             self.last_draw = datetime.now()
-            MFPGUI().mfp.send_methodcall(self.obj_id, 0, "draw_complete")
+            MFPGUI().mfp.send_methodcall.sync(self.obj_id, 0, "draw_complete")
 
         if self.last_draw != None:
             time_since_last = datetime.now() - self.last_draw

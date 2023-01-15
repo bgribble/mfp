@@ -57,8 +57,8 @@ class ConnectionElement(PatchElement):
     def delete(self):
         if (not self.dashed and self.obj_1 and self.obj_2 and
                 self.obj_1.obj_id is not None and self.obj_2.obj_id is not None):
-            MFPGUI().mfp.disconnect(self.obj_1.obj_id, self.port_1,
-                                    self.obj_2.obj_id, self.port_2)
+            MFPGUI().mfp.disconnect.sync(self.obj_1.obj_id, self.port_1,
+                                         self.obj_2.obj_id, self.port_2)
         if self.obj_1 and self in self.obj_1.connections_out:
             self.obj_1.connections_out.remove(self)
         if self.obj_2 and self in self.obj_2.connections_in:

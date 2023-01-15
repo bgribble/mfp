@@ -136,7 +136,7 @@ class EnumElement (PatchElement):
         if self.obj_id is None:
             print("EnumElement: could not create var obj")
         else:
-            MFPGUI().mfp.set_do_onload(self.obj_id, True)
+            MFPGUI().mfp.set_do_onload.sync(self.obj_id, True)
             self.obj_state = self.OBJ_COMPLETE
 
         self.draw_ports()
@@ -176,7 +176,7 @@ class EnumElement (PatchElement):
         if self.obj_id is None:
             self.create_obj()
         if self.obj_id is not None:
-            MFPGUI().mfp.send(self.obj_id, 0, self.value)
+            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
 
     def update(self):
         self.label.set_text(self.format_value(self.value))
@@ -191,7 +191,7 @@ class EnumElement (PatchElement):
         self.update_value(float(t))
         if self.obj_id is None:
             self.create_obj()
-        MFPGUI().mfp.send(self.obj_id, 0, self.value)
+        MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
 
     def configure(self, params):
         fmt_changed = False

@@ -142,8 +142,8 @@ class ConnectionMode (InputMode):
 
         if (self.source_obj and self.dest_obj
             and self.connection.obj_state != PatchElement.OBJ_DELETED):
-            if MFPGUI().mfp.connect(self.source_obj.obj_id, self.source_port,
-                                    self.dest_obj.obj_id, self.dest_port):
+            if MFPGUI().mfp.connect.sync(self.source_obj.obj_id, self.source_port,
+                                         self.dest_obj.obj_id, self.dest_port):
                 c = ConnectionElement(self.window, self.source_obj, self.source_port,
                                       self.dest_obj, self.dest_port)
                 MFPGUI().appwin.register(c)

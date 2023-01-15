@@ -235,9 +235,9 @@ class BangButtonElement (ButtonElement):
     def clicked(self):
         if self.obj_id is not None:
             if self.message is Bang:
-                MFPGUI().mfp.send_bang(self.obj_id, 0)
+                MFPGUI().mfp.send_bang.sync(self.obj_id, 0)
             else:
-                MFPGUI().mfp.send(self.obj_id, 0, self.message)
+                MFPGUI().mfp.send.sync(self.obj_id, 0, self.message)
         self.indicator = True
         self.redraw()
 
@@ -276,7 +276,7 @@ class ToggleButtonElement (ButtonElement):
             self.indicator = True
 
         if self.obj_id is not None:
-            MFPGUI().mfp.send(self.obj_id, 0, message)
+            MFPGUI().mfp.send.sync(self.obj_id, 0, message)
         self.redraw()
         return False
 
@@ -290,7 +290,7 @@ class ToggleButtonElement (ButtonElement):
     def create(self, init_type, init_args):
         ButtonElement.create(self, init_type, init_args)
         if self.obj_id:
-            MFPGUI().mfp.set_do_onload(self.obj_id, True)
+            MFPGUI().mfp.set_do_onload.sync(self.obj_id, True)
 
     def unclicked(self):
         return False

@@ -15,19 +15,20 @@ from ..connection_element import ConnectionElement
 from ..message_element import MessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
-from ..slidemeter_element import FaderElement, BarMeterElement, DialElement 
+from ..slidemeter_element import FaderElement, BarMeterElement, DialElement
 from ..via_element import SendViaElement, ReceiveViaElement
-from ..via_element import SendSignalViaElement, ReceiveSignalViaElement 
+from ..via_element import SendSignalViaElement, ReceiveSignalViaElement
 from ..button_element import BangButtonElement, ToggleButtonElement, ToggleIndicatorElement
 
+from mfp import log
 
 class PatchEditMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
         self.window = window
         self.autoplace_mode = None
-        self.autoplace_x = None 
-        self.autoplace_y = None 
+        self.autoplace_x = None
+        self.autoplace_y = None
         self.selection_edit_mode = None
 
         InputMode.__init__(self, "Edit patch", "Edit")
@@ -63,7 +64,7 @@ class PatchEditMode (InputMode):
                   "Add send signal via")
         self.bind("A-V", lambda: self.add_element(ReceiveSignalViaElement),
                   "Add receive signal via")
-        
+
         self.bind("C-x", self.cut, "Cut selection to clipboard")
         self.bind("C-c", self.copy, "Copy selection to clipboard")
         self.bind("C-v", self.paste, "Paste clipboard to selection")
@@ -77,7 +78,7 @@ class PatchEditMode (InputMode):
         self.bind("TAB", self.select_next, "Select next element")
         self.bind("S-TAB", self.select_prev, "Select previous element")
         self.bind("C-TAB", self.select_mru, "Select most-recent element")
-        self.bind("C-a", self.select_all, "Select all (in this layer)") 
+        self.bind("C-a", self.select_all, "Select all (in this layer)")
 
         self.bind("a", self.auto_place_below, "Auto-place below")
         self.bind("A", self.auto_place_above, "Auto-place above")
@@ -88,11 +89,11 @@ class PatchEditMode (InputMode):
 
     def selection_changed_cb(self, obj):
         if not self.enabled:
-            return False 
+            return False
 
         if self.window.selected:
             self.update_selection_mode()
-        else: 
+        else:
             self.disable_selection_mode()
 
     def add_element(self, factory):
@@ -153,15 +154,15 @@ class PatchEditMode (InputMode):
         if len(self.window.selected) > 1:
             if isinstance(self.selection_edit_mode, SingleSelectionEditMode):
                 self.manager.disable_minor_mode(self.selection_edit_mode)
-                self.selection_edit_mode = None 
-            if not self.selection_edit_mode: 
+                self.selection_edit_mode = None
+            if not self.selection_edit_mode:
                 self.selection_edit_mode = MultiSelectionEditMode(self.window)
                 self.manager.enable_minor_mode(self.selection_edit_mode)
         elif len(self.window.selected) == 1:
             if isinstance(self.selection_edit_mode, MultiSelectionEditMode):
                 self.manager.disable_minor_mode(self.selection_edit_mode)
-                self.selection_edit_mode = None 
-            if not self.selection_edit_mode: 
+                self.selection_edit_mode = None
+            if not self.selection_edit_mode:
                 self.selection_edit_mode = SingleSelectionEditMode(self.window)
                 self.manager.enable_minor_mode(self.selection_edit_mode)
 
@@ -174,19 +175,19 @@ class PatchEditMode (InputMode):
         return True
 
     def enable(self):
-        self.enabled = True 
-        self.manager.global_mode.allow_selection_drag = True 
+        self.enabled = True
+        self.manager.global_mode.allow_selection_drag = True
         self.update_selection_mode()
 
     def disable(self):
-        self.enabled = False 
+        self.enabled = False
         if self.autoplace_mode:
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
         self.disable_selection_mode()
 
     def cut(self):
-        return self.window.clipboard_cut((self.manager.pointer_x, 
+        return self.window.clipboard_cut((self.manager.pointer_x,
                                           self.manager.pointer_y))
 
     def copy(self):

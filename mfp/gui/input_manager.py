@@ -5,9 +5,6 @@ input_manager.py: Handle keyboard and mouse input and route through input modes
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-import inspect
-import asyncio
-
 from datetime import datetime, timedelta
 import time
 
@@ -91,18 +88,13 @@ class InputManager (object):
     def synthesize(self, key):
         self.keyseq.sequences.append(key)
 
-    async def handle_keysym(self, keysym):
-        async def t(result):
-            if inspect.isawaitable(result):
-                return await result
-            return result
-
+    def handle_keysym(self, keysym):
         if keysym is not None:
             # check minor modes first
             for minor in self.minor_modes:
                 handler = minor.lookup(keysym)
                 if handler is not None:
-                    handled = await t(handler[0]())
+                    handled = handler[0]()
                     if handled:
                         return True
 
@@ -110,27 +102,31 @@ class InputManager (object):
             if self.major_mode is not None:
                 handler = self.major_mode.lookup(keysym)
                 if handler is not None:
-                    handled = await t(handler[0]())
+                    handled = handler[0]()
                     if handled:
                         return True
 
             # then global
             handler = self.global_mode.lookup(keysym)
             if handler is not None:
-                handled = await t(handler[0]())
+                handled = handler[0]()
                 if handled:
                     return True
         return False
 
-    async def handle_event(self, stage, event):
+    def handle_event(self, stage, event):
         from gi.repository import Clutter
         from mfp import log
+
         keysym = None
         if event.type in (
                 Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE,
                 Clutter.EventType.BUTTON_PRESS,
                 Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL):
-            self.keyseq.process(event)
+            try:
+                self.keyseq.process(event)
+            except Exception as e:
+                raise
             if len(self.keyseq.sequences):
                 keysym = self.keyseq.pop()
         elif event.type == Clutter.EventType.MOTION:
@@ -165,7 +161,6 @@ class InputManager (object):
                 self.pointer_obj = None
                 self.pointer_obj_time = None
         else:
-            log.debug("event type not matched:", event.type)
             return False
 
         if not keysym:
@@ -176,7 +171,7 @@ class InputManager (object):
             rv = None
             try:
                 retry_count += 1
-                rv = await MFPGUI().async_task(self.handle_keysym(keysym))
+                rv = self.handle_keysym(keysym)
             except self.InputNeedsRequeue as e:
                 if retry_count < 5:
                     continue
