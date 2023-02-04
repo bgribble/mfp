@@ -357,7 +357,6 @@ class AsyncExecMonitor:
                 nextline = nextline.decode().strip()
 
                 if not nextline:
-                    await asyncio.sleep(0.1)
                     continue
 
                 cb_return = self.callback(nextline, self.log_module, self.log_raw)
