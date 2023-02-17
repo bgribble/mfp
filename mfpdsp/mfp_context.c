@@ -57,15 +57,15 @@ mfp_context_init(mfp_context * context)
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(request_id);
 
-    char reqbuf[512];
-    snprintf(reqbuf, 511, "{ \"classes\": [\"DSPObject\"], \"pubdata\": [ %f, %f ] }",
-            mfp_in_latency, mfp_out_latency);
-
-
     msgbuf = mfp_comm_get_buffer();
-    request_id = mfp_rpc_request("publish", reqbuf, NULL, NULL, msgbuf, &msglen);
+    msglen = snprintf(
+        msgbuf,
+        MFP_MAX_MSGSIZE-1,
+        "json:{ \"host_id\": \"%s\", \"__type__\": \"HostExports\", \"exports\": [\"DSPObject\"], \"metadata\": [ %f, %f ] }",
+        rpc_node_id, mfp_in_latency, mfp_out_latency
+    );
+
     mfp_comm_submit_buffer(msgbuf, msglen);
-    mfp_rpc_wait(request_id);
     return 0;
 }
 

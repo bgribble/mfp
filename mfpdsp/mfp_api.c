@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <glib.h>
 #include <json-glib/json-glib.h>
@@ -7,27 +6,30 @@
 int api_rpcid = -1;
 
 static void
-api_create_callback(JsonNode * response, void * data)
+api_create_callback(Carp__PythonValue * response, void * data)
 {
-    if (JSON_NODE_TYPE(response) == JSON_NODE_ARRAY) {
-        JsonArray * arry = json_node_get_array(response);
-        JsonNode * val = json_array_get_element(arry, 1);
-        if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
-            api_rpcid = (int)json_node_get_double(val);
-            return;
-        }
+    switch (response->value_types_case) {
+        case CARP__PYTHON_VALUE__VALUE_TYPES__INT:
+            api_rpcid = response->_int;
+            break;
     }
 }
 
 void
-mfp_api_init(void) 
+mfp_api_init(void)
 {
-    const char method[] = "create";
-    const char params[] = "{ \"type\": \"MFPCommand\" }";
+    const char service_name[] = "MFPCommand";
+    int instance_id = 0;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * args = mfp_rpc_args_init(&argblock);
+
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
-    int request_id = mfp_rpc_request(method, params, api_create_callback, NULL,
-                                     msgbuf, &msglen);
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, args,
+        api_create_callback, NULL,
+        msgbuf, &msglen
+    );
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(request_id);
     return;
@@ -52,123 +54,158 @@ api_load_callback(JsonNode * response, void * data)
 
 
 int
-mfp_api_send_to_inlet(mfp_context * context, int port, float value, 
+mfp_api_send_to_inlet(mfp_context * context, int port, float value,
                       char * msgbuf, int * msglen)
 {
-    const char method[] = "call";
-    const char params[] = "{\"func\": \"send\", \"rpcid\": %d, \"args\": "
-                          "[ %d, %d, %f ], \"kwargs\": {} }";
-    char tbuf[MFP_MAX_MSGSIZE];
+    const char service_name[] = "MFPCommand.send";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
 
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
-             context->default_obj_id, port, value); 
-    int request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, msglen); 
+    mfp_rpc_args_append_int(arglist, context->default_obj_id);
+    mfp_rpc_args_append_int(arglist, port);
+    mfp_rpc_args_append_double(arglist, value);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, msglen
+    );
     return request_id;
 }
 
 int
-mfp_api_send_to_outlet(mfp_context * context, int port, float value, 
+mfp_api_send_to_outlet(mfp_context * context, int port, float value,
                        char * msgbuf, int * msglen)
 {
-    const char method[] = "call";
-    const char params[] = "{\"func\": \"send_to_outlet\", \"rpcid\": %d, \"args\": "
-                          "[ %d, %d, %f ], \"kwargs\": {} }";
-    char tbuf[MFP_MAX_MSGSIZE];
+    /* FIXME - this service is not implemented in the MFPCommand API */
+    const char service_name[] = "MFPCommand.send_to_outlet";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
 
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
-             context->default_obj_id, port, value); 
-    int request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, msglen); 
+    mfp_rpc_args_append_int(arglist, context->default_obj_id);
+    mfp_rpc_args_append_int(arglist, port);
+    mfp_rpc_args_append_double(arglist, value);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, msglen
+    );
     return request_id;
 }
 
 int
 mfp_api_show_editor(mfp_context * context, int show, char * msgbuf, int * msglen)
 {
-    const char method[] = "call";
-    const char params[] = "{\"func\": \"show_editor\", \"rpcid\": %d, \"args\": "
-                          "[ %d, %d ], \"kwargs\": {} }";
-    char tbuf[MFP_MAX_MSGSIZE];
+    const char service_name[] = "MFPCommand.show_editor";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
 
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, context->default_obj_id, show); 
-    int request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, msglen); 
+    mfp_rpc_args_append_int(arglist, context->default_obj_id);
+    mfp_rpc_args_append_int(arglist, show);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, msglen
+    );
     return request_id;
 }
 
-int 
+int
 mfp_api_open_context(mfp_context * context, char * msgbuf, int * msglen)
 {
-    const char method[] = "call";
-    const char params[] = "{\"func\": \"open_context\", \"rpcid\": %d, \"args\": "
-                          "[%d, %d, %d, %d ], \"kwargs\": {} }";
-    char tbuf[MFP_MAX_MSGSIZE];
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, 
-             mfp_comm_nodeid, context->id, context->owner, context->samplerate);
-    int request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, msglen); 
+    const char service_name[] = "MFPCommand.open_context";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
+    mfp_rpc_args_append_string(arglist, rpc_node_id);
+    mfp_rpc_args_append_int(arglist, context->id);
+    mfp_rpc_args_append_int(arglist, context->owner);
+    mfp_rpc_args_append_int(arglist, context->samplerate);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, msglen
+    );
     return request_id;
 }
 
-int 
-mfp_api_load_context(mfp_context * context, char * patchfile, 
+int
+mfp_api_load_context(mfp_context * context, char * patchfile,
                      char * msgbuf, int * msglen)
 {
-    const char method[] = "call";
-    const char params[] = "{\"func\": \"load_context\", \"rpcid\": %d, \"args\": "
-                          "[\"%s\", %d, %d ], \"kwargs\": {} }";
-    char tbuf[MFP_MAX_MSGSIZE];
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, patchfile, 
-             mfp_comm_nodeid, context->id);
-    int request_id = mfp_rpc_request(method, tbuf, api_load_callback, (void *)context, 
-                                     msgbuf, msglen); 
+    const char service_name[] = "MFPCommand.load_context";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
+
+    mfp_rpc_args_append_string(arglist, patchfile);
+    mfp_rpc_args_append_int(arglist, mfp_comm_nodeid);
+    mfp_rpc_args_append_int(arglist, context->id);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        api_load_callback, (void *)context, msgbuf, msglen
+    );
     return request_id;
 }
 
-int  
+int
 mfp_api_dsp_response(int proc_id, char * resp, int resp_type, char * msgbuf, int * msglen)
 {
-    const char method[] = "call";
-    const char params[] = "{ \"func\": \"dsp_response\", \"rpcid\": %d, "
-        "\"args\": [ %d, %d, %s ], \"kwargs\": {} }";
-    char outbuf[MFP_MAX_MSGSIZE];
+    const char service_name[] = "MFPCommand.dsp_response";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
 
-    snprintf(outbuf, MFP_MAX_MSGSIZE, params, api_rpcid, proc_id, resp_type, resp);
-    int request_id = mfp_rpc_request(method, outbuf, NULL, NULL, msgbuf, msglen); 
+    mfp_rpc_args_append_int(arglist, proc_id);
+    mfp_rpc_args_append_int(arglist, resp_type);
+    mfp_rpc_args_append_string(arglist, resp);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, msglen
+    );
     return request_id;
 }
 
-/* FIXME make mfp_api_close_context nonblocking */ 
+/* FIXME make mfp_api_close_context nonblocking */
 int
 mfp_api_close_context(mfp_context * context)
 {
-    const char method[] = "call";
-    const char params[] = "{\"func\": \"close_context\", \"rpcid\": %d, "
-                          "\"args\": [ %d, %d ], \"kwargs\": {} }";
+    const char service_name[] = "MFPCommand.close_context";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
 
-    char tbuf[MFP_MAX_MSGSIZE];
+    mfp_rpc_args_append_int(arglist, mfp_comm_nodeid);
+    mfp_rpc_args_append_int(arglist, context->id);
+
     char * msgbuf = mfp_comm_get_buffer();
-    int msglen=0;
-    int request_id;
+    int msglen;
 
-    snprintf(tbuf, MFP_MAX_MSGSIZE-1, params, api_rpcid, mfp_comm_nodeid, context->id);
-    request_id = mfp_rpc_request(method, tbuf, NULL, NULL, msgbuf, &msglen);
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, &msglen
+    );
     mfp_comm_submit_buffer(msgbuf, msglen);
     mfp_rpc_wait(request_id);
 
     /* handle any DSP config requests */
     mfp_dsp_handle_requests();
 }
-    
-/* FIXME make mfp_api_exit_notify nonblocking */ 
+
+/* FIXME make mfp_api_exit_notify nonblocking */
 int
 mfp_api_exit_notify(void)
 {
-    const char method[] = "exit_notify";
-    const char params[] = "{}";
+    char announce[] =
+        "json:{ \"__type__\": \"HostExitNotify\" }";
     char * msgbuf = mfp_comm_get_buffer();
-    int msglen=0;
 
-    int request_id = mfp_rpc_request(method, params, NULL, NULL, msgbuf, &msglen);
-    mfp_comm_submit_buffer(msgbuf, msglen);
-    //mfp_rpc_wait(request_id);
+    strncpy(msgbuf, announce, strlen(announce));
+    mfp_comm_submit_buffer(msgbuf, strlen(announce));
 }
 
 

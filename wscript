@@ -8,7 +8,7 @@ WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
 out = 'wafbuild'
-pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2"]
+pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2", "libprotobuf-c" ]
 
 from waflib.Configure import conf
 import waflib
@@ -33,7 +33,7 @@ def git_version():
 
     vers = vers.strip()
 
-    return 'git_' + format(vers)
+    return str(int(vers, 16))
 
 def activate_virtualenv(ctxt):
     activate = "%s/virtual/bin/activate_this.py" % ctxt.out_dir
@@ -46,10 +46,10 @@ def make_virtualenv(ctxt, *args, **kwargs):
         targetfile = ".waf-built-virtual"
         vrule = ("cd %s && %s -p %s --system-site-packages virtual && (find %s/virtual/ -type f -o -type l > %s) && cp virtual/bin/activate virtual/bin/activate.orig"
                  % (
-                     ctxt.out_dir, 
-                     ctxt.env.VIRTUALENV[0], 
+                     ctxt.out_dir,
+                     ctxt.env.VIRTUALENV[0],
                      python_name,
-                     ctxt.out_dir, 
+                     ctxt.out_dir,
                      targetfile
                  ))
         ctxt(rule = vrule, target = targetfile, shell = True)
@@ -200,7 +200,7 @@ def egg(ctxt, *args, **kwargs):
 
 
 def gitversion(ctxt):
-    ctxt.env.GITVERSION = VERSION + "_" + git_version()
+    ctxt.env.GITVERSION = VERSION + "." + git_version()
 
 def install_deps(ctxt):
     ctxt.load(WAFTOOLS)
@@ -370,7 +370,7 @@ def configure(conf):
         uselibs.append(uname)
     conf.env.PKGCONF_LIBS = uselibs
 
-    pip_libs = ["posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy", 
+    pip_libs = ["posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy",
                 "nose", "yappi", "cython", "pyliblo" ]
     gi_libs = [ "Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 

@@ -6,9 +6,9 @@
 #include <pthread.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <sys/socket.h> 
+#include <sys/socket.h>
 #include <sys/time.h>
-#include <linux/un.h> 
+#include <linux/un.h>
 #include <sys/unistd.h>
 #include <json-glib/json-glib.h>
 #include "mfp_dsp.h"
@@ -32,11 +32,11 @@ typedef struct {
 static comm_bufblock comm_buffers[MFP_NUM_BUFFERS];
 
 int
-mfp_comm_connect(char * sockname) 
+mfp_comm_connect(char * sockname)
 {
     int socket_fd;
-    struct sockaddr_un address; 
-    struct timeval tv; 
+    struct sockaddr_un address;
+    struct timeval tv;
 
     tv.tv_sec = 0;
     tv.tv_usec = 100000;
@@ -59,15 +59,15 @@ mfp_comm_connect(char * sockname)
     setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO,(char *)&tv,sizeof(struct timeval));
 
     comm_sockname = g_strdup(sockname);
-    comm_socket = socket_fd; 
+    comm_socket = socket_fd;
     return socket_fd;
 }
 
 
-char * 
+char *
 mfp_comm_get_buffer(void)
 {
-    /* FIXME mfp_comm_get_buffer implementation is naive */ 
+    /* FIXME mfp_comm_get_buffer implementation is naive */
     for(int bufnum=0; bufnum < MFP_NUM_BUFFERS; bufnum++) {
         if(comm_buffers[bufnum].free) {
             comm_buffers[bufnum].free = 0;
@@ -82,7 +82,7 @@ mfp_comm_get_buffer(void)
 void
 mfp_comm_release_buffer(char * msgbuf)
 {
-    /* FIXME mfp_comm_get_buffer implementation is naive */ 
+    /* FIXME mfp_comm_get_buffer implementation is naive */
     for(int bufnum=0; bufnum < MFP_NUM_BUFFERS; bufnum++) {
         if(comm_buffers[bufnum].bufdata == msgbuf) {
             comm_buffers[bufnum].free = 1;
@@ -94,8 +94,8 @@ mfp_comm_release_buffer(char * msgbuf)
     return;
 }
 
-int 
-mfp_comm_submit_buffer(char * msgbuf, int msglen) 
+int
+mfp_comm_submit_buffer(char * msgbuf, int msglen)
 {
     mfp_out_data rd;
     rd.msgbuf = msgbuf;
@@ -123,11 +123,11 @@ mfp_comm_submit_buffer(char * msgbuf, int msglen)
     return 1;
 }
 
-int 
+int
 mfp_comm_send_buffer(char * msg, int msglen)
 {
     char pbuff[11];
-    snprintf(pbuff, 10, "% 8d", msglen); 
+    snprintf(pbuff, 10, "% 8d", msglen);
     pthread_mutex_lock(&comm_io_lock);
     send(comm_socket, "[ SYNC ]", 8, 0);
     send(comm_socket, pbuff, 8, 0);
@@ -139,7 +139,7 @@ mfp_comm_send_buffer(char * msg, int msglen)
 static int
 mfp_comm_launch(char * sockname)
 {
-    char mfpcmd[MFP_EXEC_SHELLMAX];  
+    char mfpcmd[MFP_EXEC_SHELLMAX];
     char * const execargs[4] = {"/bin/bash", "-c", mfpcmd, NULL};
 
     snprintf(mfpcmd, MFP_EXEC_SHELLMAX-1, "mfp --no-dsp --no-default -s %s", sockname);
@@ -155,16 +155,16 @@ mfp_comm_launch(char * sockname)
     else {
         execv("/bin/bash", execargs);
         mfp_log_error("mfp_comm_launch: exec failed\n");
-        printf("[LOG] ERROR:"); 
+        printf("[LOG] ERROR:");
         perror("execve");
     }
 
 }
 
-int 
-mfp_comm_quit_requested(void) 
+int
+mfp_comm_quit_requested(void)
 {
-    int quitreq; 
+    int quitreq;
     pthread_mutex_lock(&comm_io_lock);
     quitreq = comm_io_quitreq;
     pthread_mutex_unlock(&comm_io_lock);
@@ -173,10 +173,10 @@ mfp_comm_quit_requested(void)
 }
 
 int
-mfp_comm_init(char * init_sockid) 
+mfp_comm_init(char * init_sockid)
 {
     char * env_sockid = getenv("MFP_SOCKET");
-    int connectfd; 
+    int connectfd;
     char * conn_sockid = NULL;
     int connect_tries = 0;
 
@@ -189,7 +189,7 @@ mfp_comm_init(char * init_sockid)
     if(init_sockid > 0) {
         conn_sockid = init_sockid;
     }
-    else if (env_sockid != NULL) { 
+    else if (env_sockid != NULL) {
         conn_sockid = env_sockid;
     }
     else {
@@ -224,14 +224,14 @@ mfp_comm_init(char * init_sockid)
         mfp_log_info("Established socket connection to MFP");
     }
 
-    /* start the IO threads */ 
+    /* start the IO threads */
     mfp_comm_io_start();
 
     return 0;
 }
 
-static void *  
-mfp_comm_io_reader_thread(void * tdata) 
+static void *
+mfp_comm_io_reader_thread(void * tdata)
 {
     int quitreq = 0;
     int  phase=0;
@@ -239,45 +239,45 @@ mfp_comm_io_reader_thread(void * tdata)
     char syncbuf[]={0,0,0,0,0,0,0,0,0,0};
     char lenbuf[]={0,0,0,0,0,0,0,0,0,0};
     char msgbuf[MFP_MAX_MSGSIZE+1];
-    int bytesread; 
+    int bytesread;
     int success = 0;
-    int errstat = 0; 
+    int errstat = 0;
 
     comm_io_reader_thread_ready = 1;
 
     while(!quitreq) {
         bzero(msgbuf, MFP_MAX_MSGSIZE+1);
         if (phase == 0) {
-            bytesread = recv(comm_socket, syncbuf, 8, 0);  
-            if (bytesread == 8) { 
+            bytesread = recv(comm_socket, syncbuf, 8, 0);
+            if (bytesread == 8) {
                 errstat = 0;
                 success = 1;
                 phase = 1;
             }
-            else 
+            else
                 success = 0;
         }
         else if (phase == 1) {
-            bytesread = recv(comm_socket, lenbuf, 8, 0);  
-            if (bytesread == 8) { 
+            bytesread = recv(comm_socket, lenbuf, 8, 0);
+            if (bytesread == 8) {
                 errstat = 0;
                 mlen = atoi(lenbuf);
                 success = 1;
                 phase = 2;
             }
-            else 
+            else
                 success = 0;
         }
         else if (phase == 2) {
-            bytesread = recv(comm_socket, msgbuf, mlen, 0);  
-            if (bytesread == mlen) { 
+            bytesread = recv(comm_socket, msgbuf, mlen, 0);
+            if (bytesread == mlen) {
                 errstat = 0;
                 mlen = atoi(lenbuf);
                 phase = 0;
                 success = 1;
                 mfp_rpc_dispatch_request(msgbuf, bytesread);
             }
-            else 
+            else
                 success = 0;
         }
 
@@ -294,8 +294,8 @@ mfp_comm_io_reader_thread(void * tdata)
     return NULL;
 }
 
-static void * 
-mfp_comm_io_writer_thread(void * tdata) 
+static void *
+mfp_comm_io_writer_thread(void * tdata)
 {
     int quitreq = 0;
     char msgbuf[MFP_MAX_MSGSIZE];
@@ -306,20 +306,20 @@ mfp_comm_io_writer_thread(void * tdata)
     char pbuff[32];
 
     rdata = g_array_new(TRUE, TRUE, sizeof(mfp_out_data));
-    comm_io_writer_thread_ready = 1; 
+    comm_io_writer_thread_ready = 1;
 
     while(!quitreq) {
-        /* wait for a signal that there's data to write */ 
+        /* wait for a signal that there's data to write */
         pthread_mutex_lock(&outgoing_lock);
-        if (outgoing_queue_read == outgoing_queue_write) { 
+        if (outgoing_queue_read == outgoing_queue_write) {
             pthread_cond_wait(&outgoing_cond, &outgoing_lock);
         }
 
         gettimeofday(&nowtime, NULL);
-        alarmtime.tv_sec = nowtime.tv_sec; 
+        alarmtime.tv_sec = nowtime.tv_sec;
         alarmtime.tv_nsec = nowtime.tv_usec*1000 + 10000000;
 
-        if (outgoing_queue_read == outgoing_queue_write) { 
+        if (outgoing_queue_read == outgoing_queue_write) {
             pthread_cond_timedwait(&outgoing_cond, &outgoing_lock, &alarmtime);
         }
 
@@ -337,7 +337,7 @@ mfp_comm_io_writer_thread(void * tdata)
             r = g_array_index(rdata, mfp_out_data, reqno);
             mfp_comm_send_buffer(r.msgbuf, r.msglen);
         }
-        if (rdata->len > 0) { 
+        if (rdata->len > 0) {
             g_array_remove_range(rdata, 0, rdata->len);
         }
 
@@ -347,8 +347,8 @@ mfp_comm_io_writer_thread(void * tdata)
     return NULL;
 }
 
-void 
-mfp_comm_io_start(void) 
+void
+mfp_comm_io_start(void)
 {
     pthread_create(&comm_io_reader_thread, NULL, mfp_comm_io_reader_thread, NULL);
     pthread_create(&comm_io_writer_thread, NULL, mfp_comm_io_writer_thread, NULL);
@@ -359,15 +359,15 @@ mfp_comm_io_start(void)
 
 }
 
-void 
-mfp_comm_io_wait(void) 
+void
+mfp_comm_io_wait(void)
 {
     pthread_join(comm_io_reader_thread, NULL);
     pthread_join(comm_io_writer_thread, NULL);
 }
 
-void 
-mfp_comm_io_finish(void) 
+void
+mfp_comm_io_finish(void)
 {
     pthread_mutex_lock(&comm_io_lock);
     comm_io_quitreq = 1;

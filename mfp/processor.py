@@ -417,8 +417,7 @@ class Processor (object):
                                      len(self.dsp_outlets), params,
                                      self.patch.context, self.patch.obj_id)
         else:
-            log.warning("[dsp_init] No DSP context in %s (%s)",
-                        self.name, proc_name)
+            log.warning(f"[dsp_init] No DSP context in {self.name}, {proc_name}")
         self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 
     def dsp_inlet(self, inlet):

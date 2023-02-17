@@ -1,4 +1,7 @@
 #include "mfp_dsp.h"
+#include "call_data.pb-c.h"
+#include "envelope.pb-c.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,13 +9,16 @@
 #include <sys/time.h>
 #include <json-glib/json-glib.h>
 
+
 static int _next_reqid = 1;
 static GHashTable * request_callbacks = NULL;
 static GHashTable * request_data = NULL;
 static GHashTable * request_waiting = NULL;
-
 static pthread_mutex_t request_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t request_cond = PTHREAD_COND_INITIALIZER;
+
+char rpc_peer_id[MAX_PEER_ID_LEN] = "";
+char rpc_node_id[MAX_PEER_ID_LEN] = "";
 
 static int
 json_notval(JsonNode * node)
@@ -300,6 +306,9 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
     else if (!strcmp(methodname, "publish")) {
         printf("FIXME: publish unhandled\n");
     }
+    else {
+        mfp_log_info("FIXME: Unhandled message type %s", methodname);
+    }
     return rval;
 
 }
@@ -320,11 +329,13 @@ mfp_rpc_response(int req_id, const char * result, char * msgbuf, int * msglen)
 }
 
 int
-mfp_rpc_request(const char * method, const char * params,
-                void (* callback)(JsonNode *, void *), void * cb_data,
+mfp_rpc_request(const char * service_name,
+                int instance_id, const mfp_rpc_args * args,
+                void (* callback)(Carp__PythonValue *, void *), void * cb_data,
                 char * msgbuf, int * msglen)
 {
     int req_id = _next_reqid ++;
+    char call_buf[MFP_MAX_MSGSIZE] __attribute__ ((aligned(32)));
 
     if(msgbuf == NULL) {
         printf("mfp_rpc_request: NULL buffer, aborting buffer send\n");
@@ -332,10 +343,24 @@ mfp_rpc_request(const char * method, const char * params,
         return -1;
     }
 
-    *msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1,
-                       "{\"jsonrpc\": \"2.0\", \"id\": %d, \"method\": \"%s\", "
-                       "\"params\": %s}",
-                       req_id, method, params);
+    Carp__Envelope env = CARP__ENVELOPE__INIT;
+    Carp__CallData call_data = CARP__CALL_DATA__INIT;
+
+    call_data.host_id = rpc_peer_id;
+    call_data.call_id = req_id;
+    call_data.service_name = (char *)service_name;
+    call_data.instance_id = instance_id;
+    call_data.args = (Carp__PythonArray *)args;
+    call_data.kwargs = NULL;
+
+    int call_data_size = carp__call_data__pack(&call_data, &call_buf[0]);
+    env.content.data = call_buf;
+    env.content.len = call_data_size;
+    env.content_type = "CallData";
+
+    strncpy(msgbuf, "pb2:", 4);
+    *msglen = carp__envelope__pack(&env, msgbuf + 4) + 4;
+
     if (callback != NULL) {
         g_hash_table_insert(request_callbacks, GINT_TO_POINTER(req_id), callback);
     }
@@ -377,8 +402,61 @@ mfp_rpc_wait(int request_id)
     pthread_mutex_unlock(&request_lock);
 }
 
-int
-mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
+
+static int
+mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
+{
+    char * result = NULL;
+    void * callback;
+    int success;
+
+    mfp_log_debug("[dispatch_pb2] unpack starts");
+    Carp__Envelope * envelope = carp__envelope__unpack(NULL, msglen, msgbuf);
+
+    mfp_log_debug("[dispatch_pb2] unpacked envelope");
+    mfp_log_debug("[dispatch_pb2] message type: %s", envelope->content_type);
+    mfp_log_debug("[dispatch_pb2] message size: %d bytes", envelope->content.len);
+
+    if (!strcmp(envelope->content_type, "CallResponse")) {
+        Carp__CallResponse * response =
+            carp__call_response__unpack(NULL, envelope->content.len, envelope->content.data);
+        mfp_log_debug(
+            "[dispatch_pb2] unpacked CallResponse: callid=%d service=%s host=%s",
+            response->call_id,
+            response->service_name, response->host_id
+        );
+
+        /* it's a response, is there a callback? */
+        callback = g_hash_table_lookup(request_callbacks, GINT_TO_POINTER(response->call_id));
+        if (callback != NULL) {
+            mfp_log_debug("[dispatch_pb2] Found callback for response");
+            void (* cbfunc)(Carp__PythonValue *, void *) = (void (*)(Carp__PythonValue *, void *))callback;
+            void * cbdata = g_hash_table_lookup(request_data, GINT_TO_POINTER(response->call_id));
+
+            g_hash_table_remove(request_callbacks, GINT_TO_POINTER(response->call_id));
+            g_hash_table_remove(request_data, GINT_TO_POINTER(response->call_id));
+
+            cbfunc(response->value, cbdata);
+        }
+        else {
+            mfp_log_debug("[dispatch_pb2] No callback for response");
+        }
+
+        pthread_mutex_lock(&request_lock);
+        g_hash_table_remove(request_waiting, GINT_TO_POINTER(response->call_id));
+        pthread_cond_broadcast(&request_cond);
+        pthread_mutex_unlock(&request_lock);
+        carp__call_response__free_unpacked(response, NULL);
+    }
+
+
+    carp__envelope__free_unpacked(envelope, NULL);
+    mfp_log_debug("[dispatch_pb2] exit");
+}
+
+
+static int
+mfp_rpc_dispatch_json(const char * msgbuf, int msglen)
 {
     JsonParser * parser = json_parser_new();
     JsonNode * id, * root, * val, * params;
@@ -393,12 +471,25 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
 
     success = json_parser_load_from_data(parser, msgbuf, msglen, &err);
     if (!success) {
-        printf("Error parsing JSON data: '%s'\n", msgbuf);
+        mfp_log_info("Error parsing JSON data: '%s'\n", msgbuf);
         return -1;
     }
 
     root = json_parser_get_root(parser);
     msgobj = json_node_get_object(root);
+
+    val = json_object_get_member(msgobj, "__type__");
+    if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) {
+        const char * typename = json_node_get_string(val);
+        if (typename != NULL && !strcmp(typename, "HostExports")) {
+            val = json_object_get_member(msgobj, "host_id");
+            if (val && (JSON_NODE_TYPE(val) == JSON_NODE_VALUE)) {
+                const char * hostid = json_node_get_string(val);
+                strncpy(rpc_peer_id, hostid, MAX_PEER_ID_LEN);
+            }
+        }
+    }
+
     id = json_object_get_member(msgobj, "id");
     if (id && (JSON_NODE_TYPE(id) == JSON_NODE_VALUE)) {
         reqid = (int)json_node_get_double(id);
@@ -451,6 +542,27 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
     return 0;
 
 }
+int
+mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
+{
+    mfp_log_info("[dispatch] %s", msgbuf);
+
+    if (!strncmp(msgbuf, "json:", 5)) {
+        msgbuf += 5;
+        msglen -= 5;
+        return mfp_rpc_dispatch_json(msgbuf, msglen);
+    }
+    else if (!strncmp(msgbuf, "pb2:", 4)) {
+        msgbuf += 4;
+        msglen -= 4;
+        return mfp_rpc_dispatch_pb2(msgbuf, msglen);
+    }
+    else {
+        mfp_log_info("Unrecognized message serialization: %s", msgbuf);
+        return -1;
+    }
+
+}
 
 static void
 ready_callback(JsonNode * response, void * data)
@@ -465,12 +577,23 @@ ready_callback(JsonNode * response, void * data)
     }
 }
 
+static void
+create_uuid_32(char * buffer) {
+    const char hexdigits[] = "0123456789abcdef";
+    for (int i=0; i < 32; i++){
+        buffer[i] = hexdigits[rand() % 16];
+    }
+    buffer[32] = (char)0;
+}
 
 void
 mfp_rpc_init(void)
 {
-    const char ready_req[] = "{ \"jsonrpc\": \"2.0\", \"method\": \"ready\", \"params\": {}}";
     int req_id;
+    char announce[] =
+        "json:{ \"__type__\": \"HostAnnounce\", \"host_id\": \"%s\" }";
+    char * msgbuf;
+    int msglen;
 
     request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal);
     request_data = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -479,12 +602,84 @@ mfp_rpc_init(void)
     pthread_mutex_init(&request_lock, NULL);
     pthread_cond_init(&request_cond, NULL);
 
-    mfp_log_info("Setting up RPC system");
+    mfp_log_info("Connecting to master process...");
+    create_uuid_32(rpc_node_id);
+    msgbuf = mfp_comm_get_buffer();
+    msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, announce, rpc_node_id);
 
-    char * msgbuf = mfp_comm_get_buffer();
-    int msglen = 0;
-    req_id = mfp_rpc_request("ready", "{}", ready_callback, NULL, msgbuf, & msglen);
+    /* clear the peer ID */
+    rpc_peer_id[0] = 0;
+
     mfp_comm_submit_buffer(msgbuf, msglen);
-    mfp_rpc_wait(req_id);
+
+    /* wait for host's service response to set the peer ID*/
+    struct timespec alarmtime;
+    struct timeval nowtime;
+
+    pthread_mutex_lock(&request_lock);
+    while(!mfp_comm_quit_requested()) {
+        gettimeofday(&nowtime, NULL);
+        alarmtime.tv_sec = nowtime.tv_sec;
+        alarmtime.tv_nsec = nowtime.tv_usec*1000 + 10000000;
+        pthread_cond_timedwait(&request_cond, &request_lock, &alarmtime);
+
+        if (strlen(rpc_peer_id) > 0) {
+            break;
+        }
+    }
+    pthread_mutex_unlock(&request_lock);
 }
 
+
+mfp_rpc_args *
+mfp_rpc_args_init(mfp_rpc_argblock * argblock) {
+    /* ok maybe this is just stupid, but I don't like all the
+     * allocations we have to do just to build a short argument
+     * list. The "argblock" has enough rool for all the data in a
+     * ARGBLOCK_SIZE list of values.
+     */
+    Carp__PythonArray arginit = CARP__PYTHON_ARRAY__INIT;
+    Carp__PythonValue valinit = CARP__PYTHON_VALUE__INIT;
+
+    memcpy(&(argblock->arg_array), &arginit, sizeof(Carp__PythonArray));
+    argblock->arg_array.n_items = 0;
+    argblock->arg_array.items = &(argblock->arg_value_pointers[0]);
+
+    for(int i=0; i < MFP_RPC_ARGBLOCK_SIZE; i++) {
+        argblock->arg_value_pointers[i] = argblock->arg_values + i;
+        memcpy(&argblock->arg_values[i], &valinit, sizeof(Carp__PythonValue));
+    }
+
+    return &(argblock->arg_array);
+}
+
+void
+mfp_rpc_args_append_string(mfp_rpc_args * arglist, const char * value) {
+    int prev_count = arglist->n_items;
+
+    arglist->items[prev_count]->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__STRING;
+    arglist->items[prev_count]->_string = (char *)value;
+
+    arglist->n_items += 1;
+}
+
+void
+mfp_rpc_args_append_int(mfp_rpc_args * arglist, int value) {
+    int prev_count = arglist->n_items;
+
+    arglist->items[prev_count]->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__INT;
+    arglist->items[prev_count]->_int = value;
+
+    arglist->n_items += 1;
+}
+
+
+void
+mfp_rpc_args_append_double(mfp_rpc_args * arglist, double value) {
+    int prev_count = arglist->n_items;
+
+    arglist->items[prev_count]->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__DOUBLE;
+    arglist->items[prev_count]->_double = value;
+
+    arglist->n_items += 1;
+}

@@ -1,5 +1,4 @@
 import os
-import time
 import configparser
 import simplejson as json
 
@@ -105,6 +104,7 @@ class MFPApp (Singleton):
             label="MFP Master",
         )
         self.rpc_host.on("disconnect", self.on_host_disconnect)
+        self.rpc_host.on("exports", self.on_host_exports)
 
         await self.rpc_host.start(self.rpc_channel)
 
@@ -112,7 +112,7 @@ class MFPApp (Singleton):
         await self.rpc_host.export(MFPCommand)
 
         # dsp and gui processes
-        self.start_dsp()
+        await self.start_dsp()
 
         if not self.no_gui:
             logstart = log.log_time_base.strftime("%Y-%m-%dT%H:%M:%S.%f")
@@ -203,24 +203,29 @@ class MFPApp (Singleton):
         self.midi_mgr.start()
         log.debug("MIDI started (ALSA Sequencer)")
 
-    def start_dsp(self):
+    async def start_dsp(self):
         from .dsp_object import DSPObject, DSPContext
         if self.dsp_process is not None:
             log.debug("Terminating old DSP process...")
             self.dsp_process.finish()
             self.dsp_process = None
 
+        dspcommand = [
+            "mfpdsp", self.socket_path, self.max_blocksize,
+            self.dsp_inputs, self.dsp_outputs,
+        ]
         if not self.no_dsp:
-            self.dsp_process = RPCExecRemote("mfpdsp", self.socket_path, self.max_blocksize,
-                                             self.dsp_inputs, self.dsp_outputs,
-                                             log_module="dsp", log_raw=self.debug_remote)
-            self.dsp_process.start()
-            if not self.dsp_process.alive():
-                raise StartupError("DSP process died during startup")
+            self.dsp_process = AsyncExecMonitor(
+                *dspcommand, log_module="dsp", log_raw=self.debug_remote
+            )
+            await self.dsp_process.start()
             log.debug("Waiting for DSP process startup...")
-            self.rpc_host.subscribe(DSPObject)
-            log.debug("DSP process established connection")
-            Patch.default_context = DSPContext.lookup(DSPObject.publishers[0], 0)
+            await self.rpc_host.require(DSPObject)
+            log.debug("DSP process established connection", DSPContext.registry)
+            log.debug("Object publishers:", self.rpc_host.services_remote)
+            Patch.default_context = DSPContext.lookup(
+                self.rpc_host.services_remote["DSPObject"][0], 0
+            )
             log.debug("Default DSP context:", Patch.default_context)
 
     def remember(self, obj):
@@ -247,7 +252,7 @@ class MFPApp (Singleton):
         from .dsp_object import DSPContext
         if "DSPObject" in exports:
             context = DSPContext.lookup(peer_id, 0)
-            context.input_latency, context.output_latency = metadata.get("latency", (0, 0))
+            context.input_latency, context.output_latency = metadata
 
     async def on_host_disconnect(self, event, peer_id):
         # FIXME not called from anywhere
@@ -274,7 +279,7 @@ class MFPApp (Singleton):
                 return
 
             # delete and restart dsp backend
-            self.start_dsp()
+            await self.start_dsp()
 
             # recreate patches
             for jdata in patch_json:
@@ -605,7 +610,7 @@ class MFPApp (Singleton):
         cp.write(sessfile)
         sessfile.close()
 
-    def session_load(self, session_path, session_id):
+    async def session_load(self, session_path, session_id):
         self.session_dir = session_path
         self.session_id = session_id
         cp = configparser.SafeConfigParser(allow_no_value=True)
@@ -635,7 +640,7 @@ class MFPApp (Singleton):
         self.extpath = utils.prepend_path(session_path, self.extpath)
 
         self.no_restart = True
-        self.start_dsp()
+        await self.start_dsp()
         self.start_midi()
         for p in patches:
             self.open_file(p)
