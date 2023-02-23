@@ -14,7 +14,7 @@ class Inlet(Processor):
     doc_tooltip_obj = "Message input to patch"
     doc_tooltip_cold = "Message input to patch"
     doc_tooltip_hot = "Message input to patch (hot)"
-    
+
     do_onload = False
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -22,7 +22,7 @@ class Inlet(Processor):
             initargs, kwargs = patch.parse_args(init_args)
         else:
             initargs = []
-        
+
         if len(initargs):
             self.inletnum = initargs[0]
         elif patch is not None:
@@ -38,19 +38,18 @@ class Inlet(Processor):
         else:
             self.doc_tooltip_obj = self.doc_tooltip_cold
 
-
     def clone(self, patch, scope, name):
-        # for inlet and outlet, always clear initargs so an xlet number is 
-        # selected automatically 
+        # for inlet and outlet, always clear initargs so an xlet number is
+        # selected automatically
         prms = self.save()
-        if self.inletnum in patch.hot_inlets: 
-            hot = True 
-        else: 
-            hot = False 
+        if self.inletnum in patch.hot_inlets:
+            hot = True
+        else:
+            hot = False
 
         newobj = MFPApp().create(prms.get("type"), None, patch, scope, name)
         newobj.load(prms)
-        if hot: 
+        if hot:
             newobj.hot()
         return newobj
 
@@ -68,19 +67,22 @@ class Inlet(Processor):
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit
 
-class SignalInlet(Inlet): 
+
+class SignalInlet(Inlet):
     doc_tooltip_obj = "Signal input to patch"
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Inlet.__init__(self, init_type, init_args, patch, scope, name)
         self.dsp_outlets = [0]
-        self.dsp_inlets = [0] 
-        self.dsp_init("inlet~", io_channel=self.inletnum) 
+        self.dsp_inlets = [0]
+
+    async def setup(self):
+        await self.dsp_init("inlet~", io_channel=self.inletnum)
+
 
 class Outlet(Processor):
     doc_tooltip_obj = "Message output from patch"
-
-    do_onload = False 
+    do_onload = False
     clear_outlets = False
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -88,7 +90,6 @@ class Outlet(Processor):
             initargs, kwargs = patch.parse_args(init_args)
         else:
             initargs = []
-            kwargs = {}
 
         if len(initargs):
             self.outletnum = initargs[0]
@@ -102,8 +103,8 @@ class Outlet(Processor):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
     def clone(self, patch, scope, name):
-        # for inlet and outlet, always clear initargs so an xlet number is 
-        # selected automatically 
+        # for inlet and outlet, always clear initargs so an xlet number is
+        # selected automatically
 
         prms = self.save()
         newobj = MFPApp().create(prms.get("type"), None, patch, scope, name)
@@ -119,14 +120,18 @@ class Outlet(Processor):
             self.patch.send(AsyncOutput(in_value, self.outletnum))
         self.add_output(0, in_value)
 
-class SignalOutlet(Outlet): 
+
+class SignalOutlet(Outlet):
     doc_tooltip_obj = "Signal output from patch"
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Outlet.__init__(self, init_type, init_args, patch, scope, name)
         self.dsp_outlets = [0]
-        self.dsp_inlets = [0] 
-        self.dsp_init("outlet~", io_channel=self.outletnum) 
+        self.dsp_inlets = [0]
+
+    async def setup(self):
+        await self.dsp_init("outlet~", io_channel=self.outletnum)
+
 
 def register():
     MFPApp().register("inlet", Inlet)

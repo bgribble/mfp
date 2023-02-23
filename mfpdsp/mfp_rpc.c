@@ -42,7 +42,7 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
     JsonNode * rval;
     GValue gval = G_VALUE_INIT;
     GArray * ga;
-    float dval;
+    double dval;
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
@@ -52,10 +52,10 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
         case PARAMTYPE_BOOL:
-            dval = *(float *)param_value;
+            dval = *(double *)param_value;
             rval = json_node_new(JSON_NODE_VALUE);
-            g_value_init(&gval, G_TYPE_FLOAT);
-            g_value_set_float(&gval, dval);
+            g_value_init(&gval, G_TYPE_DOUBLE);
+            g_value_set_double(&gval, dval);
             json_node_set_value(rval, &gval);
             break;
 
@@ -73,7 +73,7 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
             jarray = json_array_new();
 
             for (int i=0; i < ga->len; i++) {
-                dval = g_array_index(ga, float, i);
+                dval = g_array_index(ga, double, i);
                 json_array_add_double_element(jarray, dval);
             }
             json_node_set_array(rval, jarray);
@@ -85,12 +85,12 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
 }
 
 static gpointer
-extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * param_val)
+extract_param_value_json(mfp_processor * proc, const char * param_name, JsonNode * param_val)
 {
     int vtype = GPOINTER_TO_INT(g_hash_table_lookup(proc->typeinfo->params, param_name));
     JsonArray * jarray;
     void * rval = NULL;
-    float dval;
+    double dval;
     const char * strval;
     int i, endex;
 
@@ -101,9 +101,9 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
         case PARAMTYPE_BOOL:
-            dval = (float)json_node_get_double(param_val);
-            rval = (gpointer)g_malloc0(sizeof(float));
-            *(float *)rval = dval;
+            dval = (double)json_node_get_double(param_val);
+            rval = (gpointer)g_malloc0(sizeof(double));
+            *(double *)rval = dval;
             break;
 
         case PARAMTYPE_STRING:
@@ -114,9 +114,48 @@ extract_param_value(mfp_processor * proc, const char * param_name, JsonNode * pa
         case PARAMTYPE_FLTARRAY:
             jarray = json_node_get_array(param_val);
             endex = json_array_get_length(jarray);
-            rval = (gpointer)g_array_sized_new(TRUE, TRUE, sizeof(float), endex);
+            rval = (gpointer)g_array_sized_new(TRUE, TRUE, sizeof(double), endex);
             for (i=0; i < endex; i++) {
-                dval = (float)json_node_get_double(json_array_get_element(jarray, i));
+                dval = (double)json_node_get_double(json_array_get_element(jarray, i));
+                g_array_append_val((GArray *)rval, dval);
+            }
+            break;
+    }
+    return rval;
+}
+
+static gpointer
+extract_param_value_pb2(mfp_processor * proc, const char * param_name, Carp__PythonValue * param_value)
+{
+    int vtype = GPOINTER_TO_INT(g_hash_table_lookup(proc->typeinfo->params, param_name));
+    void * rval = NULL;
+    double dval;
+    const char * strval;
+    int i, endex;
+
+    switch ((int)vtype) {
+        case PARAMTYPE_UNDEF:
+            printf("extract_param_value: undefined parameter %s\n", param_name);
+            break;
+        case PARAMTYPE_FLT:
+        case PARAMTYPE_INT:
+        case PARAMTYPE_BOOL:
+            dval = param_value->_double;
+            rval = (gpointer)g_malloc0(sizeof(double));
+            *(double *)rval = dval;
+            break;
+
+        case PARAMTYPE_STRING:
+            strval = param_value->_string;
+            rval = (gpointer)g_strdup(strval);
+            break;
+
+        case PARAMTYPE_FLTARRAY:
+            Carp__PythonArray * pbarray = param_value->_array;
+            endex = pbarray->n_items;
+            rval = (gpointer)g_array_sized_new(TRUE, TRUE, sizeof(double), endex);
+            for (i=0; i < endex; i++) {
+                dval = pbarray->items[i]->_double;
                 g_array_append_val((GArray *)rval, dval);
             }
             break;
@@ -177,7 +216,7 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
         rd.src_proc = obj_id;
         rd.param_name = (gpointer)json_node_dup_string(json_array_get_element(args, 0));
         rd.param_type = mfp_proc_param_type(src_proc, rd.param_name);
-        rd.param_value = (gpointer)extract_param_value(src_proc, rd.param_name,
+        rd.param_value = (gpointer)extract_param_value_json(src_proc, rd.param_name,
                                                        json_array_get_element(args, 1));
         mfp_dsp_push_request(rd);
     }
@@ -200,10 +239,21 @@ dispatch_object_methodcall(int obj_id, const char * methodname, JsonArray * args
 
 
 static void
-init_param_helper(JsonObject * obj, const gchar * key, JsonNode * val, gpointer udata)
+init_param_helper_json(JsonObject * obj, const gchar * key, JsonNode * val, gpointer udata)
 {
     mfp_processor * proc = (mfp_processor *)udata;
-    void * c_value = extract_param_value(proc, key, val);
+    void * c_value = extract_param_value_json(proc, key, val);
+
+    if (c_value != NULL) {
+        mfp_proc_setparam(proc, g_strdup(key), c_value);
+    }
+}
+
+static void
+init_param_helper_pb2(const gchar * key, Carp__PythonValue * val, gpointer udata)
+{
+    mfp_processor * proc = (mfp_processor *)udata;
+    void * c_value = extract_param_value_pb2(proc, key, val);
 
     if (c_value != NULL) {
         mfp_proc_setparam(proc, g_strdup(key), c_value);
@@ -211,7 +261,7 @@ init_param_helper(JsonObject * obj, const gchar * key, JsonNode * val, gpointer 
 }
 
 static mfp_processor *
-dispatch_create(JsonArray * args, JsonObject * kwargs)
+dispatch_create_json(JsonArray * args, JsonObject * kwargs)
 {
     int num_inlets, num_outlets;
     int ctxt_id;
@@ -243,9 +293,60 @@ dispatch_create(JsonArray * args, JsonObject * kwargs)
         }
 
         proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, ctxt);
-        json_object_foreach_member(createprms, init_param_helper, (gpointer)proc);
+        json_object_foreach_member(createprms, init_param_helper_json, (gpointer)proc);
         mfp_proc_init(proc, rpc_id, patch_id);
         return proc;
+    }
+}
+
+void
+dispatch_create_pb2(Carp__PythonArray * args, Carp__PythonDict * kwargs, mfp_rpc_args * response)
+{
+    int num_inlets, num_outlets;
+    int ctxt_id;
+    int rpc_id, patch_id;
+    mfp_procinfo * pinfo;
+    mfp_processor * proc;
+    mfp_context * ctxt;
+    Carp__PythonDict * createprms;
+    const char * typename = args->items[1]->_string;
+    pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typename);
+    mfp_log_debug("[create] typename=%s", typename);
+
+    if (pinfo == NULL) {
+        printf("[create] could not find type info for type '%s'\n", typename);
+        return;
+    }
+    else {
+        rpc_id = (int)args->items[0]->_int;
+        num_inlets = (int)args->items[2]->_int;
+        num_outlets = (int)args->items[3]->_int;
+        createprms = args->items[4]->_dict;
+        ctxt_id = (int)args->items[5]->_int;
+        patch_id = (int)args->items[6]->_int;
+
+        ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
+        if (ctxt == NULL) {
+            printf("create: cannot find context %d\n", ctxt_id);
+            return;
+        }
+
+        proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, ctxt);
+
+        for(int prm=0; prm < createprms->n_items; prm++) {
+            init_param_helper_pb2(
+                createprms->items[prm]->key->_string,
+                createprms->items[prm]->value,
+                (gpointer)proc
+            );
+
+        }
+        mfp_proc_init(proc, rpc_id, patch_id);
+
+        mfp_rpc_args_append_bool(response, 1);
+        mfp_rpc_args_append_int(response, proc->rpc_id);
+
+        return;
     }
 }
 
@@ -259,6 +360,8 @@ static char *
 dispatch_methodcall(const char * methodname, JsonObject * params)
 {
     char * rval = NULL;
+
+    mfp_log_debug("[methodcall] dispatching %s", methodname);
 
     if(!strcmp(methodname, "call")) {
         JsonNode * funcname, * funcparams, * funcobj;
@@ -289,7 +392,7 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
             printf("dispatch_methodcall: couldn't parse one of type, args, kwargs\n");
         }
         else {
-            proc = dispatch_create(json_node_get_array(args),
+            proc = dispatch_create_json(json_node_get_array(args),
                                    json_node_get_object(kwargs));
             if (proc != NULL) {
                 snprintf(ret, 31, "[true, %d]", proc->rpc_id);
@@ -310,21 +413,33 @@ dispatch_methodcall(const char * methodname, JsonObject * params)
         mfp_log_info("FIXME: Unhandled message type %s", methodname);
     }
     return rval;
-
 }
 
 int
-mfp_rpc_response(int req_id, const char * result, char * msgbuf, int * msglen)
+mfp_rpc_response(int req_id, const char * service_name, Carp__PythonValue * result, char * msgbuf, int * msglen)
 {
+    char call_buf[MFP_MAX_MSGSIZE] __attribute__ ((aligned(32)));
+
     if(msgbuf == NULL) {
         printf("mfp_rpc_response: NULL buffer, aborting buffer send\n");
         *msglen = 0;
         return -1;
     }
 
-    * msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1,
-                        "{\"jsonrpc\": \"2.0\", \"id\": %d, \"result\": %s}",
-                        req_id, result);
+    Carp__Envelope env = CARP__ENVELOPE__INIT;
+    Carp__CallResponse resp = CARP__CALL_RESPONSE__INIT;
+    resp.call_id = req_id;
+    resp.service_name = (char *)service_name;
+    resp.host_id = rpc_node_id;
+    resp.value = result;
+
+    int call_data_size = carp__call_response__pack(&resp, call_buf);
+    env.content.data = call_buf;
+    env.content.len = call_data_size;
+    env.content_type = "CallResponse";
+    strncpy(msgbuf, "pb2:", 4);
+    *msglen = carp__envelope__pack(&env, msgbuf + 4) + 4;
+
     return req_id;
 }
 
@@ -406,22 +521,49 @@ mfp_rpc_wait(int request_id)
 static int
 mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
 {
-    char * result = NULL;
     void * callback;
     int success;
 
-    mfp_log_debug("[dispatch_pb2] unpack starts");
     Carp__Envelope * envelope = carp__envelope__unpack(NULL, msglen, msgbuf);
 
-    mfp_log_debug("[dispatch_pb2] unpacked envelope");
-    mfp_log_debug("[dispatch_pb2] message type: %s", envelope->content_type);
-    mfp_log_debug("[dispatch_pb2] message size: %d bytes", envelope->content.len);
+    if (!strcmp(envelope->content_type, "CallData")) {
+        Carp__CallData * calldata =
+            carp__call_data__unpack(NULL, envelope->content.len, envelope->content.data);
 
-    if (!strcmp(envelope->content_type, "CallResponse")) {
+        mfp_log_debug(
+            "[pb2] unpacked CallData: callid=%d service=%s host=%s",
+            calldata->call_id,
+            calldata->service_name, calldata->host_id
+        );
+
+        mfp_rpc_argblock response;
+        mfp_rpc_args_init(&response);
+
+        if (!strcmp(calldata->service_name, "DSPObject")) {
+            mfp_log_debug("[pb2] Creating DSPObject");
+
+            dispatch_create_pb2(calldata->args, calldata->kwargs, &(response.arg_array));
+        }
+        if (calldata->call_id > -1) {
+            char * msgbuf = mfp_comm_get_buffer();
+            int msglen = 0;
+            mfp_log_debug("[pb2] Building response");
+            mfp_rpc_response(
+                calldata->call_id,
+                calldata->service_name,
+                &(response.arg_array_value),
+                msgbuf,
+                &msglen
+            );
+            mfp_comm_submit_buffer(msgbuf, msglen);
+            mfp_log_debug("[pb2] sent response");
+        }
+    }
+    else if (!strcmp(envelope->content_type, "CallResponse")) {
         Carp__CallResponse * response =
             carp__call_response__unpack(NULL, envelope->content.len, envelope->content.data);
         mfp_log_debug(
-            "[dispatch_pb2] unpacked CallResponse: callid=%d service=%s host=%s",
+            "[pb2] unpacked CallResponse: callid=%d service=%s host=%s",
             response->call_id,
             response->service_name, response->host_id
         );
@@ -429,7 +571,7 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
         /* it's a response, is there a callback? */
         callback = g_hash_table_lookup(request_callbacks, GINT_TO_POINTER(response->call_id));
         if (callback != NULL) {
-            mfp_log_debug("[dispatch_pb2] Found callback for response");
+            mfp_log_debug("[pb2] Found callback for response");
             void (* cbfunc)(Carp__PythonValue *, void *) = (void (*)(Carp__PythonValue *, void *))callback;
             void * cbdata = g_hash_table_lookup(request_data, GINT_TO_POINTER(response->call_id));
 
@@ -439,7 +581,7 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
             cbfunc(response->value, cbdata);
         }
         else {
-            mfp_log_debug("[dispatch_pb2] No callback for response");
+            mfp_log_debug("[pb2] No callback for response");
         }
 
         pthread_mutex_lock(&request_lock);
@@ -448,10 +590,9 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
         pthread_mutex_unlock(&request_lock);
         carp__call_response__free_unpacked(response, NULL);
     }
-
-
     carp__envelope__free_unpacked(envelope, NULL);
-    mfp_log_debug("[dispatch_pb2] exit");
+    mfp_log_debug("[pb2] done with dispatch");
+
 }
 
 
@@ -527,6 +668,7 @@ mfp_rpc_dispatch_json(const char * msgbuf, int msglen)
         if (need_response && (reqid != -1)) {
             char * msgbuf = mfp_comm_get_buffer();
             int msglen = 0;
+#if 0
             if (result != NULL) {
                 mfp_rpc_response(reqid, result, msgbuf, &msglen);
                 g_free(result);
@@ -535,6 +677,7 @@ mfp_rpc_dispatch_json(const char * msgbuf, int msglen)
                 mfp_rpc_response(reqid, "[ true, true]", msgbuf, &msglen);
             }
             mfp_comm_submit_buffer(msgbuf, msglen);
+#endif
         }
     }
 
@@ -542,6 +685,7 @@ mfp_rpc_dispatch_json(const char * msgbuf, int msglen)
     return 0;
 
 }
+
 int
 mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
 {
@@ -642,6 +786,11 @@ mfp_rpc_args_init(mfp_rpc_argblock * argblock) {
     Carp__PythonValue valinit = CARP__PYTHON_VALUE__INIT;
 
     memcpy(&(argblock->arg_array), &arginit, sizeof(Carp__PythonArray));
+    memcpy(&(argblock->arg_array_value), &valinit, sizeof(Carp__PythonValue));
+
+    argblock->arg_array_value._array = &(argblock->arg_array);
+    argblock->arg_array_value.value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__ARRAY;
+
     argblock->arg_array.n_items = 0;
     argblock->arg_array.items = &(argblock->arg_value_pointers[0]);
 
@@ -659,6 +808,16 @@ mfp_rpc_args_append_string(mfp_rpc_args * arglist, const char * value) {
 
     arglist->items[prev_count]->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__STRING;
     arglist->items[prev_count]->_string = (char *)value;
+
+    arglist->n_items += 1;
+}
+
+void
+mfp_rpc_args_append_bool(mfp_rpc_args * arglist, int value) {
+    int prev_count = arglist->n_items;
+
+    arglist->items[prev_count]->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__BOOL;
+    arglist->items[prev_count]->_bool = value;
 
     arglist->n_items += 1;
 }

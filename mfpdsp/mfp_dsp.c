@@ -12,7 +12,7 @@
 #include <time.h>
 
 int mfp_initialized = 0;
-int mfp_max_blocksize = 32768; 
+int mfp_max_blocksize = 32768;
 
 float mfp_in_latency = 0.0;
 float mfp_out_latency = 0.0;
@@ -23,16 +23,16 @@ void
 mfp_dsp_init(void) {
     int i;
     mfp_procinfo * pi;
-    mfp_procinfo * (* initfuncs[])(void) = { 
-        init_builtin_osc, init_builtin_in, init_builtin_out, 
-        init_builtin_sig, init_builtin_snap, init_builtin_ampl, 
-        init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div, 
+    mfp_procinfo * (* initfuncs[])(void) = {
+        init_builtin_osc, init_builtin_in, init_builtin_out,
+        init_builtin_sig, init_builtin_snap, init_builtin_ampl,
+        init_builtin_add, init_builtin_sub, init_builtin_mul, init_builtin_div,
         init_builtin_lt, init_builtin_gt,
         init_builtin_line, init_builtin_noise, init_builtin_buffer,
         init_builtin_biquad, init_builtin_phasor,
         init_builtin_ladspa, init_builtin_delay, init_builtin_delblk, init_builtin_noop,
         init_builtin_inlet, init_builtin_outlet,
-        init_builtin_errtest, init_builtin_slew, init_builtin_pulse, 
+        init_builtin_errtest, init_builtin_slew, init_builtin_pulse,
         init_builtin_pulsesel, init_builtin_stepseq,
         init_builtin_vc_quantize12, init_builtin_vc_freq,
         init_builtin_hold
@@ -44,7 +44,7 @@ mfp_dsp_init(void) {
     mfp_proc_registry = g_hash_table_new(g_str_hash, g_str_equal);
     mfp_proc_objects = g_hash_table_new(g_direct_hash, g_direct_equal);
     mfp_contexts = g_hash_table_new(g_direct_hash, g_direct_equal);
-    mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal); 
+    mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal);
 
     incoming_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_in_data *));
 
@@ -61,23 +61,23 @@ mfp_dsp_init(void) {
 }
 
 
-mfp_sample * 
+mfp_sample *
 mfp_get_input_buffer(mfp_context * ctxt, int chan) {
     if (ctxt->ctype == CTYPE_JACK) {
-        return jack_port_get_buffer(g_array_index(ctxt->info.jack->input_ports, 
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack->input_ports,
                                     jack_port_t *, chan), ctxt->blocksize);
     }
     else {
         int port = g_array_index(ctxt->info.lv2->input_ports, int, chan);
-        mfp_sample * ptr = mfp_lv2_get_port_data(ctxt->info.lv2, port); 
+        mfp_sample * ptr = mfp_lv2_get_port_data(ctxt->info.lv2, port);
         return ptr;
     }
 }
 
-mfp_sample * 
+mfp_sample *
 mfp_get_output_buffer(mfp_context * ctxt, int chan) {
     if (ctxt->ctype == CTYPE_JACK) {
-        return jack_port_get_buffer(g_array_index(ctxt->info.jack->output_ports, 
+        return jack_port_get_buffer(g_array_index(ctxt->info.jack->output_ports,
                                     jack_port_t *, chan), ctxt->blocksize);
     }
     else {
@@ -91,7 +91,7 @@ mfp_get_output_buffer(mfp_context * ctxt, int chan) {
     }
 }
 
-int 
+int
 mfp_num_output_buffers(mfp_context * ctxt) {
     GArray * ports = NULL;
 
@@ -112,7 +112,7 @@ mfp_num_output_buffers(mfp_context * ctxt) {
     }
 }
 
-int 
+int
 mfp_num_input_buffers(mfp_context * ctxt) {
     if (ctxt->ctype == CTYPE_JACK) {
         return ctxt->info.jack->input_ports->len;
@@ -123,14 +123,14 @@ mfp_num_input_buffers(mfp_context * ctxt) {
 }
 
 
-static int 
-depth_cmp_func(const void * a, const void *b) 
+static int
+depth_cmp_func(const void * a, const void *b)
 {
-    if ((*(mfp_processor **) a)->depth < (*(mfp_processor **)b)->depth) 
+    if ((*(mfp_processor **) a)->depth < (*(mfp_processor **)b)->depth)
         return -1;
     else if ((*(mfp_processor **) a)->depth == (*(mfp_processor **)b)->depth)
         return 0;
-    else 
+    else
         return 1;
 }
 
@@ -193,8 +193,8 @@ ready_to_schedule(mfp_processor * p)
     }
 }
 
-int 
-mfp_dsp_schedule(mfp_context * ctxt) 
+int
+mfp_dsp_schedule(mfp_context * ctxt)
 {
     int pass = 0;
     int lastpass_unsched = -1;
@@ -212,7 +212,7 @@ mfp_dsp_schedule(mfp_context * ctxt)
         }
     }
 
-    /* calculate scheduling order */ 
+    /* calculate scheduling order */
     while (another_pass == 1) {
         for (p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
             if ((*p)->context == ctxt) {
@@ -227,7 +227,7 @@ mfp_dsp_schedule(mfp_context * ctxt)
                 }
             }
         }
-        if ((thispass_unsched > 0) && 
+        if ((thispass_unsched > 0) &&
             (lastpass_unsched < 0 || (thispass_unsched < lastpass_unsched))) {
             another_pass = 1;
         }
@@ -238,14 +238,14 @@ mfp_dsp_schedule(mfp_context * ctxt)
         thispass_unsched = 0;
         pass ++;
     }
-    
+
     /* conclusion: either success, or a DSP loop */
     if (lastpass_unsched > 0) {
-        /* DSP loop: some processors not scheduled */ 
+        /* DSP loop: some processors not scheduled */
         return 0;
     }
     else {
-        /* sort processors in place by depth */ 
+        /* sort processors in place by depth */
         g_array_sort(mfp_proc_list, depth_cmp_func);
         return 1;
     }
@@ -253,13 +253,13 @@ mfp_dsp_schedule(mfp_context * ctxt)
 
 
 /*
- * mfp_dsp_run is the bridge between JACK/LV2 processing and the MFP DSP 
- * network.  It is called once per JACK/LV2 block from the process() 
+ * mfp_dsp_run is the bridge between JACK/LV2 processing and the MFP DSP
+ * network.  It is called once per JACK/LV2 block from the process()
  * callback.
  */
 
 void
-mfp_dsp_run(mfp_context * ctxt) 
+mfp_dsp_run(mfp_context * ctxt)
 {
     mfp_processor ** p;
     mfp_sample * buf;
@@ -270,14 +270,14 @@ mfp_dsp_run(mfp_context * ctxt)
     /* FIXME only handle requests for this context */
     mfp_dsp_handle_requests();
 
-    /* zero output buffers ... out~ will accumulate into them */ 
+    /* zero output buffers ... out~ will accumulate into them */
     for(chan=0; chan < chancount; chan++) {
         buf = mfp_get_output_buffer(ctxt, chan);
-        if (buf != NULL) { 
+        if (buf != NULL) {
             memset(buf, 0, ctxt->blocksize * sizeof(mfp_sample));
         }
     }
-    
+
     if (ctxt->needs_reschedule == 1) {
         if (!mfp_dsp_schedule(ctxt)) {
             mfp_log_error("Some processors could not be scheduled, check for cycles!");
@@ -295,7 +295,7 @@ mfp_dsp_run(mfp_context * ctxt)
 }
 
 void
-mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples) 
+mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
 {
     mfp_processor ** p;
     int count;
@@ -308,14 +308,14 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
 
     if (nsamples != ctxt->blocksize) {
         for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
-            /* i/o buffers are pre-allocated to mfp_max_blocksize */ 
+            /* i/o buffers are pre-allocated to mfp_max_blocksize */
             for (count = 0; count < (*p)->inlet_conn->len; count ++) {
                 mfp_block_resize((*p)->inlet_buf[count], nsamples);
             }
 
             for (count = 0; count < (*p)->outlet_conn->len; count ++) {
                 mfp_block_resize((*p)->outlet_buf[count], nsamples);
-            }    
+            }
 
             (*p)->needs_config = 1;
         }
@@ -326,10 +326,10 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
         }
         else if (ctxt->ctype == CTYPE_LV2) {
             for (count = 0; count < ctxt->info.lv2->output_buffers->len; count ++) {
-                mfp_block_resize(g_array_index(ctxt->info.lv2->output_buffers, mfp_block *, 
-                                               count), 
+                mfp_block_resize(g_array_index(ctxt->info.lv2->output_buffers, mfp_block *,
+                                               count),
                                  nsamples);
-            }    
+            }
         }
     }
 }

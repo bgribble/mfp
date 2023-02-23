@@ -22,7 +22,6 @@ class Send (Processor):
     task_nibbler = None
 
     def __init__(self, init_type, init_args, patch, scope, name):
-
         if not Send.task_nibbler:
             Send.task_nibbler = TaskNibbler()
 
@@ -179,7 +178,6 @@ class SendSignal (Send):
         
         self.dsp_inlets = [0]
         self.dsp_outlets = [0] 
-        self.dsp_init("noop~")
 
         # needed so that name changes happen timely 
         self.hot_inlets = [0, 1]
@@ -192,6 +190,8 @@ class SendSignal (Send):
 
         self.gui_params["label_text"] = self.dest_name
 
+    async def setup(self):
+        await self.dsp_init("noop~")
 
 class MessageBus (Processor): 
     display_type = "hidden"
@@ -228,7 +228,9 @@ class SignalBus (Processor):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
-        self.dsp_init("noop~")
+
+    async def setup(self):
+        await self.dsp_init("noop~")
 
     def trigger(self):
         self.outlets[0] = self.inlets[0]
@@ -351,8 +353,10 @@ class RecvSignal (Recv):
         self.src_obj = None 
         if len(initargs) > 1:
             self.src_outlet = initargs[1]
+            self.init_connect = True
         else: 
             self.src_outlet = 0
+            self.init_connect = False
 
         if len(initargs): 
             self.src_name = initargs[0]
@@ -366,9 +370,10 @@ class RecvSignal (Recv):
 
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
-        self.dsp_init("noop~")
 
-        if len(initargs):
+    async def setup(self):
+        await self.dsp_init("noop~")
+        if self.init_connect:
             self._connect(self.src_name, self.src_outlet)
 
     def _connect(self, src_name, src_outlet, wait=True):
@@ -381,6 +386,8 @@ class RecvSignal (Recv):
             self._wait_connect()
 
         return False 
+
+
 def register():
     MFPApp().register("send", Send)
     MFPApp().register("recv", Recv)

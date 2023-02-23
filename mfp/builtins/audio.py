@@ -24,7 +24,9 @@ class AudioOut(Processor):
 
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0]
-        self.dsp_init("out~", channel=self.channel)
+
+    async def setup(self):
+        await self.dsp_init("out~", channel=self.channel)
 
     def trigger(self):
         if self.inlets[1] is not Uninit:
@@ -37,7 +39,6 @@ class AudioIn(Processor):
     doc_tooltip_inlet = [ "JACK input port number (default: initarg 0)" ]
     doc_tooltip_outlet = [ "Signal output" ]
 
-
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
@@ -48,7 +49,9 @@ class AudioIn(Processor):
             self.channel = 0
 
         self.dsp_outlets = [0]
-        self.dsp_init("in~", channel=self.channel)
+
+    async def setup(self):
+        await self.dsp_init("in~", channel=self.channel)
 
     def trigger(self):
         self.channel = int(self.inlets[0])

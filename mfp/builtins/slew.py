@@ -30,7 +30,9 @@ class Slew(Processor):
         self.hot_inlets = [0, 1, 2]
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
-        self.dsp_init("slew~")
+
+    async def setup(self):
+        await self.dsp_init("slew~")
         self.dsp_obj.setparam("rise", rise)
         self.dsp_obj.setparam("fall", fall)
 

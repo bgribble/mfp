@@ -159,7 +159,7 @@ class MFPApp (Singleton):
             log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo),
                                                                len(self.pluginfo.libinfo)))
 
-    def exec_batch(self):
+    async def exec_batch(self):
         # configure logging
         log.log_raw = True
         log.log_debug = False
@@ -168,17 +168,17 @@ class MFPApp (Singleton):
         self.open_file(None)
         p = self.patches.get('default')
 
-        reader = self.create("file", self.batch_input_file or "sys.stdin",
-                             p, p.default_scope, "reader")
-        eoftest = self.create("case", "''", p, p.default_scope, "eoftest")
-        trig = self.create("trigger", "2", p, p.default_scope, "trig")
-        stripper = self.create("string.strip", None, p, p.default_scope, "strip")
+        reader = await self.create("file", self.batch_input_file or "sys.stdin",
+                                   p, p.default_scope, "reader")
+        eoftest = await self.create("case", "''", p, p.default_scope, "eoftest")
+        trig = await self.create("trigger", "2", p, p.default_scope, "trig")
+        stripper = await self.create("string.strip", None, p, p.default_scope, "strip")
         if self.batch_eval:
-            evaluator = self.create("eval", None, p, p.default_scope, "evaluator")
-        batch = self.create(self.batch_obj, self.batch_args,
+            evaluator = await self.create("eval", None, p, p.default_scope, "evaluator")
+        batch = await self.create(self.batch_obj, self.batch_args,
                             p, p.default_scope, "batch")
-        printer = self.create("print", None, p, p.default_scope, "printer")
-        msg = self.create("message", "@readline", p, p.default_scope, "nextline")
+        printer = await self.create("print", None, p, p.default_scope, "printer")
+        msg = await self.create("message", "@readline", p, p.default_scope, "nextline")
 
         reader.connect(0, eoftest, 0)
         eoftest.connect(1, trig, 0)
@@ -349,7 +349,7 @@ class MFPApp (Singleton):
         fullpath = utils.find_file_in_path(libname, self.extpath)
         log.warning("mfp_app.load_extension: not implemented completely")
 
-    def create(self, init_type, init_args, patch, scope, name):
+    async def create(self, init_type, init_args, patch, scope, name):
         # first try: is a factory registered?
         ctor = self.registry.get(init_type)
 
@@ -409,6 +409,7 @@ class MFPApp (Singleton):
         try:
             obj = ctor(init_type, init_args, patch, scope, name)
             if obj and obj.obj_id:
+                await obj.setup()
                 obj.mark_ready()
             return obj
         except Exception as e:

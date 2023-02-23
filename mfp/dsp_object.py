@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 '''
-dsp_slave.py
-Python main loop for DSP subprocess
+dsp_object.py
+Classes to represent DSP objects
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
@@ -72,3 +72,5 @@ class DSPObject:
 
     def disconnect(self, outlet, target, inlet):
         pass
+
+

@@ -18,12 +18,14 @@ class Line(Processor):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        segments = []
+        self.init_segments = []
         if len(initargs):
-            segments = self.convert_segments(initargs[0])
+            self.init_segments = self.convert_segments(initargs[0])
 
         self.dsp_outlets = [0]
-        self.dsp_init("line~", segments=segments)
+
+    async def setup(self):
+        await self.dsp_init("line~", segments=self.init_segments)
 
     def trigger(self):
         if self.inlets[0] is not None:

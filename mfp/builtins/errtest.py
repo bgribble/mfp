@@ -25,7 +25,9 @@ class ErrtestSig (Processor):
 
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
-        self.dsp_init(self.dsp_type)
+
+    async def setup(self):
+        await self.dsp_init(self.dsp_type)
 
 def register():
     MFPApp().register("errtest~", ErrtestSig)

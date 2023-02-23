@@ -7,7 +7,8 @@ Copyright (c) 2020 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
-from ..bang import Uninit 
+from ..bang import Uninit
+
 
 class VCFreq(Processor):
     doc_tooltip_obj = "Convert frequency (Hz) to V/oct signal"
@@ -24,19 +25,22 @@ class VCFreq(Processor):
         if len(initargs):
             self.base_freq = float(initargs[0])/self.A4_C0_RATIO
         else:
-            self.base_freq = self.DEFAULT_C0 
+            self.base_freq = self.DEFAULT_C0
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
-        self.dsp_init("vcfreq~", base_freq=self.base_freq)
+
+    async def setup(self):
+        await self.dsp_init("vcfreq~", base_freq=self.base_freq)
 
     def trigger(self):
-        if self.inlets[0] is not Uninit: 
+        if self.inlets[0] is not Uninit:
             val = float(self.inlets[0])
             self.dsp_obj.setparam("_sig_0", val)
-        if self.inlets[1] is not Uninit: 
-            val = float(self.inlets[1])/self/A4_C0_RATIO
+        if self.inlets[1] is not Uninit:
+            val = float(self.inlets[1])/self.A4_C0_RATIO
             self.dsp_obj.setparam("base_freq", val)
+
 
 def register():
     MFPApp().register("vcfreq~", VCFreq)

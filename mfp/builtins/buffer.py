@@ -7,7 +7,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 import numpy
 import os
-from mfp import Bang, Uninit
+from mfp import Bang
 from mfp import log
 
 from mfp.processor import Processor
@@ -25,26 +25,26 @@ class Buffer(Processor):
     RESP_RATE = 4
     RESP_OFFSET = 5
     RESP_BUFRDY = 6
-    RESP_LOOPSTART = 7 
+    RESP_LOOPSTART = 7
 
     FLOAT_SIZE = 4
 
     doc_tooltip_obj = "Capture a signal to a shared buffer"
     doc_tooltip_inlet = ["Signal input/control messages"]
-    doc_tooltip_outlet = ["Signal output", "Array output (for @slice)", 
+    doc_tooltip_outlet = ["Signal output", "Array output (for @slice)",
                           "BufferInfo and status output"]
 
     def __init__(self, init_type, init_args, patch, scope, name):
         initargs, kwargs = patch.parse_args(init_args)
 
         if len(initargs):
-            size = initargs[0]*MFPApp().samplerate/1000.0
+            self.init_size = initargs[0]*MFPApp().samplerate/1000.0
         if len(initargs) > 1:
-            channels = initargs[1]
+            self.init_channels = initargs[1]
         else:
-            channels = 1
+            self.init_channels = 1
 
-        Processor.__init__(self, channels, channels+2, init_type, init_args, 
+        Processor.__init__(self, self.init_channels, self.init_channels+2, init_type, init_args,
                            patch, scope, name)
 
         self.buf_id = None
@@ -55,9 +55,11 @@ class Buffer(Processor):
 
         self.shm_obj = None
 
-        self.dsp_inlets = list(range(channels))
-        self.dsp_outlets = list(range(channels))
-        self.dsp_init("buffer~", size=size, channels=channels)
+        self.dsp_inlets = list(range(self.init_channels))
+        self.dsp_outlets = list(range(self.init_channels))
+
+    async def setup(self):
+        await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
 
     def offset(self, channel, start):
         return (channel * self.size + start) * self.FLOAT_SIZE
@@ -116,7 +118,7 @@ class Buffer(Processor):
             slc = os.read(self.shm_obj.fd, (end - start) * self.FLOAT_SIZE)
             self.outlets[1] = list(numpy.fromstring(slc, dtype=numpy.float32))
         except Exception as e:
-            import traceback 
+            import traceback
             tb = traceback.format_exc()
             log.debug("buffer~: slice error '%s" % e)
             self.error(tb)

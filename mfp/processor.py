@@ -23,7 +23,7 @@ class MultiOutput (object):
     def __init__(self):
         self.values = []
 
-class Processor (object):
+class Processor:
     PORT_IN = 0
     PORT_OUT = 1
 
@@ -107,6 +107,10 @@ class Processor (object):
         if name is None:
             name = self.display_type
         self.assign(patch, scope, name)
+
+    async def setup(self):
+        # called after constructor
+        pass
 
     def info(self):
         log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
@@ -410,12 +414,19 @@ class Processor (object):
                                                               data=mode)
             self.set_tag("midi", "learning")
 
-    def dsp_init(self, proc_name, **params):
+    async def dsp_init(self, proc_name, **params):
         from .mfp_app import MFPApp
         if self.patch.context:
-            self.dsp_obj = DSPObject(self.obj_id, proc_name, len(self.dsp_inlets),
-                                     len(self.dsp_outlets), params,
-                                     self.patch.context, self.patch.obj_id)
+            DSPObjectFactory = await MFPApp().rpc_host.require(DSPObject)
+            log.debug(f"dsp_init: {self.obj_id} {proc_name} {len(self.dsp_inlets)} {len(self.dsp_outlets)} {params} {self.patch.context} {self.patch.obj_id}")
+            self.dsp_obj = await DSPObjectFactory(
+                self.obj_id,
+                proc_name,
+                len(self.dsp_inlets),
+                len(self.dsp_outlets), params,
+                self.patch.context,
+                self.patch.obj_id
+            )
         else:
             log.warning(f"[dsp_init] No DSP context in {self.name}, {proc_name}")
         self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
@@ -825,13 +836,13 @@ class Processor (object):
             if a in self.properties:
                 del self.properties[a]
 
-    def clone(self, patch, scope, name):
+    async def clone(self, patch, scope, name):
         from .mfp_app import MFPApp
         from .patch import Patch
         prms = self.save()
 
-        newobj = MFPApp().create(prms.get("type"), prms.get("initargs"),
-                                 patch, scope, name)
+        newobj = await MFPApp().create(prms.get("type"), prms.get("initargs"),
+                                       patch, scope, name)
         newobj.load(prms)
         return newobj
 

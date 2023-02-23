@@ -39,12 +39,12 @@ class Pulse(Processor):
         freq = 0
         ampl = 1.0
         pw = 0.5
-        loval = -1.0
-        hival = 1.0
-        mode = 0
+        self.init_loval = -1.0
+        self.init_hival = 1.0
+        self.init_mode = 0
 
         if init_type == 'gate~':
-            loval = 0.0
+            self.init_loval = 0.0
 
         if len(initargs) > 0:
             freq = initargs[0]
@@ -54,20 +54,22 @@ class Pulse(Processor):
             pw = initargs[2]
         if len(initargs) > 3:
             if initargs[3] == 'ms':
-                mode = 1
+                self.init_mode = 1
             elif initargs[3] == 'frac':
-                mode = 0
+                self.init_mode = 0
 
         self.dsp_inlets = [1, 2, 3]
         self.dsp_outlets = [0]
-        self.dsp_init(
+
+    async def setup(self):
+        await self.dsp_init(
             "pulse~",
             _sig_1=float(freq),
             _sig_2=float(ampl),
             _sig_3=float(pw),
-            hival=hival,
-            loval=loval,
-            pw_mode=mode
+            hival=self.init_hival,
+            loval=self.init_loval,
+            pw_mode=self.init_mode
         )
 
     def trigger(self):

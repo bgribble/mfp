@@ -21,7 +21,9 @@ class Ampl(Processor):
 
         self.dsp_inlets = [0]
         self.dsp_outlets = [0, 1]
-        self.dsp_init("ampl~")
+
+    async def setup(self):
+        await self.dsp_init("ampl~")
 
     def trigger(self):
         if isinstance(self.inlets[0], dict):

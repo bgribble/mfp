@@ -27,10 +27,12 @@ class Snap(Processor):
             self.retrigger = 0
 
         self.dsp_inlets = [0]
-        self.dsp_init("snap~")
+
+    async def setup(self):
+        await self.dsp_init("snap~")
         self.dsp_setparam("retrigger", self.retrigger)
 
-        if (self.retrigger): 
+        if self.retrigger: 
             self.dsp_setparam("trigger", 1);
 
     def trigger(self):

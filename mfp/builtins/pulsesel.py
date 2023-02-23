@@ -37,7 +37,9 @@ class PulseSel(Processor):
         self.dsp_inlets = [0]
         self.hot_inlets = [0, 1, 2, 3]
         self.dsp_outlets = [0]
-        self.dsp_init(
+
+    async def setup(self):
+        await self.dsp_init(
             "pulsesel~",
             bitmask=bitmask, period=period, threshold=thresh
         )

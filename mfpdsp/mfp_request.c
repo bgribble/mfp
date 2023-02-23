@@ -22,24 +22,24 @@ int          outgoing_queue_read = 0;
 pthread_mutex_t outgoing_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  outgoing_cond = PTHREAD_COND_INITIALIZER;
 
-void 
-mfp_dsp_push_request(mfp_in_data rd) 
+void
+mfp_dsp_push_request(mfp_in_data rd)
 {
-    int count; 
-    int cleanup = 0; 
+    int count;
+    int cleanup = 0;
     gpointer newreq = g_malloc0(sizeof(mfp_in_data));
     struct timespec shorttime;
 
     shorttime.tv_sec = 0; shorttime.tv_nsec = 1000;
-    memcpy(newreq, &rd, sizeof(mfp_in_data)); 
+    memcpy(newreq, &rd, sizeof(mfp_in_data));
 
-    /* note: this mutex just keeps a single writer thread with access 
-     * to the requests data, it doesn't block the JACK callback thread */ 
+    /* note: this mutex just keeps a single writer thread with access
+     * to the requests data, it doesn't block the JACK callback thread */
     pthread_mutex_lock(&incoming_lock);
     if (incoming_queue_read == incoming_queue_write) {
         cleanup = 1;
     }
-    
+
     while((incoming_queue_read == 0 && incoming_queue_write == REQ_LASTIND)
         || (incoming_queue_write + 1 == incoming_queue_read)) {
         nanosleep(&shorttime, NULL);
@@ -54,14 +54,14 @@ mfp_dsp_push_request(mfp_in_data rd)
     }
 
     if (cleanup == 1) {
-        /* now that JACK has finished with the new data, we can clean up 
-         * the old data at our leisure.  mfp_dsp_handle_requests will 
-         * put any old values that need to be freed into cmd.param_value */ 
+        /* now that JACK has finished with the new data, we can clean up
+         * the old data at our leisure.  mfp_dsp_handle_requests will
+         * put any old values that need to be freed into cmd.param_value */
         for(count=0; count < incoming_cleanup->len; count++) {
             mfp_in_data * cmd = g_array_index(incoming_cleanup, gpointer, count);
             if (cmd->reqtype == REQTYPE_SETPARAM) {
                 if (cmd->param_value != NULL) {
-                    /* FIXME g_free broken for fltarrays */ 
+                    /* FIXME g_free broken for fltarrays */
                     switch(cmd->param_type) {
                         case PARAMTYPE_INT:
                         case PARAMTYPE_FLT:
@@ -88,7 +88,7 @@ mfp_dsp_push_request(mfp_in_data rd)
         }
     }
 
-    /* we will clean this one up at some time in the future */ 
+    /* we will clean this one up at some time in the future */
     g_array_append_val(incoming_cleanup, newreq);
 
     pthread_mutex_unlock(&incoming_lock);
@@ -106,14 +106,14 @@ mfp_dsp_handle_requests(void)
         case REQTYPE_CONNECT:
             src_proc = mfp_proc_lookup(cmd->src_proc);
             dest_proc = mfp_proc_lookup(cmd->dest_proc);
-            if (src_proc != NULL && dest_proc != NULL) 
+            if (src_proc != NULL && dest_proc != NULL)
                 mfp_proc_connect(src_proc, cmd->src_port, dest_proc, cmd->dest_port);
             break;
 
         case REQTYPE_DISCONNECT:
             src_proc = mfp_proc_lookup(cmd->src_proc);
             dest_proc = mfp_proc_lookup(cmd->dest_proc);
-            if (src_proc != NULL && dest_proc != NULL) 
+            if (src_proc != NULL && dest_proc != NULL)
                 mfp_proc_disconnect(src_proc, cmd->src_port, dest_proc, cmd->dest_port);
             break;
 
@@ -125,7 +125,7 @@ mfp_dsp_handle_requests(void)
 
         case REQTYPE_SETPARAM:
             src_proc = mfp_proc_lookup(cmd->src_proc);
-            if (src_proc != NULL) { 
+            if (src_proc != NULL) {
                 mfp_proc_setparam_req(src_proc, cmd);
                 src_proc->needs_config = 1;
             }
@@ -135,7 +135,7 @@ mfp_dsp_handle_requests(void)
             printf("FIXME: getparam unimplemented\n");
             break;
 
-        case REQTYPE_RESET: 
+        case REQTYPE_RESET:
             printf("FIXME: reset unimplemented\n");
             break;
 
@@ -187,8 +187,10 @@ mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response)
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
     char tbuf[MFP_MAX_MSGSIZE];
+    mfp_log_debug("[send_response] sending %f", response);
     snprintf(tbuf, MFP_MAX_MSGSIZE, "%f", response);
     mfp_api_dsp_response(proc->rpc_id, tbuf, msg_type, msgbuf, &msglen);
+    mfp_log_debug("[send_response] %s bytes - %s", msgbuf, msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
 }
 

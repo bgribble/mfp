@@ -19,13 +19,15 @@ class StepSeq(Processor):
         Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        steps = []
+        self.init_steps = []
         if len(initargs):
-            steps = self.convert_steps(initargs[0])
+            self.init_steps = self.convert_steps(initargs[0])
 
         self.dsp_inlets = [1]
         self.dsp_outlets = [0, 1]
-        self.dsp_init("stepseq~", steps=steps, trig_ms=10, threshold=0.5)
+
+    async def setup(self):
+        await self.dsp_init("stepseq~", steps=self.init_steps, trig_ms=10, threshold=0.5)
 
     def trigger(self):
         if self.inlets[0] is not None:

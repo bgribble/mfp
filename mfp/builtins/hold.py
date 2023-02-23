@@ -7,7 +7,7 @@ Copyright (c) 2020 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
-from ..bang import Uninit 
+from ..bang import Uninit
 
 class TrackHold(Processor):
     doc_tooltip_obj = "Track and hold"
@@ -21,20 +21,23 @@ class TrackHold(Processor):
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
-        if "response" in kwargs:
-            self.dsp_init("hold~", track=True, response=True)
+        self.init_response = "response" in kwargs
+
+    async def setup(self):
+        if self.init_response:
+            await self.dsp_init("hold~", track=True, response=True)
         else:
-            self.dsp_init("hold~", track=True)
+            await self.dsp_init("hold~", track=True)
 
     def trigger(self):
-        if self.inlets[0] is not Uninit: 
+        if self.inlets[0] is not Uninit:
             val = float(self.inlets[0])
             self.dsp_obj.setparam("_sig_0", val)
-        if self.inlets[1] is not Uninit: 
+        if self.inlets[1] is not Uninit:
             val = float(self.inlets[1])
             self.inlets[1] = Uninit
             self.dsp_obj.setparam("_sig_1", val)
-        
+
     def dsp_response(self, resp_type, resp_value):
         self.outlets[1] = resp_value
 
@@ -50,21 +53,23 @@ class SampleHold(Processor):
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
+        self.init_response = "response" in kwargs
 
-        if "response" in kwargs:
-            self.dsp_init("hold~", response=True)
+    async def setup(self):
+        if self.init_response:
+            await self.dsp_init("hold~", response=True)
         else:
-            self.dsp_init("hold~")
+            await self.dsp_init("hold~")
 
     def trigger(self):
-        if self.inlets[0] is not Uninit: 
+        if self.inlets[0] is not Uninit:
             val = float(self.inlets[0])
             self.dsp_obj.setparam("_sig_0", val)
-        if self.inlets[1] is not Uninit: 
+        if self.inlets[1] is not Uninit:
             val = float(self.inlets[1])
             self.inlets[1] = Uninit
             self.dsp_obj.setparam("_sig_1", val)
-        
+
     def dsp_response(self, resp_type, resp_value):
         self.outlets[1] = resp_value
 

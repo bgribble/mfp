@@ -19,12 +19,14 @@ class Sig(Processor):
 
         initargs, kwargs = self.parse_args(init_args)
         if len(initargs):
-            value = initargs[0]
+            self.init_value = initargs[0]
         else:
-            value = 0
+            self.init_value = 0
 
         self.dsp_outlets = [0]
-        self.dsp_init("sig~")
+
+    async def setup(self):
+        await self.dsp_init("sig~")
         self.dsp_obj.setparam("value", value)
 
     def trigger(self):

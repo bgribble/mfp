@@ -141,6 +141,7 @@ typedef Carp__PythonArray mfp_rpc_args;
 #define MFP_RPC_ARGBLOCK_SIZE 32
 
 typedef struct mfp_rpc_argblock_struct {
+    Carp__PythonValue arg_array_value;
     Carp__PythonArray arg_array;
     Carp__PythonValue * arg_value_pointers[MFP_RPC_ARGBLOCK_SIZE];
     Carp__PythonValue arg_values[MFP_RPC_ARGBLOCK_SIZE];
@@ -300,21 +301,28 @@ extern void mfp_dsp_handle_requests(void);
 
 /* outgoing data processing */
 extern int mfp_rpc_request(
-        const char * service_name,
-        int instance_id,
-        const mfp_rpc_args * params,
-        void (* callback)(Carp__PythonValue *, void *),
-        void * callback_data,
-        char * msgbuf,
-        int * msglen
+    const char * service_name,
+    int instance_id,
+    const mfp_rpc_args * params,
+    void (* callback)(Carp__PythonValue *, void *),
+    void * callback_data,
+    char * msgbuf,
+    int * msglen
 );
-extern int mfp_rpc_response(int request_id, const char * result, char *, int *);
+extern int mfp_rpc_response(
+    int request_id,
+    const char * service_name,
+    Carp__PythonValue * result,
+    char * msgbuf,
+    int * msglen
+);
 extern void mfp_rpc_wait(int request_id);
 
 /* mfp_rpc.c */
 extern int mfp_rpc_dispatch_request(const char *, int);
 
 extern mfp_rpc_args * mfp_rpc_args_init(mfp_rpc_argblock * block);
+extern void mfp_rpc_args_append_bool(mfp_rpc_args *, int);
 extern void mfp_rpc_args_append_string(mfp_rpc_args *, const char *);
 extern void mfp_rpc_args_append_int(mfp_rpc_args *, int);
 extern void mfp_rpc_args_append_double(mfp_rpc_args *, double);

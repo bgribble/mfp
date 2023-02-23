@@ -7,13 +7,13 @@ Copyright (c) 2020 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
-from ..bang import Uninit 
-from mfp import log 
+from ..bang import Uninit
+
 
 class VCQ12(Processor):
     doc_tooltip_obj = "Quantize to 12TET semitones"
-    doc_tooltip_inlet = [ 
-        "Signal input", "Map of quantized tones" 
+    doc_tooltip_inlet = [
+        "Signal input", "Map of quantized tones"
     ]
 
     maps = {
@@ -47,8 +47,10 @@ class VCQ12(Processor):
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
-        mapvals = [val for pair in self.map for val in pair]
-        self.dsp_init("vcq12~", map=mapvals)
+        self.init_mapvals = [val for pair in self.map for val in pair]
+
+    async def setup(self):
+        await self.dsp_init("vcq12~", map=self.mapvals)
 
     def trigger(self):
         if self.inlets[1] is not Uninit:

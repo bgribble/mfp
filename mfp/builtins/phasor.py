@@ -22,13 +22,15 @@ class Phasor(Processor):
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
         if len(initargs):
-            freq = initargs[0]
+            self.init_freq = initargs[0]
         else:
-            freq = 0
+            self.init_freq = 0
 
         self.dsp_inlets = [1, 2]
         self.dsp_outlets = [0]
-        self.dsp_init("phasor~", _sig_1=float(freq))
+
+    async def setup(self):
+        await self.dsp_init("phasor~", _sig_1=float(self.init_freq))
 
     def trigger(self):
         # number inputs to the DSP ins (freq, amp) are

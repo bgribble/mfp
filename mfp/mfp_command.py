@@ -9,12 +9,12 @@ from mfp.utils import task
 
 @apiclass
 class MFPCommand:
-    def create(self, objtype, initargs, patch_name, scope_name, obj_name):
+    async def create(self, objtype, initargs, patch_name, scope_name, obj_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
         scope = patch.scopes.get(scope_name) or patch.default_scope
 
-        obj = MFPApp().create(objtype, initargs, patch, scope, obj_name)
+        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name)
         if obj is None:
             return None
         return obj.gui_params
@@ -49,6 +49,7 @@ class MFPCommand:
 
     def dsp_response(self, obj_id, resp_type, resp_value):
         from .mfp_app import MFPApp
+        log.debug("dsp_response: {obj_id} {resp_type} {resp_value}")
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
             obj.send((resp_type, resp_value), -1)
