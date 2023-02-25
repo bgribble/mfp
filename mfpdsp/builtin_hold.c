@@ -160,16 +160,16 @@ config(mfp_processor * proc)
     builtin_hold_data * d = (builtin_hold_data *)(proc->data);
 
     if (track_ptr != NULL) {
-        d->param_track = (int)(*(float *)track_ptr);
+        d->param_track = (int)(*(double *)track_ptr);
     }
     if (response_ptr != NULL) {
-        d->param_response = (int)(*(float *)response_ptr);
+        d->param_response = (int)(*(double *)response_ptr);
     }
     if (sig_0_ptr != NULL) {
-        d->const_in_0 = (mfp_sample)(*(float *)sig_0_ptr);
+        d->const_in_0 = (mfp_sample)(*(double *)sig_0_ptr);
     }
     if (sig_1_ptr != NULL) {
-        d->const_in_1 = (mfp_sample)(*(float *)sig_1_ptr);
+        d->const_in_1 = (mfp_sample)(*(double *)sig_1_ptr);
         g_hash_table_remove(proc->params, "_sig_1");
     }
     else {

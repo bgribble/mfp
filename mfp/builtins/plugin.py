@@ -81,11 +81,11 @@ class Plugin(Processor):
                     self.plug_control[portnum] = MFPApp().pluginfo.port_default(port)
                 self.plug_outlets += 1
 
-    def trigger(self):
+    async def trigger(self):
         for portnum, value in enumerate(self.inlets):
             if value is not Uninit:
                 self.plug_control[self.inlet_map.get(portnum, 0)] = float(value)
-        self.dsp_setparam("plug_control", self.plug_control)
+        await self.dsp_setparam("plug_control", self.plug_control)
 
 
 def register():

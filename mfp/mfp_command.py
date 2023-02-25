@@ -47,40 +47,40 @@ class MFPCommand:
         else:
             return None
 
-    def dsp_response(self, obj_id, resp_type, resp_value):
+    async def dsp_response(self, obj_id, resp_type, resp_value):
         from .mfp_app import MFPApp
         log.debug("dsp_response: {obj_id} {resp_type} {resp_value}")
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            obj.send((resp_type, resp_value), -1)
+            await obj.send((resp_type, resp_value), -1)
 
-    def send_bang(self, obj_id, port):
+    async def send_bang(self, obj_id, port):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            obj.send(Bang, port)
+            await obj.send(Bang, port)
         return True
 
-    def send(self, obj_id, port, data):
+    async def send(self, obj_id, port, data):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            obj.send(data, port)
+            await obj.send(data, port)
         return True
 
-    def eval_and_send(self, obj_id, port, message):
+    async def eval_and_send(self, obj_id, port, message):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            obj.send(obj.parse_obj(message), port)
+            await obj.send(obj.parse_obj(message), port)
         return True
 
-    def send_methodcall(self, obj_id, port, method, *args, **kwargs):
+    async def send_methodcall(self, obj_id, port, method, *args, **kwargs):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         m = MethodCall(method, *args, **kwargs)
         if isinstance(obj, Processor):
-            obj.send(m, port)
+            await obj.send(m, port)
 
     def delete(self, obj_id):
         from .mfp_app import MFPApp

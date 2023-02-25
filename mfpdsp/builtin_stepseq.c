@@ -14,7 +14,7 @@ typedef struct {
 typedef struct {
     step * steps;
     int num_steps;
-    float clock_threshold;
+    double clock_threshold;
     int trigger_len;
 
     int cur_step;
@@ -22,8 +22,8 @@ typedef struct {
     int clock_active;
     int trigger_active;
 
-    float cv_slur_start_val;
-    float cv_current_val;
+    double cv_slur_start_val;
+    double cv_current_val;
 } builtin_stepseq_data;
 
 #define MAX_STEPS 1024
@@ -48,7 +48,7 @@ config(mfp_processor * proc)
     gpointer threshold_ptr = g_hash_table_lookup(proc->params, "threshold");
     gpointer trig_ms_ptr = g_hash_table_lookup(proc->params, "trig_ms");
 
-    float step_slur, step_value, frames_per_ms;
+    double step_slur, step_value, frames_per_ms;
     int step_slur_frames;
     int step_trigger;
     step * steps = NULL;
@@ -71,9 +71,9 @@ config(mfp_processor * proc)
         rawpos = 0;
         steps = pdata->steps;
         for (scount=0; scount < num_steps; scount++) {
-            step_value = g_array_index(steps_raw, float, rawpos++);
-            step_trigger = (int)(g_array_index(steps_raw, float, rawpos++));
-            step_slur = g_array_index(steps_raw, float, rawpos++);
+            step_value = g_array_index(steps_raw, double, rawpos++);
+            step_trigger = (int)(g_array_index(steps_raw, double, rawpos++));
+            step_slur = g_array_index(steps_raw, double, rawpos++);
 
             step_slur_frames = (int)(step_slur * frames_per_ms + 0.5);
 
@@ -92,7 +92,7 @@ config(mfp_processor * proc)
 
     /* position */
     if(position_ptr != NULL) {
-        pdata->cur_step = (int)(*(float *)position_ptr);
+        pdata->cur_step = (int)(*(double *)position_ptr);
         pdata->cur_step_frame = 0;
         pdata->clock_active = 1;
         g_hash_table_remove(proc->params, "position");
@@ -101,13 +101,13 @@ config(mfp_processor * proc)
     /* trigger length */
     if(trig_ms_ptr != NULL) {
         pdata->trigger_len = (int)(
-            *(float *)trig_ms_ptr * frames_per_ms + 0.5
+            *(double *)trig_ms_ptr * frames_per_ms + 0.5
         );
     }
 
     /* incoming clock transition threshold */
     if(threshold_ptr != NULL) {
-        pdata->clock_threshold = *(float *)threshold_ptr;
+        pdata->clock_threshold = *(double *)threshold_ptr;
     }
 
     return 1;

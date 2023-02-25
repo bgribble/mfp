@@ -33,7 +33,7 @@ class Scope (Processor):
         self.gui_params = dict(plot_type="scope")
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], BufferInfo):
             self.buffer = self.inlets[0]
             if self.gui_created:
@@ -108,7 +108,7 @@ class Scatter (Processor):
             MFPApp().gui_command.command(self.obj_id, action, data)
         return True
 
-    def trigger(self):
+    async def trigger(self):
         points = {}
         for i, val in zip(range(len(self.inlets)), self.inlets):
             v = None

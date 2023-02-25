@@ -24,7 +24,7 @@ class Print (Processor):
         else:
             self.format_string = None
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.format_string = self.inlets[1]
 

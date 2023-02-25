@@ -33,7 +33,7 @@ class VCFreq(Processor):
     async def setup(self):
         await self.dsp_init("vcfreq~", base_freq=self.base_freq)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is not Uninit:
             val = float(self.inlets[0])
             self.dsp_obj.setparam("_sig_0", val)

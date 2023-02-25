@@ -20,7 +20,7 @@ class Noise(Processor):
     async def setup(self):
         await self.dsp_init("noise~")
 
-    def trigger(self):
+    async def trigger(self):
         pass
 
 

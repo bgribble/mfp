@@ -15,11 +15,11 @@ typedef struct {
     double a2;
 
     double delay_1;
-    double delay_2; 
+    double delay_2;
 } builtin_biquad_data;
 
-static int 
-process(mfp_processor * proc) 
+static int
+process(mfp_processor * proc)
 {
     builtin_biquad_data * pdata = (builtin_biquad_data *)proc->data;
     mfp_sample * in_sample = proc->inlet_buf[0]->data;
@@ -30,19 +30,19 @@ process(mfp_processor * proc)
     for (; scount < proc->inlet_buf[0]->blocksize; scount++) {
         tmp = *in_sample++;
         w_n = tmp - (pdata->a1 * pdata->delay_1) - (pdata->a2 * pdata->delay_2);
-        *out_sample ++ = (pdata->b0 * w_n) + (pdata->b1 * pdata->delay_1) + 
+        *out_sample ++ = (pdata->b0 * w_n) + (pdata->b1 * pdata->delay_1) +
             (pdata->b2 * pdata->delay_2);
-        pdata->delay_2 = pdata->delay_1; 
+        pdata->delay_2 = pdata->delay_1;
         pdata->delay_1 = w_n;
     }
     return 0;
-    
 
-    
+
+
 }
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     builtin_biquad_data * p = g_malloc(sizeof(builtin_biquad_data));
     proc->data = p;
@@ -58,7 +58,7 @@ init(mfp_processor * proc)
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     if (proc->data != NULL) {
         g_free(proc->data);
@@ -68,7 +68,7 @@ destroy(mfp_processor * proc)
 }
 
 static int
-config(mfp_processor * proc) 
+config(mfp_processor * proc)
 {
     builtin_biquad_data * pdata = (builtin_biquad_data *)proc->data;
     gpointer a1_ptr = g_hash_table_lookup(proc->params, "a1");
@@ -78,30 +78,30 @@ config(mfp_processor * proc)
     gpointer b2_ptr = g_hash_table_lookup(proc->params, "b2");
 
     if(b0_ptr != NULL) {
-        pdata->b0 = *(float *)b0_ptr ;
+        pdata->b0 = *(double *)b0_ptr ;
     }
 
     if(b1_ptr != NULL) {
-        pdata->b1 = *(float *)b1_ptr ;
+        pdata->b1 = *(double *)b1_ptr ;
     }
 
     if(b2_ptr != NULL) {
-        pdata->b2 = *(float *)b2_ptr ;
+        pdata->b2 = *(double *)b2_ptr ;
     }
 
     if(a1_ptr != NULL) {
-        pdata->a1 = *(float *)a1_ptr ;
+        pdata->a1 = *(double *)a1_ptr ;
     }
 
     if(a2_ptr != NULL) {
-        pdata->a2 = *(float *)a2_ptr ;
+        pdata->a2 = *(double *)a2_ptr ;
     }
 
     return 1;
 }
 
 static void
-reset(mfp_processor * proc) 
+reset(mfp_processor * proc)
 {
     builtin_biquad_data * pdata = (builtin_biquad_data *)proc->data;
     pdata->a1 = 0.0;
@@ -114,7 +114,7 @@ reset(mfp_processor * proc)
 
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_biquad(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
 

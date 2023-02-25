@@ -7,15 +7,15 @@
 
 typedef struct {
     int start_frame;
-    float end_val;
+    double end_val;
     int end_frame;
 } segment;
 
 typedef struct {
     int cur_frame;
     int cur_segment;
-    float start_val;
-    float cur_val;
+    double start_val;
+    double cur_val;
     segment * segv;
     int nsegs;
 } builtin_line_data;
@@ -28,8 +28,8 @@ config(mfp_processor * proc)
     builtin_line_data * pdata = (builtin_line_data *)proc->data;
     GArray * segments_raw = (GArray *)g_hash_table_lookup(proc->params, "segments");
     gpointer position_ptr = g_hash_table_lookup(proc->params, "position");
-    float delay_ms, end_val, ramp_ms, frames_per_ms;
-    float ideal_ms = 0.0;
+    double delay_ms, end_val, ramp_ms, frames_per_ms;
+    double ideal_ms = 0.0;
     int ideal_frame, actual_frame;
     segment * segments = NULL;
     int numsegs = 0;
@@ -53,9 +53,9 @@ config(mfp_processor * proc)
         framebase = 0;
         segments = pdata->segv;
         for (scount=0; scount < numsegs; scount++) {
-            delay_ms = g_array_index(segments_raw, float, rawpos++);
-            end_val = g_array_index(segments_raw, float, rawpos++);
-            ramp_ms = g_array_index(segments_raw, float, rawpos++);
+            delay_ms = g_array_index(segments_raw, double, rawpos++);
+            end_val = g_array_index(segments_raw, double, rawpos++);
+            ramp_ms = g_array_index(segments_raw, double, rawpos++);
 
             ideal_ms += delay_ms;
             ideal_frame = (int)(ideal_ms * frames_per_ms + 0.5);
@@ -82,7 +82,7 @@ config(mfp_processor * proc)
 
     /* position */
     if(position_ptr != NULL) {
-        pdata->cur_frame = (int)(*(float *)position_ptr * frames_per_ms + 0.5);
+        pdata->cur_frame = (int)(*(double *)position_ptr * frames_per_ms + 0.5);
         for(scount=0; scount < pdata->nsegs; scount++) {
             if(pdata->cur_frame >= pdata->segv[scount].start_frame &&
                pdata->cur_frame < pdata->segv[scount].end_frame) {
@@ -101,7 +101,7 @@ process_line(mfp_processor * proc)
     int cframe = data->cur_frame;
     double slope, offset;
     int scount;
-    float * sample = proc->outlet_buf[0]->data;
+    mfp_sample * sample = proc->outlet_buf[0]->data;
 
     if ((sample == NULL) || (data == NULL) || (data->nsegs == 0)) {
         mfp_block_zero(proc->outlet_buf[0]);
@@ -134,7 +134,7 @@ process_line(mfp_processor * proc)
             *sample++ = data->cur_val;
         }
         else {
-            data->cur_val = (float)((double)(cframe - cseg->start_frame)*slope + offset); 
+            data->cur_val = ((double)(cframe - cseg->start_frame)*slope + offset); 
             *sample++ = data->cur_val; 
         }
         cframe++;

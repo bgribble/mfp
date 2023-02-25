@@ -33,8 +33,8 @@ config(mfp_processor * proc)
         rawpos = 0;
         framebase = 0;
         for (int scount=0; scount < nummap; scount++) {
-            semitone = g_array_index(map_raw, float, rawpos++);
-            scaletone = g_array_index(map_raw, float, rawpos++);
+            semitone = g_array_index(map_raw, double, rawpos++);
+            scaletone = g_array_index(map_raw, double, rawpos++);
             pdata->map[(int)semitone] = scaletone;
         }
 

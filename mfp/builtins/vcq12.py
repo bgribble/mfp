@@ -52,11 +52,11 @@ class VCQ12(Processor):
     async def setup(self):
         await self.dsp_init("vcq12~", map=self.mapvals)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.mapname = self.inlets[1]
             self.map = self.maps.get(self.mapname, self.maps['semitone'])
-            self.dsp_setparam("map", [val for pair in self.map for val in pair])
+            await self.dsp_setparam("map", [val for pair in self.map for val in pair])
 
 def register():
     MFPApp().register("vcq12~", VCQ12)

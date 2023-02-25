@@ -33,7 +33,7 @@ class For(Processor):
             self.inlets[1] = initargs[0]
             self.startval = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is False:
             self.iterating = False
             return

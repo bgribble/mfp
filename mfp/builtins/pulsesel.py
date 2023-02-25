@@ -44,22 +44,22 @@ class PulseSel(Processor):
             bitmask=bitmask, period=period, threshold=thresh
         )
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is Bang:
-            self.dsp_setparam("phase", float(0))
+            await self.dsp_setparam("phase", float(0))
         elif self.inlets[0] is not Uninit:
-            self.dsp_setparam("phase", phase)
+            await self.dsp_setparam("phase", phase)
         
         if self.inlets[1] is not Uninit:
-            self.dsp_setparam("period", self.inlets[1])
+            await self.dsp_setparam("period", self.inlets[1])
             self.inlets[1] = Uninit
 
         if self.inlets[2] is not Uninit:
-            self.dsp_setparam("bitmask", self.inlets[2])
+            await self.dsp_setparam("bitmask", self.inlets[2])
             self.inlets[2] = Uninit
 
         if self.inlets[3] is not Uninit:
-            self.dsp_setparam("threshold", self.inlets[3])
+            await self.dsp_setparam("threshold", self.inlets[3])
             self.inlets[3] = Uninit
 
 def register():

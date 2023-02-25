@@ -135,11 +135,11 @@ config(mfp_processor * proc)
     int config_handled = 1;
 
     if(delay_ptr != NULL) {
-        pdata->const_delay_ms = *(float *)delay_ptr;
+        pdata->const_delay_ms = *(double *)delay_ptr;
     }
 
     if (bufsize_ptr != NULL) {
-        buf_ms = *(float *)(bufsize_ptr);
+        buf_ms = *(double *)(bufsize_ptr);
         buf_samples = buf_ms * proc->context->samplerate / 1000.0;
         buf_samples = ((int)(buf_samples / proc->context->blocksize) + 1) * proc->context->blocksize;
 

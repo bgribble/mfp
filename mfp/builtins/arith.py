@@ -30,7 +30,7 @@ class ArithProcessor(Processor):
     async def setup(self):
         await self.dsp_init(self.arith_op, _sig_1=const)
 
-    def trigger(self): 
+    async def trigger(self): 
         pass 
 
 class ArithAdd(ArithProcessor):

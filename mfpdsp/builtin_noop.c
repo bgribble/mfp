@@ -88,15 +88,15 @@ config(mfp_processor * proc)
     gpointer chan = g_hash_table_lookup(proc->params, "io_channel");
 
     if (ctxt_in != NULL) {
-        d->use_context_input = (int)(*(float *)ctxt_in);
+        d->use_context_input = (int)(*(double *)ctxt_in);
     }
 
     if(ctxt_out != NULL) {
-        d->use_context_output = (int)(*(float *)ctxt_out);
+        d->use_context_output = (int)(*(double *)ctxt_out);
     }
 
     if(chan != NULL) {
-        d->io_channel = (int)(*(float *)chan);
+        d->io_channel = (int)(*(double *)chan);
     }
 
 

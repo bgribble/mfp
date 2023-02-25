@@ -84,7 +84,7 @@ class Replay (Processor):
         self.play_stop()
         self.buffer = []
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], TimerTick):
             self.outlets[0] = self.inlets[0].payload
         elif self.recording:

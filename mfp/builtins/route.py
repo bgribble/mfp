@@ -87,7 +87,7 @@ class Route (Processor):
             self.doc_tooltip_outlet.append("Items matching %s" % (values[i],))
         self.doc_tooltip_outlet.append("Unmatched items")
 
-    def trigger(self):
+    async def trigger(self):
         # inlet 1 resets the list of addresses and may change the number of
         # outputs
         if self.inlets[1] is not Uninit:

@@ -36,7 +36,7 @@ class Slew(Processor):
         self.dsp_obj.setparam("rise", rise)
         self.dsp_obj.setparam("fall", fall)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is not Uninit: 
             val = float(self.inlets[0])
             self.dsp_obj.setparam("_sig_0", val)

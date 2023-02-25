@@ -27,7 +27,7 @@ class BitCombine (Processor):
         for i in range(num_inlets): 
             self.doc_tooltip_inlet.append("Bit %d (%s) input" % (i, 2**i)) 
 
-    def trigger(self):
+    async def trigger(self):
         if len(self.inlets) == 1 and isinstance(self.inlets[0], (list, tuple)):
             bits = self.inlets[0]
         else:
@@ -55,7 +55,7 @@ class BitSplit(Processor):
         for i in range(num_outlets): 
             self.doc_tooltip_outlet.append("Bit %d (%s) output" % (i, 2**i)) 
 
-    def trigger(self):
+    async def trigger(self):
         remainder = int(self.inlets[0])
         for bitnum in range(len(self.outlets)):
             self.outlets[bitnum] = remainder & 1

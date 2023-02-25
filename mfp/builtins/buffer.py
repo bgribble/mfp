@@ -84,7 +84,7 @@ class Buffer(Processor):
             self.outlets[2] = BufferInfo(self.buf_id, self.size, self.channels, self.rate,
                                          self.buf_offset)
 
-    def trigger(self):
+    async def trigger(self):
         incoming = self.inlets[0]
         if incoming is Bang:
             self.dsp_obj.setparam("rec_state", 1)

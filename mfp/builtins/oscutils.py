@@ -31,7 +31,7 @@ class OSCIn (Processor):
         if len(initargs) > 1:
             self.types = initargs[1]
 
-    def trigger(self):
+    async def trigger(self):
         need_update = False 
         if isinstance(self.inlets[0], OSCPacket): 
             self.outlets[0] = self.inlets[0].payload
@@ -75,7 +75,7 @@ class OSCOut (Processor):
         if len(initargs) > 1:
             self.path = initargs[1]
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[2] is not Uninit:
             self.path = self.inlets[2]
             self.inlets[2] = Uninit 

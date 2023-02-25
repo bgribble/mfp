@@ -1,29 +1,29 @@
 
 #include <glib.h>
 #include <string.h>
-#include <stdio.h> 
+#include <stdio.h>
 #include <pthread.h>
 
 #include "mfp_dsp.h"
 #include "mfp_block.h"
 
-GArray          * mfp_proc_list = NULL;       /* all mfp_processors */ 
-GHashTable      * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */ 
-GHashTable      * mfp_proc_objects = NULL;    /* hash of int ID to mfp_processor * */ 
-GHashTable      * mfp_contexts = NULL;        /* hash of int ID to mfp_context */ 
+GArray          * mfp_proc_list = NULL;       /* all mfp_processors */
+GHashTable      * mfp_proc_registry = NULL;   /* hash of names to mfp_procinfo */
+GHashTable      * mfp_proc_objects = NULL;    /* hash of int ID to mfp_processor * */
+GHashTable      * mfp_contexts = NULL;        /* hash of int ID to mfp_context */
 
-mfp_processor * 
-mfp_proc_lookup(int rpcid) 
+mfp_processor *
+mfp_proc_lookup(int rpcid)
 {
     return g_hash_table_lookup(mfp_proc_objects, GINT_TO_POINTER(rpcid));
 }
 
-/* Note: mfp_proc_create is a shortcut used by tests only */ 
+/* Note: mfp_proc_create is a shortcut used by tests only */
 mfp_processor *
-mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
+mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
                 mfp_context * ctxt)
 {
-    if (typeinfo == NULL) 
+    if (typeinfo == NULL)
         return NULL;
     return mfp_proc_init(mfp_proc_alloc(typeinfo, num_inlets, num_outlets, ctxt), 0, 0);
 }
@@ -32,7 +32,7 @@ mfp_proc_create(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
 
 mfp_processor *
-mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets, 
+mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
                mfp_context * ctxt)
 {
     mfp_processor * p;
@@ -42,7 +42,7 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
     }
 
     p = g_malloc0(sizeof(mfp_processor));
-    p->typeinfo = typeinfo; 
+    p->typeinfo = typeinfo;
     p->context = ctxt;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     p->depth = -1;
@@ -58,15 +58,15 @@ mfp_proc_alloc(mfp_procinfo * typeinfo, int num_inlets, int num_outlets,
 
 
 int
-mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int blocksize) 
+mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int blocksize)
 {
     int count;
     int success=0;
 
     /* create inlet and outlet processor pointer arrays */
     p->inlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_inlets);
-    
-    /* these are arrays of mfp_connection * */    
+
+    /* these are arrays of mfp_connection * */
     for (count = 0; count < num_inlets; count++) {
         GArray * in = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
         g_array_append_val(p->inlet_conn, in);
@@ -78,27 +78,27 @@ mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int b
         GArray * out = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
         g_array_append_val(p->outlet_conn, out);
     }
-    
+
     /* create input and output buffers (will be reallocated if blocksize changes */
     p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));
     p->inlet_buf_alloc = g_malloc0(num_inlets * sizeof(mfp_block *));
 
     for (count = 0; count < num_inlets; count ++) {
-        p->inlet_buf_alloc[count] = mfp_block_new(mfp_max_blocksize); 
+        p->inlet_buf_alloc[count] = mfp_block_new(mfp_max_blocksize);
         mfp_block_resize(p->inlet_buf_alloc[count], blocksize);
     }
 
     p->outlet_buf = g_malloc(num_outlets * sizeof(mfp_sample *));
-    
+
     for (count = 0; count < num_outlets; count ++) {
         p->outlet_buf[count] = mfp_block_new(mfp_max_blocksize);
         mfp_block_resize(p->outlet_buf[count], blocksize);
-    }    
+    }
     return success;
 }
 
 void
-mfp_proc_free_buffers(mfp_processor * self) 
+mfp_proc_free_buffers(mfp_processor * self)
 {
     int b;
     int num_inlets = self->inlet_conn->len;
@@ -141,20 +141,20 @@ mfp_proc_init(mfp_processor * p, int rpc_id, int patch_id)
     p->needs_config = 1;
 
     /* add proc to global list */
-    g_array_append_val(mfp_proc_list, p); 
-    g_hash_table_insert(mfp_proc_objects, GINT_TO_POINTER(p->rpc_id), p); 
+    g_array_append_val(mfp_proc_list, p);
+    g_hash_table_insert(mfp_proc_objects, GINT_TO_POINTER(p->rpc_id), p);
 
     p->context->needs_reschedule = 1;
     return p;
 }
 
 void
-mfp_proc_process(mfp_processor * self) 
+mfp_proc_process(mfp_processor * self)
 {
     GArray * inlet_conn;
-    mfp_connection * curr_inlet; 
+    mfp_connection * curr_inlet;
     mfp_block * inlet_buf;
-    
+
     mfp_processor * upstream_proc;
     mfp_block     * upstream_outlet_buf;
     int           upstream_outlet_num;
@@ -182,20 +182,20 @@ mfp_proc_process(mfp_processor * self)
         self->needs_reset = 0;
     }
 
-    /* accumulate all the inlet fan-ins to a single input buffer */ 
+    /* accumulate all the inlet fan-ins to a single input buffer */
 
     /* if there's exactly one output connected to an input, use that
      * output buffer as the input and don't clear it */
-    for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {    
+    for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
         inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
         if (inlet_conn->len == 1) {
             curr_inlet = g_array_index(inlet_conn, mfp_connection *, 0);
             upstream_proc = curr_inlet->dest_proc;
-            upstream_outlet_num = curr_inlet->dest_port;    
-            upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];    
-            self->inlet_buf[inlet_num] = upstream_outlet_buf; 
+            upstream_outlet_num = curr_inlet->dest_port;
+            upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];
+            self->inlet_buf[inlet_num] = upstream_outlet_buf;
         }
-        else { 
+        else {
             inlet_buf = self->inlet_buf_alloc[inlet_num];
             self->inlet_buf[inlet_num] = inlet_buf;
             mfp_block_fill(inlet_buf, 0);
@@ -203,19 +203,19 @@ mfp_proc_process(mfp_processor * self)
 
     }
 
-    /* now self->inlet_buf points to the right buffer for each inlet, 
+    /* now self->inlet_buf points to the right buffer for each inlet,
      * zeroed if needed.  Get inputs into the buffers that need it. */
-    for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {    
+    for (inlet_num = 0; inlet_num < self->inlet_conn->len; inlet_num++) {
         inlet_conn = g_array_index(self->inlet_conn, GArray *, inlet_num);
         inlet_buf = self->inlet_buf[inlet_num];
-        if (inlet_buf != self->inlet_buf_alloc[inlet_num]) { 
+        if (inlet_buf != self->inlet_buf_alloc[inlet_num]) {
             continue;
         }
         for(connect_num = 0; connect_num < inlet_conn->len; connect_num++) {
             curr_inlet = g_array_index(inlet_conn, mfp_connection *, connect_num);
             upstream_proc = curr_inlet->dest_proc;
-            upstream_outlet_num = curr_inlet->dest_port;    
-            upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];    
+            upstream_outlet_num = curr_inlet->dest_port;
+            upstream_outlet_buf = upstream_proc->outlet_buf[upstream_outlet_num];
             if (upstream_outlet_buf->blocksize == 0) {
                 mfp_log_debug("ERROR: connection %p, upstream outlet buffer gone, type=%s, self=%d.%d, upstream=%d.%d",
                               curr_inlet, self->typeinfo->name, self->rpc_id, inlet_num, upstream_proc->rpc_id, upstream_outlet_num);
@@ -226,8 +226,8 @@ mfp_proc_process(mfp_processor * self)
         }
     }
 
-    /* perform processing */ 
-    self->typeinfo->process(self);    
+    /* perform processing */
+    self->typeinfo->process(self);
 }
 
 
@@ -239,21 +239,21 @@ mfp_proc_reset(mfp_processor * self)
 
 
 void
-mfp_proc_destroy(mfp_processor * self) 
+mfp_proc_destroy(mfp_processor * self)
 {
     int procpos;
     int xlet_num;
     int conn_num;
-    GArray * xlet_connlist; 
+    GArray * xlet_connlist;
     mfp_connection * conn;
 
-    /* remove any remaining connections */ 
+    /* remove any remaining connections */
     for(xlet_num = 0; xlet_num < self->inlet_conn->len; xlet_num++) {
         xlet_connlist = g_array_index(self->inlet_conn, GArray *, xlet_num);
         while (xlet_connlist->len) {
             conn = g_array_index(xlet_connlist, mfp_connection *, 0);
             mfp_log_warning("Programming error #179: leftover connection at delete time (handled)");
-            mfp_proc_disconnect(conn->dest_proc, conn->dest_port, self, xlet_num);            
+            mfp_proc_disconnect(conn->dest_proc, conn->dest_port, self, xlet_num);
         }
     }
 
@@ -262,7 +262,7 @@ mfp_proc_destroy(mfp_processor * self)
         while (xlet_connlist->len) {
             conn = g_array_index(xlet_connlist, mfp_connection *, 0);
             mfp_log_warning("Programming error #179: leftover connection at delete time (handled)");
-            mfp_proc_disconnect(self, xlet_num, conn->dest_proc, conn->dest_port);            
+            mfp_proc_disconnect(self, xlet_num, conn->dest_proc, conn->dest_port);
         }
     }
 
@@ -285,29 +285,32 @@ mfp_proc_destroy(mfp_processor * self)
 }
 
 
-int 
-mfp_proc_connect(mfp_processor * self, int my_outlet,  
+int
+mfp_proc_connect(mfp_processor * self, int my_outlet,
                  mfp_processor * target, int targ_inlet)
 {
     GArray * xlets;
-   
+
+    mfp_log_debug("connect: connecting proc %d outlet %d to proc %d outlet %d",
+        self->rpc_id, my_outlet, target->rpc_id, targ_inlet);
+
     if ((self == NULL) || (target == NULL)) {
         mfp_log_error("connect: bad endpoint, self=%p, target=%p", self, target);
         return -1;
     }
 
-    if (my_outlet >= self->outlet_conn->len) { 
+    if (my_outlet >= self->outlet_conn->len) {
         mfp_log_error("connect: asked for outlet %d but only have %d",
                       my_outlet, self->outlet_conn->len);
         return -1;
     }
 
-    if (targ_inlet >= target->inlet_conn->len) { 
+    if (targ_inlet >= target->inlet_conn->len) {
         mfp_log_error("connect: asked for inlet %d but only have %d",
                       targ_inlet, target->inlet_conn->len);
         return -1;
     }
-    
+
     mfp_connection * conn;
 
     xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
@@ -315,8 +318,8 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
         conn = g_array_index(xlets, mfp_connection *, i);
         if ((conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
             mfp_log_warning("Programming error #179: asked to make an existing DSP connect again (handled)");
-            mfp_log_warning("From %s %d:%d to %s %d:%d", 
-                    self->typeinfo->name, self->rpc_id, my_outlet, 
+            mfp_log_warning("From %s %d:%d to %s %d:%d",
+                    self->typeinfo->name, self->rpc_id, my_outlet,
                     target->typeinfo->name, target->rpc_id, targ_inlet);
             return -1;
         }
@@ -324,11 +327,11 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
 
     mfp_connection * my_conn = g_malloc(sizeof(mfp_connection));
     mfp_connection * targ_conn = g_malloc(sizeof(mfp_connection));
-    
+
     my_conn->dest_proc = target;
     my_conn->dest_port = targ_inlet;
     targ_conn->dest_proc = self;
-    targ_conn->dest_port = my_outlet; 
+    targ_conn->dest_port = my_outlet;
 
     xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
     g_array_append_val(xlets, my_conn);
@@ -341,7 +344,7 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
 }
 
 int
-mfp_proc_disconnect(mfp_processor * self, int my_outlet, 
+mfp_proc_disconnect(mfp_processor * self, int my_outlet,
                     mfp_processor * target, int targ_inlet)
 {
     GArray * xlets;
@@ -394,21 +397,21 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
     return 0;
 }
 
-int 
-mfp_proc_setparam_req(mfp_processor * self, mfp_in_data * rd) 
+int
+mfp_proc_setparam_req(mfp_processor * self, mfp_in_data * rd)
 {
     gpointer orig_key=NULL;
     gpointer orig_val=NULL;
-    gboolean found; 
+    gboolean found;
 
     // FIXME: setparam suffering from serious confuxion
 
-    found = g_hash_table_lookup_extended(self->params, (gpointer)rd->param_name, 
+    found = g_hash_table_lookup_extended(self->params, (gpointer)rd->param_name,
                                          &orig_key, &orig_val);
-    g_hash_table_replace(self->params, (gpointer)(rd->param_name), 
+    g_hash_table_replace(self->params, (gpointer)(rd->param_name),
                          (gpointer)(rd->param_value));
 
-    if (found == TRUE) { 
+    if (found == TRUE) {
         rd->param_name = orig_key;
         rd->param_type = mfp_proc_param_type(self, orig_key);
         rd->param_value = orig_val;
@@ -416,12 +419,12 @@ mfp_proc_setparam_req(mfp_processor * self, mfp_in_data * rd)
     else {
         rd->param_name = NULL;
         rd->param_type = 0;
-        rd->param_value = NULL; 
+        rd->param_value = NULL;
     }
     return 0;
 }
 
-int 
+int
 mfp_proc_param_type(mfp_processor * self, char * param_name)
 {
     return GPOINTER_TO_INT(g_hash_table_lookup(self->typeinfo->params, param_name));
@@ -432,17 +435,17 @@ mfp_proc_setparam(mfp_processor * self, char * param_name, void * param_val)
 {
     gpointer orig_key=NULL;
     gpointer orig_val=NULL;
-    gboolean found=FALSE; 
+    gboolean found=FALSE;
 
     // FIXME: setparam_req suffering from serious confuxion
 
-    found = g_hash_table_lookup_extended(self->params, (gpointer)param_name, 
+    found = g_hash_table_lookup_extended(self->params, (gpointer)param_name,
                                          &orig_key, &orig_val);
     g_hash_table_replace(self->params, (gpointer)(param_name), (gpointer)(param_val));
     if (found) {
-        if (orig_key != NULL)  
+        if (orig_key != NULL)
             g_free(orig_key);
-        if (orig_val != NULL) 
+        if (orig_val != NULL)
             g_free(orig_val);
     }
 }
@@ -464,7 +467,7 @@ mfp_proc_has_input(mfp_processor * self, int inlet_num)
 
 }
 
-int 
+int
 mfp_proc_error(mfp_processor * self, const char * message)
 {
     return 1;

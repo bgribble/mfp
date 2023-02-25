@@ -29,7 +29,7 @@ class Sig(Processor):
         await self.dsp_init("sig~")
         self.dsp_obj.setparam("value", value)
 
-    def trigger(self):
+    async def trigger(self):
         val = float(self.inlets[0])
         self.dsp_obj.setparam("value", val)
 

@@ -25,11 +25,11 @@ class Ampl(Processor):
     async def setup(self):
         await self.dsp_init("ampl~")
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], dict):
             for param, val in self.inlets[0].items():
                 try:
-                    self.dsp_setparam(param, float(val))
+                    await self.dsp_setparam(param, float(val))
                 except Exception as e:
                     import traceback
                     tb = traceback.format_exc()

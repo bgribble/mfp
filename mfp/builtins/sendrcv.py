@@ -134,7 +134,7 @@ class Send (Processor):
 
         return True 
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit: 
             port = 0
             if isinstance(self.inlets[1], (list,tuple)):
@@ -202,7 +202,7 @@ class MessageBus (Processor):
         self.last_value = Uninit
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = self.last_value = self.inlets[0]
         self.inlets[0] = Uninit 
  
@@ -232,7 +232,7 @@ class SignalBus (Processor):
     async def setup(self):
         await self.dsp_init("noop~")
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = self.inlets[0]
 
 class Recv (Processor):
@@ -309,7 +309,7 @@ class Recv (Processor):
 
         return False 
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             port = 0
             if isinstance(self.inlets[1], (tuple,list)):

@@ -128,11 +128,11 @@ config(mfp_processor * proc)
     int config_handled = 1;
 
     if(peak_decay_ptr != NULL) {
-        pdata->peak_decay_ms = *(float *)peak_decay_ptr;
+        pdata->peak_decay_ms = *(double *)peak_decay_ptr;
     }
 
     if(rms_window_ptr != NULL) {
-        rms_window = *(float *)rms_window_ptr;
+        rms_window = *(double *)rms_window_ptr;
         rms_samples = (int)(rms_window * proc->context->samplerate / 1000.0);
         if (rms_samples < pdata->rms_buffer->allocsize) {
             mfp_block_resize(pdata->rms_buffer, rms_samples);

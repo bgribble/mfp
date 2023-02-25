@@ -29,7 +29,7 @@ class TrackHold(Processor):
         else:
             await self.dsp_init("hold~", track=True)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is not Uninit:
             val = float(self.inlets[0])
             self.dsp_obj.setparam("_sig_0", val)
@@ -61,7 +61,7 @@ class SampleHold(Processor):
         else:
             await self.dsp_init("hold~")
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is not Uninit:
             val = float(self.inlets[0])
             self.dsp_obj.setparam("_sig_0", val)

@@ -32,14 +32,14 @@ class Phasor(Processor):
     async def setup(self):
         await self.dsp_init("phasor~", _sig_1=float(self.init_freq))
 
-    def trigger(self):
+    async def trigger(self):
         # number inputs to the DSP ins (freq, amp) are
         # handled automatically
         if self.inlets[0] is Bang:
-            self.dsp_setparam("phase", float(0))
+            await self.dsp_setparam("phase", float(0))
         else:
             phase = float(self.inlets[0])
-            self.dsp_setparam("phase", phase)
+            await self.dsp_setparam("phase", phase)
 
 
 def register():

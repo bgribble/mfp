@@ -27,7 +27,7 @@ class Ampl2DB(Processor):
         if len(initargs):
             self.dbref = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.dbref = self.inlets[1]
         try: 
@@ -51,7 +51,7 @@ class DB2Ampl(Processor):
         if len(initargs):
             self.dbref = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.dbref = self.inlets[1]
 

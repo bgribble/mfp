@@ -69,10 +69,10 @@ config(mfp_processor * proc)
     gpointer retrigger_ptr = g_hash_table_lookup(proc->params, "retrigger");
 
     if(trigger_ptr != NULL) {
-        pdata->triggered = (int)(*(float *)trigger_ptr);
+        pdata->triggered = (int)(*(double *)trigger_ptr);
     }
     if(retrigger_ptr != NULL) {
-        pdata->retrigger = (int)((*(float *)retrigger_ptr) * proc->context->samplerate / 1000.0);
+        pdata->retrigger = (int)((*(double *)retrigger_ptr) * proc->context->samplerate / 1000.0);
         pdata->retrigger_count = 0;
     }
 

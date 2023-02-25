@@ -34,7 +34,7 @@ class CallFunction(Processor):
             self.arity = initargs[0]
             self.resize(arity + 1, 1)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is not Bang:
             self.thunk = self.inlets[0]
 
@@ -56,7 +56,7 @@ class ApplyMethod(Processor):
         if len(initargs):
             self.method_name = str(initargs[0])
 
-    def trigger(self):
+    async def trigger(self):
         pargs = None
         kargs = None 
        
@@ -91,7 +91,7 @@ class GetElement(Processor):
         if len(initargs):
             self.elements = initargs
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.elements = self.inlets[1]
             self.inlets[1] = Uninit
@@ -135,7 +135,7 @@ class SetElement(Processor):
         if len(initargs):
             self.element = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.element = self.inlets[1]
             self.inlets[1] = Uninit 
@@ -178,7 +178,7 @@ class GetSlice(Processor):
         if len(initargs): 
             self.slice_start = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.slice_start = self.inlets[1]
             self.inlets[1] = Uninit
@@ -212,7 +212,7 @@ class PyEval(Processor):
         if len(initargs):
             self.bindings = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         else:
@@ -249,7 +249,7 @@ class PyFunc(Processor):
 
         Processor.__init__(self, self.argcount or 1, 1, init_type, init_args, patch, scope, name)
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         elif self.argcount:
@@ -282,7 +282,7 @@ class PyAutoWrap(Processor):
             if index < len(self.inlets):
                 self.inlets[index+1] = arg
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         elif self.argcount:
@@ -307,7 +307,7 @@ class PyBinary(Processor):
         if len(initargs) == 1:
             self.inlets[1] = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.outlets[0] = self.function(self.inlets[0], self.inlets[1])
         else:
@@ -324,7 +324,7 @@ class PyUnary(Processor):
         if self.function.__doc__:
             self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = self.function(self.inlets[0])
 
 class PyNullary(Processor):
@@ -335,7 +335,7 @@ class PyNullary(Processor):
         if self.function.__doc__:
             self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = self.function()
 
 

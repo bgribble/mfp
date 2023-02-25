@@ -36,7 +36,7 @@ class Trigger (Processor):
         for i in range(numout):
             self.doc_tooltip_outlet.append("Output %d" % (numout-i,))
 
-    def trigger(self):
+    async def trigger(self):
         for i in range(len(self.outlets)):
             self.outlets[i] = self.inlets[0]
         self.inlets[0] = Uninit

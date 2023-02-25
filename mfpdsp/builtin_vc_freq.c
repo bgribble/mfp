@@ -14,7 +14,7 @@ typedef struct {
 } builtin_vc_freq_data;
 
 static int
-config(mfp_processor * proc) 
+config(mfp_processor * proc)
 {
     builtin_vc_freq_data * pdata = (builtin_vc_freq_data *)proc->data;
     GArray * base_raw = (GArray *)g_hash_table_lookup(proc->params, "base_freq");
@@ -22,18 +22,18 @@ config(mfp_processor * proc)
 
     /* populate new segment data if passed */
     if (base_raw != NULL) {
-        pdata->base_freq = (double)(*(float *)base_raw);
+        pdata->base_freq = (double)(*(double *)base_raw);
         g_hash_table_remove(proc->params, "base_freq");
     }
     if (const_ptr != NULL) {
-        pdata->const_signal = (double)(*(float *)const_ptr);
+        pdata->const_signal = (double)(*(double *)const_ptr);
     }
 
     return 1;
 }
 
-static int 
-process_vc_freq(mfp_processor * proc) 
+static int
+process_vc_freq(mfp_processor * proc)
 {
     builtin_vc_freq_data * data = ((builtin_vc_freq_data *)(proc->data));
     mfp_sample * input = proc->inlet_buf[0]->data;
@@ -46,12 +46,12 @@ process_vc_freq(mfp_processor * proc)
         mfp_block_zero(proc->outlet_buf[0]);
         return 0;
     }
-    
+
     if (mfp_proc_has_input(proc, 0)) {
         use_const = 0;
     }
 
-    /* iterate */ 
+    /* iterate */
     for(int scount=0; scount < proc->context->blocksize; scount++) {
         if (use_const) {
             inval = (double)data->const_signal;
@@ -61,20 +61,20 @@ process_vc_freq(mfp_processor * proc)
         }
         *output++ = (mfp_sample)(base * pow((double)2.0, inval));
     }
-    
+
     return 0;
 }
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     builtin_vc_freq_data * p = g_malloc0(sizeof(builtin_vc_freq_data));
-    proc->data = p; 
-    
+    proc->data = p;
+
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     builtin_vc_freq_data * p;
     if (proc->data != NULL) {
@@ -84,7 +84,7 @@ destroy(mfp_processor * proc)
 }
 
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_vc_freq(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("vcfreq~");

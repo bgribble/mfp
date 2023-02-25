@@ -63,7 +63,7 @@ class Inlet(Processor):
             self.patch.hot_inlets.remove(self.inletnum)
             self.doc_tooltip_obj = self.doc_tooltip_cold
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = self.inlets[0]
         self.inlets[0] = Uninit
 
@@ -111,7 +111,7 @@ class Outlet(Processor):
         newobj.load(prms)
         return newobj
 
-    def trigger(self):
+    async def trigger(self):
         in_value = self.inlets[0]
         self.inlets[0] = Uninit
 

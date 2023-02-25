@@ -338,10 +338,10 @@ config(mfp_processor * proc)
     builtin_arith_data * d = (builtin_arith_data *)(proc->data);
 
     if (sig_0_ptr != NULL) {
-        d->const_in_0 = (mfp_sample)(*(float *)sig_0_ptr);
+        d->const_in_0 = (mfp_sample)(*(double *)sig_0_ptr);
     }
     if (sig_1_ptr != NULL) {
-        d->const_in_1 = (mfp_sample)(*(float *)sig_1_ptr);
+        d->const_in_1 = (mfp_sample)(*(double *)sig_1_ptr);
     }
     return 1;
 }

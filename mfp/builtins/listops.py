@@ -27,7 +27,7 @@ class Pack (Processor):
             self.doc_tooltip_inlet.append("List item %d input" % i) 
 
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = [l for l in self.inlets]
 
 class Unpack (Processor):
@@ -49,7 +49,7 @@ class Unpack (Processor):
             self.doc_tooltip_outlet.append("List item %d output" % i)
         self.doc_tooltip_outlet.append("Rest of list output")
 
-    def trigger(self):
+    async def trigger(self):
         nout = len(self.outlets) - 1 
         for n in range(nout):
             try:
@@ -72,7 +72,7 @@ class Append (Processor):
         else:
             self.inlets[1] = []
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = self.inlets[1].append(self.inlets[0])
 
 class Zip (Processor):
@@ -92,7 +92,7 @@ class Zip (Processor):
 
         Processor.__init__(self, num_inlets, 1, init_type, init_args, patch, scope, name)
 
-    def trigger(self):
+    async def trigger(self):
         if len(self.inlets) == 1:
             self.outlets[0] = list(zip(*self.inlets[0]))
         else: 
@@ -112,7 +112,7 @@ class Map (Processor):
             self.inlets[1] =  initargs[0]
 
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = list(map(self.inlets[1], self.inlets[0]))
 
 
@@ -135,7 +135,7 @@ class Slice (Processor):
         if len(initargs) > 0:
             self.inlets[1] = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         start = self.inlets[1] if self.inlets[1] is not Uninit else None
         stop = self.inlets[2] if self.inlets[2] is not Uninit else None
         stride  = self.inlets[3] if self.inlets[3] is not Uninit else 1

@@ -26,7 +26,7 @@ class Dispatch (Processor):
     def method(self, value, inlet):
         self.trigger()
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
             self.outlets[0] = (self.inlets[0].method, self.inlets[0])
             self.inlets[0] = Uninit 
@@ -44,7 +44,7 @@ class BaseClass (Processor):
     def __init__(self, init_type, init_args, patch, scope, name): 
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], (list, tuple)):
             name, obj = self.inlets[0] 
             if isinstance(obj, MethodCall):

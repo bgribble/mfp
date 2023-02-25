@@ -26,11 +26,11 @@ class Biquad(Processor):
     async def setup(self):
         await self.dsp_init("biquad~")
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], dict):
             for param, val in self.inlets[0].items():
                 try:
-                    self.dsp_setparam(param, float(val))
+                    await self.dsp_setparam(param, float(val))
                 except Exception as e:
                     import traceback
                     tb = traceback.format_exc()
@@ -106,7 +106,7 @@ class BiquadWrapper(Processor):
     async def setup(self):
         await self.dsp_init("biquad~", **self.biquad_params)
 
-    def trigger(self):
+    async def trigger(self):
         recalc = False
         if self.inlets[1] is not Uninit:
             self.freq = self.inlets[1]
@@ -117,7 +117,7 @@ class BiquadWrapper(Processor):
         if recalc:
             self.biquad_params = self.biquad_thunk(self.freq, self.q)
             for n, v in self.biquad_params.items():
-                self.dsp_setparam(n, float(v))
+                await self.dsp_setparam(n, float(v))
 
 
 def mk_biquad(thunk, filter_name):

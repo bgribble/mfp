@@ -38,10 +38,10 @@ class DelaySig (Processor):
     async def setup(self):
         await self.dsp_init(self.dsp_type, bufsize=self.init_bufsize, _sig_1=self.init_size)
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[0], dict):
             for k, v in self.inlets[0].items():
-                self.dsp_setparam(k, v)
+                await self.dsp_setparam(k, v)
 
 
 class DelayBlkSig (DelaySig):

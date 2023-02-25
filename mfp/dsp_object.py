@@ -47,14 +47,6 @@ class DSPContext:
 
 @apiclass
 class DSPObject:
-    objects = {}
-
-    def __init__(self, obj_id, name, inlets, outlets, params, context, patch_id):
-        self.obj_id = obj_id
-        # peer = context.node_id
-        # ctxt = context.context_id
-        # RPCWrapper.__init__(self, obj_id, name, inlets, outlets, params, ctxt, patch_id, peer_id=peer)
-
     def reset(self):
         pass
 

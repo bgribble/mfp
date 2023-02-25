@@ -51,7 +51,7 @@ class RadioGroup (Processor):
                 self.send(RGForceFalse(), i)
             self.send(True, self.init_selection)
 
-    def trigger(self):
+    async def trigger(self):
         for inum, ival in enumerate(self.inlets):
             if ival is Uninit:
                 continue

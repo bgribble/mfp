@@ -19,7 +19,7 @@ process(mfp_processor * proc)
 
     /* iterate */ 
     for(scount=0; scount < proc->context->blocksize; scount++) {
-        *sample++ = (float)(1.0 - 2.0*(double)random() / ((double)RAND_MAX));
+        *sample++ = (1.0 - 2.0*(double)random() / ((double)RAND_MAX));
     }
 
     return 0;

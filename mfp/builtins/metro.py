@@ -42,7 +42,7 @@ class Throttle (Processor):
         if len(parsed_args):
             self.interval = timedelta(milliseconds=int(parsed_args[0]))
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.interval = timedelta(milliseconds=int(self.inlets[1]))
             self.inlets[1] = Uninit
@@ -89,7 +89,7 @@ class Delay (Processor):
         if len(parsed_args):
             self.delay = timedelta(milliseconds=int(parsed_args[0]))
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.delay = timedelta(milliseconds=int(self.inlets[1]))
             self.inlets[1] = Uninit
@@ -127,7 +127,7 @@ class Metro (Processor):
         if len(parsed_args):
             self.interval = timedelta(milliseconds=int(parsed_args[0]))
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.interval = timedelta(milliseconds=int(self.inlets[1]))
             self.inlets[1] = Uninit
@@ -184,7 +184,7 @@ class BeatChase (Processor):
         if len(parsed_args) > 0:
             self.multiplier = parsed_args[0]
 
-    def trigger(self):
+    async def trigger(self):
         def interval_div(intvl, divisor):
             ts = intvl.total_seconds() / float(divisor)
             int_sec = int(ts)

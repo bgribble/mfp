@@ -418,7 +418,6 @@ class Processor:
         from .mfp_app import MFPApp
         if self.patch.context:
             DSPObjectFactory = await MFPApp().rpc_host.require(DSPObject)
-            log.debug(f"dsp_init: {self.obj_id} {proc_name} {len(self.dsp_inlets)} {len(self.dsp_outlets)} {params} {self.patch.context} {self.patch.obj_id}")
             self.dsp_obj = await DSPObjectFactory(
                 self.obj_id,
                 proc_name,
@@ -437,14 +436,14 @@ class Processor:
     def dsp_outlet(self, outlet):
         return (self.dsp_obj, self.dsp_outlets.index(outlet))
 
-    def dsp_reset(self):
-        self.dsp_obj.reset()
+    async def dsp_reset(self):
+        await self.dsp_obj.reset()
 
-    def dsp_setparam(self, param, value):
-        self.dsp_obj.setparam(param, value)
+    async def dsp_setparam(self, param, value):
+        await self.dsp_obj.setparam(param, value)
 
-    def dsp_getparam(self, param, value):
-        return self.dsp_obj.getparam(param, value)
+    async def dsp_getparam(self, param, value):
+        return await self.dsp_obj.getparam(param, value)
 
     def delete(self):
         from .mfp_app import MFPApp
@@ -521,7 +520,7 @@ class Processor:
 
         self.conf(num_inlets=inlets, num_outlets=outlets)
 
-    def connect(self, outlet, target, inlet, show_gui=True):
+    async def connect(self, outlet, target, inlet, show_gui=True):
         from .mfp_app import MFPApp
         from .patch import Patch
 
@@ -567,7 +566,7 @@ class Processor:
             out_obj, out_outlet = self.dsp_outlet(outlet)
             in_obj, in_inlet = target.dsp_inlet(inlet)
             if out_obj and in_obj:
-                out_obj.connect(out_outlet, in_obj.obj_id, in_inlet)
+                await out_obj.connect(out_outlet, in_obj._id, in_inlet)
             else:
                 log.warning("Trying to find DSP objects, failed", type(self), self.name,
                             type(target), target.name,
@@ -594,14 +593,14 @@ class Processor:
             task(MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet))
         return True
 
-    def disconnect(self, outlet, target, inlet):
+    async def disconnect(self, outlet, target, inlet):
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             out_obj, out_outlet = self.dsp_outlet(outlet)
             in_obj, in_inlet = target.dsp_inlet(inlet)
 
             if out_obj is not None and in_obj is not None:
-                out_obj.disconnect(out_outlet, in_obj.obj_id, in_inlet)
+                await out_obj.disconnect(out_outlet, in_obj._id, in_inlet)
             else:
                 log.warning("disconnect having trouble,",
                             self, self.name, self.scope, outlet, target, inlet, in_obj,
@@ -629,7 +628,7 @@ class Processor:
             mv.values.append(value)
             self.outlets[outlet_num] = mv
 
-    def send(self, value, inlet=0):
+    async def send(self, value, inlet=0):
         if self.paused:
             return
 
@@ -637,11 +636,11 @@ class Processor:
 
         try:
             with self.trigger_lock:
-                work = self._send(value, inlet)
+                work = await self._send(value, inlet)
             while len(work):
                 w_target, w_val, w_inlet = work[0]
                 with w_target.trigger_lock:
-                    work[:1] = w_target._send(w_val, w_inlet)
+                    work[:1] = await w_target._send(w_val, w_inlet)
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
@@ -652,7 +651,7 @@ class Processor:
             if w_target:
                 w_target.error("%s" % e.args, tb)
 
-    def _send(self, value, inlet=0):
+    async def _send(self, value, inlet=0):
         if self.paused:
             return []
 
@@ -677,7 +676,7 @@ class Processor:
                     self.add_output(value.outlet_num, value.value)
                     self.inlets[inlet] = Uninit
             else:
-                self.trigger()
+                await self.trigger()
                 self.count_trigger += 1
             output_pairs = list(zip(self.connections_out, self.outlets))
 
@@ -702,7 +701,7 @@ class Processor:
         try:
             if ((inlet in self.dsp_inlets)
                     and not isinstance(value, bool) and isinstance(value, (float, int))):
-                self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
+                await self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
         except (TypeError, ValueError):
             pass
 

@@ -451,11 +451,11 @@ config(mfp_processor * proc)
     }
 
     if (bufmode_ptr != NULL) {
-        d->buf_mode = *(float *)bufmode_ptr;
+        d->buf_mode = *(double *)bufmode_ptr;
     }
 
     if (bufstate_ptr != NULL) {
-        if ((*(float *)bufstate_ptr) > 0.5) {
+        if ((*(double *)bufstate_ptr) > 0.5) {
             d->buf_state = BUF_ACTIVE;
         }
         else {
@@ -466,7 +466,7 @@ config(mfp_processor * proc)
     }
 
     if (recenable_ptr != NULL) {
-        d->rec_enabled = (int)(*(float *)recenable_ptr);
+        d->rec_enabled = (int)(*(double *)recenable_ptr);
         if(!d->rec_enabled) {
             if ((d->buf_mode == REC_LOOPSET) || (d->buf_mode == REC_LOOP)) {
                 d->buf_mode = PLAY_LOOP;
@@ -478,36 +478,36 @@ config(mfp_processor * proc)
     }
 
     if (recchan_ptr != NULL) {
-        d->rec_channels = (int)(*(float *)recchan_ptr);
+        d->rec_channels = (int)(*(double *)recchan_ptr);
     }
 
     if (trigchan_ptr != NULL) {
-        d->trig_channel = *(float *)trigchan_ptr;
+        d->trig_channel = *(double *)trigchan_ptr;
     }
 
     if (trigthresh_ptr != NULL) {
-        d->trig_thresh = *(float *)trigthresh_ptr;
+        d->trig_thresh = *(double *)trigthresh_ptr;
     }
 
     if (regionstart_ptr != NULL) {
-        d->region_start = (int)(*(float *)regionstart_ptr);
+        d->region_start = (int)(*(double *)regionstart_ptr);
     }
 
     if (regionend_ptr != NULL) {
-        d->region_end = (int)(*(float *)regionend_ptr);
+        d->region_end = (int)(*(double *)regionend_ptr);
     }
 
     if (playchan_ptr != NULL) {
-        d->play_channels = (int)(*(float *)playchan_ptr);
+        d->play_channels = (int)(*(double *)playchan_ptr);
     }
 
     if (clearchan_ptr != NULL) { 
         int channel;
-        int clear_channels = (int)(*(float *)clearchan_ptr);
+        int clear_channels = (int)(*(double *)clearchan_ptr);
         for(channel = 0; channel < d->chan_count; channel++) {
             if((1 << channel) & clear_channels) {
                 bzero(d->buf_base + channel*d->chan_size, 
-                      sizeof(float)*d->chan_size);
+                      sizeof(double)*d->chan_size);
             }
         }
         g_hash_table_remove(proc->params, "clear_channels");

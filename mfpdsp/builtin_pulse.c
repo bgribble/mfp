@@ -178,27 +178,27 @@ config(mfp_processor * proc)
 
     /* get parameters */
     if (freq_ptr != NULL) {
-        d->const_freq = *(float *)freq_ptr;
+        d->const_freq = *(double *)freq_ptr;
     }
 
     if (pw_ptr != NULL) {
-        d->const_pw = *(float *)pw_ptr;
+        d->const_pw = *(double *)pw_ptr;
     }
 
     if (loval_ptr != NULL) {
-        d->loval = *(float *)loval_ptr;
+        d->loval = *(double *)loval_ptr;
     }
 
     if (hival_ptr != NULL) {
-        d->hival = *(float *)hival_ptr;
+        d->hival = *(double *)hival_ptr;
     }
 
     if (pw_mode_ptr != NULL) {
-        d->pw_mode = (int)(*(float *)pw_mode_ptr);
+        d->pw_mode = (int)(*(double *)pw_mode_ptr);
     }
 
     if (phase_ptr != NULL) {
-        d->phase = *(float *)phase_ptr;
+        d->phase = *(double *)phase_ptr;
         g_hash_table_remove(proc->params, "phase");
         /* FIXME free in config() */
         g_free(phase_ptr);

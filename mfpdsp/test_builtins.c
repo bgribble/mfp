@@ -14,10 +14,10 @@ setparam_gpointer(mfp_processor * proc, char * param_name, gpointer value)
 }
 
 static void
-setparam_float(mfp_processor * proc, char * param_name, float value)
+setparam_double(mfp_processor * proc, char * param_name, double value)
 {
-    gpointer val = g_malloc(sizeof(float));
-    *(float *)val = value;
+    gpointer val = g_malloc(sizeof(double));
+    *(double *)val = value;
     mfp_proc_setparam(proc, g_strdup(param_name), val); 
 }
 
@@ -29,7 +29,7 @@ test_sig_1(void * data)
     mfp_sample * outp; 
 
     printf("   test_sig_1... ");
-    setparam_float(sig, "value", 13.0);
+    setparam_double(sig, "value", 13.0);
     mfp_proc_process(sig);
 
     outp = sig->outlet_buf[0]->data;
@@ -61,8 +61,8 @@ test_sig_2(void * data)
     mfp_proc_connect(sig_1, 0, dac, 0);
     mfp_proc_connect(sig_2, 0, dac, 0);
 
-    setparam_float(sig_1, "value", 13.0);
-    setparam_float(sig_2, "value", 12.0);
+    setparam_double(sig_1, "value", 13.0);
+    setparam_double(sig_2, "value", 12.0);
     mfp_dsp_schedule((mfp_context *)data);
     mfp_dsp_run((mfp_context *)data);
 
@@ -98,10 +98,10 @@ test_plus_multi(void * data)
     mfp_proc_connect(sig_2, 0, dac, 0);
     mfp_proc_connect(sig_3, 0, dac, 1);
 
-    setparam_float(sig_1, "value", 13.0);
-    setparam_float(sig_2, "value", 11.0);
-    setparam_float(sig_3, "value", 51.0);
-    setparam_float(dac, "const", 10.0);
+    setparam_double(sig_1, "value", 13.0);
+    setparam_double(sig_2, "value", 11.0);
+    setparam_double(sig_3, "value", 51.0);
+    setparam_double(dac, "const", 10.0);
 
     mfp_dsp_schedule((mfp_context *)data);
     mfp_dsp_run((mfp_context *)data);
@@ -128,11 +128,11 @@ test_line_1(void * data)
     mfp_sample * outp; 
     int snum;
 
-    float tval[] = { 0.0, 1.0, 1.0, 
+    double tval[] = { 0.0, 1.0, 1.0, 
                      0.0, 0.0, 0.0, 
                      1.0, 1.0, 1.0 };
 
-    GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(float), 6);
+    GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(double), 6);
 
     printf("   test_line_1 \n ");
     for (snum=0; snum < 9; snum++) {
@@ -205,11 +205,11 @@ test_line_2(void * data)
     int snum;
     int blocksize = ((mfp_context *)data)->blocksize;
     int samplerate = ((mfp_context *)data)->samplerate;
-    float tval_1[] = { 0.0, 1.0, 2.0*(blocksize-1)/samplerate*1000.0 } ;
-    float tval_2[] = { 0.0, 0.0, 1.0*(blocksize-1)/samplerate*1000.0 } ;
+    double tval_1[] = { 0.0, 1.0, 2.0*(blocksize-1)/samplerate*1000.0 } ;
+    double tval_2[] = { 0.0, 0.0, 1.0*(blocksize-1)/samplerate*1000.0 } ;
 
-    GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
-    GArray * env_2 = g_array_sized_new(TRUE, TRUE, sizeof(float), 4);
+    GArray * env_1 = g_array_sized_new(TRUE, TRUE, sizeof(double), 4);
+    GArray * env_2 = g_array_sized_new(TRUE, TRUE, sizeof(double), 4);
 
     for (snum=0; snum < 3; snum++) {
         g_array_append_val(env_1, tval_1[snum]);
@@ -268,18 +268,18 @@ int
 benchmark_osc_1(void * data) 
 {
     struct timeval start, end;
-    float naive, fast;
+    double naive, fast;
     mfp_block * in = mfp_block_new(((mfp_context *)data)->blocksize);
     mfp_block * out = mfp_block_new(((mfp_context *)data)->blocksize);
     int x;
     mfp_procinfo * proctype = g_hash_table_lookup(mfp_proc_registry, "osc~");
     mfp_processor * osc = mfp_proc_create(proctype, 2, 1, (mfp_context *)data);
 
-    setparam_float(osc, "_sig_1", 1000.0);
-    setparam_float(osc, "_sig_2", 100.0);
+    setparam_double(osc, "_sig_1", 1000.0);
+    setparam_double(osc, "_sig_2", 100.0);
 
     for(x = 0; x < in->blocksize; x++) {
-        in->data[x] = (float)x * 2.0*M_PI/1024.0;
+        in->data[x] = (double)x * 2.0*M_PI/1024.0;
     }
 
     gettimeofday(&start, NULL);
@@ -313,8 +313,8 @@ test_osc_2(void * data)
     int fail = 0;
 
     printf("test_osc_2... \n");
-    setparam_float(osc, "_sig_1", 1000.0);
-    setparam_float(sig, "value", 100.0);
+    setparam_double(osc, "_sig_1", 1000.0);
+    setparam_double(sig, "value", 100.0);
 
     mfp_proc_connect(sig, 0, osc, 1);
 
@@ -345,8 +345,8 @@ test_osc_1(void * data)
     int fail = 0;
 
     printf("test_osc_1... \n");
-    setparam_float(osc, "_sig_1", 1000.0);
-    setparam_float(osc, "_sig_2", 100.0);
+    setparam_double(osc, "_sig_1", 1000.0);
+    setparam_double(osc, "_sig_2", 100.0);
 
     mfp_proc_process(osc);
 
@@ -427,14 +427,14 @@ test_buffer_2(void * data)
     mfp_procinfo * buf_t = g_hash_table_lookup(mfp_proc_registry, "buffer~");
     mfp_processor * line = mfp_proc_create(line_t, 0, 1, (mfp_context *)data);
     mfp_processor * b = mfp_proc_create(buf_t, 2, 1, (mfp_context *)data);
-    GArray * lparm = g_array_sized_new(TRUE, TRUE, sizeof(float), 3);
+    GArray * lparm = g_array_sized_new(TRUE, TRUE, sizeof(double), 3);
     builtin_buffer_data * info = (builtin_buffer_data *)b->data;
     int blocksize = ((mfp_context *)data)->blocksize;
     int i;
     int fail=0;
-    float ft;
+    double ft;
 
-    ft = (float)(1000.0*(((mfp_context *)data)->blocksize/2)/((mfp_context *)data)->samplerate);
+    ft = (double)(1000.0*(((mfp_context *)data)->blocksize/2)/((mfp_context *)data)->samplerate);
     g_array_append_val(lparm, ft); 
     ft = 5.0;
     g_array_append_val(lparm, ft);
@@ -442,13 +442,13 @@ test_buffer_2(void * data)
     g_array_append_val(lparm, ft);
 
 
-    setparam_float(b, "buf_mode", 3.0);
-    setparam_float(b, "rec_channels", 1.0);
-    setparam_float(b, "rec_enabled", 1.0);
-    setparam_float(b, "trig_channel", 0.0);
-    setparam_float(b, "trig_thresh", 2.0);
-    setparam_float(b, "channels", 1.0);
-    setparam_float(b, "size", ((mfp_context *)data)->blocksize);
+    setparam_double(b, "buf_mode", 3.0);
+    setparam_double(b, "rec_channels", 1.0);
+    setparam_double(b, "rec_enabled", 1.0);
+    setparam_double(b, "trig_channel", 0.0);
+    setparam_double(b, "trig_thresh", 2.0);
+    setparam_double(b, "channels", 1.0);
+    setparam_double(b, "size", ((mfp_context *)data)->blocksize);
 
     mfp_proc_connect(line, 0, b, 0);
 
@@ -464,7 +464,7 @@ test_buffer_2(void * data)
     mfp_dsp_run((mfp_context *)data);
 
     if((info->buf_active.shm_fd == -1) 
-        || (info->buf_active.buf_size != blocksize*sizeof(float))
+        || (info->buf_active.buf_size != blocksize*sizeof(double))
         || (info->chan_count != 1) 
         || (info->chan_size != blocksize)) {
         printf("config fail %d %d %d %d\n", info->buf_active.shm_fd, 
@@ -475,14 +475,14 @@ test_buffer_2(void * data)
 
     for(i=0; i < blocksize; i++) {
         if (i < blocksize/2.0) {
-            if (info->buf_base == NULL || ((float *)(info->buf_base))[i] != 5.0) {
-                printf("Fail at %d (%f should be 5.0)\n", i, ((float *)(info->buf_base))[i]);
+            if (info->buf_base == NULL || ((double *)(info->buf_base))[i] != 5.0) {
+                printf("Fail at %d (%f should be 5.0)\n", i, ((double *)(info->buf_base))[i]);
                 fail = 1;
             }
         }
         else {
-            if (info->buf_base == NULL || ((float *)(info->buf_base))[i] != 0.0) {
-                printf("Fail at %d (%f should be 0.0)\n", i, ((float *)(info->buf_base))[i]);
+            if (info->buf_base == NULL || ((double *)(info->buf_base))[i] != 0.0) {
+                printf("Fail at %d (%f should be 0.0)\n", i, ((double *)(info->buf_base))[i]);
                 fail = 1;
             }
         }

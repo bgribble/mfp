@@ -27,7 +27,7 @@ class Line(Processor):
     async def setup(self):
         await self.dsp_init("line~", segments=self.init_segments)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is not None:
             if isinstance(self.inlets[0], (float, int)):
                 pos = float(self.inlets[0])

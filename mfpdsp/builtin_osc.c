@@ -159,15 +159,15 @@ config(mfp_processor * proc)
 
     /* get parameters */ 
     if (freq_ptr != NULL) {
-        d->const_freq = *(float *)freq_ptr;
+        d->const_freq = *(double *)freq_ptr;
     }
 
     if (ampl_ptr != NULL) {
-        d->const_ampl = *(float *)ampl_ptr;
+        d->const_ampl = *(double *)ampl_ptr;
     }
 
     if (phase_ptr != NULL) {
-        d->phase = *(float *)phase_ptr;-
+        d->phase = *(double *)phase_ptr;-
         g_hash_table_remove(proc->params, "phase");
         /* FIXME free in config() */ 
         g_free(phase_ptr);

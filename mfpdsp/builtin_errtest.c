@@ -58,18 +58,18 @@ config(mfp_processor * proc)
     int errconf;
 
     if (err_config != NULL) {
-        if ((int)(*(float *)err_config)) { 
+        if ((int)(*(double *)err_config)) { 
             printf("errtest~: About to segfault in config(), PID=%d\n", getpid());
             SEGFAULT();
         }
     }
 
     if (err_process != NULL) {
-        d->err_process = (int)(*(float *)err_process);
+        d->err_process = (int)(*(double *)err_process);
     }
 
     if (err_destroy != NULL) {
-        d->err_destroy = (int)(*(float *)err_destroy);
+        d->err_destroy = (int)(*(double *)err_destroy);
     }
 
     return 1;

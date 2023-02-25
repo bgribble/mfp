@@ -59,7 +59,7 @@ config(mfp_processor * proc)
     gpointer val_ptr = g_hash_table_lookup(proc->params, "value");
 
     if(val_ptr != NULL) {
-        d->sample = *(float *)val_ptr;
+        d->sample = *(double *)val_ptr;
     }
 
     return 1;

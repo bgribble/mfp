@@ -29,7 +29,7 @@ class StepSeq(Processor):
     async def setup(self):
         await self.dsp_init("stepseq~", steps=self.init_steps, trig_ms=10, threshold=0.5)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] is not None:
             if isinstance(self.inlets[0], (float, int)):
                 pos = float(self.inlets[0])

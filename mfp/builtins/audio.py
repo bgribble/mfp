@@ -28,10 +28,10 @@ class AudioOut(Processor):
     async def setup(self):
         await self.dsp_init("out~", channel=self.channel)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             channel = int(self.inlets[1])
-            self.dsp_setparam("channel", channel)
+            await self.dsp_setparam("channel", channel)
 
 
 class AudioIn(Processor):
@@ -53,9 +53,9 @@ class AudioIn(Processor):
     async def setup(self):
         await self.dsp_init("in~", channel=self.channel)
 
-    def trigger(self):
+    async def trigger(self):
         self.channel = int(self.inlets[0])
-        self.dsp_setparam("channel", self.channel)
+        await self.dsp_setparam("channel", self.channel)
 
 
 def register():

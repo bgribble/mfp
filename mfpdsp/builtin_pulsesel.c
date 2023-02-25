@@ -123,19 +123,19 @@ config(mfp_processor * proc)
 
     /* get parameters */
     if (period_ptr != NULL) {
-        d->period = *(float *)period_ptr;
+        d->period = *(double *)period_ptr;
     }
 
     if (bitmask_ptr != NULL) {
-        d->bitmask = (int)(*(float *)bitmask_ptr);
+        d->bitmask = (int)(*(double *)bitmask_ptr);
     }
 
     if (threshold_ptr != NULL) {
-        d->threshold = *(float *)threshold_ptr;
+        d->threshold = *(double *)threshold_ptr;
     }
 
     if (phase_ptr != NULL) {
-        d->phase = (int)*(float *)phase_ptr;
+        d->phase = (int)*(double *)phase_ptr;
         g_hash_table_remove(proc->params, "phase");
         /* FIXME free in config() */
         g_free(phase_ptr);

@@ -37,7 +37,7 @@ class Note2Freq(Processor):
             self.tuning = scale.EqualTemper()
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.scale = self.inlets[1]
             self.inlets[1] = Uninit 

@@ -43,7 +43,7 @@ class Var (Processor):
         if phase == 1 and self.value is not Uninit:
             self.send(Bang)
 
-    def trigger(self):
+    async def trigger(self):
         '''
         [var] trigger, basic form:
                 - on inlet 1, save value but do not output.
@@ -112,7 +112,7 @@ class Message (Var):
         Var.__init__(self, init_type, init_args, patch, scope, name)
         self.hot_inlets = (0, 1)
 
-    def trigger(self): 
+    async def trigger(self): 
         do_update = False
         if self.inlets[1] is not Uninit:
             self.value = self.inlets[1]

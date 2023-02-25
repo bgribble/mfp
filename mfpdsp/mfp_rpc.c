@@ -34,6 +34,59 @@ json_notval(JsonNode * node)
     }
 }
 
+static void *
+encode_param_value_pb2(mfp_processor * proc, const char * param_name, const void * param_value, Carp__PythonValue * value)
+{
+    int vtype = GPOINTER_TO_INT(g_hash_table_lookup(proc->typeinfo->params, param_name));
+    GValue gval = G_VALUE_INIT;
+    GArray * ga;
+    double dval;
+    void * rval = NULL;
+
+    switch ((int)vtype) {
+        case PARAMTYPE_UNDEF:
+            printf("encode_param_value: undefined parameter %s\n", param_name);
+            break;
+
+        case PARAMTYPE_FLT:
+            value->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__DOUBLE;
+            value->_double = *(double *)param_value;
+            break;
+
+        case PARAMTYPE_INT:
+            value->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__INT;
+            value->_int = (int)(*(double *)param_value);
+            break;
+
+        case PARAMTYPE_BOOL:
+            value->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__BOOL;
+            value->_bool = (int)(*(double *)param_value);
+            break;
+
+        case PARAMTYPE_STRING:
+            value->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__STRING;
+            value->_string = g_strdup(param_value);
+            break;
+
+        case PARAMTYPE_FLTARRAY:
+            mfp_rpc_argblock * resp = g_malloc0(sizeof(mfp_rpc_argblock));
+            mfp_rpc_args * arglist = mfp_rpc_args_init(resp);
+
+            ga = (GArray *)param_value;
+
+            for (int i=0; i < ga->len; i++) {
+                dval = g_array_index(ga, double, i);
+                mfp_rpc_args_append_double(arglist, dval);
+            }
+            value->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__ARRAY;
+            value->_array = &(resp->arg_array);
+            rval = resp;
+            break;
+    }
+    return rval;
+
+}
+
 static JsonNode *
 encode_param_value(mfp_processor * proc, const char * param_name, const void * param_value)
 {
@@ -137,6 +190,7 @@ extract_param_value_pb2(mfp_processor * proc, const char * param_name, Carp__Pyt
         case PARAMTYPE_UNDEF:
             printf("extract_param_value: undefined parameter %s\n", param_name);
             break;
+
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
         case PARAMTYPE_BOOL:
@@ -300,7 +354,7 @@ dispatch_create_json(JsonArray * args, JsonObject * kwargs)
 }
 
 void
-dispatch_create_pb2(Carp__PythonArray * args, Carp__PythonDict * kwargs, mfp_rpc_args * response)
+dispatch_create_pb2(Carp__PythonArray * args, Carp__PythonDict * kwargs, Carp__PythonValue * response)
 {
     int num_inlets, num_outlets;
     int ctxt_id;
@@ -342,9 +396,8 @@ dispatch_create_pb2(Carp__PythonArray * args, Carp__PythonDict * kwargs, mfp_rpc
 
         }
         mfp_proc_init(proc, rpc_id, patch_id);
-
-        mfp_rpc_args_append_bool(response, 1);
-        mfp_rpc_args_append_int(response, proc->rpc_id);
+        response->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__INT;
+        response->_int = proc->rpc_id;
 
         return;
     }
@@ -518,6 +571,76 @@ mfp_rpc_wait(int request_id)
 }
 
 
+static void *
+dispatch_methodcall_pb2(
+    const char * service_name,
+    int obj_id,
+    Carp__PythonArray * args,
+    Carp__PythonDict * kwargs,
+    Carp__PythonValue * rval)
+{
+    mfp_in_data rd;
+    void * to_free = NULL;
+
+    mfp_log_debug("[method] %s on %d", service_name, obj_id);
+
+    if(!strcmp(service_name, "DSPObject.connect")) {
+        mfp_log_debug("[method] connect");
+        rd.reqtype = REQTYPE_CONNECT;
+        rd.src_proc = obj_id;
+        rd.src_port = args->items[0]->_int;
+        rd.dest_proc = args->items[1]->_int;
+        rd.dest_port = args->items[2]->_int;
+        mfp_dsp_push_request(rd);
+    }
+    else if (!strcmp(service_name, "DSPObject.disconnect")) {
+        mfp_log_debug("[method] disconnect");
+        rd.reqtype = REQTYPE_DISCONNECT;
+        rd.src_proc = obj_id;
+        rd.src_port = args->items[0]->_int;
+        rd.dest_proc = args->items[1]->_int;
+        rd.dest_port = args->items[2]->_int;
+
+        mfp_dsp_push_request(rd);
+    }
+    else if (!strcmp(service_name, "DSPObject.getparam")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
+        const char * param_name = args->items[0]->_string;
+        const void * param_value = g_hash_table_lookup(src_proc->params, param_name);
+        to_free = encode_param_value_pb2(
+            src_proc, param_name, param_value, rval
+        );
+    }
+    else if (!strcmp(service_name, "DSPObject.setparam")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
+        rd.reqtype = REQTYPE_SETPARAM;
+        rd.src_proc = obj_id;
+        rd.param_name = args->items[0]->_string;
+        rd.param_type = mfp_proc_param_type(src_proc, rd.param_name);
+        rd.param_value = (gpointer)extract_param_value_pb2(
+            src_proc, rd.param_name, args->items[1]
+        );
+        mfp_dsp_push_request(rd);
+    }
+    else if (!strcmp(service_name, "DSPObject.delete")) {
+        rd.reqtype = REQTYPE_DESTROY;
+        rd.src_proc = obj_id;
+        mfp_dsp_push_request(rd);
+    }
+    else if (!strcmp(service_name, "DSPObject.reset")) {
+        rd.reqtype = REQTYPE_RESET;
+        rd.src_proc = obj_id;
+        mfp_dsp_push_request(rd);
+    }
+    else {
+        mfp_log_debug("[method] unhandled method '%s'", service_name);
+    }
+
+    return to_free;
+
+}
+
+
 static int
 mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
 {
@@ -530,48 +653,42 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
         Carp__CallData * calldata =
             carp__call_data__unpack(NULL, envelope->content.len, envelope->content.data);
 
-        mfp_log_debug(
-            "[pb2] unpacked CallData: callid=%d service=%s host=%s",
-            calldata->call_id,
-            calldata->service_name, calldata->host_id
-        );
-
-        mfp_rpc_argblock response;
-        mfp_rpc_args_init(&response);
+        Carp__PythonValue response = CARP__PYTHON_VALUE__INIT;
+        mfp_log_debug("[dispatch] service_name='%s'", calldata->service_name);
 
         if (!strcmp(calldata->service_name, "DSPObject")) {
-            mfp_log_debug("[pb2] Creating DSPObject");
-
-            dispatch_create_pb2(calldata->args, calldata->kwargs, &(response.arg_array));
+            dispatch_create_pb2(calldata->args, calldata->kwargs, &response);
         }
+        else if (!strncmp(calldata->service_name, "DSPObject", 9)) {
+            dispatch_methodcall_pb2(
+                calldata->service_name,
+                calldata->instance_id,
+                calldata->args,
+                calldata->kwargs,
+                &response
+            );
+        }
+
         if (calldata->call_id > -1) {
             char * msgbuf = mfp_comm_get_buffer();
             int msglen = 0;
-            mfp_log_debug("[pb2] Building response");
             mfp_rpc_response(
                 calldata->call_id,
                 calldata->service_name,
-                &(response.arg_array_value),
+                &response,
                 msgbuf,
                 &msglen
             );
             mfp_comm_submit_buffer(msgbuf, msglen);
-            mfp_log_debug("[pb2] sent response");
         }
     }
     else if (!strcmp(envelope->content_type, "CallResponse")) {
         Carp__CallResponse * response =
             carp__call_response__unpack(NULL, envelope->content.len, envelope->content.data);
-        mfp_log_debug(
-            "[pb2] unpacked CallResponse: callid=%d service=%s host=%s",
-            response->call_id,
-            response->service_name, response->host_id
-        );
 
         /* it's a response, is there a callback? */
         callback = g_hash_table_lookup(request_callbacks, GINT_TO_POINTER(response->call_id));
         if (callback != NULL) {
-            mfp_log_debug("[pb2] Found callback for response");
             void (* cbfunc)(Carp__PythonValue *, void *) = (void (*)(Carp__PythonValue *, void *))callback;
             void * cbdata = g_hash_table_lookup(request_data, GINT_TO_POINTER(response->call_id));
 
@@ -591,8 +708,6 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
         carp__call_response__free_unpacked(response, NULL);
     }
     carp__envelope__free_unpacked(envelope, NULL);
-    mfp_log_debug("[pb2] done with dispatch");
-
 }
 
 
@@ -689,8 +804,6 @@ mfp_rpc_dispatch_json(const char * msgbuf, int msglen)
 int
 mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
 {
-    mfp_log_info("[dispatch] %s", msgbuf);
-
     if (!strncmp(msgbuf, "json:", 5)) {
         msgbuf += 5;
         msglen -= 5;

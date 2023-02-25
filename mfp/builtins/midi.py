@@ -36,7 +36,7 @@ class MidiIn (Processor):
         self.handler = MFPApp().midi_mgr.register(self.send, 0, filters)
         self.midi_filters = copy.copy(filters)
 
-    def trigger(self):
+    async def trigger(self):
         event = self.inlets[0]
         if isinstance(event, dict):
             for attr, val in event.items():
@@ -60,7 +60,7 @@ class MidiOut (Processor):
         if len(initargs):
             self.channel = initargs[0]
 
-    def trigger(self):
+    async def trigger(self):
         event = self.inlets[0]
 
         if isinstance(event, dict):

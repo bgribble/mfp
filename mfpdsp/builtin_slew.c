@@ -87,13 +87,13 @@ config(mfp_processor * proc)
 
     
     if (const_ptr != NULL) {
-        p->const_signal = (double)(*(float *)const_ptr);
+        p->const_signal = (double)(*(double *)const_ptr);
     }
     if (rise_ptr != NULL) {
-        p->rise_time = (double)(*(float *)rise_ptr);
+        p->rise_time = (double)(*(double *)rise_ptr);
     }
     if (fall_ptr != NULL) {
-        p->fall_time = (double)(*(float *)fall_ptr);
+        p->fall_time = (double)(*(double *)fall_ptr);
     }
 
     return 1;

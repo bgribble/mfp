@@ -30,26 +30,26 @@ class Snap(Processor):
 
     async def setup(self):
         await self.dsp_init("snap~")
-        self.dsp_setparam("retrigger", self.retrigger)
+        await self.dsp_setparam("retrigger", self.retrigger)
 
         if self.retrigger: 
-            self.dsp_setparam("trigger", 1);
+            await self.dsp_setparam("trigger", 1);
 
-    def trigger(self):
+    async def trigger(self):
         if isinstance(self.inlets[1], (float, int)):
             self.retrigger = float(self.inlets[1])
 
         if self.inlets[0] is Bang:
-            self.dsp_setparam("trigger", 1.0)
+            await self.dsp_setparam("trigger", 1.0)
         elif self.inlets[0] is True:
-            self.dsp_setparam("retrigger", self.retrigger)
-            self.dsp_setparam("trigger", 1.0)
+            await self.dsp_setparam("retrigger", self.retrigger)
+            await self.dsp_setparam("trigger", 1.0)
         elif self.inlets[0] is False:
-            self.dsp_setparam("retrigger", 0.0)
+            await self.dsp_setparam("retrigger", 0.0)
         elif isinstance(self.inlets[0], dict):
             for param, val in self.inlets[1].items():
                 try:
-                    self.dsp_setparam(param, float(val))
+                    await self.dsp_setparam(param, float(val))
                 except Exception as e:
                     import traceback 
                     tb = traceback.format_exc()

@@ -29,7 +29,7 @@ class FileIO(Processor):
                 self.filename = initargs[0]
                 self.open()
 
-    def trigger(self):
+    async def trigger(self):
         self.fileobj.write(self.inlets[0])
         self.inlets[0] = Uninit
 
