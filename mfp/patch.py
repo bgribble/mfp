@@ -354,7 +354,7 @@ class Patch(Processor):
             self.create_export_gui()
         return True
 
-    def delete_gui(self):
+    async def delete_gui(self):
         if not self.gui_created:
             return True
 
@@ -362,7 +362,7 @@ class Patch(Processor):
             obj.gui_created = False
             #obj.delete_gui()
 
-        Processor.delete_gui(self)
+        await Processor.delete_gui(self)
         return True
 
     def has_unsaved_changes(self):

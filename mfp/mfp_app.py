@@ -207,7 +207,7 @@ class MFPApp (Singleton):
         from .dsp_object import DSPObject, DSPContext
         if self.dsp_process is not None:
             log.debug("Terminating old DSP process...")
-            self.dsp_process.finish()
+            self.dsp_process.cancel()
             self.dsp_process = None
 
         dspcommand = [
@@ -509,7 +509,7 @@ class MFPApp (Singleton):
             log.debug("MFPApp.finish: reaping DSP process...")
             pp = self.dsp_process
             self.dsp_process = None
-            pp.finish()
+            await pp.cancel()
 
         if self.gui_process:
             log.debug("MFPApp.finish: reaping GUI process...")
