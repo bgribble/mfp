@@ -187,10 +187,8 @@ mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response)
     char * msgbuf = mfp_comm_get_buffer();
     int msglen = 0;
     char tbuf[MFP_MAX_MSGSIZE];
-    mfp_log_debug("[send_response] sending %f", response);
     snprintf(tbuf, MFP_MAX_MSGSIZE, "%f", response);
     mfp_api_dsp_response(proc->rpc_id, tbuf, msg_type, msgbuf, &msglen);
-    mfp_log_debug("[send_response] %s bytes - %s", msgbuf, msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
 }
 

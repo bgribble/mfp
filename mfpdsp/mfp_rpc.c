@@ -194,7 +194,14 @@ extract_param_value_pb2(mfp_processor * proc, const char * param_name, Carp__Pyt
         case PARAMTYPE_FLT:
         case PARAMTYPE_INT:
         case PARAMTYPE_BOOL:
-            dval = param_value->_double;
+            switch(param_value->value_types_case) {
+                case CARP__PYTHON_VALUE__VALUE_TYPES__DOUBLE:
+                    dval = param_value->_double;
+                    break;
+                case CARP__PYTHON_VALUE__VALUE_TYPES__INT:
+                    dval = (double)(param_value->_int);
+                    break;
+            }
             rval = (gpointer)g_malloc0(sizeof(double));
             *(double *)rval = dval;
             break;
@@ -209,7 +216,14 @@ extract_param_value_pb2(mfp_processor * proc, const char * param_name, Carp__Pyt
             endex = pbarray->n_items;
             rval = (gpointer)g_array_sized_new(TRUE, TRUE, sizeof(double), endex);
             for (i=0; i < endex; i++) {
-                dval = pbarray->items[i]->_double;
+                switch(pbarray->items[i]->value_types_case) {
+                    case CARP__PYTHON_VALUE__VALUE_TYPES__DOUBLE:
+                        dval = pbarray->items[i]->_double;
+                        break;
+                    case CARP__PYTHON_VALUE__VALUE_TYPES__INT:
+                        dval = (double)(pbarray->items[i]->_int);
+                        break;
+                }
                 g_array_append_val((GArray *)rval, dval);
             }
             break;
@@ -365,7 +379,6 @@ dispatch_create_pb2(Carp__PythonArray * args, Carp__PythonDict * kwargs, Carp__P
     Carp__PythonDict * createprms;
     const char * typename = args->items[1]->_string;
     pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typename);
-    mfp_log_debug("[create] typename=%s", typename);
 
     if (pinfo == NULL) {
         printf("[create] could not find type info for type '%s'\n", typename);
@@ -582,10 +595,7 @@ dispatch_methodcall_pb2(
     mfp_in_data rd;
     void * to_free = NULL;
 
-    mfp_log_debug("[method] %s on %d", service_name, obj_id);
-
     if(!strcmp(service_name, "DSPObject.connect")) {
-        mfp_log_debug("[method] connect");
         rd.reqtype = REQTYPE_CONNECT;
         rd.src_proc = obj_id;
         rd.src_port = args->items[0]->_int;
@@ -594,7 +604,6 @@ dispatch_methodcall_pb2(
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(service_name, "DSPObject.disconnect")) {
-        mfp_log_debug("[method] disconnect");
         rd.reqtype = REQTYPE_DISCONNECT;
         rd.src_proc = obj_id;
         rd.src_port = args->items[0]->_int;
@@ -654,7 +663,6 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
             carp__call_data__unpack(NULL, envelope->content.len, envelope->content.data);
 
         Carp__PythonValue response = CARP__PYTHON_VALUE__INIT;
-        mfp_log_debug("[dispatch] service_name='%s'", calldata->service_name);
 
         if (!strcmp(calldata->service_name, "DSPObject")) {
             dispatch_create_pb2(calldata->args, calldata->kwargs, &response);
@@ -696,9 +704,6 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
             g_hash_table_remove(request_data, GINT_TO_POINTER(response->call_id));
 
             cbfunc(response->value, cbdata);
-        }
-        else {
-            mfp_log_debug("[pb2] No callback for response");
         }
 
         pthread_mutex_lock(&request_lock);

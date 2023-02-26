@@ -445,7 +445,7 @@ class Processor:
     async def dsp_getparam(self, param, value):
         return await self.dsp_obj.getparam(param, value)
 
-    def delete(self):
+    async def delete(self):
         from .mfp_app import MFPApp
         from .patch import Patch
         if hasattr(self, "patch") and self.patch is not None:
@@ -466,7 +466,7 @@ class Processor:
             for c in self.connections_out:
                 to_delete = [pr for pr in c]
                 for tobj, tport in to_delete:
-                    self.disconnect(outport, tobj, tport)
+                    await self.disconnect(outport, tobj, tport)
 
                 outport += 1
 
@@ -475,7 +475,7 @@ class Processor:
             for c in self.connections_in:
                 to_delete = [pr for pr in c]
                 for tobj, tport in to_delete:
-                    tobj.disconnect(tport, self, inport)
+                    await tobj.disconnect(tport, self, inport)
                 inport += 1
 
         if hasattr(self, "midi_learn_cbid") and self.midi_learn_cbid is not None:
@@ -488,7 +488,7 @@ class Processor:
 
         if hasattr(self, "dsp_obj") and self.dsp_obj is not None:
             if self.patch.context is not None:
-                self.dsp_obj.delete()
+                await self.dsp_obj.delete()
             self.dsp_obj = None
 
         MFPApp().forget(self)
@@ -796,9 +796,9 @@ class Processor:
         )
         self.gui_created = True
 
-    def delete_gui(self):
+    async def delete_gui(self):
         from .mfp_app import MFPApp
-        task(MFPApp().gui_command.delete(self.obj_id))
+        await MFPApp().gui_command.delete(self.obj_id)
         self.gui_created = False
 
     def conf(self, **kwargs):

@@ -9,12 +9,12 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 import simplejson as json
 from .patch import Patch
 from .utils import extends
-from . import log 
+from . import log
 from .rpc.request import ExtendedEncoder, extended_decoder_hook
 
 
 @extends(Patch)
-def json_deserialize(self, json_data):
+async def json_deserialize(self, json_data):
     from .scope import NaiveScope
 
     f = json.loads(json_data, object_hook=extended_decoder_hook)
@@ -25,30 +25,30 @@ def json_deserialize(self, json_data):
         self.gui_params = f.get('gui_params', {})
         self.gui_params['top_level'] = True
     else:
-        # pick out a few things that we need 
+        # pick out a few things that we need
         gp = f.get('gui_params', {})
         for prm in ('num_inlets', 'num_outlets', 'export_x', 'export_y', 'export_w',
                     'export_h'):
             if prm in gp:
                 self.gui_params[prm] = gp[prm]
-        self.gui_params['top_level'] = False 
+        self.gui_params['top_level'] = False
 
-    # reset params that need it 
-    self.gui_params["obj_id"] = self.obj_id 
-    self.gui_params["name"] = self.name  
+    # reset params that need it
+    self.gui_params["obj_id"] = self.obj_id
+    self.gui_params["name"] = self.name
 
     # clear old objects
     for o in self.objects.values():
-        o.delete()
+        await o.delete()
     self.objects = {}
     self.scopes = {}
     self.inlet_objects = []
     self.outlet_objects = []
-    self.dispatch_objects = [] 
+    self.dispatch_objects = []
 
     # create new objects
     # dumb_scope will allow multiple objects with a name, we will resolve when
-    # reloading scopes 
+    # reloading scopes
     dumb_scope = NaiveScope()
     idmap = self.json_unpack_objects(f, dumb_scope)
 
@@ -80,7 +80,7 @@ def json_deserialize(self, json_data):
             obj.scope = self.default_scope
 
     # make connections
-    self.json_unpack_connections(f, idmap)
+    await self.json_unpack_connections(f, idmap)
 
     inlets = len(self.inlet_objects)
     if not inlets:
@@ -92,10 +92,10 @@ def json_deserialize(self, json_data):
         self.hot_inlets = hot
 
     for oid, obj in self.objects.items():
-        obj.onload(-1) 
+        await obj.onload(-1)
 
 @extends(Patch)
-def json_unpack_connections(self, data, idmap):
+async def json_unpack_connections(self, data, idmap):
     from .mfp_app import MFPApp
     for oid, prms in data.get('objects', {}).items():
         oid = int(oid)
@@ -108,12 +108,12 @@ def json_unpack_connections(self, data, idmap):
                 inlet = c[1]
                 if dstobj is None:
                     print("Deserializing problem: can't make connection to", c[0])
-                    print(prms) 
-                else: 
-                    srcobj.connect(outlet, dstobj, inlet)
+                    print(prms)
+                else:
+                    await srcobj.connect(outlet, dstobj, inlet)
 
 @extends(Patch)
-def json_unpack_objects(self, data, scope):
+async def json_unpack_objects(self, data, scope):
     from .mfp_app import MFPApp
     idmap = {}
     idlist = list(data.get('objects').keys())
@@ -126,8 +126,8 @@ def json_unpack_objects(self, data, scope):
         otype = prms.get('type')
         oargs = prms.get('initargs')
         oname = prms.get('name')
-        
-        newobj = MFPApp().create(otype, oargs, self, scope, oname)
+
+        newobj = await MFPApp().create(otype, oargs, self, scope, oname)
         newobj.patch = self
         newobj.load(prms)
         if self.gui_created:
@@ -135,27 +135,27 @@ def json_unpack_objects(self, data, scope):
 
         idmap[int(oid)] = newobj
 
-    # find mapping for self to catch vias 
+    # find mapping for self to catch vias
     defscope = data.get('scopes').get('__patch__')
     selfid = int(defscope.get("self") or "0")
     idmap[selfid] = self
 
     self.update_export_bounds()
     for obj in need_gui:
-        obj.create_gui()
+        await obj.create_gui()
 
     return idmap
 
 @extends(Patch)
-def json_serialize(self):
+async def json_serialize(self):
     from .mfp_app import MFPApp
     f = {}
     f['type'] = self.init_type
-    gprms = { k: v for k, v in self.gui_params.items() 
-              if k not in ['dsp_context'] } 
+    gprms = { k: v for k, v in self.gui_params.items()
+              if k not in ['dsp_context'] }
     gprms['name'] = self.init_type
     f['gui_params'] = gprms
-    f['hot_inlets'] = self.hot_inlets 
+    f['hot_inlets'] = self.hot_inlets
 
     allobj = {}
     keys = list(self.objects.keys())
@@ -164,7 +164,7 @@ def json_serialize(self):
         o = self.objects.get(oid)
         if o and (isinstance(o, MFPApp) or not o.save_to_patch):
             continue
-        oinfo = o.save()
+        oinfo = await o.save()
         allobj[oid] = oinfo
 
     f['objects'] = allobj
@@ -173,7 +173,7 @@ def json_serialize(self):
     for scopename, scope in self.scopes.items():
         bindings = {}
         for objname, obj in scope.bindings.items():
-            if not obj: 
+            if not obj:
                 log.warning("json_serialize: name", objname, "has no bound object")
                 continue
             if obj and (isinstance(obj, MFPApp) or not obj.save_to_patch):

@@ -49,7 +49,6 @@ class MFPCommand:
 
     async def dsp_response(self, obj_id, resp_type, resp_value):
         from .mfp_app import MFPApp
-        log.debug("dsp_response: {obj_id} {resp_type} {resp_value}")
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
             await obj.send((resp_type, resp_value), -1)
@@ -82,11 +81,11 @@ class MFPCommand:
         if isinstance(obj, Processor):
             await obj.send(m, port)
 
-    def delete(self, obj_id):
+    async def delete(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            obj.delete()
+            await obj.delete()
 
     def set_params(self, obj_id, params):
         from .mfp_app import MFPApp

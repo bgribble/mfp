@@ -513,18 +513,18 @@ class Patch(Processor):
                 obj.create_gui(is_export=True)
         task(MFPApp().gui_command.load_complete())
 
-    def delete(self):
+    async def delete(self):
         from .mfp_app import MFPApp
 
         if self.gui_created:
-            self.delete_gui()
+            await self.delete_gui()
 
-        Processor.delete(self)
+        await Processor.delete(self)
 
         # first pass: everything but inlets/outlets
         to_delete = self.objects.values()
         for obj in list(to_delete):
-            obj.delete()
+            await obj.delete()
 
         if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:
             del MFPApp().patches[self.name]
