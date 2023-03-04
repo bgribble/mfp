@@ -390,7 +390,7 @@ class Patch(Processor):
             return True
         return False
 
-    def save_file(self, filename):
+    async def save_file(self, filename):
         basefile = os.path.basename(filename)
         parts = os.path.splitext(basefile)
 
@@ -401,7 +401,7 @@ class Patch(Processor):
             os.rename(filename, filename+'~')
 
         with open(filename, "w") as savefile:
-            savefile.write(self.json_serialize())
+            savefile.write(await self.json_serialize())
 
         self.file_origin = filename
 

@@ -167,15 +167,6 @@ def setup_default_colors():
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
-
-async def loggo(*args, **kwargs):
-    print(f"[LOG] DEBUG: [loggo] {args} {kwargs}")
-
-async def log_call(*args, **kwargs):
-    if args[1].service_name != "GUICommand.log_write":
-        print(f"[LOG] DEBUG: Calling {args[1].service_name}")
-
-
 async def main():
     import gi
     gi.require_version('Gtk', '3.0')
@@ -200,12 +191,6 @@ async def main():
     host = Host(
         label="MFP GUI",
     )
-    host.on("status", loggo)
-    host.on("connect", loggo)
-    host.on("exports", loggo)
-    host.on("disconnect", loggo)
-    host.on("call", log_call)
-
     await host.connect(channel)
 
     if args.get("logstart"):

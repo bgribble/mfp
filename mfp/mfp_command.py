@@ -172,11 +172,11 @@ class MFPCommand:
         patch = MFPApp().open_file(file_name)
         return patch.obj_id
 
-    def save_file(self, patch_name, file_name):
+    async def save_file(self, patch_name, file_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
         if patch:
-            patch.save_file(file_name)
+            await patch.save_file(file_name)
 
     def show_editor(self, obj_id, show):
         from .mfp_app import MFPApp

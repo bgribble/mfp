@@ -582,7 +582,7 @@ class MFPApp (Singleton):
         self.session_id = session_id
         self.session_save()
 
-    def session_save(self):
+    async def session_save(self):
         import os.path
 
         sessfile = open(os.path.join(self.session_dir, "session_data"), "w+")
@@ -604,7 +604,7 @@ class MFPApp (Singleton):
 
         patches = []
         for obj_id, patch in self.patches.items():
-            patch.save_file(os.path.join(self.session_dir, patch.name + '.mfp'))
+            await patch.save_file(os.path.join(self.session_dir, patch.name + '.mfp'))
             patches.append(patch.name + '.mfp')
 
         cp.set("mfp", "patches", str(patches))
@@ -684,10 +684,10 @@ class MFPApp (Singleton):
         js = json.dumps(toplevel, indent=4, cls=ExtendedEncoder)
         return js
 
-    def clipboard_paste(self, json_text, patch, scope, paste_mode):
+    async def clipboard_paste(self, json_text, patch, scope, paste_mode):
         jdata = json.loads(json_text, object_hook=extended_decoder_hook)
-        idmap = patch.json_unpack_objects(jdata, scope)
-        patch.json_unpack_connections(jdata, idmap)
+        idmap = await patch.json_unpack_objects(jdata, scope)
+        await patch.json_unpack_connections(jdata, idmap)
         return [o.obj_id for o in idmap.values()]
 
     def toggle_pause(self):
