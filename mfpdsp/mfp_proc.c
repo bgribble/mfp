@@ -291,9 +291,6 @@ mfp_proc_connect(mfp_processor * self, int my_outlet,
 {
     GArray * xlets;
 
-    mfp_log_debug("connect: connecting proc %d outlet %d to proc %d outlet %d",
-        self->rpc_id, my_outlet, target->rpc_id, targ_inlet);
-
     if ((self == NULL) || (target == NULL)) {
         mfp_log_error("connect: bad endpoint, self=%p, target=%p", self, target);
         return -1;

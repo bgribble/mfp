@@ -289,8 +289,8 @@ class PyAutoWrap(Processor):
             args = [ x for x in self.inlets[:self.argcount] if x is not Uninit]
             self.outlets[0] = self.thunk(*args)
         else: 
-            args = self.inlets[0]
-            self.outlets[0] = self.thunk(*args)
+            arg = self.inlets[0]
+            self.outlets[0] = self.thunk(arg)
 
 
 class PyBinary(Processor):
