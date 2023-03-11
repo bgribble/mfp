@@ -10,7 +10,73 @@ import simplejson as json
 from .patch import Patch
 from .utils import extends
 from . import log
-from .rpc.request import ExtendedEncoder, extended_decoder_hook
+
+
+def _dumb_load(ctor, values):
+    # try a couple of strategies
+    try:
+        initobj = ctor()
+        for attr, value in values.items():
+            setattr(initobj, attr, value)
+        return initobj
+    except Exception:
+        pass
+
+    try:
+        initobj = ctor(**values)
+        return initobj
+    except Exception:
+        pass
+
+    return None
+
+
+def ext_encode(klass):
+    ExtendedEncoder.TYPES['__' + klass.__name__ + '__'] = klass
+    return klass
+
+
+class ExtendedEncoder (json.JSONEncoder):
+    from .bang import BangType, UninitType
+    from .gui.colordb import RGBAColor
+    from .gui.ticks import ScaleType
+    from .buffer_info import BufferInfo
+
+    TYPES = {
+        '__BangType__': BangType,
+        '__UninitType__': UninitType,
+        '__RGBAColor__': RGBAColor,
+        '__BufferInfo__': BufferInfo,
+    }
+
+    DUMBTYPES = (ScaleType,)
+
+    def default(self, obj):
+        if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
+            key = "__%s__" % obj.__class__.__name__
+            return {key: obj.__dict__}
+        elif isinstance(obj, self.DUMBTYPES):
+            return str(obj)
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+
+def extended_decoder_hook(saved):
+    from ..bang import Bang, Uninit
+    if (isinstance(saved, dict) and len(saved.keys()) == 1):
+        tname, tdict = list(saved.items())[0]
+        if tname == "__BangType__":
+            return Bang
+        elif tname == "__UninitType__":
+            return Uninit
+        else:
+            ctor = ExtendedEncoder.TYPES.get(tname)
+            if ctor:
+                if hasattr(ctor, 'load'):
+                    return ctor.load(tdict)
+                else:
+                    return _dumb_load(ctor, tdict)
+    return saved
 
 
 @extends(Patch)
@@ -94,9 +160,9 @@ async def json_deserialize(self, json_data):
     for oid, obj in self.objects.items():
         await obj.onload(-1)
 
+
 @extends(Patch)
 async def json_unpack_connections(self, data, idmap):
-    from .mfp_app import MFPApp
     for oid, prms in data.get('objects', {}).items():
         oid = int(oid)
         conn = prms.get("connections", [])
@@ -111,6 +177,7 @@ async def json_unpack_connections(self, data, idmap):
                     print(prms)
                 else:
                     await srcobj.connect(outlet, dstobj, inlet)
+
 
 @extends(Patch)
 async def json_unpack_objects(self, data, scope):
@@ -146,13 +213,16 @@ async def json_unpack_objects(self, data, scope):
 
     return idmap
 
+
 @extends(Patch)
 async def json_serialize(self):
     from .mfp_app import MFPApp
     f = {}
     f['type'] = self.init_type
-    gprms = { k: v for k, v in self.gui_params.items()
-              if k not in ['dsp_context'] }
+    gprms = {
+        k: v for k, v in self.gui_params.items()
+        if k not in ['dsp_context']
+    }
     gprms['name'] = self.init_type
     f['gui_params'] = gprms
     f['hot_inlets'] = self.hot_inlets
