@@ -86,4 +86,6 @@ def register():
     hold.register()
     from . import replay
     replay.register()
+    from . import breakpoint
+    breakpoint.register()
 

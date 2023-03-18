@@ -8,7 +8,6 @@ the GUI or text-mode console
 from .evaluator import Evaluator
 from code import InteractiveInterpreter
 import ast
-from mfp import log
 
 
 class Interpreter (InteractiveInterpreter):
@@ -33,18 +32,18 @@ class Interpreter (InteractiveInterpreter):
             self.write('')
         else:
             try:
-                results = [] 
+                results = []
                 stree = ast.parse(source)
                 for obj in stree.body:
                     if isinstance(obj, ast.Expr):
                         results.append(self.evaluator.eval(source))
                     else:
                         self.evaluator.exec_str(source)
-                for r in results: 
+                for r in results:
                     self.write(repr(r) + "\n")
             except SystemExit:
                 raise
-            except:
+            except Exception:
                 self.showtraceback()
 
         return False

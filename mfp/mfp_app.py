@@ -128,17 +128,16 @@ class MFPApp (Singleton):
             await self.gui_process.start()
 
             GUICommandFactory = await self.rpc_host.require(GUICommand)
-            log.debug("Got GUICommandFactory", GUICommandFactory)
 
             self.gui_command = await GUICommandFactory()
 
             log.debug("GUI is ready, switching logging to GUI")
             log.log_func = self.gui_command.log_write
 
-            log.debug("Started logging to GUI")
-
             self.console = Interpreter(
-                self.gui_command.console_write, dict(app=self)
+                lambda *args, **kwargs: task(
+                    self.gui_command.console_write(*args, **kwargs)
+                ), dict(app=self)
             )
             await self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
 
@@ -175,8 +174,13 @@ class MFPApp (Singleton):
         stripper = await self.create("string.strip", None, p, p.default_scope, "strip")
         if self.batch_eval:
             evaluator = await self.create("eval", None, p, p.default_scope, "evaluator")
-        batch = await self.create(self.batch_obj, self.batch_args,
-                            p, p.default_scope, "batch")
+        batch = await self.create(
+            self.batch_obj,
+            self.batch_args,
+            p,
+            p.default_scope,
+            "batch"
+        )
         printer = await self.create("print", None, p, p.default_scope, "printer")
         msg = await self.create("message", "@readline", p, p.default_scope, "nextline")
 
@@ -219,14 +223,11 @@ class MFPApp (Singleton):
                 *dspcommand, log_module="dsp", log_raw=self.debug_remote
             )
             await self.dsp_process.start()
-            log.debug("Waiting for DSP process startup...")
             await self.rpc_host.require(DSPObject)
-            log.debug("DSP process established connection", DSPContext.registry)
-            log.debug("Object publishers:", self.rpc_host.services_remote)
             Patch.default_context = DSPContext.lookup(
                 self.rpc_host.services_remote["DSPObject"][0], 0
             )
-            log.debug("Default DSP context:", Patch.default_context)
+            log.debug("DSP backend started")
 
     def remember(self, obj):
         oi = self.next_obj_id
@@ -355,15 +356,12 @@ class MFPApp (Singleton):
 
         # second try: is there a .mfp patch file in the search path?
         if ctor is None:
-            log.debug("No factory for '%s' registered, looking for file." % init_type)
             filename = init_type + ".mfp"
             filepath = utils.find_file_in_path(filename, self.searchpath)
 
             if filepath:
-                log.debug("Found file", filepath)
+                log.debug("create: will load from file", filepath)
                 (typename, ctor) = Patch.register_file(filepath)
-            else:
-                log.error("No file '%s' in search path %s" % (filename, MFPApp().searchpath))
 
         # third try: can we autowrap a python function?
         if ctor is None:

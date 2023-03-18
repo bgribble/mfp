@@ -6,6 +6,7 @@ Patch class and methods
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
+import asyncio
 import os
 
 from .processor import Processor, AsyncOutput
@@ -49,6 +50,9 @@ class Patch(Processor):
         self.outlet_objects = []
         self.dispatch_objects = []
 
+        self.step_execute = False
+        self.step_tasklist = []
+
         self.init_bindings()
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
 
@@ -59,6 +63,24 @@ class Patch(Processor):
             self.gui_params['top_level'] = True
         else:
             self.gui_params['top_level'] = False
+
+    def _next(self):
+        asyncio.create_task(self.step_next())
+
+    def _run(self):
+        asyncio.create_task(self.step_run())
+
+    async def step_next(self):
+        if not len(self.step_tasklist):
+            return
+        next_task = self.step_tasklist[0]
+        self.step_tasklist[:1] = []
+        await next_task
+
+    async def step_run(self):
+        self.step_execute = False
+        while (not self.step_execute) and self.step_tasklist:
+            await self.step_next()
 
     def init_bindings(self):
         from .mfp_app import MFPApp
@@ -213,8 +235,10 @@ class Patch(Processor):
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
             if obj.init_type == 'inlet~':
-                self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects)
-                                    if p[1] and p[1].init_type == 'inlet~' ]
+                self.dsp_inlets = [
+                    p[0] for p in enumerate(self.inlet_objects)
+                    if p[1] and p[1].init_type == 'inlet~'
+                ]
                 self.gui_params['dsp_inlets'] = self.dsp_inlets
 
         elif obj.init_type in ('outlet', 'outlet~'):
@@ -225,8 +249,10 @@ class Patch(Processor):
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
             if obj.init_type == 'outlet~':
-                self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects)
-                                    if p[1] and p[1].init_type == 'outlet~' ]
+                self.dsp_outlets = [
+                    p[0] for p in enumerate(self.outlet_objects)
+                    if p[1] and p[1].init_type == 'outlet~'
+                ]
                 self.gui_params['dsp_outlets'] = self.dsp_outlets
 
         elif obj.init_type == 'dispatch':
@@ -243,8 +269,10 @@ class Patch(Processor):
 
         try:
             self.inlet_objects.remove(obj)
-            self.dsp_inlets = [ p[0] for p in enumerate(self.inlet_objects)
-                               if p[1] and p[1].init_type == 'inlet~' ]
+            self.dsp_inlets = [
+                p[0] for p in enumerate(self.inlet_objects)
+                if p[1] and p[1].init_type == 'inlet~'
+            ]
             self.gui_params['dsp_inlets'] = self.dsp_inlets
         except ValueError:
             pass

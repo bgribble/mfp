@@ -11,7 +11,6 @@ import sys
 import select
 import time
 from mfp import log
-from mfp.mfp_command import MFPCommand
 from mfp.gui_main import MFPGUI
 from gi.repository import Gtk
 
@@ -36,7 +35,7 @@ class ConsoleMgr (Thread):
         self.ps1 = '>>> '
         self.ps2 = '... '
         self.last_ps = self.ps1
-        self.continue_buffer = '' 
+        self.continue_buffer = ''
 
         self.textview.connect('key-press-event', self.key_pressed)
         self.textview.connect('button-press-event', self.button_pressed)
@@ -203,9 +202,9 @@ class ConsoleMgr (Thread):
                 cmd = self.readline()
 
             if not self.quitreq:
-                self.continue_buffer += '\n' + cmd 
+                self.continue_buffer += '\n' + cmd
                 continued = self.evaluate(self.continue_buffer)
-                if not continued: 
+                if not continued:
                     self.continue_buffer = ''
 
     def evaluate(self, cmd):
@@ -215,7 +214,7 @@ class ConsoleMgr (Thread):
         # returns False if an incorrect or complete and correct
         # expression was entered.
 
-        return MFPCommand().console_eval(cmd)  
+        return MFPGUI().mfp.console_eval.sync(cmd)
 
     def finish(self):
         self.quitreq = True

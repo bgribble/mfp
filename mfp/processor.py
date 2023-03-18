@@ -19,9 +19,11 @@ class AsyncOutput (object):
         self.outlet_num = outlet
         self.value = value
 
+
 class MultiOutput (object):
     def __init__(self):
         self.values = []
+
 
 class Processor:
     PORT_IN = 0
@@ -54,23 +56,30 @@ class Processor:
         self.inlets = [Uninit] * inlets
         self.outlets = [Uninit] * outlets
         self.outlet_order = list(range(outlets))
+
         self.status = Processor.CTOR
-        self.tags = {}
+        self.tags = {}          # tags are labels shown in notify bubble
         self.properties = {}
         self.name = None
         self.patch = None
         self.scope = None
-        self.osc_pathbase = None
-        self.osc_methods = []
+
+        # stats for inspector
         self.count_in = 0
         self.count_out = 0
         self.count_trigger = 0
         self.count_errors = 0
+
+        # MIDI event listener
         self.midi_mode = None
         self.midi_filters = None
         self.midi_cbid = None
         self.midi_learn_cbid = None
         self.error_info = {}
+
+        # OSC handling
+        self.osc_pathbase = None
+        self.osc_methods = []
 
         self.trigger_lock = threading.Lock()
 
@@ -216,7 +225,6 @@ class Processor:
         pass
 
     def assign(self, patch, scope, name):
-        from .mfp_app import MFPApp
         # null case
         if (self.patch == patch) and (self.scope == scope) and (self.name == name):
             return
@@ -576,7 +584,7 @@ class Processor:
             existing = self.connections_out[outlet]
             if (target, inlet) not in existing:
                 existing.append((target, inlet))
-        except Exception as e:
+        except Exception:
             # this can happen normally in a creation race, don't
             # flag it (Patch.connect wil retry)
             return False
@@ -637,6 +645,7 @@ class Processor:
         try:
             with self.trigger_lock:
                 work = await self._send(value, inlet)
+
             while len(work):
                 w_target, w_val, w_inlet = work[0]
                 with w_target.trigger_lock:
@@ -651,59 +660,97 @@ class Processor:
             if w_target:
                 w_target.error("%s" % e.args, tb)
 
+    async def _send__activate(self, value, inlet):
+        if self.clear_outlets:
+            self.outlets = [Uninit] * len(self.outlets)
+
+        if inlet == -1:
+            self.dsp_response(value[0], value[1])
+        elif isinstance(value, MethodCall):
+            self.method(value, inlet)
+        elif isinstance(value, AsyncOutput):
+            if value.outlet_num not in range(len(self.outlets)):
+                log.error("_send: object %s has no outlet '%s'" % (self.name,
+                                                                   value.outlet_num))
+            else:
+                self.add_output(value.outlet_num, value.value)
+                self.inlets[inlet] = Uninit
+        else:
+            await self.trigger()
+            self.count_trigger += 1
+
+    async def _send__propagate(self):
+        output_pairs = list(zip(self.connections_out, self.outlets))
+        work = []
+
+        for conns, val in [output_pairs[i] for i in self.outlet_order]:
+            if val is Uninit:
+                continue
+
+            if isinstance(val, LazyExpr):
+                val = val.call()
+            if isinstance(val, MultiOutput):
+                values = val.values
+            else:
+                values = [val]
+
+            for val in values:
+                self.count_out += 1
+                for target, tinlet in conns:
+                    if target is not None:
+                        if self.patch.step_execute:
+                            self.patch.step_tasklist.append(
+                                self._send__propagate_value(target, val, tinlet)
+                            )
+                        else:
+                            work.append((target, val, tinlet))
+                    else:
+                        log.warning("Bad output connection: obj_id=%s" % self.obj_id)
+        return work
+
+    async def _send__propagate_value(self, target, val, inlet):
+        with target.trigger_lock:
+            return await target._send(val, inlet)
+
+    async def _send__dsp_params(self, value, inlet):
+        try:
+            await self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
+        except (TypeError, ValueError):
+            pass
+
+    async def _send__initiate(self, value, inlet):
+        self.inlets[inlet] = value
+
     async def _send(self, value, inlet=0):
         if self.paused:
             return []
 
         work = []
         if inlet >= 0:
-            self.inlets[inlet] = value
+            if self.patch.step_execute:
+                self.patch.step_tasklist.append(self._send__initiate(value, inlet))
+            else:
+                await self._send__initiate(value, inlet)
 
         self.count_in += 1
 
         if inlet in self.hot_inlets or inlet == -1:
-            if self.clear_outlets:
-                self.outlets = [Uninit] * len(self.outlets)
-            if inlet == -1:
-                self.dsp_response(value[0], value[1])
-            elif isinstance(value, MethodCall):
-                self.method(value, inlet)
-            elif isinstance(value, AsyncOutput):
-                if value.outlet_num not in range(len(self.outlets)):
-                    log.error("_send: object %s has no outlet '%s'" % (self.name,
-                                                                       value.outlet_num))
-                else:
-                    self.add_output(value.outlet_num, value.value)
-                    self.inlets[inlet] = Uninit
+            if self.patch.step_execute:
+                self.patch.step_tasklist.append(self._send__activate(value, inlet))
+                self.patch.step_tasklist.append(self._send__propagate())
             else:
-                await self.trigger()
-                self.count_trigger += 1
-            output_pairs = list(zip(self.connections_out, self.outlets))
+                await self._send__activate(value, inlet)
+                work = await self._send__propagate()
 
-            for conns, val in [output_pairs[i] for i in self.outlet_order]:
-                if val is Uninit:
-                    continue
-
-                if isinstance(val, LazyExpr):
-                    val = val.call()
-                if isinstance(val, MultiOutput):
-                    values = val.values
-                else:
-                    values = [val]
-
-                for val in values:
-                    self.count_out += 1
-                    for target, tinlet in conns:
-                        if target is not None:
-                            work.append((target, val, tinlet))
-                        else:
-                            log.warning("Bad output connection: obj_id=%s" % self.obj_id)
-        try:
-            if ((inlet in self.dsp_inlets)
-                    and not isinstance(value, bool) and isinstance(value, (float, int))):
-                await self.dsp_obj.setparam("_sig_" + str(inlet), float(value))
-        except (TypeError, ValueError):
-            pass
+        if (
+            (inlet in self.dsp_inlets)
+            and not isinstance(value, bool)
+            and isinstance(value, (float, int))
+        ):
+            if self.patch.step_execute:
+                self.patch.step_tasklist.append(self._send__dsp_params(value, inlet))
+            else:
+                await self._send__dsp_params(value, inlet)
 
         return work
 
@@ -837,7 +884,6 @@ class Processor:
 
     async def clone(self, patch, scope, name):
         from .mfp_app import MFPApp
-        from .patch import Patch
         prms = self.save()
 
         newobj = await MFPApp().create(prms.get("type"), prms.get("initargs"),

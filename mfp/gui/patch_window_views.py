@@ -1,16 +1,16 @@
 
-from ..utils import extends 
-from ..mfp_command import MFPCommand 
+from ..utils import extends
+from ..mfp_command import MFPCommand
 from .tree_display import TreeDisplay
-from .patch_window import PatchWindow 
-from .patch_element import PatchElement 
-from .patch_info import PatchInfo 
-from .layer import Layer 
+from .patch_window import PatchWindow
+from .patch_element import PatchElement
+from .patch_info import PatchInfo
+from .layer import Layer
 from mfp import log
 
 @extends(PatchWindow)
 def init_object_view(self):
-    def get_obj_name(o): 
+    def get_obj_name(o):
         if isinstance(o, PatchElement):
             return o.obj_name
         elif isinstance(o, PatchInfo):
@@ -21,70 +21,70 @@ def init_object_view(self):
     def obj_name_edited(obj, new_name):
         if isinstance(obj, (PatchElement, PatchInfo)):
             obj.obj_name = new_name
-            MFPCommand().rename_obj(obj.obj_id, new_name)
+            MFPGUI().mfp.rename_obj.sync(obj.obj_id, new_name)
             obj.send_params()
         else:
-            oldscopename = obj 
+            oldscopename = obj
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
                     l.scope = new_name
-            MFPCommand().rename_scope(self.selected_patch.obj_id, oldscopename, new_name)
+            MFPGUI().mfp.rename_scope.sync(self.selected_patch.obj_id, oldscopename, new_name)
             self.selected_patch.send_params()
 
         if isinstance(obj, PatchElement):
-            parent = (obj.scope or obj.layer.scope, obj.layer.patch) 
-        elif isinstance(obj, PatchInfo): 
-            parent = None 
-        else: 
+            parent = (obj.scope or obj.layer.scope, obj.layer.patch)
+        elif isinstance(obj, PatchInfo):
+            parent = None
+        else:
             parent = (self.selected_patch,)
 
         self.object_view.update(obj, parent)
 
     def obj_selected(obj):
         self._select(obj)
-        if isinstance(obj, PatchElement): 
+        if isinstance(obj, PatchElement):
             self.layer_select(obj.layer)
         elif isinstance(obj, PatchInfo):
             self.layer_select(obj.layers[0])
         elif isinstance(obj, tuple):
             scope = obj[0]
-            patch = obj[1] 
+            patch = obj[1]
             if isinstance(patch, PatchInfo):
                 for l in patch.layers:
                     if l.scope == scope:
                         self.layer_select(l)
-                        return 
+                        return
                 self.layer_select(patch.layers[0])
             else:
                 log.debug("[obj_selected] Got tuple", obj)
                 self.layer_select(patch.layer)
 
 
-    obj_cols = [ ("Name", get_obj_name, True, obj_name_edited, True) ] 
+    obj_cols = [ ("Name", get_obj_name, True, obj_name_edited, True) ]
     object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
     object_view.select_cb = obj_selected
-    object_view.unselect_cb = self._unselect 
+    object_view.unselect_cb = self._unselect
 
-    return object_view 
+    return object_view
 
 @extends(PatchWindow)
 def init_layer_view(self):
-    def get_sortname(o): 
+    def get_sortname(o):
         if isinstance(o, Layer):
-            return o.patch.obj_name + ':%04d' % o.patch.layers.index(o) 
+            return o.patch.obj_name + ':%04d' % o.patch.layers.index(o)
         elif isinstance(o, PatchInfo):
-            return "%s (%s)" % (o.obj_name, o.context_name) 
+            return "%s (%s)" % (o.obj_name, o.context_name)
 
     def get_layer_name(o):
         if isinstance(o, Layer):
             return o.name
         elif isinstance(o, PatchInfo):
-            return "%s (%s)" % (o.obj_name, o.context_name) 
+            return "%s (%s)" % (o.obj_name, o.context_name)
 
     def get_layer_scopename(o):
         if isinstance(o, Layer):
             return o.scope
-        else: 
+        else:
             return ''
 
     def layer_name_edited(obj, new_value):
@@ -96,7 +96,7 @@ def init_layer_view(self):
                     lobj.send_params()
         elif isinstance(obj, (PatchElement, PatchInfo)):
             obj.obj_name = new_value
-            MFPCommand().rename_obj(obj.obj_id, new_value)
+            MFPGUI().mfp.rename_obj.sync(obj.obj_id, new_value)
             obj.send_params()
         return True
 
@@ -106,14 +106,14 @@ def init_layer_view(self):
             p = self.selected_patch
             if not p.has_scope(new_value):
                 log.debug("Adding scope", new_value, "to patch", self.selected_patch)
-                MFPCommand().add_scope(self.selected_patch.obj_id, new_value)
+                MFPGUI().mfp.add_scope.sync(self.selected_patch.obj_id, new_value)
                 self.object_view.insert((new_value, self.selected_patch), self.selected_patch)
 
             layer.scope = new_value
             self.selected_patch.send_params()
             for obj in self.objects:
                 if obj.obj_id is not None and obj.layer == layer:
-                    MFPCommand().set_scope(obj.obj_id, new_value)
+                    MFPGUI().mfp.set_scope.sync(obj.obj_id, new_value)
                     self.refresh(obj)
         return True
 
@@ -124,11 +124,11 @@ def init_layer_view(self):
         else:
             self._layer_select(l)
 
-    layer_cols = [("Name", get_layer_name, True, layer_name_edited, get_sortname), 
-                  ("Scope", get_layer_scopename, True, layer_scope_edited, False)] 
+    layer_cols = [("Name", get_layer_name, True, layer_name_edited, get_sortname),
+                  ("Scope", get_layer_scopename, True, layer_scope_edited, False)]
     layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
     layer_view.select_cb = sel_layer
     layer_view.unselect_cb = None
 
-    return layer_view 
+    return layer_view
 
