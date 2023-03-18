@@ -6,15 +6,14 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from threading import Thread, Lock, Condition
-import code
-import sys
-import select
 import time
-from mfp import log
 from mfp.gui_main import MFPGUI
 from gi.repository import Gtk
 
-from .key_defs import *
+from .key_defs import *  # noqa
+
+DEFAULT_PROMPT = ">>> "
+DEFAULT_CONTINUE = "... "
 
 
 class ConsoleMgr (Thread):
@@ -32,8 +31,8 @@ class ConsoleMgr (Thread):
         self.cursor_pos = 0
         self.ready = False
 
-        self.ps1 = '>>> '
-        self.ps2 = '... '
+        self.ps1 = DEFAULT_PROMPT
+        self.ps2 = DEFAULT_CONTINUE
         self.last_ps = self.ps1
         self.continue_buffer = ''
 
@@ -53,8 +52,10 @@ class ConsoleMgr (Thread):
         if event.keyval == KEY_ENTER:
             self.append("\n")
             stripped_buf = self.linebuf.strip()
-            if (len(stripped_buf)
-                and (not len(self.history) or stripped_buf != self.history[0])):
+            if (
+                len(stripped_buf)
+                and (not len(self.history) or stripped_buf != self.history[0])
+            ):
                 self.history[:0] = [self.linebuf]
                 self.history_pos = -1
             self.line_ready()
@@ -191,7 +192,6 @@ class ConsoleMgr (Thread):
             if not continued:
                 self.last_ps = self.ps1
                 MFPGUI().clutter_do(lambda: self.append(self.ps1))
-
             else:
                 self.last_ps = self.ps2
                 MFPGUI().clutter_do(lambda: self.append(self.ps2))
@@ -203,9 +203,11 @@ class ConsoleMgr (Thread):
 
             if not self.quitreq:
                 self.continue_buffer += '\n' + cmd
-                continued = self.evaluate(self.continue_buffer)
+                resp = self.evaluate(self.continue_buffer)
+                continued = resp.continued
                 if not continued:
                     self.continue_buffer = ''
+                    MFPGUI().clutter_do(lambda: self.append(resp.value + '\n'))
 
     def evaluate(self, cmd):
         # returns True if a syntactically complete but partial line
@@ -220,5 +222,5 @@ class ConsoleMgr (Thread):
         self.quitreq = True
         try:
             self.join()
-        except:
+        except Exception:
             pass

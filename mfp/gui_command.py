@@ -24,6 +24,11 @@ class GUICommand:
         else:
             print(msg)
 
+    def console_set_prompt(self, prompt):
+        from .gui_main import MFPGUI
+        MFPGUI().appwin.console_mgr.ps1 = prompt
+        return True
+
     def console_write(self, msg):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._console_write(msg))
@@ -187,7 +192,6 @@ class GUICommand:
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)
 
-
     def delete(self, obj_id):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._delete(obj_id))
@@ -213,7 +217,6 @@ class GUICommand:
             obj.obj_id = None
             obj.delete()
 
-
     def select(self, obj_id):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._select(obj_id))
@@ -226,7 +229,6 @@ class GUICommand:
             MFPGUI().appwin.layer_select(obj.layers[0])
         else:
             MFPGUI().appwin.select(obj)
-
 
     def load_start(self):
         from .gui_main import MFPGUI

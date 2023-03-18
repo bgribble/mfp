@@ -14,6 +14,7 @@ from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit, Unbound
 from .utils import TaskNibbler, task
+from .step_debugger import StepDebugger
 
 from mfp import log
 
@@ -50,8 +51,7 @@ class Patch(Processor):
         self.outlet_objects = []
         self.dispatch_objects = []
 
-        self.step_execute = False
-        self.step_tasklist = []
+        self.step_debugger = StepDebugger()
 
         self.init_bindings()
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
@@ -64,23 +64,14 @@ class Patch(Processor):
         else:
             self.gui_params['top_level'] = False
 
-    def _next(self):
-        asyncio.create_task(self.step_next())
+    async def step_execute_start(self):
+        self.step_debugger.enable()
+        await self.step_debugger.show_banner()
+        await self.step_debugger.show_prompt()
 
-    def _run(self):
-        asyncio.create_task(self.step_run())
-
-    async def step_next(self):
-        if not len(self.step_tasklist):
-            return
-        next_task = self.step_tasklist[0]
-        self.step_tasklist[:1] = []
-        await next_task
-
-    async def step_run(self):
-        self.step_execute = False
-        while (not self.step_execute) and self.step_tasklist:
-            await self.step_next()
+    async def step_execute_stop(self):
+        self.step_debugger.disable()
+        await self.step_debugger.show_leave()
 
     def init_bindings(self):
         from .mfp_app import MFPApp

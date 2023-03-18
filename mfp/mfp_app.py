@@ -134,11 +134,8 @@ class MFPApp (Singleton):
             log.debug("GUI is ready, switching logging to GUI")
             log.log_func = self.gui_command.log_write
 
-            self.console = Interpreter(
-                lambda *args, **kwargs: task(
-                    self.gui_command.console_write(*args, **kwargs)
-                ), dict(app=self)
-            )
+            self.console = Interpreter(dict(app=self))
+
             await self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
 
             # midi manager

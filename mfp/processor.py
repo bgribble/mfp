@@ -698,8 +698,8 @@ class Processor:
                 self.count_out += 1
                 for target, tinlet in conns:
                     if target is not None:
-                        if self.patch.step_execute:
-                            self.patch.step_tasklist.append(
+                        if self.patch.step_debugger.enabled:
+                            self.patch.step_debugger.add_task(
                                 self._send__propagate_value(target, val, tinlet)
                             )
                         else:
@@ -727,17 +727,17 @@ class Processor:
 
         work = []
         if inlet >= 0:
-            if self.patch.step_execute:
-                self.patch.step_tasklist.append(self._send__initiate(value, inlet))
+            if self.patch.step_debugger.enabled:
+                self.patch.step_debugger.add_task(self._send__initiate(value, inlet))
             else:
                 await self._send__initiate(value, inlet)
 
         self.count_in += 1
 
         if inlet in self.hot_inlets or inlet == -1:
-            if self.patch.step_execute:
-                self.patch.step_tasklist.append(self._send__activate(value, inlet))
-                self.patch.step_tasklist.append(self._send__propagate())
+            if self.patch.step_debugger.enabled:
+                self.patch.step_debugger.add_task(self._send__activate(value, inlet))
+                self.patch.step_debugger.add_task(self._send__propagate())
             else:
                 await self._send__activate(value, inlet)
                 work = await self._send__propagate()
@@ -747,8 +747,8 @@ class Processor:
             and not isinstance(value, bool)
             and isinstance(value, (float, int))
         ):
-            if self.patch.step_execute:
-                self.patch.step_tasklist.append(self._send__dsp_params(value, inlet))
+            if self.patch.step_debugger.enabled:
+                self.patch.step_debugger.add_task(self._send__dsp_params(value, inlet))
             else:
                 await self._send__dsp_params(value, inlet)
 
