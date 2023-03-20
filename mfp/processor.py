@@ -221,7 +221,7 @@ class Processor:
     def call_onload(self, value=True):
         self.do_onload = value
 
-    def onload(self, phase):
+    async def onload(self, phase):
         pass
 
     def assign(self, patch, scope, name):
@@ -700,7 +700,8 @@ class Processor:
                     if target is not None:
                         if self.patch.step_debugger.enabled:
                             self.patch.step_debugger.add_task(
-                                self._send__propagate_value(target, val, tinlet)
+                                self._send__propagate_value(target, val, tinlet),
+                                f"Send output to {target.name} inlet {tinlet}"
                             )
                         else:
                             work.append((target, val, tinlet))
@@ -728,7 +729,10 @@ class Processor:
         work = []
         if inlet >= 0:
             if self.patch.step_debugger.enabled:
-                self.patch.step_debugger.add_task(self._send__initiate(value, inlet))
+                self.patch.step_debugger.add_task(
+                    self._send__initiate(value, inlet),
+                    f"Receive input to {self.name} inlet {inlet}"
+                )
             else:
                 await self._send__initiate(value, inlet)
 
@@ -736,8 +740,14 @@ class Processor:
 
         if inlet in self.hot_inlets or inlet == -1:
             if self.patch.step_debugger.enabled:
-                self.patch.step_debugger.add_task(self._send__activate(value, inlet))
-                self.patch.step_debugger.add_task(self._send__propagate())
+                self.patch.step_debugger.add_task(
+                    self._send__activate(value, inlet),
+                    f"Trigger processor {self.name} from inlet {inlet}"
+                )
+                self.patch.step_debugger.add_task(
+                    self._send__propagate(),
+                    "Send outputs to connected processors"
+                )
             else:
                 await self._send__activate(value, inlet)
                 work = await self._send__propagate()
@@ -748,7 +758,10 @@ class Processor:
             and isinstance(value, (float, int))
         ):
             if self.patch.step_debugger.enabled:
-                self.patch.step_debugger.add_task(self._send__dsp_params(value, inlet))
+                self.patch.step_debugger.add_task(
+                    self._send__dsp_params(value, inlet),
+                    "Update parameters of DSP object"
+                )
             else:
                 await self._send__dsp_params(value, inlet)
 

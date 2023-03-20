@@ -25,12 +25,13 @@ class InterpreterResponse (Serializable):
             value=self.value
         )
 
+
 class Interpreter (InteractiveInterpreter):
     def __init__(self, local):
         self.evaluator = Evaluator(local_bindings=local)
         InteractiveInterpreter.__init__(self)
 
-    def runsource(self, source, filename="<MFP interactive console>", symbol="single"):
+    async def runsource(self, source, filename="<MFP interactive console>", symbol="single"):
         try:
             code = self.compile(source, filename, symbol)
         except (OverflowError, SyntaxError, ValueError):
@@ -43,15 +44,15 @@ class Interpreter (InteractiveInterpreter):
             return InterpreterResponse(continued=True)
 
         if not len(source.strip()):
-            return InterpreterResponse(continued=False, value='')
+            return InterpreterResponse(continued=False, value=None)
 
         output = []
+        results = []
         try:
-            results = []
             stree = ast.parse(source)
             for obj in stree.body:
                 if isinstance(obj, ast.Expr):
-                    results.append(self.evaluator.eval(source))
+                    results.append(await self.evaluator.eval_async(source))
                 else:
                     self.evaluator.exec_str(source)
             for r in results:
@@ -61,4 +62,8 @@ class Interpreter (InteractiveInterpreter):
         except Exception:
             self.showtraceback()
 
-        return InterpreterResponse(continued=False, value="\n".join(output))
+        if results == [None]:
+            resp_output = None
+        else:
+            resp_output = "\n".join(output)
+        return InterpreterResponse(continued=False, value=resp_output)

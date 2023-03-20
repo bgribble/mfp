@@ -6,6 +6,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 import tokenize
+import inspect
 from io import StringIO
 
 
@@ -34,6 +35,12 @@ class Evaluator (object):
 
     def eval_arglist(self, evalstr, **extra_bindings):
         return self.eval(evalstr, True, **extra_bindings)
+
+    async def eval_async(self, evalstr, collect=False, **extra_bindings):
+        rv = self.eval(evalstr, collect=False, **extra_bindings)
+        if inspect.isawaitable(rv):
+            return await rv
+        return rv
 
     def eval(self, evalstr, collect=False, **extra_bindings):
         def _eval_collect_args(*args, **kwargs):
@@ -102,7 +109,6 @@ class Evaluator (object):
             environ["patch"] = environ["__patch__"]
 
         rv = eval(str2eval, environ)
-
         return rv
 
     def exec_str(self, pystr):
@@ -115,5 +121,3 @@ class Evaluator (object):
         fileobj = open(filename, "r")
         if fileobj:
             exec(fileobj, self.global_names)
-
-

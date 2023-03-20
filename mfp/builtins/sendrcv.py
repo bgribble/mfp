@@ -5,34 +5,30 @@ sendrcv.py: Bus/virtual wire objects.
 Copyright (c) 2012-2015 Bill Gribble <grib@billgribble.com>
 '''
 
-from ..utils import TaskNibbler
+import asyncio
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from .. import Uninit
 
 from mfp import log
 
+
 class Send (Processor):
-    display_type = "sendvia" 
+    display_type = "sendvia"
     doc_tooltip_obj = "Send messages to a named receiver (create with 'send via' GUI object)"
-    doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)" ]
+    doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)"]
 
     bus_type = "bus"
 
-    task_nibbler = None
-
     def __init__(self, init_type, init_args, patch, scope, name):
-        if not Send.task_nibbler:
-            Send.task_nibbler = TaskNibbler()
-
         self.dest_name = None
         self.dest_inlet = 0
         self.dest_obj = None
-        self.dest_obj_owned = False 
+        self.dest_obj_owned = False
 
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
 
-        # needed so that name changes happen timely 
+        # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
         initargs, kwargs = self.parse_args(init_args)
@@ -49,14 +45,14 @@ class Send (Processor):
             nm += '/{}'.format(self.dest_inlet)
         return nm
 
-    def onload(self, phase):
+    async def onload(self, phase):
         if phase == 0:
-            self._connect(self.dest_name, self.dest_inlet)
+            await self._connect(self.dest_name, self.dest_inlet)
 
     def method(self, message, inlet=0):
         if inlet == 0:
             self.trigger()
-        else: 
+        else:
             self.inlets[inlet] = Uninit
             message.call(self)
 
@@ -65,121 +61,129 @@ class Send (Processor):
         gp = params.get('gui_params', {})
         self.gui_params['label_text'] = gp.get("label_text") or self.dest_name
 
-    def save(self): 
+    def save(self):
         prms = Processor.save(self)
         conns = prms['connections']
-        if conns and self.dest_obj: 
-            pruned = [] 
+        if conns and self.dest_obj:
+            pruned = []
             for objid, port in conns[0]:
                 if objid != self.dest_obj.obj_id:
                     pruned.append([objid, port])
             conns[0] = pruned
         return prms
 
-    def connect(self, outlet, target, inlet, show_gui=True):
-        Processor.connect(self, outlet, target, inlet, show_gui)
+    async def connect(self, outlet, target, inlet, show_gui=True):
+        await Processor.connect(self, outlet, target, inlet, show_gui)
         if outlet == 0:
             self.dest_obj = target
             self.dest_inlet = inlet
 
-    def _wait_connect(self):
-        def send_recheck():
-            return self._connect(self.dest_name, self.dest_inlet, False)
-        Send.task_nibbler.add_task(send_recheck, 20)
+    async def _wait_connect(self):
+        async def send_recheck():
+            return await self._connect(self.dest_name, self.dest_inlet, False)
+        conn = None
+        while conn is None:
+            asyncio.sleep(0.1)
+            conn = await send_recheck()
 
-    def _connect(self, dest_name, dest_inlet, wait=True):
-        # short-circuit if already conected 
+    async def _connect(self, dest_name, dest_inlet, wait=True):
+        # short-circuit if already conected
         if (self.dest_name == dest_name and self.dest_inlet == dest_inlet
-                and self.dest_obj is not None): 
-            return True 
+                and self.dest_obj is not None):
+            return True
 
-        # disconnect existing if needed 
+        # disconnect existing if needed
         if self.dest_obj is not None:
-            self.disconnect(0, self.dest_obj, self.dest_inlet)
-            self.dest_obj = None 
-            self.dest_obj_owned = False 
-        self.dest_name = dest_name 
+            await self.disconnect(0, self.dest_obj, self.dest_inlet)
+            self.dest_obj = None
+            self.dest_obj_owned = False
+        self.dest_name = dest_name
         self.dest_inlet = dest_inlet
 
         # find the new endpoint
         obj = MFPApp().resolve(self.dest_name, self, True)
 
         if obj is None:
-            # usually we create a bus if needed.  but if it's a reference to 
-            # another top-level patch, no. 
+            # usually we create a bus if needed.  but if it's a reference to
+            # another top-level patch, no.
             if ':' in self.dest_name or self.dest_inlet != 0:
                 if wait:
-                    self._wait_connect()
+                    await self._wait_connect()
                 return False
             else:
-                self.dest_obj = MFPApp().create(self.bus_type, "", self.patch, 
-                                                self.scope, self.dest_name)
-                self.dest_obj_owned = True 
+                self.dest_obj = await MFPApp().create(
+                    self.bus_type, "",
+                    self.patch, self.scope, self.dest_name
+                )
+                self.dest_obj_owned = True
         else:
-            self.dest_obj = obj 
-            self.dest_obj_owned = False 
-            
+            self.dest_obj = obj
+            self.dest_obj_owned = False
+
         if self.dest_obj:
-            if (len(self.dest_obj.connections_in) < self.dest_inlet+1
-                or [self, 0] not in self.dest_obj.connections_in[self.dest_inlet]):
-                self.connect(0, self.dest_obj, self.dest_inlet, False)
+            if (
+                len(self.dest_obj.connections_in) < self.dest_inlet+1
+                or [self, 0] not in self.dest_obj.connections_in[self.dest_inlet]
+            ):
+                await self.connect(0, self.dest_obj, self.dest_inlet, False)
         else:
             log.warning("[send] can't find dest object and not still looking")
 
-        self.init_args = '"%s",%s' % (self.dest_name, self.dest_inlet) 
+        self.init_args = '"%s",%s' % (self.dest_name, self.dest_inlet)
         self.conf(label_text=self._mkdispname())
 
         if self.inlets[0] is not Uninit:
-            self.trigger()
+            await self.trigger()
 
-        return True 
+        return True
 
     async def trigger(self):
-        if self.inlets[1] is not Uninit: 
+        if self.inlets[1] is not Uninit:
             port = 0
-            if isinstance(self.inlets[1], (list,tuple)):
+            if isinstance(self.inlets[1], (list, tuple)):
                 (name, port) = self.inlets[1]
             else:
                 name = self.inlets[1]
 
-            self._connect(name, port)
-            self.inlets[1] = Uninit 
+            await self._connect(name, port)
+            self.inlets[1] = Uninit
 
         if self.inlets[0] is not Uninit and self.dest_obj:
             self.outlets[0] = self.inlets[0]
-            self.inlets[0] = Uninit 
+            self.inlets[0] = Uninit
 
     def assign(self, patch, scope, name):
         pret = Processor.assign(self, patch, scope, name)
-        if self.dest_obj_owned and self.dest_obj: 
+        if self.dest_obj_owned and self.dest_obj:
             buscon = self.dest_obj.connections_out[0]
             self.dest_obj.assign(patch, scope, self.dest_obj.name)
-            for obj, port in buscon: 
+            for obj, port in buscon:
                 self.dest_obj.disconnect(0, obj, 0)
         return pret
 
     def tooltip_extra(self):
         return "<b>Connected to:</b> %s/%s (%s)" % (
-            self.dest_name, self.dest_inlet, 
-            self.dest_obj.obj_id if self.dest_obj else "none") 
+            self.dest_name, self.dest_inlet,
+            self.dest_obj.obj_id if self.dest_obj else "none")
+
 
 class SendSignal (Send):
     doc_tooltip_obj = "Send signals to the specified name"
     display_type = "sendsignalvia"
     bus_type = "bus~"
 
-    def __init__(self, init_type, init_args, patch, scope, name): 
+    def __init__(self, init_type, init_args, patch, scope, name):
         self.dest_name = None
         self.dest_inlet = 0
         self.dest_obj = None
-        self.dest_obj_owned = False 
+        self.dest_obj_owned = False
 
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        
-        self.dsp_inlets = [0]
-        self.dsp_outlets = [0] 
 
-        # needed so that name changes happen timely 
+        self.dsp_inlets = [0]
+        self.dsp_outlets = [0]
+
+        # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
         initargs, kwargs = self.parse_args(init_args)
@@ -193,10 +197,11 @@ class SendSignal (Send):
     async def setup(self):
         await self.dsp_init("noop~")
 
-class MessageBus (Processor): 
+
+class MessageBus (Processor):
     display_type = "hidden"
-    do_onload = False 
-    save_to_patch = False 
+    do_onload = False
+    save_to_patch = False
 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.last_value = Uninit
@@ -204,25 +209,26 @@ class MessageBus (Processor):
 
     async def trigger(self):
         self.outlets[0] = self.last_value = self.inlets[0]
-        self.inlets[0] = Uninit 
- 
-    def connect(self, outlet, target, inlet, show_gui=True):
-        rv = Processor.connect(self, outlet, target, inlet, show_gui)
+        self.inlets[0] = Uninit
+
+    async def connect(self, outlet, target, inlet, show_gui=True):
+        rv = await Processor.connect(self, outlet, target, inlet, show_gui)
         if self.last_value is not Uninit:
-            target.send(self.last_value, inlet)
+            await target.send(self.last_value, inlet)
         return rv
 
     def method(self, message, inlet=0):
         if inlet == 0:
             self.trigger()
-        else: 
+        else:
             self.inlets[inlet] = Uninit
             message.call(self)
 
-class SignalBus (Processor): 
+
+class SignalBus (Processor):
     display_type = "hidden"
-    do_onload = False 
-    save_to_patch = False 
+    do_onload = False
+    save_to_patch = False
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
@@ -235,41 +241,40 @@ class SignalBus (Processor):
     async def trigger(self):
         self.outlets[0] = self.inlets[0]
 
+
 class Recv (Processor):
-    display_type = "recvvia" 
+    display_type = "recvvia"
 
-    doc_tooltip_obj = "Receive messages to the specified name" 
-    doc_tooltip_inlet = [ "Passthru input" ]
-    doc_tooltip_outlet = [ "Passthru output" ]
-
-    task_nibbler = None
+    doc_tooltip_obj = "Receive messages to the specified name"
+    doc_tooltip_inlet = ["Passthru input"]
+    doc_tooltip_outlet = ["Passthru output"]
 
     def __init__(self, init_type, init_args, patch, scope, name):
-        if not Recv.task_nibbler:
-            Recv.task_nibbler = TaskNibbler()
-
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        self.src_name = self.name 
-        self.src_obj = None 
+        self.src_name = self.name
+        self.src_name_provided = False
+        self.src_obj = None
         self.src_outlet = 0
 
         if len(initargs) > 1:
             self.src_outlet = initargs[1]
 
         if len(initargs):
+            self.src_name_provided = True
             self.src_name = initargs[0]
-        else: 
+        else:
             self.src_name = self.name
 
         self.gui_params["label_text"] = self._mkdispname()
 
-        # needed so that name changes happen timely 
+        # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
-        if len(initargs):
-            self._connect(self.src_name, self.src_outlet)
+    async def setup(self):
+        if self.src_name_provided:
+            await self._connect(self.src_name, self.src_outlet)
 
     def _mkdispname(self):
         nm = self.src_name
@@ -292,80 +297,82 @@ class Recv (Processor):
         gp = params.get('gui_params', {})
         self.gui_params['label_text'] = gp.get("label_text") or self._mkdispname()
 
-    def _wait_connect(self):
-        def recv_recheck():
-            conn = self._connect(self.src_name, self.src_outlet, False)
-            return conn
-        Recv.task_nibbler.add_task(recv_recheck, 100)
+    async def _wait_connect(self):
+        async def recv_recheck():
+            return await self._connect(self.src_name, self.src_outlet, False)
 
-    def _connect(self, src_name, src_outlet, wait=True):
+        conn = None
+        while conn is None:
+            asyncio.sleep(0.1)
+            conn = await recv_recheck()
+
+    async def _connect(self, src_name, src_outlet, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)
         if src_obj:
             self.src_obj = src_obj
-            self.src_obj.connect(self.src_outlet, self, 0, False)
-            return True 
+            await self.src_obj.connect(self.src_outlet, self, 0, False)
+            return True
         elif wait:
-            self._wait_connect()
+            await self._wait_connect()
 
-        return False 
+        return False
 
     async def trigger(self):
         if self.inlets[1] is not Uninit:
             port = 0
-            if isinstance(self.inlets[1], (tuple,list)):
+            if isinstance(self.inlets[1], (tuple, list)):
                 (name, port) = self.inlets[1]
             else:
                 name = self.inlets[1]
 
             if name != self.src_name or port != self.src_outlet:
                 if self.src_obj:
-                    self.src_obj = None 
+                    self.src_obj = None
                 self.init_args = '"%s",%s' % (name, port)
                 self.src_name = name
                 self.src_outlet = port
-                self.conf(label_text = self._mkdispname())
-                self._connect(self.src_name, self.src_outlet)
+                self.conf(label_text=self._mkdispname())
+                await self._connect(self.src_name, self.src_outlet)
             self.inlets[1] = Uninit
 
         if self.src_name and self.src_obj is None:
-            self._connect(self.src_name, self.src_outlet)
+            await self._connect(self.src_name, self.src_outlet)
 
         if self.inlets[0] is not Uninit:
             self.outlets[0] = self.inlets[0]
-            self.inlets[0] = Uninit 
+            self.inlets[0] = Uninit
 
     def tooltip_extra(self):
         return "<b>Connected to:</b> %s/%s (%s)" % (
-            self.src_name, self.src_outlet, 
-            self.src_obj.obj_id if self.src_obj else "none") 
+            self.src_name, self.src_outlet,
+            self.src_obj.obj_id if self.src_obj else "none")
 
-class RecvSignal (Recv): 
-    display_type = "recvsignalvia" 
+
+class RecvSignal (Recv):
+    display_type = "recvsignalvia"
     doc_tooltip_obj = "Receive signals to the specified name"
-    
+
     def __init__(self, init_type, init_args, patch, scope, name):
-        if not Recv.task_nibbler:
-            Recv.task_nibbler = TaskNibbler()
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
-        self.src_name = None 
-        self.src_obj = None 
+        self.src_name = None
+        self.src_obj = None
         if len(initargs) > 1:
             self.src_outlet = initargs[1]
             self.init_connect = True
-        else: 
+        else:
             self.src_outlet = 0
             self.init_connect = False
 
-        if len(initargs): 
+        if len(initargs):
             self.src_name = initargs[0]
-        else: 
-            self.src_name = self.name 
+        else:
+            self.src_name = self.name
 
         self.gui_params["label_text"] = self._mkdispname()
 
-        # needed so that name changes happen timely 
+        # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
         self.dsp_inlets = [0]
@@ -374,18 +381,18 @@ class RecvSignal (Recv):
     async def setup(self):
         await self.dsp_init("noop~")
         if self.init_connect:
-            self._connect(self.src_name, self.src_outlet)
+            await self._connect(self.src_name, self.src_outlet)
 
-    def _connect(self, src_name, src_outlet, wait=True):
+    async def _connect(self, src_name, src_outlet, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)
         if src_obj and src_obj.dsp_obj and self.dsp_obj:
             self.src_obj = src_obj
-            self.src_obj.connect(self.src_outlet, self, 0, False)
-            return True 
+            await self.src_obj.connect(self.src_outlet, self, 0, False)
+            return True
         elif wait:
             self._wait_connect()
 
-        return False 
+        return False
 
 
 def register():

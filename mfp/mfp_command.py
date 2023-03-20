@@ -131,9 +131,9 @@ class MFPCommand:
             print('console:', msg)
         MFPApp().gui_command.log_write(msg)
 
-    def console_eval(self, cmd):
+    async def console_eval(self, cmd):
         from .mfp_app import MFPApp
-        return MFPApp().console.runsource(cmd)
+        return await MFPApp().console.runsource(cmd)
 
     def add_scope(self, patch_id, scope_name):
         from .mfp_app import MFPApp

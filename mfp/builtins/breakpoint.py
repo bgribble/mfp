@@ -20,7 +20,7 @@ class Breakpoint(Processor):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
     async def trigger(self):
-        await self.patch.step_execute_start()
+        await self.patch.step_execute_start(f"Breakpoint in processor {self.name}")
         self.outlets[0] = self.inlets[0]
 
 

@@ -207,15 +207,10 @@ class ConsoleMgr (Thread):
                 continued = resp.continued
                 if not continued:
                     self.continue_buffer = ''
-                    MFPGUI().clutter_do(lambda: self.append(resp.value + '\n'))
+                    if resp.value is not None:
+                        MFPGUI().clutter_do(lambda: self.append(resp.value + '\n'))
 
     def evaluate(self, cmd):
-        # returns True if a syntactically complete but partial line
-        # was entered, so we can display a continuation prompt
-
-        # returns False if an incorrect or complete and correct
-        # expression was entered.
-
         return MFPGUI().mfp.console_eval.sync(cmd)
 
     def finish(self):

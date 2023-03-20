@@ -6,12 +6,14 @@ Various utility routines not specific to MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import queue
 import asyncio
 import inspect
 import cProfile
 from threading import Thread, Lock, Condition
 from mfp import log
 from datetime import datetime, timedelta
+
 
 def task(coro):
     asyncio.create_task(coro)
@@ -337,7 +339,6 @@ class AsyncExecMonitor:
             self.log_raw = False
 
     async def start(self):
-        from mfp import log
         import shutil
 
         execfile = shutil.which(self.exec_file)
@@ -370,7 +371,6 @@ class AsyncExecMonitor:
             except Exception as e:
                 log.debug("AsyncExecMonitor: exiting with error", e)
                 break
-
 
     async def cancel(self):
         self.process.terminate()
