@@ -12,7 +12,7 @@ from ..bang import Bang, Uninit
 
 
 def get_arglist(thunk): 
-    if hasattr(thunk, 'func_code'): 
+    if hasattr(thunk, '__code__'): 
         return thunk.__code__.co_varnames
     elif hasattr(thunk, '__func__'):
         return thunk.__func__.__code__.co_varnames 
