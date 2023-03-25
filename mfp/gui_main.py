@@ -49,7 +49,9 @@ class MFPGUI (Singleton):
             'fill-color': 'default-fill-color',
             'text-color': 'default-text-color',
             'stroke-color:selected': 'default-stroke-color-selected',
+            'stroke-color:debug': 'default-stroke-color-debug',
             'fill-color:selected': 'default-fill-color-selected',
+            'fill-color:debug': 'default-fill-color-debug',
             'text-color:selected': 'default-text-color-selected',
             'text-cursor-color': 'default-text-cursor-color'
         }
@@ -144,10 +146,14 @@ def setup_default_colors():
                      ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
     ColorDB().insert('default-stroke-color-selected',
                      ColorDB().find(0x00, 0x7f, 0xff, 0xff))
+    ColorDB().insert('default-stroke-color-debug',
+                     ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
     ColorDB().insert('default-fill-color',
                      ColorDB().find(0xd4, 0xdc, 0xff, 0xff))
     ColorDB().insert('default-fill-color-selected',
                      ColorDB().find(0xe4, 0xec, 0xff, 0xff))
+    ColorDB().insert('default-fill-color-debug',
+                     ColorDB().find(0xcd, 0xf8, 0xec, 0xff))
     ColorDB().insert('default-alt-fill-color',
                      ColorDB().find(0x7d, 0x83, 0xff, 0xff))
     ColorDB().insert('default-text-color',

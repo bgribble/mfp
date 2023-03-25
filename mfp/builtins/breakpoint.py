@@ -33,7 +33,7 @@ class Breakpoint(Processor):
             self.enabled = bool(self.inlets[1])
 
         if self.enabled:
-            await self.patch.step_execute_start(f"Breakpoint in processor {self.name}")
+            await self.patch.step_execute_start(self, f"Breakpoint in processor {self.name}")
 
         self.outlets[0] = self.inlets[0]
 

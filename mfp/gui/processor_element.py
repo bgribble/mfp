@@ -223,6 +223,9 @@ class ProcessorElement (PatchElement):
                 MFPGUI().mfp.create_export_gui.sync(self.obj_id)
                 need_update = True
 
+        if "debug" in params:
+            need_update = True
+
         if need_update:
             self.update()
 

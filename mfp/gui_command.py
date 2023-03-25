@@ -63,6 +63,8 @@ class GUICommand:
 
     def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
+        from mfp import log
+        log.debug(f"configure: p={params} k={kwparams}")
         MFPGUI().clutter_do(lambda: self._configure(obj_id, params, kwparams))
         return True
 

@@ -701,7 +701,8 @@ class Processor:
                         if self.patch.step_debugger.enabled:
                             self.patch.step_debugger.add_task(
                                 self._send__propagate_value(target, val, tinlet),
-                                f"Send output to {target.name} inlet {tinlet}"
+                                f"Send output to {target.name} inlet {tinlet}",
+                                target,
                             )
                         else:
                             work.append((target, val, tinlet))
@@ -731,7 +732,8 @@ class Processor:
             if self.patch.step_debugger.enabled:
                 self.patch.step_debugger.add_task(
                     self._send__initiate(value, inlet),
-                    f"Receive input to {self.name} inlet {inlet}"
+                    f"Receive input to {self.name} inlet {inlet}",
+                    self
                 )
             else:
                 await self._send__initiate(value, inlet)
@@ -742,11 +744,13 @@ class Processor:
             if self.patch.step_debugger.enabled:
                 self.patch.step_debugger.add_task(
                     self._send__activate(value, inlet),
-                    f"Trigger processor {self.name} from inlet {inlet}"
+                    f"Trigger processor {self.name} from inlet {inlet}",
+                    self
                 )
                 self.patch.step_debugger.add_task(
                     self._send__propagate(),
-                    "Send outputs to connected processors"
+                    "Send outputs to connected processors",
+                    self
                 )
             else:
                 await self._send__activate(value, inlet)
@@ -760,7 +764,8 @@ class Processor:
             if self.patch.step_debugger.enabled:
                 self.patch.step_debugger.add_task(
                     self._send__dsp_params(value, inlet),
-                    "Update parameters of DSP object"
+                    "Update parameters of DSP object",
+                    self
                 )
             else:
                 await self._send__dsp_params(value, inlet)

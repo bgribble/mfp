@@ -64,8 +64,8 @@ class Patch(Processor):
         else:
             self.gui_params['top_level'] = False
 
-    async def step_execute_start(self, message):
-        await self.step_debugger.enable()
+    async def step_execute_start(self, target, message):
+        await self.step_debugger.enable(target)
         await self.step_debugger.show_banner(message)
         await self.step_debugger.show_prompt()
 

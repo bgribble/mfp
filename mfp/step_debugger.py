@@ -9,13 +9,26 @@ class StepDebugger:
     def __init__(self):
         self.tasklist = []
         self.enabled = False
+        self.target = None
         self.shadowed_bindings = {}
         self.event_loop_thread = threading.get_ident()
         self.event_loop = asyncio.get_event_loop()
 
-    async def enable(self):
+    def set_target(self, target):
+        if target != self.target:
+            old_target = self.target
+            self.target = target
+            if old_target:
+                old_target.conf(debug=False)
+            if target: 
+                target.conf(debug=True)
+
+    async def enable(self, target=None):
         from .mfp_app import MFPApp
         self.enabled = True
+
+        self.set_target(target)
+
         evaluator = MFPApp().console.evaluator
 
         for b in ["next", "run", "n", "r", "info", "help"]:
@@ -38,8 +51,8 @@ class StepDebugger:
                     evaluator.local_names[b].cancel()
                 evaluator.local_names[b] = self.shadowed_bindings[b]
 
-    def add_task(self, task, description):
-        self.tasklist.append((task, description))
+    def add_task(self, task, description, target):
+        self.tasklist.append((task, description, target))
 
     async def mdb_next(self, local_name):
         from .mfp_app import MFPApp
@@ -88,15 +101,18 @@ class StepDebugger:
     async def step_next(self):
         if not len(self.tasklist):
             return None
-        task, description = self.tasklist[0]
+
+        task, description, target = self.tasklist[0]
         self.tasklist[:1] = []
+        self.set_target(target)
         await task
         if self.tasklist:
-            task, description = self.tasklist[0]
+            task, description, target = self.tasklist[0]
             return description
         return None
 
     async def step_run(self):
+        self.set_target(None)
         await self.show_leave()
         while self.tasklist and len(self.tasklist) > 1:
             await self.step_next()

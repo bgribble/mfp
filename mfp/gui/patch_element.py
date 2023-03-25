@@ -59,7 +59,7 @@ class PatchElement (Clutter.Group):
                            'update_required', 'display_type', 'name', 'layername',
                            'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
                            'dsp_outlets', 'scope', 'style', 'export_offset_x',
-                           'export_offset_y']
+                           'export_offset_y', 'debug']
 
         # Clutter objects
         self.stage = window
@@ -83,6 +83,7 @@ class PatchElement (Clutter.Group):
         self.drag_y = None
         self.selected = False
         self.editable = True
+        self.debug = False
         self.update_required = False
         self.no_export = False
         self.edit_mode = None
@@ -118,7 +119,9 @@ class PatchElement (Clutter.Group):
 
     def get_color(self, colorspec):
         rgba = None
-        if self.selected:
+        if self.debug:
+            rgba = self.get_style(colorspec + ':debug')
+        elif self.selected:
             rgba = self.get_style(colorspec + ':selected')
         if not rgba:
             rgba = self.get_style(colorspec)
@@ -505,6 +508,7 @@ class PatchElement (Clutter.Group):
         self.is_export = params.get("is_export", False)
         self.export_offset_x = params.get("export_offset_x", 0)
         self.export_offset_y = params.get("export_offset_y", 0)
+        self.debug = params.get("debug", False)
 
         newscope = params.get("scope", "__patch__")
         if (not self.scope) or newscope != self.scope:
