@@ -183,6 +183,10 @@ class ConsoleMgr (Thread):
         self.textbuffer.insert(iterator, msg, -1)
         self.scroll_to_end()
 
+    def show_prompt(self, prompt):
+        self.append(prompt)
+        self.last_ps = prompt
+
     def run(self):
         time.sleep(0.1)
         continued = False
@@ -190,11 +194,9 @@ class ConsoleMgr (Thread):
         while not self.quitreq:
             # write the line prompt
             if not continued:
-                self.last_ps = self.ps1
-                MFPGUI().clutter_do(lambda: self.append(self.ps1))
+                MFPGUI().clutter_do(lambda: self.show_prompt(self.ps1))
             else:
-                self.last_ps = self.ps2
-                MFPGUI().clutter_do(lambda: self.append(self.ps2))
+                MFPGUI().clutter_do(lambda: self.show_prompt(self.ps2))
 
             # wait for input, possibly quitting if needed
             cmd = None

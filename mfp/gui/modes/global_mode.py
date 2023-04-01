@@ -31,7 +31,7 @@ class GlobalMode (InputMode):
         self.drag_last_y = None
         self.drag_target = None
 
-        self.next_console_position = 1
+        self.previous_console_position = 0
         self.next_tree_position = 1
 
         InputMode.__init__(self, "Global input bindings")
@@ -86,15 +86,18 @@ class GlobalMode (InputMode):
 
     def toggle_console(self):
         from gi.repository import Gdk
+        from mfp import log
         alloc = self.window.content_console_pane.get_allocation()
         oldpos = self.window.content_console_pane.get_position()
 
-        self.window.content_console_pane.set_position(
-            alloc.height - self.next_console_position)
-        self.next_console_position = alloc.height - oldpos
+        console_visible = oldpos < (alloc.height - 2)
+        if console_visible:
+            next_pos = alloc.height
+            self.previous_console_position = oldpos
+        else:
+            next_pos = self.previous_console_position
 
-        # KLUDGE!
-        MFPGUI().clutter_do_later(100, self._refresh)
+        self.window.content_console_pane.set_position(next_pos)
 
         return False
 

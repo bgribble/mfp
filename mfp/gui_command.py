@@ -29,6 +29,11 @@ class GUICommand:
         MFPGUI().appwin.console_mgr.ps1 = prompt
         return True
 
+    def console_show_prompt(self, prompt):
+        from .gui_main import MFPGUI
+        MFPGUI().clutter_do(lambda: MFPGUI().appwin.console_show_prompt(prompt))
+        return True
+
     def console_write(self, msg):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._console_write(msg))
@@ -64,7 +69,6 @@ class GUICommand:
     def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
         from mfp import log
-        log.debug(f"configure: p={params} k={kwparams}")
         MFPGUI().clutter_do(lambda: self._configure(obj_id, params, kwparams))
         return True
 

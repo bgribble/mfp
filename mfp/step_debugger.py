@@ -2,8 +2,6 @@ import asyncio
 import threading
 import inspect
 
-from . import log
-
 
 class StepDebugger:
     def __init__(self):
@@ -15,13 +13,17 @@ class StepDebugger:
         self.event_loop = asyncio.get_event_loop()
 
     def set_target(self, target):
+        from .mfp_app import MFPApp
         if target != self.target:
             old_target = self.target
             self.target = target
             if old_target:
                 old_target.conf(debug=False)
-            if target: 
+            if target:
                 target.conf(debug=True)
+
+            evaluator = MFPApp().console.evaluator
+            evaluator.local_names["target"] = self.target
 
     async def enable(self, target=None):
         from .mfp_app import MFPApp
@@ -31,7 +33,7 @@ class StepDebugger:
 
         evaluator = MFPApp().console.evaluator
 
-        for b in ["next", "run", "n", "r", "info", "help"]:
+        for b in ["next", "run", "info", "help", "n", "r", "i", "h", "target"]:
             if b in evaluator.local_names and b not in self.shadowed_bindings:
                 self.shadowed_bindings[b] = evaluator.local_names[b]
 
@@ -39,17 +41,21 @@ class StepDebugger:
         evaluator.local_names["n"] = self.mdb_next("n")
         evaluator.local_names["run"] = self.mdb_run("run")
         evaluator.local_names["r"] = self.mdb_run("r")
+        evaluator.local_names["info"] = self.mdb_info("info")
+        evaluator.local_names["i"] = self.mdb_info("i")
 
     def disable(self):
         from .mfp_app import MFPApp
         self.enabled = False
         evaluator = MFPApp().console.evaluator
 
-        for b in ["next", "run", "info", "help"]:
+        for b in ["n", "r", "i", "h", "next", "run", "info", "help"]:
+            if b in evaluator.local_names and inspect.isawaitable(evaluator.local_names[b]):
+                evaluator.local_names[b].cancel()
             if b in self.shadowed_bindings:
-                if b in evaluator.local_names and inspect.isawaitable(evaluator.local_names[b]):
-                    evaluator.local_names[b].cancel()
                 evaluator.local_names[b] = self.shadowed_bindings[b]
+            else:
+                del evaluator.local_names[b]
 
     def add_task(self, task, description, target):
         self.tasklist.append((task, description, target))
@@ -74,12 +80,39 @@ class StepDebugger:
         evaluator = MFPApp().console.evaluator
         evaluator.local_names[local_name] = self.mdb_run(local_name)
 
+    async def mdb_info(self, local_name):
+        from .mfp_app import MFPApp
+        proc_args = f"{' ' + self.target.init_args if self.target.init_args else ''}"
+        proc_descrip = f"{self.target.init_type}{proc_args}"
+
+        await MFPApp().gui_command.console_write(
+            f"Target: [{proc_descrip}] name={self.target.name}\n\n"
+        )
+        for ind, i in enumerate(self.target.inlets):
+            await MFPApp().gui_command.console_write(
+                f"   inlet {ind}: {self.target.inlets[ind]}\n"
+            )
+
+        await MFPApp().gui_command.console_write("\n")
+
+        for ind, i in enumerate(self.target.outlets):
+            await MFPApp().gui_command.console_write(
+                f"   outlet {ind}: {self.target.outlets[ind]}\n"
+            )
+
+        if self.tasklist:
+            next_msg = self.tasklist[0][1]
+            await MFPApp().gui_command.console_write(
+                f"next: {next_msg}\n"
+            )
+        evaluator = MFPApp().console.evaluator
+        evaluator.local_names[local_name] = self.mdb_info(local_name)
+
     async def show_prompt(self):
         from .mfp_app import MFPApp
-        await MFPApp().gui_command.console_set_prompt("mdb> ")
-        await MFPApp().gui_command.console_write(
-            "mdb> "
-        )
+        new_prompt = "mdb> "
+        await MFPApp().gui_command.console_set_prompt(new_prompt)
+        await MFPApp().gui_command.console_show_prompt(new_prompt)
 
     async def show_banner(self, message=None):
         from .mfp_app import MFPApp

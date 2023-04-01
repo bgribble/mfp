@@ -418,7 +418,7 @@ class PatchWindow(object):
 
     def quit(self, *rest):
         from .patch_info import PatchInfo
-        log.debug("Quit command from GUI or WM")
+        log.debug("quit: received command from GUI or WM")
 
         self.close_in_progress = True
         to_delete = [ p for p in self.patches if p.deletable ]
@@ -438,28 +438,30 @@ class PatchWindow(object):
         if self.console_mgr:
             self.console_mgr.quitreq = True
             self.console_mgr.join()
-            log.debug("Console thread reaped")
             self.console_mgr = None
         MFPGUI().appwin = False
-        log.debug("Calling finish()")
         MFPGUI().finish()
-        log.debug("Calling quit()")
         MFPGUI().mfp.quit.sync()
-        log.debug("All done")
+        log.debug("quit: shutdowns complete")
         return True
 
     def console_write(self, msg):
-        buf = self.console_view.get_buffer()
-        iterator = buf.get_end_iter()
-        mark = buf.get_mark("console_mark")
-        if mark is None:
-            mark = Gtk.TextMark.new("console_mark", False)
-            buf.add_mark(mark, iterator)
+        self.console_mgr.append(msg)
 
-        buf.insert(iterator, msg, -1)
-        iterator = buf.get_end_iter()
-        buf.move_mark(mark, iterator)
-        self.console_view.scroll_to_mark(mark, 0, True, 1.0, 0.9)
+    def console_show_prompt(self, msg):
+        self.console_mgr.show_prompt(msg)
+        self.console_activate()
+
+    def console_activate(self):
+        alloc = self.content_console_pane.get_allocation()
+        oldpos = self.content_console_pane.get_position()
+
+        console_visible = oldpos < (alloc.height - 2)
+        if not console_visible:
+            next_pos = self.input_mgr.global_mode.previous_console_position
+            self.content_console_pane.set_position(next_pos)
+
+        self.bottom_notebook.set_current_page(1)
 
     def log_write(self, msg, level):
         buf = self.log_view.get_buffer()
