@@ -3,6 +3,22 @@ import threading
 import inspect
 
 
+help_message = """Step debugger help
+
+A Python REPL with debugging commands defined
+
+Useful variables:
+  app: the MFP application object
+  target: The currently active processor
+
+Debug commands:
+  n, next: Perform next action
+  r, run: Run free until a breakpoint
+  i, info: Print summary of target object state
+  h, help: This message
+"""
+
+
 class StepDebugger:
     def __init__(self):
         self.tasklist = []
@@ -43,6 +59,8 @@ class StepDebugger:
         evaluator.local_names["r"] = self.mdb_run("r")
         evaluator.local_names["info"] = self.mdb_info("info")
         evaluator.local_names["i"] = self.mdb_info("i")
+        evaluator.local_names["help"] = self.mdb_help("help")
+        evaluator.local_names["h"] = self.mdb_help("h")
 
     def disable(self):
         from .mfp_app import MFPApp
@@ -51,7 +69,7 @@ class StepDebugger:
 
         for b in ["n", "r", "i", "h", "next", "run", "info", "help"]:
             if b in evaluator.local_names and inspect.isawaitable(evaluator.local_names[b]):
-                evaluator.local_names[b].cancel()
+                evaluator.local_names[b].close()
             if b in self.shadowed_bindings:
                 evaluator.local_names[b] = self.shadowed_bindings[b]
             else:
@@ -62,9 +80,9 @@ class StepDebugger:
 
     async def mdb_next(self, local_name):
         from .mfp_app import MFPApp
-        info = await self.step_next()
         evaluator = MFPApp().console.evaluator
         evaluator.local_names[local_name] = self.mdb_next(local_name)
+        info = await self.step_next()
         if info:
             await MFPApp().gui_command.console_write(
                 f"next: {info}\n"
@@ -76,12 +94,23 @@ class StepDebugger:
 
     async def mdb_run(self, local_name):
         from .mfp_app import MFPApp
-        info = await self.step_run()
         evaluator = MFPApp().console.evaluator
         evaluator.local_names[local_name] = self.mdb_run(local_name)
+        info = await self.step_run()
+
+    async def mdb_help(self, local_name):
+        from .mfp_app import MFPApp
+        evaluator = MFPApp().console.evaluator
+        evaluator.local_names[local_name] = self.mdb_help(local_name)
+
+        await MFPApp().gui_command.console_write(help_message)
+
 
     async def mdb_info(self, local_name):
         from .mfp_app import MFPApp
+        evaluator = MFPApp().console.evaluator
+        evaluator.local_names[local_name] = self.mdb_info(local_name)
+
         proc_args = f"{' ' + self.target.init_args if self.target.init_args else ''}"
         proc_descrip = f"{self.target.init_type}{proc_args}"
 
@@ -105,8 +134,6 @@ class StepDebugger:
             await MFPApp().gui_command.console_write(
                 f"next: {next_msg}\n"
             )
-        evaluator = MFPApp().console.evaluator
-        evaluator.local_names[local_name] = self.mdb_info(local_name)
 
     async def show_prompt(self):
         from .mfp_app import MFPApp
@@ -149,7 +176,10 @@ class StepDebugger:
         await self.show_leave()
         while self.tasklist and len(self.tasklist) > 1:
             await self.step_next()
-        self.enabled = False
+
         if len(self.tasklist):
-            await self.step_next()
+            task, description, target = self.tasklist[0]
+            self.disable()
+            await task
+
         return None
