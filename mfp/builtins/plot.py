@@ -2,9 +2,10 @@
 '''
 plot.py: Stub for graphical plot I/O
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
+import inspect
 from datetime import datetime
 from ..processor import Processor
 from ..mfp_app import MFPApp
@@ -24,8 +25,8 @@ class Scope (Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.buffer = None
-        self.retrig_value = True 
-        self.need_buffer_send = False 
+        self.retrig_value = True
+        self.need_buffer_send = False
 
         if init_args is not None:
             log.debug("scope: Does not accept init args")
@@ -38,8 +39,8 @@ class Scope (Processor):
             self.buffer = self.inlets[0]
             if self.gui_created:
                 MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
-            else: 
-                self.need_buffer_send = True 
+            else:
+                self.need_buffer_send = True
         elif self.inlets[0] == 1:
             pass
         elif self.inlets[0] == 0:
@@ -50,10 +51,10 @@ class Scope (Processor):
             self.outlets[0] = MethodCall("bufinfo")
 
         if self.gui_created and self.need_buffer_send:
-            self.need_buffer_send = False 
+            self.need_buffer_send = False
             MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
 
-    def range(self, minval, maxval): 
+    def range(self, minval, maxval):
         self.gui_params['y_min'] = minval
         self.gui_params['y_max'] = maxval
 
@@ -69,7 +70,7 @@ class Scope (Processor):
 
 class Scatter (Processor):
     doc_tooltip_obj = "Scatter plot for non-signal data points"
-    doc_tooltip_inlet = [] 
+    doc_tooltip_inlet = []
     doc_tooltip_outlet = ["Data recorder output"]
 
     display_type = "plot"
@@ -86,17 +87,19 @@ class Scatter (Processor):
         self.hot_inlets = list(range(channels))
         self.gui_params = dict(plot_type="scatter")
 
-        self.doc_tooltip_inlet = [] 
+        self.doc_tooltip_inlet = []
         for i in range(channels):
             self.doc_tooltip_inlet.append("Curve %d data/config input" % i)
 
         Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name)
 
-    def method(self, message, inlet):
+    async def method(self, message, inlet):
         # magic inlet argument makes messages simpler
         if inlet != 0:
             message.kwargs['inlet'] = inlet
-        message.call(self)
+        rv = message.call(self)
+        if inspect.isawaitable(rv):
+            await rv
 
     def _time(self):
         if self.time_base is None:

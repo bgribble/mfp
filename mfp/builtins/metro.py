@@ -35,7 +35,6 @@ class Throttle (Processor):
 
         if Throttle._timer is None:
             Throttle._timer = MultiTimer()
-            Throttle._timer.start()
 
         parsed_args, kwargs = self.parse_args(init_args)
 
@@ -64,8 +63,8 @@ class Throttle (Processor):
             self._timer.schedule(self.started + self.interval, self.timer_cb)
             self.outlets[0] = self.inlets[0]
 
-    def timer_cb(self):
-        self.send(TimerTick())
+    async def timer_cb(self):
+        await self.send(TimerTick())
 
 
 class Delay (Processor):
@@ -82,7 +81,6 @@ class Delay (Processor):
 
         if Delay._timer is None:
             Delay._timer = MultiTimer()
-            Delay._timer.start()
 
         parsed_args, kwargs = self.parse_args(init_args)
 
@@ -100,8 +98,8 @@ class Delay (Processor):
             self._timer.schedule(datetime.now() + self.delay, self.timer_cb, [self.inlets[0]])
             self.started = False
 
-    def timer_cb(self, data):
-        self.send(TimerTick(data))
+    async def timer_cb(self, data):
+        await self.send(TimerTick(data))
 
 
 class Metro (Processor):
@@ -120,7 +118,6 @@ class Metro (Processor):
 
         if Metro._timer is None:
             Metro._timer = MultiTimer()
-            Metro._timer.start()
 
         parsed_args, kwargs = self.parse_args(init_args)
 
@@ -148,8 +145,8 @@ class Metro (Processor):
         else:
             self.started = False
 
-    def timer_cb(self):
-        self.send(TimerTick())
+    async def timer_cb(self):
+        await self.send(TimerTick())
 
 class BeatChase (Processor):
     doc_tooltip_obj = "Chase a series of bangs, potentially adjusting timing"
@@ -176,7 +173,6 @@ class BeatChase (Processor):
 
         if BeatChase._timer is None:
             BeatChase._timer = MultiTimer()
-            BeatChase._timer.start()
 
         parsed_args, kwargs = self.parse_args(init_args)
         if len(parsed_args) > 1:
@@ -236,8 +232,8 @@ class BeatChase (Processor):
         else:
             self.run = BeatChase.STOPPED
 
-    def timer_cb(self):
-        self.send(TimerTick())
+    async def timer_cb(self):
+        await self.send(TimerTick())
 
 
 

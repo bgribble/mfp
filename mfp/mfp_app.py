@@ -412,10 +412,10 @@ class MFPApp (Singleton):
                       % (init_type, init_args))
             log.debug(e)
             log.debug_traceback()
-            self.cleanup()
+            await self.cleanup()
             return None
 
-    def cleanup(self):
+    async def cleanup(self):
         garbage = []
         for oid, obj in self.objects.items():
             if obj.status == Processor.CTOR:
@@ -426,7 +426,7 @@ class MFPApp (Singleton):
                 obj.patch.remove(obj)
                 obj.patch = None
 
-            obj.delete()
+            await obj.delete()
 
     def resolve(self, name, queryobj=None, quiet=False):
         '''

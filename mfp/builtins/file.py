@@ -1,7 +1,10 @@
+import inspect
+import io
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..bang import Uninit
+
 
 class FileIO(Processor):
     doc_tooltip_obj = "File I/O processor"
@@ -20,7 +23,7 @@ class FileIO(Processor):
         if len(initargs) > 1:
             self.mode = initargs[1]
         if len(initargs) > 0:
-            if isinstance(initargs[0], file):
+            if isinstance(initargs[0], io.IOBase):
                 self.fileobj = initargs[0]
                 self.filename = self.fileobj.name
                 self.mode = self.fileobj.mode
@@ -33,8 +36,10 @@ class FileIO(Processor):
         self.fileobj.write(self.inlets[0])
         self.inlets[0] = Uninit
 
-    def method(self, message, inlet):
+    async def method(self, message, inlet):
         rv = message.call(self)
+        if inspect.isawaitable(rv):
+            rv = await rv
         self.inlets[inlet] = Uninit
         self.outlets[0] = rv
 

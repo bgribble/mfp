@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 '''
-metro.py: Metronome control processor
+replay.py: Metronome control processor
 
-Copyright (c) 2010-2016 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from ..timer import MultiTimer
@@ -35,7 +35,6 @@ class Replay (Processor):
 
         if Replay._timer is None:
             Replay._timer = MultiTimer()
-            Replay._timer.start()
 
         parsed_args, kwargs = self.parse_args(init_args)
 
@@ -54,14 +53,14 @@ class Replay (Processor):
 
         self.playing = True
         self.playing_start = datetime.now()
-        for payload, delta in self.buffer: 
+        for payload, delta in self.buffer:
             item_id = self._timer.schedule(
-                self.playing_start + delta, 
-                self.timer_cb, 
+                self.playing_start + delta,
+                self.timer_cb,
                 [payload]
             )
             self.playing_ids.append(item_id)
-    
+
     def loop(self, data=None):
         self.play()
         if self.loop_length is None:
@@ -95,15 +94,15 @@ class Replay (Processor):
             )
             if self.playing:
                 item = self._timer.schedule(
-                    self.playing_start + event_delta, 
-                    self.timer_cb, 
+                    self.playing_start + event_delta,
+                    self.timer_cb,
                     [self.inlets[0]]
                 )
                 self.playing_ids.append(item)
             self.started = False
 
-    def timer_cb(self, data):
-        self.send(TimerTick(data))
+    async def timer_cb(self, data):
+        await self.send(TimerTick(data))
 
     def show_buffer(self):
         log.debug(self.buffer)

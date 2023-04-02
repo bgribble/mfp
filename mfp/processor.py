@@ -2,9 +2,12 @@
 '''
 processor.py: Parent class of all processors
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
+
+import inspect
 import threading
+
 from .dsp_object import DSPObject
 from .method import MethodCall
 from .evaluator import LazyExpr
@@ -667,7 +670,7 @@ class Processor:
         if inlet == -1:
             self.dsp_response(value[0], value[1])
         elif isinstance(value, MethodCall):
-            self.method(value, inlet)
+            await self.method(value, inlet)
         elif isinstance(value, AsyncOutput):
             if value.outlet_num not in range(len(self.outlets)):
                 log.error("_send: object %s has no outlet '%s'" % (self.name,
@@ -698,8 +701,8 @@ class Processor:
                 self.count_out += 1
                 for target, tinlet in conns:
                     if target is not None:
-                        if self.patch.step_debugger.enabled:
-                            self.patch.step_debugger.add_task(
+                        if self.step_debug_manager().enabled:
+                            self.step_debug_manager().add_task(
                                 self._send__propagate_value(target, val, tinlet),
                                 f"Send output to {target.name} inlet {tinlet}",
                                 target,
@@ -729,8 +732,8 @@ class Processor:
 
         work = []
         if inlet >= 0:
-            if self.patch.step_debugger.enabled:
-                self.patch.step_debugger.add_task(
+            if self.step_debug_manager().enabled:
+                self.step_debug_manager().add_task(
                     self._send__initiate(value, inlet),
                     f"Receive input to {self.name} inlet {inlet}",
                     self
@@ -741,13 +744,13 @@ class Processor:
         self.count_in += 1
 
         if inlet in self.hot_inlets or inlet == -1:
-            if self.patch.step_debugger.enabled:
-                self.patch.step_debugger.add_task(
+            if self.step_debug_manager().enabled:
+                self.step_debug_manager().add_task(
                     self._send__activate(value, inlet),
                     f"Trigger processor {self.name} from inlet {inlet}",
                     self
                 )
-                self.patch.step_debugger.add_task(
+                self.step_debug_manager().add_task(
                     self._send__propagate(),
                     "Send outputs to connected processors",
                     self
@@ -761,8 +764,8 @@ class Processor:
             and not isinstance(value, bool)
             and isinstance(value, (float, int))
         ):
-            if self.patch.step_debugger.enabled:
-                self.patch.step_debugger.add_task(
+            if self.step_debug_manager().enabled:
+                self.step_debug_manager().add_task(
                     self._send__dsp_params(value, inlet),
                     "Update parameters of DSP object",
                     self
@@ -771,6 +774,13 @@ class Processor:
                 await self._send__dsp_params(value, inlet)
 
         return work
+
+    def step_debug_manager(self):
+        from mfp.patch import Patch
+        if self.patch:
+            return self.patch.step_debugger
+        elif isinstance(self, Patch):
+            return self.step_debugger
 
     def parse_args(self, pystr, **extra_bindings):
         from .patch import Patch
@@ -808,9 +818,12 @@ class Processor:
             e = Evaluator()
             return e.eval(pystr, **extra_bindings)
 
-    def method(self, message, inlet):
+    async def method(self, message, inlet):
         '''Default method handler ignores which inlet the message was received on'''
-        message.call(self)
+        rv = message.call(self)
+        if inspect.isawaitable(rv):
+            await rv
+
         self.inlets[inlet] = Uninit
 
     def reset_counts(self):

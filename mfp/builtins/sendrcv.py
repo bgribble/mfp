@@ -6,6 +6,7 @@ Copyright (c) 2012-2015 Bill Gribble <grib@billgribble.com>
 '''
 
 import asyncio
+import inspect
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from .. import Uninit
@@ -49,12 +50,14 @@ class Send (Processor):
         if phase == 0:
             await self._connect(self.dest_name, self.dest_inlet)
 
-    def method(self, message, inlet=0):
+    async def method(self, message, inlet=0):
         if inlet == 0:
-            self.trigger()
+            await self.trigger()
         else:
             self.inlets[inlet] = Uninit
-            message.call(self)
+            rv = message.call(self)
+            if inspect.isawaitable(rv):
+                await rv
 
     def load(self, params):
         Processor.load(self, params)
@@ -217,12 +220,14 @@ class MessageBus (Processor):
             await target.send(self.last_value, inlet)
         return rv
 
-    def method(self, message, inlet=0):
+    async def method(self, message, inlet=0):
         if inlet == 0:
-            self.trigger()
+            await self.trigger()
         else:
             self.inlets[inlet] = Uninit
-            message.call(self)
+            rv = message.call(self)
+            if inspect.isawaitable(rv):
+                await rv
 
 
 class SignalBus (Processor):
@@ -285,12 +290,14 @@ class Recv (Processor):
     def delete(self):
         Processor.delete(self)
 
-    def method(self, message, inlet):
+    async def method(self, message, inlet):
         if inlet == 0:
-            self.trigger()
+            await self.trigger()
         else:
             self.inlets[inlet] = Uninit
-            message.call(self)
+            rv = message.call(self)
+            if inspect.isawaitable(rv):
+                await rv
 
     def load(self, params):
         Processor.load(self, params)

@@ -64,6 +64,9 @@ class Patch(Processor):
         else:
             self.gui_params['top_level'] = False
 
+    async def bp(self):
+        await self.step_execute_start(self, "@bp message to patch")
+
     async def step_execute_start(self, target, message):
         await self.step_debugger.enable(target)
         await self.step_debugger.show_banner(message)
@@ -183,14 +186,14 @@ class Patch(Processor):
     #############################
     # patch contents management
     #############################
-    def trigger(self):
+    async def trigger(self):
         inlist = list(range(len(self.inlets)))
         inlist.reverse()
 
         for i in inlist:
             if self.inlets[i] is not Uninit:
                 if isinstance(self.inlets[i], AsyncOutput):
-                    self.send(self.inlets[i])
+                    await self.send(self.inlets[i])
                 else:
                     self.inlet_objects[i].send(self.inlets[i])
                 self.inlets[i] = Uninit
@@ -199,19 +202,19 @@ class Patch(Processor):
             self.add_output(o, self.outlet_objects[o].outlets[0])
             self.outlet_objects[o].outlets[0] = Uninit
 
-    def method(self, message, inlet=0):
+    async def method(self, message, inlet=0):
         if len(self.dispatch_objects):
             for d in self.dispatch_objects:
-                d.send(message)
+                await d.send(message)
         else:
-            self.baseclass_method(message, inlet)
+            await self.baseclass_method(message, inlet)
 
         for o in range(len(self.outlets)):
             self.add_output(o, self.outlet_objects[o].outlets[0])
             self.outlet_objects[o].outlets[0] = Uninit
 
-    def baseclass_method(self, message, inlet=0):
-        Processor.method(self, message, inlet)
+    async def baseclass_method(self, message, inlet=0):
+        await Processor.method(self, message, inlet)
 
     def add(self, obj):
         if obj.obj_id in self.objects:
