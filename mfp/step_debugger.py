@@ -30,6 +30,8 @@ class StepDebugger:
 
     def set_target(self, target):
         from .mfp_app import MFPApp
+        from mfp import log
+
         if target != self.target:
             old_target = self.target
             self.target = target
@@ -172,7 +174,6 @@ class StepDebugger:
         return None
 
     async def step_run(self):
-        self.set_target(None)
         await self.show_leave()
         while self.tasklist and len(self.tasklist) > 1:
             await self.step_next()
@@ -181,5 +182,8 @@ class StepDebugger:
             task, description, target = self.tasklist[0]
             self.disable()
             await task
+        else:
+            self.disable()
 
+        self.set_target(None)
         return None
