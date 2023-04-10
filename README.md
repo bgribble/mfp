@@ -12,12 +12,20 @@ it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
 **What's happening now?** I have started working on MFP again and
-I have a few projects that I want to work on. The first one was 
-to switch to using [carp](https://github./com/bgribble/carp)
-instead of the `mfp/rpc/` RPC subsystem. This is done and
-merged (yay!) but there is probably a lot of broken stuff I
-haven't found yet. Next up is support for breakpoints and a 
-step debugger. 
+I have a few projects that I want to work on. 
+
+Recent progress:
+* Switch to using [carp](https://github./com/bgribble/carp)
+instead of the `mfp/rpc/` RPC subsystem. 
+* Add a step debugger using the [bp] processor and/or the 
+@bp message to the patch
+
+Up next:
+* Refactor UI actions to support undo/redo
+* Loading audio files into [buffer~]
+* Named presets for patches
+* Port to GTK4, making UI improvements along the way
+* Self-contained save format including sample and image files
 
 ### BUILDING
 
