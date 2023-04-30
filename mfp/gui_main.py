@@ -15,6 +15,7 @@ from datetime import datetime
 
 from carp.channel import UnixSocketChannel
 from carp.host import Host
+from flopsy import Store
 
 from mfp import log
 
@@ -173,6 +174,7 @@ def setup_default_colors():
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
+
 async def main():
     import gi
     gi.require_version('Gtk', '3.0')
@@ -210,6 +212,8 @@ async def main():
 
     setup_default_colors()
 
+    Store.setup_asyncio()
+
     MFPCommandFactory = await host.require(MFPCommand)
     mfp_connection = await MFPCommandFactory()
 
@@ -224,7 +228,7 @@ async def main():
     await asyncio.wait(host.tasks)
     print("[LOG] DEBUG: GUI process terminating")
 
+
 def main_sync_wrapper():
     import asyncio
     asyncio.run(main())
-

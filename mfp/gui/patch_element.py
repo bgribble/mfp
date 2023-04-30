@@ -6,16 +6,25 @@ A patch element is the parent of all GUI entities backed by MFP objects
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
+from flopsy import Store
+
 from gi.repository import Clutter
 from mfp import MFPGUI, log
 from .colordb import ColorDB
 import math
 
 
-class PatchElement (Clutter.Group):
+class PatchElement (Store, Clutter.Group):
     '''
     Parent class of elements represented in the patch window
     '''
+    store_attrs = [
+        'position_x', 'position_y', 'width', 'height',
+        'update_required', 'display_type', 'name', 'layername',
+        'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
+        'dsp_outlets', 'scope', 'style', 'export_offset_x',
+        'export_offset_y', 'debug'
+    ]
 
     style_defaults = {
         'porthole_width': 8,
@@ -39,6 +48,8 @@ class PatchElement (Clutter.Group):
     TINY_DELTA = .0001
 
     def __init__(self, window, x, y):
+        self.id = None
+
         # MFP object and UI descriptors
         self.obj_id = None
         self.parent_id = None
@@ -55,11 +66,7 @@ class PatchElement (Clutter.Group):
         self.connections_out = []
         self.connections_in = []
         self.is_export = False
-        self.param_list = ['position_x', 'position_y', 'width', 'height',
-                           'update_required', 'display_type', 'name', 'layername',
-                           'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
-                           'dsp_outlets', 'scope', 'style', 'export_offset_x',
-                           'export_offset_y', 'debug']
+        self.param_list = [a for a in self.store_attrs]
 
         # Clutter objects
         self.stage = window
@@ -92,7 +99,8 @@ class PatchElement (Clutter.Group):
         self._all_styles = self.combine_styles()
 
         # create placeholder group and add to stage
-        Clutter.Group.__init__(self)
+        super().__init__()
+        log.debug(f"Created PatchElement {self.obj_id}")
 
     def __repr__(self):
         return "<%s %s>" % (type(self).__name__, id(self))
@@ -105,10 +113,13 @@ class PatchElement (Clutter.Group):
 
     @property
     def layername(self):
-        return self.layer.name
+        return self.layer.name if self.layer else None
 
     @property
     def name(self):
+        return self.obj_name
+
+    def description(self):
         return self.obj_name
 
     def get_style(self, propname):

@@ -46,6 +46,7 @@ class GlobalMode (InputMode):
         self.bind("C-PGUP", self.window.patch_select_prev, "Select higher patch")
         self.bind("C-PGDN", self.window.patch_select_next, "Select lower patch")
 
+        self.bind("C-i", self.inspect, "Open state inspector")
         self.bind('C-f', self.window.patch_new, "Create a new patch")
         self.bind('C-o', self.open_file, "Load file into new patch")
         self.bind('C-s', self.save_file, "Save patch to file")
@@ -84,9 +85,11 @@ class GlobalMode (InputMode):
         self.bind("HOVER", lambda: self.hover(False))
         self.bind("S-HOVER", lambda: self.hover(True))
 
+    def inspect(self):
+        from flopsy import Store
+        Store.show_inspector(event_loop=MFPGUI().asyncio_loop)
+
     def toggle_console(self):
-        from gi.repository import Gdk
-        from mfp import log
         alloc = self.window.content_console_pane.get_allocation()
         oldpos = self.window.content_console_pane.get_position()
 
@@ -102,7 +105,6 @@ class GlobalMode (InputMode):
         return False
 
     def toggle_tree(self):
-        alloc = self.window.tree_canvas_pane.get_allocation()
         oldpos = self.window.tree_canvas_pane.get_position()
 
         self.window.tree_canvas_pane.set_position(self.next_tree_position)
@@ -134,10 +136,7 @@ class GlobalMode (InputMode):
         try:
             if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE:
                 o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
-        except Exception as e:
-            print("oops! exception in hover")
-            import traceback
-            traceback.print_exc()
+        except Exception:
             pass
         return False
 
@@ -315,7 +314,6 @@ class GlobalMode (InputMode):
                 if aa in ['y', 'yes']:
                     self.window.quit()
 
-        from mfp import log
         allpatches = MFPGUI().mfp.open_patches.sync()
         clean = True
         for p in allpatches:
@@ -324,7 +322,9 @@ class GlobalMode (InputMode):
         if not clean:
             self.window.get_prompted_input(
                 "There are patches with unsaved changes. Quit anyway? [yN]",
-                quit_confirm, '')
+                quit_confirm,
+                ''
+            )
         else:
             self.window.quit()
 
