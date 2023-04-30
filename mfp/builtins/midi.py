@@ -5,6 +5,7 @@ p_midi.py: builtins for MIDI I/O
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import asyncio
 import copy
 
 from ..processor import Processor
@@ -26,14 +27,29 @@ class MidiIn (Processor):
 
         initargs, kwargs = self.parse_args(init_args)
         if kwargs:
-            self.handler = MFPApp().midi_mgr.register(self.send, 0, kwargs)
+            self.handler = MFPApp().midi_mgr.register(
+                lambda event, data: asyncio.run_coroutine_threadsafe(
+                    self.send(event, data),
+                    MFPApp().midi_mgr.event_loop
+                ),
+                0, kwargs
+            )
             self.midi_filters = copy.copy(kwargs)
         else:
-            self.handler = MFPApp().midi_mgr.register(self.send, 0)
+            self.handler = MFPApp().midi_mgr.register(
+                lambda event, data: asyncio.run_coroutine_threadsafe(
+                    self.send(event, data),
+                    MFPApp().midi_mgr.event_loop
+                ),
+                0
+            )
 
     def filter(self, **filters):
         MFPApp().midi_mgr.unregister(self.handler)
-        self.handler = MFPApp().midi_mgr.register(self.send, 0, filters)
+        self.handler = MFPApp().midi_mgr.register(
+            lambda event, data: asyncio.create_task(self.send(event, data)),
+            0, filters
+        )
         self.midi_filters = copy.copy(filters)
 
     async def trigger(self):

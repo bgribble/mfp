@@ -5,6 +5,7 @@ midi.py: MIDI handling for MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import asyncio
 import alsaseq
 from .utils import QuittableThread
 from threading import Lock
@@ -291,6 +292,7 @@ class MFPMidiManager(QuittableThread):
         self.num_inports = inports
         self.num_outports = outports
         self.start_time = None
+        self.event_loop = asyncio.get_event_loop()
         self.handlers_by_id = {}
         self.handlers_by_filter = {None: {None: {None: {None: []}}}}
         self.handlers_lock = Lock()

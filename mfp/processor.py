@@ -5,6 +5,7 @@ processor.py: Parent class of all processors
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
+import asyncio
 import inspect
 import threading
 
@@ -327,26 +328,26 @@ class Processor:
                     o.add_method(path, t, self._osc_handler, i)
                     self.osc_methods.append((path, t))
 
-    def _midi_handler(self, event, data):
+    async def _midi_handler(self, event, data):
         from .midi import NoteOff, NoteOn
         if self.midi_mode == "note_bang":
-            self.send(Bang)
+            await self.send(Bang)
         elif self.midi_mode == "note_onoff":
             if isinstance(event, NoteOn):
-                self.send(True)
+                await self.send(True)
             elif isinstance(event, NoteOff):
-                self.send(False)
+                await self.send(False)
         elif self.midi_mode == "note_vel":
             if isinstance(event, NoteOn):
-                self.send(event.velocity)
+                await self.send(event.velocity)
             elif isinstance(event, NoteOff):
-                self.send(0)
+                await self.send(0)
         elif self.midi_mode == "cc_val":
-            self.send(event.value)
+            await self.send(event.value)
         elif self.midi_mode == "pgm":
-            self.send(event.program)
+            await self.send(event.program)
         elif self.midi_mode in ("chan_note", "chan", "note", "cc", "event"):
-            self.send(event)
+            await self.send(event)
 
     def _midi_learn_handler(self, event, mode):
         from .mfp_app import MFPApp
@@ -408,7 +409,10 @@ class Processor:
 
         MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
         self.midi_learn_cbid = None
-        self.midi_cbid = MFPApp().midi_mgr.register(self._midi_handler, filters=filters)
+        self.midi_cbid = MFPApp().midi_mgr.register(
+            lambda event, data: asyncio.run_coroutine_threadsafe(self._midi_handler(event, data)),
+            filters=filters
+        )
         self.midi_filters = filters
         self.midi_mode = mode
         self.set_tag("midi", "learned")
@@ -421,8 +425,10 @@ class Processor:
             if self.midi_cbid is not None:
                 MFPApp().midi_mgr.unregister(self.midi_cbid)
                 self.midi_cbid = None
-            self.midi_learn_cbid = MFPApp().midi_mgr.register(self._midi_learn_handler,
-                                                              data=mode)
+            self.midi_learn_cbid = MFPApp().midi_mgr.register(
+                self._midi_learn_handler,
+                data=mode
+            )
             self.set_tag("midi", "learning")
 
     async def dsp_init(self, proc_name, **params):
@@ -1002,5 +1008,7 @@ class Processor:
                 ports = [ports]
 
             self.midi_filters["port"] = [tuple(p) for p in ports]
-            self.midi_cbid = MFPApp().midi_mgr.register(self._midi_handler,
-                                                        filters=self.midi_filters)
+            self.midi_cbid = MFPApp().midi_mgr.register(
+                lambda event, data: asyncio.run_coroutine_threadsafe(self._midi_handler(event, data)),
+                filters=self.midi_filters
+            )
