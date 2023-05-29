@@ -17,11 +17,12 @@ DEFAULT_CONTINUE = "... "
 
 
 class ConsoleMgr (Thread):
-    def __init__(self, banner, textview):
+    def __init__(self, banner, app_window):
         self.quitreq = False
         self.lock = Lock()
         self.condition = Condition(self.lock)
-        self.textview = textview
+        # FIXME
+        self.textview = app_window.backend.console_view
         self.textbuffer = self.textview.get_buffer()
 
         self.linebuf = ''

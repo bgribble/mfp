@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from ..input_mode import InputMode
 
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 
 
 class SelectMRUMode (InputMode):

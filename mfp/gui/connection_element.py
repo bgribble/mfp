@@ -4,7 +4,7 @@ from .patch_element import PatchElement
 from .colordb import ColorDB
 from gi.repository import Clutter
 import math
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 from mfp import log
 
 

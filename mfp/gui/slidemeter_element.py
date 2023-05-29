@@ -12,7 +12,7 @@ import math
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.slider import SliderEditMode, SliderControlMode, DialEditMode, DialControlMode
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 from mfp.utils import catchall
 from . import ticks
 

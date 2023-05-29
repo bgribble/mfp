@@ -120,6 +120,8 @@ class MFPApp (Singleton):
             if self.debug:
                 guicmd.append('--debug')
 
+            log.debug(f"launching GUI: {guicmd}")
+
             self.gui_process = AsyncExecMonitor(
                 *guicmd,
                 log_module="gui",

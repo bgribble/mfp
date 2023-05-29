@@ -11,7 +11,7 @@ import cairo
 import math
 from .patch_element import PatchElement
 from .colordb import ColorDB
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 from .modes.enum_control import EnumEditMode, EnumControlMode
 
 

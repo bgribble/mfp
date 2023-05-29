@@ -8,7 +8,7 @@ from ..input_mode import InputMode
 from ..connection_element import ConnectionElement
 from ..patch_element import PatchElement
 
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 from mfp import log
 
 

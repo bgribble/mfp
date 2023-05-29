@@ -1,16 +1,21 @@
 #! /usr/bin/env python
 '''
-gui_app.py
-GTK/clutter gui for MFP -- main thread
+gui_main.py
+Gui for MFP -- main thread
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
+
+# FIXME
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkClutter', '1.0')
+gi.require_version('Clutter', '1.0')
 
 import asyncio
 import inspect
 import threading
 import argparse
-import sys
 from datetime import datetime
 
 from carp.channel import UnixSocketChannel
@@ -33,11 +38,11 @@ def clutter_do(func):
 
 
 class MFPGUI (Singleton):
-    def __init__(self, mfp_proxy):
+    def __init__(self):
+        from mfp.gui.patch_window import AppWindow
         self.call_stats = {}
         self.objects = {}
-        self.mfp = mfp_proxy
-        self.appwin = None
+        self.mfp = None
         self.debug = False
         self.asyncio_loop = asyncio.get_event_loop()
         self.asyncio_thread = threading.get_ident()
@@ -56,9 +61,7 @@ class MFPGUI (Singleton):
             'text-color:selected': 'default-text-color-selected',
             'text-cursor-color': 'default-text-cursor-color'
         }
-
-        self.clutter_thread = threading.Thread(target=self.clutter_proc)
-        self.clutter_thread.start()
+        self.appwin = None
 
     def remember(self, obj):
         self.objects[obj.obj_id] = obj
@@ -87,6 +90,7 @@ class MFPGUI (Singleton):
             log.debug_traceback()
             return False
 
+    # FIXME -- yooooooooo
     def clutter_do_later(self, delay, thunk):
         from gi.repository import GObject
         count = self.call_stats.get("clutter_later", 0) + 1
@@ -98,31 +102,6 @@ class MFPGUI (Singleton):
         count = self.call_stats.get("clutter_now", 0) + 1
         self.call_stats['clutter_now'] = count
         GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
-
-    def clutter_proc(self):
-        try:
-            from gi.repository import GObject, Gtk, GtkClutter
-
-            # explicit init seems to avoid strange thread sync/blocking issues
-            GObject.threads_init()
-            GtkClutter.init([])
-
-            # create main window
-            from mfp.gui.patch_window import PatchWindow
-            self.appwin = PatchWindow()
-
-        except Exception:
-            log.error("Fatal error during GUI startup")
-            log.debug_traceback()
-            return
-
-        try:
-            # direct logging to GUI log console
-            Gtk.main()
-        except Exception as e:
-            log.error("Caught GUI exception:", e)
-            log.debug_traceback()
-            sys.stdout.flush()
 
     def finish(self):
         from gi.repository import Gtk
@@ -176,11 +155,7 @@ def setup_default_colors():
 
 
 async def main():
-    import gi
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('GtkClutter', '1.0')
-    gi.require_version('Clutter', '1.0')
-
+    from mfp.gui.patch_window import AppWindow
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--logstart", default=None,
                         help="Reference time for log messages")
@@ -217,18 +192,37 @@ async def main():
     MFPCommandFactory = await host.require(MFPCommand)
     mfp_connection = await MFPCommandFactory()
 
-    gui = MFPGUI(mfp_connection)
-    gui.debug = debug
+    print("[LOG] DEBUG: About to create MFPGUI")
+    from mfp.gui.backends import clutter  # noqa
+    AppWindow.backend_name = "clutter"
 
+    gui = MFPGUI()
+    gui.mfp = mfp_connection
+    gui.debug = debug
+    gui.appwin = AppWindow()
+
+    print("[LOG] DEBUG: created MFPGUI")
     if debug:
         import yappi
         yappi.start()
 
     await host.export(GUICommand)
+    print("[LOG] DEBUG: publishing GUICommand")
     await asyncio.wait(host.tasks)
     print("[LOG] DEBUG: GUI process terminating")
 
 
+async def main_error_wrapper():
+    main_task = asyncio.create_task(main())
+    try:
+        await main_task
+    except Exception as e:
+        import traceback
+        print(f"[LOG] ERROR: GUI process failed with {e}")
+        tb = traceback.format_exc()
+        print(f"[LOG] ERROR: {tb}") 
+    print(f"[LOG] ERROR: main task exited")
+
 def main_sync_wrapper():
     import asyncio
-    asyncio.run(main())
+    asyncio.run(main_error_wrapper())

@@ -6,10 +6,10 @@ Extra methods to manage the layer display in the main window
 
 from ..utils import extends
 from ..mfp_command import MFPCommand
-from .patch_window import PatchWindow
+from .patch_window import AppWindow
 from .layer import Layer
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def layer_select_up(self):
     p = self.selected_patch
     if self.selected_layer in p.layers:
@@ -21,7 +21,7 @@ def layer_select_up(self):
         print(self.selected_patch)
 
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def layer_select_down(self):
     p = self.selected_patch
     if self.selected_layer in p.layers:
@@ -33,12 +33,11 @@ def layer_select_down(self):
         print(self.selected_patch)
 
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def layer_select(self, layer):
     self._layer_select(layer)
-    self.layer_view.select(layer)
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def _layer_select(self, layer):
     if not isinstance(layer, Layer):
         return
@@ -57,31 +56,32 @@ def _layer_select(self, layer):
     if self.selected_layer.patch != self.selected_patch:
         self.selected_patch = self.selected_layer.patch
 
+    self.backend.layer_select(layer)
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def layer_new(self):
     l = Layer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
-    self.layer_view.insert(l, self.selected_patch)
+    self.backend.layer_new(l, self.selected_patch)
     self.layer_select(l)
     return True
 
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def layer_new_scope(self):
     l = Layer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     l.scope = l.name.replace(" ", "_").lower()
     MFPCommand().add_scope.sync(self.selected_patch.obj_id, l.scope)
-    self.layer_view.insert(l, self.selected_patch)
     self.object_view.insert((l.scope, self.selected_patch), self.selected_patch)
 
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
+    self.backend.layer_new(l, self.selected_patch)
     self.layer_select(l)
     return True
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def layer_move_up(self):
     p = self.selected_patch
     oldpos = p.layers.index(self.selected_layer)
@@ -92,9 +92,9 @@ def layer_move_up(self):
     pre = p.layers[:newpos]
     post = [p.layers[newpos]] + p.layers[oldpos+1:]
     p.layers = pre + [self.selected_layer] + post
-    self.layer_view.update(self.selected_layer, p)
+    self.backend.layer_update(self.selected_layer, p)
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def layer_move_down(self):
     p = self.selected_patch
     oldpos = p.layers.index(self.selected_layer)
@@ -106,6 +106,4 @@ def layer_move_down(self):
     post = p.layers[newpos+1:]
     p.layers = pre + [self.selected_layer] + post
 
-    self.layer_view.update(self.selected_layer, p)
-
-
+    self.backend.layer_update(self.selected_layer, p)

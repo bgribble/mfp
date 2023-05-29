@@ -8,7 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import math
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 from .patch_element import PatchElement
 from .modes.label_edit import LabelEditMode
 from .colordb import ColorDB

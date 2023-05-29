@@ -8,7 +8,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import cairo
-from mfp import MFPGUI, log
+from mfp import log
+from mfp.gui_main import MFPGUI
 from mfp.utils import catchall
 from .patch_element import PatchElement
 from .connection_element import ConnectionElement

@@ -8,8 +8,14 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from flopsy import Store
 
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkClutter', '1.0')
+gi.require_version('Clutter', '1.0')
+
 from gi.repository import Clutter
-from mfp import MFPGUI, log
+from mfp.gui_main import MFPGUI
+from mfp import log
 from .colordb import ColorDB
 import math
 

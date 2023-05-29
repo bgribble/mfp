@@ -9,10 +9,8 @@ from ..input_mode import InputMode
 from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
 from .enum_control import EnumEditMode
-from ..message_element import TransientMessageElement
-from ..patch_element import PatchElement
 
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 
 
 class GlobalMode (InputMode):
@@ -121,12 +119,14 @@ class GlobalMode (InputMode):
         return False
 
     def transient_msg(self):
+        from ..message_element import TransientMessageElement
         if self.window.selected:
             return self.window.add_element(TransientMessageElement)
         else:
             return False
 
     def hover(self, details):
+        from ..patch_element import PatchElement
         for m in self.manager.minor_modes:
             if m.enabled and isinstance(m, (TransientMessageEditMode, LabelEditMode,
                                             EnumEditMode)):

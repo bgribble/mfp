@@ -2,13 +2,13 @@
 from ..utils import extends
 from ..mfp_command import MFPCommand
 from .tree_display import TreeDisplay
-from .patch_window import PatchWindow
+from .patch_window import AppWindow
 from .patch_element import PatchElement
 from .patch_info import PatchInfo
 from .layer import Layer
 from mfp import log
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def init_object_view(self):
     def get_obj_name(o):
         if isinstance(o, PatchElement):
@@ -61,13 +61,10 @@ def init_object_view(self):
 
 
     obj_cols = [ ("Name", get_obj_name, True, obj_name_edited, True) ]
-    object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
-    object_view.select_cb = obj_selected
-    object_view.unselect_cb = self._unselect
 
-    return object_view
+    return (obj_cols, obj_selected)
 
-@extends(PatchWindow)
+@extends(AppWindow)
 def init_layer_view(self):
     def get_sortname(o):
         if isinstance(o, Layer):
@@ -126,9 +123,7 @@ def init_layer_view(self):
 
     layer_cols = [("Name", get_layer_name, True, layer_name_edited, get_sortname),
                   ("Scope", get_layer_scopename, True, layer_scope_edited, False)]
-    layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
-    layer_view.select_cb = sel_layer
-    layer_view.unselect_cb = None
 
-    return layer_view
+    return (layer_cols, sel_layer)
+
 

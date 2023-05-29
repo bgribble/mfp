@@ -17,7 +17,7 @@ setup (name = 'mfp',
        version = '0.06.' + git_version(),
        description = 'Music for programmers',
        packages = ['mfp', 'mfp.builtins',
-                   'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes' ],
+                   'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes', 'mfp.gui.clutter' ],
        entry_points = { 'console_scripts': ['mfp=mfp.mfp_main:main_sync_wrapper',
                                             'mfpgui=mfp.gui_main:main_sync_wrapper'] },
        package_data = { 'mfp.gui': ['mfp.glade'] })

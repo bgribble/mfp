@@ -7,11 +7,12 @@ patch_clonescope.py: methods for cloning a scope within a patch
 from .utils import extends
 from .patch import Patch
 from . import log
-from .mfp_app import MFPApp
 from .bang import Uninit
 
 @extends(Patch)
 def clonescope(self, scopename, num_copies, **kwargs):
+    from .mfp_app import MFPApp
+
     scope = self.scopes.get(scopename)
     parts = scopename.split('_')
     basename = scopename

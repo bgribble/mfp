@@ -6,8 +6,6 @@ Input mode to automatically select a location for the next-created GUI item
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from ..patch_element import PatchElement
-from ..connection_element import ConnectionElement
 from ..input_mode import InputMode
 from .connection import ConnectionMode
 from mfp import log
@@ -47,12 +45,12 @@ class AutoplaceMode (InputMode):
 
         cm = [ m for m in self.manager.minor_modes if type(m) is ConnectionMode ]
         for c in cm:
-            if c.source_obj == self.key_widget: 
-                initially_below = True 
+            if c.source_obj == self.key_widget:
+                initially_below = True
                 self.placement = c.source_port
                 break
             elif c.dest_obj == self.key_widget:
-                initially_below = False 
+                initially_below = False
                 self.placement = c.dest_port
                 break
 
@@ -81,6 +79,7 @@ class AutoplaceMode (InputMode):
             self.key_widget = self.window.selected[0]
 
     def autoplace_above(self):
+        from ..patch_element import PatchElement
         self._update_key()
         if self.key_widget is None:
             if len(self.layer.objects):
@@ -105,6 +104,7 @@ class AutoplaceMode (InputMode):
         return True
 
     def autoplace_below(self):
+        from ..patch_element import PatchElement
         self._update_key()
         if self.key_widget is None:
             if len(self.layer.objects):
@@ -128,6 +128,7 @@ class AutoplaceMode (InputMode):
         return True
 
     def find_free_space_up(self, x, y):
+        from ..connection_element import ConnectionElement
         test_y = y
         width, height = self.window.stage.get_size()
         while (test_y > 0):
@@ -150,6 +151,7 @@ class AutoplaceMode (InputMode):
         return y
 
     def find_free_space_down(self, x, y):
+        from ..connection_element import ConnectionElement
         test_y = y
         width, height = self.window.stage.get_size()
         while (test_y < height - self.Y_CLEAR):

@@ -24,7 +24,7 @@ class PatchInfo (object):
         self.layers = []
         self.scopes = []
 
-        self.stage.add_patch(self)
+        self.stage.app.add_patch(self)
         self.stage.layer_view.insert(self, None)
         self.stage.object_view.insert(self, None)
 

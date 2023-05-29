@@ -8,7 +8,7 @@ from gi.repository import Clutter
 import cairo
 
 from .patch_element import PatchElement
-from mfp import MFPGUI
+from mfp.gui_main import MFPGUI
 from mfp import log
 from mfp.utils import catchall
 
