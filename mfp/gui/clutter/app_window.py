@@ -24,7 +24,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
     def __init__(self, app_window):
         self.app = app_window
 
-        self.init_clutter()
+        self.clutter_thread = threading.Thread(target=self._clutter_thread_func)
+        self.clutter_thread.start()
 
         # load Glade ui
         self.builder = Gtk.Builder()
@@ -72,37 +73,66 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.group = Clutter.Group()
 
         self.stage.add_actor(self.group)
-        self.object_view = self.create_object_view()
-        self.layer_view = self.create_layer_view()
+        self.object_view = self._init_object_view()
+        self.layer_view = self._init_layer_view()
 
         # configure Clutter stage
         self.stage.set_color(self.app.color_bg)
         self.stage.set_property('user-resizable', True)
 
+        self.selection_box = None
+        self.selection_box_layer = None
+
         ################################
         # FIXME compat stubs
         self.input_mgr = self.app.input_mgr
-
         ################################
 
         # show top-level window
         self.window.show_all()
 
-    def init_clutter(self):
-        self.clutter_thread = threading.Thread(target=self.clutter_proc)
-        self.clutter_thread.start()
+    ################################
+    # FIXME compat properties
+    @property
+    def view_x(self):
+        return self.app.view_x
 
-    def clutter_proc(self):
+    @property
+    def view_y(self):
+        return self.app.view_y
+
+    @property
+    def zoom(self):
+        return self.app.zoom
+
+    @property
+    def load_in_progress(self):
+        return self.app.load_in_progress
+
+    @property
+    def object_counts_by_type(self):
+        return self.app.object_counts_by_type
+
+    @property
+    def selected(self):
+        return self.app.selected
+
+    def active_layer(self):
+        return self.app.active_layer()
+
+    ################################
+
+    def _clutter_thread_func(self):
         import gi
         gi.require_version('Gtk', '3.0')
         gi.require_version('GtkClutter', '1.0')
         gi.require_version('Clutter', '1.0')
 
+        log.info("Clutter thread starting")
         try:
             from gi.repository import GObject, Gtk, GtkClutter
 
             # explicit init seems to avoid strange thread sync/blocking issues
-            log.info("Initializing Clutter threads")
             GObject.threads_init()
             GtkClutter.init([])
 
@@ -112,20 +142,23 @@ class ClutterAppWindowBackend (AppWindowBackend):
             return
 
         try:
+            log.info("Entering Gtk main loop")
             Gtk.main()
         except Exception as e:
             log.error("Caught GUI exception:", e)
             log.debug_traceback()
             sys.stdout.flush()
 
-    def create_object_view(self):
+        log.info("Clutter thread exiting")
+
+    def _init_object_view(self):
         obj_cols, selected_callback = self.app.init_object_view()
         object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
         object_view.select_cb = selected_callback
         object_view.unselect_cb = self.app._unselect
         return object_view
 
-    def create_layer_view(self):
+    def _init_layer_view(self):
         layer_cols, selected_callback = self.app.init_layer_view()
         layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
         layer_view.select_cb = selected_callback
@@ -156,27 +189,27 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.embed.grab_focus()
         GObject.timeout_add(10, cb)
 
-    def _resize_cb(self, widget, rect):
-        try:
-            self.stage.set_size(rect.width, rect.height)
-            if self.hud_mode_txt:
-                self.hud_mode_txt.set_position(self.stage.get_width()-80,
-                                               self.stage.get_height()-25)
-
-            if self.hud_prompt:
-                self.hud_prompt.set_position(10, self.stage.get_height() - 25)
-
-            if self.hud_prompt_input:
-                self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
-                                                   self.stage.get_height() - 25)
-        except Exception as e:
-            log.error("Error handling UI event", e)
-            log.debug(e)
-            log.debug_traceback()
-
-        return False
 
     def init_input(self):
+        def resize_cb(widget, rect):
+            try:
+                self.stage.set_size(rect.width, rect.height)
+                if self.hud_mode_txt:
+                    self.hud_mode_txt.set_position(self.stage.get_width()-80,
+                                                   self.stage.get_height()-25)
+
+                if self.hud_prompt:
+                    self.hud_prompt.set_position(10, self.stage.get_height() - 25)
+
+                if self.hud_prompt_input:
+                    self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
+                                                       self.stage.get_height() - 25)
+            except Exception as e:
+                log.error("Error handling UI event", e)
+                log.debug(e)
+                log.debug_traceback()
+
+            return False
         def grab_handler(stage, event):
             try:
                 r = self.input_mgr.handle_event(stage, event)
@@ -224,7 +257,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.stage.connect('enter-event', handler)
         self.stage.connect('leave-event', handler)
         self.stage.connect('scroll-event', grab_handler)
-        self.embed.connect('size-allocate', self._resize_cb)
+        self.embed.connect('size-allocate', resize_cb)
 
         # set tab stops on keybindings view
         ta = Pango.TabArray.new(1, True)
@@ -419,10 +452,14 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
     def show_selection_box(self, x0, y0, x1, y1):
         if x0 > x1:
-            t = x1; x1 = x0; x0 = t
+            t = x1
+            x1 = x0
+            x0 = t
 
         if y0 > y1:
-            t = y1; y1 = y0; y0 = t
+            t = y1
+            y1 = y0
+            y0 = t
 
         from gi.repository import Clutter
         if self.selection_box is None:
@@ -508,11 +545,23 @@ class ClutterAppWindowBackend (AppWindowBackend):
         else:
             return False
 
+    def screen_to_canvas(self, x, y):
+        success, new_x, new_y = self.group.transform_stage_point(x, y)
+        if success:
+            return (new_x, new_y)
+        else:
+            return (x, y)
+
+    def canvas_to_screen(self, x, y):
+        return (
+            self.view_x + x / self.zoom,
+            self.view_y + y / self.zoom,
+        )
+
     def rezoom(self):
         w, h = self.group.get_size()
         self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
         self.group.set_position(self.view_x, self.view_y)
-        # self.input_mgr.rezoom()
 
     def register(self, element):
         if element.container is None:

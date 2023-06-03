@@ -20,6 +20,48 @@ class AppWindowBackend(ABC):
     @abstractmethod
     def log_write(self, message, level):
         pass
+    
+    #####################
+    # coordinate transforms and zoom
+
+    @abstractmethod
+    def screen_to_canvas(self, x, y):
+        pass
+
+    @abstractmethod
+    def canvas_to_screen(self, x, y):
+        pass
+
+    @abstractmethod
+    def rezoom(self):
+        pass
+
+    #####################
+    # element operations 
+
+    @abstractmethod
+    def register(self, element):
+        pass
+
+    @abstractmethod
+    def unregister(self, element):
+        pass
+
+    @abstractmethod
+    def refresh(self, element):
+        pass
+
+    @abstractmethod
+    def select(self, element):
+        pass
+
+    @abstractmethod
+    def unselect(self, element):
+        pass
+
+
+    #####################
+    # autoplace 
 
     @abstractmethod
     def show_autoplace_marker(self, x, y):
@@ -28,6 +70,9 @@ class AppWindowBackend(ABC):
     @abstractmethod
     def hide_autoplace_marker(self):
         pass
+
+    #####################
+    # HUD/console 
 
     @abstractmethod
     def hud_banner(self, message, display_time=3.0):
@@ -41,6 +86,9 @@ class AppWindowBackend(ABC):
     def console_activate(self):
         pass
 
+    #####################
+    # clipboard
+
     @abstractmethod
     def clipboard_cut(self, pointer_pos):
         pass
@@ -53,16 +101,15 @@ class AppWindowBackend(ABC):
     def clipboard_paste(self, pointer_pos=None):
         pass
 
+    #####################
+    # selection box
+
     @abstractmethod
-    def rezoom(self):
+    def show_selection_box(self, x0, y0, x1, y1):
         pass
 
     @abstractmethod
-    def select(self, element):
-        pass
-
-    @abstractmethod
-    def unselect(self, element):
+    def hide_selection_box(self):
         pass
 
     @staticmethod

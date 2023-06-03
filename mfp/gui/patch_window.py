@@ -21,9 +21,6 @@ class AppWindow:
     backend_name = None
 
     def __init__(self):
-        self.selection_box = None
-        self.selection_box_layer = None
-
         # self.objects is PatchElement instances representing the
         # currently-displayed patch(es)
         self.patches = []
@@ -56,7 +53,7 @@ class AppWindow:
         self.hud_prompt_mgr = Prompter(self)
         self.input_mgr = InputManager(self)
 
-        # FIX build clutter bridge
+        # FIXME build clutter bridge
         factory = AppWindowBackend.get_backend(AppWindow.backend_name)
         self.backend = factory(self)
 
@@ -85,6 +82,24 @@ class AppWindow:
 
     def hud_write(self, *args, **kwargs):
         return self.backend.hud_write(*args, **kwargs)
+
+    def hud_prompt_input(self, *args, **kwargs):
+        return self.backend.hud_prompt_input(*args, **kwargs)
+
+    def hud_set_prompt(self, *args, **kwargs):
+        return self.backend.hud_set_prompt(*args, **kwargs)
+
+    def show_selection_box(self, *args, **kwargs):
+        return self.backend.show_selection_box(*args, **kwargs)
+
+    def hide_selection_box(self, *args, **kwargs):
+        return self.backend.hide_selection_box(*args, **kwargs)
+
+    def display_bindings(self, *args, **kwargs):
+        return self.backend.display_bindings(*args, **kwargs)
+
+    def grab_focus(self, *args, **kwargs):
+        return self.backend.grab_focus(*args, **kwargs)
 
     ###############################
 
@@ -145,13 +160,6 @@ class AppWindow:
         else:
             return False
 
-    def stage_pos(self, x, y):
-        success, new_x, new_y = self.group.transform_stage_point(x, y)
-        if success:
-            return (new_x, new_y)
-        else:
-            return (x, y)
-
     def edit_major_mode(self):
         for o in self.selected:
             o.end_control()
@@ -183,6 +191,8 @@ class AppWindow:
         self.emit_signal("add", element)
 
     def unregister(self, element):
+        self.backend.unregister(element)
+
         if element in self.selected:
             self.unselect(element)
         if element.layer:
@@ -192,7 +202,6 @@ class AppWindow:
         if element in self.input_mgr.event_sources:
             del self.input_mgr.event_sources[element]
 
-        self.backend.unregister(element)
         self.emit_signal("remove", element)
 
     def refresh(self, element):
@@ -221,7 +230,7 @@ class AppWindow:
         return True
 
     def quit(self, *rest):
-        from .gui_main import MFPGUI
+        from mfp.gui_main import MFPGUI
         from .patch_info import PatchInfo
         log.debug("quit: received command from GUI or WM")
 

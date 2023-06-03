@@ -135,7 +135,7 @@ class InputManager (object):
             # just kludging pointer_x and pointer_y from the scale callback.
             self.pointer_ev_x = event.x
             self.pointer_ev_y = event.y
-            self.pointer_x, self.pointer_y = self.window.stage_pos(event.x, event.y)
+            self.pointer_x, self.pointer_y = self.window.backend.screen_to_canvas(event.x, event.y)
             self.keyseq.process(event)
             if len(self.keyseq.sequences):
                 keysym = self.keyseq.pop()
@@ -182,7 +182,3 @@ class InputManager (object):
                 log.debug(e)
                 log.debug_traceback()
             return rv
-
-    def rezoom(self):
-        self.pointer_x, self.pointer_y = self.window.stage_pos(self.pointer_ev_x,
-                                                               self.pointer_ev_y)

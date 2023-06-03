@@ -104,6 +104,7 @@ class MFPApp (Singleton):
             label="MFP Master",
         )
         self.rpc_host.on("disconnect", self.on_host_disconnect)
+        self.rpc_host.on("connect", self.on_host_connect)
         self.rpc_host.on("exports", self.on_host_exports)
 
         await self.rpc_host.start(self.rpc_channel)
@@ -253,6 +254,9 @@ class MFPApp (Singleton):
         if "DSPObject" in exports:
             context = DSPContext.lookup(peer_id, 0)
             context.input_latency, context.output_latency = metadata
+
+    async def on_host_connect(self, event, peer_id):
+        log.debug(f"Got manage callback for {peer_id} {event}")
 
     async def on_host_disconnect(self, event, peer_id):
         # FIXME not called from anywhere
