@@ -190,13 +190,13 @@ class PatchEditMode (InputMode):
         return self.window.clipboard_cut((self.manager.pointer_x,
                                           self.manager.pointer_y))
 
-    def copy(self):
-        return self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
+    async def copy(self):
+        return await self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
 
-    def paste(self):
-        return self.window.clipboard_paste()
+    async def paste(self):
+        return await self.window.clipboard_paste()
 
-    def duplicate(self):
-        self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
+    async def duplicate(self):
+        await self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
         return self.window.clipboard_paste()
 

@@ -4,6 +4,7 @@ input_mode.py: InputMode parent class for managing key/mouse bindings and intera
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
+import inspect
 from mfp import log
 
 
@@ -75,12 +76,16 @@ class InputMode (object):
     def enable(self):
         self.enabled = True 
         for ext in self.extensions: 
-            ext.enable()
+            cb = ext.enable()
+            if inspect.isawaitable(cb):
+                MFPGUI().async_task(cb)
 
     def disable(self):
         self.enabled = False 
         for ext in self.extensions: 
-            ext.disable()
+            cb = ext.disable()
+            if inspect.isawaitable(cb):
+                MFPGUI().async_task(cb)
 
     def __repr__(self):
         return "<InputMode %s>" % self.description

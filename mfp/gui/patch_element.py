@@ -210,20 +210,20 @@ class PatchElement (Store, Clutter.Group):
     def drag(self, dx, dy):
         self.move(self.position_x + dx, self.position_y + dy)
 
-    def delete(self):
+    async def delete(self):
         self.stage.unregister(self)
         if self.obj_id is not None and not self.is_export:
-            MFPGUI().mfp.delete.sync(self.obj_id)
+            await MFPGUI().mfp.delete(self.obj_id)
         elif self.obj_id is None:
             for conn in [c for c in self.connections_out]:
-                conn.delete()
+                await conn.delete()
             for conn in [c for c in self.connections_in]:
-                conn.delete()
+                await conn.delete()
 
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED
 
-    def create(self, obj_type, init_args):
+    async def create(self, obj_type, init_args):
         scopename = self.layer.scope
         patchname = self.layer.patch.obj_name
         connections_out = self.connections_out
@@ -240,11 +240,11 @@ class PatchElement (Store, Clutter.Group):
             name = "%s_%03d" % (self.display_type, name_index)
 
         if self.obj_id is not None:
-            MFPGUI().mfp.set_gui_created.sync(self.obj_id, False)
-            MFPGUI().mfp.delete.sync(self.obj_id)
+            await MFPGUI().mfp.set_gui_created(self.obj_id, False)
+            await MFPGUI().mfp.delete(self.obj_id)
             self.obj_id = None
 
-        objinfo = MFPGUI().mfp.create.sync(obj_type, init_args, patchname, scopename, name)
+        objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name)
         if self.layer is not None and objinfo:
             objinfo["layername"] = self.layer.name
 
@@ -275,7 +275,9 @@ class PatchElement (Store, Clutter.Group):
                 else:
                     self.connections_in.append(c)
                     if not c.dashed:
-                        MFPGUI().mfp.connect.sync(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
+                        await MFPGUI().mfp.connect(
+                            c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2
+                        )
 
             for c in connections_out:
                 if c.obj_1 is self and c.port_1 >= self.num_outlets:
@@ -284,11 +286,13 @@ class PatchElement (Store, Clutter.Group):
                 else:
                     self.connections_out.append(c)
                     if not c.dashed:
-                        MFPGUI().mfp.connect.sync(c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2)
+                        await MFPGUI().mfp.connect(
+                            c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2
+                        )
 
             MFPGUI().remember(self)
             self.send_params()
-            MFPGUI().mfp.set_gui_created.sync(self.obj_id, True)
+            await MFPGUI().mfp.set_gui_created(self.obj_id, True)
 
         self.stage.refresh(self)
 
@@ -308,10 +312,9 @@ class PatchElement (Store, Clutter.Group):
         for k, v in extras.items():
             prms[k] = v
 
-        MFPGUI().mfp.set_params.sync(self.obj_id, prms)
-
-    def get_params(self):
-        return MFPGUI().mfp.get_params.sync(self.obj_id)
+        MFPGUI().mfp.set_params.task(
+            self.obj_id, prms
+        )
 
     def get_stage_position(self):
         if not self.container or not self.layer or self.container == self.layer.group:
@@ -632,7 +635,7 @@ class PatchElement (Store, Clutter.Group):
             self.stage.input_mgr.disable_minor_mode(self.control_mode)
             self.control_mode = None
 
-    def show_tip(self, xpos, ypos, details):
+    async def show_tip(self, xpos, ypos, details):
         tiptxt = None
         orig_x, orig_y = self.get_stage_position()
 
@@ -647,8 +650,8 @@ class PatchElement (Store, Clutter.Group):
             w += 2
             h += 2
             if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
-                tiptxt = MFPGUI().mfp.get_tooltip.sync(self.obj_id, pid[0], pid[1], details)
+                tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1], details)
         if tiptxt is None:
-            tiptxt = MFPGUI().mfp.get_tooltip.sync(self.obj_id, None, None, details)
+            tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, None, None, details)
         self.stage.hud_banner(tiptxt)
         return True

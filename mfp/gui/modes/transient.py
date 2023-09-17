@@ -33,5 +33,5 @@ class TransientMessageEditMode (InputMode):
 
         self.extend(LabelEditMode(window, message, label))
 
-    def cancel(self):
-        self.message.label_edit_finish(self.label, None) 
+    async def cancel(self):
+        await self.message.label_edit_finish(self.label, None) 

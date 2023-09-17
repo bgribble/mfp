@@ -47,12 +47,14 @@ class MFPCommand:
         else:
             return None
 
+    @noresp
     async def dsp_response(self, obj_id, resp_type, resp_value):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
             await obj.send((resp_type, resp_value), -1)
 
+    @noresp
     async def send_bang(self, obj_id, port):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -60,6 +62,7 @@ class MFPCommand:
             await obj.send(Bang, port)
         return True
 
+    @noresp
     async def send(self, obj_id, port, data):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -67,6 +70,7 @@ class MFPCommand:
             await obj.send(data, port)
         return True
 
+    @noresp
     async def eval_and_send(self, obj_id, port, message):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -74,6 +78,7 @@ class MFPCommand:
             await obj.send(obj.parse_obj(message), port)
         return True
 
+    @noresp
     async def send_methodcall(self, obj_id, port, method, *args, **kwargs):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -81,12 +86,15 @@ class MFPCommand:
         if isinstance(obj, Processor):
             await obj.send(m, port)
 
+    @noresp
     async def delete(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
+        log.debug(f"[mfp.delete] deleting {obj} {type(obj)} {isinstance(obj, Processor)}")
         if isinstance(obj, Processor):
             await obj.delete()
 
+    @noresp
     def set_params(self, obj_id, params):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -94,12 +102,14 @@ class MFPCommand:
         if isinstance(obj, Processor):
             obj.gui_params = params
 
+    @noresp
     def set_gui_created(self, obj_id, value):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
             obj.gui_created = value
 
+    @noresp
     def set_do_onload(self, obj_id, value):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -125,6 +135,7 @@ class MFPCommand:
         else:
             return ''
 
+    @noresp
     def log_write(self, msg):
         from .mfp_app import MFPApp
         if log.log_force_console:
@@ -135,11 +146,13 @@ class MFPCommand:
         from .mfp_app import MFPApp
         return await MFPApp().console.runsource(cmd)
 
+    @noresp
     def add_scope(self, patch_id, scope_name):
         from .mfp_app import MFPApp
         patch = MFPApp().recall(patch_id)
         patch.add_scope(scope_name)
 
+    @noresp
     def rename_scope(self, patch_id, old_name, new_name):
         from .mfp_app import MFPApp
         patch = MFPApp().recall(patch_id)
@@ -149,11 +162,13 @@ class MFPCommand:
         # FIXME merge scopes if changing to a used name?
         # FIXME signal send/receive objects to flush and re-resolve
 
+    @noresp
     def rename_obj(self, obj_id, new_name):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         obj.rename(new_name)
 
+    @noresp
     def set_scope(self, obj_id, scope_name):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -167,17 +182,20 @@ class MFPCommand:
             scope = obj.patch.add_scope(scope_name)
         obj.assign(obj.patch, scope, obj.name)
 
+    @noresp
     def open_file(self, file_name, context=None):
         from .mfp_app import MFPApp
         patch = MFPApp().open_file(file_name)
         return patch.obj_id
 
+    @noresp
     async def save_file(self, patch_name, file_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
         if patch:
             await patch.save_file(file_name)
 
+    @noresp
     def show_editor(self, obj_id, show):
         from .mfp_app import MFPApp
         patch = MFPApp().objects.get(obj_id)
@@ -189,6 +207,7 @@ class MFPCommand:
         else:
             patch.delete_gui()
 
+    @noresp
     def save_lv2(self, patch_name, plugin_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
@@ -196,6 +215,7 @@ class MFPCommand:
         if patch:
             patch.save_lv2(plugin_name, file_name)
 
+    @noresp
     def clipboard_copy(self, pointer_pos, objlist):
         from .mfp_app import MFPApp
         return MFPApp().clipboard_copy(pointer_pos, objlist)
@@ -256,6 +276,7 @@ class MFPCommand:
 
     def open_patches(self):
         from .mfp_app import MFPApp
+        log.debug(f"[open_patches] {[(p.obj_id, p.status) for p in MFPApp().patches.values()]}")
         return [p.obj_id for p in MFPApp().patches.values()]
 
     def has_unsaved_changes(self, obj_id):
@@ -266,7 +287,6 @@ class MFPCommand:
     @noresp
     def quit(self):
         from .mfp_app import MFPApp
-        from threading import Thread
         task(MFPApp().finish())
         return None
 

@@ -21,14 +21,16 @@ def init_object_view(self):
     def obj_name_edited(obj, new_name):
         if isinstance(obj, (PatchElement, PatchInfo)):
             obj.obj_name = new_name
-            MFPGUI().mfp.rename_obj.sync(obj.obj_id, new_name)
+            MFPGUI().async_task(MFPGUI().mfp.rename_obj(obj.obj_id, new_name))
             obj.send_params()
         else:
             oldscopename = obj
             for l in self.selected_patch.layers:
                 if l.scope == oldscopename:
                     l.scope = new_name
-            MFPGUI().mfp.rename_scope.sync(self.selected_patch.obj_id, oldscopename, new_name)
+            MFPGUI().async_task(MFPGUI().mfp.rename_scope(
+                self.selected_patch.obj_id, oldscopename, new_name
+            ))
             self.selected_patch.send_params()
 
         if isinstance(obj, PatchElement):
@@ -93,7 +95,7 @@ def init_layer_view(self):
                     lobj.send_params()
         elif isinstance(obj, (PatchElement, PatchInfo)):
             obj.obj_name = new_value
-            MFPGUI().mfp.rename_obj.sync(obj.obj_id, new_value)
+            MFPGUI().async_task(MFPGUI().mfp.rename_obj(obj.obj_id, new_value))
             obj.send_params()
         return True
 
@@ -103,14 +105,14 @@ def init_layer_view(self):
             p = self.selected_patch
             if not p.has_scope(new_value):
                 log.debug("Adding scope", new_value, "to patch", self.selected_patch)
-                MFPGUI().mfp.add_scope.sync(self.selected_patch.obj_id, new_value)
+                MFPGUI().async_task(MFPGUI().mfp.add_scope(self.selected_patch.obj_id, new_value))
                 self.object_view.insert((new_value, self.selected_patch), self.selected_patch)
 
             layer.scope = new_value
             self.selected_patch.send_params()
             for obj in self.objects:
                 if obj.obj_id is not None and obj.layer == layer:
-                    MFPGUI().mfp.set_scope.sync(obj.obj_id, new_value)
+                    MFPGUI().async_task(MFPGUI().mfp.set_scope(obj.obj_id, new_value))
                     self.refresh(obj)
         return True
 

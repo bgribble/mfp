@@ -137,7 +137,9 @@ class PlotElement (PatchElement):
     def draw_complete_cb(self):
         def thunk():
             self.last_draw = datetime.now()
-            MFPGUI().mfp.send_methodcall.sync(self.obj_id, 0, "draw_complete")
+            MFPGUI().mfp.send_methodcall.task(
+                self.obj_id, 0, "draw_complete"
+            )
 
         if self.last_draw != None:
             time_since_last = datetime.now() - self.last_draw
@@ -159,7 +161,7 @@ class PlotElement (PatchElement):
         # FIXME set label to editing style
         pass
 
-    def label_edit_finish(self, *args):
+    async def label_edit_finish(self, *args):
         t = self.label.get_text()
 
         if t != self.label_text:
@@ -170,7 +172,7 @@ class PlotElement (PatchElement):
 
             log.debug("PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args))
             self.proc_type = self.obj_type
-            self.create(self.proc_type, self.obj_args)
+            await self.create(self.proc_type, self.obj_args)
 
             if self.obj_id is None:
                 log.debug("PlotElement: could not create", self.obj_type, self.obj_args)
@@ -202,12 +204,6 @@ class PlotElement (PatchElement):
     def unselect(self):
         PatchElement.unselect(self)
         self.rect.set_border_color(self.stage.color_unselected)
-
-    def delete(self):
-        for c in self.connections_out + self.connections_in:
-            c.delete()
-
-        PatchElement.delete(self)
 
     def make_edit_mode(self):
         return LabelEditMode(self.stage, self, self.label)

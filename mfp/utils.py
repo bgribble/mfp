@@ -227,7 +227,10 @@ class QuittableThread(Thread):
 
         t = Thread(target=_killer_thread)
         t.start()
-        await all_dead.wait()
+        try:
+            await all_dead.wait()
+        except asyncio.exceptions.CancelledError:
+            pass
         t.join()
 
 
@@ -346,7 +349,7 @@ class AsyncExecMonitor:
         self.process = await asyncio.create_subprocess_exec(
             execfile, *[str(a) for a in self.exec_args],
             stdin=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
             stdout=asyncio.subprocess.PIPE,
         )
         self.monitor_task = asyncio.create_task(self.monitor())

@@ -118,7 +118,7 @@ class ButtonElement (PatchElement):
     def label_edit_start(self):
         return self.label_text
 
-    def label_edit_finish(self, widget, new_text, aborted=False):
+    async def label_edit_finish(self, widget, new_text, aborted=False):
         if not aborted:
             self.label_text = new_text
             self.send_params()
@@ -200,11 +200,6 @@ class ButtonElement (PatchElement):
         PatchElement.unselect(self)
         self.redraw()
 
-    def delete(self):
-        for c in self.connections_out + self.connections_in:
-            c.delete()
-        PatchElement.delete(self)
-
     def make_edit_mode(self):
         if self.obj_id is None:
             # create object
@@ -235,9 +230,9 @@ class BangButtonElement (ButtonElement):
     def clicked(self):
         if self.obj_id is not None:
             if self.message is Bang:
-                MFPGUI().mfp.send_bang.sync(self.obj_id, 0)
+                MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 0))
             else:
-                MFPGUI().mfp.send.sync(self.obj_id, 0, self.message)
+                MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.message))
         self.indicator = True
         self.redraw()
 
@@ -276,7 +271,7 @@ class ToggleButtonElement (ButtonElement):
             self.indicator = True
 
         if self.obj_id is not None:
-            MFPGUI().mfp.send.sync(self.obj_id, 0, message)
+            MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, message))
         self.redraw()
         return False
 
@@ -290,7 +285,7 @@ class ToggleButtonElement (ButtonElement):
     def create(self, init_type, init_args):
         ButtonElement.create(self, init_type, init_args)
         if self.obj_id:
-            MFPGUI().mfp.set_do_onload.sync(self.obj_id, True)
+            MFPGUI().async_task(MFPGUI().mfp.set_do_onload.sync(self.obj_id, True))
 
     def unclicked(self):
         return False

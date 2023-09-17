@@ -27,7 +27,7 @@ class EnumElement (PatchElement):
         self.value = 0
         self.digits = 1
         self.min_value = None
-        self.max_value = None 
+        self.max_value = None
         self.scientific = False
         self.format_str = "%.1f"
         self.connections_out = []
@@ -71,9 +71,9 @@ class EnumElement (PatchElement):
 
     def format_value(self, value):
         if self.min_value is not None and value < self.min_value:
-            value = self.min_value 
+            value = self.min_value
         if self.max_value is not None and value > self.max_value:
-            value = self.max_value 
+            value = self.max_value
         return self.format_str % value
 
     def draw_cb(self, texture, ct, width, height):
@@ -93,7 +93,7 @@ class EnumElement (PatchElement):
             ct.set_dash([])
         else:
             ct.set_dash([8, 4])
-        
+
         ct.translate(lw/2.0, lw/2.0)
         ct.move_to(0, 0)
         ct.line_to(0, h)
@@ -130,13 +130,13 @@ class EnumElement (PatchElement):
         if new_w is not None:
             self.set_size(new_w, self.height)
 
-    def create_obj(self):
+    async def create_obj(self):
         if self.obj_id is None:
             self.create(self.proc_type, str(self.value))
         if self.obj_id is None:
             print("EnumElement: could not create var obj")
         else:
-            MFPGUI().mfp.set_do_onload.sync(self.obj_id, True)
+            await MFPGUI().mfp.set_do_onload(self.obj_id, True)
             self.obj_state = self.OBJ_COMPLETE
 
         self.draw_ports()
@@ -153,20 +153,20 @@ class EnumElement (PatchElement):
         for c in self.connections_in:
             c.draw()
 
-    def set_bounds(self, lower, upper):
+    async def set_bounds(self, lower, upper):
         self.min_value = lower
-        self.max_value = upper 
+        self.max_value = upper
 
         if ((self.value < self.min_value) or (self.value > self.max_value)):
-            self.update_value(self.value)
+            await self.update_value(self.value)
         self.send_params()
 
-    def update_value(self, value):
+    async def update_value(self, value):
         if self.min_value is not None and value < self.min_value:
-            value = self.min_value 
+            value = self.min_value
 
         if self.max_value is not None and value > self.max_value:
-            value = self.max_value 
+            value = self.max_value
 
         # called by enumcontrolmode
         str_rep = self.format_value(value)
@@ -174,9 +174,9 @@ class EnumElement (PatchElement):
         self.value = float(str_rep)
 
         if self.obj_id is None:
-            self.create_obj()
+            await self.create_obj()
         if self.obj_id is not None:
-            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
+            await MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
     def update(self):
         self.label.set_text(self.format_value(self.value))
@@ -185,13 +185,13 @@ class EnumElement (PatchElement):
     def label_edit_start(self):
         pass
 
-    def label_edit_finish(self, *args):
+    async def label_edit_finish(self, *args):
         # called by labeleditmode
         t = self.label.get_text()
         self.update_value(float(t))
         if self.obj_id is None:
-            self.create_obj()
-        MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
+            await self.create_obj()
+        await MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
     def configure(self, params):
         fmt_changed = False
@@ -248,11 +248,6 @@ class EnumElement (PatchElement):
         PatchElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
-
-    def delete(self):
-        for c in self.connections_out + self.connections_in:
-            c.delete()
-        PatchElement.delete(self)
 
     def make_edit_mode(self):
         return EnumEditMode(self.stage, self, self.label)

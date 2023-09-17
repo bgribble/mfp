@@ -114,10 +114,10 @@ class ViaElement (PatchElement):
         return (name, port)
         
 
-    def create_obj(self, label_text):
+    async def create_obj(self, label_text):
         if self.obj_id is None:
             (name, port) = self.parse_label(label_text)
-            self.create(self.proc_type, '"%s",%s' % (name, port))
+            await self.create(self.proc_type, '"%s",%s' % (name, port))
 
     def move(self, x, y):
         self.position_x = x
@@ -133,12 +133,12 @@ class ViaElement (PatchElement):
     def label_edit_start(self):
         pass
 
-    def label_edit_finish(self, *args):
+    async def label_edit_finish(self, *args):
         # called by labeleditmode
         t = self.label.get_text()
         self.label_text = t
         if self.obj_id is None:
-            self.create_obj(t)
+            await self.create_obj(t)
         self.recenter_label()
 
     def configure(self, params):
@@ -162,11 +162,6 @@ class ViaElement (PatchElement):
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
-    def delete(self):
-        for c in self.connections_out + self.connections_in:
-            c.delete()
-        PatchElement.delete(self)
-
     def make_edit_mode(self):
         return LabelEditMode(self.stage, self, self.label)
 
@@ -178,9 +173,9 @@ class SendViaElement (ViaElement):
     display_type = "sendvia"
     proc_type = "send"
 
-    def label_edit_finish(self, *args):
-        ViaElement.label_edit_finish(self, *args)
-        MFPGUI().mfp.send.sync(self.obj_id, 1, self.parse_label(self.label.get_text()))
+    async def label_edit_finish(self, *args):
+        await ViaElement.label_edit_finish(self, *args)
+        await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
 class SendSignalViaElement (SendViaElement): 
     VIA_SIZE = 12 
@@ -197,9 +192,9 @@ class ReceiveViaElement (ViaElement):
     display_type = "recvvia"
     proc_type = "recv"
 
-    def label_edit_finish(self, *args):
-        ViaElement.label_edit_finish(self, *args)
-        MFPGUI().mfp.send.sync(self.obj_id, 1, self.parse_label(self.label.get_text()))
+    async def label_edit_finish(self, *args):
+        await ViaElement.label_edit_finish(self, *args)
+        await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
 class ReceiveSignalViaElement (ReceiveViaElement):
     VIA_SIZE = 12 

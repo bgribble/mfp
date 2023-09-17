@@ -8,15 +8,15 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 import time
 from threading import Thread
 from ..input_mode import InputMode
-from ..colordb import ColorDB 
-
-from mfp.gui_main import clutter_do
+from ..colordb import ColorDB
+from mfp import log
+from mfp.gui_main import MFPGUI, clutter_do
 
 def editpoint(s1, s2):
     l1 = len(s1)
     l2 = len(s2)
-    if s1 == s2: 
-        return None 
+    if s1 == s2:
+        return None
     for ept in range(min(l1, l2)):
         if s1[ept] != s2[ept]:
             return ept
@@ -51,7 +51,7 @@ class LabelEditMode (InputMode):
         self.multiline = multiline
         self.markup = markup
         self.text = initial if initial else self.widget.get_text()
-        self.cursor_color = ColorDB().find("default-text-cursor-color") 
+        self.cursor_color = ColorDB().find("default-text-cursor-color")
         self.undo_stack = [(self.text, len(self.text))]
         self.undo_pos = -1
         self.activate_handler_id = None
@@ -80,28 +80,27 @@ class LabelEditMode (InputMode):
         if inittxt:
             self.text = inittxt
 
-        
         self.update_label(raw=True)
         self.start_editing()
         self.widget.set_selection(0, len(self.text))
-       
+
     def disable(self):
         self.end_editing()
         self.update_label(raw=False)
 
     def start_editing(self):
-        def focus_out(*args): 
-            self.commit_edits()
+        def focus_out(*args):
+            MFPGUI().async_task(self.commit_edits())
             return True
 
         def key_press(widg, event):
-            from ..key_defs import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DN 
-            handlers = {KEY_LEFT: self.move_left, KEY_RIGHT: self.move_right, 
+            from ..key_defs import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DN
+            handlers = {KEY_LEFT: self.move_left, KEY_RIGHT: self.move_right,
                         KEY_UP: self.move_up, KEY_DN: self.move_down}
             keysym = event.keyval
             if keysym in handlers:
                 handlers[keysym]()
-                return True 
+                return True
             return False
 
         def synth_ret(*args):
@@ -112,7 +111,7 @@ class LabelEditMode (InputMode):
             self.activate_handler_id = self.widget.connect("activate", synth_ret)
         else:
             self.widget.set_single_line_mode(False)
-        
+
         self.text_changed_handler_id = self.widget.connect("text-changed", self.text_changed)
         self.key_focus_out_handler_id = self.widget.connect("key-focus-out", focus_out)
         self.key_press_handler_id = self.window.window.connect("key-press-event", key_press)
@@ -141,10 +140,10 @@ class LabelEditMode (InputMode):
             self.activate_handler_id = None
         if self.key_focus_out_handler_id:
             self.widget.disconnect(self.key_focus_out_handler_id)
-            self.key_focus_out_handler_id = None 
+            self.key_focus_out_handler_id = None
         if self.text_changed_handler_id:
             self.widget.disconnect(self.text_changed_handler_id)
-            self.text_changed_handler_id = None 
+            self.text_changed_handler_id = None
         if self.key_press_handler_id:
             self.window.window.disconnect(self.key_press_handler_id)
             self.key_press_handler_id = None
@@ -159,7 +158,7 @@ class LabelEditMode (InputMode):
         if new_text == self.text:
             return True
 
-        # FIXME - this can be wrong, for example editing fooooo to foooo the 
+        # FIXME - this can be wrong, for example editing fooooo to foooo the
         # edit point can't be known just from the text change
         change_at = editpoint(self.text, new_text)
         change_dir = len(new_text) - len(self.text)
@@ -169,43 +168,43 @@ class LabelEditMode (InputMode):
 
         self.undo_stack.append((self.text, self.editpos))
         self.text = new_text
-        
+
         editpos = self.widget.get_cursor_position()
         if editpos == -1:
             self.editpos = len(self.text)
         elif change_dir > 0:
             self.editpos = change_at + 1
-        else: 
-            self.editpos = change_at 
+        else:
+            self.editpos = change_at
 
-        return 
+        return
 
-    def commit_edits(self):
+    async def commit_edits(self):
         self.text = self.widget.get_text()
         self.end_editing()
         self.update_label(raw=False)
-        self.element.label_edit_finish(self.widget, self.text)
+        await self.element.label_edit_finish(self.widget, self.text)
         self.element.end_edit()
         return True
 
-    def rollback_edits(self):
+    async def rollback_edits(self):
         txt, pos = self.undo_stack[0]
         self.text = txt or ''
         self.end_editing()
         self.update_label(raw=False)
-        self.element.label_edit_finish(self.widget, self.text)
+        await self.element.label_edit_finish(self.widget, self.text)
         self.element.end_edit()
         return True
 
     def move_to_start(self):
         self.editpos = 0
         self.update_cursor()
-        return True 
+        return True
 
     def move_to_end(self):
         self.editpos = len(self.text)
         self.update_cursor()
-        return True 
+        return True
 
     def move_left(self):
         self.editpos = max(self.editpos - 1, 0)
@@ -221,12 +220,14 @@ class LabelEditMode (InputMode):
         lines_above = self.text[:self.editpos].split("\n")
         line_pos = len(lines_above[-1])
         if len(lines_above) > 2:
-            self.editpos = (sum([len(l) + 1 for l in lines_above[:-2]])
-                            + min(len(lines_above[-2]), line_pos))
+            self.editpos = (
+                sum([len(ll) + 1 for ll in lines_above[:-2]])
+                + min(len(lines_above[-2]), line_pos)
+            )
         elif len(lines_above) > 1:
             self.editpos = min(len(lines_above[0]), line_pos)
         else:
-            self.editpos = 0  
+            self.editpos = 0
         self.update_cursor()
         return True
 

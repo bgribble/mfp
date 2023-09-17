@@ -50,58 +50,20 @@ class AppWindow:
         self.view_x = 0
         self.view_y = 0
 
-        self.hud_prompt_mgr = Prompter(self)
         self.input_mgr = InputManager(self)
+        # set up key and mouse handling
+        self.init_input()
 
         # FIXME build clutter bridge
         factory = AppWindowBackend.get_backend(AppWindow.backend_name)
         self.backend = factory(self)
+        self.hud_prompt_mgr = Prompter(self)
 
-        self.console_mgr = ConsoleMgr("MFP interactive console", self)
-        self.console_mgr.start()
+        self.backend.initialize()
+        # FIXME contains direct GTK
+        #self.console_mgr = ConsoleMgr("MFP interactive console", self)
+        #self.console_mgr.start()
 
-        # set up key and mouse handling
-        self.init_input()
-
-    ###############################
-    # FIXME -- compatibility delegations
-    def rezoom(self, *args, **kwargs):
-        return self.backend.rezoom(*args, **kwargs)
-
-    def clipboard_cut(self, *args, **kwargs):
-        return self.backend.clipboard_cut(*args, **kwargs)
-
-    def clipboard_copy(self, *args, **kwargs):
-        return self.backend.clipboard_copy(*args, **kwargs)
-
-    def clipboard_paste(self, *args, **kwargs):
-        return self.backend.clipboard_paste(*args, **kwargs)
-
-    def log_write(self, *args, **kwargs):
-        return self.backend.log_write(*args, **kwargs)
-
-    def hud_write(self, *args, **kwargs):
-        return self.backend.hud_write(*args, **kwargs)
-
-    def hud_prompt_input(self, *args, **kwargs):
-        return self.backend.hud_prompt_input(*args, **kwargs)
-
-    def hud_set_prompt(self, *args, **kwargs):
-        return self.backend.hud_set_prompt(*args, **kwargs)
-
-    def show_selection_box(self, *args, **kwargs):
-        return self.backend.show_selection_box(*args, **kwargs)
-
-    def hide_selection_box(self, *args, **kwargs):
-        return self.backend.hide_selection_box(*args, **kwargs)
-
-    def display_bindings(self, *args, **kwargs):
-        return self.backend.display_bindings(*args, **kwargs)
-
-    def grab_focus(self, *args, **kwargs):
-        return self.backend.grab_focus(*args, **kwargs)
-
-    ###############################
 
     def init_input(self):
         # set initial major mode
@@ -109,7 +71,6 @@ class AppWindow:
         self.input_mgr.major_mode = PatchEditMode(self)
         self.input_mgr.major_mode.enable()
 
-        self.backend.init_input()
 
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI
@@ -229,7 +190,7 @@ class AppWindow:
         b.begin_edit()
         return True
 
-    def quit(self, *rest):
+    async def quit(self, *rest):
         from mfp.gui_main import MFPGUI
         from .patch_info import PatchInfo
         log.debug("quit: received command from GUI or WM")
@@ -237,25 +198,26 @@ class AppWindow:
         self.close_in_progress = True
         to_delete = [p for p in self.patches if p.deletable]
         for p in to_delete:
-            p.delete()
+            await p.delete()
         self.close_in_progress = False
 
-        allpatches = MFPGUI().mfp.open_patches.sync()
+        allpatches = await MFPGUI().mfp.open_patches()
         guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchInfo)]
 
         for a in allpatches:
             if a not in guipatches:
                 log.debug("Some patches cannot be deleted, not quitting")
+                log.debug(f"{allpatches} {guipatches}")
                 return False
 
-        if self.console_mgr:
+        if hasattr(self, 'console_mgr') and self.console_mgr:
             self.console_mgr.quitreq = True
             self.console_mgr.join()
             self.console_mgr = None
 
         MFPGUI().appwin = False
         MFPGUI().finish()
-        MFPGUI().mfp.quit.sync()
+        await MFPGUI().mfp.quit()
         log.debug("quit: shutdowns complete")
         return True
 

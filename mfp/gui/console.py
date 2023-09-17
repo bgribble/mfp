@@ -2,7 +2,7 @@
 '''
 console.py -- Python read-eval-print console for MFP
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from threading import Thread, Lock, Condition

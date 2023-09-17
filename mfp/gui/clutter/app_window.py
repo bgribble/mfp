@@ -1,8 +1,5 @@
 import pkgutil
 import sys
-import threading
-
-from gi.repository import Gtk, Gdk, GObject, Clutter, GtkClutter, Pango
 
 from mfp import log
 from mfp.gui.collision import collision_check
@@ -24,9 +21,88 @@ class ClutterAppWindowBackend (AppWindowBackend):
     def __init__(self, app_window):
         self.app = app_window
 
-        self.clutter_thread = threading.Thread(target=self._clutter_thread_func)
-        self.clutter_thread.start()
+        super().__init__(app_window)
 
+    def render(self):
+        # clutter backend does not need a render call
+        pass
+
+    def initialize(self):
+        """
+        Set up the Clutter window.
+        """
+
+        import gi
+        gi.require_version('Gtk', '3.0')
+        gi.require_version('GtkClutter', '1.0')
+        gi.require_version('Clutter', '1.0')
+
+        log.info("Clutter init starting")
+
+        try:
+            from gi.repository import GtkClutter
+
+            # explicit init seems to avoid strange thread sync/blocking issues
+            GtkClutter.init([])
+
+        except Exception:
+            log.error("Fatal error during GUI startup")
+            log.debug_traceback()
+            return
+
+        try:
+            log.info("Creating window and widgets")
+            self._init_window()
+
+        except Exception as e:
+            log.error("Caught GUI exception:", e)
+            log.debug_traceback()
+            sys.stdout.flush()
+
+        log.info("Clutter init done")
+
+    ################################
+    # FIXME compat properties
+
+    @property
+    def view_x(self):
+        return self.app.view_x
+
+    @property
+    def view_y(self):
+        return self.app.view_y
+
+    @property
+    def zoom(self):
+        return self.app.zoom
+
+    @property
+    def load_in_progress(self):
+        return self.app.load_in_progress
+
+    @property
+    def object_counts_by_type(self):
+        return self.app.object_counts_by_type
+
+    @property
+    def selected(self):
+        return self.app.selected
+
+    @property
+    def input_mgr(self):
+        return self.app.input_mgr
+
+    @property
+    def selected_layer(self):
+        return self.app.selected_layer
+
+    def active_layer(self):
+        return self.app.active_layer()
+
+    ################################
+
+    def _init_window(self):
+        from gi.repository import Clutter, Gtk, GtkClutter
         # load Glade ui
         self.builder = Gtk.Builder()
         self.builder.add_from_string(pkgutil.get_data("mfp.gui", "mfp.glade").decode())
@@ -76,6 +152,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.object_view = self._init_object_view()
         self.layer_view = self._init_layer_view()
 
+        self._init_input()
+
         # configure Clutter stage
         self.stage.set_color(self.app.color_bg)
         self.stage.set_property('user-resizable', True)
@@ -83,73 +161,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.selection_box = None
         self.selection_box_layer = None
 
-        ################################
-        # FIXME compat stubs
-        self.input_mgr = self.app.input_mgr
-        ################################
-
         # show top-level window
         self.window.show_all()
 
-    ################################
-    # FIXME compat properties
-    @property
-    def view_x(self):
-        return self.app.view_x
-
-    @property
-    def view_y(self):
-        return self.app.view_y
-
-    @property
-    def zoom(self):
-        return self.app.zoom
-
-    @property
-    def load_in_progress(self):
-        return self.app.load_in_progress
-
-    @property
-    def object_counts_by_type(self):
-        return self.app.object_counts_by_type
-
-    @property
-    def selected(self):
-        return self.app.selected
-
-    def active_layer(self):
-        return self.app.active_layer()
-
-    ################################
-
-    def _clutter_thread_func(self):
-        import gi
-        gi.require_version('Gtk', '3.0')
-        gi.require_version('GtkClutter', '1.0')
-        gi.require_version('Clutter', '1.0')
-
-        log.info("Clutter thread starting")
-        try:
-            from gi.repository import GObject, Gtk, GtkClutter
-
-            # explicit init seems to avoid strange thread sync/blocking issues
-            GObject.threads_init()
-            GtkClutter.init([])
-
-        except Exception:
-            log.error("Fatal error during GUI startup")
-            log.debug_traceback()
-            return
-
-        try:
-            log.info("Entering Gtk main loop")
-            Gtk.main()
-        except Exception as e:
-            log.error("Caught GUI exception:", e)
-            log.debug_traceback()
-            sys.stdout.flush()
-
-        log.info("Clutter thread exiting")
+        self.async_cb_events = set()
 
     def _init_object_view(self):
         obj_cols, selected_callback = self.app.init_object_view()
@@ -167,6 +182,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         return layer_view
 
     def show_autoplace_marker(self, x, y):
+        from gi.repository import Clutter
         if self.autoplace_marker is None:
             self.autoplace_marker = Clutter.Text()
             self.autoplace_marker.set_text("+")
@@ -185,12 +201,15 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.autoplace_marker.hide()
 
     def grab_focus(self):
+        from gi.repository import GObject
+
         def cb(*args):
             self.embed.grab_focus()
         GObject.timeout_add(10, cb)
 
+    def _init_input(self):
+        from gi.repository import Gdk, Clutter, Pango
 
-    def init_input(self):
         def resize_cb(widget, rect):
             try:
                 self.stage.set_size(rect.width, rect.height)
@@ -210,6 +229,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 log.debug_traceback()
 
             return False
+
         def grab_handler(stage, event):
             try:
                 r = self.input_mgr.handle_event(stage, event)
@@ -246,17 +266,17 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.grab_focus()
 
         # hook up signals
-        self.window.connect('key-press-event', steal_focuskeys)
-
+        self.stage.connect('key-press-event', steal_focuskeys)
         self.stage.connect('button-press-event', grab_handler)
         self.stage.connect('button-release-event', grab_handler)
         self.stage.connect('key-press-event', grab_handler)
         self.stage.connect('key-release-event', grab_handler)
-        self.stage.connect('destroy', self.app.quit)
         self.stage.connect('motion-event', handler)
         self.stage.connect('enter-event', handler)
         self.stage.connect('leave-event', handler)
         self.stage.connect('scroll-event', grab_handler)
+
+        self.stage.connect('destroy', self.app.quit)
         self.embed.connect('size-allocate', resize_cb)
 
         # set tab stops on keybindings view
@@ -281,6 +301,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.bottom_notebook.set_current_page(1)
 
     def log_write(self, msg, level):
+        from gi.repository import Gtk
+
         buf = self.log_view.get_buffer()
         mark = buf.get_mark("log_mark")
 
@@ -329,6 +351,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.log_view.scroll_to_mark(mark, 0, True, 0, 0.9)
 
     def display_bindings(self):
+        from gi.repository import Clutter
+
         lines = ["Active key/mouse bindings"]
         for m in self.input_mgr.minor_modes:
             lines.append("\nMinor mode: " + m.description)
@@ -362,6 +386,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         buf.insert(buf.get_end_iter(), txt)
 
     def hud_set_prompt(self, prompt, default=''):
+        from gi.repository import Clutter
+
         if (prompt is None) and self.hud_prompt_input:
             htxt = self.hud_prompt_input.get_text()
             self.hud_prompt.hide()
@@ -389,6 +415,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
                                            self.stage.get_height() - 25)
 
     def hud_write(self, msg, disp_time=3.0):
+        from gi.repository import Clutter
+
         def anim_complete(anim):
             new_history = []
             for h_actor, h_anim, h_msg in self.hud_history:
@@ -422,6 +450,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         animation.connect_after("completed", anim_complete)
 
     def hud_banner(self, msg, disp_time=3.0):
+        from gi.repository import Clutter
+
         def anim_complete(anim, actor):
             actor.destroy()
 
@@ -495,17 +525,19 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.selection_box.destroy()
             self.selection_box = None
 
-    def clipboard_cut(self, pointer_pos):
+    async def clipboard_cut(self, pointer_pos):
         if self.selected:
-            self.clipboard_copy(pointer_pos)
+            await self.clipboard_copy(pointer_pos)
             self.delete_selected()
             return True
         else:
             return False
 
-    def clipboard_copy(self, pointer_pos):
+    async def clipboard_copy(self, pointer_pos):
+        from gi.repository import Gtk, Gdk
+
         if self.selected:
-            cliptxt = MFPGUI().mfp.clipboard_copy.sync(
+            cliptxt = await MFPGUI().mfp.clipboard_copy(
                 pointer_pos,
                 [o.obj_id for o in self.selected if o.obj_id is not None]
             )
@@ -515,13 +547,15 @@ class ClutterAppWindowBackend (AppWindowBackend):
         else:
             return False
 
-    def clipboard_paste(self, pointer_pos=None):
+    async def clipboard_paste(self, pointer_pos=None):
+        from gi.repository import Gtk, Gdk
+
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         cliptxt = clipboard.wait_for_text()
         if not cliptxt:
             return False
 
-        newobj = MFPGUI().mfp.clipboard_paste.sync(
+        newobj = await MFPGUI().mfp.clipboard_paste(
             cliptxt, self.selected_patch.obj_id,
             self.selected_layer.scope, None
         )

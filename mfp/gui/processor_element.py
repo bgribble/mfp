@@ -132,7 +132,7 @@ class ProcessorElement (PatchElement):
             self.add_actor(self.label)
         self.update()
 
-    def label_edit_finish(self, widget, text=None):
+    async def label_edit_finish(self, widget, text=None):
         if text is not None:
             parts = text.split(' ', 1)
             obj_type = parts[0]
@@ -141,7 +141,7 @@ class ProcessorElement (PatchElement):
             else:
                 obj_args = None
 
-            self.create(obj_type, obj_args)
+            await self.create(obj_type, obj_args)
 
             # obj_args may get forcibly changed on create
             if self.obj_args and (len(parts) < 2 or self.obj_args != parts[1]):
@@ -176,12 +176,6 @@ class ProcessorElement (PatchElement):
         PatchElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
-
-    def delete(self):
-        for c in self.connections_out + self.connections_in:
-            c.delete()
-
-        PatchElement.delete(self)
 
     def make_edit_mode(self):
         return LabelEditMode(self.stage, self, self.label)
@@ -220,7 +214,7 @@ class ProcessorElement (PatchElement):
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
             if self.export_created:
-                MFPGUI().mfp.create_export_gui.sync(self.obj_id)
+                MFPGUI().mfp.create_export_gui.task(self.obj_id)
                 need_update = True
 
         if "debug" in params:

@@ -11,6 +11,7 @@ from .modes.label_edit import LabelEditMode
 class Prompter (object):
     def __init__(self, window):
         self.window = window
+        self.backend = window.backend
         self.queue = []
         self.current_prompt = None
         self.current_callback = None
@@ -26,19 +27,19 @@ class Prompter (object):
         self.current_prompt = prompt
         self.current_callback = callback
         self.window.hud_set_prompt(prompt, default)
-        self.mode = LabelEditMode(self.window, self, self.window.hud_prompt_input,
+        self.mode = LabelEditMode(self.backend, self, self.backend.hud_prompt_input,
                                   mode_desc="Prompted input")
         self.window.input_mgr.enable_minor_mode(self.mode)
 
     def label_edit_start(self):
         pass
 
-    def label_edit_finish(self, widget, text):
+    async def label_edit_finish(self, widget, text):
         if self.current_callback:
             try:
                 rv = self.current_callback(text)
                 if inspect.isawaitable(rv):
-                    asyncio.create_task(rv)
+                    await rv
 
             except Exception as e:
                 print("Prompter exception in callback:", e)

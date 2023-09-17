@@ -49,7 +49,7 @@ def patch_close(self):
 
 
 @extends(AppWindow)
-def patch_new(self):
+async def patch_new(self):
     MFPGUI().mfp.open_file.sync(None)
 
 

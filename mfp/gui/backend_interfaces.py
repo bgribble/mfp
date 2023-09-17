@@ -1,26 +1,39 @@
 from abc import ABC, abstractmethod
+from ..delegate import DelegateMixin, delegatemethod
 
 
-class AppWindowBackend(ABC):
-
+class AppWindowBackend(ABC, DelegateMixin):
     backend_registry = {}
 
     def __init_subclass__(cls, *args, **kwargs):
         AppWindowBackend.backend_registry[getattr(cls, "backend_name", cls.__name__)] = cls
         super().__init_subclass__(*args, **kwargs)
     
+    @staticmethod
+    def get_backend(backend_name):
+        # return a concrete impl based on the backend name
+        return AppWindowBackend.backend_registry.get(backend_name)
+
+    #####################
+    # backend control 
+
+    @abstractmethod
+    def initialize(self):
+        pass
+
     @abstractmethod
     def shutdown(self):
         pass
 
     @abstractmethod
-    def init_input(self):
+    def render(self):
         pass
 
     @abstractmethod
-    def log_write(self, message, level):
+    @delegatemethod
+    def grab_focus(self):
         pass
-    
+
     #####################
     # coordinate transforms and zoom
 
@@ -33,6 +46,7 @@ class AppWindowBackend(ABC):
         pass
 
     @abstractmethod
+    @delegatemethod
     def rezoom(self):
         pass
 
@@ -59,15 +73,16 @@ class AppWindowBackend(ABC):
     def unselect(self, element):
         pass
 
-
     #####################
     # autoplace 
 
     @abstractmethod
+    @delegatemethod
     def show_autoplace_marker(self, x, y):
         pass
 
     @abstractmethod
+    @delegatemethod
     def hide_autoplace_marker(self):
         pass
 
@@ -75,14 +90,22 @@ class AppWindowBackend(ABC):
     # HUD/console 
 
     @abstractmethod
+    @delegatemethod
     def hud_banner(self, message, display_time=3.0):
         pass
 
     @abstractmethod
+    @delegatemethod
+    def hud_write(self, message, display_time=3.0):
+        pass
+
+    @abstractmethod
+    @delegatemethod
     def hud_set_prompt(self, prompt, default=''):
         pass
 
     @abstractmethod
+    @delegatemethod
     def console_activate(self):
         pass
 
@@ -90,14 +113,17 @@ class AppWindowBackend(ABC):
     # clipboard
 
     @abstractmethod
+    @delegatemethod
     def clipboard_cut(self, pointer_pos):
         pass
 
     @abstractmethod
+    @delegatemethod
     def clipboard_copy(self, pointer_pos):
         pass
 
     @abstractmethod
+    @delegatemethod
     def clipboard_paste(self, pointer_pos=None):
         pass
 
@@ -105,16 +131,28 @@ class AppWindowBackend(ABC):
     # selection box
 
     @abstractmethod
+    @delegatemethod
     def show_selection_box(self, x0, y0, x1, y1):
         pass
 
     @abstractmethod
+    @delegatemethod
     def hide_selection_box(self):
         pass
 
-    @staticmethod
-    def get_backend(backend_name):
-        # return a concrete impl based on the backend name
-        return AppWindowBackend.backend_registry.get(backend_name)
+    #####################
+    # log output
 
+    @abstractmethod
+    @delegatemethod
+    def log_write(self, message, level):
+        pass
+    
+    #####################
+    # key bindings display
+
+    @abstractmethod
+    @delegatemethod
+    def display_bindings(self):
+        pass
 

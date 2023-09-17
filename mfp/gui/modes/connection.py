@@ -109,14 +109,14 @@ class ConnectionMode (InputMode):
                 self.manager.disable_minor_mode(self)
 
 
-    def disable(self):
+    async def disable(self):
         self.window.remove_callback(self.select_cbid)
         self.select_cbid = None
         self.window.remove_callback(self.remove_cbid)
         self.remove_cbid = None
 
         if self.connection:
-            self.connection.delete()
+            await self.connection.delete()
             self.connection = None
 
     def get_port_key(self):
@@ -132,7 +132,7 @@ class ConnectionMode (InputMode):
         self.window.get_prompted_input("Enter %s port:" % dirspec, callback)
         return True
 
-    def make_connection(self):
+    async def make_connection(self):
         # are both ends selected?
         if self.reverse and self.source_obj is None and self.window.selected:
             self.source_obj = self.window.selected[0]
@@ -142,8 +142,12 @@ class ConnectionMode (InputMode):
 
         if (self.source_obj and self.dest_obj
             and self.connection.obj_state != PatchElement.OBJ_DELETED):
-            if MFPGUI().mfp.connect.sync(self.source_obj.obj_id, self.source_port,
-                                         self.dest_obj.obj_id, self.dest_port):
+            if await MFPGUI().mfp.connect(
+                self.source_obj.obj_id,
+                self.source_port,
+                self.dest_obj.obj_id,
+                self.dest_port
+            ):
                 c = ConnectionElement(self.window, self.source_obj, self.source_port,
                                       self.dest_obj, self.dest_port)
                 MFPGUI().appwin.register(c)

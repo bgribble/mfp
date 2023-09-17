@@ -99,7 +99,7 @@ class TextElement (PatchElement):
     def label_edit_start(self):
         return self.value
 
-    def label_edit_finish(self, widget, new_text, aborted=False):
+    async def label_edit_finish(self, widget, new_text, aborted=False):
         if self.obj_id is None:
             self.create(self.proc_type, None)
         if self.obj_id is None:
@@ -107,7 +107,7 @@ class TextElement (PatchElement):
         elif new_text != self.value and not aborted:
             self.value = new_text
             self.set_text()
-            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
+            await MFPGUI().mfp.send(self.obj_id, 0, self.value)
         self.update()
 
     def end_edit(self):

@@ -72,7 +72,7 @@ def layer_new(self):
 def layer_new_scope(self):
     l = Layer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     l.scope = l.name.replace(" ", "_").lower()
-    MFPCommand().add_scope.sync(self.selected_patch.obj_id, l.scope)
+    MFPGUI().async_task(MFPGUI().mfp.add_scope.sync(self.selected_patch.obj_id, l.scope))
     self.object_view.insert((l.scope, self.selected_patch), self.selected_patch)
 
     self.selected_patch.layers.append(l)

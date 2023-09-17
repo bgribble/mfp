@@ -8,7 +8,6 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import cairo
-from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.utils import catchall
 from .patch_element import PatchElement
@@ -17,6 +16,7 @@ from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
 from .modes.clickable import ClickableControlMode
 from .colordb import ColorDB
+
 
 class MessageElement (PatchElement):
     display_type = "message"
@@ -113,7 +113,7 @@ class MessageElement (PatchElement):
     def clicked(self, *args):
         self.clickstate = True
         if self.obj_id is not None:
-            MFPGUI().mfp.send_bang.sync(self.obj_id, 0)
+            MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 0))
         self.texture.invalidate()
         return False
 
@@ -126,10 +126,10 @@ class MessageElement (PatchElement):
         self.obj_state = self.OBJ_HALFCREATED
         self.texture.invalidate()
 
-    def label_edit_finish(self, widget=None, text=None):
+    async def label_edit_finish(self, widget=None, text=None):
         if text is not None and text != self.message_text:
             self.message_text = text
-            self.create(self.proc_type, self.message_text)
+            await self.create(self.proc_type, self.message_text)
 
         if self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
@@ -186,11 +186,6 @@ class MessageElement (PatchElement):
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
-    def delete(self):
-        for c in self.connections_out + self.connections_in:
-            c.delete()
-        PatchElement.delete(self)
-
     def make_edit_mode(self):
         return LabelEditMode(self.stage, self, self.label)
 
@@ -243,17 +238,20 @@ class TransientMessageElement (MessageElement):
         self.label.set_selection(0, len(self.message_text))
         self.texture.invalidate()
 
-    def label_edit_finish(self, widget=None, text=None):
+    async def label_edit_finish(self, widget=None, text=None):
         if text is not None:
             self.message_text = text
             for to in self.target_obj:
                 if to is not self:
-                    MFPGUI().mfp.eval_and_send.sync(to.obj_id, self.target_port,
-                                                    self.message_text)
+                    await MFPGUI().mfp.eval_and_send(
+                        to.obj_id,
+                        self.target_port,
+                        self.message_text
+                    )
         for to in self.target_obj:
             self.stage.select(to)
         self.message_text = None
-        self.delete()
+        await self.delete()
 
     def make_edit_mode(self):
         return TransientMessageEditMode(self.stage, self, self.label)

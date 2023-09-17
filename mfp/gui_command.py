@@ -13,11 +13,6 @@ class GUICommand:
     @noresp
     def log_write(self, msg, level):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._log_write(msg, level))
-        return True
-
-    def _log_write(self, msg, level):
-        from .gui_main import MFPGUI
         window = MFPGUI().appwin
         if window:
             MFPGUI().appwin.log_write(msg, level)
@@ -37,18 +32,9 @@ class GUICommand:
     def console_write(self, msg):
         from .gui_main import MFPGUI
         MFPGUI().clutter_do(lambda: self._console_write(msg))
-        return True
-
-    def _console_write(self, msg):
-        from .gui_main import MFPGUI
         MFPGUI().appwin.console_write(msg)
 
     def hud_write(self, msg):
-        from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._hud_write(msg))
-        return True
-
-    def _hud_write(self, msg):
         from .gui_main import MFPGUI
         MFPGUI().appwin.hud_write(msg)
 
@@ -58,21 +44,10 @@ class GUICommand:
 
     def command(self, obj_id, action, args):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._command(obj_id, action, args))
-        return True
-
-    def _command(self, obj_id, action, args):
-        from .gui_main import MFPGUI
         obj = MFPGUI().recall(obj_id)
         obj.command(action, args)
 
     def configure(self, obj_id, params=None, **kwparams):
-        from .gui_main import MFPGUI
-        from mfp import log
-        MFPGUI().clutter_do(lambda: self._configure(obj_id, params, kwparams))
-        return True
-
-    def _configure(self, obj_id, params, kwparams):
         from .gui_main import MFPGUI
         obj = MFPGUI().recall(obj_id)
         if params is not None:
@@ -84,11 +59,6 @@ class GUICommand:
             obj.configure(prms)
 
     def create(self, obj_type, obj_args, obj_id, parent_id, params):
-        from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._create(obj_type, obj_args, obj_id, parent_id,
-                                                 params))
-
-    def _create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui_main import MFPGUI
         from .gui.patch_element import PatchElement
         from .gui.processor_element import ProcessorElement
@@ -169,10 +139,6 @@ class GUICommand:
 
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._connect(obj_1_id, obj_1_port, obj_2_id, obj_2_port))
-
-    def _connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
-        from .gui_main import MFPGUI
         from .gui.connection_element import ConnectionElement
         from .gui.patch_info import PatchInfo
         from mfp import log
@@ -198,36 +164,18 @@ class GUICommand:
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)
 
-    def delete(self, obj_id):
-        from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._delete(obj_id))
-
-    def _delete(self, obj_id):
+    async def delete(self, obj_id):
         from .gui_main import MFPGUI
         from .gui.patch_info import PatchInfo
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchInfo):
-            obj.obj_id = None
-            obj.delete()
+            await obj.delete()
             if obj in MFPGUI().appwin.patches:
                 MFPGUI().appwin.patches.remove(obj)
         elif obj is not None:
-            for c in obj.connections_out:
-                MFPGUI().appwin.unregister(c)
-                del c
-
-            for c in obj.connections_in:
-                MFPGUI().appwin.unregister(c)
-                del c
-
-            obj.obj_id = None
-            obj.delete()
+            await obj.delete()
 
     def select(self, obj_id):
-        from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._select(obj_id))
-
-    def _select(self, obj_id):
         from .gui_main import MFPGUI
         from .gui.patch_info import PatchInfo
         obj = MFPGUI().recall(obj_id)
@@ -238,17 +186,9 @@ class GUICommand:
 
     def load_start(self):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._load_start())
-
-    def _load_start(self):
-        from .gui_main import MFPGUI
         MFPGUI().appwin.load_start()
 
     def load_complete(self):
-        from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._load_complete())
-
-    def _load_complete(self):
         from .gui_main import MFPGUI
         MFPGUI().appwin.load_complete()
 

@@ -125,7 +125,7 @@ class GlobalMode (InputMode):
         else:
             return False
 
-    def hover(self, details):
+    async def hover(self, details):
         from ..patch_element import PatchElement
         for m in self.manager.minor_modes:
             if m.enabled and isinstance(m, (TransientMessageEditMode, LabelEditMode,
@@ -135,7 +135,7 @@ class GlobalMode (InputMode):
         o = self.manager.pointer_obj
         try:
             if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE:
-                o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
+                await o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
         except Exception:
             pass
         return False
@@ -159,7 +159,7 @@ class GlobalMode (InputMode):
                     MFPGUI().mfp.rename_obj.sync(patch.obj_id, newname)
                     patch.send_params()
                     self.window.refresh(patch)
-                MFPGUI().mfp.save_file.sync(patch.obj_name, fname)
+                MFPGUI().async_task(MFPGUI().mfp.save_file(patch.obj_name, fname))
         self.window.get_prompted_input("File name to save: ", cb, default_filename)
 
     def save_as_lv2(self):
@@ -173,7 +173,7 @@ class GlobalMode (InputMode):
 
     def open_file(self):
         def cb(fname):
-            MFPGUI().mfp.open_file.sync(fname)
+            MFPGUI().async_task(MFPGUI().mfp.open_file(fname))
         self.window.get_prompted_input("File name to load: ", cb)
 
     def drag_start(self):
@@ -293,7 +293,7 @@ class GlobalMode (InputMode):
         self.window.hide_selection_box()
         return True
 
-    def patch_close(self):
+    async def patch_close(self):
         def close_confirm(answer):
             if answer is not None:
                 aa = answer.strip().lower()
@@ -301,23 +301,23 @@ class GlobalMode (InputMode):
                     self.window.patch_close()
 
         p = self.window.selected_patch
-        if MFPGUI().mfp.has_unsaved_changes.sync(p.obj_id):
+        if await MFPGUI().mfp.has_unsaved_changes(p.obj_id):
             self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]",
                                            close_confirm, '')
         else:
-            self.window.patch_close()
+            await self.window.patch_close()
 
-    def quit(self):
+    async def quit(self):
         def quit_confirm(answer):
             if answer is not None:
                 aa = answer.strip().lower()
                 if aa in ['y', 'yes']:
-                    self.window.quit()
+                    MFPGUI().async_task(self.window.quit())
 
-        allpatches = MFPGUI().mfp.open_patches.sync()
+        allpatches = await MFPGUI().mfp.open_patches()
         clean = True
         for p in allpatches:
-            if MFPGUI().mfp.has_unsaved_changes.sync(p):
+            if await MFPGUI().mfp.has_unsaved_changes(p):
                 clean = False
         if not clean:
             self.window.get_prompted_input(
@@ -326,12 +326,12 @@ class GlobalMode (InputMode):
                 ''
             )
         else:
-            self.window.quit()
+            await self.window.quit()
 
-    def toggle_pause(self):
+    async def toggle_pause(self):
         from mfp import log
         try:
-            paused = MFPGUI().mfp.toggle_pause.sync()
+            paused = await MFPGUI().mfp.toggle_pause()
             if paused:
                 log.warning("Execution of all patches paused")
             else:

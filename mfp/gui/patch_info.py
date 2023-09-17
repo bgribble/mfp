@@ -8,6 +8,8 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from ..gui_main import MFPGUI
 from .layer import Layer
+from mfp import log
+
 
 class PatchInfo (object):
     display_type = "patch"
@@ -33,27 +35,24 @@ class PatchInfo (object):
 
     def has_scope(self, scope_name):
         # FIXME - needs scopes for objects in scopes-not-default-for-layers
-        return scope_name in [l.scope for l in self.layers]
+        return scope_name in [ll.scope for ll in self.layers]
 
     def synced_params(self):
         return dict(display_type=self.display_type, name=self.obj_name,
-                    layers=[(l.name, l.scope) for l in self.layers])
+                    layers=[(ll.name, ll.scope) for ll in self.layers])
 
     def send_params(self, **extras):
         prms = self.synced_params()
         for k, v in extras.items():
             prms[k] = v
         if self.obj_id is not None:
-            MFPGUI().mfp.set_params.sync(self.obj_id, prms)
+            MFPGUI().async_task(MFPGUI().mfp.set_params.sync(self.obj_id, prms))
 
     def find_layer(self, layer):
-        for l in self.layers:
-            if l.name == layer:
-                return l
+        for ll in self.layers:
+            if ll.name == layer:
+                return ll
         return None
-
-    def get_params(self):
-        return MFPGUI().mfp.get_params.sync(self.obj_id)
 
     def configure(self, params):
         self.num_inlets = params.get("num_inlets")
@@ -86,12 +85,13 @@ class PatchInfo (object):
 
         self.stage.refresh(self)
 
-    def delete(self):
+    async def delete(self):
+        log.debug(f"[patch_info.delete] obj_id={self.obj_id}")
         # delete all the processor elements
         for layer in self.layers:
             to_delete = [o for o in layer.objects]
             for o in to_delete:
-                o.delete()
+                await o.delete()
             layer.hide()
             del layer.group
             layer.group = None
@@ -102,7 +102,7 @@ class PatchInfo (object):
 
         # last, delete the patch on the control side
         if self.obj_id is not None:
-            MFPGUI().mfp.delete.sync(self.obj_id)
+            await MFPGUI().mfp.delete(self.obj_id)
             self.obj_id = None
 
     def command(self, action, data):

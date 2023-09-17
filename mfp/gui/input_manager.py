@@ -6,13 +6,14 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from datetime import datetime, timedelta
+import inspect
 import time
 
 from .input_mode import InputMode
 from .key_sequencer import KeySequencer
 from ..utils import QuittableThread
 from ..gui_main import MFPGUI
-from mfp import log
+
 
 class InputManager (object):
     class InputNeedsRequeue (Exception):
@@ -36,7 +37,7 @@ class InputManager (object):
         self.pointer_leave_time = None
         self.pointer_lastobj = None
 
-        self.hover_thresh=timedelta(microseconds=750000)
+        self.hover_thresh = timedelta(microseconds=750000)
         self.hover_mon = QuittableThread(target=self._hover_mon)
         self.hover_mon.start()
 
@@ -81,7 +82,9 @@ class InputManager (object):
             mode.enable()
 
     def disable_minor_mode(self, mode):
-        mode.disable()
+        cb = mode.disable()
+        if inspect.isawaitable(cb):
+            MFPGUI().async_task(cb)
         self.minor_modes.remove(mode)
         self.window.display_bindings()
 
@@ -95,6 +98,8 @@ class InputManager (object):
                 handler = minor.lookup(keysym)
                 if handler is not None:
                     handled = handler[0]()
+                    if inspect.isawaitable(handled):
+                        MFPGUI().async_task(handled)
                     if handled:
                         return True
 
@@ -103,6 +108,8 @@ class InputManager (object):
                 handler = self.major_mode.lookup(keysym)
                 if handler is not None:
                     handled = handler[0]()
+                    if inspect.isawaitable(handled):
+                        MFPGUI().async_task(handled)
                     if handled:
                         return True
 
@@ -110,6 +117,8 @@ class InputManager (object):
             handler = self.global_mode.lookup(keysym)
             if handler is not None:
                 handled = handler[0]()
+                if inspect.isawaitable(handled):
+                    MFPGUI().async_task(handled)
                 if handled:
                     return True
         return False
@@ -120,12 +129,14 @@ class InputManager (object):
 
         keysym = None
         if event.type in (
-                Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE,
-                Clutter.EventType.BUTTON_PRESS,
-                Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL):
+            Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE,
+            Clutter.EventType.BUTTON_PRESS,
+            Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL
+        ):
             try:
                 self.keyseq.process(event)
             except Exception as e:
+                log.error(f"Exception handling {event}: {e}")
                 raise
             if len(self.keyseq.sequences):
                 keysym = self.keyseq.pop()
@@ -144,8 +155,10 @@ class InputManager (object):
             src = self.event_sources.get(event.source)
 
             now = datetime.now()
-            if (self.pointer_leave_time is not None
-                and (now - self.pointer_leave_time) > timedelta(milliseconds=100)):
+            if (
+                self.pointer_leave_time is not None
+                and (now - self.pointer_leave_time) > timedelta(milliseconds=100)
+            ):
                 self.keyseq.mod_keys = set()
                 self.window.grab_focus()
 
@@ -172,7 +185,10 @@ class InputManager (object):
             try:
                 retry_count += 1
                 rv = self.handle_keysym(keysym)
-            except self.InputNeedsRequeue as e:
+                if inspect.isawaitable(rv):
+                    MFPGUI().async_task(rv)
+                    rv = True
+            except self.InputNeedsRequeue:
                 if retry_count < 5:
                     continue
                 else:

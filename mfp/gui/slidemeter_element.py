@@ -246,7 +246,7 @@ class SlideMeterElement (PatchElement):
         if value != self.value:
             self.value = value
             self.texture.invalidate()
-            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
+            MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.value))
 
     def update(self):
         self.texture.invalidate()
@@ -289,7 +289,7 @@ class SlideMeterElement (PatchElement):
             newval = True
 
         if newval:
-            MFPGUI().mfp.send.sync(self.obj_id, 0, self.value)
+            MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.value))
 
         self.scale_ticks = None
         self.update()
@@ -394,11 +394,6 @@ class SlideMeterElement (PatchElement):
     def unselect(self):
         PatchElement.unselect(self)
         self.texture.invalidate()
-
-    def delete(self):
-        for c in self.connections_out + self.connections_in:
-            c.delete()
-        PatchElement.delete(self)
 
     def make_edit_mode(self):
         if self.obj_id is None:

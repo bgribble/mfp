@@ -18,6 +18,8 @@ import threading
 import argparse
 from datetime import datetime
 
+import gbulb
+
 from carp.channel import UnixSocketChannel
 from carp.host import Host
 from flopsy import Store
@@ -39,11 +41,12 @@ def clutter_do(func):
 
 class MFPGUI (Singleton):
     def __init__(self):
-        from mfp.gui.patch_window import AppWindow
         self.call_stats = {}
         self.objects = {}
         self.mfp = None
         self.debug = False
+        self.asyncio_tasks = {}
+        self.asyncio_task_last_id = 0
         self.asyncio_loop = asyncio.get_event_loop()
         self.asyncio_thread = threading.get_ident()
 
@@ -69,18 +72,33 @@ class MFPGUI (Singleton):
     def recall(self, obj_id):
         return self.objects.get(obj_id)
 
-    def async_task(self, call_result, wait=False):
-        if inspect.isawaitable(call_result):
+    async def _task_wrapper(self, coro, task_id):
+        rv = None
+        try:
+            rv = await coro
+        except Exception as e:
+            log.error(f"Exception in task: {coro} {e}")
+        finally:
+            if task_id in self.asyncio_tasks:
+                del self.asyncio_tasks[task_id]
+        return rv
+
+    def async_task(self, coro):
+        if inspect.isawaitable(coro):
             current_thread = threading.get_ident()
+            task_id = self.asyncio_task_last_id
+            self.asyncio_task_last_id += 1
+
             if current_thread == self.asyncio_thread:
-                task = asyncio.create_task(call_result)
+                task = asyncio.create_task(self._task_wrapper(coro, task_id))
             else:
-                task = asyncio.run_coroutine_threadsafe(call_result, self.asyncio_loop)
-                if wait:
-                    return task.result()
+                task = asyncio.run_coroutine_threadsafe(
+                    self._task_wrapper(coro, task_id), self.asyncio_loop
+                )
+            self.asyncio_tasks[task_id] = task
             return task
         else:
-            return call_result
+            return coro
 
     def _callback_wrapper(self, thunk):
         try:
@@ -187,6 +205,7 @@ async def main():
 
     setup_default_colors()
 
+    # set up Flopsy store manager
     Store.setup_asyncio()
 
     MFPCommandFactory = await host.require(MFPCommand)
@@ -207,8 +226,11 @@ async def main():
         yappi.start()
 
     await host.export(GUICommand)
-    print("[LOG] DEBUG: publishing GUICommand")
-    await asyncio.wait(host.tasks)
+    print("[LOG] DEBUG: published GUICommand")
+    try:
+        await asyncio.wait(host.tasks)
+    except asyncio.exceptions.CancelledError:
+        pass
     print("[LOG] DEBUG: GUI process terminating")
 
 
@@ -220,9 +242,12 @@ async def main_error_wrapper():
         import traceback
         print(f"[LOG] ERROR: GUI process failed with {e}")
         tb = traceback.format_exc()
-        print(f"[LOG] ERROR: {tb}") 
-    print(f"[LOG] ERROR: main task exited")
+        print(f"[LOG] ERROR: {tb}")
+    ex = main_task.exception()
+    print(f"[LOG] ERROR: main task exited {ex}")
 
 def main_sync_wrapper():
     import asyncio
+
+    gbulb.install(gtk=True)
     asyncio.run(main_error_wrapper())
