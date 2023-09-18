@@ -86,7 +86,9 @@ class PatchInfo (object):
         self.stage.refresh(self)
 
     async def delete(self):
-        log.debug(f"[patch_info.delete] obj_id={self.obj_id}")
+        if self.obj_id is None:
+            return
+
         # delete all the processor elements
         for layer in self.layers:
             to_delete = [o for o in layer.objects]
@@ -102,8 +104,9 @@ class PatchInfo (object):
 
         # last, delete the patch on the control side
         if self.obj_id is not None:
-            await MFPGUI().mfp.delete(self.obj_id)
+            to_delete = self.obj_id
             self.obj_id = None
+            await MFPGUI().mfp.delete(to_delete)
 
     def command(self, action, data):
         pass

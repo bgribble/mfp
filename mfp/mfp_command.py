@@ -90,7 +90,6 @@ class MFPCommand:
     async def delete(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-        log.debug(f"[mfp.delete] deleting {obj} {type(obj)} {isinstance(obj, Processor)}")
         if isinstance(obj, Processor):
             await obj.delete()
 
@@ -276,7 +275,6 @@ class MFPCommand:
 
     def open_patches(self):
         from .mfp_app import MFPApp
-        log.debug(f"[open_patches] {[(p.obj_id, p.status) for p in MFPApp().patches.values()]}")
         return [p.obj_id for p in MFPApp().patches.values()]
 
     def has_unsaved_changes(self, obj_id):

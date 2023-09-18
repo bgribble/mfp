@@ -126,14 +126,15 @@ class MFPGUI (Singleton):
         if self.debug:
             import yappi
             yappi.stop()
-            yappi.convert2pstats(yappi.get_func_stats()).dump_stats(
-                'mfp-gui-funcstats.pstats')
+            yappi.convert2pstats(
+                yappi.get_func_stats()
+            ).dump_stats('mfp-gui-funcstats.pstats')
 
         log.log_func = None
         if self.appwin:
             self.appwin.quit()
             self.appwin = None
-        Gtk.main_quit()
+            Gtk.main_quit()
 
 
 def setup_default_colors():

@@ -196,14 +196,15 @@ class AppWindow:
         log.debug("quit: received command from GUI or WM")
 
         self.close_in_progress = True
-        to_delete = [p for p in self.patches if p.deletable]
-        for p in to_delete:
-            await p.delete()
-        self.close_in_progress = False
-
-        allpatches = await MFPGUI().mfp.open_patches()
-        guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchInfo)]
-
+        try:
+            to_delete = [p for p in self.patches if p.deletable]
+            for p in to_delete:
+                await p.delete()
+            allpatches = await MFPGUI().mfp.open_patches()
+            guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchInfo)]
+        except Exception as e:
+            log.debug(f"Error while quitting: {e}")
+            raise
         for a in allpatches:
             if a not in guipatches:
                 log.debug("Some patches cannot be deleted, not quitting")
@@ -215,10 +216,9 @@ class AppWindow:
             self.console_mgr.join()
             self.console_mgr = None
 
-        MFPGUI().appwin = False
-        MFPGUI().finish()
         await MFPGUI().mfp.quit()
-        log.debug("quit: shutdowns complete")
+        self.close_in_progress = False
+        log.debug("quit: shutdown complete")
         return True
 
     def console_write(self, msg):
