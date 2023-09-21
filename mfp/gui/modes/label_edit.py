@@ -5,12 +5,12 @@ label_edit.py: Minor mode for editing contents of a clutter.Text label
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-import time
-from threading import Thread
+import asyncio
 from ..input_mode import InputMode
 from ..colordb import ColorDB
 from mfp import log
-from mfp.gui_main import MFPGUI, clutter_do
+from mfp.gui_main import MFPGUI
+
 
 def editpoint(s1, s2):
     l1 = len(s1)
@@ -22,23 +22,34 @@ def editpoint(s1, s2):
             return ept
     return min(l1, l2)
 
-class Blinker (Thread):
-    def __init__(self, txt, blink_time=0.5):
+
+class Blinker:
+    """
+    Blinks the cursor in a text widget
+    """
+    def __init__(self, blink_time=0.5):
         self.blink_time = 0.5
-        self.txt = txt
-        self.quitreq = False
-        Thread.__init__(self)
+        self.tasks = {}
 
-    @clutter_do
-    def set_cursor(self, val):
-        self.txt.set_cursor_visible(val)
+    def set_cursor(self, widget, val):
+        widget.set_cursor_visible(val)
 
-    def run(self):
+    async def run(self, widget):
         cursor = True
-        while not self.quitreq:
-            self.set_cursor(cursor)
+        while True:
+            self.set_cursor(widget, cursor)
             cursor = not cursor
-            time.sleep(self.blink_time)
+            await asyncio.sleep(self.blink_time)
+
+    def start(self, widget):
+        if widget not in self.tasks:
+            self.tasks[widget] = MFPGUI().async_task(self.run(widget))
+
+    async def stop(self, widget):
+        if widget in self.tasks:
+            await self.tasks[widget].cancel()
+            del self.tasks[widget]
+        self.set_cursor(False)
 
 
 class LabelEditMode (InputMode):
@@ -59,7 +70,7 @@ class LabelEditMode (InputMode):
         self.key_focus_out_handler_id = None
         self.key_press_handler_id = None
         self.editpos = 0
-        self.blinker = None
+        self.blinker = Blinker()
 
         InputMode.__init__(self, mode_desc)
 
@@ -122,13 +133,7 @@ class LabelEditMode (InputMode):
         self.widget.set_cursor_visible(True)
         self.update_cursor()
 
-        if self.blinker is not None:
-            self.blinker.quitreq = True
-            self.blinker.join()
-            self.blinker = None
-
-        self.blinker = Blinker(self.widget)
-        self.blinker.start()
+        self.blinker.start(self.widget)
 
     def end_editing(self):
         self.widget.set_editable(False)
@@ -148,10 +153,7 @@ class LabelEditMode (InputMode):
             self.window.window.disconnect(self.key_press_handler_id)
             self.key_press_handler_id = None
 
-        if self.blinker is not None:
-            self.blinker.quitreq = True
-            self.blinker.join()
-            self.blinker = None
+        self.blinker.stop()
 
     def text_changed(self, *args):
         new_text = self.widget.get_text()
