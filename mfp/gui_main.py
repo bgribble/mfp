@@ -6,17 +6,16 @@ Gui for MFP -- main thread
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
-# FIXME
-import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GtkClutter', '1.0')
-gi.require_version('Clutter', '1.0')
-
 import asyncio
 import inspect
 import threading
 import argparse
 from datetime import datetime
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkClutter', '1.0')
+gi.require_version('Clutter', '1.0')
 
 import gbulb
 
@@ -31,6 +30,7 @@ from .mfp_command import MFPCommand
 from .gui_command import GUICommand
 
 
+# decorator version 
 def clutter_do(func):
     def wrapped(*args, **kwargs):
         from mfp.gui_main import MFPGUI
@@ -111,14 +111,10 @@ class MFPGUI (Singleton):
     # FIXME -- yooooooooo
     def clutter_do_later(self, delay, thunk):
         from gi.repository import GObject
-        count = self.call_stats.get("clutter_later", 0) + 1
-        self.call_stats['clutter_later'] = count
         GObject.timeout_add(int(delay), self._callback_wrapper, thunk)
 
     def clutter_do(self, thunk):
         from gi.repository import GObject
-        count = self.call_stats.get("clutter_now", 0) + 1
-        self.call_stats['clutter_now'] = count
         GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
 
     def finish(self):
@@ -206,6 +202,11 @@ async def main():
 
     setup_default_colors()
 
+    def _exception(exc, tbinfo):
+        log.error("[carp] Exception: {exc}")
+
+    host.on("exception", _exception)
+
     # set up Flopsy store manager
     Store.setup_asyncio()
 
@@ -227,12 +228,9 @@ async def main():
         yappi.start()
 
     await host.export(GUICommand)
-    print("[LOG] DEBUG: published GUICommand")
-    try:
-        await asyncio.wait(host.tasks)
-    except asyncio.exceptions.CancelledError:
-        pass
-    print("[LOG] DEBUG: GUI process terminating")
+    print("[LOG] DEBUG: published GUICommand, setup complete")
+    await host.wait_for_completion()
+    await channel.close()
 
 
 async def main_error_wrapper():
@@ -246,6 +244,7 @@ async def main_error_wrapper():
         print(f"[LOG] ERROR: {tb}")
     ex = main_task.exception()
     print(f"[LOG] ERROR: main task exited {ex}")
+
 
 def main_sync_wrapper():
     import asyncio

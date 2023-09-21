@@ -1,6 +1,5 @@
 from carp.service import apiclass, noresp
 
-
 @apiclass
 class GUICommand:
     def ready(self):
@@ -26,12 +25,11 @@ class GUICommand:
 
     def console_show_prompt(self, prompt):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: MFPGUI().appwin.console_show_prompt(prompt))
+        MFPGUI().appwin.console_show_prompt(prompt)
         return True
 
     def console_write(self, msg):
         from .gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: self._console_write(msg))
         MFPGUI().appwin.console_write(msg)
 
     def hud_write(self, msg):

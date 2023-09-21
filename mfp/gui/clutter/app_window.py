@@ -560,7 +560,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.selected_layer.scope, None
         )
 
-        def paste_select_helper():
+        if newobj is not None:
+            self.unselect_all()
             for o in newobj:
                 obj = MFPGUI().recall(o)
                 if obj is None:
@@ -570,12 +571,6 @@ class ClutterAppWindowBackend (AppWindowBackend):
                     if obj not in self.selected:
                         self.select(MFPGUI().recall(o))
             return False
-
-        if newobj is not None:
-            self.unselect_all()
-            MFPGUI().clutter_do(paste_select_helper)
-
-            return True
         else:
             return False
 
