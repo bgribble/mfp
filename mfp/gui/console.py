@@ -5,10 +5,10 @@ console.py -- Python read-eval-print console for MFP
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
-from threading import Thread, Lock, Condition
-import time
+import asyncio
 from mfp.gui_main import MFPGUI
 from gi.repository import Gtk
+from mfp import log
 
 from .key_defs import *  # noqa
 
@@ -16,11 +16,11 @@ DEFAULT_PROMPT = ">>> "
 DEFAULT_CONTINUE = "... "
 
 
-class ConsoleMgr (Thread):
+class ConsoleMgr:
     def __init__(self, banner, app_window):
-        self.quitreq = False
-        self.lock = Lock()
-        self.condition = Condition(self.lock)
+        self.task = None
+        self.new_input = asyncio.Event()
+
         # FIXME
         self.textview = app_window.backend.console_view
         self.textbuffer = self.textview.get_buffer()
@@ -41,8 +41,6 @@ class ConsoleMgr (Thread):
         self.textview.connect('button-press-event', self.button_pressed)
 
         self.append(banner + '\n')
-
-        Thread.__init__(self)
 
     def button_pressed(self, *args):
         # ignore pesky mousing
@@ -145,22 +143,23 @@ class ConsoleMgr (Thread):
         self.textbuffer.insert(end_iter, self.linebuf, -1)
         end_iter = self.textbuffer.get_end_iter()
 
-        cursiter = self.textbuffer.get_iter_at_line_offset(lastline,
-                                                           len(self.last_ps) + self.cursor_pos)
+        cursiter = self.textbuffer.get_iter_at_line_offset(
+            lastline, len(self.last_ps) + self.cursor_pos
+        )
         self.textbuffer.place_cursor(cursiter)
         self.scroll_to_end()
 
     def line_ready(self):
         self.ready = True
-        with self.lock:
-            self.condition.notify()
+        self.new_input.set()
 
-    def readline(self):
+    async def readline(self):
         '''
         Try to return a complete line, or None if one is not ready
         '''
 
         def try_once():
+            self.new_input.clear()
             if self.ready:
                 buf = self.linebuf
                 self.linebuf = ''
@@ -170,14 +169,9 @@ class ConsoleMgr (Thread):
             else:
                 return None
 
-        with self.lock:
-            buf = try_once()
-            if buf is not None:
-                return buf
-            self.condition.wait(0.2)
-            buf = try_once()
-            if buf is not None:
-                return buf
+        await self.new_input.wait()
+        buf = try_once()
+        return buf
 
     def append(self, msg):
         iterator = self.textbuffer.get_end_iter()
@@ -188,37 +182,39 @@ class ConsoleMgr (Thread):
         self.append(prompt)
         self.last_ps = prompt
 
-    def run(self):
-        time.sleep(0.1)
+    def start(self):
+        self.task = MFPGUI().async_task(self.run())
+
+    async def run(self):
         continued = False
 
-        while not self.quitreq:
+        while True:
             # write the line prompt
             if not continued:
-                MFPGUI().clutter_do(lambda: self.show_prompt(self.ps1))
+                self.show_prompt(self.ps1)
             else:
-                MFPGUI().clutter_do(lambda: self.show_prompt(self.ps2))
+                self.show_prompt(self.ps2)
 
-            # wait for input, possibly quitting if needed
+            self.redisplay()
+
+            # wait for input
             cmd = None
-            while cmd is None and not self.quitreq:
-                cmd = self.readline()
+            while cmd is None:
+                cmd = await self.readline()
 
-            if not self.quitreq:
-                self.continue_buffer += '\n' + cmd
-                resp = self.evaluate(self.continue_buffer)
-                continued = resp.continued
-                if not continued:
-                    self.continue_buffer = ''
-                    if resp.value is not None:
-                        MFPGUI().clutter_do(lambda: self.append(resp.value + '\n'))
+            self.continue_buffer += '\n' + cmd
+            resp = await self.evaluate(self.continue_buffer)
+            continued = resp.continued
+            if not continued:
+                self.continue_buffer = ''
+                if resp.value is not None:
+                    self.append(resp.value + '\n')
 
-    def evaluate(self, cmd):
-        return MFPGUI().mfp.console_eval.sync(cmd)
+    async def evaluate(self, cmd):
+        return await MFPGUI().mfp.console_eval(cmd)
 
     def finish(self):
-        self.quitreq = True
-        try:
-            self.join()
-        except Exception:
-            pass
+        if self.task:
+            task = self.task
+            self.task = None
+            task.cancel()

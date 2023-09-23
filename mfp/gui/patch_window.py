@@ -60,9 +60,10 @@ class AppWindow:
         self.hud_prompt_mgr = Prompter(self)
 
         self.backend.initialize()
+
         # FIXME contains direct GTK
-        #self.console_mgr = ConsoleMgr("MFP interactive console", self)
-        #self.console_mgr.start()
+        self.console_mgr = ConsoleMgr("MFP interactive console", self)
+        self.console_mgr.start()
 
 
     def init_input(self):
@@ -212,9 +213,7 @@ class AppWindow:
                 return False
 
         if hasattr(self, 'console_mgr') and self.console_mgr:
-            self.console_mgr.quitreq = True
-            self.console_mgr.join()
-            self.console_mgr = None
+            self.console_mgr.finish()
 
         await MFPGUI().mfp.quit()
         self.close_in_progress = False

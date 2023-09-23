@@ -3,7 +3,7 @@
 via_element.py
 A patch element corresponding to a send or receive box
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Clutter
@@ -29,7 +29,7 @@ class ViaElement (PatchElement):
     LABEL_HEIGHT = 15
     LABEL_FUDGE = 0
     LABEL_Y = 0
-    STYLE = None
+    GLYPH_STYLE = None
 
     def __init__(self, window, x, y):
         PatchElement.__init__(self, window, x, y)
@@ -45,7 +45,7 @@ class ViaElement (PatchElement):
 
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_position(0, self.TEXTURE_Y)
-        self.label_text = None 
+        self.label_text = None
         self.label = Clutter.Text()
         self.label.set_position(0, self.LABEL_Y)
         self.set_reactive(True)
@@ -67,7 +67,7 @@ class ViaElement (PatchElement):
     def draw_cb(self, texture, ct):
         self.texture.clear()
 
-        if self.STYLE in ("empty_circled", "filled_circled"):
+        if self.GLYPH_STYLE in ("empty_circled", "filled_circled"):
             arcsize = self.VIA_SIZE / 3.5
             linewidth = 1
         else:
@@ -79,14 +79,14 @@ class ViaElement (PatchElement):
         cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
         ct.arc(cent, cent, arcsize, 0, 2 * math.pi)
         color = ColorDB.to_cairo(self.get_color('stroke-color'))
-        if self.STYLE[:5] == "empty":
+        if self.GLYPH_STYLE[:5] == "empty":
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
         else:
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.fill()
 
-        if self.STYLE[-7:] == "circled":
+        if self.GLYPH_STYLE[-7:] == "circled":
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.set_line_width(1)
             cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
@@ -96,7 +96,7 @@ class ViaElement (PatchElement):
     def recenter_label(self):
         w = self.label.get_width()
         x, y = self.label.get_position()
-        self.label.set_position((self.texture.get_width() - self.label.get_width()) / 2.0, y)
+        self.label.set_position((self.texture.get_width() - w) / 2.0, y)
 
     def text_changed_cb(self, *args):
         self.recenter_label()
@@ -106,13 +106,12 @@ class ViaElement (PatchElement):
         port = 0
         name = txt
         if len(parts) == 2:
-            try: 
+            try:
                 port = int(parts[1])
                 name = parts[0]
-            except: 
+            except Exception:
                 pass
         return (name, port)
-        
 
     async def create_obj(self, label_text):
         if self.obj_id is None:
@@ -165,8 +164,9 @@ class ViaElement (PatchElement):
     def make_edit_mode(self):
         return LabelEditMode(self.stage, self, self.label)
 
+
 class SendViaElement (ViaElement):
-    STYLE = "empty"
+    GLYPH_STYLE = "empty"
     LABEL_Y = ViaElement.VIA_SIZE + ViaElement.VIA_FUDGE / 2.0
     TEXTURE_Y = 0
 
@@ -177,14 +177,16 @@ class SendViaElement (ViaElement):
         await ViaElement.label_edit_finish(self, *args)
         await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
-class SendSignalViaElement (SendViaElement): 
-    VIA_SIZE = 12 
-    STYLE = "empty_circled"
+
+class SendSignalViaElement (SendViaElement):
+    VIA_SIZE = 12
+    GLYPH_STYLE = "empty_circled"
     display_type = "sendsignalvia"
     proc_type = "send~"
 
+
 class ReceiveViaElement (ViaElement):
-    STYLE = "filled"
+    GLYPH_STYLE = "filled"
     LABEL_Y = 0
     LABEL_FUDGE = 2.5
     TEXTURE_Y = ViaElement.LABEL_HEIGHT + LABEL_FUDGE
@@ -196,9 +198,9 @@ class ReceiveViaElement (ViaElement):
         await ViaElement.label_edit_finish(self, *args)
         await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
+
 class ReceiveSignalViaElement (ReceiveViaElement):
-    VIA_SIZE = 12 
-    STYLE = "filled_circled"
+    VIA_SIZE = 12
+    GLYPH_STYLE = "filled_circled"
     display_type = "recvsignalvia"
     proc_type = "recv~"
-

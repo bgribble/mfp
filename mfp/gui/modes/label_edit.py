@@ -45,11 +45,11 @@ class Blinker:
         if widget not in self.tasks:
             self.tasks[widget] = MFPGUI().async_task(self.run(widget))
 
-    async def stop(self, widget):
+    def stop(self, widget):
         if widget in self.tasks:
-            await self.tasks[widget].cancel()
+            self.tasks[widget].cancel()
             del self.tasks[widget]
-        self.set_cursor(False)
+        self.set_cursor(widget, False)
 
 
 class LabelEditMode (InputMode):
@@ -153,7 +153,7 @@ class LabelEditMode (InputMode):
             self.window.window.disconnect(self.key_press_handler_id)
             self.key_press_handler_id = None
 
-        self.blinker.stop()
+        self.blinker.stop(self.widget)
 
     def text_changed(self, *args):
         new_text = self.widget.get_text()

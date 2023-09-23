@@ -86,7 +86,7 @@ class Send (Processor):
             return await self._connect(self.dest_name, self.dest_inlet, False)
         conn = None
         while conn is None:
-            asyncio.sleep(0.1)
+            await asyncio.sleep(0.1)
             conn = await send_recheck()
 
     async def _connect(self, dest_name, dest_inlet, wait=True):
@@ -287,9 +287,6 @@ class Recv (Processor):
             nm += '/{}'.format(self.src_outlet)
         return nm
 
-    def delete(self):
-        Processor.delete(self)
-
     async def method(self, message, inlet):
         if inlet == 0:
             await self.trigger()
@@ -310,7 +307,7 @@ class Recv (Processor):
 
         conn = None
         while conn is None:
-            asyncio.sleep(0.1)
+            await asyncio.sleep(0.1)
             conn = await recv_recheck()
 
     async def _connect(self, src_name, src_outlet, wait=True):

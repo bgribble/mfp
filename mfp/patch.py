@@ -6,7 +6,6 @@ Patch class and methods
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-import asyncio
 import os
 
 from .processor import Processor, AsyncOutput
@@ -310,7 +309,6 @@ class Patch(Processor):
             log.error("Programming error: asked for inlet '%d' in patch %s but it has %d"
                       % (inlet, self.name, len(self.inlet_objects)))
             return (None, 0)
-
 
     def dsp_outlet(self, outlet):
         try:

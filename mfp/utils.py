@@ -6,17 +6,19 @@ Various utility routines not specific to MFP
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-import queue
 import asyncio
 import inspect
 import cProfile
-from threading import Thread, Lock, Condition
+from threading import Thread, Lock
 from mfp import log
 from datetime import datetime, timedelta
 
+all_tasks = []
+
 
 def task(coro):
-    asyncio.create_task(coro)
+    all_tasks.append(asyncio.create_task(coro))
+
 
 def homepath(fn):
     import os.path
@@ -234,46 +236,55 @@ class QuittableThread(Thread):
         t.join()
 
 
-class TaskNibbler (QuittableThread):
+class TaskNibbler:
     class NoData (object):
         pass
     NODATA = NoData()
 
     def __init__(self):
-        self.lock = Lock()
-        self.cv = Condition(self.lock)
         self.queue = []
         self.failed = []
-        QuittableThread.__init__(self)
-        self.start()
+        self.task = None
+        self.new_work = asyncio.Event()
 
-    def run(self):
+    async def _task_launcher(self):
+        log.debug("[TaskNibbler] launching task")
+        try:
+            await self._process_queue()
+        except Exception as e:
+            log.debug(f"[TaskNibbler] Exception {e}")
+            log.debug_traceback()
+        finally:
+            self.task = None
+
+    async def _process_queue(self):
         work = []
         retry = []
 
-        while not self.join_req:
-            with self.lock:
-                self.cv.wait(0.25)
-                work = []
-                if self.queue:
-                    work.extend(self.queue)
-                    self.queue = []
+        while len(self.queue) or len(self.failed):
+            work = []
+            if self.queue:
+                work.extend(self.queue)
+                self.queue = []
 
-                if self.failed:
-                    toonew = []
-                    newest = datetime.utcnow() - timedelta(milliseconds=250)
-                    for jobs, timestamp in self.failed:
-                        if timestamp < newest:
-                            work.extend(jobs)
-                        else:
-                            toonew.append((jobs, timestamp))
-                    self.failed = toonew
+            if self.failed:
+                toonew = []
+                newest = datetime.utcnow() - timedelta(milliseconds=250)
+                for jobs, timestamp in self.failed:
+                    if timestamp < newest:
+                        work.extend(jobs)
+                    else:
+                        toonew.append((jobs, timestamp))
+                self.failed = toonew
+
             retry = []
             for unit, retry_count, data in work:
                 try:
                     done = unit(*data)
+                    if inspect.isawaitable(done):
+                        done = await done
                 except Exception:
-                    log.debug("Exception while running", unit)
+                    log.debug("[TaskNibbler] Exception while running", unit)
                     log.debug_traceback()
 
                 if not done and retry_count:
@@ -286,13 +297,15 @@ class TaskNibbler (QuittableThread):
                     retry.append((unit, retry_count, data))
 
             if retry:
-                with self.lock:
-                    self.failed.append((retry, datetime.utcnow()))
+                self.failed.append((retry, datetime.utcnow()))
+            await asyncio.wait_for(self.new_work.wait(), 0.26)
 
     def add_task(self, task, retry, *data):
-        with self.lock:
-            self.queue.append((task, retry, data))
-            self.cv.notify()
+        self.queue.append((task, retry, data))
+        if not self.task:
+            self.task = asyncio.create_task(self._task_launcher())
+        else:
+            self.new_work.set()
 
 
 def log_monitor(message, log_module, debug=False):

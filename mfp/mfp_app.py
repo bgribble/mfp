@@ -259,7 +259,6 @@ class MFPApp (Singleton):
         log.debug(f"Got manage callback for {peer_id} {event}")
 
     async def on_host_disconnect(self, event, peer_id):
-        # FIXME not called from anywhere
         # if we lost a DSP host, try to restart
         log.debug(f"Got unmanage callback for {peer_id}")
         dead_patches = [
@@ -277,7 +276,7 @@ class MFPApp (Singleton):
                 patch_json.append(p.json_serialize())
                 p.delete_gui()
                 p.context = None
-                p.delete()
+                await p.delete()
 
             if self.no_restart:
                 return
@@ -299,7 +298,7 @@ class MFPApp (Singleton):
             log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
             log.warning("DSP backend exited with no-restart flag, not restarting")
             for p in dead_patches:
-                p.delete()
+                await p.delete()
             log.debug("Finished cleaning up patches")
 
     def open_file(self, file_name, context=None, show_gui=True):
@@ -529,7 +528,7 @@ class MFPApp (Singleton):
 
         async def wait_and_finish(*args, **kwargs):
             import time
-            asyncio.sleep(0.5)
+            await asyncio.sleep(0.5)
             await self.finish()
             log.debug("MFPApp.finish_soon: done with app.finish", threading._active)
             return True

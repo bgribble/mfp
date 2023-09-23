@@ -5,13 +5,13 @@ input_manager.py: Handle keyboard and mouse input and route through input modes
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
+import asyncio
 from datetime import datetime, timedelta
 import inspect
-import time
 
+from mfp import log
 from .input_mode import InputMode
 from .key_sequencer import KeySequencer
-from ..utils import QuittableThread
 from ..gui_main import MFPGUI
 
 
@@ -38,16 +38,16 @@ class InputManager (object):
         self.pointer_lastobj = None
 
         self.hover_thresh = timedelta(microseconds=750000)
-        self.hover_mon = QuittableThread(target=self._hover_mon)
-        self.hover_mon.start()
 
-    def _hover_mon(self, thread, *rest):
-        while not thread.join_req:
+        MFPGUI().async_task(self.hover_monitor())
+
+    async def hover_monitor(self):
+        while True:
             if self.pointer_obj_time is not None:
                 elapsed = datetime.now() - self.pointer_obj_time
                 if elapsed > self.hover_thresh:
-                    MFPGUI().clutter_do(self._hover_handler)
-            time.sleep(0.2)
+                    self._hover_handler()
+            await asyncio.sleep(0.2)
 
     def _hover_handler(self):
         self.handle_keysym(self.keyseq.canonicalize("HOVER"))

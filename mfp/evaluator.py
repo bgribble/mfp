@@ -9,6 +9,8 @@ import tokenize
 import inspect
 from io import StringIO
 
+from mfp import log
+
 
 class LazyExpr(object):
     def __init__(self, thunk):
@@ -38,6 +40,7 @@ class Evaluator (object):
 
     async def eval_async(self, evalstr, collect=False, **extra_bindings):
         rv = self.eval(evalstr, collect=False, **extra_bindings)
+
         if inspect.isawaitable(rv):
             return await rv
         return rv

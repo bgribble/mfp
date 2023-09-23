@@ -106,7 +106,6 @@ class PatchElement (Store, Clutter.Group):
 
         # create placeholder group and add to stage
         super().__init__()
-        log.debug(f"Created PatchElement {self.obj_id}")
 
     def __repr__(self):
         return "<%s %s>" % (type(self).__name__, id(self))

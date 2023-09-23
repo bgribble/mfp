@@ -12,11 +12,6 @@ import threading
 import argparse
 from datetime import datetime
 
-import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GtkClutter', '1.0')
-gi.require_version('Clutter', '1.0')
-
 import gbulb
 
 from carp.channel import UnixSocketChannel
@@ -29,8 +24,13 @@ from .singleton import Singleton
 from .mfp_command import MFPCommand
 from .gui_command import GUICommand
 
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkClutter', '1.0')
+gi.require_version('Clutter', '1.0')
 
-# decorator version 
+
+# decorator version
 def clutter_do(func):
     def wrapped(*args, **kwargs):
         from mfp.gui_main import MFPGUI
@@ -77,7 +77,9 @@ class MFPGUI (Singleton):
         try:
             rv = await coro
         except Exception as e:
+            import traceback
             log.error(f"Exception in task: {coro} {e}")
+            log.error(traceback.format_exc())
         finally:
             if task_id in self.asyncio_tasks:
                 del self.asyncio_tasks[task_id]

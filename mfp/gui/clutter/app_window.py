@@ -528,7 +528,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
     async def clipboard_cut(self, pointer_pos):
         if self.selected:
             await self.clipboard_copy(pointer_pos)
-            self.delete_selected()
+            await self.delete_selected()
             return True
         else:
             return False
