@@ -14,7 +14,7 @@ def git_version():
     return str(int(vers.strip(), 16))
 
 setup (name = 'mfp',
-       version = '0.06.' + git_version(),
+       version = '0.6.' + git_version(),
        description = 'Music for programmers',
        packages = ['mfp', 'mfp.builtins',
                    'mfp.gui', 'mfp.gui.xyplot', 'mfp.gui.modes', 'mfp.gui.clutter' ],
