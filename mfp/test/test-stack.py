@@ -18,7 +18,7 @@ class LimitedIncr (Processor):
         self.lastval = None
         Processor.__init__(self, 1, 1, 'limitedincr', '', patch, None, None)
 
-    def trigger(self):
+    async def trigger(self):
         if self.inlets[0] < self.limit:
             self.outlets[0] = self.inlets[0] + 1
             self.lastval = self.outlets[0]
@@ -32,7 +32,7 @@ class FanOut (Processor):
         self.tag = tag
         Processor.__init__(self, 1, 4, "fanout", '', patch, None, None)
 
-    def trigger(self):
+    async def trigger(self):
         self.outlets[0] = self.outlets[1] = self.outlets[2] = self.outlets[3] = Bang
         FanOut.trail.append(self.tag)
 
@@ -58,7 +58,6 @@ class StackDepthTest(IsolatedAsyncioTestCase):
         '''test_100: 100 recursions doesn't overflow stack'''
         self.inc.limit = 100
         await self.var.send(0, 0)
-        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100)
 
@@ -66,7 +65,6 @@ class StackDepthTest(IsolatedAsyncioTestCase):
         '''test_1000: 1000 recursions doesn't overflow stack'''
         self.inc.limit = 1000
         await self.var.send(0, 0)
-        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 1000)
 
@@ -74,7 +72,6 @@ class StackDepthTest(IsolatedAsyncioTestCase):
         '''test_10000: 10000 recursions doesn't overflow stack'''
         self.inc.limit = 10000
         await self.var.send(0, 0)
-        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 10000)
 
@@ -82,7 +79,6 @@ class StackDepthTest(IsolatedAsyncioTestCase):
         '''test_100000: 100000 recursions doesn't overflow stack'''
         self.inc.limit = 100000
         await self.var.send(0, 0)
-        print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100000)
 
@@ -110,5 +106,4 @@ class DepthFirstTest(IsolatedAsyncioTestCase):
     async def test_depthfirst(self):
         '''test_depthfirst: depth-first execution order is preserved'''
         await self.procs[0].send(Bang, 0)
-        print(FanOut.trail)
         self.assertEqual(FanOut.trail, [0, 1, 5, 6, 7, 8, 2, 3, 9, 4])
