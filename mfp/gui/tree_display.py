@@ -8,6 +8,7 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from gi.repository import Gtk, GObject
+from mfp.gui_main import MFPGUI
 from mfp import log
 
 
@@ -30,7 +31,9 @@ class TreeDisplay (object):
             self.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         self.treeview.set_model(self.treestore)
-        self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)
+        self.glib_select_cb_id = self.selection.connect(
+            "changed", self._select_cb
+        )
 
         colnum = 0
         for c in columns:
@@ -238,7 +241,9 @@ class TreeDisplay (object):
                 self.treestore.set(iter, 0, obj)
 
         # restore signal handler
-        self.glib_select_cb_id = self.selection.connect("changed", self._select_cb)
+        self.glib_select_cb_id = self.selection.connect(
+            "changed", self._select_cb
+        )
         self.refresh()
 
         if need_select:

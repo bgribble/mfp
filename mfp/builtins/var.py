@@ -39,9 +39,9 @@ class Var (Processor):
         elif len(kwargs):
             self.value = kwargs
 
-    def onload(self, phase):
+    async def onload(self, phase):
         if phase == 1 and self.value is not Uninit:
-            self.send(Bang)
+            await self.send(Bang)
 
     async def trigger(self):
         '''

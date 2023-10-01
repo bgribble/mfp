@@ -47,6 +47,10 @@ def write_log_entry(msg, level=0):
     global log_func
     global log_thread
     global log_loop
+    global log_quiet
+
+    if log_quiet:
+        return
 
     logged = False 
     if msg and log_func:

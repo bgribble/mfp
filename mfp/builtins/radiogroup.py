@@ -10,14 +10,14 @@ from ..mfp_app import MFPApp
 from ..bang import Uninit
 
 class RGForceFalse (object):
-    pass 
+    pass
 
 class RadioGroup (Processor):
     '''
     Processor to manage a set of toggle buttons
     Takes input from each and sends output to the previous
-    selection to toggle it off 
-    All inlets are hot 
+    selection to toggle it off
+    All inlets are hot
     '''
 
     doc_tooltip_obj = "Control a radio group of toggle buttons"
@@ -31,25 +31,25 @@ class RadioGroup (Processor):
         else:
             init_selection = 0
 
-        self.init_selection = init_selection 
+        self.init_selection = init_selection
         self.selection = None
         self.hot_inlets = list(range(num_inlets))
 
-        self.doc_tooltip_inlet = [] 
-        self.doc_tooltip_outlet = [] 
+        self.doc_tooltip_inlet = []
+        self.doc_tooltip_outlet = []
 
         for i in range(num_inlets):
             self.doc_tooltip_inlet.append("Button %(port_num)d input")
             self.doc_tooltip_outlet.append("Button %(port_num)d output")
 
-        Processor.__init__(self, num_inlets, num_inlets+1, 
+        Processor.__init__(self, num_inlets, num_inlets+1,
                            init_type, init_args, patch, scope, name)
 
-    def onload(self, phase):
+    async def onload(self, phase):
         if phase == 1:
             for i in range(len(self.inlets)):
-                self.send(RGForceFalse(), i)
-            self.send(True, self.init_selection)
+                await self.send(RGForceFalse(), i)
+            await self.send(True, self.init_selection)
 
     async def trigger(self):
         for inum, ival in enumerate(self.inlets):
@@ -57,22 +57,22 @@ class RadioGroup (Processor):
                 continue
             elif ival is True:
                 if self.selection is inum:
-                    continue 
+                    continue
                 if self.selection is not None:
-                    self.outlets[self.selection] = False 
+                    self.outlets[self.selection] = False
 
                 self.selection = inum
-                self.outlets[self.selection] = True 
+                self.outlets[self.selection] = True
                 break
-            elif (not ival) or isinstance(ival, RGForceFalse): 
-                if inum == self.selection: 
-                    self.selection = None 
-                if isinstance(ival, RGForceFalse): 
-                    self.outlets[inum] = False 
+            elif (not ival) or isinstance(ival, RGForceFalse):
+                if inum == self.selection:
+                    self.selection = None
+                if isinstance(ival, RGForceFalse):
+                    self.outlets[inum] = False
                 break
         for inum in range(len(self.inlets)):
             self.inlets[inum] = Uninit
         self.outlets[-1] = self.selection
-            
+
 def register():
     MFPApp().register("radiogroup", RadioGroup)

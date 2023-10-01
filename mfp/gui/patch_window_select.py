@@ -36,16 +36,16 @@ def patch_select_next(self):
 
 
 @extends(AppWindow)
-def patch_close(self):
+async def patch_close(self):
     p = self.selected_patch
     if p and p.deletable:
         self.patch_select_next()
         self.patches.remove(p)
-        p.delete()
+        await p.delete()
     else:
         log.debug("Cannot close window. Close UI via plugin host Edit button")
     if not len(self.patches):
-        self.quit()
+        await self.quit()
 
 
 @extends(AppWindow)
@@ -75,12 +75,12 @@ def select(self, obj):
 
 
 @extends(AppWindow)
-def _unselect(self, obj):
+async def _unselect(self, obj):
     if obj is None:
         return
     if isinstance(obj, PatchElement):
         if obj.edit_mode:
-            obj.end_edit()
+            await obj.end_edit()
         obj.end_control()
         obj.unselect()
     if obj in self.selected:
@@ -91,15 +91,15 @@ def _unselect(self, obj):
 
 
 @extends(AppWindow)
-def unselect(self, obj):
+async def unselect(self, obj):
     if obj in self.selected and obj is not None:
-        self._unselect(obj)
+        await self._unselect(obj)
     return True
 
 
 @extends(AppWindow)
-def select_all(self):
-    self.unselect_all()
+async def select_all(self):
+    await self.unselect_all()
     for obj in self.objects:
         if obj.layer == self.active_layer():
             self.select(obj)
@@ -107,17 +107,17 @@ def select_all(self):
 
 
 @extends(AppWindow)
-def unselect_all(self):
+async def unselect_all(self):
     oldsel = self.selected
     self.selected = []
     for obj in oldsel:
         obj.end_control()
-        self._unselect(obj)
+        await self._unselect(obj)
     return True
 
 
 @extends(AppWindow)
-def select_next(self):
+async def select_next(self):
     key_obj = None
 
     if len(self.selected_layer.objects) == 0:
@@ -137,7 +137,7 @@ def select_next(self):
 
     for count in range(len(self.selected_layer.objects)):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
-            self.unselect_all()
+            await self.unselect_all()
             self.select(self.selected_layer.objects[candidate])
             return True
         candidate = (candidate + 1) % len(self.selected_layer.objects)
@@ -145,7 +145,7 @@ def select_next(self):
 
 
 @extends(AppWindow)
-def select_prev(self):
+async def select_prev(self):
     key_obj = None
     if len(self.selected_layer.objects) == 0:
         return False
@@ -162,7 +162,7 @@ def select_prev(self):
 
     while candidate > -len(self.selected_layer.objects):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
-            self.unselect_all()
+            await self.unselect_all()
             self.select(self.selected_layer.objects[candidate])
             return True
         candidate -= 1
@@ -193,7 +193,7 @@ def move_selected(self, dx, dy):
 @extends(AppWindow)
 async def delete_selected(self):
     olist = self.selected
-    self.unselect_all()
+    await self.unselect_all()
     for o in olist:
         if o.editable:
             await o.delete()

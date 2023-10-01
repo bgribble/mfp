@@ -194,7 +194,7 @@ class Patch(Processor):
                 if isinstance(self.inlets[i], AsyncOutput):
                     await self.send(self.inlets[i])
                 else:
-                    self.inlet_objects[i].send(self.inlets[i])
+                    await self.inlet_objects[i].send(self.inlets[i])
                 self.inlets[i] = Uninit
 
         for o in range(len(self.outlets)):
@@ -283,14 +283,14 @@ class Patch(Processor):
         except ValueError:
             pass
 
-    def connect(self, outlet, target, inlet, show_gui=True):
-        def _patch_connect_retry(args):
-            rv = Processor.connect(*args)
+    async def connect(self, outlet, target, inlet, show_gui=True):
+        async def _patch_connect_retry(args):
+            rv = await Processor.connect(*args)
             return rv
 
         # we may have to retry this if some outlets are made in
         # the loadbang
-        initial = Processor.connect(self, outlet, target, inlet, show_gui)
+        initial = await Processor.connect(self, outlet, target, inlet, show_gui)
         if not initial:
             self.task_nibbler.add_task(
                 lambda args: _patch_connect_retry(args), 20,

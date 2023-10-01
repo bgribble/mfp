@@ -45,7 +45,7 @@ class Prompter (object):
                 print("Prompter exception in callback:", e)
                 pass
 
-    def end_edit(self):
+    async def end_edit(self):
         if self.mode:
             self.window.input_mgr.disable_minor_mode(self.mode)
             self.mode = None

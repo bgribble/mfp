@@ -205,18 +205,18 @@ class GlobalMode (InputMode):
         self.drag_started = False
         return True
 
-    def selbox_start(self, select_mode):
+    async def selbox_start(self, select_mode):
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:
-                    self.window.unselect_all()
+                    await self.window.unselect_all()
                     self.window.select(self.manager.pointer_obj)
                     raise self.manager.InputNeedsRequeue()
 
                 if self.allow_selection_drag:
                     self.selection_drag_started = True
             else:
-                self.window.unselect_all()
+                await self.window.unselect_all()
                 self.selbox_started = True
         elif select_mode is True:
             if (self.manager.pointer_obj
@@ -225,7 +225,7 @@ class GlobalMode (InputMode):
             self.selbox_started = True
         else:
             if self.manager.pointer_obj in self.window.selected:
-                self.window.unselect(self.manager.pointer_obj)
+                await self.window.unselect(self.manager.pointer_obj)
             self.selbox_started = True
 
         px = self.manager.pointer_x
@@ -237,7 +237,7 @@ class GlobalMode (InputMode):
         self.drag_last_y = py
         return True
 
-    def selbox_motion(self, select_mode):
+    async def selbox_motion(self, select_mode):
         if not (self.selbox_started or self.selection_drag_started):
             return False
 
@@ -267,14 +267,14 @@ class GlobalMode (InputMode):
                 if obj not in self.selbox_changed:
                     self.selbox_changed.append(obj)
                     if obj in self.window.selected:
-                        self.window.unselect(obj)
+                        await self.window.unselect(obj)
                     else:
                         self.window.select(obj)
         new_changed = []
         for obj in self.selbox_changed:
             if obj not in enclosed:
                 if obj in self.window.selected:
-                    self.window.unselect(obj)
+                    await self.window.unselect(obj)
                 else:
                     self.window.select(obj)
             else:

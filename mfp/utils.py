@@ -197,8 +197,12 @@ class QuittableThread(Thread):
 
     @classmethod
     def finish_all(klass):
+        if not QuittableThread._all_threads_lock:
+            return
+
         with QuittableThread._all_threads_lock:
             work = [t for t in QuittableThread._all_threads]
+
         for t in work:
             t.finish()
 

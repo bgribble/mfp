@@ -20,7 +20,8 @@ from ..via_element import SendViaElement, ReceiveViaElement
 from ..via_element import SendSignalViaElement, ReceiveSignalViaElement
 from ..button_element import BangButtonElement, ToggleButtonElement, ToggleIndicatorElement
 
-from mfp import log
+from mfp.gui_main import MFPGUI
+
 
 class PatchEditMode (InputMode):
     def __init__(self, window):
@@ -34,35 +35,35 @@ class PatchEditMode (InputMode):
         InputMode.__init__(self, "Edit patch", "Edit")
         self.bind('ESC', self.window.control_major_mode, "Exit edit mode")
 
-        self.bind("p", lambda: self.add_element(ProcessorElement),
+        self.bind("p", self.add_element(ProcessorElement),
                   "Add processor box")
-        self.bind("m", lambda: self.add_element(MessageElement),
+        self.bind("m", self.add_element(MessageElement),
                   "Add message box")
-        self.bind("n", lambda: self.add_element(EnumElement),
+        self.bind("n", self.add_element(EnumElement),
                   "Add number box")
-        self.bind("t", lambda: self.add_element(TextElement),
+        self.bind("t", self.add_element(TextElement),
                   "Add text comment")
-        self.bind("u", lambda: self.add_element(ToggleButtonElement),
+        self.bind("u", self.add_element(ToggleButtonElement),
                   "Add toggle button")
-        self.bind("g", lambda: self.add_element(BangButtonElement),
+        self.bind("g", self.add_element(BangButtonElement),
                   "Add bang button")
-        self.bind("i", lambda: self.add_element(ToggleIndicatorElement),
+        self.bind("i", self.add_element(ToggleIndicatorElement),
                   "Add on/off indicator")
-        self.bind("s", lambda: self.add_element(FaderElement),
+        self.bind("s", self.add_element(FaderElement),
                   "Add slider")
-        self.bind("b", lambda: self.add_element(BarMeterElement),
+        self.bind("b", self.add_element(BarMeterElement),
                   "Add bar meter")
-        self.bind("d", lambda: self.add_element(DialElement),
+        self.bind("d", self.add_element(DialElement),
                   "Add dial control")
-        self.bind("x", lambda: self.add_element(PlotElement),
+        self.bind("x", self.add_element(PlotElement),
                   "Add X/Y plot")
-        self.bind("v", lambda: self.add_element(SendViaElement),
+        self.bind("v", self.add_element(SendViaElement),
                   "Add send message via")
-        self.bind("V", lambda: self.add_element(ReceiveViaElement),
+        self.bind("V", self.add_element(ReceiveViaElement),
                   "Add receive message via")
-        self.bind("A-v", lambda: self.add_element(SendSignalViaElement),
+        self.bind("A-v", self.add_element(SendSignalViaElement),
                   "Add send signal via")
-        self.bind("A-V", lambda: self.add_element(ReceiveSignalViaElement),
+        self.bind("A-V", self.add_element(ReceiveSignalViaElement),
                   "Add receive signal via")
 
         self.bind("C-x", self.cut, "Cut selection to clipboard")
@@ -97,7 +98,12 @@ class PatchEditMode (InputMode):
             self.disable_selection_mode()
 
     def add_element(self, factory):
-        self.window.unselect_all()
+        async def helper():
+            return await self._add_element(factory)
+        return helper
+
+    async def _add_element(self, factory):
+        await self.window.unselect_all()
         if self.autoplace_mode is None:
             self.window.add_element(factory)
         else:
@@ -131,17 +137,17 @@ class PatchEditMode (InputMode):
             self.autoplace_mode = None
         return True
 
-    def select_all(self):
-        self.window.select_all()
+    async def select_all(self):
+        await self.window.select_all()
         self.update_selection_mode()
 
-    def select_next(self):
-        self.window.select_next()
+    async def select_next(self):
+        await self.window.select_next()
         self.update_selection_mode()
         return True
 
-    def select_prev(self):
-        self.window.select_prev()
+    async def select_prev(self):
+        await self.window.select_prev()
         self.update_selection_mode()
         return True
 
@@ -186,9 +192,9 @@ class PatchEditMode (InputMode):
             self.autoplace_mode = None
         self.disable_selection_mode()
 
-    def cut(self):
-        return self.window.clipboard_cut((self.manager.pointer_x,
-                                          self.manager.pointer_y))
+    async def cut(self):
+        return await self.window.clipboard_cut((self.manager.pointer_x,
+                                                self.manager.pointer_y))
 
     async def copy(self):
         return await self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))

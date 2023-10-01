@@ -211,7 +211,7 @@ class MFPApp (Singleton):
         from .dsp_object import DSPObject, DSPContext
         if self.dsp_process is not None:
             log.debug("Terminating old DSP process...")
-            self.dsp_process.cancel()
+            await self.dsp_process.cancel()
             self.dsp_process = None
 
         dspcommand = [

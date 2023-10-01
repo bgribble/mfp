@@ -167,8 +167,8 @@ class SliderEditMode (InputMode):
         self.slider.send_params()
         return True 
 
-    def end_edits(self):
-        self.slider.end_edit()
+    async def end_edits(self):
+        await self.slider.end_edit()
         return True 
 
 class DialControlMode(SliderControlMode):

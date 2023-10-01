@@ -62,7 +62,7 @@ class ExtendedEncoder (json.JSONEncoder):
 
 
 def extended_decoder_hook(saved):
-    from ..bang import Bang, Uninit
+    from .bang import Bang, Uninit
     if (isinstance(saved, dict) and len(saved.keys()) == 1):
         tname, tdict = list(saved.items())[0]
         if tname == "__BangType__":
@@ -234,7 +234,7 @@ async def json_serialize(self):
         o = self.objects.get(oid)
         if o and (isinstance(o, MFPApp) or not o.save_to_patch):
             continue
-        oinfo = await o.save()
+        oinfo = o.save()
         allobj[oid] = oinfo
 
     f['objects'] = allobj

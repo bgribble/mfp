@@ -27,39 +27,39 @@ class EnumEditMode (InputMode):
         def cb(value):
             if value.lower() == "none":
                 value = None
-            else: 
+            else:
                 value = float(value)
-            self.enum.set_bounds(self.enum.min_value, value) 
+            self.enum.set_bounds(self.enum.min_value, value)
         self.window.get_prompted_input("Number upper bound: ", cb)
-        return True 
+        return True
 
     def set_lower(self):
         def cb(value):
             if value.lower() == "none":
                 value = None
-            else: 
+            else:
                 value = float(value)
-            self.enum.set_bounds(value, self.enum.max_value) 
+            self.enum.set_bounds(value, self.enum.max_value)
         self.window.get_prompted_input("Number lower bound: ", cb)
-        return True 
+        return True
 
     def add_digit(self):
         self.enum.digits += 1
         self.enum.format_update()
         self.enum.update()
-        return True 
+        return True
 
     def del_digit(self):
         if self.enum.digits > 0:
             self.enum.digits -= 1
         self.enum.format_update()
         self.enum.update()
-        return True 
+        return True
 
     def end_edits(self):
         self.manager.disable_minor_mode(self)
-        self.enum.edit_mode = None 
-        return False 
+        self.enum.edit_mode = None
+        return False
 
 class EnumControlMode (InputMode):
     def __init__(self, window, element):

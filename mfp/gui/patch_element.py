@@ -7,6 +7,10 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from flopsy import Store
+from mfp.gui_main import MFPGUI
+from mfp import log
+from .colordb import ColorDB
+import math
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -14,10 +18,6 @@ gi.require_version('GtkClutter', '1.0')
 gi.require_version('Clutter', '1.0')
 
 from gi.repository import Clutter
-from mfp.gui_main import MFPGUI
-from mfp import log
-from .colordb import ColorDB
-import math
 
 
 class PatchElement (Store, Clutter.Group):
@@ -615,7 +615,7 @@ class PatchElement (Store, Clutter.Group):
             self.stage.input_mgr.enable_minor_mode(self.edit_mode)
         self.update_badge()
 
-    def end_edit(self):
+    async def end_edit(self):
         if self.edit_mode:
             self.stage.input_mgr.disable_minor_mode(self.edit_mode)
             self.edit_mode = None

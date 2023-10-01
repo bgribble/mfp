@@ -110,8 +110,8 @@ class TextElement (PatchElement):
             await MFPGUI().mfp.send(self.obj_id, 0, self.value)
         self.update()
 
-    def end_edit(self):
-        PatchElement.end_edit(self)
+    async def end_edit(self):
+        await PatchElement.end_edit(self)
         self.set_text()
 
     def text_changed_cb(self, *args):

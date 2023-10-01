@@ -1,14 +1,15 @@
-
-from unittest import TestCase
+import threading
+import asyncio
+from unittest import IsolatedAsyncioTestCase
 from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
 from mfp.scope import NaiveScope
-from mfp import Bang
+from mfp import Bang, log, builtins
 from mfp.processor import Processor
 
 
-def mkproc(case, init_type, init_args=None):
-    return MFPApp().create(init_type, init_args, case.patch, None, init_type)
+async def mkproc(case, init_type, init_args=None):
+    return await MFPApp().create(init_type, init_args, case.patch, None, init_type)
 
 
 class LimitedIncr (Processor):
@@ -36,60 +37,78 @@ class FanOut (Processor):
         FanOut.trail.append(self.tag)
 
 
-class StackDepthTest(TestCase):
-    def setUp(self):
+class StackDepthTest(IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        MFPApp().no_gui = True
+        MFPApp().no_dsp = True
+        MFPApp().next_obj_id = 0
+        MFPApp().objects = {}
+        log.log_quiet = True
+        log.log_thread = threading.get_ident()
+        log.log_loop = asyncio.get_event_loop()
+        await MFPApp().setup()
+        builtins.register()
         self.patch = Patch('default', '', None, NaiveScope(), 'default')
-        self.var = mkproc(self, "var", "0")
+        self.var = await mkproc(self, "var", "0")
         self.inc = LimitedIncr(self.patch)
-        self.var.connect(0, self.inc, 0)
-        self.inc.connect(0, self.var, 0)
+        await self.var.connect(0, self.inc, 0)
+        await self.inc.connect(0, self.var, 0)
 
-    def test_100(self):
+    async def test_100(self):
         '''test_100: 100 recursions doesn't overflow stack'''
         self.inc.limit = 100
-        self.var.send(0, 0)
+        await self.var.send(0, 0)
         print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100)
 
-    def test_1000(self):
+    async def test_1000(self):
         '''test_1000: 1000 recursions doesn't overflow stack'''
         self.inc.limit = 1000
-        self.var.send(0, 0)
+        await self.var.send(0, 0)
         print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 1000)
 
-    def test_10000(self):
+    async def test_10000(self):
         '''test_10000: 10000 recursions doesn't overflow stack'''
         self.inc.limit = 10000
-        self.var.send(0, 0)
+        await self.var.send(0, 0)
         print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 10000)
 
-    def test_100000(self):
+    async def test_100000(self):
         '''test_100000: 100000 recursions doesn't overflow stack'''
         self.inc.limit = 100000
-        self.var.send(0, 0)
+        await self.var.send(0, 0)
         print("Last value:", self.inc.lastval)
         self.assertEqual(self.var.status, Processor.READY)
         self.assertEqual(self.inc.lastval, 100000)
 
 
-class DepthFirstTest(TestCase):
-    def setUp(self):
+class DepthFirstTest(IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        MFPApp().no_gui = True
+        MFPApp().no_dsp = True
+        MFPApp().next_obj_id = 0
+        MFPApp().objects = {}
+        log.log_quiet = True
+        log.log_thread = threading.get_ident()
+        log.log_loop = asyncio.get_event_loop()
+        await MFPApp().setup()
+        builtins.register()
         self.patch = Patch('default', '', None, NaiveScope(), 'default')
         FanOut.trail = []
         self.procs = [FanOut(self.patch, i) for i in range(0, 10)]
         for i in range(1, 5):
-            self.procs[0].connect(i - 1, self.procs[i], 0)
+            await self.procs[0].connect(i - 1, self.procs[i], 0)
         for i in range(5, 9):
-            self.procs[1].connect(i - 5, self.procs[i], 0)
-        self.procs[3].connect(0, self.procs[9], 0)
+            await self.procs[1].connect(i - 5, self.procs[i], 0)
+        await self.procs[3].connect(0, self.procs[9], 0)
 
-    def test_depthfirst(self):
+    async def test_depthfirst(self):
         '''test_depthfirst: depth-first execution order is preserved'''
-        self.procs[0].send(Bang, 0)
+        await self.procs[0].send(Bang, 0)
         print(FanOut.trail)
         self.assertEqual(FanOut.trail, [0, 1, 5, 6, 7, 8, 2, 3, 9, 4])

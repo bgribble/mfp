@@ -1,63 +1,57 @@
+import asyncio
+import threading
 
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
 from mfp.scope import NaiveScope
-
-def setup():
-    MFPApp().setup()
-
-def mkproc(case, init_type, init_args=None):
-    return MFPApp().create(init_type, init_args, case.patch, None, init_type)
+from mfp import builtins
+from mfp import log
 
 
-class DSPObjectTests (TestCase):
-    def setUp(self):
+async def mkproc(testcase, init_type, init_args=None):
+    return await MFPApp().create(init_type, init_args, testcase.patch, None, init_type)
+
+
+class DSPObjectTests (IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        MFPApp().no_gui = True
+        MFPApp().no_restart = True
+        MFPApp().next_obj_id = 0
+        MFPApp().objects = {}
+        log.log_quiet = True
+        log.log_thread = threading.get_ident()
+        log.log_loop = asyncio.get_event_loop()
+        await MFPApp().setup()
+        builtins.register()
         self.patch = Patch('default', '', None, NaiveScope(), 'default')
 
-    def tearDown(self):
-        import time
-        time.sleep(0.500)
-
-    def test_create(self):
+    async def test_create(self):
         '''test_create: [dsp] can make a DSP object'''
-        o = mkproc(self, "osc~", "500")
+        await mkproc(self, "osc~", "500")
 
-    def test_read(self):
+    async def test_read(self):
         '''test_read: [dsp] can read back a creation parameter'''
-        o = mkproc(self, "osc~", "500")
-        print("test_read: objid = ", o, o.dsp_obj)
-        f = o.dsp_obj.getparam("_sig_1")
-        print(f)
+        o = await mkproc(self, "osc~", "500")
+        f = await o.dsp_obj.getparam("_sig_1")
         assert f == 500
 
-    def test_connect_disconnect(self):
+    async def test_connect_disconnect(self):
         '''test_connect_disconnect: [dsp] make/break connections'''
-        print("============= Creating in~")
-        inp = mkproc(self, "in~", "0")
-        print("============= Creating out~")
-        outp = mkproc(self, "out~", "0")
+        inp = await mkproc(self, "in~", "0")
+        outp = await mkproc(self, "out~", "0")
 
-        print("============= Created objects")
-        inp.connect(0, outp, 0)
-        print("============= Called connect")
-        inp.disconnect(0, outp, 0)
-        print("============== disconnected")
+        await inp.connect(0, outp, 0)
+        await inp.disconnect(0, outp, 0)
 
-    def test_delete(self):
+    async def test_delete(self):
         '''test_destroy: [dsp] destroy dsp object'''
-        print("Creating")
-        inp = mkproc(self, "in~", "0")
-        outp = mkproc(self, "out~", "0")
-        print("connecting")
-        inp.connect(0, outp, 0)
-        print("deleting")
-        outp.delete()
-        inp.delete()
-        print("done")
+        inp = await mkproc(self, "in~", "0")
+        outp = await mkproc(self, "out~", "0")
+        await inp.connect(0, outp, 0)
+        await outp.delete()
+        await inp.delete()
 
-
-def teardown():
-    MFPApp().finish()
-    print("test-dsp.py: MFPApp finish done")
+    async def asyncTearDown(self):
+        await MFPApp().finish()

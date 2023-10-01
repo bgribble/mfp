@@ -186,7 +186,7 @@ class LabelEditMode (InputMode):
         self.end_editing()
         self.update_label(raw=False)
         await self.element.label_edit_finish(self.widget, self.text)
-        self.element.end_edit()
+        await self.element.end_edit()
         return True
 
     async def rollback_edits(self):
@@ -195,7 +195,7 @@ class LabelEditMode (InputMode):
         self.end_editing()
         self.update_label(raw=False)
         await self.element.label_edit_finish(self.widget, self.text)
-        self.element.end_edit()
+        await self.element.end_edit()
         return True
 
     def move_to_start(self):

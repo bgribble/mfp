@@ -228,10 +228,10 @@ class TransientMessageElement (MessageElement):
 
         return True
 
-    def end_edit(self):
-        PatchElement.end_edit(self)
+    async def end_edit(self):
+        await PatchElement.end_edit(self)
         if self.obj_state == self.OBJ_COMPLETE:
-            self.delete()
+            await self.delete()
 
     def label_edit_start(self):
         self.label.set_text(self.message_text)

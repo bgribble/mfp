@@ -130,9 +130,9 @@ class AppWindow:
             self.input_mgr.set_major_mode(PatchEditMode(self))
         return True
 
-    def control_major_mode(self):
+    async def control_major_mode(self):
         for o in self.selected:
-            o.end_edit()
+            await o.end_edit()
             o.begin_control()
 
         if isinstance(self.input_mgr.major_mode, PatchEditMode):
