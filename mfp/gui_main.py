@@ -19,6 +19,7 @@ from carp.host import Host
 from flopsy import Store
 
 from mfp import log
+from mfp.utils import AsyncTaskManager
 
 from .singleton import Singleton
 from .mfp_command import MFPCommand
@@ -45,10 +46,7 @@ class MFPGUI (Singleton):
         self.objects = {}
         self.mfp = None
         self.debug = False
-        self.asyncio_tasks = {}
-        self.asyncio_task_last_id = 0
-        self.asyncio_loop = asyncio.get_event_loop()
-        self.asyncio_thread = threading.get_ident()
+        self.async_task = AsyncTaskManager()
 
         self.style_defaults = {
             'font-face': 'Cantarell,Sans',
@@ -71,36 +69,6 @@ class MFPGUI (Singleton):
 
     def recall(self, obj_id):
         return self.objects.get(obj_id)
-
-    async def _task_wrapper(self, coro, task_id):
-        rv = None
-        try:
-            rv = await coro
-        except Exception as e:
-            import traceback
-            log.error(f"Exception in task: {coro} {e}")
-            log.error(traceback.format_exc())
-        finally:
-            if task_id in self.asyncio_tasks:
-                del self.asyncio_tasks[task_id]
-        return rv
-
-    def async_task(self, coro):
-        if inspect.isawaitable(coro):
-            current_thread = threading.get_ident()
-            task_id = self.asyncio_task_last_id
-            self.asyncio_task_last_id += 1
-
-            if current_thread == self.asyncio_thread:
-                task = asyncio.create_task(self._task_wrapper(coro, task_id))
-            else:
-                task = asyncio.run_coroutine_threadsafe(
-                    self._task_wrapper(coro, task_id), self.asyncio_loop
-                )
-            self.asyncio_tasks[task_id] = task
-            return task
-        else:
-            return coro
 
     def _callback_wrapper(self, thunk):
         try:

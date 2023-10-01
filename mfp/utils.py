@@ -9,15 +9,10 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 import asyncio
 import inspect
 import cProfile
+import threading
 from threading import Thread, Lock
 from mfp import log
 from datetime import datetime, timedelta
-
-all_tasks = []
-
-
-def task(coro):
-    all_tasks.append(asyncio.create_task(coro))
 
 
 def homepath(fn):
@@ -333,6 +328,49 @@ def log_monitor(message, log_module, debug=False):
             log.error("JACK: " + message, module=log_module)
     elif debug and len(message):
         log.debug("%s " % log_module, message)
+
+
+class AsyncTaskManager:
+    def __init__(self):
+        self.asyncio_tasks = {}
+        self.asyncio_task_last_id = 0
+        self.asyncio_loop = asyncio.get_event_loop()
+        self.asyncio_thread = threading.get_ident()
+
+    async def _task_wrapper(self, coro, task_id):
+        rv = None
+        try:
+            rv = await coro
+        except Exception as e:
+            import traceback
+            log.error(f"Exception in task: {coro} {e}")
+            log.error(traceback.format_exc())
+        finally:
+            if task_id in self.asyncio_tasks:
+                del self.asyncio_tasks[task_id]
+        return rv
+
+    def __call__(self, coro):
+        """
+        self.async_task = AsyncTaskManager()
+        self.async_task(coro())
+        """
+
+        if inspect.isawaitable(coro):
+            current_thread = threading.get_ident()
+            task_id = self.asyncio_task_last_id
+            self.asyncio_task_last_id += 1
+
+            if current_thread == self.asyncio_thread:
+                task = asyncio.create_task(self._task_wrapper(coro, task_id))
+            else:
+                task = asyncio.run_coroutine_threadsafe(
+                    self._task_wrapper(coro, task_id), self.asyncio_loop
+                )
+            self.asyncio_tasks[task_id] = task
+            return task
+        else:
+            return coro
 
 
 class AsyncExecMonitor:

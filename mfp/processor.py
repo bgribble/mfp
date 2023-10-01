@@ -14,7 +14,7 @@ from .method import MethodCall
 from .evaluator import LazyExpr
 from .bang import Uninit, Bang
 from .scope import LexicalScope
-from .utils import isiterable, task
+from .utils import isiterable
 from . import log
 
 
@@ -554,7 +554,7 @@ class Processor:
 
         if inlet > len(target.inlets):
             if isinstance(target, Patch):
-                Patch.task_nibbler.add_task(
+                Patch.task_nibbler.add_MFPApp().async_task(
                     lambda args: Processor.connect(*args), 20,
                     [self, outlet, target, inlet, show_gui])
                 log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
@@ -569,7 +569,7 @@ class Processor:
         if outlet in self.dsp_outlets:
             if inlet not in target.dsp_inlets:
                 if isinstance(target, Patch):
-                    Patch.task_nibbler.add_task(
+                    Patch.task_nibbler.add_MFPApp().async_task(
                         lambda args: Processor.connect(*args), 20,
                         [self, outlet, target, inlet, show_gui])
                     log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
@@ -607,7 +607,7 @@ class Processor:
                 "hidden", "sendvia", "sendsignalvia")
             and target.display_type not in (
                 "hidden", "recvvia", "recvsignalvia")):
-            task(MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet))
+            MFPApp().async_task(MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet))
         return True
 
     async def disconnect(self, outlet, target, inlet):
@@ -708,7 +708,7 @@ class Processor:
                 for target, tinlet in conns:
                     if target is not None:
                         if self.step_debug_manager().enabled:
-                            self.step_debug_manager().add_task(
+                            self.step_debug_manager().add_MFPApp().async_task(
                                 self._send__propagate_value(target, val, tinlet),
                                 f"Send output to {target.name} inlet {tinlet}",
                                 target,
@@ -739,7 +739,7 @@ class Processor:
         work = []
         if inlet >= 0:
             if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_task(
+                self.step_debug_manager().add_MFPApp().async_task(
                     self._send__initiate(value, inlet),
                     f"Receive input to {self.name} inlet {inlet}",
                     self
@@ -751,12 +751,12 @@ class Processor:
 
         if inlet in self.hot_inlets or inlet == -1:
             if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_task(
+                self.step_debug_manager().add_MFPApp().async_task(
                     self._send__activate(value, inlet),
                     f"Trigger processor {self.name} from inlet {inlet}",
                     self
                 )
-                self.step_debug_manager().add_task(
+                self.step_debug_manager().add_MFPApp().async_task(
                     self._send__propagate(),
                     "Send outputs to connected processors",
                     self
@@ -771,7 +771,7 @@ class Processor:
             and isinstance(value, (float, int))
         ):
             if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_task(
+                self.step_debug_manager().add_MFPApp().async_task(
                     self._send__dsp_params(value, inlet),
                     "Update parameters of DSP object",
                     self
@@ -874,7 +874,7 @@ class Processor:
             self.gui_params['export_offset_y'] = yoff
             self.gui_params['position_y'] += yoff
 
-        task(
+        MFPApp().async_task(
             MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
                                         parent_id, self.gui_params)
         )
@@ -890,7 +890,7 @@ class Processor:
         for k, v in kwargs.items():
             self.gui_params[k] = v
         if self.gui_created:
-            task(MFPApp().gui_command.configure(self.obj_id, **kwargs))
+            MFPApp().async_task(MFPApp().gui_command.configure(self.obj_id, **kwargs))
 
     def set_tag(self, tag, value):
         self.tags[tag] = value

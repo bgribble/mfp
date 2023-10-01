@@ -9,7 +9,7 @@ from .singleton import Singleton
 from .interpreter import Interpreter
 from .processor import Processor
 from .method import MethodCall
-from .utils import QuittableThread, AsyncExecMonitor, task
+from .utils import QuittableThread, AsyncExecMonitor, AsyncTaskManager
 from .bang import Unbound
 
 from pluginfo import PlugInfo
@@ -88,6 +88,10 @@ class MFPApp (Singleton):
         self.pluginfo = PlugInfo()
         self.app_scope = LexicalScope("__app__")
         self.patches = {}
+
+        # helper to run async task
+        self.async_task = AsyncTaskManager()
+
 
     async def setup(self):
         from .mfp_command import MFPCommand
@@ -345,7 +349,7 @@ class MFPApp (Singleton):
         loadtime = datetime.now() - starttime
         log.debug("Patch loaded, elapsed time %s" % loadtime)
         if show_gui and patch.gui_created:
-            task(MFPApp().gui_command.select(patch.obj_id))
+            self.async_task(MFPApp().gui_command.select(patch.obj_id))
         return patch
 
     def load_extension(self, libname):

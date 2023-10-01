@@ -12,7 +12,7 @@ from .processor import Processor, AsyncOutput
 from .evaluator import Evaluator
 from .scope import LexicalScope
 from .bang import Uninit, Unbound
-from .utils import TaskNibbler, task
+from .utils import TaskNibbler
 from .step_debugger import StepDebugger
 
 from mfp import log
@@ -292,7 +292,7 @@ class Patch(Processor):
         # the loadbang
         initial = await Processor.connect(self, outlet, target, inlet, show_gui)
         if not initial:
-            self.task_nibbler.add_task(
+            self.task_nibbler.add_MFPApp().async_task(
                 lambda args: _patch_connect_retry(args), 20,
                 [self, outlet, target, inlet, show_gui]
             )
@@ -353,7 +353,7 @@ class Patch(Processor):
         Processor.create_gui(self, **kwargs)
 
         if self.gui_params.get("top_level"):
-            task(MFPApp().gui_command.load_start())
+            MFPApp().async_task(MFPApp().gui_command.load_start())
 
             for oid, obj in list(self.objects.items()):
                 if obj.display_type != "hidden":
@@ -366,10 +366,10 @@ class Patch(Processor):
                                 "hidden", "sendvia", "sendsignalvia")
                             and dstobj.display_type not in (
                                 "hidden", "recvvia", "recvsignalvia")):
-                            task(MFPApp().gui_command.connect(obj.obj_id, srcport,
+                            MFPApp().async_task(MFPApp().gui_command.connect(obj.obj_id, srcport,
                                                               dstobj.obj_id, dstport))
-            task(MFPApp().gui_command.load_complete())
-            task(MFPApp().gui_command.select(self.obj_id))
+            MFPApp().async_task(MFPApp().gui_command.load_complete())
+            MFPApp().async_task(MFPApp().gui_command.select(self.obj_id))
         else:
             self.create_export_gui()
         return True
@@ -457,7 +457,7 @@ class Patch(Processor):
             self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
             if not MFPApp().no_onload:
-                self.task_nibbler.add_task(
+                self.task_nibbler.add_MFPApp().async_task(
                     lambda objects: self._run_onload(objects), False,
                     [obj for obj in self.objects.values()]
                 )
@@ -476,7 +476,7 @@ class Patch(Processor):
         self.update_export_bounds()
 
         if MFPApp().gui_command:
-            task(MFPApp().gui_command.load_complete())
+            MFPApp().async_task(MFPApp().gui_command.load_complete())
         return True
 
     def obj_is_exportable(self, obj):
@@ -527,11 +527,11 @@ class Patch(Processor):
     def create_export_gui(self):
         from .mfp_app import MFPApp
         # non-toplevel Patch means show the Export UI layer only
-        task(MFPApp().gui_command.load_start())
+        MFPApp().async_task(MFPApp().gui_command.load_start())
         for oid, obj in list(self.objects.items()):
             if self.obj_is_exportable(obj):
                 obj.create_gui(is_export=True)
-        task(MFPApp().gui_command.load_complete())
+        MFPApp().async_task(MFPApp().gui_command.load_complete())
 
     async def delete(self):
         from .mfp_app import MFPApp

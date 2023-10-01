@@ -4,8 +4,6 @@ from .patch import Patch
 from .method import MethodCall
 from .processor import Processor
 from mfp import log
-from mfp.utils import task
-
 
 @apiclass
 class MFPCommand:
@@ -285,7 +283,7 @@ class MFPCommand:
     @noresp
     def quit(self):
         from .mfp_app import MFPApp
-        task(MFPApp().finish())
+        MFPApp().async_task(MFPApp().finish())
         return None
 
     def toggle_pause(self):
