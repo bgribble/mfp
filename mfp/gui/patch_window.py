@@ -9,7 +9,7 @@ from mfp import log
 
 from .backend_interfaces import AppWindowBackend
 from .input_manager import InputManager
-from .console import ConsoleMgr
+from .console import ConsoleManager
 from .prompter import Prompter
 from .colordb import ColorDB
 from .modes.global_mode import GlobalMode
@@ -62,8 +62,8 @@ class AppWindow:
         self.backend.initialize()
 
         # FIXME contains direct GTK
-        self.console_mgr = ConsoleMgr("MFP interactive console", self)
-        self.console_mgr.start()
+        self.console_manager = ConsoleManager("MFP interactive console", self)
+        self.console_manager.start()
 
 
     def init_input(self):
@@ -212,8 +212,8 @@ class AppWindow:
                 log.debug(f"{allpatches} {guipatches}")
                 return False
 
-        if hasattr(self, 'console_mgr') and self.console_mgr:
-            self.console_mgr.finish()
+        if hasattr(self, 'console_manager') and self.console_manager:
+            self.console_manager.finish()
 
         await MFPGUI().mfp.quit()
         self.close_in_progress = False
@@ -221,10 +221,10 @@ class AppWindow:
         return True
 
     def console_write(self, msg):
-        self.console_mgr.append(msg)
+        self.console_manager.append(msg)
 
     def console_show_prompt(self, msg):
-        self.console_mgr.show_prompt(msg)
+        self.console_manager.show_prompt(msg)
         self.console_activate()
 
     def get_prompted_input(self, prompt, callback, default=''):

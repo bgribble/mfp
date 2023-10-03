@@ -20,7 +20,7 @@ class GUICommand:
 
     def console_set_prompt(self, prompt):
         from .gui_main import MFPGUI
-        MFPGUI().appwin.console_mgr.ps1 = prompt
+        MFPGUI().appwin.console_manager.ps1 = prompt
         return True
 
     def console_show_prompt(self, prompt):

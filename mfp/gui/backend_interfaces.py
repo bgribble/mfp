@@ -176,3 +176,32 @@ class InputManagerBackend(ABC, DelegateMixin):
     def handle_event(self, *args):
         pass
 
+
+class ConsoleManagerBackend(ABC, DelegateMixin):
+    backend_registry = {}
+
+    def __init_subclass__(cls, *args, **kwargs):
+        ConsoleManagerBackend.backend_registry[
+            getattr(cls, "backend_name", cls.__name__)
+        ] = cls
+        super().__init_subclass__(*args, **kwargs)
+
+    @staticmethod
+    def get_backend(backend_name):
+        # return a concrete impl based on the backend name
+        return ConsoleManagerBackend.backend_registry.get(backend_name)
+
+    @abstractmethod
+    @delegatemethod
+    def scroll_to_end(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def redisplay(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def append(self, text):
+        pass
