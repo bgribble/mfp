@@ -9,7 +9,7 @@ import asyncio
 from datetime import datetime, timedelta
 import inspect
 
-from mfp import log
+from .backend_interfaces import InputManagerBackend
 from .input_mode import InputMode
 from .key_sequencer import KeySequencer
 from ..gui_main import MFPGUI
@@ -20,6 +20,7 @@ class InputManager (object):
         pass
 
     def __init__(self, window):
+        from .patch_window import AppWindow
         self.window = window
         self.global_mode = None
         self.major_mode = None
@@ -36,8 +37,10 @@ class InputManager (object):
         self.pointer_obj_time = None
         self.pointer_leave_time = None
         self.pointer_lastobj = None
-
         self.hover_thresh = timedelta(microseconds=750000)
+
+        factory = InputManagerBackend.get_backend(AppWindow.backend_name)
+        self.backend = factory(self)
 
         MFPGUI().async_task(self.hover_monitor())
 
@@ -122,79 +125,3 @@ class InputManager (object):
                 if handled:
                     return True
         return False
-
-    def handle_event(self, stage, event):
-        from gi.repository import Clutter
-        from mfp import log
-
-        keysym = None
-        if event.type in (
-            Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE,
-            Clutter.EventType.BUTTON_PRESS,
-            Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL
-        ):
-            try:
-                self.keyseq.process(event)
-            except Exception as e:
-                log.error(f"Exception handling {event}: {e}")
-                raise
-            if len(self.keyseq.sequences):
-                keysym = self.keyseq.pop()
-        elif event.type == Clutter.EventType.MOTION:
-            # FIXME: if the scaling changes so that window.stage_pos would return a
-            # different value, that should generate a MOTION event.  Currently we are
-            # just kludging pointer_x and pointer_y from the scale callback.
-            self.pointer_ev_x = event.x
-            self.pointer_ev_y = event.y
-            self.pointer_x, self.pointer_y = self.window.backend.screen_to_canvas(event.x, event.y)
-            self.keyseq.process(event)
-            if len(self.keyseq.sequences):
-                keysym = self.keyseq.pop()
-
-        elif event.type == Clutter.EventType.ENTER:
-            src = self.event_sources.get(event.source)
-
-            now = datetime.now()
-            if (
-                self.pointer_leave_time is not None
-                and (now - self.pointer_leave_time) > timedelta(milliseconds=100)
-            ):
-                self.keyseq.mod_keys = set()
-                self.window.grab_focus()
-
-            if src and self.window.object_visible(src):
-                self.pointer_obj = src
-                self.pointer_obj_time = now
-
-        elif event.type == Clutter.EventType.LEAVE:
-            src = self.event_sources.get(event.source)
-            self.pointer_leave_time = datetime.now()
-            if src == self.pointer_obj:
-                self.pointer_lastobj = self.pointer_obj
-                self.pointer_obj = None
-                self.pointer_obj_time = None
-        else:
-            return False
-
-        if not keysym:
-            return True
-
-        retry_count = 0
-        while True:
-            rv = None
-            try:
-                retry_count += 1
-                rv = self.handle_keysym(keysym)
-                if inspect.isawaitable(rv):
-                    MFPGUI().async_task(rv)
-                    rv = True
-            except self.InputNeedsRequeue:
-                if retry_count < 5:
-                    continue
-                else:
-                    return False
-            except Exception as e:
-                log.error("Exception while handling key command", keysym)
-                log.debug(e)
-                log.debug_traceback()
-            return rv

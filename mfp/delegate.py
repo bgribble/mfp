@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 """
-delegate.py -- helper for delegating methods to a backend 
+delegate.py -- helper for delegating methods to a backend
 
 A "backend" that is being delegated to should inherit
-from DelegateMixin. 
+from DelegateMixin.
 
-Methods in the backend decorated with @delegatemethod 
-will be available on the frontend object passed as a 
+Methods in the backend decorated with @delegatemethod
+will be available on the frontend object passed as a
 constructor arg to the backend.
 
 If the Backend interface is abstract (which is to be expected)
@@ -36,13 +36,13 @@ class delegatemethod:
         self.func = func
 
     def __set_name__(self, owner, name):
+        if not hasattr(owner, 'delegated_methods'):
+            owner.delegated_methods = []
         owner.delegated_methods.append(name)
         setattr(owner, name, self.func)
 
 
 class DelegateMixin:
-    delegated_methods = []
-
     def __init__(self, delegator):
         for attr in self.delegated_methods:
             setattr(delegator, attr, self._delegate_helper(attr))

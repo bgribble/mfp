@@ -8,14 +8,14 @@ class AppWindowBackend(ABC, DelegateMixin):
     def __init_subclass__(cls, *args, **kwargs):
         AppWindowBackend.backend_registry[getattr(cls, "backend_name", cls.__name__)] = cls
         super().__init_subclass__(*args, **kwargs)
-    
+
     @staticmethod
     def get_backend(backend_name):
         # return a concrete impl based on the backend name
         return AppWindowBackend.backend_registry.get(backend_name)
 
     #####################
-    # backend control 
+    # backend control
 
     @abstractmethod
     def initialize(self):
@@ -51,7 +51,7 @@ class AppWindowBackend(ABC, DelegateMixin):
         pass
 
     #####################
-    # element operations 
+    # element operations
 
     @abstractmethod
     def register(self, element):
@@ -74,7 +74,7 @@ class AppWindowBackend(ABC, DelegateMixin):
         pass
 
     #####################
-    # autoplace 
+    # autoplace
 
     @abstractmethod
     @delegatemethod
@@ -87,7 +87,7 @@ class AppWindowBackend(ABC, DelegateMixin):
         pass
 
     #####################
-    # HUD/console 
+    # HUD/console
 
     @abstractmethod
     @delegatemethod
@@ -147,12 +147,32 @@ class AppWindowBackend(ABC, DelegateMixin):
     @delegatemethod
     def log_write(self, message, level):
         pass
-    
+
     #####################
     # key bindings display
 
     @abstractmethod
     @delegatemethod
     def display_bindings(self):
+        pass
+
+
+class InputManagerBackend(ABC, DelegateMixin):
+    backend_registry = {}
+
+    def __init_subclass__(cls, *args, **kwargs):
+        InputManagerBackend.backend_registry[
+            getattr(cls, "backend_name", cls.__name__)
+        ] = cls
+        super().__init_subclass__(*args, **kwargs)
+
+    @staticmethod
+    def get_backend(backend_name):
+        # return a concrete impl based on the backend name
+        return InputManagerBackend.backend_registry.get(backend_name)
+
+    @abstractmethod
+    @delegatemethod
+    def handle_event(self, *args):
         pass
 

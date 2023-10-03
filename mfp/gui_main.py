@@ -184,7 +184,7 @@ async def main():
     mfp_connection = await MFPCommandFactory()
 
     print("[LOG] DEBUG: About to create MFPGUI")
-    from mfp.gui.backends import clutter  # noqa
+    from mfp.gui import backends  # noqa
     AppWindow.backend_name = "clutter"
 
     gui = MFPGUI()
