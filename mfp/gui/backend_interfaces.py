@@ -1,19 +1,33 @@
 from abc import ABC, abstractmethod
 from ..delegate import DelegateMixin, delegatemethod
 
+from abc import ABC, abstractmethod
 
-class AppWindowBackend(ABC, DelegateMixin):
-    backend_registry = {}
+class BackendInterface:
+    _registry = {}
+    _interfaces = {}
 
     def __init_subclass__(cls, *args, **kwargs):
-        AppWindowBackend.backend_registry[getattr(cls, "backend_name", cls.__name__)] = cls
+        if BackendInterface in cls.__bases__:
+            BackendInterface._interfaces[cls.__name__] = cls
+        else:
+            for interface in BackendInterface._interfaces.values():
+                if issubclass(cls, interface):
+                    be_name = getattr(cls, "backend_name", cls.__name__)
+                    interface_registry = BackendInterface._registry.setdefault(interface.__name__, {})
+                    interface_registry[be_name] = cls
+
         super().__init_subclass__(*args, **kwargs)
 
-    @staticmethod
-    def get_backend(backend_name):
-        # return a concrete impl based on the backend name
-        return AppWindowBackend.backend_registry.get(backend_name)
+    @classmethod
+    def get_backend(cls, backend_name):
+        if cls not in BackendInterface._interfaces.values():
+            raise ValueError(f"get_backend: class {cls} is not an interface")
 
+        return BackendInterface._registry.get(cls.__name__, {}).get(backend_name)
+
+
+class AppWindowBackend(ABC, BackendInterface, DelegateMixin):
     #####################
     # backend control
 
@@ -157,40 +171,14 @@ class AppWindowBackend(ABC, DelegateMixin):
         pass
 
 
-class InputManagerBackend(ABC, DelegateMixin):
-    backend_registry = {}
-
-    def __init_subclass__(cls, *args, **kwargs):
-        InputManagerBackend.backend_registry[
-            getattr(cls, "backend_name", cls.__name__)
-        ] = cls
-        super().__init_subclass__(*args, **kwargs)
-
-    @staticmethod
-    def get_backend(backend_name):
-        # return a concrete impl based on the backend name
-        return InputManagerBackend.backend_registry.get(backend_name)
-
+class InputManagerBackend(ABC, BackendInterface, DelegateMixin):
     @abstractmethod
     @delegatemethod
     def handle_event(self, *args):
         pass
 
 
-class ConsoleManagerBackend(ABC, DelegateMixin):
-    backend_registry = {}
-
-    def __init_subclass__(cls, *args, **kwargs):
-        ConsoleManagerBackend.backend_registry[
-            getattr(cls, "backend_name", cls.__name__)
-        ] = cls
-        super().__init_subclass__(*args, **kwargs)
-
-    @staticmethod
-    def get_backend(backend_name):
-        # return a concrete impl based on the backend name
-        return ConsoleManagerBackend.backend_registry.get(backend_name)
-
+class ConsoleManagerBackend(ABC, BackendInterface, DelegateMixin):
     @abstractmethod
     @delegatemethod
     def scroll_to_end(self):
@@ -205,3 +193,16 @@ class ConsoleManagerBackend(ABC, DelegateMixin):
     @delegatemethod
     def append(self, text):
         pass
+
+
+class LayerBackend(ABC, BackendInterface, DelegateMixin):
+    @abstractmethod
+    @delegatemethod
+    def show(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def hide(self):
+        pass
+

@@ -170,7 +170,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         obj_cols, selected_callback = self.app.init_object_view()
         object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
         object_view.select_cb = selected_callback
-        object_view.unselect_cb = self.app._unselect
+        object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.app._unselect(obj))
         return object_view
 
     def _init_layer_view(self):
@@ -187,11 +187,11 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.autoplace_marker = Clutter.Text()
             self.autoplace_marker.set_text("+")
             self.autoplace_layer = self.selected_layer
-            self.autoplace_layer.group.add_actor(self.autoplace_marker)
+            self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
         elif self.autoplace_layer != self.selected_layer:
-            self.autoplace_layer.group.remove_actor(self.autoplace_marker)
+            self.autoplace_layer.backend.group.remove_actor(self.autoplace_marker)
             self.autoplace_layer = self.selected_layer
-            self.autoplace_layer.group.add_actor(self.autoplace_marker)
+            self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
         self.autoplace_marker.set_position(x, y)
         self.autoplace_marker.set_depth(-10)
         self.autoplace_marker.show()
@@ -498,11 +498,11 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.selection_box.set_color(self.app.color_transparent)
             self.selection_box.set_border_color(self.app.color_unselected)
             self.selection_box_layer = self.selected_layer
-            self.selection_box_layer.group.add_actor(self.selection_box)
+            self.selection_box_layer.backend.group.add_actor(self.selection_box)
         elif self.selection_box_layer != self.selected_layer:
-            self.selection_box_layer.group.remove_actor(self.selection_box)
+            self.selection_box_layer.backend.group.remove_actor(self.selection_box)
             self.selection_box_layer = self.selected_layer
-            self.selection_box_layer.group.add_actor(self.selection_box)
+            self.selection_box_layer.backend.group.add_actor(self.selection_box)
         self.selection_box.set_position(x0, y0)
         self.selection_box.set_size(max(1, x1-x0), max(1, y1-y0))
         self.selection_box.show()
@@ -595,10 +595,9 @@ class ClutterAppWindowBackend (AppWindowBackend):
     def register(self, element):
         if element.container is None:
             if element.layer is None:
-                print("WARNING: element has no layer", element, self)
+                log.debug("WARNING: element has no layer", element, self)
             else:
-                element.layer.group.add_actor(element)
-                element.container = element.layer.group
+                element.container = element.layer.backend.group
 
         if not isinstance(element, ConnectionElement):
             if self.load_in_progress:
@@ -612,12 +611,16 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 self.object_view.insert(element, (element.scope, element.layer.patch),
                                         update=update)
             else:
-                self.object_view.insert(element, (element.layer.scope, element.layer.patch),
-                                        update=update)
+                self.object_view.insert(
+                    element,
+                    (element.layer.scope, element.layer.patch),
+                    update=update
+                )
 
     def unregister(self, element):
         if element.container:
-            element.container.remove_actor(element)
+            if isinstance(element.container, PatchElement):
+                element.container.remove(element)
             element.container = None
 
         self.object_view.remove(element)

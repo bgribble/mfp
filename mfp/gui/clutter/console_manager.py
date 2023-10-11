@@ -2,7 +2,7 @@
 from gi.repository import Gtk
 from ..backend_interfaces import ConsoleManagerBackend
 
-from .key_defs import *  # noqa
+from ..key_defs import *  # noqa
 
 
 class ClutterConsoleManagerBackend(ConsoleManagerBackend):
@@ -26,7 +26,7 @@ class ClutterConsoleManagerBackend(ConsoleManagerBackend):
 
     def key_pressed(self, widget, event):
         if event.keyval == KEY_ENTER:
-            self.console_manager.append("\n")
+            self.append("\n")
             stripped_buf = self.console_manager.linebuf.strip()
             if (
                 len(stripped_buf)

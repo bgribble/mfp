@@ -15,7 +15,8 @@ DEFAULT_CONTINUE = "... "
 
 class ConsoleManager:
     def __init__(self, banner, app_window):
-        from .patch_window import AppWindow
+        self.app_window = app_window
+
         self.task = None
         self.new_input = asyncio.Event()
 
@@ -31,10 +32,10 @@ class ConsoleManager:
         self.last_ps = self.ps1
         self.continue_buffer = ''
 
-        self.append(banner + '\n')
-
-        factory = ConsoleManagerBackend.get_backend(AppWindow.backend_name)
+        factory = ConsoleManagerBackend.get_backend(app_window.backend_name)
         self.backend = factory(self)
+
+        self.append(banner + '\n')
 
     def line_ready(self):
         self.ready = True

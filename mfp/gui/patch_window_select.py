@@ -171,7 +171,7 @@ async def select_prev(self):
 
 
 @extends(AppWindow)
-def select_mru(self):
+async def select_mru(self):
     self.input_mgr.enable_minor_mode(SelectMRUMode(self))
     return True
 

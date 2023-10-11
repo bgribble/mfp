@@ -74,10 +74,12 @@ class PatchElement (Store, Clutter.Group):
         self.is_export = False
         self.param_list = [a for a in self.store_attrs]
 
-        # Clutter objects
+        # non-backend-specific
         self.stage = window
         self.container = None
         self.layer = None
+
+        # FIXME -- clutter objects
         self.badge = None
         self.badge_times = {}
         self.badge_current = None
@@ -210,7 +212,8 @@ class PatchElement (Store, Clutter.Group):
         self.move(self.position_x + dx, self.position_y + dy)
 
     async def delete(self):
-        self.stage.unregister(self)
+        # FIXME this is because self.stage is the backend, not the app window
+        MFPGUI().appwin.unregister(self)
         if self.obj_id is not None and not self.is_export:
             await MFPGUI().mfp.delete(self.obj_id)
         elif self.obj_id is None:
@@ -316,7 +319,7 @@ class PatchElement (Store, Clutter.Group):
         )
 
     def get_stage_position(self):
-        if not self.container or not self.layer or self.container == self.layer.group:
+        if not self.container or not self.layer or self.container == self.layer:
             return (self.position_x, self.position_y)
         else:
             pos_x = self.position_x
@@ -579,8 +582,7 @@ class PatchElement (Store, Clutter.Group):
         if layer and layer == self.layer:
             return
         elif self.layer:
-            if self.get_parent() == self.layer.group:
-                self.layer.group.remove_actor(self)
+            if self.container == self.layer:
                 self.container = None
                 layer_child = True
             elif self.get_parent() is None:
@@ -591,8 +593,7 @@ class PatchElement (Store, Clutter.Group):
 
         layer.add(self)
         if layer_child:
-            self.layer.group.add_actor(self)
-            self.container = self.layer.group
+            self.container = self.layer
         self.send_params()
 
         for c in self.connections_out + self.connections_in:

@@ -9,7 +9,7 @@ from mfp import log
 
 from .backend_interfaces import AppWindowBackend
 from .input_manager import InputManager
-from .console import ConsoleManager
+from .console_manager import ConsoleManager
 from .prompter import Prompter
 from .colordb import ColorDB
 from .modes.global_mode import GlobalMode
@@ -50,28 +50,24 @@ class AppWindow:
         self.view_x = 0
         self.view_y = 0
 
-        self.input_mgr = InputManager(self)
         # set up key and mouse handling
+        self.input_mgr = InputManager(self)
         self.init_input()
 
-        # FIXME build clutter bridge
         factory = AppWindowBackend.get_backend(AppWindow.backend_name)
         self.backend = factory(self)
         self.hud_prompt_mgr = Prompter(self)
 
         self.backend.initialize()
 
-        # FIXME contains direct GTK
         self.console_manager = ConsoleManager("MFP interactive console", self)
         self.console_manager.start()
-
 
     def init_input(self):
         # set initial major mode
         self.input_mgr.global_mode = GlobalMode(self)
         self.input_mgr.major_mode = PatchEditMode(self)
         self.input_mgr.major_mode.enable()
-
 
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI
@@ -153,8 +149,6 @@ class AppWindow:
         self.emit_signal("add", element)
 
     def unregister(self, element):
-        self.backend.unregister(element)
-
         if element in self.selected:
             self.unselect(element)
         if element.layer:
@@ -164,6 +158,7 @@ class AppWindow:
         if element in self.input_mgr.event_sources:
             del self.input_mgr.event_sources[element]
 
+        self.backend.unregister(element)
         self.emit_signal("remove", element)
 
     def refresh(self, element):

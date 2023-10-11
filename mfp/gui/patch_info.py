@@ -15,7 +15,7 @@ class PatchInfo (object):
     display_type = "patch"
 
     def __init__(self, window, x, y):
-        self.stage = window
+        self.app_window = window
         self.obj_id = None
         self.obj_type = None
         self.obj_args = None
@@ -26,9 +26,13 @@ class PatchInfo (object):
         self.layers = []
         self.scopes = []
 
-        self.stage.app.add_patch(self)
-        self.stage.layer_view.insert(self, None)
-        self.stage.object_view.insert(self, None)
+        self.app_window.add_patch(self)
+
+        # FIXME move to backend
+        self.layer_view = self.app_window.backend.layer_view
+        self.object_view = self.app_window.backend.object_view
+        self.layer_view.insert(self, None)
+        self.object_view.insert(self, None)
 
     def update(self):
         pass
@@ -68,22 +72,22 @@ class PatchInfo (object):
         for name, scope in layers:
             layer = self.find_layer(name)
             if layer is None:
-                layer = Layer(self.stage, self, name, scope)
+                layer = Layer(self.app_window, self, name, scope)
             newlayers.append(layer)
         self.layers = newlayers
 
         self.scopes = []
         for layer in self.layers:
-            if not self.stage.layer_view.in_tree(layer):
-                self.stage.layer_view.insert(layer, self)
+            if not self.layer_view.in_tree(layer):
+                self.layer_view.insert(layer, self)
             if layer.scope not in self.scopes:
                 self.scopes.append(layer.scope)
 
         for s in self.scopes:
-            if not self.stage.object_view.in_tree((s, self)):
-                self.stage.object_view.insert((s, self), self)
+            if not self.object_view.in_tree((s, self)):
+                self.object_view.insert((s, self), self)
 
-        self.stage.refresh(self)
+        self.app_window.refresh(self)
 
     async def delete(self):
         if self.obj_id is None:
@@ -95,12 +99,11 @@ class PatchInfo (object):
             for o in to_delete:
                 await o.delete()
             layer.hide()
-            del layer.group
-            layer.group = None
+            layer.delete()
 
         # remove the patch from layers and objects lists
-        self.stage.object_view.remove(self)
-        self.stage.layer_view.remove(self)
+        self.object_view.remove(self)
+        self.layer_view.remove(self)
 
         # last, delete the patch on the control side
         if self.obj_id is not None:

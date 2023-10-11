@@ -172,8 +172,8 @@ async def main():
 
     setup_default_colors()
 
-    def _exception(exc, tbinfo):
-        log.error("[carp] Exception: {exc}")
+    def _exception(exc, tbinfo, *args):
+        log.error(f"[carp] Exception: '{exc}' '{tbinfo}' '{args}'")
 
     host.on("exception", _exception)
 
