@@ -4,6 +4,7 @@ import inspect
 from mfp import log
 from mfp.gui_main import MFPGUI
 from ..backend_interfaces import InputManagerBackend
+from ..input_manager import InputManager
 
 
 class ClutterInputManagerBackend(InputManagerBackend):
@@ -12,6 +13,63 @@ class ClutterInputManagerBackend(InputManagerBackend):
     def __init__(self, input_manager):
         self.input_manager = input_manager
         super().__init__(input_manager)
+
+    async def run_handlers(self, handlers, keysym, coro=None, offset=-1):
+        retry_count = 0
+
+        while retry_count < 5:
+            try:
+                for index, handler in enumerate(handlers):
+                    # this is for the case where we were iterating over
+                    # handlers and found one async, and are restarting in
+                    # the middle of the loop, but async
+                    if index < offset:
+                        continue
+                    elif retry_count == 0 and index == offset:
+                        rv = coro
+                    else:
+                        rv = handler()
+
+                    if inspect.isawaitable(rv):
+                        rv = await rv
+                    if rv:
+                        return True
+                return False
+            except InputManager.InputNeedsRequeue:
+                retry_count += 1
+            except Exception as e:
+                log.error(f"[run_handlers] Exception while handling key command {keysym}: {e}")
+                log.debug_traceback()
+                return False
+
+    def handle_keysym(self, keysym):
+        if not keysym:
+            return True
+
+        handlers = self.input_manager.get_handlers(keysym)
+        if any(inspect.iscoroutinefunction(h) for h in handlers):
+            MFPGUI().async_task(self.run_handlers(handlers, keysym))
+            return True
+
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                for item, handler in enumerate(handlers):
+                    handler_rv = handler()
+                    if inspect.isawaitable(handler_rv):
+                        MFPGUI().async_task(self.run_handlers(
+                            handlers, keysym, coro=handler_rv, offset=item
+                        ))
+                        return True
+                    elif handler_rv:
+                        return True
+                return False
+            except InputManager.InputNeedsRequeue:
+                retry_count += 1
+            except Exception as e:
+                log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e}")
+                log.debug_traceback()
+                return False
 
     def handle_event(self, *args):
         from gi.repository import Clutter
@@ -27,7 +85,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
             try:
                 self.input_manager.keyseq.process(event)
             except Exception as e:
-                log.error(f"Exception handling {event}: {e}")
+                log.error(f"[handle_event] Exception handling {event}: {e}")
                 raise
             if len(self.input_manager.keyseq.sequences):
                 keysym = self.input_manager.keyseq.pop()
@@ -37,7 +95,9 @@ class ClutterInputManagerBackend(InputManagerBackend):
             # just kludging pointer_x and pointer_y from the scale callback.
             self.input_manager.pointer_ev_x = event.x
             self.input_manager.pointer_ev_y = event.y
-            self.input_manager.pointer_x, self.input_manager.pointer_y = self.input_manager.window.backend.screen_to_canvas(event.x, event.y)
+            self.input_manager.pointer_x, self.input_manager.pointer_y = (
+                self.input_manager.window.backend.screen_to_canvas(event.x, event.y)
+            )
             self.input_manager.keyseq.process(event)
             if len(self.input_manager.keyseq.sequences):
                 keysym = self.input_manager.keyseq.pop()
@@ -67,25 +127,4 @@ class ClutterInputManagerBackend(InputManagerBackend):
         else:
             return False
 
-        if not keysym:
-            return True
-
-        retry_count = 0
-        while True:
-            rv = None
-            try:
-                retry_count += 1
-                rv = self.input_manager.handle_keysym(keysym)
-                if inspect.isawaitable(rv):
-                    MFPGUI().async_task(rv)
-                    rv = True
-            except self.input_manager.InputNeedsRequeue:
-                if retry_count < 5:
-                    continue
-                else:
-                    return False
-            except Exception as e:
-                log.error("Exception while handling key command", keysym)
-                log.debug(e)
-                log.debug_traceback()
-            return rv
+        return self.handle_keysym(keysym)

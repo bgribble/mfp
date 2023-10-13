@@ -4,7 +4,7 @@ clickable.py: Control mode for clickable items (message, bang, toggle)
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
-
+from ..input_manager import InputManager
 from ..input_mode import InputMode
 from .label_edit import LabelEditMode
 

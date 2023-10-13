@@ -96,6 +96,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
     def selected_layer(self):
         return self.app.selected_layer
 
+    @property
+    def color_bg(self):
+        return self.app.color_bg
+
     def active_layer(self):
         return self.app.active_layer()
 

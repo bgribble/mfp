@@ -1,15 +1,15 @@
-MFP INPUT MODES 
+MFP INPUT MODES
 -----------------------
 
 This document briefly describes MFP's input handling
-code and the basic design behind it.  
+code and the basic design behind it.
 
-The overall approach is loosely modeled on Emacs' "mode" 
+The overall approach is loosely modeled on Emacs' "mode"
 concept.  There is a "global mode", containing input
 bindings that are always active, exactly one "major
 mode" (currently, either Edit or Operate) and a stack
 of "minor modes" that are enabled and disabled as
-appropriate.  
+appropriate.
 
 The code
 ---------------------
@@ -27,9 +27,9 @@ The code
 
  * mfp/gui/modes/global_mode.py: the global mode
 
- * mfp/gui/modes/patch_edit.py: The Edit major mode 
+ * mfp/gui/modes/patch_edit.py: The Edit major mode
 
- * mfp/gui/modes/patch_control.py: The Operate major mode 
+ * mfp/gui/modes/patch_control.py: The Operate major mode
 
  * Other mfp/gui/modes/*: Minor modes
 
@@ -38,17 +38,17 @@ Event handling
 
 When input events (key presses, pointer motion, button
 clicks) are received, they are first canonicalized and
-then passed up the stack of active modes, in this order: 
+then passed up the stack of active modes, in this order:
 
-  * Minor modes (most recently activated first) 
+  * Minor modes (most recently activated first)
   * Major mode
-  * Global mode 
+  * Global mode
 
 Each mode registers "bindings" for input events via the
 InputMode.bind() method in its constructor.  Each mode
 is queried in turn for a relevant binding.  If a binding
 is found, the handler is called.  Any handler that
-returns True will terminate the handling of that event. 
+returns True will terminate the handling of that event.
 
 Most of the "modality" of the interface (i.e. the
 changing effects of input such as keypresses and pointer
@@ -56,7 +56,7 @@ activity) is provided by the dynamic stacking of minor
 modes.  For instance, a "m" keypress in Edit mode will
 create a Message box and activate LabelEditMode to edit
 the content, so the next keypress goes into the label
-text.  
+text.
 
 LabelEditMode
 ---------------------
@@ -70,6 +70,6 @@ However, because GTK really wants to use cursor keys to
 shift focus, while we want to use them to edit text,
 there is an extra layer of nonsense with the
 key-press-event so that we grab cursor keys before GTK
-sees them and process them through the mode.  
+sees them and process them through the mode.
 
 

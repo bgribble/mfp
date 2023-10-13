@@ -49,11 +49,17 @@ class InputManager (object):
             if self.pointer_obj_time is not None:
                 elapsed = datetime.now() - self.pointer_obj_time
                 if elapsed > self.hover_thresh:
-                    self._hover_handler()
+                    await self._hover_handler()
             await asyncio.sleep(0.2)
 
-    def _hover_handler(self):
-        self.handle_keysym(self.keyseq.canonicalize("HOVER"))
+    async def _hover_handler(self):
+        handlers = self.get_handlers(self.keyseq.canonicalize("HOVER"))
+        for handler in handlers:
+            rv = handler()
+            if inspect.isawaitable(rv):
+                rv = await rv
+            if rv:
+                return True
         return False
 
     def global_binding(self, key, action, helptext=''):
@@ -94,34 +100,24 @@ class InputManager (object):
     def synthesize(self, key):
         self.keyseq.sequences.append(key)
 
-    def handle_keysym(self, keysym):
+    def get_handlers(self, keysym):
+        handlers = []
         if keysym is not None:
             # check minor modes first
             for minor in self.minor_modes:
                 handler = minor.lookup(keysym)
                 if handler is not None:
-                    handled = handler[0]()
-                    if inspect.isawaitable(handled):
-                        MFPGUI().async_task(handled)
-                    if handled:
-                        return True
+                    handlers.append(handler[0])
 
             # then major mode
             if self.major_mode is not None:
                 handler = self.major_mode.lookup(keysym)
                 if handler is not None:
-                    handled = handler[0]()
-                    if inspect.isawaitable(handled):
-                        MFPGUI().async_task(handled)
-                    if handled:
-                        return True
+                    handlers.append(handler[0])
 
             # then global
             handler = self.global_mode.lookup(keysym)
             if handler is not None:
-                handled = handler[0]()
-                if inspect.isawaitable(handled):
-                    MFPGUI().async_task(handled)
-                if handled:
-                    return True
-        return False
+                handlers.append(handler[0])
+
+        return handlers

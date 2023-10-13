@@ -9,8 +9,9 @@ from ..input_mode import InputMode
 from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
 from .enum_control import EnumEditMode
-
+from ..input_manager import InputManager
 from mfp.gui_main import MFPGUI
+from mfp import log
 
 
 class GlobalMode (InputMode):
@@ -211,7 +212,7 @@ class GlobalMode (InputMode):
                 if self.manager.pointer_obj not in self.window.selected:
                     await self.window.unselect_all()
                     self.window.select(self.manager.pointer_obj)
-                    raise self.manager.InputNeedsRequeue()
+                    raise InputManager.InputNeedsRequeue()
 
                 if self.allow_selection_drag:
                     self.selection_drag_started = True
@@ -294,11 +295,11 @@ class GlobalMode (InputMode):
         return True
 
     async def patch_close(self):
-        def close_confirm(answer):
+        async def close_confirm(answer):
             if answer is not None:
                 aa = answer.strip().lower()
                 if aa in ['y', 'yes']:
-                    self.window.patch_close()
+                    await self.window.patch_close()
 
         p = self.window.selected_patch
         if await MFPGUI().mfp.has_unsaved_changes(p.obj_id):

@@ -269,6 +269,5 @@ class TreeDisplay (object):
             self.selected[:0] = [obj]
             pathstr = self.object_paths.get(obj)
             if pathstr:
-                log.debug(self.object_paths)
                 path = Gtk.TreePath.new_from_string(pathstr)
                 self.selection.select_path(path)
