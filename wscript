@@ -22,14 +22,6 @@ allwheels = []
 allwheeltargets = []
 
 
-def eggname(pkgname, pkgver, pyver, arch):
-    if arch:
-        archstr = "-%s" % arch
-    else:
-        archstr = ""
-    return "%s-%s-py%s%s.egg" % (pkgname, pkgver, pyver, archstr)
-
-
 def wheelname(pkgname, pkgver, pyver, arch):
     if arch:
         archstr = "-%s" % arch
@@ -470,44 +462,56 @@ def configure(conf):
 
 
 def build(bld):
+    import platform
+    import sys
+
+    version_python_only = f'py{sys.version_info.major}'
+    version_extensions = f'cp{sys.version_info.major}{sys.version_info.minor}'
+    version_extensions = f'{version_extensions}-{version_extensions}'
+    arch = f'{sys.platform}_{platform.machine()}'
+
     # only gets built if USE_VIRTUALENV is set
     bld.make_virtualenv()
 
     bld.wheel(
         pkgname="mfp",
         version=bld.env.GITVERSION,
-        pyver="py3",
+        pyver=version_python_only
     )
     bld.wheel(
         srcdir="pluginfo",
         pkgname="pluginfo",
-        pyver="cp311-cp311",
-        arch="linux_x86_64",
+        pyver=version_extensions,
+        arch=arch,
         version="1.0"
     )
     bld.wheel(
         srcdir="testext",
         pkgname="testext",
-        arch="linux_x86_64",
-        pyver="cp311-cp311",
+        pyver=version_extensions,
+        arch=arch,
         version="1.0"
     )
     bld.wheel(
         srcdir="lib/alsaseq-0.4.1",
         pkgname="alsaseq",
         extname="alsaseq",
-        arch="linux_x86_64",
-        pyver="cp311-cp311",
+        pyver=version_extensions,
+        arch=arch,
         version="0.4.1"
     )
 
+    cflags = ["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE"]
+    if 'x86' in arch:
+        cflags.append("-DMFP_USE_SSE")
+
     bld.shlib(source=bld.path.ant_glob("mfpdsp/*.c"),
               target="mfpdsp",
-              cflags=["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
+              cflags=cflags,
               uselib=bld.env.PKGCONF_LIBS)
 
     bld.program(source="mfpdsp/main.c", target="mfpdsp/mfpdsp",
-                cflags=["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE", "-DMFP_USE_SSE"],
+                cflags=cflags,
                 uselib=bld.env.PKGCONF_LIBS,
                 use=['mfpdsp'])
     bld.add_group()
