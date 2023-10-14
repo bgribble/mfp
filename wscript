@@ -425,6 +425,7 @@ def configure(conf):
 
     # LADSPA header
     conf.check_cc(header_name="ladspa.h")
+    conf.check_cc(header_name="asoundlib.h")
 
     # pip-installable libs we just mark them as not available
     for lib in pip_libs:
