@@ -42,6 +42,8 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
     GArray * ga;
     double dval;
     void * rval = NULL;
+    mfp_rpc_argblock * resp = NULL;
+    mfp_rpc_args * arglist = NULL;
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
@@ -69,8 +71,8 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
             break;
 
         case PARAMTYPE_FLTARRAY:
-            mfp_rpc_argblock * resp = g_malloc0(sizeof(mfp_rpc_argblock));
-            mfp_rpc_args * arglist = mfp_rpc_args_init(resp);
+            resp = g_malloc0(sizeof(mfp_rpc_argblock));
+            arglist = mfp_rpc_args_init(resp);
 
             ga = (GArray *)param_value;
 
@@ -96,6 +98,7 @@ extract_param_value(mfp_processor * proc, const char * param_name, Carp__PythonV
     double dval;
     const char * strval;
     int i, endex;
+    Carp__PythonArray * pbarray = NULL;
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
@@ -123,7 +126,7 @@ extract_param_value(mfp_processor * proc, const char * param_name, Carp__PythonV
             break;
 
         case PARAMTYPE_FLTARRAY:
-            Carp__PythonArray * pbarray = param_value->_array;
+            pbarray = param_value->_array;
             endex = pbarray->n_items;
             rval = (gpointer)g_array_sized_new(TRUE, TRUE, sizeof(double), endex);
             for (i=0; i < endex; i++) {
