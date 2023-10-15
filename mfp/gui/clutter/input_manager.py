@@ -19,6 +19,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
 
         while retry_count < 5:
             try:
+
                 for index, handler in enumerate(handlers):
                     # this is for the case where we were iterating over
                     # handlers and found one async, and are restarting in
@@ -36,7 +37,10 @@ class ClutterInputManagerBackend(InputManagerBackend):
                         return True
                 return False
             except InputManager.InputNeedsRequeue:
+                # handlers might have changed in the previous handler
+                handlers = self.input_manager.get_handlers(keysym)
                 retry_count += 1
+                offset = -1
             except Exception as e:
                 log.error(f"[run_handlers] Exception while handling key command {keysym}: {e}")
                 log.debug_traceback()
@@ -47,9 +51,6 @@ class ClutterInputManagerBackend(InputManagerBackend):
             return True
 
         handlers = self.input_manager.get_handlers(keysym)
-        if any(inspect.iscoroutinefunction(h) for h in handlers):
-            MFPGUI().async_task(self.run_handlers(handlers, keysym))
-            return True
 
         retry_count = 0
         while retry_count < 5:
@@ -65,6 +66,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
                         return True
                 return False
             except InputManager.InputNeedsRequeue:
+                handlers = self.input_manager.get_handlers(keysym)
                 retry_count += 1
             except Exception as e:
                 log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e}")

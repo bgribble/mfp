@@ -1,7 +1,6 @@
 
 from ..utils import extends
 from ..mfp_command import MFPCommand
-from .tree_display import TreeDisplay
 from .patch_window import AppWindow
 from .patch_element import PatchElement
 from .patch_info import PatchInfo

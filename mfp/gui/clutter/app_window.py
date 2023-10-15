@@ -9,11 +9,11 @@ from mfp.gui_main import MFPGUI
 from ..key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT
 from ..backend_interfaces import AppWindowBackend
 
-from ..tree_display import TreeDisplay
 from ..connection_element import ConnectionElement
 from ..patch_element import PatchElement
 from ..patch_info import PatchInfo
 
+from .tree_display import TreeDisplay
 
 class ClutterAppWindowBackend (AppWindowBackend):
     backend_name = "clutter"
