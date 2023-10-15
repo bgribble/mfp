@@ -7,7 +7,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 
 from mfp.processor import Processor
 from ..mfp_app import MFPApp
-from mfp import log 
+
 
 class Line(Processor):
     doc_tooltip_obj = "Ramp/line generator"
@@ -31,15 +31,17 @@ class Line(Processor):
         if self.inlets[0] is not None:
             if isinstance(self.inlets[0], (float, int)):
                 pos = float(self.inlets[0])
-                self.dsp_obj.setparam("position", pos)
-            else: 
+                await self.dsp_obj.setparam("position", pos)
+            else:
                 segs = self.convert_segments(self.inlets[0])
-                self.dsp_obj.setparam("segments", segs)
+                await self.dsp_obj.setparam("segments", segs)
 
     def convert_segments(self, segments):
-        if (isinstance(segments, (list, tuple)) 
-            and not isinstance(segments[0], (list, tuple))):
-            # one-segment message 
+        if (
+            isinstance(segments, (list, tuple))
+            and not isinstance(segments[0], (list, tuple))
+        ):
+            # one-segment message
             segments = [segments]
 
         unpacked = []
@@ -52,6 +54,7 @@ class Line(Processor):
                 unpacked.extend([float(0.0), float(s[0]), float(s[1])])
 
         return unpacked
+
 
 def register():
     MFPApp().register("line~", Line)

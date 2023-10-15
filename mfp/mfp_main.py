@@ -272,7 +272,7 @@ async def main():
     elif args.get("help_builtins"):
         log.log_debug = None
         log.log_file = None
-        app.open_file(None)
+        await app.open_file(None)
         for name, factory in sorted(app.registry.items()):
             if hasattr(factory, 'doc_tooltip_obj'):
                 print("%-12s : %s" % ("[%s]" % name, factory.doc_tooltip_obj))
@@ -302,9 +302,9 @@ async def main():
             # create initial patch
             if len(patchfiles):
                 for p in patchfiles:
-                    app.open_file(p)
+                    await app.open_file(p)
             elif not app.no_default:
-                app.open_file(None)
+                await app.open_file(None)
             # allow session management
             app.session_management_setup()
 

@@ -50,7 +50,7 @@ async def patch_close(self):
 
 @extends(AppWindow)
 async def patch_new(self):
-    MFPGUI().mfp.open_file.sync(None)
+    await MFPGUI().mfp.open_file(None)
 
 
 @extends(AppWindow)

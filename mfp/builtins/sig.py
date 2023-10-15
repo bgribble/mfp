@@ -27,11 +27,11 @@ class Sig(Processor):
 
     async def setup(self):
         await self.dsp_init("sig~")
-        self.dsp_obj.setparam("value", value)
+        await self.dsp_obj.setparam("value", self.init_value)
 
     async def trigger(self):
         val = float(self.inlets[0])
-        self.dsp_obj.setparam("value", val)
+        await self.dsp_obj.setparam("value", val)
 
 
 def register():

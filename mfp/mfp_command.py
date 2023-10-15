@@ -180,9 +180,9 @@ class MFPCommand:
         obj.assign(obj.patch, scope, obj.name)
 
     @noresp
-    def open_file(self, file_name, context=None):
+    async def open_file(self, file_name, context=None):
         from .mfp_app import MFPApp
-        patch = MFPApp().open_file(file_name)
+        patch = await MFPApp().open_file(file_name)
         return patch.obj_id
 
     @noresp
@@ -193,16 +193,16 @@ class MFPCommand:
             await patch.save_file(file_name)
 
     @noresp
-    def show_editor(self, obj_id, show):
+    async def show_editor(self, obj_id, show):
         from .mfp_app import MFPApp
         patch = MFPApp().objects.get(obj_id)
         if not isinstance(patch, Patch):
             log.warning("show_editor: error: obj_id=%s, obj=%s is not a patch"
                         % (obj_id, patch))
         elif show:
-            patch.create_gui()
+            await patch.create_gui()
         else:
-            patch.delete_gui()
+            await patch.delete_gui()
 
     @noresp
     def save_lv2(self, patch_name, plugin_name):
@@ -242,16 +242,16 @@ class MFPCommand:
         else:
             return False
 
-    def load_context(self, file_name, node_id, context_id):
+    async def load_context(self, file_name, node_id, context_id):
         from .mfp_app import MFPApp
         from .dsp_object import DSPContext
         ctxt = DSPContext.lookup(node_id, context_id)
-        patch = MFPApp().open_file(file_name, ctxt, False)
+        patch = await MFPApp().open_file(file_name, ctxt, False)
         patch.hot_inlets = list(range(len(patch.inlets)))
         patch.gui_params['deletable'] = False
         return patch.obj_id
 
-    def close_context(self, node_id, context_id):
+    async def close_context(self, node_id, context_id):
         from .mfp_app import MFPApp
         from .dsp_object import DSPContext
         ctxt = DSPContext.lookup(node_id, context_id)
@@ -263,7 +263,7 @@ class MFPCommand:
 
         for patch in to_delete:
             pid = patch.obj_id
-            patch.delete()
+            await patch.delete()
             if pid in MFPApp().patches:
                 del MFPApp().patches[patch_id]
 
@@ -275,10 +275,10 @@ class MFPCommand:
         from .mfp_app import MFPApp
         return [p.obj_id for p in MFPApp().patches.values()]
 
-    def has_unsaved_changes(self, obj_id):
+    async def has_unsaved_changes(self, obj_id):
         from .mfp_app import MFPApp
         patch = MFPApp().recall(obj_id)
-        return patch.has_unsaved_changes()
+        return await patch.has_unsaved_changes()
 
     @noresp
     def quit(self):

@@ -326,9 +326,9 @@ class Patch(Processor):
     def register_file(klass, filename):
         from .mfp_app import MFPApp
 
-        def factory(init_type, init_args, patch, scope, name, context=None):
+        async def factory(init_type, init_args, patch, scope, name, context=None):
             p = Patch(init_type, init_args, patch, scope, name, context)
-            p._load_file(filename)
+            await p._load_file(filename)
             p.init_type = init_type
             return p
 
@@ -340,7 +340,7 @@ class Patch(Processor):
         MFPApp().register(parts[0], factory)
         return (parts[0], factory)
 
-    def create_gui(self, **kwargs):
+    async def create_gui(self, **kwargs):
         from .mfp_app import MFPApp
 
         if MFPApp().no_gui:
@@ -350,28 +350,33 @@ class Patch(Processor):
 
         # create the basic element info
         self.update_export_bounds()
-        Processor.create_gui(self, **kwargs)
+        await Processor.create_gui(self, **kwargs)
 
         if self.gui_params.get("top_level"):
-            MFPApp().async_task(MFPApp().gui_command.load_start())
+            await MFPApp().gui_command.load_start()
 
             for oid, obj in list(self.objects.items()):
                 if obj.display_type != "hidden":
-                    obj.create_gui()
+                    await obj.create_gui()
 
             for oid, obj in self.objects.items():
                 for srcport, connections in enumerate(obj.connections_out):
                     for dstobj, dstport in connections:
-                        if (obj.display_type not in (
-                                "hidden", "sendvia", "sendsignalvia")
+                        if (
+                            obj.display_type not in (
+                                "hidden", "sendvia", "sendsignalvia"
+                            )
                             and dstobj.display_type not in (
-                                "hidden", "recvvia", "recvsignalvia")):
-                            MFPApp().async_task(MFPApp().gui_command.connect(obj.obj_id, srcport,
-                                                              dstobj.obj_id, dstport))
-            MFPApp().async_task(MFPApp().gui_command.load_complete())
-            MFPApp().async_task(MFPApp().gui_command.select(self.obj_id))
+                                "hidden", "recvvia", "recvsignalvia"
+                            )
+                        ):
+                            await MFPApp().gui_command.connect(
+                                obj.obj_id, srcport, dstobj.obj_id, dstport
+                            )
+            await MFPApp().gui_command.load_complete()
+            await MFPApp().gui_command.select(self.obj_id)
         else:
-            self.create_export_gui()
+            await self.create_export_gui()
         return True
 
     async def delete_gui(self):
@@ -385,7 +390,7 @@ class Patch(Processor):
         await Processor.delete_gui(self)
         return True
 
-    def has_unsaved_changes(self):
+    async def has_unsaved_changes(self):
         import difflib
         import copy
         if self.file_origin:
@@ -395,7 +400,7 @@ class Patch(Processor):
                 if k in self.gui_params:
                     del self.gui_params[k]
 
-            newjson = self.json_serialize()
+            newjson = await self.json_serialize()
             self.gui_params = saved_gui
 
             cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
@@ -425,16 +430,16 @@ class Patch(Processor):
 
         self.file_origin = filename
 
-    def save_lv2(self, plugname, filename):
+    async def save_lv2(self, plugname, filename):
         import os.path
         log.debug("save_lv2: %s, %s" % (plugname, filename))
         plugpath = self.lv2_create_dir(plugname)
         ttlpath = os.path.join(plugpath, "manifest.ttl")
         self.lv2_write_ttl(ttlpath, plugname, filename)
         patchpath = os.path.join(plugpath, filename)
-        self.save_file(patchpath)
+        await self.save_file(patchpath)
 
-    def _load_file(self, filename):
+    async def _load_file(self, filename):
         from .mfp_app import MFPApp
         from .utils import splitpath
 
@@ -453,30 +458,27 @@ class Patch(Processor):
                 pass
 
         if jsdata is not None:
-            self.json_deserialize(jsdata)
+            await self.json_deserialize(jsdata)
             self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
             if not MFPApp().no_onload:
-                self.task_nibbler.add_MFPApp().async_task(
-                    lambda objects: self._run_onload(objects), False,
-                    [obj for obj in self.objects.values()]
-                )
+                await self._run_onload(self.objects.values())
 
-    def _run_onload(self, objects):
+    async def _run_onload(self, objects):
         from .mfp_app import MFPApp
-        for phase in (0,1):
+        for phase in (0, 1):
             for obj in objects:
                 try:
                     if obj.do_onload:
-                        obj.onload(phase)
+                        await obj.onload(phase)
                 except Exception as e:
-                    log.error("Problem initializing %s.%s" % (obj.scope.name, obj.name))
+                    log.error(f"Problem initializing {obj.scope.name}.{obj.name}: {e}")
                     log.debug_traceback()
 
         self.update_export_bounds()
 
         if MFPApp().gui_command:
-            MFPApp().async_task(MFPApp().gui_command.load_complete())
+            await MFPApp().gui_command.load_complete()
         return True
 
     def obj_is_exportable(self, obj):
@@ -524,14 +526,14 @@ class Patch(Processor):
                   height=max(self.gui_params.get('height') or 0,
                              (self.gui_params.get('export_h') or 0) + 20))
 
-    def create_export_gui(self):
+    async def create_export_gui(self):
         from .mfp_app import MFPApp
         # non-toplevel Patch means show the Export UI layer only
-        MFPApp().async_task(MFPApp().gui_command.load_start())
+        await MFPApp().gui_command.load_start()
         for oid, obj in list(self.objects.items()):
             if self.obj_is_exportable(obj):
-                obj.create_gui(is_export=True)
-        MFPApp().async_task(MFPApp().gui_command.load_complete())
+                await obj.create_gui(is_export=True)
+        await MFPApp().gui_command.load_complete()
 
     async def delete(self):
         from .mfp_app import MFPApp
@@ -549,7 +551,6 @@ class Patch(Processor):
         await Processor.delete(self)
 
 # load extension methods
-from . import patch_json
-from . import patch_lv2
-from . import patch_clonescope
-
+from . import patch_json  # noqa
+from . import patch_lv2  # noqa
+from . import patch_clonescope  # noqa

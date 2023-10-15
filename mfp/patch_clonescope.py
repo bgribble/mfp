@@ -10,7 +10,7 @@ from . import log
 from .bang import Uninit
 
 @extends(Patch)
-def clonescope(self, scopename, num_copies, **kwargs):
+async def clonescope(self, scopename, num_copies, **kwargs):
     from .mfp_app import MFPApp
 
     scope = self.scopes.get(scopename)
@@ -155,4 +155,4 @@ def clonescope(self, scopename, num_copies, **kwargs):
         )
 
     for obj in need_gui:
-        obj.create_gui()
+        await obj.create_gui()

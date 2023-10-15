@@ -111,8 +111,8 @@ class GUICommand:
                     if not layer:
                         layer = MFPGUI().appwin.active_layer()
                     layer.add(o)
-                    layer.group.add_actor(o)
-                    o.container = layer.group
+                    # layer.backend.group.add_actor(o)
+                    # o.container = layer.backend.group
                 elif isinstance(parent, PatchElement):
                     # FIXME: don't hardcode GOP offsets
                     if not parent.export_x:
@@ -124,8 +124,8 @@ class GUICommand:
                     o.move(xpos, ypos)
                     o.editable = False
                     parent.layer.add(o)
-                    parent.add_actor(o)
-                    o.container = parent
+                    # parent.add_actor(o)
+                    # o.container = parent
 
                 o.configure(params)
                 MFPGUI().appwin.register(o)

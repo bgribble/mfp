@@ -852,7 +852,7 @@ class Processor:
             for tbline in tb.strip().split('\n'):
                 log.debug(tbline)
 
-    def create_gui(self, **kwargs):
+    async def create_gui(self, **kwargs):
         from .mfp_app import MFPApp
         parent_id = self.patch.obj_id if self.patch is not None else None
         for param, value in kwargs.items():
@@ -874,9 +874,10 @@ class Processor:
             self.gui_params['export_offset_y'] = yoff
             self.gui_params['position_y'] += yoff
 
-        MFPApp().async_task(
-            MFPApp().gui_command.create(self.init_type, self.init_args, self.obj_id,
-                                        parent_id, self.gui_params)
+        
+        await MFPApp().gui_command.create(
+            self.init_type, self.init_args, self.obj_id,
+            parent_id, self.gui_params
         )
         self.gui_created = True
 

@@ -1,3 +1,4 @@
+import inspect
 import os
 import configparser
 import simplejson as json
@@ -168,7 +169,7 @@ class MFPApp (Singleton):
         log.log_debug = False
         log.log_force_console = False
 
-        self.open_file(None)
+        await self.open_file(None)
         p = self.patches.get('default')
 
         reader = await self.create("file", self.batch_input_file or "sys.stdin",
@@ -295,8 +296,8 @@ class MFPApp (Singleton):
                 patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
                 self.patches[patch.name] = patch
                 # FIXME -- need to call onload
-                patch.json_deserialize(jdata)
-                patch.create_gui()
+                await patch.json_deserialize(jdata)
+                await patch.create_gui()
 
         else:
             log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
@@ -305,7 +306,7 @@ class MFPApp (Singleton):
                 await p.delete()
             log.debug("Finished cleaning up patches")
 
-    def open_file(self, file_name, context=None, show_gui=True):
+    async def open_file(self, file_name, context=None, show_gui=True):
         from datetime import datetime
 
         starttime = datetime.now()
@@ -336,6 +337,8 @@ class MFPApp (Singleton):
 
             if factory:
                 patch = factory(name, "", None, self.app_scope, name, context)
+                if inspect.isawaitable(patch):
+                    patch = await patch
 
         if patch is None:
             patch = Patch(name, '', None, self.app_scope, name, context)
@@ -343,13 +346,13 @@ class MFPApp (Singleton):
 
         self.patches[patch.name] = patch
         if show_gui:
-            patch.create_gui()
+            await patch.create_gui()
         patch.mark_ready()
 
         loadtime = datetime.now() - starttime
         log.debug("Patch loaded, elapsed time %s" % loadtime)
         if show_gui and patch.gui_created:
-            self.async_task(MFPApp().gui_command.select(patch.obj_id))
+            await MFPApp().gui_command.select(patch.obj_id)
         return patch
 
     def load_extension(self, libname):
@@ -412,6 +415,9 @@ class MFPApp (Singleton):
         # factory found, use it
         try:
             obj = ctor(init_type, init_args, patch, scope, name)
+            if inspect.isawaitable(obj):
+                obj = await obj
+
             if obj and obj.obj_id:
                 await obj.setup()
                 obj.mark_ready()
@@ -648,7 +654,7 @@ class MFPApp (Singleton):
         await self.start_dsp()
         self.start_midi()
         for p in patches:
-            self.open_file(p)
+            await self.open_file(p)
 
     def clipboard_copy(self, pointer_pos, obj_ids):
         from .mfp_main import version

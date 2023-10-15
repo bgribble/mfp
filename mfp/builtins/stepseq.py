@@ -7,7 +7,6 @@ Copyright (c) 2018-2019 Bill Gribble <grib@billgribble.com>
 
 from mfp.processor import Processor
 from ..mfp_app import MFPApp
-from mfp import log
 
 
 class StepSeq(Processor):
@@ -33,10 +32,10 @@ class StepSeq(Processor):
         if self.inlets[0] is not None:
             if isinstance(self.inlets[0], (float, int)):
                 pos = float(self.inlets[0])
-                self.dsp_obj.setparam("position", pos)
+                await self.dsp_obj.setparam("position", pos)
             else:
                 steps = self.convert_steps(self.inlets[0])
-                self.dsp_obj.setparam("steps", steps)
+                await self.dsp_obj.setparam("steps", steps)
 
     # steps come in as a list of lists/tuples
     # each step is (value: float, trigger: bool, slur: float)

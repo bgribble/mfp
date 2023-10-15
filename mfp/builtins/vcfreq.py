@@ -36,12 +36,11 @@ class VCFreq(Processor):
     async def trigger(self):
         if self.inlets[0] is not Uninit:
             val = float(self.inlets[0])
-            self.dsp_obj.setparam("_sig_0", val)
+            await self.dsp_obj.setparam("_sig_0", val)
         if self.inlets[1] is not Uninit:
             val = float(self.inlets[1])/self.A4_C0_RATIO
-            self.dsp_obj.setparam("base_freq", val)
+            await self.dsp_obj.setparam("base_freq", val)
 
 
 def register():
     MFPApp().register("vcfreq~", VCFreq)
-

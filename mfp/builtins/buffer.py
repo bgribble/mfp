@@ -87,17 +87,17 @@ class Buffer(Processor):
     async def trigger(self):
         incoming = self.inlets[0]
         if incoming is Bang:
-            self.dsp_obj.setparam("rec_state", 1)
+            await self.dsp_obj.setparam("rec_state", 1)
         elif incoming is True:
-            self.dsp_obj.setparam("rec_enabled", 1)
+            await self.dsp_obj.setparam("rec_enabled", 1)
         elif incoming is False:
-            self.dsp_obj.setparam("rec_enabled", 0)
+            await self.dsp_obj.setparam("rec_enabled", 0)
         elif isinstance(incoming, dict):
             for k, v in incoming.items():
                 if k == "size":
                     v = v*MFPApp().samplerate/1000.0
                 setattr(self, k, v)
-                self.dsp_obj.setparam(k, v)
+                await self.dsp_obj.setparam(k, v)
 
     def slice(self, start, end, channel=0):
         if self.shm_obj is None:

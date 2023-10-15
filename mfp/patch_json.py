@@ -209,7 +209,7 @@ async def json_unpack_objects(self, data, scope):
 
     self.update_export_bounds()
     for obj in need_gui:
-        obj.create_gui()
+        await obj.create_gui()
 
     return idmap
 
