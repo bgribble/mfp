@@ -86,7 +86,7 @@ class GlobalMode (InputMode):
 
     def inspect(self):
         from flopsy import Store
-        Store.show_inspector(event_loop=MFPGUI().asyncio_loop)
+        Store.show_inspector(event_loop=MFPGUI().async_task.asyncio_loop)
 
     def toggle_console(self):
         alloc = self.window.content_console_pane.get_allocation()
