@@ -47,7 +47,7 @@ encode_param_value(mfp_processor * proc, const char * param_name, const void * p
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
-            printf("encode_param_value: undefined parameter %s\n", param_name);
+            mfp_log_debug("[encode_param_value] undefined parameter %s\n", param_name);
             break;
 
         case PARAMTYPE_FLT:
@@ -102,7 +102,7 @@ extract_param_value(mfp_processor * proc, const char * param_name, Carp__PythonV
 
     switch ((int)vtype) {
         case PARAMTYPE_UNDEF:
-            printf("extract_param_value: undefined parameter %s\n", param_name);
+            mfp_log_debug("[extract_param_value] undefined parameter %s\n", param_name);
             break;
 
         case PARAMTYPE_FLT:
@@ -171,7 +171,7 @@ dispatch_create(Carp__PythonArray * args, Carp__PythonDict * kwargs, Carp__Pytho
     pinfo = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, typename);
 
     if (pinfo == NULL) {
-        printf("[create] could not find type info for type '%s'\n", typename);
+        mfp_log_debug("[create] could not find type info for type '%s'\n", typename);
         return;
     }
     else {
@@ -184,7 +184,7 @@ dispatch_create(Carp__PythonArray * args, Carp__PythonDict * kwargs, Carp__Pytho
 
         ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
         if (ctxt == NULL) {
-            printf("create: cannot find context %d\n", ctxt_id);
+            mfp_log_debug("[create] cannot find context %d\n", ctxt_id);
             return;
         }
 
@@ -213,7 +213,7 @@ mfp_rpc_response(int req_id, const char * service_name, Carp__PythonValue * resu
     char call_buf[MFP_MAX_MSGSIZE] __attribute__ ((aligned(32)));
 
     if(msgbuf == NULL) {
-        printf("mfp_rpc_response: NULL buffer, aborting buffer send\n");
+        mfp_log_debug("[mfp_rpc_response] NULL buffer, aborting buffer send\n");
         *msglen = 0;
         return -1;
     }
@@ -221,7 +221,7 @@ mfp_rpc_response(int req_id, const char * service_name, Carp__PythonValue * resu
     Carp__Envelope env = CARP__ENVELOPE__INIT;
     Carp__CallResponse resp = CARP__CALL_RESPONSE__INIT;
     resp.call_id = req_id;
-    resp.service_name = (char *)service_name;
+    resp.service_name = (char *)g_strdup(service_name);
     resp.host_id = rpc_node_id;
     resp.value = result;
 
@@ -245,7 +245,7 @@ mfp_rpc_request(const char * service_name,
     char call_buf[MFP_MAX_MSGSIZE] __attribute__ ((aligned(32)));
 
     if(msgbuf == NULL) {
-        printf("mfp_rpc_request: NULL buffer, aborting buffer send\n");
+        mfp_log_debug("[mfp_rpc_request] NULL buffer, aborting buffer send\n");
         *msglen = 0;
         return -1;
     }
@@ -286,7 +286,7 @@ mfp_rpc_wait(int request_id)
     gpointer reqwaiting;
 
     if (request_id < 0) {
-        mfp_log_debug("mfp_rpc: BADREQUEST, not waiting\n");
+        mfp_log_debug("[mfp_rpc] BADREQUEST, not waiting\n");
         return;
     }
 
@@ -340,7 +340,7 @@ dispatch_methodcall(
     }
     else if (!strcmp(service_name, "DSPObject.getparam")) {
         mfp_processor * src_proc = mfp_proc_lookup(obj_id);
-        const char * param_name = args->items[0]->_string;
+        const char * param_name = g_strdup(args->items[0]->_string);
         const void * param_value = g_hash_table_lookup(src_proc->params, param_name);
         to_free = encode_param_value(
             src_proc, param_name, param_value, rval
@@ -350,7 +350,7 @@ dispatch_methodcall(
         mfp_processor * src_proc = mfp_proc_lookup(obj_id);
         rd.reqtype = REQTYPE_SETPARAM;
         rd.src_proc = obj_id;
-        rd.param_name = args->items[0]->_string;
+        rd.param_name = g_strdup(args->items[0]->_string);
         rd.param_type = mfp_proc_param_type(src_proc, rd.param_name);
         rd.param_value = (gpointer)extract_param_value(
             src_proc, rd.param_name, args->items[1]

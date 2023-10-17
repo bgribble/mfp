@@ -220,6 +220,7 @@ class MFPApp (Singleton):
             self.dsp_process = None
 
         dspcommand = [
+            # "valgrind", "--leak-check=full",
             "mfpdsp", self.socket_path, self.max_blocksize,
             self.dsp_inputs, self.dsp_outputs,
         ]
@@ -278,8 +279,8 @@ class MFPApp (Singleton):
             patch_json = []
 
             for p in dead_patches:
-                patch_json.append(p.json_serialize())
-                p.delete_gui()
+                patch_json.append(await p.json_serialize())
+                await p.delete_gui()
                 p.context = None
                 await p.delete()
 
@@ -643,8 +644,8 @@ class MFPApp (Singleton):
 
         # if we made it this far, clean up the existing session and go
         for obj_id, patch in list(self.patches.items()):
-            patch.delete_gui()
-            patch.delete()
+            await patch.delete_gui()
+            await patch.delete()
         self.patches = {}
 
         self.searchpath = utils.prepend_path(session_path, self.searchpath)
