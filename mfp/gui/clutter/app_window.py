@@ -103,6 +103,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
     def active_layer(self):
         return self.app.active_layer()
 
+    @property
+    def selected_patch(self):
+        return self.app.selected_patch
+
     ################################
 
     def _init_window(self):
@@ -546,7 +550,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 [o.obj_id for o in self.selected if o.obj_id is not None]
             )
             clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-            clipboard.set_text(cliptxt, -1)
+            if cliptxt:
+                clipboard.set_text(cliptxt, -1)
             return True
         else:
             return False
@@ -565,7 +570,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         )
 
         if newobj is not None:
-            self.unselect_all()
+            await self.app.unselect_all()
             for o in newobj:
                 obj = MFPGUI().recall(o)
                 if obj is None:
@@ -573,7 +578,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 if not isinstance(obj, PatchInfo):
                     obj.move_to_layer(self.selected_layer)
                     if obj not in self.selected:
-                        self.select(MFPGUI().recall(o))
+                        self.app.select(MFPGUI().recall(o))
             return False
         else:
             return False

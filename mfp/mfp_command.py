@@ -212,7 +212,6 @@ class MFPCommand:
         if patch:
             patch.save_lv2(plugin_name, file_name)
 
-    @noresp
     def clipboard_copy(self, pointer_pos, objlist):
         from .mfp_app import MFPApp
         return MFPApp().clipboard_copy(pointer_pos, objlist)
