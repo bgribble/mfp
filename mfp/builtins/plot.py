@@ -108,7 +108,7 @@ class Scatter (Processor):
 
     def _chartconf(self, action, data=None):
         if self.gui_created:
-            MFPApp().gui_command.command(self.obj_id, action, data)
+            MFPApp().async_task(MFPApp().gui_command.command(self.obj_id, action, data))
         return True
 
     async def trigger(self):
