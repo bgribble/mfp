@@ -46,7 +46,7 @@ ladspa_setup(mfp_processor * proc)
         lib_index = 0;
     }
     else {
-        lib_index = (int)(*(float *)p_lib_index);
+        lib_index = (int)(*(double *)p_lib_index);
     }
 
     d->lib_name = g_strdup((char *)p_lib_name);
@@ -199,7 +199,7 @@ config(mfp_processor * proc)
     /* copy plugin control values */
     if (control_p != NULL) {
         for (portnum=0; portnum < ((GArray *)control_p)->len; portnum++) {
-            newval =  g_array_index((GArray *)control_p, float, portnum);
+            newval =  g_array_index((GArray *)control_p, double, portnum);
             d->plug_control[portnum] = newval;
         }
     }

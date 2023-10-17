@@ -22,32 +22,32 @@ typedef struct {
     int  buf_chancount;
     int  buf_chansize;
     int  buf_size;
-    int  buf_ready; 
+    int  buf_ready;
 } buf_info;
 
 
 typedef struct {
     buf_info buf_active;
-    buf_info buf_to_alloc; 
+    buf_info buf_to_alloc;
 
-    mfp_sample * buf_base;  
+    mfp_sample * buf_base;
     int chan_count;
     int chan_size;
-    
-    /* trigger settings (for TRIG_THRESH, TRIG_EXT modes */ 
+
+    /* trigger settings (for TRIG_THRESH, TRIG_EXT modes */
     int trig_pretrigger;
     int trig_channel;
     int trig_op;
     mfp_sample trig_thresh;
 
-    /* record settings */ 
+    /* record settings */
     int play_channels;
     int rec_channels;
     int rec_enabled;
 
-    /* region definition (for LOOP modes, set by REC_LOOPSET) */ 
+    /* region definition (for LOOP modes, set by REC_LOOPSET) */
     int region_start;
-    int region_end; 
+    int region_end;
 
     int buf_pos;
     int buf_mode;
@@ -55,39 +55,39 @@ typedef struct {
 
 } builtin_buffer_data;
 
-/* buf_type values */ 
+/* buf_type values */
 #define BUFTYPE_PRIVATE 0
-#define BUFTYPE_SHARED 1 
+#define BUFTYPE_SHARED 1
 
-/* buf_mode values */ 
-#define REC_BANG 0        /* on Bang, record buffer and stop */ 
-#define REC_LOOPSET 1     /* record, establishing region_start and region_end */ 
-#define REC_LOOP 2        /* continuously record between region_start and region_end */ 
-#define REC_TRIG_THRESH 3 /* When trig_channel crosses trig_thresh, rec buffer and stop */ 
-#define REC_TRIG_EXT 4    /* when external input crosses trig_thresh, rec buffer and stop */ 
-#define PLAY_BANG 5       /* play buffer once */ 
-#define PLAY_LOOP 6       /* loop over region */ 
+/* buf_mode values */
+#define REC_BANG 0        /* on Bang, record buffer and stop */
+#define REC_LOOPSET 1     /* record, establishing region_start and region_end */
+#define REC_LOOP 2        /* continuously record between region_start and region_end */
+#define REC_TRIG_THRESH 3 /* When trig_channel crosses trig_thresh, rec buffer and stop */
+#define REC_TRIG_EXT 4    /* when external input crosses trig_thresh, rec buffer and stop */
+#define PLAY_BANG 5       /* play buffer once */
+#define PLAY_LOOP 6       /* loop over region */
 
-/* trig_op values */ 
-#define TRIG_GT 0 
+/* trig_op values */
+#define TRIG_GT 0
 #define TRIG_LT 1
 
-/* response types */ 
+/* response types */
 #define RESP_TRIGGERED 0
 #define RESP_BUFID 1
 #define RESP_BUFSIZE 2
 #define RESP_BUFCHAN 3
-#define RESP_RATE 4 
+#define RESP_RATE 4
 #define RESP_OFFSET 5
 #define RESP_BUFRDY 6
 #define RESP_LOOPSTART 7
 
-/* buf_state values */ 
-#define BUF_IDLE 0 
+/* buf_state values */
+#define BUF_IDLE 0
 #define BUF_ACTIVE 1
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     builtin_buffer_data * d = g_malloc0(sizeof(builtin_buffer_data));
 
@@ -96,14 +96,14 @@ init(mfp_processor * proc)
     d->buf_active.buf_type = BUFTYPE_SHARED;
     d->buf_active.buf_size = 0;
     d->buf_active.buf_ptr = NULL;
-    d->buf_active.buf_ready = 0; 
+    d->buf_active.buf_ready = 0;
 
     d->buf_to_alloc.shm_id[0] = 0;
     d->buf_to_alloc.shm_fd = -1;
     d->buf_to_alloc.buf_type = BUFTYPE_SHARED;
     d->buf_to_alloc.buf_size = 0;
     d->buf_to_alloc.buf_ptr = NULL;
-    d->buf_to_alloc.buf_ready = 0; 
+    d->buf_to_alloc.buf_ready = 0;
 
     d->buf_base = NULL;
     d->chan_count = 0;
@@ -112,25 +112,25 @@ init(mfp_processor * proc)
     d->trig_pretrigger = 0;
     d->trig_op = TRIG_GT;
     d->trig_thresh = 0.0;
-    
+
     d->rec_enabled = 0;
     d->rec_channels = 0;
     d->play_channels = 0;
 
     d->buf_pos = 0;
-    d->buf_mode = REC_BANG; 
+    d->buf_mode = REC_BANG;
     d->buf_state = BUF_IDLE;
 
     d->region_start = 0;
     d->region_end = 0;
-    
+
     proc->data = d;
 
     return;
 }
 
-static int 
-process(mfp_processor * proc) 
+static int
+process(mfp_processor * proc)
 {
     builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
     int dstart = 0;
@@ -138,48 +138,48 @@ process(mfp_processor * proc)
     mfp_block * trig_block;
     mfp_sample * outptr, *inptr;
     int inpos, outpos;
-    int loopstart=0; 
+    int loopstart=0;
 
     if (d->buf_base == NULL) {
         return 0;
     }
 
-    /* if not currently capturing, check for trigger conditions */ 
+    /* if not currently capturing, check for trigger conditions */
     if(d->buf_state == BUF_IDLE && d->rec_enabled) {
         if ((d->buf_mode == REC_TRIG_EXT) || (d->buf_mode == REC_TRIG_THRESH)) {
             /* trig_block is the data we will be looking at to find a trigger condition */
             switch (d->buf_mode) {
-                case REC_TRIG_EXT: 
+                case REC_TRIG_EXT:
                     trig_block = proc->inlet_buf[proc->inlet_conn->len - 1];
                     break;
 
                 case REC_TRIG_THRESH:
-                    if(d->trig_channel > proc->inlet_conn->len-1) 
+                    if(d->trig_channel > proc->inlet_conn->len-1)
                         return -1;
                     trig_block = proc->inlet_buf[d->trig_channel];
                     break;
             }
 
-            /* iterate over trig_block looking for a trigger */ 
+            /* iterate over trig_block looking for a trigger */
             dstart = 0;
             while(d->buf_state == BUF_IDLE) {
-                if (d->trig_pretrigger == 0) { 
-                    if((d->trig_op == TRIG_GT) 
+                if (d->trig_pretrigger == 0) {
+                    if((d->trig_op == TRIG_GT)
                         && (trig_block->data[dstart] <= d->trig_thresh)) {
                         d->trig_pretrigger = 1;
                     }
-                    else if((d->trig_op == TRIG_LT) 
+                    else if((d->trig_op == TRIG_LT)
                         && (trig_block->data[dstart] >= d->trig_thresh)) {
                         d->trig_pretrigger = 1;
                     }
                 }
-                else { 
-                    if((d->trig_op == TRIG_GT) 
+                else {
+                    if((d->trig_op == TRIG_GT)
                         && (trig_block->data[dstart] > d->trig_thresh)) {
                         d->buf_state = BUF_ACTIVE;
                         d->trig_pretrigger = 0;
                     }
-                    else if ((d->trig_op == TRIG_LT)  
+                    else if ((d->trig_op == TRIG_LT)
                         && (trig_block->data[dstart] < d->trig_thresh)) {
                         d->buf_state = BUF_ACTIVE;
                         d->trig_pretrigger = 0;
@@ -213,14 +213,14 @@ process(mfp_processor * proc)
         }
     }
 
-    /* zero output buffer in preparation for PLAY operations */ 
+    /* zero output buffer in preparation for PLAY operations */
     for(channel=0; channel < d->chan_count; channel++) {
         mfp_block_zero(proc->outlet_buf[channel]);
     }
 
-    /* if we are playing, copy data from the buffer to the outlet */ 
+    /* if we are playing, copy data from the buffer to the outlet */
     if (d->buf_state != BUF_IDLE) {
-        /* accumulate non-masked channels in the output buffer */ 
+        /* accumulate non-masked channels in the output buffer */
         for(channel=0; channel < d->chan_count; channel++) {
             if((1 << channel) & d->play_channels) {
                 outptr = proc->outlet_buf[channel]->data;
@@ -238,7 +238,7 @@ process(mfp_processor * proc)
                         outptr[outpos] = 0;
                     }
                 }
-            } 
+            }
         }
     }
 
@@ -250,7 +250,7 @@ process(mfp_processor * proc)
         for(channel=0; channel < d->chan_count; channel++) {
             if((1 << channel) & d->rec_channels) {
                 if (d->buf_mode == REC_LOOP) {
-                    /* accumulate into buffer */ 
+                    /* accumulate into buffer */
                     outptr = (float *)d->buf_base + (channel*d->chan_size);
                     outpos = d->buf_pos;
                     inptr = proc->inlet_buf[channel]->data;
@@ -273,11 +273,11 @@ process(mfp_processor * proc)
 
     if (d->buf_state != BUF_IDLE) {
 
-        if (tocopy == 0) { 
+        if (tocopy == 0) {
             tocopy = proc->context->blocksize;
         }
 
-        /* update d->buf_pos for next block */ 
+        /* update d->buf_pos for next block */
         if (d->buf_mode == REC_LOOPSET) {
             d->buf_pos = MIN(d->buf_pos + proc->context->blocksize, d->chan_size);
             d->region_end = d->buf_pos;
@@ -286,8 +286,8 @@ process(mfp_processor * proc)
             d->buf_pos += tocopy;
         }
         else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
-            d->buf_pos = 
-                d->region_start + ((d->buf_pos - d->region_start + tocopy) 
+            d->buf_pos =
+                d->region_start + ((d->buf_pos - d->region_start + tocopy)
                         % (d->region_end - d->region_start));
             loopstart = 1;
         }
@@ -310,11 +310,11 @@ process(mfp_processor * proc)
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
     if(d->buf_active.buf_ptr != NULL) {
-        if (d->buf_active.buf_type == BUFTYPE_SHARED) 
+        if (d->buf_active.buf_type == BUFTYPE_SHARED)
             munmap(d->buf_active.buf_ptr, d->buf_active.buf_size);
         else {
             g_free(d->buf_active.buf_ptr);
@@ -342,10 +342,10 @@ shared_buffer_alloc(buf_info * buf)
 
     gettimeofday(&tv, NULL);
 
-    snprintf(buf->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d", 
-             pid, (int)tv.tv_sec, (int)tv.tv_usec); 
-    buf->shm_fd = shm_open(buf->shm_id, O_RDWR|O_CREAT, S_IRWXU); 
-    
+    snprintf(buf->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d",
+             pid, (int)tv.tv_sec, (int)tv.tv_usec);
+    buf->shm_fd = shm_open(buf->shm_id, O_RDWR|O_CREAT, S_IRWXU);
+
     if(buf->buf_ptr != NULL) {
         munmap(buf->buf_ptr, buf->buf_size);
         buf->buf_ptr = NULL;
@@ -359,7 +359,7 @@ shared_buffer_alloc(buf_info * buf)
 }
 
 static void
-buffer_activate(builtin_buffer_data * d) 
+buffer_activate(builtin_buffer_data * d)
 {
     d->buf_to_alloc.buf_ready = ALLOC_IDLE;
     memcpy(&(d->buf_active), &(d->buf_to_alloc), sizeof(buf_info));
@@ -369,8 +369,8 @@ buffer_activate(builtin_buffer_data * d)
 
 }
 
-static void 
-alloc(mfp_processor * proc, void * alloc_data) 
+static void
+alloc(mfp_processor * proc, void * alloc_data)
 {
     buf_info * buf = (buf_info *)alloc_data;
 
@@ -382,12 +382,12 @@ alloc(mfp_processor * proc, void * alloc_data)
         int allocsize = buf->buf_chancount * buf->buf_chansize * sizeof(float);
         buf->buf_size = allocsize;
         buf->buf_ptr = g_malloc0(allocsize);
-    }   
+    }
 }
 
 
 static int
-config(mfp_processor * proc) 
+config(mfp_processor * proc)
 {
     gpointer size_ptr = g_hash_table_lookup(proc->params, "size");
     gpointer channels_ptr = g_hash_table_lookup(proc->params, "channels");
@@ -410,20 +410,20 @@ config(mfp_processor * proc)
 
     int new_size=d->chan_size, new_channels=d->chan_count;
 
-    int config_handled = 1; 
+    int config_handled = 1;
 
     if(size_ptr != NULL) {
-        new_size = (int)(*(float *)size_ptr);
+        new_size = (int)(*(double *)size_ptr);
     }
     if(channels_ptr != NULL) {
-        new_channels = (int)(*(float *)channels_ptr);
+        new_channels = (int)(*(double *)channels_ptr);
     }
 
     if ((new_size != d->chan_size) || (new_channels != d->chan_count)) {
         if(d->buf_to_alloc.buf_ready == ALLOC_READY) {
             buffer_activate(d);
             d->region_start = 0;
-            d->region_end = 0; 
+            d->region_end = 0;
             d->buf_pos = 0;
             if (d->buf_active.buf_type == BUFTYPE_SHARED) {
                 mfp_dsp_send_response_str(proc, RESP_BUFID, d->buf_active.shm_id);
@@ -445,7 +445,7 @@ config(mfp_processor * proc)
             config_handled = 0;
         }
         else {
-            /* still working */ 
+            /* still working */
             config_handled = 0;
         }
     }
@@ -501,12 +501,12 @@ config(mfp_processor * proc)
         d->play_channels = (int)(*(double *)playchan_ptr);
     }
 
-    if (clearchan_ptr != NULL) { 
+    if (clearchan_ptr != NULL) {
         int channel;
         int clear_channels = (int)(*(double *)clearchan_ptr);
         for(channel = 0; channel < d->chan_count; channel++) {
             if((1 << channel) & clear_channels) {
-                bzero(d->buf_base + channel*d->chan_size, 
+                bzero(d->buf_base + channel*d->chan_size,
                       sizeof(double)*d->chan_size);
             }
         }
@@ -517,10 +517,10 @@ config(mfp_processor * proc)
     return config_handled;
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_buffer(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
-    
+
     p->name = strdup("buffer~");
     p->is_generator = 0;
     p->process = process;

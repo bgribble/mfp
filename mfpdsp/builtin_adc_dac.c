@@ -5,8 +5,8 @@
 #include "mfp_dsp.h"
 #include "mfp_block.h"
 
-static int 
-process_in(mfp_processor * proc) 
+static int
+process_in(mfp_processor * proc)
 {
     gpointer chan_ptr = g_hash_table_lookup(proc->params, "channel");
     int channel = 0;
@@ -14,7 +14,7 @@ process_in(mfp_processor * proc)
     mfp_block * outbuf;
 
     if (chan_ptr != NULL) {
-        channel = (int)(*(float *)chan_ptr);
+        channel = (int)(*(double *)chan_ptr);
     }
 
     inbuf = mfp_get_input_buffer(proc->context, channel);
@@ -31,7 +31,7 @@ process_in(mfp_processor * proc)
 }
 
 static int
-process_out(mfp_processor * proc) 
+process_out(mfp_processor * proc)
 {
     gpointer chan_ptr = g_hash_table_lookup(proc->params, "channel");
     int channel = 0;
@@ -40,7 +40,7 @@ process_out(mfp_processor * proc)
     int count;
 
     if (chan_ptr != NULL) {
-        channel = (int)(*(float *)chan_ptr);
+        channel = (int)(*(double *)chan_ptr);
     }
     outbuf = mfp_get_output_buffer(proc->context, channel);
     inbuf = proc->inlet_buf[0]->data;
@@ -54,14 +54,14 @@ process_out(mfp_processor * proc)
     return 1;
 }
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     return;
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     return;
 }
@@ -73,7 +73,7 @@ config(mfp_processor * proc)
 }
 
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_in(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("in~");
@@ -88,7 +88,7 @@ init_builtin_in(void) {
     return p;
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_out(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("out~");
