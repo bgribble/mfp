@@ -35,10 +35,6 @@ def layer_select_down(self):
 
 @extends(AppWindow)
 def layer_select(self, layer):
-    self._layer_select(layer)
-
-@extends(AppWindow)
-def _layer_select(self, layer):
     if not isinstance(layer, Layer):
         return
     if self.selected_layer is not None:

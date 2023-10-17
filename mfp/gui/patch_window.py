@@ -7,6 +7,7 @@ The main MFP window and associated code
 
 from mfp import log
 
+from ..gui_main import MFPGUI
 from .backend_interfaces import AppWindowBackend
 from .input_manager import InputManager
 from .console_manager import ConsoleManager
@@ -150,7 +151,7 @@ class AppWindow:
 
     def unregister(self, element):
         if element in self.selected:
-            self.unselect(element)
+            MFPGUI().async_task(self.unselect(element))
         if element.layer:
             element.layer.remove(element)
         if element in self.objects:

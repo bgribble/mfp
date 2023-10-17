@@ -117,10 +117,9 @@ def init_layer_view(self):
 
     def sel_layer(l):
         if isinstance(l, PatchInfo):
-            self.layer_view.select(None)
             self.layer_select(l.layers[0])
         else:
-            self._layer_select(l)
+            self.layer_select(l)
 
     layer_cols = [("Name", get_layer_name, True, layer_name_edited, get_sortname),
                   ("Scope", get_layer_scopename, True, layer_scope_edited, False)]

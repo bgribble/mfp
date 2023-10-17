@@ -644,8 +644,6 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.object_view.update(element, (element.scope, element.layer.patch))
         elif element.layer is not None:
             self.object_view.update(element, (element.layer.scope, element.layer.patch))
-        else:
-            log.warning("refresh: WARNING: element has no layer,", element)
 
     def load_complete(self):
         self.object_view.refresh()
