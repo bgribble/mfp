@@ -106,8 +106,12 @@ class LabelEditMode (InputMode):
 
         def key_press(widg, event):
             from ..key_defs import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DN
-            handlers = {KEY_LEFT: self.move_left, KEY_RIGHT: self.move_right,
-                        KEY_UP: self.move_up, KEY_DN: self.move_down}
+            handlers = {
+                KEY_LEFT: self.move_left,
+                KEY_RIGHT: self.move_right,
+                KEY_UP: self.move_up,
+                KEY_DN: self.move_down
+            }
             keysym = event.keyval
             if keysym in handlers:
                 handlers[keysym]()
@@ -266,7 +270,7 @@ class LabelEditMode (InputMode):
         return True
 
     def update_cursor(self):
-        self.widget.grab_key_focus()
+        self.widget.grab_focus()
         self.widget.set_cursor_position(self.editpos)
         self.widget.set_selection(self.editpos, self.editpos)
 

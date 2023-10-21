@@ -9,6 +9,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import math
 from mfp.gui_main import MFPGUI
+from .text_widget import TextWidget
 from .patch_element import PatchElement
 from .modes.label_edit import LabelEditMode
 from .colordb import ColorDB
@@ -46,11 +47,10 @@ class ViaElement (PatchElement):
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_position(0, self.TEXTURE_Y)
         self.label_text = None
-        self.label = Clutter.Text()
+        self.label = TextWidget(self)
         self.label.set_position(0, self.LABEL_Y)
         self.set_reactive(True)
         self.add_actor(self.texture)
-        self.add_actor(self.label)
 
         # configure label
         self.label.set_color(self.get_color('text-color'))

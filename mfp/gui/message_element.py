@@ -10,6 +10,7 @@ from gi.repository import Clutter
 import cairo
 from mfp.gui_main import MFPGUI
 from mfp.utils import catchall
+from .text_widget import TextWidget
 from .patch_element import PatchElement
 from .connection_element import ConnectionElement
 from .modes.label_edit import LabelEditMode
@@ -36,11 +37,9 @@ class MessageElement (PatchElement):
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_size(35, 25)
 
-        self.label = Clutter.Text()
+        self.label = TextWidget(self)
 
         self.set_reactive(True)
-        self.add_actor(self.label)
-
         self.set_size(35, 25)
         self.obj_state = self.OBJ_HALFCREATED
         self.texture.invalidate()

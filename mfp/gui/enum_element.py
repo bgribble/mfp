@@ -8,7 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import cairo
-import math
+from .text_widget import TextWidget
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from mfp.gui_main import MFPGUI
@@ -43,10 +43,9 @@ class EnumElement (PatchElement):
         self.texture.connect("draw", self.draw_cb)
         self.set_content(self.texture)
 
-        self.label = Clutter.Text()
+        self.label = TextWidget(self)
 
         self.set_reactive(True)
-        self.add_actor(self.label)
 
         # configure label
         self.label.set_position(4, 1)
@@ -98,7 +97,7 @@ class EnumElement (PatchElement):
         ct.move_to(0, 0)
         ct.line_to(0, h)
         ct.line_to(w, h)
-        ct.line_to(w, h / 3.0 )
+        ct.line_to(w, h / 3.0)
         ct.line_to(w - h / 3.0, 0)
         ct.line_to(0, 0)
         ct.close_path()
@@ -254,4 +253,3 @@ class EnumElement (PatchElement):
 
     def make_control_mode(self):
         return EnumControlMode(self.stage, self)
-

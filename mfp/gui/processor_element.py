@@ -6,12 +6,13 @@ A patch element corresponding to a signal or control processor
 
 from gi.repository import Clutter
 import cairo
+from .text_widget import TextWidget
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
-from mfp import log
 from mfp.utils import catchall
+
 
 class ProcessorElement (PatchElement):
     display_type = "processor"
@@ -55,15 +56,16 @@ class ProcessorElement (PatchElement):
         self.texture.set_size(35, 25)
 
         # label
-        self.label = Clutter.Text()
+        self.label = TextWidget(self)
         self.label.set_position(self.label_off_x, self.label_off_y)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
 
-        if self.show_label:
-            self.add_actor(self.label)
+        if not self.show_label:
+            self.label.hide()
+
         self.set_reactive(True)
 
     def update(self):
@@ -129,7 +131,7 @@ class ProcessorElement (PatchElement):
     def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
         if not self.show_label:
-            self.add_actor(self.label)
+            self.label.show()
         self.update()
 
     async def label_edit_finish(self, widget, text=None):
@@ -151,7 +153,7 @@ class ProcessorElement (PatchElement):
             self.obj_state = self.OBJ_COMPLETE
 
         if not self.show_label:
-            self.remove_actor(self.label)
+            self.label.hide()
 
         self.update()
 
@@ -195,9 +197,9 @@ class ProcessorElement (PatchElement):
             if oldval ^ self.show_label:
                 need_update = True
                 if self.show_label:
-                    self.add_actor(self.label)
+                    self.label.show()
                 else:
-                    self.remove_actor(self.label)
+                    self.label.hide()
 
         self.export_x = params.get("export_x")
         self.export_y = params.get("export_y")

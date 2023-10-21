@@ -10,6 +10,7 @@ from gi.repository import Clutter
 import cairo
 
 from mfp.utils import catchall
+from .text_widget import TextWidget
 from .patch_element import PatchElement
 from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
@@ -72,7 +73,7 @@ class ButtonElement (PatchElement):
         self.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
-        self.label = Clutter.Text()
+        self.label = TextWidget(self)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.connect('text-changed', self.label_changed_cb)
@@ -81,7 +82,6 @@ class ButtonElement (PatchElement):
         self.label_text = ''
 
         self.set_reactive(True)
-        self.add_actor(self.label)
 
         self.set_size(20, 20)
         self.move(x, y)

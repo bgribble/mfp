@@ -153,22 +153,22 @@ async def main():
     socketpath = args.get("socketpath")
     debug = args.get('debug')
 
-    print("[LOG] DEBUG: GUI process starting")
-
-    channel = UnixSocketChannel(socket_path=socketpath)
-    host = Host(
-        label="MFP GUI",
-    )
-    await host.connect(channel)
+    log.log_module = "gui"
+    log.log_func = log.rpclog
+    log.log_debug = True
 
     if args.get("logstart"):
         st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f")
         if st:
             log.log_time_base = st
 
-    log.log_module = "gui"
-    log.log_func = log.rpclog
-    log.log_debug = True
+    log.debug("UI starting")
+
+    channel = UnixSocketChannel(socket_path=socketpath)
+    host = Host(
+        label="MFP GUI",
+    )
+    await host.connect(channel)
 
     setup_default_colors()
 
@@ -183,7 +183,6 @@ async def main():
     MFPCommandFactory = await host.require(MFPCommand)
     mfp_connection = await MFPCommandFactory()
 
-    print("[LOG] DEBUG: About to create MFPGUI")
     from mfp.gui import backends  # noqa
     AppWindow.backend_name = "clutter"
 
@@ -192,13 +191,11 @@ async def main():
     gui.debug = debug
     gui.appwin = AppWindow()
 
-    print("[LOG] DEBUG: created MFPGUI")
     if debug:
         import yappi
         yappi.start()
 
     await host.export(GUICommand)
-    print("[LOG] DEBUG: published GUICommand, setup complete")
     await host.wait_for_completion()
     await channel.close()
 

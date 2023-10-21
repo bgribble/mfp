@@ -15,6 +15,7 @@ from mfp.utils import catchall
 from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
 from .colordb import ColorDB
+from .text_widget import TextWidget
 
 
 class TextElement (PatchElement):
@@ -43,11 +44,10 @@ class TextElement (PatchElement):
         self.texture.connect("draw", self.draw_cb)
         self.set_content(self.texture)
 
-        self.label = Clutter.Text()
+        self.label = TextWidget(self)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.set_position(3, 3)
-        self.add_actor(self.label)
 
         self.update_required = True
         self.move(x, y)

@@ -4,6 +4,7 @@ import sys
 from mfp import log
 from mfp.gui.collision import collision_check
 from mfp.gui.colordb import ColorDB
+from mfp.gui.text_widget import TextWidget
 from mfp.gui_main import MFPGUI
 
 from ..key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT
@@ -14,6 +15,7 @@ from ..patch_element import PatchElement
 from ..patch_info import PatchInfo
 
 from .tree_display import TreeDisplay
+
 
 class ClutterAppWindowBackend (AppWindowBackend):
     backend_name = "clutter"
@@ -37,8 +39,6 @@ class ClutterAppWindowBackend (AppWindowBackend):
         gi.require_version('GtkClutter', '1.0')
         gi.require_version('Clutter', '1.0')
 
-        log.info("Clutter init starting")
-
         try:
             from gi.repository import GtkClutter
 
@@ -51,15 +51,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
             return
 
         try:
-            log.info("Creating window and widgets")
             self._init_window()
 
         except Exception as e:
             log.error("Caught GUI exception:", e)
             log.debug_traceback()
             sys.stdout.flush()
-
-        log.info("Clutter init done")
 
     ################################
     # FIXME compat properties
@@ -146,6 +143,9 @@ class ClutterAppWindowBackend (AppWindowBackend):
         box.pack_start(self.embed, True, True, 0)
         self.embed.set_sensitive(True)
         self.stage = self.embed.get_stage()
+
+        # FIXME compatibility with PatchElements for LabelEditMode
+        self.container = self.stage
 
         # significant widgets we will be dealing with later
         self.bottom_notebook = self.builder.get_object("bottom_notebook")
@@ -371,7 +371,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         lines.append("\nMajor mode: " + m.description)
 
         if self.hud_mode_txt is None:
-            self.hud_mode_txt = Clutter.Text.new()
+            self.hud_mode_txt = Clutter.Text()
             self.stage.add_actor(self.hud_mode_txt)
 
         self.hud_mode_txt.set_position(self.stage.get_width()-80,
@@ -409,11 +409,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
 
             self.hud_prompt = Clutter.Text()
-            self.hud_prompt_input = Clutter.Text()
+            self.hud_prompt_input = TextWidget(self)
             self.stage.add_actor(self.hud_prompt)
             self.hud_prompt.set_position(10, self.stage.get_height() - 25)
             self.hud_prompt.set_property("opacity", 255)
-            self.stage.add_actor(self.hud_prompt_input)
         else:
             self.hud_prompt.show()
             self.hud_prompt_input.show()

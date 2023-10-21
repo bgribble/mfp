@@ -206,3 +206,123 @@ class LayerBackend(ABC, BackendInterface, DelegateMixin):
     def hide(self):
         pass
 
+class TextWidgetBackend(ABC, BackendInterface, DelegateMixin):
+    @abstractmethod
+    @delegatemethod
+    def set_single_line_mode(self, val):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_activatable(self, val):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_editable(self, val):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_cursor_position(self, pos):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_cursor_visible(self, pos):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_cursor_color(self, color):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def grab_focus(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def hide(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def show(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def get_width(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def get_height(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def get_position(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_position(self, x_pos, y_pos):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def get_text(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_text(self, text):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_markup(self, text):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_reactive(self, is_reactive):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_color(self, color):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_font_name(self, font_name):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def get_property(self, propname):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def disconnect(self, handler_id):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def connect(self, signal, handler):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_use_markup(self, use_markup):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def set_selection(self, start, end):
+        pass
