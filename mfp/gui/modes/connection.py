@@ -48,8 +48,8 @@ class ConnectionMode (InputMode):
         self.bind("8", lambda: self.set_port_key(8), "Connect port 8")
         self.bind("9", lambda: self.set_port_key(9), "Connect port 9")
 
-        self.select_cbid = self.window.add_callback("select", self.select)
-        self.remove_cbid = self.window.add_callback("remove", self.remove_cb)
+        self.select_cbid = self.window.signal_listen("select", self.select_cb)
+        self.remove_cbid = self.window.signal_listen("remove", self.remove_cb)
 
     def update_connection(self):
         if (self.source_obj is None or self.dest_obj is None):
@@ -96,7 +96,10 @@ class ConnectionMode (InputMode):
 
         self.update_connection()
 
-    def remove_cb(self, obj):
+    def select_cb(self, window, signal, obj):
+        self.select(obj)
+
+    def remove_cb(self, window, signal, obj):
         if obj is self.connection:
             self.connection = None
         elif obj is self.dest_obj:

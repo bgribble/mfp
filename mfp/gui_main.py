@@ -42,6 +42,8 @@ def clutter_do(func):
 
 class MFPGUI (Singleton):
     def __init__(self):
+        super().__init__()
+
         self.call_stats = {}
         self.objects = {}
         self.mfp = None

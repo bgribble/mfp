@@ -84,11 +84,10 @@ class PatchEditMode (InputMode):
         self.bind("a", self.auto_place_below, "Auto-place below")
         self.bind("A", self.auto_place_above, "Auto-place above")
 
+        self.window.signal_listen("select", self.selection_changed_cb)
+        self.window.signal_listen("unselect", self.selection_changed_cb)
 
-        self.window.add_callback("select", self.selection_changed_cb)
-        self.window.add_callback("unselect", self.selection_changed_cb)
-
-    def selection_changed_cb(self, obj):
+    def selection_changed_cb(self, window, signal, obj):
         if not self.enabled:
             return False
 

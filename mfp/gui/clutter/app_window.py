@@ -271,9 +271,15 @@ class ClutterAppWindowBackend (AppWindowBackend):
             else:
                 return False
 
+        def signal_repeater(signal_name):
+            # FIXME need to transform event here
+            return lambda target, event: MFPGUI().async_task(
+                self.app.signal_emit(signal_name, event)
+            )
+
         self.grab_focus()
 
-        # hook up signals
+        # hook up internal signals
         self.stage.connect('key-press-event', steal_focuskeys)
         self.stage.connect('button-press-event', grab_handler)
         self.stage.connect('button-release-event', grab_handler)
@@ -286,6 +292,11 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         self.stage.connect('destroy', self.app.quit)
         self.embed.connect('size-allocate', resize_cb)
+
+        self.stage.connect('key-press-event', signal_repeater("key-press-event"))
+        self.stage.connect('key-release-event', signal_repeater("key-release-event"))
+        self.stage.connect('button-press-event', signal_repeater("button-press-event"))
+        self.stage.connect('button-release-event', signal_repeater("button-release-event"))
 
         # set tab stops on keybindings view
         ta = Pango.TabArray.new(1, True)
@@ -416,6 +427,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         else:
             self.hud_prompt.show()
             self.hud_prompt_input.show()
+
         self.hud_prompt.set_markup(prompt)
         self.hud_prompt_input.set_text(default)
         self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),

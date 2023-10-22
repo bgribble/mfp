@@ -104,7 +104,7 @@ class LabelEditMode (InputMode):
             MFPGUI().async_task(self.commit_edits())
             return True
 
-        def key_press(widg, event):
+        def key_press(window, signal, event):
             from ..key_defs import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DN
             handlers = {
                 KEY_LEFT: self.move_left,
@@ -123,13 +123,13 @@ class LabelEditMode (InputMode):
 
         if self.multiline is False:
             self.widget.set_single_line_mode(True)
-            self.activate_handler_id = self.widget.connect("activate", synth_ret)
+            self.activate_handler_id = self.widget.signal_listen("activate", synth_ret)
         else:
             self.widget.set_single_line_mode(False)
 
-        self.text_changed_handler_id = self.widget.connect("text-changed", self.text_changed)
-        self.key_focus_out_handler_id = self.widget.connect("key-focus-out", focus_out)
-        self.key_press_handler_id = self.window.window.connect("key-press-event", key_press)
+        self.text_changed_handler_id = self.widget.signal_listen("text-changed", self.text_changed)
+        self.key_focus_out_handler_id = self.widget.signal_listen("key-focus-out", focus_out)
+        self.key_press_handler_id = MFPGUI().appwin.signal_listen("key-press-event", key_press)
 
         self.editpos = len(self.text)
         self.widget.set_editable(True)
@@ -143,18 +143,18 @@ class LabelEditMode (InputMode):
         self.widget.set_editable(False)
         self.widget.set_cursor_visible(False)
         if self.activate_handler_id:
-            self.widget.disconnect(self.activate_handler_id)
+            self.widget.signal_unlisten(self.activate_handler_id)
             self.widget.set_activatable(False)
             self.widget.set_single_line_mode(False)
             self.activate_handler_id = None
         if self.key_focus_out_handler_id:
-            self.widget.disconnect(self.key_focus_out_handler_id)
+            self.widget.signal_unlisten(self.key_focus_out_handler_id)
             self.key_focus_out_handler_id = None
         if self.text_changed_handler_id:
-            self.widget.disconnect(self.text_changed_handler_id)
+            self.widget.signal_unlisten(self.text_changed_handler_id)
             self.text_changed_handler_id = None
         if self.key_press_handler_id:
-            self.window.window.disconnect(self.key_press_handler_id)
+            MFPGUI().appwin.signal_unlisten(self.key_press_handler_id)
             self.key_press_handler_id = None
 
         self.blinker.stop(self.widget)

@@ -16,15 +16,15 @@ class Latency(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 1, 2, init_type, init_args, patch, scope, name)
 
-        self.callback = MFPApp().add_callback("latency", self._latency_cb)
+        self.callback = MFPApp().signal_listen("latency", self._latency_cb)
         self.outlet_order = [1, 0]
 
-    def _latency_cb(self):
+    def _latency_cb(self, app, signal):
         self.send(Bang)
 
     def delete(self):
         if self.callback is not None:
-            MFPApp().remove_callback(self.callback)
+            MFPApp().signal_unlisten(self.callback)
         Processor.delete(self)
 
     async def trigger(self):

@@ -19,21 +19,21 @@ class PatchControlMode (InputMode):
         self.bind("S-TAB", self.select_prev, "Select previous element")
         self.bind("C-TAB", self.select_mru, "Select most-recent element")
 
-        self.window.add_callback("select", self.begin_control)
-        self.window.add_callback("unselect", self.end_control)
+        self.window.signal_listen("select", self.begin_control)
+        self.window.signal_listen("unselect", self.end_control)
 
     def enable(self):
         self.enabled = True
         self.manager.global_mode.allow_selection_drag = False
 
-    def begin_control(self, obj):
+    def begin_control(self, window, signal, obj):
         if not self.enabled:
             return False
 
         if obj is not None:
             obj.begin_control()
 
-    def end_control(self, obj):
+    def end_control(self, window, signal, obj):
         if not self.enabled:
             return False
 

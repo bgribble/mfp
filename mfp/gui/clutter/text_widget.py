@@ -2,8 +2,8 @@ from ..backend_interfaces import TextWidgetBackend
 
 from gi.repository import Clutter
 from .app_window import ClutterAppWindowBackend
-
 from mfp import log
+from mfp.gui_main import MFPGUI
 
 
 class ClutterTextWidgetBackend(TextWidgetBackend):
@@ -20,6 +20,18 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
 
         self.label = Clutter.Text()
         self.parent.add_actor(self.label)
+
+        def signal_repeater(signal_name):
+            return lambda *args: MFPGUI().async_task(
+                self.owner.signal_emit(signal_name, *args)
+            )
+
+        # repeat the Clutter signals to MFP signals on the TextWidget
+        self.label.connect("activate", signal_repeater("activate"))
+        self.label.connect("text-changed", signal_repeater("text-changed"))
+        self.label.connect("key-focus-out", signal_repeater("key-focus-out"))
+        self.label.connect("key-focus-in", signal_repeater("key-focus-in"))
+
         super().__init__(owner)
 
     def grab_focus(self):
@@ -52,6 +64,9 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
     def set_single_line_mode(self, val):
         return self.label.set_single_line_mode(val)
 
+    def get_cursor_position(self):
+        return self.label.get_cursor_position()
+
     def set_cursor_position(self, pos):
         return self.label.set_cursor_position(pos)
 
@@ -81,13 +96,6 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
 
     def get_property(self, propname):
         return self.label.get_property(propname)
-
-    # FIXME signals
-    def connect(self, signal, handler):
-        return self.label.connect(signal, handler)
-
-    def disconnect(self, handler_id):
-        return self.label.disconnect(handler_id)
 
     def set_use_markup(self, use_markup):
         return self.label.set_use_markup(use_markup)

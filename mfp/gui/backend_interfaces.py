@@ -224,6 +224,11 @@ class TextWidgetBackend(ABC, BackendInterface, DelegateMixin):
 
     @abstractmethod
     @delegatemethod
+    def get_cursor_position(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
     def set_cursor_position(self, pos):
         pass
 
@@ -305,16 +310,6 @@ class TextWidgetBackend(ABC, BackendInterface, DelegateMixin):
     @abstractmethod
     @delegatemethod
     def get_property(self, propname):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def disconnect(self, handler_id):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def connect(self, signal, handler):
         pass
 
     @abstractmethod

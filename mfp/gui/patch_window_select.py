@@ -62,7 +62,7 @@ def _select(self, obj):
     obj.select()
 
     self.backend.select(obj)
-    self.emit_signal("select", obj)
+    MFPGUI().async_task(self.signal_emit("select", obj))
 
 
 @extends(AppWindow)
@@ -87,7 +87,7 @@ async def _unselect(self, obj):
         self.selected.remove(obj)
 
     self.backend.unselect(obj)
-    self.emit_signal("unselect", obj)
+    MFPGUI().async_task(self.signal_emit("unselect", obj))
 
 
 @extends(AppWindow)

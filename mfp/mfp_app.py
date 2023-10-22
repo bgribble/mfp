@@ -10,7 +10,7 @@ from .singleton import Singleton
 from .interpreter import Interpreter
 from .processor import Processor
 from .method import MethodCall
-from .utils import QuittableThread, AsyncExecMonitor, AsyncTaskManager
+from .utils import QuittableThread, AsyncExecMonitor, AsyncTaskManager, SignalMixin
 from .bang import Unbound
 
 from pluginfo import PlugInfo
@@ -24,8 +24,10 @@ class StartupError(Exception):
     pass
 
 
-class MFPApp (Singleton):
+class MFPApp (Singleton, SignalMixin):
     def __init__(self):
+        super().__init__()
+
         # configuration items -- should be populated before calling setup()
         self.no_gui = False
         self.no_dsp = False
@@ -555,32 +557,7 @@ class MFPApp (Singleton):
             msgid, msgval = msg
             # latency changed
             if msgid == 1:
-                self.emit_signal("latency")
-
-    #####################
-    # callbacks
-    #####################
-
-    def add_callback(self, signal_name, callback):
-        cbid = self.callbacks_last_id
-        self.callbacks_last_id += 1
-
-        oldlist = self.callbacks.setdefault(signal_name, [])
-        oldlist.append((cbid, callback))
-
-        return cbid
-
-    def remove_callback(self, cb_id):
-        for signal, hlist in self.callbacks.items():
-            for num, cbinfo in enumerate(hlist):
-                if cbinfo[0] == cb_id:
-                    hlist[num:num+1] = []
-                    return True
-        return False
-
-    def emit_signal(self, signal_name, *args):
-        for cbinfo in self.callbacks.get(signal_name, []):
-            cbinfo[1](*args)
+                self.signal_emit("latency")
 
     def session_management_setup(self):
         from . import nsm

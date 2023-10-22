@@ -40,7 +40,6 @@ mfp_init_all(char * sockname)
     mfp_rpc_init();
     mfp_api_init();
     mfp_initialized = 1;
-    mfp_log_debug("[mfp_init_all] initialized!");
     return;
 }
 
@@ -113,11 +112,8 @@ main(int argc, char ** argv)
     mfp_init_all(sockname);
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
 
-    mfp_log_debug("[main] JACK startup complete, context=%p");
     mfp_context_init(ctxt);
-    mfp_log_debug("[main] context init complete");
     mfp_comm_io_wait();
-    mfp_log_debug("[main] IO loop exited");
     mfp_jack_shutdown();
     return 0;
 

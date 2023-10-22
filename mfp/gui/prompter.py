@@ -7,6 +7,7 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 import inspect
 import asyncio
 from .modes.label_edit import LabelEditMode
+from mfp import log
 
 class Prompter (object):
     def __init__(self, window):
@@ -42,7 +43,6 @@ class Prompter (object):
                 rv = self.current_callback(text)
                 if inspect.isawaitable(rv):
                     await rv
-
             except Exception as e:
                 print("Prompter exception in callback:", e)
                 pass
@@ -51,6 +51,7 @@ class Prompter (object):
         if self.mode:
             self.window.input_mgr.disable_minor_mode(self.mode)
             self.mode = None
+
         self.window.hud_set_prompt(None)
         if len(self.queue):
             nextitem = self.queue[0]

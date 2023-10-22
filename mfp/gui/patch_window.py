@@ -7,6 +7,7 @@ The main MFP window and associated code
 
 from mfp import log
 
+from mfp.utils import SignalMixin
 from ..gui_main import MFPGUI
 from .backend_interfaces import AppWindowBackend
 from .input_manager import InputManager
@@ -18,10 +19,12 @@ from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
 
 
-class AppWindow:
+class AppWindow (SignalMixin):
     backend_name = None
 
     def __init__(self):
+        super().__init__()
+
         # self.objects is PatchElement instances representing the
         # currently-displayed patch(es)
         self.patches = []
@@ -147,7 +150,7 @@ class AppWindow:
             element.send_params()
 
         self.backend.register(element)
-        self.emit_signal("add", element)
+        MFPGUI().async_task(self.signal_emit("add", element))
 
     def unregister(self, element):
         if element in self.selected:
@@ -160,7 +163,7 @@ class AppWindow:
             del self.input_mgr.event_sources[element]
 
         self.backend.unregister(element)
-        self.emit_signal("remove", element)
+        MFPGUI().async_task(self.signal_emit("remove", element))
 
     def refresh(self, element):
         self.backend.refresh(element)
@@ -225,32 +228,6 @@ class AppWindow:
 
     def get_prompted_input(self, prompt, callback, default=''):
         self.hud_prompt_mgr.get_input(prompt, callback, default)
-
-    #####################
-    # callbacks
-    #####################
-
-    def add_callback(self, signal_name, callback):
-        cbid = self.callbacks_last_id
-        self.callbacks_last_id += 1
-
-        oldlist = self.callbacks.setdefault(signal_name, [])
-        oldlist.append((cbid, callback))
-
-        return cbid
-
-    def remove_callback(self, cb_id):
-        for signal, hlist in self.callbacks.items():
-            for num, cbinfo in enumerate(hlist):
-                if cbinfo[0] == cb_id:
-                    hlist[num:num+1] = []
-                    return True
-        return False
-
-    def emit_signal(self, signal_name, *args):
-        for cbinfo in self.callbacks.get(signal_name, []):
-            cbinfo[1](*args)
-
 
 # additional methods in @extends wrappers
 from . import patch_window_layer  # noqa
