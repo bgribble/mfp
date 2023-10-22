@@ -19,7 +19,6 @@ class ClutterInputManagerBackend(InputManagerBackend):
 
         while retry_count < 5:
             try:
-
                 for index, handler in enumerate(handlers):
                     # this is for the case where we were iterating over
                     # handlers and found one async, and are restarting in

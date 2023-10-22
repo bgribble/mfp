@@ -1,5 +1,12 @@
+"""
+mfp_app.py
+
+Declare the main MFPApp object that holds app state in the GUI process
+"""
+
 import inspect
 import os
+import os.path
 import configparser
 import simplejson as json
 
@@ -95,7 +102,6 @@ class MFPApp (Singleton, SignalMixin):
         # helper to run async task
         self.async_task = AsyncTaskManager()
 
-
     async def setup(self):
         from .mfp_command import MFPCommand
         from .gui_command import GUICommand
@@ -103,7 +109,7 @@ class MFPApp (Singleton, SignalMixin):
         from carp.channel import UnixSocketChannel
         from carp.host import Host
 
-        log.debug("Main thread started, pid = %s" % os.getpid())
+        log.debug(f"Main thread started, pid = {os.getpid()}")
 
         # RPC service setup
         self.rpc_channel = UnixSocketChannel(socket_path=self.socket_path)
@@ -146,7 +152,7 @@ class MFPApp (Singleton, SignalMixin):
 
             self.console = Interpreter(dict(app=self))
 
-            await self.gui_command.hud_write("<b>Welcome to MFP %s</b>" % version())
+            await self.gui_command.hud_write(f"<b>Welcome to MFP {version()}</b>")
 
             # midi manager
             self.start_midi()
@@ -179,8 +185,11 @@ class MFPApp (Singleton, SignalMixin):
         eoftest = await self.create("case", "''", p, p.default_scope, "eoftest")
         trig = await self.create("trigger", "2", p, p.default_scope, "trig")
         stripper = await self.create("string.strip", None, p, p.default_scope, "strip")
+        evaluator = None
+
         if self.batch_eval:
             evaluator = await self.create("eval", None, p, p.default_scope, "evaluator")
+
         batch = await self.create(
             self.batch_obj,
             self.batch_args,
@@ -194,6 +203,7 @@ class MFPApp (Singleton, SignalMixin):
         reader.connect(0, eoftest, 0)
         eoftest.connect(1, trig, 0)
         trig.connect(1, stripper, 0)
+
         if self.batch_eval:
             stripper.connect(0, evaluator, 0)
             evaluator.connect(0, batch, 0)
@@ -298,6 +308,7 @@ class MFPApp (Singleton, SignalMixin):
                 name = jobj.get("gui_params", {}).get("name")
                 patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
                 self.patches[patch.name] = patch
+
                 # FIXME -- need to call onload
                 await patch.json_deserialize(jdata)
                 await patch.create_gui()
@@ -360,7 +371,7 @@ class MFPApp (Singleton, SignalMixin):
 
     def load_extension(self, libname):
         fullpath = utils.find_file_in_path(libname, self.extpath)
-        log.warning("mfp_app.load_extension: not implemented completely")
+        log.warning(f"mfp_app.load_extension: not implemented completely, path={fullpath}")
 
     async def create(self, init_type, init_args, patch, scope, name):
         # first try: is a factory registered?
@@ -373,7 +384,7 @@ class MFPApp (Singleton, SignalMixin):
 
             if filepath:
                 log.debug("create: will load from file", filepath)
-                (typename, ctor) = Patch.register_file(filepath)
+                (_, ctor) = Patch.register_file(filepath)
 
         # third try: can we autowrap a python function?
         if ctor is None:
@@ -435,7 +446,7 @@ class MFPApp (Singleton, SignalMixin):
 
     async def cleanup(self):
         garbage = []
-        for oid, obj in self.objects.items():
+        for _, obj in self.objects.items():
             if obj.status == Processor.CTOR:
                 garbage.append(obj)
 
@@ -467,11 +478,11 @@ class MFPApp (Singleton, SignalMixin):
             parts = name.split(':')
             if len(parts) > 2:
                 return None
-            else:
-                queryobj = self.patches.get(parts[0])
-                name = parts[1]
-                if not queryobj:
-                    return None
+
+            queryobj = self.patches.get(parts[0])
+            name = parts[1]
+            if not queryobj:
+                return None
 
         parts = name.split('.')
 
@@ -500,11 +511,10 @@ class MFPApp (Singleton, SignalMixin):
 
         if obj is not Unbound:
             return obj
-        else:
-            if not quiet:
-                log.warning("resolve: can't resolve name '%s' in context %s"
-                            % (name, queryobj))
-            return None
+        if not quiet:
+            log.warning("resolve: can't resolve name '%s' in context %s"
+                        % (name, queryobj))
+        return None
 
     async def finish(self):
         log.log_func = None
@@ -540,21 +550,20 @@ class MFPApp (Singleton, SignalMixin):
         import asyncio
 
         async def wait_and_finish(*args, **kwargs):
-            import time
             await asyncio.sleep(0.5)
             await self.finish()
             log.debug("MFPApp.finish_soon: done with app.finish", threading._active)
             return True
+
         qt = threading.Thread(target=lambda *args, **kwargs: asyncio.run(wait_and_finish()))
         qt.start()
         self.leftover_threads.append(qt)
-        return None
 
     def send(self, msg, port):
         if isinstance(msg, MethodCall):
             msg.call(self)
         elif isinstance(msg, (list, tuple)):
-            msgid, msgval = msg
+            msgid, _ = msg
             # latency changed
             if msgid == 1:
                 self.signal_emit("latency")
@@ -564,15 +573,12 @@ class MFPApp (Singleton, SignalMixin):
         self.session_managed = nsm.init_nsm()
 
     def session_init(self, session_path, session_id):
-        import os
         os.mkdir(session_path)
         self.session_dir = session_path
         self.session_id = session_id
         self.session_save()
 
     async def session_save(self):
-        import os.path
-
         sessfile = open(os.path.join(self.session_dir, "session_data"), "w+")
         if sessfile is None:
             return None
@@ -591,7 +597,7 @@ class MFPApp (Singleton, SignalMixin):
             cp.set("mfp", attr, val)
 
         patches = []
-        for obj_id, patch in self.patches.items():
+        for _, patch in self.patches.items():
             await patch.save_file(os.path.join(self.session_dir, patch.name + '.mfp'))
             patches.append(patch.name + '.mfp')
 
@@ -620,7 +626,7 @@ class MFPApp (Singleton, SignalMixin):
         patches = eval(cp.get("mfp", "patches"))
 
         # if we made it this far, clean up the existing session and go
-        for obj_id, patch in list(self.patches.items()):
+        for _, patch in list(self.patches.items()):
             await patch.delete_gui()
             await patch.delete()
         self.patches = {}

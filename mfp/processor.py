@@ -18,13 +18,13 @@ from .utils import isiterable
 from . import log
 
 
-class AsyncOutput (object):
+class AsyncOutput:
     def __init__(self, value, outlet):
         self.outlet_num = outlet
         self.value = value
 
 
-class MultiOutput (object):
+class MultiOutput:
     def __init__(self):
         self.values = []
 
@@ -131,6 +131,11 @@ class Processor:
         return True
 
     def tooltip(self, port_dir=None, port_num=None, details=False):
+        tip = None
+        dsptip = None
+        hottip = None
+        lines = []
+
         if port_dir == self.PORT_IN:
             if port_num < len(self.doc_tooltip_inlet):
                 tip = self.doc_tooltip_inlet[port_num]
@@ -150,7 +155,7 @@ class Processor:
             return (('<b>[%(init_type)s] inlet %(port_num)d:</b> ' + dsptip + hottip + tip)
                     % dict(init_type=self.init_type, port_num=port_num))
 
-        elif port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
+        if port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
             if port_num < len(self.doc_tooltip_outlet):
                 tip = self.doc_tooltip_outlet[port_num]
             else:
@@ -162,62 +167,62 @@ class Processor:
 
             return (('<b>[%(init_type)s] outlet %(port_num)d:</b> ' + dsptip + tip)
                     % dict(init_type=self.init_type, port_num=port_num))
-        else:
-            # basic one-liner
-            lines = [('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type]
 
-            # details for geeks like me
-            if details:
-                # name and ID
-                lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
-                scopename = ('' if self.scope == self.patch.default_scope
-                             else self.scope.name + '.')
-                scopedname = '%s%s' % (scopename, self.name)
+        # basic one-liner
+        lines = [('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type]
 
-                lines.append('      <b>Path:</b> %s.%s' % (self.patch.name, scopedname))
-                lines.append('          <b>Messages in:</b> %s, <b>Messages out:</b> %s'
-                             % (self.count_in, self.count_out))
-                lines.append('          <b>Times triggered:</b> %s, <b>Errors:</b> %s'
-                             % (self.count_trigger, self.count_errors))
-                if self.count_errors:
-                    lines.append('          <b>Error messages:</b>')
-                    for msg, count in self.error_info.items():
-                        lines.append('              %s: %s' % (count, msg))
+        # details for geeks like me
+        if details:
+            # name and ID
+            lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
+            scopename = ('' if self.scope == self.patch.default_scope
+                         else self.scope.name + '.')
+            scopedname = '%s%s' % (scopename, self.name)
 
-                if len(self.properties):
-                    lines.append('      <b>Properties:</b>')
+            lines.append('      <b>Path:</b> %s.%s' % (self.patch.name, scopedname))
+            lines.append('          <b>Messages in:</b> %s, <b>Messages out:</b> %s'
+                         % (self.count_in, self.count_out))
+            lines.append('          <b>Times triggered:</b> %s, <b>Errors:</b> %s'
+                         % (self.count_trigger, self.count_errors))
+            if self.count_errors:
+                lines.append('          <b>Error messages:</b>')
+                for msg, count in self.error_info.items():
+                    lines.append('              %s: %s' % (count, msg))
 
-                    for k, v in self.properties.items():
-                        lines.append('          %s -> %s' % (k, v))
-                # class-provided extra details
-                otherinfo = self.tooltip_extra()
-                if otherinfo:
-                    if isinstance(otherinfo, str):
-                        otherinfo = [otherinfo]
-                    for o in otherinfo:
-                        if isinstance(o, str):
-                            lines.append('      ' + o)
+            if len(self.properties):
+                lines.append('      <b>Properties:</b>')
 
-                # OSC controllers
-                lines.append('      <b>OSC handlers:</b>')
-                minfo = {}
-                for m in self.osc_methods:
-                    s = minfo.setdefault(m[0], [])
-                    s.append(m[1])
-                for m in sorted(minfo.keys()):
-                    lines.append('          %s %s' % (m, minfo[m]))
+                for k, v in self.properties.items():
+                    lines.append('          %s -> %s' % (k, v))
+            # class-provided extra details
+            otherinfo = self.tooltip_extra()
+            if otherinfo:
+                if isinstance(otherinfo, str):
+                    otherinfo = [otherinfo]
+                for o in otherinfo:
+                    if isinstance(o, str):
+                        lines.append('      ' + o)
 
-                # MIDI controllers
-                from .mfp_app import MFPApp
-                if self.midi_filters:
-                    paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
-                    lines.append('      <b>MIDI handlers:</b>')
-                    for p in paths:
-                        lines.append('          Chan: %s, Type: %s, Number: %s'
-                                     % (p[2] if p[2] is not None else "All",
-                                        p[1] if p[1] is not None else "All",
-                                        p[3] if p[3] is not None else "All"))
-            return '\n'.join(lines)
+            # OSC controllers
+            lines.append('      <b>OSC handlers:</b>')
+            minfo = {}
+            for m in self.osc_methods:
+                s = minfo.setdefault(m[0], [])
+                s.append(m[1])
+            for m in sorted(minfo.keys()):
+                lines.append('          %s %s' % (m, minfo[m]))
+
+            # MIDI controllers
+            from .mfp_app import MFPApp
+            if self.midi_filters:
+                paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
+                lines.append('      <b>MIDI handlers:</b>')
+                for p in paths:
+                    lines.append('          Chan: %s, Type: %s, Number: %s'
+                                 % (p[2] if p[2] is not None else "All",
+                                    p[1] if p[1] is not None else "All",
+                                    p[3] if p[3] is not None else "All"))
+        return '\n'.join(lines)
 
     def tooltip_extra(self):
         return False
@@ -231,7 +236,7 @@ class Processor:
     def assign(self, patch, scope, name):
         # null case
         if (self.patch == patch) and (self.scope == scope) and (self.name == name):
-            return
+            return None
 
         if self.patch is not None and self.scope is not None and self.name is not None:
             self.patch.unbind(self.name, self.scope)
@@ -265,6 +270,10 @@ class Processor:
         self.conf(name=self.name, scope=self.scope.name)
         self.osc_init()
         return self.name
+
+    def dsp_response(self, resp_id, resp_value):
+        # override in Processor subclass
+        pass
 
     def rename(self, new_name):
         self.assign(self.patch, self.scope, new_name)
@@ -481,7 +490,7 @@ class Processor:
         if hasattr(self, "connections_out"):
             outport = 0
             for c in self.connections_out:
-                to_delete = [pr for pr in c]
+                to_delete = list(c)
                 for tobj, tport in to_delete:
                     await self.disconnect(outport, tobj, tport)
 
@@ -490,7 +499,7 @@ class Processor:
         if hasattr(self, "connections_in"):
             inport = 0
             for c in self.connections_in:
-                to_delete = [pr for pr in c]
+                to_delete = list(c)
                 for tobj, tport in to_delete:
                     await tobj.disconnect(tport, self, inport)
                 inport += 1
@@ -554,9 +563,10 @@ class Processor:
 
         if inlet > len(target.inlets):
             if isinstance(target, Patch):
-                Patch.task_nibbler.add_MFPApp().async_task(
+                MFPApp().async_task(
                     lambda args: Processor.connect(*args), 20,
-                    [self, outlet, target, inlet, show_gui])
+                    [self, outlet, target, inlet, show_gui]
+                )
                 log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
                             % (target.name, target.obj_id, len(target.inlets), inlet))
                 return True
@@ -569,9 +579,10 @@ class Processor:
         if outlet in self.dsp_outlets:
             if inlet not in target.dsp_inlets:
                 if isinstance(target, Patch):
-                    Patch.task_nibbler.add_MFPApp().async_task(
+                    MFPApp().async_task(
                         lambda args: Processor.connect(*args), 20,
-                        [self, outlet, target, inlet, show_gui])
+                        [self, outlet, target, inlet, show_gui]
+                    )
                     log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
                                 % (target.name, target.obj_id))
                     return True
@@ -689,6 +700,8 @@ class Processor:
             self.count_trigger += 1
 
     async def _send__propagate(self):
+        from .mfp_app import MFPApp
+
         output_pairs = list(zip(self.connections_out, self.outlets))
         work = []
 
@@ -708,7 +721,7 @@ class Processor:
                 for target, tinlet in conns:
                     if target is not None:
                         if self.step_debug_manager().enabled:
-                            self.step_debug_manager().add_MFPApp().async_task(
+                            MFPApp().async_task(
                                 self._send__propagate_value(target, val, tinlet),
                                 f"Send output to {target.name} inlet {tinlet}",
                                 target,
@@ -733,13 +746,15 @@ class Processor:
         self.inlets[inlet] = value
 
     async def _send(self, value, inlet=0):
+        from .mfp_app import MFPApp
+
         if self.paused:
             return []
 
         work = []
         if inlet >= 0:
             if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_MFPApp().async_task(
+                MFPApp().async_task(
                     self._send__initiate(value, inlet),
                     f"Receive input to {self.name} inlet {inlet}",
                     self
@@ -751,12 +766,12 @@ class Processor:
 
         if inlet in self.hot_inlets or inlet == -1:
             if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_MFPApp().async_task(
+                MFPApp().async_task(
                     self._send__activate(value, inlet),
                     f"Trigger processor {self.name} from inlet {inlet}",
                     self
                 )
-                self.step_debug_manager().add_MFPApp().async_task(
+                MFPApp().async_task(
                     self._send__propagate(),
                     "Send outputs to connected processors",
                     self
@@ -771,7 +786,7 @@ class Processor:
             and isinstance(value, (float, int))
         ):
             if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_MFPApp().async_task(
+                MFPApp().async_task(
                     self._send__dsp_params(value, inlet),
                     "Update parameters of DSP object",
                     self
@@ -874,7 +889,6 @@ class Processor:
             self.gui_params['export_offset_y'] = yoff
             self.gui_params['position_y'] += yoff
 
-        
         await MFPApp().gui_command.create(
             self.init_type, self.init_args, self.obj_id,
             parent_id, self.gui_params
@@ -906,11 +920,11 @@ class Processor:
         self.status = Processor.READY
 
     def property(self, *args, **kwargs):
-        if len(kwargs):
+        if kwargs and len(kwargs):
             for key, value in kwargs.items():
                 self.properties[key] = value
             return None
-        elif len(args):
+        elif args and len(args):
             return [self.properties.get(a) for a in args]
         else:
             return []

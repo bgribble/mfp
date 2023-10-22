@@ -11,11 +11,11 @@ from ..method import MethodCall
 from ..bang import Bang, Uninit
 
 
-def get_arglist(thunk): 
-    if hasattr(thunk, '__code__'): 
+def get_arglist(thunk):
+    if hasattr(thunk, '__code__'):
         return thunk.__code__.co_varnames
     elif hasattr(thunk, '__func__'):
-        return thunk.__func__.__code__.co_varnames 
+        return thunk.__func__.__code__.co_varnames
     else:
         return None
 
@@ -43,11 +43,11 @@ class CallFunction(Processor):
 class ApplyMethod(Processor):
     doc_tooltip_obj = "Create a method call object"
     doc_tooltip_inlet = ["Name of method",
-                         "Positional arguments to method call", 
+                         "Positional arguments to method call",
                          "Keyword arguments to method call" ]
-                         
+
     doc_tooltip_outlet = ["MethodCall object output"]
-                         
+
     def __init__(self, init_type, init_args, patch, scope, name):
         self.method_name = None
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
@@ -58,18 +58,18 @@ class ApplyMethod(Processor):
 
     async def trigger(self):
         pargs = None
-        kargs = None 
-       
+        kargs = None
+
         if self.inlets[0] is not Bang:
             self.method_name = str(self.inlets[0])
 
-        if self.inlets[1] is not Uninit: 
+        if self.inlets[1] is not Uninit:
             pargs = self.inlets[1]
 
         if self.inlets[2] is not Uninit:
             kargs = self.inlets[2]
 
-        if kargs is not None and pargs is not None: 
+        if kargs is not None and pargs is not None:
             self.outlets[0] = MethodCall(self.method_name, *pargs, **kargs)
         elif pargs is not None:
             self.outlets[0] = MethodCall(self.method_name, *pargs)
@@ -80,7 +80,7 @@ class ApplyMethod(Processor):
 
 
 class GetElement(Processor):
-    doc_tooltip_obj = "Get element or attribute from object" 
+    doc_tooltip_obj = "Get element or attribute from object"
     doc_tooltip_inlet = ["Object to get from",
                          "Element to get (default: initarg 0)" ]
     doc_tooltip_outlet = ["Specified element output", "Passthru of source"]
@@ -117,7 +117,7 @@ class GetElement(Processor):
         self.outlets[1] = self.inlets[0]
 
 class SetElement(Processor):
-    doc_tooltip_obj = "Set element or attribute of object" 
+    doc_tooltip_obj = "Set element or attribute of object"
     doc_tooltip_inlet = ["Object to modify",
                          "Element to set (default: initarg 0)",
                          "Value to set (default: initarg 1)"]
@@ -126,8 +126,8 @@ class SetElement(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
-        self.element = None 
-        self.newval = None 
+        self.element = None
+        self.newval = None
 
         if len(initargs) > 1:
             self.newval = initargs[1]
@@ -138,27 +138,27 @@ class SetElement(Processor):
     async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.element = self.inlets[1]
-            self.inlets[1] = Uninit 
+            self.inlets[1] = Uninit
 
-        if self.inlets[2] is not Uninit: 
+        if self.inlets[2] is not Uninit:
             self.newval = self.inlets[2]
-            self.inlets[2] = Uninit 
+            self.inlets[2] = Uninit
 
         if self.element is None:
             return
 
         target = self.inlets[0]
-        self.inlets[0] = Uninit 
+        self.inlets[0] = Uninit
 
         if isinstance(self.element, (int, float)) or isinstance(target, dict):
-            target[self.element] = self.newval 
+            target[self.element] = self.newval
         elif isinstance(self.element, str):
             setattr(target, self.element, self.newval)
 
-        self.outlets[0] = target 
+        self.outlets[0] = target
 
 class GetSlice(Processor):
-    doc_tooltip_obj = "Get a slice of list elements" 
+    doc_tooltip_obj = "Get a slice of list elements"
     doc_tooltip_inlet = ["Object to get from",
                          "Start of slice (default: initarg 0)",
                          "End of slice (default: end of input)"]
@@ -175,7 +175,7 @@ class GetSlice(Processor):
             self.stride = initargs[2]
         if len(initargs) > 1:
             self.slice_end = initargs[1]
-        if len(initargs): 
+        if len(initargs):
             self.slice_start = initargs[0]
 
     async def trigger(self):
@@ -225,8 +225,8 @@ class PyEval(Processor):
         for name, value in kwargs.items():
             self.bindings[name] = value
 
-class PyFunc(Processor): 
-    doc_tooltip_obj = "Evaluate function" 
+class PyFunc(Processor):
+    doc_tooltip_obj = "Evaluate function"
 
     def __init__(self, init_type, init_args, patch, scope, name):
         if init_args:
@@ -240,11 +240,11 @@ class PyFunc(Processor):
 
         if arguments is not None:
             self.argcount = len(arguments)
-            self.doc_tooltip_inlet = [] 
+            self.doc_tooltip_inlet = []
             for v in arguments:
                 self.doc_tooltip_inlet.append("Argument %s" % v)
-        else: 
-            self.argcount = None 
+        else:
+            self.argcount = None
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
 
         Processor.__init__(self, self.argcount or 1, 1, init_type, init_args, patch, scope, name)
@@ -253,17 +253,17 @@ class PyFunc(Processor):
         if isinstance(self.inlets[0], MethodCall):
             self.inlets[0].call(self)
         elif self.argcount:
-            self.outlets[0] = self.thunk(*self.inlets[:self.argcount]) 
-        else: 
-            self.outlets[0] = self.thunk(self.inlets[0]) 
-            
+            self.outlets[0] = self.thunk(*self.inlets[:self.argcount])
+        else:
+            self.outlets[0] = self.thunk(self.inlets[0])
 
-class PyAutoWrap(Processor): 
+
+class PyAutoWrap(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         self.thunk = patch.parse_obj(init_type)
         self.argcount = 0
         initargs, kwargs = patch.parse_args(init_args)
-       
+
         arguments = get_arglist(self.thunk)
 
         if arguments is not None:
@@ -273,7 +273,7 @@ class PyAutoWrap(Processor):
             self.doc_tooltip_inlet = []
             for v in arguments:
                 self.doc_tooltip_inlet.append("Argument %s" % v)
-        else: 
+        else:
             self.argcount = 0
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
         Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name)
@@ -288,7 +288,7 @@ class PyAutoWrap(Processor):
         elif self.argcount:
             args = [ x for x in self.inlets[:self.argcount] if x is not Uninit]
             self.outlets[0] = self.thunk(*args)
-        else: 
+        else:
             arg = self.inlets[0]
             self.outlets[0] = self.thunk(arg)
 
@@ -342,7 +342,7 @@ class PyNullary(Processor):
 def mk_nullary(pyfunc, name, doc=None):
     def factory(iname, args, patch, scope, obj_name):
         proc = PyNullary(pyfunc, iname, args, patch, scope, obj_name)
-        if doc: 
+        if doc:
             proc.doc_tooltip_obj = doc
         return proc
     MFPApp().register(name, factory)
@@ -429,7 +429,7 @@ def register():
     mk_unary(operator.neg, "neg", "Negate value")
     mk_unary(cmath.phase, "phase", "Angle (radians) of complex number")
 
-    # logical/bit ops 
+    # logical/bit ops
     mk_unary(operator.not_, "not", "Logical negate")
     mk_binary(operator.and_, "and", "Logical and")
     mk_binary(operator.or_, "or", "Logical or")
@@ -446,7 +446,7 @@ def register():
     mk_unary(type, "type", "Extract object type")
     mk_unary(dict, "dict", "Convert to dictionary")
 
-    from datetime import datetime 
+    from datetime import datetime
     mk_nullary(datetime.now, "now", "Current time-of-day")
     mk_unary(applyargs(datetime), "datetime", "Create a datetime object")
     mk_unary(make_date, "date", "Convert to a date")

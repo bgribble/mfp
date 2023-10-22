@@ -272,8 +272,10 @@ class Patch(Processor):
 
         try:
             self.outlet_objects.remove(obj)
-            self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects)
-                                if p[1] and p[1].init_type == 'outlet~' ]
+            self.dsp_outlets = [
+                p[0] for p in enumerate(self.outlet_objects)
+                if p[1] and p[1].init_type == 'outlet~'
+            ]
             self.gui_params['dsp_outlets'] = self.dsp_outlets
         except ValueError:
             pass
@@ -284,6 +286,8 @@ class Patch(Processor):
             pass
 
     async def connect(self, outlet, target, inlet, show_gui=True):
+        from .mfp_app import MFPApp
+
         async def _patch_connect_retry(args):
             rv = await Processor.connect(*args)
             return rv
@@ -292,7 +296,7 @@ class Patch(Processor):
         # the loadbang
         initial = await Processor.connect(self, outlet, target, inlet, show_gui)
         if not initial:
-            self.task_nibbler.add_MFPApp().async_task(
+            MFPApp().async_task(
                 lambda args: _patch_connect_retry(args), 20,
                 [self, outlet, target, inlet, show_gui]
             )

@@ -207,6 +207,7 @@ class GlobalMode (InputMode):
         return True
 
     async def selbox_start(self, select_mode):
+        log.debug(f"[selbox_start] select_mode={select_mode} pointer_obj={self.manager.pointer_obj} selected={self.window.selected}")
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:

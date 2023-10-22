@@ -17,7 +17,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('GtkClutter', '1.0')
 gi.require_version('Clutter', '1.0')
 
-from gi.repository import Clutter
+from gi.repository import Clutter  # noqa
 
 
 class PatchElement (Store, Clutter.Group):
@@ -204,7 +204,7 @@ class PatchElement (Store, Clutter.Group):
         for c in self.connections_in:
             c.draw()
 
-    def move_z (self, z):
+    def move_z(self, z):
         self.position_z = z
         self.set_z_position(z)
 
@@ -575,7 +575,6 @@ class PatchElement (Store, Clutter.Group):
 
         self.draw_ports()
         self.stage.refresh(self)
-
 
     def move_to_layer(self, layer):
         layer_child = False
