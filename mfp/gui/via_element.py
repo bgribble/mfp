@@ -55,7 +55,7 @@ class ViaElement (PatchElement):
         # configure label
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
-        self.label.connect('text-changed', self.text_changed_cb)
+        self.label.signal_listen('text-changed', self.text_changed_cb)
 
         self.move(x, y)
         self.set_size(self.VIA_SIZE + 2 * self.VIA_FUDGE,

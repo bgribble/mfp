@@ -113,9 +113,9 @@ class ConnectionMode (InputMode):
 
 
     async def disable(self):
-        self.window.remove_callback(self.select_cbid)
+        self.window.signal_unlisten(self.select_cbid)
         self.select_cbid = None
-        self.window.remove_callback(self.remove_cbid)
+        self.window.signal_unlisten(self.remove_cbid)
         self.remove_cbid = None
 
         if self.connection:

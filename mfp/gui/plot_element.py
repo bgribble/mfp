@@ -103,7 +103,7 @@ class PlotElement (PatchElement):
         self.label.set_position(self.label_off_x, self.label_off_y)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
-        self.label.connect('text-changed', self.label_changed_cb)
+        self.label.signal_listen('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
 
         # chart created later

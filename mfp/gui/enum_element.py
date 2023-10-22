@@ -51,7 +51,7 @@ class EnumElement (PatchElement):
         self.label.set_position(4, 1)
         self.label.set_font_name(self.get_fontspec())
         self.label.set_color(self.get_color('text-color'))
-        self.label.connect('text-changed', self.text_changed_cb)
+        self.label.signal_listen('text-changed', self.text_changed_cb)
         self.label.set_text(self.format_value(self.value))
 
         # click handler

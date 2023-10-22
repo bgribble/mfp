@@ -53,7 +53,7 @@ class TextElement (PatchElement):
         self.move(x, y)
         self.set_size(12, 12)
         self.set_reactive(True)
-        self.label_changed_cb = self.label.connect('text-changed', self.text_changed_cb)
+        self.label_changed_cb = self.label.signal_listen('text-changed', self.text_changed_cb)
 
     def update(self):
         if not self.get_style('canvas-size'):
