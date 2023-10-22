@@ -10,10 +10,12 @@ from mfp import log
 from mfp.mfp_app import MFPApp
 from mfp.gui_main import MFPGUI
 from .modes.label_edit import LabelEditMode
+from .text_widget import TextWidget
 from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
 
 from datetime import datetime
+
 
 class PlotElement (PatchElement):
     display_type = "plot"
@@ -31,7 +33,6 @@ class PlotElement (PatchElement):
     style_defaults = {
         'axis-color': 'default-alt-fill-color'
     }
-
 
     def __init__(self, window, x, y, params={}):
         PatchElement.__init__(self, window, x, y)
@@ -86,7 +87,7 @@ class PlotElement (PatchElement):
 
     def create_display(self, width, height):
         self.rect = clutter.Rectangle()
-        self.label = clutter.Text()
+        self.label = TextWidget(self)
 
         # group
         clutter.Group.set_size(self, width, height)
@@ -109,7 +110,6 @@ class PlotElement (PatchElement):
         # chart created later
         self.xyplot = None
 
-        self.add_actor(self.label)
         self.add_actor(self.rect)
         self.set_reactive(True)
 
@@ -141,7 +141,7 @@ class PlotElement (PatchElement):
                 self.obj_id, 0, "draw_complete"
             )
 
-        if self.last_draw != None:
+        if self.last_draw is not None:
             time_since_last = datetime.now() - self.last_draw
             delta_msec = time_since_last.total_seconds() * 1000.0
             if (delta_msec > self.min_interval):
