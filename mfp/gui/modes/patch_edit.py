@@ -104,12 +104,12 @@ class PatchEditMode (InputMode):
     async def _add_element(self, factory):
         await self.window.unselect_all()
         if self.autoplace_mode is None:
-            self.window.add_element(factory)
+            await self.window.add_element(factory)
         else:
             dx = factory.style_defaults.get('autoplace-dx', 0)
             dy = factory.style_defaults.get('autoplace-dy', 0)
 
-            self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
+            await self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
 

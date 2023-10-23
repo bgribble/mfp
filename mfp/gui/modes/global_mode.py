@@ -5,13 +5,13 @@ global_mode.py: Global input mode bindings
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+from mfp.gui_main import MFPGUI
+from mfp import log
 from ..input_mode import InputMode
 from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
 from .enum_control import EnumEditMode
 from ..input_manager import InputManager
-from mfp.gui_main import MFPGUI
-from mfp import log
 
 
 class GlobalMode (InputMode):
@@ -119,18 +119,20 @@ class GlobalMode (InputMode):
         self.window.content_console_pane.set_position(oldpos - 1)
         return False
 
-    def transient_msg(self):
+    async def transient_msg(self):
         from ..message_element import TransientMessageElement
         if self.window.selected:
-            return self.window.add_element(TransientMessageElement)
-        else:
-            return False
+            return await self.window.add_element(TransientMessageElement)
+        return False
 
     async def hover(self, details):
         from ..patch_element import PatchElement
         for m in self.manager.minor_modes:
-            if m.enabled and isinstance(m, (TransientMessageEditMode, LabelEditMode,
-                                            EnumEditMode)):
+            if (
+                m.enabled and isinstance(
+                    m, (TransientMessageEditMode, LabelEditMode, EnumEditMode)
+                )
+            ):
                 details = False
 
         o = self.manager.pointer_obj
@@ -207,12 +209,11 @@ class GlobalMode (InputMode):
         return True
 
     async def selbox_start(self, select_mode):
-        log.debug(f"[selbox_start] select_mode={select_mode} pointer_obj={self.manager.pointer_obj} selected={self.window.selected}")
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:
                     await self.window.unselect_all()
-                    self.window.select(self.manager.pointer_obj)
+                    await self.window.select(self.manager.pointer_obj)
                     raise InputManager.InputNeedsRequeue()
 
                 if self.allow_selection_drag:
@@ -223,7 +224,7 @@ class GlobalMode (InputMode):
         elif select_mode is True:
             if (self.manager.pointer_obj
                     and self.manager.pointer_obj not in self.window.selected):
-                self.window.select(self.manager.pointer_obj)
+                await self.window.select(self.manager.pointer_obj)
             self.selbox_started = True
         else:
             if self.manager.pointer_obj in self.window.selected:
@@ -256,29 +257,31 @@ class GlobalMode (InputMode):
                     obj.drag(dx, dy)
             return True
 
-        enclosed = self.window.show_selection_box(self.drag_start_x, self.drag_start_y,
-                                                  self.drag_last_x, self.drag_last_y)
+        enclosed = self.window.show_selection_box(
+            self.drag_start_x, self.drag_start_y,
+            self.drag_last_x, self.drag_last_y
+        )
 
         for obj in enclosed:
             if select_mode:
                 if obj not in self.window.selected:
                     if obj not in self.selbox_changed:
                         self.selbox_changed.append(obj)
-                    self.window.select(obj)
+                    await self.window.select(obj)
             else:
                 if obj not in self.selbox_changed:
                     self.selbox_changed.append(obj)
                     if obj in self.window.selected:
                         await self.window.unselect(obj)
                     else:
-                        self.window.select(obj)
+                        await self.window.select(obj)
         new_changed = []
         for obj in self.selbox_changed:
             if obj not in enclosed:
                 if obj in self.window.selected:
                     await self.window.unselect(obj)
                 else:
-                    self.window.select(obj)
+                    await self.window.select(obj)
             else:
                 new_changed.append(obj)
         self.selbox_changed = new_changed
@@ -331,7 +334,6 @@ class GlobalMode (InputMode):
             await self.window.quit()
 
     async def toggle_pause(self):
-        from mfp import log
         try:
             paused = await MFPGUI().mfp.toggle_pause()
             if paused:

@@ -174,14 +174,14 @@ class GUICommand:
         elif obj is not None:
             await obj.delete()
 
-    def select(self, obj_id):
+    async def select(self, obj_id):
         from .gui_main import MFPGUI
         from .gui.patch_info import PatchInfo
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchInfo):
             MFPGUI().appwin.layer_select(obj.layers[0])
         else:
-            MFPGUI().appwin.select(obj)
+            await MFPGUI().appwin.select(obj)
 
     def load_start(self):
         from .gui_main import MFPGUI

@@ -168,7 +168,7 @@ class AppWindow (SignalMixin):
     def refresh(self, element):
         self.backend.refresh(element)
 
-    def add_element(self, factory, x=None, y=None):
+    async def add_element(self, factory, x=None, y=None):
         if x is None:
             x = self.input_mgr.pointer_x
         if y is None:
@@ -185,7 +185,7 @@ class AppWindow (SignalMixin):
         self.active_layer().add(b)
         self.register(b)
         self.refresh(b)
-        self.select(b)
+        await self.select(b)
 
         b.begin_edit()
         return True

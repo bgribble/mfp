@@ -29,7 +29,7 @@ class SelectMRUMode (InputMode):
         self.select_cbid = self.window.signal_listen("select", self.touch)
         self.remove_cbid = self.window.signal_listen("remove", self.forget)
 
-    def select_next(self):
+    async def select_next(self):
         try:
             curloc = SelectMRUMode.mru_list.index(self.window.selected)
         except:
@@ -39,7 +39,7 @@ class SelectMRUMode (InputMode):
             newloc = curloc + 1
         else:
             newloc = 0
-        self.window.select(SelectMRUMode.mru_list[newloc])
+        await self.window.select(SelectMRUMode.mru_list[newloc])
         return True
 
     def key_release(self, stage, event):

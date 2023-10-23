@@ -103,10 +103,10 @@ class EnumControlMode (InputMode):
         return True
 
 
-    def drag_start(self):
+    async def drag_start(self):
         if self.manager.pointer_obj == self.enum:
             if self.manager.pointer_obj not in self.window.selected:
-                self.window.select(self.manager.pointer_obj)
+                await self.window.select(self.manager.pointer_obj)
 
             self.drag_started = True
             self.drag_start_x = self.manager.pointer_x

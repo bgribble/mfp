@@ -54,7 +54,7 @@ async def patch_new(self):
 
 
 @extends(AppWindow)
-def _select(self, obj):
+async def _select(self, obj):
     if (obj is None) or (not isinstance(obj, PatchElement)) or (obj in self.selected):
         return
 
@@ -62,15 +62,15 @@ def _select(self, obj):
     obj.select()
 
     self.backend.select(obj)
-    MFPGUI().async_task(self.signal_emit("select", obj))
+    await self.signal_emit("select", obj)
 
 
 @extends(AppWindow)
-def select(self, obj):
+async def select(self, obj):
     if obj in self.selected:
         return True
 
-    self._select(obj)
+    await self._select(obj)
     return True
 
 
@@ -102,7 +102,7 @@ async def select_all(self):
     await self.unselect_all()
     for obj in self.objects:
         if obj.layer == self.active_layer():
-            self.select(obj)
+            await self.select(obj)
     return True
 
 
@@ -138,7 +138,7 @@ async def select_next(self):
     for count in range(len(self.selected_layer.objects)):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
             await self.unselect_all()
-            self.select(self.selected_layer.objects[candidate])
+            await self.select(self.selected_layer.objects[candidate])
             return True
         candidate = (candidate + 1) % len(self.selected_layer.objects)
     return False
@@ -163,7 +163,7 @@ async def select_prev(self):
     while candidate > -len(self.selected_layer.objects):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
             await self.unselect_all()
-            self.select(self.selected_layer.objects[candidate])
+            await self.select(self.selected_layer.objects[candidate])
             return True
         candidate -= 1
 
