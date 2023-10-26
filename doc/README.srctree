@@ -114,7 +114,7 @@ Main window:
                           management 
    patch_window_views.py  Additional methods of PatchWindow for  
                           object and layer view management 
-   patch_info.py          PatchInfo class, one for each patch loaded for 
+   patch_info.py          PatchDisplay class, one for each patch loaded for 
                           editing 
    layer.py               Layer class, one for each layer of each patch 
                           loaded for editing

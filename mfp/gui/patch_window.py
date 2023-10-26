@@ -95,10 +95,10 @@ class AppWindow (SignalMixin):
                 self.layer_select(self.selected_patch.layers[0])
             self.backend.load_complete()
 
-    def add_patch(self, patch_info):
-        self.patches.append(patch_info)
-        self.selected_patch = patch_info
-        if len(patch_info.layers):
+    def add_patch(self, patch_display):
+        self.patches.append(patch_display)
+        self.selected_patch = patch_display
+        if len(patch_display.layers):
             self.layer_select(self.selected_patch.layers[0])
 
     def object_visible(self, obj):
@@ -191,8 +191,7 @@ class AppWindow (SignalMixin):
         return True
 
     async def quit(self, *rest):
-        from mfp.gui_main import MFPGUI
-        from .patch_info import PatchInfo
+        from .patch_display import PatchDisplay
         log.debug("quit: received command from GUI or WM")
 
         self.close_in_progress = True
@@ -201,7 +200,7 @@ class AppWindow (SignalMixin):
             for p in to_delete:
                 await p.delete()
             allpatches = await MFPGUI().mfp.open_patches()
-            guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchInfo)]
+            guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchDisplay)]
         except Exception as e:
             log.debug(f"Error while quitting: {e}")
             raise

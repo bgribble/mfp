@@ -3,7 +3,7 @@ from ..utils import extends
 from ..mfp_command import MFPCommand
 from .patch_window import AppWindow
 from .base_element import BaseElement
-from .patch_info import PatchInfo
+from .patch_display import PatchDisplay
 from .layer import Layer
 from mfp import log
 
@@ -12,13 +12,13 @@ def init_object_view(self):
     def get_obj_name(o):
         if isinstance(o, BaseElement):
             return o.obj_name
-        elif isinstance(o, PatchInfo):
+        elif isinstance(o, PatchDisplay):
             return "%s (%s)" % (o.obj_name, o.context_name)
         elif isinstance(o, tuple):
             return o[0]
 
     def obj_name_edited(obj, new_name):
-        if isinstance(obj, (BaseElement, PatchInfo)):
+        if isinstance(obj, (BaseElement, PatchDisplay)):
             obj.obj_name = new_name
             MFPGUI().async_task(MFPGUI().mfp.rename_obj(obj.obj_id, new_name))
             obj.send_params()
@@ -34,7 +34,7 @@ def init_object_view(self):
 
         if isinstance(obj, BaseElement):
             parent = (obj.scope or obj.layer.scope, obj.layer.patch)
-        elif isinstance(obj, PatchInfo):
+        elif isinstance(obj, PatchDisplay):
             parent = None
         else:
             parent = (self.selected_patch,)
@@ -45,12 +45,12 @@ def init_object_view(self):
         self._select(obj)
         if isinstance(obj, BaseElement):
             self.layer_select(obj.layer)
-        elif isinstance(obj, PatchInfo):
+        elif isinstance(obj, PatchDisplay):
             self.layer_select(obj.layers[0])
         elif isinstance(obj, tuple):
             scope = obj[0]
             patch = obj[1]
-            if isinstance(patch, PatchInfo):
+            if isinstance(patch, PatchDisplay):
                 for l in patch.layers:
                     if l.scope == scope:
                         self.layer_select(l)
@@ -70,13 +70,13 @@ def init_layer_view(self):
     def get_sortname(o):
         if isinstance(o, Layer):
             return o.patch.obj_name + ':%04d' % o.patch.layers.index(o)
-        elif isinstance(o, PatchInfo):
+        elif isinstance(o, PatchDisplay):
             return "%s (%s)" % (o.obj_name, o.context_name)
 
     def get_layer_name(o):
         if isinstance(o, Layer):
             return o.name
-        elif isinstance(o, PatchInfo):
+        elif isinstance(o, PatchDisplay):
             return "%s (%s)" % (o.obj_name, o.context_name)
 
     def get_layer_scopename(o):
@@ -92,7 +92,7 @@ def init_layer_view(self):
             for lobj in self.objects:
                 if lobj.layer == obj:
                     lobj.send_params()
-        elif isinstance(obj, (BaseElement, PatchInfo)):
+        elif isinstance(obj, (BaseElement, PatchDisplay)):
             obj.obj_name = new_value
             MFPGUI().async_task(MFPGUI().mfp.rename_obj(obj.obj_id, new_value))
             obj.send_params()
@@ -116,7 +116,7 @@ def init_layer_view(self):
         return True
 
     def sel_layer(l):
-        if isinstance(l, PatchInfo):
+        if isinstance(l, PatchDisplay):
             self.layer_select(l.layers[0])
         else:
             self.layer_select(l)

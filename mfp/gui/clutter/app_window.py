@@ -12,7 +12,7 @@ from ..backend_interfaces import AppWindowBackend
 
 from ..connection_element import ConnectionElement
 from ..base_element import BaseElement
-from ..patch_info import PatchInfo
+from ..patch_display import PatchDisplay
 
 from .tree_display import TreeDisplay
 
@@ -586,7 +586,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 obj = MFPGUI().recall(o)
                 if obj is None:
                     return True
-                if not isinstance(obj, PatchInfo):
+                if not isinstance(obj, PatchDisplay):
                     obj.move_to_layer(self.selected_layer)
                     if obj not in self.selected:
                         self.app.select(MFPGUI().recall(o))
@@ -646,7 +646,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.object_view.remove(element)
 
     def refresh(self, element):
-        if isinstance(element, PatchInfo):
+        if isinstance(element, PatchDisplay):
             self.object_view.update(element, None)
             self.layer_view.update(element, None)
             return
