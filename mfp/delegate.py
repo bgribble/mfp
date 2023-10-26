@@ -44,6 +44,7 @@ class delegatemethod:
 
 class DelegateMixin:
     def __init__(self, delegator):
+        self.wrapper = delegator
         for attr in self.delegated_methods:
             setattr(delegator, attr, self._delegate_helper(attr))
 

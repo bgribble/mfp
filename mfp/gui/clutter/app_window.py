@@ -1,3 +1,9 @@
+"""
+clutter/app_window.py - Clutter backend for main app window
+
+wrapper object delegates backend-specific methods here
+"""
+
 import pkgutil
 import sys
 
@@ -19,11 +25,6 @@ from .tree_display import TreeDisplay
 
 class ClutterAppWindowBackend (AppWindowBackend):
     backend_name = "clutter"
-
-    def __init__(self, app_window):
-        self.app = app_window
-
-        super().__init__(app_window)
 
     def render(self):
         # clutter backend does not need a render call
@@ -57,54 +58,6 @@ class ClutterAppWindowBackend (AppWindowBackend):
             log.error("Caught GUI exception:", e)
             log.debug_traceback()
             sys.stdout.flush()
-
-    ################################
-    # FIXME compat properties
-
-    @property
-    def view_x(self):
-        return self.app.view_x
-
-    @property
-    def view_y(self):
-        return self.app.view_y
-
-    @property
-    def zoom(self):
-        return self.app.zoom
-
-    @property
-    def load_in_progress(self):
-        return self.app.load_in_progress
-
-    @property
-    def object_counts_by_type(self):
-        return self.app.object_counts_by_type
-
-    @property
-    def selected(self):
-        return self.app.selected
-
-    @property
-    def input_mgr(self):
-        return self.app.input_mgr
-
-    @property
-    def selected_layer(self):
-        return self.app.selected_layer
-
-    @property
-    def color_bg(self):
-        return self.app.color_bg
-
-    def active_layer(self):
-        return self.app.active_layer()
-
-    @property
-    def selected_patch(self):
-        return self.app.selected_patch
-
-    ################################
 
     def _init_window(self):
         from gi.repository import Clutter, Gtk, GtkClutter
@@ -163,7 +116,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self._init_input()
 
         # configure Clutter stage
-        self.stage.set_color(self.app.color_bg)
+        self.stage.set_color(self.wrapper.color_bg)
         self.stage.set_property('user-resizable', True)
 
         self.selection_box = None
@@ -175,14 +128,14 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.async_cb_events = set()
 
     def _init_object_view(self):
-        obj_cols, selected_callback = self.app.init_object_view()
+        obj_cols, selected_callback = self.wrapper.init_object_view()
         object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
         object_view.select_cb = selected_callback
-        object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.app._unselect(obj))
+        object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.wrapper._unselect(obj))
         return object_view
 
     def _init_layer_view(self):
-        layer_cols, selected_callback = self.app.init_layer_view()
+        layer_cols, selected_callback = self.wrapper.init_layer_view()
         layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
         layer_view.select_cb = selected_callback
         layer_view.unselect_cb = None
@@ -194,11 +147,11 @@ class ClutterAppWindowBackend (AppWindowBackend):
         if self.autoplace_marker is None:
             self.autoplace_marker = Clutter.Text()
             self.autoplace_marker.set_text("+")
-            self.autoplace_layer = self.selected_layer
+            self.autoplace_layer = self.wrapper.selected_layer
             self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
-        elif self.autoplace_layer != self.selected_layer:
+        elif self.autoplace_layer != self.wrapper.selected_layer:
             self.autoplace_layer.backend.group.remove_actor(self.autoplace_marker)
-            self.autoplace_layer = self.selected_layer
+            self.autoplace_layer = self.wrapper.selected_layer
             self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
         self.autoplace_marker.set_position(x, y)
         self.autoplace_marker.set_depth(-10)
@@ -240,7 +193,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         def grab_handler(stage, event):
             try:
-                r = self.input_mgr.handle_event(stage, event)
+                r = self.wrapper.input_mgr.handle_event(stage, event)
                 if not self.embed.has_focus():
                     self.grab_focus()
                     return False
@@ -253,7 +206,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         def handler(stage, event):
             try:
-                return self.input_mgr.handle_event(stage, event)
+                return self.wrapper.input_mgr.handle_event(stage, event)
             except Exception as e:
                 log.error("Error handling UI event", event)
                 log.debug(e)
@@ -267,14 +220,14 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 e.keyval = event.keyval
                 e.type = Clutter.EventType.KEY_PRESS
 
-                return self.input_mgr.handle_event(self.stage, e)
+                return self.wrapper.input_mgr.handle_event(self.stage, e)
             else:
                 return False
 
         def signal_repeater(signal_name):
             # FIXME need to transform event here
             return lambda target, event: MFPGUI().async_task(
-                self.app.signal_emit(signal_name, event)
+                self.wrapper.signal_emit(signal_name, event)
             )
 
         self.grab_focus()
@@ -290,7 +243,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.stage.connect('leave-event', handler)
         self.stage.connect('scroll-event', grab_handler)
 
-        self.stage.connect('destroy', self.app.quit)
+        self.stage.connect('destroy', self.wrapper.quit)
         self.embed.connect('size-allocate', resize_cb)
 
         self.stage.connect('key-press-event', signal_repeater("key-press-event"))
@@ -303,7 +256,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         ta.set_tab(0, Pango.TabAlign.LEFT, 120)
         self.builder.get_object("key_bindings_text").set_tabs(ta)
 
-        self.input_mgr.pointer_x, self.input_mgr.pointer_y = self.embed.get_pointer()
+        self.wrapper.input_mgr.pointer_x, self.wrapper.input_mgr.pointer_y = self.embed.get_pointer()
 
         # show keybindings
         self.display_bindings()
@@ -314,7 +267,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         console_visible = oldpos < (alloc.height - 2)
         if not console_visible:
-            next_pos = self.input_mgr.global_mode.previous_console_position
+            next_pos = self.wrapper.input_mgr.global_mode.previous_console_position
             self.content_console_pane.set_position(next_pos)
 
         self.bottom_notebook.set_current_page(1)
@@ -373,12 +326,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
         from gi.repository import Clutter
 
         lines = ["Active key/mouse bindings"]
-        for m in self.input_mgr.minor_modes:
+        for m in self.wrapper.input_mgr.minor_modes:
             lines.append("\nMinor mode: " + m.description)
             for b in m.directory():
                 lines.append("%s\t%s" % (b[0], b[1]))
 
-        m = self.input_mgr.major_mode
+        m = self.wrapper.input_mgr.major_mode
         lines.append("\nMajor mode: " + m.description)
 
         if self.hud_mode_txt is None:
@@ -393,7 +346,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
             lines.append("%s\t%s" % (b[0], b[1]))
 
         lines.append("\nGlobal bindings:")
-        m = self.input_mgr.global_mode
+        m = self.wrapper.input_mgr.global_mode
         for b in m.directory():
             lines.append("%s\t%s" % (b[0], b[1]))
 
@@ -446,7 +399,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.hud_history = new_history
 
         if not len(self.hud_history) or self.hud_history[0][2] != msg:
-            for actor, anim, oldmsg in self.hud_history:
+            for actor, anim, _ in self.hud_history:
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
         else:
             self.hud_history[0][1].completed()
@@ -514,13 +467,13 @@ class ClutterAppWindowBackend (AppWindowBackend):
         if self.selection_box is None:
             self.selection_box = Clutter.Rectangle()
             self.selection_box.set_border_width(1.0)
-            self.selection_box.set_color(self.app.color_transparent)
-            self.selection_box.set_border_color(self.app.color_unselected)
-            self.selection_box_layer = self.selected_layer
+            self.selection_box.set_color(self.wrapper.color_transparent)
+            self.selection_box.set_border_color(self.wrapper.color_unselected)
+            self.selection_box_layer = self.wrapper.selected_layer
             self.selection_box_layer.backend.group.add_actor(self.selection_box)
-        elif self.selection_box_layer != self.selected_layer:
+        elif self.selection_box_layer != self.wrapper.selected_layer:
             self.selection_box_layer.backend.group.remove_actor(self.selection_box)
-            self.selection_box_layer = self.selected_layer
+            self.selection_box_layer = self.wrapper.selected_layer
             self.selection_box_layer.backend.group.add_actor(self.selection_box)
         self.selection_box.set_position(x0, y0)
         self.selection_box.set_size(max(1, x1-x0), max(1, y1-y0))
@@ -529,7 +482,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         enclosed = []
         selection_corners = [(x0, y0), (x1, y0),
                              (x0, y1), (x1, y1)]
-        for obj in self.selected_layer.objects:
+        for obj in self.wrapper.selected_layer.objects:
             if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
                 continue
             corners = obj.corners()
@@ -545,27 +498,25 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.selection_box = None
 
     async def clipboard_cut(self, pointer_pos):
-        if self.selected:
+        if self.wrapper.selected:
             await self.clipboard_copy(pointer_pos)
             await self.delete_selected()
             return True
-        else:
-            return False
+        return False
 
     async def clipboard_copy(self, pointer_pos):
         from gi.repository import Gtk, Gdk
 
-        if self.selected:
+        if self.wrapper.selected:
             cliptxt = await MFPGUI().mfp.clipboard_copy(
                 pointer_pos,
-                [o.obj_id for o in self.selected if o.obj_id is not None]
+                [o.obj_id for o in self.wrapper.selected if o.obj_id is not None]
             )
             clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
             if cliptxt:
                 clipboard.set_text(cliptxt, -1)
             return True
-        else:
-            return False
+        return False
 
     async def clipboard_paste(self, pointer_pos=None):
         from gi.repository import Gtk, Gdk
@@ -576,20 +527,20 @@ class ClutterAppWindowBackend (AppWindowBackend):
             return False
 
         newobj = await MFPGUI().mfp.clipboard_paste(
-            cliptxt, self.selected_patch.obj_id,
-            self.selected_layer.scope, None
+            cliptxt, self.wrapper.selected_patch.obj_id,
+            self.wrapper.selected_layer.scope, None
         )
 
         if newobj is not None:
-            await self.app.unselect_all()
+            await self.wrapper.unselect_all()
             for o in newobj:
                 obj = MFPGUI().recall(o)
                 if obj is None:
                     return True
                 if not isinstance(obj, PatchDisplay):
-                    obj.move_to_layer(self.selected_layer)
-                    if obj not in self.selected:
-                        self.app.select(MFPGUI().recall(o))
+                    obj.move_to_layer(self.wrapper.selected_layer)
+                    if obj not in self.wrapper.selected:
+                        self.wrapper.select(MFPGUI().recall(o))
             return False
         else:
             return False
@@ -603,14 +554,14 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
     def canvas_to_screen(self, x, y):
         return (
-            self.view_x + x / self.zoom,
-            self.view_y + y / self.zoom,
+            self.wrapper.view_x + x / self.wrapper.zoom,
+            self.wrapper.view_y + y / self.wrapper.zoom,
         )
 
     def rezoom(self):
         w, h = self.group.get_size()
-        self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
-        self.group.set_position(self.view_x, self.view_y)
+        self.group.set_scale_full(self.wrapper.zoom, self.wrapper.zoom, w / 2.0, h / 2.0)
+        self.group.set_position(self.wrapper.view_x, self.wrapper.view_y)
 
     def register(self, element):
         if element.container is None:
@@ -620,7 +571,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 element.container = element.layer.backend.group
 
         if not isinstance(element, ConnectionElement):
-            if self.load_in_progress:
+            if self.wrapper.load_in_progress:
                 update = False
             else:
                 update = True
@@ -651,7 +602,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.layer_view.update(element, None)
             return
 
-        if self.load_in_progress:
+        if self.wrapper.load_in_progress:
             return
 
         if isinstance(element.container, BaseElement):
