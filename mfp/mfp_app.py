@@ -109,7 +109,7 @@ class MFPApp (Singleton, SignalMixin):
         from carp.channel import UnixSocketChannel
         from carp.host import Host
 
-        log.debug(f"Main thread started, pid = {os.getpid()}")
+        log.info(f"Main thread started, pid = {os.getpid()}")
 
         # RPC service setup
         self.rpc_channel = UnixSocketChannel(socket_path=self.socket_path)
@@ -134,7 +134,7 @@ class MFPApp (Singleton, SignalMixin):
             if self.debug:
                 guicmd.append('--debug')
 
-            log.debug(f"launching GUI: {guicmd}")
+            log.debug(f"Launching GUI: {guicmd}")
 
             self.gui_process = AsyncExecMonitor(
                 *guicmd,
@@ -147,7 +147,7 @@ class MFPApp (Singleton, SignalMixin):
 
             self.gui_command = await GUICommandFactory()
 
-            log.debug("GUI is ready, switching logging to GUI")
+            log.debug("GUI is ready. Switching logging to GUI...")
             log.log_func = self.gui_command.log_write
 
             self.console = Interpreter(dict(app=self))

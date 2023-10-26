@@ -15,6 +15,7 @@ from .evaluator import LazyExpr
 from .bang import Uninit, Bang
 from .scope import LexicalScope
 from .utils import isiterable
+from .step_debugger import StepDebugger
 from . import log
 
 
@@ -237,6 +238,9 @@ class Processor:
         self.do_onload = value
 
     async def onload(self, phase):
+        pass
+
+    async def trigger(self):
         pass
 
     def assign(self, patch, scope, name):
@@ -617,7 +621,6 @@ class Processor:
         existing = target.connections_in[inlet]
         if (self, outlet) not in existing:
             existing.append((self, outlet))
-
         if (
             self.gui_created
             and show_gui
@@ -668,6 +671,13 @@ class Processor:
             self.outlets[outlet_num] = mv
 
     async def send(self, value, inlet=0):
+        """
+        Main entry point to trigger a processor
+
+        The helper _send returns a list of work to
+        be done next. This is the trampoline to keep
+        from running into stack depth limitations.
+        """
         if self.paused:
             return
 
@@ -691,6 +701,85 @@ class Processor:
             if w_target:
                 w_target.error("%s" % e.args, tb)
 
+    async def _send(self, value, inlet=0, step_execute=False):
+        """
+        Workhorse of processor triggering.
+
+        _send is broken into phases:
+        _send__initiate to put inputs into the target's inlets
+        _send__activate to run the trigger() method
+        _send__propagate to create new work items propagating outlets
+        """
+        if self.paused:
+            return []
+
+        debug = self.step_debug_manager().enabled
+        debug_tasks = []
+        send_tasks = []
+
+        # inlet is -1 for dsp response messages. For regular inlets,
+        # put the inbound in the .inlets
+        if inlet >= 0:
+            if debug:
+                debug_tasks.append((
+                    self._send__initiate(value, inlet),
+                    f"Receive input to {self.name} inlet {inlet}",
+                    self
+                ))
+            else:
+                await self._send__initiate(value, inlet)
+
+        self.count_in += 1
+
+        # if it's a message input to a DSP input, the
+        # DSP engine will deal with it
+        if (
+            (inlet in self.dsp_inlets)
+            and not isinstance(value, bool)
+            and isinstance(value, (float, int))
+        ):
+            if debug:
+                debug_tasks.append((
+                    self._send__dsp_params(value, inlet),
+                    "Update parameters of DSP object for {self.name}",
+                    self
+                ))
+            else:
+                await self._send__dsp_params(value, inlet)
+
+        # activate the processor and make a worklist
+        # of where to send it next
+        if inlet in self.hot_inlets or inlet == -1:
+            if debug:
+                debug_tasks.append((
+                    self._send__activate(value, inlet),
+                    f"Trigger processor {self.name} from inlet {inlet}",
+                    self
+                ))
+            else:
+                await self._send__activate(value, inlet)
+
+            # step mode could be activated or deactivated in activate
+            debug = self.step_debug_manager().enabled
+            if debug:
+                debug_tasks.append((
+                    self._send__propagate(),
+                    f"Send outputs from {self.name} to connected processors",
+                    self
+                ))
+            else:
+                send_tasks = await self._send__propagate()
+
+        if debug:
+            if step_execute:
+                self.step_debug_manager().prepend_tasks(debug_tasks)
+            else:
+                for task in debug_tasks:
+                    self.step_debug_manager().add_task(*task)
+            return []
+
+        return send_tasks
+
     async def _send__activate(self, value, inlet):
         if self.clear_outlets:
             self.outlets = [Uninit] * len(self.outlets)
@@ -711,6 +800,12 @@ class Processor:
             self.count_trigger += 1
 
     async def _send__propagate(self):
+        """
+        Pass outputs along the data flow path
+
+        'work' is our trampoline worklist. Note that the contents are
+        different if we are in debugging mode.
+        """
         output_pairs = list(zip(self.connections_out, self.outlets))
         work = []
 
@@ -730,20 +825,32 @@ class Processor:
                 for target, tinlet in conns:
                     if target is not None:
                         if self.step_debug_manager().enabled:
-                            self.step_debug_manager().add_task(
+                            work.append((
                                 self._send__propagate_value(target, val, tinlet),
                                 f"Send output to {target.name} inlet {tinlet}",
                                 target,
-                            )
+                            ))
                         else:
                             work.append((target, val, tinlet))
                     else:
                         log.warning("Bad output connection: obj_id=%s" % self.obj_id)
+
+        if self.step_debug_manager().enabled and work:
+            self.step_debug_manager().prepend_tasks(work)
+            return []
+
         return work
 
     async def _send__propagate_value(self, target, val, inlet):
+        """
+        Helper used by step debugger.
+
+        Instead of building a worklist, in the step debugger we add this
+        task to the debugger task list.
+        """
+
         with target.trigger_lock:
-            return await target._send(val, inlet)
+            return await target._send(val, inlet, step_execute=True)
 
     async def _send__dsp_params(self, value, inlet):
         try:
@@ -754,59 +861,11 @@ class Processor:
     async def _send__initiate(self, value, inlet):
         self.inlets[inlet] = value
 
-    async def _send(self, value, inlet=0):
-        if self.paused:
-            return []
-
-        work = []
-        if inlet >= 0:
-            if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_task(
-                    self._send__initiate(value, inlet),
-                    f"Receive input to {self.name} inlet {inlet}",
-                    self
-                )
-            else:
-                await self._send__initiate(value, inlet)
-
-        self.count_in += 1
-
-        if inlet in self.hot_inlets or inlet == -1:
-            if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_task(
-                    self._send__activate(value, inlet),
-                    f"Trigger processor {self.name} from inlet {inlet}",
-                    self
-                )
-                self.step_debug_manager().add_task(
-                    self._send__propagate(),
-                    "Send outputs to connected processors",
-                    self
-                )
-            else:
-                await self._send__activate(value, inlet)
-                work = await self._send__propagate()
-
-        if (
-            (inlet in self.dsp_inlets)
-            and not isinstance(value, bool)
-            and isinstance(value, (float, int))
-        ):
-            if self.step_debug_manager().enabled:
-                self.debug_manager().add_task(
-                    self._send__dsp_params(value, inlet),
-                    "Update parameters of DSP object",
-                    self
-                )
-            else:
-                await self._send__dsp_params(value, inlet)
-
-        return work
-
     def step_debug_manager(self):
         if self.patch:
             return self.patch.step_debugger
-        return self.step_debugger
+        # this only happens during tests
+        return StepDebugger()
 
     def parse_args(self, pystr, **extra_bindings):
         from .patch import Patch

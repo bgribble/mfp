@@ -67,11 +67,15 @@ class Patch(Processor):
         await self.step_execute_start(self, "@bp message to patch")
 
     async def step_execute_start(self, target, message):
+        if self.step_debugger.enabled:
+            return
         await self.step_debugger.enable(target)
         await self.step_debugger.show_banner(message)
         await self.step_debugger.show_prompt()
 
     async def step_execute_stop(self):
+        if not self.step_debugger.enabled:
+            return
         self.step_debugger.disable()
         await self.step_debugger.show_leave()
 
@@ -296,7 +300,7 @@ class Patch(Processor):
         # the loadbang
         initial = await Processor.connect(self, outlet, target, inlet, show_gui)
         if not initial:
-            MFPApp().async_task(
+            Patch.task_nibbler.add_task(
                 lambda args: _patch_connect_retry(args), 20,
                 [self, outlet, target, inlet, show_gui]
             )

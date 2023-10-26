@@ -1,7 +1,12 @@
+"""
+step_debugger.py - support for step-by-step execution
+
+Copyright (c) Bill Gribble <grib@billgribble.com>
+"""
+
 import asyncio
 import threading
 import inspect
-
 
 help_message = """Step debugger help
 
@@ -30,7 +35,6 @@ class StepDebugger:
 
     def set_target(self, target):
         from .mfp_app import MFPApp
-        from mfp import log
 
         if target != self.target:
             old_target = self.target
@@ -70,12 +74,17 @@ class StepDebugger:
         evaluator = MFPApp().console.evaluator
 
         for b in ["n", "r", "i", "h", "next", "run", "info", "help"]:
+            # cancel all the coroutine actions
             if b in evaluator.local_names and inspect.isawaitable(evaluator.local_names[b]):
                 evaluator.local_names[b].close()
+
             if b in self.shadowed_bindings:
                 evaluator.local_names[b] = self.shadowed_bindings[b]
             else:
                 del evaluator.local_names[b]
+
+    def prepend_tasks(self, tasklist):
+        self.tasklist[:0] = tasklist
 
     def add_task(self, task, description, target):
         self.tasklist.append((task, description, target))
@@ -84,7 +93,9 @@ class StepDebugger:
         from .mfp_app import MFPApp
         evaluator = MFPApp().console.evaluator
         evaluator.local_names[local_name] = self.mdb_next(local_name)
+
         info = await self.step_next()
+
         if info:
             await MFPApp().gui_command.console_write(
                 f"next: {info}\n"
@@ -98,7 +109,7 @@ class StepDebugger:
         from .mfp_app import MFPApp
         evaluator = MFPApp().console.evaluator
         evaluator.local_names[local_name] = self.mdb_run(local_name)
-        info = await self.step_run()
+        await self.step_run()
 
     async def mdb_help(self, local_name):
         from .mfp_app import MFPApp
@@ -106,7 +117,6 @@ class StepDebugger:
         evaluator.local_names[local_name] = self.mdb_help(local_name)
 
         await MFPApp().gui_command.console_write(help_message)
-
 
     async def mdb_info(self, local_name):
         from .mfp_app import MFPApp
@@ -121,7 +131,7 @@ class StepDebugger:
         )
         for ind, i in enumerate(self.target.inlets):
             await MFPApp().gui_command.console_write(
-                f"   inlet {ind}: {self.target.inlets[ind]}\n"
+                f"   inlet {ind}: {i}\n"
             )
 
         await MFPApp().gui_command.console_write("\n")
@@ -161,11 +171,12 @@ class StepDebugger:
             t.cancel()
 
     async def step_next(self):
-        if not len(self.tasklist):
+        if len(self.tasklist) == 0:
             return None
 
         task, description, target = self.tasklist[0]
         self.tasklist[:1] = []
+
         self.set_target(target)
         await task
         if self.tasklist:
@@ -178,8 +189,8 @@ class StepDebugger:
         while self.tasklist and len(self.tasklist) > 1:
             await self.step_next()
 
-        if len(self.tasklist):
-            task, description, target = self.tasklist[0]
+        if len(self.tasklist) > 0:
+            task, _, _ = self.tasklist[0]
             self.disable()
             await task
         else:
