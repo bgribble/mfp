@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 '''
-patch_window.py
+app_window.py
 The main MFP window and associated code
 '''
 
@@ -229,6 +229,6 @@ class AppWindow (SignalMixin):
         self.hud_prompt_mgr.get_input(prompt, callback, default)
 
 # additional methods in @extends wrappers
-from . import patch_window_layer  # noqa
-from . import patch_window_views  # noqa
-from . import patch_window_select  # noqa
+from . import app_window_layer  # noqa
+from . import app_window_views  # noqa
+from . import app_window_select  # noqa

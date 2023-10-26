@@ -1,7 +1,7 @@
 
 from ..utils import extends
 from ..mfp_command import MFPCommand
-from .patch_window import AppWindow
+from .app_window import AppWindow
 from .base_element import BaseElement
 from .patch_display import PatchDisplay
 from .layer import Layer

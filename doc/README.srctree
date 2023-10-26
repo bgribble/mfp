@@ -1,53 +1,53 @@
-MFP source tree layout overview 
+MFP source tree layout overview
 
 NOTE: I edit in a 100-column window
 
 Important dirs
 =========================================================
 
-mfp/           Python source for MFP application 
-mfp/builtins   All built-in processor definitions 
-mfp/gui/       All UI and input handling code 
-mfp/gui/modes  Input mode definitions 
+mfp/           Python source for MFP application
+mfp/builtins   All built-in processor definitions
+mfp/gui/       All UI and input handling code
+mfp/gui/modes  Input mode definitions
 
-mfpdsp/        C source for mfpdsp extension (JACK interface and 
+mfpdsp/        C source for mfpdsp extension (JACK interface and
                implementation of all DSP builtins)
 
-pluginfo/      C/Python source for pluginfo extension (Extract information 
-               from installed plugins, currently just LADSPA) 
+pluginfo/      C/Python source for pluginfo extension (Extract information
+               from installed plugins, currently just LADSPA)
 
-testext/       C/Python source for testext extension (discover and run tests 
-               in C shared libraries) 
+testext/       C/Python source for testext extension (discover and run tests
+               in C shared libraries)
 
 Important files in mfp/ (grouped by architectural element)
 =========================================================
 
 Multiprocessing/RPC framework:  This is how communication/RPC between the
 DSP, GUI, and control nodes is implemented.  This code evolved by
-trial-and-error and is a bit of a mess.  
+trial-and-error and is a bit of a mess.
 
     mfp/rpc_worker.py     Defines RPCServer class, one on each node,
                           which handles the multiprocessing setup and RPC
                           method dispatch (highest-level comm between
-                          nodes) 
+                          nodes)
     mfp/request_pipe.py   RequestPipe class, performs the actual
                           transactional IO and manages a pool of worker
-                          threads to dispatch requests   
+                          threads to dispatch requests
     mfp/worker_pool.py    Defines WorkerPool and BaseWorker, which
                           RequestPipe delegates the worker pool management
-                          to 
+                          to
     mfp/rpc_wrapper.py    The @rpcwrap decorator and the underlying
-                          class manglement.  
+                          class manglement.
 
-Main, GUI, and DSP node control: 
+Main, GUI, and DSP node control:
 
     mfp/mfp_app.py        MFPApp singleton, which is The Application,
 
-    mfp/mfp_command.py    MFPCommand, which is the RPC-wrapped API 
+    mfp/mfp_command.py    MFPCommand, which is the RPC-wrapped API
 
     mfp/gui_main.py       MFPGUI singleton, which wraps the Clutter
                           main loop, and GUICommand, which is the
-                          RPC-wrapped API 
+                          RPC-wrapped API
 
     mfp/dsp_object.py     DSPObject, which is an RPC-wrapped handle to
                           a C DSP object from the mfpdsp extension, and
@@ -56,87 +56,87 @@ Main, GUI, and DSP node control:
 
 Patch and Processor:  These are the heart of the code base and are where
 most of the action is.  There has been a lot of churn in these files and
-they could definitely stand a refactoring. 
+they could definitely stand a refactoring.
 
    mfp/processor.py       Processor class. Every MFP object is a
                           Processor, including Patch.  This is the most
-                          important source file in the app. 
+                          important source file in the app.
    mfp/patch.py           Patch class.  A Patch is a user-created
-                          object which combines a bunch of Processors. 
+                          object which combines a bunch of Processors.
    mfp/scope.py           LexicalScope (name lookup) class def
    mfp/method.py          MethodCall class (wraps a call as MFP data)
 
 Evaluator:  The Python evaluator is used in lots of places, but most
 prominently in turning text from message and processor box creation into
 Python objects.  To support syntactic sugar I have to do some
-pre-evaluation parsing and string mangling in the Evaluator class. 
+pre-evaluation parsing and string mangling in the Evaluator class.
 
    mfp/evaluator.py       Evaluator class, a wrapper for Python eval/exec.
                           Each Patch has its own Evaluator
 
-   mfp/interpreter.py     Interpreter class, subclass of Python 
+   mfp/interpreter.py     Interpreter class, subclass of Python
                           InteractiveInterpreter, which manages console
                           I/O for the GUI console
 
-Tools used by builtins: 
+Tools used by builtins:
 
-   mfp/bang.py            The Bang and Uninit special global variables  
-   mfp/midi.py            ALSA sequencer wrapping and MIDI datatypes 
-   mfp/osc.py             OSCManager (liblo interface) 
-   mfp/timer.py           MultiTimer (scheduler for [metro] etc) 
+   mfp/bang.py            The Bang and Uninit special global variables
+   mfp/midi.py            ALSA sequencer wrapping and MIDI datatypes
+   mfp/osc.py             OSCManager (liblo interface)
+   mfp/timer.py           MultiTimer (scheduler for [metro] etc)
    mfp/scale.py           Tuning and Scale class defs (for [note2freq])
 
-Important files in mfp/gui 
+Important files in mfp/gui
 =========================================================
 
-Input management: 
+Input management:
 
-   input_manager.py       Top-level dispatch of input events (keypress, 
-                          mouse button, mouse motion) to app action.  
+   input_manager.py       Top-level dispatch of input events (keypress,
+                          mouse button, mouse motion) to app action.
                           Delegates to KeySequencer for input
                           canonicalization and InputMode for action lookup
-   key_sequencer.py       Turns Clutter Events into canonical strings 
-                          like "C-a" for control-A, "C-M1-MOTION" for 
-                          mouse motion with button 1 and control key 
+   key_sequencer.py       Turns Clutter Events into canonical strings
+                          like "C-a" for control-A, "C-M1-MOTION" for
+                          mouse motion with button 1 and control key
                           held down, etc
    input_mode.py          InputMode class, basically a dictionary mapping
-                          canonical inputs to actions.  BaseElements 
-                          create InputMode subclasses (defined in modes/) 
-                          for their own control and edit functions. 
+                          canonical inputs to actions.  BaseElements
+                          create InputMode subclasses (defined in modes/)
+                          for their own control and edit functions.
 
-Main window: 
+Main window:
 
-   mfp.glade              The Glade window definition 
-   patch_window.py        PatchWindow class.  This is the main application
-                          window. 
-   patch_window_select.py Additional methods of PatchWindow for selection 
-   patch_window_layer.py  Additional methods of PatchWindow for layer 
-                          management 
-   patch_window_views.py  Additional methods of PatchWindow for  
-                          object and layer view management 
-   patch_info.py          PatchDisplay class, one for each patch loaded for 
-                          editing 
-   layer.py               Layer class, one for each layer of each patch 
+   mfp.glade              The Glade window definition
+   app_window.py        AppWindow class.  This is the main application
+                          window.
+   app_window_select.py Additional methods of AppWindow for selection
+   app_window_layer.py  Additional methods of AppWindow for layer
+                          management
+   app_window_views.py  Additional methods of AppWindow for
+                          object and layer view management
+   patch_info.py          PatchDisplay class, one for each patch loaded for
+                          editing
+   layer.py               Layer class, one for each layer of each patch
                           loaded for editing
-   prompter.py            Manage prompted input in HUD area at bottom 
+   prompter.py            Manage prompted input in HUD area at bottom
                           of editing window
-   tree_display.py        TreeDisplay class, a convenience wrapper around 
-                          GtkTreeView/GtkTreeStore used in object_view and 
-                          layer_view 
+   tree_display.py        TreeDisplay class, a convenience wrapper around
+                          GtkTreeView/GtkTreeStore used in object_view and
+                          layer_view
 
-Element UI types: 
+Element UI types:
 
-   base_element.py       BaseElement parent class. Every part of the 
-                          patch on the screen (processor box, message box, 
-                          connection) is a BaseElement.  The following 
-                          _element.py files define subclasses. 
+   base_element.py       BaseElement parent class. Every part of the
+                          patch on the screen (processor box, message box,
+                          connection) is a BaseElement.  The following
+                          _element.py files define subclasses.
    button_element.py      Toggle and bang button and indicators
-   connection_element.py  Line between processors 
+   connection_element.py  Line between processors
    enum_element.py        Number box
-   message_element.py     Message box 
-   plot_element.py        Scatter/signal plot (guts are in ./xyplot/) 
-   processor_element.py   Simple processor box 
-   slidemeter_element.py  Slider/barmeter 
-   text_element.py        Comment text 
-   via_element.py         Send/receive vias 
+   message_element.py     Message box
+   plot_element.py        Scatter/signal plot (guts are in ./xyplot/)
+   processor_element.py   Simple processor box
+   slidemeter_element.py  Slider/barmeter
+   text_element.py        Comment text
+   via_element.py         Send/receive vias
 

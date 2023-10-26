@@ -142,7 +142,7 @@ def setup_default_colors():
 
 
 async def main():
-    from mfp.gui.patch_window import AppWindow
+    from mfp.gui.app_window import AppWindow
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--logstart", default=None,
                         help="Reference time for log messages")

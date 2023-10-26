@@ -1,13 +1,13 @@
 #! /usr/bin/env python
 '''
-patch_window_select.py
+app_window_select.py
 Helper methods for patch window selection
 
 Copyright (c) 2012-2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..utils import extends
-from .patch_window import AppWindow
+from .app_window import AppWindow
 from .base_element import BaseElement
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode

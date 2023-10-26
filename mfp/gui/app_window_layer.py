@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 '''
-patch_window_layer.py
+app_window_layer.py
 Extra methods to manage the layer display in the main window
 '''
 
 from ..utils import extends
 from ..mfp_command import MFPCommand
-from .patch_window import AppWindow
+from .app_window import AppWindow
 from .layer import Layer
 
 @extends(AppWindow)
