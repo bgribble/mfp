@@ -100,7 +100,7 @@ Input management:
                           mouse motion with button 1 and control key 
                           held down, etc
    input_mode.py          InputMode class, basically a dictionary mapping
-                          canonical inputs to actions.  PatchElements 
+                          canonical inputs to actions.  BaseElements 
                           create InputMode subclasses (defined in modes/) 
                           for their own control and edit functions. 
 
@@ -126,9 +126,9 @@ Main window:
 
 Element UI types: 
 
-   patch_element.py       PatchElement parent class. Every part of the 
+   base_element.py       BaseElement parent class. Every part of the 
                           patch on the screen (processor box, message box, 
-                          connection) is a PatchElement.  The following 
+                          connection) is a BaseElement.  The following 
                           _element.py files define subclasses. 
    button_element.py      Toggle and bang button and indicators
    connection_element.py  Line between processors 

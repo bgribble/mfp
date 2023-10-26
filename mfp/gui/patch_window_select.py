@@ -8,7 +8,7 @@ Copyright (c) 2012-2013 Bill Gribble <grib@billgribble.com>
 
 from ..utils import extends
 from .patch_window import AppWindow
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
 from ..gui_main import MFPGUI
@@ -55,7 +55,7 @@ async def patch_new(self):
 
 @extends(AppWindow)
 async def _select(self, obj):
-    if (obj is None) or (not isinstance(obj, PatchElement)) or (obj in self.selected):
+    if (obj is None) or (not isinstance(obj, BaseElement)) or (obj in self.selected):
         return
 
     self.selected[:0] = [obj]
@@ -78,7 +78,7 @@ async def select(self, obj):
 async def _unselect(self, obj):
     if obj is None:
         return
-    if isinstance(obj, PatchElement):
+    if isinstance(obj, BaseElement):
         if obj.edit_mode:
             await obj.end_edit()
         obj.end_control()

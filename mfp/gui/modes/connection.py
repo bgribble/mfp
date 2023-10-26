@@ -6,7 +6,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from ..input_mode import InputMode
 from ..connection_element import ConnectionElement
-from ..patch_element import PatchElement
+from ..base_element import BaseElement
 
 from mfp.gui_main import MFPGUI
 from mfp import log
@@ -58,7 +58,7 @@ class ConnectionMode (InputMode):
                 self.connection = None
             return True
 
-        if self.connection is None or self.connection.obj_state == PatchElement.OBJ_DELETED:
+        if self.connection is None or self.connection.obj_state == BaseElement.OBJ_DELETED:
             self.connection = ConnectionElement(self.window,
                                                 self.source_obj, self.source_port,
                                                 self.dest_obj, self.dest_port,
@@ -144,7 +144,7 @@ class ConnectionMode (InputMode):
             self.dest_obj = self.window.selected[0]
 
         if (self.source_obj and self.dest_obj
-            and self.connection.obj_state != PatchElement.OBJ_DELETED):
+            and self.connection.obj_state != BaseElement.OBJ_DELETED):
             if await MFPGUI().mfp.connect(
                 self.source_obj.obj_id,
                 self.source_port,

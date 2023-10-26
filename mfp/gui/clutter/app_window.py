@@ -11,7 +11,7 @@ from ..key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGH
 from ..backend_interfaces import AppWindowBackend
 
 from ..connection_element import ConnectionElement
-from ..patch_element import PatchElement
+from ..base_element import BaseElement
 from ..patch_info import PatchInfo
 
 from .tree_display import TreeDisplay
@@ -144,7 +144,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.embed.set_sensitive(True)
         self.stage = self.embed.get_stage()
 
-        # FIXME compatibility with PatchElements for LabelEditMode
+        # FIXME compatibility with BaseElements for LabelEditMode
         self.container = self.stage
 
         # significant widgets we will be dealing with later
@@ -625,7 +625,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
             else:
                 update = True
 
-            if isinstance(element.container, PatchElement):
+            if isinstance(element.container, BaseElement):
                 self.object_view.insert(element, (element.scope, element.container), update=update)
             elif element.scope:
                 self.object_view.insert(element, (element.scope, element.layer.patch),
@@ -639,7 +639,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
     def unregister(self, element):
         if element.container:
-            if isinstance(element.container, PatchElement):
+            if isinstance(element.container, BaseElement):
                 element.container.remove(element)
             element.container = None
 
@@ -654,7 +654,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         if self.load_in_progress:
             return
 
-        if isinstance(element.container, PatchElement):
+        if isinstance(element.container, BaseElement):
             self.object_view.update(element, (element.scope, element.container))
         elif element.layer is not None and element.scope is not None:
             self.object_view.update(element, (element.scope, element.layer.patch))

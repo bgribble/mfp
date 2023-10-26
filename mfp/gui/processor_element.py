@@ -7,14 +7,14 @@ A patch element corresponding to a signal or control processor
 from gi.repository import Clutter
 import cairo
 from .text_widget import TextWidget
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 from mfp.utils import catchall
 
 
-class ProcessorElement (PatchElement):
+class ProcessorElement (BaseElement):
     display_type = "processor"
     proc_type = None
 
@@ -23,7 +23,7 @@ class ProcessorElement (PatchElement):
     label_off_y = 0
 
     def __init__(self, window, x, y, params={}):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
 
         self.param_list.extend(["show_label", "export_x", "export_y",
                                 "export_w", "export_h"])
@@ -164,18 +164,18 @@ class ProcessorElement (PatchElement):
             self.update()
 
     def set_size(self, w, h):
-        PatchElement.set_size(self, w, h)
+        BaseElement.set_size(self, w, h)
 
         self.texture.set_size(w, h)
         self.texture.invalidate()
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
@@ -211,7 +211,7 @@ class ProcessorElement (PatchElement):
         params["width"] = max(self.width, params.get("export_w") or 0)
         params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight)
 
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE

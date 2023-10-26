@@ -25,7 +25,7 @@ class AppWindow (SignalMixin):
     def __init__(self):
         super().__init__()
 
-        # self.objects is PatchElement instances representing the
+        # self.objects is BaseElement instances representing the
         # currently-displayed patch(es)
         self.patches = []
         self.objects = []

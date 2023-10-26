@@ -11,7 +11,7 @@ import cairo
 from mfp.gui_main import MFPGUI
 from mfp.utils import catchall
 from .text_widget import TextWidget
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .connection_element import ConnectionElement
 from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
@@ -19,14 +19,14 @@ from .modes.clickable import ClickableControlMode
 from .colordb import ColorDB
 
 
-class MessageElement (PatchElement):
+class MessageElement (BaseElement):
     display_type = "message"
     proc_type = "message"
 
     PORT_TWEAK = 5
 
     def __init__(self, window, x, y):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
 
         self.message_text = None
         self.clickstate = False
@@ -56,7 +56,7 @@ class MessageElement (PatchElement):
         self.update_required = True
 
     def set_size(self, width, height):
-        PatchElement.set_size(self, width, height)
+        BaseElement.set_size(self, width, height)
         self.texture.set_size(width, height)
         self.update()
 
@@ -165,23 +165,23 @@ class MessageElement (PatchElement):
         if self.obj_state != self.OBJ_COMPLETE and self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
             self.update()
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
 
     def port_position(self, port_dir, port_num):
         # tweak the right input port display to be left of the "kick"
-        if port_dir == PatchElement.PORT_IN and port_num == 1:
-            default = PatchElement.port_position(self, port_dir, port_num)
+        if port_dir == BaseElement.PORT_IN and port_num == 1:
+            default = BaseElement.port_position(self, port_dir, port_num)
             return (default[0] - self.PORT_TWEAK, default[1])
         else:
-            return PatchElement.port_position(self, port_dir, port_num)
+            return BaseElement.port_position(self, port_dir, port_num)
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
@@ -228,7 +228,7 @@ class TransientMessageElement (MessageElement):
         return True
 
     async def end_edit(self):
-        await PatchElement.end_edit(self)
+        await BaseElement.end_edit(self)
         if self.obj_state == self.OBJ_COMPLETE:
             await self.delete()
 

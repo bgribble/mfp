@@ -5,7 +5,7 @@ A patch element corresponding to an XY scatter or line plot
 '''
 
 from gi.repository import Clutter as clutter
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from mfp import log
 from mfp.mfp_app import MFPApp
 from mfp.gui_main import MFPGUI
@@ -17,7 +17,7 @@ from .xyplot.scopeplot import ScopePlot
 from datetime import datetime
 
 
-class PlotElement (PatchElement):
+class PlotElement (BaseElement):
     display_type = "plot"
     proc_type = "plot"
 
@@ -35,7 +35,7 @@ class PlotElement (PatchElement):
     }
 
     def __init__(self, window, x, y, params={}):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
 
         self.param_list.extend(['x_min', 'x_max', 'y_min', 'y_max',
                                 'plot_style', 'plot_type'])
@@ -80,7 +80,7 @@ class PlotElement (PatchElement):
             return "none"
 
     def set_size(self, width, height):
-        PatchElement.set_size(self, width, height)
+        BaseElement.set_size(self, width, height)
         self.rect.set_size(width, height)
         if self.xyplot:
             self.xyplot.set_size(width-self.WIDTH_PAD, height-self.LABEL_SPACE-self.WIDTH_PAD)
@@ -198,11 +198,11 @@ class PlotElement (PatchElement):
             c.draw()
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.rect.set_border_color(self.stage.color_selected)
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.rect.set_border_color(self.stage.color_unselected)
 
     def make_edit_mode(self):
@@ -217,7 +217,7 @@ class PlotElement (PatchElement):
         elif action == "bounds":
             self.set_bounds(*data)
             return True
-        elif PatchElement.command(self, action, data):
+        elif BaseElement.command(self, action, data):
             return True
 
         return False
@@ -249,4 +249,4 @@ class PlotElement (PatchElement):
         if self.xyplot is not None:
             self.xyplot.configure(params)
 
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)

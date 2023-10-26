@@ -9,20 +9,20 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import cairo
 from .text_widget import TextWidget
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .colordb import ColorDB
 from mfp.gui_main import MFPGUI
 from .modes.enum_control import EnumEditMode, EnumControlMode
 
 
-class EnumElement (PatchElement):
+class EnumElement (BaseElement):
     display_type = "enum"
     proc_type = "enum"
 
     PORT_TWEAK = 7
 
     def __init__(self, window, x, y):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
 
         self.value = 0
         self.digits = 1
@@ -111,7 +111,7 @@ class EnumElement (PatchElement):
         ct.stroke()
 
     def set_size(self, w, h):
-        PatchElement.set_size(self, w, h)
+        BaseElement.set_size(self, w, h)
 
         self.texture.set_size(w, h)
         self.texture.invalidate()
@@ -228,23 +228,23 @@ class EnumElement (PatchElement):
         if 'height' in params:
             del params['height']
 
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
 
     def port_position(self, port_dir, port_num):
         # tweak the right input port display to be left of the slant
-        if port_dir == PatchElement.PORT_IN and port_num == 1:
-            default = PatchElement.port_position(self, port_dir, port_num)
+        if port_dir == BaseElement.PORT_IN and port_num == 1:
+            default = BaseElement.port_position(self, port_dir, port_num)
             return (default[0] - self.PORT_TWEAK, default[1])
         else:
-            return PatchElement.port_position(self, port_dir, port_num)
+            return BaseElement.port_position(self, port_dir, port_num)
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 

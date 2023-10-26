@@ -10,12 +10,12 @@ from gi.repository import Clutter
 import math
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .modes.label_edit import LabelEditMode
 from .colordb import ColorDB
 
 
-class ViaElement (PatchElement):
+class ViaElement (BaseElement):
     display_type = None
     proc_type = None
 
@@ -33,7 +33,7 @@ class ViaElement (PatchElement):
     GLYPH_STYLE = None
 
     def __init__(self, window, x, y):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
         self.param_list.append("label_text")
         self.connections_out = []
         self.connections_in = []
@@ -144,7 +144,7 @@ class ViaElement (PatchElement):
         self.label_text = params.get("label_text", "")
         self.label.set_text(self.label_text)
         self.recenter_label()
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
 
     def port_position(self, port_dir, port_num):
         # vias connect to the center of the texture
@@ -152,12 +152,12 @@ class ViaElement (PatchElement):
                 self.TEXTURE_Y + (self.VIA_SIZE + self.VIA_FUDGE) / 2.0)
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 

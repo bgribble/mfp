@@ -126,7 +126,7 @@ class GlobalMode (InputMode):
         return False
 
     async def hover(self, details):
-        from ..patch_element import PatchElement
+        from ..base_element import BaseElement
         for m in self.manager.minor_modes:
             if (
                 m.enabled and isinstance(
@@ -137,7 +137,7 @@ class GlobalMode (InputMode):
 
         o = self.manager.pointer_obj
         try:
-            if o is not None and o.obj_state == PatchElement.OBJ_COMPLETE:
+            if o is not None and o.obj_state == BaseElement.OBJ_COMPLETE:
                 await o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
         except Exception:
             pass

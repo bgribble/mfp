@@ -11,7 +11,7 @@ import cairo
 
 from mfp.utils import catchall
 from .text_widget import TextWidget
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
 from .modes.label_edit import LabelEditMode
@@ -48,7 +48,7 @@ def rounded_box(ctx, xorig, yorig, w, h, rad):
     ctx.close_path()
 
 
-class ButtonElement (PatchElement):
+class ButtonElement (BaseElement):
     proc_type = "var"
 
     style_defaults = {
@@ -63,7 +63,7 @@ class ButtonElement (PatchElement):
     PORT_TWEAK = 5
 
     def __init__(self, window, x, y):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
 
         self.indicator = False
 
@@ -130,7 +130,7 @@ class ButtonElement (PatchElement):
             self.redraw()
 
     def set_size(self, width, height):
-        PatchElement.set_size(self, width, height)
+        BaseElement.set_size(self, width, height)
         self.texture.set_size(width, height)
         self.redraw()
 
@@ -189,15 +189,15 @@ class ButtonElement (PatchElement):
                 self.label.set_markup(self.label_text or '')
             self.center_label()
 
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
         self.redraw()
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.redraw()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.redraw()
 
     def make_edit_mode(self):
@@ -295,21 +295,21 @@ class ToggleIndicatorElement (ButtonElement):
     display_type = "indicator"
 
     def make_control_mode(self):
-        return PatchElement.make_control_mode(self)
+        return BaseElement.make_control_mode(self)
 
     def select(self, *args):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.draw_ports()
         self.redraw()
 
     def unselect(self, *args):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.hide_ports()
         self.redraw()
 
     def draw_ports(self):
         if self.selected:
-            PatchElement.draw_ports(self)
+            BaseElement.draw_ports(self)
 
     @catchall
     def draw_cb(self, texture, ct, width, height):

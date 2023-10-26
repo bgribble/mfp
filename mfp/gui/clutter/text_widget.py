@@ -12,7 +12,7 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
     def __init__(self, owner):
         self.owner = owner
 
-        # FIXME rn PatchElement is always a Group
+        # FIXME rn BaseElement is always a Group
         if isinstance(owner.container, Clutter.Group):
             self.parent = owner.container
         elif isinstance(owner.container, ClutterAppWindowBackend):

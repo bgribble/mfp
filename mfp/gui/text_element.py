@@ -7,7 +7,7 @@ A text element (comment) in a patch
 from gi.repository import Clutter
 import cairo
 
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from mfp.gui_main import MFPGUI
 from mfp import log
 from mfp.utils import catchall
@@ -18,7 +18,7 @@ from .colordb import ColorDB
 from .text_widget import TextWidget
 
 
-class TextElement (PatchElement):
+class TextElement (BaseElement):
     display_type = "text"
     proc_type = "text"
 
@@ -33,7 +33,7 @@ class TextElement (PatchElement):
     }
 
     def __init__(self, window, x, y):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
         self.value = ''
         self.clickchange = False
         self.default = ''
@@ -87,14 +87,14 @@ class TextElement (PatchElement):
         return True
 
     def set_size(self, w, h):
-        PatchElement.set_size(self, w, h)
+        BaseElement.set_size(self, w, h)
 
         self.texture.set_size(w, h)
         self.texture.invalidate()
 
     def draw_ports(self):
         if self.selected:
-            PatchElement.draw_ports(self)
+            BaseElement.draw_ports(self)
 
     def label_edit_start(self):
         return self.value
@@ -111,7 +111,7 @@ class TextElement (PatchElement):
         self.update()
 
     async def end_edit(self):
-        await PatchElement.end_edit(self)
+        await BaseElement.end_edit(self)
         self.set_text()
 
     def text_changed_cb(self, *args):
@@ -138,13 +138,13 @@ class TextElement (PatchElement):
         return True
 
     def select(self, *args):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
         self.draw_ports()
 
     def unselect(self, *args):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
         self.hide_ports()
@@ -180,7 +180,7 @@ class TextElement (PatchElement):
         if params.get('border') is not None:
             self.border = params.get('border')
 
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
         if newsize:
             self.set_size(*newsize)
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 '''
-patch_element.py
+base_element.py
 A patch element is the parent of all GUI entities backed by MFP objects
 
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
@@ -20,7 +20,7 @@ gi.require_version('Clutter', '1.0')
 from gi.repository import Clutter  # noqa
 
 
-class PatchElement (Store, Clutter.Group):
+class BaseElement (Store, Clutter.Group):
     '''
     Parent class of elements represented in the patch window
     '''
@@ -156,7 +156,7 @@ class PatchElement (Store, Clutter.Group):
 
     def combine_styles(self):
         styles = {}
-        for styleset in (MFPGUI().style_defaults, PatchElement.style_defaults,
+        for styleset in (MFPGUI().style_defaults, BaseElement.style_defaults,
                          type(self).style_defaults, self.style):
             styles.update(styleset)
         return styles
@@ -326,7 +326,7 @@ class PatchElement (Store, Clutter.Group):
             pos_y = self.position_y
 
             c = self.container
-            while isinstance(c, PatchElement):
+            while isinstance(c, BaseElement):
                 pos_x += c.position_x
                 pos_y += c.position_y
                 c = c.container
@@ -343,7 +343,7 @@ class PatchElement (Store, Clutter.Group):
     def port_position(self, port_dir, port_num):
         w = self.get_width()
         h = self.get_height()
-        if port_dir == PatchElement.PORT_IN:
+        if port_dir == BaseElement.PORT_IN:
             if self.num_inlets < 2:
                 spc = 0
             else:
@@ -353,7 +353,7 @@ class PatchElement (Store, Clutter.Group):
                            / (self.num_inlets - 1.0)))
             return (self.get_style('porthole_border') + spc * port_num, 0)
 
-        elif port_dir == PatchElement.PORT_OUT:
+        elif port_dir == BaseElement.PORT_OUT:
             if self.num_outlets < 2:
                 spc = 0
             else:
@@ -465,13 +465,13 @@ class PatchElement (Store, Clutter.Group):
             ports_done.append(pobj)
 
         for i in range(self.num_inlets):
-            x, y = self.port_position(PatchElement.PORT_IN, i)
-            pid = (PatchElement.PORT_IN, i)
+            x, y = self.port_position(BaseElement.PORT_IN, i)
+            pid = (BaseElement.PORT_IN, i)
             confport(pid, x, y)
 
         for i in range(self.num_outlets):
-            x, y = self.port_position(PatchElement.PORT_OUT, i)
-            pid = (PatchElement.PORT_OUT, i)
+            x, y = self.port_position(BaseElement.PORT_OUT, i)
+            pid = (BaseElement.PORT_OUT, i)
             confport(pid, x, y)
 
         # clean up -- ports may need to be deleted if
@@ -495,11 +495,11 @@ class PatchElement (Store, Clutter.Group):
                 pobj.hide()
 
         for i in range(self.num_inlets):
-            pid = (PatchElement.PORT_IN, i)
+            pid = (BaseElement.PORT_IN, i)
             hideport(pid)
 
         for i in range(self.num_outlets):
-            pid = (PatchElement.PORT_OUT, i)
+            pid = (BaseElement.PORT_OUT, i)
             hideport(pid)
 
     def command(self, action, data):

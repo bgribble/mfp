@@ -2,7 +2,7 @@
 from ..utils import extends
 from ..mfp_command import MFPCommand
 from .patch_window import AppWindow
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .patch_info import PatchInfo
 from .layer import Layer
 from mfp import log
@@ -10,7 +10,7 @@ from mfp import log
 @extends(AppWindow)
 def init_object_view(self):
     def get_obj_name(o):
-        if isinstance(o, PatchElement):
+        if isinstance(o, BaseElement):
             return o.obj_name
         elif isinstance(o, PatchInfo):
             return "%s (%s)" % (o.obj_name, o.context_name)
@@ -18,7 +18,7 @@ def init_object_view(self):
             return o[0]
 
     def obj_name_edited(obj, new_name):
-        if isinstance(obj, (PatchElement, PatchInfo)):
+        if isinstance(obj, (BaseElement, PatchInfo)):
             obj.obj_name = new_name
             MFPGUI().async_task(MFPGUI().mfp.rename_obj(obj.obj_id, new_name))
             obj.send_params()
@@ -32,7 +32,7 @@ def init_object_view(self):
             ))
             self.selected_patch.send_params()
 
-        if isinstance(obj, PatchElement):
+        if isinstance(obj, BaseElement):
             parent = (obj.scope or obj.layer.scope, obj.layer.patch)
         elif isinstance(obj, PatchInfo):
             parent = None
@@ -43,7 +43,7 @@ def init_object_view(self):
 
     def obj_selected(obj):
         self._select(obj)
-        if isinstance(obj, PatchElement):
+        if isinstance(obj, BaseElement):
             self.layer_select(obj.layer)
         elif isinstance(obj, PatchInfo):
             self.layer_select(obj.layers[0])
@@ -92,7 +92,7 @@ def init_layer_view(self):
             for lobj in self.objects:
                 if lobj.layer == obj:
                     lobj.send_params()
-        elif isinstance(obj, (PatchElement, PatchInfo)):
+        elif isinstance(obj, (BaseElement, PatchInfo)):
             obj.obj_name = new_value
             MFPGUI().async_task(MFPGUI().mfp.rename_obj(obj.obj_id, new_value))
             obj.send_params()

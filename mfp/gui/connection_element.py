@@ -1,6 +1,6 @@
 
 import cairo
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .colordb import ColorDB
 from gi.repository import Clutter
 import math
@@ -8,7 +8,7 @@ from mfp.gui_main import MFPGUI
 from mfp import log
 
 
-class ConnectionElement(PatchElement):
+class ConnectionElement(BaseElement):
     display_type = "connection"
     LINE_WIDTH = 1.5
 
@@ -27,7 +27,7 @@ class ConnectionElement(PatchElement):
         if port_1 in obj_1.dsp_outlets:
             self.dsp_connect = True
         px, py = obj_1.get_stage_position()
-        PatchElement.__init__(self, window, px, py)
+        BaseElement.__init__(self, window, px, py)
 
         self.texture = Clutter.Canvas.new()
         self.set_content(self.texture)
@@ -47,11 +47,11 @@ class ConnectionElement(PatchElement):
         self.draw()
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.draw()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.draw()
 
     async def delete(self):
@@ -68,20 +68,20 @@ class ConnectionElement(PatchElement):
 
         self.obj_1 = None
         self.obj_2 = None
-        await PatchElement.delete(self)
+        await BaseElement.delete(self)
 
     def draw_ports(self):
         pass
 
     def set_size(self, width, height):
-        PatchElement.set_size(self, width, height)
+        BaseElement.set_size(self, width, height)
         self.texture.set_size(width, height)
         self.texture.invalidate()
 
     def corners(self):
         if self.obj_1 and self.obj_2:
-            p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
-            p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
+            p1 = self.obj_1.port_center(BaseElement.PORT_OUT, self.port_1)
+            p2 = self.obj_2.port_center(BaseElement.PORT_IN, self.port_2)
             return [p1, p2]
         else:
             return None
@@ -90,8 +90,8 @@ class ConnectionElement(PatchElement):
         if self.obj_1 is None or self.obj_2 is None:
             return
 
-        p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
-        p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
+        p1 = self.obj_1.port_center(BaseElement.PORT_OUT, self.port_1)
+        p2 = self.obj_2.port_center(BaseElement.PORT_IN, self.port_2)
 
         if self.dsp_connect is True:
             self.width = 2.5 * self.LINE_WIDTH

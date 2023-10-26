@@ -9,7 +9,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import cairo
 import math
-from .patch_element import PatchElement
+from .base_element import BaseElement
 from .colordb import ColorDB
 from .modes.slider import SliderEditMode, SliderControlMode, DialEditMode, DialControlMode
 from mfp.gui_main import MFPGUI
@@ -17,7 +17,7 @@ from mfp.utils import catchall
 from . import ticks
 
 
-class SlideMeterElement (PatchElement):
+class SlideMeterElement (BaseElement):
     '''
     Vertical/horizontal slider/meter element
     Contains an optional scale
@@ -47,7 +47,7 @@ class SlideMeterElement (PatchElement):
     RIGHT = 0x01
 
     def __init__(self, window, x, y):
-        PatchElement.__init__(self, window, x, y)
+        BaseElement.__init__(self, window, x, y)
         self.param_list.extend(['min_value', 'max_value', 'show_scale', 'scale',
                                 'scale_position', 'orientation', 'zeropoint'])
         # parameters controlling display
@@ -378,21 +378,21 @@ class SlideMeterElement (PatchElement):
         if dr is not None:
             self.dial_radius = dr
 
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
         if changes:
             self.texture.invalidate()
 
     def set_size(self, width, height):
-        PatchElement.set_size(self, width, height)
+        BaseElement.set_size(self, width, height)
         self.texture.set_size(width, height)
         self.texture.invalidate()
 
     def select(self):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.texture.invalidate()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.texture.invalidate()
 
     def make_edit_mode(self):
