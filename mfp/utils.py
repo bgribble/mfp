@@ -387,7 +387,8 @@ class AsyncTaskManager:
         except Exception as e:
             import traceback
             log.error(f"Exception in task: {coro} {e}")
-            log.error(traceback.format_exc())
+            for ll in traceback.format_exc().split("\n"):
+                log.error(ll)
         finally:
             if task_id in self.asyncio_tasks:
                 del self.asyncio_tasks[task_id]

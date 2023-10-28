@@ -30,10 +30,10 @@ class ConnectionElement(BaseElement):
         BaseElement.__init__(self, window, px, py)
 
         self.texture = Clutter.Canvas.new()
-        self.set_content(self.texture)
+        self.backend.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
         if obj_1.layer is not None:
             self.move_to_layer(obj_1.layer)
         elif obj_2.layer is not None:
@@ -104,7 +104,7 @@ class ConnectionElement(BaseElement):
         self.position_y = p1[1] - math.sin(theta) * self.width / 2.0
 
         self.set_position(self.position_x, self.position_y)
-        self.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
+        self.backend.group.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
 
         self.set_size(math.ceil(self.width), math.ceil(self.height))
 

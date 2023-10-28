@@ -12,6 +12,8 @@ class ClutterInputManagerBackend(InputManagerBackend):
 
     def __init__(self, input_manager):
         self.input_manager = input_manager
+        self.event_source_reverse = {}
+
         super().__init__(input_manager)
 
     async def run_handlers(self, handlers, keysym, coro=None, offset=-1):
@@ -104,7 +106,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
                 keysym = self.input_manager.keyseq.pop()
 
         elif event.type == Clutter.EventType.ENTER:
-            src = self.input_manager.event_sources.get(event.source)
+            src = self.event_source_reverse.get(event.source)
 
             now = datetime.now()
             if (
@@ -119,7 +121,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
                 self.input_manager.pointer_obj_time = now
 
         elif event.type == Clutter.EventType.LEAVE:
-            src = self.input_manager.event_sources.get(event.source)
+            src = self.event_source_reverse.get(event.source)
             self.input_manager.pointer_leave_time = datetime.now()
             if src == self.input_manager.pointer_obj:
                 self.input_manager.pointer_lastobj = self.input_manager.pointer_obj

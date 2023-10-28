@@ -41,11 +41,11 @@ class EnumElement (BaseElement):
         # create elements
         self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
-        self.set_content(self.texture)
+        self.backend.group.set_content(self.texture)
 
         self.label = TextWidget(self)
 
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
 
         # configure label
         self.label.set_position(4, 1)
@@ -249,7 +249,7 @@ class EnumElement (BaseElement):
         self.texture.invalidate()
 
     def make_edit_mode(self):
-        return EnumEditMode(self.stage, self, self.label)
+        return EnumEditMode(self.app_window, self, self.label)
 
     def make_control_mode(self):
-        return EnumControlMode(self.stage, self)
+        return EnumControlMode(self.app_window, self)

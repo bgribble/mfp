@@ -111,7 +111,7 @@ class PlotElement (BaseElement):
         self.xyplot = None
 
         self.add_actor(self.rect)
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
 
     # methods useful for interaction
     def set_bounds(self, x_min, y_min, x_max, y_max):
@@ -199,14 +199,14 @@ class PlotElement (BaseElement):
 
     def select(self):
         BaseElement.select(self)
-        self.rect.set_border_color(self.stage.color_selected)
+        self.rect.set_border_color(self.app_window.color_selected)
 
     def unselect(self):
         BaseElement.unselect(self)
-        self.rect.set_border_color(self.stage.color_unselected)
+        self.rect.set_border_color(self.app_window.color_unselected)
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label)
+        return LabelEditMode(self.app_window, self, self.label)
 
     def command(self, action, data):
         if self.xyplot.command(action, data):

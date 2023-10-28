@@ -42,7 +42,7 @@ class TextElement (BaseElement):
 
         self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
-        self.set_content(self.texture)
+        self.backend.group.set_content(self.texture)
 
         self.label = TextWidget(self)
         self.label.set_color(self.get_color('text-color'))
@@ -52,7 +52,7 @@ class TextElement (BaseElement):
         self.update_required = True
         self.move(x, y)
         self.set_size(12, 12)
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
         self.label_changed_cb = self.label.signal_listen('text-changed', self.text_changed_cb)
 
     def update(self):
@@ -123,7 +123,7 @@ class TextElement (BaseElement):
             self.value = txt or ''
             self.set_text()
         if self.selected and self.clickchange:
-            self.stage.get_prompted_input("New text:", newtext, self.value)
+            self.app_window.get_prompted_input("New text:", newtext, self.value)
         return True
 
     def set_text(self):
@@ -150,11 +150,11 @@ class TextElement (BaseElement):
         self.hide_ports()
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label,
+        return LabelEditMode(self.app_window, self, self.label,
                              multiline=True, markup=True, initial=self.value)
 
     def make_control_mode(self):
-        return ClickableControlMode(self.stage, self, "Change text", 'A-')
+        return ClickableControlMode(self.app_window, self, "Change text", 'A-')
 
     def configure(self, params):
         if params.get('value') is not None:

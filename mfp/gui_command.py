@@ -59,6 +59,7 @@ class GUICommand:
 
     def create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui_main import MFPGUI
+        from .gui.patch_display import PatchDisplay
         from .gui.base_element import BaseElement
         from .gui.processor_element import ProcessorElement
         from .gui.message_element import MessageElement
@@ -66,7 +67,6 @@ class GUICommand:
         from .gui.enum_element import EnumElement
         from .gui.plot_element import PlotElement
         from .gui.slidemeter_element import SlideMeterElement, DialElement
-        from .gui.patch_display import PatchDisplay
         from .gui.via_element import SendViaElement, ReceiveViaElement
         from .gui.via_element import SendSignalViaElement, ReceiveSignalViaElement
         from .gui.button_element import ToggleButtonElement
@@ -111,8 +111,6 @@ class GUICommand:
                     if not layer:
                         layer = MFPGUI().appwin.active_layer()
                     layer.add(o)
-                    # layer.backend.group.add_actor(o)
-                    # o.container = layer.backend.group
                 elif isinstance(parent, BaseElement):
                     # FIXME: don't hardcode GOP offsets
                     if not parent.export_x:
@@ -124,8 +122,6 @@ class GUICommand:
                     o.move(xpos, ypos)
                     o.editable = False
                     parent.layer.add(o)
-                    # parent.add_actor(o)
-                    # o.container = parent
 
                 o.configure(params)
                 MFPGUI().appwin.register(o)

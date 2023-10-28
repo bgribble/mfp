@@ -11,7 +11,6 @@ from .base_element import BaseElement
 from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
-from mfp.utils import catchall
 
 
 class ProcessorElement (BaseElement):
@@ -25,8 +24,13 @@ class ProcessorElement (BaseElement):
     def __init__(self, window, x, y, params={}):
         BaseElement.__init__(self, window, x, y)
 
-        self.param_list.extend(["show_label", "export_x", "export_y",
-                                "export_w", "export_h"])
+        self.param_list.extend([
+            "show_label",
+            "export_x",
+            "export_y",
+            "export_w",
+            "export_h"
+        ])
         self.show_label = params.get("show_label", True)
 
         # display elements
@@ -51,7 +55,7 @@ class ProcessorElement (BaseElement):
     def create_display(self):
         # box
         self.texture = Clutter.Canvas.new()
-        self.set_content(self.texture)
+        self.backend.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_size(35, 25)
 
@@ -66,7 +70,7 @@ class ProcessorElement (BaseElement):
         if not self.show_label:
             self.label.hide()
 
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
 
     def update(self):
         if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
@@ -85,7 +89,6 @@ class ProcessorElement (BaseElement):
 
         self.set_size(new_w, self.texture.get_property('height'))
 
-    @catchall
     def draw_cb(self, texture, ct, width, height):
         lw = 2.0
 
@@ -180,7 +183,7 @@ class ProcessorElement (BaseElement):
         self.texture.invalidate()
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label)
+        return LabelEditMode(self.app_window, self, self.label)
 
     def configure(self, params):
         if self.obj_args is None:

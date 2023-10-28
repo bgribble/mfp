@@ -70,7 +70,7 @@ class ButtonElement (BaseElement):
         # create elements
         self.texture = Clutter.Canvas.new()
         self.texture.set_size(20, 20)
-        self.set_content(self.texture)
+        self.backend.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
         self.label = TextWidget(self)
@@ -81,7 +81,7 @@ class ButtonElement (BaseElement):
         self.label.set_use_markup(True)
         self.label_text = ''
 
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
 
         self.set_size(20, 20)
         self.move(x, y)
@@ -212,10 +212,10 @@ class ButtonElement (BaseElement):
                 self.draw_ports()
         self.redraw()
 
-        return LabelEditMode(self.stage, self, self.label)
+        return LabelEditMode(self.app_window, self, self.label)
 
     def make_control_mode(self):
-        return ClickableControlMode(self.stage, self, "Button control")
+        return ClickableControlMode(self.app_window, self, "Button control")
 
 
 class BangButtonElement (ButtonElement):

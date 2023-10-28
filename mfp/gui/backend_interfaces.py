@@ -321,3 +321,38 @@ class TextWidgetBackend(ABC, BackendInterface, DelegateMixin):
     @delegatemethod
     def set_selection(self, start, end):
         pass
+
+
+class BaseElementBackend(ABC, BackendInterface, DelegateMixin):
+    @abstractmethod
+    @delegatemethod
+    def move_to_top(self):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def update_badge(self):
+        pass
+
+    @abstractmethod
+    def draw_ports(self):
+        pass
+
+    @abstractmethod
+    def hide_ports(self):
+        pass
+
+    @abstractmethod
+    def set_size(self, width, height):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def move(self, x, y):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def move_z(self, z):
+        pass
+

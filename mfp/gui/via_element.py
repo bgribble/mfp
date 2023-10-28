@@ -49,7 +49,7 @@ class ViaElement (BaseElement):
         self.label_text = None
         self.label = TextWidget(self)
         self.label.set_position(0, self.LABEL_Y)
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
         self.add_actor(self.texture)
 
         # configure label
@@ -162,7 +162,7 @@ class ViaElement (BaseElement):
         self.texture.invalidate()
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label)
+        return LabelEditMode(self.app_window, self, self.label)
 
 
 class SendViaElement (ViaElement):

@@ -412,8 +412,6 @@ class Patch(Processor):
             self.gui_params = saved_gui
 
             cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
-            for dline in cdiff:
-                print(dline)
 
             if oldjson != newjson:
                 log.warning("Unsaved changes in '%s'" % self.name, "(%s)" % self.file_origin)

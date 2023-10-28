@@ -75,9 +75,9 @@ class SlideMeterElement (BaseElement):
         # create the texture
         self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
-        self.set_content(self.texture)
+        self.backend.group.set_content(self.texture)
 
-        self.set_reactive(True)
+        self.backend.group.set_reactive(True)
 
         self.set_size(self.DEFAULT_W, self.DEFAULT_H)
         self.move(x, y)
@@ -403,10 +403,10 @@ class SlideMeterElement (BaseElement):
                 return None
             else:
                 self.draw_ports()
-        return SliderEditMode(self.stage, self, "Fader/meter edit")
+        return SliderEditMode(self.app_window, self, "Fader/meter edit")
 
     def make_control_mode(self):
-        return SliderControlMode(self.stage, self, "Fader/meter control")
+        return SliderControlMode(self.app_window, self, "Fader/meter control")
 
 
 class FaderElement(SlideMeterElement):
@@ -578,10 +578,10 @@ class DialElement(SlideMeterElement):
                 return None
             else:
                 self.draw_ports()
-        return DialEditMode(self.stage, self, "Dial edit")
+        return DialEditMode(self.app_window, self, "Dial edit")
 
     def make_control_mode(self):
-        return DialControlMode(self.stage, self, "Dial control")
+        return DialControlMode(self.app_window, self, "Dial control")
 
 
 

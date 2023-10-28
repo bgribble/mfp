@@ -33,13 +33,13 @@ class MessageElement (BaseElement):
 
         # create elements
         self.texture = Clutter.Canvas.new()
-        self.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_size(35, 25)
+        self.backend.group.set_content(self.texture)
+        self.backend.group.set_reactive(True)
 
         self.label = TextWidget(self)
 
-        self.set_reactive(True)
         self.set_size(35, 25)
         self.obj_state = self.OBJ_HALFCREATED
         self.texture.invalidate()
@@ -186,10 +186,10 @@ class MessageElement (BaseElement):
         self.texture.invalidate()
 
     def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label)
+        return LabelEditMode(self.app_window, self, self.label)
 
     def make_control_mode(self):
-        return ClickableControlMode(self.stage, self, "Message control")
+        return ClickableControlMode(self.app_window, self, "Message control")
 
 
 class TransientMessageElement (MessageElement):
@@ -219,9 +219,9 @@ class TransientMessageElement (MessageElement):
 
         self.target_port = portnum
         for to in self.target_obj:
-            c = ConnectionElement(self.stage, self, 0, to, self.target_port)
-            self.stage.active_layer().add(c)
-            self.stage.register(c)
+            c = ConnectionElement(self.app_window, self, 0, to, self.target_port)
+            self.app_window.active_layer().add(c)
+            self.app_window.register(c)
             self.connections_out.append(c)
             to.connections_in.append(c)
 
@@ -248,9 +248,9 @@ class TransientMessageElement (MessageElement):
                         self.message_text
                     )
         for to in self.target_obj:
-            self.stage.select(to)
+            self.app_window.select(to)
         self.message_text = None
         await self.delete()
 
     def make_edit_mode(self):
-        return TransientMessageEditMode(self.stage, self, self.label)
+        return TransientMessageEditMode(self.app_window, self, self.label)

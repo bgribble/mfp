@@ -1,9 +1,13 @@
-from ..backend_interfaces import TextWidgetBackend
+"""
+clutter/text_widget.py -- backend implementation of TextWidget for Clutter
+"""
 
 from gi.repository import Clutter
-from .app_window import ClutterAppWindowBackend
-from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.base_element import BaseElement
+
+from ..backend_interfaces import TextWidgetBackend
+from .app_window import ClutterAppWindowBackend
 
 
 class ClutterTextWidgetBackend(TextWidgetBackend):
@@ -12,9 +16,8 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
     def __init__(self, owner):
         self.owner = owner
 
-        # FIXME rn BaseElement is always a Group
-        if isinstance(owner.container, Clutter.Group):
-            self.parent = owner.container
+        if isinstance(owner.container, BaseElement):
+            self.parent = owner.container.backend.group
         elif isinstance(owner.container, ClutterAppWindowBackend):
             self.parent = owner.container.container
 

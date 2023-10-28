@@ -25,6 +25,9 @@ from .tree_display import TreeDisplay
 
 class ClutterAppWindowBackend (AppWindowBackend):
     backend_name = "clutter"
+    reversed_attrs = [
+        'input_mgr', 'object_counts_by_type'
+    ]
 
     def render(self):
         # clutter backend does not need a render call
@@ -569,6 +572,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 log.debug("WARNING: element has no layer", element, self)
             else:
                 element.container = element.layer.backend.group
+        
+        self.wrapper.input_mgr.backend.event_source_reverse[element.backend.group] = element
 
         if not isinstance(element, ConnectionElement):
             if self.wrapper.load_in_progress:
@@ -595,6 +600,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
             element.container = None
 
         self.object_view.remove(element)
+        if element.backend.group in self.wrapper.input_mgr.backend.event_source_reverse:
+           del self.wrapper.input_mgr.backend.event_source_reverse[element.backend.group]
 
     def refresh(self, element):
         if isinstance(element, PatchDisplay):
