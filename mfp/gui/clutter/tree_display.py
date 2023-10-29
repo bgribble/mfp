@@ -10,6 +10,7 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 import inspect
 from gi.repository import Gtk, GObject
 from mfp.gui_main import MFPGUI
+from mfp import log
 
 
 class TreeDisplay (object):
@@ -74,6 +75,10 @@ class TreeDisplay (object):
         return True
 
     def _select_cb(self, selection):
+        MFPGUI().async_task(self._select_cb_helper(selection))
+        return True
+
+    async def _select_cb_helper(self, selection):
         selections = []
 
         def selfn(mod, path, itr, data):
@@ -86,16 +91,14 @@ class TreeDisplay (object):
                 if self.unselect_cb:
                     self.unselect_cb(s)
 
-        """
         for s in selections:
             if self.select_cb:
                 rv = self.select_cb(s)
                 if inspect.isawaitable(rv):
-                    MFPGUI().async_task(rv)
-        """
+                    await rv
         self.selected = selections
 
-        return False
+        return True
 
     def _sort_func(self, model, iter_a, iter_b, data):
         obj_a = model.get_value(iter_a, 0)
@@ -167,21 +170,22 @@ class TreeDisplay (object):
             if parent_path:
                 parent_iter = self.treestore.get_iter_from_string(parent_path)
 
-        iter = self.treestore.append(parent_iter)
-        self.treestore.set_value(iter, 0, obj)
+        new_iter = self.treestore.append(parent_iter)
+        self.treestore.set_value(new_iter, 0, obj)
         self._update_paths()
         return self.object_paths.get(obj)
 
     def insert(self, obj, parent, update=True):
         if obj in self.object_paths:
             return None
+
         piter = None
         if parent is not None:
             ppath = self._ensure_path(parent)
             piter = self.treestore.get_iter_from_string(ppath)
 
-        iter = self.treestore.append(piter)
-        self.treestore.set_value(iter, 0, obj)
+        new_iter = self.treestore.append(piter)
+        self.treestore.set_value(new_iter, 0, obj)
         self.object_parents[obj] = parent
         self._update_paths()
         if update:
@@ -211,8 +215,8 @@ class TreeDisplay (object):
     def remove(self, obj, update=True):
         path = self.object_paths.get(obj)
         if path:
-            iter = self.treestore.get_iter_from_string(path)
-            self.treestore.remove(iter)
+            new_iter = self.treestore.get_iter_from_string(path)
+            self.treestore.remove(new_iter)
             if obj in self.object_paths:
                 del self.object_paths[obj]
             if obj in self.object_parents:
@@ -222,6 +226,9 @@ class TreeDisplay (object):
             self.refresh()
 
     def update(self, obj, parent):
+        if obj not in self.object_paths:
+            return
+
         need_select = False
         if obj in self.selected:
             need_select = True
@@ -257,15 +264,13 @@ class TreeDisplay (object):
 
     def in_tree(self, obj):
         p = self.object_paths.get(obj)
-        if p:
-            return True
-        else:
-            return False
+        return bool(p)
 
     def select(self, obj):
         if obj in self.selected:
             return
-        elif obj is None:
+
+        if obj is None:
             self.selected = []
             self.selection.unselect_all()
         else:

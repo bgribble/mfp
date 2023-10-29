@@ -293,6 +293,7 @@ class BaseElement (Store):
             MFPGUI().remember(self)
             self.send_params()
             await MFPGUI().mfp.set_gui_created(self.obj_id, True)
+            await MFPGUI().appwin.signal_emit("created", self)
 
         self.app_window.refresh(self)
 

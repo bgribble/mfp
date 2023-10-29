@@ -232,7 +232,7 @@ class MFPApp (Singleton, SignalMixin):
             self.dsp_process = None
 
         dspcommand = [
-            "valgrind", "--leak-check=full",
+            # "valgrind", "--leak-check=full",
             "mfpdsp", self.socket_path, self.max_blocksize,
             self.dsp_inputs, self.dsp_outputs,
         ]
@@ -566,7 +566,7 @@ class MFPApp (Singleton, SignalMixin):
             msgid, _ = msg
             # latency changed
             if msgid == 1:
-                self.signal_emit("latency")
+                self.async_task(self.signal_emit("latency"))
 
     def session_management_setup(self):
         from . import nsm

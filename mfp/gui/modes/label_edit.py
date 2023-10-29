@@ -100,8 +100,9 @@ class LabelEditMode (InputMode):
         self.update_label(raw=False)
 
     def start_editing(self):
-        def focus_out(*args):
-            MFPGUI().async_task(self.commit_edits())
+        async def focus_out(*args):
+            log.debug("[label_edit] got key-focus-out, pushing edits")
+            await self.commit_edits()
             return True
 
         def key_press(window, signal, event):

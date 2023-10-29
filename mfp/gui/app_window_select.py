@@ -60,7 +60,6 @@ async def _select(self, obj):
 
     self.selected[:0] = [obj]
     obj.select()
-
     self.backend.select(obj)
     await self.signal_emit("select", obj)
 

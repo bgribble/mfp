@@ -135,6 +135,20 @@ class ClutterAppWindowBackend (AppWindowBackend):
         object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
         object_view.select_cb = selected_callback
         object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.wrapper._unselect(obj))
+
+        async def on_create(window, signal, element):
+            if isinstance(element.container, BaseElement):
+                object_view.insert(element, (element.scope, element.container))
+            elif element.scope:
+                object_view.insert(element, (element.scope, element.layer.patch))
+            else:
+                object_view.insert(
+                    element,
+                    (element.layer.scope, element.layer.patch),
+                )
+
+        self.wrapper.signal_listen("created", on_create)
+
         return object_view
 
     def _init_layer_view(self):
@@ -581,17 +595,6 @@ class ClutterAppWindowBackend (AppWindowBackend):
             else:
                 update = True
 
-            if isinstance(element.container, BaseElement):
-                self.object_view.insert(element, (element.scope, element.container), update=update)
-            elif element.scope:
-                self.object_view.insert(element, (element.scope, element.layer.patch),
-                                        update=update)
-            else:
-                self.object_view.insert(
-                    element,
-                    (element.layer.scope, element.layer.patch),
-                    update=update
-                )
 
     def unregister(self, element):
         if element.container:
@@ -627,10 +630,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
         pass
 
     def select(self, obj):
-        self.object_view.select(obj)
+        if self.object_view.in_tree(obj):
+            self.object_view.select(obj)
 
     def unselect(self, obj):
-        self.object_view.unselect(obj)
+        if self.object_view.in_tree(obj):
+            self.object_view.unselect(obj)
 
     def layer_new(self, layer, patch):
         self.layer_view.insert(layer, patch)
