@@ -161,7 +161,7 @@ class ViaElement (BaseElement):
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
 

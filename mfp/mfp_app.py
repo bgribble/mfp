@@ -232,7 +232,7 @@ class MFPApp (Singleton, SignalMixin):
             self.dsp_process = None
 
         dspcommand = [
-            # "valgrind", "--leak-check=full",
+            "valgrind", "--leak-check=full",
             "mfpdsp", self.socket_path, self.max_blocksize,
             self.dsp_inputs, self.dsp_outputs,
         ]

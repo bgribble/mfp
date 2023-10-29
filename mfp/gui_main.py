@@ -174,8 +174,10 @@ async def main():
 
     setup_default_colors()
 
-    def _exception(exc, tbinfo, *args):
-        log.error(f"[carp] Exception: '{exc}' '{tbinfo}' '{args}'")
+    def _exception(exc, tbinfo, traceback):
+        log.error(f"[carp] Exception: {tbinfo} '{args}'")
+        for ll in traceback.split('\n'):
+            log.error(ll)
 
     host.on("exception", _exception)
 

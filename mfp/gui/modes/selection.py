@@ -15,7 +15,7 @@ class SelectionEditMode (InputMode):
 
         InputMode.__init__(self, "Edit selection")
 
-        self.affinity = -10 
+        self.affinity = -10
 
         self.bind("UP", lambda: self.window.move_selected(0, -1),
                   "Move selection up 1 unit")
@@ -45,31 +45,31 @@ class SingleSelectionEditMode (InputMode):
         self.window = window
         InputMode.__init__(self, "Single selection")
 
-        self.affinity = -10 
+        self.affinity = -10
 
         self.bind("c", self.connect_fwd, "Connect from element")
         self.bind("C", self.connect_rev, "Connect to element")
         self.bind("RET", self.edit_selected, "Edit element")
         self.extend(SelectionEditMode(window))
 
-    def edit_selected(self):
-        self.window.selected[0].begin_edit() 
+    async def edit_selected(self):
+        await self.window.selected[0].begin_edit()
 
     def connect_fwd(self):
         if self.window.selected:
-            for s in self.window.selected: 
-                if s.editable: 
+            for s in self.window.selected:
+                if s.editable:
                     self.manager.enable_minor_mode(ConnectionMode(self.window, s))
-                    return True 
-        return False 
+                    return True
+        return False
 
     def connect_rev(self):
         if self.window.selected:
-            for s in self.window.selected: 
-                if s.editable: 
+            for s in self.window.selected:
+                if s.editable:
                     self.manager.enable_minor_mode(ConnectionMode(self.window, s, connect_rev=True))
                     return True
-        return False 
+        return False
 
 class MultiSelectionEditMode (InputMode):
     def __init__(self, window):

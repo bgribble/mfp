@@ -13,8 +13,8 @@ from mfp import log
 
 class Osc(Processor):
     doc_tooltip_obj = "Sine oscillator"
-    doc_tooltip_inlet = ["Phase reset (radians)", 
-                         "Frequency (hz) (min: 0, max: samplerate/2, default: initarg 0)", 
+    doc_tooltip_inlet = ["Phase reset (radians)",
+                         "Frequency (hz) (min: 0, max: samplerate/2, default: initarg 0)",
                          "Amplitude (default: initarg 1)"]
     doc_tooltip_outlet = ["Signal output" ]
 
@@ -22,7 +22,7 @@ class Osc(Processor):
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
         self.init_freq = 0
-        self.init_ampl = 1.0 
+        self.init_ampl = 1.0
 
         if len(initargs) > 0:
             self.init_freq = initargs[0]

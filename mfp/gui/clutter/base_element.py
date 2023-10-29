@@ -7,6 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 import math
 from gi.repository import Clutter
 
+from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement
 from ..colordb import ColorDB
 from ..backend_interfaces import BaseElementBackend
@@ -135,7 +136,7 @@ class ClutterBaseElementBackend(BaseElementBackend):
 
             if dsp_port:
                 pobj.set_border_width(1.5)
-                pobj.set_color(self.app_window.color_bg)
+                pobj.set_color(MFPGUI().appwin.color_bg)
                 pobj.set_border_color(self.wrapper.get_color('stroke-color'))
             else:
                 pobj.set_color(self.wrapper.get_color('stroke-color'))

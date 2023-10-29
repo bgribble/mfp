@@ -441,18 +441,18 @@ class BaseElement (Store):
         for c in self.connections_out + self.connections_in:
             c.move_to_layer(layer)
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return None
 
     def make_control_mode(self):
         return None
 
-    def begin_edit(self):
+    async def begin_edit(self):
         if not self.editable:
             return False
 
         if not self.edit_mode:
-            self.edit_mode = self.make_edit_mode()
+            self.edit_mode = await self.make_edit_mode()
 
         if self.edit_mode:
             self.app_window.input_mgr.enable_minor_mode(self.edit_mode)

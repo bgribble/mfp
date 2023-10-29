@@ -7,9 +7,9 @@ and object lists
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
+import inspect
 from gi.repository import Gtk, GObject
 from mfp.gui_main import MFPGUI
-from mfp import log
 
 
 class TreeDisplay (object):
@@ -86,10 +86,13 @@ class TreeDisplay (object):
                 if self.unselect_cb:
                     self.unselect_cb(s)
 
+        """
         for s in selections:
             if self.select_cb:
-                self.select_cb(s)
-
+                rv = self.select_cb(s)
+                if inspect.isawaitable(rv):
+                    MFPGUI().async_task(rv)
+        """
         self.selected = selections
 
         return False
@@ -156,18 +159,18 @@ class TreeDisplay (object):
         ppath = self.object_paths.get(obj)
         if ppath is not None:
             return ppath
-        else:
-            parent_iter = None
-            if isinstance(obj, tuple):
-                parent = obj[1]
-                parent_path = self.object_paths.get(parent)
-                if parent_path:
-                    parent_iter = self.treestore.get_iter_from_string(parent_path)
 
-            iter = self.treestore.append(parent_iter)
-            self.treestore.set_value(iter, 0, obj)
-            self._update_paths()
-            return self.object_paths.get(obj)
+        parent_iter = None
+        if isinstance(obj, tuple):
+            parent = obj[1]
+            parent_path = self.object_paths.get(parent)
+            if parent_path:
+                parent_iter = self.treestore.get_iter_from_string(parent_path)
+
+        iter = self.treestore.append(parent_iter)
+        self.treestore.set_value(iter, 0, obj)
+        self._update_paths()
+        return self.object_paths.get(obj)
 
     def insert(self, obj, parent, update=True):
         if obj in self.object_paths:

@@ -149,7 +149,7 @@ class TextElement (BaseElement):
         self.texture.invalidate()
         self.hide_ports()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label,
                              multiline=True, markup=True, initial=self.value)
 

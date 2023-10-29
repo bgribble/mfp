@@ -187,7 +187,7 @@ class AppWindow (SignalMixin):
         self.refresh(b)
         await self.select(b)
 
-        b.begin_edit()
+        await b.begin_edit()
         return True
 
     async def quit(self, *rest):

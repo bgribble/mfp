@@ -205,7 +205,7 @@ class PlotElement (BaseElement):
         BaseElement.unselect(self)
         self.rect.set_border_color(self.app_window.color_unselected)
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
     def command(self, action, data):

@@ -41,8 +41,8 @@ def init_object_view(self):
 
         self.object_view.update(obj, parent)
 
-    def obj_selected(obj):
-        self._select(obj)
+    async def obj_selected(obj):
+        await self._select(obj)
         if isinstance(obj, BaseElement):
             self.layer_select(obj.layer)
         elif isinstance(obj, PatchDisplay):
@@ -57,9 +57,7 @@ def init_object_view(self):
                         return
                 self.layer_select(patch.layers[0])
             else:
-                log.debug("[obj_selected] Got tuple", obj)
                 self.layer_select(patch.layer)
-
 
     obj_cols = [ ("Name", get_obj_name, True, obj_name_edited, True) ]
 

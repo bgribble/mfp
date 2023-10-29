@@ -200,10 +200,10 @@ class ButtonElement (BaseElement):
         BaseElement.unselect(self)
         self.redraw()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         if self.obj_id is None:
             # create object
-            self.create(self.proc_type, str(self.indicator))
+            await self.create(self.proc_type, str(self.indicator))
 
             # complete drawing
             if self.obj_id is None:

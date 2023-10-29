@@ -185,7 +185,7 @@ class MessageElement (BaseElement):
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
     def make_control_mode(self):
@@ -197,7 +197,7 @@ class TransientMessageElement (MessageElement):
 
     def __init__(self, window, x, y):
         self.target_obj = [t for t in window.selected if t is not self]
-        self.target_port = None
+        self.target_port = 0
 
         pos_x, pos_y = self.target_obj[0].get_stage_position()
         MessageElement.__init__(self, window, pos_x, pos_y - self.ELBOW_ROOM)
@@ -208,23 +208,27 @@ class TransientMessageElement (MessageElement):
         self.label.set_text(self.message_text)
         self.obj_state = self.OBJ_COMPLETE
         self.draw_ports()
-        self.set_port(0)
 
-    def set_port(self, portnum):
-        if portnum == self.target_port:
-            return True
+        self._make_connections()
 
-        for c in self.connections_out:
-            c.delete()
-
-        self.target_port = portnum
+    def _make_connections(self):
         for to in self.target_obj:
             c = ConnectionElement(self.app_window, self, 0, to, self.target_port)
-            self.app_window.active_layer().add(c)
+            self.app_window.wrapper.active_layer().add(c)
             self.app_window.register(c)
             self.connections_out.append(c)
             to.connections_in.append(c)
 
+    async def set_port(self, portnum):
+        if portnum == self.target_port:
+            return True
+
+        self.target_port = portnum
+
+        for c in self.connections_out:
+            await c.delete()
+
+        self._make_connections()
         return True
 
     async def end_edit(self):
@@ -252,5 +256,5 @@ class TransientMessageElement (MessageElement):
         self.message_text = None
         await self.delete()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return TransientMessageEditMode(self.app_window, self, self.label)

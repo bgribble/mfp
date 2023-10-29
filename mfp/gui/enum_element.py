@@ -248,7 +248,7 @@ class EnumElement (BaseElement):
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return EnumEditMode(self.app_window, self, self.label)
 
     def make_control_mode(self):

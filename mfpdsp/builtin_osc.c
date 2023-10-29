@@ -16,11 +16,11 @@ typedef struct {
 #define OSC_TABSIZE 2048
 #define OSC_TABRANGE (2.0 * M_PI + 0.000001)
 #define OSC_TABSCALE (OSC_TABSIZE / OSC_TABRANGE)
-#define OSC_TABINCR (OSC_TABRANGE / OSC_TABSIZE) 
+#define OSC_TABINCR (OSC_TABRANGE / OSC_TABSIZE)
 
-double osc_table[OSC_TABSIZE + 1]; 
+double osc_table[OSC_TABSIZE + 1];
 
-static void 
+static void
 table_load(void) {
     double phase = 0.0;
     double phase_incr = OSC_TABINCR;
@@ -33,9 +33,9 @@ table_load(void) {
 }
 
 
-static mfp_sample 
+static mfp_sample
 table_lookup(double phase) {
-        
+
     int index = (int)(phase * OSC_TABSCALE);
     double rem, s1, s2;
 
@@ -61,8 +61,8 @@ table_lookup(double phase) {
 
 }
 
-static int 
-process_osc(mfp_processor * proc) 
+static int
+process_osc(mfp_processor * proc)
 {
     builtin_osc_data * d = (builtin_osc_data *)(proc->data);
     int mode_am = 0, mode_fm = 0;
@@ -88,7 +88,7 @@ process_osc(mfp_processor * proc)
 
 
     if(mode_fm == 1) {
-        newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0); 
+        newphase = mfp_block_prefix_sum(proc->inlet_buf[0], phase_base, d->phase, d->int_0);
         newphase = fmod(newphase, 2.0*M_PI);
 
         /* wrap the phase to function domain */
@@ -118,8 +118,8 @@ process_osc(mfp_processor * proc)
     return 0;
 }
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     builtin_osc_data * d = g_malloc0(sizeof(builtin_osc_data));
 
@@ -130,11 +130,10 @@ init(mfp_processor * proc)
     mfp_block_resize(d->int_0, proc->context->blocksize);
 
     proc->data = (void *)d;
-
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     builtin_osc_data * d = (builtin_osc_data *)(proc->data);
 
@@ -144,20 +143,20 @@ destroy(mfp_processor * proc)
     }
 }
 
-static int 
-config(mfp_processor * proc) 
+static int
+config(mfp_processor * proc)
 {
     builtin_osc_data * d = (builtin_osc_data *)(proc->data);
     gpointer freq_ptr = g_hash_table_lookup(proc->params, "_sig_1");
     gpointer ampl_ptr = g_hash_table_lookup(proc->params, "_sig_2");
     gpointer phase_ptr = g_hash_table_lookup(proc->params, "phase");
 
-    /* if blocksize has changed, resize internal buffer */ 
+    /* if blocksize has changed, resize internal buffer */
     if (d->int_0->blocksize != proc->context->blocksize) {
         mfp_block_resize(d->int_0, proc->context->blocksize);
     }
 
-    /* get parameters */ 
+    /* get parameters */
     if (freq_ptr != NULL) {
         d->const_freq = *(double *)freq_ptr;
     }
@@ -167,9 +166,9 @@ config(mfp_processor * proc)
     }
 
     if (phase_ptr != NULL) {
-        d->phase = *(double *)phase_ptr;-
+        d->phase = *(double *)phase_ptr;
         g_hash_table_remove(proc->params, "phase");
-        /* FIXME free in config() */ 
+        /* FIXME free in config() */
         g_free(phase_ptr);
     }
 
@@ -178,7 +177,7 @@ config(mfp_processor * proc)
 
 
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_osc(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("osc~");
@@ -196,5 +195,3 @@ init_builtin_osc(void) {
 
     return p;
 }
-
-

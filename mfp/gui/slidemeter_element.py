@@ -395,10 +395,10 @@ class SlideMeterElement (BaseElement):
         BaseElement.unselect(self)
         self.texture.invalidate()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         if self.obj_id is None:
             # create the underlying var
-            self.create(self.proc_type, str(self.value))
+            await self.create(self.proc_type, str(self.value))
             if self.obj_id is None:
                 return None
             else:
@@ -570,10 +570,10 @@ class DialElement(SlideMeterElement):
         ct.close_path()
         ct.fill()
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         if self.obj_id is None:
             # create the underlying var
-            self.create(self.proc_type, str(self.value))
+            await self.create(self.proc_type, str(self.value))
             if self.obj_id is None:
                 return None
             else:
