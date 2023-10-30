@@ -1,78 +1,66 @@
 #! /usr/bin/env python
 '''
-colordb.py -- RGBA color definitions for MFP app 
+colordb.py -- RGBA color definitions for MFP app
 
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..singleton import Singleton
+from .backend_interfaces import ColorDBBackend
 
-class RGBAColor(object):
+
+class RGBAColor:
     def __init__(self, r, g, b, a):
-        self.red = r 
+        self.red = r
         self.green = g
         self.blue = b
-        self.alpha = a 
+        self.alpha = a
 
     @classmethod
     def load(self, propdict):
         return RGBAColor(propdict.get('red', 0),
-                         propdict.get('green', 0), 
+                         propdict.get('green', 0),
                          propdict.get('blue', 0),
                          propdict.get('alpha', 0))
 
 
-class ColorDB (Singleton): 
-    named_colors = {} 
-    rgba_colors = {}  
+class ColorDB (Singleton):
+    named_colors = {}
+    rgba_colors = {}
+
+    def __init__(self):
+        from .app_window import AppWindow
+        factory = ColorDBBackend.get_backend(AppWindow.backend_name)
+        self.backend = factory(self)
+        super().__init__()
 
     def find(self, *colorinfo):
-        from gi.repository import Clutter 
         ll = len(colorinfo)
         if ll > 2:
-            # RGB or RGBA color values 
+            # RGB or RGBA color values
+            key = None
             if ll > 3:
-                key = (int(colorinfo[0]), int(colorinfo[1]), 
+                key = (int(colorinfo[0]), int(colorinfo[1]),
                        int(colorinfo[2]), int(colorinfo[3]))
-            elif ll == 3: 
+            elif ll == 3:
                 key = (int(colorinfo[0]), int(colorinfo[1]), int(colorinfo[2]), 255)
 
-            if key not in self.rgba_colors:
-                nc = Clutter.Color.new(*key)
-                self.rgba_colors[key] = nc
-            else: 
-                nc = self.rgba_colors.get(key)
-            return nc 
-        elif isinstance(colorinfo[0], str):
-            nc = self.named_colors.get(colorinfo[0])
-            if nc is not None:
-                return nc 
-            
-            color = Clutter.Color()
-            rv = color.from_string(colorinfo[0])
-            if isinstance(rv, tuple):
-                if isinstance(rv[0], Clutter.Color):
-                    color = rv[0]
-                elif isinstance(rv[1], Clutter.Color):
-                    color = rv[1]
-            return color 
+            if key in self.rgba_colors:
+                return self.rgba_colors.get(key)
 
-    def find_cairo(self, *colorinfo):
-        tmp = self.find(*colorinfo)
-        if tmp is not None:
-            rv = RGBAColor(tmp.red / 255.0, tmp.green / 255.0, tmp.blue/255.0, tmp.alpha/255.0)
-        else: 
-            print("ColorDB(): did not find color", colorinfo)
-            rv = RGBAColor(0, 0, 0, 255)
-        return rv 
-        
+            nc = self.create_from_rgba(*key)
+            self.rgba_colors[key] = nc
+            return nc
+
+        if isinstance(colorinfo[0], str):
+            color_name = colorinfo[0]
+            if color_name in self.named_colors:
+                return self.named_colors[color_name]
+
+            nc = self.create_from_name(color_name)
+            self.named_colors[color_name] = nc
+            return nc
+        return None
+
     def insert(self, name, color):
         self.named_colors[name] = color
-
-    @classmethod
-    def to_cairo(klass, color): 
-        return RGBAColor(color.red / 255.0, color.green/ 255.0, color.blue / 255.0, 
-                         color.alpha / 255.0)
-
-    
-

@@ -112,12 +112,12 @@ class ProcessorElement (BaseElement):
         ct.close_path()
 
         # fill to paint the background
-        color = ColorDB.to_cairo(self.get_color('fill-color'))
+        color = ColorDB().normalize(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ct.fill_preserve()
 
         # stroke to draw the outline
-        color = ColorDB.to_cairo(self.get_color('stroke-color'))
+        color = ColorDB().normalize(self.get_color('stroke-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
         if self.obj_state == self.OBJ_COMPLETE:

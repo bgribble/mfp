@@ -71,7 +71,7 @@ class TextElement (BaseElement):
         ct.restore()
 
         # fill to paint the background
-        color = ColorDB.to_cairo(self.get_color('fill-color'))
+        color = ColorDB().normalize(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ct.rectangle(0, 0, width, height)
         ct.fill()
@@ -81,7 +81,7 @@ class TextElement (BaseElement):
             ct.translate(0.5, 0.5)
             ct.set_antialias(cairo.ANTIALIAS_NONE)
             ct.rectangle(0, 0, width-1, height-1)
-            color = ColorDB.to_cairo(self.get_color('border-color'))
+            color = ColorDB().normalize(self.get_color('border-color'))
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
         return True

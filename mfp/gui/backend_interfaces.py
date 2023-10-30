@@ -1,7 +1,12 @@
+"""
+backend_interfaces.py -- interface declarations for UI classes
+
+Copyright (c) Bill Gribble <grib@billgribble.com>
+"""
+
 from abc import ABC, abstractmethod
 from ..delegate import DelegateMixin, delegatemethod
 
-from abc import ABC, abstractmethod
 
 class BackendInterface:
     _registry = {}
@@ -206,6 +211,7 @@ class LayerBackend(ABC, BackendInterface, DelegateMixin):
     def hide(self):
         pass
 
+
 class TextWidgetBackend(ABC, BackendInterface, DelegateMixin):
     @abstractmethod
     @delegatemethod
@@ -356,3 +362,19 @@ class BaseElementBackend(ABC, BackendInterface, DelegateMixin):
     def move_z(self, z):
         pass
 
+
+class ColorDBBackend(ABC, BackendInterface, DelegateMixin):
+    @abstractmethod
+    @delegatemethod
+    def create_from_rgba(self, red, green, blue, alpha):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def create_from_name(self, name):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def normalize(self, color):
+        pass

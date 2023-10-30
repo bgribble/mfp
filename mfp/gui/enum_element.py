@@ -102,11 +102,11 @@ class EnumElement (BaseElement):
         ct.line_to(0, 0)
         ct.close_path()
 
-        color = ColorDB.to_cairo(self.get_color('fill-color'))
+        color = ColorDB().normalize(self.get_color('fill-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.fill_preserve()
 
-        color = ColorDB.to_cairo(self.get_color('stroke-color'))
+        color = ColorDB().normalize(self.get_color('stroke-color'))
         ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.stroke()
 

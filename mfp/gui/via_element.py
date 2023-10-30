@@ -78,7 +78,7 @@ class ViaElement (BaseElement):
         ct.set_line_width(linewidth)
         cent = (self.VIA_SIZE + self.VIA_FUDGE) / 2.0
         ct.arc(cent, cent, arcsize, 0, 2 * math.pi)
-        color = ColorDB.to_cairo(self.get_color('stroke-color'))
+        color = ColorDB().normalize(self.get_color('stroke-color'))
         if self.GLYPH_STYLE[:5] == "empty":
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()

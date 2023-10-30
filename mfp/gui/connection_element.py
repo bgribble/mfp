@@ -134,7 +134,7 @@ class ConnectionElement(BaseElement):
         ctx.line_to(0, height)
         ctx.close_path()
 
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
+        c = ColorDB().normalize(self.get_color('stroke-color'))
         ctx.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ctx.stroke()
         return True

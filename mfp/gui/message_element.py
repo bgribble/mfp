@@ -94,12 +94,12 @@ class MessageElement (BaseElement):
         ct.close_path()
 
         # fill to paint the background
-        c = ColorDB.to_cairo(self.get_color('fill-color'))
+        c = ColorDB().normalize(self.get_color('fill-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.fill_preserve()
 
         # stroke to draw the outline
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
+        c = ColorDB().normalize(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.stroke()
 

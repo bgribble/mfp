@@ -28,7 +28,8 @@ class MarkStyle (object):
 
     def set_color(self, newcolor):
         if isinstance(newcolor, str):
-            c = ColorDB().find_cairo(newcolor)
+            c = ColorDB().find(newcolor)
+            c = ColorDB().normalize(c)
         elif isinstance(newcolor, RGBAColor): 
             c = newcolor 
         self.col_r = c.red

@@ -91,7 +91,7 @@ class SlideMeterElement (BaseElement):
 
     @catchall
     def draw_cb(self, texture, ct, width, height):
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
+        c = ColorDB().normalize(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         lw = 1
 
@@ -143,7 +143,7 @@ class SlideMeterElement (BaseElement):
         # draw the scale if required
         if self.show_scale:
             fontsize = self.get_style('font-size-scale')
-            c = ColorDB.to_cairo(self.get_color('text-color'))
+            c = ColorDB().normalize(self.get_color('text-color'))
             ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
             ct.set_font_size(fontsize)
 
@@ -183,7 +183,7 @@ class SlideMeterElement (BaseElement):
         if self.zeropoint is not None and h < self.MIN_BARSIZE:
             h = self.MIN_BARSIZE
 
-        c = ColorDB.to_cairo(self.get_color('meter-color'))
+        c = ColorDB().normalize(self.get_color('meter-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.rectangle(x_min+lw/2, y_max + lw/2 - val2pixels(max_fillval), bar_w-lw, h-lw)
         ct.fill()
@@ -505,7 +505,7 @@ class DialElement(SlideMeterElement):
 
     @catchall
     def draw_cb(self, texture, ct, width, height):
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
+        c = ColorDB().normalize(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
 
@@ -551,7 +551,7 @@ class DialElement(SlideMeterElement):
         ct.stroke()
 
         # and the tasty filling
-        c = ColorDB.to_cairo(self.get_color('meter-color'))
+        c = ColorDB().normalize(self.get_color('meter-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         min_val, max_val = self.fill_interval()
         min_theta = self.val2theta(min_val)

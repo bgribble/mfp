@@ -139,7 +139,7 @@ class ButtonElement (BaseElement):
         w = width - 2
         h = height - 2
 
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
+        c = ColorDB().normalize(self.get_color('stroke-color'))
 
         # Clear texture
         ct.save()
@@ -163,7 +163,7 @@ class ButtonElement (BaseElement):
         ih = h - 2 * ioff
         rounded_box(ct, ioff, ioff, iw, ih, corner-1)
 
-        c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
+        c = ColorDB().normalize(self.get_color('fill-color:lit'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         if self.indicator:
             ct.fill()
@@ -322,7 +322,7 @@ class ToggleIndicatorElement (ButtonElement):
         ct.paint()
         ct.restore()
 
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
+        c = ColorDB().normalize(self.get_color('stroke-color'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
 
         ct.set_line_width(1.5)
@@ -338,7 +338,7 @@ class ToggleIndicatorElement (ButtonElement):
         ih = h - 2 * ioff
         circle(ct, ioff, ioff, iw, ih)
 
-        c = ColorDB.to_cairo(self.get_color('fill-color:lit'))
+        c = ColorDB().normalize(self.get_color('fill-color:lit'))
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         if self.indicator:
             ct.fill()

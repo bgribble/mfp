@@ -172,7 +172,6 @@ async def main():
     )
     await host.connect(channel)
 
-    setup_default_colors()
 
     def _exception(exc, tbinfo, traceback):
         log.error(f"[carp] Exception: {tbinfo} '{args}'")
@@ -189,6 +188,8 @@ async def main():
 
     from mfp.gui import backends  # noqa
     AppWindow.backend_name = "clutter"
+
+    setup_default_colors()
 
     gui = MFPGUI()
     gui.mfp = mfp_connection
@@ -212,7 +213,8 @@ async def main_error_wrapper():
         import traceback
         print(f"[LOG] ERROR: GUI process failed with {e}")
         tb = traceback.format_exc()
-        print(f"[LOG] ERROR: {tb}")
+        for ll in tb.split("\n"):
+            print(f"[LOG] ERROR: {ll}")
     ex = main_task.exception()
     print(f"[LOG] ERROR: main task exited {ex}")
 

@@ -4,3 +4,4 @@ from mfp.gui.clutter.console_manager import ClutterConsoleManagerBackend  # noqa
 from mfp.gui.clutter.layer import ClutterLayerBackend  # noqa
 from mfp.gui.clutter.text_widget import ClutterTextWidgetBackend  # noqa
 from mfp.gui.clutter.base_element import ClutterBaseElementBackend  # noqa
+from mfp.gui.clutter.colordb import ClutterColorDBBackend  # noqa

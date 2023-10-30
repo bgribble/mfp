@@ -51,14 +51,14 @@ class ClutterBaseElementBackend(BaseElementBackend):
         btext, bcolor = self.badge_current
         halfbadge = self.wrapper.get_style('badge_size') / 2.0
 
-        color = ColorDB.to_cairo(bcolor)
+        color = ColorDB().normalize(bcolor)
         ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         ctx.move_to(halfbadge, halfbadge)
         ctx.arc(halfbadge, halfbadge, halfbadge, 0, 2*math.pi)
         ctx.fill()
 
         extents = ctx.text_extents(btext)
-        color = ColorDB.to_cairo(ColorDB().find("white"))
+        color = ColorDB().normalize(ColorDB().find("white"))
         ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         twidth = extents[4]
         theight = extents[3]
