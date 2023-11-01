@@ -5,6 +5,9 @@ from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..bang import Uninit
 
+class EOF:
+    pass
+
 
 class FileIO(Processor):
     doc_tooltip_obj = "File I/O processor"
@@ -45,12 +48,18 @@ class FileIO(Processor):
 
     def read(self, size=None):
         if size is None:
-            return self.fileobj.read()
+            rv = self.fileobj.read()
         else:
-            return self.fileobj.read(size)
+            rv = self.fileobj.read(size)
+        if rv == '':
+            return EOF()
+        return rv
 
     def readline(self):
-        return self.fileobj.readline()
+        rv = self.fileobj.readline()
+        if rv == '':
+            return EOF()
+        return rv
 
     def readlines(self):
         return self.fileobj.readlines()

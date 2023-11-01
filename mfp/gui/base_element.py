@@ -214,11 +214,11 @@ class BaseElement (Store):
         MFPGUI().appwin.unregister(self)
         if self.obj_id is not None and not self.is_export:
             await MFPGUI().mfp.delete(self.obj_id)
-        elif self.obj_id is None:
-            for conn in [c for c in self.connections_out]:
-                await conn.delete()
-            for conn in [c for c in self.connections_in]:
-                await conn.delete()
+
+        for conn in [c for c in self.connections_out]:
+            await conn.delete()
+        for conn in [c for c in self.connections_in]:
+            await conn.delete()
 
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED

@@ -173,6 +173,7 @@ class MFPApp (Singleton, SignalMixin):
 
     async def exec_batch(self):
         # configure logging
+        log.log_quiet = True
         log.log_raw = True
         log.log_debug = False
         log.log_force_console = False
@@ -180,11 +181,15 @@ class MFPApp (Singleton, SignalMixin):
         await self.open_file(None)
         p = self.patches.get('default')
 
-        reader = await self.create("file", self.batch_input_file or "sys.stdin",
-                                   p, p.default_scope, "reader")
-        eoftest = await self.create("case", "''", p, p.default_scope, "eoftest")
+        # create a patch that iterates over the lines of stdin
+        # and feeds each one into the patch on the command line
+        reader = await self.create(
+            "file",
+            self.batch_input_file or "sys.stdin",
+            p, p.default_scope, "reader")
         trig = await self.create("trigger", "2", p, p.default_scope, "trig")
-        stripper = await self.create("string.strip", None, p, p.default_scope, "strip")
+        eoftest = await self.create("case", "EOF", p, p.default_scope, "eoftest")
+        stripper = await self.create("strip", None, p, p.default_scope, "strip")
         evaluator = None
 
         if self.batch_eval:
@@ -200,21 +205,21 @@ class MFPApp (Singleton, SignalMixin):
         printer = await self.create("print", None, p, p.default_scope, "printer")
         msg = await self.create("message", "@readline", p, p.default_scope, "nextline")
 
-        reader.connect(0, eoftest, 0)
-        eoftest.connect(1, trig, 0)
-        trig.connect(1, stripper, 0)
+        await reader.connect(0, trig, 0)
+        await trig.connect(0, eoftest, 0)
+        await trig.connect(1, stripper, 0)
+        await eoftest.connect(1, msg, 0)
 
         if self.batch_eval:
-            stripper.connect(0, evaluator, 0)
-            evaluator.connect(0, batch, 0)
+            await stripper.connect(0, evaluator, 0)
+            await evaluator.connect(0, batch, 0)
         else:
-            stripper.connect(0, batch, 0)
-        trig.connect(0, msg, 0)
-        batch.connect(0, printer, 0)
-        msg.connect(0, reader, 0)
+            await stripper.connect(0, batch, 0)
+        await batch.connect(0, printer, 0)
+        await msg.connect(0, reader, 0)
 
         # start the reader
-        reader.send(MethodCall("readline"))
+        await reader.send(MethodCall("readline"))
 
     def start_midi(self):
         from . import midi

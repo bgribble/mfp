@@ -446,6 +446,11 @@ def register():
     mk_unary(type, "type", "Extract object type")
     mk_unary(dict, "dict", "Convert to dictionary")
 
+    # string methods
+    mk_unary(lambda s: s.strip() if isinstance(s, str) else s, 
+             "strip", "Strip whitespace and newlines")
+
+
     from datetime import datetime
     mk_nullary(datetime.now, "now", "Current time-of-day")
     mk_unary(applyargs(datetime), "datetime", "Create a datetime object")
