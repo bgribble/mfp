@@ -448,9 +448,13 @@ def register():
     mk_unary(dict, "dict", "Convert to dictionary")
 
     # string methods
-    mk_unary(lambda s: s.strip() if isinstance(s, str) else s, 
-             "strip", "Strip whitespace and newlines")
+    mk_unary(
+        lambda s: s.strip() if isinstance(s, str) else s,
+        "strip", "Strip whitespace and newlines")
 
+    mk_binary(
+        lambda instr, splitstr=" ": instr.split(splitstr) if isinstance(instr, str) else instr,
+        "split", "Split a string into pieces")
 
     from datetime import datetime
     mk_nullary(datetime.now, "now", "Current time-of-day")
