@@ -73,7 +73,7 @@ class XYPlot (Clutter.Group):
         self.border.set_color(self.color_bg)
         self.border.set_size(self.width, self.height)
         self.border.set_position(0, 0)
-        self.add_actor(self.border)
+        self.backend.group.add_actor(self.border)
 
         self.plot_w = self.width - self.MARGIN_LEFT
         self.plot_h = self.height - self.MARGIN_BOT
@@ -83,12 +83,12 @@ class XYPlot (Clutter.Group):
         self.x_axis = Quilt(self.plot_w, self.MARGIN_BOT)
         self.x_axis.set_position(self.MARGIN_LEFT, self.height - self.MARGIN_BOT)
         self.x_axis.set_viewport_origin(0, 0)
-        self.add_actor(self.x_axis)
+        self.backend.group.add_actor(self.x_axis)
 
         self.y_axis = Quilt(self.MARGIN_LEFT, self.plot_h)
         self.y_axis.set_position(0, 0)
         self.y_axis.set_viewport_origin(0, -self.plot_h / 2.0)
-        self.add_actor(self.y_axis)
+        self.backend.group.add_actor(self.y_axis)
 
         self.x_axis.set_render_cb(self.draw_xaxis_cb)
         self.y_axis.set_render_cb(self.draw_yaxis_cb)
@@ -99,11 +99,11 @@ class XYPlot (Clutter.Group):
         self.plot_border.set_color(self.color_bg)
         self.plot_border.set_size(self.plot_w, self.plot_h)
         self.plot_border.set_position(self.MARGIN_LEFT, 0)
-        self.add_actor(self.plot_border)
+        self.backend.group.add_actor(self.plot_border)
 
         self.create_plot()
         self.plot.set_position(self.MARGIN_LEFT, 0)
-        self.add_actor(self.plot)
+        self.backend.group.add_actor(self.plot)
 
     def create_plot(self):
         self.plot = Quilt(self.plot_w, self.plot_h)

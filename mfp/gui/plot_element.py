@@ -110,7 +110,7 @@ class PlotElement (BaseElement):
         # chart created later
         self.xyplot = None
 
-        self.add_actor(self.rect)
+        self.backend.group.add_actor(self.rect)
         self.backend.group.set_reactive(True)
 
     # methods useful for interaction
@@ -231,7 +231,7 @@ class PlotElement (BaseElement):
                                         MFPApp().samplerate)
                 self.xyplot.draw_complete_cb = self.draw_complete_cb
             if self.xyplot:
-                self.add_actor(self.xyplot)
+                self.backend.group.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)
 
         if self.obj_args is None:

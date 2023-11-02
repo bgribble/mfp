@@ -50,7 +50,7 @@ class ViaElement (BaseElement):
         self.label = TextWidget(self)
         self.label.set_position(0, self.LABEL_Y)
         self.backend.group.set_reactive(True)
-        self.add_actor(self.texture)
+        self.backend.group.add_actor(self.texture)
 
         # configure label
         self.label.set_color(self.get_color('text-color'))

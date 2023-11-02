@@ -33,7 +33,7 @@ class Quilt (clutter.Group):
 
         self.tile_group = clutter.Group()
         self.tile_group.show()
-        self.add_actor(self.tile_group)
+        self.backend.group.add_actor(self.tile_group)
 
         self.tile_animation = None
         self.tile_size = tilesize
