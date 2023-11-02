@@ -14,7 +14,11 @@ class TextWidget(SignalMixin):
         super().__init__()
 
         self.container = element
+        self.editable = False
 
         # FIXME element should have a backend but doesn't
         factory = TextWidgetBackend.get_backend(MFPGUI().appwin.backend_name)
         self.backend = factory(self)
+
+    def set_editable(self, val):
+        self.editable = val

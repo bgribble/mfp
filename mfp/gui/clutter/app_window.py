@@ -233,6 +233,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         def steal_focuskeys(target, event):
             badkeys = [KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT]
             if isinstance(event, Gdk.EventKey) and event.keyval in badkeys:
+                log.debug(f"[steal_focuskeys] got {event}")
                 e = Clutter.KeyEvent()
                 e.keyval = event.keyval
                 e.type = Clutter.EventType.KEY_PRESS

@@ -31,7 +31,6 @@ class Pack (Processor):
         self.outlets[0] = [l for l in self.inlets]
 
 class Unpack (Processor):
-
     doc_tooltip_obj = "Break list into items" 
     doc_tooltip_inlet = [ "List input"] 
 
@@ -59,6 +58,7 @@ class Unpack (Processor):
 
         self.outlets[-1] = self.inlets[0][nout:]
 
+
 class Append (Processor):
     doc_tooltip_obj = "Append an item to a list"
     doc_tooltip_inlet = ["Item to append", "List to append to"]
@@ -73,7 +73,11 @@ class Append (Processor):
             self.inlets[1] = []
 
     async def trigger(self):
-        self.outlets[0] = self.inlets[1].append(self.inlets[0])
+        import copy
+        new_list = copy.copy(self.inlets[1])
+        new_list.append(self.inlets[0])
+        self.outlets[0] = new_list
+
 
 class Zip (Processor):
     doc_tooltip_obj = "Merge input lists by item"

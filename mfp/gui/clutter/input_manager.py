@@ -63,7 +63,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
                             handlers, keysym, coro=handler_rv, offset=item
                         ))
                         return True
-                    elif handler_rv:
+                    if handler_rv:
                         return True
                 return False
             except InputManager.InputNeedsRequeue:
@@ -73,6 +73,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
                 log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e}")
                 log.debug_traceback()
                 return False
+        return False
 
     def handle_event(self, *args):
         from gi.repository import Clutter

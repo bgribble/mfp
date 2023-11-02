@@ -394,6 +394,7 @@ def register():
 
     mk_unary(lambda l: l[0], "first")
     mk_unary(lambda l: l[1:], "rest")
+    mk_unary(lambda l: list(sorted(l)), "sort")
 
     mk_binary(operator.add, "+", "Add")
     mk_binary(operator.sub, "-", "Subtract")

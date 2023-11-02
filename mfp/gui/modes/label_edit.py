@@ -84,6 +84,8 @@ class LabelEditMode (InputMode):
         self.bind("RIGHT", self.move_right, "Move cursor right")
         self.bind("UP", self.move_up, "Move cursor up one line")
         self.bind("DOWN", self.move_down, "Move cursor down one line")
+        self.bind("BS", self.delete_left, "Delete to the left")
+        self.bind("DEL", self.delete_right, "Delete to the right")
         self.bind("C-z", self.undo_edit, "Undo typing")
         self.bind("C-r", self.redo_edit, "Redo typing")
 
@@ -92,33 +94,50 @@ class LabelEditMode (InputMode):
             self.text = inittxt
 
         self.update_label(raw=True)
-        self.start_editing()
         self.widget.set_selection(0, len(self.text))
+        self.start_editing()
+
+    def lookup(self, keysym):
+        if binding := super().lookup(keysym):
+            return binding
+
+        if len(keysym) == 1:
+            return (lambda *args: self.insert_text(keysym), "Insert text")
+
+        return None
+
+    def insert_text(self, keysym):
+        newtext = self.text[:self.editpos] + keysym + self.text[self.editpos:]
+        self.text = newtext
+        self.editpos += 1
+        self.update_label(raw=True)
+        self.update_cursor()
+        return True
+
+    def delete_left(self):
+        if self.editpos == 0:
+            return True
+        newtext = self.text[:self.editpos-1] + self.text[self.editpos:]
+        self.text = newtext
+        self.editpos -= 1
+        self.update_label(raw=True)
+        self.update_cursor()
+        return True
+
+    def delete_right(self):
+        if self.editpos == len(self.text):
+            return True
+        newtext = self.text[:self.editpos] + self.text[self.editpos+1:]
+        self.text = newtext
+        self.update_label(raw=True)
+        self.update_cursor()
+        return True
 
     def disable(self):
         self.end_editing()
         self.update_label(raw=False)
 
     def start_editing(self):
-        async def focus_out(*args):
-            log.debug("[label_edit] got key-focus-out, pushing edits")
-            await self.commit_edits()
-            return True
-
-        def key_press(window, signal, event):
-            from ..key_defs import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DN
-            handlers = {
-                KEY_LEFT: self.move_left,
-                KEY_RIGHT: self.move_right,
-                KEY_UP: self.move_up,
-                KEY_DN: self.move_down
-            }
-            keysym = event.keyval
-            if keysym in handlers:
-                handlers[keysym]()
-                return True
-            return False
-
         def synth_ret(*args):
             self.manager.synthesize("RET")
 
@@ -129,14 +148,12 @@ class LabelEditMode (InputMode):
             self.widget.set_single_line_mode(False)
 
         self.text_changed_handler_id = self.widget.signal_listen("text-changed", self.text_changed)
-        self.key_focus_out_handler_id = self.widget.signal_listen("key-focus-out", focus_out)
-        self.key_press_handler_id = MFPGUI().appwin.signal_listen("key-press-event", key_press)
 
         self.editpos = len(self.text)
-        self.widget.set_editable(True)
         self.widget.set_cursor_color(self.cursor_color)
         self.widget.set_cursor_visible(True)
         self.update_cursor()
+        self.widget.set_editable(True)
 
         self.blinker.start(self.widget)
 
@@ -215,11 +232,13 @@ class LabelEditMode (InputMode):
 
     def move_left(self):
         self.editpos = max(self.editpos - 1, 0)
+        self.update_label(raw=True)
         self.update_cursor()
         return True
 
     def move_right(self):
         self.editpos = min(self.editpos + 1, len(self.text))
+        self.update_label(raw=True)
         self.update_cursor()
         return True
 

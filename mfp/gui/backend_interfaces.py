@@ -225,11 +225,6 @@ class TextWidgetBackend(ABC, BackendInterface, DelegateMixin):
 
     @abstractmethod
     @delegatemethod
-    def set_editable(self, val):
-        pass
-
-    @abstractmethod
-    @delegatemethod
     def get_cursor_position(self):
         pass
 

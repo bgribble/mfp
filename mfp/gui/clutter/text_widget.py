@@ -5,6 +5,7 @@ clutter/text_widget.py -- backend implementation of TextWidget for Clutter
 from gi.repository import Clutter
 from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement
+from mfp import log
 
 from ..backend_interfaces import TextWidgetBackend
 from .app_window import ClutterAppWindowBackend
@@ -23,6 +24,9 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
 
         self.label = Clutter.Text()
         self.parent.add_actor(self.label)
+
+        self.key_press_handler_id = None
+        self.edit_mode = None
 
         def signal_repeater(signal_name):
             return lambda *args: MFPGUI().async_task(
@@ -60,9 +64,6 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
 
     def set_activatable(self, val):
         return self.label.set_activatable(val)
-
-    def set_editable(self, val):
-        return self.label.set_editable(val)
 
     def set_single_line_mode(self, val):
         return self.label.set_single_line_mode(val)
