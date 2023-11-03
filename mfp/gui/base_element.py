@@ -485,6 +485,8 @@ class BaseElement (Store):
         if self.obj_id is None:
             return False
 
+        # FIXME per-port tooltips need backend support
+        """
         for (pid, pobj) in self.port_elements.items():
             x, y = pobj.get_position()
             x += orig_x - 1
@@ -494,6 +496,7 @@ class BaseElement (Store):
             h += 2
             if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
                 tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1], details)
+        """
         if tiptxt is None:
             tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, None, None, details)
         self.app_window.hud_banner(tiptxt)
