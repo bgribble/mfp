@@ -402,6 +402,7 @@ class MFPApp (Singleton, SignalMixin):
                 log.error(e)
 
         if ctor is None:
+            log.error(f"create: No factory found for {init_type}")
             return None
 
         # create intervening scope if needed

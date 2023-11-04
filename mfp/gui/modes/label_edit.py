@@ -70,6 +70,8 @@ class LabelEditMode (InputMode):
         self.key_focus_out_handler_id = None
         self.key_press_handler_id = None
         self.editpos = 0
+        self.selection_start = 0
+        self.selection_end = 0
         self.blinker = Blinker()
 
         InputMode.__init__(self, mode_desc)
@@ -77,6 +79,7 @@ class LabelEditMode (InputMode):
         if not self.multiline:
             self.bind("RET", self.commit_edits, "Accept edits")
         else:
+            self.bind("RET", lambda: self.insert_text("\n"), "Insert newline")
             self.bind("C-RET", self.commit_edits, "Accept edits")
 
         self.bind("ESC", self.rollback_edits, "Discard edits")
@@ -84,53 +87,88 @@ class LabelEditMode (InputMode):
         self.bind("RIGHT", self.move_right, "Move cursor right")
         self.bind("UP", self.move_up, "Move cursor up one line")
         self.bind("DOWN", self.move_down, "Move cursor down one line")
+        self.bind("S-LEFT", self.select_left, "Grow/shrink selection left")
+        self.bind("S-RIGHT", self.select_right, "Grow/shrink selection right")
+        self.bind("S-UP", self.select_up, "Grow/shrink selection up one line")
+        self.bind("S-DOWN", self.select_down, "Gro/shrink selection down one line")
         self.bind("BS", self.delete_left, "Delete to the left")
         self.bind("DEL", self.delete_right, "Delete to the right")
+        self.bind("C-a", self.select_all, "Select all text")
         self.bind("C-z", self.undo_edit, "Undo typing")
         self.bind("C-r", self.redo_edit, "Redo typing")
+
+        self.bind(None, self.insert_text, "Insert text")
 
         inittxt = self.element.label_edit_start()
         if inittxt:
             self.text = inittxt
 
         self.update_label(raw=True)
-        self.widget.set_selection(0, len(self.text))
+
         self.start_editing()
+        self.update_cursor()
+        self.set_selection(0, len(self.text))
 
-    def lookup(self, keysym):
-        if binding := super().lookup(keysym):
-            return binding
+    def set_selection(self, start, end):
+        self.selection_start = start
+        self.selection_end = end
+        self.widget.set_selection(start, end)
 
-        if len(keysym) == 1:
-            return (lambda *args: self.insert_text(keysym), "Insert text")
+    def delete_selection(self):
+        if self.selection_start == self.selection_end:
+            return
 
-        return None
+        self.editpos = self.selection_start
+        self.text = self.text[:self.selection_start] + self.text[self.selection_end:]
+        self.update_label(raw=True)
+        self.set_selection(self.editpos, self.editpos)
+
+    def select_all(self):
+        self.set_selection(0, len(self.text))
+        self.editpos = 0
 
     def insert_text(self, keysym):
+        if len(keysym) > 1:
+            return
+
+        self.delete_selection()
+
         newtext = self.text[:self.editpos] + keysym + self.text[self.editpos:]
         self.text = newtext
+
         self.editpos += 1
         self.update_label(raw=True)
-        self.update_cursor()
+        self.set_selection(self.editpos, self.editpos)
+
         return True
 
     def delete_left(self):
         if self.editpos == 0:
             return True
+
+        if self.selection_start != self.selection_end:
+            self.delete_selection()
+            return True
+
         newtext = self.text[:self.editpos-1] + self.text[self.editpos:]
         self.text = newtext
         self.editpos -= 1
         self.update_label(raw=True)
-        self.update_cursor()
+        self.set_selection(self.editpos, self.editpos)
         return True
 
     def delete_right(self):
         if self.editpos == len(self.text):
             return True
+
+        if self.selection_start != self.selection_end:
+            self.delete_selection()
+            return True
+
         newtext = self.text[:self.editpos] + self.text[self.editpos+1:]
         self.text = newtext
         self.update_label(raw=True)
-        self.update_cursor()
+        self.set_selection(self.editpos, self.editpos)
         return True
 
     def disable(self):
@@ -192,6 +230,7 @@ class LabelEditMode (InputMode):
 
         self.undo_stack.append((self.text, self.editpos))
         self.text = new_text
+        return True
 
         editpos = self.widget.get_cursor_position()
         if editpos == -1:
@@ -222,53 +261,128 @@ class LabelEditMode (InputMode):
 
     def move_to_start(self):
         self.editpos = 0
-        self.update_cursor()
+        self.set_selection(self.editpos, self.editpos)
         return True
 
     def move_to_end(self):
         self.editpos = len(self.text)
-        self.update_cursor()
+        self.set_selection(self.editpos, self.editpos)
         return True
 
     def move_left(self):
         self.editpos = max(self.editpos - 1, 0)
-        self.update_label(raw=True)
-        self.update_cursor()
+        self.set_selection(self.editpos, self.editpos)
+        return True
+
+    def select_left(self):
+        orig_start = self.selection_start
+        orig_end = self.selection_end
+
+        new_editpos = max(self.editpos - 1, 0)
+
+        if new_editpos < orig_start:
+            new_start = new_editpos
+            new_end = orig_end
+        else:
+            new_start = orig_start
+            new_end = orig_end - 1
+
+        self.editpos = new_editpos
+        self.set_selection(
+            new_start, new_end
+        )
         return True
 
     def move_right(self):
         self.editpos = min(self.editpos + 1, len(self.text))
-        self.update_label(raw=True)
-        self.update_cursor()
+        self.set_selection(self.editpos, self.editpos)
         return True
 
-    def move_up(self):
-        lines_above = self.text[:self.editpos].split("\n")
+    def select_right(self):
+        orig_start = self.selection_start
+        orig_end = self.selection_end
+
+        new_editpos = min(self.editpos + 1, len(self.text))
+
+        if new_editpos > orig_end:
+            new_end = new_editpos
+            new_start = orig_start
+        else:
+            new_end = orig_end
+            new_start = orig_start + 1
+
+        self.editpos = new_editpos
+        self.set_selection(
+            new_start, new_end
+        )
+        return True
+
+    def _one_line_up(self, pos):
+        lines_above = self.text[:pos].split("\n")
         line_pos = len(lines_above[-1])
         if len(lines_above) > 2:
-            self.editpos = (
-                sum([len(ll) + 1 for ll in lines_above[:-2]])
+            return (
+                sum(len(ll) + 1 for ll in lines_above[:-2])
                 + min(len(lines_above[-2]), line_pos)
             )
-        elif len(lines_above) > 1:
-            self.editpos = min(len(lines_above[0]), line_pos)
-        else:
-            self.editpos = 0
-        self.update_cursor()
+        if len(lines_above) > 1:
+            return min(len(lines_above[0]), line_pos)
+        return 0
+
+    def move_up(self):
+        self.editpos = self._one_line_up(self.editpos)
+        self.set_selection(self.editpos, self.editpos)
         return True
 
-    def move_down(self):
-        lines_above = self.text[:self.editpos].split("\n")
-        lines_below = self.text[self.editpos:].split("\n")
+    def select_up(self):
+        if self.editpos == self.selection_start:
+            new_start = self._one_line_up(self.selection_start)
+            new_end = self.selection_end
+            self.editpos = new_start
+        else:
+            new_start = self.selection_start
+            new_end = self._one_line_up(self.selection_end)
+            self.editpos = new_end
+
+            if new_end < self.selection_start:
+                new_start = new_end
+                new_end = self.selection_start
+        self.set_selection(new_start, new_end)
+        return True
+
+    def _one_line_down(self, pos):
+        lines_above = self.text[:pos].split("\n")
+        lines_below = self.text[pos:].split("\n")
         line_pos = len(lines_above[-1])
-        line_start = self.editpos
+        line_start = pos
 
         if len(lines_below) > 1:
-            self.editpos = (line_start + len(lines_below[0]) + 1
-                            + min(len(lines_below[1]), line_pos))
+            return (
+                line_start
+                + len(lines_below[0])
+                + 1
+                + min(len(lines_below[1]), line_pos)
+            )
+        return len(self.text)
+
+    def move_down(self):
+        self.editpos = self._one_line_down(self.editpos)
+        self.set_selection(self.editpos, self.editpos)
+        return True
+
+    def select_down(self):
+        if self.editpos == self.selection_end:
+            new_start = self.selection_start
+            new_end = self._one_line_down(self.selection_end)
+            self.editpos = new_end
         else:
-            self.editpos = len(self.text)
-        self.update_cursor()
+            new_start = self._one_line_down(self.selection_start)
+            new_end = self.selection_end
+            self.editpos = new_start
+            if new_start > self.selection_end:
+                new_end = new_start
+                new_start = self.selection_end
+        self.set_selection(new_start, new_end)
         return True
 
     def undo_edit(self):
@@ -292,7 +406,6 @@ class LabelEditMode (InputMode):
     def update_cursor(self):
         self.widget.grab_focus()
         self.widget.set_cursor_position(self.editpos)
-        self.widget.set_selection(self.editpos, self.editpos)
 
     def update_label(self, raw=True):
         if raw or self.markup is False:

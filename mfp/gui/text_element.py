@@ -101,7 +101,7 @@ class TextElement (BaseElement):
 
     async def label_edit_finish(self, widget, new_text, aborted=False):
         if self.obj_id is None:
-            self.create(self.proc_type, None)
+            await self.create(self.proc_type, None)
         if self.obj_id is None:
             log.warning("TextElement: could not create obj")
         elif new_text != self.value and not aborted:
