@@ -161,7 +161,9 @@ class GetSlice(Processor):
     doc_tooltip_obj = "Get a slice of list elements"
     doc_tooltip_inlet = ["Object to get from",
                          "Start of slice (default: initarg 0)",
-                         "End of slice (default: end of input)"]
+                         "End of slice (default: end of input or initarg 1)",
+                         "Stride (default: 1 or initarg 2)"
+                         ]
     doc_tooltip_outlet = ["Slice output"]
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -192,6 +194,7 @@ class GetSlice(Processor):
             self.inlets[3] = Uninit
 
         if self.slice_end is not None:
+            log.debug("[slice] {self.slice_start} {self.slice_end} {self.stride}")
             self.outlets[0] = self.inlets[0][
                 self.slice_start:self.slice_end:self.stride
             ]
@@ -384,7 +387,7 @@ def applyargs(func):
 
 def register():
     MFPApp().register("get", GetElement)
-    MFPApp().register("set", SetElement)
+    MFPApp().register("set!", SetElement)
     MFPApp().register("slice", GetSlice)
     MFPApp().register("eval", PyEval)
     MFPApp().register("apply", ApplyMethod)
@@ -446,6 +449,7 @@ def register():
     mk_unary(list, "list", "Convert to list")
     mk_unary(type, "type", "Extract object type")
     mk_unary(dict, "dict", "Convert to dictionary")
+    mk_unary(set, "set", "Convert to set")
 
     # string methods
     mk_unary(
