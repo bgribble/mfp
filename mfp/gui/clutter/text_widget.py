@@ -9,7 +9,7 @@ from mfp import log
 
 from ..backend_interfaces import TextWidgetBackend
 from .app_window import ClutterAppWindowBackend
-
+from .event import repeat_event
 
 class ClutterTextWidgetBackend(TextWidgetBackend):
     backend_name = "clutter"
@@ -28,16 +28,11 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
         self.key_press_handler_id = None
         self.edit_mode = None
 
-        def signal_repeater(signal_name):
-            return lambda *args: MFPGUI().async_task(
-                self.owner.signal_emit(signal_name, *args)
-            )
-
         # repeat the Clutter signals to MFP signals on the TextWidget
-        self.label.connect("activate", signal_repeater("activate"))
-        self.label.connect("text-changed", signal_repeater("text-changed"))
-        self.label.connect("key-focus-out", signal_repeater("key-focus-out"))
-        self.label.connect("key-focus-in", signal_repeater("key-focus-in"))
+        self.label.connect("activate", repeat_event(self.owner, "activate"))
+        self.label.connect("text-changed", repeat_event(self.owner, "text-changed"))
+        self.label.connect("key-focus-out", repeat_event(self.owner, "key-focus-out"))
+        self.label.connect("key-focus-in", repeat_event(self.owner, "key-focus-in"))
 
         super().__init__(owner)
 

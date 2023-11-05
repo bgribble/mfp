@@ -20,6 +20,7 @@ from ..connection_element import ConnectionElement
 from ..base_element import BaseElement
 from ..patch_display import PatchDisplay
 
+from .event import repeat_event
 from .tree_display import TreeDisplay
 
 
@@ -186,7 +187,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         GObject.timeout_add(10, cb)
 
     def _init_input(self):
-        from gi.repository import Gdk, Clutter, Pango
+        from gi.repository import Pango
 
         def resize_cb(widget, rect):
             try:
@@ -208,66 +209,25 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
             return False
 
-        def grab_handler(stage, event):
-            try:
-                r = self.wrapper.input_mgr.handle_event(stage, event)
-                if not self.embed.has_focus():
-                    self.grab_focus()
-                    return False
-                return r
-            except Exception as e:
-                log.error("Error handling UI event", event)
-                log.debug(e)
-                log.debug_traceback()
-                return False
-
-        def handler(stage, event):
-            try:
-                return self.wrapper.input_mgr.handle_event(stage, event)
-            except Exception as e:
-                log.error("Error handling UI event", event)
-                log.debug(e)
-                log.debug_traceback()
-                return False
-
-        def steal_focuskeys(target, event):
-            badkeys = [KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT]
-            if isinstance(event, Gdk.EventKey) and event.keyval in badkeys:
-                log.debug(f"[steal_focuskeys] got {event}")
-                e = Clutter.KeyEvent()
-                e.keyval = event.keyval
-                e.type = Clutter.EventType.KEY_PRESS
-
-                return self.wrapper.input_mgr.handle_event(self.stage, e)
-            else:
-                return False
-
-        def signal_repeater(signal_name):
-            # FIXME need to transform event here
-            return lambda target, event: MFPGUI().async_task(
-                self.wrapper.signal_emit(signal_name, event)
-            )
+        def steal_focus(*args):
+            log.debug("[steal_focus] grabbing focus")
+            self.grab_focus()
+            return False
 
         self.grab_focus()
-
-        # hook up internal signals
-        self.stage.connect('key-press-event', steal_focuskeys)
-        self.stage.connect('button-press-event', grab_handler)
-        self.stage.connect('button-release-event', grab_handler)
-        self.stage.connect('key-press-event', grab_handler)
-        self.stage.connect('key-release-event', grab_handler)
-        self.stage.connect('motion-event', handler)
-        self.stage.connect('enter-event', handler)
-        self.stage.connect('leave-event', handler)
-        self.stage.connect('scroll-event', grab_handler)
 
         self.stage.connect('destroy', self.wrapper.quit)
         self.embed.connect('size-allocate', resize_cb)
 
-        self.stage.connect('key-press-event', signal_repeater("key-press-event"))
-        self.stage.connect('key-release-event', signal_repeater("key-release-event"))
-        self.stage.connect('button-press-event', signal_repeater("button-press-event"))
-        self.stage.connect('button-release-event', signal_repeater("button-release-event"))
+        self.stage.connect('key-press-event', repeat_event(self.wrapper, "key-press-event"))
+        self.stage.connect('key-release-event', repeat_event(self.wrapper, "key-release-event"))
+        self.stage.connect('button-press-event', repeat_event(self.wrapper, "button-press-event"))
+        self.stage.connect('button-release-event', repeat_event(self.wrapper, "button-release-event"))
+        self.stage.connect('motion-event', repeat_event(self.wrapper, "motion-event"))
+        self.stage.connect('scroll-event', repeat_event(self.wrapper, "scroll-event"))
+
+        self.wrapper.signal_listen("key-press-event", steal_focus)
+        self.wrapper.signal_listen("button-press-event", steal_focus)
 
         # set tab stops on keybindings view
         ta = Pango.TabArray.new(1, True)

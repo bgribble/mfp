@@ -6,6 +6,17 @@ from mfp.gui_main import MFPGUI
 from ..backend_interfaces import InputManagerBackend
 from ..input_manager import InputManager
 
+from ..event import (
+    ButtonPressEvent,
+    ButtonReleaseEvent,
+    EnterEvent,
+    KeyPressEvent,
+    KeyReleaseEvent,
+    LeaveEvent,
+    MotionEvent,
+    ScrollEvent
+)
+
 
 class ClutterInputManagerBackend(InputManagerBackend):
     backend_name = "clutter"
@@ -76,16 +87,13 @@ class ClutterInputManagerBackend(InputManagerBackend):
         return False
 
     def handle_event(self, *args):
-        from gi.repository import Clutter
-
         stage, event = args
 
         keysym = None
-        if event.type in (
-            Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE,
-            Clutter.EventType.BUTTON_PRESS,
-            Clutter.EventType.BUTTON_RELEASE, Clutter.EventType.SCROLL
-        ):
+        if isinstance(event, (
+            KeyPressEvent, KeyReleaseEvent, ButtonPressEvent, ButtonReleaseEvent,
+            ScrollEvent
+        )):
             try:
                 self.input_manager.keyseq.process(event)
             except Exception as e:
@@ -93,7 +101,8 @@ class ClutterInputManagerBackend(InputManagerBackend):
                 raise
             if len(self.input_manager.keyseq.sequences):
                 keysym = self.input_manager.keyseq.pop()
-        elif event.type == Clutter.EventType.MOTION:
+
+        elif isinstance(event, MotionEvent):
             # FIXME: if the scaling changes so that window.stage_pos would return a
             # different value, that should generate a MOTION event.  Currently we are
             # just kludging pointer_x and pointer_y from the scale callback.
@@ -106,8 +115,8 @@ class ClutterInputManagerBackend(InputManagerBackend):
             if len(self.input_manager.keyseq.sequences):
                 keysym = self.input_manager.keyseq.pop()
 
-        elif event.type == Clutter.EventType.ENTER:
-            src = self.event_source_reverse.get(event.source)
+        elif isinstance(event, EnterEvent):
+            src = event.target
 
             now = datetime.now()
             if (
@@ -121,8 +130,8 @@ class ClutterInputManagerBackend(InputManagerBackend):
                 self.input_manager.pointer_obj = src
                 self.input_manager.pointer_obj_time = now
 
-        elif event.type == Clutter.EventType.LEAVE:
-            src = self.event_source_reverse.get(event.source)
+        elif isinstance(event, LeaveEvent):
+            src = event.target
             self.input_manager.pointer_leave_time = datetime.now()
             if src == self.input_manager.pointer_obj:
                 self.input_manager.pointer_lastobj = self.input_manager.pointer_obj

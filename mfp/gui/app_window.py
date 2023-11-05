@@ -73,6 +73,28 @@ class AppWindow (SignalMixin):
         self.input_mgr.major_mode = PatchEditMode(self)
         self.input_mgr.major_mode.enable()
 
+        def handler(obj, signal, event, *rest):
+            try:
+                rv = self.input_mgr.handle_event(obj, event)
+                # FIXME make this a more generic post-input call
+                self.backend.grab_focus()
+                return rv
+            except Exception as e:
+                log.error("Error handling UI event", event)
+                log.debug(e)
+                log.debug_traceback()
+                return False
+
+        # hook up input signals
+        self.signal_listen('button-press-event', handler)
+        self.signal_listen('button-release-event', handler)
+        self.signal_listen('key-press-event', handler)
+        self.signal_listen('key-release-event', handler)
+        self.signal_listen('motion-event', handler)
+        self.signal_listen('enter-event', handler)
+        self.signal_listen('leave-event', handler)
+        self.signal_listen('scroll-event', handler)
+
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI
         rgba = MFPGUI().style_defaults.get(colorspec)
