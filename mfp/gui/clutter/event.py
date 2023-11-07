@@ -78,7 +78,7 @@ def transform_event(clutter_event, mfp_target):
         return EnterEvent(target=mfp_target)
 
     if clutter_event.type == Clutter.EventType.LEAVE:
-        return EnterEvent(target=mfp_target)
+        return LeaveEvent(target=mfp_target)
 
     return None
 

@@ -76,7 +76,6 @@ class AppWindow (SignalMixin):
         def handler(obj, signal, event, *rest):
             try:
                 rv = self.input_mgr.handle_event(obj, event)
-                # FIXME make this a more generic post-input call
                 self.backend.grab_focus()
                 return rv
             except Exception as e:
@@ -91,9 +90,10 @@ class AppWindow (SignalMixin):
         self.signal_listen('key-press-event', handler)
         self.signal_listen('key-release-event', handler)
         self.signal_listen('motion-event', handler)
+        self.signal_listen('scroll-event', handler)
         self.signal_listen('enter-event', handler)
         self.signal_listen('leave-event', handler)
-        self.signal_listen('scroll-event', handler)
+        self.signal_listen('quit', self.quit)
 
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI

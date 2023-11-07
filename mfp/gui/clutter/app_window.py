@@ -126,6 +126,20 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.selection_box = None
         self.selection_box_layer = None
 
+        # set app icon
+        icon_theme = Gtk.IconTheme.get_default()
+        icon_name = "mfp-icon"
+        icon_path = sys.exec_prefix + '/share/mfp/icons/'
+        icon_theme.add_resource_path(icon_path)
+        icon_theme.append_search_path(icon_path)
+        sizes = [16, 24, 32, 48, 64, 96]
+        pixbufs = [
+            icon_theme.load_icon(icon_name, s, 0)
+            for s in sizes
+        ]
+        log.debug(f"loaded icons: {pixbufs}")
+        self.window.set_icon_list(pixbufs)
+
         # show top-level window
         self.window.show_all()
 
@@ -181,7 +195,6 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
     def grab_focus(self):
         from gi.repository import GObject
-
         def cb(*args):
             self.embed.grab_focus()
         GObject.timeout_add(10, cb)
@@ -193,15 +206,17 @@ class ClutterAppWindowBackend (AppWindowBackend):
             try:
                 self.stage.set_size(rect.width, rect.height)
                 if self.hud_mode_txt:
-                    self.hud_mode_txt.set_position(self.stage.get_width()-80,
-                                                   self.stage.get_height()-25)
+                    self.hud_mode_txt.set_position(
+                        self.stage.get_width()-80, self.stage.get_height()-25
+                    )
 
                 if self.hud_prompt:
                     self.hud_prompt.set_position(10, self.stage.get_height() - 25)
 
                 if self.hud_prompt_input:
-                    self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
-                                                       self.stage.get_height() - 25)
+                    self.hud_prompt_input.set_position(
+                        15 + self.hud_prompt.get_width(), self.stage.get_height() - 25
+                    )
             except Exception as e:
                 log.error("Error handling UI event", e)
                 log.debug(e)
@@ -209,14 +224,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
             return False
 
-        def steal_focus(*args):
-            log.debug("[steal_focus] grabbing focus")
-            self.grab_focus()
-            return False
-
         self.grab_focus()
 
-        self.stage.connect('destroy', self.wrapper.quit)
         self.embed.connect('size-allocate', resize_cb)
 
         self.stage.connect('key-press-event', repeat_event(self.wrapper, "key-press-event"))
@@ -225,9 +234,9 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.stage.connect('button-release-event', repeat_event(self.wrapper, "button-release-event"))
         self.stage.connect('motion-event', repeat_event(self.wrapper, "motion-event"))
         self.stage.connect('scroll-event', repeat_event(self.wrapper, "scroll-event"))
-
-        self.wrapper.signal_listen("key-press-event", steal_focus)
-        self.wrapper.signal_listen("button-press-event", steal_focus)
+        self.stage.connect('enter-event', repeat_event(self.wrapper, "enter-event"))
+        self.stage.connect('leave-event', repeat_event(self.wrapper, "leave-event"))
+        self.stage.connect('destroy', repeat_event(self.wrapper, "quit"))
 
         # set tab stops on keybindings view
         ta = Pango.TabArray.new(1, True)

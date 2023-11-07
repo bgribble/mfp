@@ -98,7 +98,6 @@ class BaseElement (Store):
         self.style = {}
         self._all_styles = self.combine_styles()
 
-        # create the Clutter.Group and Store
         super().__init__()
 
         factory = BaseElementBackend.get_backend(window.backend_name)
