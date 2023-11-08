@@ -1,14 +1,15 @@
 
 import cairo
+from gi.repository import Clutter
 from .base_element import BaseElement
 from .colordb import ColorDB
-from gi.repository import Clutter
 import math
 from mfp.gui_main import MFPGUI
 from mfp import log
 
+from .clutter.base_element import ClutterBaseElementBackend
 
-class ConnectionElement(BaseElement):
+class ConnectionElement(ClutterBaseElementBackend):
     display_type = "connection"
     LINE_WIDTH = 1.5
 
@@ -27,13 +28,14 @@ class ConnectionElement(BaseElement):
         if port_1 in obj_1.dsp_outlets:
             self.dsp_connect = True
         px, py = obj_1.get_stage_position()
-        BaseElement.__init__(self, window, px, py)
+
+        super().__init__(window, px, py)
 
         self.texture = Clutter.Canvas.new()
-        self.backend.group.set_content(self.texture)
+        self.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
-        self.backend.group.set_reactive(True)
+        self.group.set_reactive(True)
         if obj_1.layer is not None:
             self.move_to_layer(obj_1.layer)
         elif obj_2.layer is not None:
@@ -47,11 +49,11 @@ class ConnectionElement(BaseElement):
         self.draw()
 
     def select(self):
-        BaseElement.select(self)
+        super().select()
         self.draw()
 
     def unselect(self):
-        BaseElement.unselect(self)
+        super().unselect()
         self.draw()
 
     async def delete(self):
@@ -68,13 +70,13 @@ class ConnectionElement(BaseElement):
 
         self.obj_1 = None
         self.obj_2 = None
-        await BaseElement.delete(self)
+        await super().delete()
 
     def draw_ports(self):
         pass
 
     def set_size(self, width, height):
-        BaseElement.set_size(self, width, height)
+        super().set_size(width, height)
         self.texture.set_size(width, height)
         self.texture.invalidate()
 
@@ -104,7 +106,7 @@ class ConnectionElement(BaseElement):
         self.position_y = p1[1] - math.sin(theta) * self.width / 2.0
 
         self.set_position(self.position_x, self.position_y)
-        self.backend.group.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
+        self.group.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
 
         self.set_size(math.ceil(self.width), math.ceil(self.height))
 

@@ -557,7 +557,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
             else:
                 element.container = element.layer.backend.group
 
-        self.wrapper.input_mgr.backend.event_source_reverse[element.backend.group] = element
+        self.wrapper.input_mgr.backend.event_source_reverse[element.group] = element
 
         if not isinstance(element, ConnectionElement):
             if self.wrapper.load_in_progress:
@@ -573,8 +573,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
             element.container = None
 
         self.object_view.remove(element)
-        if element.backend.group in self.wrapper.input_mgr.backend.event_source_reverse:
-           del self.wrapper.input_mgr.backend.event_source_reverse[element.backend.group]
+        if element.group in self.wrapper.input_mgr.backend.event_source_reverse:
+           del self.wrapper.input_mgr.backend.event_source_reverse[element.group]
 
     def refresh(self, element):
         if isinstance(element, PatchDisplay):

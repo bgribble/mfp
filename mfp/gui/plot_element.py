@@ -110,8 +110,8 @@ class PlotElement (BaseElement):
         # chart created later
         self.xyplot = None
 
-        self.backend.group.add_actor(self.rect)
-        self.backend.group.set_reactive(True)
+        self.group.add_actor(self.rect)
+        self.group.set_reactive(True)
 
     # methods useful for interaction
     def set_bounds(self, x_min, y_min, x_max, y_max):
@@ -231,7 +231,7 @@ class PlotElement (BaseElement):
                                         MFPApp().samplerate)
                 self.xyplot.draw_complete_cb = self.draw_complete_cb
             if self.xyplot:
-                self.backend.group.add_actor(self.xyplot)
+                self.group.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)
 
         if self.obj_args is None:

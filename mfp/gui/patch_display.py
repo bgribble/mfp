@@ -34,6 +34,10 @@ class PatchDisplay (object):
         self.layer_view.insert(self, None)
         self.object_view.insert(self, None)
 
+    @classmethod
+    def get_factory(cls):
+        return cls
+
     def update(self):
         pass
 

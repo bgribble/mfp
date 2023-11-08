@@ -24,6 +24,9 @@ class BackendInterface:
 
         super().__init_subclass__(*args, **kwargs)
 
+    def setup(self):
+        pass
+
     @classmethod
     def get_backend(cls, backend_name):
         if cls not in BackendInterface._interfaces.values():
@@ -357,7 +360,6 @@ class BaseElementBackend(ABC, BackendInterface, DelegateMixin):
     def move_z(self, z):
         pass
 
-
 class ColorDBBackend(ABC, BackendInterface, DelegateMixin):
     @abstractmethod
     @delegatemethod
@@ -373,3 +375,5 @@ class ColorDBBackend(ABC, BackendInterface, DelegateMixin):
     @delegatemethod
     def normalize(self, color):
         pass
+
+

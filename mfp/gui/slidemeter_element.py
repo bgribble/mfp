@@ -75,9 +75,9 @@ class SlideMeterElement (BaseElement):
         # create the texture
         self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
-        self.backend.group.set_content(self.texture)
+        self.group.set_content(self.texture)
 
-        self.backend.group.set_reactive(True)
+        self.group.set_reactive(True)
 
         self.set_size(self.DEFAULT_W, self.DEFAULT_H)
         self.move(x, y)

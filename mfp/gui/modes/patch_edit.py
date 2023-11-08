@@ -96,8 +96,9 @@ class PatchEditMode (InputMode):
         else:
             self.disable_selection_mode()
 
-    def add_element(self, factory):
+    def add_element(self, element_type):
         async def helper():
+            factory = element_type.get_factory()
             return await self._add_element(factory)
         return helper
 

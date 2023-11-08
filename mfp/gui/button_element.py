@@ -70,7 +70,7 @@ class ButtonElement (BaseElement):
         # create elements
         self.texture = Clutter.Canvas.new()
         self.texture.set_size(20, 20)
-        self.backend.group.set_content(self.texture)
+        self.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
         self.label = TextWidget(self)
@@ -81,7 +81,7 @@ class ButtonElement (BaseElement):
         self.label.set_use_markup(True)
         self.label_text = ''
 
-        self.backend.group.set_reactive(True)
+        self.group.set_reactive(True)
 
         self.set_size(20, 20)
         self.move(x, y)

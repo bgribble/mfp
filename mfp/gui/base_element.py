@@ -100,11 +100,12 @@ class BaseElement (Store):
 
         super().__init__()
 
-        factory = BaseElementBackend.get_backend(window.backend_name)
-        self.backend = factory(self)
-
     def __repr__(self):
         return "<%s %s>" % (type(self).__name__, id(self))
+
+    @classmethod
+    def get_factory(cls):
+        return cls
 
     def corners(self):
         return [(self.position_x, self.position_y),
@@ -134,7 +135,6 @@ class BaseElement (Store):
         self.width = width
         self.height = height
 
-        self.backend.set_size(width, height)
         self.draw_ports()
         self.send_params()
 
@@ -145,13 +145,7 @@ class BaseElement (Store):
         return self._all_styles.get(propname)
 
     def set_position(self, x, y):
-        self.backend.move(x, y)
-
-    def draw_ports(self):
-        self.backend.draw_ports()
-
-    def hide_ports(self):
-        self.backend.hide_ports()
+        self.move(x, y)
 
     def get_fontspec(self):
         return '{} {}px'.format(self.get_style('font-face'), self.get_style('font-size'))

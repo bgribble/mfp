@@ -122,7 +122,7 @@ class GlobalMode (InputMode):
     async def transient_msg(self):
         from ..message_element import TransientMessageElement
         if self.window.selected:
-            return await self.window.add_element(TransientMessageElement)
+            return await self.window.add_element(TransientMessageElement.get_factory())
         return False
 
     async def hover(self, details):

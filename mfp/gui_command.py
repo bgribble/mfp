@@ -93,8 +93,9 @@ class GUICommand:
             'button': BangButtonElement,
             'indicator': ToggleIndicatorElement
         }
-        ctor = ctors.get(elementtype, ProcessorElement)
-        if ctor:
+        element_cls = ctors.get(elementtype, ProcessorElement)
+        if element_cls:
+            ctor = element_cls.get_factory()
             o = ctor(MFPGUI().appwin, params.get('position_x', 0), params.get('position_y', 0))
             o.obj_id = obj_id
             o.parent_id = parent_id

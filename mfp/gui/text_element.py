@@ -42,7 +42,7 @@ class TextElement (BaseElement):
 
         self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
-        self.backend.group.set_content(self.texture)
+        self.group.set_content(self.texture)
 
         self.label = TextWidget(self)
         self.label.set_color(self.get_color('text-color'))
@@ -52,7 +52,7 @@ class TextElement (BaseElement):
         self.update_required = True
         self.move(x, y)
         self.set_size(12, 12)
-        self.backend.group.set_reactive(True)
+        self.group.set_reactive(True)
         self.label_changed_cb = self.label.signal_listen('text-changed', self.text_changed_cb)
 
     def update(self):

@@ -7,13 +7,13 @@ A patch element corresponding to a signal or control processor
 from gi.repository import Clutter
 import cairo
 from .text_widget import TextWidget
-from .base_element import BaseElement
 from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 
+from .clutter.base_element import ClutterBaseElementBackend
 
-class ProcessorElement (BaseElement):
+class ProcessorElement (ClutterBaseElementBackend):
     display_type = "processor"
     proc_type = None
 
@@ -22,7 +22,7 @@ class ProcessorElement (BaseElement):
     label_off_y = 0
 
     def __init__(self, window, x, y, params={}):
-        BaseElement.__init__(self, window, x, y)
+        super().__init__(window, x, y)
 
         self.param_list.extend([
             "show_label",
@@ -55,7 +55,7 @@ class ProcessorElement (BaseElement):
     def create_display(self):
         # box
         self.texture = Clutter.Canvas.new()
-        self.backend.group.set_content(self.texture)
+        self.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_size(35, 25)
 
@@ -70,7 +70,7 @@ class ProcessorElement (BaseElement):
         if not self.show_label:
             self.label.hide()
 
-        self.backend.group.set_reactive(True)
+        self.group.set_reactive(True)
 
     def update(self):
         if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
@@ -167,18 +167,18 @@ class ProcessorElement (BaseElement):
             self.update()
 
     def set_size(self, w, h):
-        BaseElement.set_size(self, w, h)
+        super().set_size(w, h)
 
         self.texture.set_size(w, h)
         self.texture.invalidate()
 
     def select(self):
-        BaseElement.select(self)
+        super().select()
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
     def unselect(self):
-        BaseElement.unselect(self)
+        super().unselect()
         self.label.set_color(self.get_color('text-color'))
         self.texture.invalidate()
 
@@ -214,7 +214,7 @@ class ProcessorElement (BaseElement):
         params["width"] = max(self.width, params.get("export_w") or 0)
         params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight)
 
-        BaseElement.configure(self, params)
+        super().configure(params)
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE

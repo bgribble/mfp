@@ -18,7 +18,10 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
         self.owner = owner
 
         if isinstance(owner.container, BaseElement):
-            self.parent = owner.container.backend.group
+            if hasattr(owner.container, 'group'):
+                self.parent = owner.container.group
+            else:
+                self.parent = owner.container.backend.group
         elif isinstance(owner.container, ClutterAppWindowBackend):
             self.parent = owner.container.container
 

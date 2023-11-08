@@ -5,7 +5,6 @@ connection.py: ConnectionMode minor mode
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from ..input_mode import InputMode
-from ..connection_element import ConnectionElement
 from ..base_element import BaseElement
 
 from mfp.gui_main import MFPGUI
@@ -52,6 +51,7 @@ class ConnectionMode (InputMode):
         self.remove_cbid = self.window.signal_listen("remove", self.remove_cb)
 
     def update_connection(self):
+        from ..connection_element import ConnectionElement
         if (self.source_obj is None or self.dest_obj is None):
             if self.connection:
                 self.connection.delete()
@@ -136,6 +136,7 @@ class ConnectionMode (InputMode):
         return True
 
     async def make_connection(self):
+        from ..connection_element import ConnectionElement
         # are both ends selected?
         if self.reverse and self.source_obj is None and self.window.selected:
             self.source_obj = self.window.selected[0]

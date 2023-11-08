@@ -41,11 +41,11 @@ class EnumElement (BaseElement):
         # create elements
         self.texture = Clutter.Canvas.new()
         self.texture.connect("draw", self.draw_cb)
-        self.backend.group.set_content(self.texture)
+        self.group.set_content(self.texture)
 
         self.label = TextWidget(self)
 
-        self.backend.group.set_reactive(True)
+        self.group.set_reactive(True)
 
         # configure label
         self.label.set_position(4, 1)
