@@ -1,5 +1,5 @@
 """
-clutter/message_elemt.py -- clutter backend for message elements
+clutter/message_element.py -- clutter backend for message elements
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
@@ -17,7 +17,6 @@ from ..message_element import (
     TransientMessageElement,
     TransientMessageElementImpl,
 )
-
 
 
 class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseElementBackend):

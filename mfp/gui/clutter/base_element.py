@@ -45,28 +45,6 @@ class ClutterBaseElementBackend(BaseElement):
         for c in self.connections_out + self.connections_in:
             bump(c)
 
-    def draw_badge_cb(self, tex, ctx):
-        tex.clear()
-        if self.badge_current is None:
-            return
-        btext, bcolor = self.badge_current
-        halfbadge = self.get_style('badge_size') / 2.0
-
-        color = ColorDB().normalize(bcolor)
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ctx.move_to(halfbadge, halfbadge)
-        ctx.arc(halfbadge, halfbadge, halfbadge, 0, 2*math.pi)
-        ctx.fill()
-
-        extents = ctx.text_extents(btext)
-        color = ColorDB().normalize(ColorDB().find("white"))
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        twidth = extents[4]
-        theight = extents[3]
-
-        ctx.move_to(halfbadge - twidth/2.0, halfbadge + theight/2.0)
-        ctx.show_text(btext)
-
     def update_badge(self):
         badgesize = self.get_style('badge_size')
         if self.badge is None:

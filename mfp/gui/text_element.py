@@ -16,9 +16,10 @@ from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
 from .colordb import ColorDB
 from .text_widget import TextWidget
+from .clutter.base_element import ClutterBaseElementBackend
 
 
-class TextElement (BaseElement):
+class TextElement (ClutterBaseElementBackend):
     display_type = "text"
     proc_type = "text"
 
