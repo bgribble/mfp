@@ -60,7 +60,7 @@ class ProcessorElement (ClutterBaseElementBackend):
         self.texture.set_size(35, 25)
 
         # label
-        self.label = TextWidget(self)
+        self.label = TextWidget.get_factory()(self)
         self.label.set_position(self.label_off_x, self.label_off_y)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())

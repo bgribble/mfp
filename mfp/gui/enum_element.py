@@ -43,7 +43,7 @@ class EnumElement (BaseElement):
         self.texture.connect("draw", self.draw_cb)
         self.group.set_content(self.texture)
 
-        self.label = TextWidget(self)
+        self.label = TextWidget.get_factory()(self)
 
         self.group.set_reactive(True)
 

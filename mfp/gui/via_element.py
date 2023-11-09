@@ -47,7 +47,7 @@ class ViaElement (BaseElement):
         self.texture.connect("draw", self.draw_cb)
         self.texture.set_position(0, self.TEXTURE_Y)
         self.label_text = None
-        self.label = TextWidget(self)
+        self.label = TextWidget.get_factory()(self)
         self.label.set_position(0, self.LABEL_Y)
         self.group.set_reactive(True)
         self.group.add_actor(self.texture)

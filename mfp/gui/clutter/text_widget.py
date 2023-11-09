@@ -3,27 +3,27 @@ clutter/text_widget.py -- backend implementation of TextWidget for Clutter
 """
 
 from gi.repository import Clutter
-from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement
-from mfp import log
 
-from ..backend_interfaces import TextWidgetBackend
+from ..text_widget import TextWidget, TextWidgetImpl
 from .app_window import ClutterAppWindowBackend
 from .event import repeat_event
 
-class ClutterTextWidgetBackend(TextWidgetBackend):
+
+class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
     backend_name = "clutter"
 
-    def __init__(self, owner):
-        self.owner = owner
-
-        if isinstance(owner.container, BaseElement):
-            if hasattr(owner.container, 'group'):
-                self.parent = owner.container.group
+    def __init__(self, container):
+        super().__init__()
+        self.container = container
+        self.parent = None
+        if isinstance(self.container, BaseElement):
+            if hasattr(self.container, 'group'):
+                self.parent = self.container.group
             else:
-                self.parent = owner.container.backend.group
-        elif isinstance(owner.container, ClutterAppWindowBackend):
-            self.parent = owner.container.container
+                self.parent = self.container.backend.group
+        elif isinstance(self.container, ClutterAppWindowBackend):
+            self.parent = self.container.container
 
         self.label = Clutter.Text()
         self.parent.add_actor(self.label)
@@ -32,12 +32,10 @@ class ClutterTextWidgetBackend(TextWidgetBackend):
         self.edit_mode = None
 
         # repeat the Clutter signals to MFP signals on the TextWidget
-        self.label.connect("activate", repeat_event(self.owner, "activate"))
-        self.label.connect("text-changed", repeat_event(self.owner, "text-changed"))
-        self.label.connect("key-focus-out", repeat_event(self.owner, "key-focus-out"))
-        self.label.connect("key-focus-in", repeat_event(self.owner, "key-focus-in"))
-
-        super().__init__(owner)
+        self.label.connect("activate", repeat_event(self, "activate"))
+        self.label.connect("text-changed", repeat_event(self, "text-changed"))
+        self.label.connect("key-focus-out", repeat_event(self, "key-focus-out"))
+        self.label.connect("key-focus-in", repeat_event(self, "key-focus-in"))
 
     def grab_focus(self):
         return self.label.grab_key_focus()

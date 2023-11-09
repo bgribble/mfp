@@ -73,7 +73,7 @@ class ButtonElement (BaseElement):
         self.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
-        self.label = TextWidget(self)
+        self.label = TextWidget.get_factory()(self)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.signal_listen('text-changed', self.label_changed_cb)

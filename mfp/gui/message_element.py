@@ -39,7 +39,7 @@ class MessageElement (BaseElement):
         self.obj_state = self.OBJ_HALFCREATED
 
         # configure label
-        self.label = TextWidget(self)
+        self.label = TextWidget.get_factory()(self)
         self.label.set_position(4, 1)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())

@@ -44,7 +44,7 @@ class TextElement (BaseElement):
         self.texture.connect("draw", self.draw_cb)
         self.group.set_content(self.texture)
 
-        self.label = TextWidget(self)
+        self.label = TextWidget.get_factory()(self)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.set_position(3, 3)
