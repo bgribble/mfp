@@ -29,8 +29,10 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
         self.group.set_reactive(True)
 
         # resize widget whne text gets longer
-        self.label.signal_listen('text-changed', self.text_changed_cb)
+        self.label.signal_listen('text-changed', self.label_changed_cb)
         self.set_size(35, 25)
+        self.move(x, y)
+
         self.redraw()
 
     def redraw(self):
@@ -40,7 +42,6 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
     def set_size(self, width, height):
         super().set_size(width, height)
         self.texture.set_size(width, height)
-        self.update()
 
     def label_changed_cb(self, *args):
         newtext = self.label.get_text()
@@ -96,25 +97,3 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
         ct.set_line_width(lw)
         ct.stroke()
         return True
-
-    def draw_badge_cb(self, tex, ctx):
-        tex.clear()
-        if self.badge_current is None:
-            return
-        btext, bcolor = self.badge_current
-        halfbadge = self.get_style('badge_size') / 2.0
-
-        color = ColorDB().normalize(bcolor)
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ctx.move_to(halfbadge, halfbadge)
-        ctx.arc(halfbadge, halfbadge, halfbadge, 0, 2*math.pi)
-        ctx.fill()
-
-        extents = ctx.text_extents(btext)
-        color = ColorDB().normalize(ColorDB().find("white"))
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        twidth = extents[4]
-        theight = extents[3]
-
-        ctx.move_to(halfbadge - twidth/2.0, halfbadge + theight/2.0)
-        ctx.show_text(btext)

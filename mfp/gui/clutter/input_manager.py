@@ -23,7 +23,6 @@ class ClutterInputManagerBackend(InputManagerBackend):
 
     def __init__(self, input_manager):
         self.input_manager = input_manager
-        self.event_source_reverse = {}
 
         super().__init__(input_manager)
 
@@ -117,7 +116,6 @@ class ClutterInputManagerBackend(InputManagerBackend):
 
         elif isinstance(event, EnterEvent):
             src = event.target
-
             now = datetime.now()
             if (
                 self.input_manager.pointer_leave_time is not None
@@ -126,7 +124,11 @@ class ClutterInputManagerBackend(InputManagerBackend):
                 self.input_manager.keyseq.mod_keys = set()
                 self.input_manager.window.grab_focus()
 
-            if src and self.input_manager.window.object_visible(src):
+            if (
+                src
+                and src != self.input_manager.window
+                and self.input_manager.window.object_visible(src)
+            ):
                 self.input_manager.pointer_obj = src
                 self.input_manager.pointer_obj_time = now
 

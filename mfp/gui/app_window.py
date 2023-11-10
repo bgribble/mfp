@@ -44,15 +44,13 @@ class AppWindow (SignalMixin):
         self.color_selected = self.get_color('stroke-color:selected')
         self.color_bg = self.get_color('canvas-color')
 
-        # callbacks facility... not yet too much used, but "select" and
-        # "add" are in use
-        self.callbacks = {}
-        self.callbacks_last_id = 0
-
         # viewport info
         self.zoom = 1.0
         self.view_x = 0
         self.view_y = 0
+
+        # impl-specific mapping of widgets to MFP display elements
+        self.event_sources = {}
 
         # set up key and mouse handling
         self.input_mgr = InputManager(self)

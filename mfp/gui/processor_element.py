@@ -59,12 +59,11 @@ class ProcessorElement (BaseElement):
         self.export_h = None
         self.export_created = False
 
-        # create display
-        self.set_size(35, 25)
-        self.move(x, y)
-
         self.obj_state = self.OBJ_HALFCREATED
-        self.update()
+
+    @classmethod
+    def get_factory(cls):
+        return ProcessorElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def update(self):
         if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
@@ -82,6 +81,7 @@ class ProcessorElement (BaseElement):
         new_w = max(35, port_width, label_width, box_width)
 
         self.set_size(new_w, self.texture.get_property('height'))
+        self.redraw()
 
     def get_label(self):
         return self.label

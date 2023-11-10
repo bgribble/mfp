@@ -82,9 +82,6 @@ class MFPApp (Singleton, SignalMixin):
         self.session_dir = None
         self.session_id = None
 
-        # app callbacks
-        self.callbacks = {}
-        self.callbacks_last_id = 0
         self.leftover_threads = []
 
         # processor class registry

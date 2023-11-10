@@ -75,10 +75,18 @@ def transform_event(clutter_event, mfp_target):
         )
 
     if clutter_event.type == Clutter.EventType.ENTER:
-        return EnterEvent(target=mfp_target)
+        if hasattr(mfp_target, 'event_sources'):
+            source = mfp_target.event_sources.get(clutter_event.source, mfp_target)
+        else:
+            source = mfp_target
+        return EnterEvent(target=source)
 
     if clutter_event.type == Clutter.EventType.LEAVE:
-        return LeaveEvent(target=mfp_target)
+        if hasattr(mfp_target, 'event_sources'):
+            source = mfp_target.event_sources.get(clutter_event.source, mfp_target)
+        else:
+            source = mfp_target
+        return LeaveEvent(target=source)
 
     return None
 
@@ -91,5 +99,5 @@ def repeat_event(target, signal_name):
         else:
             event, *rest = args
             ev = transform_event(event, target)
-            MFPGUI().async_task(target.signal_emit(signal_name, ev))
+            MFPGUI().async_task(target.signal_emit(signal_name, ev, *rest))
     return _inner
