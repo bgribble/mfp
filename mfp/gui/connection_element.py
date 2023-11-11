@@ -80,6 +80,12 @@ class ConnectionElement(ClutterBaseElementBackend):
         self.texture.set_size(width, height)
         self.texture.invalidate()
 
+    def move(self, x, y):
+        self.position_x = x
+        self.position_y = y
+
+        self.group.set_position(x, y)
+
     def corners(self):
         if self.obj_1 and self.obj_2:
             p1 = self.obj_1.port_center(BaseElement.PORT_OUT, self.port_1)

@@ -170,15 +170,14 @@ async def main():
     host = Host(
         label="MFP GUI",
     )
-    await host.connect(channel)
-
-
     def _exception(exc, tbinfo, traceback):
-        log.error(f"[carp] Exception: {tbinfo} '{args}'")
+        log.error(f"[carp] Exception: {tbinfo}")
         for ll in traceback.split('\n'):
             log.error(ll)
 
     host.on("exception", _exception)
+
+    await host.connect(channel)
 
     # set up Flopsy store manager
     Store.setup_asyncio()

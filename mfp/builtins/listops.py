@@ -4,13 +4,13 @@ p_listops.py: Wrappers for common list operations
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
-from mfp import log
+from mfp import log, Bang
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..bang import Uninit
 
 class Pack (Processor):
-    doc_tooltip_obj = "Collect inputs into a list" 
+    doc_tooltip_obj = "Collect inputs into a list"
     doc_tooltip_outlet = [ "List output" ]
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -23,16 +23,16 @@ class Pack (Processor):
         self.resize(num_inlets, 1)
 
         self.doc_tooltip_inlet = []
-        for i in range(num_inlets): 
-            self.doc_tooltip_inlet.append("List item %d input" % i) 
+        for i in range(num_inlets):
+            self.doc_tooltip_inlet.append("List item %d input" % i)
 
 
     async def trigger(self):
         self.outlets[0] = [l for l in self.inlets]
 
 class Unpack (Processor):
-    doc_tooltip_obj = "Break list into items" 
-    doc_tooltip_inlet = [ "List input"] 
+    doc_tooltip_obj = "Break list into items"
+    doc_tooltip_inlet = [ "List input"]
 
     def __init__(self, init_type, init_args, patch, scope, name):
         initargs, kwargs = patch.parse_args(init_args)
@@ -43,13 +43,13 @@ class Unpack (Processor):
             num_outlets = 1
         Processor.__init__(self, 1, num_outlets, init_type, init_args, patch, scope, name)
         self.outlet_order.reverse()
-        self.doc_tooltip_outlet = [] 
+        self.doc_tooltip_outlet = []
         for i in range(num_outlets-1):
             self.doc_tooltip_outlet.append("List item %d output" % i)
         self.doc_tooltip_outlet.append("Rest of list output")
 
     async def trigger(self):
-        nout = len(self.outlets) - 1 
+        nout = len(self.outlets) - 1
         for n in range(nout):
             try:
                 self.outlets[n] = self.inlets[0][n]
@@ -90,7 +90,7 @@ class Zip (Processor):
             num_inlets = initargs[0]
         else:
             num_inlets = 1
-        self.doc_tooltip_inlet = [] 
+        self.doc_tooltip_inlet = []
         for i in range(num_inlets):
             self.doc_tooltip_inlet.append("List %d input" % i)
 
@@ -99,7 +99,7 @@ class Zip (Processor):
     async def trigger(self):
         if len(self.inlets) == 1:
             self.outlets[0] = list(zip(*self.inlets[0]))
-        else: 
+        else:
             self.outlets[0] = list(zip(*self.inlets))
 
 class Map (Processor):
@@ -110,8 +110,8 @@ class Map (Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = patch.parse_args(init_args)
-        
-        self.func = lambda x: x 
+
+        self.func = lambda x: x
         if len(initargs):
             self.inlets[1] =  initargs[0]
 
@@ -122,16 +122,16 @@ class Map (Processor):
 
 class Slice (Processor):
     doc_tooltip_obj = "Extract a slice of an iterable"
-    doc_tooltip_inlet = ["List", "Start element (default: initarg 0)", 
-                         "End element (default: initarg 1)", 
+    doc_tooltip_inlet = ["List", "Start element (default: initarg 0)",
+                         "End element (default: initarg 1)",
                          "Stride (default: initarg 2)"]
     doc_tooltip_outlet = [ "List output" ]
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = patch.parse_args(init_args)
-        
-        self.func = lambda x: x 
+
+        self.func = lambda x: x
         if len(initargs) > 2:
             self.inlets[3] = initargs[2]
         if len(initargs) > 1:
@@ -147,6 +147,35 @@ class Slice (Processor):
         self.outlets[0] = self.inlets[0][slicer]
 
 
+class Range (Processor):
+    doc_tooltip_obj = "Produce a list with a range of values"
+    doc_tooltip_inlet = [
+        "Tuple/list of (start, end, stride)"
+    ]
+    doc_tooltip_outlet = [ "List output" ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = patch.parse_args(init_args)
+
+        self.default_start = 0
+        self.default_stride = 1
+        if len(initargs):
+            self.default_start = initargs[0]
+        if len(initargs) > 1:
+            self.default_stride = initargs[1]
+
+    async def trigger(self):
+        if isinstance(self.inlets[0], (int, float)):
+            params = (self.default_start, self.inlets[0], self.default_stride) 
+        else:
+            params = list(self.inlets[0])
+            if len(params) == 1:
+                params = [self.default_start, params[0], self.default_stride]
+            elif len(params) == 2:
+                params = [params[0], params[1], self.default_stride]
+
+        self.outlets[0] = list(range(*params))
 
 
 def register():
@@ -156,6 +185,7 @@ def register():
     MFPApp().register("append", Append)
     MFPApp().register("map", Map)
     MFPApp().register("slice", Slice)
+    MFPApp().register("range", Range)
 
 
 

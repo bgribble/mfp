@@ -117,6 +117,13 @@ class MFPApp (Singleton, SignalMixin):
         self.rpc_host.on("connect", self.on_host_connect)
         self.rpc_host.on("exports", self.on_host_exports)
 
+        def _exception(exc, tbinfo, traceback):
+            log.error(f"[carp] Exception: {tbinfo}")
+            for ll in traceback.split('\n'):
+                log.error(ll)
+
+        self.rpc_host.on("exception", _exception)
+
         await self.rpc_host.start(self.rpc_channel)
 
         # classes served by this RPC host:

@@ -279,6 +279,7 @@ class PyAutoWrap(Processor):
         else:
             self.argcount = 0
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
+
         Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name)
 
         for index, arg in enumerate(initargs):
