@@ -39,7 +39,7 @@ class MessageElement (BaseElement):
         self.obj_state = self.OBJ_HALFCREATED
 
         # configure label
-        self.label = TextWidget.get_factory()(self)
+        self.label = TextWidget.build(self)
         self.label.set_position(4, 1)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
@@ -149,7 +149,7 @@ class TransientMessageElement (MessageElement):
 
     def _make_connections(self):
         for to in self.target_obj:
-            c = ConnectionElement(self.app_window, self, 0, to, self.target_port)
+            c = ConnectionElement.build(self.app_window, self, 0, to, self.target_port)
             self.app_window.wrapper.active_layer().add(c)
             self.app_window.register(c)
             self.connections_out.append(c)

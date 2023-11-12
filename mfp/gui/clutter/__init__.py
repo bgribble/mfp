@@ -7,3 +7,4 @@ from .base_element import ClutterBaseElementBackend  # noqa
 from .colordb import ClutterColorDBBackend  # noqa
 from .message_element import ClutterMessageElementImpl  # noqa
 from .processor_element import ClutterProcessorElementImpl  # noqa
+from .connection_element import ClutterConnectionElementImpl  # noqa

@@ -95,8 +95,7 @@ class GUICommand:
         }
         element_cls = ctors.get(elementtype, ProcessorElement)
         if element_cls:
-            ctor = element_cls.get_factory()
-            o = ctor(MFPGUI().appwin, params.get('position_x', 0), params.get('position_y', 0))
+            o = element_cls.build(MFPGUI().appwin, params.get('position_x', 0), params.get('position_y', 0))
             o.obj_id = obj_id
             o.parent_id = parent_id
             o.obj_type = obj_type
@@ -156,7 +155,7 @@ class GUICommand:
             if conn.obj_2 == obj_2 and conn.port_2 == obj_2_port:
                 return
 
-        c = ConnectionElement(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
+        c = ConnectionElement.build(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)
         MFPGUI().appwin.register(c)
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)

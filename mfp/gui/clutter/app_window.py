@@ -363,7 +363,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
 
             self.hud_prompt = Clutter.Text()
-            self.hud_prompt_input = TextWidget.get_factory()(self)
+            self.hud_prompt_input = TextWidget.build(self)
             self.stage.add_actor(self.hud_prompt)
             self.hud_prompt.set_position(10, self.stage.get_height() - 25)
             self.hud_prompt.set_property("opacity", 255)

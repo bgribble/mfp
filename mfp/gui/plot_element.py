@@ -87,7 +87,7 @@ class PlotElement (BaseElement):
 
     def create_display(self, width, height):
         self.rect = clutter.Rectangle()
-        self.label = TextWidget.get_factory()(self)
+        self.label = TextWidget.build(self)
 
         # group
         clutter.Group.set_size(self, width, height)

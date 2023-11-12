@@ -59,10 +59,12 @@ class ConnectionMode (InputMode):
             return True
 
         if self.connection is None or self.connection.obj_state == BaseElement.OBJ_DELETED:
-            self.connection = ConnectionElement(self.window,
-                                                self.source_obj, self.source_port,
-                                                self.dest_obj, self.dest_port,
-                                                dashed=True)
+            self.connection = ConnectionElement.build(
+                self.window,
+                self.source_obj, self.source_port,
+                self.dest_obj, self.dest_port,
+                dashed=True
+            )
             self.source_obj.connections_out.append(self.connection)
             self.dest_obj.connections_in.append(self.connection)
         else:
@@ -152,8 +154,10 @@ class ConnectionMode (InputMode):
                 self.dest_obj.obj_id,
                 self.dest_port
             ):
-                c = ConnectionElement(self.window, self.source_obj, self.source_port,
-                                      self.dest_obj, self.dest_port)
+                c = ConnectionElement.build(
+                    self.window, self.source_obj, self.source_port,
+                    self.dest_obj, self.dest_port
+                )
                 MFPGUI().appwin.register(c)
                 self.source_obj.connections_out.append(c)
                 self.dest_obj.connections_in.append(c)

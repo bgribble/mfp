@@ -38,6 +38,10 @@ class PatchDisplay (object):
     def get_factory(cls):
         return cls
 
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_factory()(*args, **kwargs)
+
     def update(self):
         pass
 

@@ -107,6 +107,10 @@ class BaseElement (Store):
     def get_factory(cls):
         return cls
 
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_factory()(*args, **kwargs)
+
     def corners(self):
         return [(self.position_x, self.position_y),
                 (self.position_x + self.width, self.position_y),
@@ -143,6 +147,9 @@ class BaseElement (Store):
 
     def get_style(self, propname):
         return self._all_styles.get(propname)
+
+    def get_position(self):
+        return (self.position_x, self.position_y)
 
     def set_position(self, x, y):
         self.move(x, y)

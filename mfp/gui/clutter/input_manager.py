@@ -110,6 +110,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
             self.input_manager.pointer_x, self.input_manager.pointer_y = (
                 self.input_manager.window.backend.screen_to_canvas(event.x, event.y)
             )
+            log.debug(f"[motion] set cursor pos to ({self.input_manager.pointer_x}, {self.input_manager.pointer_y})")
             self.input_manager.keyseq.process(event)
             if len(self.input_manager.keyseq.sequences):
                 keysym = self.input_manager.keyseq.pop()

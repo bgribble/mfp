@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 '''
 processor_element.py
+
 A patch element corresponding to a signal or control processor
 '''
 

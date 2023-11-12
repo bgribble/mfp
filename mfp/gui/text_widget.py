@@ -29,6 +29,10 @@ class TextWidget(SignalMixin):
     def get_factory(cls):
         return TextWidgetImpl.get_backend(MFPGUI().appwin.backend_name)
 
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_factory()(*args, **kwargs)
+
 
 class TextWidgetImpl(ABC, BackendInterface):
     @abstractmethod
