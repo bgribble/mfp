@@ -167,7 +167,7 @@ class Range (Processor):
 
     async def trigger(self):
         if isinstance(self.inlets[0], (int, float)):
-            params = (self.default_start, self.inlets[0], self.default_stride) 
+            params = (self.default_start, self.inlets[0], self.default_stride)
         else:
             params = list(self.inlets[0])
             if len(params) == 1:
@@ -186,6 +186,3 @@ def register():
     MFPApp().register("map", Map)
     MFPApp().register("slice", Slice)
     MFPApp().register("range", Range)
-
-
-

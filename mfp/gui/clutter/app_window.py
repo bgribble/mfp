@@ -527,7 +527,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
                 if not isinstance(obj, PatchDisplay):
                     obj.move_to_layer(self.wrapper.selected_layer)
                     if obj not in self.wrapper.selected:
-                        self.wrapper.select(MFPGUI().recall(o))
+                        await self.wrapper.select(MFPGUI().recall(o))
             return False
         else:
             return False
