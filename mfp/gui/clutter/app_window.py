@@ -152,9 +152,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
         object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.wrapper._unselect(obj))
 
         async def on_create(window, signal, element):
-            if isinstance(element.container, BaseElement):
+            if isinstance(element, PatchDisplay):
+                return
+
+            if hasattr(element, 'container') and isinstance(element.container, BaseElement):
                 object_view.insert(element, (element.scope, element.container))
-            elif element.scope:
+            elif hasattr(element, 'scope') and element.scope:
                 object_view.insert(element, (element.scope, element.layer.patch))
             else:
                 object_view.insert(

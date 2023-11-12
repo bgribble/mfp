@@ -259,10 +259,11 @@ class Patch(Processor):
         try:
             if obj.scope is not None and obj.name is not None:
                 self.unbind(obj.name, obj.scope)
+            obj.patch = None
             del self.objects[obj.obj_id]
         except KeyError:
-            log.error("Error deleting obj", obj, "can't find key", obj.obj_id)
-            log.debug_traceback()
+            log.error(f"Error deleting obj {obj}, can't find key {obj.obj_id}, continuing")
+            log.debug(f"obj info: {obj.name} {obj.init_type} {obj.init_args} deleted={obj.status == obj.DELETED}")
 
         try:
             self.inlet_objects.remove(obj)

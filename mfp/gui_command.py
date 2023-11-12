@@ -132,6 +132,7 @@ class GUICommand:
             MFPGUI().remember(o)
             MFPGUI().appwin.refresh(o)
             o.update()
+            MFPGUI().async_task(MFPGUI().appwin.signal_emit("created", o))
 
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI
