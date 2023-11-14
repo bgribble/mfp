@@ -4,11 +4,14 @@ pyfunc.py: Wrappers for common unary and binary Python functions
 
 Copyright (c) 2010-2017 Bill Gribble <grib@billgribble.com>
 '''
+import copy
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..method import MethodCall
 from ..bang import Bang, Uninit
+
+from mfp import log
 
 
 def get_arglist(thunk):
@@ -18,6 +21,15 @@ def get_arglist(thunk):
         return thunk.__func__.__code__.co_varnames
     else:
         return None
+
+
+def isiterable(obj):
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
+
 
 class CallFunction(Processor):
     doc_tooltip_obj = "Call a n-ary function"
@@ -32,13 +44,14 @@ class CallFunction(Processor):
 
         if len(initargs):
             self.arity = initargs[0]
-            self.resize(arity + 1, 1)
+            self.resize(self.arity + 1, 1)
 
     async def trigger(self):
         if self.inlets[0] is not Bang:
             self.thunk = self.inlets[0]
 
         self.outlets[0] = self.thunk(*self.inlets[1:])
+
 
 class ApplyMethod(Processor):
     doc_tooltip_obj = "Create a method call object"
@@ -88,12 +101,23 @@ class GetElement(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
+        self.default_element = None
+        if "default" in kwargs:
+            self.default_element = kwargs["default"]
+
+        self.elements = None
         if len(initargs):
             self.elements = initargs
 
     async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.elements = self.inlets[1]
+            if not isinstance(self.inlets[1], (list, tuple)):
+                elt = self.inlets[1]
+                if isinstance(elt, str) or not isiterable(elt):
+                    self.elements = [elt]
+                else:
+                    self.elements = list(elt)
             self.inlets[1] = Uninit
 
         if self.elements is None:
@@ -102,12 +126,34 @@ class GetElement(Processor):
         values = []
 
         for element in self.elements:
-            if isinstance(element, (int, float)):
-                values.append(self.inlets[0][int(element)])
+            if isinstance(self.inlets[0], (list, tuple, str)):
+                idx = int(element)
+                if idx < len(self.inlets[0]):
+                    values.append(self.inlets[0][int(element)])
+                else:
+                    if callable(self.default_element):
+                        default = self.default_element()
+                    else:
+                        default = self.default_element
+                    values.append(default)
             elif isinstance(self.inlets[0], dict):
-                values.append(self.inlets[0].get(element))
+                if element in self.inlets[0]:
+                    values.append(self.inlets[0].get(element))
+                else:
+                    if callable(self.default_element):
+                        default = self.default_element()
+                    else:
+                        default = self.default_element
+                    values.append(default)
             else:
-                values.append(getattr(self.inlets[0], element))
+                if hasattr(self.inlets[0], element):
+                    values.append(getattr(self.inlets[0], element))
+                else:
+                    if callable(self.default_element):
+                        default = self.default_element()
+                    else:
+                        default = self.default_element
+                    values.append(default)
 
         if len(values) == 1:
             self.outlets[0] = values[0]
@@ -115,6 +161,7 @@ class GetElement(Processor):
             self.outlets[0] = values
 
         self.outlets[1] = self.inlets[0]
+
 
 class SetElement(Processor):
     doc_tooltip_obj = "Set element or attribute of object"
@@ -137,25 +184,35 @@ class SetElement(Processor):
 
     async def trigger(self):
         if self.inlets[1] is not Uninit:
-            self.element = self.inlets[1]
+            element = self.inlets[1]
             self.inlets[1] = Uninit
+        else:
+            element = self.element
 
         if self.inlets[2] is not Uninit:
-            self.newval = self.inlets[2]
+            newval = self.inlets[2]
             self.inlets[2] = Uninit
+        else:
+            newval = self.newval
 
-        if self.element is None:
-            return
-
-        target = self.inlets[0]
+        target = copy.copy(self.inlets[0])
         self.inlets[0] = Uninit
 
-        if isinstance(self.element, (int, float)) or isinstance(target, dict):
-            target[self.element] = self.newval
-        elif isinstance(self.element, str):
-            setattr(target, self.element, self.newval)
+        if element is None:
+            return
+
+        if isinstance(target, str):
+            element = int(element)
+            str_items = list(target)
+            str_items[element] = newval
+            target = ''.join(str_items)
+        elif isinstance(element, (int, float)) or isinstance(target, dict):
+            target[element] = newval
+        elif isinstance(element, str):
+            setattr(target, element, newval)
 
         self.outlets[0] = target
+
 
 class GetSlice(Processor):
     doc_tooltip_obj = "Get a slice of list elements"
@@ -296,6 +353,37 @@ class PyAutoWrap(Processor):
             arg = self.inlets[0]
             self.outlets[0] = self.thunk(arg)
 
+class PyCompareRoute(Processor):
+    """
+    PyCompareRoute -- route input to output selected by comparison
+
+    [>: 0] routes inlet 1 to outlet 1 if greater than 0, else outlet 2
+    """
+
+    doc_tooltip_inlet = ["Argument 1", "Argument 2 (default: initarg 0)"]
+
+    def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
+        self.function = pyfunc
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+
+        if self.function.__doc__:
+            self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
+
+        if len(initargs) == 1:
+            self.inlets[1] = initargs[0]
+
+    async def trigger(self):
+        if self.inlets[1] is not Uninit:
+            cmpval = bool(self.function(self.inlets[0], self.inlets[1]))
+        else:
+            # hope for a default
+            cmpval = bool(self.function(self.inlets[0]))
+        if cmpval:
+            self.outlets[0] = self.inlets[0]
+        else:
+            self.outlets[1] = self.inlets[0]
+
 
 class PyBinary(Processor):
     doc_tooltip_inlet = ["Argument 1", "Argument 2 (default: initarg 0)"]
@@ -368,6 +456,16 @@ def mk_unary(pyfunc, name, doc=None):
         return proc
     MFPApp().register(name, factory)
 
+
+def mk_cmproute(pyfunc, name, doc=None):
+    def factory(iname, args, patch, scope, obj_name):
+        proc = PyCompareRoute(pyfunc, iname, args, patch, scope, obj_name)
+        if doc:
+            proc.doc_tooltip_obj = doc
+        return proc
+    MFPApp().register(name, factory)
+
+
 import operator
 import math
 import cmath
@@ -384,7 +482,6 @@ def applyargs(func):
     def wrapped(args):
         return func(*args)
     return wrapped
-
 
 def register():
     MFPApp().register("get", GetElement)
@@ -427,6 +524,14 @@ def register():
     mk_binary(operator.le, "<=", "Less than or equal comparison")
     mk_binary(operator.eq, "==", "Equality comparison")
     mk_binary(operator.ne, "!=", "Not-equal comparison")
+
+    mk_cmproute(operator.gt, ">:", "Route on greater-than comparison")
+    mk_cmproute(operator.lt, "<:", "Route on less-than comparison")
+    mk_cmproute(operator.ge, ">=:", "Route on greater than or equal comparison")
+    mk_cmproute(operator.le, "<=:", "Route on less than or equal comparison")
+    mk_cmproute(operator.eq, "==:", "Route on equality comparison")
+    mk_cmproute(operator.ne, "!=:", "Route on not-equal comparison")
+
     mk_binary(max, "max", "Maximum of 2 inputs")
     mk_binary(min, "min", "Minimum of 2 inputs")
 
@@ -460,6 +565,14 @@ def register():
     mk_binary(
         lambda instr, splitstr=" ": instr.split(splitstr) if isinstance(instr, str) else instr,
         "split", "Split a string into pieces")
+
+    mk_binary(
+        lambda instr, initial: instr.startswith(initial) if isinstance(instr, str) else False,
+        "startswith", "Test if string starts with another string")
+
+    mk_cmproute(
+        lambda instr, initial: instr.startswith(initial) if isinstance(instr, str) else False,
+        "startswith:", "Route on whether string starts with another string")
 
     from datetime import datetime
     mk_nullary(datetime.now, "now", "Current time-of-day")

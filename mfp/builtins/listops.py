@@ -60,8 +60,8 @@ class Unpack (Processor):
 
 
 class Append (Processor):
-    doc_tooltip_obj = "Append an item to a list"
-    doc_tooltip_inlet = ["Item to append", "List to append to"]
+    doc_tooltip_obj = "Append an item to a list or string"
+    doc_tooltip_inlet = [ "List to append to", "Item to append"]
     doc_tooltip_outlet = [ "List output" ]
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -73,10 +73,11 @@ class Append (Processor):
             self.inlets[1] = []
 
     async def trigger(self):
-        import copy
-        new_list = copy.copy(self.inlets[1])
-        new_list.append(self.inlets[0])
-        self.outlets[0] = new_list
+        if isinstance(self.inlets[0], str):
+            newval = self.inlets[0] + str(self.inlets[1])
+        else:
+            newval = list(self.inlets[0]) + [self.inlets[1]]
+        self.outlets[0] = newval
 
 
 class Zip (Processor):
