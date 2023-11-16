@@ -55,6 +55,10 @@ class FileIO(Processor):
             return EOF()
         return rv
 
+    def rewind(self):
+        if self.fileobj:
+            self.fileobj.seek(0)
+
     def readline(self):
         rv = self.fileobj.readline()
         if rv == '':

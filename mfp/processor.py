@@ -66,7 +66,7 @@ class Processor:
 
         self.inlets = [Uninit] * inlets
         self.outlets = [Uninit] * outlets
-        self.outlet_order = list(range(outlets))
+        self.outlet_order = list(reversed(range(outlets)))
 
         self.status = Processor.CTOR
         self.tags = {}          # tags are labels shown in notify bubble
@@ -552,7 +552,7 @@ class Processor:
                     self.disconnect(outlet, tobj, tport)
             self.outlets[outlets:] = []
             self.connections_out[outlets:] = []
-        self.outlet_order = list(range(len(self.outlets)))
+        self.outlet_order = list(reversed(range(len(self.outlets))))
 
         self.conf(num_inlets=inlets, num_outlets=outlets)
 
@@ -694,8 +694,8 @@ class Processor:
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
-            log.error("%s (%s): send to inlet %d failed: %s" %
-                      (self.name, self.init_type, inlet, value))
+            log.error("%s.%s (%s): send to inlet %d failed: '%s'" %
+                      (self.patch.name, self.name, self.init_type, inlet, value))
             log.error("Exception: %s" % e.args)
             log.debug_traceback()
             if w_target:

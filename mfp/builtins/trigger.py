@@ -30,7 +30,7 @@ class Trigger (Processor):
         else:
             numout = 1
         self.resize(1, numout)
-        self.outlet_order.reverse()
+        #self.outlet_order.reverse()
 
         self.doc_tooltip_outlet = [] 
         for i in range(numout):

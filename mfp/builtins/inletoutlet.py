@@ -117,7 +117,7 @@ class Outlet(Processor):
 
         if self.patch and self.patch.trigger_lock.acquire(False):
             self.patch.trigger_lock.release()
-            self.patch.send(AsyncOutput(in_value, self.outletnum))
+            await self.patch.send(AsyncOutput(in_value, self.outletnum))
         self.add_output(0, in_value)
 
 

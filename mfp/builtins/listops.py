@@ -42,7 +42,6 @@ class Unpack (Processor):
         else:
             num_outlets = 1
         Processor.__init__(self, 1, num_outlets, init_type, init_args, patch, scope, name)
-        self.outlet_order.reverse()
         self.doc_tooltip_outlet = []
         for i in range(num_outlets-1):
             self.doc_tooltip_outlet.append("List item %d output" % i)
@@ -76,7 +75,7 @@ class Append (Processor):
         if isinstance(self.inlets[0], str):
             newval = self.inlets[0] + str(self.inlets[1])
         else:
-            newval = list(self.inlets[0]) + [self.inlets[1]]
+            newval = [v for v in list(self.inlets[0])] + [self.inlets[1]]
         self.outlets[0] = newval
 
 

@@ -57,7 +57,7 @@ class ApplyMethod(Processor):
     doc_tooltip_obj = "Create a method call object"
     doc_tooltip_inlet = ["Name of method",
                          "Positional arguments to method call",
-                         "Keyword arguments to method call" ]
+                         "Keyword arguments to method call"]
 
     doc_tooltip_outlet = ["MethodCall object output"]
 
@@ -95,7 +95,7 @@ class ApplyMethod(Processor):
 class GetElement(Processor):
     doc_tooltip_obj = "Get element or attribute from object"
     doc_tooltip_inlet = ["Object to get from",
-                         "Element to get (default: initarg 0)" ]
+                         "Element to get (default: initarg 0)"]
     doc_tooltip_outlet = ["Specified element output", "Passthru of source"]
 
     def __init__(self, init_type, init_args, patch, scope, name):
@@ -118,7 +118,6 @@ class GetElement(Processor):
                     self.elements = [elt]
                 else:
                     self.elements = list(elt)
-            self.inlets[1] = Uninit
 
         if self.elements is None:
             return
@@ -172,7 +171,7 @@ class SetElement(Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        initargs, _ = self.parse_args(init_args)
         self.element = None
         self.newval = None
 
@@ -185,18 +184,15 @@ class SetElement(Processor):
     async def trigger(self):
         if self.inlets[1] is not Uninit:
             element = self.inlets[1]
-            self.inlets[1] = Uninit
         else:
             element = self.element
 
         if self.inlets[2] is not Uninit:
             newval = self.inlets[2]
-            self.inlets[2] = Uninit
         else:
             newval = self.newval
 
         target = copy.copy(self.inlets[0])
-        self.inlets[0] = Uninit
 
         if element is None:
             return
@@ -225,7 +221,7 @@ class GetSlice(Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        initargs, _ = self.parse_args(init_args)
         self.slice_end = None
         self.slice_start = 0
         self.stride = 1
@@ -240,18 +236,14 @@ class GetSlice(Processor):
     async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.slice_start = self.inlets[1]
-            self.inlets[1] = Uninit
 
         if self.inlets[2] is not Uninit:
             self.slice_end = self.inlets[2]
-            self.inlets[2] = Uninit
 
         if self.inlets[3] is not Uninit:
             self.stride = self.inlets[3]
-            self.inlets[3] = Uninit
 
         if self.slice_end is not None:
-            log.debug("[slice] {self.slice_start} {self.slice_end} {self.stride}")
             self.outlets[0] = self.inlets[0][
                 self.slice_start:self.slice_end:self.stride
             ]
@@ -261,8 +253,8 @@ class GetSlice(Processor):
 
 class PyEval(Processor):
     doc_tooltip_obj = "Evaluate Python expression"
-    doc_tooltip_inlet = [ "Expression to evaluate" ]
-    doc_tooltip_outlet = [ "Result of evaluation" ]
+    doc_tooltip_inlet = ["Expression to evaluate"]
+    doc_tooltip_outlet = ["Result of evaluation"]
 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.bindings = {}
@@ -578,4 +570,3 @@ def register():
     mk_nullary(datetime.now, "now", "Current time-of-day")
     mk_unary(applyargs(datetime), "datetime", "Create a datetime object")
     mk_unary(make_date, "date", "Convert to a date")
-

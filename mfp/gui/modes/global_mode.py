@@ -212,17 +212,17 @@ class GlobalMode (InputMode):
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:
-                    log.debug(f"[selbox] selecting pointer_obj {self.manager.pointer_obj}")
+                    #log.debug(f"[selbox] selecting pointer_obj {self.manager.pointer_obj}")
                     await self.window.unselect_all()
                     await self.window.select(self.manager.pointer_obj)
                     raise InputManager.InputNeedsRequeue()
                 else:
-                    log.debug(f"[selbox] was None, pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
-
+                    #log.debug(f"[selbox] was None, pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
+                    pass
                 if self.allow_selection_drag:
                     self.selection_drag_started = True
             else:
-                log.debug(f"[selbox] pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
+                #log.debug(f"[selbox] pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
                 await self.window.unselect_all()
                 self.selbox_started = True
         elif select_mode is True:
