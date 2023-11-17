@@ -92,8 +92,6 @@ class Processor:
         self.osc_pathbase = None
         self.osc_methods = []
 
-        self.trigger_lock = threading.Lock()
-
         self.gui_created = False
 
         # gui_params are passed back and forth to the UI process
@@ -684,13 +682,11 @@ class Processor:
         w_target = None
 
         try:
-            with self.trigger_lock:
-                work = await self._send(value, inlet)
+            work = await self._send(value, inlet)
 
             while len(work):
                 w_target, w_val, w_inlet = work[0]
-                with w_target.trigger_lock:
-                    work[:1] = await w_target._send(w_val, w_inlet)
+                work[:1] = await w_target._send(w_val, w_inlet)
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
@@ -848,9 +844,7 @@ class Processor:
         Instead of building a worklist, in the step debugger we add this
         task to the debugger task list.
         """
-
-        with target.trigger_lock:
-            return await target._send(val, inlet, step_execute=True)
+        return await target._send(val, inlet, step_execute=True)
 
     async def _send__dsp_params(self, value, inlet):
         try:
