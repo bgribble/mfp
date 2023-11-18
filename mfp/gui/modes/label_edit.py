@@ -96,6 +96,9 @@ class LabelEditMode (InputMode):
         self.bind("C-a", self.select_all, "Select all text")
         self.bind("C-z", self.undo_edit, "Undo typing")
         self.bind("C-r", self.redo_edit, "Redo typing")
+        self.bind("C-v", self.paste, "Paste from clipboard into label")
+        self.bind("C-c", self.copy, "Copy selection into clipboard")
+        self.bind("C-x", self.cut, "Cut selection into clipboard")
 
         self.bind(None, self.insert_text, "Insert text")
 
@@ -108,6 +111,27 @@ class LabelEditMode (InputMode):
         self.start_editing()
         self.update_cursor()
         self.set_selection(0, len(self.text))
+
+    def cut(self):
+        sel = self.text[self.selection_start:self.selection_end]
+        self.window.clipboard_set(sel)
+        self.delete_selection()
+        return True
+
+    def copy(self):
+        sel = self.text[self.selection_start:self.selection_end]
+        self.window.clipboard_set(sel)
+        return True
+
+    def paste(self):
+        newtext = self.window.clipboard_get()
+        self.delete_selection()
+        newtext = self.text[:self.editpos] + newtext + self.text[self.editpos:]
+        self.text = newtext
+
+        self.update_label(raw=True)
+        self.set_selection(self.editpos, self.editpos + len(newtext))
+        return True
 
     def set_selection(self, start, end):
         self.selection_start = start
@@ -129,7 +153,7 @@ class LabelEditMode (InputMode):
 
     def insert_text(self, keysym):
         if len(keysym) > 1:
-            return
+            return False
 
         self.delete_selection()
 

@@ -136,6 +136,16 @@ class AppWindowBackend(ABC, BackendInterface, DelegateMixin):
 
     @abstractmethod
     @delegatemethod
+    def clipboard_get(self, pointer_pos):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def clipboard_set(self, pointer_pos):
+        pass
+
+    @abstractmethod
+    @delegatemethod
     def clipboard_cut(self, pointer_pos):
         pass
 

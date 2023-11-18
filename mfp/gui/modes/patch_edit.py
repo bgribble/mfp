@@ -193,8 +193,9 @@ class PatchEditMode (InputMode):
         self.disable_selection_mode()
 
     async def cut(self):
-        return await self.window.clipboard_cut((self.manager.pointer_x,
-                                                self.manager.pointer_y))
+        return await self.window.clipboard_cut(
+            (self.manager.pointer_x, self.manager.pointer_y)
+        )
 
     async def copy(self):
         return await self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))

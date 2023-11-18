@@ -488,6 +488,17 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.selection_box.destroy()
             self.selection_box = None
 
+    def clipboard_get(self):
+        from gi.repository import Gtk, Gdk
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        return clipboard.wait_for_text()
+
+    def clipboard_set(self, cliptxt):
+        from gi.repository import Gtk, Gdk
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        if cliptxt:
+            clipboard.set_text(cliptxt, -1)
+
     async def clipboard_cut(self, pointer_pos):
         if self.wrapper.selected:
             await self.clipboard_copy(pointer_pos)
@@ -496,24 +507,17 @@ class ClutterAppWindowBackend (AppWindowBackend):
         return False
 
     async def clipboard_copy(self, pointer_pos):
-        from gi.repository import Gtk, Gdk
-
         if self.wrapper.selected:
             cliptxt = await MFPGUI().mfp.clipboard_copy(
                 pointer_pos,
                 [o.obj_id for o in self.wrapper.selected if o.obj_id is not None]
             )
-            clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-            if cliptxt:
-                clipboard.set_text(cliptxt, -1)
+            self.clipboard_set(cliptxt)
             return True
         return False
 
     async def clipboard_paste(self, pointer_pos=None):
-        from gi.repository import Gtk, Gdk
-
-        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        cliptxt = clipboard.wait_for_text()
+        cliptxt = self.clipboard_get()
         if not cliptxt:
             return False
 
