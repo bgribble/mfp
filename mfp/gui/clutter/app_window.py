@@ -13,7 +13,6 @@ from mfp.gui.colordb import ColorDB
 from mfp.gui.text_widget import TextWidget
 from mfp.gui_main import MFPGUI
 
-from ..key_defs import KEY_TAB, KEY_SHIFTTAB, KEY_UP, KEY_DN, KEY_LEFT, KEY_RIGHT
 from ..backend_interfaces import AppWindowBackend
 
 from ..connection_element import ConnectionElement
@@ -198,8 +197,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
     def grab_focus(self):
         from gi.repository import GObject
+
         def cb(*args):
             self.embed.grab_focus()
+
         GObject.timeout_add(10, cb)
 
     def _init_input(self):
@@ -490,7 +491,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
     async def clipboard_cut(self, pointer_pos):
         if self.wrapper.selected:
             await self.clipboard_copy(pointer_pos)
-            await self.delete_selected()
+            await self.wrapper.delete_selected()
             return True
         return False
 
@@ -563,10 +564,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.wrapper.event_sources[element.group] = element
 
         if not isinstance(element, ConnectionElement):
-            if self.wrapper.load_in_progress:
-                update = False
-            else:
-                update = True
+            if not self.wrapper.load_in_progress:
+                self.refresh(element)
 
     def unregister(self, element):
         if element.container:
@@ -576,7 +575,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         self.object_view.remove(element)
         if element.group in self.wrapper.event_sources:
-           del self.wrapper.event_sources[element.group]
+            del self.wrapper.event_sources[element.group]
 
     def refresh(self, element):
         if isinstance(element, PatchDisplay):
