@@ -4,22 +4,25 @@ text_element.py
 A text element (comment) in a patch
 '''
 
-from gi.repository import Clutter
-import cairo
+from abc import ABC, abstractmethod
 
-from .base_element import BaseElement
 from mfp.gui_main import MFPGUI
 from mfp import log
-from mfp.utils import catchall
+from .base_element import BaseElement
+from .backend_interfaces import BackendInterface
 
 from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
-from .colordb import ColorDB
 from .text_widget import TextWidget
-from .clutter.base_element import ClutterBaseElementBackend
 
 
-class TextElement (ClutterBaseElementBackend):
+class TextElementImpl(ABC, BackendInterface):
+    @abstractmethod
+    def redraw(self):
+        pass
+
+
+class TextElement (BaseElement):
     display_type = "text"
     proc_type = "text"
 
@@ -34,68 +37,34 @@ class TextElement (ClutterBaseElementBackend):
     }
 
     def __init__(self, window, x, y):
-        BaseElement.__init__(self, window, x, y)
+        super().__init__(window, x, y)
         self.value = ''
         self.clickchange = False
         self.default = ''
 
         self.param_list.extend(['value', 'clickchange', 'default'])
 
-        self.texture = Clutter.Canvas.new()
-        self.texture.connect("draw", self.draw_cb)
-        self.group.set_content(self.texture)
-
         self.label = TextWidget.build(self)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.set_position(3, 3)
 
-        self.update_required = True
-        self.move(x, y)
-        self.set_size(12, 12)
-        self.group.set_reactive(True)
         self.label_changed_cb = self.label.signal_listen('text-changed', self.text_changed_cb)
+
+    @classmethod
+    def get_factory(cls):
+        return TextElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def update(self):
         if not self.get_style('canvas-size'):
             self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM,
                           self.label.get_height() + self.ELBOW_ROOM)
-        self.texture.invalidate()
+        self.redraw()
         self.draw_ports()
-
-    @catchall
-    def draw_cb(self, texture, ct, width, height):
-        # clear the drawing area
-        ct.save()
-        ct.set_operator(cairo.OPERATOR_CLEAR)
-        ct.paint()
-        ct.restore()
-
-        # fill to paint the background
-        color = ColorDB().normalize(self.get_color('fill-color'))
-        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ct.rectangle(0, 0, width, height)
-        ct.fill()
-
-        if self.clickchange or self.get_style('border'):
-            ct.set_line_width(1.0)
-            ct.translate(0.5, 0.5)
-            ct.set_antialias(cairo.ANTIALIAS_NONE)
-            ct.rectangle(0, 0, width-1, height-1)
-            color = ColorDB().normalize(self.get_color('border-color'))
-            ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-            ct.stroke()
-        return True
-
-    def set_size(self, w, h):
-        BaseElement.set_size(self, w, h)
-
-        self.texture.set_size(w, h)
-        self.texture.invalidate()
 
     def draw_ports(self):
         if self.selected:
-            BaseElement.draw_ports(self)
+            super().draw_ports()
 
     def label_edit_start(self):
         return self.value
@@ -117,7 +86,6 @@ class TextElement (ClutterBaseElementBackend):
 
     def text_changed_cb(self, *args):
         self.update()
-        return
 
     def clicked(self):
         def newtext(txt):
@@ -128,7 +96,7 @@ class TextElement (ClutterBaseElementBackend):
         return True
 
     def set_text(self):
-        if len(self.value):
+        if len(self.value) > 0:
             self.label.set_markup(self.value)
         else:
             size_set = self.get_style('canvas-size')
@@ -141,18 +109,20 @@ class TextElement (ClutterBaseElementBackend):
     def select(self, *args):
         BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        self.redraw()
         self.draw_ports()
 
     def unselect(self, *args):
         BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        self.redraw()
         self.hide_ports()
 
     async def make_edit_mode(self):
-        return LabelEditMode(self.app_window, self, self.label,
-                             multiline=True, markup=True, initial=self.value)
+        return LabelEditMode(
+            self.app_window, self, self.label,
+            multiline=True, markup=True, initial=self.value
+        )
 
     def make_control_mode(self):
         return ClickableControlMode(self.app_window, self, "Change text", 'A-')
@@ -177,9 +147,6 @@ class TextElement (ClutterBaseElementBackend):
                 newsize = newstyle.get('canvas-size')
                 params['width'] = newsize[0]
                 params['height'] = newsize[1]
-
-        if params.get('border') is not None:
-            self.border = params.get('border')
 
         BaseElement.configure(self, params)
         if newsize:
