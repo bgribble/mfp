@@ -112,12 +112,8 @@ class GetElement(Processor):
     async def trigger(self):
         if self.inlets[1] is not Uninit:
             self.elements = self.inlets[1]
-            if not isinstance(self.inlets[1], (list, tuple)):
-                elt = self.inlets[1]
-                if isinstance(elt, str) or not isiterable(elt):
-                    self.elements = [elt]
-                else:
-                    self.elements = list(elt)
+            if not isinstance(self.inlets[1], list):
+                self.elements = [self.inlets[1]]
 
         if self.elements is None:
             return
