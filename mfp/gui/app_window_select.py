@@ -77,16 +77,17 @@ async def select(self, obj):
 async def _unselect(self, obj):
     if obj is None:
         return
+
     if isinstance(obj, BaseElement):
         if obj.edit_mode:
             await obj.end_edit()
         obj.end_control()
         obj.unselect()
+        self.backend.unselect(obj)
+        MFPGUI().async_task(self.signal_emit("unselect", obj))
+
     if obj in self.selected:
         self.selected.remove(obj)
-
-    self.backend.unselect(obj)
-    MFPGUI().async_task(self.signal_emit("unselect", obj))
 
 
 @extends(AppWindow)

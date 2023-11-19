@@ -469,7 +469,7 @@ class Patch(Processor):
             self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
             if not MFPApp().no_onload:
-                await self._run_onload(self.objects.values())
+                await self._run_onload(list(self.objects.values()))
 
     async def _run_onload(self, objects):
         from .mfp_app import MFPApp

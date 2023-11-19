@@ -559,6 +559,10 @@ def register():
         "split", "Split a string into pieces")
 
     mk_binary(
+        lambda inval, joinstr="": joinstr.join(inval) if isiterable(inval) else inval,
+        "join", "Concatenate an array or tuple of strings into one")
+
+    mk_binary(
         lambda instr, initial: instr.startswith(initial) if isinstance(instr, str) else False,
         "startswith", "Test if string starts with another string")
 
