@@ -6,13 +6,19 @@ A patch element corresponding to a number box or enum selector
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from gi.repository import Clutter
-import cairo
+from abc import ABC, abstractmethod
+
+from mfp.gui_main import MFPGUI
+from .backend_interfaces import BackendInterface
 from .text_widget import TextWidget
 from .base_element import BaseElement
-from .colordb import ColorDB
-from mfp.gui_main import MFPGUI
 from .modes.enum_control import EnumEditMode, EnumControlMode
+
+
+class EnumElementImpl(ABC, BackendInterface):
+    @abstractmethod
+    def redraw(self):
+        pass
 
 
 class EnumElement (BaseElement):
@@ -22,7 +28,7 @@ class EnumElement (BaseElement):
     PORT_TWEAK = 7
 
     def __init__(self, window, x, y):
-        BaseElement.__init__(self, window, x, y)
+        super().__init__(window, x, y)
 
         self.value = 0
         self.digits = 1
@@ -38,28 +44,17 @@ class EnumElement (BaseElement):
 
         self.obj_state = self.OBJ_HALFCREATED
 
-        # create elements
-        self.texture = Clutter.Canvas.new()
-        self.texture.connect("draw", self.draw_cb)
-        self.group.set_content(self.texture)
-
-        self.label = TextWidget.build(self)
-
-        self.group.set_reactive(True)
-
         # configure label
+        self.label = TextWidget.build(self)
         self.label.set_position(4, 1)
         self.label.set_font_name(self.get_fontspec())
         self.label.set_color(self.get_color('text-color'))
         self.label.signal_listen('text-changed', self.text_changed_cb)
         self.label.set_text(self.format_value(self.value))
 
-        # click handler
-        # self.actor.connect('button-press-event', self.button_press_cb)
-
-        self.move(x, y)
-        self.set_size(35, 25)
-        self.texture.invalidate()
+    @classmethod
+    def get_factory(cls):
+        return EnumElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def format_update(self):
         if self.scientific:
@@ -75,53 +70,12 @@ class EnumElement (BaseElement):
             value = self.max_value
         return self.format_str % value
 
-    def draw_cb(self, texture, ct, width, height):
-        lw = 2
-        w = width - lw
-        h = height - lw
-
-        # clear the drawing area
-        ct.save()
-        ct.set_operator(cairo.OPERATOR_CLEAR)
-        ct.paint()
-        ct.restore()
-
-        ct.set_line_width(lw)
-        ct.set_antialias(cairo.ANTIALIAS_NONE)
-        if self.obj_state == self.OBJ_COMPLETE:
-            ct.set_dash([])
-        else:
-            ct.set_dash([8, 4])
-
-        ct.translate(lw/2.0, lw/2.0)
-        ct.move_to(0, 0)
-        ct.line_to(0, h)
-        ct.line_to(w, h)
-        ct.line_to(w, h / 3.0)
-        ct.line_to(w - h / 3.0, 0)
-        ct.line_to(0, 0)
-        ct.close_path()
-
-        color = ColorDB().normalize(self.get_color('fill-color'))
-        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
-        ct.fill_preserve()
-
-        color = ColorDB().normalize(self.get_color('stroke-color'))
-        ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
-        ct.stroke()
-
-    def set_size(self, w, h):
-        BaseElement.set_size(self, w, h)
-
-        self.texture.set_size(w, h)
-        self.texture.invalidate()
-
     def text_changed_cb(self, *args):
         lwidth = self.label.get_property('width')
         bwidth = self.width
 
         new_w = None
-        if (lwidth > (bwidth - 20)):
+        if lwidth > (bwidth - 20):
             new_w = lwidth + 20
         elif (bwidth > 35) and (lwidth < (bwidth - 20)):
             new_w = max(35, lwidth + 20)
@@ -131,7 +85,7 @@ class EnumElement (BaseElement):
 
     async def create_obj(self):
         if self.obj_id is None:
-            self.create(self.proc_type, str(self.value))
+            await self.create(self.proc_type, str(self.value))
         if self.obj_id is None:
             print("EnumElement: could not create var obj")
         else:
@@ -139,18 +93,7 @@ class EnumElement (BaseElement):
             self.obj_state = self.OBJ_COMPLETE
 
         self.draw_ports()
-        self.texture.invalidate()
-
-    def move(self, x, y):
-        self.position_x = x
-        self.position_y = y
-        self.set_position(x, y)
-
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
+        self.redraw()
 
     async def set_bounds(self, lower, upper):
         self.min_value = lower
@@ -179,7 +122,7 @@ class EnumElement (BaseElement):
 
     def update(self):
         self.label.set_text(self.format_value(self.value))
-        self.texture.invalidate()
+        self.redraw()
 
     def label_edit_start(self):
         pass
@@ -187,10 +130,11 @@ class EnumElement (BaseElement):
     async def label_edit_finish(self, *args):
         # called by labeleditmode
         t = self.label.get_text()
-        self.update_value(float(t))
+        await self.update_value(float(t))
         if self.obj_id is None:
             await self.create_obj()
         await MFPGUI().mfp.send(self.obj_id, 0, self.value)
+        self.redraw()
 
     def configure(self, params):
         fmt_changed = False
@@ -221,14 +165,13 @@ class EnumElement (BaseElement):
         if fmt_changed or val_changed:
             self.label.set_text(self.format_value(self.value))
 
-        self.texture.invalidate()
-
         if 'width' in params:
             del params['width']
         if 'height' in params:
             del params['height']
 
         BaseElement.configure(self, params)
+        self.redraw()
 
     def port_position(self, port_dir, port_num):
         # tweak the right input port display to be left of the slant
@@ -241,12 +184,12 @@ class EnumElement (BaseElement):
     def select(self):
         BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        self.redraw()
 
     def unselect(self):
         BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        self.redraw()
 
     async def make_edit_mode(self):
         return EnumEditMode(self.app_window, self, self.label)

@@ -22,3 +22,4 @@ from .via_element import (  # noqa
     ClutterReceiveSignalViaElementImpl,  # noqa
 )
 from .text_element import ClutterTextElementImpl
+from .enum_element import ClutterEnumElementImpl
