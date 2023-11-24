@@ -289,6 +289,7 @@ class BaseElement (Store):
                         await MFPGUI().mfp.connect(
                             c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2
                         )
+            self.draw_ports()
 
             MFPGUI().remember(self)
             self.send_params()

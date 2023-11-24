@@ -104,9 +104,9 @@ class GlobalMode (InputMode):
         return False
 
     def toggle_tree(self):
-        oldpos = self.window.tree_canvas_pane.get_position()
+        oldpos = self.window.backend.tree_canvas_pane.get_position()
 
-        self.window.tree_canvas_pane.set_position(self.next_tree_position)
+        self.window.backend.tree_canvas_pane.set_position(self.next_tree_position)
         self.next_tree_position = oldpos
 
         # KLUDGE!

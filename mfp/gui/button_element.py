@@ -6,46 +6,34 @@ A patch element corresponding to a "bang" or "toggle" style button
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from gi.repository import Clutter
-import cairo
+from abc import ABC, abstractmethod
 
 from mfp.utils import catchall
 from .text_widget import TextWidget
+from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
-from .colordb import ColorDB
 from .modes.clickable import ClickableControlMode
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 from ..bang import Bang
-import math
 
 
-def circle(ctx, xorig, yorig, w, h):
-    w = w-1.0
-    h = h-1.0
-    ctx.set_antialias(cairo.ANTIALIAS_DEFAULT)
-    ctx.translate(xorig, yorig)
-    ctx.arc(w/2.0, h/2.0, w/2.0, 0, 2*math.pi)
-    ctx.close_path()
+class ButtonElementImpl(ABC, BackendInterface):
+    @abstractmethod
+    def redraw(self):
+        pass
 
 
-def rounded_box(ctx, xorig, yorig, w, h, rad):
-    seg_h = h - 2 * rad
-    seg_w = w - 2 * rad
-    cdelta = rad / 2.0
+class BangButtonElementImpl(ABC, BackendInterface):
+    pass
 
-    ctx.set_antialias(cairo.ANTIALIAS_DEFAULT)
-    ctx.translate(xorig, yorig)
-    ctx.move_to(0, rad)
-    ctx.line_to(0, rad + seg_h)
-    ctx.curve_to(0, rad + seg_h + cdelta, cdelta, h, rad, h)
-    ctx.line_to(rad + seg_w, h)
-    ctx.curve_to(rad + seg_w + cdelta, h, w, h - rad + cdelta, w, h - rad)
-    ctx.line_to(w, rad)
-    ctx.curve_to(w, rad - cdelta, w - rad + cdelta, 0, w - rad, 0)
-    ctx.line_to(rad, 0)
-    ctx.curve_to(rad - cdelta, 0, 0, rad - cdelta, 0, rad)
-    ctx.close_path()
+
+class ToggleButtonElementImpl(ABC, BackendInterface):
+    pass
+
+
+class ToggleIndicatorElementImpl(ABC, BackendInterface):
+    pass
 
 
 class ButtonElement (BaseElement):
@@ -63,15 +51,10 @@ class ButtonElement (BaseElement):
     PORT_TWEAK = 5
 
     def __init__(self, window, x, y):
-        BaseElement.__init__(self, window, x, y)
+        super().__init__(window, x, y)
 
         self.indicator = False
-
-        # create elements
-        self.texture = Clutter.Canvas.new()
-        self.texture.set_size(20, 20)
-        self.group.set_content(self.texture)
-        self.texture.connect("draw", self.draw_cb)
+        self.message = None
 
         self.label = TextWidget.build(self)
         self.label.set_color(self.get_color('text-color'))
@@ -81,21 +64,14 @@ class ButtonElement (BaseElement):
         self.label.set_use_markup(True)
         self.label_text = ''
 
-        self.group.set_reactive(True)
-
-        self.set_size(20, 20)
-        self.move(x, y)
-
         self.param_list.append('label_text')
+
         # request update when value changes
         self.update_required = True
 
-    def redraw(self):
-        self.texture.invalidate()
-        if self.indicator:
-            self.label.set_color(self.get_color('text-color:lit'))
-        else:
-            self.label.set_color(self.get_color('text-color'))
+    @classmethod
+    def get_factory(cls):
+        return ButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def center_label(self):
         label_halfwidth = self.label.get_property('width')/2.0
@@ -129,47 +105,6 @@ class ButtonElement (BaseElement):
 
             self.redraw()
 
-    def set_size(self, width, height):
-        BaseElement.set_size(self, width, height)
-        self.texture.set_size(width, height)
-        self.redraw()
-
-    @catchall
-    def draw_cb(self, texture, ct, width, height):
-        w = width - 2
-        h = height - 2
-
-        c = ColorDB().normalize(self.get_color('stroke-color'))
-
-        # Clear texture
-        ct.save()
-        ct.set_operator(cairo.OPERATOR_CLEAR)
-        ct.paint()
-        ct.restore()
-
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
-
-        ct.set_line_width(1.5)
-        ct.set_antialias(cairo.ANTIALIAS_NONE)
-
-        # draw the box
-        corner = max(2, 0.1*min(w, h))
-        rounded_box(ct, 1, 1, w, h, corner)
-        ct.stroke()
-
-        # draw the indicator
-        ioff = max(3, 0.075*min(w, h))
-        iw = w - 2 * ioff
-        ih = h - 2 * ioff
-        rounded_box(ct, ioff, ioff, iw, ih, corner-1)
-
-        c = ColorDB().normalize(self.get_color('fill-color:lit'))
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
-        if self.indicator:
-            ct.fill()
-        else:
-            ct.stroke()
-
     def configure(self, params):
         set_text = False
 
@@ -189,7 +124,7 @@ class ButtonElement (BaseElement):
                 self.label.set_markup(self.label_text or '')
             self.center_label()
 
-        BaseElement.configure(self, params)
+        super().configure(params)
         self.redraw()
 
     def select(self):
@@ -208,8 +143,7 @@ class ButtonElement (BaseElement):
             # complete drawing
             if self.obj_id is None:
                 return None
-            else:
-                self.draw_ports()
+            self.draw_ports()
         self.redraw()
 
         return LabelEditMode(self.app_window, self, self.label)
@@ -224,8 +158,12 @@ class BangButtonElement (ButtonElement):
     def __init__(self, window, x, y):
         self.message = Bang
 
-        ButtonElement.__init__(self, window, x, y)
+        super().__init__(window, x, y)
         self.param_list.extend(['message'])
+
+    @classmethod
+    def get_factory(cls):
+        return BangButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def clicked(self):
         if self.obj_id is not None:
@@ -248,18 +186,22 @@ class BangButtonElement (ButtonElement):
         if "message" in params:
             self.message = params.get("message")
 
-        ButtonElement.configure(self, params)
+        super().configure(params)
 
 
 class ToggleButtonElement (ButtonElement):
     display_type = "toggle"
 
     def __init__(self, window, x, y):
+        super().__init__(window, x, y)
         self.off_message = False
         self.on_message = True
-        ButtonElement.__init__(self, window, x, y)
 
         self.param_list.extend(['on_message', 'off_message'])
+
+    @classmethod
+    def get_factory(cls):
+        return ToggleButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def clicked(self):
         message = None
@@ -282,10 +224,10 @@ class ToggleButtonElement (ButtonElement):
             self.off_message = params.get("off_message")
         ButtonElement.configure(self, params)
 
-    def create(self, init_type, init_args):
-        ButtonElement.create(self, init_type, init_args)
+    async def create(self, init_type, init_args):
+        await super().create(init_type, init_args)
         if self.obj_id:
-            MFPGUI().async_task(MFPGUI().mfp.set_do_onload.sync(self.obj_id, True))
+            await MFPGUI().mfp.set_do_onload(self.obj_id, True)
 
     def unclicked(self):
         return False
@@ -294,53 +236,23 @@ class ToggleButtonElement (ButtonElement):
 class ToggleIndicatorElement (ButtonElement):
     display_type = "indicator"
 
+    @classmethod
+    def get_factory(cls):
+        return ToggleIndicatorElementImpl.get_backend(MFPGUI().appwin.backend_name)
+
     def make_control_mode(self):
         return BaseElement.make_control_mode(self)
 
     def select(self, *args):
-        BaseElement.select(self)
+        super().select()
         self.draw_ports()
         self.redraw()
 
     def unselect(self, *args):
-        BaseElement.unselect(self)
+        super().unselect()
         self.hide_ports()
         self.redraw()
 
     def draw_ports(self):
         if self.selected:
-            BaseElement.draw_ports(self)
-
-    @catchall
-    def draw_cb(self, texture, ct, width, height):
-        w = width - 2
-        h = height - 2
-
-        # clear texture
-        ct.save()
-        ct.set_operator(cairo.OPERATOR_CLEAR)
-        ct.paint()
-        ct.restore()
-
-        c = ColorDB().normalize(self.get_color('stroke-color'))
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
-
-        ct.set_line_width(1.5)
-        ct.set_antialias(cairo.ANTIALIAS_NONE)
-
-        # draw the box
-        circle(ct, 1, 1, w, h)
-        ct.stroke()
-
-        # draw the indicator
-        ioff = max(3, 0.075*min(w, h))
-        iw = w - 2 * ioff
-        ih = h - 2 * ioff
-        circle(ct, ioff, ioff, iw, ih)
-
-        c = ColorDB().normalize(self.get_color('fill-color:lit'))
-        ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
-        if self.indicator:
-            ct.fill()
-        else:
-            ct.stroke()
+            super().draw_ports()

@@ -4,7 +4,6 @@ Clutter UI backend
 Imports here make sure the backend is registered with the factory
 """
 
-
 from .app_window import ClutterAppWindowBackend  # noqa
 from .input_manager import ClutterInputManagerBackend  # noqa
 from .console_manager import ClutterConsoleManagerBackend  # noqa
@@ -23,3 +22,9 @@ from .via_element import (  # noqa
 )
 from .text_element import ClutterTextElementImpl
 from .enum_element import ClutterEnumElementImpl
+from .button_element import (
+    ClutterButtonElementImpl,
+    ClutterToggleIndicatorElementImpl,
+    ClutterToggleButtonElementImpl,
+    ClutterBangButtonElementImpl,
+)
