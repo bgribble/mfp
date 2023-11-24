@@ -14,6 +14,11 @@ from .colordb import ClutterColorDBBackend  # noqa
 from .message_element import ClutterMessageElementImpl  # noqa
 from .processor_element import ClutterProcessorElementImpl  # noqa
 from .connection_element import ClutterConnectionElementImpl  # noqa
+from .slidemeter_element import (
+    ClutterFaderElementImpl,
+    ClutterBarMeterElementImpl,
+    ClutterDialElementImpl
+)
 from .via_element import (  # noqa
     ClutterSendViaElementImpl,  # noqa
     ClutterReceiveViaElementImpl,  # noqa
