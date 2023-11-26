@@ -33,7 +33,7 @@ class Quilt (clutter.Group):
 
         self.tile_group = clutter.Group()
         self.tile_group.show()
-        self.backend.group.add_actor(self.tile_group)
+        self.add_actor(self.tile_group)
 
         self.tile_animation = None
         self.tile_size = tilesize
@@ -54,9 +54,9 @@ class Quilt (clutter.Group):
 
     def set_viewport_origin(self, pos_x, pos_y, flush=False):
         '''
-        Sets the position of the origin (upper right corner) of 
-        the viewport in the pixel coordinate system of the quilt 
-        tiles. 
+        Sets the position of the origin (upper right corner) of
+        the viewport in the pixel coordinate system of the quilt
+        tiles.
         '''
         self.tile_group.set_position(-pos_x, -pos_y)
         self.viewport_x = pos_x

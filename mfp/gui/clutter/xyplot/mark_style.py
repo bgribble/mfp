@@ -3,22 +3,22 @@
 mark_style.py
 Helper class to save style info and render a styled mark/stroke
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
-from  ..colordb import ColorDB, RGBAColor
 import math
+from mfp.gui.colordb import ColorDB, RGBAColor
 
 
-class MarkStyle (object):
+class MarkStyle:
     SQRT_3 = 3.0 ** 0.5
 
     def __init__(self):
         self.col_r = 0
         self.col_g = 0
         self.col_b = 0
-        self.col_a = 1 
-        self.colorspec = (0,0,0,1)
+        self.col_a = 1
+        self.colorspec = (0, 0, 0, 1)
         self.shape = "dot"
         self.size = 1.0
         self.stroke_style = None
@@ -30,8 +30,8 @@ class MarkStyle (object):
         if isinstance(newcolor, str):
             c = ColorDB().find(newcolor)
             c = ColorDB().normalize(c)
-        elif isinstance(newcolor, RGBAColor): 
-            c = newcolor 
+        elif isinstance(newcolor, RGBAColor):
+            c = newcolor
         self.col_r = c.red
         self.col_g = c.green
         self.col_b = c.blue
