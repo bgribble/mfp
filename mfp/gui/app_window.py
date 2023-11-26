@@ -165,12 +165,12 @@ class AppWindow (SignalMixin):
         oldcount = self.object_counts_by_type.get(element.display_type, 0)
         self.object_counts_by_type[element.display_type] = oldcount + 1
         self.input_mgr.event_sources[element] = element
+        self.backend.register(element)
+        MFPGUI().async_task(self.signal_emit("add", element))
 
         if element.obj_id is not None:
             element.send_params()
 
-        self.backend.register(element)
-        MFPGUI().async_task(self.signal_emit("add", element))
 
     def unregister(self, element):
         if element in self.selected:

@@ -88,9 +88,10 @@ class GlobalMode (InputMode):
         from flopsy import Store
         Store.show_inspector(event_loop=MFPGUI().async_task.asyncio_loop)
 
+    # FIXME this is clutter-specific
     def toggle_console(self):
-        alloc = self.window.content_console_pane.get_allocation()
-        oldpos = self.window.content_console_pane.get_position()
+        alloc = self.window.backend.content_console_pane.get_allocation()
+        oldpos = self.window.backend.content_console_pane.get_position()
 
         console_visible = oldpos < (alloc.height - 2)
         if console_visible:
@@ -103,6 +104,7 @@ class GlobalMode (InputMode):
 
         return False
 
+    # FIXME this is clutter-specific
     def toggle_tree(self):
         oldpos = self.window.backend.tree_canvas_pane.get_position()
 
@@ -114,9 +116,10 @@ class GlobalMode (InputMode):
 
         return False
 
+    # FIXME this is clutter-specific
     def _refresh(self):
-        oldpos = self.window.content_console_pane.get_position()
-        self.window.content_console_pane.set_position(oldpos - 1)
+        oldpos = self.window.backend.content_console_pane.get_position()
+        self.window.backend.content_console_pane.set_position(oldpos - 1)
         return False
 
     async def transient_msg(self):
@@ -212,17 +215,15 @@ class GlobalMode (InputMode):
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:
-                    log.debug(f"[selbox] selecting pointer_obj {self.manager.pointer_obj}")
+                    # log.debug(f"[selbox] selecting pointer_obj {self.manager.pointer_obj}")
                     await self.window.unselect_all()
                     await self.window.select(self.manager.pointer_obj)
                     raise InputManager.InputNeedsRequeue()
-                else:
-                    log.debug(f"[selbox] was None, pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
-                    pass
+                # log.debug(f"[selbox] was None, pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
                 if self.allow_selection_drag:
                     self.selection_drag_started = True
             else:
-                log.debug(f"[selbox] pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
+                # log.debug(f"[selbox] pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
                 await self.window.unselect_all()
                 self.selbox_started = True
         elif select_mode is True:
@@ -292,7 +293,7 @@ class GlobalMode (InputMode):
         return True
 
     def selbox_end(self):
-        log.debug("[selbox_end] got button-up")
+        #log.debug("[selbox_end] got button-up")
         if self.selection_drag_started:
             for obj in self.window.selected:
                 obj.send_params()

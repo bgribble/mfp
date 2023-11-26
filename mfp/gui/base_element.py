@@ -265,6 +265,7 @@ class BaseElement (Store):
         self.dsp_outlets = objinfo.get("dsp_outlets", [])
 
         if self.obj_id is not None:
+            MFPGUI().remember(self)
             self.configure(objinfo)
 
             # rebuild connections if necessary
@@ -291,7 +292,6 @@ class BaseElement (Store):
                         )
             self.draw_ports()
 
-            MFPGUI().remember(self)
             self.send_params()
             await MFPGUI().mfp.set_gui_created(self.obj_id, True)
             await MFPGUI().appwin.signal_emit("created", self)
