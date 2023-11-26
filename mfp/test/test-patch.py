@@ -62,10 +62,18 @@ class PatchTests (IsolatedAsyncioTestCase):
         self.assertEqual(fail, False)
 
     async def test_inlet_outlet(self):
+        """
+        Create a patch with an inlet and an outlet that are
+        connected. Send the patch a message. The message should
+        come out the outlet. 
+        """
+
+        # add inlet/outlet to self.patch
         o1 = await mkproc(self, "inlet")
         o2 = await mkproc(self, "outlet")
         await o1.connect(0, o2, 0)
 
+        # connect to another patch with inlet/outlet passthru
         p2 = Patch('default', '', None, NaiveScope(), 'default')
         o3 = await MFPApp().create("inlet", None, p2, None, "inlet")
         o4 = await MFPApp().create("outlet", None, p2, None, "outlet")

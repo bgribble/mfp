@@ -10,6 +10,7 @@ import asyncio
 import inspect
 import cProfile
 import threading
+from collections import defaultdict
 from threading import Thread, Lock
 from mfp import log
 from datetime import datetime, timedelta
@@ -208,11 +209,14 @@ class QuittableThread(Thread):
         while next_victim:
             if isinstance(next_victim, Thread) and next_victim.is_alive():
                 next_victim.join(.2)
+            if not QuittableThread._all_threads_lock:
+                return
             with QuittableThread._all_threads_lock:
                 living_threads = [
                     t for t in QuittableThread._all_threads
                     if t.is_alive()
                 ]
+
                 if len(living_threads) > 0:
                     next_victim = living_threads[0]
                 else:
@@ -233,6 +237,45 @@ class QuittableThread(Thread):
         except asyncio.exceptions.CancelledError:
             pass
         t.join()
+
+
+class SignalMixin:
+    """
+    Add callback/emit capability to objects
+
+    Not thread-safe but should be fine with asyncio
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.signal_handlers = defaultdict(list)
+        self.handlers_by_id = {}
+        self.last_handler_id = 0
+
+    def signal_listen(self, signal, handler, *args):
+        new_id = self.last_handler_id + 1
+        self.last_handler_id = new_id
+        old_handlers = self.signal_handlers[signal]
+        old_handlers.append((new_id, handler, args))
+        self.handlers_by_id[new_id] = signal
+        return new_id
+
+    def signal_unlisten(self, handler_id):
+        signal = self.handlers_by_id.get(handler_id)
+        if signal is not None:
+            new_handlers = [
+                h for h in self.signal_handlers[signal]
+                if h[0] != handler_id
+            ]
+            self.signal_handlers[signal] = new_handlers
+
+    async def signal_emit(self, signal, *args):
+        handlers = self.signal_handlers[signal]
+        for handler_id, callback, callback_data in handlers:
+            handler_rv = callback(self, signal, *callback_data, *args)
+            if inspect.isawaitable(handler_rv):
+                handler_rv = await handler_rv
+            if handler_rv:
+                return
 
 
 class TaskNibbler:
@@ -344,7 +387,8 @@ class AsyncTaskManager:
         except Exception as e:
             import traceback
             log.error(f"Exception in task: {coro} {e}")
-            log.error(traceback.format_exc())
+            for ll in traceback.format_exc().split("\n"):
+                log.error(ll)
         finally:
             if task_id in self.asyncio_tasks:
                 del self.asyncio_tasks[task_id]
@@ -423,7 +467,6 @@ class AsyncExecMonitor:
                     await cb_return
 
             except asyncio.CancelledError:
-                log.debug("AsyncExecMonitor: task cancelled")
                 break
 
             except Exception as e:

@@ -12,12 +12,12 @@ it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
 **What's happening now?** I have started working on MFP again and
-I have a few projects that I want to work on. 
+I have a few projects that I want to work on.
 
 Recent progress:
 * Switch to using [carp](https://github./com/bgribble/carp)
-instead of the `mfp/rpc/` RPC subsystem. 
-* Add a step debugger using the [bp] processor and/or the 
+instead of the `mfp/rpc/` RPC subsystem.
+* Add a step debugger using the [bp] processor and/or the
 @bp message to the patch
 
 Up next:

@@ -91,8 +91,11 @@ class Send (Processor):
 
     async def _connect(self, dest_name, dest_inlet, wait=True):
         # short-circuit if already conected
-        if (self.dest_name == dest_name and self.dest_inlet == dest_inlet
-                and self.dest_obj is not None):
+        if (
+            self.dest_name == dest_name 
+            and self.dest_inlet == dest_inlet
+            and self.dest_obj is not None
+        ):
             return True
 
         # disconnect existing if needed
@@ -277,8 +280,8 @@ class Recv (Processor):
         # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
-    async def setup(self):
-        if self.src_name_provided:
+    async def onload(self, phase):
+        if phase == 1 and self.src_name_provided:
             await self._connect(self.src_name, self.src_outlet)
 
     def _mkdispname(self):

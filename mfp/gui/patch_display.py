@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 '''
-patch_info.py
-PatchInfo class capturing display information for a patch
+patch_display.py
+PatchDisplay class capturing display information for a patch
 
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
@@ -11,7 +11,7 @@ from .layer import Layer
 from mfp import log
 
 
-class PatchInfo (object):
+class PatchDisplay (object):
     display_type = "patch"
 
     def __init__(self, window, x, y):
@@ -33,6 +33,14 @@ class PatchInfo (object):
         self.object_view = self.app_window.backend.object_view
         self.layer_view.insert(self, None)
         self.object_view.insert(self, None)
+
+    @classmethod
+    def get_factory(cls):
+        return cls
+
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_factory()(*args, **kwargs)
 
     def update(self):
         pass

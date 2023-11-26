@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 '''
-patch_window_layer.py
+app_window_layer.py
 Extra methods to manage the layer display in the main window
 '''
 
 from ..utils import extends
 from ..mfp_command import MFPCommand
-from .patch_window import AppWindow
+from .app_window import AppWindow
 from .layer import Layer
 
 @extends(AppWindow)
@@ -68,7 +68,7 @@ def layer_new(self):
 def layer_new_scope(self):
     l = Layer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     l.scope = l.name.replace(" ", "_").lower()
-    MFPGUI().async_task(MFPGUI().mfp.add_scope.sync(self.selected_patch.obj_id, l.scope))
+    MFPGUI().async_task(MFPGUI().mfp.add_scope(self.selected_patch.obj_id, l.scope))
     self.object_view.insert((l.scope, self.selected_patch), self.selected_patch)
 
     self.selected_patch.layers.append(l)

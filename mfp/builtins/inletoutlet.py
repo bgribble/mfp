@@ -115,9 +115,6 @@ class Outlet(Processor):
         in_value = self.inlets[0]
         self.inlets[0] = Uninit
 
-        if self.patch and self.patch.trigger_lock.acquire(False):
-            self.patch.trigger_lock.release()
-            self.patch.send(AsyncOutput(in_value, self.outletnum))
         self.add_output(0, in_value)
 
 

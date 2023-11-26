@@ -15,21 +15,28 @@ from .evaluator import LazyExpr
 from .bang import Uninit, Bang
 from .scope import LexicalScope
 from .utils import isiterable
+from .step_debugger import StepDebugger
 from . import log
 
 
-class AsyncOutput (object):
+class AsyncOutput:
     def __init__(self, value, outlet):
         self.outlet_num = outlet
         self.value = value
 
 
-class MultiOutput (object):
+class MultiOutput:
     def __init__(self):
         self.values = []
 
 
 class Processor:
+    """
+    Processor - parent class of all the types of processor
+
+    Way too much stuff in here
+    """
+
     PORT_IN = 0
     PORT_OUT = 1
 
@@ -59,7 +66,7 @@ class Processor:
 
         self.inlets = [Uninit] * inlets
         self.outlets = [Uninit] * outlets
-        self.outlet_order = list(range(outlets))
+        self.outlet_order = list(reversed(range(outlets)))
 
         self.status = Processor.CTOR
         self.tags = {}          # tags are labels shown in notify bubble
@@ -84,8 +91,6 @@ class Processor:
         # OSC handling
         self.osc_pathbase = None
         self.osc_methods = []
-
-        self.trigger_lock = threading.Lock()
 
         self.gui_created = False
 
@@ -131,6 +136,11 @@ class Processor:
         return True
 
     def tooltip(self, port_dir=None, port_num=None, details=False):
+        tip = None
+        dsptip = None
+        hottip = None
+        lines = []
+
         if port_dir == self.PORT_IN:
             if port_num < len(self.doc_tooltip_inlet):
                 tip = self.doc_tooltip_inlet[port_num]
@@ -150,7 +160,7 @@ class Processor:
             return (('<b>[%(init_type)s] inlet %(port_num)d:</b> ' + dsptip + hottip + tip)
                     % dict(init_type=self.init_type, port_num=port_num))
 
-        elif port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
+        if port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
             if port_num < len(self.doc_tooltip_outlet):
                 tip = self.doc_tooltip_outlet[port_num]
             else:
@@ -162,62 +172,62 @@ class Processor:
 
             return (('<b>[%(init_type)s] outlet %(port_num)d:</b> ' + dsptip + tip)
                     % dict(init_type=self.init_type, port_num=port_num))
-        else:
-            # basic one-liner
-            lines = [('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type]
 
-            # details for geeks like me
-            if details:
-                # name and ID
-                lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
-                scopename = ('' if self.scope == self.patch.default_scope
-                             else self.scope.name + '.')
-                scopedname = '%s%s' % (scopename, self.name)
+        # basic one-liner
+        lines = [('<b>[%s]:</b> ' + self.doc_tooltip_obj) % self.init_type]
 
-                lines.append('      <b>Path:</b> %s.%s' % (self.patch.name, scopedname))
-                lines.append('          <b>Messages in:</b> %s, <b>Messages out:</b> %s'
-                             % (self.count_in, self.count_out))
-                lines.append('          <b>Times triggered:</b> %s, <b>Errors:</b> %s'
-                             % (self.count_trigger, self.count_errors))
-                if self.count_errors:
-                    lines.append('          <b>Error messages:</b>')
-                    for msg, count in self.error_info.items():
-                        lines.append('              %s: %s' % (count, msg))
+        # details for geeks like me
+        if details:
+            # name and ID
+            lines.append('      <b>Name:</b> %s  <b>ID:</b> %s' % (self.name, self.obj_id))
+            scopename = ('' if self.scope == self.patch.default_scope
+                         else self.scope.name + '.')
+            scopedname = '%s%s' % (scopename, self.name)
 
-                if len(self.properties):
-                    lines.append('      <b>Properties:</b>')
+            lines.append('      <b>Path:</b> %s.%s' % (self.patch.name, scopedname))
+            lines.append('          <b>Messages in:</b> %s, <b>Messages out:</b> %s'
+                         % (self.count_in, self.count_out))
+            lines.append('          <b>Times triggered:</b> %s, <b>Errors:</b> %s'
+                         % (self.count_trigger, self.count_errors))
+            if self.count_errors:
+                lines.append('          <b>Error messages:</b>')
+                for msg, count in self.error_info.items():
+                    lines.append('              %s: %s' % (count, msg))
 
-                    for k, v in self.properties.items():
-                        lines.append('          %s -> %s' % (k, v))
-                # class-provided extra details
-                otherinfo = self.tooltip_extra()
-                if otherinfo:
-                    if isinstance(otherinfo, str):
-                        otherinfo = [otherinfo]
-                    for o in otherinfo:
-                        if isinstance(o, str):
-                            lines.append('      ' + o)
+            if len(self.properties):
+                lines.append('      <b>Properties:</b>')
 
-                # OSC controllers
-                lines.append('      <b>OSC handlers:</b>')
-                minfo = {}
-                for m in self.osc_methods:
-                    s = minfo.setdefault(m[0], [])
-                    s.append(m[1])
-                for m in sorted(minfo.keys()):
-                    lines.append('          %s %s' % (m, minfo[m]))
+                for k, v in self.properties.items():
+                    lines.append('          %s -> %s' % (k, v))
+            # class-provided extra details
+            otherinfo = self.tooltip_extra()
+            if otherinfo:
+                if isinstance(otherinfo, str):
+                    otherinfo = [otherinfo]
+                for o in otherinfo:
+                    if isinstance(o, str):
+                        lines.append('      ' + o)
 
-                # MIDI controllers
-                from .mfp_app import MFPApp
-                if self.midi_filters:
-                    paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
-                    lines.append('      <b>MIDI handlers:</b>')
-                    for p in paths:
-                        lines.append('          Chan: %s, Type: %s, Number: %s'
-                                     % (p[2] if p[2] is not None else "All",
-                                        p[1] if p[1] is not None else "All",
-                                        p[3] if p[3] is not None else "All"))
-            return '\n'.join(lines)
+            # OSC controllers
+            lines.append('      <b>OSC handlers:</b>')
+            minfo = {}
+            for m in self.osc_methods:
+                s = minfo.setdefault(m[0], [])
+                s.append(m[1])
+            for m in sorted(minfo.keys()):
+                lines.append('          %s %s' % (m, minfo[m]))
+
+            # MIDI controllers
+            from .mfp_app import MFPApp
+            if self.midi_filters:
+                paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
+                lines.append('      <b>MIDI handlers:</b>')
+                for p in paths:
+                    lines.append('          Chan: %s, Type: %s, Number: %s'
+                                 % (p[2] if p[2] is not None else "All",
+                                    p[1] if p[1] is not None else "All",
+                                    p[3] if p[3] is not None else "All"))
+        return '\n'.join(lines)
 
     def tooltip_extra(self):
         return False
@@ -228,10 +238,13 @@ class Processor:
     async def onload(self, phase):
         pass
 
+    async def trigger(self):
+        pass
+
     def assign(self, patch, scope, name):
         # null case
         if (self.patch == patch) and (self.scope == scope) and (self.name == name):
-            return
+            return None
 
         if self.patch is not None and self.scope is not None and self.name is not None:
             self.patch.unbind(self.name, self.scope)
@@ -265,6 +278,10 @@ class Processor:
         self.conf(name=self.name, scope=self.scope.name)
         self.osc_init()
         return self.name
+
+    def dsp_response(self, resp_id, resp_value):
+        # override in Processor subclass
+        pass
 
     def rename(self, new_name):
         self.assign(self.patch, self.scope, new_name)
@@ -481,7 +498,7 @@ class Processor:
         if hasattr(self, "connections_out"):
             outport = 0
             for c in self.connections_out:
-                to_delete = [pr for pr in c]
+                to_delete = list(c)
                 for tobj, tport in to_delete:
                     await self.disconnect(outport, tobj, tport)
 
@@ -490,7 +507,7 @@ class Processor:
         if hasattr(self, "connections_in"):
             inport = 0
             for c in self.connections_in:
-                to_delete = [pr for pr in c]
+                to_delete = list(c)
                 for tobj, tport in to_delete:
                     await tobj.disconnect(tport, self, inport)
                 inport += 1
@@ -533,7 +550,7 @@ class Processor:
                     self.disconnect(outlet, tobj, tport)
             self.outlets[outlets:] = []
             self.connections_out[outlets:] = []
-        self.outlet_order = list(range(len(self.outlets)))
+        self.outlet_order = list(reversed(range(len(self.outlets))))
 
         self.conf(num_inlets=inlets, num_outlets=outlets)
 
@@ -554,24 +571,25 @@ class Processor:
 
         if inlet > len(target.inlets):
             if isinstance(target, Patch):
-                Patch.task_nibbler.add_MFPApp().async_task(
+                Patch.task_nibbler.add_task(
                     lambda args: Processor.connect(*args), 20,
-                    [self, outlet, target, inlet, show_gui])
+                    [self, outlet, target, inlet, show_gui]
+                )
                 log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
                             % (target.name, target.obj_id, len(target.inlets), inlet))
                 return True
-            else:
-                log.warning("Error: Can't connect to '%s' (obj_id %d) inlet %d (only %d inlets)"
-                            % (target.name, target.obj_id, inlet, len(target.inlets)))
-                return False
+            log.warning("Error: Can't connect to '%s' (obj_id %d) inlet %d (only %d inlets)"
+                        % (target.name, target.obj_id, inlet, len(target.inlets)))
+            return False
 
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             if inlet not in target.dsp_inlets:
                 if isinstance(target, Patch):
-                    Patch.task_nibbler.add_MFPApp().async_task(
+                    Patch.task_nibbler.add_task(
                         lambda args: Processor.connect(*args), 20,
-                        [self, outlet, target, inlet, show_gui])
+                        [self, outlet, target, inlet, show_gui]
+                    )
                     log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
                                 % (target.name, target.obj_id))
                     return True
@@ -601,13 +619,18 @@ class Processor:
         existing = target.connections_in[inlet]
         if (self, outlet) not in existing:
             existing.append((self, outlet))
-
-        if (self.gui_created and show_gui and
-            self.display_type not in (
-                "hidden", "sendvia", "sendsignalvia")
-            and target.display_type not in (
-                "hidden", "recvvia", "recvsignalvia")):
-            MFPApp().async_task(MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet))
+        if (
+            self.gui_created
+            and show_gui
+            and self.display_type not in (
+                "hidden", "sendvia", "sendsignalvia"
+            ) and target.display_type not in (
+                "hidden", "recvvia", "recvsignalvia"
+            )
+        ):
+            MFPApp().async_task(
+                MFPApp().gui_command.connect(self.obj_id, outlet, target.obj_id, inlet)
+            )
         return True
 
     async def disconnect(self, outlet, target, inlet):
@@ -646,28 +669,112 @@ class Processor:
             self.outlets[outlet_num] = mv
 
     async def send(self, value, inlet=0):
+        """
+        Main entry point to trigger a processor
+
+        The helper _send returns a list of work to
+        be done next. This is the trampoline to keep
+        from running into stack depth limitations.
+        """
         if self.paused:
             return
 
         w_target = None
 
         try:
-            with self.trigger_lock:
-                work = await self._send(value, inlet)
+            work = await self._send(value, inlet)
 
             while len(work):
                 w_target, w_val, w_inlet = work[0]
-                with w_target.trigger_lock:
-                    work[:1] = await w_target._send(w_val, w_inlet)
+                work[:1] = await w_target._send(w_val, w_inlet)
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
-            log.error("%s (%s): send to inlet %d failed: %s" %
-                      (self.name, self.init_type, inlet, value))
+            log.error("%s.%s (%s): send to inlet %d failed: '%s'" %
+                      (self.patch.name, self.name, self.init_type, inlet, value))
             log.error("Exception: %s" % e.args)
             log.debug_traceback()
             if w_target:
                 w_target.error("%s" % e.args, tb)
+
+    async def _send(self, value, inlet=0, step_execute=False):
+        """
+        Workhorse of processor triggering.
+
+        _send is broken into phases:
+        _send__initiate to put inputs into the target's inlets
+        _send__activate to run the trigger() method
+        _send__propagate to create new work items propagating outlets
+        """
+        if self.paused:
+            return []
+
+        debug = self.step_debug_manager().enabled
+        debug_tasks = []
+        send_tasks = []
+
+        # inlet is -1 for dsp response messages. For regular inlets,
+        # put the inbound in the .inlets
+        if inlet >= 0:
+            if debug:
+                debug_tasks.append((
+                    self._send__initiate(value, inlet),
+                    f"Receive input to {self.name} inlet {inlet}",
+                    self
+                ))
+            else:
+                await self._send__initiate(value, inlet)
+
+        self.count_in += 1
+
+        # if it's a message input to a DSP input, the
+        # DSP engine will deal with it
+        if (
+            (inlet in self.dsp_inlets)
+            and not isinstance(value, bool)
+            and isinstance(value, (float, int))
+        ):
+            if debug:
+                debug_tasks.append((
+                    self._send__dsp_params(value, inlet),
+                    "Update parameters of DSP object for {self.name}",
+                    self
+                ))
+            else:
+                await self._send__dsp_params(value, inlet)
+
+        # activate the processor and make a worklist
+        # of where to send it next
+        if inlet in self.hot_inlets or inlet == -1:
+            if debug:
+                debug_tasks.append((
+                    self._send__activate(value, inlet),
+                    f"Trigger processor {self.name} from inlet {inlet}",
+                    self
+                ))
+            else:
+                await self._send__activate(value, inlet)
+
+            # step mode could be activated or deactivated in activate
+            debug = self.step_debug_manager().enabled
+            if debug:
+                debug_tasks.append((
+                    self._send__propagate(),
+                    f"Send outputs from {self.name} to connected processors",
+                    self
+                ))
+            else:
+                send_tasks = await self._send__propagate()
+
+        if debug:
+            if step_execute:
+                self.step_debug_manager().prepend_tasks(debug_tasks)
+            else:
+                for task in debug_tasks:
+                    self.step_debug_manager().add_task(*task)
+            return []
+
+        return send_tasks
 
     async def _send__activate(self, value, inlet):
         if self.clear_outlets:
@@ -689,6 +796,12 @@ class Processor:
             self.count_trigger += 1
 
     async def _send__propagate(self):
+        """
+        Pass outputs along the data flow path
+
+        'work' is our trampoline worklist. Note that the contents are
+        different if we are in debugging mode.
+        """
         output_pairs = list(zip(self.connections_out, self.outlets))
         work = []
 
@@ -708,20 +821,30 @@ class Processor:
                 for target, tinlet in conns:
                     if target is not None:
                         if self.step_debug_manager().enabled:
-                            self.step_debug_manager().add_MFPApp().async_task(
+                            work.append((
                                 self._send__propagate_value(target, val, tinlet),
                                 f"Send output to {target.name} inlet {tinlet}",
                                 target,
-                            )
+                            ))
                         else:
                             work.append((target, val, tinlet))
                     else:
                         log.warning("Bad output connection: obj_id=%s" % self.obj_id)
+
+        if self.step_debug_manager().enabled and work:
+            self.step_debug_manager().prepend_tasks(work)
+            return []
+
         return work
 
     async def _send__propagate_value(self, target, val, inlet):
-        with target.trigger_lock:
-            return await target._send(val, inlet)
+        """
+        Helper used by step debugger.
+
+        Instead of building a worklist, in the step debugger we add this
+        task to the debugger task list.
+        """
+        return await target._send(val, inlet, step_execute=True)
 
     async def _send__dsp_params(self, value, inlet):
         try:
@@ -732,64 +855,16 @@ class Processor:
     async def _send__initiate(self, value, inlet):
         self.inlets[inlet] = value
 
-    async def _send(self, value, inlet=0):
-        if self.paused:
-            return []
-
-        work = []
-        if inlet >= 0:
-            if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_MFPApp().async_task(
-                    self._send__initiate(value, inlet),
-                    f"Receive input to {self.name} inlet {inlet}",
-                    self
-                )
-            else:
-                await self._send__initiate(value, inlet)
-
-        self.count_in += 1
-
-        if inlet in self.hot_inlets or inlet == -1:
-            if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_MFPApp().async_task(
-                    self._send__activate(value, inlet),
-                    f"Trigger processor {self.name} from inlet {inlet}",
-                    self
-                )
-                self.step_debug_manager().add_MFPApp().async_task(
-                    self._send__propagate(),
-                    "Send outputs to connected processors",
-                    self
-                )
-            else:
-                await self._send__activate(value, inlet)
-                work = await self._send__propagate()
-
-        if (
-            (inlet in self.dsp_inlets)
-            and not isinstance(value, bool)
-            and isinstance(value, (float, int))
-        ):
-            if self.step_debug_manager().enabled:
-                self.step_debug_manager().add_MFPApp().async_task(
-                    self._send__dsp_params(value, inlet),
-                    "Update parameters of DSP object",
-                    self
-                )
-            else:
-                await self._send__dsp_params(value, inlet)
-
-        return work
-
     def step_debug_manager(self):
-        from mfp.patch import Patch
         if self.patch:
             return self.patch.step_debugger
-        elif isinstance(self, Patch):
-            return self.step_debugger
+        # this only happens during tests
+        return StepDebugger()
 
     def parse_args(self, pystr, **extra_bindings):
         from .patch import Patch
+        from .evaluator import Evaluator
+
         if "scope" not in extra_bindings:
             extra_bindings["scope"] = self.scope
         if "__self__" not in extra_bindings:
@@ -799,15 +874,17 @@ class Processor:
 
         if isinstance(self, Patch):
             return self.evaluator.eval_arglist(pystr, **extra_bindings)
-        elif self.patch:
+
+        if self.patch:
             return self.patch.parse_args(pystr, **extra_bindings)
-        else:
-            from .evaluator import Evaluator
-            e = Evaluator()
-            return e.eval_arglist(pystr, **extra_bindings)
+
+        e = Evaluator()
+        return e.eval_arglist(pystr, **extra_bindings)
 
     def parse_obj(self, pystr, **extra_bindings):
         from .patch import Patch
+        from .evaluator import Evaluator
+
         if "scope" not in extra_bindings:
             extra_bindings["scope"] = self.scope
         if "__self__" not in extra_bindings:
@@ -817,15 +894,17 @@ class Processor:
 
         if isinstance(self, Patch):
             return self.evaluator.eval(pystr, **extra_bindings)
-        elif self.patch:
+
+        if self.patch:
             return self.patch.parse_obj(pystr, **extra_bindings)
-        else:
-            from .evaluator import Evaluator
-            e = Evaluator()
-            return e.eval(pystr, **extra_bindings)
+
+        e = Evaluator()
+        return e.eval(pystr, **extra_bindings)
 
     async def method(self, message, inlet):
-        '''Default method handler ignores which inlet the message was received on'''
+        '''
+        Default method handler ignores which inlet the message was received on
+        '''
         rv = message.call(self)
         if inspect.isawaitable(rv):
             await rv
@@ -874,7 +953,6 @@ class Processor:
             self.gui_params['export_offset_y'] = yoff
             self.gui_params['position_y'] += yoff
 
-        
         await MFPApp().gui_command.create(
             self.init_type, self.init_args, self.obj_id,
             parent_id, self.gui_params
@@ -906,14 +984,15 @@ class Processor:
         self.status = Processor.READY
 
     def property(self, *args, **kwargs):
-        if len(kwargs):
+        if kwargs and len(kwargs) > 0:
             for key, value in kwargs.items():
                 self.properties[key] = value
             return None
-        elif len(args):
+
+        if args and len(args) > 0:
             return [self.properties.get(a) for a in args]
-        else:
-            return []
+
+        return []
 
     def property_delete(self, *args):
         for a in args:

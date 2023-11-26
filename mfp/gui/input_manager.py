@@ -20,7 +20,7 @@ class InputManager (object):
         pass
 
     def __init__(self, window):
-        from .patch_window import AppWindow
+        from .app_window import AppWindow
         self.window = window
         self.global_mode = None
         self.major_mode = None

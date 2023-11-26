@@ -2,20 +2,20 @@
 '''
 key_sequencer.py: Collect modifiers and key/mouse clicks into Emacs-like strings
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from mfp import log
-from gi.repository import Clutter
 from . import key_defs
 
-
-def get_key_unicode(ev):
-    if ev.unicode_value:
-        return ord(ev.unicode_value)
-    else:
-        v = Clutter.keysym_to_unicode(ev.keyval)
-        return v
+from .event import (
+    ButtonPressEvent,
+    ButtonReleaseEvent,
+    KeyPressEvent,
+    KeyReleaseEvent,
+    MotionEvent,
+    ScrollEvent
+)
 
 
 class KeySequencer (object):
@@ -26,16 +26,15 @@ class KeySequencer (object):
         self.sequences = []
 
     def pop(self):
-        if len(self.sequences):
+        if len(self.sequences) > 0:
             rval = self.sequences[0]
             self.sequences[:1] = []
             return rval
-        else:
-            return None
+        return None
 
     def process(self, event):
         # KEY PRESS
-        if event.type == Clutter.EventType.KEY_PRESS:
+        if isinstance(event, KeyPressEvent):
             code = event.keyval
             if code in key_defs.MOD_ALL:
                 if code in (key_defs.MOD_SHIFTALT, key_defs.MOD_SHIFTRALT):
@@ -47,7 +46,7 @@ class KeySequencer (object):
                 self.sequences.append(self.canonicalize(event))
 
         # KEY RELEASE
-        elif event.type == Clutter.EventType.KEY_RELEASE:
+        elif isinstance(event, KeyReleaseEvent):
             code = event.keyval
             if code in key_defs.MOD_ALL:
                 try:
@@ -60,8 +59,9 @@ class KeySequencer (object):
                     pass
 
         # BUTTON PRESS, BUTTON RELEASE, MOUSE MOTION
-        elif event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE,
-                            Clutter.EventType.MOTION, Clutter.EventType.SCROLL):
+        elif isinstance(event, (
+            ButtonPressEvent, ButtonReleaseEvent, MotionEvent, ScrollEvent
+        )):
             self.sequences.append(self.canonicalize(event))
 
     def canonicalize(self, event):
@@ -77,11 +77,11 @@ class KeySequencer (object):
         if isinstance(event, str):
             if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
                 key = 'S-' + key
-
             return key + event
 
-        if event.type in (Clutter.EventType.KEY_PRESS, Clutter.EventType.KEY_RELEASE):
+        if isinstance(event, (KeyPressEvent, KeyReleaseEvent)):
             ks = event.keyval
+            # FIXME - shifted unicode keys
             if ks >= 256 and ((key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys)):
                 key = 'S-' + key
 
@@ -110,15 +110,13 @@ class KeySequencer (object):
             elif ks == key_defs.KEY_PGDN:
                 key += 'PGDN'
             elif ks < 256:
-                kuni = get_key_unicode(event)
-                if kuni < 32:
-                    ks = chr(event.keyval)
+                if event.unicode and event.unicode.islower():
                     if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
-                        log.debug("SHIFT in modifiers but below 256 (%s)" % kuni)
-                        ks = ks.upper()
-                    key += ks
+                        key += event.unicode.upper()
+                    else:
+                        key += event.unicode
                 else:
-                    key += chr(kuni)
+                    key += event.unicode
             else:
                 log.debug("unhandled keycode", ks)
                 key += "%d" % ks
@@ -127,7 +125,7 @@ class KeySequencer (object):
         if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
             key = 'S-' + key
 
-        if event.type in (Clutter.EventType.BUTTON_PRESS, Clutter.EventType.BUTTON_RELEASE):
+        if isinstance(event, (ButtonPressEvent, ButtonReleaseEvent)):
             button = event.button
             clicks = event.click_count
             key += "M%d" % button
@@ -137,40 +135,32 @@ class KeySequencer (object):
             elif clicks == 3:
                 key += "TRIPLE"
 
-            if event.type == Clutter.EventType.BUTTON_PRESS:
+            if isinstance(event, ButtonPressEvent):
                 key += 'DOWN'
                 self.mouse_buttons.add(button)
             else:
                 key += 'UP'
                 self.mouse_buttons.remove(button)
 
-        elif event.type == Clutter.EventType.MOTION:
+        elif isinstance(event, MotionEvent):
             for b in (1, 2, 3):
                 if b in self.mouse_buttons:
                     key += 'M%d-' % b
             key += 'MOTION'
 
-        elif event.type == Clutter.EventType.SCROLL:
-            for b in (1, 2, 3):
-                if b in self.mouse_buttons:
-                    key += 'M%d-' % b
-            key += 'SCROLL'
-            direction = event.direction
-            if direction == Clutter.ScrollDirection.SMOOTH:
-                delta = Clutter.Event.get_scroll_delta(event)
-                if abs(delta.dy) > 0.001 and abs(delta.dy) < 0.2:
+        elif isinstance(event, ScrollEvent):
+            if abs(event.dy) < 0.1:
+                key = ''
+            else:
+                for b in (1, 2, 3):
+                    if b in self.mouse_buttons:
+                        key += 'M%d-' % b
+                key += 'SCROLL'
+                if event.smooth:
                     key += 'SMOOTH'
-
-                if abs(delta.dy) <= .001:
-                    pass
-                elif delta.dy < 0:
-                    direction = Clutter.ScrollDirection.UP
-                else:
-                    direction = Clutter.ScrollDirection.DOWN
-
-            if direction == Clutter.ScrollDirection.DOWN:
-                key += 'DOWN'
-            elif direction == Clutter.ScrollDirection.UP:
-                key += 'UP'
+                if event.dy > 0.001:
+                    key += 'DOWN'
+                elif event.dy < -0.001:
+                    key += 'UP'
 
         return key

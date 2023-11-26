@@ -80,7 +80,7 @@ class AutoplaceMode (InputMode):
             self.key_widget = self.window.selected[0]
 
     def autoplace_above(self):
-        from ..patch_element import PatchElement
+        from ..base_element import BaseElement
         self._update_key()
         if self.key_widget is None:
             if len(self.layer.objects):
@@ -95,7 +95,7 @@ class AutoplaceMode (InputMode):
             self.placement = 0
 
         if self.placement < kw.num_inlets:
-            x, y = kw.port_center(PatchElement.PORT_IN, self.placement)
+            x, y = kw.port_center(BaseElement.PORT_IN, self.placement)
             x -= kw.get_style('porthole_border') + kw.get_style('porthole_width') / 2.0
             y = self.find_free_space_up(x, y - self.ABOVE_SPACING)
 
@@ -105,7 +105,7 @@ class AutoplaceMode (InputMode):
         return True
 
     def autoplace_below(self):
-        from ..patch_element import PatchElement
+        from ..base_element import BaseElement
         self._update_key()
         if self.key_widget is None:
             if len(self.layer.objects):
@@ -119,7 +119,7 @@ class AutoplaceMode (InputMode):
         if self.placement >= kw.num_outlets:
             self.placement = 0
 
-        x, y = kw.port_center(PatchElement.PORT_OUT, self.placement)
+        x, y = kw.port_center(BaseElement.PORT_OUT, self.placement)
         x -= kw.get_style('porthole_border') + kw.get_style('porthole_width') / 2.0
         y = self.find_free_space_down(x, y + self.BELOW_SPACING)
 

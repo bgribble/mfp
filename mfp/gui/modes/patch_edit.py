@@ -84,11 +84,10 @@ class PatchEditMode (InputMode):
         self.bind("a", self.auto_place_below, "Auto-place below")
         self.bind("A", self.auto_place_above, "Auto-place above")
 
+        self.window.signal_listen("select", self.selection_changed_cb)
+        self.window.signal_listen("unselect", self.selection_changed_cb)
 
-        self.window.add_callback("select", self.selection_changed_cb)
-        self.window.add_callback("unselect", self.selection_changed_cb)
-
-    def selection_changed_cb(self, obj):
+    def selection_changed_cb(self, window, signal, obj):
         if not self.enabled:
             return False
 
@@ -97,20 +96,21 @@ class PatchEditMode (InputMode):
         else:
             self.disable_selection_mode()
 
-    def add_element(self, factory):
+    def add_element(self, element_type):
         async def helper():
-            return await self._add_element(factory)
+            return await self._add_element(element_type)
         return helper
 
-    async def _add_element(self, factory):
+    async def _add_element(self, element_type):
         await self.window.unselect_all()
+        factory = element_type.build
         if self.autoplace_mode is None:
-            self.window.add_element(factory)
+            await self.window.add_element(factory)
         else:
-            dx = factory.style_defaults.get('autoplace-dx', 0)
-            dy = factory.style_defaults.get('autoplace-dy', 0)
+            dx = element_type.style_defaults.get('autoplace-dx', 0)
+            dy = element_type.style_defaults.get('autoplace-dy', 0)
 
-            self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
+            await self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
 
@@ -193,8 +193,9 @@ class PatchEditMode (InputMode):
         self.disable_selection_mode()
 
     async def cut(self):
-        return await self.window.clipboard_cut((self.manager.pointer_x,
-                                                self.manager.pointer_y))
+        return await self.window.clipboard_cut(
+            (self.manager.pointer_x, self.manager.pointer_y)
+        )
 
     async def copy(self):
         return await self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
@@ -204,5 +205,5 @@ class PatchEditMode (InputMode):
 
     async def duplicate(self):
         await self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
-        return self.window.clipboard_paste()
+        return await self.window.clipboard_paste()
 

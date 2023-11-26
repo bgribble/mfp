@@ -43,12 +43,23 @@ class delegatemethod:
 
 
 class DelegateMixin:
+    reversed_attrs = []
+
     def __init__(self, delegator):
+        self.wrapper = delegator
         for attr in self.delegated_methods:
             setattr(delegator, attr, self._delegate_helper(attr))
+
+        for attr in self.reversed_attrs:
+            setattr(type(self), attr, property(self._reverse_delegate_helper(attr)))
 
     def _delegate_helper(self, attr):
         thunk = getattr(self, attr)
         def inner(*args, **kwargs):
             return thunk(*args, **kwargs)
+        return inner
+
+    def _reverse_delegate_helper(self, attr):
+        def inner(*args, **kwargs):
+            return getattr(self.wrapper, attr)
         return inner

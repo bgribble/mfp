@@ -1,14 +1,14 @@
 #! /usr/bin/env python
 '''
-patch_window_select.py
+app_window_select.py
 Helper methods for patch window selection
 
 Copyright (c) 2012-2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from ..utils import extends
-from .patch_window import AppWindow
-from .patch_element import PatchElement
+from .app_window import AppWindow
+from .base_element import BaseElement
 from .connection_element import ConnectionElement
 from .modes.select_mru import SelectMRUMode
 from ..gui_main import MFPGUI
@@ -54,23 +54,22 @@ async def patch_new(self):
 
 
 @extends(AppWindow)
-def _select(self, obj):
-    if (obj is None) or (not isinstance(obj, PatchElement)) or (obj in self.selected):
+async def _select(self, obj):
+    if (obj is None) or (not isinstance(obj, BaseElement)) or (obj in self.selected):
         return
 
     self.selected[:0] = [obj]
     obj.select()
-
     self.backend.select(obj)
-    self.emit_signal("select", obj)
+    await self.signal_emit("select", obj)
 
 
 @extends(AppWindow)
-def select(self, obj):
+async def select(self, obj):
     if obj in self.selected:
         return True
 
-    self._select(obj)
+    await self._select(obj)
     return True
 
 
@@ -78,16 +77,17 @@ def select(self, obj):
 async def _unselect(self, obj):
     if obj is None:
         return
-    if isinstance(obj, PatchElement):
+
+    if isinstance(obj, BaseElement):
         if obj.edit_mode:
             await obj.end_edit()
         obj.end_control()
         obj.unselect()
+        self.backend.unselect(obj)
+        MFPGUI().async_task(self.signal_emit("unselect", obj))
+
     if obj in self.selected:
         self.selected.remove(obj)
-
-    self.backend.unselect(obj)
-    self.emit_signal("unselect", obj)
 
 
 @extends(AppWindow)
@@ -102,7 +102,7 @@ async def select_all(self):
     await self.unselect_all()
     for obj in self.objects:
         if obj.layer == self.active_layer():
-            self.select(obj)
+            await self.select(obj)
     return True
 
 
@@ -138,7 +138,7 @@ async def select_next(self):
     for count in range(len(self.selected_layer.objects)):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
             await self.unselect_all()
-            self.select(self.selected_layer.objects[candidate])
+            await self.select(self.selected_layer.objects[candidate])
             return True
         candidate = (candidate + 1) % len(self.selected_layer.objects)
     return False
@@ -163,7 +163,7 @@ async def select_prev(self):
     while candidate > -len(self.selected_layer.objects):
         if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
             await self.unselect_all()
-            self.select(self.selected_layer.objects[candidate])
+            await self.select(self.selected_layer.objects[candidate])
             return True
         candidate -= 1
 

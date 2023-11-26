@@ -1,12 +1,13 @@
 #! /usr/bin/env python
 '''
-patch_window.py
+app_window.py
 The main MFP window and associated code
 '''
 
 
 from mfp import log
 
+from mfp.utils import SignalMixin
 from ..gui_main import MFPGUI
 from .backend_interfaces import AppWindowBackend
 from .input_manager import InputManager
@@ -18,11 +19,13 @@ from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
 
 
-class AppWindow:
+class AppWindow (SignalMixin):
     backend_name = None
 
     def __init__(self):
-        # self.objects is PatchElement instances representing the
+        super().__init__()
+
+        # self.objects is BaseElement instances representing the
         # currently-displayed patch(es)
         self.patches = []
         self.objects = []
@@ -41,15 +44,13 @@ class AppWindow:
         self.color_selected = self.get_color('stroke-color:selected')
         self.color_bg = self.get_color('canvas-color')
 
-        # callbacks facility... not yet too much used, but "select" and
-        # "add" are in use
-        self.callbacks = {}
-        self.callbacks_last_id = 0
-
         # viewport info
         self.zoom = 1.0
         self.view_x = 0
         self.view_y = 0
+
+        # impl-specific mapping of widgets to MFP display elements
+        self.event_sources = {}
 
         # set up key and mouse handling
         self.input_mgr = InputManager(self)
@@ -69,6 +70,28 @@ class AppWindow:
         self.input_mgr.global_mode = GlobalMode(self)
         self.input_mgr.major_mode = PatchEditMode(self)
         self.input_mgr.major_mode.enable()
+
+        def handler(obj, signal, event, *rest):
+            try:
+                rv = self.input_mgr.handle_event(obj, event)
+                self.backend.grab_focus()
+                return rv
+            except Exception as e:
+                log.error("Error handling UI event", event)
+                log.debug(e)
+                log.debug_traceback()
+                return False
+
+        # hook up input signals
+        self.signal_listen('button-press-event', handler)
+        self.signal_listen('button-release-event', handler)
+        self.signal_listen('key-press-event', handler)
+        self.signal_listen('key-release-event', handler)
+        self.signal_listen('motion-event', handler)
+        self.signal_listen('scroll-event', handler)
+        self.signal_listen('enter-event', handler)
+        self.signal_listen('leave-event', handler)
+        self.signal_listen('quit', self.quit)
 
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI
@@ -92,10 +115,10 @@ class AppWindow:
                 self.layer_select(self.selected_patch.layers[0])
             self.backend.load_complete()
 
-    def add_patch(self, patch_info):
-        self.patches.append(patch_info)
-        self.selected_patch = patch_info
-        if len(patch_info.layers):
+    def add_patch(self, patch_display):
+        self.patches.append(patch_display)
+        self.selected_patch = patch_display
+        if len(patch_display.layers):
             self.layer_select(self.selected_patch.layers[0])
 
     def object_visible(self, obj):
@@ -142,12 +165,12 @@ class AppWindow:
         oldcount = self.object_counts_by_type.get(element.display_type, 0)
         self.object_counts_by_type[element.display_type] = oldcount + 1
         self.input_mgr.event_sources[element] = element
+        self.backend.register(element)
+        MFPGUI().async_task(self.signal_emit("add", element))
 
         if element.obj_id is not None:
             element.send_params()
 
-        self.backend.register(element)
-        self.emit_signal("add", element)
 
     def unregister(self, element):
         if element in self.selected:
@@ -160,12 +183,12 @@ class AppWindow:
             del self.input_mgr.event_sources[element]
 
         self.backend.unregister(element)
-        self.emit_signal("remove", element)
+        MFPGUI().async_task(self.signal_emit("remove", element))
 
     def refresh(self, element):
         self.backend.refresh(element)
 
-    def add_element(self, factory, x=None, y=None):
+    async def add_element(self, factory, x=None, y=None):
         if x is None:
             x = self.input_mgr.pointer_x
         if y is None:
@@ -182,14 +205,13 @@ class AppWindow:
         self.active_layer().add(b)
         self.register(b)
         self.refresh(b)
-        self.select(b)
+        await self.select(b)
 
-        b.begin_edit()
+        await b.begin_edit()
         return True
 
     async def quit(self, *rest):
-        from mfp.gui_main import MFPGUI
-        from .patch_info import PatchInfo
+        from .patch_display import PatchDisplay
         log.debug("quit: received command from GUI or WM")
 
         self.close_in_progress = True
@@ -198,7 +220,7 @@ class AppWindow:
             for p in to_delete:
                 await p.delete()
             allpatches = await MFPGUI().mfp.open_patches()
-            guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchInfo)]
+            guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchDisplay)]
         except Exception as e:
             log.debug(f"Error while quitting: {e}")
             raise
@@ -226,33 +248,7 @@ class AppWindow:
     def get_prompted_input(self, prompt, callback, default=''):
         self.hud_prompt_mgr.get_input(prompt, callback, default)
 
-    #####################
-    # callbacks
-    #####################
-
-    def add_callback(self, signal_name, callback):
-        cbid = self.callbacks_last_id
-        self.callbacks_last_id += 1
-
-        oldlist = self.callbacks.setdefault(signal_name, [])
-        oldlist.append((cbid, callback))
-
-        return cbid
-
-    def remove_callback(self, cb_id):
-        for signal, hlist in self.callbacks.items():
-            for num, cbinfo in enumerate(hlist):
-                if cbinfo[0] == cb_id:
-                    hlist[num:num+1] = []
-                    return True
-        return False
-
-    def emit_signal(self, signal_name, *args):
-        for cbinfo in self.callbacks.get(signal_name, []):
-            cbinfo[1](*args)
-
-
 # additional methods in @extends wrappers
-from . import patch_window_layer  # noqa
-from . import patch_window_views  # noqa
-from . import patch_window_select  # noqa
+from . import app_window_layer  # noqa
+from . import app_window_views  # noqa
+from . import app_window_select  # noqa

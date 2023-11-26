@@ -1,19 +1,25 @@
 #! /usr/bin/env python
 '''
 processor_element.py
+
 A patch element corresponding to a signal or control processor
 '''
 
-from gi.repository import Clutter
-import cairo
-from .patch_element import PatchElement
-from .colordb import ColorDB
+from abc import ABC, abstractmethod
+from .text_widget import TextWidget
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
-from mfp import log
-from mfp.utils import catchall
+from .backend_interfaces import BackendInterface
+from .base_element import BaseElement
 
-class ProcessorElement (PatchElement):
+
+class ProcessorElementImpl(ABC, BackendInterface):
+    @abstractmethod
+    def redraw(self):
+        pass
+
+
+class ProcessorElement (BaseElement):
     display_type = "processor"
     proc_type = None
 
@@ -21,50 +27,44 @@ class ProcessorElement (PatchElement):
     label_off_x = 3
     label_off_y = 0
 
-    def __init__(self, window, x, y, params={}):
-        PatchElement.__init__(self, window, x, y)
+    def __init__(self, window, x, y, params=None):
+        if params is None:
+            params = {}
 
-        self.param_list.extend(["show_label", "export_x", "export_y",
-                                "export_w", "export_h"])
+        super().__init__(window, x, y)
+
+        self.param_list.extend([
+            "show_label",
+            "export_x",
+            "export_y",
+            "export_w",
+            "export_h"
+        ])
         self.show_label = params.get("show_label", True)
 
         # display elements
-        self.texture = None
-        self.label = None
+        self.label = TextWidget.get_factory()(self)
+        self.label.set_position(self.label_off_x, self.label_off_y)
+        self.label.set_color(self.get_color('text-color'))
+        self.label.set_font_name(self.get_fontspec())
+        self.label.signal_listen('text-changed', self.label_changed_cb)
+        self.label.set_reactive(False)
         self.label_text = None
+
+        if not self.show_label:
+            self.label.hide()
+
         self.export_x = None
         self.export_y = None
         self.export_w = None
         self.export_h = None
         self.export_created = False
 
-        # create display
-        self.create_display()
-        self.set_size(35, 25)
-        self.move(x, y)
-
         self.obj_state = self.OBJ_HALFCREATED
 
-        self.update()
-
-    def create_display(self):
-        # box
-        self.texture = Clutter.Canvas.new()
-        self.set_content(self.texture)
-        self.texture.connect("draw", self.draw_cb)
-        self.texture.set_size(35, 25)
-
-        # label
-        self.label = Clutter.Text()
-        self.label.set_position(self.label_off_x, self.label_off_y)
-        self.label.set_color(self.get_color('text-color'))
-        self.label.set_font_name(self.get_fontspec())
-        self.label.connect('text-changed', self.label_changed_cb)
-        self.label.set_reactive(False)
-
-        if self.show_label:
-            self.add_actor(self.label)
-        self.set_reactive(True)
+    @classmethod
+    def get_factory(cls):
+        return ProcessorElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def update(self):
         if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
@@ -82,46 +82,7 @@ class ProcessorElement (PatchElement):
         new_w = max(35, port_width, label_width, box_width)
 
         self.set_size(new_w, self.texture.get_property('height'))
-
-    @catchall
-    def draw_cb(self, texture, ct, width, height):
-        lw = 2.0
-
-        w = width - lw
-        h = height - lw
-
-        # clear the drawing area
-        ct.save()
-        ct.set_operator(cairo.OPERATOR_CLEAR)
-        ct.paint()
-        ct.restore()
-
-        ct.set_line_width(lw)
-        ct.set_antialias(cairo.ANTIALIAS_NONE)
-        ct.translate(lw/2.0, lw/2.0)
-        ct.move_to(0, 0)
-        ct.line_to(0, h)
-        ct.line_to(w, h)
-        ct.line_to(w, 0)
-        ct.line_to(0, 0)
-        ct.close_path()
-
-        # fill to paint the background
-        color = ColorDB.to_cairo(self.get_color('fill-color'))
-        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ct.fill_preserve()
-
-        # stroke to draw the outline
-        color = ColorDB.to_cairo(self.get_color('stroke-color'))
-        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-
-        if self.obj_state == self.OBJ_COMPLETE:
-            ct.set_dash([])
-        else:
-            ct.set_dash([8, 4])
-        ct.set_line_width(lw)
-        ct.stroke()
-        return True
+        self.redraw()
 
     def get_label(self):
         return self.label
@@ -129,7 +90,7 @@ class ProcessorElement (PatchElement):
     def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
         if not self.show_label:
-            self.add_actor(self.label)
+            self.label.show()
         self.update()
 
     async def label_edit_finish(self, widget, text=None):
@@ -151,34 +112,12 @@ class ProcessorElement (PatchElement):
             self.obj_state = self.OBJ_COMPLETE
 
         if not self.show_label:
-            self.remove_actor(self.label)
+            self.label.hide()
 
         self.update()
 
-    def label_changed_cb(self, *args):
-        newtext = self.label.get_text()
-        if newtext != self.label_text:
-            self.label_text = newtext
-            self.update()
-
-    def set_size(self, w, h):
-        PatchElement.set_size(self, w, h)
-
-        self.texture.set_size(w, h)
-        self.texture.invalidate()
-
-    def select(self):
-        PatchElement.select(self)
-        self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
-
-    def unselect(self):
-        PatchElement.unselect(self)
-        self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
-
-    def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label)
+    async def make_edit_mode(self):
+        return LabelEditMode(self.app_window, self, self.label)
 
     def configure(self, params):
         if self.obj_args is None:
@@ -195,9 +134,9 @@ class ProcessorElement (PatchElement):
             if oldval ^ self.show_label:
                 need_update = True
                 if self.show_label:
-                    self.add_actor(self.label)
+                    self.label.show()
                 else:
-                    self.remove_actor(self.label)
+                    self.label.hide()
 
         self.export_x = params.get("export_x")
         self.export_y = params.get("export_y")
@@ -209,7 +148,7 @@ class ProcessorElement (PatchElement):
         params["width"] = max(self.width, params.get("export_w") or 0)
         params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight)
 
-        PatchElement.configure(self, params)
+        super().configure(params)
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
@@ -222,4 +161,3 @@ class ProcessorElement (PatchElement):
 
         if need_update:
             self.update()
-

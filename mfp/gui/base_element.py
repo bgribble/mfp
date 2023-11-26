@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 '''
-patch_element.py
+base_element.py
 A patch element is the parent of all GUI entities backed by MFP objects
 
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
@@ -10,17 +10,11 @@ from flopsy import Store
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB
+from .backend_interfaces import BaseElementBackend
 import math
 
-import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GtkClutter', '1.0')
-gi.require_version('Clutter', '1.0')
 
-from gi.repository import Clutter
-
-
-class PatchElement (Store, Clutter.Group):
+class BaseElement (Store):
     '''
     Parent class of elements represented in the patch window
     '''
@@ -74,16 +68,14 @@ class PatchElement (Store, Clutter.Group):
         self.is_export = False
         self.param_list = [a for a in self.store_attrs]
 
-        # non-backend-specific
-        self.stage = window
+        self.app_window = window
+
+        # container is either a layer or another BaseElement (graph-on-parent)
         self.container = None
+
+        # could be the same as self.container but is definitely a layer
         self.layer = None
 
-        # FIXME -- clutter objects
-        self.badge = None
-        self.badge_times = {}
-        self.badge_current = None
-        self.port_elements = {}
         self.tags = {}
 
         # UI state
@@ -106,11 +98,18 @@ class PatchElement (Store, Clutter.Group):
         self.style = {}
         self._all_styles = self.combine_styles()
 
-        # create placeholder group and add to stage
         super().__init__()
 
     def __repr__(self):
         return "<%s %s>" % (type(self).__name__, id(self))
+
+    @classmethod
+    def get_factory(cls):
+        return cls
+
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_factory()(*args, **kwargs)
 
     def corners(self):
         return [(self.position_x, self.position_y),
@@ -126,11 +125,34 @@ class PatchElement (Store, Clutter.Group):
     def name(self):
         return self.obj_name
 
+    def get_size(self):
+        return (self.width, self.height)
+
+    def set_size(self, width, height):
+        if (
+            self.width and self.height
+            and abs(width - self.width) < BaseElement.TINY_DELTA
+            and abs(height - self.height) < BaseElement.TINY_DELTA
+        ):
+            return
+
+        self.width = width
+        self.height = height
+
+        self.draw_ports()
+        self.send_params()
+
     def description(self):
         return self.obj_name
 
     def get_style(self, propname):
         return self._all_styles.get(propname)
+
+    def get_position(self):
+        return (self.position_x, self.position_y)
+
+    def set_position(self, x, y):
+        self.move(x, y)
 
     def get_fontspec(self):
         return '{} {}px'.format(self.get_style('font-face'), self.get_style('font-size'))
@@ -156,8 +178,12 @@ class PatchElement (Store, Clutter.Group):
 
     def combine_styles(self):
         styles = {}
-        for styleset in (MFPGUI().style_defaults, PatchElement.style_defaults,
-                         type(self).style_defaults, self.style):
+        for styleset in (
+            MFPGUI().style_defaults,
+            BaseElement.style_defaults,
+            type(self).style_defaults,
+            self.style
+        ):
             styles.update(styleset)
         return styles
 
@@ -176,51 +202,23 @@ class PatchElement (Store, Clutter.Group):
         self.selected = False
         self.draw_ports()
 
-    def move_to_top(self):
-        def bump(actor):
-            p = actor.get_parent()
-            if not p:
-                return
-            p.remove_actor(actor)
-            p.add_actor(actor)
-
-        bump(self)
-        for c in self.connections_out + self.connections_in:
-            bump(c)
-
     def drag_start(self, x, y):
         self.drag_x = x - self.position_x
         self.drag_y = y - self.position_y
-
-    def move(self, x, y):
-        self.position_x = x
-        self.position_y = y
-
-        self.set_position(x, y)
-
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
-
-    def move_z (self, z):
-        self.position_z = z
-        self.set_z_position(z)
 
     def drag(self, dx, dy):
         self.move(self.position_x + dx, self.position_y + dy)
 
     async def delete(self):
-        # FIXME this is because self.stage is the backend, not the app window
+        # FIXME this is because self.app_window is the backend, not the app window
         MFPGUI().appwin.unregister(self)
         if self.obj_id is not None and not self.is_export:
             await MFPGUI().mfp.delete(self.obj_id)
-        elif self.obj_id is None:
-            for conn in [c for c in self.connections_out]:
-                await conn.delete()
-            for conn in [c for c in self.connections_in]:
-                await conn.delete()
+
+        for conn in [c for c in self.connections_out]:
+            await conn.delete()
+        for conn in [c for c in self.connections_in]:
+            await conn.delete()
 
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED
@@ -238,7 +236,7 @@ class PatchElement (Store, Clutter.Group):
         if self.obj_name is not None:
             name = self.obj_name
         else:
-            name_index = self.stage.object_counts_by_type.get(self.display_type, 0)
+            name_index = self.app_window.object_counts_by_type.get(self.display_type, 0)
             name = "%s_%03d" % (self.display_type, name_index)
 
         if self.obj_id is not None:
@@ -251,7 +249,7 @@ class PatchElement (Store, Clutter.Group):
             objinfo["layername"] = self.layer.name
 
         if objinfo is None:
-            self.stage.hud_write("ERROR: Could not create, see log for details")
+            self.app_window.hud_write("ERROR: Could not create, see log for details")
             self.connections_out = connections_out
             self.connections_in = connections_in
             return None
@@ -267,13 +265,14 @@ class PatchElement (Store, Clutter.Group):
         self.dsp_outlets = objinfo.get("dsp_outlets", [])
 
         if self.obj_id is not None:
+            MFPGUI().remember(self)
             self.configure(objinfo)
 
             # rebuild connections if necessary
             for c in connections_in:
                 if c.obj_2 is self and c.port_2 >= self.num_inlets:
                     c.obj_2 = None
-                    c.delete()
+                    await c.delete()
                 else:
                     self.connections_in.append(c)
                     if not c.dashed:
@@ -284,19 +283,20 @@ class PatchElement (Store, Clutter.Group):
             for c in connections_out:
                 if c.obj_1 is self and c.port_1 >= self.num_outlets:
                     c.obj_1 = None
-                    c.delete()
+                    await c.delete()
                 else:
                     self.connections_out.append(c)
                     if not c.dashed:
                         await MFPGUI().mfp.connect(
                             c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2
                         )
+            self.draw_ports()
 
-            MFPGUI().remember(self)
             self.send_params()
             await MFPGUI().mfp.set_gui_created(self.obj_id, True)
+            await MFPGUI().appwin.signal_emit("created", self)
 
-        self.stage.refresh(self)
+        self.app_window.refresh(self)
 
         return self.obj_id
 
@@ -326,7 +326,7 @@ class PatchElement (Store, Clutter.Group):
             pos_y = self.position_y
 
             c = self.container
-            while isinstance(c, PatchElement):
+            while isinstance(c, BaseElement):
                 pos_x += c.position_x
                 pos_y += c.position_y
                 c = c.container
@@ -341,9 +341,9 @@ class PatchElement (Store, Clutter.Group):
                 pos_y + ppos[1] + 0.5 * self.get_style('porthole_height'))
 
     def port_position(self, port_dir, port_num):
-        w = self.get_width()
-        h = self.get_height()
-        if port_dir == PatchElement.PORT_IN:
+        w = self.width
+        h = self.height
+        if port_dir == BaseElement.PORT_IN:
             if self.num_inlets < 2:
                 spc = 0
             else:
@@ -353,7 +353,7 @@ class PatchElement (Store, Clutter.Group):
                            / (self.num_inlets - 1.0)))
             return (self.get_style('porthole_border') + spc * port_num, 0)
 
-        elif port_dir == PatchElement.PORT_OUT:
+        elif port_dir == BaseElement.PORT_OUT:
             if self.num_outlets < 2:
                 spc = 0
             else:
@@ -364,161 +364,6 @@ class PatchElement (Store, Clutter.Group):
             return (self.get_style('porthole_border') + spc * port_num,
                     h - self.get_style('porthole_height'))
 
-    def draw_badge_cb(self, tex, ctx):
-        tex.clear()
-        if self.badge_current is None:
-            return
-        btext, bcolor = self.badge_current
-        halfbadge = self.get_style('badge_size') / 2.0
-
-        color = ColorDB.to_cairo(bcolor)
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ctx.move_to(halfbadge, halfbadge)
-        ctx.arc(halfbadge, halfbadge, halfbadge, 0, 2*math.pi)
-        ctx.fill()
-
-        extents = ctx.text_extents(btext)
-        color = ColorDB.to_cairo(ColorDB().find("white"))
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        twidth = extents[4]
-        theight = extents[3]
-
-        ctx.move_to(halfbadge - twidth/2.0, halfbadge + theight/2.0)
-        ctx.show_text(btext)
-
-    def update_badge(self):
-        badgesize = self.get_style('badge_size')
-        if self.badge is None:
-            self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
-            self.add_actor(self.badge)
-            self.badge.connect("draw", self.draw_badge_cb)
-
-        ypos = min(self.get_style('porthole_height') + self.get_style('porthole_border'),
-                   self.height - badgesize / 2.0)
-        self.badge.set_position(self.width - badgesize/2.0, ypos)
-        tagged = False
-
-        if self.edit_mode:
-            self.badge_current = ("E", self.get_color('badge-edit-color'))
-            tagged = True
-        else:
-            self.badge_current = None
-
-        if not tagged and "midi" in self.tags:
-            if self.tags["midi"] == "learning":
-                self.badge_current = ("M", self.get_color('badge-learn-color'))
-                tagged = True
-            else:
-                self.badge_current = None
-
-        if not tagged and "osc" in self.tags:
-            if self.tags["osc"] == "learning":
-                self.badge_current = ("O", self.get_color('badge-learn-color'))
-                tagged = True
-            else:
-                self.badge_current = None
-
-        if not tagged and "errorcount" in self.tags:
-            ec = self.tags["errorcount"]
-            if ec > 9:
-                ec = "!"
-            elif ec > 0:
-                ec = "%d" % ec
-            if ec:
-                self.badge_current = (ec, self.get_color('badge-error-color'))
-                tagged = True
-
-        self.badge.invalidate()
-
-    def draw_ports(self):
-        if self.editable is False:
-            return
-
-        ports_done = []
-
-        def confport(pid, px, py):
-            pobj = self.port_elements.get(pid)
-            dsp_port = False
-            if (pid[0] == self.PORT_IN) and pid[1] in self.dsp_inlets:
-                dsp_port = True
-
-            if (pid[0] == self.PORT_OUT) and pid[1] in self.dsp_outlets:
-                dsp_port = True
-
-            if pobj is None:
-                pobj = Clutter.Rectangle()
-                pobj.set_size(self.get_style('porthole_width'),
-                              self.get_style('porthole_height'))
-                self.add_actor(pobj)
-                self.port_elements[pid] = pobj
-
-            if dsp_port:
-                pobj.set_border_width(1.5)
-                pobj.set_color(self.stage.color_bg)
-                pobj.set_border_color(self.get_color('stroke-color'))
-            else:
-                pobj.set_color(self.get_color('stroke-color'))
-
-            pobj.set_position(px, py)
-            pobj.set_z_position(0.2)
-            pobj.show()
-            ports_done.append(pobj)
-
-        for i in range(self.num_inlets):
-            x, y = self.port_position(PatchElement.PORT_IN, i)
-            pid = (PatchElement.PORT_IN, i)
-            confport(pid, x, y)
-
-        for i in range(self.num_outlets):
-            x, y = self.port_position(PatchElement.PORT_OUT, i)
-            pid = (PatchElement.PORT_OUT, i)
-            confport(pid, x, y)
-
-        # clean up -- ports may need to be deleted if
-        # the object resizes smaller
-        for pid, port in list(self.port_elements.items()):
-            if port not in ports_done:
-                del self.port_elements[pid]
-                self.remove_actor(port)
-
-        # redraw connections
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
-
-    def hide_ports(self):
-        def hideport(pid):
-            pobj = self.port_elements.get(pid)
-            if pobj:
-                pobj.hide()
-
-        for i in range(self.num_inlets):
-            pid = (PatchElement.PORT_IN, i)
-            hideport(pid)
-
-        for i in range(self.num_outlets):
-            pid = (PatchElement.PORT_OUT, i)
-            hideport(pid)
-
-    def command(self, action, data):
-        pass
-
-    def set_size(self, width, height):
-        if (self.width and self.height
-                and abs(width - self.width) < self.TINY_DELTA
-                and abs(height - self.height) < self.TINY_DELTA):
-            return
-
-        self.width = width
-        self.height = height
-        Clutter.Group.set_size(self, self.width, self.height)
-        self.update_badge()
-        self.draw_ports()
-
-        if self.obj_id and self.name:
-            self.send_params()
 
     def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
@@ -543,7 +388,7 @@ class PatchElement (Store, Clutter.Group):
         layer_name = params.get("layername") or params.get("layer")
 
         mypatch = ((self.layer and self.layer.patch)
-                   or (self.stage and self.stage.selected_patch))
+                   or (self.app_window and self.app_window.selected_patch))
         layer = None
         if mypatch:
             layer = mypatch.find_layer(layer_name)
@@ -574,8 +419,7 @@ class PatchElement (Store, Clutter.Group):
             self.set_size(w, h)
 
         self.draw_ports()
-        self.stage.refresh(self)
-
+        self.app_window.refresh(self)
 
     def move_to_layer(self, layer):
         layer_child = False
@@ -599,28 +443,28 @@ class PatchElement (Store, Clutter.Group):
         for c in self.connections_out + self.connections_in:
             c.move_to_layer(layer)
 
-    def make_edit_mode(self):
+    async def make_edit_mode(self):
         return None
 
     def make_control_mode(self):
         return None
 
-    def begin_edit(self):
+    async def begin_edit(self):
         if not self.editable:
             return False
 
         if not self.edit_mode:
-            self.edit_mode = self.make_edit_mode()
+            self.edit_mode = await self.make_edit_mode()
 
         if self.edit_mode:
-            self.stage.input_mgr.enable_minor_mode(self.edit_mode)
+            self.app_window.input_mgr.enable_minor_mode(self.edit_mode)
         self.update_badge()
 
     async def end_edit(self):
         if self.edit_mode:
-            self.stage.input_mgr.disable_minor_mode(self.edit_mode)
+            self.app_window.input_mgr.disable_minor_mode(self.edit_mode)
             self.edit_mode = None
-            self.stage.refresh(self)
+            self.app_window.refresh(self)
         self.update_badge()
 
     def begin_control(self):
@@ -628,11 +472,11 @@ class PatchElement (Store, Clutter.Group):
             self.control_mode = self.make_control_mode()
 
         if self.control_mode:
-            self.stage.input_mgr.enable_minor_mode(self.control_mode)
+            self.app_window.input_mgr.enable_minor_mode(self.control_mode)
 
     def end_control(self):
         if self.control_mode:
-            self.stage.input_mgr.disable_minor_mode(self.control_mode)
+            self.app_window.input_mgr.disable_minor_mode(self.control_mode)
             self.control_mode = None
 
     async def show_tip(self, xpos, ypos, details):
@@ -642,6 +486,8 @@ class PatchElement (Store, Clutter.Group):
         if self.obj_id is None:
             return False
 
+        # FIXME per-port tooltips need backend support
+        """
         for (pid, pobj) in self.port_elements.items():
             x, y = pobj.get_position()
             x += orig_x - 1
@@ -651,7 +497,8 @@ class PatchElement (Store, Clutter.Group):
             h += 2
             if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
                 tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1], details)
+        """
         if tiptxt is None:
             tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, None, None, details)
-        self.stage.hud_banner(tiptxt)
+        self.app_window.hud_banner(tiptxt)
         return True

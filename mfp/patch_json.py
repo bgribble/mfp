@@ -172,10 +172,7 @@ async def json_unpack_connections(self, data, idmap):
             for c in connlist:
                 dstobj = idmap.get(c[0])
                 inlet = c[1]
-                if dstobj is None:
-                    print("Deserializing problem: can't make connection to", c[0])
-                    print(prms)
-                else:
+                if dstobj is not None:
                     await srcobj.connect(outlet, dstobj, inlet)
 
 

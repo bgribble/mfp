@@ -8,9 +8,10 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from gi.repository import Clutter
 import math
+from  mfp.gui import ticks
+from mfp.gui.colordb import ColorDB
+
 from .quilt import Quilt
-from .. import ticks
-from ..colordb import ColorDB
 
 class XYPlot (Clutter.Group):
     '''
@@ -45,7 +46,7 @@ class XYPlot (Clutter.Group):
         # colors
         self.color_fg = self.element.get_color('stroke-color')
         self.color_bg = self.element.get_color('canvas-color')
-        self.color_axes = ColorDB().to_cairo(self.element.get_color('axis-color'))
+        self.color_axes = ColorDB().normalize(self.element.get_color('axis-color'))
 
         # initialized by create() call
         self.border = None

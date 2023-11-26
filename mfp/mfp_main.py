@@ -22,6 +22,7 @@ from .utils import QuittableThread
 from .bang import Bang, Uninit
 from .method import MethodCall
 from .midi import NoteOn, NoteOff, NotePress, MidiCC, MidiUndef, MidiPitchbend, MidiPgmChange
+from .builtins.file import EOF
 
 from .mfp_app import MFPApp, StartupError
 
@@ -66,6 +67,8 @@ def add_evaluator_defaults():
     Evaluator.bind_global("Uninit", Uninit)
     Evaluator.bind_global("MethodCall", MethodCall)
     Evaluator.bind_global("LazyExpr", LazyExpr)
+
+    Evaluator.bind_global("EOF", EOF)
 
     Evaluator.bind_global("NoteOn", NoteOn)
     Evaluator.bind_global("NoteOff", NoteOff)
@@ -201,10 +204,10 @@ async def main():
         app.batch_input_file = args.get("batch_input")
         app.batch_eval = args.get("batch_eval", False)
         app.no_gui = True
-        log.log_raw = True
         log.log_quiet = True
 
     if args.get("verbose"):
+        log.log_verbose = True
         log.log_force_console = True
 
     if args.get("verbose_remote"):
@@ -265,9 +268,7 @@ async def main():
     if args.get("help"):
         log.log_debug = None
         log.log_file = None
-        log.debug("printing help and exiting")
         parser.print_help()
-        log.debug("done with print_help(), quitting")
         await app.finish()
     elif args.get("help_builtins"):
         log.log_debug = None
@@ -292,11 +293,11 @@ async def main():
             try:
                 if len(patchfiles) == 1:
                     app.batch_obj = patchfiles[0]
-                    app.exec_batch()
+                    await app.exec_batch()
                 else:
                     log.debug("Batch mode requires exactly one input file")
             finally:
-                app.finish()
+                await app.finish()
 
         else:
             # create initial patch

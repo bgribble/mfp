@@ -63,6 +63,10 @@ mfp_dsp_init(void) {
 
 mfp_sample *
 mfp_get_input_buffer(mfp_context * ctxt, int chan) {
+    if (chan >= mfp_num_input_buffers(ctxt)) {
+        return NULL;
+    }
+
     if (ctxt->ctype == CTYPE_JACK) {
         return jack_port_get_buffer(g_array_index(ctxt->info.jack->input_ports,
                                     jack_port_t *, chan), ctxt->blocksize);
@@ -76,9 +80,15 @@ mfp_get_input_buffer(mfp_context * ctxt, int chan) {
 
 mfp_sample *
 mfp_get_output_buffer(mfp_context * ctxt, int chan) {
+    if (chan >= mfp_num_output_buffers(ctxt)) {
+        return NULL;
+    }
+
     if (ctxt->ctype == CTYPE_JACK) {
-        return jack_port_get_buffer(g_array_index(ctxt->info.jack->output_ports,
-                                    jack_port_t *, chan), ctxt->blocksize);
+        return jack_port_get_buffer(
+            g_array_index(ctxt->info.jack->output_ports, jack_port_t *, chan),
+            ctxt->blocksize
+        );
     }
     else {
         mfp_block * blk = g_array_index(ctxt->info.lv2->output_buffers, mfp_block *, chan);
@@ -114,11 +124,22 @@ mfp_num_output_buffers(mfp_context * ctxt) {
 
 int
 mfp_num_input_buffers(mfp_context * ctxt) {
+    GArray * ports = NULL;
+
     if (ctxt->ctype == CTYPE_JACK) {
-        return ctxt->info.jack->input_ports->len;
+        if (ctxt->info.jack != NULL) {
+            ports = ctxt->info.jack->input_ports;
+        }
     }
     else {
-        return ctxt->info.lv2->input_ports->len;
+        ports = ctxt->info.lv2->input_ports;
+    }
+
+    if (ports != NULL) {
+        return ports->len;
+    }
+    else {
+        return 0;
     }
 }
 

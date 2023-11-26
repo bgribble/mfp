@@ -67,11 +67,15 @@ class Patch(Processor):
         await self.step_execute_start(self, "@bp message to patch")
 
     async def step_execute_start(self, target, message):
+        if self.step_debugger.enabled:
+            return
         await self.step_debugger.enable(target)
         await self.step_debugger.show_banner(message)
         await self.step_debugger.show_prompt()
 
     async def step_execute_stop(self):
+        if not self.step_debugger.enabled:
+            return
         self.step_debugger.disable()
         await self.step_debugger.show_leave()
 
@@ -255,10 +259,11 @@ class Patch(Processor):
         try:
             if obj.scope is not None and obj.name is not None:
                 self.unbind(obj.name, obj.scope)
+            obj.patch = None
             del self.objects[obj.obj_id]
         except KeyError:
-            log.error("Error deleting obj", obj, "can't find key", obj.obj_id)
-            log.debug_traceback()
+            log.error(f"Error deleting obj {obj}, can't find key {obj.obj_id}, continuing")
+            log.debug(f"obj info: {obj.name} {obj.init_type} {obj.init_args} deleted={obj.status == obj.DELETED}")
 
         try:
             self.inlet_objects.remove(obj)
@@ -272,8 +277,10 @@ class Patch(Processor):
 
         try:
             self.outlet_objects.remove(obj)
-            self.dsp_outlets = [ p[0] for p in enumerate(self.outlet_objects)
-                                if p[1] and p[1].init_type == 'outlet~' ]
+            self.dsp_outlets = [
+                p[0] for p in enumerate(self.outlet_objects)
+                if p[1] and p[1].init_type == 'outlet~'
+            ]
             self.gui_params['dsp_outlets'] = self.dsp_outlets
         except ValueError:
             pass
@@ -284,6 +291,8 @@ class Patch(Processor):
             pass
 
     async def connect(self, outlet, target, inlet, show_gui=True):
+        from .mfp_app import MFPApp
+
         async def _patch_connect_retry(args):
             rv = await Processor.connect(*args)
             return rv
@@ -292,7 +301,7 @@ class Patch(Processor):
         # the loadbang
         initial = await Processor.connect(self, outlet, target, inlet, show_gui)
         if not initial:
-            self.task_nibbler.add_MFPApp().async_task(
+            Patch.task_nibbler.add_task(
                 lambda args: _patch_connect_retry(args), 20,
                 [self, outlet, target, inlet, show_gui]
             )
@@ -404,8 +413,6 @@ class Patch(Processor):
             self.gui_params = saved_gui
 
             cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
-            for dline in cdiff:
-                print(dline)
 
             if oldjson != newjson:
                 log.warning("Unsaved changes in '%s'" % self.name, "(%s)" % self.file_origin)
@@ -462,7 +469,7 @@ class Patch(Processor):
             self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
             if not MFPApp().no_onload:
-                await self._run_onload(self.objects.values())
+                await self._run_onload(list(self.objects.values()))
 
     async def _run_onload(self, objects):
         from .mfp_app import MFPApp

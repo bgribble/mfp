@@ -16,6 +16,7 @@ log_raw = False
 log_func = None
 log_debug = True
 log_force_console = False 
+log_verbose = False
 
 ts_trans = str.maketrans("0123456789", "xxxxxxxxxx")
 
@@ -25,11 +26,11 @@ def make_log_entry(tag, *parts):
     global log_quiet
 
     msg = ' '.join([str(p) for p in parts])
-    if log_raw:
-        if (not log_quiet or tag == "print"): 
-            return msg + '\n'
-        else: 
-            return None
+    if log_quiet and not log_verbose and tag != "print":
+        return None
+
+    if log_raw and not log_verbose:
+        return msg + '\n'
 
     dt = (datetime.now() - log_time_base).total_seconds()
     ts = "%.3f" % dt
@@ -47,10 +48,6 @@ def write_log_entry(msg, level=0):
     global log_func
     global log_thread
     global log_loop
-    global log_quiet
-
-    if log_quiet:
-        return
 
     logged = False 
     if msg and log_func:
@@ -122,4 +119,4 @@ def debug_traceback():
         debug(l)
 
 def logprint(* parts):
-    write_log_entry(make_log_entry("print", * parts))
+    write_log_entry(make_log_entry("print", *parts))

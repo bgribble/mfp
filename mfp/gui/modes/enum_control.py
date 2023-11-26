@@ -87,7 +87,7 @@ class EnumControlMode (InputMode):
         self.bind("UP", lambda: self.changeval(1.0))
         self.bind("DOWN", lambda: self.changeval(-1.0))
 
-    def changeval(self, delta):
+    async def changeval(self, delta):
         if self.enum.scientific:
             try:
                 logdigits = int(math.log10(self.enum.value))
@@ -99,14 +99,14 @@ class EnumControlMode (InputMode):
             base_incr = 10 ** (-self.enum.digits)
 
         self.value = self.enum.value + delta * base_incr
-        self.enum.update_value(self.value)
+        await self.enum.update_value(self.value)
         return True
 
 
-    def drag_start(self):
+    async def drag_start(self):
         if self.manager.pointer_obj == self.enum:
             if self.manager.pointer_obj not in self.window.selected:
-                self.window.select(self.manager.pointer_obj)
+                await self.window.select(self.manager.pointer_obj)
 
             self.drag_started = True
             self.drag_start_x = self.manager.pointer_x
@@ -118,7 +118,7 @@ class EnumControlMode (InputMode):
         else:
             return False
 
-    def drag_selected(self, delta=1.0):
+    async def drag_selected(self, delta=1.0):
         if self.drag_started is False:
             return False
 
@@ -127,7 +127,7 @@ class EnumControlMode (InputMode):
 
         self.drag_last_x = self.manager.pointer_x
         self.drag_last_y = self.manager.pointer_y
-        self.changeval(-1.0*delta*dy)
+        await self.changeval(-1.0*delta*dy)
 
         return True
 

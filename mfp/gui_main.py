@@ -42,6 +42,8 @@ def clutter_do(func):
 
 class MFPGUI (Singleton):
     def __init__(self):
+        super().__init__()
+
         self.call_stats = {}
         self.objects = {}
         self.mfp = None
@@ -140,7 +142,7 @@ def setup_default_colors():
 
 
 async def main():
-    from mfp.gui.patch_window import AppWindow
+    from mfp.gui.app_window import AppWindow
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--logstart", default=None,
                         help="Reference time for log messages")
@@ -153,29 +155,29 @@ async def main():
     socketpath = args.get("socketpath")
     debug = args.get('debug')
 
-    print("[LOG] DEBUG: GUI process starting")
-
-    channel = UnixSocketChannel(socket_path=socketpath)
-    host = Host(
-        label="MFP GUI",
-    )
-    await host.connect(channel)
+    log.log_module = "gui"
+    log.log_func = log.rpclog
+    log.log_debug = True
 
     if args.get("logstart"):
         st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f")
         if st:
             log.log_time_base = st
 
-    log.log_module = "gui"
-    log.log_func = log.rpclog
-    log.log_debug = True
+    log.debug("UI starting")
 
-    setup_default_colors()
-
-    def _exception(exc, tbinfo, *args):
-        log.error(f"[carp] Exception: '{exc}' '{tbinfo}' '{args}'")
+    channel = UnixSocketChannel(socket_path=socketpath)
+    host = Host(
+        label="MFP GUI",
+    )
+    def _exception(exc, tbinfo, traceback):
+        log.error(f"[carp] Exception: {tbinfo}")
+        for ll in traceback.split('\n'):
+            log.error(ll)
 
     host.on("exception", _exception)
+
+    await host.connect(channel)
 
     # set up Flopsy store manager
     Store.setup_asyncio()
@@ -183,22 +185,21 @@ async def main():
     MFPCommandFactory = await host.require(MFPCommand)
     mfp_connection = await MFPCommandFactory()
 
-    print("[LOG] DEBUG: About to create MFPGUI")
     from mfp.gui import backends  # noqa
     AppWindow.backend_name = "clutter"
+
+    setup_default_colors()
 
     gui = MFPGUI()
     gui.mfp = mfp_connection
     gui.debug = debug
     gui.appwin = AppWindow()
 
-    print("[LOG] DEBUG: created MFPGUI")
     if debug:
         import yappi
         yappi.start()
 
     await host.export(GUICommand)
-    print("[LOG] DEBUG: published GUICommand, setup complete")
     await host.wait_for_completion()
     await channel.close()
 
@@ -211,7 +212,8 @@ async def main_error_wrapper():
         import traceback
         print(f"[LOG] ERROR: GUI process failed with {e}")
         tb = traceback.format_exc()
-        print(f"[LOG] ERROR: {tb}")
+        for ll in tb.split("\n"):
+            print(f"[LOG] ERROR: {ll}")
     ex = main_task.exception()
     print(f"[LOG] ERROR: main task exited {ex}")
 

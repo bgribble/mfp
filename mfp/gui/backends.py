@@ -1,4 +1,8 @@
-from mfp.gui.clutter.app_window import ClutterAppWindowBackend  # noqa
-from mfp.gui.clutter.input_manager import ClutterInputManagerBackend  # noqa
-from mfp.gui.clutter.console_manager import ClutterConsoleManagerBackend  # noqa
-from mfp.gui.clutter.layer import ClutterLayerBackend  # noqa
+"""
+backends.py
+
+Import all the backend code so the appropriate registries get built
+"""
+
+import mfp.gui.clutter  # noqa
+

@@ -1,14 +1,23 @@
+"""
+connection_element.py -- connection between elements
 
-import cairo
-from .patch_element import PatchElement
-from .colordb import ColorDB
-from gi.repository import Clutter
-import math
+Copyright (c) Bill Gribble <grib@billgribble.com>
+"""
+
+from abc import ABC, abstractmethod
 from mfp.gui_main import MFPGUI
-from mfp import log
+
+from .backend_interfaces import BackendInterface
+from .base_element import BaseElement
 
 
-class ConnectionElement(PatchElement):
+class ConnectionElementImpl(ABC, BackendInterface):
+    @abstractmethod
+    def redraw(self):
+        pass
+
+
+class ConnectionElement(BaseElement):
     display_type = "connection"
     LINE_WIDTH = 1.5
 
@@ -26,33 +35,21 @@ class ConnectionElement(PatchElement):
 
         if port_1 in obj_1.dsp_outlets:
             self.dsp_connect = True
-        px, py = obj_1.get_stage_position()
-        PatchElement.__init__(self, window, px, py)
 
-        self.texture = Clutter.Canvas.new()
-        self.set_content(self.texture)
-        self.texture.connect("draw", self.draw_cb)
-
-        self.set_reactive(True)
-        if obj_1.layer is not None:
-            self.move_to_layer(obj_1.layer)
-        elif obj_2.layer is not None:
-            self.move_to_layer(obj_2.layer)
-        else:
-            print("WARNING: creating ConnectionElement with no layer")
-            print(obj_1, obj_2)
-
-        self.set_size(15, 15)
-        self.move(px, py)
-        self.draw()
+        px, py = self.obj_1.get_position()
+        super().__init__(window, px, py)
 
     def select(self):
-        PatchElement.select(self)
+        super().select()
         self.draw()
 
     def unselect(self):
-        PatchElement.unselect(self)
+        super().unselect()
         self.draw()
+
+    @classmethod
+    def get_factory(cls):
+        return ConnectionElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     async def delete(self):
         if (not self.dashed and self.obj_1 and self.obj_2 and
@@ -68,73 +65,4 @@ class ConnectionElement(PatchElement):
 
         self.obj_1 = None
         self.obj_2 = None
-        await PatchElement.delete(self)
-
-    def draw_ports(self):
-        pass
-
-    def set_size(self, width, height):
-        PatchElement.set_size(self, width, height)
-        self.texture.set_size(width, height)
-        self.texture.invalidate()
-
-    def corners(self):
-        if self.obj_1 and self.obj_2:
-            p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
-            p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
-            return [p1, p2]
-        else:
-            return None
-
-    def draw(self):
-        if self.obj_1 is None or self.obj_2 is None:
-            return
-
-        p1 = self.obj_1.port_center(PatchElement.PORT_OUT, self.port_1)
-        p2 = self.obj_2.port_center(PatchElement.PORT_IN, self.port_2)
-
-        if self.dsp_connect is True:
-            self.width = 2.5 * self.LINE_WIDTH
-        else:
-            self.width = 1.5 * self.LINE_WIDTH
-        self.height = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
-        theta = math.atan2(p1[0] - p2[0], p2[1] - p1[1])
-        self.rotation = theta * 180.0 / math.pi
-        self.position_x = p1[0] - math.cos(theta) * self.width / 2.0
-        self.position_y = p1[1] - math.sin(theta) * self.width / 2.0
-
-        self.set_position(self.position_x, self.position_y)
-        self.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
-
-        self.set_size(math.ceil(self.width), math.ceil(self.height))
-
-    def draw_cb(self, texture, ctx, width, height):
-        # clear the drawing area
-        ctx.save()
-        ctx.set_operator(cairo.OPERATOR_CLEAR)
-        ctx.paint()
-        ctx.restore()
-
-        ctx.set_operator(cairo.OPERATOR_OVER)
-        ctx.set_antialias(cairo.ANTIALIAS_NONE)
-
-        if self.dsp_connect:
-            lw = 2.0 * self.LINE_WIDTH
-        else:
-            lw = self.LINE_WIDTH
-        ctx.set_line_width(lw)
-
-        if self.dashed:
-            ctx.set_dash([4, 4])
-        else:
-            ctx.set_dash([])
-
-        ctx.translate(width/2.0, lw/2.0)
-        ctx.move_to(0, 0)
-        ctx.line_to(0, height)
-        ctx.close_path()
-
-        c = ColorDB.to_cairo(self.get_color('stroke-color'))
-        ctx.set_source_rgba(c.red, c.green, c.blue, c.alpha)
-        ctx.stroke()
-        return True
+        await super().delete()

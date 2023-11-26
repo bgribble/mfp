@@ -536,7 +536,6 @@ mfp_rpc_init(void)
     pthread_mutex_init(&request_lock, NULL);
     pthread_cond_init(&request_cond, NULL);
 
-    mfp_log_info("Connecting to master process...");
     create_uuid_32(rpc_node_id);
     msgbuf = mfp_comm_get_buffer();
     msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, announce, rpc_node_id);

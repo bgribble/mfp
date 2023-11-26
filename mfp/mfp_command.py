@@ -1,9 +1,17 @@
+"""
+mfp_command.py -- API to send commands to the main MFP process
+
+Copyright (c) Bill Gribble <grib@billgribble.com>
+"""
+
 from carp.service import apiclass, noresp
+
+from mfp import log
 from .bang import Bang
 from .patch import Patch
 from .method import MethodCall
 from .processor import Processor
-from mfp import log
+
 
 @apiclass
 class MFPCommand:
@@ -14,6 +22,7 @@ class MFPCommand:
 
         obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name)
         if obj is None:
+            log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name}")
             return None
         return obj.gui_params
 
@@ -23,8 +32,7 @@ class MFPCommand:
         if isinstance(obj, Patch):
             obj.create_export_gui()
             return True
-        else:
-            return False
+        return False
 
     def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .mfp_app import MFPApp
@@ -32,8 +40,7 @@ class MFPCommand:
         obj_2 = MFPApp().recall(obj_2_id)
         if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
             return obj_1.connect(obj_1_port, obj_2, obj_2_port)
-        else:
-            return None
+        return None
 
     def disconnect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .mfp_app import MFPApp
@@ -42,8 +49,7 @@ class MFPCommand:
 
         if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
             return obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
-        else:
-            return None
+        return None
 
     @noresp
     async def dsp_response(self, obj_id, resp_type, resp_value):
@@ -121,8 +127,7 @@ class MFPCommand:
                         num_outlets=len(obj.outlets),
                         dsp_inlets=obj.dsp_inlets,
                         dsp_outlets=obj.dsp_outlets)
-        else:
-            return {}
+        return {}
 
     def get_tooltip(self, obj_id, direction=None, portno=None, details=False):
         from .mfp_app import MFPApp
@@ -227,7 +232,7 @@ class MFPCommand:
         from .mfp_app import MFPApp
         try:
             ctxt_name = open("/proc/%d/cmdline" % owner_pid, "r").read().split("\x00")[0]
-            log.debug("open_context: new context, name=%s" % ctxt_name)
+            log.debug(f"open_context: new context, name={ctxt_name}")
         except Exception:
             ctxt_name = ""
 
@@ -238,8 +243,7 @@ class MFPCommand:
 
         if DSPContext.create(node_id, context_id, ctxt_name):
             return True
-        else:
-            return False
+        return False
 
     async def load_context(self, file_name, node_id, context_id):
         from .mfp_app import MFPApp
@@ -256,7 +260,7 @@ class MFPCommand:
         ctxt = DSPContext.lookup(node_id, context_id)
 
         to_delete = []
-        for patch_id, patch in MFPApp().patches.items():
+        for _, patch in MFPApp().patches.items():
             if patch.context == ctxt:
                 to_delete.append(patch)
 
@@ -264,7 +268,7 @@ class MFPCommand:
             pid = patch.obj_id
             await patch.delete()
             if pid in MFPApp().patches:
-                del MFPApp().patches[patch_id]
+                del MFPApp().patches[pid]
 
         if not len(MFPApp().patches):
             MFPApp().finish_soon()

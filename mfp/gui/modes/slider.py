@@ -49,10 +49,10 @@ class SliderControlMode (InputMode):
         self.slider.update_value(self.slider.value + dv)
         return True
 
-    def drag_start(self):
+    async def drag_start(self):
         if self.manager.pointer_obj == self.slider:
             if self.slider not in self.window.selected:
-                self.window.select(self.slider)
+                await self.window.select(self.slider)
 
             if (self.slider.slider_enable 
                 and self.slider.point_in_slider(self.manager.pointer_x, 

@@ -4,20 +4,25 @@ text_element.py
 A text element (comment) in a patch
 '''
 
-from gi.repository import Clutter
-import cairo
+from abc import ABC, abstractmethod
 
-from .patch_element import PatchElement
 from mfp.gui_main import MFPGUI
 from mfp import log
-from mfp.utils import catchall
+from .base_element import BaseElement
+from .backend_interfaces import BackendInterface
 
 from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
-from .colordb import ColorDB
+from .text_widget import TextWidget
 
 
-class TextElement (PatchElement):
+class TextElementImpl(ABC, BackendInterface):
+    @abstractmethod
+    def redraw(self):
+        pass
+
+
+class TextElement (BaseElement):
     display_type = "text"
     proc_type = "text"
 
@@ -32,76 +37,41 @@ class TextElement (PatchElement):
     }
 
     def __init__(self, window, x, y):
-        PatchElement.__init__(self, window, x, y)
+        super().__init__(window, x, y)
         self.value = ''
         self.clickchange = False
         self.default = ''
 
         self.param_list.extend(['value', 'clickchange', 'default'])
 
-        self.texture = Clutter.Canvas.new()
-        self.texture.connect("draw", self.draw_cb)
-        self.set_content(self.texture)
-
-        self.label = Clutter.Text()
+        self.label = TextWidget.build(self)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.set_position(3, 3)
-        self.add_actor(self.label)
 
-        self.update_required = True
-        self.move(x, y)
-        self.set_size(12, 12)
-        self.set_reactive(True)
-        self.label_changed_cb = self.label.connect('text-changed', self.text_changed_cb)
+        self.label_changed_cb = self.label.signal_listen('text-changed', self.text_changed_cb)
+
+    @classmethod
+    def get_factory(cls):
+        return TextElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
     def update(self):
         if not self.get_style('canvas-size'):
             self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM,
                           self.label.get_height() + self.ELBOW_ROOM)
-        self.texture.invalidate()
+        self.redraw()
         self.draw_ports()
-
-    @catchall
-    def draw_cb(self, texture, ct, width, height):
-        # clear the drawing area
-        ct.save()
-        ct.set_operator(cairo.OPERATOR_CLEAR)
-        ct.paint()
-        ct.restore()
-
-        # fill to paint the background
-        color = ColorDB.to_cairo(self.get_color('fill-color'))
-        ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ct.rectangle(0, 0, width, height)
-        ct.fill()
-
-        if self.clickchange or self.get_style('border'):
-            ct.set_line_width(1.0)
-            ct.translate(0.5, 0.5)
-            ct.set_antialias(cairo.ANTIALIAS_NONE)
-            ct.rectangle(0, 0, width-1, height-1)
-            color = ColorDB.to_cairo(self.get_color('border-color'))
-            ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-            ct.stroke()
-        return True
-
-    def set_size(self, w, h):
-        PatchElement.set_size(self, w, h)
-
-        self.texture.set_size(w, h)
-        self.texture.invalidate()
 
     def draw_ports(self):
         if self.selected:
-            PatchElement.draw_ports(self)
+            super().draw_ports()
 
     def label_edit_start(self):
         return self.value
 
     async def label_edit_finish(self, widget, new_text, aborted=False):
         if self.obj_id is None:
-            self.create(self.proc_type, None)
+            await self.create(self.proc_type, None)
         if self.obj_id is None:
             log.warning("TextElement: could not create obj")
         elif new_text != self.value and not aborted:
@@ -111,23 +81,22 @@ class TextElement (PatchElement):
         self.update()
 
     async def end_edit(self):
-        await PatchElement.end_edit(self)
+        await BaseElement.end_edit(self)
         self.set_text()
 
     def text_changed_cb(self, *args):
         self.update()
-        return
 
     def clicked(self):
         def newtext(txt):
             self.value = txt or ''
             self.set_text()
         if self.selected and self.clickchange:
-            self.stage.get_prompted_input("New text:", newtext, self.value)
+            self.app_window.get_prompted_input("New text:", newtext, self.value)
         return True
 
     def set_text(self):
-        if len(self.value):
+        if len(self.value) > 0:
             self.label.set_markup(self.value)
         else:
             size_set = self.get_style('canvas-size')
@@ -138,23 +107,25 @@ class TextElement (PatchElement):
         return True
 
     def select(self, *args):
-        PatchElement.select(self)
+        BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        self.redraw()
         self.draw_ports()
 
     def unselect(self, *args):
-        PatchElement.unselect(self)
+        BaseElement.unselect(self)
         self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        self.redraw()
         self.hide_ports()
 
-    def make_edit_mode(self):
-        return LabelEditMode(self.stage, self, self.label,
-                             multiline=True, markup=True, initial=self.value)
+    async def make_edit_mode(self):
+        return LabelEditMode(
+            self.app_window, self, self.label,
+            multiline=True, markup=True, initial=self.value
+        )
 
     def make_control_mode(self):
-        return ClickableControlMode(self.stage, self, "Change text", 'A-')
+        return ClickableControlMode(self.app_window, self, "Change text", 'A-')
 
     def configure(self, params):
         if params.get('value') is not None:
@@ -177,10 +148,7 @@ class TextElement (PatchElement):
                 params['width'] = newsize[0]
                 params['height'] = newsize[1]
 
-        if params.get('border') is not None:
-            self.border = params.get('border')
-
-        PatchElement.configure(self, params)
+        BaseElement.configure(self, params)
         if newsize:
             self.set_size(*newsize)
 
