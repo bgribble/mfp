@@ -66,7 +66,7 @@ class GUICommand:
         from .gui.text_element import TextElement
         from .gui.enum_element import EnumElement
         from .gui.plot_element import PlotElement
-        from .gui.slidemeter_element import SlideMeterElement, DialElement
+        from .gui.slidemeter_element import FaderElement, BarMeterElement, DialElement
         from .gui.via_element import SendViaElement, ReceiveViaElement
         from .gui.via_element import SendSignalViaElement, ReceiveSignalViaElement
         from .gui.button_element import ToggleButtonElement
@@ -82,7 +82,9 @@ class GUICommand:
             'text': TextElement,
             'enum': EnumElement,
             'plot': PlotElement,
-            'slidemeter': SlideMeterElement,
+            'slidemeter': FaderElement,
+            'fader': FaderElement,
+            'barmeter': BarMeterElement,
             'dial': DialElement,
             'patch': PatchDisplay,
             'sendvia': SendViaElement,
