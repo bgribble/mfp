@@ -164,7 +164,11 @@ class ClutterAppWindowBackend (AppWindowBackend):
                     (element.layer.scope, element.layer.patch),
                 )
 
+        def on_rename(window, signal, obj, parent):
+            object_view.update(obj, parent)
+
         self.wrapper.signal_listen("created", on_create)
+        self.wrapper.signal_listen("rename", on_rename)
 
         return object_view
 

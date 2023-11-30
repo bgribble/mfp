@@ -3,11 +3,11 @@ clutter/processor_element.py -- clutter backend for processor elements
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
-import math
 
 from gi.repository import Clutter
 import cairo
 
+from mfp import log
 from ..colordb import ColorDB
 from .base_element import ClutterBaseElementBackend
 from ..processor_element import (

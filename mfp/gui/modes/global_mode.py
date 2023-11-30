@@ -84,6 +84,10 @@ class GlobalMode (InputMode):
         self.bind("HOVER", lambda: self.hover(False))
         self.bind("S-HOVER", lambda: self.hover(True))
 
+        self.bind('C-.', self.force_reset, "Reset all modifier keys and input modes")
+        self.bind('S-C-.', self.force_reset, "Reset all modifier keys and input modes")
+        self.bind('M1-C-.', self.force_reset, "Reset all modifier keys and input modes")
+
     def inspect(self):
         from flopsy import Store
         Store.show_inspector(event_loop=MFPGUI().async_task.asyncio_loop)
@@ -121,6 +125,15 @@ class GlobalMode (InputMode):
         oldpos = self.window.backend.content_console_pane.get_position()
         self.window.backend.content_console_pane.set_position(oldpos - 1)
         return False
+
+    async def force_reset(self):
+        await self.window.unselect_all()
+
+        while self.manager.minor_modes:
+            self.manager.disable_minor_mode(self.manager.minor_modes[0])
+
+        self.manager.keyseq.mouse_buttons = set()
+        self.manager.keyseq.mod_keys = set()
 
     async def transient_msg(self):
         from ..message_element import TransientMessageElement
