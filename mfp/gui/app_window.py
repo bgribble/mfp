@@ -133,9 +133,7 @@ class AppWindow (SignalMixin):
 
         return self.selected_layer
 
-    def active_group(self):
-        return self.active_layer().group
-
+    # FIXME Clutter 
     def ready(self):
         if self.window and self.window.get_realized():
             return True
@@ -206,7 +204,6 @@ class AppWindow (SignalMixin):
         self.register(b)
         self.refresh(b)
         await self.select(b)
-
         await b.begin_edit()
         return True
 

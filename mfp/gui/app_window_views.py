@@ -46,7 +46,7 @@ def init_object_view(self):
         else:
             parent = (self.selected_patch,)
 
-        self.object_view.update(obj, parent)
+        self.signal_emit("rename", obj, parent)
 
     async def obj_selected(obj):
         await self._select(obj)

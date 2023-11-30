@@ -91,6 +91,9 @@ class InputManager (object):
             mode.enable()
 
     def disable_minor_mode(self, mode):
+        if mode not in self.minor_modes:
+            return
+
         cb = mode.disable()
         if inspect.isawaitable(cb):
             MFPGUI().async_task(cb)

@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 '''
-label_edit.py: Minor mode for editing contents of a clutter.Text label
+label_edit.py: Minor mode for editing contents of a label
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 import asyncio
@@ -136,6 +136,7 @@ class LabelEditMode (InputMode):
     def set_selection(self, start, end):
         self.selection_start = start
         self.selection_end = end
+        self.update_label(raw=True)
         self.widget.set_selection(start, end)
 
     def delete_selection(self):
@@ -254,7 +255,6 @@ class LabelEditMode (InputMode):
 
         self.undo_stack.append((self.text, self.editpos))
         self.text = new_text
-        return True
 
         editpos = self.widget.get_cursor_position()
         if editpos == -1:
@@ -264,7 +264,7 @@ class LabelEditMode (InputMode):
         else:
             self.editpos = change_at
 
-        return
+        return True
 
     async def commit_edits(self):
         self.text = self.widget.get_text()
