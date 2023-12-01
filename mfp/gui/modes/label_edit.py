@@ -162,7 +162,6 @@ class LabelEditMode (InputMode):
         self.text = newtext
 
         self.editpos += 1
-        self.update_label(raw=True)
         self.set_selection(self.editpos, self.editpos)
 
         return True

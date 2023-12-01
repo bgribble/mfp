@@ -51,9 +51,11 @@ class KeySequencer (object):
             if code in key_defs.MOD_ALL:
                 try:
                     if code in (key_defs.MOD_SHIFTALT, key_defs.MOD_SHIFTRALT):
-                        self.mod_keys.remove(key_defs.MOD_SHIFT)
-                        self.mod_keys.remove(key_defs.MOD_ALT)
-                    else:
+                        if key_defs.MOD_SHIFT in self.mod_keys:
+                            self.mod_keys.remove(key_defs.MOD_SHIFT)
+                        if key_defs.MOD_ALT in self.mod_keys:
+                            self.mod_keys.remove(key_defs.MOD_ALT)
+                    elif code in self.mod_keys:
                         self.mod_keys.remove(code)
                 except KeyError:
                     pass
@@ -81,8 +83,13 @@ class KeySequencer (object):
 
         if isinstance(event, (KeyPressEvent, KeyReleaseEvent)):
             ks = event.keyval
+
             # FIXME - shifted unicode keys
-            if ks >= 256 and ((key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys)):
+            if (
+                ks >= 256
+                and ((key_defs.MOD_SHIFT in self.mod_keys)
+                     or (key_defs.MOD_RSHIFT in self.mod_keys))
+            ):
                 key = 'S-' + key
 
             if ks in (key_defs.KEY_TAB, key_defs.KEY_SHIFTTAB):
@@ -140,7 +147,8 @@ class KeySequencer (object):
                 self.mouse_buttons.add(button)
             else:
                 key += 'UP'
-                self.mouse_buttons.remove(button)
+                if button in self.mouse_buttons:
+                    self.mouse_buttons.remove(button)
 
         elif isinstance(event, MotionEvent):
             for b in (1, 2, 3):
