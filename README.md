@@ -15,7 +15,7 @@ questions, or pull requests.
 I have a few projects that I want to work on.
 
 Recent progress:
-* Switch to using [carp](https://github./com/bgribble/carp)
+* Switch to using [carp](https://github.com/bgribble/carp)
 instead of the `mfp/rpc/` RPC subsystem.
 * Add a step debugger using the [bp] processor and/or the
 @bp message to the patch
