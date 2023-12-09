@@ -29,7 +29,7 @@ class ClutterLayerBackend(LayerBackend):
         else:
             child = obj
 
-        self.group.remove_actor(child)
+        self.group.remove_child(child)
 
     def add(self, obj):
         if isinstance(obj, BaseElement):
@@ -41,8 +41,8 @@ class ClutterLayerBackend(LayerBackend):
         child = group
         if parent != self.group:
             if parent:
-                parent.remove_actor(child)
-            self.group.add_actor(child)
+                parent.remove_child(child)
+            self.group.add_child(child)
 
     def delete(self):
         del self.group

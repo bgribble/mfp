@@ -188,7 +188,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.autoplace_layer = self.wrapper.selected_layer
             self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
         elif self.autoplace_layer != self.wrapper.selected_layer:
-            self.autoplace_layer.backend.group.remove_actor(self.autoplace_marker)
+            if self.autoplace_layer.backend.group:
+                self.autoplace_layer.backend.group.remove_actor(self.autoplace_marker)
             self.autoplace_layer = self.wrapper.selected_layer
             self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
         self.autoplace_marker.set_position(x, y)
@@ -569,7 +570,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
             else:
                 element.container = element.layer.backend.group
 
-        self.wrapper.event_sources[element.group] = element
+        if element.group is None:
+            log.debug(f"[register] group for {element} is None!!")
+        else:
+            self.wrapper.event_sources[element.group] = element
+            if hasattr(element, 'texture'):
+                self.wrapper.event_sources[element.texture] = element
 
         if not isinstance(element, ConnectionElement):
             if not self.wrapper.load_in_progress:
@@ -584,6 +590,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.object_view.remove(element)
         if element.group in self.wrapper.event_sources:
             del self.wrapper.event_sources[element.group]
+        if hasattr(element, 'texture') and element.texture in self.wrapper.event_sources:
+            del self.wrapper.event_sources[element.texture]
 
     def refresh(self, element):
         if isinstance(element, PatchDisplay):

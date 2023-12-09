@@ -28,6 +28,9 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.label = Clutter.Text()
         self.parent.add_actor(self.label)
 
+        if hasattr(self.container, 'app_window'):
+            self.container.app_window.event_sources[self.label] = self.container
+
         self.key_press_handler_id = None
         self.edit_mode = None
 
@@ -37,8 +40,15 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.label.connect("key-focus-out", repeat_event(self, "key-focus-out"))
         self.label.connect("key-focus-in", repeat_event(self, "key-focus-in"))
 
+    async def delete(self):
+        if self.label:
+            if hasattr(self.container, 'app_window') and self.label in self.container.app_window.event_sources:
+                del self.container.app_window.event_sources[self.label]
+            self.label.destroy()
+            self.label = None
+
     def grab_focus(self):
-        return self.label.grab_key_focus()
+        return self.label.grab_key_focus() if self.label else None
 
     def show(self):
         return self.parent.add_actor(self.label)
@@ -68,10 +78,10 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
         return self.label.get_cursor_position()
 
     def set_cursor_position(self, pos):
-        return self.label.set_cursor_position(pos)
+        return self.label.set_cursor_position(pos) if self.label else None
 
     def set_cursor_visible(self, visible):
-        return self.label.set_cursor_visible(visible)
+        return self.label.set_cursor_visible(visible) if self.label else None
 
     def set_cursor_color(self, color):
         return self.label.set_cursor_color(color)
@@ -80,7 +90,7 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
         return self.label.get_text()
 
     def set_text(self, text):
-        return self.label.set_text(text)
+        return self.label.set_text(text) if self.label else None
 
     def set_markup(self, text):
         return self.label.set_markup(text)
@@ -98,7 +108,7 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
         return self.label.get_property(propname)
 
     def set_use_markup(self, use_markup):
-        return self.label.set_use_markup(use_markup)
+        return self.label.set_use_markup(use_markup) if self.label else None
 
     def set_selection(self, start, end):
         return self.label.set_selection(start, end)

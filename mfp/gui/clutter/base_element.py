@@ -16,13 +16,34 @@ class ClutterBaseElementBackend(BaseElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
-        self.group = Clutter.Group()
+        self.group = Clutter.Group.new()
         self.badge = None
         self.badge_times = {}
         self.badge_current = None
         self.port_elements = {}
 
         super().__init__(window, x, y)
+
+    async def delete(self):
+        await super().delete()
+
+        if self.badge:
+            if self.badge in self.app_window.event_sources:
+                del self.app_window.event_sources[self.badge]
+            self.badge.destroy()
+            self.badge = None
+
+        for port in self.port_elements.values():
+            port.destroy()
+
+        self.port_elements = {}
+
+        if self.group:
+            if self.group in self.app_window.event_sources:
+                del self.app_window.event_sources[self.group]
+            self.group.destroy()
+            self.group = None
+
 
     def move_to_top(self):
         def bump(element):
@@ -64,9 +85,13 @@ class ClutterBaseElementBackend(BaseElement):
         ctx.show_text(btext)
 
     def update_badge(self):
+        if self.group is None:
+            return 
+
         badgesize = self.get_style('badge_size')
         if self.badge is None:
             self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
+            self.app_window.event_sources[self.badge] = self
             self.group.add_actor(self.badge)
             self.badge.connect("draw", self.draw_badge_cb)
 
@@ -108,7 +133,7 @@ class ClutterBaseElementBackend(BaseElement):
         self.badge.invalidate()
 
     def draw_ports(self):
-        if self.editable is False:
+        if self.editable is False or self.group is None:
             return
 
         ports_done = []

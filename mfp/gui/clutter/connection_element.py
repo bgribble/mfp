@@ -39,6 +39,13 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
         self.move(px, py)
         self.draw()
 
+    async def delete(self):
+        if self.texture:
+            self.group.set_content(None)
+            self.texture = None
+
+        await super().delete()
+
     def redraw(self):
         super().redraw()
         self.draw()

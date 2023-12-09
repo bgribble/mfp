@@ -7,6 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from mfp.gui_main import MFPGUI
 from mfp import log
+from mfp.gui.collision import collision_check
 from ..input_mode import InputMode
 from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
@@ -225,6 +226,22 @@ class GlobalMode (InputMode):
         return True
 
     async def selbox_start(self, select_mode):
+
+        px = self.manager.pointer_x
+        py = self.manager.pointer_y
+        enclosed = []
+        selection_corners = [(px, py), (px+1, py), (px+1, py+1), (px, py+1)]
+
+        for obj in self.window.selected_layer.objects:
+            if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
+                continue
+            corners = obj.corners()
+
+            if corners and collision_check(selection_corners, corners):
+                enclosed.append(obj)
+        if enclosed:
+            self.manager.pointer_obj = enclosed[0]
+
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:

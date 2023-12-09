@@ -29,11 +29,22 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
         self.group.set_reactive(True)
 
         # resize widget whne text gets longer
-        self.label.signal_listen('text-changed', self.label_changed_cb)
+        self.handler_id = self.label.signal_listen('text-changed', self.label_changed_cb)
         self.set_size(35, 25)
         self.move(x, y)
 
         self.redraw()
+
+    async def delete(self):
+        if self.texture:
+            self.group.set_content(None)
+            self.texture = None
+        if self.label:
+            self.label.signal_unlisten(self.handler_id)
+            await self.label.delete()
+            self.label = None
+
+        await super().delete()
 
     def redraw(self):
         super().redraw()
@@ -56,8 +67,10 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
 
     def unselect(self):
         super().unselect()
-        self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        if self.label:
+            self.label.set_color(self.get_color('text-color'))
+        if self.texture:
+            self.texture.invalidate()
 
     def draw_cb(self, texture, ct, width, height):
         lw = 2.0

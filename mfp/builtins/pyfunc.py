@@ -555,6 +555,11 @@ def register():
         "split", "Split a string into pieces")
 
     mk_binary(
+        lambda haystack, needle: (needle in haystack),
+        "in", "Check if an item is in an iterable"
+    )
+
+    mk_binary(
         lambda inval, joinstr="": joinstr.join(inval) if isiterable(inval) else inval,
         "join", "Concatenate an array or tuple of strings into one")
 

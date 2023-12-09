@@ -27,7 +27,6 @@ class InputManager (object):
         self.minor_modes = []
         self.minor_seqno = 0
         self.keyseq = KeySequencer()
-        self.event_sources = {}
         self.root_source = None
         self.pointer_x = None
         self.pointer_y = None
