@@ -111,7 +111,8 @@ class MessageElement (BaseElement):
 
     def unselect(self):
         BaseElement.unselect(self)
-        self.label.set_color(self.get_color('text-color'))
+        if self.label:
+            self.label.set_color(self.get_color('text-color'))
         self.redraw()
 
     async def make_edit_mode(self):

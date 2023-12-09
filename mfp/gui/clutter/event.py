@@ -74,9 +74,23 @@ def transform_event(clutter_event, mfp_target):
             dy=delta.dy
         )
 
+    # NOTE: the event.source is not reliable, at least not on my
+    # machine with my GL setup. It sometimes comes up with a Clutter
+    # object that is not visible, or is on the other edge of the screen.
+    # enter/leave really only used for HOVER determination to show object
+    # docs so it's OK that it is wrong  sometimes :/
     if clutter_event.type == Clutter.EventType.ENTER:
         if hasattr(mfp_target, 'event_sources'):
-            source = mfp_target.event_sources.get(clutter_event.source, mfp_target)
+            source = mfp_target.event_sources.get(clutter_event.source)
+            if not source and hasattr(clutter_event.source, 'container'):
+                container = clutter_event.source.container
+                source = mfp_target.event_sources.get(container)
+                if not source and hasattr(container, 'container'):
+                    container = container.container
+                    source = mfp_target.event_sources.get(container)
+            if not source:
+                source = mfp_target
+
         else:
             source = mfp_target
         return EnterEvent(target=source)

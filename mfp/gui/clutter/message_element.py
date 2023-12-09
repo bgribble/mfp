@@ -32,11 +32,24 @@ class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseE
         self.group.set_reactive(True)
 
         # resize widget whne text gets longer
-        self.label.signal_listen('text-changed', self.text_changed_cb)
+        self.handler_id = self.label.signal_listen('text-changed', self.text_changed_cb)
         self.set_size(35, 25)
         self.redraw()
 
+    async def delete(self):
+        if self.texture:
+            self.group.set_content(None)
+            self.texture = None
+        if self.label:
+            self.label.signal_unlisten(self.handler_id)
+            await self.label.delete()
+            self.label = None
+
+        await super().delete()
+
     def redraw(self):
+        if not self.texture:
+            return
         super().redraw()
         self.texture.invalidate()
 
@@ -47,6 +60,8 @@ class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseE
 
     @catchall
     def text_changed_cb(self, *args):
+        if self.group is None:
+            return
         lwidth = self.label.get_property('width')
         bwidth = self.texture.get_property('width')
 

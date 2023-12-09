@@ -119,11 +119,11 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBac
 
     def select(self):
         super().select()
-        self.rect.set_border_color(self.app_window.color_selected)
+        self.rect.set_border_color(self.app_window.wrapper.color_selected)
 
     def unselect(self):
         super().unselect()
-        self.rect.set_border_color(self.app_window.color_unselected)
+        self.rect.set_border_color(self.app_window.wrapper.color_unselected)
 
     def command(self, action, data):
         if self.xyplot.command(action, data):
