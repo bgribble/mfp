@@ -57,6 +57,19 @@ class Unpack (Processor):
 
         self.outlets[-1] = self.inlets[0][nout:]
 
+class Hodor (Processor):
+    doc_tooltip_obj = "Hold the hot input to reverse output order"
+    doc_tooltip_inlet = [ "Inlet 0", "Inlet 1" ]
+    doc_tooltip_outlet = [ "Outlet 0", "Outlet 1" ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
+        self.hot_inlets = [1]
+
+    async def trigger(self):
+        self.outlets[0] = self.inlets[0]
+        self.outlets[1] = self.inlets[1]
+
 
 class Append (Processor):
     doc_tooltip_obj = "Append an item to a list or string"
@@ -113,11 +126,30 @@ class Map (Processor):
 
         self.func = lambda x: x
         if len(initargs):
-            self.inlets[1] =  initargs[0]
-
+            self.func = initargs[0]
 
     async def trigger(self):
-        self.outlets[0] = list(map(self.inlets[1], self.inlets[0]))
+        if self.inlets[1] != Uninit:
+            self.func = self.inlets[1]
+        self.outlets[0] = list(map(self.func, self.inlets[0]))
+
+class Filter (Processor):
+    doc_tooltip_obj = "Pass through elements if the function returns True"
+    doc_tooltip_inlet = [ "List", "Function to apply (default: initarg 1)"]
+    doc_tooltip_outlet = [ "List output" ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = patch.parse_args(init_args)
+
+        self.func = lambda x: x
+        if len(initargs):
+            self.func = initargs[0]
+
+    async def trigger(self):
+        if self.inlets[1] != Uninit:
+            self.func = self.inlets[1]
+        self.outlets[0] = list(filter(self.func, self.inlets[0]))
 
 
 class Slice (Processor):
@@ -181,8 +213,10 @@ class Range (Processor):
 def register():
     MFPApp().register("pack", Pack)
     MFPApp().register("unpack", Unpack)
+    MFPApp().register("hodor", Hodor)
     MFPApp().register("zip", Zip)
     MFPApp().register("append", Append)
     MFPApp().register("map", Map)
+    MFPApp().register("filter", Filter)
     MFPApp().register("slice", Slice)
     MFPApp().register("range", Range)
