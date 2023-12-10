@@ -133,7 +133,7 @@ class AppWindow (SignalMixin):
 
         return self.selected_layer
 
-    # FIXME Clutter 
+    # FIXME Clutter
     def ready(self):
         if self.window and self.window.get_realized():
             return True
@@ -190,7 +190,7 @@ class AppWindow (SignalMixin):
             y = self.input_mgr.pointer_y
 
         try:
-            b = factory(self.backend, x, y)
+            b = factory(self, x, y)
         except Exception as e:
             log.warning("add_element: Error while creating with factory", factory)
             log.warning(e)

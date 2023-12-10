@@ -6,15 +6,15 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from mfp.processor import Processor
-from ..mfp_app import MFPApp
 from mfp.bang import Bang, Uninit
-from mfp import log
+from ..mfp_app import MFPApp
+
 
 def iterable(o):
     try:
         getattr(o, '__getitem__')
         return True
-    except AttributeError as e:
+    except AttributeError:
         return False
 
 
@@ -38,16 +38,18 @@ class For(Processor):
         if self.inlets[0] is False:
             self.iterating = False
             return
-        elif self.iterating:
-            return
-        elif iterable(self.inlets[0]):
+
+        if iterable(self.inlets[0]):
             self.inlets[1] = self.inlets[0]
             self.startval = self.inlets[0]
             self.inlets[0] = Uninit
-            self.iterating = True
         elif self.inlets[0] in (Bang, True):
-            self.iterating = True
             self.startval = self.inlets[1]
+
+        if self.iterating:
+            return
+
+        self.iterating = True
 
         while self.iterating and iterable(self.inlets[1]) and len(self.inlets[1]) > 0:
             val = self.inlets[1][0]

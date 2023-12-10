@@ -110,8 +110,9 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
 
     def set_size(self, width, height):
         super().set_size(width, height)
-        self.texture.set_size(width, height)
-        self.texture.invalidate()
+        if self.texture:
+            self.texture.set_size(width, height)
+            self.texture.invalidate()
 
     def move(self, x, y):
         self.position_x = x

@@ -29,7 +29,11 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.parent.add_actor(self.label)
 
         if hasattr(self.container, 'app_window'):
-            self.container.app_window.event_sources[self.label] = self.container
+            window = self.container.app_window
+            if hasattr(window, 'wrapper'):
+                window = window.wrapper
+
+            window.event_sources[self.label] = self.container
 
         self.key_press_handler_id = None
         self.edit_mode = None

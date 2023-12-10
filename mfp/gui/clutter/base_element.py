@@ -44,7 +44,6 @@ class ClutterBaseElementBackend(BaseElement):
             self.group.destroy()
             self.group = None
 
-
     def move_to_top(self):
         def bump(element):
             if hasattr(element, 'backend'):
@@ -52,9 +51,13 @@ class ClutterBaseElementBackend(BaseElement):
             else:
                 actor = element.group
 
+            if not actor:
+                return
+
             p = actor.get_parent()
             if not p:
                 return
+
             p.remove_actor(actor)
             p.add_actor(actor)
 
@@ -209,6 +212,9 @@ class ClutterBaseElementBackend(BaseElement):
     def move(self, x, y):
         self.position_x = x
         self.position_y = y
+
+        if not self.group:
+            return
 
         self.group.set_position(x, y)
 

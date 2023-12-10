@@ -105,7 +105,7 @@ class GlobalMode (InputMode):
         else:
             next_pos = self.previous_console_position
 
-        self.window.content_console_pane.set_position(next_pos)
+        self.window.backend.content_console_pane.set_position(next_pos)
 
         return False
 
