@@ -71,7 +71,8 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
         self.group.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
 
         self.set_size(math.ceil(self.width), math.ceil(self.height))
-        self.texture.invalidate()
+        if self.texture:
+            self.texture.invalidate()
 
 
     def draw_cb(self, texture, ctx, width, height):

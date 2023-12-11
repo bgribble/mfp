@@ -62,8 +62,10 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
 
     def select(self):
         super().select()
-        self.label.set_color(self.get_color('text-color'))
-        self.texture.invalidate()
+        if self.label:
+            self.label.set_color(self.get_color('text-color'))
+        if self.texture:
+            self.texture.invalidate()
 
     def unselect(self):
         super().unselect()
