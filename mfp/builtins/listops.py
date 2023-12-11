@@ -115,6 +115,25 @@ class Zip (Processor):
         else:
             self.outlets[0] = list(zip(*self.inlets))
 
+class Sort (Processor):
+    doc_tooltip_obj = "Sort a list"
+    doc_tooltip_inlet = [ "List", "Key function (default: element)" ]
+    doc_tooltip_outlet = [ "List output" ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = patch.parse_args(init_args)
+
+        self.func = lambda x: x
+        if len(initargs):
+            self.func = initargs[0]
+
+    async def trigger(self):
+        if self.inlets[1] != Uninit:
+            self.func = self.inlets[1]
+        self.outlets[0] = list(sorted(self.inlets[0], key=self.func))
+
+
 class Map (Processor):
     doc_tooltip_obj = "Apply a function to each list element"
     doc_tooltip_inlet = [ "List", "Function to apply (default: initarg 1)"]
@@ -218,5 +237,6 @@ def register():
     MFPApp().register("append", Append)
     MFPApp().register("map", Map)
     MFPApp().register("filter", Filter)
+    MFPApp().register("sort", Sort)
     MFPApp().register("slice", Slice)
     MFPApp().register("range", Range)

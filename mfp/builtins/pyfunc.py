@@ -559,6 +559,11 @@ def register():
         "in", "Check if an item is in an iterable"
     )
 
+    mk_cmproute(
+        lambda haystack, needle: (needle in haystack),
+        "in:", "Route based on whether an item is in an iterable"
+    )
+
     mk_binary(
         lambda inval, joinstr="": joinstr.join(inval) if isiterable(inval) else inval,
         "join", "Concatenate an array or tuple of strings into one")
