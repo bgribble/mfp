@@ -106,7 +106,8 @@ class MessageElement (BaseElement):
 
     def select(self):
         BaseElement.select(self)
-        self.label.set_color(self.get_color('text-color'))
+        if self.label:
+            self.label.set_color(self.get_color('text-color'))
         self.redraw()
 
     def unselect(self):
@@ -151,7 +152,7 @@ class TransientMessageElement (MessageElement):
     def _make_connections(self):
         for to in self.target_obj:
             c = ConnectionElement.build(self.app_window, self, 0, to, self.target_port)
-            self.app_window.wrapper.active_layer().add(c)
+            self.app_window.active_layer().add(c)
             self.app_window.register(c)
             self.connections_out.append(c)
             to.connections_in.append(c)
