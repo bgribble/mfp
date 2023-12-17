@@ -576,6 +576,14 @@ def register():
         lambda instr, initial: instr.startswith(initial) if isinstance(instr, str) else False,
         "startswith:", "Route on whether string starts with another string")
 
+    mk_binary(
+        lambda instr, initial: instr.endswith(initial) if isinstance(instr, str) else False,
+        "endswith", "Test if string ends with another string")
+
+    mk_cmproute(
+        lambda instr, initial: instr.endswith(initial) if isinstance(instr, str) else False,
+        "endswith:", "Route on whether string ends with another string")
+
     from datetime import datetime
     mk_nullary(datetime.now, "now", "Current time-of-day")
     mk_unary(applyargs(datetime), "datetime", "Create a datetime object")
