@@ -122,10 +122,10 @@ class GetElement(Processor):
 
         for element in self.elements:
             if isinstance(self.inlets[0], (list, tuple, str)):
-                idx = int(element)
-                if idx < len(self.inlets[0]):
-                    values.append(self.inlets[0][int(element)])
-                else:
+                try:
+                    val_at_loc = self.inlets[0][int(element)]
+                    values.append(val_at_loc)
+                except IndexError:
                     if callable(self.default_element):
                         default = self.default_element()
                     else:
@@ -205,6 +205,43 @@ class SetElement(Processor):
 
         self.outlets[0] = target
 
+
+class DeleteElement(Processor):
+    doc_tooltip_obj = "Delete element or attribute from object"
+    doc_tooltip_inlet = ["Object to get from",
+                         "Element to get (default: initarg 0)"]
+    doc_tooltip_outlet = ["Object after deletion"]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+
+        self.elements = None
+        if len(initargs):
+            self.elements = initargs
+
+    async def trigger(self):
+        if self.inlets[1] is not Uninit:
+            self.elements = self.inlets[1]
+            if not isinstance(self.inlets[1], list):
+                self.elements = [self.inlets[1]]
+
+        if self.elements is None:
+            return
+
+        value = self.inlets[0]
+
+        for element in self.elements:
+            if isinstance(value, (list, tuple, str)):
+                try:
+                    idx = int(element)
+                    value = value[:idx] + value[idx+1:]
+                except ValueError:
+                    pass
+            elif isinstance(value, dict):
+                if element in value:
+                    del value[element]
+        self.outlets[0] = value
 
 class GetSlice(Processor):
     doc_tooltip_obj = "Get a slice of list elements"
@@ -471,9 +508,17 @@ def applyargs(func):
         return func(*args)
     return wrapped
 
+
+def index(haystack, needle):
+    try:
+        return haystack.index(needle)
+    except ValueError:
+        return None
+
 def register():
     MFPApp().register("get", GetElement)
     MFPApp().register("set!", SetElement)
+    MFPApp().register("delete", DeleteElement)
     MFPApp().register("slice", GetSlice)
     MFPApp().register("eval", PyEval)
     MFPApp().register("apply", ApplyMethod)
@@ -553,6 +598,11 @@ def register():
     mk_binary(
         lambda instr, splitstr=" ": instr.split(splitstr) if isinstance(instr, str) else instr,
         "split", "Split a string into pieces")
+
+    mk_binary(
+        index,
+        "index", "Return the position of a target in an iterable, or None"
+    )
 
     mk_binary(
         lambda haystack, needle: (needle in haystack),
