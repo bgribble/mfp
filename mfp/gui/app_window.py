@@ -133,7 +133,7 @@ class AppWindow (SignalMixin):
 
         return self.selected_layer
 
-    # FIXME Clutter
+    # FIXME clutter
     def ready(self):
         if self.window and self.window.get_realized():
             return True

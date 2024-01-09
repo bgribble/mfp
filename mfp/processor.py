@@ -521,7 +521,7 @@ class Processor:
             self.midi_cbid = None
 
         if hasattr(self, "dsp_obj") and self.dsp_obj is not None:
-            if self.patch.context is not None:
+            if self.patch and self.patch.context is not None:
                 await self.dsp_obj.delete()
             self.dsp_obj = None
 

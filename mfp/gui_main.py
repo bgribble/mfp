@@ -80,7 +80,7 @@ class MFPGUI (Singleton):
             log.debug_traceback()
             return False
 
-    # FIXME -- yooooooooo
+    # FIXME clutter
     def clutter_do_later(self, delay, thunk):
         from gi.repository import GObject
         GObject.timeout_add(int(delay), self._callback_wrapper, thunk)
