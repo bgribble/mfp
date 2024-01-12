@@ -111,13 +111,14 @@ class GlobalMode (InputMode):
 
     # FIXME this is clutter-specific
     def toggle_tree(self):
+        from mfp.gui.clutter.utils import clutter_do_later
         oldpos = self.window.backend.tree_canvas_pane.get_position()
 
         self.window.backend.tree_canvas_pane.set_position(self.next_tree_position)
         self.next_tree_position = oldpos
 
         # KLUDGE!
-        MFPGUI().clutter_do_later(100, self._refresh)
+        clutter_do_later(100, self._refresh)
 
         return False
 

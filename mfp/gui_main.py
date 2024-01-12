@@ -31,15 +31,6 @@ gi.require_version('GtkClutter', '1.0')
 gi.require_version('Clutter', '1.0')
 
 
-# decorator version
-def clutter_do(func):
-    def wrapped(*args, **kwargs):
-        from mfp.gui_main import MFPGUI
-        MFPGUI().clutter_do(lambda: func(*args, **kwargs))
-
-    return wrapped
-
-
 class MFPGUI (Singleton):
     def __init__(self):
         super().__init__()
@@ -72,23 +63,6 @@ class MFPGUI (Singleton):
     def recall(self, obj_id):
         return self.objects.get(obj_id)
 
-    def _callback_wrapper(self, thunk):
-        try:
-            return thunk()
-        except Exception as e:
-            log.debug("Exception in GUI operation:", e)
-            log.debug_traceback()
-            return False
-
-    # FIXME clutter
-    def clutter_do_later(self, delay, thunk):
-        from gi.repository import GObject
-        GObject.timeout_add(int(delay), self._callback_wrapper, thunk)
-
-    def clutter_do(self, thunk):
-        from gi.repository import GObject
-        GObject.idle_add(self._callback_wrapper, thunk, priority=GObject.PRIORITY_DEFAULT)
-
     def finish(self):
         from gi.repository import Gtk
         if self.debug:
@@ -102,6 +76,7 @@ class MFPGUI (Singleton):
         if self.appwin:
             self.appwin.quit()
             self.appwin = None
+            # FIXME clutter
             Gtk.main_quit()
 
 
