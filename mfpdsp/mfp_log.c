@@ -4,12 +4,19 @@
 #include "mfp_dsp.h" 
 #define LOG_MAX 2048
 
+int mfp_log_quiet = 0;
+
 void 
 _mfp_log(const char * level, const char * site_filename, int site_lineno, ...)
 {
     char logbuf[LOG_MAX];
     char * fmt;
     va_list args;
+
+    if (mfp_log_quiet) {
+        return;
+    }
+
     va_start(args, site_lineno);
     fmt = va_arg(args, char *);
     vsnprintf(logbuf, LOG_MAX-1, fmt, args);

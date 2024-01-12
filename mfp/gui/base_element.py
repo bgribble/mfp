@@ -10,8 +10,6 @@ from flopsy import Store
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB
-from .backend_interfaces import BaseElementBackend
-import math
 
 
 class BaseElement (Store):
@@ -340,9 +338,14 @@ class BaseElement (Store):
         return (pos_x + ppos[0] + 0.5 * self.get_style('porthole_width'),
                 pos_y + ppos[1] + 0.5 * self.get_style('porthole_height'))
 
+    def port_size(self):
+        return (self.get_style('porthole_width'), self.get_style('porthole_height'))
+
     def port_position(self, port_dir, port_num):
         w = self.width
         h = self.height
+
+        # inlet
         if port_dir == BaseElement.PORT_IN:
             if self.num_inlets < 2:
                 spc = 0
@@ -353,17 +356,16 @@ class BaseElement (Store):
                            / (self.num_inlets - 1.0)))
             return (self.get_style('porthole_border') + spc * port_num, 0)
 
-        elif port_dir == BaseElement.PORT_OUT:
-            if self.num_outlets < 2:
-                spc = 0
-            else:
-                spc = max(self.get_style('porthole_minspace'),
-                          ((w - self.get_style('porthole_width')
-                            - 2.0 * self.get_style('porthole_border'))
-                           / (self.num_outlets - 1.0)))
-            return (self.get_style('porthole_border') + spc * port_num,
-                    h - self.get_style('porthole_height'))
-
+        # outlet
+        if self.num_outlets < 2:
+            spc = 0
+        else:
+            spc = max(self.get_style('porthole_minspace'),
+                      ((w - self.get_style('porthole_width')
+                        - 2.0 * self.get_style('porthole_border'))
+                       / (self.num_outlets - 1.0)))
+        return (self.get_style('porthole_border') + spc * port_num,
+                h - self.get_style('porthole_height'))
 
     def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
@@ -486,18 +488,17 @@ class BaseElement (Store):
         if self.obj_id is None:
             return False
 
-        # FIXME per-port tooltips need backend support
-        """
-        for (pid, pobj) in self.port_elements.items():
-            x, y = pobj.get_position()
-            x += orig_x - 1
-            y += orig_y - 1
-            w, h = pobj.get_size()
-            w += 2
-            h += 2
-            if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
-                tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, pid[0], pid[1], details)
-        """
+        for direction, num_ports in [(self.PORT_IN, self.num_inlets), (self.PORT_OUT, self.num_outlets)]:
+            for port_num in range(num_ports):
+                x, y = self.port_position(direction, port_num)
+                x += orig_x - 1
+                y += orig_y - 1
+                w, h = self.port_size()
+                w += 2
+                h += 2
+                if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
+                    tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, direction, port_num, details)
+
         if tiptxt is None:
             tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, None, None, details)
         self.app_window.hud_banner(tiptxt)

@@ -177,7 +177,7 @@ class GUICommand:
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay
         obj = MFPGUI().recall(obj_id)
-        if isinstance(obj, PatchDisplay):
+        if isinstance(obj, PatchDisplay) and len(obj.layers) > 0:
             MFPGUI().appwin.layer_select(obj.layers[0])
         else:
             await MFPGUI().appwin.select(obj)

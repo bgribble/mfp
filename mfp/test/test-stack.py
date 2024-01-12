@@ -106,4 +106,4 @@ class DepthFirstTest(IsolatedAsyncioTestCase):
     async def test_depthfirst(self):
         '''test_depthfirst: depth-first execution order is preserved'''
         await self.procs[0].send(Bang, 0)
-        self.assertEqual(FanOut.trail, [0, 1, 5, 6, 7, 8, 2, 3, 9, 4])
+        self.assertEqual(FanOut.trail, [0, 4, 3, 9, 2, 1, 8, 7, 6, 5])

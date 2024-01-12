@@ -379,7 +379,7 @@ alloc(mfp_processor * proc, void * alloc_data)
     }
     else {
         /* private buffer alloc, not shared with other processes */
-        int allocsize = buf->buf_chancount * buf->buf_chansize * sizeof(float);
+        int allocsize = buf->buf_chancount * buf->buf_chansize * sizeof(mfp_sample);
         buf->buf_size = allocsize;
         buf->buf_ptr = g_malloc0(allocsize);
     }
@@ -507,7 +507,7 @@ config(mfp_processor * proc)
         for(channel = 0; channel < d->chan_count; channel++) {
             if((1 << channel) & clear_channels) {
                 bzero(d->buf_base + channel*d->chan_size,
-                      sizeof(double)*d->chan_size);
+                      sizeof(mfp_sample)*d->chan_size);
             }
         }
         g_hash_table_remove(proc->params, "clear_channels");

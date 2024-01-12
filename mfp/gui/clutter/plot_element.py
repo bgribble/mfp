@@ -11,6 +11,7 @@ from mfp.gui_main import MFPGUI
 from mfp.mfp_app import MFPApp
 from mfp import log
 
+from .utils import clutter_do_later
 from .base_element import ClutterBaseElementBackend
 from ..plot_element import (
     PlotElement,
@@ -113,7 +114,7 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBac
             if delta_msec > self.min_interval:
                 thunk()
             else:
-                MFPGUI().clutter_do_later(self.min_interval-delta_msec, thunk)
+                clutter_do_later(self.min_interval-delta_msec, thunk)
         else:
             thunk()
 
