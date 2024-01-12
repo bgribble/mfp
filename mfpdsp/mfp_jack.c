@@ -188,12 +188,14 @@ test_SETUP(void)
     ctxt->blocksize = 1024;
     ctxt->samplerate = 44100;
 
+    mfp_log_quiet = 1;
+
     /* called before each test case, where each test case is run
      * in a separate executable */
     mfp_dsp_init();
     mfp_alloc_init();
 
-
+    mfp_log_quiet = 0;
     return (void *)ctxt;
 }
 

@@ -17,6 +17,7 @@ async def mkproc(testcase, init_type, init_args=None):
 class DSPObjectTests (IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         MFPApp().no_gui = True
+        MFPApp().no_dsp = False
         MFPApp().no_restart = True
         MFPApp().next_obj_id = 0
         MFPApp().objects = {}

@@ -1,31 +1,46 @@
+"""
+test-control-1 -- test basic control builtins
+"""
+import threading
+import asyncio
+from unittest import IsolatedAsyncioTestCase
+
 from mfp.mfp_app import MFPApp
 from mfp.patch import Patch
 from mfp.scope import NaiveScope
 from mfp.bang import Bang, Uninit
+from mfp import log, builtins
 
-from unittest import IsolatedAsyncioTestCase
 
-
-async def mkproc(case, init_type, init_args=None):
-    return await MFPApp().create(init_type, init_args, case.patch, None, init_type)
+async def mkproc(testcase, init_type, init_args=None):
+    return await MFPApp().create(init_type, init_args, testcase.patch, None, init_type)
 
 
 class PlusTest(IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
+        MFPApp().no_gui = True
+        MFPApp().no_dsp = True
+        MFPApp().next_obj_id = 0
+        MFPApp().objects = {}
+        log.log_quiet = True
+        log.log_thread = threading.get_ident()
+        log.log_loop = asyncio.get_event_loop()
+        await MFPApp().setup()
+        builtins.register()
         self.patch = Patch('default', '', None, NaiveScope(), 'default')
-        self.plus = await mkproc(self, "+", None, )
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
+        self.plus = await mkproc(self, "+", None)
         self.out = await mkproc(self, "var")
         await self.plus.connect(0, self.out, 0)
 
     async def test_default(self):
         '''test with default creation args'''
-        self.plus = mkproc(self, "+", "12")
+        self.plus = await mkproc(self, "+", "12")
         await self.plus.connect(0, self.out, 0)
         await self.plus.send(13, 0)
-        print("outlets:", self.out.outlets)
         assert self.out.outlets[0] == 25
 
-        self.plus.send(99, 0)
+        await self.plus.send(99, 0)
         assert self.out.outlets[0] == 111
 
     async def test_numbers(self):
@@ -47,12 +62,24 @@ class PlusTest(IsolatedAsyncioTestCase):
 
         assert self.out.outlets[0] is Uninit
 
+    async def asyncTearDown(self):
+        await MFPApp().finish()
 
 class PrintTest(IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
+        MFPApp().no_gui = True
+        MFPApp().no_dsp = True
+        MFPApp().next_obj_id = 0
+        MFPApp().objects = {}
+        log.log_quiet = True
+        log.log_thread = threading.get_ident()
+        log.log_loop = asyncio.get_event_loop()
+        await MFPApp().setup()
+        builtins.register()
         self.patch = Patch('default', '', None, NaiveScope(), 'default')
-        self.pr = mkproc(self, "print")
-        self.out = mkproc(self, "var")
+        self.patch = Patch('default', '', None, NaiveScope(), 'default')
+        self.pr = await mkproc(self, "print")
+        self.out = await mkproc(self, "var")
         await self.pr.connect(0, self.out, 0)
 
     async def test_default(self):
@@ -83,9 +110,20 @@ class PrintTest(IsolatedAsyncioTestCase):
 
         assert self.out.outlets[0] == "1 2 3"
 
+    async def asyncTearDown(self):
+        await MFPApp().finish()
 
 class RouteTest (IsolatedAsyncioTestCase):
-    async def setUp(self):
+    async def asyncSetUp(self):
+        MFPApp().no_gui = True
+        MFPApp().no_dsp = True
+        MFPApp().next_obj_id = 0
+        MFPApp().objects = {}
+        log.log_quiet = True
+        log.log_thread = threading.get_ident()
+        log.log_loop = asyncio.get_event_loop()
+        await MFPApp().setup()
+        builtins.register()
         self.patch = Patch('default', '', None, NaiveScope(), 'default')
         self.r = await mkproc(self, "route", 'False, 1, "hello"')
 
@@ -149,10 +187,11 @@ class RouteTest (IsolatedAsyncioTestCase):
 
     async def test_connections_ok(self):
         '''[route] --> [var] connection remains when addresses resized'''
-        v = mkproc(self, "var")
-        self.r.connect(0, v, 0)
+        v = await mkproc(self, "var")
+        await self.r.connect(0, v, 0)
         await self.r.send([4], 1)
         await self.r.send([4, 'hello'], 0)
-        print(self.r.addresses)
-        print(v.outlets)
         assert v.outlets[0] == ['hello']
+
+    async def asyncTearDown(self):
+        await MFPApp().finish()

@@ -41,7 +41,7 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
  *
  */
 
-PyObject * 
+PyObject *
 run_dl_test(PyObject * mod, PyObject * args)
 {
     char * libname = NULL;
@@ -76,7 +76,7 @@ run_dl_test(PyObject * mod, PyObject * args)
         Py_IncRef(Py_None);
         return Py_None;
     }
-    
+
     /* look up test */
     dlfile = dlopen(libname, RTLD_NOW);
     if (dlfile == NULL) {
@@ -85,7 +85,7 @@ run_dl_test(PyObject * mod, PyObject * args)
         return Py_None;
     }
 
-    
+
     if(strcmp(setup, "None")) {
         setupfunc = dlsym(dlfile, setup);
         if (setupfunc == NULL) {
@@ -129,7 +129,7 @@ run_dl_test(PyObject * mod, PyObject * args)
 
     if (error_happened)
         pyres = Py_None;
-    else if (testres) 
+    else if (testres)
         pyres = Py_True;
     else
         pyres = Py_False;
@@ -145,7 +145,7 @@ static PyMethodDef TestExtMethods[] = {
 };
 
 
-/* the following init code mostly copied from 
+/* the following init code mostly copied from
  * https://docs.python.org/2/howto/cporting.html */
 
 struct module_state {
