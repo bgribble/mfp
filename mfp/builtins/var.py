@@ -46,14 +46,14 @@ class Var (Processor):
     async def trigger(self):
         '''
         [var] trigger, basic form:
-                - on inlet 1, save value but do not output.
-                  Possibly update GUI display.
-                - Bang on inlet 0: output stored value
-                - anything else on inlet 0: save and output value
-                  Possibly update GUI display
+        - on inlet 1, save value but do not output.
+          Possibly update GUI display.
+        - Bang on inlet 0: output stored value
+        - anything else on inlet 0: save and output value
+          Possibly update GUI display
 
         As [text]:
-                - ensure that value is a string and save it in the gui_params
+        - ensure that value is a string and save it in the gui_params
 
         '''
         do_update = False
@@ -77,12 +77,6 @@ class Var (Processor):
             and ('value' not in self.gui_params or self.gui_params['value'] != self.value)):
             self.conf(value=self.value)
         return True
-
-    def save(self):
-        base_dict = Processor.save(self)
-        if self.init_type != "message":
-            base_dict["value"] = self.value
-        return base_dict
 
     def load(self, params):
         Processor.load(self, params)
@@ -126,9 +120,6 @@ class Message (Var):
         if do_update and self.gui_params.get("update_required"):
             self.gui_params['value'] = self.value
             self.conf(value=self.value)
-
-    def save(self):
-        return Processor.save(self)
 
 class Text (Var):
     doc_tooltip_obj = "Comment using SGML-type markup for style"
