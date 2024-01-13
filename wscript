@@ -81,6 +81,9 @@ def fix_virtualenv(ctxt, *args, **kwargs):
             "echo 'if echo $LD_LIBRARY_PATH | grep -vq :%s/lib64:' >> activate.edited" % ctxt.env.PREFIX,
             "echo 'then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/lib64:' >> activate.edited" % ctxt.env.PREFIX,
             "echo 'fi' >> activate.edited",
+            "echo 'if echo $LD_LIBRARY_PATH | grep -vq :%s/lib:' >> activate.edited" % ctxt.env.PREFIX,
+            "echo 'then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/lib:' >> activate.edited" % ctxt.env.PREFIX,
+            "echo 'fi' >> activate.edited",
             "mv activate.edited virtual/bin/activate",
             "touch %s" % targetfile
         ]

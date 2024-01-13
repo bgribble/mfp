@@ -1,22 +1,23 @@
-BUILDING AND INSTALLING MFP 
+BUILDING AND INSTALLING MFP
 ===================================
 
-Post version 0.06, 2016-02-07
+Post version 0.07, 2024-01-15
 
 TL;DR
 ---------------------
 
-   $ ./waf configure --python=python3 --virtualenv --prefix ~/mfpvirt build install install_deps 
-     [...] 
-   $ . ~/mfpvirt/bin/activate  
-   (mfpvirt)$ mfp -v 
+   $ ./waf configure --python=python3 --virtualenv --prefix ~/mfpvirt build install install_deps
+     [...]
+   $ . ~/mfpvirt/bin/activate
+   (mfpvirt)$ mfp -v
 
-THINGS TO KNOW 
+THINGS TO KNOW
 ---------------------
 
-OS platform: I have only tested MFP on 64-bit Linux.  
+OS platform: I have only tested MFP on 32-bit (raspi) and 64-bit
+Linux.
 
-python: MFP requires Python 3.x at this time. 
+python: MFP requires Python 3.x at this time.
 
 waf: MFP uses 'waf', which you can think of as a replacement for
 autotools and make.  You do not need to install waf; the correct
@@ -25,7 +26,7 @@ is designed to work; more information can be found at
 https://code.google.com/p/waf/.  MFP's "Makefile" or
 "configure.in" equivalent is the file "wscript", which is a plain
 Python file.  The entry points used by waf are the functions
-"configure" and "build", defined near the bottom of the file. 
+"configure" and "build", defined near the bottom of the file.
 
 virtualenv: At this phase of MFP's development you should
 probably build it in a "virtualenv" sandbox.  The waf scripts
@@ -35,112 +36,112 @@ configure with --virtualenv as in the TL;DR above and the build
 will go into the virtual environment.  When you specify
 --virtualenv, the install prefix (--prefix) is the path to the
 virtual environment, so you shouldn't let this default to
-/usr/local.  
+/usr/local.
 
 setuptools: The build process depends on Python setuptools.  If
 you have virtualenv installed, you have setuptools already, but
 if you aren't using virtualenv you may need to install setuptools
 separately.  It's packaged as "python-setuptools" on Debian and
-Ubuntu. 
+Ubuntu.
 
 pip:  The modern replacement for "easy_install" to install Python
 packages is called pip.  If (1) you are using Debian or Ubuntu, (2)
 you do not want to use a --virtualenv install, and (3) you want to use
 the './waf install_deps' feature to install some Python dependencies,
 you need the Debian package 'python-pip', or your distro's equivalent,
-installed.  
+installed.
 
 gcc: The C components of mfp (mfpdsp, pluginfo, and testext) are
 straightforward C but include some c99-isms, mainly due to LV2.  I
 have been using versions from gcc-4.8.3 to 9.3.0 with no trouble.
 
-CONFIGURING 
+CONFIGURING
 -----------------------
 
-The basic form: 
+The basic form:
 
-    $ ./waf configure [options] 
+    $ ./waf configure [options]
 
 A full list of options is shown by ./waf --help, under
 "Configuration options".  --virtualenv is the only "custom"
-option. 
+option.
 
 
 LIBRARIES
 -----------------------
 
 The "mfpdsp" C library/program needs a few C libraries with their
-development headers and pkg-config files installed:  
- 
+development headers and pkg-config files installed:
+
  * ladspa.h       (LADSPA plugins)
- * glib-2.0       (GLib/GObject) 
+ * glib-2.0       (GLib/GObject)
  * json-glib-2.0  (JSON serializing/deserializing)
- * serd-0         (LV2 TTL parsing) 
+ * serd-0         (LV2 TTL parsing)
  * jack           (duh)
  * liblo          (OSC library, needed by pyliblo)
  * lv2 headers    (LV2 load/save)
 
-You'll get errors in the "./waf configure" process if these aren't installed.  
+You'll get errors in the "./waf configure" process if these aren't installed.
 
 Python runtime dependencies are checked for in "configure" and many of
 them can be automagically installed by "./waf install_deps" if you
-wish. 
+wish.
 
 install_deps must be run after "./waf install".  If you
 are using a virtualenv, the installed Python libraries will also
-be installed into the virtualenv. 
+be installed into the virtualenv.
 
 Note that the Python language bindings for Gtk+/GLib and Clutter libraries
 CANNOT be automatically installed by this build process.  You need to
 install your OS package manager's package for the "GIR" (GObject
 Introspection Repository) data for Clutter, Glib, Gtk+, Gdk,
 GtkClutter, and Pango, and the Python infrastructure to use that data.
-In Debian, these are packaged as: 
+In Debian, these are packaged as:
 
     gir1.2-clutter-1.0
-    gir1.2-gtkclutter-1.0 
+    gir1.2-gtkclutter-1.0
     gir1.2-pango-1.0
     gir1.2-glib-2.0
-    gir1.2-gtk-3.0 
-    python-gi 
+    gir1.2-gtk-3.0
+    python-gi
 
-BUILDING 
+BUILDING
 -----------------------
 
-    $ ./waf build 
+    $ ./waf build
 
 This will build the project into ./wafbuild (or other directory as
 specified to "configure").  There may be some temporary stuff placed
 into ./build/ and ./dist/ by setuptools, so I wouldn't use those as
-names for the waf build directory. 
+names for the waf build directory.
 
 INSTALLING
 --------------------------
 
-    $ ./waf install 
+    $ ./waf install
 
 The installation root defaults to /usr/local and can be modified
 by passing in the --prefix argument to "./waf configure".
 
-If you get errors on the install step to the effect of os.symlink 
-failing to make a link because the file already exists -- see GitHub 
+If you get errors on the install step to the effect of os.symlink
+failing to make a link because the file already exists -- see GitHub
 issue #220 and please add a comment indicating your Linux distribution
-and that you are having this problem.  
+and that you are having this problem.
 
 Note that the instances of #220 I have seen are failing at the
 very tail end of the install process, and are trying to install
 files that are already there... which means that you can probably
 ignore this error.  Try activating the virtualenv and running
-mfp.  If it launches, you are good to go. 
+mfp.  If it launches, you are good to go.
 
 RUNNING TESTS
 --------------------------
 
 There are some tests, though not as many as I would like.  What's
 there basically comes in two flavors, all of which can be run
-with various incantations of the `nosetests` test runner:  
+with various incantations of the `nosetests` test runner:
 
- * Python test cases in mfp/test: run with plain `python /usr/bin/nosetests -v mfp/` 
+ * Python test cases in mfp/test: run with plain `nosetests -v mfp/test/`
 
  * C test cases in mfpdsp/test_*: run with the `testext` plugin
-   to nosetests, `python /usr/bin/nosetests -v --with-testext --exe wafbuild/libmfpdsp.so`
+   to nosetests, `nosetests -v --with-testext --exe wafbuild/libmfpdsp.so`
