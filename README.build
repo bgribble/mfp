@@ -134,6 +134,24 @@ files that are already there... which means that you can probably
 ignore this error.  Try activating the virtualenv and running
 mfp.  If it launches, you are good to go.
 
+
+DESKTOP FILE
+--------------------------
+
+The template desktop file `mfp.desktop` will be populated with
+paths and installed to ${PREFIX}/share/mfp/mfp.desktop. You will
+need to copy it to wherever such things go on your system. 
+
+The icon path is what I needed to get icons working on my Gnome
+system. You may need to change it. If you need to do something
+manual, the actual icon image is the one in mfp.svg. I can't
+express how crabby I am about how messed up icons are on the
+Linux desktop. 
+
+For what it's worth, on my system the desktop file should be
+~/.local/share/applications/mfp.desktop
+
+
 RUNNING TESTS
 --------------------------
 

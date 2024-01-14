@@ -127,7 +127,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         # set app icon
         icon_theme = Gtk.IconTheme.get_default()
-        icon_name = "mfp-icon"
+        icon_name = "mfp"
         icon_path = sys.exec_prefix + '/share/mfp/icons/'
         icon_theme.add_resource_path(icon_path)
         icon_theme.append_search_path(icon_path)
@@ -136,7 +136,6 @@ class ClutterAppWindowBackend (AppWindowBackend):
             icon_theme.load_icon(icon_name, s, 0)
             for s in sizes
         ]
-        log.debug(f"loaded icons: {pixbufs}")
         self.window.set_icon_list(pixbufs)
 
         # show top-level window
