@@ -133,13 +133,6 @@ class AppWindow (SignalMixin):
 
         return self.selected_layer
 
-    # FIXME clutter
-    def ready(self):
-        if self.window and self.window.get_realized():
-            return True
-        else:
-            return False
-
     def edit_major_mode(self):
         for o in self.selected:
             o.end_control()

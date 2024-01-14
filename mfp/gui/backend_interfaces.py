@@ -56,6 +56,11 @@ class AppWindowBackend(ABC, BackendInterface, DelegateMixin):
     def grab_focus(self):
         pass
 
+    @abstractmethod
+    @delegatemethod
+    def ready(self):
+        pass
+
     #####################
     # coordinate transforms and zoom
 

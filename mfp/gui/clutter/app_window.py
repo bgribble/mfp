@@ -62,6 +62,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
             log.debug_traceback()
             sys.stdout.flush()
 
+    def ready(self):
+        if self.window and self.window.get_realized():
+            return True
+        else:
+            return False
+
     def _init_window(self):
         from gi.repository import Clutter, Gtk, GtkClutter
         # load Glade ui
