@@ -89,6 +89,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.hud_prompt = None
         self.hud_prompt_input = None
         self.hud_mode_txt = None
+
+        self.previous_console_position = 0
+        self.next_tree_position = 1
+
         ############################
 
         ############################
@@ -143,6 +147,9 @@ class ClutterAppWindowBackend (AppWindowBackend):
             for s in sizes
         ]
         self.window.set_icon_list(pixbufs)
+
+        self.wrapper.signal_listen("toggle-console", self._toggle_console)
+        self.wrapper.signal_listen("toggle-info-panel", self._toggle_info_panel)
 
         # show top-level window
         self.window.show_all()
@@ -312,10 +319,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
         start_it, end_it = leader_iters()
         buf.apply_tag(monotag, start_it, end_it)
 
-        if (level == 1):
+        if level == 1:
             start_it, end_it = leader_iters()
             buf.apply_tag(warntag, start_it, end_it)
-        elif (level == 2):
+        elif level == 2:
             start_it, end_it = leader_iters()
             buf.apply_tag(errtag, start_it, end_it)
 
@@ -637,3 +644,31 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
     def layer_update(self, layer, patch):
         self.layer_view.update(layer, patch)
+
+    async def _toggle_console(self, *args):
+        alloc = self.content_console_pane.get_allocation()
+        oldpos = self.content_console_pane.get_position()
+
+        console_visible = oldpos < (alloc.height - 2)
+        if console_visible:
+            next_pos = alloc.height
+            self.previous_console_position = oldpos
+        else:
+            next_pos = self.previous_console_position
+
+        self.content_console_pane.set_position(next_pos)
+
+    async def _toggle_info_panel(self, *args):
+        def refresh():
+            oldpos = self.content_console_pane.get_position()
+            self.content_console_pane.set_position(oldpos - 1)
+            return False
+
+        from mfp.gui.clutter.utils import clutter_do_later
+        oldpos = self.tree_canvas_pane.get_position()
+
+        self.tree_canvas_pane.set_position(self.next_tree_position)
+        self.next_tree_position = oldpos
+
+        # KLUDGE!
+        clutter_do_later(100, refresh)

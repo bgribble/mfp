@@ -31,9 +31,6 @@ class GlobalMode (InputMode):
         self.drag_last_y = None
         self.drag_target = None
 
-        self.previous_console_position = 0
-        self.next_tree_position = 1
-
         InputMode.__init__(self, "Global input bindings")
 
         # global keybindings
@@ -93,39 +90,12 @@ class GlobalMode (InputMode):
         from flopsy import Store
         Store.show_inspector(event_loop=MFPGUI().async_task.asyncio_loop)
 
-    # FIXME this is clutter-specific
-    def toggle_console(self):
-        alloc = self.window.backend.content_console_pane.get_allocation()
-        oldpos = self.window.backend.content_console_pane.get_position()
-
-        console_visible = oldpos < (alloc.height - 2)
-        if console_visible:
-            next_pos = alloc.height
-            self.previous_console_position = oldpos
-        else:
-            next_pos = self.previous_console_position
-
-        self.window.backend.content_console_pane.set_position(next_pos)
-
+    async def toggle_console(self):
+        await self.window.signal_emit("toggle-console")
         return False
 
-    # FIXME this is clutter-specific
-    def toggle_tree(self):
-        from mfp.gui.clutter.utils import clutter_do_later
-        oldpos = self.window.backend.tree_canvas_pane.get_position()
-
-        self.window.backend.tree_canvas_pane.set_position(self.next_tree_position)
-        self.next_tree_position = oldpos
-
-        # KLUDGE!
-        clutter_do_later(100, self._refresh)
-
-        return False
-
-    # FIXME this is clutter-specific
-    def _refresh(self):
-        oldpos = self.window.backend.content_console_pane.get_position()
-        self.window.backend.content_console_pane.set_position(oldpos - 1)
+    async def toggle_tree(self):
+        await self.window.signal_emit("toggle-info-panel")
         return False
 
     async def force_reset(self):

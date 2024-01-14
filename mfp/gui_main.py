@@ -64,7 +64,6 @@ class MFPGUI (Singleton):
         return self.objects.get(obj_id)
 
     def finish(self):
-        from gi.repository import Gtk
         if self.debug:
             import yappi
             yappi.stop()
@@ -76,8 +75,6 @@ class MFPGUI (Singleton):
         if self.appwin:
             self.appwin.quit()
             self.appwin = None
-            # FIXME clutter
-            Gtk.main_quit()
 
 
 def setup_default_colors():
