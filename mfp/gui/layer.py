@@ -25,6 +25,7 @@ class Layer:
     def add(self, obj):
         BAD = 1000000
         obj.layer = self
+        obj.layername = self.name
 
         def distance(left, right):
             d1 = ((obj.position_x - left.position_x) ** 2

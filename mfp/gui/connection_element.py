@@ -21,6 +21,10 @@ class ConnectionElement(BaseElement):
     display_type = "connection"
     LINE_WIDTH = 1.5
 
+    store_attrs = BaseElement.store_attrs + [
+        "rotation", "dashed", "obj_1", "port_1", "obj_2", "port_2"
+    ]
+
     def __init__(self, window, obj_1, port_1, obj_2, port_2, dashed=False):
 
         self.obj_1 = obj_1
@@ -38,14 +42,6 @@ class ConnectionElement(BaseElement):
 
         px, py = self.obj_1.get_position()
         super().__init__(window, px, py)
-
-    def select(self):
-        super().select()
-        self.draw()
-
-    def unselect(self):
-        super().unselect()
-        self.draw()
 
     @classmethod
     def get_factory(cls):

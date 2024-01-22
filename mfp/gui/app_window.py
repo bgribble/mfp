@@ -232,8 +232,8 @@ class AppWindow (SignalMixin):
         self.console_manager.show_prompt(msg)
         self.console_activate()
 
-    def get_prompted_input(self, prompt, callback, default=''):
-        self.hud_prompt_mgr.get_input(prompt, callback, default)
+    async def get_prompted_input(self, prompt, callback, default=''):
+        await self.hud_prompt_mgr.get_input(prompt, callback, default)
 
 # additional methods in @extends wrappers
 from . import app_window_layer  # noqa

@@ -6,7 +6,7 @@ A patch element is the parent of all GUI entities backed by MFP objects
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
-from flopsy import Store
+from flopsy import Store, mutates
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB
@@ -17,11 +17,11 @@ class BaseElement (Store):
     Parent class of elements represented in the patch window
     '''
     store_attrs = [
-        'position_x', 'position_y', 'width', 'height',
+        'position_x', 'position_y', 'position_z', 'width', 'height',
         'update_required', 'display_type', 'name', 'layername',
         'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
         'dsp_outlets', 'scope', 'style', 'export_offset_x',
-        'export_offset_y', 'debug'
+        'export_offset_y', 'debug', 'obj_name', 'obj_state'
     ]
 
     style_defaults = {
@@ -73,6 +73,7 @@ class BaseElement (Store):
 
         # could be the same as self.container but is definitely a layer
         self.layer = None
+        self.layername = None
 
         self.tags = {}
 
@@ -84,8 +85,8 @@ class BaseElement (Store):
         self.export_offset_y = 0
         self.width = None
         self.height = None
-        self.drag_x = None
-        self.drag_y = None
+        self.drag_start_x = None
+        self.drag_start_y = None
         self.selected = False
         self.editable = True
         self.debug = False
@@ -116,26 +117,41 @@ class BaseElement (Store):
                 (self.position_x, self.position_y + self.height)]
 
     @property
-    def layername(self):
-        return self.layer.name if self.layer else None
-
-    @property
     def name(self):
         return self.obj_name
 
     def get_size(self):
         return (self.width, self.height)
 
-    def set_size(self, width, height):
-        if (
-            self.width and self.height
-            and abs(width - self.width) < BaseElement.TINY_DELTA
-            and abs(height - self.height) < BaseElement.TINY_DELTA
-        ):
+    async def set_size(self, width, height, update_state=True, **kwargs):
+        prev_width = kwargs.get('width', self.width)
+        prev_height = kwargs.get('height', self.height)
+        changed_w = not self.width or abs(width - self.width) > BaseElement.TINY_DELTA
+        changed_h = not self.height or abs(height - self.height) > BaseElement.TINY_DELTA
+
+        if self.width and self.height and not changed_w and not changed_h:
             return
 
-        self.width = width
-        self.height = height
+        if update_state:
+            if changed_w:
+                await self.dispatch(
+                    self.action(
+                        self.SET_WIDTH,
+                        value=width,
+                    ),
+                    previous=dict(width=prev_width)
+                )
+            if changed_h:
+                await self.dispatch(
+                    self.action(
+                        self.SET_HEIGHT,
+                        value=height,
+                    ),
+                    previous=dict(height=prev_height)
+                )
+        else:
+            self.width = width
+            self.height = height
 
         self.draw_ports()
         self.send_params()
@@ -148,9 +164,6 @@ class BaseElement (Store):
 
     def get_position(self):
         return (self.position_x, self.position_y)
-
-    def set_position(self, x, y):
-        self.move(x, y)
 
     def get_fontspec(self):
         return '{} {}px'.format(self.get_style('font-face'), self.get_style('font-size'))
@@ -185,7 +198,7 @@ class BaseElement (Store):
             styles.update(styleset)
         return styles
 
-    def update(self):
+    async def update(self):
         pass
 
     def event_source(self):
@@ -200,13 +213,48 @@ class BaseElement (Store):
         self.selected = False
         self.draw_ports()
 
-    def drag_start(self, x, y):
-        self.drag_x = x - self.position_x
-        self.drag_y = y - self.position_y
+    def drag_start(self):
+        self.drag_start_x = self.position_x
+        self.drag_start_y = self.position_y
 
-    def drag(self, dx, dy):
-        self.move(self.position_x + dx, self.position_y + dy)
+    async def drag_end(self):
+        await self.move(
+            self.position_x,
+            self.position_y,
+            update_state=True,
+            previous_x=self.drag_start_x,
+            previous_y=self.drag_start_y
+        )
 
+    async def drag(self, dx, dy):
+        await self.move(self.position_x + dx, self.position_y + dy, update_state=False)
+
+    async def move(self, x, y, update_state=True, **kwargs):
+        previous_x = kwargs.get('previous_x', self.position_x)
+        previous_y = kwargs.get('previous_y', self.position_y)
+
+        if update_state:
+            if abs(x - previous_x) > self.TINY_DELTA:
+                await self.dispatch(
+                    self.action(
+                        self.SET_POSITION_X,
+                        value=x,
+                    ),
+                    previous=dict(position_x=previous_x)
+                )
+            if abs(y - previous_y) > self.TINY_DELTA:
+                await self.dispatch(
+                    self.action(
+                        self.SET_POSITION_Y,
+                        value=y,
+                    ),
+                    previous=dict(position_y=previous_y)
+                )
+        else:
+            self.position_x = x
+            self.position_y = y
+
+    @mutates('obj_state')
     async def delete(self):
         # FIXME this is because self.app_window is the backend, not the app window
         MFPGUI().appwin.unregister(self)
@@ -252,6 +300,7 @@ class BaseElement (Store):
             self.connections_in = connections_in
             return None
 
+        # FIXME flopsy
         self.obj_id = objinfo.get('obj_id')
         self.obj_name = objinfo.get('name')
         self.obj_args = objinfo.get('initargs')
@@ -264,7 +313,7 @@ class BaseElement (Store):
 
         if self.obj_id is not None:
             MFPGUI().remember(self)
-            self.configure(objinfo)
+            await self.configure(objinfo)
 
             # rebuild connections if necessary
             for c in connections_in:
@@ -289,8 +338,8 @@ class BaseElement (Store):
                             c.obj_1.obj_id, c.port_1, c.obj_2.obj_id, c.port_2
                         )
             self.draw_ports()
-
             self.send_params()
+
             await MFPGUI().mfp.set_gui_created(self.obj_id, True)
             await MFPGUI().appwin.signal_emit("created", self)
 
@@ -367,7 +416,12 @@ class BaseElement (Store):
         return (self.get_style('porthole_border') + spc * port_num,
                 h - self.get_style('porthole_height'))
 
-    def configure(self, params):
+    @mutates(
+        'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
+        'obj_name', 'no_export', 'is_export', 'export_offset_x',
+        'export_offset_y', 'debug', 'layername'
+    )
+    async def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
         self.num_outlets = params.get("num_outlets", 0)
         self.dsp_inlets = params.get("dsp_inlets", [])
@@ -412,17 +466,18 @@ class BaseElement (Store):
             xpos = params['position_x']
             ypos = params['position_y']
 
-            self.move(xpos, ypos)
+            await self.move(xpos, ypos)
 
         if "z_index" in params:
             self.move_z(params.get("z_index"))
 
         if (w != w_orig) or (h != h_orig):
-            self.set_size(w, h)
+            await self.set_size(w, h)
 
         self.draw_ports()
         self.app_window.refresh(self)
 
+    @mutates('layername')
     def move_to_layer(self, layer):
         layer_child = False
         if layer and layer == self.layer:
@@ -457,6 +512,7 @@ class BaseElement (Store):
 
         if not self.edit_mode:
             self.edit_mode = await self.make_edit_mode()
+            await self.edit_mode.setup()
 
         if self.edit_mode:
             self.app_window.input_mgr.enable_minor_mode(self.edit_mode)

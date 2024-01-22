@@ -102,7 +102,8 @@ class LabelEditMode (InputMode):
 
         self.bind(None, self.insert_text, "Insert text")
 
-        inittxt = self.element.label_edit_start()
+    async def setup(self):
+        inittxt = await self.element.label_edit_start()
         if inittxt:
             self.text = inittxt
 

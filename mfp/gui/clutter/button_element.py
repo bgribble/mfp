@@ -59,14 +59,16 @@ class ClutterButtonElementImpl(ButtonElement, ButtonElementImpl, ClutterBaseElem
 
         # create elements
         self.texture = Clutter.Canvas.new()
-        self.texture.set_size(20, 20)
         self.texture.connect("draw", self.draw_cb)
 
         self.group.set_content(self.texture)
         self.group.set_reactive(True)
 
-        self.set_size(20, 20)
-        self.move(x, y)
+        self.width = 20
+        self.height = 20
+        self.texture.set_size(self.width, self.height)
+        self.group.set_size(self.width, self.height)
+        self.group.set_position(x, y)
 
     def redraw(self):
         self.texture.invalidate()
@@ -75,8 +77,8 @@ class ClutterButtonElementImpl(ButtonElement, ButtonElementImpl, ClutterBaseElem
         else:
             self.label.set_color(self.get_color('text-color'))
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height):
+        await super().set_size(width, height)
         self.texture.set_size(width, height)
         self.redraw()
 

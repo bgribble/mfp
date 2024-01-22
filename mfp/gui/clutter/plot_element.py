@@ -27,7 +27,6 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBac
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 
-
         # display elements
         self.rect = None
         self.xyplot = None
@@ -36,9 +35,13 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBac
         width = self.INIT_WIDTH + self.WIDTH_PAD
         height = self.INIT_HEIGHT + self.LABEL_SPACE + self.HEIGHT_PAD
         self.create_display(width, height)
-        self.set_size(width, height)
-        self.move(x, y)
-        self.update()
+        self.width = width
+        self.height = height
+        self.rect.set_size(width, height)
+        if self.xyplot:
+            self.xyplot.set_size(width-self.WIDTH_PAD, height-self.LABEL_SPACE-self.WIDTH_PAD)
+        self.group.set_position(x, y)
+        self.draw_ports()
 
     @property
     def plot_style(self):
@@ -54,8 +57,8 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBac
             return "scope"
         return "none"
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height):
+        await super().set_size(width, height)
         self.rect.set_size(width, height)
         if self.xyplot:
             self.xyplot.set_size(width-self.WIDTH_PAD, height-self.LABEL_SPACE-self.WIDTH_PAD)
@@ -140,7 +143,7 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBac
 
         return False
 
-    def configure(self, params):
+    async def configure(self, params):
         if "plot_type" in params and self.xyplot is None:
             if params["plot_type"] == "scatter":
                 self.xyplot = ScatterPlot(self, self.INIT_WIDTH, self.INIT_HEIGHT)
@@ -153,6 +156,6 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBac
                 self.xyplot.set_position(3, self.LABEL_SPACE)
 
         if self.xyplot is not None:
-            self.xyplot.configure(params)
+            await self.xyplot.configure(params)
 
-        super().configure(params)
+        await super().configure(params)

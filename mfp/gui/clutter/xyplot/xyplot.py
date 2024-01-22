@@ -315,5 +315,5 @@ class XYPlot (Clutter.Group):
             ctx.show_text("%.5g" % tick)
             ctx.restore()
 
-    def configure(self, params):
+    async def configure(self, params):
         pass

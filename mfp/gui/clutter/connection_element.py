@@ -33,11 +33,16 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
         elif self.obj_2.layer is not None:
             self.move_to_layer(self.obj_2.layer)
 
-        self.set_size(15, 15)
+        self.width = 15
+        self.height = 15
+        self.texture.set_size(self.width, self.height)
 
         px, py = self.obj_1.get_position()
-        self.move(px, py)
-        self.draw()
+        self.position_x = px
+        self.position_y = py
+
+    async def update(self):
+        await self.draw()
 
     async def delete(self):
         if self.texture:
@@ -46,34 +51,59 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
 
         await super().delete()
 
+    def select(self):
+        super().select()
+        self.redraw()
+
+    def unselect(self):
+        super().unselect()
+        self.redraw()
+
     def redraw(self):
         super().redraw()
-        self.draw()
+        self.texture.invalidate()
 
-    def draw(self):
+    async def draw(self, update_state=True, **kwargs):
         if self.obj_1 is None or self.obj_2 is None:
             return
+        prev_rotation = kwargs.get("rotation", self.rotation)
 
         p1 = self.obj_1.port_center(BaseElement.PORT_OUT, self.port_1)
         p2 = self.obj_2.port_center(BaseElement.PORT_IN, self.port_2)
 
         if self.dsp_connect is True:
-            self.width = 2.5 * self.LINE_WIDTH
+            width = 2.5 * self.LINE_WIDTH
         else:
-            self.width = 1.5 * self.LINE_WIDTH
-        self.height = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
+            width = 1.5 * self.LINE_WIDTH
+        height = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
         theta = math.atan2(p1[0] - p2[0], p2[1] - p1[1])
-        self.rotation = theta * 180.0 / math.pi
-        self.position_x = p1[0] - math.cos(theta) * self.width / 2.0
-        self.position_y = p1[1] - math.sin(theta) * self.width / 2.0
+        rotation = theta * 180.0 / math.pi
+        position_x = p1[0] - math.cos(theta) * width / 2.0
+        position_y = p1[1] - math.sin(theta) * width / 2.0
 
-        self.set_position(self.position_x, self.position_y)
+        await self.move(position_x, position_y, update_state=update_state, **kwargs)
+
+        if update_state and abs(prev_rotation-rotation) > BaseElement.TINY_DELTA:
+            await self.dispatch(
+                self.action(
+                    self.SET_ROTATION,
+                    value=rotation,
+                ),
+                previous=dict(rotation=prev_rotation)
+            )
+        else:
+            self.rotation = rotation
+
+        self.group.set_position(self.position_x, self.position_y)
         self.group.set_rotation(Clutter.RotateAxis.Z_AXIS, self.rotation, 0, 0, 0)
 
-        self.set_size(math.ceil(self.width), math.ceil(self.height))
+        await self.set_size(
+            math.ceil(width), math.ceil(height),
+            update_state=update_state,
+            **kwargs
+        )
         if self.texture:
             self.texture.invalidate()
-
 
     def draw_cb(self, texture, ctx, width, height):
         # clear the drawing area
@@ -109,16 +139,14 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
     def draw_ports(self):
         pass
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
         if self.texture:
             self.texture.set_size(width, height)
             self.texture.invalidate()
 
-    def move(self, x, y):
-        self.position_x = x
-        self.position_y = y
-
+    async def move(self, x, y, **kwargs):
+        await super().move(x, y, **kwargs)
         self.group.set_position(x, y)
 
     def corners(self):

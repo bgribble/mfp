@@ -48,9 +48,9 @@ class ClickableControlMode (InputMode):
         self.widget.unclicked()
         return False
 
-    def quick_click(self):
+    async def quick_click(self):
         self.clickstate = True
-        self.widget.clicked()
+        await self.widget.clicked()
         self.clickstate = False 
         self.widget.unclicked()
         return True

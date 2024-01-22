@@ -73,7 +73,7 @@ class ButtonElement (BaseElement):
     def get_factory(cls):
         return ButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    def center_label(self):
+    async def center_label(self):
         label_halfwidth = self.label.get_property('width')/2.0
         label_halfheight = self.label.get_property('height')/2.0
 
@@ -81,17 +81,17 @@ class ButtonElement (BaseElement):
             nwidth = max(self.width, 2*label_halfwidth + 10)
             nheight = max(self.height, 2*label_halfheight + 10)
             if nwidth != self.width or nheight != self.height:
-                self.set_size(nwidth, nheight)
+                await self.set_size(nwidth, nheight)
 
         if self.width and self.height:
             self.label.set_position(self.width/2.0-label_halfwidth,
                                     self.height/2.0-label_halfheight-2)
 
     @catchall
-    def label_changed_cb(self, *args):
-        self.center_label()
+    async def label_changed_cb(self, *args):
+        await self.center_label()
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         return self.label_text
 
     async def label_edit_finish(self, widget, new_text, aborted=False):
@@ -105,7 +105,7 @@ class ButtonElement (BaseElement):
 
             self.redraw()
 
-    def configure(self, params):
+    async def configure(self, params):
         set_text = False
 
         if "value" in params:
@@ -122,9 +122,9 @@ class ButtonElement (BaseElement):
                 self.label.set_markup("<b>%s</b>" % (self.label_text or ''))
             else:
                 self.label.set_markup(self.label_text or '')
-            self.center_label()
+            await self.center_label()
 
-        super().configure(params)
+        await super().configure(params)
         self.redraw()
 
     def select(self):
@@ -165,7 +165,7 @@ class BangButtonElement (ButtonElement):
     def get_factory(cls):
         return BangButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    def clicked(self):
+    async def clicked(self):
         if self.obj_id is not None:
             if self.message is Bang:
                 MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 0))
@@ -182,11 +182,11 @@ class BangButtonElement (ButtonElement):
 
         return False
 
-    def configure(self, params):
+    async def configure(self, params):
         if "message" in params:
             self.message = params.get("message")
 
-        super().configure(params)
+        await super().configure(params)
 
 
 class ToggleButtonElement (ButtonElement):
@@ -203,7 +203,7 @@ class ToggleButtonElement (ButtonElement):
     def get_factory(cls):
         return ToggleButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    def clicked(self):
+    async def clicked(self):
         message = None
         if self.indicator:
             message = self.off_message
@@ -217,12 +217,12 @@ class ToggleButtonElement (ButtonElement):
         self.redraw()
         return False
 
-    def configure(self, params):
+    async def configure(self, params):
         if "on_message" in params:
             self.on_message = params.get("on_message")
         if "off_message" in params:
             self.off_message = params.get("off_message")
-        ButtonElement.configure(self, params)
+        await super().configure(params)
 
     async def create(self, init_type, init_args):
         await super().create(init_type, init_args)

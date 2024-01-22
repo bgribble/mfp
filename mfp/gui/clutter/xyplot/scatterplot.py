@@ -186,7 +186,7 @@ class ScatterPlot (XYPlot):
         return sd 
 
 
-    def configure(self, params):
+    async def configure(self, params):
         modes = dict(LINEAR=0, LOG=1, LOG_10=1, LOG_2=2)
         s = params.get("plot_style")
         if s:

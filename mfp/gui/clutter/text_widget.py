@@ -46,8 +46,12 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
 
     async def delete(self):
         if self.label:
-            if hasattr(self.container, 'app_window') and self.label in self.container.app_window.event_sources:
+            if (
+                hasattr(self.container, 'app_window') 
+                and self.label in self.container.app_window.event_sources
+            ):
                 del self.container.app_window.event_sources[self.label]
+
             self.label.destroy()
             self.label = None
 

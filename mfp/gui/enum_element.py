@@ -70,7 +70,7 @@ class EnumElement (BaseElement):
             value = self.max_value
         return self.format_str % value
 
-    def text_changed_cb(self, *args):
+    async def text_changed_cb(self, *args):
         lwidth = self.label.get_property('width')
         bwidth = self.width
 
@@ -81,7 +81,7 @@ class EnumElement (BaseElement):
             new_w = max(35, lwidth + 20)
 
         if new_w is not None:
-            self.set_size(new_w, self.height)
+            await self.set_size(new_w, self.height)
 
     async def create_obj(self):
         if self.obj_id is None:
@@ -120,11 +120,11 @@ class EnumElement (BaseElement):
         if self.obj_id is not None:
             await MFPGUI().mfp.send(self.obj_id, 0, self.value)
 
-    def update(self):
+    async def update(self):
         self.label.set_text(self.format_value(self.value))
         self.redraw()
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         pass
 
     async def label_edit_finish(self, *args):
@@ -136,7 +136,7 @@ class EnumElement (BaseElement):
         await MFPGUI().mfp.send(self.obj_id, 0, self.value)
         self.redraw()
 
-    def configure(self, params):
+    async def configure(self, params):
         fmt_changed = False
         val_changed = False
 
@@ -170,7 +170,7 @@ class EnumElement (BaseElement):
         if 'height' in params:
             del params['height']
 
-        BaseElement.configure(self, params)
+        await super().configure(self, params)
         self.redraw()
 
     def port_position(self, port_dir, port_num):

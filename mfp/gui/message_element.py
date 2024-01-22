@@ -27,6 +27,9 @@ class MessageElement (BaseElement):
     display_type = "message"
     proc_type = "message"
 
+    label_off_x = 4
+    label_off_y = 1
+
     PORT_TWEAK = 5
 
     def __init__(self, window, x, y):
@@ -40,21 +43,20 @@ class MessageElement (BaseElement):
 
         # configure label
         self.label = TextWidget.build(self)
-        self.label.set_position(4, 1)
+        self.label.set_position(self.label_off_x, self.label_off_y)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
-
-        self.move(x, y)
+        self.label.set_reactive(False)
 
     @classmethod
     def get_factory(cls):
         return MessageElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    def update(self):
+    async def update(self):
         self.redraw()
         self.draw_ports()
 
-    def clicked(self, *args):
+    async def clicked(self, *args):
         self.clickstate = True
         if self.obj_id is not None:
             MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 0))
@@ -66,9 +68,9 @@ class MessageElement (BaseElement):
         self.redraw()
         return False
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
-        self.redraw()
+        await self.update()
 
     async def label_edit_finish(self, widget=None, text=None):
         if text is not None and text != self.message_text:
@@ -78,9 +80,9 @@ class MessageElement (BaseElement):
         if self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
             self.send_params()
-            self.update()
+            await self.update()
 
-    def configure(self, params):
+    async def configure(self, params):
         if params.get('value') is not None:
             self.message_text = repr(params.get('value'))
             self.label.set_text(self.message_text)
@@ -94,8 +96,8 @@ class MessageElement (BaseElement):
 
         if self.obj_state != self.OBJ_COMPLETE and self.obj_id is not None:
             self.obj_state = self.OBJ_COMPLETE
-            self.update()
-        BaseElement.configure(self, params)
+            await self.update()
+        await super().configure(params)
 
     def port_position(self, port_dir, port_num):
         # tweak the right input port display to be left of the "kick"
@@ -152,7 +154,7 @@ class TransientMessageElement (MessageElement):
     def _make_connections(self):
         for to in self.target_obj:
             c = ConnectionElement.build(self.app_window, self, 0, to, self.target_port)
-            self.app_window.active_layer().add(c)
+            c.move_to_layer(self.app_window.active_layer())
             self.app_window.register(c)
             self.connections_out.append(c)
             to.connections_in.append(c)
@@ -174,10 +176,10 @@ class TransientMessageElement (MessageElement):
         if self.obj_state == self.OBJ_COMPLETE:
             await self.delete()
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         self.label.set_text(self.message_text)
         self.label.set_selection(0, len(self.message_text))
-        self.redraw()
+        await self.update()
 
     async def label_edit_finish(self, widget=None, text=None):
         if text is not None:

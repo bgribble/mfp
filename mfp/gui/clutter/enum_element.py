@@ -27,8 +27,11 @@ class ClutterEnumElementImpl(EnumElement, EnumElementImpl, ClutterBaseElementBac
         self.group.set_content(self.texture)
         self.group.set_reactive(True)
 
-        self.move(x, y)
-        self.set_size(35, 25)
+        self.group.set_position(x, y)
+        self.width = 35
+        self.height = 25
+        self.texture.set_size(self.width, self.height)
+        self.group.set_size(self.width, self.height)
 
     def redraw(self):
         super().redraw()
@@ -69,8 +72,8 @@ class ClutterEnumElementImpl(EnumElement, EnumElementImpl, ClutterBaseElementBac
         ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.stroke()
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height):
+        await super().set_size(width, height)
 
         self.texture.set_size(width, height)
         self.texture.invalidate()

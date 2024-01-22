@@ -28,10 +28,13 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
         self.group.set_content(self.texture)
         self.group.set_reactive(True)
 
-        # resize widget whne text gets longer
+        # resize widget when text gets longer
         self.handler_id = self.label.signal_listen('text-changed', self.label_changed_cb)
-        self.set_size(35, 25)
-        self.move(x, y)
+        self.width = 35
+        self.height = 25
+        self.texture.set_size(self.width, self.height)
+        self.group.set_size(self.width, self.height)
+        self.group.set_position(x, y)
 
         self.redraw()
 
@@ -50,15 +53,15 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
         super().redraw()
         self.texture.invalidate()
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height):
+        await super().set_size(width, height)
         self.texture.set_size(width, height)
 
-    def label_changed_cb(self, *args):
+    async def label_changed_cb(self, *args):
         newtext = self.label.get_text()
         if newtext != self.label_text:
             self.label_text = newtext
-            self.update()
+            await self.update()
 
     def select(self):
         super().select()

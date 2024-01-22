@@ -107,63 +107,63 @@ class SliderEditMode (InputMode):
         self.bind("C-]", self.set_hi, "Enter upper bound")
         self.bind("C-|", self.set_zero, "Enter zero point")
 
-    def set_low(self): 
+    async def set_low(self): 
         def hud_cb(value): 
             if value is not None:
                 self.slider.set_bounds(float(value), self.slider.max_value)
-        self.window.get_prompted_input("Slider lower bound: ", hud_cb)
+        await self.window.get_prompted_input("Slider lower bound: ", hud_cb)
         return True 
 
-    def set_hi(self): 
+    async def set_hi(self): 
         def hud_cb(value): 
             if value is not None:
                 self.slider.set_bounds(self.slider.min_value, float(value))
-        self.window.get_prompted_input("Slider upper bound: ", hud_cb)
+        await self.window.get_prompted_input("Slider upper bound: ", hud_cb)
         return True 
 
-    def set_zero(self): 
+    async def set_zero(self): 
         def hud_cb(value): 
             if value is not None:
                 if value != "None":
                     self.slider.set_zeropoint(float(value))
                 else: 
                     self.slider.set_zeropoint(None)
-        self.window.get_prompted_input("Slider zero point: ", hud_cb)
+        await self.window.get_prompted_input("Slider zero point: ", hud_cb)
         return True 
 
-    def toggle_scale(self):
-        self.slider.set_show_scale(not self.slider.show_scale)
-        self.slider.update()
+    async def toggle_scale(self):
+        await self.slider.set_show_scale(not self.slider.show_scale)
+        await self.slider.update()
         self.slider.send_params()
         return True 
 
-    def toggle_orient(self):
+    async def toggle_orient(self):
         if self.slider.orientation == self.slider.HORIZONTAL:
             self.slider.set_orientation(self.slider.VERTICAL)
         else: 
             self.slider.set_orientation(self.slider.HORIZONTAL)
 
-        self.slider.update()
+        await self.slider.update()
         self.slider.send_params()
         return True 
 
-    def toggle_direction(self):
+    async def toggle_direction(self):
         if self.slider.direction == self.slider.POSITIVE:
             self.slider.direction = self.slider.NEGATIVE
         else: 
             self.slider.direction = self.slider.POSITIVE
 
-        self.slider.update()
+        await self.slider.update()
         self.slider.send_params()
         return True 
 
-    def toggle_side(self):
+    async def toggle_side(self):
         if self.slider.scale_position == self.slider.RIGHT:
             self.slider.scale_position = self.slider.LEFT
         else: 
             self.slider.scale_position = self.slider.RIGHT 
 
-        self.slider.update()
+        await self.slider.update()
         self.slider.send_params()
         return True 
 

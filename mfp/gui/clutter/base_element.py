@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import math
 from gi.repository import Clutter
+from flopsy import mutates
 
 from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement
@@ -89,7 +90,7 @@ class ClutterBaseElementBackend(BaseElement):
 
     def update_badge(self):
         if self.group is None:
-            return 
+            return
 
         badgesize = self.get_style('badge_size')
         if self.badge is None:
@@ -188,12 +189,7 @@ class ClutterBaseElementBackend(BaseElement):
                 del self.port_elements[pid]
                 self.group.remove_actor(port)
 
-        # redraw connections
-        for c in self.connections_out:
-            c.draw()
-
-        for c in self.connections_in:
-            c.draw()
+        MFPGUI().async_task(self.redraw_connections())
 
     def hide_ports(self):
         def hideport(pid):
@@ -209,9 +205,16 @@ class ClutterBaseElementBackend(BaseElement):
             pid = (BaseElement.PORT_OUT, i)
             hideport(pid)
 
-    def move(self, x, y):
-        self.position_x = x
-        self.position_y = y
+    async def redraw_connections(self):
+        # redraw connections
+        for c in self.connections_out:
+            await c.draw()
+
+        for c in self.connections_in:
+            await c.draw()
+
+    async def move(self, x, y, **kwargs):
+        await super().move(x, y, **kwargs)
 
         if not self.group:
             return
@@ -219,16 +222,17 @@ class ClutterBaseElementBackend(BaseElement):
         self.group.set_position(x, y)
 
         for c in self.connections_out:
-            c.draw()
+            await c.draw(update_state=kwargs.get("update_state", True))
 
         for c in self.connections_in:
-            c.draw()
+            await c.draw(update_state=kwargs.get("update_state", True))
 
+    @mutates('position_z')
     def move_z(self, z):
         self.position_z = z
         self.group.set_z_position(z)
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
         Clutter.Group.set_size(self.group, width, height)
         self.update_badge()

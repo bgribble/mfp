@@ -42,7 +42,7 @@ class PatchDisplay (object):
     def build(cls, *args, **kwargs):
         return cls.get_factory()(*args, **kwargs)
 
-    def update(self):
+    async def update(self):
         pass
 
     def has_scope(self, scope_name):
@@ -66,7 +66,7 @@ class PatchDisplay (object):
                 return ll
         return None
 
-    def configure(self, params):
+    async def configure(self, params):
         self.num_inlets = params.get("num_inlets")
         self.num_outlets = params.get("num_outlets")
         self.dsp_inlets = params.get("dsp_inlets")

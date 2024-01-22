@@ -18,13 +18,13 @@ class Prompter (object):
         self.current_callback = None
         self.mode = None
 
-    def get_input(self, prompt, callback, default):
+    async def get_input(self, prompt, callback, default):
         if self.mode is None:
-            self._begin(prompt, callback, default)
+            await self._begin(prompt, callback, default)
         else:
             self.queue.append([prompt, callback, default])
 
-    def _begin(self, prompt, callback, default):
+    async def _begin(self, prompt, callback, default):
         self.current_prompt = prompt
         self.current_callback = callback
         self.window.hud_set_prompt(prompt, default)
@@ -32,9 +32,10 @@ class Prompter (object):
             self.backend, self, self.backend.hud_prompt_input,
             mode_desc="Prompted input"
         )
+        await self.mode.setup()
         self.window.input_mgr.enable_minor_mode(self.mode)
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         pass
 
     async def label_edit_finish(self, widget, text):
@@ -56,6 +57,6 @@ class Prompter (object):
         if len(self.queue):
             nextitem = self.queue[0]
             self.queue = self.queue[1:]
-            self._begin(nextitem[0], nextitem[1], nextitem[2])
+            await self._begin(nextitem[0], nextitem[1], nextitem[2])
 
 

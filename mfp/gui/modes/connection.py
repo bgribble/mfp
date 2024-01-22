@@ -50,11 +50,11 @@ class ConnectionMode (InputMode):
         self.select_cbid = self.window.signal_listen("select", self.select_cb)
         self.remove_cbid = self.window.signal_listen("remove", self.remove_cb)
 
-    def update_connection(self):
+    async def update_connection(self):
         from ..connection_element import ConnectionElement
         if (self.source_obj is None or self.dest_obj is None):
             if self.connection:
-                self.connection.delete()
+                await self.connection.delete()
                 self.connection = None
             return True
 
@@ -83,9 +83,9 @@ class ConnectionMode (InputMode):
             self.connection.port_1 = self.source_port
             self.connection.port_2 = self.dest_port
 
-            self.connection.draw()
+        await self.connection.draw()
 
-    def select(self, obj):
+    async def select(self, obj):
         if not obj.editable:
             return
 
@@ -96,10 +96,10 @@ class ConnectionMode (InputMode):
             if self.source_obj is not None and obj and self.source_obj != obj:
                 self.dest_obj = obj
 
-        self.update_connection()
+        await self.update_connection()
 
-    def select_cb(self, window, signal, obj):
-        self.select(obj)
+    async def select_cb(self, window, signal, obj):
+        await self.select(obj)
 
     def remove_cb(self, window, signal, obj):
         if obj is self.connection:
@@ -124,7 +124,7 @@ class ConnectionMode (InputMode):
             await self.connection.delete()
             self.connection = None
 
-    def get_port_key(self):
+    async def get_port_key(self):
         def callback(txt):
             self.set_port_key(int(txt))
 
@@ -134,11 +134,12 @@ class ConnectionMode (InputMode):
         else:
             dirspec = "source output"
 
-        self.window.get_prompted_input("Enter %s port:" % dirspec, callback)
+        await self.window.get_prompted_input("Enter %s port:" % dirspec, callback)
         return True
 
     async def make_connection(self):
         from ..connection_element import ConnectionElement
+
         # are both ends selected?
         if self.reverse and self.source_obj is None and self.window.selected:
             self.source_obj = self.window.selected[0]
@@ -154,13 +155,13 @@ class ConnectionMode (InputMode):
                 self.dest_obj.obj_id,
                 self.dest_port
             ):
-                c = ConnectionElement.build(
-                    self.window, self.source_obj, self.source_port,
-                    self.dest_obj, self.dest_port
-                )
-                MFPGUI().appwin.register(c)
-                self.source_obj.connections_out.append(c)
-                self.dest_obj.connections_in.append(c)
+
+                self.connection.dashed = False
+                MFPGUI().appwin.register(self.connection)
+                self.source_obj.connections_out.append(self.connection)
+                self.dest_obj.connections_in.append(self.connection)
+                await self.connection.draw()
+                self.connection = None
             else:
                 log.debug("ConnectionMode: Cannot make connection")
 
@@ -172,7 +173,7 @@ class ConnectionMode (InputMode):
         self.manager.disable_minor_mode(self)
         return True
 
-    def set_port_key(self, portnum):
+    async def set_port_key(self, portnum):
         if self.reverse:
             if (self.source_obj is None and self.window.selected and
                     self.window.selected[0] != self.dest_obj):
@@ -191,5 +192,5 @@ class ConnectionMode (InputMode):
                 self.dest_port = max(0, min(portnum, self.dest_obj.num_inlets-1))
             else:
                 self.source_port = max(0, min(portnum, self.source_obj.num_outlets-1))
-        self.update_connection()
+        await self.update_connection()
         return True

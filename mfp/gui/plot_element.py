@@ -67,13 +67,13 @@ class PlotElement (BaseElement):
     def get_factory(cls):
         return PlotElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    def update(self):
+    async def update(self):
         self.draw_ports()
 
     def get_label(self):
         return self.label
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         # FIXME set label to editing style
         pass
 
@@ -97,7 +97,6 @@ class PlotElement (BaseElement):
                 self.draw_ports()
 
             # FIXME set label to non-editing style
-            self.update()
 
     def label_changed_cb(self, *args):
         pass
@@ -105,7 +104,7 @@ class PlotElement (BaseElement):
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
-    def configure(self, params):
+    async def configure(self, params):
         if self.obj_args is None:
             self.label.set_text("%s" % (self.obj_type,))
         else:
@@ -118,4 +117,4 @@ class PlotElement (BaseElement):
 
         self.set_bounds(x_min, y_min, x_max, y_max)
 
-        super().configure(params)
+        await super().configure(params)
