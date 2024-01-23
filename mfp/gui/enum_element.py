@@ -170,7 +170,7 @@ class EnumElement (BaseElement):
         if 'height' in params:
             del params['height']
 
-        await super().configure(self, params)
+        await super().configure(params)
         self.redraw()
 
     def port_position(self, port_dir, port_num):

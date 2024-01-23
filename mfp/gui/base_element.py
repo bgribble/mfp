@@ -320,6 +320,8 @@ class BaseElement (Store):
                 if c.obj_2 is self and c.port_2 >= self.num_inlets:
                     c.obj_2 = None
                     await c.delete()
+                elif c.obj_1 is None or c.obj_2 is None:
+                    await c.delete()
                 else:
                     self.connections_in.append(c)
                     if not c.dashed:
@@ -330,6 +332,8 @@ class BaseElement (Store):
             for c in connections_out:
                 if c.obj_1 is self and c.port_1 >= self.num_outlets:
                     c.obj_1 = None
+                    await c.delete()
+                elif c.obj_1 is None or c.obj_2 is None:
                     await c.delete()
                 else:
                     self.connections_out.append(c)

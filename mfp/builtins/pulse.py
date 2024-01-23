@@ -36,9 +36,9 @@ class Pulse(Processor):
     def __init__(self, init_type, init_args, patch, scope, name):
         Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
-        freq = 0
-        ampl = 1.0
-        pw = 0.5
+        self.init_freq = 0
+        self.init_ampl = 1.0
+        self.init_pw = 0.5
         self.init_loval = -1.0
         self.init_hival = 1.0
         self.init_mode = 0
@@ -47,11 +47,11 @@ class Pulse(Processor):
             self.init_loval = 0.0
 
         if len(initargs) > 0:
-            freq = initargs[0]
+            self.init_freq = initargs[0]
         if len(initargs) > 1:
-            ampl = initargs[1]
+            self.init_ampl = initargs[1]
         if len(initargs) > 2:
-            pw = initargs[2]
+            self.init_pw = initargs[2]
         if len(initargs) > 3:
             if initargs[3] == 'ms':
                 self.init_mode = 1
@@ -64,9 +64,9 @@ class Pulse(Processor):
     async def setup(self):
         await self.dsp_init(
             "pulse~",
-            _sig_1=float(freq),
-            _sig_2=float(ampl),
-            _sig_3=float(pw),
+            _sig_1=float(self.init_freq),
+            _sig_2=float(self.init_ampl),
+            _sig_3=float(self.init_pw),
             hival=self.init_hival,
             loval=self.init_loval,
             pw_mode=self.init_mode

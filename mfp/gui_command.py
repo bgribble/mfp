@@ -121,7 +121,7 @@ class GUICommand:
                         )
                     xpos = params.get("position_x", 0) - parent.export_x + 2
                     ypos = params.get("position_y", 0) - parent.export_y + 20
-                    o.move(xpos, ypos)
+                    await o.move(xpos, ypos)
                     o.editable = False
                     parent.layer.add(o)
 
@@ -135,7 +135,7 @@ class GUICommand:
             await o.update()
             await MFPGUI().appwin.signal_emit("created", o)
 
-    def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+    async def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI
         from .gui.connection_element import ConnectionElement
         from .gui.patch_display import PatchDisplay
@@ -161,6 +161,7 @@ class GUICommand:
         MFPGUI().appwin.register(c)
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)
+        await c.update()
 
     async def delete(self, obj_id):
         from .gui_main import MFPGUI

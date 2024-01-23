@@ -1,9 +1,10 @@
 #! /usr/bin/env python
 '''
 patch_display.py
-PatchDisplay class capturing display information for a patch
+PatchDisplay class captures display information for a patch:
+a subset of the layers and objects in the app window
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from ..gui_main import MFPGUI

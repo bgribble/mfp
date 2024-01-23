@@ -40,6 +40,7 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
         px, py = self.obj_1.get_position()
         self.position_x = px
         self.position_y = py
+        self.texture.invalidate()
 
     async def update(self):
         await self.draw()
@@ -61,7 +62,8 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
 
     def redraw(self):
         super().redraw()
-        self.texture.invalidate()
+        if self.texture:
+            self.texture.invalidate()
 
     async def draw(self, update_state=True, **kwargs):
         if self.obj_1 is None or self.obj_2 is None:

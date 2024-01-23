@@ -153,7 +153,7 @@ class ProcessorElement (BaseElement):
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
             if self.export_created:
-                MFPGUI().mfp.create_export_gui.task(self.obj_id)
+                await MFPGUI().mfp.create_export_gui(self.obj_id)
                 need_update = True
 
         if "debug" in params:

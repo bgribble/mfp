@@ -26,11 +26,11 @@ class MFPCommand:
             return None
         return obj.gui_params
 
-    def create_export_gui(self, obj_id):
+    async def create_export_gui(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Patch):
-            obj.create_export_gui()
+            await obj.create_export_gui()
             return True
         return False
 
