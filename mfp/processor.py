@@ -101,10 +101,12 @@ class Processor:
 
         scopename = scope.name if scope else "__patch__"
 
-        defaults = dict(obj_id=self.obj_id,
-                        initargs=self.init_args, display_type=self.display_type,
-                        scope=scopename,
-                        num_inlets=inlets, num_outlets=outlets)
+        defaults = dict(
+            obj_id=self.obj_id,
+            initargs=self.init_args, display_type=self.display_type,
+            scope=scopename,
+            num_inlets=inlets, num_outlets=outlets
+        )
 
         for k, v in defaults.items():
             if k not in self.gui_params:
@@ -223,10 +225,12 @@ class Processor:
                 paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
                 lines.append('      <b>MIDI handlers:</b>')
                 for p in paths:
-                    lines.append('          Chan: %s, Type: %s, Number: %s'
-                                 % (p[2] if p[2] is not None else "All",
-                                    p[1] if p[1] is not None else "All",
-                                    p[3] if p[3] is not None else "All"))
+                    lines.append(
+                        '          Chan: %s, Type: %s, Number: %s'
+                        % (p[2] if p[2] is not None else "All",
+                           p[1] if p[1] is not None else "All",
+                           p[3] if p[3] is not None else "All")
+                    )
         return '\n'.join(lines)
 
     def tooltip_extra(self):

@@ -23,7 +23,7 @@ from ..slidemeter_element import (
 
 class ClutterSlideMeterElementImpl(SlideMeterElement, ClutterBaseElementBackend):
     backend_name = "clutter"
-    
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 

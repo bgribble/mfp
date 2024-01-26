@@ -2,7 +2,7 @@
 '''
 clickable.py: Control mode for clickable items (message, bang, toggle)
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 from ..input_manager import InputManager
 from ..input_mode import InputMode
@@ -51,6 +51,6 @@ class ClickableControlMode (InputMode):
     async def quick_click(self):
         self.clickstate = True
         await self.widget.clicked()
-        self.clickstate = False 
+        self.clickstate = False
         self.widget.unclicked()
         return True

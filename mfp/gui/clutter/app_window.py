@@ -596,7 +596,9 @@ class ClutterAppWindowBackend (AppWindowBackend):
     def unregister(self, element):
         if element.container:
             if isinstance(element.container, BaseElement):
-                element.container.remove(element)
+                parent = element.group.get_parent()
+                if parent:
+                    parent.remove_child(element.group)
             element.container = None
 
         self.object_view.remove(element)

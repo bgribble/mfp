@@ -22,7 +22,7 @@ class Layer:
             self.objects.remove(obj)
         self.add(obj)
 
-    def add(self, obj):
+    def add(self, obj, container=None):
         BAD = 1000000
         obj.layer = self
         obj.layername = self.name
@@ -62,7 +62,7 @@ class Layer:
             newloc = distances.index(min(distances))
             self.objects[newloc:newloc] = [obj]
 
-        self.backend.add(obj)
+        self.backend.add(obj, container=container)
 
     def remove(self, obj):
         if obj in self.objects:

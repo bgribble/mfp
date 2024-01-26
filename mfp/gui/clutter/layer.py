@@ -4,6 +4,7 @@ from ..backend_interfaces import LayerBackend
 
 from mfp import log
 
+
 class ClutterLayerBackend(LayerBackend):
     backend_name = "clutter"
 
@@ -29,20 +30,24 @@ class ClutterLayerBackend(LayerBackend):
         else:
             child = obj
 
-        self.group.remove_child(child)
+        parent = child.get_parent()
+        if parent:
+            parent.remove_child(child)
 
-    def add(self, obj):
+    def add(self, obj, container=None):
         if isinstance(obj, BaseElement):
             group = obj.group
         else:
             group = obj.backend.group
 
+        dest_group = (container and container.group) or self.group
+
         parent = group.get_parent()
         child = group
-        if parent != self.group:
+        if parent != dest_group:
             if parent:
                 parent.remove_child(child)
-            self.group.add_child(child)
+            dest_group.add_child(child)
 
     def delete(self):
         del self.group

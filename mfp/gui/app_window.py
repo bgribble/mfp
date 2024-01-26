@@ -161,7 +161,6 @@ class AppWindow (SignalMixin):
         if element.obj_id is not None:
             element.send_params()
 
-
     def unregister(self, element):
         if element in self.selected:
             MFPGUI().async_task(self.unselect(element))
