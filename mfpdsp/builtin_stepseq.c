@@ -37,6 +37,9 @@ typedef struct {
  *    steps: ordered array of value/trigger/slur
  *    threshold: thresh for input clock
  *    trigger_len: frames for output trigger
+ * signal outputs:
+ *    [0] sequenced value
+ *    [1] trigger on change
  */
 
 static int
