@@ -25,7 +25,8 @@ class InputMode (object):
         self.seqno = None
 
     async def setup(self):
-        pass
+        for mode in self.extensions:
+            await mode.setup()
 
     def extend(self, mode):
         self.extensions.append(mode)

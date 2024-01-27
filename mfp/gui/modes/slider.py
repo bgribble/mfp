@@ -108,26 +108,26 @@ class SliderEditMode (InputMode):
         self.bind("C-|", self.set_zero, "Enter zero point")
 
     async def set_low(self): 
-        def hud_cb(value): 
+        async def hud_cb(value): 
             if value is not None:
-                self.slider.set_bounds(float(value), self.slider.max_value)
+                await self.slider.set_bounds(float(value), self.slider.max_value)
         await self.window.get_prompted_input("Slider lower bound: ", hud_cb)
         return True 
 
     async def set_hi(self): 
-        def hud_cb(value): 
+        async def hud_cb(value): 
             if value is not None:
-                self.slider.set_bounds(self.slider.min_value, float(value))
+                await self.slider.set_bounds(self.slider.min_value, float(value))
         await self.window.get_prompted_input("Slider upper bound: ", hud_cb)
         return True 
 
     async def set_zero(self): 
-        def hud_cb(value): 
+        async def hud_cb(value): 
             if value is not None:
                 if value != "None":
-                    self.slider.set_zeropoint(float(value))
+                    await self.slider.set_zeropoint(float(value))
                 else: 
-                    self.slider.set_zeropoint(None)
+                    await self.slider.set_zeropoint(None)
         await self.window.get_prompted_input("Slider zero point: ", hud_cb)
         return True 
 

@@ -147,8 +147,9 @@ class GlobalMode (InputMode):
                     parts = os.path.splitext(basefile)
                     newname = parts[0]
                     patch.obj_name = newname
-                    MFPGUI().mfp.rename_obj.sync(patch.obj_id, newname)
-                    patch.send_params()
+                    await MFPGUI().mfp.rename_obj(patch.obj_id, newname)
+                    prms = patch.synced_params()
+                    await MFPGUI().mfp.set_params(patch.obj_id, prms)
                     self.window.refresh(patch)
                 await MFPGUI().mfp.save_file(patch.obj_name, fname)
         await self.window.get_prompted_input("File name to save: ", cb, default_filename)

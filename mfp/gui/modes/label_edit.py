@@ -113,6 +113,8 @@ class LabelEditMode (InputMode):
         self.update_cursor()
         self.set_selection(0, len(self.text))
 
+        await super().setup()
+
     def cut(self):
         sel = self.text[self.selection_start:self.selection_end]
         self.window.clipboard_set(sel)

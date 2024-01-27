@@ -163,3 +163,16 @@ with various incantations of the `nosetests` test runner:
 
  * C test cases in mfpdsp/test_*: run with the `testext` plugin
    to nosetests, `nosetests -v --with-testext --exe wafbuild/libmfpdsp.so`
+
+Note on nosetests: I started using it because, 12+ years ago, it
+was the best test runner. Now other tools like pytest have won
+more mindshare. I spent some effort on the plugins to run C tests
+for mfpdsp so I am sticking with nosetests.
+
+HOWEVER, the original nosetests is abandoned and doesn't work
+with current Python versions, and the "new" version of nosetests
+(nose2) changed the way plugins worked, and doesn't support the
+--exe option needed to point nose to the libmfpdsp.so file. So I
+switched over to "pynose", which is a fork of the original
+nosetests, just updated to work with contemporary Python. It gets
+installed by install_deps. 

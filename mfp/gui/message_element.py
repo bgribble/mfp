@@ -192,7 +192,7 @@ class TransientMessageElement (MessageElement):
                         self.message_text
                     )
         for to in self.target_obj:
-            self.app_window.select(to)
+            await self.app_window.select(to)
         self.message_text = None
         await self.delete()
 

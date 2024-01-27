@@ -332,7 +332,7 @@ class Patch(Processor):
     ############################
 
     @classmethod
-    def register_file(klass, filename):
+    def register_file(cls, filename):
         from .mfp_app import MFPApp
 
         async def factory(init_type, init_args, patch, scope, name, context=None):
@@ -354,7 +354,7 @@ class Patch(Processor):
 
         if MFPApp().no_gui:
             return False
-        elif self.gui_created:
+        if self.gui_created:
             return True
 
         # create the basic element info
@@ -392,15 +392,13 @@ class Patch(Processor):
         if not self.gui_created:
             return True
 
-        for oid, obj in self.objects.items():
+        for _, obj in self.objects.items():
             obj.gui_created = False
-            #obj.delete_gui()
 
         await Processor.delete_gui(self)
         return True
 
     async def has_unsaved_changes(self):
-        import difflib
         import copy
         if self.file_origin:
             oldjson = open(self.file_origin, 'r').read()
@@ -412,7 +410,7 @@ class Patch(Processor):
             newjson = await self.json_serialize()
             self.gui_params = saved_gui
 
-            cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
+            # cdiff = difflib.context_diff(oldjson.split('\n'), newjson.split('\n'))
 
             if oldjson != newjson:
                 log.warning("Unsaved changes in '%s'" % self.name, "(%s)" % self.file_origin)
@@ -431,7 +429,7 @@ class Patch(Processor):
 
         if os.path.isfile(filename):
             os.rename(filename, filename+'~')
-
+        log.debug(f"Saving patch to {filename}")
         with open(filename, "w") as savefile:
             savefile.write(await self.json_serialize())
 

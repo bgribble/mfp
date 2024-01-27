@@ -59,7 +59,7 @@ class PatchDisplay (object):
         for k, v in extras.items():
             prms[k] = v
         if self.obj_id is not None:
-            MFPGUI().async_task(MFPGUI().mfp.set_params.sync(self.obj_id, prms))
+            MFPGUI().async_task(MFPGUI().mfp.set_params(self.obj_id, prms))
 
     def find_layer(self, layer):
         for ll in self.layers:

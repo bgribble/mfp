@@ -234,7 +234,7 @@ class BaseElement (Store):
         previous_y = kwargs.get('previous_y', self.position_y)
 
         if update_state:
-            if abs(x - previous_x) > self.TINY_DELTA:
+            if previous_x is None or abs(x - previous_x) > self.TINY_DELTA:
                 await self.dispatch(
                     self.action(
                         self.SET_POSITION_X,
@@ -242,7 +242,7 @@ class BaseElement (Store):
                     ),
                     previous=dict(position_x=previous_x)
                 )
-            if abs(y - previous_y) > self.TINY_DELTA:
+            if previous_y is None or abs(y - previous_y) > self.TINY_DELTA:
                 await self.dispatch(
                     self.action(
                         self.SET_POSITION_Y,
