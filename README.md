@@ -24,7 +24,7 @@ Up next:
 * Refactor UI actions to support undo/redo
 * Loading audio files into [buffer~]
 * Named presets for patches
-* Port to GTK4, making UI improvements along the way
+* Port to Dear ImGUI, making UI improvements along the way
 * Self-contained save format including sample and image files
 
 ### BUILDING
@@ -77,8 +77,8 @@ to ask for your patience with:
 
 Ticket | Description
 -------| --------------
- #165 | Markup in comments does not render when patch is loaded.  Workaround: Click in another window.
- #217 | MFP must be stopped with `kill -9` in (hopefully rare) error conditions. Workaround: ^Z to stop the process from the shell, then `kill -9 %1`
+ #292 | In larger patches, selection and interaction may get messed up
+ #291 | When editing a label, the cursor disappears
  #204 | Logging is broken when loaded as LV2 plugin
  #212 | Rendering of smooth curves on XY plot shows gaps
  #220 | 'waf install' can give error messages. Workaround: See the bottom of README.build; possibly no action is required.
