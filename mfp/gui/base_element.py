@@ -290,6 +290,11 @@ class BaseElement (Store):
             await MFPGUI().mfp.delete(self.obj_id)
             self.obj_id = None
 
+        # need to emit this signal before creating so that if
+        # create() makes sub-objects with visible elements they
+        # get put in the correct place in the object tree
+        await MFPGUI().appwin.signal_emit("created", self)
+
         objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name)
         if self.layer is not None and objinfo:
             objinfo["layername"] = self.layer.name
@@ -345,7 +350,6 @@ class BaseElement (Store):
             self.send_params()
 
             await MFPGUI().mfp.set_gui_created(self.obj_id, True)
-            await MFPGUI().appwin.signal_emit("created", self)
 
         self.app_window.refresh(self)
 

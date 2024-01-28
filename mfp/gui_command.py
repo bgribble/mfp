@@ -112,8 +112,8 @@ class GUICommand:
                         layer = parent.find_layer(params["layername"])
                     if not layer:
                         layer = MFPGUI().appwin.active_layer()
-                    layer.add(o)
                     o.container = layer
+                    layer.add(o)
                 elif isinstance(parent, BaseElement):
                     # FIXME: don't hardcode GOP offsets
                     if not parent.export_x:
@@ -121,8 +121,8 @@ class GUICommand:
                             f"_create: parent {parent.scope.name}.{parent.name} has no export_x\n",
                         )
                     o.editable = False
-                    parent.layer.add(o, container=parent)
                     o.container = parent
+                    parent.layer.add(o, container=parent)
 
                 await o.configure(params)
                 MFPGUI().appwin.register(o)
