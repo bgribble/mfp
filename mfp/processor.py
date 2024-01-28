@@ -586,34 +586,34 @@ class Processor:
                         % (target.name, target.obj_id, inlet, len(target.inlets)))
             return False
 
-        # is this a DSP connection?
-        if outlet in self.dsp_outlets:
-            if inlet not in target.dsp_inlets:
-                if isinstance(target, Patch):
-                    Patch.task_nibbler.add_task(
-                        lambda args: Processor.connect(*args), 20,
-                        [self, outlet, target, inlet, show_gui]
-                    )
-                    log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
-                                % (target.name, target.obj_id))
-                    return True
-                log.warning(
-                    "Error: Can't connect DSP out %s of '%s' to non-DSP in %s of '%s'"
-                    % (outlet, self.name, inlet, target.name))
-                return False
-
-            out_obj, out_outlet = self.dsp_outlet(outlet)
-            in_obj, in_inlet = target.dsp_inlet(inlet)
-            if out_obj and in_obj:
-                await out_obj.connect(out_outlet, in_obj._id, in_inlet)
-            else:
-                log.warning("Trying to find DSP objects, failed", type(self), self.name,
-                            type(target), target.name,
-                            inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
-
         try:
             existing = self.connections_out[outlet]
             if (target, inlet) not in existing:
+                # is this a DSP connection?
+                if outlet in self.dsp_outlets:
+                    if inlet not in target.dsp_inlets:
+                        if isinstance(target, Patch):
+                            Patch.task_nibbler.add_task(
+                                lambda args: Processor.connect(*args), 20,
+                                [self, outlet, target, inlet, show_gui]
+                            )
+                            log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
+                                        % (target.name, target.obj_id))
+                            return True
+                        log.warning(
+                            "Error: Can't connect DSP out %s of '%s' to non-DSP in %s of '%s'"
+                            % (outlet, self.name, inlet, target.name))
+                        return False
+
+                    out_obj, out_outlet = self.dsp_outlet(outlet)
+                    in_obj, in_inlet = target.dsp_inlet(inlet)
+                    if out_obj and in_obj:
+                        await out_obj.connect(out_outlet, in_obj._id, in_inlet)
+                    else:
+                        log.warning("Trying to find DSP objects, failed", type(self), self.name,
+                                    type(target), target.name,
+                                    inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
+
                 existing.append((target, inlet))
         except Exception:
             # this can happen normally in a creation race, don't
