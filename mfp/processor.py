@@ -297,10 +297,16 @@ class Processor:
             self.assign(self.patch, self.patch.scopes.get(new_scope), self.name)
 
     def _osc_handler(self, path, args, types, src, data):
+        from .mfp_app import MFPApp
+
         if types[0] == 's':
-            self.send(self.patch.parse_obj(args[0]))
+            MFPApp().async_task(
+                self.send(self.patch.parse_obj(args[0]))
+            )
         else:
-            self.send(args[0])
+            MFPApp().async_task(
+                self.send(args[0])
+            )
 
         # return 0 means completely handled, nonzero keep trying
         return 0
