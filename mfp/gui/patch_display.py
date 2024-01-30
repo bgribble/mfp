@@ -119,6 +119,3 @@ class PatchDisplay (object):
             to_delete = self.obj_id
             self.obj_id = None
             await MFPGUI().mfp.delete(to_delete)
-
-    def command(self, action, data):
-        pass

@@ -4,6 +4,7 @@ mfp_command.py -- API to send commands to the main MFP process
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
+import json
 from carp.service import apiclass, noresp
 
 from mfp import log
@@ -56,7 +57,7 @@ class MFPCommand:
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            await obj.send((resp_type, resp_value), -1)
+            await obj.send((resp_type, json.loads(resp_value)), -1)
 
     @noresp
     async def send_bang(self, obj_id, port):

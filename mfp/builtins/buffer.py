@@ -81,8 +81,13 @@ class Buffer(Processor):
         elif resp_id == self.RESP_OFFSET:
             self.buf_offset = resp_value
         elif resp_id == self.RESP_BUFRDY:
-            self.outlets[2] = BufferInfo(self.buf_id, self.size, self.channels, self.rate,
-                                         self.buf_offset)
+            self.outlets[2] = BufferInfo(
+                buf_id=self.buf_id,
+                size=self.size,
+                channels=self.channels,
+                rate=self.rate,
+                offset=self.buf_offset
+            )
 
     async def trigger(self):
         incoming = self.inlets[0]
@@ -125,8 +130,13 @@ class Buffer(Processor):
             return None
 
     def bufinfo(self):
-        self.outlets[2] = BufferInfo(self.buf_id, self.size, self.channels, self.rate,
-                                     self.buf_offset)
+        self.outlets[2] = BufferInfo(
+            buf_id=self.buf_id,
+            size=self.size,
+            channels=self.channels,
+            rate=self.rate,
+            offset=self.buf_offset
+        )
 
 
 def register():

@@ -567,3 +567,6 @@ class BaseElement (Store):
             tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, None, None, details)
         self.app_window.hud_banner(tiptxt)
         return True
+
+    def command(self, action, args):
+        pass
