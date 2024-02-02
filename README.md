@@ -72,11 +72,14 @@ object, including assigned MIDI and OSC controllers.
 ## KNOWN BROKEN
 
 There are a number of bugs that I hoped to get fixed by this
-release (0.05) but have not.  Here are some that I will just have
+release (0.7) but have not.  Here are some that I will just have
 to ask for your patience with:
 
 Ticket | Description
 -------| --------------
+ #299 | If JACK isn't running and can't be started, launch fails ugly
+ #298 | Occasional retry loop on quit
+ #297 | Bad behavior on abort of file load 
  #292 | In larger patches, selection and interaction may get messed up
  #291 | When editing a label, the cursor disappears
  #204 | Logging is broken when loaded as LV2 plugin
