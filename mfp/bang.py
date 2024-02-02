@@ -1,18 +1,21 @@
 from .singleton import Singleton
+from carp.serializer import Serializable
 
-class BangType (Singleton):
+class BangType (Serializable, Singleton):
     def __repr__(self):
         return "Bang"
+
+    def to_dict(self):
+        return {}
 
     @classmethod
     def load(klass, objdict):
         return Bang
 
 
-class UninitType (Singleton):
+class UninitType (Serializable, Singleton):
     def __repr__(self):
         return "Uninit"
-
 
     def __add__(self, other):
         return self 

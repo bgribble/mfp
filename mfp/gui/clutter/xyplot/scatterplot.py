@@ -23,7 +23,7 @@ class ScatterPlot (XYPlot):
         self.x_scroll = 0
         self.y_scroll = 0
 
-        XYPlot.__init__(self, element, width, height)
+        super().__init__(element, width, height)
 
     def draw_field_cb(self, texture, ctxt, px_min, px_max):
         def stroke_to(styler, curve, px, ptnum, delta):
@@ -36,8 +36,8 @@ class ScatterPlot (XYPlot):
             dst_px[0] -= px_min[0]
             dst_px[1] -= px_min[1]
             styler.stroke(ctxt, dst_px, px)
-       
-        # if the viewport is animated (viewport_scroll not 0) 
+
+        # if the viewport is animated (viewport_scroll not 0)
         # the position of the field may have changed.
         field_vp = self.plot.get_viewport_origin()
         field_vp_pos = self.px2pt(field_vp)
@@ -53,7 +53,7 @@ class ScatterPlot (XYPlot):
             self.y_max = field_vp_pos[1]
             self.y_min = self.y_max - field_h
             self._recalc_y_scale()
-       
+
         for curve in self.points:
             curve = int(curve)
             styler = self.style.get(curve)
@@ -71,7 +71,8 @@ class ScatterPlot (XYPlot):
                     pc = self.pt2px(p)
                     pc[0] -= px_min[0]
                     pc[1] -= px_min[1]
-                    styler.mark(ctxt, pc)
+                    if styler.shape != "none":
+                        styler.mark(ctxt, pc)
                     if styler.stroke_style:
                         stroke_to(styler, curve, pc, ptnum, -1)
                 if styler.stroke_style:
@@ -94,6 +95,7 @@ class ScatterPlot (XYPlot):
         pts.append([ptnum, point])
 
         tiles = self.index_point(point, curve, ptnum)
+
         for tile_id in tiles:
             tex = self.plot.tile_by_pos.get(tile_id)
             if tex is not None:
@@ -108,9 +110,9 @@ class ScatterPlot (XYPlot):
 
         px = self.pt2px(point)
         if px is None:
-            # point is not legal, usually on log charts 
+            # point is not legal, usually on log charts
             return []
-
+        
         curve = int(curve)
 
         tiles = []
@@ -141,7 +143,7 @@ class ScatterPlot (XYPlot):
         for tile_id in tiles:
             pts = bytile.setdefault(tile_id, [])
             pts.append([ptnum, point])
-
+        
         return tiles
 
     def reindex(self):
@@ -183,7 +185,7 @@ class ScatterPlot (XYPlot):
             props["shape"] = style.shape
             props["stroke"] = style.stroke_style
 
-        return sd 
+        return sd
 
 
     async def configure(self, params):
@@ -191,27 +193,27 @@ class ScatterPlot (XYPlot):
         s = params.get("plot_style")
         if s:
             self.set_style(s)
-        
-        need_vp = False 
+
+        need_vp = False
         x = params.get("x_axis")
         if x:
             mode = modes.get(x.upper())
-            if mode != self.x_axis_mode: 
-                self.x_axis_mode = mode 
+            if mode != self.x_axis_mode:
+                self.x_axis_mode = mode
                 self._recalc_x_scale()
                 xax = self.pt2px((self.x_min, self.y_min))
                 self.x_axis.set_viewport_origin(xax[0], 0, True)
-                need_vp = True 
+                need_vp = True
 
         y = params.get("y_axis")
         if y:
             mode = modes.get(y.upper())
             if mode != self.y_axis_mode:
-                self.y_axis_mode = mode 
+                self.y_axis_mode = mode
                 self._recalc_y_scale()
                 yax = self.pt2px((self.x_min, self.y_max))
                 self.y_axis.set_viewport_origin(0, yax[1], True)
-                need_vp = True 
+                need_vp = True
 
         if need_vp:
             origin = self.pt2px((self.x_min, self.y_max))

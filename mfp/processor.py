@@ -1068,7 +1068,6 @@ class Processor:
 
         # special handling for gui_params
         gp = prms.get('gui_params')
-
         for k, v in gp.items():
             self.gui_params[k] = v
         self.gui_params['scope'] = self.scope.name

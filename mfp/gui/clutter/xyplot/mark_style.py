@@ -8,7 +8,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import math
 from mfp.gui.colordb import ColorDB, RGBAColor
-
+from mfp import log
 
 class MarkStyle:
     SQRT_3 = 3.0 ** 0.5
@@ -26,12 +26,18 @@ class MarkStyle:
         self.size_elt = None
         self.alpha_elt = None
 
+    def __repr__(self):
+        return f"<MarkStyle r={self.col_r} g={self.col_g} b={self.col_b} a={self.col_a} {self.shape} {self.size} {self.stroke_style}"
+
     def set_color(self, newcolor):
         if isinstance(newcolor, str):
             c = ColorDB().find(newcolor)
             c = ColorDB().normalize(c)
         elif isinstance(newcolor, RGBAColor):
             c = newcolor
+        else:
+            log.debug(f"MarkStyle.set_color: color is not a recognized type: {newcolor} {type(newcolor)}")
+            return
         self.col_r = c.red
         self.col_g = c.green
         self.col_b = c.blue
@@ -83,4 +89,6 @@ class MarkStyle:
             self.mark_square(ctx, point)
         elif self.shape == "triangle":
             self.mark_triangle(ctx, point)
+        else:
+            return
         ctx.stroke()

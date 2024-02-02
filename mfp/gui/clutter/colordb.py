@@ -27,7 +27,12 @@ class ClutterColorDBBackend(ColorDBBackend):
         from mfp.gui.colordb import RGBAColor
 
         if color is not None:
-            rv = RGBAColor(color.red / 255.0, color.green / 255.0, color.blue/255.0, color.alpha/255.0)
+            rv = RGBAColor(
+                red=(color.red / 255.0),
+                green=(color.green / 255.0),
+                blue=(color.blue/255.0),
+                alpha=color.alpha/255.0
+            )
         else:
-            rv = RGBAColor(0, 0, 0, 1)
+            rv = RGBAColor(red=0, green=0, blue=0, alpha=1)
         return rv

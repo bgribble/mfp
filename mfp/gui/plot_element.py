@@ -42,8 +42,10 @@ class PlotElement (BaseElement):
 
         super().__init__(window, x, y)
 
-        self.param_list.extend(['x_min', 'x_max', 'y_min', 'y_max',
-                                'plot_style', 'plot_type'])
+        self.param_list.extend([
+            'x_min', 'x_max', 'y_min', 'y_max',
+            'plot_style', 'plot_type'
+        ])
 
         # display bounds
         self.x_min = 0.0
@@ -86,7 +88,6 @@ class PlotElement (BaseElement):
             if len(parts) > 1:
                 self.obj_args = parts[1]
 
-            log.debug("PlotElement: type=%s, args=%s" % (self.obj_type, self.obj_args))
             self.proc_type = self.obj_type
             await self.create(self.proc_type, self.obj_args)
 
