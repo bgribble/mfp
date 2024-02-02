@@ -49,7 +49,7 @@ class StepSeq(Processor):
         unpacked = []
         for s in steps:
             if isinstance(s, (float, int)):
-                unpacked.extend([float(s), True, float(0.0)])
+                unpacked.extend([float(s), float(1.0), float(0.0)])
             elif len(s) > 2:
                 unpacked.extend([float(s[0]), float(s[1]), float(s[2])])
             elif len(s) == 2:

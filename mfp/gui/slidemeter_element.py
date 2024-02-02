@@ -22,7 +22,12 @@ class SlideMeterElement (BaseElement):
     Can be output-only or interactive
     Scale can be dB or linear
     '''
-
+    extra_params = [
+        'min_value', 'max_value', 'show_scale', 'scale',
+        'scale_font_size', 'scale_position', 'orientation',
+        'zeropoint'
+    ]
+    store_attrs = BaseElement.store_attrs + extra_params
     display_type = "slidemeter"
     proc_type = "slidemeter"
 
@@ -31,8 +36,6 @@ class SlideMeterElement (BaseElement):
         'meter-color': 'default-alt-fill-color'
     }
 
-    DEFAULT_W = 25
-    DEFAULT_H = 100
     SCALE_SPACE = 30
     TICK_SPACE = 14
     TICK_LEN = 5
@@ -45,8 +48,8 @@ class SlideMeterElement (BaseElement):
 
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
-        self.param_list.extend(['min_value', 'max_value', 'show_scale', 'scale',
-                                'scale_position', 'orientation', 'zeropoint'])
+        self.param_list.extend([*self.extra_params])
+
         # parameters controlling display
         self.value = 0.0
         self.min_value = 0.0
@@ -56,6 +59,7 @@ class SlideMeterElement (BaseElement):
         self.slider_enable = True
         self.scale = ticks.LinearScale()
         self.scale_position = self.LEFT
+        self.scale_font_size = 7
         self.orientation = self.VERTICAL
         self.zeropoint = None
 
@@ -100,29 +104,29 @@ class SlideMeterElement (BaseElement):
             self.redraw()
             MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.value))
 
-    def set_orientation(self, orient):
+    async def set_orientation(self, orient):
         if orient != self.orientation:
-            self.set_size(self.height, self.width)
-        self.orientation = orient
+            await self.set_size(self.height, self.width)
+        await self.dispatch(self.action(self.SET_ORIENTATION, value=orient))
 
-    def set_show_scale(self, show_scale):
+    async def set_show_scale(self, show_scale):
         if show_scale == self.show_scale:
             return
 
         if show_scale:
             self.show_scale = True
             if self.orientation & self.HORIZONTAL:
-                self.set_size(self.get_width(), self.get_height() + self.SCALE_SPACE)
+                await self.set_size(self.get_width(), self.get_height() + self.SCALE_SPACE)
             else:
-                self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
+                await self.set_size(self.get_width() + self.SCALE_SPACE, self.get_height())
         else:
             self.show_scale = False
             if self.orientation & self.HORIZONTAL:
-                self.set_size(self.get_width(), self.get_height() - self.SCALE_SPACE)
+                await self.set_size(self.get_width(), self.get_height() - self.SCALE_SPACE)
             else:
-                self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
+                await self.set_size(self.get_width() - self.SCALE_SPACE, self.get_height())
 
-    def set_bounds(self, min_val, max_val):
+    async def set_bounds(self, min_val, max_val):
         self.max_value = max_val
         self.min_value = min_val
         self.scale.set_bounds(self.min_value, self.max_value)
@@ -140,15 +144,15 @@ class SlideMeterElement (BaseElement):
             MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.value))
 
         self.scale_ticks = None
-        self.update()
+        await self.update()
         self.send_params()
 
-    def set_zeropoint(self, zp):
+    async def set_zeropoint(self, zp):
         self.zeropoint = zp
-        self.update()
+        await self.update()
         self.send_params()
 
-    def configure(self, params):
+    async def configure(self, params):
         changes = False
 
         v = params.get("orientation")
@@ -213,7 +217,7 @@ class SlideMeterElement (BaseElement):
         if rescale:
             self.scale.set_bounds(self.min_value, self.max_value)
             self.scale_ticks = None
-            self.update()
+            await self.update()
 
         v = params.get("value")
         if v is not None:
@@ -229,7 +233,7 @@ class SlideMeterElement (BaseElement):
         if dr is not None:
             self.dial_radius = dr
 
-        BaseElement.configure(self, params)
+        await super().configure(params)
         if changes:
             self.redraw()
 
@@ -258,7 +262,11 @@ class SlideMeterElement (BaseElement):
 class FaderElementImpl(ABC, BackendInterface):
     pass
 
+
 class FaderElement(SlideMeterElement):
+    DEFAULT_W = 20
+    DEFAULT_H = 100
+
     @classmethod
     def get_factory(cls):
         return FaderElementImpl.get_backend(MFPGUI().appwin.backend_name)
@@ -289,6 +297,7 @@ class DialElement(SlideMeterElement):
     DEFAULT_W = 50
     DEFAULT_H = 50
     DEFAULT_R = 24
+
     BAR_WIDTH = 0.7
     THETA_MIN = 0.65*math.pi
     THETA_MAX = 0.35*math.pi
@@ -307,17 +316,22 @@ class DialElement(SlideMeterElement):
     def set_orientation(self, orient):
         pass
 
-    def set_show_scale(self, show_scale):
+    async def set_show_scale(self, show_scale):
         if show_scale == self.show_scale:
             return
 
         if show_scale:
             self.show_scale = True
-            self.set_size(2*self.dial_radius + 2.0 + 7*self.scale_font_size,
-                          2*self.dial_radius + 2.0 + 3*self.scale_font_size)
+            await self.set_size(
+                2*self.dial_radius + 2.0 + 7*self.scale_font_size,
+                2*self.dial_radius + 2.0 + 3*self.scale_font_size
+            )
         else:
             self.show_scale = False
-            self.set_size(2*self.dial_radius + 2.0, 2*self.dial_radius + 2.0)
+            await self.set_size(
+                2*self.dial_radius + 2.0,
+                2*self.dial_radius + 2.0
+            )
 
     async def make_edit_mode(self):
         if self.obj_id is None:

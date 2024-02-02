@@ -102,7 +102,8 @@ class LabelEditMode (InputMode):
 
         self.bind(None, self.insert_text, "Insert text")
 
-        inittxt = self.element.label_edit_start()
+    async def setup(self):
+        inittxt = await self.element.label_edit_start()
         if inittxt:
             self.text = inittxt
 
@@ -111,6 +112,8 @@ class LabelEditMode (InputMode):
         self.start_editing()
         self.update_cursor()
         self.set_selection(0, len(self.text))
+
+        await super().setup()
 
     def cut(self):
         sel = self.text[self.selection_start:self.selection_end]

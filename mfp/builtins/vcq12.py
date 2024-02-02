@@ -50,7 +50,7 @@ class VCQ12(Processor):
         self.init_mapvals = [val for pair in self.map for val in pair]
 
     async def setup(self):
-        await self.dsp_init("vcq12~", map=self.mapvals)
+        await self.dsp_init("vcq12~", map=self.init_mapvals)
 
     async def trigger(self):
         if self.inlets[1] is not Uninit:
@@ -58,6 +58,6 @@ class VCQ12(Processor):
             self.map = self.maps.get(self.mapname, self.maps['semitone'])
             await self.dsp_setparam("map", [val for pair in self.map for val in pair])
 
+
 def register():
     MFPApp().register("vcq12~", VCQ12)
-

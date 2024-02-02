@@ -1,9 +1,10 @@
 #! /usr/bin/env python
 '''
 patch_display.py
-PatchDisplay class capturing display information for a patch
+PatchDisplay class captures display information for a patch:
+a subset of the layers and objects in the app window
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from ..gui_main import MFPGUI
@@ -42,7 +43,7 @@ class PatchDisplay (object):
     def build(cls, *args, **kwargs):
         return cls.get_factory()(*args, **kwargs)
 
-    def update(self):
+    async def update(self):
         pass
 
     def has_scope(self, scope_name):
@@ -58,7 +59,7 @@ class PatchDisplay (object):
         for k, v in extras.items():
             prms[k] = v
         if self.obj_id is not None:
-            MFPGUI().async_task(MFPGUI().mfp.set_params.sync(self.obj_id, prms))
+            MFPGUI().async_task(MFPGUI().mfp.set_params(self.obj_id, prms))
 
     def find_layer(self, layer):
         for ll in self.layers:
@@ -66,7 +67,7 @@ class PatchDisplay (object):
                 return ll
         return None
 
-    def configure(self, params):
+    async def configure(self, params):
         self.num_inlets = params.get("num_inlets")
         self.num_outlets = params.get("num_outlets")
         self.dsp_inlets = params.get("dsp_inlets")
@@ -118,6 +119,3 @@ class PatchDisplay (object):
             to_delete = self.obj_id
             self.obj_id = None
             await MFPGUI().mfp.delete(to_delete)
-
-    def command(self, action, data):
-        pass

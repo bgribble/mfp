@@ -124,7 +124,6 @@ class ClutterInputManagerBackend(InputManagerBackend):
             ):
                 self.input_manager.keyseq.mod_keys = set()
                 self.input_manager.window.grab_focus()
-
             if (
                 src
                 and src != self.input_manager.window

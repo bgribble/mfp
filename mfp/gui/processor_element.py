@@ -66,7 +66,7 @@ class ProcessorElement (BaseElement):
     def get_factory(cls):
         return ProcessorElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    def update(self):
+    async def update(self):
         if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
             label_width = self.label.get_property('width') + 14
         else:
@@ -81,17 +81,17 @@ class ProcessorElement (BaseElement):
 
         new_w = max(35, port_width, label_width, box_width)
 
-        self.set_size(new_w, self.texture.get_property('height'))
+        await self.set_size(new_w, self.texture.get_property('height'))
         self.redraw()
 
     def get_label(self):
         return self.label
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
         if not self.show_label:
             self.label.show()
-        self.update()
+        await self.update()
 
     async def label_edit_finish(self, widget, text=None):
         if text is not None:
@@ -114,12 +114,12 @@ class ProcessorElement (BaseElement):
         if not self.show_label:
             self.label.hide()
 
-        self.update()
+        await self.update()
 
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
-    def configure(self, params):
+    async def configure(self, params):
         if self.obj_args is None:
             self.label.set_text("%s" % (self.obj_type,))
         else:
@@ -148,16 +148,16 @@ class ProcessorElement (BaseElement):
         params["width"] = max(self.width, params.get("export_w") or 0)
         params["height"] = max(self.height, (params.get("export_h") or 0) + labelheight)
 
-        super().configure(params)
+        await super().configure(params)
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
             if self.export_created:
-                MFPGUI().mfp.create_export_gui.task(self.obj_id)
+                await MFPGUI().mfp.create_export_gui(self.obj_id)
                 need_update = True
 
         if "debug" in params:
             need_update = True
 
         if need_update:
-            self.update()
+            await self.update()

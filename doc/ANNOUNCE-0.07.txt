@@ -1,0 +1,123 @@
+MFP -- Music For Programmers
+Release 0.7
+
+I'm pleased to announce a new version of MFP, mostly consisting
+of internal refactoring and architecture changes.  It's been
+almost 7 years since the last release! This one may not have a lot
+of user-facing changes, but MFP is much improved internally and this
+release is the base for what I hope will be a lot of exciting future
+work.
+
+If you're wondering why it's been so long since the last release,
+the TL;DR is J-O-B. Recently I have managed to find a time slot
+to work on my personal projects more and I've been really
+enjoying getting back into MFP development.
+
+A summary of changes is below.  Please see the GitHub issue tracker
+for complete details:
+
+  http://github.com/bgribble/mfp
+
+This version is still source-code-only, but the new build system
+should make it a bit easier for those who would like to try it.
+
+Significant changes since release v0.06
+----------------------------------------
+
+* Internal architecture converted to use Python asyncio rather than
+  threads.
+
+* RPC between main process, DSP process, and UI process shifted
+  to a separately-released package called "carp" (will be installed
+  as part of build process)
+
+* RPC serialization mostly uses protobuf for efficiency
+
+* UI code refactored into toolkit-agnostic and toolkit-dependent
+  code, in anticipation of beginning a migration to Dear ImGUI
+
+* Built UI state management out with a separately-released
+  package called "flopsy" (will be installed as part of build
+  process). This is building the foundation for robust undo/redo,
+  but still not there yet.
+
+* Added a step debugger with breakpoints for debugging patches
+
+* Lots of new builtins and bugfixes resulting from my attempts to 
+do the 2023 and 2024 Advent of Code in MFP patches. 
+
+
+About MFP
+----------------------------------------
+
+MFP is an environment for visually composing computer programs,
+with an emphasis on music and real-time audio synthesis and
+analysis.  It's very much inspired by Miller Puckette's Pure Data
+(pd) and Max/MSP, with a bit of LabView and TouchOSC for good
+measure.  It is targeted at musicians, recording engineers, and
+software developers who like the "patching" dataflow metaphor for
+coding up audio synthesis, processing, and analysis.
+
+MFP is a completely new code base, written in Python and C, with
+a Clutter UI.  It has been under development by a solo developer
+(me!), as a spare-time project for several years.
+
+Compared to Pure Data, its nearest relative, MFP is superficially
+pretty similar but differs in a few key ways:
+
+ * MFP uses Python data natively.  Any literal data entered in the
+   UI is parsed by the Python evaluator, and any Python value is a
+   legitimate "message" on the dataflow network. This makes it much
+   easier to make patches that work like conventional "programs".
+
+ * MFP provides fairly raw access to Python constructs if desired.
+   For example, the built-in Python console allows live coding of
+   Python functions as patch elements at runtime.
+
+ * Name resolution and namespacing are addressed more robustly,
+   with explicit support for lexical scoping.  This allows patches
+   to have a dynamic number of inputs and outputs, with hygienic
+   layer copying preserving the lexical structure of each "voice"
+
+ * The UI is largely keyboard-driven, with a modal input system
+   that feels a bit like vim.  The graphical presentation is a
+   single-window style with layers rather than multiple windows.
+
+ * There is fairly deep integration of Open Sound Control (OSC), with
+   every patch element having an OSC address and the ability to learn
+   any other desired address.  MIDI controller learning is also robustly
+   supported.
+
+ * MFP has just a fraction of the builtin and addon functionality
+   provided by PD.  It's not up to being a replacement except in
+   very limited cases!
+
+The code and issue tracker are hosted on GitHub:
+
+    https://github.com/bgribble/mfp
+
+You can find the LAC-2013 paper and accompanying screenshots,
+some sample patches, and a few other bits of documentation in the
+doc directory of the GitHub repo.  The README files at the top
+level of the source tree contain dependency, build, and
+getting-started information.
+
+More sample patches are in my personal patch repo:
+
+    https://github.com/bgribble/mfp-patches
+
+
+Where's it going?
+----------------------------------------
+
+I've been working on MFP as a spare time project for almost 14
+years now.  The likelihood that it will ever have more than a few
+users is low.  Luckily, that doesn't bother me much; MFP is a
+tool I am building mainly for my own use and education.
+
+That being said, if there's something about it that appeals to
+you, I welcome your interest and participation.
+
+Thanks,
+Bill Gribble <grib@billgribble.com>
+

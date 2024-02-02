@@ -40,6 +40,7 @@ class ClutterBaseViaElementImpl(ViaElement, ClutterBaseElementBackend):
         txs = self.VIA_SIZE + self.VIA_FUDGE
         self.texture = Clutter.CairoTexture.new(txs, txs)
         self.texture.set_size(txs, txs)
+        self.group.set_size(txs, txs)
         self.texture.set_surface_size(txs, txs)
 
         self.texture.connect("draw", self.draw_cb)
@@ -47,6 +48,7 @@ class ClutterBaseViaElementImpl(ViaElement, ClutterBaseElementBackend):
 
         self.group.set_reactive(True)
         self.group.add_actor(self.texture)
+        self.group.set_position(x, y)
 
         self.recenter_label()
         self.redraw()

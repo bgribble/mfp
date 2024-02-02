@@ -14,15 +14,19 @@ class InputMode (object):
         if short_description is not None:
             self.short_description = short_description
         else:
-            self.short_description = self.description 
-        
-        self.enabled = False 
+            self.short_description = self.description
+
+        self.enabled = False
         self.default = None
         self.bindings = {}
         self.extensions = []
         self.num_bindings = 0
         self.affinity = 0
         self.seqno = None
+
+    async def setup(self):
+        for mode in self.extensions:
+            await mode.setup()
 
     def extend(self, mode):
         self.extensions.append(mode)
@@ -74,15 +78,15 @@ class InputMode (object):
         return None
 
     def enable(self):
-        self.enabled = True 
-        for ext in self.extensions: 
+        self.enabled = True
+        for ext in self.extensions:
             cb = ext.enable()
             if inspect.isawaitable(cb):
                 MFPGUI().async_task(cb)
 
     def disable(self):
-        self.enabled = False 
-        for ext in self.extensions: 
+        self.enabled = False
+        for ext in self.extensions:
             cb = ext.disable()
             if inspect.isawaitable(cb):
                 MFPGUI().async_task(cb)

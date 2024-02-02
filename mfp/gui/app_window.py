@@ -133,13 +133,6 @@ class AppWindow (SignalMixin):
 
         return self.selected_layer
 
-    # FIXME clutter
-    def ready(self):
-        if self.window and self.window.get_realized():
-            return True
-        else:
-            return False
-
     def edit_major_mode(self):
         for o in self.selected:
             o.end_control()
@@ -167,7 +160,6 @@ class AppWindow (SignalMixin):
 
         if element.obj_id is not None:
             element.send_params()
-
 
     def unregister(self, element):
         if element in self.selected:
@@ -239,8 +231,8 @@ class AppWindow (SignalMixin):
         self.console_manager.show_prompt(msg)
         self.console_activate()
 
-    def get_prompted_input(self, prompt, callback, default=''):
-        self.hud_prompt_mgr.get_input(prompt, callback, default)
+    async def get_prompted_input(self, prompt, callback, default=''):
+        await self.hud_prompt_mgr.get_input(prompt, callback, default)
 
 # additional methods in @extends wrappers
 from . import app_window_layer  # noqa

@@ -23,37 +23,37 @@ class EnumEditMode (InputMode):
         self.bind("C-]", self.set_upper, "Set upper bound on value")
         self.extend(LabelEditMode(window, element, label))
 
-    def set_upper(self):
+    async def set_upper(self):
         def cb(value):
             if value.lower() == "none":
                 value = None
             else:
                 value = float(value)
             self.enum.set_bounds(self.enum.min_value, value)
-        self.window.get_prompted_input("Number upper bound: ", cb)
+        await self.window.get_prompted_input("Number upper bound: ", cb)
         return True
 
-    def set_lower(self):
+    async def set_lower(self):
         def cb(value):
             if value.lower() == "none":
                 value = None
             else:
                 value = float(value)
             self.enum.set_bounds(value, self.enum.max_value)
-        self.window.get_prompted_input("Number lower bound: ", cb)
+        await self.window.get_prompted_input("Number lower bound: ", cb)
         return True
 
-    def add_digit(self):
+    async def add_digit(self):
         self.enum.digits += 1
         self.enum.format_update()
-        self.enum.update()
+        await self.enum.update()
         return True
 
-    def del_digit(self):
+    async def del_digit(self):
         if self.enum.digits > 0:
             self.enum.digits -= 1
         self.enum.format_update()
-        self.enum.update()
+        await self.enum.update()
         return True
 
     def end_edits(self):

@@ -32,17 +32,20 @@ class ClutterSlideMeterElementImpl(SlideMeterElement, ClutterBaseElementBackend)
             self.texture = Clutter.Canvas.new()
             self.texture.connect("draw", self.draw_cb)
             self.group.set_content(self.texture)
-
             self.group.set_reactive(True)
 
-            self.set_size(self.DEFAULT_W, self.DEFAULT_H)
-            self.move(x, y)
+            self.width = self.DEFAULT_W
+            self.height = self.DEFAULT_H
+            self.texture.set_size(self.width, self.height)
+            self.group.set_size(self.width, self.height)
+
+        self.group.set_position(x, y)
 
     def redraw(self):
         self.texture.invalidate()
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height):
+        await super().set_size(width, height)
         self.texture.set_size(width, height)
         self.texture.invalidate()
 
@@ -206,8 +209,11 @@ class ClutterDialElementImpl(DialElement, DialElementImpl, ClutterSlideMeterElem
         self.group.set_content(self.texture)
         self.group.set_reactive(True)
 
-        self.set_size(self.DEFAULT_W, self.DEFAULT_H)
-        self.move(x, y)
+        self.width = self.DEFAULT_W
+        self.height = self.DEFAULT_H
+        self.texture.set_size(self.width, self.height)
+        self.group.set_size(self.width, self.height)
+        self.redraw()
 
     def p2r(self, r, theta):
         x = (self.width / 2.0) + r * math.cos(theta)

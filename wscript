@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+from waflib import Utils
 from waflib.Configure import conf
 from waflib.Build import BuildContext, InstallContext, CleanContext, CFG_FILES
 import waflib
@@ -80,6 +81,9 @@ def fix_virtualenv(ctxt, *args, **kwargs):
             ) % ctxt.env.PREFIX.replace("/", "\\/")),
             "echo 'if echo $LD_LIBRARY_PATH | grep -vq :%s/lib64:' >> activate.edited" % ctxt.env.PREFIX,
             "echo 'then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/lib64:' >> activate.edited" % ctxt.env.PREFIX,
+            "echo 'fi' >> activate.edited",
+            "echo 'if echo $LD_LIBRARY_PATH | grep -vq :%s/lib:' >> activate.edited" % ctxt.env.PREFIX,
+            "echo 'then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/lib:' >> activate.edited" % ctxt.env.PREFIX,
             "echo 'fi' >> activate.edited",
             "mv activate.edited virtual/bin/activate",
             "touch %s" % targetfile
@@ -517,8 +521,19 @@ def build(bld):
                 use=['mfpdsp'])
     bld.add_group()
 
-    #bld(features="install_wheels")
-    #bld.add_group()
+    bld.install_files(
+        "share/mfp/icons/hicolor/scalable/actions/",
+        "mfp.svg"
+    )
+    
+    if bld.cmd == "install":
+        desktop_dir = Utils.subst_vars("${PREFIX}/share/mfp", bld.env)
+        desktop_filename = "mfp.desktop"
+        desktop_template = Utils.readf(desktop_filename)
+        desktop_content = Utils.subst_vars(desktop_template, bld.env)
+        if not os.path.exists(desktop_dir):
+            os.makedirs(desktop_dir)
+        Utils.writef(f"{desktop_dir}/{desktop_filename}", desktop_content)
 
     # must make virtualenv "relocatable" after all packages added
     bld.fix_virtualenv()

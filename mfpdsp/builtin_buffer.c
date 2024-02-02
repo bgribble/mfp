@@ -344,8 +344,11 @@ shared_buffer_alloc(buf_info * buf)
 
     snprintf(buf->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d",
              pid, (int)tv.tv_sec, (int)tv.tv_usec);
-    buf->shm_fd = shm_open(buf->shm_id, O_RDWR|O_CREAT, S_IRWXU);
 
+    buf->shm_fd = shm_open(buf->shm_id, O_RDWR|O_CREAT, S_IRWXU);
+    if (buf->shm_fd < 0) {
+        mfp_log_debug("shm_open() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
+    }
     if(buf->buf_ptr != NULL) {
         munmap(buf->buf_ptr, buf->buf_size);
         buf->buf_ptr = NULL;
@@ -354,7 +357,7 @@ shared_buffer_alloc(buf_info * buf)
     buf->buf_size = size;
     buf->buf_ptr = mmap(NULL,  size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
     if (buf->buf_ptr == NULL) {
-        printf("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
+        mfp_log_debug("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
     }
 }
 

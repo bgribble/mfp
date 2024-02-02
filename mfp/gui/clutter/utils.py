@@ -1,6 +1,6 @@
 from mfp import log
 
-def _callback_wrapper(self, thunk):
+def _callback_wrapper(thunk):
     try:
         return thunk()
     except Exception as e:
@@ -8,7 +8,7 @@ def _callback_wrapper(self, thunk):
         log.debug_traceback()
         return False
 
-def clutter_do_later(self, delay, thunk):
+def clutter_do_later(delay, thunk):
     from gi.repository import GObject
-    GObject.timeout_add(int(delay), self._callback_wrapper, thunk)
+    GObject.timeout_add(int(delay), _callback_wrapper, thunk)
 

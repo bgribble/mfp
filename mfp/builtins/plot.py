@@ -38,19 +38,20 @@ class Scope (Processor):
         if isinstance(self.inlets[0], BufferInfo):
             self.buffer = self.inlets[0]
             if self.gui_created:
-                MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
+                await MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
+                self.need_buffer_send = False
             else:
                 self.need_buffer_send = True
         elif self.inlets[0] == 1:
             pass
         elif self.inlets[0] == 0:
             if self.gui_created:
-                self.grab()
+                await self.grab()
+
         if self.buffer is None:
-            log.debug("scope: got input from buffer, but no bufferinfo.. requesting")
             self.outlets[0] = MethodCall("bufinfo")
 
-        if self.gui_created and self.need_buffer_send:
+        if self.gui_created and self.buffer and self.need_buffer_send:
             self.need_buffer_send = False
             MFPApp().gui_command.command(self.obj_id, "buffer", self.buffer)
 
@@ -64,8 +65,8 @@ class Scope (Processor):
     def draw_complete(self):
         self.outlets[0] = self.retrig_value
 
-    def grab(self):
-        MFPApp().gui_command.command(self.obj_id, "grab", None)
+    async def grab(self):
+        await MFPApp().gui_command.command(self.obj_id, "grab", None)
 
 
 class Scatter (Processor):

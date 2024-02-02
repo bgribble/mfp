@@ -40,12 +40,9 @@ class ViaElement (BaseElement):
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.signal_listen('text-changed', self.text_changed_cb)
-
-        self.move(x, y)
-        self.set_size(
-            self.VIA_SIZE + 2 * self.VIA_FUDGE,
-            self.VIA_SIZE + self.LABEL_HEIGHT + self.LABEL_FUDGE + 2 * self.VIA_FUDGE
-        )
+        
+        self.width = self.VIA_SIZE + 2 * self.VIA_FUDGE
+        self.height = self.VIA_SIZE + self.LABEL_HEIGHT + self.LABEL_FUDGE + 2 * self.VIA_FUDGE
 
     def text_changed_cb(self, *args):
         self.recenter_label()
@@ -67,7 +64,7 @@ class ViaElement (BaseElement):
             (name, port) = self.parse_label(label_text)
             await self.create(self.proc_type, '"%s",%s' % (name, port))
 
-    def label_edit_start(self, *args):
+    async def label_edit_start(self, *args):
         pass
 
     async def label_edit_finish(self, *args):
@@ -78,11 +75,11 @@ class ViaElement (BaseElement):
             await self.create_obj(t)
         self.recenter_label()
 
-    def configure(self, params):
+    async def configure(self, params):
         self.label_text = params.get("label_text", "")
         self.label.set_text(self.label_text)
         self.recenter_label()
-        BaseElement.configure(self, params)
+        await super().configure(params)
 
     def port_position(self, port_dir, port_num):
         # vias connect to the center of the texture
@@ -101,7 +98,6 @@ class ViaElement (BaseElement):
 
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
-
 
 class SendViaElementImpl(ABC, BackendInterface):
     @abstractmethod

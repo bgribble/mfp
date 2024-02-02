@@ -73,7 +73,8 @@ def extended_decoder_hook(saved):
             ctor = ExtendedEncoder.TYPES.get(tname)
             if ctor:
                 if hasattr(ctor, 'load'):
-                    return ctor.load(tdict)
+                    loaded = ctor.load(tdict)
+                    return loaded
                 else:
                     return _dumb_load(ctor, tdict)
     return saved

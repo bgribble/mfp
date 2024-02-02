@@ -55,10 +55,12 @@ class TextElement (BaseElement):
     def get_factory(cls):
         return TextElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    def update(self):
+    async def update(self):
         if not self.get_style('canvas-size'):
-            self.set_size(self.label.get_width() + 2*self.ELBOW_ROOM,
-                          self.label.get_height() + self.ELBOW_ROOM)
+            await self.set_size(
+                self.label.get_width() + 2*self.ELBOW_ROOM,
+                self.label.get_height() + self.ELBOW_ROOM
+            )
         self.redraw()
         self.draw_ports()
 
@@ -66,7 +68,7 @@ class TextElement (BaseElement):
         if self.selected:
             super().draw_ports()
 
-    def label_edit_start(self):
+    async def label_edit_start(self):
         return self.value
 
     async def label_edit_finish(self, widget, new_text, aborted=False):
@@ -78,21 +80,21 @@ class TextElement (BaseElement):
             self.value = new_text
             self.set_text()
             await MFPGUI().mfp.send(self.obj_id, 0, self.value)
-        self.update()
+        await self.update()
 
     async def end_edit(self):
         await BaseElement.end_edit(self)
         self.set_text()
 
-    def text_changed_cb(self, *args):
-        self.update()
+    async def text_changed_cb(self, *args):
+        await self.update()
 
-    def clicked(self):
+    async def clicked(self):
         def newtext(txt):
             self.value = txt or ''
             self.set_text()
         if self.selected and self.clickchange:
-            self.app_window.get_prompted_input("New text:", newtext, self.value)
+            await self.app_window.get_prompted_input("New text:", newtext, self.value)
         return True
 
     def set_text(self):
@@ -127,7 +129,7 @@ class TextElement (BaseElement):
     def make_control_mode(self):
         return ClickableControlMode(self.app_window, self, "Change text", 'A-')
 
-    def configure(self, params):
+    async def configure(self, params):
         if params.get('value') is not None:
             new_text = params.get('value')
             if new_text != self.value:
@@ -148,13 +150,14 @@ class TextElement (BaseElement):
                 params['width'] = newsize[0]
                 params['height'] = newsize[1]
 
-        BaseElement.configure(self, params)
+        await super().configure(params)
+
         if newsize:
-            self.set_size(*newsize)
+            await self.set_size(*newsize)
 
         if 'style' in params:
             newstyle = params['style']
             if 'font-face' in newstyle or 'font-size' in newstyle:
                 self.label.set_font_name(self.get_fontspec())
 
-        self.update()
+        await self.update()

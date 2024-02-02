@@ -46,18 +46,18 @@ class GUICommand:
         obj = MFPGUI().recall(obj_id)
         obj.command(action, args)
 
-    def configure(self, obj_id, params=None, **kwparams):
+    async def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
         obj = MFPGUI().recall(obj_id)
         if params is not None:
-            obj.configure(params)
+            await obj.configure(params)
         else:
             prms = obj.synced_params()
             for k, v in kwparams.items():
                 prms[k] = v
-            obj.configure(prms)
+            await obj.configure(prms)
 
-    def create(self, obj_type, obj_args, obj_id, parent_id, params):
+    async def create(self, obj_type, obj_args, obj_id, parent_id, params):
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay
         from .gui.base_element import BaseElement
@@ -112,6 +112,7 @@ class GUICommand:
                         layer = parent.find_layer(params["layername"])
                     if not layer:
                         layer = MFPGUI().appwin.active_layer()
+                    o.container = layer
                     layer.add(o)
                 elif isinstance(parent, BaseElement):
                     # FIXME: don't hardcode GOP offsets
@@ -119,23 +120,21 @@ class GUICommand:
                         log.debug(
                             f"_create: parent {parent.scope.name}.{parent.name} has no export_x\n",
                         )
-                    xpos = params.get("position_x", 0) - parent.export_x + 2
-                    ypos = params.get("position_y", 0) - parent.export_y + 20
-                    o.move(xpos, ypos)
                     o.editable = False
-                    parent.layer.add(o)
+                    o.container = parent
+                    parent.layer.add(o, container=parent)
 
-                o.configure(params)
+                await o.configure(params)
                 MFPGUI().appwin.register(o)
             else:
-                o.configure(params)
+                await o.configure(params)
 
             MFPGUI().remember(o)
             MFPGUI().appwin.refresh(o)
-            o.update()
-            MFPGUI().async_task(MFPGUI().appwin.signal_emit("created", o))
+            await o.update()
+            await MFPGUI().appwin.signal_emit("created", o)
 
-    def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+    async def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI
         from .gui.connection_element import ConnectionElement
         from .gui.patch_display import PatchDisplay
@@ -161,6 +160,7 @@ class GUICommand:
         MFPGUI().appwin.register(c)
         obj_1.connections_out.append(c)
         obj_2.connections_in.append(c)
+        await c.update()
 
     async def delete(self, obj_id):
         from .gui_main import MFPGUI

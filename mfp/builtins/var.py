@@ -20,11 +20,11 @@ class Var (Processor):
     '''
 
     doc_tooltip_obj = "Store a variable message (any type)"
-    doc_tooltip_inlet = ["Save input and emit from outlet, or only emit if input is Bang", 
+    doc_tooltip_inlet = ["Save input and emit from outlet, or only emit if input is Bang",
                          "Save input but do not emit (default: initarg 0)" ]
     doc_tooltip_outlet = ["Value output"]
 
-    do_onload = False 
+    do_onload = False
 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.gui_type = init_type
@@ -46,14 +46,14 @@ class Var (Processor):
     async def trigger(self):
         '''
         [var] trigger, basic form:
-                - on inlet 1, save value but do not output.
-                  Possibly update GUI display.
-                - Bang on inlet 0: output stored value
-                - anything else on inlet 0: save and output value
-                  Possibly update GUI display
+        - on inlet 1, save value but do not output.
+          Possibly update GUI display.
+        - Bang on inlet 0: output stored value
+        - anything else on inlet 0: save and output value
+          Possibly update GUI display
 
         As [text]:
-                - ensure that value is a string and save it in the gui_params
+        - ensure that value is a string and save it in the gui_params
 
         '''
         do_update = False
@@ -66,23 +66,19 @@ class Var (Processor):
 
         if self.inlets[0] is not Uninit:
             # Bang just causes output
-            if (self.inlets[0] is not Bang):
+            if self.inlets[0] is not Bang:
                 self.value = self.inlets[0]
                 if self.init_type == "text":
                     self.value = str(self.value)
                 do_update = True
             self.outlets[0] = self.value
             self.inlets[0] = Uninit
-        if (do_update and self.gui_params.get("update_required")
-            and ('value' not in self.gui_params or self.gui_params['value'] != self.value)):
+        if (
+            do_update and self.gui_params.get("update_required")
+            and ('value' not in self.gui_params or self.gui_params['value'] != self.value)
+        ):
             self.conf(value=self.value)
         return True
-
-    def save(self):
-        base_dict = Processor.save(self)
-        if self.init_type != "message":
-            base_dict["value"] = self.value
-        return base_dict
 
     def load(self, params):
         Processor.load(self, params)
@@ -101,18 +97,21 @@ class Var (Processor):
             vs = str(self.value)
         if len(vs) > 30:
             dots = '...'
-        return "<b>Value:</b> %s%s" % (vs[:30], dots)  
+        return "<b>Value:</b> %s%s" % (vs[:30], dots)
 
-class Message (Var): 
+
+class Message (Var):
     doc_tooltip_obj = "Store literal Python data as a message to emit when clicked/triggered"
-    doc_tooltip_inlet = ["Emit message on any input", 
-                         "Load new message but do not emit" ]
+    doc_tooltip_inlet = [
+        "Emit message on any input",
+        "Load new message but do not emit"
+    ]
 
     def __init__(self, init_type, init_args, patch, scope, name):
         Var.__init__(self, init_type, init_args, patch, scope, name)
         self.hot_inlets = (0, 1)
 
-    async def trigger(self): 
+    async def trigger(self):
         do_update = False
         if self.inlets[1] is not Uninit:
             self.value = self.inlets[1]
@@ -127,22 +126,31 @@ class Message (Var):
             self.gui_params['value'] = self.value
             self.conf(value=self.value)
 
-    def save(self):
-        return Processor.save(self)
 
 class Text (Var):
     doc_tooltip_obj = "Comment using SGML-type markup for style"
 
+    def save(self):
+        base_dict = super().save()
+        base_dict["value"] = self.value
+        return base_dict
+
+
 class Enum (Var):
     doc_tooltip_obj = "Enter and update a numeric message"
 
+    def save(self):
+        base_dict = super().save()
+        base_dict["value"] = self.value
+        return base_dict
+
     def tooltip_extra(self):
         minv = self.gui_params.get("min_value")
-        maxv = self.gui_params.get("max_value") 
+        maxv = self.gui_params.get("max_value")
         digits = self.gui_params.get("digits", 1)
-        ffmt = "%%.%df" % digits 
+        ffmt = "%%.%df" % digits
 
-        vv = '' 
+        vv = ''
         if minv is not None or maxv is not None:
             vv = "val"
 
@@ -154,20 +162,26 @@ class Enum (Var):
 
         if vv != '':
             vv = "<b>Range:</b> (%s)" % vv
-        else: 
-            vv = None 
-        return [ vv, Var.tooltip_extra(self) ]
+        else:
+            vv = None
+        return [vv, Var.tooltip_extra(self)]
+
 
 class SlideMeter (Var):
     doc_tooltip_obj = "Display/control a number with a slider"
-    do_onload = True 
+    do_onload = True
+
+    def save(self):
+        base_dict = super().save()
+        base_dict["value"] = self.value
+        return base_dict
 
     def tooltip_extra(self):
         minv = self.gui_params.get("min_value")
-        maxv = self.gui_params.get("max_value") 
+        maxv = self.gui_params.get("max_value")
         ffmt = "%.1f"
 
-        vv = '' 
+        vv = ''
         if minv is not None or maxv is not None:
             vv = "val"
 
@@ -180,7 +194,8 @@ class SlideMeter (Var):
         if vv != '':
             vv = " (%s)" % vv
 
-        return [ '<b>Range:</b> ' + vv, Var.tooltip_extra(self) ]
+        return ['<b>Range:</b> ' + vv, Var.tooltip_extra(self)]
+
 
 def register():
     MFPApp().register("var", Var)

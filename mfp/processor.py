@@ -101,10 +101,12 @@ class Processor:
 
         scopename = scope.name if scope else "__patch__"
 
-        defaults = dict(obj_id=self.obj_id,
-                        initargs=self.init_args, display_type=self.display_type,
-                        scope=scopename,
-                        num_inlets=inlets, num_outlets=outlets)
+        defaults = dict(
+            obj_id=self.obj_id,
+            initargs=self.init_args, display_type=self.display_type,
+            scope=scopename,
+            num_inlets=inlets, num_outlets=outlets
+        )
 
         for k, v in defaults.items():
             if k not in self.gui_params:
@@ -223,10 +225,12 @@ class Processor:
                 paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
                 lines.append('      <b>MIDI handlers:</b>')
                 for p in paths:
-                    lines.append('          Chan: %s, Type: %s, Number: %s'
-                                 % (p[2] if p[2] is not None else "All",
-                                    p[1] if p[1] is not None else "All",
-                                    p[3] if p[3] is not None else "All"))
+                    lines.append(
+                        '          Chan: %s, Type: %s, Number: %s'
+                        % (p[2] if p[2] is not None else "All",
+                           p[1] if p[1] is not None else "All",
+                           p[3] if p[3] is not None else "All")
+                    )
         return '\n'.join(lines)
 
     def tooltip_extra(self):
@@ -293,10 +297,16 @@ class Processor:
             self.assign(self.patch, self.patch.scopes.get(new_scope), self.name)
 
     def _osc_handler(self, path, args, types, src, data):
+        from .mfp_app import MFPApp
+
         if types[0] == 's':
-            self.send(self.patch.parse_obj(args[0]))
+            MFPApp().async_task(
+                self.send(self.patch.parse_obj(args[0]))
+            )
         else:
-            self.send(args[0])
+            MFPApp().async_task(
+                self.send(args[0])
+            )
 
         # return 0 means completely handled, nonzero keep trying
         return 0
@@ -582,34 +592,34 @@ class Processor:
                         % (target.name, target.obj_id, inlet, len(target.inlets)))
             return False
 
-        # is this a DSP connection?
-        if outlet in self.dsp_outlets:
-            if inlet not in target.dsp_inlets:
-                if isinstance(target, Patch):
-                    Patch.task_nibbler.add_task(
-                        lambda args: Processor.connect(*args), 20,
-                        [self, outlet, target, inlet, show_gui]
-                    )
-                    log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
-                                % (target.name, target.obj_id))
-                    return True
-                log.warning(
-                    "Error: Can't connect DSP out %s of '%s' to non-DSP in %s of '%s'"
-                    % (outlet, self.name, inlet, target.name))
-                return False
-
-            out_obj, out_outlet = self.dsp_outlet(outlet)
-            in_obj, in_inlet = target.dsp_inlet(inlet)
-            if out_obj and in_obj:
-                await out_obj.connect(out_outlet, in_obj._id, in_inlet)
-            else:
-                log.warning("Trying to find DSP objects, failed", type(self), self.name,
-                            type(target), target.name,
-                            inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
-
         try:
             existing = self.connections_out[outlet]
             if (target, inlet) not in existing:
+                # is this a DSP connection?
+                if outlet in self.dsp_outlets:
+                    if inlet not in target.dsp_inlets:
+                        if isinstance(target, Patch):
+                            Patch.task_nibbler.add_task(
+                                lambda args: Processor.connect(*args), 20,
+                                [self, outlet, target, inlet, show_gui]
+                            )
+                            log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
+                                        % (target.name, target.obj_id))
+                            return True
+                        log.warning(
+                            "Error: Can't connect DSP out %s of '%s' to non-DSP in %s of '%s'"
+                            % (outlet, self.name, inlet, target.name))
+                        return False
+
+                    out_obj, out_outlet = self.dsp_outlet(outlet)
+                    in_obj, in_inlet = target.dsp_inlet(inlet)
+                    if out_obj and in_obj:
+                        await out_obj.connect(out_outlet, in_obj._id, in_inlet)
+                    else:
+                        log.warning("Trying to find DSP objects, failed", type(self), self.name,
+                                    type(target), target.name,
+                                    inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
+
                 existing.append((target, inlet))
         except Exception:
             # this can happen normally in a creation race, don't
@@ -1058,7 +1068,6 @@ class Processor:
 
         # special handling for gui_params
         gp = prms.get('gui_params')
-
         for k, v in gp.items():
             self.gui_params[k] = v
         self.gui_params['scope'] = self.scope.name

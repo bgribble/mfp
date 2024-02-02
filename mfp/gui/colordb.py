@@ -5,23 +5,31 @@ colordb.py -- RGBA color definitions for MFP app
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
+from carp.serializer import Serializable
+from mfp import log
 from ..singleton import Singleton
 from .backend_interfaces import ColorDBBackend
 
 
-class RGBAColor:
-    def __init__(self, r, g, b, a):
-        self.red = r
-        self.green = g
-        self.blue = b
-        self.alpha = a
+class RGBAColor(Serializable):
+    def __init__(self, *, red=0, green=0, blue=0, alpha=0):
+        self.red = red
+        self.green = green
+        self.blue = blue
+        self.alpha = alpha
+        super().__init__()
+
+    def to_dict(self):
+        return dict(
+            red=self.red,
+            green=self.green,
+            blue=self.blue,
+            alpha=self.alpha
+        )
 
     @classmethod
-    def load(self, propdict):
-        return RGBAColor(propdict.get('red', 0),
-                         propdict.get('green', 0),
-                         propdict.get('blue', 0),
-                         propdict.get('alpha', 0))
+    def load(cls, propdict):
+        return RGBAColor(**propdict)
 
 
 class ColorDB (Singleton):

@@ -46,8 +46,12 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
 
     async def delete(self):
         if self.label:
-            if hasattr(self.container, 'app_window') and self.label in self.container.app_window.event_sources:
+            if (
+                hasattr(self.container, 'app_window')
+                and self.label in self.container.app_window.event_sources
+            ):
                 del self.container.app_window.event_sources[self.label]
+
             self.label.destroy()
             self.label = None
 
@@ -61,58 +65,96 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
         return self.parent.remove_actor(self.label)
 
     def get_width(self):
+        if not self.label:
+            return
         return self.label.get_width()
 
     def get_height(self):
+        if not self.label:
+            return
         return self.label.get_height()
 
     def get_position(self):
+        if not self.label:
+            return
         return self.label.get_position()
 
     def set_position(self, x_pos, y_pos):
+        if not self.label:
+            return
         return self.label.set_position(x_pos, y_pos)
 
     def set_activatable(self, val):
+        if not self.label:
+            return
         return self.label.set_activatable(val)
 
     def set_single_line_mode(self, val):
+        if not self.label:
+            return
         return self.label.set_single_line_mode(val)
 
     def get_cursor_position(self):
+        if not self.label:
+            return
         return self.label.get_cursor_position()
 
     def set_cursor_position(self, pos):
+        if not self.label:
+            return
         return self.label.set_cursor_position(pos) if self.label else None
 
     def set_cursor_visible(self, visible):
+        if not self.label:
+            return
         return self.label.set_cursor_visible(visible) if self.label else None
 
     def set_cursor_color(self, color):
+        if not self.label:
+            return
         return self.label.set_cursor_color(color)
 
     def get_text(self):
+        if not self.label:
+            return
         return self.label.get_text()
 
     def set_text(self, text):
+        if not self.label:
+            return
         return self.label.set_text(text) if self.label else None
 
     def set_markup(self, text):
+        if not self.label:
+            return
         return self.label.set_markup(text)
 
     def set_reactive(self, is_reactive):
+        if not self.label:
+            return
         return self.label.set_reactive(is_reactive)
 
     def set_color(self, color):
+        if not self.label:
+            return
         return self.label.set_color(color)
 
     def set_font_name(self, font_name):
+        if not self.label:
+            return
         return self.label.set_font_name(font_name)
 
     def get_property(self, propname):
+        if not self.label:
+            return
         return self.label.get_property(propname)
 
     def set_use_markup(self, use_markup):
+        if not self.label:
+            return
         return self.label.set_use_markup(use_markup) if self.label else None
 
     def set_selection(self, start, end):
+        if not self.label:
+            return
         return self.label.set_selection(start, end)

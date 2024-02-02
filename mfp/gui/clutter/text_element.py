@@ -27,9 +27,12 @@ class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementBac
         self.group.set_content(self.texture)
 
         self.update_required = True
-        self.move(x, y)
-        self.set_size(12, 12)
+        self.width = 12
+        self.height = 12
+        self.texture.set_size(self.width, self.height)
+        self.group.set_size(self.width, self.height)
         self.group.set_reactive(True)
+        self.group.set_position(x, y)
 
     def redraw(self):
         self.texture.invalidate()
@@ -59,8 +62,8 @@ class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementBac
             ct.stroke()
         return True
 
-    def set_size(self, width, height):
-        super().set_size(width, height)
+    async def set_size(self, width, height):
+        await super().set_size(width, height)
 
         self.texture.set_size(width, height)
         self.texture.invalidate()

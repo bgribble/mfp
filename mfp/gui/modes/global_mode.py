@@ -31,9 +31,6 @@ class GlobalMode (InputMode):
         self.drag_last_y = None
         self.drag_target = None
 
-        self.previous_console_position = 0
-        self.next_tree_position = 1
-
         InputMode.__init__(self, "Global input bindings")
 
         # global keybindings
@@ -93,39 +90,12 @@ class GlobalMode (InputMode):
         from flopsy import Store
         Store.show_inspector(event_loop=MFPGUI().async_task.asyncio_loop)
 
-    # FIXME this is clutter-specific
-    def toggle_console(self):
-        alloc = self.window.backend.content_console_pane.get_allocation()
-        oldpos = self.window.backend.content_console_pane.get_position()
-
-        console_visible = oldpos < (alloc.height - 2)
-        if console_visible:
-            next_pos = alloc.height
-            self.previous_console_position = oldpos
-        else:
-            next_pos = self.previous_console_position
-
-        self.window.backend.content_console_pane.set_position(next_pos)
-
+    async def toggle_console(self):
+        await self.window.signal_emit("toggle-console")
         return False
 
-    # FIXME this is clutter-specific
-    def toggle_tree(self):
-        from mfp.gui.clutter.utils import clutter_do_later
-        oldpos = self.window.backend.tree_canvas_pane.get_position()
-
-        self.window.backend.tree_canvas_pane.set_position(self.next_tree_position)
-        self.next_tree_position = oldpos
-
-        # KLUDGE!
-        clutter_do_later(100, self._refresh)
-
-        return False
-
-    # FIXME this is clutter-specific
-    def _refresh(self):
-        oldpos = self.window.backend.content_console_pane.get_position()
-        self.window.backend.content_console_pane.set_position(oldpos - 1)
+    async def toggle_tree(self):
+        await self.window.signal_emit("toggle-info-panel")
         return False
 
     async def force_reset(self):
@@ -161,7 +131,7 @@ class GlobalMode (InputMode):
             pass
         return False
 
-    def save_file(self):
+    async def save_file(self):
         import os.path
         patch = self.window.selected_patch
         if patch.last_filename is None:
@@ -169,7 +139,7 @@ class GlobalMode (InputMode):
         else:
             default_filename = patch.last_filename
 
-        def cb(fname):
+        async def cb(fname):
             if fname:
                 patch.last_filename = fname
                 if fname != default_filename:
@@ -177,25 +147,26 @@ class GlobalMode (InputMode):
                     parts = os.path.splitext(basefile)
                     newname = parts[0]
                     patch.obj_name = newname
-                    MFPGUI().mfp.rename_obj.sync(patch.obj_id, newname)
-                    patch.send_params()
+                    await MFPGUI().mfp.rename_obj(patch.obj_id, newname)
+                    prms = patch.synced_params()
+                    await MFPGUI().mfp.set_params(patch.obj_id, prms)
                     self.window.refresh(patch)
-                MFPGUI().async_task(MFPGUI().mfp.save_file(patch.obj_name, fname))
-        self.window.get_prompted_input("File name to save: ", cb, default_filename)
+                await MFPGUI().mfp.save_file(patch.obj_name, fname)
+        await self.window.get_prompted_input("File name to save: ", cb, default_filename)
 
-    def save_as_lv2(self):
+    async def save_as_lv2(self):
         patch = self.window.selected_patch
         default_plugname = 'mfp_' + patch.obj_name
 
-        def cb(plugname):
+        async def cb(plugname):
             if plugname:
-                MFPGUI().mfp.save_lv2.sync(patch.obj_name, plugname)
-        self.window.get_prompted_input("Plugin name to save: ", cb, default_plugname)
+                await MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
+        await self.window.get_prompted_input("Plugin name to save: ", cb, default_plugname)
 
-    def open_file(self):
-        def cb(fname):
-            MFPGUI().async_task(MFPGUI().mfp.open_file(fname))
-        self.window.get_prompted_input("File name to load: ", cb)
+    async def open_file(self):
+        async def cb(fname):
+            await MFPGUI().mfp.open_file(fname)
+        await self.window.get_prompted_input("File name to load: ", cb)
 
     def drag_start(self):
         self.drag_started = True
@@ -227,34 +198,23 @@ class GlobalMode (InputMode):
         return True
 
     async def selbox_start(self, select_mode):
-
         px = self.manager.pointer_x
         py = self.manager.pointer_y
         enclosed = []
         selection_corners = [(px, py), (px+1, py), (px+1, py+1), (px, py+1)]
 
-        for obj in self.window.selected_layer.objects:
-            if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
-                continue
-            corners = obj.corners()
-
-            if corners and collision_check(selection_corners, corners):
-                enclosed.append(obj)
-        if enclosed:
-            self.manager.pointer_obj = enclosed[0]
-
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:
-                    # log.debug(f"[selbox] selecting pointer_obj {self.manager.pointer_obj}")
                     await self.window.unselect_all()
                     await self.window.select(self.manager.pointer_obj)
                     raise InputManager.InputNeedsRequeue()
-                # log.debug(f"[selbox] was None, pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
                 if self.allow_selection_drag:
                     self.selection_drag_started = True
+                    for obj in self.window.selected:
+                        if obj.editable and obj.display_type != 'connection':
+                            obj.drag_start()
             else:
-                # log.debug(f"[selbox] pointer_obj={self.manager.pointer_obj}, selected={self.window.selected}")
                 await self.window.unselect_all()
                 self.selbox_started = True
         elif select_mode is True:
@@ -289,7 +249,7 @@ class GlobalMode (InputMode):
         if self.selection_drag_started:
             for obj in self.window.selected:
                 if obj.editable and obj.display_type != 'connection':
-                    obj.drag(dx, dy)
+                    await obj.drag(dx, dy)
             return True
 
         enclosed = self.window.show_selection_box(
@@ -323,10 +283,11 @@ class GlobalMode (InputMode):
 
         return True
 
-    def selbox_end(self):
-        #log.debug("[selbox_end] got button-up")
+    async def selbox_end(self):
         if self.selection_drag_started:
             for obj in self.window.selected:
+                if obj.editable and obj.display_type != 'connection':
+                    await obj.drag_end()
                 obj.send_params()
         self.selbox_started = False
         self.selection_drag_started = False
@@ -343,7 +304,7 @@ class GlobalMode (InputMode):
 
         p = self.window.selected_patch
         if await MFPGUI().mfp.has_unsaved_changes(p.obj_id):
-            self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]",
+            await self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]",
                                            close_confirm, '')
         else:
             await self.window.patch_close()
@@ -361,7 +322,7 @@ class GlobalMode (InputMode):
             if await MFPGUI().mfp.has_unsaved_changes(p):
                 clean = False
         if not clean:
-            self.window.get_prompted_input(
+            await self.window.get_prompted_input(
                 "There are patches with unsaved changes. Quit anyway? [yN]",
                 quit_confirm,
                 ''
