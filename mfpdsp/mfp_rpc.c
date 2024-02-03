@@ -499,19 +499,6 @@ mfp_rpc_dispatch_request(const char * msgbuf, int msglen)
 }
 
 static void
-ready_callback(JsonNode * response, void * data)
-{
-    if (JSON_NODE_TYPE(response) == JSON_NODE_ARRAY) {
-        JsonArray * arry = json_node_get_array(response);
-        JsonNode * val = json_array_get_element(arry, 1);
-        if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
-            mfp_comm_nodeid = (int)json_node_get_double(val);
-            return;
-        }
-    }
-}
-
-static void
 create_uuid_32(char * buffer) {
     const char hexdigits[] = "0123456789abcdef";
     for (int i=0; i < 32; i++){

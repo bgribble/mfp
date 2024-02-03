@@ -211,12 +211,12 @@ class MFPCommand:
             await patch.delete_gui()
 
     @noresp
-    def save_lv2(self, patch_name, plugin_name):
+    async def save_lv2(self, patch_name, plugin_name):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
         file_name = plugin_name + ".mfp"
         if patch:
-            patch.save_lv2(plugin_name, file_name)
+            await patch.save_lv2(plugin_name, file_name)
 
     def clipboard_copy(self, pointer_pos, objlist):
         from .mfp_app import MFPApp
@@ -243,12 +243,14 @@ class MFPCommand:
             MFPApp().samplerate = samplerate
 
         if DSPContext.create(node_id, context_id, ctxt_name):
+            log.debug(f"open_context: created context, node={node_id} id={context_id} name={ctxt_name}")
             return True
         return False
 
     async def load_context(self, file_name, node_id, context_id):
         from .mfp_app import MFPApp
         from .dsp_object import DSPContext
+        log.debug(f"load_context: loading {file_name} in context node={node_id} ctxt_id={context_id}")
         ctxt = DSPContext.lookup(node_id, context_id)
         patch = await MFPApp().open_file(file_name, ctxt, False)
         patch.hot_inlets = list(range(len(patch.inlets)))
@@ -272,7 +274,7 @@ class MFPCommand:
                 del MFPApp().patches[pid]
 
         if not len(MFPApp().patches):
-            MFPApp().finish_soon()
+            await MFPApp().finish_soon()
             return None
 
     def open_patches(self):
