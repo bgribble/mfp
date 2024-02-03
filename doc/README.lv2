@@ -1,8 +1,7 @@
 Beginning with version 0.05, an MFP patch can be saved as an LV2
 plugin.  Note that MFP can still not *host* LV2 plugins, only
-LADSPA at this time (via the [plugin~ object)Note that as of this
-release the scope is not included, so there may be a problem with
-.  But it can act as a plugin in other hosts.
+LADSPA at this time (via the [plugin~ object).  But it can act as
+a plugin in other hosts.
 
 The support is pretty rudimentary, and is mainly intended to
 allow some exploration of "Max for Live" type interactions with

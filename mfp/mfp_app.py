@@ -555,19 +555,13 @@ class MFPApp (Singleton, SignalMixin):
 
         log.debug("MFPApp.finish: all children reaped, good-bye!")
 
-    def finish_soon(self):
-        import threading
+    async def finish_soon(self):
         import asyncio
 
-        async def wait_and_finish(*args, **kwargs):
-            await asyncio.sleep(0.5)
-            await self.finish()
-            log.debug("MFPApp.finish_soon: done with app.finish", threading._active)
-            return True
-
-        qt = threading.Thread(target=lambda *args, **kwargs: asyncio.run(wait_and_finish()))
-        qt.start()
-        self.leftover_threads.append(qt)
+        await asyncio.sleep(0.5)
+        await self.finish()
+        log.debug("MFPApp.finish_soon: done with app.finish")
+        return True
 
     def send(self, msg, port):
         if isinstance(msg, MethodCall):
