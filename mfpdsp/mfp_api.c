@@ -199,11 +199,13 @@ int
 mfp_api_exit_notify(void)
 {
     char announce[] =
-        "json:{ \"__type__\": \"HostExitNotify\" }";
+        "json:{ \"__type__\": \"HostExitNotify\", \"host_id\": \"%s\" }";
     char * msgbuf = mfp_comm_get_buffer();
+    int msglen;
 
     strncpy(msgbuf, announce, strlen(announce));
-    mfp_comm_submit_buffer(msgbuf, strlen(announce));
+    msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, announce, rpc_node_id);
+    mfp_comm_submit_buffer(msgbuf, msglen);
 }
 
 
