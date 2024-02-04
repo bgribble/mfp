@@ -38,7 +38,7 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
 
         self.redraw()
 
-    async def delete(self):
+    async def delete(self, **kwargs):
         if self.texture:
             self.group.set_content(None)
             self.texture = None
@@ -47,7 +47,7 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
             await self.label.delete()
             self.label = None
 
-        await super().delete()
+        await super().delete(**kwargs)
 
     def redraw(self):
         super().redraw()

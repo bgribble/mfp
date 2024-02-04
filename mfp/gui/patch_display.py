@@ -98,7 +98,7 @@ class PatchDisplay (object):
 
         self.app_window.refresh(self)
 
-    async def delete(self):
+    async def delete(self, delete_obj=True):
         if self.obj_id is None:
             return
 
@@ -106,7 +106,7 @@ class PatchDisplay (object):
         for layer in self.layers:
             to_delete = [o for o in layer.objects]
             for o in to_delete:
-                await o.delete()
+                await o.delete(delete_obj=delete_obj)
             layer.hide()
             layer.delete()
 
@@ -115,7 +115,7 @@ class PatchDisplay (object):
         self.layer_view.remove(self)
 
         # last, delete the patch on the control side
-        if self.obj_id is not None:
-            to_delete = self.obj_id
-            self.obj_id = None
+        to_delete = self.obj_id
+        self.obj_id = None
+        if delete_obj and to_delete is not None:
             await MFPGUI().mfp.delete(to_delete)

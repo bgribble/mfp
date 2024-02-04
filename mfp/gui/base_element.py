@@ -255,16 +255,16 @@ class BaseElement (Store):
             self.position_y = y
 
     @mutates('obj_state')
-    async def delete(self):
+    async def delete(self, delete_obj=True):
         # FIXME this is because self.app_window is the backend, not the app window
         MFPGUI().appwin.unregister(self)
-        if self.obj_id is not None and not self.is_export:
+        if delete_obj and self.obj_id is not None and not self.is_export:
             await MFPGUI().mfp.delete(self.obj_id)
 
         for conn in [c for c in self.connections_out]:
-            await conn.delete()
+            await conn.delete(delete_obj=delete_obj)
         for conn in [c for c in self.connections_in]:
-            await conn.delete()
+            await conn.delete(delete_obj=delete_obj)
 
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED

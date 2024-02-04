@@ -331,7 +331,7 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
         for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
             /* i/o buffers are pre-allocated to mfp_max_blocksize */
             for (count = 0; count < (*p)->inlet_conn->len; count ++) {
-                mfp_block_resize((*p)->inlet_buf[count], nsamples);
+                mfp_block_resize((*p)->inlet_buf_alloc[count], nsamples);
             }
 
             for (count = 0; count < (*p)->outlet_conn->len; count ++) {
@@ -340,16 +340,16 @@ mfp_dsp_set_blocksize(mfp_context * ctxt, int nsamples)
 
             (*p)->needs_config = 1;
         }
-
         ctxt->blocksize = nsamples;
         if (ctxt->ctype == CTYPE_JACK) {
             return;
         }
         else if (ctxt->ctype == CTYPE_LV2) {
             for (count = 0; count < ctxt->info.lv2->output_buffers->len; count ++) {
-                mfp_block_resize(g_array_index(ctxt->info.lv2->output_buffers, mfp_block *,
-                                               count),
-                                 nsamples);
+                mfp_block_resize(
+                    g_array_index(ctxt->info.lv2->output_buffers, mfp_block *, count),
+                    nsamples
+                );
             }
         }
     }

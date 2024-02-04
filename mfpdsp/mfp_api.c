@@ -37,18 +37,15 @@ mfp_api_init(void)
 
 
 static void
-api_load_callback(JsonNode * response, void * data)
+api_load_callback(Carp__PythonValue * response, void * data)
 {
     int patch_objid;
     mfp_context * context = (mfp_context *)data;
 
-    if (JSON_NODE_TYPE(response) == JSON_NODE_ARRAY) {
-        JsonArray * arry = json_node_get_array(response);
-        JsonNode * val = json_array_get_element(arry, 1);
-        if (JSON_NODE_TYPE(val) == JSON_NODE_VALUE) {
-            patch_objid = (int)json_node_get_double(val);
-            mfp_context_default_io(context, patch_objid);
-        }
+    switch (response->value_types_case) {
+        case CARP__PYTHON_VALUE__VALUE_TYPES__INT:
+            mfp_context_default_io(context, response->_int);
+            break;
     }
 }
 
@@ -132,8 +129,9 @@ mfp_api_open_context(mfp_context * context, char * msgbuf, int * msglen)
 }
 
 int
-mfp_api_load_context(mfp_context * context, char * patchfile,
-                     char * msgbuf, int * msglen)
+mfp_api_load_context(
+    mfp_context * context, char * patchfile, char * msgbuf, int * msglen
+)
 {
     const char service_name[] = "MFPCommand.load_context";
     const int instance_id = api_rpcid;
@@ -141,7 +139,7 @@ mfp_api_load_context(mfp_context * context, char * patchfile,
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
 
     mfp_rpc_args_append_string(arglist, patchfile);
-    mfp_rpc_args_append_int(arglist, mfp_comm_nodeid);
+    mfp_rpc_args_append_string(arglist, rpc_node_id);
     mfp_rpc_args_append_int(arglist, context->id);
 
     int request_id = mfp_rpc_request(
@@ -179,7 +177,7 @@ mfp_api_close_context(mfp_context * context)
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
 
-    mfp_rpc_args_append_int(arglist, mfp_comm_nodeid);
+    mfp_rpc_args_append_string(arglist, rpc_node_id);
     mfp_rpc_args_append_int(arglist, context->id);
 
     char * msgbuf = mfp_comm_get_buffer();
@@ -201,11 +199,13 @@ int
 mfp_api_exit_notify(void)
 {
     char announce[] =
-        "json:{ \"__type__\": \"HostExitNotify\" }";
+        "json:{ \"__type__\": \"HostExitNotify\", \"host_id\": \"%s\" }";
     char * msgbuf = mfp_comm_get_buffer();
+    int msglen;
 
     strncpy(msgbuf, announce, strlen(announce));
-    mfp_comm_submit_buffer(msgbuf, strlen(announce));
+    msglen = snprintf(msgbuf, MFP_MAX_MSGSIZE-1, announce, rpc_node_id);
+    mfp_comm_submit_buffer(msgbuf, msglen);
 }
 
 

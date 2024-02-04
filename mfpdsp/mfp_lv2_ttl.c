@@ -191,7 +191,7 @@ mfp_lv2_ttl_read(mfp_lv2_info * self, const char * bundle_path)
     ttl_parse_info * pinfo;
 
     sprintf(combined_path, "%s%s", bundle_path, mfest);
-    printf("ttl_read: looking for file at '%s'\n", combined_path); 
+    mfp_log_debug("ttl_read: looking for file at '%s'\n", combined_path); 
 
     fp = fopen(combined_path, "rb");
     pinfo = g_malloc0(sizeof(ttl_parse_info));

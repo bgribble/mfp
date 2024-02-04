@@ -13,7 +13,6 @@
 #include <json-glib/json-glib.h>
 #include "mfp_dsp.h"
 
-int mfp_comm_nodeid = -1;
 static char * comm_sockname = NULL;
 static int comm_socket = -1;
 static int comm_procpid = -1;
