@@ -143,37 +143,39 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
         return;
     }
 
-    mfp_lv2_info * self = context->info.lv2;
+    mfp_lv2_info * lv2_info = context->info.lv2;
     int first_run=1;
 
     mfp_dsp_set_blocksize(context, nframes);
 
-    if (self->port_control_values->len > 0) {
+    if (lv2_info->port_control_values->len > 0) {
         first_run = 0;
     }
     else {
-        g_array_set_size(self->port_control_values, self->port_data->len);
+        g_array_set_size(lv2_info->port_control_values, lv2_info->port_data->len);
     }
 
     /* send an event to control [inlet]/[outlet] on startup and any change
      * in value
      */
 
-    for(int i=0; i < (self->port_data->len ); i++) {
-        if((self->port_input_mask & (1 << i)) &&
-           (self->port_control_mask & (1 << i))) {
+    for(int i=0; i < lv2_info->port_data->len; i++) {
+        if (
+            lv2_info->port_input_mask &
+            lv2_info->port_control_mask & (1 << i)
+        ) {
             int val_changed = 1;
-            void * pdata = mfp_lv2_get_port_data(self, i);
+            void * pdata = mfp_lv2_get_port_data(lv2_info, i);
             if (pdata != NULL) {
                 float val = *(float *)pdata;
                 if (!first_run &&
-                    (g_array_index(self->port_control_values, float, i) == val )) {
+                    (g_array_index(lv2_info->port_control_values, float, i) == val )) {
                     val_changed = 0;
                 }
 
                 if (val_changed) {
-                    g_array_index(self->port_control_values, float, i) = val;
-                    if (i < self->port_data->len-1) {
+                    g_array_index(lv2_info->port_control_values, float, i) = val;
+                    if (i < lv2_info->port_data->len-1) {
                         mfp_lv2_send_control_input(context, i, val);
                     }
                     else {
@@ -187,30 +189,34 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
     mfp_dsp_run(context);
 
     /* copy the output buffers to the output ports */
-    for (int port = 0; port < context->info.lv2->output_ports->len; port ++) {
-        int lv2port = g_array_index(context->info.lv2->output_ports, int, port);
-        if (context->info.lv2->port_audio_mask &&
-            context->info.lv2->port_output_mask && (1 << lv2port)) {
-            mfp_sample * destptr = mfp_lv2_get_port_data(context->info.lv2, lv2port);
+    for (int port = 0; port < lv2_info->output_ports->len; port ++) {
+        int lv2port = g_array_index(lv2_info->output_ports, int, port);
+        if (
+            lv2_info->port_audio_mask &
+            lv2_info->port_output_mask & (1 << lv2port)
+        ) {
+            mfp_sample * destptr = mfp_lv2_get_port_data(lv2_info, lv2port);
             mfp_sample * srcptr = mfp_get_output_buffer(context, port);
             memcpy(destptr, srcptr, nframes*sizeof(mfp_sample));
         }
     }
 
-    for(int i=0; i < self->port_data->len; i++) {
-        if((self->port_output_mask & (1 << i)) &&
-           (self->port_control_mask & (1 << i))) {
+    for(int i=0; i < lv2_info->port_data->len; i++) {
+        if(
+            lv2_info->port_output_mask & (1 << i) &
+            lv2_info->port_control_mask
+        ) {
             int val_changed = 1;
-            void * pdata = mfp_lv2_get_port_data(self, i);
+            void * pdata = mfp_lv2_get_port_data(lv2_info, i);
             if (pdata != NULL) {
                 float val = *(float *)pdata;
                 if (!first_run &&
-                    (g_array_index(self->port_control_values, float, i) == val )) {
+                    (g_array_index(lv2_info->port_control_values, float, i) == val )) {
                     val_changed = 0;
                 }
 
                 if (val_changed) {
-                    g_array_index(self->port_control_values, float, i) = val;
+                    g_array_index(lv2_info->port_control_values, float, i) = val;
                     mfp_lv2_send_control_output(context, i, val);
                 }
             }
