@@ -11,7 +11,7 @@ import os
 import os.path
 
 APPNAME = "mfp"
-VERSION = "0.6"
+VERSION = "0.7"
 WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
