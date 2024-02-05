@@ -27,6 +27,11 @@ Up next:
 * Port to Dear ImGUI, making UI improvements along the way
 * Self-contained save format including sample and image files
 
+This release (0.7) is the last release that will exclusively
+support Gtk/Clutter for the UI. I plan to branch immediately 
+after the release and start working on the Dear ImGUI port; 
+Clutter is too bitrotted to keep using it. 
+
 ### BUILDING
 
 See README.build
