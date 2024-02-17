@@ -13,7 +13,7 @@ from mfp.gui.base_element import BaseElement
 from ..colordb import ColorDB
 
 
-class ClutterBaseElementBackend(BaseElement):
+class ClutterBaseElementImpl(BaseElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -47,10 +47,7 @@ class ClutterBaseElementBackend(BaseElement):
 
     def move_to_top(self):
         def bump(element):
-            if hasattr(element, 'backend'):
-                actor = element.backend.group
-            else:
-                actor = element.group
+            actor = element.group
 
             if not actor:
                 return

@@ -12,7 +12,7 @@ from mfp.mfp_app import MFPApp
 from mfp import log
 
 from .utils import clutter_do_later
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..plot_element import (
     PlotElement,
     PlotElementImpl
@@ -21,7 +21,7 @@ from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
 
 
-class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementBackend):
+class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):

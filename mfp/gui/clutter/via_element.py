@@ -11,7 +11,7 @@ from mfp import log
 from gi.repository import Clutter
 
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..via_element import (
     ViaElement,
     SendViaElement,
@@ -25,7 +25,7 @@ from ..via_element import (
 )
 
 
-class ClutterBaseViaElementImpl(ViaElement, ClutterBaseElementBackend):
+class ClutterBaseViaElementImpl(ViaElement, ClutterBaseElementImpl):
     backend_name = "clutter"
 
     VIA_SIZE = 10

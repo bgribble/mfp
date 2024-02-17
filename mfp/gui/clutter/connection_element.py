@@ -10,14 +10,14 @@ import cairo
 
 from ..colordb import ColorDB
 from ..base_element import BaseElement
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..connection_element import (
     ConnectionElement,
     ConnectionElementImpl,
 )
 
 
-class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, ClutterBaseElementBackend):
+class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, ClutterBaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, obj_1, port_1, obj_2, port_2, dashed=False):

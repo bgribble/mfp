@@ -9,7 +9,7 @@ import cairo
 
 from mfp.utils import catchall
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..base_element import BaseElement
 from ..message_element import (
     MessageElement,
@@ -19,7 +19,7 @@ from ..message_element import (
 )
 
 
-class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseElementBackend):
+class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):

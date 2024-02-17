@@ -8,14 +8,14 @@ from gi.repository import Clutter
 import cairo
 
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..enum_element import (
     EnumElement,
     EnumElementImpl
 )
 
 
-class ClutterEnumElementImpl(EnumElement, EnumElementImpl, ClutterBaseElementBackend):
+class ClutterEnumElementImpl(EnumElement, EnumElementImpl, ClutterBaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):

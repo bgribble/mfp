@@ -9,14 +9,14 @@ import cairo
 
 from mfp.utils import catchall
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..text_element import (
     TextElement,
     TextElementImpl
 )
 
 
-class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementBackend):
+class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):

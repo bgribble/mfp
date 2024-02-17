@@ -9,7 +9,7 @@ from .input_manager import ClutterInputManagerImpl  # noqa
 from .console_manager import ClutterConsoleManagerImpl  # noqa
 from .layer import ClutterLayerImpl  # noqa
 from .text_widget import ClutterTextWidgetImpl  # noqa
-from .base_element import ClutterBaseElementBackend  # noqa
+from .base_element import ClutterBaseElementImpl  # noqa
 from .colordb import ClutterColorDBBackend  # noqa
 from .message_element import ClutterMessageElementImpl  # noqa
 from .plot_element import ClutterPlotElementImpl  # noqa

@@ -9,7 +9,7 @@ import cairo
 
 from mfp.utils import catchall
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..slidemeter_element import (
     FaderElement,
     FaderElementImpl,
@@ -21,7 +21,7 @@ from ..slidemeter_element import (
 )
 
 
-class ClutterSlideMeterElementImpl(SlideMeterElement, ClutterBaseElementBackend):
+class ClutterSlideMeterElementImpl(SlideMeterElement, ClutterBaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
