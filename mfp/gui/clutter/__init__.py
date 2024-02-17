@@ -7,7 +7,7 @@ Imports here make sure the backends are registered
 from .app_window import ClutterAppWindowImpl  # noqa
 from .input_manager import ClutterInputManagerImpl  # noqa
 from .console_manager import ClutterConsoleManagerImpl  # noqa
-from .layer import ClutterLayerBackend  # noqa
+from .layer import ClutterLayerImpl  # noqa
 from .text_widget import ClutterTextWidgetImpl  # noqa
 from .base_element import ClutterBaseElementBackend  # noqa
 from .colordb import ClutterColorDBBackend  # noqa
@@ -19,7 +19,7 @@ from .slidemeter_element import (  # noqa
     ClutterFaderElementImpl,  # noqa
     ClutterBarMeterElementImpl,  # noqa
     ClutterDialElementImpl  # noqa
-)Backend
+)
 from .via_element import (  # noqa
     ClutterSendViaElementImpl,  # noqa
     ClutterReceiveViaElementImpl,  # noqa

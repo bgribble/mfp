@@ -81,7 +81,7 @@ class PatchDisplay (object):
         for name, scope in layers:
             layer = self.find_layer(name)
             if layer is None:
-                layer = Layer(self.app_window, self, name, scope)
+                layer = Layer.build(self.app_window, self, name, scope)
             newlayers.append(layer)
         self.layers = newlayers
 

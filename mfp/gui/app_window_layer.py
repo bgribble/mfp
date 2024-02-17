@@ -55,7 +55,7 @@ def layer_select(self, layer):
 
 @extends(AppWindow)
 def layer_new(self):
-    l = Layer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
+    l = Layer.build(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
     self.layer_create(l, self.selected_patch)
@@ -65,7 +65,7 @@ def layer_new(self):
 
 @extends(AppWindow)
 def layer_new_scope(self):
-    l = Layer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
+    l = Layer.build(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     l.scope = l.name.replace(" ", "_").lower()
     MFPGUI().async_task(MFPGUI().mfp.add_scope(self.selected_patch.obj_id, l.scope))
     self.object_view.insert((l.scope, self.selected_patch), self.selected_patch)

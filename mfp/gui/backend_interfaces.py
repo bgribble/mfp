@@ -35,20 +35,6 @@ class BackendInterface:
         return BackendInterface._registry.get(cls.__name__, {}).get(backend_name)
 
 
-
-class LayerBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def show(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def hide(self):
-        pass
-
-
-
 class BaseElementBackend(ABC, BackendInterface, DelegateMixin):
     @abstractmethod
     @delegatemethod

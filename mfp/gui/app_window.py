@@ -12,6 +12,7 @@ from mfp.utils import SignalMixin
 from ..gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .input_manager import InputManager
+from .layer import Layer
 from .console_manager import ConsoleManager
 from .prompter import Prompter
 from .colordb import ColorDB
@@ -206,6 +207,9 @@ class AppWindow (BackendInterface, SignalMixin):
         ConsoleManager.backend_name = self.backend_name
         self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
+        
+        Layer.backend_name = self.backend_name
+
 
     @classmethod
     def build(cls, *args, **kwargs):

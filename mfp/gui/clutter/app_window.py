@@ -194,12 +194,12 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             self.autoplace_marker = Clutter.Text()
             self.autoplace_marker.set_text("+")
             self.autoplace_layer = self.selected_layer
-            self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
+            self.autoplace_layer.group.add_actor(self.autoplace_marker)
         elif self.autoplace_layer != self.selected_layer:
-            if self.autoplace_layer.backend.group:
-                self.autoplace_layer.backend.group.remove_actor(self.autoplace_marker)
+            if self.autoplace_layer.group:
+                self.autoplace_layer.group.remove_actor(self.autoplace_marker)
             self.autoplace_layer = self.selected_layer
-            self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
+            self.autoplace_layer.group.add_actor(self.autoplace_marker)
         self.autoplace_marker.set_position(x, y)
         self.autoplace_marker.set_depth(-10)
         self.autoplace_marker.show()
@@ -474,11 +474,11 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             self.selection_box.set_color(self.color_transparent)
             self.selection_box.set_border_color(self.color_unselected)
             self.selection_box_layer = self.selected_layer
-            self.selection_box_layer.backend.group.add_actor(self.selection_box)
+            self.selection_box_layer.group.add_actor(self.selection_box)
         elif self.selection_box_layer != self.selected_layer:
-            self.selection_box_layer.backend.group.remove_actor(self.selection_box)
+            self.selection_box_layer.group.remove_actor(self.selection_box)
             self.selection_box_layer = self.selected_layer
-            self.selection_box_layer.backend.group.add_actor(self.selection_box)
+            self.selection_box_layer.group.add_actor(self.selection_box)
         self.selection_box.set_position(x0, y0)
         self.selection_box.set_size(max(1, x1-x0), max(1, y1-y0))
         self.selection_box.show()
@@ -576,7 +576,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             if element.layer is None:
                 log.debug("WARNING: element has no layer", element, self)
             else:
-                element.container = element.layer.backend.group
+                element.container = element.layer.group
 
         if element.group is None:
             log.debug(f"[register] group for {element} is None!!")

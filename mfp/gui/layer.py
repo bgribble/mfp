@@ -3,19 +3,34 @@
 layer.py
 A layer in the patch window
 '''
-from .backend_interfaces import LayerBackend
-from mfp import log
+from abc import ABC, abstractmethod
+from .backend_interfaces import BackendInterface
 
-class Layer:
+
+class LayerImpl(ABC):
+    @abstractmethod
+    def show(self):
+        pass
+
+    @abstractmethod
+    def hide(self):
+        pass
+
+
+class Layer(BackendInterface):
+    backend_name = None
+
     def __init__(self, app_window, patch, name, scope="__patch__"):
         self.app_window = app_window
         self.patch = patch
         self.name = name
         self.scope = scope
         self.objects = []
+        super().__init__()
 
-        factory = LayerBackend.get_backend(app_window.backend_name)
-        self.backend = factory(self)
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_backend(cls.backend_name)(*args, **kwargs)
 
     def resort(self, obj):
         if obj in self.objects:
@@ -62,15 +77,7 @@ class Layer:
             newloc = distances.index(min(distances))
             self.objects[newloc:newloc] = [obj]
 
-        self.backend.add(obj, container=container)
-
     def remove(self, obj):
         if obj in self.objects:
             self.objects.remove(obj)
         obj.layer = None
-        self.backend.remove(obj)
-
-    def delete(self):
-        self.backend.delete()
-
-
