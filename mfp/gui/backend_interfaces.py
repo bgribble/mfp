@@ -35,13 +35,6 @@ class BackendInterface:
         return BackendInterface._registry.get(cls.__name__, {}).get(backend_name)
 
 
-class InputManagerBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def handle_event(self, *args):
-        pass
-
-
 
 class LayerBackend(ABC, BackendInterface, DelegateMixin):
     @abstractmethod

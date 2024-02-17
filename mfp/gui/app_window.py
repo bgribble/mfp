@@ -195,8 +195,10 @@ class AppWindow (BackendInterface, SignalMixin):
         self.event_sources = {}
 
         # set up key and mouse handling
-        self.input_mgr = InputManager(self)
+        InputManager.backend_name = self.backend_name
+        self.input_mgr = InputManager.build(self)
         self.init_input()
+
         self.hud_prompt_mgr = Prompter(self)
 
         self.initialize()
