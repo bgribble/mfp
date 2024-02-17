@@ -60,7 +60,6 @@ async def _select(self, obj):
 
     self.selected[:0] = [obj]
     obj.select()
-    self.backend.select(obj)
     await self.signal_emit("select", obj)
 
 
@@ -83,8 +82,7 @@ async def _unselect(self, obj):
             await obj.end_edit()
         obj.end_control()
         obj.unselect()
-        self.backend.unselect(obj)
-        MFPGUI().async_task(self.signal_emit("unselect", obj))
+        await self.signal_emit("unselect", obj)
 
     if obj in self.selected:
         self.selected.remove(obj)

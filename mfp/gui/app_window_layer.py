@@ -52,14 +52,13 @@ def layer_select(self, layer):
     if self.selected_layer.patch != self.selected_patch:
         self.selected_patch = self.selected_layer.patch
 
-    self.backend.layer_select(layer)
 
 @extends(AppWindow)
 def layer_new(self):
     l = Layer(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
-    self.backend.layer_new(l, self.selected_patch)
+    self.layer_create(l, self.selected_patch)
     self.layer_select(l)
     return True
 
@@ -73,7 +72,7 @@ def layer_new_scope(self):
 
     self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
-    self.backend.layer_new(l, self.selected_patch)
+    self.layer_create(l, self.selected_patch)
     self.layer_select(l)
     return True
 
@@ -88,7 +87,7 @@ def layer_move_up(self):
     pre = p.layers[:newpos]
     post = [p.layers[newpos]] + p.layers[oldpos+1:]
     p.layers = pre + [self.selected_layer] + post
-    self.backend.layer_update(self.selected_layer, p)
+    self.layer_update(self.selected_layer, p)
 
 @extends(AppWindow)
 def layer_move_down(self):
@@ -102,4 +101,4 @@ def layer_move_down(self):
     post = p.layers[newpos+1:]
     p.layers = pre + [self.selected_layer] + post
 
-    self.backend.layer_update(self.selected_layer, p)
+    self.layer_update(self.selected_layer, p)

@@ -108,7 +108,7 @@ class ClutterInputManagerBackend(InputManagerBackend):
             self.input_manager.pointer_ev_x = event.x
             self.input_manager.pointer_ev_y = event.y
             self.input_manager.pointer_x, self.input_manager.pointer_y = (
-                self.input_manager.window.backend.screen_to_canvas(event.x, event.y)
+                self.input_manager.window.screen_to_canvas(event.x, event.y)
             )
             #log.debug(f"[motion] set cursor pos to ({self.input_manager.pointer_x}, {self.input_manager.pointer_y})")
             self.input_manager.keyseq.process(event)

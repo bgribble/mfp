@@ -165,7 +165,8 @@ async def main():
     gui = MFPGUI()
     gui.mfp = mfp_connection
     gui.debug = debug
-    gui.appwin = AppWindow()
+
+    gui.appwin = AppWindow.build()
 
     if debug:
         import yappi

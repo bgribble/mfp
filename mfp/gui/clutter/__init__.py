@@ -4,9 +4,9 @@ Clutter UI backend
 Imports here make sure the backends are registered
 """
 
-from .app_window import ClutterAppWindowBackend  # noqa
+from .app_window import ClutterAppWindowImpl  # noqa
 from .input_manager import ClutterInputManagerBackend  # noqa
-from .console_manager import ClutterConsoleManagerBackend  # noqa
+from .console_manager import ClutterConsoleManagerImpl  # noqa
 from .layer import ClutterLayerBackend  # noqa
 from .text_widget import ClutterTextWidgetImpl  # noqa
 from .base_element import ClutterBaseElementBackend  # noqa

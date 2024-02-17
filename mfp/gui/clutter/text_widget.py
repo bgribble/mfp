@@ -6,7 +6,7 @@ from gi.repository import Clutter
 from mfp.gui.base_element import BaseElement
 
 from ..text_widget import TextWidget, TextWidgetImpl
-from .app_window import ClutterAppWindowBackend
+from .app_window import ClutterAppWindowImpl
 from .event import repeat_event
 
 
@@ -22,7 +22,7 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
                 self.parent = self.container.group
             else:
                 self.parent = self.container.backend.group
-        elif isinstance(self.container, ClutterAppWindowBackend):
+        elif isinstance(self.container, ClutterAppWindowImpl):
             self.parent = self.container.container
 
         self.label = Clutter.Text()

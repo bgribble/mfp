@@ -12,7 +12,6 @@ from mfp import log
 class Prompter (object):
     def __init__(self, window):
         self.window = window
-        self.backend = window.backend
         self.queue = []
         self.current_prompt = None
         self.current_callback = None
@@ -29,7 +28,7 @@ class Prompter (object):
         self.current_callback = callback
         self.window.hud_set_prompt(prompt, default)
         self.mode = LabelEditMode(
-            self.backend, self, self.backend.hud_prompt_input,
+            self.window, self, self.window.hud_prompt_input,
             mode_desc="Prompted input"
         )
         await self.mode.setup()

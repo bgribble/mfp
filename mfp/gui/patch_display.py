@@ -29,9 +29,9 @@ class PatchDisplay (object):
 
         self.app_window.add_patch(self)
 
-        # FIXME move to backend
-        self.layer_view = self.app_window.backend.layer_view
-        self.object_view = self.app_window.backend.object_view
+        # FIXME clutter move to backend
+        self.layer_view = self.app_window.layer_view
+        self.object_view = self.app_window.object_view
         self.layer_view.insert(self, None)
         self.object_view.insert(self, None)
 

@@ -11,7 +11,7 @@ class ClutterLayerBackend(LayerBackend):
     def __init__(self, layer):
         self.layer = layer
         self.app_window = layer.app_window
-        self.container = self.app_window.backend.group
+        self.container = self.app_window.group
         self.group = Clutter.Group()
 
         super().__init__(layer)
