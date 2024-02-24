@@ -7,7 +7,6 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from gi.repository import Clutter
 import cairo
 
-from mfp.utils import catchall
 from ..colordb import ColorDB
 from .base_element import ClutterBaseElementImpl
 from ..base_element import BaseElement
@@ -19,7 +18,7 @@ from ..message_element import (
 )
 
 
-class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseElementImpl):
+class ClutterMessageElementImpl(MessageElementImpl, ClutterBaseElementImpl, MessageElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -57,8 +56,8 @@ class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseE
         super().redraw()
         self.texture.invalidate()
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
         self.texture.set_size(width, height)
         await self.update()
 
@@ -129,4 +128,3 @@ class ClutterTransientMessageElementImpl(
     ClutterMessageElementImpl,
 ):
     backend_name = "clutter"
-

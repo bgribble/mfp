@@ -16,7 +16,7 @@ from ..processor_element import (
 )
 
 
-class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, ClutterBaseElementImpl):
+class ClutterProcessorElementImpl(ProcessorElementImpl, ClutterBaseElementImpl, ProcessorElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -53,8 +53,8 @@ class ClutterProcessorElementImpl(ProcessorElement, ProcessorElementImpl, Clutte
         super().redraw()
         self.texture.invalidate()
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
         self.texture.set_size(width, height)
 
     async def label_changed_cb(self, *args):

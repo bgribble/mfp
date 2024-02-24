@@ -25,7 +25,7 @@ from ..via_element import (
 )
 
 
-class ClutterBaseViaElementImpl(ViaElement, ClutterBaseElementImpl):
+class ClutterBaseViaElementImpl(ClutterBaseElementImpl):
     backend_name = "clutter"
 
     VIA_SIZE = 10
@@ -91,7 +91,7 @@ class ClutterBaseViaElementImpl(ViaElement, ClutterBaseElementImpl):
             ct.stroke()
 
 
-class ClutterSendViaElementImpl(SendViaElement, SendViaElementImpl, ClutterBaseViaElementImpl):
+class ClutterSendViaElementImpl(SendViaElementImpl, ClutterBaseViaElementImpl, SendViaElement):
     GLYPH_STYLE = "empty"
     LABEL_Y = ClutterBaseViaElementImpl.VIA_SIZE + ClutterBaseViaElementImpl.VIA_FUDGE / 2.0
     TEXTURE_Y = 0
@@ -100,7 +100,7 @@ class ClutterSendViaElementImpl(SendViaElement, SendViaElementImpl, ClutterBaseV
         ClutterBaseViaElementImpl.redraw(self)
 
 
-class ClutterSendSignalViaElementImpl(SendSignalViaElement, SendSignalViaElementImpl, ClutterBaseViaElementImpl):
+class ClutterSendSignalViaElementImpl(SendSignalViaElementImpl, ClutterBaseViaElementImpl, SendSignalViaElement):
     VIA_SIZE = 12
     GLYPH_STYLE = "empty_circled"
     LABEL_Y = ClutterBaseViaElementImpl.VIA_SIZE + ClutterBaseViaElementImpl.VIA_FUDGE / 2.0
@@ -110,7 +110,7 @@ class ClutterSendSignalViaElementImpl(SendSignalViaElement, SendSignalViaElement
         ClutterBaseViaElementImpl.redraw(self)
 
 
-class ClutterReceiveViaElementImpl(ReceiveViaElement, ReceiveViaElementImpl, ClutterBaseViaElementImpl):
+class ClutterReceiveViaElementImpl(ReceiveViaElementImpl, ClutterBaseViaElementImpl, ReceiveViaElement):
     GLYPH_STYLE = "filled"
     LABEL_Y = 0
     LABEL_FUDGE = 2.5
@@ -121,7 +121,7 @@ class ClutterReceiveViaElementImpl(ReceiveViaElement, ReceiveViaElementImpl, Clu
 
 
 class ClutterReceiveSignalViaElementImpl(
-    ReceiveSignalViaElement, ReceiveSignalViaElementImpl, ClutterBaseViaElementImpl
+    ReceiveSignalViaElementImpl, ClutterBaseViaElementImpl, ReceiveSignalViaElement
 ):
     VIA_SIZE = 12
     GLYPH_STYLE = "filled_circled"

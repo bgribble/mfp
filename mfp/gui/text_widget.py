@@ -4,7 +4,7 @@ text_widget.py -- wrapper around text widget for backend independence
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from mfp.utils import SignalMixin
 from .backend_interfaces import BackendInterface
 from ..gui_main import MFPGUI
@@ -26,15 +26,15 @@ class TextWidget(SignalMixin):
         self.editable = val
 
     @classmethod
-    def get_factory(cls):
-        return TextWidgetImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return TextWidgetImpl.get_backend(backend_name)
 
     @classmethod
-    def build(cls, *args, **kwargs):
-        return cls.get_factory()(*args, **kwargs)
+    def build(cls, parent, *args, **kwargs):
+        return cls.get_backend(MFPGUI().backend_name)(parent, *args, **kwargs)
 
 
-class TextWidgetImpl(ABC, BackendInterface):
+class TextWidgetImpl(BackendInterface, metaclass=ABCMeta):
     @abstractmethod
     def set_single_line_mode(self, val):
         pass

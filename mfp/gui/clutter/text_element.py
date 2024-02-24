@@ -16,7 +16,7 @@ from ..text_element import (
 )
 
 
-class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementImpl):
+class ClutterTextElementImpl(TextElementImpl, ClutterBaseElementImpl, TextElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -62,8 +62,8 @@ class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementImp
             ct.stroke()
         return True
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
 
         self.texture.set_size(width, height)
         self.texture.invalidate()

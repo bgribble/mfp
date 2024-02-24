@@ -29,8 +29,6 @@ class ConsoleManagerImpl(ABC):
 
 
 class ConsoleManager (BackendInterface):
-    backend_name = None
-
     def __init__(self, banner, app_window):
         self.app_window = app_window
 
@@ -51,7 +49,7 @@ class ConsoleManager (BackendInterface):
 
     @classmethod
     def build(cls, *args, **kwargs):
-        return cls.get_backend(cls.backend_name)(*args, **kwargs)
+        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     def line_ready(self):
         self.ready = True

@@ -16,12 +16,13 @@ from .layer import Layer
 from .console_manager import ConsoleManager
 from .prompter import Prompter
 from .colordb import ColorDB
+from .base_element import BaseElement
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
 
 
-class AppWindowImpl(ABC):
+class AppWindowImpl(BackendInterface, ABC):
     #####################
     # backend control
 
@@ -162,9 +163,7 @@ class AppWindowImpl(ABC):
         pass
 
 
-class AppWindow (BackendInterface, SignalMixin):
-    backend_name = None
-
+class AppWindow (SignalMixin):
     def __init__(self):
         super().__init__()
 
@@ -204,16 +203,17 @@ class AppWindow (BackendInterface, SignalMixin):
 
         self.initialize()
 
-        ConsoleManager.backend_name = self.backend_name
         self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
-        
-        Layer.backend_name = self.backend_name
 
 
     @classmethod
+    def get_backend(cls, backend_name):
+        return AppWindowImpl.get_backend(backend_name)
+
+    @classmethod
     def build(cls, *args, **kwargs):
-        return cls.get_backend(cls.backend_name)(*args, **kwargs)
+        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     def init_input(self):
         # set initial major mode

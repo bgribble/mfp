@@ -6,10 +6,45 @@ A patch element is the parent of all GUI entities backed by MFP objects
 Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
+from abc import ABCMeta, abstractmethod
 from flopsy import Store, mutates
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB
+from .backend_interfaces import BackendInterface
+
+class BaseElementImpl(metaclass=ABCMeta):
+    @abstractmethod
+    async def delete(self):
+        await super().delete()
+
+    @abstractmethod
+    def update_badge(self):
+        pass
+
+    @abstractmethod
+    def draw_ports(self):
+        pass
+
+    @abstractmethod
+    def hide_ports(self):
+        pass
+
+    @abstractmethod
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
+
+    @abstractmethod
+    async def move(self, x, y, **kwargs):
+        await super().move(x, y, **kwargs)
+
+    @abstractmethod
+    def move_z(self, z):
+        pass
+
+    @abstractmethod
+    def move_to_top(self):
+        pass
 
 
 class BaseElement (Store):
@@ -97,18 +132,19 @@ class BaseElement (Store):
         self.style = {}
         self._all_styles = self.combine_styles()
 
-        super().__init__()
+        super().__init__(window, x, y)
 
     def __repr__(self):
         return "<%s %s>" % (type(self).__name__, id(self))
 
     @classmethod
-    def get_factory(cls):
-        return cls
-
-    @classmethod
     def build(cls, *args, **kwargs):
-        return cls.get_factory()(*args, **kwargs)
+        backend = cls.get_backend(MFPGUI().backend_name)
+        if not backend:
+            log.error(f"[BaseElement.build] No '{MFPGUI().backend_name}' backend found for {cls}")
+            log.debug(BackendInterface._registry)
+            raise ValueError
+        return backend(*args, **kwargs)
 
     def corners(self):
         return [(self.position_x, self.position_y),
@@ -123,7 +159,8 @@ class BaseElement (Store):
     def get_size(self):
         return (self.width, self.height)
 
-    async def set_size(self, width, height, update_state=True, **kwargs):
+    async def set_size(self, width, height, **kwargs):
+        update_state = kwargs.get("update_state", True)
         prev_width = kwargs.get('width', self.width)
         prev_height = kwargs.get('height', self.height)
         changed_w = not self.width or abs(width - self.width) > BaseElement.TINY_DELTA
@@ -229,7 +266,8 @@ class BaseElement (Store):
     async def drag(self, dx, dy):
         await self.move(self.position_x + dx, self.position_y + dy, update_state=False)
 
-    async def move(self, x, y, update_state=True, **kwargs):
+    async def move(self, x, y, **kwargs):
+        update_state = kwargs.get("update_state", True)
         previous_x = kwargs.get('previous_x', self.position_x)
         previous_y = kwargs.get('previous_y', self.position_y)
 

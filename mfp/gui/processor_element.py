@@ -5,7 +5,7 @@ processor_element.py
 A patch element corresponding to a signal or control processor
 '''
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from .text_widget import TextWidget
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
@@ -13,7 +13,7 @@ from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
 
 
-class ProcessorElementImpl(ABC, BackendInterface):
+class ProcessorElementImpl(BackendInterface, metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
@@ -43,7 +43,7 @@ class ProcessorElement (BaseElement):
         self.show_label = params.get("show_label", True)
 
         # display elements
-        self.label = TextWidget.get_factory()(self)
+        self.label = TextWidget.get_backend(MFPGUI().backend_name)(self)
         self.label.set_position(self.label_off_x, self.label_off_y)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
@@ -63,8 +63,8 @@ class ProcessorElement (BaseElement):
         self.obj_state = self.OBJ_HALFCREATED
 
     @classmethod
-    def get_factory(cls):
-        return ProcessorElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return ProcessorElementImpl.get_backend(backend_name)
 
     async def update(self):
         if self.show_label or self.obj_state == self.OBJ_HALFCREATED:

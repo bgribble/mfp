@@ -8,15 +8,32 @@ import math
 from gi.repository import Clutter
 from flopsy import mutates
 
+from mfp import log
 from mfp.gui_main import MFPGUI
-from mfp.gui.base_element import BaseElement
+from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
 
 
-class ClutterBaseElementImpl(BaseElement):
+class ClutterBaseElementImpl(BaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
+        # instance vars that are actually declared in BaseElement
+        if not hasattr(self, 'app_window'):
+            self.app_window = None
+            self.connections_out = []
+            self.connections_in = []
+            self.dsp_inlets = []
+            self.dsp_outlets = []
+            self.num_inlets = None
+            self.num_outlets = None
+            self.tags = {}
+            self.width = None
+            self.height = None
+            self.position_z = None
+            self.edit_mode = None
+            self.editable = None
+
         self.group = Clutter.Group.new()
         self.badge = None
         self.badge_times = {}
@@ -24,6 +41,15 @@ class ClutterBaseElementImpl(BaseElement):
         self.port_elements = {}
 
         super().__init__(window, x, y)
+
+    def get_style(self, style_item):
+        return super().get_style(style_item)
+
+    def get_color(self, color_name):
+        return super().get_color(color_name)
+
+    def port_position(self, direction, port_num):
+        return super().port_position(direction, port_num)
 
     async def delete(self):
         await super().delete()

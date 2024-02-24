@@ -17,30 +17,20 @@ from ..connection_element import (
 )
 
 
-class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, ClutterBaseElementImpl):
+class ClutterConnectionElementImpl(ConnectionElementImpl, ClutterBaseElementImpl, ConnectionElement):
     backend_name = "clutter"
 
-    def __init__(self, window, obj_1, port_1, obj_2, port_2, dashed=False):
-        super().__init__(window, obj_1, port_1, obj_2, port_2, dashed)
+    def __init__(self, window, position_x, position_y):
+        super().__init__(window, position_x, position_y)
 
         self.texture = Clutter.Canvas.new()
         self.group.set_content(self.texture)
         self.texture.connect("draw", self.draw_cb)
 
         self.group.set_reactive(True)
-        if self.obj_1.layer is not None:
-            self.move_to_layer(self.obj_1.layer)
-        elif self.obj_2.layer is not None:
-            self.move_to_layer(self.obj_2.layer)
-
         self.width = 15
         self.height = 15
         self.texture.set_size(self.width, self.height)
-
-        px, py = self.obj_1.get_position()
-        self.position_x = px
-        self.position_y = py
-        self.texture.invalidate()
 
     async def update(self):
         await self.draw()
@@ -61,6 +51,11 @@ class ClutterConnectionElementImpl(ConnectionElement, ConnectionElementImpl, Clu
         self.redraw()
 
     def redraw(self):
+        if self.obj_1.layer is not None:
+            self.move_to_layer(self.obj_1.layer)
+        elif self.obj_2.layer is not None:
+            self.move_to_layer(self.obj_2.layer)
+
         super().redraw()
         if self.texture:
             self.texture.invalidate()

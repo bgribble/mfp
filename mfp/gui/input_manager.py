@@ -23,8 +23,6 @@ class InputManagerImpl(ABC):
 
 
 class InputManager(BackendInterface):
-    backend_name = None
-
     class InputNeedsRequeue (Exception):
         pass
 
@@ -50,7 +48,7 @@ class InputManager(BackendInterface):
 
     @classmethod
     def build(cls, *args, **kwargs):
-        return cls.get_backend(cls.backend_name)(*args, **kwargs)
+        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     async def hover_monitor(self):
         while True:

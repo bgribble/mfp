@@ -21,7 +21,7 @@ from .xyplot.scatterplot import ScatterPlot
 from .xyplot.scopeplot import ScopePlot
 
 
-class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementImpl):
+class ClutterPlotElementImpl(PlotElementImpl, ClutterBaseElementImpl, PlotElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -57,8 +57,8 @@ class ClutterPlotElementImpl(PlotElement, PlotElementImpl, ClutterBaseElementImp
             return "scope"
         return "none"
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
         self.rect.set_size(width, height)
         if self.xyplot:
             self.xyplot.set_size(width-self.WIDTH_PAD, height-self.LABEL_SPACE-self.WIDTH_PAD)

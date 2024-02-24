@@ -6,7 +6,6 @@ Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
 from carp.serializer import Serializable
-from mfp import log
 from ..singleton import Singleton
 from .backend_interfaces import ColorDBBackend
 
@@ -37,8 +36,8 @@ class ColorDB (Singleton):
     rgba_colors = {}
 
     def __init__(self):
-        from .app_window import AppWindow
-        factory = ColorDBBackend.get_backend(AppWindow.backend_name)
+        from ..gui_main import MFPGUI
+        factory = ColorDBBackend.get_backend(MFPGUI().backend_name)
         self.backend = factory(self)
         super().__init__()
 

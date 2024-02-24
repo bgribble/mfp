@@ -5,7 +5,7 @@ A layer in the patch window
 '''
 from abc import ABC, abstractmethod
 from .backend_interfaces import BackendInterface
-
+from ..gui_main import MFPGUI
 
 class LayerImpl(ABC):
     @abstractmethod
@@ -18,8 +18,6 @@ class LayerImpl(ABC):
 
 
 class Layer(BackendInterface):
-    backend_name = None
-
     def __init__(self, app_window, patch, name, scope="__patch__"):
         self.app_window = app_window
         self.patch = patch
@@ -30,7 +28,7 @@ class Layer(BackendInterface):
 
     @classmethod
     def build(cls, *args, **kwargs):
-        return cls.get_backend(cls.backend_name)(*args, **kwargs)
+        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     def resort(self, obj):
         if obj in self.objects:

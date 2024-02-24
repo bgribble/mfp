@@ -11,7 +11,10 @@ from .layer import ClutterLayerImpl  # noqa
 from .text_widget import ClutterTextWidgetImpl  # noqa
 from .base_element import ClutterBaseElementImpl  # noqa
 from .colordb import ClutterColorDBBackend  # noqa
-from .message_element import ClutterMessageElementImpl  # noqa
+from .message_element import (  # noqa
+    ClutterMessageElementImpl,
+    ClutterTransientMessageElementImpl,
+)
 from .plot_element import ClutterPlotElementImpl  # noqa
 from .processor_element import ClutterProcessorElementImpl  # noqa
 from .connection_element import ClutterConnectionElementImpl  # noqa

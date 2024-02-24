@@ -6,7 +6,7 @@ A patch element corresponding to a number box or enum selector
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
@@ -15,7 +15,7 @@ from .base_element import BaseElement
 from .modes.enum_control import EnumEditMode, EnumControlMode
 
 
-class EnumElementImpl(ABC, BackendInterface):
+class EnumElementImpl(BackendInterface, metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
@@ -53,8 +53,8 @@ class EnumElement (BaseElement):
         self.label.set_text(self.format_value(self.value))
 
     @classmethod
-    def get_factory(cls):
-        return EnumElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return EnumElementImpl.get_backend(backend_name)
 
     def format_update(self):
         if self.scientific:

@@ -4,7 +4,8 @@ backend_interfaces.py -- interface declarations for UI classes
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
-from abc import ABC, abstractmethod
+from mfp import log
+from abc import ABCMeta, abstractmethod
 from ..delegate import DelegateMixin, delegatemethod
 
 
@@ -12,17 +13,24 @@ class BackendInterface:
     _registry = {}
     _interfaces = {}
 
-    def __init_subclass__(cls, *args, **kwargs):
+    def __init_subclass__(cls, **kwargs):
+        '''
+        If class directly inherits from BackendInterface, it's an implementation
+        base class (an interface). Otherwise, it's an implementation
+        of the interface.
+        '''
         if BackendInterface in cls.__bases__:
-            BackendInterface._interfaces[cls.__name__] = cls
+            interface_name = getattr(cls, "interface_name", cls.__name__)
+            BackendInterface._interfaces[interface_name] = cls
         else:
             for interface in BackendInterface._interfaces.values():
                 if interface in cls.__bases__:
+                    interface_name = getattr(interface, "interface_name", interface.__name__)
                     be_name = getattr(cls, "backend_name", cls.__name__)
-                    interface_registry = BackendInterface._registry.setdefault(interface.__name__, {})
+                    interface_registry = BackendInterface._registry.setdefault(interface_name, {})
                     interface_registry[be_name] = cls
 
-        super().__init_subclass__(*args, **kwargs)
+        super().__init_subclass__(**kwargs)
 
     def setup(self):
         pass
@@ -30,45 +38,15 @@ class BackendInterface:
     @classmethod
     def get_backend(cls, backend_name):
         if cls not in BackendInterface._interfaces.values():
+            log.debug(f"[get_backend] {BackendInterface._interfaces}")
             raise ValueError(f"get_backend: class {cls} is not an interface")
 
-        return BackendInterface._registry.get(cls.__name__, {}).get(backend_name)
+        interface_name = getattr(cls, "interface_name", cls.__name__)
+        backend = BackendInterface._registry.get(interface_name, {}).get(backend_name)
+        return backend
 
 
-class BaseElementBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def move_to_top(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def update_badge(self):
-        pass
-
-    @abstractmethod
-    def draw_ports(self):
-        pass
-
-    @abstractmethod
-    def hide_ports(self):
-        pass
-
-    @abstractmethod
-    def set_size(self, width, height):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def move(self, x, y):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def move_z(self, z):
-        pass
-
-class ColorDBBackend(ABC, BackendInterface, DelegateMixin):
+class ColorDBBackend(BackendInterface, DelegateMixin, metaclass=ABCMeta):
     @abstractmethod
     @delegatemethod
     def create_from_rgba(self, red, green, blue, alpha):
