@@ -5,8 +5,6 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from mfp import log
-from abc import ABCMeta, abstractmethod
-from ..delegate import DelegateMixin, delegatemethod
 
 
 class BackendInterface:
@@ -44,22 +42,3 @@ class BackendInterface:
         interface_name = getattr(cls, "interface_name", cls.__name__)
         backend = BackendInterface._registry.get(interface_name, {}).get(backend_name)
         return backend
-
-
-class ColorDBBackend(BackendInterface, DelegateMixin, metaclass=ABCMeta):
-    @abstractmethod
-    @delegatemethod
-    def create_from_rgba(self, red, green, blue, alpha):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def create_from_name(self, name):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def normalize(self, color):
-        pass
-
-

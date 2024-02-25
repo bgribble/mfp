@@ -11,7 +11,6 @@ from .selection import SingleSelectionEditMode, MultiSelectionEditMode
 
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
-from ..connection_element import ConnectionElement
 from ..message_element import MessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
@@ -19,8 +18,6 @@ from ..slidemeter_element import FaderElement, BarMeterElement, DialElement
 from ..via_element import SendViaElement, ReceiveViaElement
 from ..via_element import SendSignalViaElement, ReceiveSignalViaElement
 from ..button_element import BangButtonElement, ToggleButtonElement, ToggleIndicatorElement
-
-from mfp.gui_main import MFPGUI
 
 
 class PatchEditMode (InputMode):
@@ -105,15 +102,16 @@ class PatchEditMode (InputMode):
         await self.window.unselect_all()
         factory = element_type.build
         if self.autoplace_mode is None:
-            await self.window.add_element(factory)
+            obj = await self.window.add_element(factory)
         else:
             dx = element_type.style_defaults.get('autoplace-dx', 0)
             dy = element_type.style_defaults.get('autoplace-dy', 0)
 
-            await self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
+            obj = await self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
-
+        if obj:
+            await self.window.select(obj)
         self.update_selection_mode()
         return True
 
@@ -206,4 +204,3 @@ class PatchEditMode (InputMode):
     async def duplicate(self):
         await self.window.clipboard_copy((self.manager.pointer_x, self.manager.pointer_y))
         return await self.window.clipboard_paste()
-

@@ -156,7 +156,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         obj_cols, selected_callback = self.init_object_view()
         object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
         object_view.select_cb = selected_callback
-        object_view.unselect_cb = lambda obj: MFPGUI().async_task(self._unselect(obj))
+        object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.unselect(obj))
 
         async def on_create(window, signal, element):
             if isinstance(element, PatchDisplay):
@@ -629,18 +629,18 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
     async def select(self, obj):
         if self.object_view.in_tree(obj):
             self.object_view.select(obj)
-        return await super().select(obj)
+        return await AppWindow.select(self, obj)
 
     async def unselect(self, obj):
         if self.object_view.in_tree(obj):
             self.object_view.unselect(obj)
-        return await super().unselect(obj)
+        return await AppWindow.unselect(self, obj)
 
     def layer_create(self, layer, patch):
         self.layer_view.insert(layer, patch)
 
     def layer_select(self, layer):
-        super().layer_select(layer)
+        AppWindow.layer_select(self, layer)
         self.layer_view.select(layer)
 
     def layer_update(self, layer, patch):

@@ -46,10 +46,10 @@ def init_object_view(self):
         else:
             parent = (self.selected_patch,)
 
-        self.signal_emit("rename", obj, parent)
+        MFPGUI().async_task(self.signal_emit("rename", obj, parent))
 
     async def obj_selected(obj):
-        await self._select(obj)
+        await self.select(obj)
         if isinstance(obj, BaseElement):
             self.layer_select(obj.layer)
         elif isinstance(obj, PatchDisplay):

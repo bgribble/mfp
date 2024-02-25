@@ -124,7 +124,7 @@ class ClutterMessageElementImpl(MessageElementImpl, ClutterBaseElementImpl, Mess
 
 class ClutterTransientMessageElementImpl(
     TransientMessageElement,
-    TransientMessageElementImpl,
     ClutterMessageElementImpl,
+    TransientMessageElementImpl,
 ):
     backend_name = "clutter"

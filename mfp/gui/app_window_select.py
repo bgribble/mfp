@@ -54,26 +54,19 @@ async def patch_new(self):
 
 
 @extends(AppWindow)
-async def _select(self, obj):
-    if (obj is None) or (not isinstance(obj, BaseElement)) or (obj in self.selected):
+async def select(self, obj):
+    if (obj is None) or (not isinstance(obj, BaseElement)):
         return
 
-    self.selected[:0] = [obj]
+    if obj not in self.selected:
+        self.selected = [obj] + self.selected
     obj.select()
     await self.signal_emit("select", obj)
-
-
-@extends(AppWindow)
-async def select(self, obj):
-    if obj in self.selected:
-        return True
-
-    await self._select(obj)
     return True
 
 
 @extends(AppWindow)
-async def _unselect(self, obj):
+async def unselect(self, obj):
     if obj is None:
         return
 
@@ -86,12 +79,6 @@ async def _unselect(self, obj):
 
     if obj in self.selected:
         self.selected.remove(obj)
-
-
-@extends(AppWindow)
-async def unselect(self, obj):
-    if obj in self.selected and obj is not None:
-        await self._unselect(obj)
     return True
 
 
@@ -110,7 +97,7 @@ async def unselect_all(self):
     self.selected = []
     for obj in oldsel:
         obj.end_control()
-        await self._unselect(obj)
+        await self.unselect(obj)
     return True
 
 
