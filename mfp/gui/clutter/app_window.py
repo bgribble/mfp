@@ -188,6 +188,13 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
         return layer_view
 
+    def add_patch(self, patch_display):
+        super().add_patch(patch_display)
+        self.layer_view.insert(patch_display, None)
+        for s in patch_display.scopes:
+            if not self.object_view.in_tree((s, patch_display)):
+                self.object_view.insert((s, patch_display), patch_display)
+
     def show_autoplace_marker(self, x, y):
         from gi.repository import Clutter
         if self.autoplace_marker is None:
@@ -276,7 +283,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
         self.bottom_notebook.set_current_page(1)
 
-    def log_write(self, msg, level):
+    def log_write(self, message, level):
         from gi.repository import Gtk
 
         buf = self.log_view.get_buffer()
@@ -289,8 +296,8 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             end = buf.get_iter_at_mark(mark)
             end.backward_line()
             end.set_line_offset(0)
-            if ']' in msg:
-                end.forward_chars(msg.index(']') + 1)
+            if ']' in message:
+                end.forward_chars(message.index(']') + 1)
             return (start, end)
 
         # this is a bit complicated so that we ensure scrolling is
@@ -310,7 +317,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         if mark is None:
             mark = Gtk.TextMark.new("log_mark", False)
             buf.add_mark(mark, start_it)
-        buf.insert(start_it, msg, -1)
+        buf.insert(start_it, message, -1)
 
         start_it, end_it = leader_iters()
         buf.apply_tag(monotag, start_it, end_it)
@@ -390,7 +397,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
                                            self.stage.get_height() - 25)
 
-    def hud_write(self, msg, disp_time=3.0):
+    def hud_write(self, message, disp_time=3.0):
         from gi.repository import Clutter
 
         def anim_complete(anim):
@@ -402,7 +409,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
                     h_actor.destroy()
             self.hud_history = new_history
 
-        if not len(self.hud_history) or self.hud_history[0][2] != msg:
+        if len(self.hud_history) == 0 or self.hud_history[0][2] != message:
             for actor, anim, _ in self.hud_history:
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
         else:
@@ -418,11 +425,11 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         else:
             actor.set_position(10, self.stage.get_height() - 45)
         actor.set_property("opacity", 255)
-        actor.set_markup(msg)
+        actor.set_markup(message)
 
         animation = actor.animatev(Clutter.AnimationMode.EASE_IN_CUBIC,
                                    disp_time * 1000.0, ['opacity'], [0])
-        self.hud_history[0:0] = [(actor, animation, msg)]
+        self.hud_history[0:0] = [(actor, animation, message)]
         animation.connect_after("completed", anim_complete)
 
     def hud_banner(self, msg, disp_time=3.0):
@@ -571,7 +578,11 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
         self.group.set_position(self.view_x, self.view_y)
 
+    def get_size(self):
+        return self.stage.get_size()
+
     def register(self, element):
+        super().register(element)
         if element.container is None:
             if element.layer is None:
                 log.debug("WARNING: element has no layer", element, self)
@@ -590,12 +601,16 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
                 self.refresh(element)
 
     def unregister(self, element):
+        super().unregister(element)
         if element.container:
             if isinstance(element.container, BaseElement):
                 parent = element.group.get_parent()
                 if parent:
                     parent.remove_child(element.group)
             element.container = None
+
+        if isinstance(element, PatchDisplay):
+            self.layer_view.remove(element)
 
         self.object_view.remove(element)
         if element.group in self.event_sources:
@@ -605,6 +620,10 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
     def refresh(self, element):
         if isinstance(element, PatchDisplay):
+            for s in element.scopes:
+                if not self.object_view.in_tree((s, element)):
+                    self.object_view.insert((s, element), element)
+
             self.object_view.update(element, None)
             self.layer_view.update(element, None)
             return
@@ -620,6 +639,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             self.object_view.update(element, (element.layer.scope, element.layer.patch))
 
     def load_complete(self):
+        super().load_complete()
         self.object_view.refresh()
         self.layer_view.refresh()
 

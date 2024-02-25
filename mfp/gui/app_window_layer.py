@@ -5,9 +5,10 @@ Extra methods to manage the layer display in the main window
 '''
 
 from ..utils import extends
-from ..mfp_command import MFPCommand
 from .app_window import AppWindow
 from .layer import Layer
+from ..gui_main import MFPGUI
+
 
 @extends(AppWindow)
 def layer_select_up(self):
@@ -56,7 +57,6 @@ def layer_select(self, layer):
 @extends(AppWindow)
 def layer_new(self):
     l = Layer.build(self, self.selected_patch, "Layer %d" % len(self.selected_patch.layers))
-    self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
     self.layer_create(l, self.selected_patch)
     self.layer_select(l)
@@ -70,7 +70,6 @@ def layer_new_scope(self):
     MFPGUI().async_task(MFPGUI().mfp.add_scope(self.selected_patch.obj_id, l.scope))
     self.object_view.insert((l.scope, self.selected_patch), self.selected_patch)
 
-    self.selected_patch.layers.append(l)
     self.selected_patch.send_params()
     self.layer_create(l, self.selected_patch)
     self.layer_select(l)

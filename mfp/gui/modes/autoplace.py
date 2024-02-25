@@ -130,8 +130,7 @@ class AutoplaceMode (InputMode):
     def find_free_space_up(self, x, y):
         from ..connection_element import ConnectionElement
         test_y = y
-        # FIXME clutter
-        width, height = self.window.stage.get_size()
+        width, height = self.window.get_size()
         while (test_y > 0):
             clear = True
             for o in self.layer.objects:
@@ -154,8 +153,7 @@ class AutoplaceMode (InputMode):
     def find_free_space_down(self, x, y):
         from ..connection_element import ConnectionElement
         test_y = y
-        # FIXME clutter 
-        width, height = self.window.stage.get_size()
+        width, height = self.window.get_size()
         while (test_y < height - self.Y_CLEAR):
             clear = True
             overlaps = []
@@ -177,8 +175,7 @@ class AutoplaceMode (InputMode):
         return y
 
     def autoplace_noselection(self):
-        # FIXME clutter
-        width, height = self.window.stage.get_size()
+        width, height = self.window.get_size()
         spacing = self.NONE_SPACING
         cols = int(width / spacing)
         rows = int(height / spacing)

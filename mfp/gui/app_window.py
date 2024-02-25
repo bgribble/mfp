@@ -61,6 +61,10 @@ class AppWindowImpl(BackendInterface, ABC):
     def rezoom(self):
         pass
 
+    @abstractmethod
+    def get_size(self):
+        pass
+
     #####################
     # element operations
 
@@ -195,7 +199,6 @@ class AppWindow (SignalMixin):
         self.event_sources = {}
 
         # set up key and mouse handling
-        InputManager.backend_name = self.backend_name
         self.input_mgr = InputManager.build(self)
         self.init_input()
 
@@ -263,7 +266,6 @@ class AppWindow (SignalMixin):
                 self.selected_patch = self.patches[0]
             if self.selected_layer is None and self.selected_patch is not None:
                 self.layer_select(self.selected_patch.layers[0])
-            self.backend.load_complete()
 
     def add_patch(self, patch_display):
         self.patches.append(patch_display)
@@ -305,7 +307,6 @@ class AppWindow (SignalMixin):
 
         oldcount = self.object_counts_by_type.get(element.display_type, 0)
         self.object_counts_by_type[element.display_type] = oldcount + 1
-        self.backend.register(element)
         MFPGUI().async_task(self.signal_emit("add", element))
 
         if element.obj_id is not None:
@@ -319,11 +320,7 @@ class AppWindow (SignalMixin):
         if element in self.objects:
             self.objects.remove(element)
 
-        self.backend.unregister(element)
         MFPGUI().async_task(self.signal_emit("remove", element))
-
-    def refresh(self, element):
-        self.backend.refresh(element)
 
     async def add_element(self, factory, x=None, y=None):
         if x is None:

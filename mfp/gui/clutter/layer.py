@@ -10,9 +10,14 @@ class ClutterLayerImpl(Layer, LayerImpl):
         super().__init__(app_window, patch, name, scope)
         self.container = self.app_window.group
         self.group = Clutter.Group()
+        self.patch.layers.append(self)
+
+        if not self.app_window.layer_view.in_tree(self):
+            self.app_window.layer_view.insert(self, self.patch)
 
     def show(self):
-        self.container.add_child(self.group)
+        if self.container and self.group:
+            self.container.add_child(self.group)
 
     def hide(self):
         if self.group in self.container.get_children():
