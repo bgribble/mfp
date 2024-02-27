@@ -67,8 +67,8 @@ class ConnectionElement(BaseElement):
             self.dsp_connect = True
         self.redraw()
 
-    async def delete(self):
-        if (not self.dashed and self.obj_1 and self.obj_2 and
+    async def delete(self, delete_obj=True):
+        if (delete_obj and not self.dashed and self.obj_1 and self.obj_2 and
                 self.obj_1.obj_id is not None and self.obj_2.obj_id is not None):
             await MFPGUI().mfp.disconnect(
                 self.obj_1.obj_id, self.port_1,

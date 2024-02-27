@@ -163,15 +163,17 @@ class GUICommand:
         await c.update()
 
     async def delete(self, obj_id):
+        from mfp import log
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay
+
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchDisplay):
-            await obj.delete()
+            await obj.delete(delete_obj=False)
             if obj in MFPGUI().appwin.patches:
                 MFPGUI().appwin.patches.remove(obj)
         elif obj is not None:
-            await obj.delete()
+            await obj.delete(delete_obj=False)
 
     async def select(self, obj_id):
         from .gui_main import MFPGUI

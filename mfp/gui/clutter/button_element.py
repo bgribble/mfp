@@ -159,4 +159,4 @@ class ClutterToggleIndicatorElementImpl(
         if self.indicator:
             ct.fill()
         else:
-            ct.stiroke()
+            ct.stroke()

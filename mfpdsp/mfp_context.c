@@ -81,22 +81,18 @@ mfp_context_default_io(mfp_context * context, int patch_id)
     inlet_t = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, "inlet~");
     outlet_t = (mfp_procinfo *)g_hash_table_lookup(mfp_proc_registry, "outlet~");
 
-    printf("connect_default_io: finding inlet~ and outlet~\n");
-
     for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
         if (((*p)->patch_id == patch_id) && ((*p)->typeinfo == inlet_t)) {
-            newval = g_malloc0(sizeof(float));
-            *(float *)newval = 1.0;
-            mfp_proc_setparam((*p), "use_context_input", newval);
-            /* FIXME -- you were working here */
-            printf("  found inlet~ %p (id %d)\n", (*p), (*p)->rpc_id);
+            newval = g_malloc0(sizeof(double));
+            *(double *)newval = 1.0;
+            mfp_proc_setparam((*p), g_strdup("use_context_input"), newval);
+            (*p)->needs_config = 1;
         }
         if (((*p)->patch_id == patch_id) && ((*p)->typeinfo == outlet_t)) {
-            newval = g_malloc0(sizeof(float));
-            *(float *)newval = 1.0;
-            mfp_proc_setparam((*p), "use_context_output", newval);
-            /* FIXME -- you were working here */
-            printf("  found outlet~ %p (id %d)\n", (*p), (*p)->rpc_id);
+            newval = g_malloc0(sizeof(double));
+            *(double *)newval = 1.0;
+            mfp_proc_setparam((*p), g_strdup("use_context_output"), newval);
+            (*p)->needs_config = 1;
         }
     }
 }

@@ -35,12 +35,12 @@ class ClutterConnectionElementImpl(ConnectionElementImpl, ClutterBaseElementImpl
     async def update(self):
         await self.draw()
 
-    async def delete(self):
+    async def delete(self, **kwargs):
         if self.texture:
             self.group.set_content(None)
             self.texture = None
 
-        await super().delete()
+        await super().delete(**kwargs)
 
     def select(self):
         super().select()
