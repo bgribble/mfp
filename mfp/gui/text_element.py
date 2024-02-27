@@ -33,7 +33,8 @@ class TextElement (BaseElement):
         'fill-color:selected': 'transparent',
         'border': False,
         'border-color': 'default-stroke-color',
-        'canvas-size': None
+        'canvas-size': None,
+        'draw-ports': 'selected'
     }
 
     def __init__(self, window, x, y):
@@ -63,10 +64,6 @@ class TextElement (BaseElement):
             )
         self.redraw()
         self.draw_ports()
-
-    def draw_ports(self):
-        if self.selected:
-            super().draw_ports()
 
     async def label_edit_start(self):
         return self.value

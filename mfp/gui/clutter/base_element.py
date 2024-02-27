@@ -8,7 +8,6 @@ import math
 from gi.repository import Clutter
 from flopsy import mutates
 
-from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
@@ -41,15 +40,6 @@ class ClutterBaseElementImpl(BaseElementImpl):
         self.port_elements = {}
 
         super().__init__(window, x, y)
-
-    def get_style(self, style_item):
-        return super().get_style(style_item)
-
-    def get_color(self, color_name):
-        return super().get_color(color_name)
-
-    def port_position(self, direction, port_num):
-        return super().port_position(direction, port_num)
 
     async def delete(self):
         await super().delete()
@@ -160,6 +150,10 @@ class ClutterBaseElementImpl(BaseElementImpl):
         self.badge.invalidate()
 
     def draw_ports(self):
+        port_rule = self.get_style("draw-ports") or "always"
+        if port_rule == "never" or port_rule == "selected" and not self.selected:
+            return
+
         if self.editable is False or self.group is None:
             return
 
