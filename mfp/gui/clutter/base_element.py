@@ -25,8 +25,8 @@ class ClutterBaseElementBackend(BaseElement):
 
         super().__init__(window, x, y)
 
-    async def delete(self):
-        await super().delete()
+    async def delete(self, **kwargs):
+        await super().delete(**kwargs)
 
         if self.badge:
             if self.badge in self.app_window.event_sources:

@@ -11,20 +11,20 @@ typedef struct {
     int use_context_output;
 } builtin_noop_data;
 
-static int 
-process(mfp_processor * proc) 
+static int
+process(mfp_processor * proc)
 {
     builtin_noop_data * d = (builtin_noop_data *)(proc->data);
-    mfp_sample * inptr, * outptr; 
+    mfp_sample * inptr, * outptr;
 
     int blocksize = proc->context->blocksize;
 
-    if (proc == NULL) { 
+    if (proc == NULL) {
         return -1;
     }
 
     if(d->use_context_input) {
-        inptr = mfp_get_input_buffer(proc->context, d->io_channel); 
+        inptr = mfp_get_input_buffer(proc->context, d->io_channel);
     }
     else {
         if (proc->inlet_buf == NULL) {
@@ -41,7 +41,7 @@ process(mfp_processor * proc)
     }
 
     if(d->use_context_output) {
-        outptr = mfp_get_output_buffer(proc->context, d->io_channel); 
+        outptr = mfp_get_output_buffer(proc->context, d->io_channel);
     }
     else {
         if (proc->outlet_buf == NULL) {
@@ -58,12 +58,12 @@ process(mfp_processor * proc)
     }
 
     memcpy(outptr, inptr, blocksize*sizeof(mfp_sample));
-        
+
     return 0;
 }
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     builtin_noop_data * d = g_malloc0(sizeof(builtin_noop_data));
     d->use_context_input = 0;
@@ -74,18 +74,19 @@ init(mfp_processor * proc)
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     return;
 }
 
 static int
-config(mfp_processor * proc) 
+config(mfp_processor * proc)
 {
     builtin_noop_data * d = (builtin_noop_data *)(proc->data);
     gpointer ctxt_in = g_hash_table_lookup(proc->params, "use_context_input");
     gpointer ctxt_out = g_hash_table_lookup(proc->params, "use_context_output");
     gpointer chan = g_hash_table_lookup(proc->params, "io_channel");
+
 
     if (ctxt_in != NULL) {
         d->use_context_input = (int)(*(double *)ctxt_in);
@@ -99,11 +100,10 @@ config(mfp_processor * proc)
         d->io_channel = (int)(*(double *)chan);
     }
 
-
     return 1;
 }
 
-static mfp_procinfo *  
+static mfp_procinfo *
 init_builtin_noop_wrapper(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->is_generator = 1;
@@ -118,21 +118,21 @@ init_builtin_noop_wrapper(void) {
     return p;
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_outlet(void) {
     mfp_procinfo * p = init_builtin_noop_wrapper();
     p->name = strdup("outlet~");
     return p;
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_inlet(void) {
     mfp_procinfo * p = init_builtin_noop_wrapper();
     p->name = strdup("inlet~");
     return p;
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_noop(void) {
     mfp_procinfo * p = init_builtin_noop_wrapper();
     p->name = strdup("noop~");

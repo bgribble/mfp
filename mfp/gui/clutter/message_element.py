@@ -40,7 +40,7 @@ class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseE
         self.group.set_position(x, y)
         self.redraw()
 
-    async def delete(self):
+    async def delete(self, **kwargs):
         if self.texture:
             self.group.set_content(None)
             self.texture = None
@@ -49,7 +49,7 @@ class ClutterMessageElementImpl(MessageElement, MessageElementImpl, ClutterBaseE
             await self.label.delete()
             self.label = None
 
-        await super().delete()
+        await super().delete(**kwargs)
 
     def redraw(self):
         if not self.texture:
