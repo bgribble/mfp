@@ -15,8 +15,8 @@ from .backend_interfaces import BackendInterface
 
 class BaseElementImpl(metaclass=ABCMeta):
     @abstractmethod
-    async def delete(self):
-        await super().delete()
+    async def delete(self, **kwargs):
+        await super().delete(**kwargs)
 
     @abstractmethod
     def update_badge(self):
