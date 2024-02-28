@@ -5,7 +5,7 @@ A patch element corresponding to an XY scatter or line plot
 '''
 
 
-from abc import ABC
+from abc import ABCMeta
 
 from mfp import log
 from mfp.gui_main import MFPGUI
@@ -15,7 +15,7 @@ from .modes.label_edit import LabelEditMode
 from .text_widget import TextWidget
 
 
-class PlotElementImpl(ABC, BackendInterface):
+class PlotElementImpl(BackendInterface, metaclass=ABCMeta):
     pass
 
 
@@ -66,8 +66,8 @@ class PlotElement (BaseElement):
         self.label.set_reactive(False)
 
     @classmethod
-    def get_factory(cls):
-        return PlotElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return PlotElementImpl.get_backend(backend_name)
 
     async def update(self):
         self.draw_ports()

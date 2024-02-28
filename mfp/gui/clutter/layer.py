@@ -1,29 +1,31 @@
 from gi.repository import Clutter
 from mfp.gui.base_element import BaseElement
-from ..backend_interfaces import LayerBackend
-
-from mfp import log
+from mfp.gui.layer import Layer, LayerImpl
 
 
-class ClutterLayerBackend(LayerBackend):
+class ClutterLayerImpl(Layer, LayerImpl):
     backend_name = "clutter"
 
-    def __init__(self, layer):
-        self.layer = layer
-        self.app_window = layer.app_window
-        self.container = self.app_window.backend.group
+    def __init__(self, app_window, patch, name, scope="__patch__"):
+        super().__init__(app_window, patch, name, scope)
+        self.container = self.app_window.group
         self.group = Clutter.Group()
+        self.patch.layers.append(self)
 
-        super().__init__(layer)
+        if not self.app_window.layer_view.in_tree(self):
+            self.app_window.layer_view.insert(self, self.patch)
 
     def show(self):
-        self.container.add_child(self.group)
+        if self.container and self.group:
+            self.container.add_child(self.group)
 
     def hide(self):
         if self.group in self.container.get_children():
             self.container.remove_child(self.group)
 
     def remove(self, obj):
+        super().remove(obj)
+
         if isinstance(obj, BaseElement):
             child = obj.group
             obj.parent = None
@@ -35,6 +37,8 @@ class ClutterLayerBackend(LayerBackend):
             parent.remove_child(child)
 
     def add(self, obj, container=None):
+        super().add(obj, container=container)
+
         if isinstance(obj, BaseElement):
             group = obj.group
         else:

@@ -9,14 +9,14 @@ import cairo
 
 from mfp.utils import catchall
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..text_element import (
     TextElement,
     TextElementImpl
 )
 
 
-class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementBackend):
+class ClutterTextElementImpl(TextElementImpl, ClutterBaseElementImpl, TextElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -62,8 +62,8 @@ class ClutterTextElementImpl(TextElement, TextElementImpl, ClutterBaseElementBac
             ct.stroke()
         return True
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
 
         self.texture.set_size(width, height)
         self.texture.invalidate()

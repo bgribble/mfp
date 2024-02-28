@@ -6,7 +6,7 @@ A patch element corresponding to a "bang" or "toggle" style button
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 from mfp.utils import catchall
 from .text_widget import TextWidget
@@ -18,21 +18,21 @@ from ..gui_main import MFPGUI
 from ..bang import Bang
 
 
-class ButtonElementImpl(ABC, BackendInterface):
+class ButtonElementImpl(BackendInterface, metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
 
 
-class BangButtonElementImpl(ABC, BackendInterface):
+class BangButtonElementImpl(BackendInterface, metaclass=ABCMeta):
     pass
 
 
-class ToggleButtonElementImpl(ABC, BackendInterface):
+class ToggleButtonElementImpl(BackendInterface, metaclass=ABCMeta):
     pass
 
 
-class ToggleIndicatorElementImpl(ABC, BackendInterface):
+class ToggleIndicatorElementImpl(BackendInterface, metaclass=ABCMeta):
     pass
 
 
@@ -70,8 +70,8 @@ class ButtonElement (BaseElement):
         self.update_required = True
 
     @classmethod
-    def get_factory(cls):
-        return ButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return ButtonElementImpl.get_backend(backend_name)
 
     async def center_label(self):
         label_halfwidth = self.label.get_property('width')/2.0
@@ -162,8 +162,8 @@ class BangButtonElement (ButtonElement):
         self.param_list.extend(['message'])
 
     @classmethod
-    def get_factory(cls):
-        return BangButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return BangButtonElementImpl.get_backend(backend_name)
 
     async def clicked(self):
         if self.obj_id is not None:
@@ -200,8 +200,8 @@ class ToggleButtonElement (ButtonElement):
         self.param_list.extend(['on_message', 'off_message'])
 
     @classmethod
-    def get_factory(cls):
-        return ToggleButtonElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return ToggleButtonElementImpl.get_backend(backend_name)
 
     async def clicked(self):
         message = None
@@ -237,8 +237,8 @@ class ToggleIndicatorElement (ButtonElement):
     display_type = "indicator"
 
     @classmethod
-    def get_factory(cls):
-        return ToggleIndicatorElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return ToggleIndicatorElementImpl.get_backend(backend_name)
 
     def make_control_mode(self):
         return BaseElement.make_control_mode(self)

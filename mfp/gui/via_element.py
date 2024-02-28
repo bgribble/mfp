@@ -6,7 +6,7 @@ A patch element corresponding to a send or receive box
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -40,7 +40,7 @@ class ViaElement (BaseElement):
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.signal_listen('text-changed', self.text_changed_cb)
-        
+
         self.width = self.VIA_SIZE + 2 * self.VIA_FUDGE
         self.height = self.VIA_SIZE + self.LABEL_HEIGHT + self.LABEL_FUDGE + 2 * self.VIA_FUDGE
 
@@ -74,6 +74,7 @@ class ViaElement (BaseElement):
         if self.obj_id is None:
             await self.create_obj(t)
         self.recenter_label()
+        await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
     async def configure(self, params):
         self.label_text = params.get("label_text", "")
@@ -99,69 +100,46 @@ class ViaElement (BaseElement):
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
-class SendViaElementImpl(ABC, BackendInterface):
+
+class SendViaElementImpl(metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
 
 
-class SendViaElement (ViaElement):
+class SendViaElement (BackendInterface, ViaElement):
     display_type = "sendvia"
     proc_type = "send"
 
-    @classmethod
-    def get_factory(cls):
-        return SendViaElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-    async def label_edit_finish(self, *args):
-        await ViaElement.label_edit_finish(self, *args)
-        await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
-
-
-class SendSignalViaElementImpl(ABC, BackendInterface):
+class SendSignalViaElementImpl(metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
 
 
-class SendSignalViaElement (SendViaElement):
+class SendSignalViaElement (BackendInterface, ViaElement):
     display_type = "sendsignalvia"
     proc_type = "send~"
 
-    @classmethod
-    def get_factory(cls):
-        return SendSignalViaElementImpl.get_backend(MFPGUI().appwin.backend_name)
 
-
-class ReceiveViaElementImpl(ABC, BackendInterface):
+class ReceiveViaElementImpl(metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
 
 
-class ReceiveViaElement (ViaElement):
+class ReceiveViaElement (BackendInterface, ViaElement):
     display_type = "recvvia"
     proc_type = "recv"
 
-    async def label_edit_finish(self, *args):
-        await ViaElement.label_edit_finish(self, *args)
-        await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
-    @classmethod
-    def get_factory(cls):
-        return ReceiveViaElementImpl.get_backend(MFPGUI().appwin.backend_name)
-
-
-class ReceiveSignalViaElementImpl(ABC, BackendInterface):
+class ReceiveSignalViaElementImpl(metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
 
 
-class ReceiveSignalViaElement (ReceiveViaElement):
+class ReceiveSignalViaElement (BackendInterface, ViaElement):
     display_type = "recvsignalvia"
     proc_type = "recv~"
-
-    @classmethod
-    def get_factory(cls):
-        return ReceiveSignalViaElementImpl.get_backend(MFPGUI().appwin.backend_name)

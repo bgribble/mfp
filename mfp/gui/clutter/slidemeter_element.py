@@ -9,7 +9,7 @@ import cairo
 
 from mfp.utils import catchall
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..slidemeter_element import (
     FaderElement,
     FaderElementImpl,
@@ -21,7 +21,7 @@ from ..slidemeter_element import (
 )
 
 
-class ClutterSlideMeterElementImpl(SlideMeterElement, ClutterBaseElementBackend):
+class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -44,8 +44,8 @@ class ClutterSlideMeterElementImpl(SlideMeterElement, ClutterBaseElementBackend)
     def redraw(self):
         self.texture.invalidate()
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
         self.texture.set_size(width, height)
         self.texture.invalidate()
 
@@ -185,18 +185,18 @@ class ClutterSlideMeterElementImpl(SlideMeterElement, ClutterBaseElementBackend)
 
 
 class ClutterFaderElementImpl(
-    FaderElement, FaderElementImpl, ClutterSlideMeterElementImpl
+    FaderElementImpl, ClutterSlideMeterElementImpl, FaderElement
 ):
     backend_name = "clutter"
 
 
 class ClutterBarMeterElementImpl(
-    BarMeterElement, BarMeterElementImpl, ClutterSlideMeterElementImpl
+    BarMeterElementImpl, ClutterSlideMeterElementImpl, BarMeterElement
 ):
     backend_name = "clutter"
 
 
-class ClutterDialElementImpl(DialElement, DialElementImpl, ClutterSlideMeterElementImpl):
+class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, DialElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):

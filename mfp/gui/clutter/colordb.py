@@ -4,7 +4,7 @@ clutter/colordb.py -- Clutter backend for color database
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 from gi.repository import Clutter
-from ..backend_interfaces import ColorDBBackend
+from ..colordb import ColorDBBackend
 
 
 class ClutterColorDBBackend(ColorDBBackend):

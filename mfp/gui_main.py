@@ -40,6 +40,7 @@ class MFPGUI (Singleton):
         self.mfp = None
         self.debug = False
         self.async_task = AsyncTaskManager()
+        self.backend_name = None
 
         self.style_defaults = {
             'font-face': 'Cantarell,Sans',
@@ -158,14 +159,15 @@ async def main():
     mfp_connection = await MFPCommandFactory()
 
     from mfp.gui import backends  # noqa
-    AppWindow.backend_name = "clutter"
-
-    setup_default_colors()
 
     gui = MFPGUI()
     gui.mfp = mfp_connection
     gui.debug = debug
-    gui.appwin = AppWindow()
+    gui.backend_name = "clutter"
+
+    setup_default_colors()
+
+    gui.appwin = AppWindow.build()
 
     if debug:
         import yappi

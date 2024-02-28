@@ -5,10 +5,11 @@ colordb.py -- RGBA color definitions for MFP app
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 
+from abc import ABCMeta, abstractmethod
 from carp.serializer import Serializable
-from mfp import log
 from ..singleton import Singleton
-from .backend_interfaces import ColorDBBackend
+from .backend_interfaces import BackendInterface
+from ..delegate import DelegateMixin, delegatemethod
 
 
 class RGBAColor(Serializable):
@@ -32,13 +33,30 @@ class RGBAColor(Serializable):
         return RGBAColor(**propdict)
 
 
+class ColorDBBackend(BackendInterface, DelegateMixin, metaclass=ABCMeta):
+    @abstractmethod
+    @delegatemethod
+    def create_from_rgba(self, red, green, blue, alpha):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def create_from_name(self, name):
+        pass
+
+    @abstractmethod
+    @delegatemethod
+    def normalize(self, color):
+        pass
+
+
 class ColorDB (Singleton):
     named_colors = {}
     rgba_colors = {}
 
     def __init__(self):
-        from .app_window import AppWindow
-        factory = ColorDBBackend.get_backend(AppWindow.backend_name)
+        from ..gui_main import MFPGUI
+        factory = ColorDBBackend.get_backend(MFPGUI().backend_name)
         self.backend = factory(self)
         super().__init__()
 

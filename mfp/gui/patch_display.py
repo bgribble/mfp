@@ -12,7 +12,7 @@ from .layer import Layer
 from mfp import log
 
 
-class PatchDisplay (object):
+class PatchDisplay:
     display_type = "patch"
 
     def __init__(self, window, x, y):
@@ -28,12 +28,6 @@ class PatchDisplay (object):
         self.scopes = []
 
         self.app_window.add_patch(self)
-
-        # FIXME move to backend
-        self.layer_view = self.app_window.backend.layer_view
-        self.object_view = self.app_window.backend.object_view
-        self.layer_view.insert(self, None)
-        self.object_view.insert(self, None)
 
     @classmethod
     def get_factory(cls):
@@ -81,20 +75,14 @@ class PatchDisplay (object):
         for name, scope in layers:
             layer = self.find_layer(name)
             if layer is None:
-                layer = Layer(self.app_window, self, name, scope)
+                layer = Layer.build(self.app_window, self, name, scope)
             newlayers.append(layer)
         self.layers = newlayers
 
         self.scopes = []
         for layer in self.layers:
-            if not self.layer_view.in_tree(layer):
-                self.layer_view.insert(layer, self)
             if layer.scope not in self.scopes:
                 self.scopes.append(layer.scope)
-
-        for s in self.scopes:
-            if not self.object_view.in_tree((s, self)):
-                self.object_view.insert((s, self), self)
 
         self.app_window.refresh(self)
 
@@ -109,10 +97,6 @@ class PatchDisplay (object):
                 await o.delete(delete_obj=delete_obj)
             layer.hide()
             layer.delete()
-
-        # remove the patch from layers and objects lists
-        self.object_view.remove(self)
-        self.layer_view.remove(self)
 
         # last, delete the patch on the control side
         to_delete = self.obj_id

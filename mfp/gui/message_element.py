@@ -6,7 +6,7 @@ A patch element corresponding to a clickable message
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -17,7 +17,7 @@ from .modes.transient import TransientMessageEditMode
 from .modes.clickable import ClickableControlMode
 
 
-class MessageElementImpl(ABC, BackendInterface):
+class MessageElementImpl(BackendInterface, metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
@@ -49,8 +49,8 @@ class MessageElement (BaseElement):
         self.label.set_reactive(False)
 
     @classmethod
-    def get_factory(cls):
-        return MessageElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return MessageElementImpl.get_backend(backend_name)
 
     async def update(self):
         self.redraw()
@@ -67,6 +67,9 @@ class MessageElement (BaseElement):
         self.clickstate = False
         self.redraw()
         return False
+
+    async def set_size(self, width, height, **kwargs):
+        return await super().set_size(width, height, **kwargs)
 
     async def label_edit_start(self):
         self.obj_state = self.OBJ_HALFCREATED
@@ -125,8 +128,11 @@ class MessageElement (BaseElement):
         return ClickableControlMode(self.app_window, self, "Message control")
 
 
-class TransientMessageElementImpl(ABC, BackendInterface):
-    pass
+class TransientMessageElementImpl(BackendInterface, metaclass=ABCMeta):
+    @abstractmethod
+    def redraw(self):
+        pass
+
 
 class TransientMessageElement (MessageElement):
     ELBOW_ROOM = 50
@@ -148,8 +154,8 @@ class TransientMessageElement (MessageElement):
         self._make_connections()
 
     @classmethod
-    def get_factory(cls):
-        return TransientMessageElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return TransientMessageElementImpl.get_backend(backend_name)
 
     def _make_connections(self):
         for to in self.target_obj:

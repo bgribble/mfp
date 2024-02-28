@@ -6,21 +6,27 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 import asyncio
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 import inspect
 
-from .backend_interfaces import InputManagerBackend
+from .backend_interfaces import BackendInterface
 from .input_mode import InputMode
 from .key_sequencer import KeySequencer
 from ..gui_main import MFPGUI
 
 
-class InputManager (object):
+class InputManagerImpl(ABC):
+    @abstractmethod
+    def handle_event(self, *args):
+        pass
+
+
+class InputManager(BackendInterface):
     class InputNeedsRequeue (Exception):
         pass
 
     def __init__(self, window):
-        from .app_window import AppWindow
         self.window = window
         self.global_mode = None
         self.major_mode = None
@@ -38,10 +44,11 @@ class InputManager (object):
         self.pointer_lastobj = None
         self.hover_thresh = timedelta(microseconds=750000)
 
-        factory = InputManagerBackend.get_backend(AppWindow.backend_name)
-        self.backend = factory(self)
-
         MFPGUI().async_task(self.hover_monitor())
+
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     async def hover_monitor(self):
         while True:

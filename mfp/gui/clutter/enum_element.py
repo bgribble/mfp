@@ -8,14 +8,14 @@ from gi.repository import Clutter
 import cairo
 
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..enum_element import (
     EnumElement,
     EnumElementImpl
 )
 
 
-class ClutterEnumElementImpl(EnumElement, EnumElementImpl, ClutterBaseElementBackend):
+class ClutterEnumElementImpl(EnumElementImpl, ClutterBaseElementImpl, EnumElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -72,8 +72,8 @@ class ClutterEnumElementImpl(EnumElement, EnumElementImpl, ClutterBaseElementBac
         ct.set_source_rgba(color.red, color.green, color.blue, 1.0)
         ct.stroke()
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
 
         self.texture.set_size(width, height)
         self.texture.invalidate()

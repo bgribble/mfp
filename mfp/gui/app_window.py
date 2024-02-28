@@ -5,23 +5,169 @@ The main MFP window and associated code
 '''
 
 
+from abc import ABC, abstractmethod
 from mfp import log
 
 from mfp.utils import SignalMixin
 from ..gui_main import MFPGUI
-from .backend_interfaces import AppWindowBackend
+from .backend_interfaces import BackendInterface
 from .input_manager import InputManager
+from .layer import Layer
 from .console_manager import ConsoleManager
 from .prompter import Prompter
 from .colordb import ColorDB
+from .base_element import BaseElement
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
 
 
-class AppWindow (SignalMixin):
-    backend_name = None
+class AppWindowImpl(BackendInterface, ABC):
+    #####################
+    # backend control
 
+    @abstractmethod
+    def initialize(self):
+        pass
+
+    @abstractmethod
+    def shutdown(self):
+        pass
+
+    @abstractmethod
+    def render(self):
+        pass
+
+    @abstractmethod
+    def grab_focus(self):
+        pass
+
+    @abstractmethod
+    def ready(self):
+        pass
+
+    #####################
+    # coordinate transforms and zoom
+
+    @abstractmethod
+    def screen_to_canvas(self, x, y):
+        pass
+
+    @abstractmethod
+    def canvas_to_screen(self, x, y):
+        pass
+
+    @abstractmethod
+    def rezoom(self):
+        pass
+
+    @abstractmethod
+    def get_size(self):
+        pass
+
+    #####################
+    # element operations
+
+    @abstractmethod
+    def register(self, element):
+        pass
+
+    @abstractmethod
+    def unregister(self, element):
+        pass
+
+    @abstractmethod
+    def refresh(self, element):
+        pass
+
+    @abstractmethod
+    def select(self, element):
+        pass
+
+    @abstractmethod
+    def unselect(self, element):
+        pass
+
+    #####################
+    # autoplace
+
+    @abstractmethod
+    def show_autoplace_marker(self, x, y):
+        pass
+
+    @abstractmethod
+    def hide_autoplace_marker(self):
+        pass
+
+    #####################
+    # HUD/console
+
+    @abstractmethod
+    def hud_banner(self, message, display_time=3.0):
+        pass
+
+    @abstractmethod
+    def hud_write(self, message, display_time=3.0):
+        pass
+
+    @abstractmethod
+    def hud_set_prompt(self, prompt, default=''):
+        pass
+
+    @abstractmethod
+    def console_activate(self):
+        pass
+
+    #####################
+    # clipboard
+
+    @abstractmethod
+    def clipboard_get(self, pointer_pos):
+        pass
+
+    @abstractmethod
+    def clipboard_set(self, pointer_pos):
+        pass
+
+    @abstractmethod
+    def clipboard_cut(self, pointer_pos):
+        pass
+
+    @abstractmethod
+    def clipboard_copy(self, pointer_pos):
+        pass
+
+    @abstractmethod
+    def clipboard_paste(self, pointer_pos=None):
+        pass
+
+    #####################
+    # selection box
+
+    @abstractmethod
+    def show_selection_box(self, x0, y0, x1, y1):
+        pass
+
+    @abstractmethod
+    def hide_selection_box(self):
+        pass
+
+    #####################
+    # log output
+
+    @abstractmethod
+    def log_write(self, message, level):
+        pass
+
+    #####################
+    # key bindings display
+
+    @abstractmethod
+    def display_bindings(self):
+        pass
+
+
+class AppWindow (SignalMixin):
     def __init__(self):
         super().__init__()
 
@@ -53,17 +199,24 @@ class AppWindow (SignalMixin):
         self.event_sources = {}
 
         # set up key and mouse handling
-        self.input_mgr = InputManager(self)
+        self.input_mgr = InputManager.build(self)
         self.init_input()
 
-        factory = AppWindowBackend.get_backend(AppWindow.backend_name)
-        self.backend = factory(self)
         self.hud_prompt_mgr = Prompter(self)
 
-        self.backend.initialize()
+        self.initialize()
 
-        self.console_manager = ConsoleManager("MFP interactive console", self)
+        self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
+
+
+    @classmethod
+    def get_backend(cls, backend_name):
+        return AppWindowImpl.get_backend(backend_name)
+
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     def init_input(self):
         # set initial major mode
@@ -74,7 +227,7 @@ class AppWindow (SignalMixin):
         def handler(obj, signal, event, *rest):
             try:
                 rv = self.input_mgr.handle_event(obj, event)
-                self.backend.grab_focus()
+                self.grab_focus()
                 return rv
             except Exception as e:
                 log.error("Error handling UI event", event)
@@ -113,7 +266,6 @@ class AppWindow (SignalMixin):
                 self.selected_patch = self.patches[0]
             if self.selected_layer is None and self.selected_patch is not None:
                 self.layer_select(self.selected_patch.layers[0])
-            self.backend.load_complete()
 
     def add_patch(self, patch_display):
         self.patches.append(patch_display)
@@ -155,7 +307,6 @@ class AppWindow (SignalMixin):
 
         oldcount = self.object_counts_by_type.get(element.display_type, 0)
         self.object_counts_by_type[element.display_type] = oldcount + 1
-        self.backend.register(element)
         MFPGUI().async_task(self.signal_emit("add", element))
 
         if element.obj_id is not None:
@@ -169,11 +320,7 @@ class AppWindow (SignalMixin):
         if element in self.objects:
             self.objects.remove(element)
 
-        self.backend.unregister(element)
         MFPGUI().async_task(self.signal_emit("remove", element))
-
-    def refresh(self, element):
-        self.backend.refresh(element)
 
     async def add_element(self, factory, x=None, y=None):
         if x is None:

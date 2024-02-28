@@ -5,15 +5,30 @@ console.py -- Python read-eval-print console for MFP
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
+from abc import ABC, abstractmethod
 import asyncio
 from mfp.gui_main import MFPGUI
-from .backend_interfaces import ConsoleManagerBackend
+from .backend_interfaces import BackendInterface
 
 DEFAULT_PROMPT = ">>> "
 DEFAULT_CONTINUE = "... "
 
 
-class ConsoleManager:
+class ConsoleManagerImpl(ABC):
+    @abstractmethod
+    def scroll_to_end(self):
+        pass
+
+    @abstractmethod
+    def redisplay(self):
+        pass
+
+    @abstractmethod
+    def append(self, text):
+        pass
+
+
+class ConsoleManager (BackendInterface):
     def __init__(self, banner, app_window):
         self.app_window = app_window
 
@@ -32,10 +47,9 @@ class ConsoleManager:
         self.last_ps = self.ps1
         self.continue_buffer = ''
 
-        factory = ConsoleManagerBackend.get_backend(app_window.backend_name)
-        self.backend = factory(self)
-
-        self.append(banner + '\n')
+    @classmethod
+    def build(cls, *args, **kwargs):
+        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     def line_ready(self):
         self.ready = True

@@ -10,7 +10,7 @@ import cairo
 
 from mfp.utils import catchall
 from ..colordb import ColorDB
-from .base_element import ClutterBaseElementBackend
+from .base_element import ClutterBaseElementImpl
 from ..button_element import (
     ButtonElement,
     ButtonElementImpl,
@@ -51,7 +51,7 @@ def rounded_box(ctx, xorig, yorig, w, h, rad):
     ctx.close_path()
 
 
-class ClutterButtonElementImpl(ButtonElement, ButtonElementImpl, ClutterBaseElementBackend):
+class ClutterButtonElementImpl(ButtonElementImpl, ClutterBaseElementImpl, ButtonElement):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
@@ -77,8 +77,8 @@ class ClutterButtonElementImpl(ButtonElement, ButtonElementImpl, ClutterBaseElem
         else:
             self.label.set_color(self.get_color('text-color'))
 
-    async def set_size(self, width, height):
-        await super().set_size(width, height)
+    async def set_size(self, width, height, **kwargs):
+        await super().set_size(width, height, **kwargs)
         self.texture.set_size(width, height)
         self.redraw()
 

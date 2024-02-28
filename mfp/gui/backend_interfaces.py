@@ -4,25 +4,31 @@ backend_interfaces.py -- interface declarations for UI classes
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
-from abc import ABC, abstractmethod
-from ..delegate import DelegateMixin, delegatemethod
+from mfp import log
 
 
 class BackendInterface:
     _registry = {}
     _interfaces = {}
 
-    def __init_subclass__(cls, *args, **kwargs):
+    def __init_subclass__(cls, **kwargs):
+        '''
+        If class directly inherits from BackendInterface, it's an implementation
+        base class (an interface). Otherwise, it's an implementation
+        of the interface.
+        '''
         if BackendInterface in cls.__bases__:
-            BackendInterface._interfaces[cls.__name__] = cls
+            interface_name = getattr(cls, "interface_name", cls.__name__)
+            BackendInterface._interfaces[interface_name] = cls
         else:
             for interface in BackendInterface._interfaces.values():
                 if interface in cls.__bases__:
+                    interface_name = getattr(interface, "interface_name", interface.__name__)
                     be_name = getattr(cls, "backend_name", cls.__name__)
-                    interface_registry = BackendInterface._registry.setdefault(interface.__name__, {})
+                    interface_registry = BackendInterface._registry.setdefault(interface_name, {})
                     interface_registry[be_name] = cls
 
-        super().__init_subclass__(*args, **kwargs)
+        super().__init_subclass__(**kwargs)
 
     def setup(self):
         pass
@@ -30,254 +36,9 @@ class BackendInterface:
     @classmethod
     def get_backend(cls, backend_name):
         if cls not in BackendInterface._interfaces.values():
+            log.debug(f"[get_backend] {BackendInterface._interfaces}")
             raise ValueError(f"get_backend: class {cls} is not an interface")
 
-        return BackendInterface._registry.get(cls.__name__, {}).get(backend_name)
-
-
-class AppWindowBackend(ABC, BackendInterface, DelegateMixin):
-    #####################
-    # backend control
-
-    @abstractmethod
-    def initialize(self):
-        pass
-
-    @abstractmethod
-    def shutdown(self):
-        pass
-
-    @abstractmethod
-    def render(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def grab_focus(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def ready(self):
-        pass
-
-    #####################
-    # coordinate transforms and zoom
-
-    @abstractmethod
-    def screen_to_canvas(self, x, y):
-        pass
-
-    @abstractmethod
-    def canvas_to_screen(self, x, y):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def rezoom(self):
-        pass
-
-    #####################
-    # element operations
-
-    @abstractmethod
-    def register(self, element):
-        pass
-
-    @abstractmethod
-    def unregister(self, element):
-        pass
-
-    @abstractmethod
-    def refresh(self, element):
-        pass
-
-    @abstractmethod
-    def select(self, element):
-        pass
-
-    @abstractmethod
-    def unselect(self, element):
-        pass
-
-    #####################
-    # autoplace
-
-    @abstractmethod
-    @delegatemethod
-    def show_autoplace_marker(self, x, y):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def hide_autoplace_marker(self):
-        pass
-
-    #####################
-    # HUD/console
-
-    @abstractmethod
-    @delegatemethod
-    def hud_banner(self, message, display_time=3.0):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def hud_write(self, message, display_time=3.0):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def hud_set_prompt(self, prompt, default=''):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def console_activate(self):
-        pass
-
-    #####################
-    # clipboard
-
-    @abstractmethod
-    @delegatemethod
-    def clipboard_get(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def clipboard_set(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def clipboard_cut(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def clipboard_copy(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def clipboard_paste(self, pointer_pos=None):
-        pass
-
-    #####################
-    # selection box
-
-    @abstractmethod
-    @delegatemethod
-    def show_selection_box(self, x0, y0, x1, y1):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def hide_selection_box(self):
-        pass
-
-    #####################
-    # log output
-
-    @abstractmethod
-    @delegatemethod
-    def log_write(self, message, level):
-        pass
-
-    #####################
-    # key bindings display
-
-    @abstractmethod
-    @delegatemethod
-    def display_bindings(self):
-        pass
-
-
-class InputManagerBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def handle_event(self, *args):
-        pass
-
-
-class ConsoleManagerBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def scroll_to_end(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def redisplay(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def append(self, text):
-        pass
-
-
-class LayerBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def show(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def hide(self):
-        pass
-
-
-
-class BaseElementBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def move_to_top(self):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def update_badge(self):
-        pass
-
-    @abstractmethod
-    def draw_ports(self):
-        pass
-
-    @abstractmethod
-    def hide_ports(self):
-        pass
-
-    @abstractmethod
-    def set_size(self, width, height):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def move(self, x, y):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def move_z(self, z):
-        pass
-
-class ColorDBBackend(ABC, BackendInterface, DelegateMixin):
-    @abstractmethod
-    @delegatemethod
-    def create_from_rgba(self, red, green, blue, alpha):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def create_from_name(self, name):
-        pass
-
-    @abstractmethod
-    @delegatemethod
-    def normalize(self, color):
-        pass
-
-
+        interface_name = getattr(cls, "interface_name", cls.__name__)
+        backend = BackendInterface._registry.get(interface_name, {}).get(backend_name)
+        return backend

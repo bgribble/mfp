@@ -4,7 +4,7 @@ text_element.py
 A text element (comment) in a patch
 '''
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 from mfp.gui_main import MFPGUI
 from mfp import log
@@ -16,7 +16,7 @@ from .modes.clickable import ClickableControlMode
 from .text_widget import TextWidget
 
 
-class TextElementImpl(ABC, BackendInterface):
+class TextElementImpl(BackendInterface, metaclass=ABCMeta):
     @abstractmethod
     def redraw(self):
         pass
@@ -33,7 +33,8 @@ class TextElement (BaseElement):
         'fill-color:selected': 'transparent',
         'border': False,
         'border-color': 'default-stroke-color',
-        'canvas-size': None
+        'canvas-size': None,
+        'draw-ports': 'selected'
     }
 
     def __init__(self, window, x, y):
@@ -52,8 +53,8 @@ class TextElement (BaseElement):
         self.label_changed_cb = self.label.signal_listen('text-changed', self.text_changed_cb)
 
     @classmethod
-    def get_factory(cls):
-        return TextElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return TextElementImpl.get_backend(backend_name)
 
     async def update(self):
         if not self.get_style('canvas-size'):
@@ -63,10 +64,6 @@ class TextElement (BaseElement):
             )
         self.redraw()
         self.draw_ports()
-
-    def draw_ports(self):
-        if self.selected:
-            super().draw_ports()
 
     async def label_edit_start(self):
         return self.value

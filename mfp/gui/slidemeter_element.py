@@ -7,7 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 import math
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
@@ -259,7 +259,7 @@ class SlideMeterElement (BaseElement):
         return SliderControlMode(self.app_window, self, "Fader/meter control")
 
 
-class FaderElementImpl(ABC, BackendInterface):
+class FaderElementImpl(BackendInterface, metaclass=ABCMeta):
     pass
 
 
@@ -268,11 +268,11 @@ class FaderElement(SlideMeterElement):
     DEFAULT_H = 100
 
     @classmethod
-    def get_factory(cls):
-        return FaderElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return FaderElementImpl.get_backend(backend_name)
 
 
-class BarMeterElementImpl(ABC, BackendInterface):
+class BarMeterElementImpl(BackendInterface, metaclass=ABCMeta):
     pass
 
 
@@ -283,11 +283,11 @@ class BarMeterElement(SlideMeterElement):
         self.slider_enable = False
 
     @classmethod
-    def get_factory(cls):
-        return BarMeterElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return BarMeterElementImpl.get_backend(backend_name)
 
 
-class DialElementImpl(ABC, BackendInterface):
+class DialElementImpl(BackendInterface, metaclass=ABCMeta):
     pass
 
 class DialElement(SlideMeterElement):
@@ -310,8 +310,8 @@ class DialElement(SlideMeterElement):
         self.param_list.append('dial_radius')
 
     @classmethod
-    def get_factory(cls):
-        return DialElementImpl.get_backend(MFPGUI().appwin.backend_name)
+    def get_backend(cls, backend_name):
+        return DialElementImpl.get_backend(backend_name)
 
     def set_orientation(self, orient):
         pass

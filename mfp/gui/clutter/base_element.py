@@ -9,14 +9,30 @@ from gi.repository import Clutter
 from flopsy import mutates
 
 from mfp.gui_main import MFPGUI
-from mfp.gui.base_element import BaseElement
+from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
 
 
-class ClutterBaseElementBackend(BaseElement):
+class ClutterBaseElementImpl(BaseElementImpl):
     backend_name = "clutter"
 
     def __init__(self, window, x, y):
+        # instance vars that are actually declared in BaseElement
+        if not hasattr(self, 'app_window'):
+            self.app_window = None
+            self.connections_out = []
+            self.connections_in = []
+            self.dsp_inlets = []
+            self.dsp_outlets = []
+            self.num_inlets = None
+            self.num_outlets = None
+            self.tags = {}
+            self.width = None
+            self.height = None
+            self.position_z = None
+            self.edit_mode = None
+            self.editable = None
+
         self.group = Clutter.Group.new()
         self.badge = None
         self.badge_times = {}
@@ -47,10 +63,7 @@ class ClutterBaseElementBackend(BaseElement):
 
     def move_to_top(self):
         def bump(element):
-            if hasattr(element, 'backend'):
-                actor = element.backend.group
-            else:
-                actor = element.group
+            actor = element.group
 
             if not actor:
                 return
@@ -137,6 +150,10 @@ class ClutterBaseElementBackend(BaseElement):
         self.badge.invalidate()
 
     def draw_ports(self):
+        port_rule = self.get_style("draw-ports") or "always"
+        if port_rule == "never" or port_rule == "selected" and not self.selected:
+            return
+
         if self.editable is False or self.group is None:
             return
 

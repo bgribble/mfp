@@ -8,12 +8,11 @@ import pkgutil
 import sys
 
 from mfp import log
+from mfp.gui.app_window import AppWindow, AppWindowImpl
 from mfp.gui.collision import collision_check
 from mfp.gui.colordb import ColorDB
 from mfp.gui.text_widget import TextWidget
 from mfp.gui_main import MFPGUI
-
-from ..backend_interfaces import AppWindowBackend
 
 from ..connection_element import ConnectionElement
 from ..base_element import BaseElement
@@ -23,11 +22,8 @@ from .event import repeat_event
 from .tree_display import TreeDisplay
 
 
-class ClutterAppWindowBackend (AppWindowBackend):
+class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
     backend_name = "clutter"
-    reversed_attrs = [
-        'input_mgr', 'object_counts_by_type', 'selected'
-    ]
 
     def render(self):
         # clutter backend does not need a render call
@@ -129,7 +125,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self._init_input()
 
         # configure Clutter stage
-        self.stage.set_color(self.wrapper.color_bg)
+        self.stage.set_color(self.color_bg)
         self.stage.set_property('user-resizable', True)
 
         self.selection_box = None
@@ -148,8 +144,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
         ]
         self.window.set_icon_list(pixbufs)
 
-        self.wrapper.signal_listen("toggle-console", self._toggle_console)
-        self.wrapper.signal_listen("toggle-info-panel", self._toggle_info_panel)
+        self.signal_listen("toggle-console", self._toggle_console)
+        self.signal_listen("toggle-info-panel", self._toggle_info_panel)
 
         # show top-level window
         self.window.show_all()
@@ -157,10 +153,10 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.async_cb_events = set()
 
     def _init_object_view(self):
-        obj_cols, selected_callback = self.wrapper.init_object_view()
+        obj_cols, selected_callback = self.init_object_view()
         object_view = TreeDisplay(self.builder.get_object("object_tree"), True, *obj_cols)
         object_view.select_cb = selected_callback
-        object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.wrapper._unselect(obj))
+        object_view.unselect_cb = lambda obj: MFPGUI().async_task(self.unselect(obj))
 
         async def on_create(window, signal, element):
             if isinstance(element, PatchDisplay):
@@ -179,31 +175,38 @@ class ClutterAppWindowBackend (AppWindowBackend):
         def on_rename(window, signal, obj, parent):
             object_view.update(obj, parent)
 
-        self.wrapper.signal_listen("created", on_create)
-        self.wrapper.signal_listen("rename", on_rename)
+        self.signal_listen("created", on_create)
+        self.signal_listen("rename", on_rename)
 
         return object_view
 
     def _init_layer_view(self):
-        layer_cols, selected_callback = self.wrapper.init_layer_view()
+        layer_cols, selected_callback = self.init_layer_view()
         layer_view = TreeDisplay(self.builder.get_object("layer_tree"), False, *layer_cols)
         layer_view.select_cb = selected_callback
         layer_view.unselect_cb = None
 
         return layer_view
 
+    def add_patch(self, patch_display):
+        super().add_patch(patch_display)
+        self.layer_view.insert(patch_display, None)
+        for s in patch_display.scopes:
+            if not self.object_view.in_tree((s, patch_display)):
+                self.object_view.insert((s, patch_display), patch_display)
+
     def show_autoplace_marker(self, x, y):
         from gi.repository import Clutter
         if self.autoplace_marker is None:
             self.autoplace_marker = Clutter.Text()
             self.autoplace_marker.set_text("+")
-            self.autoplace_layer = self.wrapper.selected_layer
-            self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
-        elif self.autoplace_layer != self.wrapper.selected_layer:
-            if self.autoplace_layer.backend.group:
-                self.autoplace_layer.backend.group.remove_actor(self.autoplace_marker)
-            self.autoplace_layer = self.wrapper.selected_layer
-            self.autoplace_layer.backend.group.add_actor(self.autoplace_marker)
+            self.autoplace_layer = self.selected_layer
+            self.autoplace_layer.group.add_actor(self.autoplace_marker)
+        elif self.autoplace_layer != self.selected_layer:
+            if self.autoplace_layer.group:
+                self.autoplace_layer.group.remove_actor(self.autoplace_marker)
+            self.autoplace_layer = self.selected_layer
+            self.autoplace_layer.group.add_actor(self.autoplace_marker)
         self.autoplace_marker.set_position(x, y)
         self.autoplace_marker.set_depth(-10)
         self.autoplace_marker.show()
@@ -249,22 +252,22 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         self.embed.connect('size-allocate', resize_cb)
 
-        self.stage.connect('key-press-event', repeat_event(self.wrapper, "key-press-event"))
-        self.stage.connect('key-release-event', repeat_event(self.wrapper, "key-release-event"))
-        self.stage.connect('button-press-event', repeat_event(self.wrapper, "button-press-event"))
-        self.stage.connect('button-release-event', repeat_event(self.wrapper, "button-release-event"))
-        self.stage.connect('motion-event', repeat_event(self.wrapper, "motion-event"))
-        self.stage.connect('scroll-event', repeat_event(self.wrapper, "scroll-event"))
-        self.stage.connect('enter-event', repeat_event(self.wrapper, "enter-event"))
-        self.stage.connect('leave-event', repeat_event(self.wrapper, "leave-event"))
-        self.stage.connect('destroy', repeat_event(self.wrapper, "quit"))
+        self.stage.connect('key-press-event', repeat_event(self, "key-press-event"))
+        self.stage.connect('key-release-event', repeat_event(self, "key-release-event"))
+        self.stage.connect('button-press-event', repeat_event(self, "button-press-event"))
+        self.stage.connect('button-release-event', repeat_event(self, "button-release-event"))
+        self.stage.connect('motion-event', repeat_event(self, "motion-event"))
+        self.stage.connect('scroll-event', repeat_event(self, "scroll-event"))
+        self.stage.connect('enter-event', repeat_event(self, "enter-event"))
+        self.stage.connect('leave-event', repeat_event(self, "leave-event"))
+        self.stage.connect('destroy', repeat_event(self, "quit"))
 
         # set tab stops on keybindings view
         ta = Pango.TabArray.new(1, True)
         ta.set_tab(0, Pango.TabAlign.LEFT, 120)
         self.builder.get_object("key_bindings_text").set_tabs(ta)
 
-        self.wrapper.input_mgr.pointer_x, self.wrapper.input_mgr.pointer_y = self.embed.get_pointer()
+        self.input_mgr.pointer_x, self.input_mgr.pointer_y = self.embed.get_pointer()
 
         # show keybindings
         self.display_bindings()
@@ -275,12 +278,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
         console_visible = oldpos < (alloc.height - 2)
         if not console_visible:
-            next_pos = self.wrapper.input_mgr.global_mode.previous_console_position
+            next_pos = self.input_mgr.global_mode.previous_console_position
             self.content_console_pane.set_position(next_pos)
 
         self.bottom_notebook.set_current_page(1)
 
-    def log_write(self, msg, level):
+    def log_write(self, message, level):
         from gi.repository import Gtk
 
         buf = self.log_view.get_buffer()
@@ -293,8 +296,8 @@ class ClutterAppWindowBackend (AppWindowBackend):
             end = buf.get_iter_at_mark(mark)
             end.backward_line()
             end.set_line_offset(0)
-            if ']' in msg:
-                end.forward_chars(msg.index(']') + 1)
+            if ']' in message:
+                end.forward_chars(message.index(']') + 1)
             return (start, end)
 
         # this is a bit complicated so that we ensure scrolling is
@@ -314,7 +317,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         if mark is None:
             mark = Gtk.TextMark.new("log_mark", False)
             buf.add_mark(mark, start_it)
-        buf.insert(start_it, msg, -1)
+        buf.insert(start_it, message, -1)
 
         start_it, end_it = leader_iters()
         buf.apply_tag(monotag, start_it, end_it)
@@ -334,12 +337,12 @@ class ClutterAppWindowBackend (AppWindowBackend):
         from gi.repository import Clutter
 
         lines = ["Active key/mouse bindings"]
-        for m in self.wrapper.input_mgr.minor_modes:
+        for m in self.input_mgr.minor_modes:
             lines.append("\nMinor mode: " + m.description)
             for b in m.directory():
                 lines.append("%s\t%s" % (b[0], b[1]))
 
-        m = self.wrapper.input_mgr.major_mode
+        m = self.input_mgr.major_mode
         lines.append("\nMajor mode: " + m.description)
 
         if self.hud_mode_txt is None:
@@ -354,7 +357,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
             lines.append("%s\t%s" % (b[0], b[1]))
 
         lines.append("\nGlobal bindings:")
-        m = self.wrapper.input_mgr.global_mode
+        m = self.input_mgr.global_mode
         for b in m.directory():
             lines.append("%s\t%s" % (b[0], b[1]))
 
@@ -394,7 +397,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
                                            self.stage.get_height() - 25)
 
-    def hud_write(self, msg, disp_time=3.0):
+    def hud_write(self, message, disp_time=3.0):
         from gi.repository import Clutter
 
         def anim_complete(anim):
@@ -406,7 +409,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
                     h_actor.destroy()
             self.hud_history = new_history
 
-        if not len(self.hud_history) or self.hud_history[0][2] != msg:
+        if len(self.hud_history) == 0 or self.hud_history[0][2] != message:
             for actor, anim, _ in self.hud_history:
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
         else:
@@ -422,11 +425,11 @@ class ClutterAppWindowBackend (AppWindowBackend):
         else:
             actor.set_position(10, self.stage.get_height() - 45)
         actor.set_property("opacity", 255)
-        actor.set_markup(msg)
+        actor.set_markup(message)
 
         animation = actor.animatev(Clutter.AnimationMode.EASE_IN_CUBIC,
                                    disp_time * 1000.0, ['opacity'], [0])
-        self.hud_history[0:0] = [(actor, animation, msg)]
+        self.hud_history[0:0] = [(actor, animation, message)]
         animation.connect_after("completed", anim_complete)
 
     def hud_banner(self, msg, disp_time=3.0):
@@ -475,14 +478,14 @@ class ClutterAppWindowBackend (AppWindowBackend):
         if self.selection_box is None:
             self.selection_box = Clutter.Rectangle()
             self.selection_box.set_border_width(1.0)
-            self.selection_box.set_color(self.wrapper.color_transparent)
-            self.selection_box.set_border_color(self.wrapper.color_unselected)
-            self.selection_box_layer = self.wrapper.selected_layer
-            self.selection_box_layer.backend.group.add_actor(self.selection_box)
-        elif self.selection_box_layer != self.wrapper.selected_layer:
-            self.selection_box_layer.backend.group.remove_actor(self.selection_box)
-            self.selection_box_layer = self.wrapper.selected_layer
-            self.selection_box_layer.backend.group.add_actor(self.selection_box)
+            self.selection_box.set_color(self.color_transparent)
+            self.selection_box.set_border_color(self.color_unselected)
+            self.selection_box_layer = self.selected_layer
+            self.selection_box_layer.group.add_actor(self.selection_box)
+        elif self.selection_box_layer != self.selected_layer:
+            self.selection_box_layer.group.remove_actor(self.selection_box)
+            self.selection_box_layer = self.selected_layer
+            self.selection_box_layer.group.add_actor(self.selection_box)
         self.selection_box.set_position(x0, y0)
         self.selection_box.set_size(max(1, x1-x0), max(1, y1-y0))
         self.selection_box.show()
@@ -490,7 +493,7 @@ class ClutterAppWindowBackend (AppWindowBackend):
         enclosed = []
         selection_corners = [(x0, y0), (x1, y0),
                              (x0, y1), (x1, y1)]
-        for obj in self.wrapper.selected_layer.objects:
+        for obj in self.selected_layer.objects:
             if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
                 continue
             corners = obj.corners()
@@ -517,17 +520,17 @@ class ClutterAppWindowBackend (AppWindowBackend):
             clipboard.set_text(cliptxt, -1)
 
     async def clipboard_cut(self, pointer_pos):
-        if self.wrapper.selected:
+        if self.selected:
             await self.clipboard_copy(pointer_pos)
-            await self.wrapper.delete_selected()
+            await self.delete_selected()
             return True
         return False
 
     async def clipboard_copy(self, pointer_pos):
-        if self.wrapper.selected:
+        if self.selected:
             cliptxt = await MFPGUI().mfp.clipboard_copy(
                 pointer_pos,
-                [o.obj_id for o in self.wrapper.selected if o.obj_id is not None]
+                [o.obj_id for o in self.selected if o.obj_id is not None]
             )
             self.clipboard_set(cliptxt)
             return True
@@ -539,20 +542,20 @@ class ClutterAppWindowBackend (AppWindowBackend):
             return False
 
         newobj = await MFPGUI().mfp.clipboard_paste(
-            cliptxt, self.wrapper.selected_patch.obj_id,
-            self.wrapper.selected_layer.scope, None
+            cliptxt, self.selected_patch.obj_id,
+            self.selected_layer.scope, None
         )
 
         if newobj is not None:
-            await self.wrapper.unselect_all()
+            await self.unselect_all()
             for o in newobj:
                 obj = MFPGUI().recall(o)
                 if obj is None:
                     return True
                 if not isinstance(obj, PatchDisplay):
-                    obj.move_to_layer(self.wrapper.selected_layer)
-                    if obj not in self.wrapper.selected:
-                        await self.wrapper.select(MFPGUI().recall(o))
+                    obj.move_to_layer(self.selected_layer)
+                    if obj not in self.selected:
+                        await self.select(MFPGUI().recall(o))
             return False
         else:
             return False
@@ -566,34 +569,39 @@ class ClutterAppWindowBackend (AppWindowBackend):
 
     def canvas_to_screen(self, x, y):
         return (
-            self.wrapper.view_x + x / self.wrapper.zoom,
-            self.wrapper.view_y + y / self.wrapper.zoom,
+            self.view_x + x / self.zoom,
+            self.view_y + y / self.zoom,
         )
 
     def rezoom(self):
         w, h = self.group.get_size()
-        self.group.set_scale_full(self.wrapper.zoom, self.wrapper.zoom, w / 2.0, h / 2.0)
-        self.group.set_position(self.wrapper.view_x, self.wrapper.view_y)
+        self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
+        self.group.set_position(self.view_x, self.view_y)
+
+    def get_size(self):
+        return self.stage.get_size()
 
     def register(self, element):
+        super().register(element)
         if element.container is None:
             if element.layer is None:
                 log.debug("WARNING: element has no layer", element, self)
             else:
-                element.container = element.layer.backend.group
+                element.container = element.layer.group
 
         if element.group is None:
             log.debug(f"[register] group for {element} is None!!")
         else:
-            self.wrapper.event_sources[element.group] = element
+            self.event_sources[element.group] = element
             if hasattr(element, 'texture'):
-                self.wrapper.event_sources[element.texture] = element
+                self.event_sources[element.texture] = element
 
         if not isinstance(element, ConnectionElement):
-            if not self.wrapper.load_in_progress:
+            if not self.load_in_progress:
                 self.refresh(element)
 
     def unregister(self, element):
+        super().unregister(element)
         if element.container:
             if isinstance(element.container, BaseElement):
                 parent = element.group.get_parent()
@@ -601,19 +609,26 @@ class ClutterAppWindowBackend (AppWindowBackend):
                     parent.remove_child(element.group)
             element.container = None
 
+        if isinstance(element, PatchDisplay):
+            self.layer_view.remove(element)
+
         self.object_view.remove(element)
-        if element.group in self.wrapper.event_sources:
-            del self.wrapper.event_sources[element.group]
-        if hasattr(element, 'texture') and element.texture in self.wrapper.event_sources:
-            del self.wrapper.event_sources[element.texture]
+        if element.group in self.event_sources:
+            del self.event_sources[element.group]
+        if hasattr(element, 'texture') and element.texture in self.event_sources:
+            del self.event_sources[element.texture]
 
     def refresh(self, element):
         if isinstance(element, PatchDisplay):
+            for s in element.scopes:
+                if not self.object_view.in_tree((s, element)):
+                    self.object_view.insert((s, element), element)
+
             self.object_view.update(element, None)
             self.layer_view.update(element, None)
             return
 
-        if self.wrapper.load_in_progress:
+        if self.load_in_progress:
             return
 
         if isinstance(element.container, BaseElement):
@@ -624,24 +639,28 @@ class ClutterAppWindowBackend (AppWindowBackend):
             self.object_view.update(element, (element.layer.scope, element.layer.patch))
 
     def load_complete(self):
+        super().load_complete()
         self.object_view.refresh()
         self.layer_view.refresh()
 
     def shutdown(self):
         pass
 
-    def select(self, obj):
+    async def select(self, obj):
         if self.object_view.in_tree(obj):
             self.object_view.select(obj)
+        return await AppWindow.select(self, obj)
 
-    def unselect(self, obj):
+    async def unselect(self, obj):
         if self.object_view.in_tree(obj):
             self.object_view.unselect(obj)
+        return await AppWindow.unselect(self, obj)
 
-    def layer_new(self, layer, patch):
+    def layer_create(self, layer, patch):
         self.layer_view.insert(layer, patch)
 
     def layer_select(self, layer):
+        AppWindow.layer_select(self, layer)
         self.layer_view.select(layer)
 
     def layer_update(self, layer, patch):
