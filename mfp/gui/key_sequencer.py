@@ -86,7 +86,7 @@ class KeySequencer (object):
 
             # FIXME - shifted unicode keys
             if (
-                ks >= 256
+                ks and ks >= 256
                 and ((key_defs.MOD_SHIFT in self.mod_keys)
                      or (key_defs.MOD_RSHIFT in self.mod_keys))
             ):
@@ -116,7 +116,7 @@ class KeySequencer (object):
                 key += 'PGUP'
             elif ks == key_defs.KEY_PGDN:
                 key += 'PGDN'
-            elif ks < 256:
+            elif not ks or ks < 256:
                 if event.unicode and event.unicode.islower():
                     if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
                         key += event.unicode.upper()

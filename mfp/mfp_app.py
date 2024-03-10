@@ -40,6 +40,7 @@ class MFPApp (Singleton, SignalMixin):
         self.no_dsp = False
         self.no_restart = False
         self.no_onload = False
+        self.gui_backend = None
         self.debug = False
         self.debug_remote = False
         self.osc_port = None
@@ -134,7 +135,7 @@ class MFPApp (Singleton, SignalMixin):
 
         if not self.no_gui:
             logstart = log.log_time_base.strftime("%Y-%m-%dT%H:%M:%S.%f")
-            guicmd = ["mfpgui", "-s", self.socket_path, "-l", logstart]
+            guicmd = ["mfpgui", "-s", self.socket_path, "-l", logstart, '--backend', self.gui_backend]
             if self.debug:
                 guicmd.append('--debug')
 

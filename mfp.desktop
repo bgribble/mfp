@@ -4,5 +4,6 @@ Version=1.0
 Type=Application
 Terminal=false
 Exec=${PREFIX}/bin/mfp
+StartupWMClass=mfp
 Name=mfp
 Icon=${PREFIX}/share/mfp/icons/hicolor/scalable/actions/mfp.svg

@@ -123,10 +123,12 @@ async def main():
                         help="Path to Unix-domain socket for RPC")
     parser.add_argument("-d", "--debug", action="store_true",
                         help="Enable debugging behaviors")
-
+    parser.add_argument("-b", "--backend", default="clutter",
+                        help="UI framework to use")
     args = vars(parser.parse_args())
     socketpath = args.get("socketpath")
     debug = args.get('debug')
+    backend = args.get('backend')
 
     log.log_module = "gui"
     log.log_func = log.rpclog
@@ -163,7 +165,7 @@ async def main():
     gui = MFPGUI()
     gui.mfp = mfp_connection
     gui.debug = debug
-    gui.backend_name = "clutter"
+    gui.backend_name = backend
 
     setup_default_colors()
 

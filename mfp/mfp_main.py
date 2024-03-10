@@ -140,6 +140,9 @@ async def main():
                         help="Log all messages to console")
     parser.add_argument("--verbose-remote", action="store_true",
                         help="Log all child console output")
+    parser.add_argument("-g", "--gui-backend", default="clutter", type=str,
+                        help="GUI backend type (clutter or imgui). Imgui is incomplete."
+                        )
     parser.add_argument("--max-bufsize", default=2048,
                         help="Maximum JACK buffer size to support (default: 2048 frames)")
     parser.add_argument("--no-gui", action="store_true",
@@ -180,7 +183,7 @@ async def main():
     # configure some things from command line
     app.no_gui = args.get("no_gui") or args.get("help_builtins") or args.get("help")
     app.no_dsp = args.get("no_dsp") or args.get("help_builtins") or args.get("help")
-
+    app.gui_backend = args.get("gui_backend")
     app.no_default = args.get("no_default")
     app.no_restart = args.get("no_restart")
     app.no_onload = args.get("no_onload")
