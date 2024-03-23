@@ -199,7 +199,7 @@ class AppWindow (SignalMixin):
         self.event_sources = {}
 
         # set up key and mouse handling
-        self.input_mgr = InputManager.build(self)
+        self.input_mgr = InputManager(self)
         self.init_input()
 
         self.hud_prompt_mgr = Prompter(self)

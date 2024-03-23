@@ -2,27 +2,31 @@
 '''
 input_manager.py: Handle keyboard and mouse input and route through input modes
 
-Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 import asyncio
-from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 import inspect
 
-from .backend_interfaces import BackendInterface
+from mfp import log
+
 from .input_mode import InputMode
 from .key_sequencer import KeySequencer
+from .event import (
+    KeyPressEvent,
+    KeyReleaseEvent,
+    ButtonPressEvent,
+    ButtonReleaseEvent,
+    ScrollEvent,
+    MotionEvent,
+    EnterEvent,
+    LeaveEvent,
+)
 from ..gui_main import MFPGUI
 
 
-class InputManagerImpl(ABC):
-    @abstractmethod
-    def handle_event(self, *args):
-        pass
-
-
-class InputManager(BackendInterface):
+class InputManager:
     class InputNeedsRequeue (Exception):
         pass
 
@@ -67,6 +71,124 @@ class InputManager(BackendInterface):
             if rv:
                 return True
         return False
+
+    async def run_handlers(self, handlers, keysym, coro=None, offset=-1):
+        retry_count = 0
+
+        while retry_count < 5:
+            try:
+                for index, handler in enumerate(handlers):
+                    # this is for the case where we were iterating over
+                    # handlers and found one async, and are restarting in
+                    # the middle of the loop, but async
+                    if index < offset:
+                        continue
+                    elif retry_count == 0 and index == offset:
+                        rv = coro
+                    else:
+                        rv = handler()
+
+                    if inspect.isawaitable(rv):
+                        rv = await rv
+                    if rv:
+                        return True
+                return False
+            except InputManager.InputNeedsRequeue:
+                # handlers might have changed in the previous handler
+                handlers = self.get_handlers(keysym)
+                retry_count += 1
+                offset = -1
+            except Exception as e:
+                log.error(f"[run_handlers] Exception while handling key command {keysym}: {e}")
+                log.debug_traceback()
+                return False
+
+    def handle_keysym(self, keysym):
+        if not keysym:
+            return True
+        handlers = self.get_handlers(keysym)
+        log.debug(f"[input] keysym={keysym} handlers={handlers}")
+        return bool(handlers)
+
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                for item, handler in enumerate(handlers):
+                    handler_rv = handler()
+                    if inspect.isawaitable(handler_rv):
+                        MFPGUI().async_task(self.run_handlers(
+                            handlers, keysym, coro=handler_rv, offset=item
+                        ))
+                        return True
+                    if handler_rv:
+                        return True
+                return False
+            except InputManager.InputNeedsRequeue:
+                handlers = self.get_handlers(keysym)
+                retry_count += 1
+            except Exception as e:
+                log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e}")
+                log.debug_traceback()
+                return False
+        return False
+
+    def handle_event(self, *args):
+        _, event = args
+
+        keysym = None
+        if isinstance(event, (
+            KeyPressEvent, KeyReleaseEvent, ButtonPressEvent, ButtonReleaseEvent,
+            ScrollEvent
+        )):
+            try:
+                self.keyseq.process(event)
+            except Exception as e:
+                log.error(f"[handle_event] Exception handling {event}: {e}")
+                raise
+            if len(self.keyseq.sequences) > 0:
+                keysym = self.keyseq.pop()
+
+        elif isinstance(event, MotionEvent):
+            # FIXME: if the scaling changes so that window.stage_pos would return a
+            # different value, that should generate a MOTION event.  Currently we are
+            # just kludging pointer_x and pointer_y from the scale callback.
+            self.pointer_ev_x = event.x
+            self.pointer_ev_y = event.y
+            self.pointer_x, self.pointer_y = (
+                self.window.screen_to_canvas(event.x, event.y)
+            )
+            self.keyseq.process(event)
+            if len(self.keyseq.sequences) > 0:
+                keysym = self.keyseq.pop()
+
+        elif isinstance(event, EnterEvent):
+            src = event.target
+            now = datetime.now()
+            if (
+                self.pointer_leave_time is not None
+                and (now - self.pointer_leave_time) > timedelta(milliseconds=100)
+            ):
+                self.keyseq.mod_keys = set()
+                self.window.grab_focus()
+            if (
+                src
+                and src != self.window
+                and self.window.object_visible(src)
+            ):
+                self.pointer_obj = src
+                self.pointer_obj_time = now
+
+        elif isinstance(event, LeaveEvent):
+            src = event.target
+            self.pointer_leave_time = datetime.now()
+            if src == self.pointer_obj:
+                self.pointer_lastobj = self.pointer_obj
+                self.pointer_obj = None
+                self.pointer_obj_time = None
+        else:
+            return False
+
+        return self.handle_keysym(keysym)
 
     def global_binding(self, key, action, helptext=''):
         self.global_mode.bind(key, action, helptext)
