@@ -4,52 +4,31 @@ Main window class for ImGui backend
 """
 
 import asyncio
-import ctypes
 import sys
 
-from sdl2 import (
-    SDL_DestroyWindow,
-    SDL_Event,
-    SDL_GL_SwapWindow,
-    SDL_GL_DeleteContext,
-    SDL_KEYDOWN,
-    SDL_MOUSEWHEEL,
-    SDL_MOUSEMOTION,
-    SDL_PollEvent,
-    SDL_TEXTINPUT,
-    SDL_QUIT,
-    SDL_Quit,
-    SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL, SDL_SCANCODE_CAPSLOCK, SDL_SCANCODE_ESCAPE,
-    SDLK_LCTRL, SDLK_RCTRL, SDLK_CAPSLOCK, SDLK_ESCAPE
-)
 from imgui_bundle import imgui
-from imgui_bundle.python_backends.sdl_backend import SDL2Renderer
 import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
 from ..app_window import AppWindow, AppWindowImpl
-from .utils import create_sdl2_window, update_sdl2_keymap
 from .inputs import imgui_process_inputs, imgui_key_map
-from ..event import KeyPressEvent, ScrollEvent, MotionEvent
+from .sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
 
-# keys that are often remapped at the OS level. Check for these
-# and manage them.
-SDL_REMAPPABLE = {
-    SDLK_LCTRL: (SDL_SCANCODE_LCTRL, imgui.Key.im_gui_mod_ctrl),
-    SDLK_RCTRL: (SDL_SCANCODE_RCTRL, imgui.Key.im_gui_mod_ctrl),
-    SDLK_CAPSLOCK: (SDL_SCANCODE_CAPSLOCK, None),
-    SDLK_ESCAPE: (SDL_SCANCODE_ESCAPE, imgui.Key.escape),
-}
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
     INIT_WIDTH = 800
     INIT_HEIGHT = 600
 
+    def __init__(self, *args, **kwargs):
+        self.imgui_impl = None
+        self.imgui_renderer = None
+
+        super().__init__(*args, **kwargs)
+
     async def _render_task(self):
         keep_going = True
-        event = SDL_Event()
 
         io = imgui.get_io()
         io.config_input_trickle_event_queue = True
@@ -58,49 +37,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             keep_going
             and not self.close_in_progress
         ):
-            await asyncio.sleep(0)
-            while SDL_PollEvent(ctypes.byref(event)) != 0:
-                await asyncio.sleep(0)
-                if event.type == SDL_QUIT:
-                    keep_going = False
-                    break
-
-                if event.type == SDL_TEXTINPUT:
-                    # text-generating key presses don't "count" to imgui
-                    # for some reason.
-                    ev = KeyPressEvent(
-                        target=self.input_mgr.pointer_obj,
-                        keyval=None,
-                        unicode=event.text.text.decode('utf-8')
-                    )
-                    MFPGUI().async_task(self.signal_emit("key-press-event", ev))
-                elif event.type == SDL_KEYDOWN:
-                    # imgui doesn't automatically remap keys, but we can
-                    # do it live because SDL reports both the scancode and the
-                    # keycode
-                    if event.key.keysym.sym in SDL_REMAPPABLE:
-                        remap_info = SDL_REMAPPABLE.get(event.key.keysym.sym)
-                        if event.key.keysym.scancode != remap_info[0]:
-                            if self.imgui_renderer.key_map.get(event.key.keysym.scancode) != remap_info[1]:
-                                self.imgui_renderer.key_map[event.key.keysym.scancode] = remap_info[1]
-                elif event.type == SDL_MOUSEWHEEL:
-                    ev = ScrollEvent(
-                        target=self.input_mgr.pointer_obj,
-                        dx=event.wheel.x,
-                        dy=event.wheel.y
-                    )
-                    MFPGUI().async_task(self.signal_emit("scroll-event", ev))
-                elif event.type == SDL_MOUSEMOTION:
-                    ev = MotionEvent(
-                        target=self.input_mgr.pointer_obj,
-                        x=event.motion.x,
-                        y=event.motion.y
-                    )
-                    MFPGUI().async_task(self.signal_emit("motion-event", ev))
-
-                self.imgui_renderer.process_event(event)
-
             # top of loop stuff
+            await asyncio.sleep(0)
+            await self.imgui_impl.process_events()
             self.imgui_renderer.process_inputs()
 
             # start processing for this frame
@@ -114,12 +53,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             gl.glClear(gl.GL_COLOR_BUFFER_BIT)
             imgui.render()
             self.imgui_renderer.render(imgui.get_draw_data())
-            SDL_GL_SwapWindow(self.sdl2_window)
+
+            self.imgui_impl.swap_window()
 
         self.imgui_renderer.shutdown()
-        SDL_GL_DeleteContext(self.gl_context)
-        SDL_DestroyWindow(self.sdl2_window)
-        SDL_Quit()
+        self.imgui_impl.shutdown()
         await self.signal_emit("quit")
 
     #####################
@@ -133,14 +71,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.buttons_pressed = set()
 
         # create the window and renderer
-        self.sdl2_window, self.gl_context = create_sdl2_window(
-            "mfp", self.window_width, self.window_height, self.icon_path
-        )
         imgui.create_context()
-        log.debug(f"[imgui] window={self.sdl2_window} context={self.gl_context}")
-        self.imgui_renderer = SDL2Renderer(self.sdl2_window)
-
-        update_sdl2_keymap(self.imgui_renderer)
+        self.imgui_impl = ImguiRenderer(self)
 
         self.keymap = imgui_key_map()
         self.mouse_clicks = {}
@@ -164,7 +96,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File"):
                 # Quit
-                clicked, rest = imgui.menu_item("Quit", "Ctrl+Q", False)
+                clicked, _ = imgui.menu_item("Quit", "Ctrl+Q", False)
                 if clicked:
                     keep_going = False
                 imgui.end_menu()
