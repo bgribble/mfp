@@ -5,8 +5,37 @@ import OpenGL.GL as gl
 from PIL import Image
 
 from mfp import log as mfplog
+from imgui_bundle import imgui, ImVec2
 from sdl2 import *
 import os
+
+
+def update_sdl2_keymap(renderer):
+    renderer.key_map[SDL_SCANCODE_0] = imgui.Key(536)
+
+    for index, key in enumerate("123456789"):
+        renderer.key_map[SDL_SCANCODE_1 + index] = imgui.Key(index + 537)
+
+    for index, key in enumerate("abcdefghijklmnopqrstuvwxyz"):
+        renderer.key_map[SDL_SCANCODE_A + index] = imgui.Key(index + 546)
+
+    renderer.key_map[SDL_SCANCODE_APOSTROPHE] = imgui.Key(596)
+    renderer.key_map[SDL_SCANCODE_COMMA] = imgui.Key(597)
+    renderer.key_map[SDL_SCANCODE_MINUS] = imgui.Key(598)
+    renderer.key_map[SDL_SCANCODE_PERIOD] = imgui.Key(599)
+    renderer.key_map[SDL_SCANCODE_SLASH] = imgui.Key(600)
+    renderer.key_map[SDL_SCANCODE_SEMICOLON] = imgui.Key(601)
+    renderer.key_map[SDL_SCANCODE_EQUALS] = imgui.Key(602)
+    renderer.key_map[SDL_SCANCODE_LEFTBRACKET] = imgui.Key(603)
+    renderer.key_map[SDL_SCANCODE_BACKSLASH] = imgui.Key(604)
+    renderer.key_map[SDL_SCANCODE_RIGHTBRACKET] = imgui.Key(605)
+    renderer.key_map[SDL_SCANCODE_GRAVE] = imgui.Key(606)
+
+    # Fn keys
+    for index in range(12):
+        renderer.key_map[SDL_SCANCODE_F1 + index] = imgui.Key(572 + index)
+
+
 
 def create_sdl2_window(name, width, height, icon_path):
     os.environ['SDL_VIDEO_X11_WMCLASS'] = "mfp"
@@ -17,7 +46,7 @@ def create_sdl2_window(name, width, height, icon_path):
             + SDL_GetError().decode("utf-8")
         )
         return None, None
-    
+
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24)
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8)

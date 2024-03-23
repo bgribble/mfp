@@ -56,6 +56,8 @@ class ClutterInputManagerImpl(InputManager, InputManagerImpl):
             return True
 
         handlers = self.get_handlers(keysym)
+        log.debug(f"[input] keysym={keysym} handlers={handlers}")
+        return bool(handlers) 
 
         retry_count = 0
         while retry_count < 5:

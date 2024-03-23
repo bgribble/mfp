@@ -54,8 +54,9 @@ class ImguiInputManagerImpl(InputManager, InputManagerImpl):
     def handle_keysym(self, keysym):
         if not keysym:
             return True
-        log.debug(f"[input] keysym={keysym}")
         handlers = self.get_handlers(keysym)
+        log.debug(f"[input] keysym={keysym} handlers={handlers}")
+        return bool(handlers)
 
         retry_count = 0
         while retry_count < 5:
