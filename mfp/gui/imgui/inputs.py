@@ -116,12 +116,34 @@ def imgui_process_inputs(app_window):
                 )
                 MFPGUI().async_task(app_window.signal_emit("button-press-event", ev))
             elif any_dead_keys and mfp_key is not None:
-                ev = KeyPressEvent(
-                    target=app_window.input_mgr.pointer_obj,
-                    keyval=mfp_key,
-                    unicode=chr(mfp_key)
-                )
-                MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
+                # this is the case where a mod key is held down and another 
+                # key is pressed. the sdl2 backend generally doesn't emit 
+                # SDL_TEXTINPUT for these but does in some cases. We wamt to make
+                # sure we don't send double events if there's about to be a 
+                # SDL_TEXTINPUT right after this.
+                need_event = True 
+                mfp_keys_pressed = [app_window.keymap.get(k) for k in keys_currently_pressed]
+                if key_defs.MOD_CTRL in mfp_keys_pressed:
+                    txt_keys = [ord(k) for k in "109;,.'"]
+                    if mfp_key in txt_keys:
+                        need_event = False
+                if key_defs.MOD_ALT in mfp_keys_pressed:
+                    nontxt_keys = [
+                        ord("x"), ord("c"), ord("v"), 
+                        key_defs.KEY_ENTER, key_defs.KEY_UP, key_defs.KEY_DN,
+                        key_defs.KEY_LEFT, key_defs.KEY_RIGHT
+                    ]
+                    if mfp_key not in nontxt_keys and key_defs.MOD_CTRL not in mfp_keys_pressed:
+                        need_event = False
+
+                if need_event:
+                    ev = KeyPressEvent(
+                        target=app_window.input_mgr.pointer_obj,
+                        keyval=mfp_key,
+                        unicode=chr(mfp_key)
+                    )
+                    log.debug(f"[inputs] sending key-press-event {ev}")
+                    MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
 
     if key_releases:
         for k in key_releases:

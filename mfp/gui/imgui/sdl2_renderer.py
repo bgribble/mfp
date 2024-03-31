@@ -140,11 +140,21 @@ class ImguiSDL2Renderer:
 
     async def process_events(self) -> bool:
         event = SDL_Event()
+        width = ctypes.c_int()
+        height = ctypes.c_int()
+
         while SDL_PollEvent(ctypes.byref(event)) != 0:
+            SDL_GetWindowSize(self.window, width, height)
+            w_width = int(width.value)
+            w_height = int(height.value)
+            if w_width != self.app_window.window_width or w_height != self.app_window.window_height:
+                self.app_window.window_width = w_width
+                self.app_window.window_height = w_height
+
             await asyncio.sleep(0)
             if event.type == SDL_QUIT:
                 return False
-
+            skip_event = False
             if event.type == SDL_TEXTINPUT:
                 # text-generating key presses don't "count" to imgui
                 # for some reason.
@@ -155,6 +165,17 @@ class ImguiSDL2Renderer:
                 )
                 MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
+                # for some reason SDL forces ALT-v to be ALT-INSERT
+                if event.key.keysym.scancode == SDL_SCANCODE_INSERT and event.key.keysym.mod & KMOD_ALT:
+                    ev = KeyPressEvent(
+                        target=self.app_window.input_mgr.pointer_obj,
+                        keyval=None,
+                        unicode="v"
+                    )
+                    mfplog.debug(f"[renderer] sending key-press-event {ev}")
+                    MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
+                    skip_event = True
+
                 # imgui doesn't automatically remap keys, but we can
                 # do it live because SDL reports both the scancode and the
                 # keycode
@@ -178,5 +199,6 @@ class ImguiSDL2Renderer:
                 )
                 MFPGUI().async_task(self.app_window.signal_emit("motion-event", ev))
 
-            self.renderer.process_event(event)
+            if not skip_event:
+                self.renderer.process_event(event)
         return True

@@ -422,7 +422,7 @@ def configure(conf):
     pip_libs = [
         "posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy",
         "pynose", "yappi", "cython", "pyliblo", "gbulb", "carp-rpc", "flopsy",
-        "pyopengl", "imgui[sdl2]", "Pillow"
+        "pyopengl", "imgui_bundle", "Pillow"
     ]
     gi_libs = ["Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
