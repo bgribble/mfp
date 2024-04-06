@@ -242,7 +242,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
                         15 + self.hud_prompt.get_width(), self.stage.get_height() - 25
                     )
             except Exception as e:
-                log.error("Error handling UI event", e)
+                log.error("Error handling resize event", e)
                 log.debug(e)
                 log.debug_traceback()
 

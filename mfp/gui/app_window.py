@@ -218,32 +218,32 @@ class AppWindow (SignalMixin):
     def build(cls, *args, **kwargs):
         return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
+    def input_handler(self, target, signal, event, *rest):
+        try:
+            rv = self.input_mgr.handle_event(target, event)
+            self.grab_focus()
+            return rv
+        except Exception as e:
+            log.error("Error handling UI event", event)
+            log.debug(e)
+            log.debug_traceback()
+            return False
+
     def init_input(self):
         # set initial major mode
         self.input_mgr.global_mode = GlobalMode(self)
         self.input_mgr.major_mode = PatchEditMode(self)
         self.input_mgr.major_mode.enable()
 
-        def handler(obj, signal, event, *rest):
-            try:
-                rv = self.input_mgr.handle_event(obj, event)
-                self.grab_focus()
-                return rv
-            except Exception as e:
-                log.error("Error handling UI event", event)
-                log.debug(e)
-                log.debug_traceback()
-                return False
-
         # hook up input signals
-        self.signal_listen('button-press-event', handler)
-        self.signal_listen('button-release-event', handler)
-        self.signal_listen('key-press-event', handler)
-        self.signal_listen('key-release-event', handler)
-        self.signal_listen('motion-event', handler)
-        self.signal_listen('scroll-event', handler)
-        self.signal_listen('enter-event', handler)
-        self.signal_listen('leave-event', handler)
+        self.signal_listen('button-press-event', self.input_handler)
+        self.signal_listen('button-release-event', self.input_handler)
+        self.signal_listen('key-press-event', self.input_handler)
+        self.signal_listen('key-release-event', self.input_handler)
+        self.signal_listen('motion-event', self.input_handler)
+        self.signal_listen('scroll-event', self.input_handler)
+        self.signal_listen('enter-event', self.input_handler)
+        self.signal_listen('leave-event', self.input_handler)
         self.signal_listen('quit', self.quit)
 
     def get_color(self, colorspec):

@@ -74,13 +74,14 @@ class InputManager:
 
     async def run_handlers(self, handlers, keysym, coro=None, offset=-1):
         retry_count = 0
-
+        current_handler = None
         while retry_count < 5:
             try:
                 for index, handler in enumerate(handlers):
                     # this is for the case where we were iterating over
                     # handlers and found one async, and are restarting in
                     # the middle of the loop, but async
+                    current_handler = handler
                     if index < offset:
                         continue
                     elif retry_count == 0 and index == offset:
@@ -99,7 +100,7 @@ class InputManager:
                 retry_count += 1
                 offset = -1
             except Exception as e:
-                log.error(f"[run_handlers] Exception while handling key command {keysym}: {e}")
+                log.error(f"[run_handlers] Exception while handling key command {keysym}: {e} {current_handler}")
                 log.debug_traceback()
                 return False
 
@@ -107,13 +108,17 @@ class InputManager:
         if not keysym:
             return True
         handlers = self.get_handlers(keysym)
-        log.debug(f"[input] keysym={keysym} handlers={handlers}")
-        return bool(handlers)
-
+        current_handler = None
         retry_count = 0
+
+        if not handlers:
+            log.debug(f"[input_manager] keysym not handled {keysym}")
+            return False
+
         while retry_count < 5:
             try:
                 for item, handler in enumerate(handlers):
+                    current_handler = handler
                     handler_rv = handler()
                     if inspect.isawaitable(handler_rv):
                         MFPGUI().async_task(self.run_handlers(
@@ -127,7 +132,7 @@ class InputManager:
                 handlers = self.get_handlers(keysym)
                 retry_count += 1
             except Exception as e:
-                log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e}")
+                log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e} {current_handler}")
                 log.debug_traceback()
                 return False
         return False
@@ -162,6 +167,7 @@ class InputManager:
                 keysym = self.keyseq.pop()
 
         elif isinstance(event, EnterEvent):
+            log.debug(f"[input] EnterEvent: {event} {event.target}")
             src = event.target
             now = datetime.now()
             if (
@@ -170,6 +176,7 @@ class InputManager:
             ):
                 self.keyseq.mod_keys = set()
                 self.window.grab_focus()
+
             if (
                 src
                 and src != self.window

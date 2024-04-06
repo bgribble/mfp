@@ -1,6 +1,11 @@
-from ..console_manager import ConsoleManager, ConsoleManagerImpl
+from imgui_bundle import imgui
 
+from mfp.utils import SignalMixin
+from mfp import log
+from ..event import KeyPressEvent
+from ..console_manager import ConsoleManager, ConsoleManagerImpl
 from ..key_defs import *  # noqa
+
 
 class TextBuffer:
     def __init__(self, init_value=""):
@@ -29,16 +34,18 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
         super().__init__(banner, app_window)
 
         self.textbuffer = TextBuffer()
-
+        self.linebuf = ""
         self.append(banner + '\n')
 
-    def button_pressed(self, *args):
-        # ignore pesky mousing
-        return True
+    def render(self, width, height):
+        imgui.text(self.textbuffer.buffer + self.linebuf)
 
-    def key_pressed(self, widget, event):
+    def handle_event(self, target, event):
+        log.debug(f"[console] got {target} {event}")
+        if not isinstance(event, KeyPressEvent):
+            return
+
         if event.keyval == KEY_ENTER:
-            self.append("\n")
             stripped_buf = self.linebuf.strip()
             if (
                 len(stripped_buf)
@@ -46,6 +53,8 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
             ):
                 self.history[:0] = [self.linebuf]
                 self.history_pos = -1
+                self.append(self.linebuf)
+            self.append("\n")
             self.line_ready()
             return True
         if event.keyval == KEY_BKSP:
@@ -55,7 +64,7 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
                 self.cursor_pos -= 1
                 self.redisplay()
             return True
-        if (event.keyval == KEY_DEL or event.string == CTRL_D):
+        if (event.keyval == KEY_DEL or event.unicode == CTRL_D):
             if self.cursor_pos < len(self.linebuf):
                 self.linebuf = (
                     self.linebuf[:self.cursor_pos] + self.linebuf[self.cursor_pos + 1:])
@@ -90,23 +99,23 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
                 self.cursor_pos += 1
             self.redisplay()
             return True
-        if event.string == CTRL_A:
+        if event.unicode == CTRL_A:
             self.cursor_pos = 0
             self.redisplay()
             return True
-        if event.string == CTRL_E:
+        if event.unicode == CTRL_E:
             self.cursor_pos = len(self.linebuf)
             self.redisplay()
-        if event.string == CTRL_K:
+        if event.unicode == CTRL_K:
             self.linebuf = self.linebuf[:self.cursor_pos]
             self.redisplay()
-        if len(event.string) > 0:
-            if ord(event.string[0]) < 32:
+        if event.unicode and len(event.unicode) > 0:
+            if ord(event.unicode[0]) < 32:
                 return True
-            # print event.string, event.keyval, event.get_keycode()
+            # print event.unicode, event.keyval, event.get_keycode()
             self.linebuf = (
                 self.linebuf[:self.cursor_pos]
-                + event.string
+                + event.unicode
                 + self.linebuf[self.cursor_pos:]
             )
             self.cursor_pos += 1

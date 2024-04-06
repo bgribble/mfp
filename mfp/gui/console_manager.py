@@ -30,6 +30,8 @@ class ConsoleManagerImpl(ABC):
 
 class ConsoleManager (BackendInterface):
     def __init__(self, banner, app_window):
+        super().__init__()
+
         self.app_window = app_window
 
         self.task = None
