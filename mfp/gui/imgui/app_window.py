@@ -50,27 +50,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.signal_listen("motion-event", self.handle_motion)
 
-    def input_handler(self, target, signal, event, *rest):
-        """
-        override default input handler. Inputs go to the input_mgr
-        only when the main canvas window is selected.
-        """
-        try:
-            rv = None
-            if self.selected_window == "canvas":
-                rv = self.input_mgr.handle_event(target, event)
-            elif self.selected_window == "console":
-                rv = self.console_manager.handle_event(target, event) 
-            else:
-                log.warning(f"[input_handler] no selected window, ignoring {event}")
-            self.grab_focus()
-            return rv
-        except Exception as e:
-            log.error("Error handling UI event", event)
-            log.debug(e)
-            log.debug_traceback()
-            return False
-
     async def handle_motion(self, target, signal, event, *rest):
         prev_pointer_obj = event.target
         new_pointer_obj = prev_pointer_obj
@@ -81,7 +60,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if not new_pointer_obj and self.info_panel_visible:
             if event.x < self.info_panel_width:
                 new_pointer_obj = None
-            else: 
+            else:
                 new_pointer_obj = self
         if new_pointer_obj != prev_pointer_obj:
             if prev_pointer_obj:
@@ -149,6 +128,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # renderer
     def render(self):
+        from mfp.gui.modes.global_mode import GlobalMode
+        from mfp.gui.modes.console_mode import ConsoleMode
         keep_going = True
 
         # process input state and convert to events
@@ -294,6 +275,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.text("canvas panel")
         if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
             self.selected_window = "canvas"
+            if not isinstance(self.input_mgr.global_mode, GlobalMode):
+                self.input_mgr.global_mode = GlobalMode(self)
 
         imgui.end()
 
@@ -313,6 +296,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             )
             if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
                 self.selected_window = "console"
+                if not isinstance(self.input_mgr.global_mode, ConsoleMode):
+                    self.input_mgr.global_mode = ConsoleMode(self)
+
             self.console_manager.render(self.window_width, self.console_panel_height)
             imgui.end()
 
@@ -323,7 +309,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.pop_style_var()  # border
         imgui.end()
 
-        imgui.pop_style_var()  # padding 
+        imgui.pop_style_var()  # padding
         imgui.pop_style_var()  # border
         imgui.pop_style_var()  # rounding
 
@@ -352,7 +338,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # status line at bottom
         ########################################
-        
+
         # clean up any weirdness from first frame
         if self.frame_count == 0:
             self.selected_window = "canvas"
