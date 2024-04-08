@@ -62,8 +62,8 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
             and (len(self.history) == 0 or stripped_buf != self.history[0])
         ):
             self.history[:0] = [self.linebuf]
-            self.history_pos = -1
-            self.append(self.linebuf)
+        self.history_pos = -1
+        self.append(self.linebuf)
         self.append("\n")
         self.line_ready()
         return True

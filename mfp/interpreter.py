@@ -52,7 +52,16 @@ class Interpreter (InteractiveInterpreter):
             stree = ast.parse(source)
             for obj in stree.body:
                 if isinstance(obj, ast.Expr):
-                    results.append(await self.evaluator.eval_async(source))
+                    results.append(
+                        # in the interactive console, 'print' should return its
+                        # args as a string since stdout is useless
+                        #
+                        # FIXME do something about input
+                        await self.evaluator.eval_async(
+                            source,
+                            **{"print": lambda *args: ' '.join([str(a) for a in args])}
+                        )
+                    )
                 else:
                     self.evaluator.exec_str(source)
             for r in results:

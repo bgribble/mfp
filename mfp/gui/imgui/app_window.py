@@ -277,6 +277,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.selected_window = "canvas"
             if not isinstance(self.input_mgr.global_mode, GlobalMode):
                 self.input_mgr.global_mode = GlobalMode(self)
+                self.input_mgr.major_mode.enable()
 
         imgui.end()
 
@@ -298,6 +299,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 self.selected_window = "console"
                 if not isinstance(self.input_mgr.global_mode, ConsoleMode):
                     self.input_mgr.global_mode = ConsoleMode(self)
+                    self.input_mgr.major_mode.disable()
+                    for m in list(self.input_mgr.minor_modes):
+                        self.input_mgr.disable_minor_mode(m)
 
             self.console_manager.render(self.window_width, self.console_panel_height)
             imgui.end()

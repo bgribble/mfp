@@ -112,7 +112,6 @@ class InputManager:
         retry_count = 0
 
         if not handlers:
-            log.debug(f"[input_manager] keysym not handled {keysym}")
             return False
 
         while retry_count < 5:
@@ -248,7 +247,7 @@ class InputManager:
                     handlers.append(handler[0])
 
             # then major mode
-            if self.major_mode is not None:
+            if self.major_mode is not None and self.major_mode.enabled:
                 handler = self.major_mode.lookup(keysym)
                 if handler is not None:
                     handlers.append(handler[0])
