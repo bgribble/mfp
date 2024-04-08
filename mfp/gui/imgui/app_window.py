@@ -46,6 +46,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.selected_window = "canvas"
 
+        self.log_text = ""
+
         super().__init__(*args, **kwargs)
 
         self.signal_listen("motion-event", self.handle_motion)
@@ -220,9 +222,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         console_node = imgui.internal.dock_builder_get_node(self.console_panel_id)
         console_size = console_node.size
+        self.console_panel_height = console_size[1]
 
         info_node = imgui.internal.dock_builder_get_node(self.info_panel_id)
         info_size = info_node.size
+        self.info_panel_width = info_size[0]
 
         canvas_node = imgui.internal.dock_builder_get_node(self.canvas_panel_id)
         canvas_size = canvas_node.size
@@ -255,8 +259,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # canvas window
-        canvas_width = self.window_width
-        canvas_height = self.window_height - self.MENU_HEIGHT
+        canvas_width = canvas_size[0]
+        canvas_height = canvas_size[1]
         canvas_x = 0
         if self.info_panel_visible:
             canvas_width -= self.info_panel_width
@@ -285,7 +289,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ########################################
 
         ########################################
-        # console
+        # bottom panel (console and log)
         if self.console_panel_visible:
             imgui.begin(
                 "console_panel",
@@ -303,7 +307,20 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     for m in list(self.input_mgr.minor_modes):
                         self.input_mgr.disable_minor_mode(m)
 
-            self.console_manager.render(self.window_width, self.console_panel_height)
+            if imgui.begin_tab_bar("console_tab_bar", imgui.TabBarFlags_.none):
+                if imgui.begin_tab_item("Log")[0]:
+                    imgui.input_text_multiline(
+                        'log_output_text',
+                        self.log_text,
+                        (self.window_width, self.console_panel_height - self.MENU_HEIGHT),
+                        imgui.InputTextFlags_.read_only
+                    )
+                    imgui.end_tab_item()
+                if imgui.begin_tab_item("Console")[0]:
+                    self.console_manager.render(self.window_width, self.console_panel_height - self.MENU_HEIGHT)
+                    imgui.end_tab_item()
+                imgui.end_tab_bar()
+
             imgui.end()
 
         # console
@@ -451,7 +468,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # log output
     def log_write(self, message, level):
-        pass
+        self.log_text = self.log_text + message
 
     #####################
     # key bindings display
