@@ -80,8 +80,11 @@ class BaseElement (Store):
     OBJ_DELETED = 4
     TINY_DELTA = .0001
 
+    last_id = 0
+
     def __init__(self, window, x, y):
-        self.id = None
+        self.id = BaseElement.last_id + 1
+        BaseElement.last_id = self.id
 
         # MFP object and UI descriptors
         self.obj_id = None

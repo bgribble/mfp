@@ -38,6 +38,24 @@ class ClutterProcessorElementImpl(ProcessorElementImpl, ClutterBaseElementImpl, 
 
         self.redraw()
 
+    async def update(self):
+        if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
+            label_width = self.label.get_property('width') + 14
+        else:
+            label_width = 0
+
+        box_width = self.export_w or 0
+
+        new_w = None
+        num_ports = max(self.num_inlets, self.num_outlets)
+        port_width = (num_ports * self.get_style('porthole_minspace')
+                      + 2*self.get_style('porthole_border'))
+
+        new_w = max(35, port_width, label_width, box_width)
+
+        await self.set_size(new_w, self.texture.get_property('height'))
+        self.redraw()
+
     async def delete(self, **kwargs):
         if self.texture:
             self.group.set_content(None)

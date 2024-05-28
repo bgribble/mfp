@@ -7,7 +7,7 @@ import asyncio
 import sys
 from datetime import datetime
 
-from imgui_bundle import imgui
+from imgui_bundle import imgui, imgui_node_editor as nedit
 import OpenGL.GL as gl
 
 from mfp import log
@@ -78,6 +78,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         io.config_flags |= imgui.ConfigFlags_.docking_enable
         io.config_input_trickle_event_queue = True
 
+        ed = nedit.create_editor()
+        nedit.set_current_editor(ed)
+
         while (
             keep_going
             and not self.close_in_progress
@@ -101,6 +104,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             self.imgui_impl.swap_window()
 
+        nedit.destroy_editor(ed)
         self.imgui_renderer.shutdown()
         self.imgui_impl.shutdown()
         await self.signal_emit("quit")
@@ -231,8 +235,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         canvas_node = imgui.internal.dock_builder_get_node(self.canvas_panel_id)
         canvas_size = canvas_node.size
 
-        #log.debug(f"render: console={console_size} info={info_size} canvas={canvas_size}")
-
         ########################################
         # left-side info display
         if self.info_panel_visible:
@@ -276,12 +278,17 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 | imgui.WindowFlags_.no_title_bar
             ),
         )
-        imgui.text("canvas panel")
         if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
             self.selected_window = "canvas"
             if not isinstance(self.input_mgr.global_mode, GlobalMode):
                 self.input_mgr.global_mode = GlobalMode(self)
                 self.input_mgr.major_mode.enable()
+        nedit.begin("canvas_editor", imgui.ImVec2(0.0, 0.0))
+
+        for obj in self.objects:
+            obj.render()
+
+        nedit.end()  # node_editor
 
         imgui.end()
 
@@ -387,10 +394,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     # coordinate transforms and zoom
 
     def screen_to_canvas(self, x, y):
-        return (x, y)
+        return nedit.screen_to_canvas((x, y))
 
     def canvas_to_screen(self, x, y):
-        return (x, y)
+        return nedit.canvas_to_screen((x, y))
 
     def rezoom(self):
         pass
@@ -400,21 +407,20 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     #####################
     # element operations
-
     def register(self, element):
-        pass
+        super().register(element)
 
     def unregister(self, element):
-        pass
+        super().unregister(element)
 
     def refresh(self, element):
         pass
 
     async def select(self, element):
-        pass
+        return await super().select(element)
 
     async def unselect(self, element):
-        pass
+       return await super().unselect(element)
 
     #####################
     # autoplace
