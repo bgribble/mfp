@@ -5,4 +5,6 @@ from .layer import ImguiLayerImpl
 from .console_manager import ImguiConsoleManagerImpl
 from .base_element import ImguiBaseElementImpl
 from .processor_element import ImguiProcessorElementImpl
+from .message_element import ImguiMessageElementImpl
+from .connection_element import ImguiConnectionElementImpl
 from .text_widget import ImguiTextWidgetImpl

@@ -5,8 +5,8 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 import math
-from imgui_bundle import imgui, imgui_node_editor as nedit
-from flopsy import mutates
+from imgui_bundle import imgui, imgui_node_editor as nedit  # noqa
+from flopsy import mutates  # noqa
 
 from mfp import log
 
@@ -53,6 +53,13 @@ class ImguiBaseElementImpl(BaseElementImpl):
             bump(c)
 
     def draw_ports(self):
+        def semicircle_points(cx, cy, rx, ry, n, dir):
+            return [
+                (cx + rx * math.cos(k * math.pi / (n-1)),
+                 cy + ry * dir * math.sin(k * math.pi / (n-1)))
+                for k in range(n)
+            ]
+
         port_rule = self.get_style("draw-ports") or "always"
         if port_rule == "never" or port_rule == "selected" and not self.selected:
             return
@@ -82,22 +89,25 @@ class ImguiBaseElementImpl(BaseElementImpl):
                 pin_id,
                 nedit.PinKind.input if pid[0] == BaseElement.PORT_IN else nedit.PinKind.output
             )
+
+            pw = self.get_style('porthole_width')
+            ph = self.get_style('porthole_height')
+
             nedit.pin_rect(
-                (px, py),
-                (px+self.get_style('porthole_width'),
-                 py+self.get_style('porthole_height'))
+                (px, py), (px + pw, py + ph)
             )
+            outport = pid[0] == BaseElement.PORT_OUT
             nedit.pin_pivot_rect(
-                (px, py),
-                (px+self.get_style('porthole_width')/2.0,
-                 py+self.get_style('porthole_height')/2.0)
+                (px+pw/2, py + (ph if outport else 0)),
+                (px+pw/2, py + (ph if outport else 0))
             )
-            draw_list.add_rect(
-                (px, py),
-                (px+self.get_style('porthole_width'),
-                 py+self.get_style('porthole_height')),
-                imgui.IM_COL32(255, 0, 0, 255)
+            points = semicircle_points(
+                px + pw / 2.0, py + (ph if outport else 0),
+                pw / 2.0, ph,
+                9, -1 if outport else 1
             )
+            draw_list.add_convex_poly_filled(points, imgui.IM_COL32(255, 0, 0, 255))
+            draw_list.add_polyline(points, imgui.IM_COL32(0, 0, 0, 100), 0, 1)
 
             """
             if dsp_port:
@@ -113,9 +123,9 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
             ports_done.append(pin_id)
 
-        nedit.push_style_var(nedit.StyleVar.source_direction, (0, 1))
-        nedit.push_style_var(nedit.StyleVar.target_direction, (0, -1))
-        nedit.push_style_var(nedit.StyleVar.pin_rounding, 0)
+        nedit.push_style_var(nedit.StyleVar.source_direction, (0, 0.5))
+        nedit.push_style_var(nedit.StyleVar.target_direction, (0, -0.5))
+        nedit.push_style_var(nedit.StyleVar.pin_rounding, 2)
 
         nedit.push_style_color(nedit.StyleColor.pin_rect_border, (0, 0, 0, 255))
         nedit.push_style_color(nedit.StyleColor.pin_rect, (0, 0, 0, 255))

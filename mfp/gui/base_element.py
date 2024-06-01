@@ -449,7 +449,8 @@ class BaseElement (Store):
                 spc = 0
             else:
                 spc = max(self.get_style('porthole_minspace'),
-                          ((w - self.get_style('porthole_width')
+                          ((w 
+                            - self.get_style('porthole_width')
                             - 2.0 * self.get_style('porthole_border'))
                            / (self.num_inlets - 1.0)))
             return (self.get_style('porthole_border') + spc * port_num, 0)

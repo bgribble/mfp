@@ -12,6 +12,7 @@ import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.connection_element import ConnectionElement
 from ..app_window import AppWindow, AppWindowImpl
 from .inputs import imgui_process_inputs, imgui_key_map
 from .sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
@@ -285,8 +286,15 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 self.input_mgr.major_mode.enable()
         nedit.begin("canvas_editor", imgui.ImVec2(0.0, 0.0))
 
+        # first pass: non-links
         for obj in self.objects:
-            obj.render()
+            if not isinstance(obj, ConnectionElement):
+                obj.render()
+
+        # second pass: links
+        for obj in self.objects:
+            if isinstance(obj, ConnectionElement):
+                obj.render()
 
         nedit.end()  # node_editor
 

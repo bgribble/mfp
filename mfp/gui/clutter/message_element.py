@@ -77,6 +77,13 @@ class ClutterMessageElementImpl(MessageElementImpl, ClutterBaseElementImpl, Mess
             await self.set_size(new_w, self.texture.get_property('height'))
             await self.update()
 
+    def port_position(self, port_dir, port_num):
+        # tweak the right input port display to be left of the "kick"
+        if port_dir == BaseElement.PORT_IN and port_num == 1:
+            default = BaseElement.port_position(self, port_dir, port_num)
+            return (default[0] - self.PORT_TWEAK, default[1])
+        return BaseElement.port_position(self, port_dir, port_num)
+
     def draw_cb(self, texture, ct, width, height):
         if self.clickstate:
             lw = 5.0

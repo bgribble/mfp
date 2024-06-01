@@ -1,22 +1,27 @@
 """
-imgui/processor_element.py -- imgui backend for processor elements
+imgui/message_element.py -- imgui backend for message elements
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
+import math
 
 from mfp import log
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from .base_element import ImguiBaseElementImpl
-from ..processor_element import (
-    ProcessorElement,
-    ProcessorElementImpl,
+from ..message_element import (
+    MessageElement,
+    MessageElementImpl,
 )
 
 ImColor = imgui.ImColor
 
 
-class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, ProcessorElement):
+class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageElement):
     backend_name = "imgui"
+
+    style_defaults = {
+        'porthole_border': 6  # allow for rounded corners
+    }
 
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
@@ -26,17 +31,17 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
     def render(self):
         """
-        processor element
+        message element
 
-        * rectangle with hard corners
-        * top and bottom "rails" containing ports
-        * semicircular ports
+        * rectangle with rounded corners
+        * gradient background
+        * semicircular ports (only in edit mode)
         """
-
         # style
-        nedit.push_style_var(nedit.StyleVar.node_rounding, 0.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (6, 4, 6, 8))
+        nedit.push_style_var(nedit.StyleVar.node_rounding, 6.0)
+        nedit.push_style_var(nedit.StyleVar.node_padding, (6, 4, 8, 6))
         nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 255))
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 
         ##########################
         # render
@@ -46,7 +51,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
                 self.node_id,
                 self.app_window.screen_to_canvas(self.position_x, self.position_y)
             )
-        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
         nedit.begin_node(self.node_id)
 
         # node content: just the label
@@ -89,3 +93,4 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
+
