@@ -55,6 +55,7 @@ async def patch_new(self):
 
 @extends(AppWindow)
 async def select(self, obj):
+    log.debug(f"[select] selecting {obj}")
     if (obj is None) or (not isinstance(obj, BaseElement)):
         return
 
@@ -197,17 +198,10 @@ def reset_zoom(self):
 
 
 @extends(AppWindow)
-def zoom_out(self, ratio):
-    if self.zoom >= 0.1:
-        self.zoom *= ratio
-        self.rezoom()
-    return True
-
-
-@extends(AppWindow)
-def zoom_in(self, ratio):
-    if self.zoom < 20:
-        self.zoom *= ratio
+def relative_zoom(self, ratio):
+    candidate_zoom = ratio * self.zoom
+    if 0.1 <= candidate_zoom <= 20:
+        self.zoom = candidate_zoom
         self.rezoom()
     return True
 

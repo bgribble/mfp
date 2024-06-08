@@ -267,7 +267,8 @@ class BaseElement (Store):
         )
 
     async def drag(self, dx, dy):
-        await self.move(self.position_x + dx, self.position_y + dy, update_state=False)
+        if "drag" not in self.motion_overrides:
+            await self.move(self.position_x + dx, self.position_y + dy, update_state=False)
 
     async def move(self, x, y, **kwargs):
         update_state = kwargs.get("update_state", True)

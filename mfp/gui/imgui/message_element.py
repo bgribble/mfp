@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 import math
 
 from mfp import log
+from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from .base_element import ImguiBaseElementImpl
 from ..message_element import (
@@ -39,7 +40,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         """
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 6.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (6, 4, 8, 6))
+        nedit.push_style_var(nedit.StyleVar.node_padding, (6, 4, 6, 8))
         nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 255))
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 
@@ -51,13 +52,26 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
                 self.node_id,
                 self.app_window.screen_to_canvas(self.position_x, self.position_y)
             )
+
+        # check selection status
+        if nedit.is_node_selected(self.node_id):
+            if not self.selected:
+                log.debug(f"[render] node {self} becomes selected")
+                MFPGUI().async_task(self.app_window.select(self))
+                self.selected = True
+        else:
+            if self.selected:
+                log.debug(f"[render] node {self} becomes unselected")
+                MFPGUI().async_task(self.app_window.unselect(self))
+                self.selected = False
+
         nedit.begin_node(self.node_id)
 
         # node content: just the label
         self.label.render()
 
         # connections
-        self.draw_ports()
+        self.render_ports()
 
         nedit.end_node()
         imgui.pop_style_var()

@@ -21,6 +21,8 @@ from ..event import EnterEvent, LeaveEvent
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
+    motion_overrides = ["drag", "zoom", "canvas_pos"]
+
     INIT_WIDTH = 800
     INIT_HEIGHT = 600
 
@@ -48,6 +50,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.selected_window = "canvas"
 
         self.log_text = ""
+
+        self.user_zoom_set = False
 
         super().__init__(*args, **kwargs)
 
@@ -79,7 +83,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         io.config_flags |= imgui.ConfigFlags_.docking_enable
         io.config_input_trickle_event_queue = True
 
-        ed = nedit.create_editor()
+        config = nedit.Config()
+        config.settings_file = "/dev/null"
+        ed = nedit.create_editor(config)
+
         nedit.set_current_editor(ed)
 
         while (
@@ -178,6 +185,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 | imgui.WindowFlags_.no_docking
                 | imgui.WindowFlags_.no_title_bar
                 | imgui.WindowFlags_.no_resize
+                | imgui.WindowFlags_.no_saved_settings
             ),
         )
 
@@ -285,6 +293,15 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 self.input_mgr.global_mode = GlobalMode(self)
                 self.input_mgr.major_mode.enable()
         nedit.begin("canvas_editor", imgui.ImVec2(0.0, 0.0))
+
+        actual_zoom = nedit.get_current_zoom()
+        if self.user_zoom_set and actual_zoom != self.zoom:
+            log.debug(f"[render] Can't set zoom from {actual_zoom} to {self.zoom}, reverting")
+            self.user_zoom_set = False
+            self.zoom = actual_zoom
+        elif not self.user_zoom_set and actual_zoom != self.zoom:
+            log.debug(f"[render] Catching up self.zoom from {self.zoom} to {actual_zoom}")
+            self.zoom = actual_zoom
 
         # first pass: non-links
         for obj in self.objects:
@@ -408,7 +425,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         return nedit.canvas_to_screen((x, y))
 
     def rezoom(self):
-        pass
+        self.user_zoom_set = True
 
     def get_size(self):
         return (self.window_width, self.window_height)
@@ -425,10 +442,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         pass
 
     async def select(self, element):
-        return await super().select(element)
+        return await AppWindow.select(self, element)
 
     async def unselect(self, element):
-       return await super().unselect(element)
+       return await AppWindow.unselect(self, element)
 
     #####################
     # autoplace
@@ -474,7 +491,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # selection box
     def show_selection_box(self, x0, y0, x1, y1):
-        pass
+        return []
 
     def hide_selection_box(self):
         pass

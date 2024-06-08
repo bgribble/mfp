@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
+from mfp import log
 from ..colordb import ColorDB
 from mfp.gui.base_element import BaseElement
 from .base_element import ImguiBaseElementImpl
@@ -23,19 +24,24 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
 
     def render(self):
         """
-        mostly we will be letting the ingui_node_editor handle links
+        mostly we will be letting the imgui_node_editor handle links
         """
         if not self.node_id:
             self.node_id = nedit.LinkId.create()
 
+        from_port_obj = self.obj_1.port_elements.get(
+            (BaseElement.PORT_OUT, self.port_1)
+        )
+        to_port_obj = self.obj_2.port_elements.get(
+            (BaseElement.PORT_IN, self.port_2)
+        )
+        if not from_port_obj or not to_port_obj:
+            return
+
         nedit.link(
             self.node_id,
-            self.obj_1.port_elements[
-                (BaseElement.PORT_OUT, self.port_1)
-            ],
-            self.obj_2.port_elements[
-                (BaseElement.PORT_IN, self.port_2)
-            ],
+            from_port_obj,
+            to_port_obj,
             (0, 0, 255, 255),
             1,
         )

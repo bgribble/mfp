@@ -81,11 +81,11 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     @abstractmethod
-    def select(self, element):
+    async def select(self, element):
         pass
 
     @abstractmethod
-    def unselect(self, element):
+    async def unselect(self, element):
         pass
 
     #####################

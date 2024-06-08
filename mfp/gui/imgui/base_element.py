@@ -5,12 +5,9 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 import math
-from imgui_bundle import imgui, imgui_node_editor as nedit  # noqa
-from flopsy import mutates  # noqa
+from imgui_bundle import imgui, imgui_node_editor as nedit
+from flopsy import mutates
 
-from mfp import log
-
-from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
 
@@ -52,11 +49,11 @@ class ImguiBaseElementImpl(BaseElementImpl):
         for c in self.connections_out + self.connections_in:
             bump(c)
 
-    def draw_ports(self):
-        def semicircle_points(cx, cy, rx, ry, n, dir):
+    def render_ports(self):
+        def semicircle_points(cx, cy, rx, ry, n, direction):
             return [
                 (cx + rx * math.cos(k * math.pi / (n-1)),
-                 cy + ry * dir * math.sin(k * math.pi / (n-1)))
+                 cy + ry * direction * math.sin(k * math.pi / (n-1)))
                 for k in range(n)
             ]
 
@@ -66,7 +63,12 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
         if self.editable is False or self.node_id is None:
             return
-        x_orig, y_orig = self.app_window.screen_to_canvas(self.position_x, self.position_y)
+
+        p_tl = imgui.get_item_rect_min()
+        x_orig = p_tl[0] - 6
+        y_orig = p_tl[1] - 4
+
+        # x_orig, y_orig = self.app_window.screen_to_canvas(self.position_x, self.position_y)
 
         draw_list = imgui.get_window_draw_list()
         ports_done = []
@@ -173,74 +175,72 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
     def update_badge(self):
         return
+        """
+                badgesize = self.get_style('badge_size')
+                if self.badge is None:
+                    self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
+                    self.app_window.event_sources[self.badge] = self
+                    self.group.add_actor(self.badge)
+                    self.badge.connect("draw", self.draw_badge_cb)
 
-        badgesize = self.get_style('badge_size')
-        if self.badge is None:
-            self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
-            self.app_window.event_sources[self.badge] = self
-            self.group.add_actor(self.badge)
-            self.badge.connect("draw", self.draw_badge_cb)
+                ypos = min(self.get_style('porthole_height') + self.get_style('porthole_border'),
+                           self.height - badgesize / 2.0)
+                self.badge.set_position(self.width - badgesize/2.0, ypos)
+                tagged = False
 
-        ypos = min(self.get_style('porthole_height') + self.get_style('porthole_border'),
-                   self.height - badgesize / 2.0)
-        self.badge.set_position(self.width - badgesize/2.0, ypos)
-        tagged = False
+                if self.edit_mode:
+                    self.badge_current = ("E", self.get_color('badge-edit-color'))
+                    tagged = True
+                else:
+                    self.badge_current = None
 
-        if self.edit_mode:
-            self.badge_current = ("E", self.get_color('badge-edit-color'))
-            tagged = True
-        else:
-            self.badge_current = None
+                if not tagged and "midi" in self.tags:
+                    if self.tags["midi"] == "learning":
+                        self.badge_current = ("M", self.get_color('badge-learn-color'))
+                        tagged = True
+                    else:
+                        self.badge_current = None
 
-        if not tagged and "midi" in self.tags:
-            if self.tags["midi"] == "learning":
-                self.badge_current = ("M", self.get_color('badge-learn-color'))
-                tagged = True
-            else:
-                self.badge_current = None
+                if not tagged and "osc" in self.tags:
+                    if self.tags["osc"] == "learning":
+                        self.badge_current = ("O", self.get_color('badge-learn-color'))
+                        tagged = True
+                    else:
+                        self.badge_current = None
 
-        if not tagged and "osc" in self.tags:
-            if self.tags["osc"] == "learning":
-                self.badge_current = ("O", self.get_color('badge-learn-color'))
-                tagged = True
-            else:
-                self.badge_current = None
+                if not tagged and "errorcount" in self.tags:
+                    ec = self.tags["errorcount"]
+                    if ec > 9:
+                        ec = "!"
+                    elif ec > 0:
+                        ec = "%d" % ec
+                    if ec:
+                        self.badge_current = (ec, self.get_color('badge-error-color'))
+                        tagged = True
 
-        if not tagged and "errorcount" in self.tags:
-            ec = self.tags["errorcount"]
-            if ec > 9:
-                ec = "!"
-            elif ec > 0:
-                ec = "%d" % ec
-            if ec:
-                self.badge_current = (ec, self.get_color('badge-error-color'))
-                tagged = True
-
-        self.badge.invalidate()
+                self.badge.invalidate()
+        """
 
     def hide_ports(self):
         return
+    """
+            def hideport(pid):
+                pobj = self.port_elements.get(pid)
+                if pobj:
+                    pobj.hide()
 
-        def hideport(pid):
-            pobj = self.port_elements.get(pid)
-            if pobj:
-                pobj.hide()
+            for i in range(self.num_inlets):
+                pid = (BaseElement.PORT_IN, i)
+                hideport(pid)
 
-        for i in range(self.num_inlets):
-            pid = (BaseElement.PORT_IN, i)
-            hideport(pid)
-
-        for i in range(self.num_outlets):
-            pid = (BaseElement.PORT_OUT, i)
-            hideport(pid)
+            for i in range(self.num_outlets):
+                pid = (BaseElement.PORT_OUT, i)
+                hideport(pid)
+    """
 
     async def redraw_connections(self):
-        # redraw connections
-        for c in self.connections_out:
-            await c.draw()
+        pass
 
-        for c in self.connections_in:
-            await c.draw()
 
     @mutates('position_z')
     def move_z(self, z):

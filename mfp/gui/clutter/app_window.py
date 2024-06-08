@@ -24,6 +24,7 @@ from .tree_display import TreeDisplay
 
 class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
     backend_name = "clutter"
+    motion_overrides = []
 
     def render(self):
         # clutter backend does not need a render call

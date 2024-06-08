@@ -71,13 +71,13 @@ class GlobalMode (InputMode):
         self.bind("S-C-M1-MOTION", self.drag_motion, "Drag viewport")
         self.bind("S-C-M1UP", self.drag_end, "End drag viewport")
 
-        self.bind('+', lambda: self.window.zoom_in(1.25), "Zoom view in")
-        self.bind('=', lambda: self.window.zoom_in(1.25), "Zoom view in")
-        self.bind('-', lambda: self.window.zoom_out(0.8), "Zoom view out")
-        self.bind('SCROLLUP', lambda: self.window.zoom_in(1.06), "Zoom view in")
-        self.bind('SCROLLDOWN', lambda: self.window.zoom_in(0.95), "Zoom view out")
-        self.bind('SCROLLSMOOTHUP', lambda: self.window.zoom_in(1.015), "Zoom view in")
-        self.bind('SCROLLSMOOTHDOWN', lambda: self.window.zoom_in(0.985), "Zoom view out")
+        self.bind('+', lambda: self.window.relative_zoom(1.25), "Zoom view in")
+        self.bind('=', lambda: self.window.relative_zoom(1.25), "Zoom view in")
+        self.bind('-', lambda: self.window.relative_zoom(0.8), "Zoom view out")
+        self.bind('SCROLLUP', lambda: self.scroll_zoom(1.06), "Zoom view in")
+        self.bind('SCROLLDOWN', lambda: self.scroll_zoom(0.95), "Zoom view out")
+        self.bind('SCROLLSMOOTHUP', lambda: self.scroll_zoom(1.015), "Zoom view in")
+        self.bind('SCROLLSMOOTHDOWN', lambda: self.scroll_zoom(0.985), "Zoom view out")
         self.bind('C-0', self.window.reset_zoom, "Reset view position and zoom")
         self.bind("HOVER", lambda: self.hover(False))
         self.bind("S-HOVER", lambda: self.hover(True))
@@ -85,6 +85,11 @@ class GlobalMode (InputMode):
         self.bind('C-.', self.force_reset, "Reset all modifier keys and input modes")
         self.bind('S-C-.', self.force_reset, "Reset all modifier keys and input modes")
         self.bind('M1-C-.', self.force_reset, "Reset all modifier keys and input modes")
+
+    def scroll_zoom(self, ratio):
+        if "scroll-zoom" in self.window.motion_overrides:
+            return
+        self.window.relative_zoom(ratio)
 
     def inspect(self):
         from flopsy import Store

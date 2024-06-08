@@ -5,6 +5,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from mfp import log
+from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from .base_element import ImguiBaseElementImpl
 from ..processor_element import (
@@ -46,6 +47,19 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
                 self.node_id,
                 self.app_window.screen_to_canvas(self.position_x, self.position_y)
             )
+
+        # check selection status
+        if nedit.is_node_selected(self.node_id):
+            if not self.selected:
+                log.debug(f"[render] node {self} becomes selected")
+                MFPGUI().async_task(self.app_window.select(self))
+                self.selected = True
+        else:
+            if self.selected:
+                log.debug(f"[render] node {self} becomes unselected")
+                MFPGUI().async_task(self.app_window.unselect(self))
+                self.selected = False
+
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
         nedit.begin_node(self.node_id)
 
@@ -53,7 +67,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         self.label.render()
 
         # connections
-        self.draw_ports()
+        self.render_ports()
 
         nedit.end_node()
         imgui.pop_style_var()
@@ -70,7 +84,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         ##########################
 
         nedit.pop_style_color()  # color
-        nedit.pop_style_var()
+        nedit.pop_style_var(2)  # padding, rounding
 
     def draw_ports(self):
         super().draw_ports()
