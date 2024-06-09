@@ -65,6 +65,7 @@ class ConnectionMode (InputMode):
                 self.dest_obj, self.dest_port,
                 dashed=True
             )
+            self.window.register(self.connection)
             self.source_obj.connections_out.append(self.connection)
             self.dest_obj.connections_in.append(self.connection)
         else:
@@ -157,7 +158,6 @@ class ConnectionMode (InputMode):
             ):
 
                 self.connection.dashed = False
-                MFPGUI().appwin.register(self.connection)
                 self.source_obj.connections_out.append(self.connection)
                 self.dest_obj.connections_in.append(self.connection)
                 await self.connection.draw()

@@ -50,10 +50,6 @@ class InputManager:
 
         MFPGUI().async_task(self.hover_monitor())
 
-    @classmethod
-    def build(cls, *args, **kwargs):
-        return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
-
     async def hover_monitor(self):
         while True:
             if self.pointer_obj_time is not None:
@@ -166,7 +162,6 @@ class InputManager:
                 keysym = self.keyseq.pop()
 
         elif isinstance(event, EnterEvent):
-            log.debug(f"[input] EnterEvent: {event} {event.target}")
             src = event.target
             now = datetime.now()
             if (

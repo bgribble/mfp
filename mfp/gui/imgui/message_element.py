@@ -48,22 +48,13 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         # render
         if self.node_id is None:
             self.node_id = nedit.NodeId.create()
+            self.position_set = False
             nedit.set_node_position(
                 self.node_id,
-                self.app_window.screen_to_canvas(self.position_x, self.position_y)
+                (self.position_x, self.position_y)
             )
 
-        # check selection status
-        if nedit.is_node_selected(self.node_id):
-            if not self.selected:
-                log.debug(f"[render] node {self} becomes selected")
-                MFPGUI().async_task(self.app_window.select(self))
-                self.selected = True
-        else:
-            if self.selected:
-                log.debug(f"[render] node {self} becomes unselected")
-                MFPGUI().async_task(self.app_window.unselect(self))
-                self.selected = False
+        self.render_sync_with_imgui()
 
         nedit.begin_node(self.node_id)
 
@@ -82,7 +73,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
 
         self.width = p_br[0] - p_tl[0]
         self.height = p_br[1] - p_tl[1]
-        self.position_x, self.position_y = self.app_window.canvas_to_screen(p_tl[0], p_tl[1])
+        self.position_x, self.position_y = (p_tl[0], p_tl[1])
 
         # render
         ##########################

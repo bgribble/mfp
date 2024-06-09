@@ -8,6 +8,7 @@ import math
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from flopsy import mutates
 
+from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
 
@@ -39,7 +40,22 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.badge_current = None
         self.port_elements = {}
 
+        self.selection_set = False
+        self.position_Set = False
+
         super().__init__(window, x, y)
+
+    def select(self):
+        self.selection_set = True
+        return super().select()
+
+    def unselect(self):
+        self.selection_set = True
+        return super().unselect()
+
+    async def move(self, x, y, **kwargs):
+        self.position_set = True
+        await super().move(x, y, **kwargs)
 
     def move_to_top(self):
         def bump(element):
@@ -48,6 +64,34 @@ class ImguiBaseElementImpl(BaseElementImpl):
         bump(self)
         for c in self.connections_out + self.connections_in:
             bump(c)
+
+    # every subclass should call this somewhere in the render method
+    def render_sync_with_imgui(self):
+        if self.position_set:
+            self.position_set = False
+            nedit.set_node_position(
+                self.node_id,
+                (self.position_x, self.position_y)
+            )
+
+        # check selection status
+        if self.selection_set:
+            self.selection_set = False
+            if self.selected:
+                if not nedit.is_node_selected(self.node_id):
+                    nedit.select_node(self.node_id)
+            else:
+                if nedit.is_node_selected(self.node_id):
+                    nedit.deselect_node(self.node_id)
+        else:
+            if nedit.is_node_selected(self.node_id):
+                if not self.selected:
+                    MFPGUI().async_task(self.app_window.select(self))
+                    self.selected = True
+            else:
+                if self.selected:
+                    MFPGUI().async_task(self.app_window.unselect(self))
+                    self.selected = False
 
     def render_ports(self):
         def semicircle_points(cx, cy, rx, ry, n, direction):

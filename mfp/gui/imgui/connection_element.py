@@ -7,10 +7,11 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
 from mfp import log
-from ..colordb import ColorDB
+from mfp.gui_main import MFPGUI
+from mfp.gui.colordb import ColorDB
 from mfp.gui.base_element import BaseElement
 from .base_element import ImguiBaseElementImpl
-from ..connection_element import (
+from mfp.gui.connection_element import (
     ConnectionElement,
     ConnectionElementImpl,
 )
@@ -30,20 +31,32 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
             self.node_id = nedit.LinkId.create()
 
         from_port_obj = self.obj_1.port_elements.get(
-            (BaseElement.PORT_OUT, self.port_1)
+            (BaseElement.PORT_OUT, self.port_1 or 0)
         )
         to_port_obj = self.obj_2.port_elements.get(
-            (BaseElement.PORT_IN, self.port_2)
+            (BaseElement.PORT_IN, self.port_2 or 0)
         )
         if not from_port_obj or not to_port_obj:
             return
+
+        # check selection status
+        if nedit.is_link_selected(self.node_id):
+            if not self.selected:
+                MFPGUI().async_task(self.app_window.select(self))
+                self.selected = True
+        else:
+            if self.selected:
+                MFPGUI().async_task(self.app_window.unselect(self))
+                self.selected = False
+        complete_color = (0, 0, 255, 255)
+        dashed_color = (40, 40, 80, 255)
 
         nedit.link(
             self.node_id,
             from_port_obj,
             to_port_obj,
-            (0, 0, 255, 255),
-            1,
+            dashed_color if self.dashed else complete_color,
+            1 if not self.dsp_connect else 3,
         )
 
     def draw_ports(self):
@@ -57,6 +70,9 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
 
     def redraw(self):
         super().redraw()
+
+    async def draw(self):
+        pass
 
     async def label_changed_cb(self, *args):
         pass

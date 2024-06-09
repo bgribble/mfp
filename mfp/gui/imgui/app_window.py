@@ -295,12 +295,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         nedit.begin("canvas_editor", imgui.ImVec2(0.0, 0.0))
 
         actual_zoom = nedit.get_current_zoom()
+
+        # FIXME +/-/0 binding keys don't work yet
         if self.user_zoom_set and actual_zoom != self.zoom:
-            log.debug(f"[render] Can't set zoom from {actual_zoom} to {self.zoom}, reverting")
             self.user_zoom_set = False
             self.zoom = actual_zoom
         elif not self.user_zoom_set and actual_zoom != self.zoom:
-            log.debug(f"[render] Catching up self.zoom from {self.zoom} to {actual_zoom}")
             self.zoom = actual_zoom
 
         # first pass: non-links
