@@ -304,14 +304,32 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.zoom = actual_zoom
 
         # first pass: non-links
+        all_pins = {}
         for obj in self.objects:
             if not isinstance(obj, ConnectionElement):
                 obj.render()
+                for port_id, pin_id in obj.port_elements.items():
+                    all_pins[pin_id.id()] = (obj, port_id)
 
         # second pass: links
         for obj in self.objects:
             if isinstance(obj, ConnectionElement):
                 obj.render()
+
+        #############################
+        # creation of links (by click-drag)
+        if nedit.begin_create():
+            start_pin = nedit.PinId.create()
+            end_pin = nedit.PinId.create()
+            if nedit.query_new_link(start_pin, end_pin):
+                if start_pin and end_pin and nedit.accept_new_item():
+                    start_obj, start_port_id = all_pins.get(start_pin.id(), (None, None))
+                    end_obj, end_port_id = all_pins.get(end_pin.id(), (None, None))
+                    log.debug(f"[window] connecting {start_obj} {start_port_id} to {end_obj} {end_port_id}")
+                    MFPGUI().async_task(
+                        self.render_make_connection(start_obj, start_port_id[1], end_obj, end_port_id[1])
+                    )
+            nedit.end_create()
 
         nedit.end()  # node_editor
 
@@ -401,6 +419,15 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if len(self.frame_timestamps) > 10:
             self.frame_timestamps = self.frame_timestamps[-10:]
         return keep_going
+
+    # helper for interactive connect-by-click
+    async def render_make_connection(self, src_obj, src_port, dest_obj, dest_port):
+        return await MFPGUI().mfp.connect(
+            src_obj.obj_id,
+            src_port,
+            dest_obj.obj_id,
+            dest_port
+        )
 
     def grab_focus(self):
         pass

@@ -64,6 +64,9 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         # connections
         self.render_ports()
 
+        # status badge
+        self.render_badge()
+
         nedit.end_node()
         imgui.pop_style_var()
 

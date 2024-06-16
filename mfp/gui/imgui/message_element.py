@@ -64,6 +64,9 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         # connections
         self.render_ports()
 
+        # status badge, is needed
+        self.render_badge()
+
         nedit.end_node()
         imgui.pop_style_var()
 

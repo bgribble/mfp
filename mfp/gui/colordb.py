@@ -13,6 +13,9 @@ from ..delegate import DelegateMixin, delegatemethod
 
 
 class RGBAColor(Serializable):
+    """
+    RGBAColor represents colors on a (0, 255) interval for each element
+    """
     def __init__(self, *, red=0, green=0, blue=0, alpha=0):
         self.red = red
         self.green = green
@@ -36,17 +39,27 @@ class RGBAColor(Serializable):
 class ColorDBBackend(BackendInterface, DelegateMixin, metaclass=ABCMeta):
     @abstractmethod
     @delegatemethod
-    def create_from_rgba(self, red, green, blue, alpha):
+    def create_from_rgba(self, red: int, green: int, blue: int, alpha: int):
+        """
+        create_from_rgba assumes (0, 255) for each element and returns a
+        native color object
+        """
         pass
 
     @abstractmethod
     @delegatemethod
-    def create_from_name(self, name):
+    def create_from_name(self, name) -> RGBAColor:
+        """
+        Native color object from name (color name DB is backend specific)
+        """
         pass
 
     @abstractmethod
     @delegatemethod
-    def normalize(self, color):
+    def normalize(self, color) -> RGBAColor:
+        """
+        Takes a native color type and converts to RGBAColor
+        """
         pass
 
 

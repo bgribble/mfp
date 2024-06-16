@@ -8,6 +8,7 @@ import math
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from flopsy import mutates
 
+from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
@@ -92,6 +93,29 @@ class ImguiBaseElementImpl(BaseElementImpl):
                 if self.selected:
                     MFPGUI().async_task(self.app_window.unselect(self))
                     self.selected = False
+
+    def render_badge(self):
+        if not self.badge_current:
+            return
+
+        badgesize = self.get_style('badge_size')
+        halfbadge = badgesize / 2.0
+        ypos = 0
+        xpos = self.width
+        btext, bcolor = self.badge_current
+
+        draw_list = imgui.get_window_draw_list()
+        draw_list.add_circle_filled(
+            (xpos + self.position_x, ypos + self.position_y),
+            halfbadge,
+            ColorDB().backend.im_col32(bcolor),
+            24
+        )
+        draw_list.add_text(
+            (xpos - halfbadge/2.0 + self.position_x + 0.5, ypos - halfbadge + self.position_y + 0.5),
+            imgui.IM_COL32(255, 255, 255, 255),
+            btext
+        )
 
     def render_ports(self):
         def semicircle_points(cx, cy, rx, ry, n, direction):
@@ -190,80 +214,45 @@ class ImguiBaseElementImpl(BaseElementImpl):
         # the object resizes smaller
         for pid, port in list(self.port_elements.items()):
             if port not in ports_done:
+                pin_id = self.port_elements[pid]
                 del self.port_elements[pid]
 
         nedit.pop_style_var(3)
         nedit.pop_style_color(2)
 
-    def draw_badge_cb(self, tex, ctx):
-        tex.clear()
-        if self.badge_current is None:
-            return
-        btext, bcolor = self.badge_current
-        halfbadge = self.get_style('badge_size') / 2.0
-
-        color = ColorDB().normalize(bcolor)
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        ctx.move_to(halfbadge, halfbadge)
-        ctx.arc(halfbadge, halfbadge, halfbadge, 0, 2*math.pi)
-        ctx.fill()
-
-        extents = ctx.text_extents(btext)
-        color = ColorDB().normalize(ColorDB().find("white"))
-        ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-        twidth = extents[4]
-        theight = extents[3]
-
-        ctx.move_to(halfbadge - twidth/2.0, halfbadge + theight/2.0)
-        ctx.show_text(btext)
-
     def update_badge(self):
-        return
-        """
-                badgesize = self.get_style('badge_size')
-                if self.badge is None:
-                    self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
-                    self.app_window.event_sources[self.badge] = self
-                    self.group.add_actor(self.badge)
-                    self.badge.connect("draw", self.draw_badge_cb)
+        tagged = False
 
-                ypos = min(self.get_style('porthole_height') + self.get_style('porthole_border'),
-                           self.height - badgesize / 2.0)
-                self.badge.set_position(self.width - badgesize/2.0, ypos)
-                tagged = False
+        if self.edit_mode:
+            self.badge_current = ("E", self.get_color('badge-edit-color'))
+            tagged = True
+        else:
+            self.badge_current = None
 
-                if self.edit_mode:
-                    self.badge_current = ("E", self.get_color('badge-edit-color'))
-                    tagged = True
-                else:
-                    self.badge_current = None
+        if not tagged and "midi" in self.tags:
+            if self.tags["midi"] == "learning":
+                self.badge_current = ("M", self.get_color('badge-learn-color'))
+                tagged = True
+            else:
+                self.badge_current = None
 
-                if not tagged and "midi" in self.tags:
-                    if self.tags["midi"] == "learning":
-                        self.badge_current = ("M", self.get_color('badge-learn-color'))
-                        tagged = True
-                    else:
-                        self.badge_current = None
+        if not tagged and "osc" in self.tags:
+            if self.tags["osc"] == "learning":
+                self.badge_current = ("O", self.get_color('badge-learn-color'))
+                tagged = True
+            else:
+                self.badge_current = None
 
-                if not tagged and "osc" in self.tags:
-                    if self.tags["osc"] == "learning":
-                        self.badge_current = ("O", self.get_color('badge-learn-color'))
-                        tagged = True
-                    else:
-                        self.badge_current = None
+        if not tagged and "errorcount" in self.tags:
+            ec = self.tags["errorcount"]
+            if ec > 9:
+                ec = "!"
+            elif ec > 0:
+                ec = "%d" % ec
+            if ec:
+                self.badge_current = (ec, self.get_color('badge-error-color'))
+                tagged = True
 
-                if not tagged and "errorcount" in self.tags:
-                    ec = self.tags["errorcount"]
-                    if ec > 9:
-                        ec = "!"
-                    elif ec > 0:
-                        ec = "%d" % ec
-                    if ec:
-                        self.badge_current = (ec, self.get_color('badge-error-color'))
-                        tagged = True
-
-                self.badge.invalidate()
-        """
 
     def hide_ports(self):
         return
