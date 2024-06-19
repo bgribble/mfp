@@ -39,9 +39,12 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         """
 
         # style
-        nedit.push_style_var(nedit.StyleVar.node_rounding, 0.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (6, 4, 6, 8))
-        nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 255))
+        nedit.push_style_var(nedit.StyleVar.node_rounding, 0.25)
+        nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 6))
+
+        nedit.push_style_color(nedit.StyleColor.node_bg, (200, 200, 200, 255))
+        nedit.push_style_color(nedit.StyleColor.hov_node_border, (80, 80, 80, 255))
+        nedit.push_style_color(nedit.StyleColor.sel_node_border, (50, 50, 50, 255))
 
         ##########################
         # render
@@ -81,7 +84,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         # render
         ##########################
 
-        nedit.pop_style_color()  # color
+        nedit.pop_style_color(3)  # color
         nedit.pop_style_var(2)  # padding, rounding
 
     def draw_ports(self):

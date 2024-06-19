@@ -55,7 +55,6 @@ async def patch_new(self):
 
 @extends(AppWindow)
 async def select(self, obj):
-    log.debug(f"[select] selecting {obj}")
     if (obj is None) or (not isinstance(obj, BaseElement)):
         return
 

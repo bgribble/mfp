@@ -12,6 +12,7 @@ from .event import repeat_event
 
 class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
     backend_name = "clutter"
+    blink_cursor = True
 
     def __init__(self, container):
         super().__init__()

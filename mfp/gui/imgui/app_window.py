@@ -82,6 +82,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         io = imgui.get_io()
         io.config_flags |= imgui.ConfigFlags_.docking_enable
         io.config_input_trickle_event_queue = True
+        io.config_input_text_cursor_blink = False
 
         config = nedit.Config()
         config.settings_file = "/dev/null"
@@ -152,6 +153,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ########################################
         # global style setup
         imgui.style_colors_light()
+        imgui.push_style_color(imgui.Col_.text_selected_bg, (200, 200, 255, 255))
 
         ########################################
         # menu bar
@@ -383,6 +385,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.pop_style_var()  # padding
         imgui.pop_style_var()  # border
         imgui.pop_style_var()  # rounding
+
+        imgui.pop_style_color() # text selected bg
 
         # full-screen window
         ########################################

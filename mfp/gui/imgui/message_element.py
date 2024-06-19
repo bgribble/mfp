@@ -39,8 +39,8 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         * semicircular ports (only in edit mode)
         """
         # style
-        nedit.push_style_var(nedit.StyleVar.node_rounding, 6.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (6, 4, 6, 8))
+        nedit.push_style_var(nedit.StyleVar.node_rounding, 4.0)
+        nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 4))
         nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 255))
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 

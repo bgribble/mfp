@@ -133,8 +133,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
             return
 
         p_tl = imgui.get_item_rect_min()
-        x_orig = p_tl[0] - 6
-        y_orig = p_tl[1] - 4
+        x_orig = p_tl[0] - 4
+        y_orig = p_tl[1] - 2 
 
         # x_orig, y_orig = self.app_window.screen_to_canvas(self.position_x, self.position_y)
 
@@ -163,21 +163,23 @@ class ImguiBaseElementImpl(BaseElementImpl):
             pw = self.get_style('porthole_width')
             ph = self.get_style('porthole_height')
 
-            nedit.pin_rect(
-                (px, py), (px + pw, py + ph)
-            )
             outport = pid[0] == BaseElement.PORT_OUT
+            nedit.pin_rect(
+                (px, py + (ph if outport else -ph)), 
+                (px + pw, py + ph + (ph if outport else -ph))
+            )
             nedit.pin_pivot_rect(
-                (px+pw/2, py + (ph if outport else 0)),
-                (px+pw/2, py + (ph if outport else 0))
+                (px+pw/2, py + (0 if outport else -ph)),
+                (px+pw/2, py + (0 if outport else -ph))
             )
             points = semicircle_points(
-                px + pw / 2.0, py + (ph if outport else 0),
+                px + pw / 2.0, 
+                py + (ph if outport else 0),
                 pw / 2.0, ph,
-                9, -1 if outport else 1
+                9, 
+                1 if outport else -1
             )
-            draw_list.add_convex_poly_filled(points, imgui.IM_COL32(255, 0, 0, 255))
-            draw_list.add_polyline(points, imgui.IM_COL32(0, 0, 0, 100), 0, 1)
+            draw_list.add_convex_poly_filled(points, imgui.IM_COL32(50, 50, 50, 255))
 
             """
             if dsp_port:
@@ -195,10 +197,10 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
         nedit.push_style_var(nedit.StyleVar.source_direction, (0, 0.5))
         nedit.push_style_var(nedit.StyleVar.target_direction, (0, -0.5))
-        nedit.push_style_var(nedit.StyleVar.pin_rounding, 2)
+        nedit.push_style_var(nedit.StyleVar.pin_rounding, 0)
 
-        nedit.push_style_color(nedit.StyleColor.pin_rect_border, (0, 0, 0, 255))
-        nedit.push_style_color(nedit.StyleColor.pin_rect, (0, 0, 0, 255))
+        nedit.push_style_color(nedit.StyleColor.pin_rect_border, (0, 0, 0, 100))
+        nedit.push_style_color(nedit.StyleColor.pin_rect, (0, 0, 0, 100))
 
         for i in range(self.num_inlets):
             x, y = self.port_position(BaseElement.PORT_IN, i)
@@ -219,6 +221,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
         nedit.pop_style_var(3)
         nedit.pop_style_color(2)
+
 
     def update_badge(self):
         tagged = False

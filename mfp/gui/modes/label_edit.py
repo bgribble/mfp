@@ -220,7 +220,8 @@ class LabelEditMode (InputMode):
         self.update_cursor()
         self.widget.set_editable(True)
 
-        self.blinker.start(self.widget)
+        if self.widget.blink_cursor:
+            self.blinker.start(self.widget)
 
     def end_editing(self):
         self.widget.set_editable(False)
@@ -240,7 +241,8 @@ class LabelEditMode (InputMode):
             MFPGUI().appwin.signal_unlisten(self.key_press_handler_id)
             self.key_press_handler_id = None
 
-        self.blinker.stop(self.widget)
+        if self.widget.blink_cursor:
+            self.blinker.stop(self.widget)
 
     def text_changed(self, *args):
         new_text = self.widget.get_text()
