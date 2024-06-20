@@ -8,3 +8,4 @@ from .processor_element import ImguiProcessorElementImpl
 from .message_element import ImguiMessageElementImpl
 from .connection_element import ImguiConnectionElementImpl
 from .text_widget import ImguiTextWidgetImpl
+from .text_element import ImguiTextElementImpl

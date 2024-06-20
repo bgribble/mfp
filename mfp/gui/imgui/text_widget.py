@@ -10,7 +10,7 @@ from ..text_widget import TextWidget, TextWidgetImpl
 
 class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     backend_name = "imgui"
-    blink_cursor = False 
+    blink_cursor = False
 
     def __init__(self, container):
         super().__init__()
@@ -36,27 +36,37 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.visible = True
 
     def render(self):
-        # multiline?
-        imgui.text(self.text)
-        text_width, text_height = imgui.calc_text_size(self.text)
+        extra_bit = ''
+        if self.multiline and self.text[:-1] == '\n':
+            extra_bit = ' '
+
+        imgui.text(self.text + extra_bit)
+        self.font_width, self.font_height = imgui.calc_text_size("M")
 
         w, h = imgui.get_item_rect_size()
         left_x, top_y = imgui.get_item_rect_min()
 
-        if len(self.text) > 0:
-            self.font_width = text_width / len(self.text)
-            self.font_height = text_height
-        
-        if self.editable:
-            draw_list = imgui.get_window_draw_list()
+        if not self.editable or len(self.text) == 0:
+            return
 
-            # draw cursor
-            draw_list.add_rect_filled(
-                (left_x + self.selection_start * self.font_width, top_y),
-                (left_x + self.selection_end * self.font_width + 1.0, top_y + self.font_height),
-                imgui.IM_COL32(0, 0, 0, 90) 
-            )
+        draw_list = imgui.get_window_draw_list()
+        lines = self.text.split("\n")
+        line_start_pos = 0
 
+        for line in lines:
+            line_end_pos = line_start_pos + len(line)
+            if self.selection_start <= line_end_pos and self.selection_end >= line_start_pos:
+                box_start = max(0, self.selection_start - line_start_pos)
+                box_end = min(len(line), self.selection_end - line_start_pos)
+
+                # draw cursor
+                draw_list.add_rect_filled(
+                    (left_x + box_start * self.font_width, top_y),
+                    (left_x + box_end * self.font_width + 1.0, top_y + self.font_height),
+                    imgui.IM_COL32(0, 0, 0, 90)
+                )
+            line_start_pos += len(line) + 1
+            top_y += self.font_height
 
     def set_single_line_mode(self, val):
         self.multiline = not val
