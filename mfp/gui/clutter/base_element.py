@@ -158,7 +158,9 @@ class ClutterBaseElementImpl(BaseElementImpl):
             return
 
         ports_done = []
-
+        port_height = self.get_style('porthole_height')
+        port_width = self.get_style('porthole_width')
+        
         def confport(pid, px, py):
             pobj = self.port_elements.get(pid)
             dsp_port = False
@@ -170,10 +172,7 @@ class ClutterBaseElementImpl(BaseElementImpl):
 
             if pobj is None:
                 pobj = Clutter.Rectangle()
-                pobj.set_size(
-                    self.get_style('porthole_width'),
-                    self.get_style('porthole_height')
-                )
+                pobj.set_size(port_width, port_height)
                 self.group.add_actor(pobj)
                 self.port_elements[pid] = pobj
 
@@ -192,12 +191,12 @@ class ClutterBaseElementImpl(BaseElementImpl):
         for i in range(self.num_inlets):
             x, y = self.port_position(BaseElement.PORT_IN, i)
             pid = (BaseElement.PORT_IN, i)
-            confport(pid, x, y)
+            confport(pid, x - port_width / 2, y)
 
         for i in range(self.num_outlets):
             x, y = self.port_position(BaseElement.PORT_OUT, i)
             pid = (BaseElement.PORT_OUT, i)
-            confport(pid, x, y)
+            confport(pid, x - port_width / 2, y - port_height)
 
         # clean up -- ports may need to be deleted if
         # the object resizes smaller

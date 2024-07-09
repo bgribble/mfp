@@ -2,7 +2,9 @@
 imgui/text_widget.py -- backend implementation of TextWidget for Imgui
 """
 
+import re
 from imgui_bundle import imgui
+# from imgui_bundle import imgui_md as markdown
 
 from mfp import log
 from ..text_widget import TextWidget, TextWidgetImpl
@@ -17,6 +19,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.container = container
         self.parent = None
         self.text = ""
+        self.markdown_text = ""
         self.width = 0
         self.height = 0
         self.position_x = 0
@@ -34,13 +37,23 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.cursor_visible = False
 
         self.visible = True
+        self.use_markup = False
 
     def render(self):
         extra_bit = ''
         if self.multiline and self.text[:-1] == '\n':
             extra_bit = ' '
 
-        imgui.text(self.text + extra_bit)
+        if self.markdown_text and self.use_markup:
+            # markdown.render(self.markdown_text)
+            # strip tags
+            stripped_text = re.sub(r'<[^>]*?>', '', self.text)
+
+            imgui.text(stripped_text + extra_bit)
+
+        else:
+            imgui.text(self.text + extra_bit)
+
         self.font_width, self.font_height = imgui.calc_text_size("M")
 
         w, h = imgui.get_item_rect_size()
@@ -115,7 +128,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.text = text
 
     def set_markup(self, text):
-        self.text = text
+        self.markdown_text = text
+        self.use_markup = True
 
     def set_reactive(self, is_reactive):
         pass
@@ -132,7 +146,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         return None
 
     def set_use_markup(self, use_markup):
-        pass
+        self.use_markup = use_markup
 
     def set_selection(self, start, end):
         self.selection_start = start

@@ -82,11 +82,6 @@ class ViaElement (BaseElement):
         self.recenter_label()
         await super().configure(params)
 
-    def port_position(self, port_dir, port_num):
-        # vias connect to the center of the texture
-        return ((self.VIA_SIZE + self.VIA_FUDGE) / 2.0,
-                self.TEXTURE_Y + (self.VIA_SIZE + self.VIA_FUDGE) / 2.0)
-
     def select(self):
         BaseElement.select(self)
         self.label.set_color(self.get_color('text-color'))

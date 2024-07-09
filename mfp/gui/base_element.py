@@ -267,7 +267,7 @@ class BaseElement (Store):
         )
 
     async def drag(self, dx, dy):
-        if "drag" not in self.motion_overrides:
+        if "drag" not in self.app_window.motion_overrides:
             await self.move(self.position_x + dx, self.position_y + dy, update_state=False)
 
     async def move(self, x, y, **kwargs):
@@ -434,38 +434,41 @@ class BaseElement (Store):
         ppos = self.port_position(port_dir, port_num)
         pos_x, pos_y = self.get_stage_position()
 
-        return (pos_x + ppos[0] + 0.5 * self.get_style('porthole_width'),
-                pos_y + ppos[1] + 0.5 * self.get_style('porthole_height'))
+        return (pos_x + ppos[0], pos_y + ppos[1])
 
     def port_size(self):
         return (self.get_style('porthole_width'), self.get_style('porthole_height'))
 
     def port_position(self, port_dir, port_num):
+        """
+        port_position returns the (x,y) position of the center of the
+        porthole, on the object bounding box. If the rendered box is
+        offset from that position, that can be handled in the renderer.
+        """
         w = self.width
         h = self.height
-
+        port_width = self.get_style('porthole_width')
         # inlet
         if port_dir == BaseElement.PORT_IN:
             if self.num_inlets < 2:
                 spc = 0
             else:
                 spc = max(self.get_style('porthole_minspace'),
-                          ((w 
-                            - self.get_style('porthole_width')
+                          ((w
+                            - port_width
                             - 2.0 * self.get_style('porthole_border'))
                            / (self.num_inlets - 1.0)))
-            return (self.get_style('porthole_border') + spc * port_num, 0)
+            return (self.get_style('porthole_border') + spc * port_num + port_width / 2.0, 0)
 
         # outlet
         if self.num_outlets < 2:
             spc = 0
         else:
             spc = max(self.get_style('porthole_minspace'),
-                      ((w - self.get_style('porthole_width')
+                      ((w - port_width
                         - 2.0 * self.get_style('porthole_border'))
                        / (self.num_outlets - 1.0)))
-        return (self.get_style('porthole_border') + spc * port_num,
-                h - self.get_style('porthole_height'))
+        return (self.get_style('porthole_border') + spc * port_num + port_width / 2.0, h)
 
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',

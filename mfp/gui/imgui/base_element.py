@@ -117,83 +117,86 @@ class ImguiBaseElementImpl(BaseElementImpl):
             btext
         )
 
-    def render_ports(self):
+    def render_port(self, port_id, px, py, dsp_port):
         def semicircle_points(cx, cy, rx, ry, n, direction):
+            yoff = -ry if direction > 0 else 0
             return [
-                (cx + rx * math.cos(k * math.pi / (n-1)),
-                 cy + ry * direction * math.sin(k * math.pi / (n-1)))
+                (
+                    cx + rx * math.cos(k * math.pi / (n-1)),
+                    cy + ry * direction * math.sin(k * math.pi / (n-1)) + yoff
+                )
                 for k in range(n)
             ]
 
-        port_rule = self.get_style("draw-ports") or "always"
-        if port_rule == "never" or port_rule == "selected" and not self.selected:
-            return
+        out_port = port_id[0] == BaseElement.PORT_OUT
+        draw_list = imgui.get_window_draw_list()
 
+        pw = self.get_style('porthole_width')
+        ph = self.get_style('porthole_height')
+        points = semicircle_points(
+            px,
+            py + (ph if out_port else 0),
+            pw / 2.0, ph,
+            9,
+            1 if out_port else -1
+        )
+        draw_list.add_convex_poly_filled(points, imgui.IM_COL32(50, 50, 50, 255))
+
+        """
+        if dsp_port:
+            pobj.set_border_width(1.5)
+            pobj.set_color(MFPGUI().appwin.color_bg)
+            pobj.set_border_color(self.get_color('stroke-color'))
+        else:
+            pobj.set_color(self.get_color('stroke-color'))
+        """
+
+    def render_pin(self, port_id, px, py):
+        pin_id = self.port_elements.get(port_id)
+        dsp_port = False
+        if (port_id[0] == BaseElement.PORT_IN) and port_id[1] in self.dsp_inlets:
+            dsp_port = True
+
+        if (port_id[0] == BaseElement.PORT_OUT) and port_id[1] in self.dsp_outlets:
+            dsp_port = True
+
+        if pin_id is None:
+            pin_id = nedit.PinId.create()
+            self.port_elements[port_id] = pin_id
+
+        nedit.push_style_var(nedit.StyleVar.pin_border_width, 1)
+        nedit.begin_pin(
+            pin_id,
+            nedit.PinKind.input if port_id[0] == BaseElement.PORT_IN else nedit.PinKind.output
+        )
+
+        pw = self.get_style('porthole_width')
+        ph = self.get_style('porthole_height')
+
+        outport = port_id[0] == BaseElement.PORT_OUT
+        nedit.pin_rect(
+            (px - pw/2, py + (0 if outport else -ph)),
+            (px + pw/2, py + ph + (0 if outport else -ph))
+        )
+        nedit.pin_pivot_rect(
+            (px, py), (px, py)
+        )
+        port_rule = self.get_style("draw-ports") or "always"
+        draw_ports = port_rule != "never" and (port_rule != "selected" or self.selected)
+        if draw_ports:
+            self.render_port(port_id, px, py, dsp_port)
+        nedit.end_pin()
+        nedit.pop_style_var()
+
+    def render_ports(self):
         if self.editable is False or self.node_id is None:
             return
 
         p_tl = imgui.get_item_rect_min()
+        
+        # FIXME hardcoded padding
         x_orig = p_tl[0] - 4
-        y_orig = p_tl[1] - 2 
-
-        # x_orig, y_orig = self.app_window.screen_to_canvas(self.position_x, self.position_y)
-
-        draw_list = imgui.get_window_draw_list()
-        ports_done = []
-
-        def confport(pid, px, py):
-            pin_id = self.port_elements.get(pid)
-            dsp_port = False
-            if (pid[0] == BaseElement.PORT_IN) and pid[1] in self.dsp_inlets:
-                dsp_port = True
-
-            if (pid[0] == BaseElement.PORT_OUT) and pid[1] in self.dsp_outlets:
-                dsp_port = True
-
-            if pin_id is None:
-                pin_id = nedit.PinId.create()
-                self.port_elements[pid] = pin_id
-
-            nedit.push_style_var(nedit.StyleVar.pin_border_width, 2 if dsp_port else 1)
-            nedit.begin_pin(
-                pin_id,
-                nedit.PinKind.input if pid[0] == BaseElement.PORT_IN else nedit.PinKind.output
-            )
-
-            pw = self.get_style('porthole_width')
-            ph = self.get_style('porthole_height')
-
-            outport = pid[0] == BaseElement.PORT_OUT
-            nedit.pin_rect(
-                (px, py + (ph if outport else -ph)), 
-                (px + pw, py + ph + (ph if outport else -ph))
-            )
-            nedit.pin_pivot_rect(
-                (px+pw/2, py + (0 if outport else -ph)),
-                (px+pw/2, py + (0 if outport else -ph))
-            )
-            points = semicircle_points(
-                px + pw / 2.0, 
-                py + (ph if outport else 0),
-                pw / 2.0, ph,
-                9, 
-                1 if outport else -1
-            )
-            draw_list.add_convex_poly_filled(points, imgui.IM_COL32(50, 50, 50, 255))
-
-            """
-            if dsp_port:
-                pobj.set_border_width(1.5)
-                pobj.set_color(MFPGUI().appwin.color_bg)
-                pobj.set_border_color(self.get_color('stroke-color'))
-            else:
-                pobj.set_color(self.get_color('stroke-color'))
-            """
-
-            nedit.end_pin()
-            nedit.pop_style_var()
-
-            ports_done.append(pin_id)
+        y_orig = p_tl[1] - 2
 
         nedit.push_style_var(nedit.StyleVar.source_direction, (0, 0.5))
         nedit.push_style_var(nedit.StyleVar.target_direction, (0, -0.5))
@@ -202,26 +205,27 @@ class ImguiBaseElementImpl(BaseElementImpl):
         nedit.push_style_color(nedit.StyleColor.pin_rect_border, (0, 0, 0, 100))
         nedit.push_style_color(nedit.StyleColor.pin_rect, (0, 0, 0, 100))
 
+        ports_done = []
         for i in range(self.num_inlets):
             x, y = self.port_position(BaseElement.PORT_IN, i)
             pid = (BaseElement.PORT_IN, i)
-            confport(pid, x + x_orig, y + y_orig)
+            self.render_pin(pid, x + x_orig, y + y_orig)
+            ports_done.append(pid)
 
         for i in range(self.num_outlets):
             x, y = self.port_position(BaseElement.PORT_OUT, i)
             pid = (BaseElement.PORT_OUT, i)
-            confport(pid, x + x_orig, y + y_orig)
+            self.render_pin(pid, x + x_orig, y + y_orig)
+            ports_done.append(pid)
 
         # clean up -- ports may need to be deleted if
         # the object resizes smaller
         for pid, port in list(self.port_elements.items()):
-            if port not in ports_done:
-                pin_id = self.port_elements[pid]
+            if pid not in ports_done:
                 del self.port_elements[pid]
 
-        nedit.pop_style_var(3)
         nedit.pop_style_color(2)
-
+        nedit.pop_style_var(3)
 
     def update_badge(self):
         tagged = False

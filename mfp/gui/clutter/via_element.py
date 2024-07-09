@@ -7,13 +7,11 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 import math
 
-from mfp import log
 from gi.repository import Clutter
 
 from ..colordb import ColorDB
 from .base_element import ClutterBaseElementImpl
 from ..via_element import (
-    ViaElement,
     SendViaElement,
     SendViaElementImpl,
     SendSignalViaElement,
@@ -35,6 +33,8 @@ class ClutterBaseViaElementImpl(ClutterBaseElementImpl):
     LABEL_Y = 0
 
     def __init__(self, window, x, y):
+        self.label = None
+
         super().__init__(window, x, y)
 
         txs = self.VIA_SIZE + self.VIA_FUDGE
@@ -60,6 +60,11 @@ class ClutterBaseViaElementImpl(ClutterBaseElementImpl):
         w = self.label.get_width()
         _, y = self.label.get_position()
         self.label.set_position((self.texture.get_width() - w) / 2.0, y)
+
+    def port_position(self, port_dir, port_num):
+        # vias connect to the center of the texture
+        return ((self.VIA_SIZE + self.VIA_FUDGE) / 2.0,
+                self.TEXTURE_Y + (self.VIA_SIZE + self.VIA_FUDGE) / 2.0)
 
     def draw_cb(self, texture, ct):
         self.texture.clear()
@@ -100,7 +105,9 @@ class ClutterSendViaElementImpl(SendViaElementImpl, ClutterBaseViaElementImpl, S
         ClutterBaseViaElementImpl.redraw(self)
 
 
-class ClutterSendSignalViaElementImpl(SendSignalViaElementImpl, ClutterBaseViaElementImpl, SendSignalViaElement):
+class ClutterSendSignalViaElementImpl(
+    SendSignalViaElementImpl, ClutterBaseViaElementImpl, SendSignalViaElement
+):
     VIA_SIZE = 12
     GLYPH_STYLE = "empty_circled"
     LABEL_Y = ClutterBaseViaElementImpl.VIA_SIZE + ClutterBaseViaElementImpl.VIA_FUDGE / 2.0

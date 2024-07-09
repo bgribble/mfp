@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
+# from ingui_bundle imgui_md as markdown
 import OpenGL.GL as gl
 
 from mfp import log
@@ -83,6 +84,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         io.config_flags |= imgui.ConfigFlags_.docking_enable
         io.config_input_trickle_event_queue = True
         io.config_input_text_cursor_blink = False
+
+        # FIXME can't use imgui_md -- it depends on immmap
+        # markdown.initialize_markdown()
+        # font_loader = markdown.get_font_loader_function()
+        # font_loader()
 
         config = nedit.Config()
         config.settings_file = "/dev/null"

@@ -41,8 +41,9 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 4.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 4))
+        nedit.push_style_var(nedit.StyleVar.node_border_width, 1)
         nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 255))
-        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
+
 
         ##########################
         # render
@@ -53,6 +54,8 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
                 self.node_id,
                 (self.position_x, self.position_y)
             )
+
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 
         self.render_sync_with_imgui()
 
@@ -68,7 +71,6 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         self.render_badge()
 
         nedit.end_node()
-        imgui.pop_style_var()
 
         # update size after render
         p_tl = imgui.get_item_rect_min()
@@ -81,8 +83,9 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         # render
         ##########################
 
+        imgui.pop_style_var()
         nedit.pop_style_color()  # color
-        nedit.pop_style_var()
+        nedit.pop_style_var(3)
 
     def draw_ports(self):
         super().draw_ports()

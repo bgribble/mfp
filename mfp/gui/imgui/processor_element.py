@@ -41,11 +41,13 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0.25)
         nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 6))
+        nedit.push_style_var(nedit.StyleVar.node_border_width, 1)
 
         nedit.push_style_color(nedit.StyleColor.node_bg, (200, 200, 200, 255))
         nedit.push_style_color(nedit.StyleColor.hov_node_border, (80, 80, 80, 255))
         nedit.push_style_color(nedit.StyleColor.sel_node_border, (50, 50, 50, 255))
 
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
         ##########################
         # render
         if self.node_id is None:
@@ -58,7 +60,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         self.render_sync_with_imgui()
 
-        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
         nedit.begin_node(self.node_id)
 
         # node content: just the label
@@ -71,7 +72,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         self.render_badge()
 
         nedit.end_node()
-        imgui.pop_style_var()
 
         # update size and position after render
         p_tl = imgui.get_item_rect_min()
@@ -84,8 +84,9 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         # render
         ##########################
 
+        imgui.pop_style_var()
         nedit.pop_style_color(3)  # color
-        nedit.pop_style_var(2)  # padding, rounding
+        nedit.pop_style_var(3)  # padding, rounding
 
     def draw_ports(self):
         super().draw_ports()
