@@ -193,10 +193,11 @@ class ImguiBaseElementImpl(BaseElementImpl):
             return
 
         p_tl = imgui.get_item_rect_min()
-        
+        padding = self.get_style('padding')
+
         # FIXME hardcoded padding
-        x_orig = p_tl[0] - 4
-        y_orig = p_tl[1] - 2
+        x_orig = p_tl[0] - padding[0]
+        y_orig = p_tl[1] - padding[1]
 
         nedit.push_style_var(nedit.StyleVar.source_direction, (0, 0.5))
         nedit.push_style_var(nedit.StyleVar.target_direction, (0, -0.5))

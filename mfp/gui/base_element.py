@@ -64,6 +64,7 @@ class BaseElement (Store):
         'porthole_height': 4,
         'porthole_border': 1,
         'porthole_minspace': 11,
+        'padding': [4, 2, 4, 2],  # left, top, right, bottom
         'badge_size': 15,
         'badge-edit-color': 'default-edit-badge-color',
         'badge-learn-color': 'default-learn-badge-color',

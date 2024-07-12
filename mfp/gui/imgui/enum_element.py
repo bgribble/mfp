@@ -1,29 +1,23 @@
 """
-imgui/message_element.py -- imgui backend for message elements
+imgui/enum_element.py -- imgui backend for numeric/enumerated elements
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
-from mfp import log
-from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit
+
 from .base_element import ImguiBaseElementImpl
-from ..message_element import (
-    MessageElement,
-    MessageElementImpl,
-    TransientMessageElement,
-    TransientMessageElementImpl
+from ..enum_element import (
+    EnumElement,
+    EnumElementImpl
 )
 
-ImColor = imgui.ImColor
 
-
-class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageElement):
+class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
     backend_name = "imgui"
 
     style_defaults = {
-        'porthole_border': 6,  # allow for rounded corners
-        'padding': (4, 2, 4, 4)
+        'padding': (12, 2, 4, 2)
     }
 
     def __init__(self, window, x, y):
@@ -32,16 +26,17 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         self.width = 35
         self.height = 25
 
+
     def render(self):
         """
-        message element
+        enum element
 
-        * rectangle with rounded corners
-        * gradient background
+        * rectangle with square corners
+        * triangle on left side
         * semicircular ports (only in edit mode)
         """
         # style
-        nedit.push_style_var(nedit.StyleVar.node_rounding, 4.0)
+        nedit.push_style_var(nedit.StyleVar.node_rounding, 0.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, self.get_style('padding'))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1)
         nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 255))
@@ -81,6 +76,18 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         self.height = p_br[1] - p_tl[1]
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
 
+        caret_off = 3.5 
+        caret_width = 5
+        draw_list = imgui.get_window_draw_list()
+        draw_list.add_convex_poly_filled(
+            [
+                (p_tl[0] + caret_off, p_tl[1] + caret_off),
+                (p_tl[0] + caret_off + caret_width, p_tl[1] + self.height/2),
+                (p_tl[0] + caret_off, p_tl[1] + self.height - caret_off),
+            ],
+            imgui.IM_COL32(150, 150, 150, 255)
+        )
+
         # render
         ##########################
 
@@ -106,9 +113,3 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
 
-class ImguiTransientMessageElementImpl(
-    TransientMessageElement,
-    ImguiMessageElementImpl,
-    TransientMessageElementImpl,
-):
-    backend_name = "imgui"

@@ -77,3 +77,12 @@ class ClutterEnumElementImpl(EnumElementImpl, ClutterBaseElementImpl, EnumElemen
 
         self.texture.set_size(width, height)
         self.texture.invalidate()
+
+    def port_position(self, port_dir, port_num):
+        # tweak the right input port display to be left of the slant
+        if port_dir == BaseElement.PORT_IN and port_num == 1:
+            default = BaseElement.port_position(self, port_dir, port_num)
+            return (default[0] - self.PORT_TWEAK, default[1])
+        else:
+            return BaseElement.port_position(self, port_dir, port_num)
+

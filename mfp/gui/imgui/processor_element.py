@@ -21,6 +21,10 @@ ImColor = imgui.ImColor
 class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, ProcessorElement):
     backend_name = "imgui"
 
+    style_defaults = {
+        'padding': (4, 2, 4, 6)
+    }
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
         self.node_id = None
@@ -40,7 +44,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0.25)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 6))
+        nedit.push_style_var(nedit.StyleVar.node_padding, self.get_style('padding'))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1)
 
         nedit.push_style_color(nedit.StyleColor.node_bg, (200, 200, 200, 255))
