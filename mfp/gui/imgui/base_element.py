@@ -10,6 +10,7 @@ from flopsy import mutates
 
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.event import EnterEvent, LeaveEvent
 from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
 
@@ -44,6 +45,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.selection_set = False
         self.position_Set = False
 
+        self.hovered_state = False
+
         super().__init__(window, x, y)
 
     def select(self):
@@ -73,6 +76,23 @@ class ImguiBaseElementImpl(BaseElementImpl):
             nedit.set_node_position(
                 self.node_id,
                 (self.position_x, self.position_y)
+            )
+
+        # check hover
+        if nedit.get_hovered_node() == self.node_id:
+            hovered = True
+        else:
+            hovered = False
+
+        if hovered and not self.hovered_state:
+            self.hovered_state = True
+            MFPGUI().async_task(
+                self.app_window.signal_emit("enter-event", EnterEvent(target=self))
+            )
+        if not hovered and self.hovered_state:
+            self.hovered_state = False
+            MFPGUI().async_task(
+                self.app_window.signal_emit("leave-event", LeaveEvent(target=self))
             )
 
         # check selection status

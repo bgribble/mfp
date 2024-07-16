@@ -8,12 +8,13 @@ import sys
 from datetime import datetime
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
-# from ingui_bundle imgui_md as markdown
+# from imgui_bundle imgui_md as markdown
 import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.connection_element import ConnectionElement
+from mfp.gui.modes.patch_edit import PatchEditMode
 from ..app_window import AppWindow, AppWindowImpl
 from .inputs import imgui_process_inputs, imgui_key_map
 from .sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
@@ -92,8 +93,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         config = nedit.Config()
         config.settings_file = "/dev/null"
-        ed = nedit.create_editor(config)
 
+        ed = nedit.create_editor(config)
         nedit.set_current_editor(ed)
 
         while (
@@ -301,6 +302,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 self.input_mgr.global_mode = GlobalMode(self)
                 self.input_mgr.major_mode.enable()
         nedit.begin("canvas_editor", imgui.ImVec2(0.0, 0.0))
+
+        conf = nedit.get_config()
+        if isinstance(self.input_mgr.major_mode, PatchEditMode):
+            conf.drag_button_index = 0
+        else:
+            conf.drag_button_index = 3
 
         actual_zoom = nedit.get_current_zoom()
 

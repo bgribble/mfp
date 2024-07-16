@@ -76,7 +76,7 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
         self.height = p_br[1] - p_tl[1]
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
 
-        caret_off = 3.5 
+        caret_off = 3.5
         caret_width = 5
         draw_list = imgui.get_window_draw_list()
         draw_list.add_convex_poly_filled(

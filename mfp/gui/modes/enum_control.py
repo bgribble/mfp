@@ -2,12 +2,13 @@
 '''
 enum_control.py: EnumControl major mode
 
-Copyright (c) 2010-2013 Bill Gribble <grib@billgribble.com>
+Copyright Bill Gribble <grib@billgribble.com>
 '''
 
 import math
 from ..input_mode import InputMode
 from .label_edit import LabelEditMode
+
 
 class EnumEditMode (InputMode):
     def __init__(self, window, element, label):
@@ -61,6 +62,7 @@ class EnumEditMode (InputMode):
         self.enum.edit_mode = None
         return False
 
+
 class EnumControlMode (InputMode):
     def __init__(self, window, element):
         self.manager = window.input_mgr
@@ -102,7 +104,6 @@ class EnumControlMode (InputMode):
         await self.enum.update_value(self.value)
         return True
 
-
     async def drag_start(self):
         if self.manager.pointer_obj == self.enum:
             if self.manager.pointer_obj not in self.window.selected:
@@ -115,14 +116,12 @@ class EnumControlMode (InputMode):
             self.drag_last_y = self.manager.pointer_y
             self.value = self.enum.value
             return True
-        else:
-            return False
+        return False
 
     async def drag_selected(self, delta=1.0):
         if self.drag_started is False:
             return False
 
-        dx = self.manager.pointer_x - self.drag_last_x
         dy = self.manager.pointer_y - self.drag_last_y
 
         self.drag_last_x = self.manager.pointer_x
@@ -135,5 +134,4 @@ class EnumControlMode (InputMode):
         if self.drag_started:
             self.drag_started = False
             return True
-        else:
-            return False
+        return False
