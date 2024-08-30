@@ -7,11 +7,14 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
+from typing import Optional
 from flopsy import Store, mutates
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB
 from .backend_interfaces import BackendInterface
+
 
 class BaseElementImpl(metaclass=ABCMeta):
     @abstractmethod
@@ -47,17 +50,50 @@ class BaseElementImpl(metaclass=ABCMeta):
         pass
 
 
+@dataclass
+class ParamInfo:
+    label: str
+    editable: Optional[bool] = True
+    tooltip: Optional[str] = ""
+    param_type: Optional[type] = str
+
+
+class ListOfInt(list):
+    pass
+
+
+BASE_STORE_ATTRS = {
+    'obj_type': ParamInfo(label="Type", param_type=str),
+    'obj_args': ParamInfo(label="Creation args", param_type=str),
+    'display_type': ParamInfo(label="Display type", param_type=str, editable=False),
+    'obj_name': ParamInfo(label="Name", param_type=str),
+    'obj_state': ParamInfo(label="State", param_type=int, editable=False),
+    'scope': ParamInfo(label="Lexical scope", param_type=str),
+    'layername': ParamInfo(label="Layer", param_type=str),
+    'position_x': ParamInfo(label="X position", param_type=float),
+    'position_y': ParamInfo(label="Y position", param_type=float),
+    'position_z': ParamInfo(label="Z position", param_type=float),
+    'width': ParamInfo(label="Width", param_type=float, editable=False),
+    'height': ParamInfo(label="Height", param_type=float, editable=False),
+    'update_required': ParamInfo(label="Update required", param_type=bool),
+    'no_export': ParamInfo(label="No export", param_type=bool),
+    'is_export': ParamInfo(label="Is export", param_type=bool),
+    'num_inlets': ParamInfo(label="# inlets", param_type=int, editable=False),
+    'num_outlets': ParamInfo(label="# outlets", param_type=int, editable=False),
+    'dsp_inlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
+    'dsp_outlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
+    'style': ParamInfo(label="Lexical scope", param_type=dict),
+    'export_offset_x': ParamInfo(label="Export offset X", param_type=float),
+    'export_offset_y': ParamInfo(label="Export offset Y", param_type=float),
+    'debug': ParamInfo(label="Enable debugging", param_type=bool),
+}
+
+
 class BaseElement (Store):
     '''
     Parent class of elements represented in the patch window
     '''
-    store_attrs = [
-        'position_x', 'position_y', 'position_z', 'width', 'height',
-        'update_required', 'display_type', 'name', 'layername',
-        'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
-        'dsp_outlets', 'scope', 'style', 'export_offset_x',
-        'export_offset_y', 'debug', 'obj_name', 'obj_state'
-    ]
+    store_attrs = BASE_STORE_ATTRS
 
     style_defaults = {
         'porthole_width': 8,
@@ -419,17 +455,17 @@ class BaseElement (Store):
     def get_stage_position(self):
         if not self.container or not self.layer or self.container == self.layer:
             return (self.position_x, self.position_y)
-        else:
-            pos_x = self.position_x
-            pos_y = self.position_y
 
-            c = self.container
-            while isinstance(c, BaseElement):
-                pos_x += c.position_x
-                pos_y += c.position_y
-                c = c.container
+        pos_x = self.position_x
+        pos_y = self.position_y
 
-            return (pos_x, pos_y)
+        c = self.container
+        while isinstance(c, BaseElement):
+            pos_x += c.position_x
+            pos_y += c.position_y
+            c = c.container
+
+        return (pos_x, pos_y)
 
     def port_center(self, port_dir, port_num):
         ppos = self.port_position(port_dir, port_num)
@@ -537,7 +573,8 @@ class BaseElement (Store):
         layer_child = False
         if layer and layer == self.layer:
             return
-        elif self.layer:
+
+        if self.layer:
             if self.container == self.layer:
                 self.container = None
                 layer_child = True
@@ -559,6 +596,7 @@ class BaseElement (Store):
         return None
 
     def make_control_mode(self):
+        # should be overridden
         return None
 
     async def begin_edit(self):

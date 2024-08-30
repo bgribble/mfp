@@ -3,14 +3,14 @@
 slidemeter_element.py
 A patch element corresponding to a vertical or horizontal slider/meter
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 import math
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
-from .base_element import BaseElement
+from .base_element import BaseElement, ParamInfo
 from .modes.slider import SliderEditMode, SliderControlMode, DialEditMode, DialControlMode
 from . import ticks
 
@@ -22,12 +22,20 @@ class SlideMeterElement (BaseElement):
     Can be output-only or interactive
     Scale can be dB or linear
     '''
-    extra_params = [
-        'min_value', 'max_value', 'show_scale', 'scale',
-        'scale_font_size', 'scale_position', 'orientation',
-        'zeropoint'
-    ]
-    store_attrs = BaseElement.store_attrs + extra_params
+    extra_params = {
+        'min_value': ParamInfo(label="Min value", param_type=float),
+        'max_value': ParamInfo(label="Max value", param_type=float),
+        'show_scale': ParamInfo(label="Show scale", param_type=bool),
+        'scale': ParamInfo(label="Scale", param_type=int),
+        'scale_font_size': ParamInfo(label="Scale font size", param_type=float),
+        'scale_position': ParamInfo(label="Scale position", param_type=int),
+        'orientation': ParamInfo(label="Orientation", param_type=int),
+        'zeropoint': ParamInfo(label="Zero point", param_type=float),
+    }
+
+    store_attrs = {
+        **BaseElement.store_attrs, **extra_params
+    }
     display_type = "slidemeter"
     proc_type = "slidemeter"
 

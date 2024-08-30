@@ -8,7 +8,7 @@ from abc import ABCMeta, abstractmethod
 from mfp.gui_main import MFPGUI
 
 from .backend_interfaces import BackendInterface
-from .base_element import BaseElement
+from .base_element import BaseElement, ParamInfo
 
 
 class ConnectionElementImpl(BackendInterface, metaclass=ABCMeta):
@@ -21,9 +21,16 @@ class ConnectionElement(BaseElement):
     display_type = "connection"
     LINE_WIDTH = 1.5
 
-    store_attrs = BaseElement.store_attrs + [
-        "rotation", "dashed", "obj_1", "port_1", "obj_2", "port_2"
-    ]
+    # FIXME object state elements should be object types
+    store_attrs = {
+        **BaseElement.store_attrs,
+        "rotation": ParamInfo(label="Rotation", param_type=float),
+        "dashed": ParamInfo(label="Dashed", param_type=bool),
+        "obj_1": ParamInfo(label="From object", param_type=int),
+        "port_1": ParamInfo(label="From port", param_type=int),
+        "obj_2": ParamInfo(label="To object", param_type=int),
+        "port_2": ParamInfo(label="To port", param_type=int)
+    }
 
     def __init__(self, window, position_x, position_y):
 

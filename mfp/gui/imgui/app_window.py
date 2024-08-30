@@ -19,16 +19,16 @@ from ..app_window import AppWindow, AppWindowImpl
 from .inputs import imgui_process_inputs, imgui_key_map
 from .sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
 from ..event import EnterEvent, LeaveEvent
-
+from . import info_panel, menu_bar
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
     motion_overrides = ["drag", "zoom", "canvas_pos"]
 
-    INIT_WIDTH = 800
-    INIT_HEIGHT = 600
+    INIT_WIDTH = 900
+    INIT_HEIGHT = 700
 
-    INIT_INFO_PANEL_WIDTH = 150
+    INIT_INFO_PANEL_WIDTH = 250
     INIT_CONSOLE_PANEL_HEIGHT = 150
     MENU_HEIGHT = 21
 
@@ -165,12 +165,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ########################################
         # menu bar
         if imgui.begin_main_menu_bar():
-            if imgui.begin_menu("File"):
-                # Quit
-                clicked, _ = imgui.menu_item("Quit", "Ctrl+Q", False)
-                if clicked:
-                    keep_going = False
-                imgui.end_menu()
+            quit_selected = menu_bar.render(self)
+            if quit_selected:
+                keep_going = False
 
             imgui.end_main_menu_bar()
         # menu bar
@@ -218,12 +215,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             _, self.console_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    dockspace_id, int(imgui.Dir_.down), 0.25
+                    dockspace_id, imgui.Dir_.down, 0.25
                 )
             )
-            _, self.canvas_panel_id, self.info_panel_id = (
+            _, self.info_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    self.canvas_panel_id, int(imgui.Dir_.right), 0.75
+                    self.canvas_panel_id, imgui.Dir_.right, 0.25
                 )
             )
 
@@ -254,37 +251,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         canvas_size = canvas_node.size
 
         ########################################
-        # left-side info display
-        if self.info_panel_visible:
-            panel_height = self.window_height - self.MENU_HEIGHT
-            if self.console_panel_visible:
-                panel_height -= self.console_panel_height
-
-            imgui.begin(
-                "info_panel",
-                flags=(
-                    imgui.WindowFlags_.no_collapse
-                    | imgui.WindowFlags_.no_move
-                    | imgui.WindowFlags_.no_title_bar
-                ),
-            )
-            if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
-                self.selected_window = None
-            imgui.text("info panel")
-
-            imgui.end()
-
-        # left-side info display
-        ########################################
-
-        ########################################
         # canvas window
         canvas_width = canvas_size[0]
         canvas_height = canvas_size[1]
         canvas_x = 0
         if self.info_panel_visible:
             canvas_width -= self.info_panel_width
-            canvas_x += self.info_panel_width
         if self.console_panel_visible:
             canvas_height -= self.console_panel_height
 
@@ -351,6 +323,29 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.end()
 
         # canvas window
+        ########################################
+
+        ########################################
+        # right-side info display
+        if self.info_panel_visible:
+            panel_height = self.window_height - self.MENU_HEIGHT
+            if self.console_panel_visible:
+                panel_height -= self.console_panel_height
+
+            imgui.begin(
+                "info_panel",
+                flags=(
+                    imgui.WindowFlags_.no_collapse
+                    | imgui.WindowFlags_.no_move
+                    | imgui.WindowFlags_.no_title_bar
+                ),
+            )
+            if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
+                self.selected_window = None
+            info_panel.render(self)
+            imgui.end()
+
+        # right-side info display
         ########################################
 
         ########################################
