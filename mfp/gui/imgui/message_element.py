@@ -4,6 +4,7 @@ imgui/message_element.py -- imgui backend for message elements
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
+from flopsy import mutates
 from mfp import log
 from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit
@@ -32,6 +33,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         self.width = 35
         self.height = 25
 
+    @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         """
         message element
@@ -91,6 +93,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
     def draw_ports(self):
         super().draw_ports()
 
+    @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
         await super().move(x, y, **kwargs)
 
@@ -103,8 +106,10 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
     async def label_changed_cb(self, *args):
         pass
 
+    @mutates('width', 'height')
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
+
 
 class ImguiTransientMessageElementImpl(
     TransientMessageElement,

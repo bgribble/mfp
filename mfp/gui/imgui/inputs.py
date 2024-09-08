@@ -99,7 +99,8 @@ def imgui_process_inputs(app_window):
                     keyval=mfp_key,
                     unicode=None
                 )
-                MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
+                if app_window.selected_window == "canvas":
+                    MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
             elif mfp_key in key_defs.MOUSE_BUTTONS:
                 clickinfo = app_window.mouse_clicks.get(mfp_key)
                 click_count = 1
@@ -142,8 +143,8 @@ def imgui_process_inputs(app_window):
                         keyval=mfp_key,
                         unicode=chr(mfp_key)
                     )
-                    log.debug(f"[inputs] sending key-press-event {ev}")
-                    MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
+                    if app_window.selected_window == "canvas":
+                        MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
 
     if key_releases:
         for k in key_releases:
@@ -154,7 +155,8 @@ def imgui_process_inputs(app_window):
                     keyval=mfp_key,
                     unicode=None
                 )
-                MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
+                if app_window.selected_window == "canvas":
+                    MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
             elif mfp_key in key_defs.MOUSE_BUTTONS:
                 clickinfo = app_window.mouse_clicks.get(mfp_key)
                 click_count = 1
@@ -173,6 +175,7 @@ def imgui_process_inputs(app_window):
                     keyval=mfp_key,
                     unicode=chr(mfp_key)
                 )
-                MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
+                if app_window.selected_window == "canvas":
+                    MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
 
     app_window.keys_pressed = keys_currently_pressed

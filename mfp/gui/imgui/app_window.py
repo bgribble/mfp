@@ -45,6 +45,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.console_panel_height = self.INIT_CONSOLE_PANEL_HEIGHT
 
         self.canvas_panel_id = None
+        self.canvas_panel_width = self.INIT_WIDTH - self.INIT_INFO_PANEL_WIDTH
 
         self.frame_count = 0
         self.frame_timestamps = []
@@ -67,10 +68,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 if prev_pointer_obj != self.console_manager:
                     new_pointer_obj = self.console_manager
         if not new_pointer_obj and self.info_panel_visible:
-            if event.x < self.info_panel_width:
-                new_pointer_obj = None
-            else:
+            if event.x < self.canvas_panel_width:
                 new_pointer_obj = self
+            else:
+                new_pointer_obj = None
         if new_pointer_obj != prev_pointer_obj:
             if prev_pointer_obj:
                 await self.signal_emit("leave-event", LeaveEvent(target=prev_pointer_obj))
@@ -252,7 +253,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # canvas window
-        canvas_width = canvas_size[0]
+        self.canvas_panel_width = canvas_width = canvas_size[0]
         canvas_height = canvas_size[1]
         canvas_x = 0
         if self.info_panel_visible:

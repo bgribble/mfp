@@ -5,16 +5,13 @@ send/receive, signal/control - 4 types total
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
-import math
-
+from flopsy import mutates
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
-from mfp import log
 
 from ..colordb import ColorDB
 from ..base_element import BaseElement
 from ..via_element import (
-    ViaElement,
     SendViaElement,
     SendViaElementImpl,
     SendSignalViaElement,
@@ -55,6 +52,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         self.label.set_position((self.texture.get_width() - w) / 2.0, y)
         """
 
+    @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         """
         via element - no node drawn, just the label and the port
@@ -165,6 +163,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
             py += self.height
         return px, py
 
+    @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
         await super().move(x, y, **kwargs)
 
@@ -177,6 +176,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
     async def label_changed_cb(self, *args):
         pass
 
+    @mutates('width', 'height')
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
 

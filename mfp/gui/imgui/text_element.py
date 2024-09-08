@@ -4,6 +4,8 @@ imgui/text_element.py -- imgui backend for text (comment) elements
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
+from flopsy import mutates
+
 from mfp.utils import catchall
 from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit
@@ -26,6 +28,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         self.height = 12
         self.position_set = False
 
+    @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 1.0)
@@ -88,6 +91,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
     def draw_ports(self):
         super().draw_ports()
 
+    @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
         await super().move(x, y, **kwargs)
 
@@ -100,5 +104,6 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
     async def label_changed_cb(self, *args):
         pass
 
+    @mutates('width', 'height')
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)

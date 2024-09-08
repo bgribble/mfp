@@ -95,11 +95,11 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
     def draw_ports(self):
         super().draw_ports()
 
+    @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
         await super().move(x, y, **kwargs)
 
     async def delete(self, **kwargs):
-        log.debug(f"[processor] deleting {self}")
         await super().delete(**kwargs)
 
     def redraw(self):
@@ -108,5 +108,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
     async def label_changed_cb(self, *args):
         pass
 
+    @mutates('width', 'height')
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)

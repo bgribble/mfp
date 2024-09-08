@@ -6,7 +6,8 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
-from mfp import log
+from flopsy import mutates
+
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from mfp.gui.base_element import BaseElement
@@ -23,6 +24,7 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
     def __init__(self, window, position_x, position_y):
         super().__init__(window, position_x, position_y)
 
+    @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         """
         mostly we will be letting the imgui_node_editor handle links
@@ -62,6 +64,7 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
     def draw_ports(self):
         super().draw_ports()
 
+    @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
         await super().move(x, y, **kwargs)
 
@@ -77,5 +80,6 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
     async def label_changed_cb(self, *args):
         pass
 
+    @mutates('width', 'height')
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)

@@ -5,6 +5,8 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from imgui_bundle import imgui
+from mfp import log
+from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement
 
 
@@ -35,13 +37,42 @@ def render_param(app_window, param_name, param_type, param_value):
         app_window.info_panel_width * 0.3,
         40
     )
-    if param_type.param_type:
-        imgui.push_item_width(label_width)
-        imgui.text(param_type.label)
-        imgui.pop_item_width()
-        newval = imgui.input_text(f"##{param_name}", str(param_value))
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 2.0))
+    imgui.push_item_width(label_width)
+    imgui.text(param_type.label)
+    imgui.pop_item_width()
+    imgui.pop_style_var()
+    #imgui.same_line()
 
-    return newval
+    newval = param_value
+
+    if param_type.param_type is str:
+        changed, newval = imgui.input_text(
+            f"##{param_name}",
+            str(param_value),
+            imgui.InputTextFlags_.enter_returns_true
+        )
+    elif param_type.param_type is int:
+        changed, newval = imgui.input_int(
+            f"##{param_name}",
+            int(param_value),
+            step=1,
+            step_fast=10,
+            flags=imgui.InputTextFlags_.enter_returns_true
+        )
+    elif param_type.param_type is float:
+        changed, newval = imgui.input_double(
+            f"##{param_name}",
+            float(param_value),
+            step=1,
+            step_fast=10,
+            format="%.2f",
+            flags=imgui.InputTextFlags_.enter_returns_true
+        )
+
+    if changed:
+        return newval
+    return param_value
 
 
 def render_basics_tab(app_window):
@@ -66,6 +97,8 @@ def render_basics_tab(app_window):
             sel = app_window.selected[0]
             pvalue = getattr(sel, param)
             newval = render_param(app_window, param, ptype, pvalue)
+            if newval != pvalue:
+                MFPGUI().async_task(sel.store_setter(param)(newval))
 
     for param in any_params:
         ptype = BaseElement.store_attrs.get(param)
@@ -73,4 +106,5 @@ def render_basics_tab(app_window):
             sel = app_window.selected[0]
             pvalue = getattr(sel, param)
             newval = render_param(app_window, param, ptype, pvalue)
-
+            if newval != pvalue:
+                MFPGUI().async_task(sel.store_setter(param)(newval))

@@ -43,7 +43,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.port_elements = {}
 
         self.selection_set = False
-        self.position_Set = False
+        self.position_set = False
 
         self.hovered_state = False
 
@@ -56,6 +56,26 @@ class ImguiBaseElementImpl(BaseElementImpl):
     def unselect(self):
         self.selection_set = True
         return super().unselect()
+
+    def _SET_POSITION_X(self, new_pos, previous=None):
+        self.position_set = True
+        if previous:
+            old_pos = previous.get("position_x")
+        else:
+            old_pos = self.position_x
+
+        self.position_x = new_pos
+        return "position_x", old_pos
+
+    def _SET_POSITION_Y(self, new_pos, previous=None):
+        self.position_set = True
+        if previous:
+            old_pos = previous.get("position_y")
+        else:
+            old_pos = self.position_y
+
+        self.position_y = new_pos
+        return "position_y", old_pos
 
     async def move(self, x, y, **kwargs):
         self.position_set = True

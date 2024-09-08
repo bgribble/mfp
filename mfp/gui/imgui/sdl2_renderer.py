@@ -163,7 +163,8 @@ class ImguiSDL2Renderer:
                     keyval=None,
                     unicode=event.text.text.decode('utf-8')
                 )
-                MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
+                if self.app_window.selected_window == "canvas":
+                    MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
                 # for some reason SDL forces ALT-v to be ALT-INSERT
                 if event.key.keysym.scancode == SDL_SCANCODE_INSERT and event.key.keysym.mod & KMOD_ALT:
@@ -172,8 +173,8 @@ class ImguiSDL2Renderer:
                         keyval=None,
                         unicode="v"
                     )
-                    mfplog.debug(f"[renderer] sending key-press-event {ev}")
-                    MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
+                    if self.app_window.selected_window == "canvas":
+                        MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
                     skip_event = True
 
                 # imgui doesn't automatically remap keys, but we can

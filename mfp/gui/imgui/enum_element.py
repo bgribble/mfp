@@ -5,6 +5,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
+from flopsy import mutates
 
 from .base_element import ImguiBaseElementImpl
 from ..enum_element import (
@@ -26,7 +27,7 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
         self.width = 35
         self.height = 25
 
-
+    @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         """
         enum element
@@ -98,6 +99,7 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
     def draw_ports(self):
         super().draw_ports()
 
+    @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
         await super().move(x, y, **kwargs)
 
@@ -110,6 +112,7 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
     async def label_changed_cb(self, *args):
         pass
 
+    @mutates('width', 'height')
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
 
