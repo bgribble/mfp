@@ -6,6 +6,7 @@ A text element (comment) in a patch
 
 from abc import ABCMeta, abstractmethod
 
+from flopsy import saga
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .base_element import BaseElement
@@ -55,6 +56,11 @@ class TextElement (BaseElement):
     @classmethod
     def get_backend(cls, backend_name):
         return TextElementImpl.get_backend(backend_name)
+
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff):
+        if self.obj_type:
+            yield await self.label_edit_finish(None, f"{self.obj_type} {self.obj_args}")
 
     async def update(self):
         if not self.get_style('canvas-size'):

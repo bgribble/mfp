@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from flopsy import saga
 
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
@@ -56,6 +57,11 @@ class EnumElement (BaseElement):
     def get_backend(cls, backend_name):
         return EnumElementImpl.get_backend(backend_name)
 
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff):
+        if self.obj_type:
+            yield await self.label_edit_finish(None, f"{self.obj_type} {self.obj_args}")
+    
     def format_update(self):
         if self.scientific:
             oper = "e"

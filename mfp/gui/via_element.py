@@ -7,6 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from flopsy import saga
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -63,6 +64,11 @@ class ViaElement (BaseElement):
         if self.obj_id is None:
             (name, port) = self.parse_label(label_text)
             await self.create(self.proc_type, '"%s",%s' % (name, port))
+
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff):
+        if self.obj_type:
+            yield await self.label_edit_finish(None, f"{self.obj_type} {self.obj_args}")
 
     async def label_edit_start(self, *args):
         pass

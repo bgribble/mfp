@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from flopsy import saga
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -51,6 +52,11 @@ class MessageElement (BaseElement):
     @classmethod
     def get_backend(cls, backend_name):
         return MessageElementImpl.get_backend(backend_name)
+
+    @saga('obj_args')
+    async def recreate_element(self, action, state_diff):
+        if self.obj_type:
+            yield await self.label_edit_finish(None, f"{self.obj_args}")
 
     async def update(self):
         self.redraw()
