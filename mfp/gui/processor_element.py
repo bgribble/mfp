@@ -6,6 +6,10 @@ A patch element corresponding to a signal or control processor
 '''
 
 from abc import ABCMeta, abstractmethod
+
+from flopsy import saga
+
+from mfp import log
 from .text_widget import TextWidget
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
@@ -74,6 +78,11 @@ class ProcessorElement (BaseElement):
         if not self.show_label:
             self.label.show()
         await self.update()
+
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff):
+        if self.obj_type:
+            yield await self.label_edit_finish(None, f"{self.obj_type} {self.obj_args}")
 
     async def label_edit_finish(self, widget, text=None):
         if text is not None:

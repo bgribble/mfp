@@ -209,6 +209,9 @@ class GlobalMode (InputMode):
         enclosed = []
         selection_corners = [(px, py), (px+1, py), (px+1, py+1), (px, py+1)]
 
+        if self.window.selected_window != "canvas":
+            return
+
         if select_mode is None:
             if self.manager.pointer_obj is not None:
                 if self.manager.pointer_obj not in self.window.selected:

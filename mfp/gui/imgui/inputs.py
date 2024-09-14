@@ -115,14 +115,15 @@ def imgui_process_inputs(app_window):
                     button=1 + mfp_key - key_defs.MOUSE_LEFT,
                     click_count=click_count
                 )
-                MFPGUI().async_task(app_window.signal_emit("button-press-event", ev))
+                if app_window.selected_window == "canvas":
+                    MFPGUI().async_task(app_window.signal_emit("button-press-event", ev))
             elif any_dead_keys and mfp_key is not None:
-                # this is the case where a mod key is held down and another 
-                # key is pressed. the sdl2 backend generally doesn't emit 
+                # this is the case where a mod key is held down and another
+                # key is pressed. the sdl2 backend generally doesn't emit
                 # SDL_TEXTINPUT for these but does in some cases. We wamt to make
-                # sure we don't send double events if there's about to be a 
+                # sure we don't send double events if there's about to be a
                 # SDL_TEXTINPUT right after this.
-                need_event = True 
+                need_event = True
                 mfp_keys_pressed = [app_window.keymap.get(k) for k in keys_currently_pressed]
                 if key_defs.MOD_CTRL in mfp_keys_pressed:
                     txt_keys = [ord(k) for k in "109;,.'"]
@@ -130,7 +131,7 @@ def imgui_process_inputs(app_window):
                         need_event = False
                 if key_defs.MOD_ALT in mfp_keys_pressed:
                     nontxt_keys = [
-                        ord("x"), ord("c"), ord("v"), 
+                        ord("x"), ord("c"), ord("v"),
                         key_defs.KEY_ENTER, key_defs.KEY_UP, key_defs.KEY_DN,
                         key_defs.KEY_LEFT, key_defs.KEY_RIGHT
                     ]
@@ -161,14 +162,15 @@ def imgui_process_inputs(app_window):
                 clickinfo = app_window.mouse_clicks.get(mfp_key)
                 click_count = 1
                 if clickinfo:
-                    click_count = clickinfo[1] 
+                    click_count = clickinfo[1]
 
                 ev = ButtonReleaseEvent(
                     target=app_window.input_mgr.pointer_obj,
                     button=1 + mfp_key - key_defs.MOUSE_LEFT,
                     click_count=click_count
                 )
-                MFPGUI().async_task(app_window.signal_emit("button-release-event", ev))
+                if app_window.selected_window == "canvas":
+                    MFPGUI().async_task(app_window.signal_emit("button-release-event", ev))
             elif any_dead_keys and mfp_key is not None:
                 ev = KeyReleaseEvent(
                     target=app_window.input_mgr.pointer_obj,

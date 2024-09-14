@@ -98,7 +98,8 @@ def render_basics_tab(app_window):
             pvalue = getattr(sel, param)
             newval = render_param(app_window, param, ptype, pvalue)
             if newval != pvalue:
-                MFPGUI().async_task(sel.store_setter(param)(newval))
+                log.info(f"[info] setting {param} to {newval}")
+                MFPGUI().async_task(sel.dispatch_setter(param, newval))
 
     for param in any_params:
         ptype = BaseElement.store_attrs.get(param)
@@ -107,4 +108,4 @@ def render_basics_tab(app_window):
             pvalue = getattr(sel, param)
             newval = render_param(app_window, param, ptype, pvalue)
             if newval != pvalue:
-                MFPGUI().async_task(sel.store_setter(param)(newval))
+                MFPGUI().async_task(sel.dispatch_setter(param, newval))

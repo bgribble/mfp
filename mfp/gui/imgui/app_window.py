@@ -155,9 +155,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         from mfp.gui.modes.console_mode import ConsoleMode
         keep_going = True
 
-        # process input state and convert to events
-        imgui_process_inputs(self)
-
         ########################################
         # global style setup
         imgui.style_colors_light()
@@ -342,7 +339,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 ),
             )
             if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
-                self.selected_window = None
+                self.selected_window = "info"
             info_panel.render(self)
             imgui.end()
 
@@ -422,6 +419,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # status line at bottom
         ########################################
+
+        # process input state and convert to events
+        imgui_process_inputs(self)
 
         # clean up any weirdness from first frame
         if self.frame_count == 0:
