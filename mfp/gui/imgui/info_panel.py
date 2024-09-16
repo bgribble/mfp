@@ -37,16 +37,27 @@ def render_param(app_window, param_name, param_type, param_value):
         app_window.info_panel_width * 0.3,
         40
     )
-    imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 2.0))
+
+    if param_type.editable is False:
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
+    else:
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 4.0))
+
     imgui.push_item_width(label_width)
     imgui.text(param_type.label)
     imgui.pop_item_width()
-    imgui.pop_style_var()
-    #imgui.same_line()
+    # imgui.same_line()
 
     newval = param_value
+    changed = False
 
-    if param_type.param_type is str:
+    if param_type.editable is False:
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
+        imgui.text(
+            " " + str(param_value),
+        )
+        imgui.pop_style_var()
+    elif param_type.param_type is str:
         changed, newval = imgui.input_text(
             f"##{param_name}",
             str(param_value),
@@ -70,6 +81,7 @@ def render_param(app_window, param_name, param_type, param_value):
             flags=imgui.InputTextFlags_.enter_returns_true
         )
 
+    imgui.pop_style_var()
     if changed:
         return newval
     return param_value
@@ -98,7 +110,6 @@ def render_basics_tab(app_window):
             pvalue = getattr(sel, param)
             newval = render_param(app_window, param, ptype, pvalue)
             if newval != pvalue:
-                log.info(f"[info] setting {param} to {newval}")
                 MFPGUI().async_task(sel.dispatch_setter(param, newval))
 
     for param in any_params:
@@ -109,3 +120,15 @@ def render_basics_tab(app_window):
             newval = render_param(app_window, param, ptype, pvalue)
             if newval != pvalue:
                 MFPGUI().async_task(sel.dispatch_setter(param, newval))
+        elif len(app_window.selected) > 1:
+            min_val = min(
+                getattr(elem, param) for elem in app_window.selected
+            )
+            new_val = render_param(app_window, param, ptype, min_val)
+            if min_val != new_val:
+                delta = new_val - min_val
+                for elem in app_window.selected:
+                    old_val = getattr(elem, param)
+                    MFPGUI().async_task(
+                        elem.dispatch_setter(param, old_val + delta)
+                    )
