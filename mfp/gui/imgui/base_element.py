@@ -5,8 +5,9 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 import math
+from datetime import datetime
 from imgui_bundle import imgui, imgui_node_editor as nedit
-from flopsy import mutates, saga
+from flopsy import mutates
 
 from mfp import log
 from mfp.gui_main import MFPGUI
@@ -41,6 +42,9 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.badge_times = {}
         self.badge_current = None
         self.port_elements = {}
+
+        self.tooltip_info = {}
+        self.tooltip_timestamp = None
 
         self.selection_set = False
         self.position_set = False
@@ -88,6 +92,11 @@ class ImguiBaseElementImpl(BaseElementImpl):
         bump(self)
         for c in self.connections_out + self.connections_in:
             bump(c)
+
+    async def tooltip_update(self):
+        info = await MFPGUI().mfp.get_tooltip_info(self.obj_id)
+        self.tooltip_info = info
+        self.tooltip_timestamp = datetime.now()
 
     # every subclass should call this somewhere in the render method
     def render_sync_with_imgui(self):

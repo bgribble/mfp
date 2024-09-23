@@ -7,7 +7,6 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import asyncio
 import inspect
-import threading
 
 from .dsp_object import DSPObject
 from .method import MethodCall
@@ -136,6 +135,89 @@ class Processor:
         log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
                   % (self.obj_id, self.name, self.init_type, self.init_args))
         return True
+
+    def tooltip_info(self, port_dir=None, port_num=None, details=False):
+        tip = None
+        dsptip = None
+        hottip = None
+
+        info = {}
+
+        if port_dir == self.PORT_IN:
+            if port_num < len(self.doc_tooltip_inlet):
+                tip = self.doc_tooltip_inlet[port_num]
+            else:
+                tip = "No port tip defined"
+
+            if port_num in self.dsp_inlets:
+                dsptip = '(~) '
+            else:
+                dsptip = ''
+
+            if port_num in self.hot_inlets:
+                hottip = '(hot) '
+            else:
+                hottip = ''
+
+            info['port_tooltip'] = (
+                ('[%(init_type)s] inlet %(port_num)d: ' + dsptip + hottip + tip)
+                % dict(init_type=self.init_type, port_num=port_num)
+            )
+
+        if port_dir == self.PORT_OUT and port_num < len(self.doc_tooltip_outlet):
+            if port_num < len(self.doc_tooltip_outlet):
+                tip = self.doc_tooltip_outlet[port_num]
+            else:
+                tip = "No port tip defined"
+            if port_num in self.dsp_outlets:
+                dsptip = '(~) '
+            else:
+                dsptip = ''
+
+            info['port_tooltip'] = (
+                ('[%(init_type)s] outlet %(port_num)d: ' + dsptip + tip)
+                % dict(init_type=self.init_type, port_num=port_num)
+            )
+
+        # basic one-liner
+        info['tooltip'] = ('[%s]: ' + self.doc_tooltip_obj) % self.init_type
+
+        info['messages_in'] = self.count_in
+        info['messages_out'] = self.count_out
+        info['trigger_count'] = self.count_trigger
+        info['error_count'] = self.count_errors
+
+        if self.count_errors:
+            info['error_messages'] = []
+            for msg, count in self.error_info.items():
+                info['error_messages'].append((msg, count))
+
+        info['properties'] = {**self.properties}
+        info['tooltip_extra'] = self.tooltip_extra()
+
+        # OSC controllers
+        minfo = {}
+        for m in self.osc_methods:
+            s = minfo.setdefault(m[0], [])
+            s.append(m[1])
+        info['osc_handlers'] = {
+            m: minfo[m]
+            for m in sorted(minfo.keys())
+        }
+
+        # MIDI controllers
+        from .mfp_app import MFPApp
+        midi = []
+        if self.midi_filters:
+            paths = MFPApp().midi_mgr._filt2paths(self.midi_filters)
+            for p in paths:
+                midi.append(dict(
+                    channel=p[2] if p[2] is not None else "All",
+                    type=p[1] if p[1] is not None else "All",
+                    number=p[3] if p[3] is not None else "All"
+                ))
+        info['midi_handlers'] = midi
+        return info
 
     def tooltip(self, port_dir=None, port_num=None, details=False):
         tip = None
