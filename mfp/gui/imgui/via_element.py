@@ -34,8 +34,8 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
     LABEL_Y = 0
 
     style_defaults = {
-        'porthole_width': 8,
-        'porthole_height': 8,
+        'porthole-width': 8,
+        'porthole-height': 8,
     }
 
     def __init__(self, window, x, y):
@@ -114,7 +114,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
 
         outport = False
         pw = self.VIA_SIZE
-        half_height = self.get_style('porthole_height') / 2.0
+        half_height = self.get_style('porthole-height') / 2.0
         if self.GLYPH_STYLE in ("empty_circled", "filled_circled"):
             arcsize = self.VIA_SIZE / 3.5
             linewidth = 1

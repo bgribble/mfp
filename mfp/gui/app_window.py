@@ -15,7 +15,7 @@ from .input_manager import InputManager
 from .layer import Layer
 from .console_manager import ConsoleManager
 from .prompter import Prompter
-from .colordb import ColorDB
+from .colordb import ColorDB, RGBAColor
 from .base_element import BaseElement
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
@@ -179,6 +179,8 @@ class AppWindow (SignalMixin):
 
         self.selected_patch = None
         self.selected_layer = None
+        self.selected_window = "canvas"
+
         self.selected = []
 
         self.load_in_progress = 0
@@ -253,8 +255,10 @@ class AppWindow (SignalMixin):
             return None
         elif isinstance(rgba, str):
             return ColorDB().find(rgba)
-        else:
+        elif isinstance(rgba, (list, tuple)):
             return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
+        else:
+            return rgba
 
     def load_start(self):
         self.load_in_progress += 1

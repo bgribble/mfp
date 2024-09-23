@@ -84,7 +84,7 @@ class ClutterBaseElementImpl(BaseElementImpl):
         if self.badge_current is None:
             return
         btext, bcolor = self.badge_current
-        halfbadge = self.get_style('badge_size') / 2.0
+        halfbadge = self.get_style('badge-size') / 2.0
 
         color = ColorDB().normalize(bcolor)
         ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
@@ -105,14 +105,14 @@ class ClutterBaseElementImpl(BaseElementImpl):
         if self.group is None:
             return
 
-        badgesize = self.get_style('badge_size')
+        badgesize = self.get_style('badge-size')
         if self.badge is None:
             self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
             self.app_window.event_sources[self.badge] = self
             self.group.add_actor(self.badge)
             self.badge.connect("draw", self.draw_badge_cb)
 
-        ypos = min(self.get_style('porthole_height') + self.get_style('porthole_border'),
+        ypos = min(self.get_style('porthole-height') + self.get_style('porthole-border'),
                    self.height - badgesize / 2.0)
         self.badge.set_position(self.width - badgesize/2.0, ypos)
         tagged = False
@@ -158,8 +158,8 @@ class ClutterBaseElementImpl(BaseElementImpl):
             return
 
         ports_done = []
-        port_height = self.get_style('porthole_height')
-        port_width = self.get_style('porthole_width')
+        port_height = self.get_style('porthole-height')
+        port_width = self.get_style('porthole-width')
         
         def confport(pid, px, py):
             pobj = self.port_elements.get(pid)

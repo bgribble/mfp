@@ -40,10 +40,10 @@ class ButtonElement (BaseElement):
     proc_type = "var"
 
     style_defaults = {
-        'porthole_height': 2,
-        'porthole_width': 6,
-        'porthole_minspace': 8,
-        'porthole_border': 3,
+        'porthole-height': 2,
+        'porthole-width': 6,
+        'porthole-minspace': 8,
+        'porthole-border': 3,
         'fill-color:lit': 'default-alt-fill-color',
         'text-color:lit': 'default-light-text-color'
     }

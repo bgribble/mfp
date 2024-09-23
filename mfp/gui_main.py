@@ -6,10 +6,12 @@ Gui for MFP -- main thread
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
+import argparse
 import asyncio
 import inspect
 import threading
-import argparse
+from collections import defaultdict
+
 from datetime import datetime
 
 import gbulb
@@ -21,6 +23,8 @@ from flopsy import Store
 from mfp import log
 from mfp.utils import AsyncTaskManager
 
+from mfp.gui.colordb import ColorDB, RGBAColor
+from mfp.gui.param_info import ParamInfo, ListOfInt
 from .singleton import Singleton
 from .mfp_command import MFPCommand
 from .gui_command import GUICommand
@@ -42,19 +46,47 @@ class MFPGUI (Singleton):
         self.async_task = AsyncTaskManager()
         self.backend_name = None
 
+        self.style_vars = {
+            'autoplace-dx': ParamInfo(label="X offset for autoplace", param_type=float),
+            'axis-color': ParamInfo(label="Plot axis color", param_type=RGBAColor),
+            'badge-edit-color': ParamInfo(label="Badge color (edit)", param_type=RGBAColor),
+            'badge-error-color': ParamInfo(label="Badge color (error)", param_type=RGBAColor),
+            'badge-learn-color': ParamInfo(label="Badge color (learn)", param_type=RGBAColor),
+            'badge-size': ParamInfo(label="Badge size", param_type=float),
+            'canvas-color': ParamInfo(label="Canvas background color", param_type=RGBAColor),
+            'draw-ports': ParamInfo(label="When to draw inlet/outlet ports", param_type=str),
+            'fill-color': ParamInfo(label="Element fill color", param_type=RGBAColor),
+            'fill-color:debug': ParamInfo(label="Element fill color (debug)", param_type=RGBAColor),
+            'fill-color:selected':ParamInfo(label="Element fill color (selected)", param_type=RGBAColor),
+            'font-face': ParamInfo(label="Font faces", param_type=str),
+            'font-size': ParamInfo(label="Font size", param_type=float),
+            'padding': ParamInfo(label="Element padding", param_type=ListOfInt),
+            'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
+            'porthole-height': ParamInfo(label="Inlet/outlet port width", param_type=float),
+            'porthole-width': ParamInfo(label="Inlet/outlet port width", param_type=float),
+            'porthole-minspace': ParamInfo(label="Inlet/outlet min space", param_type=float),
+            'stroke-color': ParamInfo(label="Element outline color", param_type=RGBAColor),
+            'stroke-color:debug': ParamInfo(label="Element outline color (debug)", param_type=RGBAColor),
+            'stroke-color:selected': ParamInfo(label="Element outline color (selected)", param_type=RGBAColor),
+            'text-color': ParamInfo(label="Text color", param_type=RGBAColor),
+            'text-color:selected': ParamInfo(label="Text color (selected)", param_type=RGBAColor),
+            'text-cursor-color': ParamInfo(label="Text cursor color", param_type=RGBAColor),
+        }
+
+
         self.style_defaults = {
             'font-face': 'Cantarell,Sans',
             'font-size': 16,
-            'canvas-color': 'default-canvas-color',
-            'stroke-color': 'default-stroke-color',
-            'fill-color': 'default-fill-color',
-            'text-color': 'default-text-color',
-            'stroke-color:selected': 'default-stroke-color-selected',
-            'stroke-color:debug': 'default-stroke-color-debug',
-            'fill-color:selected': 'default-fill-color-selected',
-            'fill-color:debug': 'default-fill-color-debug',
-            'text-color:selected': 'default-text-color-selected',
-            'text-cursor-color': 'default-text-cursor-color'
+            'canvas-color': ColorDB().find('default-canvas-color'),
+            'stroke-color': ColorDB().find('default-stroke-color'),
+            'fill-color': ColorDB().find('default-fill-color'),
+            'text-color': ColorDB().find('default-text-color'),
+            'stroke-color:selected': ColorDB().find('default-stroke-color-selected'),
+            'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
+            'fill-color:selected': ColorDB().find('default-fill-color-selected'),
+            'fill-color:debug': ColorDB().find('default-fill-color-debug'),
+            'text-color:selected': ColorDB().find('default-text-color-selected'),
+            'text-cursor-color': ColorDB().find('default-text-cursor-color'),
         }
         self.appwin = None
 
@@ -162,12 +194,14 @@ async def main():
 
     from mfp.gui import backends  # noqa
 
+    ColorDB.backend_name = backend
+
+    setup_default_colors()
+
     gui = MFPGUI()
     gui.mfp = mfp_connection
     gui.debug = debug
     gui.backend_name = backend
-
-    setup_default_colors()
 
     gui.appwin = AppWindow.build()
 

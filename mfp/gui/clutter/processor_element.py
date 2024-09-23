@@ -48,8 +48,8 @@ class ClutterProcessorElementImpl(ProcessorElementImpl, ClutterBaseElementImpl, 
 
         new_w = None
         num_ports = max(self.num_inlets, self.num_outlets)
-        port_width = (num_ports * self.get_style('porthole_minspace')
-                      + 2*self.get_style('porthole_border'))
+        port_width = (num_ports * self.get_style('porthole-minspace')
+                      + 2*self.get_style('porthole-border'))
 
         new_w = max(35, port_width, label_width, box_width)
 

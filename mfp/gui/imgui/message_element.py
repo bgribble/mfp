@@ -23,7 +23,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
     backend_name = "imgui"
 
     style_defaults = {
-        'porthole_border': 6,  # allow for rounded corners
+        'porthole-border': 6,  # allow for rounded corners
         'padding': (4, 2, 4, 4)
     }
 

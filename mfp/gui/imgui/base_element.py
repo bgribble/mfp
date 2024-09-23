@@ -138,7 +138,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
         if not self.badge_current:
             return
 
-        badgesize = self.get_style('badge_size')
+        badgesize = self.get_style('badge-size')
         halfbadge = badgesize / 2.0
         ypos = 0
         xpos = self.width
@@ -171,8 +171,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
         out_port = port_id[0] == BaseElement.PORT_OUT
         draw_list = imgui.get_window_draw_list()
 
-        pw = self.get_style('porthole_width')
-        ph = self.get_style('porthole_height')
+        pw = self.get_style('porthole-width')
+        ph = self.get_style('porthole-height')
         points = semicircle_points(
             px,
             py + (ph if out_port else 0),
@@ -210,8 +210,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
             nedit.PinKind.input if port_id[0] == BaseElement.PORT_IN else nedit.PinKind.output
         )
 
-        pw = self.get_style('porthole_width')
-        ph = self.get_style('porthole_height')
+        pw = self.get_style('porthole-width')
+        ph = self.get_style('porthole-height')
 
         outport = port_id[0] == BaseElement.PORT_OUT
         nedit.pin_rect(

@@ -7,13 +7,12 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass
-from typing import Optional
 from flopsy import Store, mutates
 from mfp.gui_main import MFPGUI
 from mfp import log
-from .colordb import ColorDB
+from .colordb import ColorDB, RGBAColor
 from .backend_interfaces import BackendInterface
+from .param_info import ParamInfo, ListOfInt
 
 
 class BaseElementImpl(metaclass=ABCMeta):
@@ -50,18 +49,6 @@ class BaseElementImpl(metaclass=ABCMeta):
         pass
 
 
-@dataclass
-class ParamInfo:
-    label: str
-    editable: Optional[bool] = True
-    tooltip: Optional[str] = ""
-    param_type: Optional[type] = str
-
-
-class ListOfInt(list):
-    pass
-
-
 BASE_STORE_ATTRS = {
     'obj_type': ParamInfo(label="Type", param_type=str),
     'obj_args': ParamInfo(label="Creation args", param_type=str),
@@ -82,7 +69,7 @@ BASE_STORE_ATTRS = {
     'num_outlets': ParamInfo(label="# outlets", param_type=int, editable=False),
     'dsp_inlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
     'dsp_outlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
-    'style': ParamInfo(label="Lexical scope", param_type=dict),
+    'style': ParamInfo(label="Style variables", param_type=dict),
     'export_offset_x': ParamInfo(label="Export offset X", param_type=float),
     'export_offset_y': ParamInfo(label="Export offset Y", param_type=float),
     'debug': ParamInfo(label="Enable debugging", param_type=bool),
@@ -94,17 +81,13 @@ class BaseElement (Store):
     Parent class of elements represented in the patch window
     '''
     store_attrs = BASE_STORE_ATTRS
-
     style_defaults = {
-        'porthole_width': 8,
-        'porthole_height': 4,
-        'porthole_border': 1,
-        'porthole_minspace': 11,
+        'porthole-width': 8,
+        'porthole-height': 4,
+        'porthole-border': 1,
+        'porthole-minspace': 11,
         'padding': [4, 2, 4, 2],  # left, top, right, bottom
-        'badge_size': 15,
-        'badge-edit-color': 'default-edit-badge-color',
-        'badge-learn-color': 'default-learn-badge-color',
-        'badge-error-color': 'default-error-badge-color'
+        'badge-size': 15,
     }
 
     PORT_IN = 0
@@ -151,6 +134,13 @@ class BaseElement (Store):
         self.layername = None
 
         self.tags = {}
+
+        # these can't be initialized until there's a backend
+        BaseElement.style_defaults.update({
+            'badge-edit-color': ColorDB().find('default-edit-badge-color'),
+            'badge-learn-color': ColorDB().find('default-learn-badge-color'),
+            'badge-error-color': ColorDB().find('default-error-badge-color')
+        })
 
         # UI state
         self.position_x = x
@@ -259,10 +249,11 @@ class BaseElement (Store):
         if not rgba:
             log.error('Could not find color %s in %s' % (colorspec, self._all_styles))
             return ColorDB().find(64, 64, 64, 255)
-        elif isinstance(rgba, str):
+        if isinstance(rgba, str):
             return ColorDB().find(rgba)
-        else:
+        if isinstance(rgba, (list, tuple)):
             return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
+        return rgba
 
     def combine_styles(self):
         styles = {}
@@ -474,7 +465,7 @@ class BaseElement (Store):
         return (pos_x + ppos[0], pos_y + ppos[1])
 
     def port_size(self):
-        return (self.get_style('porthole_width'), self.get_style('porthole_height'))
+        return (self.get_style('porthole-width'), self.get_style('porthole-height'))
 
     def port_position(self, port_dir, port_num):
         """
@@ -484,28 +475,28 @@ class BaseElement (Store):
         """
         w = self.width
         h = self.height
-        port_width = self.get_style('porthole_width')
+        port_width = self.get_style('porthole-width')
         # inlet
         if port_dir == BaseElement.PORT_IN:
             if self.num_inlets < 2:
                 spc = 0
             else:
-                spc = max(self.get_style('porthole_minspace'),
+                spc = max(self.get_style('porthole-minspace'),
                           ((w
                             - port_width
-                            - 2.0 * self.get_style('porthole_border'))
+                            - 2.0 * self.get_style('porthole-border'))
                            / (self.num_inlets - 1.0)))
-            return (self.get_style('porthole_border') + spc * port_num + port_width / 2.0, 0)
+            return (self.get_style('porthole-border') + spc * port_num + port_width / 2.0, 0)
 
         # outlet
         if self.num_outlets < 2:
             spc = 0
         else:
-            spc = max(self.get_style('porthole_minspace'),
+            spc = max(self.get_style('porthole-minspace'),
                       ((w - port_width
-                        - 2.0 * self.get_style('porthole_border'))
+                        - 2.0 * self.get_style('porthole-border'))
                        / (self.num_outlets - 1.0)))
-        return (self.get_style('porthole_border') + spc * port_num + port_width / 2.0, h)
+        return (self.get_style('porthole-border') + spc * port_num + port_width / 2.0, h)
 
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',

@@ -30,6 +30,8 @@ class RGBAColor(Serializable):
             blue=self.blue,
             alpha=self.alpha
         )
+    def __str__(self):
+        return f"{int(self.red):02x}{int(self.green):02x}{int(self.blue):02x}{int(self.alpha):02x}"
 
     @classmethod
     def load(cls, propdict):
@@ -66,10 +68,11 @@ class ColorDBBackend(BackendInterface, DelegateMixin, metaclass=ABCMeta):
 class ColorDB (Singleton):
     named_colors = {}
     rgba_colors = {}
+    backend_name = None
 
     def __init__(self):
         from ..gui_main import MFPGUI
-        factory = ColorDBBackend.get_backend(MFPGUI().backend_name)
+        factory = ColorDBBackend.get_backend(ColorDB.backend_name)
         self.backend = factory(self)
         super().__init__()
 
