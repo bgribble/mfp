@@ -32,6 +32,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
             self.tags = {}
             self.width = None
             self.height = None
+            self.min_width = 0
+            self.min_height = 0
             self.position_z = None
             self.edit_mode = None
             self.editable = None
@@ -61,6 +63,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.selection_set = True
         return super().unselect()
 
+    # position_x and position_y need special handling because
+    # the imgui canvas can change them independently
     def _SET_POSITION_X(self, new_pos, previous=None):
         self.position_set = True
         if previous:

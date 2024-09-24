@@ -28,7 +28,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     INIT_WIDTH = 900
     INIT_HEIGHT = 700
 
-    INIT_INFO_PANEL_WIDTH = 250
+    INIT_INFO_PANEL_WIDTH = 300
     INIT_CONSOLE_PANEL_HEIGHT = 150
     MENU_HEIGHT = 21
 
@@ -218,7 +218,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             )
             _, self.info_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    self.canvas_panel_id, imgui.Dir_.right, 0.25
+                    self.canvas_panel_id, imgui.Dir_.right, 0.33
                 )
             )
 

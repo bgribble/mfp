@@ -28,10 +28,10 @@ class ImguiColorDBBackend(ColorDBBackend):
 
     def im_colvec(self, color):
         return (
-            color.red,
-            color.green,
-            color.blue,
-            color.alpha
+            color.red / 255.0,
+            color.green / 255.0,
+            color.blue / 255.0,
+            color.alpha / 255.0
         )
 
     def normalize(self, color):

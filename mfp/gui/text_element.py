@@ -11,7 +11,7 @@ from mfp.gui_main import MFPGUI
 from mfp import log
 from .base_element import BaseElement
 from .backend_interfaces import BackendInterface
-
+from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
 from .modes.clickable import ClickableControlMode
 from .text_widget import TextWidget
@@ -30,11 +30,7 @@ class TextElement (BaseElement):
     ELBOW_ROOM = 5
 
     style_defaults = {
-        'fill-color': 'transparent',
-        'fill-color:selected': 'transparent',
         'border': False,
-        'border-color': 'default-stroke-color',
-        'canvas-size': None,
         'draw-ports': 'selected'
     }
 
@@ -45,6 +41,12 @@ class TextElement (BaseElement):
         self.default = ''
 
         self.param_list.extend(['value', 'clickchange', 'default'])
+
+        # these can't be initialized until there's a backend
+        type(self).style_defaults.update({
+            'fill-color': ColorDB().find('transparent'),
+            'fill-color:selected': ColorDB().find('transparent'),
+        })
 
         self.label = TextWidget.build(self)
         self.label.set_color(self.get_color('text-color'))
@@ -63,11 +65,10 @@ class TextElement (BaseElement):
             yield await self.label_edit_finish(None, f"{self.obj_type} {self.obj_args}")
 
     async def update(self):
-        if not self.get_style('canvas-size'):
-            await self.set_size(
-                self.label.get_width() + 2*self.ELBOW_ROOM,
-                self.label.get_height() + self.ELBOW_ROOM
-            )
+        await self.set_size(
+            self.label.get_width() + 2*self.ELBOW_ROOM,
+            self.label.get_height() + self.ELBOW_ROOM
+        )
         self.redraw()
         self.draw_ports()
 
@@ -104,8 +105,7 @@ class TextElement (BaseElement):
         if len(self.value) > 0:
             self.label.set_markup(self.value)
         else:
-            size_set = self.get_style('canvas-size')
-            self.value = self.default or (not size_set and '...') or ''
+            self.value = self.default or '...'
             self.label.set_markup(self.value)
 
     def unclicked(self):
@@ -148,10 +148,6 @@ class TextElement (BaseElement):
         newsize = None
         if 'style' in params:
             newstyle = params.get('style')
-            if 'canvas-size' in newstyle:
-                newsize = newstyle.get('canvas-size')
-                params['width'] = newsize[0]
-                params['height'] = newsize[1]
 
         await super().configure(params)
 

@@ -42,6 +42,7 @@ def render(app_window):
                 render_bindings_tab(app_window)
                 imgui.end_tab_item()
             if imgui.begin_tab_item("Activity")[0]:
+                render_activity_tab(app_window)
                 imgui.end_tab_item()
         imgui.end_tab_bar()
 
@@ -150,7 +151,9 @@ def render_basics_tab(app_window):
         'display_type',
         'obj_name',
         'scope',
-        'layername'
+        'layername',
+        'min_width',
+        'min_height',
     ]
 
     any_params = [
@@ -244,7 +247,6 @@ def render_style_tab(app_window):
                 imgui.end_tab_item()
 
         if style and style_changed:
-            log.debug(f"setting element style for {sel} to: {style} was {sel.style}")
             MFPGUI().async_task(sel.dispatch_setter('style', style))
 
         imgui.end_tab_bar()
@@ -252,48 +254,98 @@ def render_style_tab(app_window):
 
 def render_bindings_tab(app_window):
     sel = app_window.selected[0]
-    if sel.tooltip_info:
+    if not sel.tooltip_info:
+        return
 
-        imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
-        imgui.text("OSC bindings")
-        if imgui.begin_table(
-            "##osc_bindings",
-            2,
-            imgui.TableFlags_.row_bg | imgui.TableFlags_.borders | imgui.TableFlags_.borders_h | imgui.TableFlags_.borders_v
-        ):
-            # headers
-            imgui.table_setup_column("Route")
-            imgui.table_setup_column("Types")
-            imgui.table_headers_row()
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
+    imgui.text("OSC bindings")
+    if imgui.begin_table(
+        "##osc_bindings",
+        2,
+        (
+            imgui.TableFlags_.row_bg
+            | imgui.TableFlags_.borders
+            | imgui.TableFlags_.borders_h
+            | imgui.TableFlags_.borders_v
+            | imgui.TableFlags_.borders_v
+            | imgui.TableFlags_.sizing_fixed_fit
+        )
+    ):
+        # headers
+        imgui.table_setup_column("Route")
+        imgui.table_setup_column("Types", 0, 60)
+        imgui.table_headers_row()
 
-            for route, handler in sel.tooltip_info.get("osc_handlers", {}).items():
-                imgui.table_next_row()
-                imgui.table_set_column_index(0)
-                imgui.text(route)
-                imgui.table_set_column_index(1)
-                imgui.text(str(handler))
-            imgui.end_table()
-        imgui.text("MIDI bindings")
+        for route, handler in sel.tooltip_info.get("osc_handlers", {}).items():
+            imgui.table_next_row()
+            imgui.table_set_column_index(0)
+            imgui.text(route)
+            imgui.table_set_column_index(1)
+            imgui.text(str(handler))
+        imgui.end_table()
+    imgui.text("MIDI bindings")
 
-        if imgui.begin_table(
-            "##midi_bindings",
-            3,
-            imgui.TableFlags_.row_bg | imgui.TableFlags_.borders | imgui.TableFlags_.borders_h | imgui.TableFlags_.borders_v
-        ):
-            # headers
-            imgui.table_setup_column("Chan")
-            imgui.table_setup_column("Note")
-            imgui.table_setup_column("Type")
-            imgui.table_headers_row()
+    if imgui.begin_table(
+        "##midi_bindings",
+        3,
+        imgui.TableFlags_.row_bg | imgui.TableFlags_.borders | imgui.TableFlags_.borders_h | imgui.TableFlags_.borders_v
+    ):
+        # headers
+        imgui.table_setup_column("Chan")
+        imgui.table_setup_column("Note")
+        imgui.table_setup_column("Type")
+        imgui.table_headers_row()
 
-            for binding in sel.tooltip_info.get("midi_handlers", []):
-                imgui.table_next_row()
-                imgui.table_set_column_index(0)
-                imgui.text(binding["channel"])
-                imgui.table_set_column_index(1)
-                imgui.text(binding["note"])
-                imgui.table_set_column_index(2)
-                imgui.text(binding["type"])
-            imgui.end_table()
-        imgui.pop_style_var()
+        for binding in sel.tooltip_info.get("midi_handlers", []):
+            imgui.table_next_row()
+            imgui.table_set_column_index(0)
+            imgui.text(binding["channel"])
+            imgui.table_set_column_index(1)
+            imgui.text(binding["note"])
+            imgui.table_set_column_index(2)
+            imgui.text(binding["type"])
+        imgui.end_table()
+    imgui.pop_style_var()
 
+
+def render_activity_tab(app_window):
+
+    sel = app_window.selected[0]
+    if not sel.tooltip_info:
+        return
+    info = sel.tooltip_info
+
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
+
+    imgui.text(f"Messages in: {info.get('messages_in')}")
+    imgui.text(f"Messages out: {info.get('messages_out')}")
+    imgui.text(f"Times triggered: {info.get('trigger_count')}")
+    imgui.text('')
+    imgui.text(f"Error count: {info.get('error_count')}")
+
+    imgui.text("Error messages:")
+    if imgui.begin_table(
+        "##error_messages",
+        2,
+        (
+            imgui.TableFlags_.row_bg
+            | imgui.TableFlags_.borders
+            | imgui.TableFlags_.borders_h
+            | imgui.TableFlags_.borders_v
+            | imgui.TableFlags_.sizing_fixed_fit
+        )
+    ):
+        # headers
+        imgui.table_setup_column("Count", 0, 50)
+        imgui.table_setup_column("Message")
+        imgui.table_headers_row()
+
+        for message, count in info.get('error_messages', []):
+            imgui.table_next_row()
+            imgui.table_set_column_index(0)
+            imgui.text(str(count))
+            imgui.table_set_column_index(1)
+            imgui.text(message)
+        imgui.end_table()
+
+    imgui.pop_style_var()

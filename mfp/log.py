@@ -104,11 +104,16 @@ def debug(*parts, **kwargs):
         write_log_entry(make_log_entry(module, *parts), level=0)
 
 
-def debug_traceback():
+def debug_traceback(exc=None):
     import traceback
-    tb = traceback.format_stack()
-    for l in tb[:-2]:
-        debug(l)
+    if exc:
+        tb = traceback.format_exception(exc)
+        for l in tb:
+            debug(l)
+    else:
+        tb = traceback.format_stack()
+        for l in tb[:-2]:
+            debug(l)
 
 
 def logprint(*parts):

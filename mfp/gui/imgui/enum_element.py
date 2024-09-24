@@ -59,12 +59,23 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
         nedit.begin_node(self.node_id)
 
         # node content: just the label
+        imgui.begin_group()
         self.label.render()
+
+        content_w, content_h = imgui.get_item_rect_size()
+
+        if content_w < self.min_width:
+            imgui.same_line()
+            imgui.dummy([self.min_width - content_w, 1])
+
+        if content_h < self.min_height:
+            imgui.dummy([1, self.min_height - content_h])
+        imgui.end_group()
 
         # connections
         self.render_ports()
 
-        # status badge, is needed
+        # status badge, if needed
         self.render_badge()
 
         nedit.end_node()

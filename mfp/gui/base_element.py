@@ -7,7 +7,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
-from flopsy import Store, mutates
+from flopsy import Store, mutates, saga
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB, RGBAColor
@@ -62,6 +62,8 @@ BASE_STORE_ATTRS = {
     'position_z': ParamInfo(label="Z position", param_type=float),
     'width': ParamInfo(label="Width", param_type=float, editable=False),
     'height': ParamInfo(label="Height", param_type=float, editable=False),
+    'min_width': ParamInfo(label="Min width", param_type=float),
+    'min_height': ParamInfo(label="Min height", param_type=float),
     'update_required': ParamInfo(label="Update required", param_type=bool),
     'no_export': ParamInfo(label="No export", param_type=bool),
     'is_export': ParamInfo(label="Is export", param_type=bool),
@@ -148,6 +150,8 @@ class BaseElement (Store):
         self.position_z = 0
         self.export_offset_x = 0
         self.export_offset_y = 0
+        self.min_width = 0
+        self.min_height = 0
         self.width = None
         self.height = None
         self.drag_start_x = None
@@ -198,6 +202,9 @@ class BaseElement (Store):
 
         if self.width and self.height and not changed_w and not changed_h:
             return
+
+        width = max(width, self.min_width)
+        height = max(height, self.min_height)
 
         if update_state:
             if changed_w:
@@ -338,6 +345,11 @@ class BaseElement (Store):
 
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED
+
+    @saga('style')
+    async def update_all_styles(self, action, state_diff):
+        self._all_styles = self.combine_styles()
+        yield None
 
     async def create(self, obj_type, init_args):
         scopename = self.layer.scope

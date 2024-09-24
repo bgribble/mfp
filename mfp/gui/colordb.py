@@ -77,6 +77,9 @@ class ColorDB (Singleton):
         super().__init__()
 
     def find(self, *colorinfo):
+        if not isinstance(self, ColorDB):
+            raise ValueError("ColorDB methods must be called with ColorDB().method()")
+
         ll = len(colorinfo)
         if ll > 2:
             # RGB or RGBA color values
