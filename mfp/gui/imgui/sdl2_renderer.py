@@ -163,7 +163,7 @@ class ImguiSDL2Renderer:
                     keyval=None,
                     unicode=event.text.text.decode('utf-8')
                 )
-                if self.app_window.selected_window == "canvas":
+                if self.app_window.selected_window != "info":
                     MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
                 # for some reason SDL forces ALT-v to be ALT-INSERT
@@ -173,7 +173,7 @@ class ImguiSDL2Renderer:
                         keyval=None,
                         unicode="v"
                     )
-                    if self.app_window.selected_window == "canvas":
+                    if self.app_window.selected_window != "info":
                         MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
                     skip_event = True
 
