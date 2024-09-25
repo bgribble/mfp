@@ -92,8 +92,15 @@ class GlobalMode (InputMode):
         self.window.relative_zoom(ratio)
 
     def inspect(self):
-        from flopsy import Store
-        Store.show_inspector(event_loop=MFPGUI().async_task.asyncio_loop)
+        """
+        show the flopsy state inspector (debugger)
+        """
+        from flopsy import Inspector
+        if self.window.inspector is None:
+            self.window.inspector = Inspector(
+                title="State inspector", event_loop=MFPGUI().async_task.asyncio_loop\
+            )
+        self.window.inspector.focus()
 
     async def toggle_console(self):
         await self.window.signal_emit("toggle-console")

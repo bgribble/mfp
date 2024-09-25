@@ -420,10 +420,14 @@ def configure(conf):
     conf.env.PKGCONF_LIBS = uselibs
 
     pip_libs = [
-        "posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy",
-        "pynose", "yappi", "cython", "pyliblo", "gbulb", "carp-rpc", "flopsy",
-        "pyopengl", "imgui_bundle", "Pillow"
+        "posix_ipc", "simplejson", "numpy",
+        "pynose", "yappi", "cython", "pyliblo",
+        ("cairo", "pycairo"), "gbulb",               # clutter only
+        "pyopengl", "sdl", "imgui_bundle", "Pillow", # imgui only
+        "carp-rpc", "flopsy",                        # my other libs
     ]
+
+    # all only needed for clutter backend
     gi_libs = ["Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
     pip_notfound = []

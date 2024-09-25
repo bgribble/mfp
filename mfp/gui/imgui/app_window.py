@@ -52,6 +52,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.selected_window = "canvas"
 
+        self.inspector = None
+
         self.log_text = ""
 
         self.user_zoom_set = False
@@ -213,7 +215,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             _, self.console_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    dockspace_id, imgui.Dir_.down, 0.25
+                    dockspace_id, imgui.Dir_.down, 0.30
                 )
             )
             _, self.info_panel_id, self.canvas_panel_id = (
@@ -419,6 +421,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # status line at bottom
         ########################################
+
+        ########################################
+        # flopsy inspector should be in an independent window
+
+        if self.inspector is not None:
+            inspector_keep_going = self.inspector.render()
+            if not inspector_keep_going:
+                self.inspector = None
 
         # process input state and convert to events
         imgui_process_inputs(self)
