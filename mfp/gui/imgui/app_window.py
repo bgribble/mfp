@@ -35,6 +35,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def __init__(self, *args, **kwargs):
         self.imgui_impl = None
         self.imgui_renderer = None
+        self.imgui_repeating_keys = {}
 
         self.info_panel_id = None
         self.info_panel_visible = True
