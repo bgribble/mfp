@@ -24,7 +24,7 @@ class ConsoleMode (InputMode):
         # global keybindings
         self.bind("RET", self.console.handle_enter, "Evaluate current line")
         self.bind("UP", self.console.handle_cursor_up, "Cursor up")
-        self.bind("DN", self.console.handle_cursor_down, "Cursor down")
+        self.bind("DOWN", self.console.handle_cursor_down, "Cursor down")
         self.bind("LEFT", self.console.handle_cursor_left, "Cursor left")
         self.bind("RIGHT", self.console.handle_cursor_right, "Cursor right")
         self.bind("BS", self.console.handle_backspace, "Backspace")

@@ -24,8 +24,8 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         super().__init__(window, x, y)
 
         self.update_required = True
-        self.width = 12
-        self.height = 12
+        self.min_width = self.width = 12
+        self.min_height = self.height = 12
         self.position_set = False
 
     @mutates('position_x', 'position_y', 'width', 'height')
@@ -35,11 +35,11 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 2))
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            ColorDB().backend.im_colvec(self.get_color('fill-color'))
+            self.get_color('fill-color').to_rgba()
         )
         nedit.push_style_color(
             nedit.StyleColor.node_border,
-            ColorDB().backend.im_colvec(self.get_color('stroke-color'))
+            self.get_color('stroke-color').to_rgba()
         )
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 

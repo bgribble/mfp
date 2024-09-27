@@ -27,6 +27,7 @@ from .base_element import ImguiBaseElementImpl
 class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
     backend_name = "imgui"
 
+    GLYPH_STYLE = "none"
     VIA_SIZE = 10
     VIA_FUDGE = 5
     LABEL_HEIGHT = 15
@@ -64,7 +65,9 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         nedit.push_style_var(nedit.StyleVar.selected_node_border_width, 0.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 2))
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
-        nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 0))
+        nedit.push_style_color(
+            nedit.StyleColor.node_bg, (255, 255, 255, 0)
+        )
 
         ##########################
         # render
@@ -115,6 +118,9 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         outport = False
         pw = self.VIA_SIZE
         half_height = self.get_style('porthole-height') / 2.0
+
+        stroke_color = self.get_color('stroke-color').to_rgba()
+
         if self.GLYPH_STYLE in ("empty_circled", "filled_circled"):
             arcsize = self.VIA_SIZE / 3.5
             linewidth = 1
@@ -134,7 +140,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
             draw_list.add_circle(
                 (px, py + half_height * (1 if outport else -1)),
                 arcsize,
-                imgui.IM_COL32(50, 50, 50, 255),
+                stroke_color,
                 24,
                 linewidth
             )
@@ -142,16 +148,15 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
             draw_list.add_circle_filled(
                 (px, py + half_height * (1 if outport else -1)),
                 arcsize,
-                imgui.IM_COL32(50, 50, 50, 255),
+                stroke_color,
                 24
             )
 
         if self.GLYPH_STYLE.endswith("circled"):
-
             draw_list.add_circle(
                 (px, py + half_height * (1 if outport else -1)),
                 pw / 2.0,
-                imgui.IM_COL32(50, 50, 50, 255),
+                stroke_color,
                 24,
                 linewidth
             )
@@ -225,4 +230,3 @@ class ImguiReceiveSignalViaElementImpl(
 
     def redraw(self):
         ImguiBaseViaElementImpl.redraw(self)
-

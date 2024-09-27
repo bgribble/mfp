@@ -5,7 +5,7 @@ Main window class for ImGui backend
 
 import asyncio
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
 # from imgui_bundle imgui_md as markdown
@@ -20,6 +20,9 @@ from .inputs import imgui_process_inputs, imgui_key_map
 from .sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
 from ..event import EnterEvent, LeaveEvent
 from . import info_panel, menu_bar
+
+MAX_RENDER_US = 200000
+
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
@@ -70,11 +73,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             if event.y >= self.window_height - self.console_panel_height:
                 if prev_pointer_obj != self.console_manager:
                     new_pointer_obj = self.console_manager
+                    self.selected_window = "console"
         if not new_pointer_obj and self.info_panel_visible:
             if event.x < self.canvas_panel_width:
                 new_pointer_obj = self
-            else:
-                new_pointer_obj = None
         if new_pointer_obj != prev_pointer_obj:
             if prev_pointer_obj:
                 await self.signal_emit("leave-event", LeaveEvent(target=prev_pointer_obj))
@@ -105,10 +107,20 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             keep_going
             and not self.close_in_progress
         ):
-            # top of loop stuff
-            await asyncio.sleep(0)
-            await self.imgui_impl.process_events()
+            # idle while there are no input events
+            loop_start_time = datetime.now()
+            while True:
+                keep_going, events_processed = await self.imgui_impl.process_events()
+                if events_processed or not keep_going:
+                    break
+                if datetime.now() > loop_start_time + timedelta(microseconds=MAX_RENDER_US):
+                    break
+                await asyncio.sleep(.01)
+
             self.imgui_renderer.process_inputs()
+
+            if not keep_going:
+                continue
 
             # start processing for this frame
             imgui.new_frame()
@@ -269,7 +281,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 | imgui.WindowFlags_.no_title_bar
             ),
         )
-        if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
+        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
             self.selected_window = "canvas"
             if not isinstance(self.input_mgr.global_mode, GlobalMode):
                 self.input_mgr.global_mode = GlobalMode(self)
@@ -313,7 +325,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 if start_pin and end_pin and nedit.accept_new_item():
                     start_obj, start_port_id = all_pins.get(start_pin.id(), (None, None))
                     end_obj, end_port_id = all_pins.get(end_pin.id(), (None, None))
-                    log.debug(f"[window] connecting {start_obj} {start_port_id} to {end_obj} {end_port_id}")
                     MFPGUI().async_task(
                         self.render_make_connection(start_obj, start_port_id[1], end_obj, end_port_id[1])
                     )
@@ -341,7 +352,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     | imgui.WindowFlags_.no_title_bar
                 ),
             )
-            if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
+            if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
                 self.selected_window = "info"
             info_panel.render(self)
             imgui.end()
@@ -360,7 +371,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     | imgui.WindowFlags_.no_title_bar
                 ),
             )
-            if imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
+            if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
                 self.selected_window = "console"
                 if not isinstance(self.input_mgr.global_mode, ConsoleMode):
                     self.input_mgr.global_mode = ConsoleMode(self)

@@ -63,6 +63,7 @@ class MFPGUI (Singleton):
             'font-size': ParamInfo(label="Font size", param_type=float),
             'padding': ParamInfo(label="Element padding", param_type=ListOfInt),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
+            'porthole-color': ParamInfo(label="Inlet/outlet color", param_type=RGBAColor),
             'porthole-height': ParamInfo(label="Inlet/outlet port width", param_type=float),
             'porthole-width': ParamInfo(label="Inlet/outlet port width", param_type=float),
             'porthole-minspace': ParamInfo(label="Inlet/outlet min space", param_type=float),
@@ -76,16 +77,17 @@ class MFPGUI (Singleton):
 
 
         self.style_defaults = {
-            'font-face': 'Cantarell,Sans',
-            'font-size': 16,
             'canvas-color': ColorDB().find('default-canvas-color'),
-            'stroke-color': ColorDB().find('default-stroke-color'),
             'fill-color': ColorDB().find('default-fill-color'),
-            'text-color': ColorDB().find('default-text-color'),
-            'stroke-color:selected': ColorDB().find('default-stroke-color-selected'),
-            'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
             'fill-color:selected': ColorDB().find('default-fill-color-selected'),
             'fill-color:debug': ColorDB().find('default-fill-color-debug'),
+            'font-face': 'Cantarell,Sans',
+            'font-size': 16,
+            'porthole-color': ColorDB().find('default-stroke-color'),
+            'stroke-color': ColorDB().find('default-stroke-color'),
+            'stroke-color:selected': ColorDB().find('default-stroke-color-selected'),
+            'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
+            'text-color': ColorDB().find('default-text-color'),
             'text-color:selected': ColorDB().find('default-text-color-selected'),
             'text-cursor-color': ColorDB().find('default-text-cursor-color'),
         }

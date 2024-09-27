@@ -186,6 +186,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
         pw = self.get_style('porthole-width')
         ph = self.get_style('porthole-height')
+        pcolor = self.get_style('porthole-color')
+
         points = semicircle_points(
             px,
             py + (ph if out_port else 0),
@@ -193,16 +195,18 @@ class ImguiBaseElementImpl(BaseElementImpl):
             9,
             1 if out_port else -1
         )
-        draw_list.add_convex_poly_filled(points, imgui.IM_COL32(50, 50, 50, 255))
-
-        """
         if dsp_port:
-            pobj.set_border_width(1.5)
-            pobj.set_color(MFPGUI().appwin.color_bg)
-            pobj.set_border_color(self.get_color('stroke-color'))
+            draw_list.add_polyline(
+                points,
+                ColorDB().backend.im_col32(pcolor),
+                imgui.ImDrawFlags_.closed, 
+                1.0,
+            )
         else:
-            pobj.set_color(self.get_color('stroke-color'))
-        """
+            draw_list.add_convex_poly_filled(
+                points, 
+                ColorDB().backend.im_col32(pcolor)
+            )
 
     def render_pin(self, port_id, px, py):
         pin_id = self.port_elements.get(port_id)

@@ -16,8 +16,6 @@ from ..message_element import (
     TransientMessageElementImpl
 )
 
-ImColor = imgui.ImColor
-
 
 class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageElement):
     backend_name = "imgui"
@@ -46,7 +44,10 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         nedit.push_style_var(nedit.StyleVar.node_rounding, 4.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, self.get_style('padding'))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1)
-        nedit.push_style_color(nedit.StyleColor.node_bg, (255, 255, 255, 255))
+        nedit.push_style_color(
+            nedit.StyleColor.node_bg,
+            self.get_color('fill-color').to_rgba()
+        )
 
         ##########################
         # render

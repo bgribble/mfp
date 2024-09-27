@@ -142,8 +142,10 @@ class ImguiSDL2Renderer:
         event = SDL_Event()
         width = ctypes.c_int()
         height = ctypes.c_int()
+        events_processed = False
 
         while SDL_PollEvent(ctypes.byref(event)) != 0:
+            events_processed = True
             SDL_GetWindowSize(self.window, width, height)
             w_width = int(width.value)
             w_height = int(height.value)
@@ -151,9 +153,9 @@ class ImguiSDL2Renderer:
                 self.app_window.window_width = w_width
                 self.app_window.window_height = w_height
 
-            await asyncio.sleep(0)
             if event.type == SDL_QUIT:
-                return False
+                return False, events_processed
+
             skip_event = False
             if event.type == SDL_TEXTINPUT:
                 # text-generating key presses don't "count" to imgui
@@ -202,4 +204,4 @@ class ImguiSDL2Renderer:
 
             if not skip_event:
                 self.renderer.process_event(event)
-        return True
+        return True, events_processed
