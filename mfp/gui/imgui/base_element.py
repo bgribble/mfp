@@ -186,7 +186,9 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
         pw = self.get_style('porthole-width')
         ph = self.get_style('porthole-height')
-        pcolor = self.get_style('porthole-color')
+        pcolor = self.get_color(
+            'porthole-color:selected' if self.selected else 'porthole-color'
+        )
 
         points = semicircle_points(
             px,
@@ -260,8 +262,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
         nedit.push_style_var(nedit.StyleVar.target_direction, (0, -0.5))
         nedit.push_style_var(nedit.StyleVar.pin_rounding, 0)
 
-        nedit.push_style_color(nedit.StyleColor.pin_rect_border, (0, 0, 0, 100))
-        nedit.push_style_color(nedit.StyleColor.pin_rect, (0, 0, 0, 100))
+        nedit.push_style_color(nedit.StyleColor.pin_rect_border, (0, 0, 0, 0.25))
+        nedit.push_style_color(nedit.StyleColor.pin_rect, (0, 0, 0, 0.25))
 
         ports_done = []
         for i in range(self.num_inlets):

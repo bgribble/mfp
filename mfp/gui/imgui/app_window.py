@@ -55,9 +55,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.frame_timestamps = []
 
         self.selected_window = "canvas"
-
         self.inspector = None
-
         self.log_text = ""
 
         self.user_zoom_set = False
@@ -286,9 +284,35 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             if not isinstance(self.input_mgr.global_mode, GlobalMode):
                 self.input_mgr.global_mode = GlobalMode(self)
                 self.input_mgr.major_mode.enable()
+
+        nedit.push_style_color(
+            nedit.StyleColor.bg,
+            self.get_color('canvas-color').to_rgbaf()
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.node_border,
+            self.get_color('stroke-color').to_rgbaf()
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.sel_node_border, (0, 0, 0, 0)
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.sel_link_border, (0, 0, 0, 0)
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.hov_node_border,
+            self.get_color('stroke-color:hover').to_rgbaf()
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.hov_link_border,
+            self.get_color('stroke-color:hover').to_rgbaf()
+        )
+
         nedit.begin("canvas_editor", imgui.ImVec2(0.0, 0.0))
 
         conf = nedit.get_config()
+
+        # disable NodeEditor dragging of nodes when not in edit mode
         if isinstance(self.input_mgr.major_mode, PatchEditMode):
             conf.drag_button_index = 0
         else:
@@ -331,6 +355,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             nedit.end_create()
 
         nedit.end()  # node_editor
+        nedit.pop_style_color(5)
 
         imgui.end()
 

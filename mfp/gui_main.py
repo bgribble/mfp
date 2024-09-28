@@ -64,12 +64,14 @@ class MFPGUI (Singleton):
             'padding': ParamInfo(label="Element padding", param_type=ListOfInt),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
             'porthole-color': ParamInfo(label="Inlet/outlet color", param_type=RGBAColor),
+            'porthole-color:selected': ParamInfo(label="Inlet/outlet color (selected)", param_type=RGBAColor),
             'porthole-height': ParamInfo(label="Inlet/outlet port width", param_type=float),
             'porthole-width': ParamInfo(label="Inlet/outlet port width", param_type=float),
             'porthole-minspace': ParamInfo(label="Inlet/outlet min space", param_type=float),
             'stroke-color': ParamInfo(label="Element outline color", param_type=RGBAColor),
             'stroke-color:debug': ParamInfo(label="Element outline color (debug)", param_type=RGBAColor),
             'stroke-color:selected': ParamInfo(label="Element outline color (selected)", param_type=RGBAColor),
+            'stroke-color:hover': ParamInfo(label="Element outline color (hover)", param_type=RGBAColor),
             'text-color': ParamInfo(label="Text color", param_type=RGBAColor),
             'text-color:selected': ParamInfo(label="Text color (selected)", param_type=RGBAColor),
             'text-cursor-color': ParamInfo(label="Text cursor color", param_type=RGBAColor),
@@ -84,8 +86,10 @@ class MFPGUI (Singleton):
             'font-face': 'Cantarell,Sans',
             'font-size': 16,
             'porthole-color': ColorDB().find('default-stroke-color'),
+            'porthole-color:selected': ColorDB().find('default-stroke-color-selected'),
             'stroke-color': ColorDB().find('default-stroke-color'),
             'stroke-color:selected': ColorDB().find('default-stroke-color-selected'),
+            'stroke-color:hover': ColorDB().find('default-stroke-color-hover'),
             'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
             'text-color': ColorDB().find('default-text-color'),
             'text-color:selected': ColorDB().find('default-text-color-selected'),
@@ -121,6 +125,8 @@ def setup_default_colors():
                      ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
     ColorDB().insert('default-stroke-color-selected',
                      ColorDB().find(0x00, 0x7f, 0xff, 0xff))
+    ColorDB().insert('default-stroke-color-hover',
+                     ColorDB().find(0x00, 0x20, 0x40, 0x0d))
     ColorDB().insert('default-stroke-color-debug',
                      ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
     ColorDB().insert('default-fill-color',

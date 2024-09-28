@@ -50,8 +50,8 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
             if self.selected:
                 MFPGUI().async_task(self.app_window.unselect(self))
                 self.selected = False
-        complete_color = (0, 0, 255, 255)
-        dashed_color = (40, 40, 80, 255)
+        complete_color = (0, 0, 1, 1)
+        dashed_color = (0.2, 0.2, 0.8, 1.0)
 
         nedit.link(
             self.node_id,

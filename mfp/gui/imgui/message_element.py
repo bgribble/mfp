@@ -43,10 +43,18 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 4.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, self.get_style('padding'))
-        nedit.push_style_var(nedit.StyleVar.node_border_width, 1)
+        nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            self.get_color('fill-color').to_rgba()
+            self.get_color(
+                'fill-color:selected' if self.selected else 'fill-color'
+            ).to_rgbaf()
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.node_border,
+            self.get_color(
+                'stroke-color:selected' if self.selected else 'stroke-color'
+            ).to_rgbaf()
         )
 
         ##########################
@@ -99,7 +107,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         ##########################
 
         imgui.pop_style_var()
-        nedit.pop_style_color()  # color
+        nedit.pop_style_color(2)  # color
         nedit.pop_style_var(3)
 
     def draw_ports(self):

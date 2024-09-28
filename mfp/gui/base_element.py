@@ -347,7 +347,7 @@ class BaseElement (Store):
         self.obj_state = self.OBJ_DELETED
 
     @saga('style')
-    async def update_all_styles(self, action, state_diff):
+    async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
         yield None
 

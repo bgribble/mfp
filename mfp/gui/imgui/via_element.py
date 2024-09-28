@@ -66,7 +66,16 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 2))
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
         nedit.push_style_color(
-            nedit.StyleColor.node_bg, (255, 255, 255, 0)
+            nedit.StyleColor.node_bg,
+            self.get_color(
+                'fill-color:selected' if self.selected else 'fill-color'
+            ).to_rgbaf()
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.node_border,
+            self.get_color(
+                'stroke-color:selected' if self.selected else 'stroke-color'
+            ).to_rgbaf()
         )
 
         ##########################
@@ -105,7 +114,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         # render
         ##########################
 
-        nedit.pop_style_color()  # color
+        nedit.pop_style_color(2)  # color
         imgui.pop_style_var()
         nedit.pop_style_var(5)
 

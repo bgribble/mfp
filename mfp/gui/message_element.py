@@ -54,7 +54,7 @@ class MessageElement (BaseElement):
         return MessageElementImpl.get_backend(backend_name)
 
     @saga('obj_args')
-    async def recreate_element(self, action, state_diff):
+    async def recreate_element(self, action, state_diff, previous):
         if self.obj_type:
             yield await self.label_edit_finish(None, f"{self.obj_args}")
 
