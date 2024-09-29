@@ -454,7 +454,7 @@ class MFPMidiManager(QuittableThread):
             alsaseq.output(raw_tuple)
         except Exception as e:
             log.debug("alsaseq: error on output of", raw_tuple, e)
-            log.debug_traceback()
+            log.debug_traceback(e)
 
         elapsed = datetime.now() - starttime
 

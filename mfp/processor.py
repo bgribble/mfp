@@ -785,7 +785,7 @@ class Processor:
             log.error("%s.%s (%s): send to inlet %d failed: '%s'" %
                       (self.patch.name, self.name, self.init_type, inlet, value))
             log.error("Exception: %s" % e.args)
-            log.debug_traceback()
+            log.debug_traceback(e)
             if w_target:
                 w_target.error("%s" % e.args, tb)
 

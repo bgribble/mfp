@@ -478,7 +478,7 @@ class Patch(Processor):
                         await obj.onload(phase)
                 except Exception as e:
                     log.error(f"Problem initializing {obj.scope.name}.{obj.name}: {e}")
-                    log.debug_traceback()
+                    log.debug_traceback(e)
 
         self.update_export_bounds()
 

@@ -157,7 +157,7 @@ def catchall(thunk):
             return thunk(*args, **kwargs)
         except Exception as e:
             log.debug("Error in", thunk.__name__, e)
-            log.debug_traceback()
+            log.debug_traceback(e)
     return handled
 
 
@@ -295,7 +295,7 @@ class TaskNibbler:
             await self._process_queue()
         except Exception as e:
             log.debug(f"[TaskNibbler] Exception {e}")
-            log.debug_traceback()
+            log.debug_traceback(e)
         finally:
             self.task = None
 
@@ -325,9 +325,9 @@ class TaskNibbler:
                     done = unit(*data)
                     if inspect.isawaitable(done):
                         done = await done
-                except Exception:
+                except Exception as e:
                     log.debug("[TaskNibbler] Exception while running", unit)
-                    log.debug_traceback()
+                    log.debug_traceback(e)
 
                 if not done and retry_count:
                     if isinstance(retry_count, (int, float)):

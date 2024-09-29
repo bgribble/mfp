@@ -5,7 +5,7 @@ def _callback_wrapper(thunk):
         return thunk()
     except Exception as e:
         log.debug("Exception in GUI operation:", e)
-        log.debug_traceback()
+        log.debug_traceback(e)
         return False
 
 def clutter_do_later(delay, thunk):

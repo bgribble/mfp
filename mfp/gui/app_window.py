@@ -228,7 +228,7 @@ class AppWindow (SignalMixin):
         except Exception as e:
             log.error("Error handling UI event", event)
             log.debug(e)
-            log.debug_traceback()
+            log.debug_traceback(e)
             return False
 
     def init_input(self):

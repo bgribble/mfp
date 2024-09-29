@@ -97,7 +97,7 @@ class InputManager:
                 offset = -1
             except Exception as e:
                 log.error(f"[run_handlers] Exception while handling key command {keysym}: {e} {current_handler}")
-                log.debug_traceback()
+                log.debug_traceback(e)
                 return False
 
     def handle_keysym(self, keysym):
@@ -128,7 +128,7 @@ class InputManager:
                 retry_count += 1
             except Exception as e:
                 log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e} {current_handler}")
-                log.debug_traceback()
+                log.debug_traceback(e)
                 return False
         return False
 

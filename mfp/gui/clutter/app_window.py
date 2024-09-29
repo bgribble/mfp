@@ -46,9 +46,9 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             # explicit init seems to avoid strange thread sync/blocking issues
             GtkClutter.init([])
 
-        except Exception:
+        except Exception as e:
             log.error("Fatal error during GUI startup")
-            log.debug_traceback()
+            log.debug_traceback(e)
             return
 
         try:
@@ -56,7 +56,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
         except Exception as e:
             log.error("Caught GUI exception:", e)
-            log.debug_traceback()
+            log.debug_traceback(e)
             sys.stdout.flush()
 
     def ready(self):
@@ -245,7 +245,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             except Exception as e:
                 log.error("Error handling resize event", e)
                 log.debug(e)
-                log.debug_traceback()
+                log.debug_traceback(e)
 
             return False
 

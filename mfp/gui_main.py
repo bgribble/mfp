@@ -8,9 +8,6 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import argparse
 import asyncio
-import inspect
-import threading
-from collections import defaultdict
 
 from datetime import datetime
 
@@ -234,11 +231,12 @@ async def main_error_wrapper():
         for ll in tb.split("\n"):
             print(f"[LOG] ERROR: {ll}")
     ex = main_task.exception()
-    print(f"[LOG] ERROR: main task exited {ex}")
+    if ex:
+        print(f"[LOG] ERROR: quit: task exited with exception {ex}")
+    else:
+        print("[LOG] ERROR: quit: task exited normally")
 
 
 def main_sync_wrapper():
-    import asyncio
-
     gbulb.install(gtk=True)
     asyncio.run(main_error_wrapper())

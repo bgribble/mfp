@@ -450,8 +450,7 @@ class MFPApp (Singleton, SignalMixin):
         except Exception as e:
             log.error("Caught exception while trying to create %s (%s)"
                       % (init_type, init_args))
-            log.debug(e)
-            log.debug_traceback()
+            log.debug_traceback(e)
             await self.cleanup()
             return None
 
