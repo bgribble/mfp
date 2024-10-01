@@ -192,6 +192,8 @@ def reset_zoom(self):
     self.zoom = 1.0
     self.view_x = 0
     self.view_y = 0
+    self.viewport_pos_set = True
+    self.viewport_zoom_set = True
     self.rezoom()
     return True
 
@@ -200,8 +202,11 @@ def reset_zoom(self):
 def relative_zoom(self, ratio):
     candidate_zoom = ratio * self.zoom
     if 0.1 <= candidate_zoom <= 20:
+        orig_zoom = self.zoom
         self.zoom = candidate_zoom
-        self.rezoom()
+        self.rezoom(previous=orig_zoom)
+        self.viewport_pos_set = True
+        self.viewport_zoom_set = True
     return True
 
 
@@ -209,5 +214,6 @@ def relative_zoom(self, ratio):
 def move_view(self, dx, dy):
     self.view_x += dx
     self.view_y += dy
+    self.viewport_pos_set = True
     self.rezoom()
     return True

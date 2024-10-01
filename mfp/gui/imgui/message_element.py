@@ -66,6 +66,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
                 self.node_id,
                 (self.position_x, self.position_y)
             )
+            nedit.set_node_z_position(self.node_id, self.position_z)
 
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 

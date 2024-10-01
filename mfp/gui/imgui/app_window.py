@@ -26,7 +26,7 @@ MAX_RENDER_US = 200000
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
-    motion_overrides = ["drag", "zoom", "canvas_pos"]
+    motion_overrides = ["drag", "scroll-zoom", "canvas_pos"]
 
     INIT_WIDTH = 900
     INIT_HEIGHT = 700
@@ -39,6 +39,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_impl = None
         self.imgui_renderer = None
         self.imgui_repeating_keys = {}
+        self.imgui_needs_reselect = []
 
         self.info_panel_id = None
         self.info_panel_visible = True
@@ -50,15 +51,15 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.canvas_panel_id = None
         self.canvas_panel_width = self.INIT_WIDTH - self.INIT_INFO_PANEL_WIDTH
+        self.canvas_panel_height = self.INIT_HEIGHT - self.INIT_CONSOLE_PANEL_HEIGHT
 
         self.frame_count = 0
         self.frame_timestamps = []
+        self.viewport_box_nodes = None
 
         self.selected_window = "canvas"
         self.inspector = None
         self.log_text = ""
-
-        self.user_zoom_set = False
 
         super().__init__(*args, **kwargs)
 
@@ -158,7 +159,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         MFPGUI().async_task(self._render_task())
 
     def shutdown(self):
-        log.debug("[imgui] shutdown")
         self.close_in_progress = True
 
     #####################
@@ -167,6 +167,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         from mfp.gui.modes.global_mode import GlobalMode
         from mfp.gui.modes.console_mode import ConsoleMode
         keep_going = True
+        menu_height = self.MENU_HEIGHT
 
         ########################################
         # global style setup
@@ -181,13 +182,20 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 keep_going = False
 
             imgui.end_main_menu_bar()
+
+            _, menu_height = imgui.get_cursor_pos()
+
         # menu bar
         ########################################
 
+        canvas_origin = (1, menu_height + 1)
+
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 0))
+
         ########################################
         # full-screen window containing the dockspace
-        imgui.set_next_window_size((self.window_width, self.window_height - 2*self.MENU_HEIGHT))
-        imgui.set_next_window_pos((0, self.MENU_HEIGHT))
+        imgui.set_next_window_size((self.window_width, self.window_height - 2*menu_height))
+        imgui.set_next_window_pos((0, menu_height))
 
         # main window is plain, no border, no padding
         imgui.push_style_var(imgui.StyleVar_.window_rounding, 0)
@@ -264,12 +272,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ########################################
         # canvas window
         self.canvas_panel_width = canvas_width = canvas_size[0]
-        canvas_height = canvas_size[1]
-        canvas_x = 0
-        if self.info_panel_visible:
-            canvas_width -= self.info_panel_width
-        if self.console_panel_visible:
-            canvas_height -= self.console_panel_height
+        self.canvas_panel_height = canvas_height = canvas_size[1]
 
         imgui.begin(
             "canvas",
@@ -279,6 +282,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 | imgui.WindowFlags_.no_title_bar
             ),
         )
+        cursor_x, cursor_y = imgui.get_cursor_pos()
         if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
             self.selected_window = "canvas"
             if not isinstance(self.input_mgr.global_mode, GlobalMode):
@@ -308,7 +312,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.get_color('stroke-color:hover').to_rgbaf()
         )
 
-        nedit.begin("canvas_editor", imgui.ImVec2(0.0, 0.0))
+        nedit.begin("canvas_editor", (0.0, 0.0))
 
         conf = nedit.get_config()
 
@@ -318,14 +322,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         else:
             conf.drag_button_index = 3
 
-        actual_zoom = nedit.get_current_zoom()
-
-        # FIXME +/-/0 binding keys don't work yet
-        if self.user_zoom_set and actual_zoom != self.zoom:
-            self.user_zoom_set = False
-            self.zoom = actual_zoom
-        elif not self.user_zoom_set and actual_zoom != self.zoom:
-            self.zoom = actual_zoom
+        # reselect nodes if needed
+        if self.imgui_needs_reselect:
+            nedit.clear_selection()
+            for obj in self.imgui_needs_reselect:
+                nedit.select_node(obj.node_id, True)
+            self.imgui_needs_reselect = []
 
         # first pass: non-links
         all_pins = {}
@@ -339,6 +341,84 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         for obj in self.objects:
             if isinstance(obj, ConnectionElement):
                 obj.render()
+
+        #############################
+        # viewport management
+        # this is janky. We create an invisible upper-left and lower-right
+        # node that we will use wth zoom_to_selection()
+
+        # create nodes if needed
+        if self.viewport_box_nodes is None:
+            min_node_id = nedit.NodeId.create()
+            max_node_id = nedit.NodeId.create()
+            self.viewport_box_nodes = (min_node_id, max_node_id)
+
+        current_zoom = nedit.get_current_zoom()
+        viewport_x, viewport_y = nedit.screen_to_canvas(canvas_origin)
+
+        need_navigate = False
+        need_zoom = False
+
+        if current_zoom != self.zoom:
+            if self.viewport_zoom_set:
+                need_navigate = True
+                need_zoom = True
+            else:
+                self.zoom = current_zoom
+
+        self.viewport_zoom_set = False
+
+        if self.view_x != viewport_x or self.view_y != viewport_y:
+            if self.viewport_pos_set:
+                need_navigate = True
+            else:
+                self.view_x = viewport_x
+                self.view_y = viewport_y
+
+        self.viewport_pos_set = False
+
+        if need_navigate:
+            upper_left = (self.view_x, self.view_y)
+            window_size = (self.canvas_panel_width, self.canvas_panel_height)
+            canvas_dimensions = (
+                self.zoom * window_size[0],
+                self.zoom * window_size[1]
+            )
+            lower_right = (
+                self.view_x + canvas_dimensions[0],
+                self.view_y + canvas_dimensions[1]
+            )
+            nedit.push_style_var(nedit.StyleVar.node_rounding, 0)
+            nedit.push_style_var(nedit.StyleVar.node_padding, (0, 0, 0, 0))
+            nedit.push_style_var(nedit.StyleVar.node_border_width, 0)
+
+            nedit.set_node_position( self.viewport_box_nodes[0], upper_left)
+            nedit.begin_node(self.viewport_box_nodes[0])
+            nedit.end_node()
+            node_width, node_height = nedit.get_node_size(self.viewport_box_nodes[0])
+
+            nedit.set_node_position(
+                self.viewport_box_nodes[1],
+                (lower_right[0] - node_width, lower_right[1] - node_height)
+            )
+            nedit.begin_node(self.viewport_box_nodes[1])
+            nedit.end_node()
+            nedit.pop_style_var(3)
+
+            # save the current selection, then clear it
+            selection = [
+                obj for obj in self.objects if obj.selected
+            ]
+            for obj in selection:
+                nedit.deselect_node(obj.node_id)
+
+            # select the upper-left and lower-right nodes
+            for obj_id in self.viewport_box_nodes:
+                nedit.select_node(obj_id, True)
+
+            # navigate to them
+            nedit.navigate_to_selection(need_zoom, 0)
+            self.imgui_needs_reselect = selection
 
         #############################
         # creation of links (by click-drag)
@@ -365,7 +445,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ########################################
         # right-side info display
         if self.info_panel_visible:
-            panel_height = self.window_height - self.MENU_HEIGHT
+            panel_height = self.window_height - menu_height
             if self.console_panel_visible:
                 panel_height -= self.console_panel_height
 
@@ -409,12 +489,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     imgui.input_text_multiline(
                         'log_output_text',
                         self.log_text,
-                        (self.window_width, self.console_panel_height - self.MENU_HEIGHT),
+                        (self.window_width, self.console_panel_height - menu_height),
                         imgui.InputTextFlags_.read_only
                     )
                     imgui.end_tab_item()
                 if imgui.begin_tab_item("Console")[0]:
-                    self.console_manager.render(self.window_width, self.console_panel_height - self.MENU_HEIGHT)
+                    self.console_manager.render(self.window_width, self.console_panel_height - menu_height)
                     imgui.end_tab_item()
                 imgui.end_tab_bar()
 
@@ -430,6 +510,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.pop_style_var()  # padding
         imgui.pop_style_var()  # border
         imgui.pop_style_var()  # rounding
+        imgui.pop_style_var()  # spacing
 
         imgui.pop_style_color() # text selected bg
 
@@ -438,8 +519,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # status line at bottom
-        imgui.set_next_window_size((self.window_width, self.MENU_HEIGHT))
-        imgui.set_next_window_pos((0, self.window_height - self.MENU_HEIGHT))
+        imgui.set_next_window_size((self.window_width, menu_height))
+        imgui.set_next_window_pos((0, self.window_height - menu_height))
         imgui.begin(
             "status_line",
             flags=(
@@ -478,6 +559,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.frame_timestamps.append(datetime.now())
         if len(self.frame_timestamps) > 10:
             self.frame_timestamps = self.frame_timestamps[-10:]
+
+
+
         return keep_going
 
     # helper for interactive connect-by-click
@@ -511,8 +595,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def canvas_to_screen(self, x, y):
         return nedit.canvas_to_screen((x, y))
 
-    def rezoom(self):
-        self.user_zoom_set = True
+    def rezoom(self, **kwargs):
+        if 'previous' in kwargs:
+            prev_zoom = kwargs['previous']
+            curr_zoom = self.zoom
+
+        self.viewport_zoom_set = True
 
     def get_size(self):
         return (self.window_width, self.window_height)
@@ -532,7 +620,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         return await AppWindow.select(self, element)
 
     async def unselect(self, element):
-       return await AppWindow.unselect(self, element)
+        return await AppWindow.unselect(self, element)
 
     #####################
     # autoplace

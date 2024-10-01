@@ -196,6 +196,8 @@ class AppWindow (SignalMixin):
         self.zoom = 1.0
         self.view_x = 0
         self.view_y = 0
+        self.viewport_zoom_set = False
+        self.viewport_pos_set = False
 
         # impl-specific mapping of widgets to MFP display elements
         self.event_sources = {}

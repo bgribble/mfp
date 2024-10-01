@@ -574,10 +574,12 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             self.view_y + y / self.zoom,
         )
 
-    def rezoom(self):
+    def rezoom(self, **kwargs):
         w, h = self.group.get_size()
         self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
         self.group.set_position(self.view_x, self.view_y)
+        self.viewport_pos_set = True
+        self.viewport_zoom_set = True
 
     def get_size(self):
         return self.stage.get_size()

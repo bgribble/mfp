@@ -110,6 +110,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
                 self.node_id,
                 (self.position_x, self.position_y)
             )
+            nedit.set_node_z_position(self.node_id, self.position_z)
 
         # check hover
         if nedit.get_hovered_node() == self.node_id:

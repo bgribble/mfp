@@ -181,7 +181,6 @@ class GlobalMode (InputMode):
         await self.window.get_prompted_input("File name to load: ", cb)
 
     def drag_start(self):
-        log.debug("[global] dragging viewport")
         self.drag_started = True
         px = self.manager.pointer_ev_x
         py = self.manager.pointer_ev_y

@@ -61,6 +61,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
                 self.node_id,
                 (self.position_x, self.position_y)
             )
+            nedit.set_node_z_position(self.node_id, self.position_z)
 
         self.render_sync_with_imgui()
 
