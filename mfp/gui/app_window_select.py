@@ -44,7 +44,7 @@ async def patch_close(self):
         await p.delete()
     else:
         log.debug("Cannot close window. Close UI via plugin host Edit button")
-    if not len(self.patches):
+    if not len(self.patches) > 0:
         await self.quit()
 
 

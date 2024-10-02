@@ -608,6 +608,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def canvas_to_screen(self, x, y):
         return nedit.canvas_to_screen((x, y))
 
+    def move_view(self, dx, dy):
+        self.view_x -= dx
+        self.view_y -= dy
+        self.viewport_pos_set = True
+        return True
+
     def rezoom(self, **kwargs):
         if 'previous' in kwargs:
             prev_zoom = kwargs['previous']
