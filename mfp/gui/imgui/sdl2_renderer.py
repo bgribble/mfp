@@ -204,4 +204,6 @@ class ImguiSDL2Renderer:
 
             if not skip_event:
                 self.renderer.process_event(event)
+            await asyncio.sleep(0)
+
         return True, events_processed

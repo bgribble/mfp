@@ -6,6 +6,7 @@ Main window class for ImGui backend
 import asyncio
 import sys
 from datetime import datetime, timedelta
+from flopsy import Store
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
 # from imgui_bundle imgui_md as markdown
@@ -66,6 +67,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.signal_listen("motion-event", self.handle_motion)
 
     async def handle_motion(self, target, signal, event, *rest):
+        """
+        Listener to set the currently-active panel based on pointer position
+        """
         prev_pointer_obj = event.target
         new_pointer_obj = prev_pointer_obj
         if self.console_panel_visible:
@@ -113,6 +117,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 if events_processed or not keep_going:
                     break
                 if datetime.now() > loop_start_time + timedelta(microseconds=MAX_RENDER_US):
+                    break
+                if Store.last_activity_time() > loop_start_time:
                     break
                 await asyncio.sleep(.01)
 
@@ -271,8 +277,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # canvas window
-        self.canvas_panel_width = canvas_width = canvas_size[0]
-        self.canvas_panel_height = canvas_height = canvas_size[1]
+        self.canvas_panel_width = canvas_size[0]
+        self.canvas_panel_height = canvas_size[1]
 
         imgui.begin(
             "canvas",
@@ -353,7 +359,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             max_node_id = nedit.NodeId.create()
             self.viewport_box_nodes = (min_node_id, max_node_id)
 
-        current_zoom = nedit.get_current_zoom()
+        current_zoom = 1.0 / nedit.get_current_zoom()
         viewport_x, viewport_y = nedit.screen_to_canvas(canvas_origin)
 
         need_navigate = False
@@ -378,15 +384,22 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.viewport_pos_set = False
 
         if need_navigate:
-            upper_left = (self.view_x, self.view_y)
             window_size = (self.canvas_panel_width, self.canvas_panel_height)
+            # navigate_to_selection expands the selection box by 10%
+            EXP = 1.10
+            dw = 0.5 * (1.0 - 1.0/EXP) * window_size[0]
+            dh = 0.5 * (1.0 - 1.0/EXP) * window_size[1]
+            upper_left = (
+                self.view_x + dw,
+                self.view_y + dh
+            )
             canvas_dimensions = (
-                self.zoom * window_size[0],
-                self.zoom * window_size[1]
+                (1.0 / self.zoom) * window_size[0],
+                (1.0 / self.zoom) * window_size[1]
             )
             lower_right = (
-                self.view_x + canvas_dimensions[0],
-                self.view_y + canvas_dimensions[1]
+                self.view_x + canvas_dimensions[0] - 2*dw,
+                self.view_y + canvas_dimensions[1] - 2*dh
             )
             nedit.push_style_var(nedit.StyleVar.node_rounding, 0)
             nedit.push_style_var(nedit.StyleVar.node_padding, (0, 0, 0, 0))
@@ -395,11 +408,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             nedit.set_node_position( self.viewport_box_nodes[0], upper_left)
             nedit.begin_node(self.viewport_box_nodes[0])
             nedit.end_node()
-            node_width, node_height = nedit.get_node_size(self.viewport_box_nodes[0])
 
             nedit.set_node_position(
-                self.viewport_box_nodes[1],
-                (lower_right[0] - node_width, lower_right[1] - node_height)
+                self.viewport_box_nodes[1], lower_right
             )
             nedit.begin_node(self.viewport_box_nodes[1])
             nedit.end_node()
@@ -534,6 +545,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if len(self.frame_timestamps) > 1:
             elapsed = (self.frame_timestamps[-1] - self.frame_timestamps[0]).total_seconds()
             imgui.text(f"FPS: {int((len(self.frame_timestamps)-1) / elapsed)}")
+            imgui.same_line()
+            imgui.text(f"Zoom: {(1.0/nedit.get_current_zoom()):0.2f}")
 
         imgui.end()
 
