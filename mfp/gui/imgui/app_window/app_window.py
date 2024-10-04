@@ -14,16 +14,14 @@ import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
-from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.event import EnterEvent, LeaveEvent
-from mfp.gui.modes.patch_edit import PatchEditMode
 from mfp.gui.app_window import AppWindow, AppWindowImpl
 from ..inputs import imgui_process_inputs, imgui_key_map
 from ..sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
 from . import menu_bar, canvas_panel, info_panel, console_panel, status_line
 
 MAX_RENDER_US = 200000
-
+PEAK_FPS = 60
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
@@ -109,6 +107,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ed = nedit.create_editor(config)
         nedit.set_current_editor(ed)
 
+        gl.glClearColor(1.0, 1.0, 1.0, 1)
+
+        sync_time = None
         while (
             keep_going
             and not self.close_in_progress
@@ -124,7 +125,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     break
                 if Store.last_activity_time() > loop_start_time:
                     break
-                await asyncio.sleep(.01)
+                await asyncio.sleep(0.01)
 
             self.imgui_renderer.process_inputs()
 
@@ -132,21 +133,28 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 continue
 
             # start processing for this frame
-            new_frame_start = datetime.now()
             imgui.new_frame()
-            new_frame_time = (datetime.now() - new_frame_start).total_seconds() * 1000.0
-            if new_frame_time > 6:
-                log.warning(f"[render_task] new_frame() delayed {new_frame_time} ms")
 
             # hard work
             keep_going = self.render()
 
-            # bottom of loop stuff
-            gl.glClearColor(1.0, 1.0, 1.0, 1)
+            ######################
+            # bottom of loop stuff - hand over the frame to imgui
+
+            if sync_time:
+                # it seems like we are capped at 60 FPS and the sync happens
+                # (blocking) in glClear(). If we do an asyncio sleep here, we can do
+                # other work until the sync rolls around so glClear doesn't block
+                elapsed_ms = (datetime.now() - sync_time).total_seconds() * 1000
+                min_frame_ms = (1 / PEAK_FPS) * 1000
+                if min_frame_ms > (elapsed_ms + 1):
+                    sleepy_time = (min_frame_ms - elapsed_ms) / 1000
+                    await asyncio.sleep(sleepy_time)
+
             gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+            sync_time = datetime.now()
             imgui.render()
             self.imgui_renderer.render(imgui.get_draw_data())
-
             self.imgui_impl.swap_window()
 
         nedit.destroy_editor(ed)
@@ -178,7 +186,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # renderer
     def render(self):
-        from mfp.gui.modes.global_mode import GlobalMode
         keep_going = True
 
         ########################################
@@ -199,9 +206,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # menu bar
         ########################################
-
-        # for some reason this still leaves a gap under the menu bar
-        canvas_origin = (1, self.menu_height + 1)
 
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 0))
 
@@ -286,7 +290,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # canvas panel
-        canvas_panel.render(app_window)
+        canvas_panel.render(self)
 
         ########################################
         # right-side info display
@@ -317,21 +321,20 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.pop_style_var()  # rounding
         imgui.pop_style_var()  # spacing
 
-        imgui.pop_style_color() # text selected bg
+        imgui.pop_style_color()  # text selected bg
 
         # full-screen window
         ########################################
 
         ########################################
         # status line at bottom
-        status_line.render()
+        status_line.render(self)
 
         # status line at bottom
         ########################################
 
         ########################################
         # flopsy inspector should be in an independent window
-
         if self.inspector is not None:
             inspector_keep_going = self.inspector.render()
             if not inspector_keep_going:
@@ -348,8 +351,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.frame_timestamps.append(datetime.now())
         if len(self.frame_timestamps) > 10:
             self.frame_timestamps = self.frame_timestamps[-10:]
-
-
 
         return keep_going
 

@@ -5,6 +5,11 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
+from mfp.gui_main import MFPGUI
+from mfp.gui.connection_element import ConnectionElement
+from mfp.gui.modes.patch_edit import PatchEditMode
+from mfp.gui.modes.global_mode import GlobalMode
+
 
 def render(app_window):
     imgui.begin(
@@ -19,7 +24,7 @@ def render(app_window):
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
         app_window.selected_window = "canvas"
         if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
-            app_window.input_mgr.global_mode = GlobalMode(self)
+            app_window.input_mgr.global_mode = GlobalMode(app_window)
             app_window.input_mgr.major_mode.enable()
 
     nedit.push_style_color(
@@ -86,6 +91,9 @@ def render(app_window):
         max_node_id = nedit.NodeId.create()
         app_window.viewport_box_nodes = (min_node_id, max_node_id)
 
+    # for some reason this still leaves a gap under the menu bar
+    canvas_origin = (1, app_window.menu_height + 1)
+
     current_zoom = 1.0 / nedit.get_current_zoom()
     viewport_x, viewport_y = nedit.screen_to_canvas(canvas_origin)
 
@@ -132,7 +140,7 @@ def render(app_window):
         nedit.push_style_var(nedit.StyleVar.node_padding, (0, 0, 0, 0))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 0)
 
-        nedit.set_node_position( app_window.viewport_box_nodes[0], upper_left)
+        nedit.set_node_position(app_window.viewport_box_nodes[0], upper_left)
         nedit.begin_node(app_window.viewport_box_nodes[0])
         nedit.end_node()
 
@@ -178,4 +186,4 @@ def render(app_window):
     imgui.end()
 
     # nothing in here can make us exit
-    return True 
+    return True

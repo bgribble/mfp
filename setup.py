@@ -19,7 +19,7 @@ setup (name = 'mfp',
        packages = [
            'mfp', 'mfp.builtins',
            'mfp.gui', 'mfp.gui.modes',
-           'mfp.gui.imgui',
+           'mfp.gui.imgui', 'mfp.gui.imgui.app_window',
            'mfp.gui.clutter', 'mfp.gui.clutter.xyplot'
        ],
        entry_points = { 'console_scripts': ['mfp=mfp.mfp_main:main_sync_wrapper',

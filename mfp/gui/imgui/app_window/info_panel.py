@@ -12,6 +12,24 @@ from mfp.gui.colordb import RGBAColor
 from mfp.gui.base_element import BaseElement
 from mfp.gui.param_info import ListOfInt
 
+single_params = [
+    'obj_type',
+    'obj_args',
+    'display_type',
+    'obj_name',
+    'scope',
+    'layername',
+    'min_width',
+    'min_height',
+]
+
+
+any_params = [
+    'position_x',
+    'position_y',
+    'position_z',
+]
+
 
 # info panel is the layer/patch list and the object inspector
 def render(app_window):
@@ -24,12 +42,25 @@ def render(app_window):
         ),
     )
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        self.selected_window = "info"
+        app_window.selected_window = "info"
+
     if imgui.begin_tab_bar("inspector_tab_bar", imgui.TabBarFlags_.none):
         # always show info about selection
         if imgui.begin_tab_item("Basics")[0]:
             render_basics_tab(app_window)
             imgui.end_tab_item()
+
+        # specific info about this type of object
+        if len(app_window.selected) == 1:
+            param_list = [
+                pname
+                for pname, pval in app_window.selected[0].store_attrs.items()
+                if pname not in single_params and pname not in any_params and pval.show
+            ]
+
+            if len(param_list) > 0 and imgui.begin_tab_item("Params")[0]:
+                render_params_tab(app_window, param_list)
+                imgui.end_tab_item()
 
         # show style for global (no selection) or single selection
         if len(app_window.selected) <= 1:
@@ -158,23 +189,6 @@ def render_param(app_window, param_name, param_type, param_value):
 
 
 def render_basics_tab(app_window):
-    single_params = [
-        'obj_type',
-        'obj_args',
-        'display_type',
-        'obj_name',
-        'scope',
-        'layername',
-        'min_width',
-        'min_height',
-    ]
-
-    any_params = [
-        'position_x',
-        'position_y',
-        'position_z',
-    ]
-
     if len(app_window.selected) == 1:
         for param in single_params:
             ptype = BaseElement.store_attrs.get(param)
@@ -204,6 +218,19 @@ def render_basics_tab(app_window):
                     MFPGUI().async_task(
                         elem.dispatch_setter(param, old_val + delta)
                     )
+
+
+def render_params_tab(app_window, param_list):
+    if len(app_window.selected) != 1 or len(param_list) == 0:
+        return
+
+    for param in param_list:
+        sel = app_window.selected[0]
+        ptype = sel.store_attrs.get(param)
+        pvalue = getattr(sel, param)
+        newval = render_param(app_window, param, ptype, pvalue)
+        if newval != pvalue:
+            MFPGUI().async_task(sel.dispatch_setter(param, newval))
 
 
 def render_style_tab(app_window):

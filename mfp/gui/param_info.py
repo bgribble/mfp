@@ -9,6 +9,7 @@ from typing import Optional
 class ParamInfo:
     label: str
     editable: Optional[bool] = True
+    show: Optional[bool] = False
     tooltip: Optional[str] = ""
     param_type: Optional[type] = str
 
