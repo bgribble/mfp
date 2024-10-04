@@ -15,6 +15,16 @@ from mfp.gui.param_info import ListOfInt
 
 # info panel is the layer/patch list and the object inspector
 def render(app_window):
+    imgui.begin(
+        "info_panel",
+        flags=(
+            imgui.WindowFlags_.no_collapse
+            | imgui.WindowFlags_.no_move
+            | imgui.WindowFlags_.no_title_bar
+        ),
+    )
+    if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+        self.selected_window = "info"
     if imgui.begin_tab_bar("inspector_tab_bar", imgui.TabBarFlags_.none):
         # always show info about selection
         if imgui.begin_tab_item("Basics")[0]:
@@ -45,8 +55,11 @@ def render(app_window):
                 render_activity_tab(app_window)
                 imgui.end_tab_item()
         imgui.end_tab_bar()
+    imgui.end()
 
 
+# I want to log a message when there's an error rendering a param,
+# but only once -- not on every render()
 logged_errors = set()
 
 
