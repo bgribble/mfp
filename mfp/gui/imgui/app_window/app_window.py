@@ -75,13 +75,17 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         """
         prev_pointer_obj = event.target
         new_pointer_obj = prev_pointer_obj
+        if event.y < self.menu_height and self.selected_window != "menu":
+            self.selected_window = "menu"
+            new_pointer_obj = None
+
         if self.console_panel_visible:
             if event.y >= self.window_height - self.console_panel_height:
                 if prev_pointer_obj != self.console_manager:
                     new_pointer_obj = self.console_manager
                     self.selected_window = "console"
         if not new_pointer_obj and self.info_panel_visible:
-            if event.x < self.canvas_panel_width:
+            if event.y > self.menu_height and event.x < self.canvas_panel_width:
                 new_pointer_obj = self
         if new_pointer_obj != prev_pointer_obj:
             if prev_pointer_obj:
@@ -394,8 +398,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         return nedit.canvas_to_screen((x, y))
 
     def move_view(self, dx, dy):
-        self.view_x -= dx
-        self.view_y -= dy
+        self.view_x -= dx / self.zoom
+        self.view_y -= dy / self.zoom
         self.viewport_pos_set = True
         return True
 
