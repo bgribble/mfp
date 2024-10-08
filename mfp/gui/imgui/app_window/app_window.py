@@ -66,6 +66,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         super().__init__(*args, **kwargs)
 
         self.signal_listen("motion-event", self.handle_motion)
+        self.signal_listen("toggle-console", self.handle_toggle_console)
+        self.signal_listen("toggle-info-panel", self.handle_toggle_info_panel)
 
     async def handle_motion(self, target, signal, event, *rest):
         """
@@ -87,6 +89,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             if new_pointer_obj != self:
                 await self.signal_emit("enter-event", EnterEvent(target=new_pointer_obj))
         return False
+
+    async def handle_toggle_console(self, *rest):
+        self.console_panel_visible = not self.console_panel_visible
+
+    async def handle_toggle_info_panel(self, *rest):
+        self.info_panel_visible = not self.info_panel_visible
 
     async def _render_task(self):
         keep_going = True
