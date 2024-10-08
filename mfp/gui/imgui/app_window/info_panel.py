@@ -10,7 +10,7 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import RGBAColor
 from mfp.gui.base_element import BaseElement
-from mfp.gui.param_info import ListOfInt
+from mfp.gui.param_info import ListOfInt, ListOfPairs
 
 single_params = [
     'obj_type',
@@ -111,35 +111,87 @@ def render_param(app_window, param_name, param_type, param_value):
                 " " + str(param_value),
             )
             imgui.pop_style_var()
+
         elif param_type.param_type is str:
             changed, newval = imgui.input_text(
                 f"##{param_name}",
                 str(param_value),
                 imgui.InputTextFlags_.enter_returns_true
             )
+
         elif param_type.param_type is ListOfInt:
             changed, newval = imgui.input_text(
                 f"##{param_name}",
                 str(param_value),
                 imgui.InputTextFlags_.enter_returns_true
             )
+
+        elif param_type.param_type is bool:
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (6, 0))
+            imgui.same_line()
+            changed, newval = imgui.checkbox(
+                f"##{param_name}",
+                bool(param_value),
+            )
+            imgui.pop_style_var()
+
         elif param_type.param_type is int:
-            changed, newval = imgui.input_int(
-                f"##{param_name}",
-                int(param_value),
-                step=1,
-                step_fast=10,
-                flags=imgui.InputTextFlags_.enter_returns_true
-            )
+            show_input = True
+            show_input_changed = False
+            if param_type.null:
+                imgui.push_style_var(imgui.StyleVar_.item_spacing, (6, 0))
+                imgui.same_line()
+                show_input_changed, none_val = imgui.checkbox(
+                    f"##{param_name}_none",
+                    param_value is None
+                )
+                imgui.same_line()
+                imgui.text(" None")
+                imgui.pop_style_var()
+                if none_val:
+                    show_input = False
+            if show_input:
+                changed, newval = imgui.input_int(
+                    f"##{param_name}",
+                    int(param_value),
+                    step=1,
+                    step_fast=10,
+                    flags=imgui.InputTextFlags_.enter_returns_true
+                )
+                changed = changed or show_input_changed
+            else:
+                changed = show_input_changed
+                newval = None
+
         elif param_type.param_type is float:
-            changed, newval = imgui.input_double(
-                f"##{param_name}",
-                float(param_value),
-                step=1,
-                step_fast=10,
-                format="%.2f",
-                flags=imgui.InputTextFlags_.enter_returns_true
-            )
+            show_input = True
+            show_input_changed = False
+            if param_type.null:
+                imgui.push_style_var(imgui.StyleVar_.item_spacing, (6, 0))
+                imgui.same_line()
+                show_input_changed, none_val = imgui.checkbox(
+                    f"##{param_name}_none",
+                    param_value is None
+                )
+                imgui.same_line()
+                imgui.text(" None")
+                imgui.pop_style_var()
+                if none_val:
+                    show_input = False
+            if show_input:
+                changed, newval = imgui.input_double(
+                    f"##{param_name}",
+                    float(param_value or 0),
+                    step=1,
+                    step_fast=10,
+                    format="%.2f",
+                    flags=imgui.InputTextFlags_.enter_returns_true
+                )
+                changed = changed or show_input_changed
+            else:
+                changed = show_input_changed
+                newval = None
+
         elif param_type.param_type is RGBAColor:
             components = [
                 param_value.red / 255.0,
@@ -170,6 +222,86 @@ def render_param(app_window, param_name, param_type, param_value):
                 newval = RGBAColor(
                     red=red*255.0, green=green*255.0, blue=blue*255.0, alpha=alpha*255.0
                 )
+
+        elif param_type.param_type is ListOfPairs:
+            newval = []
+            changed = False
+
+            if param_value and len(param_value) > 0:
+                flags = 0
+                if imgui.begin_table(f"##{param_name}_table", 3, flags):
+                    imgui.table_setup_column("Display")
+                    imgui.table_setup_column("Value")
+                    imgui.table_setup_column("Del")
+                    imgui.table_headers_row()
+
+                    for row_num, row_item in enumerate(param_value):
+                        display, value = row_item
+                        imgui.table_next_row()
+                        imgui.table_set_column_index(0)
+                        imgui.push_id(row_num)
+                        display_changed, display_newval = imgui.input_text(
+                            f"##{param_name}_display",
+                            display
+                        )
+                        imgui.table_set_column_index(1)
+                        val_changed, val_newval = imgui.input_text(
+                            f"##{param_name}_value",
+                            value
+                        )
+                        imgui.table_set_column_index(2)
+                        del_clicked = imgui.button("x")
+                        imgui.pop_id()
+
+                        if del_clicked:
+                            changed = True
+                            continue
+
+                        new_item = (
+                            display_newval if display_changed else display,
+                            val_newval if val_changed else value
+                        )
+
+                        changed = changed or val_changed or display_changed
+                        newval.append(new_item)
+                    imgui.end_table()
+            if imgui.button("Add"):
+                newval.append(("", ""))
+                changed = True
+
+        elif param_type.param_type is dict:
+            newval = {}
+            changed = False
+
+            if param_value and len(param_value) > 0:
+                flags = 0
+                if imgui.begin_table(f"##{param_name}_table", 2, flags):
+                    for row_num, row_key in enumerate(param_value):
+                        row_value = param_value.get(row_key)
+                        imgui.table_next_row()
+
+                        imgui.table_set_column_index(0)
+                        imgui.push_id(row_num)
+                        imgui.text("  " + row_key)
+
+                        imgui.table_set_column_index(1)
+                        val_changed, val_newval = imgui.input_text(
+                            f"##{param_name}_value",
+                            str(row_value)
+                        )
+                        imgui.pop_id()
+                        if val_changed:
+                            try:
+                                val_type = type(row_value)
+                                newval[row_key] = val_type(val_newval)
+                                changed = True
+                            except Exception:
+                                newval[row_key] = row_value
+
+                        else:
+                            newval[row_key] = row_value
+                    imgui.end_table()
+
         if param_name in logged_errors:
             logged_errors.remove(param_name)
     except Exception as e:
