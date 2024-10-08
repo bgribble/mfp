@@ -22,7 +22,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
 
     style_defaults = {
         'porthole-border': 6,  # allow for rounded corners
-        'padding': (4, 2, 4, 4)
+        'padding': dict(left=4, top=2, right=4, bottom=4)
     }
 
     def __init__(self, window, x, y):

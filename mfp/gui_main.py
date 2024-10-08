@@ -58,6 +58,8 @@ class MFPGUI (Singleton):
             'fill-color:selected':ParamInfo(label="Element fill color (selected)", param_type=RGBAColor),
             'font-face': ParamInfo(label="Font faces", param_type=str),
             'font-size': ParamInfo(label="Font size", param_type=float),
+            'grid-color:edit': ParamInfo(label="Grid color (edit)", param_type=RGBAColor),
+            'grid-color:operate': ParamInfo(label="Grid color (operate)", param_type=RGBAColor),
             'padding': ParamInfo(label="Element padding", param_type=dict),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
             'porthole-color': ParamInfo(label="Inlet/outlet color", param_type=RGBAColor),
@@ -82,6 +84,8 @@ class MFPGUI (Singleton):
             'fill-color:debug': ColorDB().find('default-fill-color-debug'),
             'font-face': 'Cantarell,Sans',
             'font-size': 16,
+            'grid-color:edit': ColorDB().find('default-grid-color'),
+            'grid-color:operate': ColorDB().find('transparent'),
             'porthole-color': ColorDB().find('default-stroke-color'),
             'porthole-color:selected': ColorDB().find('default-stroke-color-selected'),
             'stroke-color': ColorDB().find('default-stroke-color'),
@@ -128,6 +132,8 @@ def setup_default_colors():
                      ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
     ColorDB().insert('default-fill-color',
                      ColorDB().find(0xd4, 0xdc, 0xff, 0xff))
+    ColorDB().insert('default-grid-color',
+                     ColorDB().find(0xd0, 0xd0, 0xd0, 0xff))
     ColorDB().insert('default-fill-color-selected',
                      ColorDB().find(0xe4, 0xec, 0xff, 0xff))
     ColorDB().insert('default-fill-color-debug',

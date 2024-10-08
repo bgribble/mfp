@@ -50,6 +50,17 @@ def render(app_window):
         app_window.get_color('stroke-color:hover').to_rgbaf()
     )
 
+    if isinstance(app_window.input_mgr.major_mode, PatchEditMode):
+        nedit.push_style_color(
+            nedit.StyleColor.grid,
+            app_window.get_color('grid-color:edit').to_rgbaf()
+        )
+    else:
+        nedit.push_style_color(
+            nedit.StyleColor.grid,
+            app_window.get_color('grid-color:operate').to_rgbaf()
+        )
+
     nedit.begin("canvas_editor", (0.0, 0.0))
 
     conf = nedit.get_config()

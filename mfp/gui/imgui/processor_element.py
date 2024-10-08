@@ -20,7 +20,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
     backend_name = "imgui"
 
     style_defaults = {
-        'padding': (4, 2, 4, 6)
+        'padding': dict(left=4, top=2, right=4, bottom=6)
     }
 
     def __init__(self, window, x, y):
@@ -62,7 +62,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
             nedit.StyleColor.node_border,
             self.get_color(
                 'stroke-color:selected' if self.selected else 'stroke-color'
-            ).to_rgbaf() 
+            ).to_rgbaf()
         )
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 
