@@ -41,8 +41,15 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         """
 
         # style
+        padding = self.get_style('padding')
+        padding_tpl = (
+            padding.get('left', 0),
+            padding.get('top', 0),
+            padding.get('right', 0),
+            padding.get('bottom', 0)
+        )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0.25)
-        nedit.push_style_var(nedit.StyleVar.node_padding, self.get_style('padding'))
+        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
 
         nedit.push_style_color(

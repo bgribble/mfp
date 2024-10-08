@@ -7,7 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
-from flopsy import saga
+from flopsy import saga, mutates
 
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
@@ -15,7 +15,7 @@ from .text_widget import TextWidget
 from .base_element import BaseElement
 from .modes.enum_control import EnumEditMode, EnumControlMode
 
-from .param_info import ParamInfo
+from .param_info import ParamInfo, ListOfPairs
 
 
 class EnumElementImpl(BackendInterface, metaclass=ABCMeta):
@@ -31,8 +31,8 @@ class EnumElement (BaseElement):
         **BaseElement.store_attrs,
         **{
             'digits': ParamInfo(label="Digits", param_type=int, show=True),
-            'min_value': ParamInfo(label="Min value", param_type=float, show=True),
-            'max_value': ParamInfo(label="Max value", param_type=float, show=True),
+            'min_value': ParamInfo(label="Min value", param_type=float, show=True, null=True),
+            'max_value': ParamInfo(label="Max value", param_type=float, show=True, null=True),
             'scientific': ParamInfo(label="Use scientific notation", param_type=bool, show=True),
         }
     }
@@ -47,6 +47,7 @@ class EnumElement (BaseElement):
         self.max_value = None
         self.scientific = False
         self.format_str = "%.1f"
+
         self.connections_out = []
         self.connections_in = []
         self.update_required = True
@@ -75,6 +76,11 @@ class EnumElement (BaseElement):
             yield await self.label_edit_finish(
                 None, f"{self.obj_type}{args}"
             )
+
+    @saga('min_value', 'max_value', 'digits', 'scientific')
+    async def reformat_label(self, action, state_diff, previous):
+        self.format_update()
+        yield await self.update_value(self.value)
 
     def format_update(self):
         if self.scientific:
@@ -115,6 +121,7 @@ class EnumElement (BaseElement):
         self.draw_ports()
         self.redraw()
 
+    @mutates('min_value', 'max_value')
     async def set_bounds(self, lower, upper):
         self.min_value = lower
         self.max_value = upper

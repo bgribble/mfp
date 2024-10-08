@@ -18,14 +18,14 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
     backend_name = "imgui"
 
     style_defaults = {
-        'padding': (12, 2, 4, 2)
+        'padding': dict(left=12, top=2, right=4, bottom=2)
     }
 
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
         self.node_id = None
-        self.width = 35
-        self.height = 25
+        self.min_width = self.width = 24
+        self.min_height = self.height = 12
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
@@ -34,11 +34,18 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
 
         * rectangle with square corners
         * triangle on left side
-        * semicircular ports (only in edit mode)
+        * semicircular ports
         """
         # style
+        padding = self.get_style('padding')
+        padding_tpl = (
+            padding.get('left', 0),
+            padding.get('top', 0),
+            padding.get('right', 0),
+            padding.get('bottom', 0)
+        )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, self.get_style('padding'))
+        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
         nedit.push_style_color(
             nedit.StyleColor.node_bg,

@@ -58,7 +58,7 @@ class MFPGUI (Singleton):
             'fill-color:selected':ParamInfo(label="Element fill color (selected)", param_type=RGBAColor),
             'font-face': ParamInfo(label="Font faces", param_type=str),
             'font-size': ParamInfo(label="Font size", param_type=float),
-            'padding': ParamInfo(label="Element padding", param_type=ListOfInt),
+            'padding': ParamInfo(label="Element padding", param_type=dict),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
             'porthole-color': ParamInfo(label="Inlet/outlet color", param_type=RGBAColor),
             'porthole-color:selected': ParamInfo(label="Inlet/outlet color (selected)", param_type=RGBAColor),

@@ -88,7 +88,7 @@ class BaseElement (Store):
         'porthole-height': 4,
         'porthole-border': 1,
         'porthole-minspace': 11,
-        'padding': [4, 2, 4, 2],  # left, top, right, bottom
+        'padding': dict(left=4, top=2, right=4, bottom=2),
         'badge-size': 15,
     }
 
