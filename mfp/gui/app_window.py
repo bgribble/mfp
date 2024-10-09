@@ -122,23 +122,11 @@ class AppWindowImpl(BackendInterface, ABC):
     # clipboard
 
     @abstractmethod
-    def clipboard_get(self, pointer_pos):
+    def clipboard_get(self):
         pass
 
     @abstractmethod
-    def clipboard_set(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    def clipboard_cut(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    def clipboard_copy(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    def clipboard_paste(self, pointer_pos=None):
+    def clipboard_set(self, cliptext):
         pass
 
     #####################
@@ -393,6 +381,48 @@ class AppWindow (SignalMixin):
 
     async def get_prompted_input(self, prompt, callback, default=''):
         await self.hud_prompt_mgr.get_input(prompt, callback, default)
+
+    async def clipboard_cut(self, pointer_pos):
+        if self.selected:
+            await self.clipboard_copy(pointer_pos)
+            await self.delete_selected()
+            return True
+        return False
+
+    async def clipboard_copy(self, pointer_pos):
+        if self.selected:
+            cliptxt = await MFPGUI().mfp.clipboard_copy(
+                pointer_pos,
+                [o.obj_id for o in self.selected if o.obj_id is not None]
+            )
+            self.clipboard_set(cliptxt)
+            return True
+        return False
+
+    async def clipboard_paste(self, pointer_pos=None):
+        from .patch_display import PatchDisplay
+        cliptxt = self.clipboard_get()
+        if not cliptxt:
+            return False
+
+        newobj = await MFPGUI().mfp.clipboard_paste(
+            cliptxt, self.selected_patch.obj_id,
+            self.selected_layer.scope, None
+        )
+
+        if newobj is not None:
+            await self.unselect_all()
+            for o in newobj:
+                obj = MFPGUI().recall(o)
+                if obj is None:
+                    return True
+                if not isinstance(obj, PatchDisplay):
+                    obj.move_to_layer(self.selected_layer)
+                    if obj not in self.selected:
+                        await self.select(MFPGUI().recall(o))
+            return False
+        else:
+            return False
 
 # additional methods in @extends wrappers
 from . import app_window_layer  # noqa

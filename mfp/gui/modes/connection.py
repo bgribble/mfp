@@ -139,8 +139,6 @@ class ConnectionMode (InputMode):
         return True
 
     async def make_connection(self):
-        from ..connection_element import ConnectionElement
-
         # are both ends selected?
         if self.reverse and self.source_obj is None and self.window.selected:
             self.source_obj = self.window.selected[0]
@@ -156,7 +154,6 @@ class ConnectionMode (InputMode):
                 self.dest_obj.obj_id,
                 self.dest_port
             ):
-
                 self.connection.dashed = False
                 self.source_obj.connections_out.append(self.connection)
                 self.dest_obj.connections_in.append(self.connection)

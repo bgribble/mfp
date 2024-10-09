@@ -456,20 +456,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     #####################
     # clipboard
-    def clipboard_get(self, pointer_pos):
-        pass
+    def clipboard_get(self):
+        return imgui.get_clipboard_text()
 
-    def clipboard_set(self, pointer_pos):
-        pass
-
-    def clipboard_cut(self, pointer_pos):
-        pass
-
-    def clipboard_copy(self, pointer_pos):
-        pass
-
-    def clipboard_paste(self, pointer_pos=None):
-        pass
+    def clipboard_set(self, cliptext):
+        return imgui.set_clipboard_text(cliptext)
 
     #####################
     # selection box
