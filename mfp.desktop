@@ -5,4 +5,6 @@ Type=Application
 Terminal=false
 Exec=${PREFIX}/bin/mfp
 Name=mfp
+X-NSM-Capable=true
+X-NSM-Exec=mfp
 Icon=${PREFIX}/share/mfp/icons/hicolor/scalable/actions/mfp.svg
