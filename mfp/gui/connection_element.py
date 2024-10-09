@@ -4,6 +4,7 @@ connection_element.py -- connection between elements
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
+from flopsy import mutates
 from abc import ABCMeta, abstractmethod
 from mfp.gui_main import MFPGUI
 
@@ -63,12 +64,17 @@ class ConnectionElement(BaseElement):
 
         return connection
 
+    @mutates('obj_1', 'obj_2', 'port_1', 'port_2', 'dashed', 'position_z')
     def connect(self, obj_1, port_1, obj_2, port_2, dashed=False):
         self.obj_1 = obj_1
         self.port_1 = port_1
         self.obj_2 = obj_2
         self.port_2 = port_2
         self.dashed = dashed
+
+        self.layer = self.obj_1.layer
+        self.layername = self.obj_1.layername
+        self.position_z = self.obj_1.position_z
 
         if port_1 in obj_1.dsp_outlets:
             self.dsp_connect = True

@@ -78,18 +78,19 @@ def render(app_window):
             nedit.select_node(obj.node_id, True)
         app_window.imgui_needs_reselect = []
 
-    # first pass: non-links
-    all_pins = {}
-    for obj in app_window.objects:
-        if not isinstance(obj, ConnectionElement):
-            obj.render()
-            for port_id, pin_id in obj.port_elements.items():
-                all_pins[pin_id.id()] = (obj, port_id)
+    if app_window.selected_layer:
+        # first pass: non-links
+        all_pins = {}
+        for obj in sorted(app_window.selected_layer.objects, key=lambda o: o.position_z):
+            if not isinstance(obj, ConnectionElement):
+                obj.render()
+                for port_id, pin_id in obj.port_elements.items():
+                    all_pins[pin_id.id()] = (obj, port_id)
 
-    # second pass: links
-    for obj in app_window.objects:
-        if isinstance(obj, ConnectionElement):
-            obj.render()
+        # second pass: links
+        for obj in sorted(app_window.objects, key=lambda o: o.position_z):
+            if obj.layer == app_window.selected_layer and isinstance(obj, ConnectionElement):
+                obj.render()
 
     #############################
     # viewport management

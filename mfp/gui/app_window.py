@@ -153,6 +153,14 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     #####################
+    # layers
+    def layer_create(self, layer, patch):
+        pass
+
+    def layer_update(self, layer, patch):
+        pass
+
+    #####################
     # log output
 
     @abstractmethod

@@ -8,6 +8,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from flopsy import mutates
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
+from mfp import log
 
 from ..colordb import ColorDB
 from ..base_element import BaseElement
@@ -67,15 +68,12 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            self.get_color(
-                'fill-color:selected' if self.selected else 'fill-color'
-            ).to_rgbaf()
+            ColorDB().find('transparent').to_rgbaf()
+
         )
         nedit.push_style_color(
             nedit.StyleColor.node_border,
-            self.get_color(
-                'stroke-color:selected' if self.selected else 'stroke-color'
-            ).to_rgbaf()
+            ColorDB().find('transparent').to_rgbaf()
         )
 
         ##########################
@@ -129,7 +127,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         pw = self.VIA_SIZE
         half_height = self.get_style('porthole-height') / 2.0
 
-        stroke_color = self.get_color('stroke-color').to_rgba()
+        stroke_color = imgui.IM_COL32(*self.get_color('stroke-color').to_rgba())
 
         if self.GLYPH_STYLE in ("empty_circled", "filled_circled"):
             arcsize = self.VIA_SIZE / 3.5

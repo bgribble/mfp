@@ -480,6 +480,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         pass
 
     #####################
+    # layers
+    def layer_create(self, layer, patch):
+        pass
+
+    def layer_update(self, layer, patch):
+        pass
+
+    #####################
     # log output
     def log_write(self, message, level):
         self.log_text = self.log_text + message
