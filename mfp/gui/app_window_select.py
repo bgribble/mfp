@@ -214,8 +214,9 @@ def relative_zoom(self, ratio):
 
 @extends(AppWindow)
 def move_view(self, dx, dy):
-    self.view_x += dx
-    self.view_y += dy
+    di = self.selected_patch.display_info
+    di.view_x += dx
+    di.view_y += dy
     self.viewport_pos_set = True
     self.rezoom()
     return True

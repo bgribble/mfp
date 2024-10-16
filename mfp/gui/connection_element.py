@@ -34,7 +34,6 @@ class ConnectionElement(BaseElement):
     }
 
     def __init__(self, window, position_x, position_y):
-
         self.obj_1 = None
         self.port_1 = None
         self.obj_2 = None
@@ -72,8 +71,9 @@ class ConnectionElement(BaseElement):
         self.port_2 = port_2
         self.dashed = dashed
 
-        self.layer = self.obj_1.layer
-        self.layername = self.obj_1.layername
+        if obj_1.layer and obj_1.layer != self.layer:
+            self.move_to_layer(obj_1.layer)
+
         self.position_z = self.obj_1.position_z
 
         if port_1 in obj_1.dsp_outlets:

@@ -12,6 +12,7 @@ from mfp.gui.app_window import AppWindow, AppWindowImpl
 from mfp.gui.collision import collision_check
 from mfp.gui.colordb import ColorDB
 from mfp.gui.text_widget import TextWidget
+from mfp.gui.tile_manager import Tile
 from mfp.gui_main import MFPGUI
 
 from ..connection_element import ConnectionElement
@@ -67,15 +68,15 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
     @property
     def view_x(self):
-        return self.selected_patch.view_x
+        return self.selected_patch.display_info.view_x
 
     @property
     def view_y(self):
-        return self.selected_patch.view_y
+        return self.selected_patch.display_info.view_y
 
     @property
     def zoom(self):
-        return self.selected_patch.view_zoom
+        return self.selected_patch.display_info.view_zoom
 
     def _init_window(self):
         from gi.repository import Clutter, Gtk, GtkClutter
@@ -202,7 +203,21 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         return layer_view
 
     def add_patch(self, patch_display):
+        patch_display.display_info = Tile(
+            title=patch_display.obj_name,
+            origin_x=0,
+            origin_y=0,
+            width=0,
+            height=0,
+            view_x=0,
+            view_y=0,
+            view_zoom=1.0,
+            id_page=0,
+            id_tile=0,
+            neighbors={}
+        )
         super().add_patch(patch_display)
+
         self.layer_view.insert(patch_display, None)
         for s in patch_display.scopes:
             if not self.object_view.in_tree((s, patch_display)):
