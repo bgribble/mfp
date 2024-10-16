@@ -43,8 +43,8 @@ def render_tile(app_window, patch):
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
         app_window.selected_patch = patch
         app_window.selected_layer = patch.selected_layer
-        imgui.set_window_focus()
         app_window.selected_window = "canvas"
+        imgui.set_window_focus()
 
     # get_cursor_pos appears to be relative to the origin of the current window
     cursor_pos = imgui.get_cursor_pos()
@@ -153,16 +153,12 @@ def render_tile(app_window, patch):
         else:
             tile.view_zoom = current_zoom
 
-    app_window.viewport_zoom_set = False
-
     if tile.view_x != viewport_x or tile.view_y != viewport_y:
         if app_window.viewport_pos_set:
             need_navigate = True
         else:
             tile.view_x = viewport_x
             tile.view_y = viewport_y
-
-    app_window.viewport_pos_set = False
 
     if need_navigate:
         window_size = (tile.width - canvas_origin[0], tile.height - canvas_origin[1])
@@ -260,6 +256,9 @@ def render(app_window):
         imgui.push_id(tile_num)
         render_tile(app_window, patch)
         imgui.pop_id()
+
+    app_window.viewport_zoom_set = False
+    app_window.viewport_pos_set = False
 
     imgui.end()
 
