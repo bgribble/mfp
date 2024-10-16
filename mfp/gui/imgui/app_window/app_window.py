@@ -16,6 +16,8 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.event import EnterEvent, LeaveEvent
 from mfp.gui.app_window import AppWindow, AppWindowImpl
+from mfp.gui.patch_display import PatchDisplay
+from mfp.gui.tile_manager import TileManager, Tile
 from ..inputs import imgui_process_inputs, imgui_key_map
 from ..sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
 from . import menu_bar, canvas_panel, info_panel, console_panel, status_line
@@ -23,9 +25,10 @@ from . import menu_bar, canvas_panel, info_panel, console_panel, status_line
 MAX_RENDER_US = 200000
 PEAK_FPS = 60
 
+
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
-    motion_overrides = ["drag", "scroll-zoom", "canvas_pos"]
+    motion_overrides = ["drag", "scroll-zoom", "canvas-pos"]
 
     INIT_WIDTH = 900
     INIT_HEIGHT = 700
@@ -40,6 +43,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_repeating_keys = {}
         self.imgui_needs_reselect = []
 
+        self.nedit_config = None
+
         self.menu_height = self.INIT_MENU_HEIGHT
 
         self.info_panel_id = None
@@ -53,6 +58,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.canvas_panel_id = None
         self.canvas_panel_width = self.INIT_WIDTH - self.INIT_INFO_PANEL_WIDTH
         self.canvas_panel_height = self.INIT_HEIGHT - self.INIT_CONSOLE_PANEL_HEIGHT
+
+        self.canvas_tile_page = 0
+        self.canvas_tile_manager = TileManager(
+            self.canvas_panel_width,
+            self.canvas_panel_height
+        )
 
         self.frame_count = 0
         self.frame_timestamps = []
@@ -113,11 +124,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         # font_loader = markdown.get_font_loader_function()
         # font_loader()
 
-        config = nedit.Config()
-        config.settings_file = "/dev/null"
+        self.nedit_config = nedit.Config()
+        self.nedit_config.settings_file = "/dev/null"
 
-        ed = nedit.create_editor(config)
-        nedit.set_current_editor(ed)
+        # FIXME this dummy editor is needed for some
+        # hidden call to nedit.* during initialization of the
+        # first patch. should be removed.
+        nedit_editor = nedit.create_editor(self.nedit_config)
+        nedit.set_current_editor(nedit_editor)
 
         gl.glClearColor(1.0, 1.0, 1.0, 1)
 
@@ -169,7 +183,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.imgui_renderer.render(imgui.get_draw_data())
             self.imgui_impl.swap_window()
 
-        nedit.destroy_editor(ed)
+        for p in self.patches:
+            if hasattr(p, 'nedit_editor'):
+                nedit.destroy_editor(p.nedit_editor)
         self.imgui_renderer.shutdown()
         self.imgui_impl.shutdown()
         await self.signal_emit("quit")
@@ -214,7 +230,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             imgui.end_main_menu_bar()
 
-            _, self.menu_height = imgui.get_cursor_pos()
+            _, menu_height = imgui.get_cursor_pos()
+            self.menu_height = menu_height - 5
 
         # menu bar
         ########################################
@@ -223,7 +240,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # full-screen window containing the dockspace
-        imgui.set_next_window_size((self.window_width, self.window_height - 2*self.menu_height))
+        imgui.set_next_window_size((self.window_width, self.window_height - 2*self.menu_height - 5))
         imgui.set_next_window_pos((0, self.menu_height))
 
         # main window is plain, no border, no padding
@@ -240,6 +257,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 | imgui.WindowFlags_.no_title_bar
                 | imgui.WindowFlags_.no_resize
                 | imgui.WindowFlags_.no_saved_settings
+                | imgui.WindowFlags_.no_bring_to_front_on_focus
             ),
         )
 
@@ -299,18 +317,18 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         canvas_size = canvas_node.size
         self.canvas_panel_width = canvas_size[0]
         self.canvas_panel_height = canvas_size[1]
+        self.canvas_tile_manager.resize(canvas_size[0], canvas_size[1])
 
         ########################################
         # canvas panel
         canvas_panel.render(self)
 
+        # canvas panel
+        ########################################
+
         ########################################
         # right-side info display
         if self.info_panel_visible:
-            panel_height = self.window_height - self.menu_height
-            if self.console_panel_visible:
-                panel_height -= self.console_panel_height
-
             info_panel.render(self)
 
         # right-side info display
@@ -390,23 +408,32 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     #####################
     # coordinate transforms and zoom
-
     def screen_to_canvas(self, x, y):
-        return nedit.screen_to_canvas((x, y))
+        if not self.selected_patch or not self.selected_patch.display_info:
+            return (x, y)
+        di = self.selected_patch.display_info
+        screen_x_delta = x - di.origin_x
+        screen_y_delta = y - di.origin_y - self.menu_height - 20
+        canvas_x = di.view_x + di.view_zoom * screen_x_delta
+        canvas_y = di.view_y + di.view_zoom * screen_y_delta
+        return (canvas_x, canvas_y)
 
     def canvas_to_screen(self, x, y):
         return nedit.canvas_to_screen((x, y))
 
     def move_view(self, dx, dy):
-        self.view_x -= dx / self.zoom
-        self.view_y -= dy / self.zoom
+        patch = self.selected_patch
+
+        patch.display_info.view_x -= dx / patch.display_info.view_zoom
+        patch.display_info.view_y -= dy / patch.display_info.view_zoom
         self.viewport_pos_set = True
         return True
 
     def rezoom(self, **kwargs):
+        patch = self.selected_patch
         if 'previous' in kwargs:
             prev_zoom = kwargs['previous']
-            curr_zoom = self.zoom
+            curr_zoom = patch.display_info.view_zoom
 
         self.viewport_zoom_set = True
 
@@ -477,6 +504,18 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     def layer_update(self, layer, patch):
         pass
+
+    #####################
+    # patches / MDI
+    def add_patch(self, patch):
+        if isinstance(patch.display_info, Tile):
+            self.canvas_tile_manager.add_tile(patch.display_info)
+        else:
+            tile = self.canvas_tile_manager.alloc_tile(page=self.canvas_tile_page)
+            patch.display_info = tile
+        self.viewport_zoom_set = True
+        self.viewport_pos_set = True
+        super().add_patch(patch)
 
     #####################
     # log output

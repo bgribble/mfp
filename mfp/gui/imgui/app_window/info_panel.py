@@ -10,7 +10,7 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import RGBAColor
 from mfp.gui.base_element import BaseElement
-from mfp.gui.param_info import ListOfInt, ListOfPairs
+from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs
 
 single_params = [
     'obj_type',
@@ -39,15 +39,20 @@ def render(app_window):
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
             | imgui.WindowFlags_.no_title_bar
+            | imgui.WindowFlags_.no_bring_to_front_on_focus
         ),
     )
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
         app_window.selected_window = "info"
 
     if imgui.begin_tab_bar("inspector_tab_bar", imgui.TabBarFlags_.none):
+        if imgui.begin_tab_item("Patch")[0]:
+            render_patch_tab(app_window)
+            imgui.end_tab_item()
+
         # always show info about selection
-        if imgui.begin_tab_item("Basics")[0]:
-            render_basics_tab(app_window)
+        if imgui.begin_tab_item("Object")[0]:
+            render_object_tab(app_window)
             imgui.end_tab_item()
 
         # specific info about this type of object
@@ -320,7 +325,63 @@ def render_param(app_window, param_name, param_type, param_value):
     return param_value
 
 
-def render_basics_tab(app_window):
+def render_patch_tab(app_window):
+    patch = app_window.selected_patch
+    layer = app_window.selected_layer
+
+    if not patch or not layer:
+        return
+
+    ######################
+    # patch params
+    imgui.separator_text(" Patch ")
+
+    oldval = patch.obj_name
+    newval = render_param(
+        app_window, 'patch_name', ParamInfo(label="Name", param_type=str), oldval
+    )
+    if newval != oldval:
+        patch.obj_name = newval
+        MFPGUI().async_task(MFPGUI().mfp.rename_obj(patch.obj_id, newval))
+        patch.send_params()
+
+    ######################
+    # viewport params
+    imgui.separator_text(" Viewport ")
+    di = patch.display_info
+    view_x = render_param(
+        app_window, 'viewport_x', ParamInfo(label="X origin", param_type=float), di.view_x
+    )
+    view_y = render_param(
+        app_window, 'viewport_y', ParamInfo(label="Y origin", param_type=float), di.view_y
+    )
+    view_zoom = render_param(
+        app_window, 'viewport_zoom', ParamInfo(label="Zoom", param_type=float), di.view_zoom
+    )
+
+    if view_x != di.view_x or view_y != di.view_y:
+        di.view_x = view_x
+        di.view_y = view_y
+        app_window.viewport_pos_set = True
+
+    if view_zoom != di.view_zoom:
+        di.view_zoom = view_zoom
+        app_window.viewport_zoom_set = True
+
+    ######################
+    # layer params
+    imgui.separator_text(" Layer ")
+
+    oldval = layer.name
+    newval = render_param(
+        app_window, 'layer_name', ParamInfo(label="Name", param_type=str), oldval
+    )
+    if newval != oldval:
+        layer.name = newval
+        patch.send_params()
+
+
+def render_object_tab(app_window):
     if len(app_window.selected) == 1:
         for param in single_params:
             ptype = BaseElement.store_attrs.get(param)

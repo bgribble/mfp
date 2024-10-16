@@ -65,6 +65,18 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         else:
             return False
 
+    @property
+    def view_x(self):
+        return self.selected_patch.view_x
+
+    @property
+    def view_y(self):
+        return self.selected_patch.view_y
+
+    @property
+    def zoom(self):
+        return self.selected_patch.view_zoom
+
     def _init_window(self):
         from gi.repository import Clutter, Gtk, GtkClutter
         # load Glade ui

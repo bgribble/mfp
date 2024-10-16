@@ -3,8 +3,8 @@ from imgui_bundle import imgui, imgui_node_editor as nedit
 CHAR_PIXELS = 10
 
 def render(app_window):
-    imgui.set_next_window_size((app_window.window_width, app_window.menu_height))
-    imgui.set_next_window_pos((0, app_window.window_height - app_window.menu_height))
+    imgui.set_next_window_size((app_window.window_width, app_window.menu_height + 5))
+    imgui.set_next_window_pos((0, app_window.window_height - app_window.menu_height -5 ))
     imgui.begin(
         "status_line",
         flags=(
@@ -22,7 +22,7 @@ def render(app_window):
 
         elapsed = (app_window.frame_timestamps[-1] - app_window.frame_timestamps[0]).total_seconds()
         fps = int((len(app_window.frame_timestamps)-1) / elapsed)
-        right_corner_text = f"FPS: {fps} Zoom: {(1.0/nedit.get_current_zoom()):0.2f}"
+        right_corner_text = f"FPS: {fps} Pointer: ({app_window.input_mgr.pointer_ev_x}, {app_window.input_mgr.pointer_ev_y})"
         cur = imgui.get_cursor_pos()
         imgui.set_cursor_pos((
             app_window.window_width - len(right_corner_text) * CHAR_PIXELS,

@@ -41,6 +41,8 @@ def layer_select(self, layer):
     if self.selected_layer is not None:
         self.selected_layer.hide()
 
+    layer.patch.selected_layer = layer
+
     if layer != self.selected_layer:
         sname = layer.scope
         if sname == "__patch__":

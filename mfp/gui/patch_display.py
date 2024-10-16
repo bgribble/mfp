@@ -26,6 +26,8 @@ class PatchDisplay:
         self.last_filename = None
         self.layers = []
         self.scopes = []
+        self.selected_layer = None
+        self.display_info = None
 
         self.app_window.add_patch(self)
 

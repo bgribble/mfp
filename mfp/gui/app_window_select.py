@@ -166,8 +166,8 @@ async def move_selected(self, dx, dy):
     for obj in self.selected:
         if obj.editable and obj.display_type != 'connection':
             await obj.move(
-                max(0, obj.position_x + dx * self.zoom),
-                max(0, obj.position_y + dy * self.zoom)
+                max(0, obj.position_x + dx * self.selected_patch.display_info.view_zoom),
+                max(0, obj.position_y + dy * self.selected_patch.display_info.view_zoom)
             )
             if obj.obj_id is not None:
                 obj.send_params()
@@ -189,9 +189,10 @@ async def delete_selected(self):
 
 @extends(AppWindow)
 def reset_zoom(self):
-    self.zoom = 1.0
-    self.view_x = 0
-    self.view_y = 0
+    di = self.selected_patch.display_info
+    di.view_zoom = 1.0
+    di.view_x = 0
+    di.view_y = 0
     self.viewport_pos_set = True
     self.viewport_zoom_set = True
     self.rezoom()
@@ -200,10 +201,11 @@ def reset_zoom(self):
 
 @extends(AppWindow)
 def relative_zoom(self, ratio):
-    candidate_zoom = ratio * self.zoom
+    di = self.selected_patch.display_info
+    candidate_zoom = ratio * di.view_zoom
     if 0.1 <= candidate_zoom <= 20:
-        orig_zoom = self.zoom
-        self.zoom = candidate_zoom
+        orig_zoom = di.view_zoom
+        di.view_zoom = candidate_zoom
         self.rezoom(previous=orig_zoom)
         self.viewport_pos_set = True
         self.viewport_zoom_set = True

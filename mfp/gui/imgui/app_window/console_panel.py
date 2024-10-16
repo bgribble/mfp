@@ -10,6 +10,7 @@ def render(app_window):
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
             | imgui.WindowFlags_.no_title_bar
+            | imgui.WindowFlags_.no_bring_to_front_on_focus
         ),
     )
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):

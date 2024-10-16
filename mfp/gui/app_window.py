@@ -149,6 +149,11 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     #####################
+    # patches / MDI
+    def add_patch(self, patch):
+        pass
+
+    #####################
     # log output
 
     @abstractmethod
@@ -188,10 +193,7 @@ class AppWindow (SignalMixin):
         self.color_selected = self.get_color('stroke-color:selected')
         self.color_bg = self.get_color('canvas-color')
 
-        # viewport info
-        self.zoom = 1.0
-        self.view_x = 0
-        self.view_y = 0
+        # viewport info has been modified by code (not a backend lib)
         self.viewport_zoom_set = False
         self.viewport_pos_set = False
 
