@@ -17,7 +17,11 @@ def render(app_window):
 
     if len(app_window.frame_timestamps) > 1:
         if app_window.input_mgr and app_window.input_mgr.major_mode:
-            imgui.text(app_window.input_mgr.major_mode.short_description)
+            imgui.text(
+                f"{app_window.input_mgr.global_mode.short_description} > {app_window.input_mgr.major_mode.short_description}"
+            )
+            imgui.same_line()
+            imgui.text(f" ({app_window.selected_window})")
             imgui.same_line()
 
         elapsed = (app_window.frame_timestamps[-1] - app_window.frame_timestamps[0]).total_seconds()

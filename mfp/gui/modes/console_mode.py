@@ -19,7 +19,7 @@ class ConsoleMode (InputMode):
         self.console = window.console_manager
         self.window = window
 
-        InputMode.__init__(self, "Console input bindings")
+        InputMode.__init__(self, "Console input bindings", "Console")
 
         # global keybindings
         self.bind("RET", self.console.handle_enter, "Evaluate current line")

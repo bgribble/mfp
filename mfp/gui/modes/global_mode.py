@@ -31,7 +31,7 @@ class GlobalMode (InputMode):
         self.drag_last_y = None
         self.drag_target = None
 
-        InputMode.__init__(self, "Global input bindings")
+        InputMode.__init__(self, "Global input bindings", "Global")
 
         # global keybindings
         self.bind("!", self.transient_msg, "Send message to selection")

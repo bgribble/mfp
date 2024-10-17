@@ -45,6 +45,9 @@ def render_tile(app_window, patch):
         app_window.selected_layer = patch.selected_layer
         app_window.selected_window = "canvas"
         imgui.set_window_focus()
+        if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
+            app_window.input_mgr.global_mode = GlobalMode(app_window)
+            app_window.input_mgr.major_mode.enable()
 
     # get_cursor_pos appears to be relative to the origin of the current window
     cursor_pos = imgui.get_cursor_pos()
@@ -240,7 +243,7 @@ def render(app_window):
             | imgui.WindowFlags_.no_bring_to_front_on_focus
         ),
     )
-    cursor_x, cursor_y = imgui.get_cursor_pos()
+
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
         app_window.selected_window = "canvas"
         if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
