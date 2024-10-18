@@ -76,7 +76,6 @@ class PatchEditMode (InputMode):
         self.bind("TAB", self.select_next, "Select next element")
         self.bind("S-TAB", self.select_prev, "Select previous element")
         self.bind("C-TAB", self.select_mru, "Select most-recent element")
-        self.bind("C-a", self.select_all, "Select all (in this layer)")
 
         self.bind("a", self.auto_place_below, "Auto-place below")
         self.bind("A", self.auto_place_above, "Auto-place above")

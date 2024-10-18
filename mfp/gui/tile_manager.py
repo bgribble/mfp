@@ -124,10 +124,11 @@ class TileManager:
         (as seen from tile_1) and are adjoining in the cross dimension
         """
         def fequal(v1, v2):
-            math.fabs(v1 - v2) < FUZZ
+            return math.fabs(v1 - v2) < FUZZ
 
         adjoining = False
-        overlap = False
+        overlapping = False
+
         if direction == 'left':
             adjoining = fequal(
                 tile_2.origin_x + tile_2.width,
@@ -187,9 +188,15 @@ class TileManager:
         """
         opps = dict(left='right', right='left', top='bottom', bottom='top')
 
+        made_space = False
+
+        # find a neighbor that can expand to fill this space
         for neighbor_dir in ['left', 'right', 'top', 'bottom']:
             scalable_direction = True
             neighbors = tile.neighbors.get(neighbor_dir, [])
+            if not neighbors:
+                continue
+
             for n in neighbors:
                 # if, for a direction, all the neighbors in that direction
                 # only have "tile" as a neighbor in the opposite direction,
@@ -220,6 +227,15 @@ class TileManager:
                         if self._check_neighbor(potential_neighbor, adjusted_neighbor, neighbor_dir):
                             self._connect_neighbor(potential_neighbor, adjusted_neighbor, neighbor_dir)
                         self._remove_neighbor(potential_neighbor, tile, neighbor_dir)
+                made_space = True
+                break
+        if not made_space:
+            log.debug("[remove_tile] Couldn't find a friend to expand")
+
+        for ndir, neighbors in tile.neighbors.items():
+            for n in neighbors:
+                reverse_neighbors = n.neighbors.setdefault(opps[ndir], [])
+                reverse_neighbors.remove(tile)
 
         tile.page_id = None
         tile.neighbors = {}
@@ -235,7 +251,7 @@ class TileManager:
         dh = tile.height / 2 if direction == TileManager.VERT else 0
 
         new_tile = Tile(
-            title="New tile",
+            title='New tile',
             origin_x=tile.origin_x + dw,
             origin_y=tile.origin_y + dh,
             width=tile.width - dw,
@@ -253,48 +269,38 @@ class TileManager:
 
         if direction == TileManager.HORIZ:
             old_neighbors['left'] = tile.neighbors.get('left') or []
-            old_neighbors['right'] = [ new_tile ]
+            old_neighbors['right'] = [new_tile]
 
-            new_neighbors['left'] = [ tile ]
+            new_neighbors['left'] = [tile]
             new_neighbors['right'] = tile.neighbors.get('right') or []
 
             for nbr in tile.neighbors.get('top') or []:
-                if (
-                    (nbr.origin_x + neighbor.width) >= tile.origin_x
-                    and nbr.origin_x <= (tile.origin_x + tile.width)
-                ):
-                    old_top = old_neighbors.setdefault("top", [])
-                    old_top.append(nbr)
+                if self._check_neighbor(tile, nbr, 'top'):
+                    old = old_neighbors.setdefault('top', [])
+                    old.append(nbr)
                 else:
                     nbr.neighbors['bottom'] = [
                         n for n in (nbr.neighbors['bottom'] or [])
                         if n is not tile
                     ]
-                if (
-                    (nbr.origin_x + nbr.width) >= new_tile.origin_x
-                    and nbr.origin_x <= (new_tile.origin_x + new_tile.width)
-                ):
-                    new_top = new_neighbors.setdefault("top", [])
-                    new_top.append(nbr)
+                if self._check_neighbor(new_tile, nbr, 'top'):
+                    new = new_neighbors.setdefault('top', [])
+                    new.append(nbr)
+                    nbr.neighbors['bottom'].append(new_tile)
 
             for nbr in tile.neighbors.get('bottom') or []:
-                if (
-                    (nbr.origin_x + nbr.width) >= tile.origin_x
-                    and nbr.origin_x <= (tile.origin_x + tile.width)
-                ):
-                    old_top = old_neighbors.setdefault("bottom", [])
-                    old_top.append(nbr)
+                if self._check_neighbor(tile, nbr, 'bottom'):
+                    old = old_neighbors.setdefault('bottom', [])
+                    old.append(nbr)
                 else:
                     nbr.neighbors['top'] = [
                         n for n in (nbr.neighbors['top'] or [])
                         if n is not tile
                     ]
-                if (
-                    (nbr.origin_x + nbr.width) >= new_tile.origin_x
-                    and nbr.origin_x <= (new_tile.origin_x + new_tile.width)
-                ):
-                    new_top = new_neighbors.setdefault("bottom", [])
-                    new_top.append(nbr)
+                if self._check_neighbor(new_tile, nbr, 'bottom'):
+                    new = new_neighbors.setdefault('bottom', [])
+                    new.append(nbr)
+                    nbr.neighbors['top'].append(new_tile)
         else:
             old_neighbors['top'] = tile.neighbors.get('top') or []
             old_neighbors['bottom'] = [new_tile]
@@ -303,44 +309,36 @@ class TileManager:
             new_neighbors['bottom'] = tile.neighbors.get('bottom') or []
 
             for nbr in tile.neighbors.get('left') or []:
-                if (
-                    (nbr.origin_y + nbr.height) >= tile.origin_y
-                    and nbr.origin_y <= (tile.origin_y + tile.height)
-                ):
-                    old_left = old_neighbors.setdefault("left", [])
-                    old_left.append(nbr)
+                if self._check_neighbor(tile, nbr, 'left'):
+                    old = old_neighbors.setdefault('left', [])
+                    old.append(nbr)
                 else:
                     nbr.neighbors['right'] = [
                         n for n in (nbr.neighbors['right'] or [])
                         if n is not tile
                     ]
-                if (
-                    (nbr.origin_y + nbr.height) >= new_tile.origin_y
-                    and nbr.origin_y <= (new_tile.origin_y + new_tile.height)
-                ):
-                    new_left = new_neighbors.setdefault("left", [])
-                    new_left.append(nbr)
+                if self._check_neighbor(new_tile, nbr, 'left'):
+                    new = new_neighbors.setdefault('left', [])
+                    new.append(nbr)
+                    nbr.neighbors['right'].append(new_tile)
 
             for nbr in tile.neighbors.get('right') or []:
-                if (
-                    (nbr.origin_y + nbr.height) >= tile.origin_y
-                    and nbr.origin_y <= (tile.origin_y + tile.height)
-                ):
-                    old_left = old_neighbors.setdefault("right", [])
-                    old_left.append(nbr)
+                if self._check_neighbor(tile, nbr, 'right'):
+                    old = old_neighbors.setdefault('right', [])
+                    old.append(nbr)
                 else:
                     nbr.neighbors['left'] = [
                         n for n in (nbr.neighbors['left'] or [])
                         if n is not tile
                     ]
-                if (
-                    (nbr.origin_y + nbr.height) >= new_tile.origin_y
-                    and nbr.origin_y <= (new_tile.origin_y + new_tile.height)
-                ):
-                    new_left = new_neighbors.setdefault("right", [])
-                    new_left.append(nbr)
+                if self._check_neighbor(new_tile, nbr, 'right'):
+                    new = new_neighbors.setdefault('right', [])
+                    new.append(nbr)
+                    nbr.neighbors['left'].append(new_tile)
+
         tile.neighbors = old_neighbors
         new_tile.neighbors = new_neighbors
 
         self.add_tile(new_tile)
+
         return (tile, new_tile)

@@ -89,7 +89,8 @@ class GlobalMode (InputMode):
 
         # imgui only
         if window.backend_name == "imgui":
-            self.bind('C-a', lambda: self.manager.enable_minor_mode(TileManagerMode(self.window)))
+            self.tile_manager_mode = TileManagerMode(self.window)
+            self.bind('C-a', lambda: self.manager.enable_minor_mode(self.tile_manager_mode))
 
     def scroll_zoom(self, ratio):
         if "scroll-zoom" in self.window.motion_overrides:

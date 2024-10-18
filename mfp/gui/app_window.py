@@ -196,6 +196,7 @@ class AppWindow (SignalMixin):
         # viewport info has been modified by code (not a backend lib)
         self.viewport_zoom_set = False
         self.viewport_pos_set = False
+        self.viewport_selection_set = False
 
         # impl-specific mapping of widgets to MFP display elements
         self.event_sources = {}

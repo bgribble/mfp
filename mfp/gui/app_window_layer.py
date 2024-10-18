@@ -54,6 +54,7 @@ def layer_select(self, layer):
     self.selected_layer.show()
     if self.selected_layer.patch != self.selected_patch:
         self.selected_patch = self.selected_layer.patch
+    self.viewport_selection_set = True
 
 
 @extends(AppWindow)

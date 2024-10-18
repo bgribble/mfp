@@ -32,7 +32,7 @@ def render_tile(app_window, patch):
     nedit.set_current_editor(patch.nedit_editor)
 
     imgui.begin(
-        patch.obj_name,
+        f"{patch.obj_name} ({tile.page_id}.{tile.tile_id})",
         flags=(
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
@@ -41,13 +41,18 @@ def render_tile(app_window, patch):
     )
 
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.selected_patch = patch
-        app_window.selected_layer = patch.selected_layer
         app_window.selected_window = "canvas"
-        imgui.set_window_focus()
         if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
             app_window.input_mgr.global_mode = GlobalMode(app_window)
             app_window.input_mgr.major_mode.enable()
+
+    if app_window.viewport_selection_set:
+        if app_window.selected_patch == patch:
+            imgui.set_window_focus()
+            app_window.viewport_selection_set = False
+    elif imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
+        app_window.selected_patch = patch
+        app_window.selected_layer = patch.selected_layer
 
     # get_cursor_pos appears to be relative to the origin of the current window
     cursor_pos = imgui.get_cursor_pos()
