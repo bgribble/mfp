@@ -11,26 +11,33 @@ enough there that I use it in my own music-making.  As of now
 it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
-**What's happening now?** I have started working on MFP again and
-I have a few projects that I want to work on.
+**What's happening now?** I am working on MFP pretty actively. The main
+branch currently contains a WIP backend that uses [Dear
+ImGUI](https://github.com/ocornut/imgui) for the UI, via the excellent
+[imgui-bundle](https://github.com/pthom/imgui_bundle) bindings. To try it out,
+pass the command-line arg `--gui-backend=imgui` (Clutter is still the default).
 
-Recent progress:
-* Switch to using [carp](https://github.com/bgribble/carp)
-instead of the `mfp/rpc/` RPC subsystem.
-* Add a step debugger using the [bp] processor and/or the
-@bp message to the patch
+The new UI looks quite a bit different. It's more like Max in the
+visual presentation of patches and the addition of a pretty
+extensive right-side parameter editing panel. It's already
+better than the Clutter UI in important ways. Some big
+differences:
 
-Up next:
-* Refactor UI actions to support undo/redo
-* Loading audio files into [buffer~]
-* Named presets for patches
-* Port to Dear ImGUI, making UI improvements along the way
-* Self-contained save format including sample and image files
+* A tiled patch display area, to allow multiple patches to be
+  viewed/edited at once
+* A menu bar that should reflect most available actions (still not built out)
+* Ability to directly edit object parameters and style in the
+  "Info" panel
 
-This release (0.7) is the last release that will exclusively
-support Gtk/Clutter for the UI. I plan to branch immediately 
-after the release and start working on the Dear ImGUI port; 
-Clutter is too bitrotted to keep using it. 
+Many display elements and app features are still not implemented,
+so some patches won't work properly and you can expect to see
+some errors if you try to add unimplemented elements to the
+patch.
+
+The most recent release (0.7) is the last release that will
+exclusively support Gtk/Clutter for the UI. I will release 0.8 when I
+feel that the Dear Imgui backend is at parity with the Clutter backend,
+and then 0.9 will likely remove the Clutter backend.
 
 ### BUILDING
 
@@ -84,7 +91,7 @@ Ticket | Description
 -------| --------------
  #299 | If JACK isn't running and can't be started, launch fails ugly
  #298 | Occasional retry loop on quit
- #297 | Bad behavior on abort of file load 
+ #297 | Bad behavior on abort of file load
  #292 | In larger patches, selection and interaction may get messed up
  #291 | When editing a label, the cursor disappears
  #204 | Logging is broken when loaded as LV2 plugin
