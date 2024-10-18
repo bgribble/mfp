@@ -5,7 +5,8 @@ import math
 from dataclasses import dataclass, field
 from mfp import log
 
-FUZZ = 0.00001
+FUZZ = 0.5
+
 
 @dataclass
 class Tile:
@@ -274,6 +275,13 @@ class TileManager:
             new_neighbors['left'] = [tile]
             new_neighbors['right'] = tile.neighbors.get('right') or []
 
+            for nbr in tile.neighbors.get('right') or []:
+                nbr.neighbors['left'] = [
+                    n for n in (nbr.neighbors['left'] or [])
+                    if n is not tile
+                ]
+                nbr.neighbors['left'].append(new_tile)
+
             for nbr in tile.neighbors.get('top') or []:
                 if self._check_neighbor(tile, nbr, 'top'):
                     old = old_neighbors.setdefault('top', [])
@@ -307,6 +315,13 @@ class TileManager:
 
             new_neighbors['top'] = [tile]
             new_neighbors['bottom'] = tile.neighbors.get('bottom') or []
+
+            for nbr in tile.neighbors.get('bottom') or []:
+                nbr.neighbors['top'] = [
+                    n for n in (nbr.neighbors['top'] or [])
+                    if n is not tile
+                ]
+                nbr.neighbors['top'].append(new_tile)
 
             for nbr in tile.neighbors.get('left') or []:
                 if self._check_neighbor(tile, nbr, 'left'):

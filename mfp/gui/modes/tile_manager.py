@@ -55,8 +55,8 @@ class TileManagerMode (InputMode):
         self.bind("DOWN", self.select_down, "Select tile below")
         self.bind("LEFT", self.select_left, "Select tile to the left")
         self.bind("RIGHT", self.select_right, "Select tile to the right")
-        #self.bind("o", self.select_next, "Select next tile by number")
-        #self.bind(";", self.select_last, "Select last tile by number")
+        self.bind("'", self.select_next, "Select next tile by number")
+        self.bind(";", self.select_prev, "Select previous tile by number")
         #self.bind("x", self.close_tile, "Close tile")
 
         self.bind(None, self.dismiss_mode, "End tile management mode")
@@ -79,6 +79,38 @@ class TileManagerMode (InputMode):
         if neighbor_tiles:
             neighbor_tile = sorted(neighbor_tiles, key=lambda t: t.origin_x)[0]
             self._select_tile(neighbor_tile)
+        self.manager.disable_minor_mode(self)
+        return True
+
+    def select_next(self):
+        current_id = self.window.selected_patch.display_info.tile_id
+        current_page_id = self.window.selected_patch.display_info.page_id
+        try:
+            next_patch = next(
+                p for p in sorted(self.window.patches, key=lambda p: p.display_info.tile_id)
+                if p.display_info.page_id == current_page_id and p.display_info.tile_id > current_id
+            )
+        except StopIteration:
+            next_patch = None
+        if next_patch:
+            self._select_tile(next_patch.display_info)
+
+        self.manager.disable_minor_mode(self)
+        return True
+
+    def select_prev(self):
+        current_id = self.window.selected_patch.display_info.tile_id
+        current_page_id = self.window.selected_patch.display_info.page_id
+        try:
+            next_patch = next(
+                p for p in sorted(self.window.patches, key=lambda p: -p.display_info.tile_id)
+                if p.display_info.page_id == current_page_id and p.display_info.tile_id < current_id
+            )
+        except StopIteration:
+            next_patch = None
+        if next_patch:
+            self._select_tile(next_patch.display_info)
+
         self.manager.disable_minor_mode(self)
         return True
 
