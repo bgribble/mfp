@@ -1,23 +1,27 @@
 """
 Helper to track and manipulate tiles in a tmux style
 """
-from dataclasses import dataclass
+import math
+from dataclasses import dataclass, field
 from mfp import log
 
+FUZZ = 0.00001
 
 @dataclass
 class Tile:
     title: str
-    origin_x: float
-    origin_y: float
-    width: float
-    height: float
-    view_x: float 
-    view_y: float
-    view_zoom: float
-    id_page: int
-    id_tile: int
-    neighbors: dict
+    tile_id: int
+    page_id: int
+    origin_x: float = 0
+    origin_y: float = 0
+    width: float = 0
+    height: float = 0
+    view_x: float = 0
+    view_y: float = 0
+    view_zoom: float = 1.0
+    neighbors: dict = field(default_factory=dict)
+    in_use: bool = False
+
 
 class TileManager:
     HORIZ = 1
@@ -27,8 +31,23 @@ class TileManager:
         self.total_width = total_width
         self.total_height = total_height
         self.tiles = []
-        self.next_id_page = 0
-        self.next_id_tile = 0
+        self.next_page_id = 0
+        self.next_tile_id = 0
+
+    def find_tile(self, **kwargs):
+        # are there any free tiles?
+        for tile in self.tiles:
+            if tile.in_use:
+                continue
+            found_match = True
+            for attr, val in kwargs.items():
+                if getattr(tile, attr) != val:
+                    found_match = False
+                    break
+            if found_match:
+                return tile
+
+        return self.alloc_tile(**kwargs)
 
     def resize(self, new_width, new_height):
         """
@@ -49,24 +68,18 @@ class TileManager:
     def init_tile(self, **kwargs):
         t = Tile(
             title="Initial tile",
-            origin_x=0,
-            origin_y=0,
             width=self.total_width,
             height=self.total_height,
-            view_x=0,
-            view_y=0,
-            view_zoom=1.0,
-            id_page=self.next_id_page,
-            id_tile=self.next_id_tile,
-            neighbors={}
+            page_id=self.next_page_id,
+            tile_id=self.next_tile_id,
         )
 
         # optional overrides for tile fields
         for k, v in kwargs.items():
             setattr(t, k, v)
 
-        self.next_id_page += 1
-        self.next_id_tile += 1
+        self.next_page_id += 1
+        self.next_tile_id += 1
         self.tiles.append(t)
         return t
 
@@ -82,7 +95,7 @@ class TileManager:
 
     def get_page(self, page_id):
         return [
-            t for t in self.tiles if t.id_page == page_id
+            t for t in self.tiles if t.page_id == page_id
         ]
 
     def alloc_tile(self, **kwargs):
@@ -105,9 +118,116 @@ class TileManager:
         old_tile, new_tile = self.split_tile(biggest_tile, divide_dir)
         return new_tile
 
+    def _check_neighbor(self, tile_1, tile_2, direction):
+        """
+        return True if tile_1 and tile_2 overlap in "direction"
+        (as seen from tile_1) and are adjoining in the cross dimension
+        """
+        def fequal(v1, v2):
+            math.fabs(v1 - v2) < FUZZ
+
+        adjoining = False
+        overlap = False
+        if direction == 'left':
+            adjoining = fequal(
+                tile_2.origin_x + tile_2.width,
+                tile_1.origin_x
+            )
+        elif direction == 'right':
+            adjoining = fequal(
+                tile_1.origin_x + tile_1.width,
+                tile_2.origin_x
+            )
+        elif direction == 'top':
+            adjoining = fequal(
+                tile_2.origin_y + tile_2.height,
+                tile_1.origin_y
+            )
+        elif direction == 'bottom':
+            adjoining = fequal(
+                tile_1.origin_y + tile_1.height,
+                tile_2.origin_y
+            )
+
+        if direction in ['left', 'right']:
+            overlapping = (
+                (tile_1.origin_y + tile_1.height) >= tile_2.origin_y
+                and tile_1.origin_y <= (tile_2.origin_y + tile_2.height)
+            )
+        else:
+            overlapping = (
+                (tile_1.origin_x + tile_1.width) >= tile_2.origin_x
+                and tile_1.origin_x <= (tile_2.origin_x + tile_2.width)
+            )
+
+        return adjoining and overlapping
+
+    def _connect_neighbor(self, tile_1, tile_2, direction):
+        """
+        point tile_1 and tile_2 at each other as neighbors
+        """
+        opps = dict(left='right', right='left', top='bottom', bottom='top')
+        n = tile_1.neighbors.setdefault(direction, [])
+        if tile_2 not in n:
+            n.append(tile_2)
+        n = tile_2.neighbors.setdefault(opps[direction], [])
+        if tile_1 not in n:
+            n.append(tile_1)
+
+    def _remove_neighbor(self, tile_1, tile_2, direction):
+        neighbors = tile_1.neighbors.get(direction, [])
+        if tile_2 in neighbors:
+            tile_1.neighbors[direction] = [
+                n for n in neighbors if n != tile_2
+            ]
+
+    def remove_tile(self, tile):
+        """
+        Remove tile, adjusting neighbors to fill space
+        """
+        opps = dict(left='right', right='left', top='bottom', bottom='top')
+
+        for neighbor_dir in ['left', 'right', 'top', 'bottom']:
+            scalable_direction = True
+            neighbors = tile.neighbors.get(neighbor_dir, [])
+            for n in neighbors:
+                # if, for a direction, all the neighbors in that direction
+                # only have "tile" as a neighbor in the opposite direction,
+                # then it's safe to scale the neighbors in that direction to
+                # fill tile's space
+                opp_neighbors = n.neighbors.get(opps[neighbor_dir], [])
+                if len(opp_neighbors) != 1:
+                    scalable_direction = False
+                    break
+
+            if scalable_direction:
+                # "neighbors" is the set of tiles we are adjusting.
+                # we need to potentially connect them as neighbors with
+                # "tile"'s neighbors on the opposite side
+                for adjusted_neighbor in neighbors:
+                    if neighbor_dir == 'left':
+                        adjusted_neighbor.width += tile.width
+                    elif neighbor_dir == 'right':
+                        adjusted_neighbor.width += tile.width
+                        adjusted_neighbor.origin_x -= tile.width
+                    elif neighbor_dir == 'top':
+                        adjusted_neighbor.height += tile.height
+                    elif neighbor_dir == 'bottom':
+                        adjusted_neighbor.height += tile.height
+                        adjusted_neighbor.origin_y -= tile.height
+
+                    for potential_neighbor in tile.neighbors.get(opps[neighbor_dir], []):
+                        if self._check_neighbor(potential_neighbor, adjusted_neighbor, neighbor_dir):
+                            self._connect_neighbor(potential_neighbor, adjusted_neighbor, neighbor_dir)
+                        self._remove_neighbor(potential_neighbor, tile, neighbor_dir)
+
+        tile.page_id = None
+        tile.neighbors = {}
+
     def convert_to_page(self, tile):
-        tile.id_page = self.next_id_page
-        self.next_id_page += 1
+        self.remove_tile(tile)
+        tile.page_id = self.next_page_id
+        self.next_page_id += 1
         self.maximize_tile(tile)
 
     def split_tile(self, tile, direction):
@@ -120,14 +240,10 @@ class TileManager:
             origin_y=tile.origin_y + dh,
             width=tile.width - dw,
             height=tile.height - dh,
-            view_x=0, 
-            view_y=0,
-            view_zoom=1.0,
-            id_page=tile.id_page,
-            id_tile=self.next_id_tile,
-            neighbors={}
+            page_id=tile.page_id,
+            tile_id=self.next_tile_id,
         )
-        self.next_id_tile += 1
+        self.next_tile_id += 1
 
         tile.width -= dw
         tile.height -= dh

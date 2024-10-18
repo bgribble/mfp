@@ -252,7 +252,7 @@ def render(app_window):
 
     displayed_patches = [
         p for p in app_window.patches
-        if p.display_info.id_page == app_window.canvas_tile_page
+        if p.display_info.page_id == app_window.canvas_tile_page
     ]
 
     for tile_num, patch in enumerate(displayed_patches):

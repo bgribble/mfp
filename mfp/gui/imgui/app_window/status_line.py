@@ -17,8 +17,13 @@ def render(app_window):
 
     if len(app_window.frame_timestamps) > 1:
         if app_window.input_mgr and app_window.input_mgr.major_mode:
+            mgr = app_window.input_mgr
+            mode_label = f"{mgr.global_mode.short_description} > {mgr.major_mode.short_description}"
+            minor = ','.join(
+                [m.short_description for m in reversed(mgr.minor_modes)]
+            )
             imgui.text(
-                f"{app_window.input_mgr.global_mode.short_description} > {app_window.input_mgr.major_mode.short_description}"
+                f"{mode_label}{' > ' if minor else ''}{minor}"
             )
             imgui.same_line()
             imgui.text(f" ({app_window.selected_window})")

@@ -212,8 +212,8 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             view_x=0,
             view_y=0,
             view_zoom=1.0,
-            id_page=0,
-            id_tile=0,
+            page_id=0,
+            tile_id=0,
             neighbors={}
         )
         super().add_patch(patch_display)

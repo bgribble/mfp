@@ -12,6 +12,7 @@ from ..input_mode import InputMode
 from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
 from .enum_control import EnumEditMode
+from .tile_manager import TileManagerMode
 from ..input_manager import InputManager
 
 
@@ -85,6 +86,10 @@ class GlobalMode (InputMode):
         self.bind('C-.', self.force_reset, "Reset all modifier keys and input modes")
         self.bind('S-C-.', self.force_reset, "Reset all modifier keys and input modes")
         self.bind('M1-C-.', self.force_reset, "Reset all modifier keys and input modes")
+
+        # imgui only
+        if window.backend_name == "imgui":
+            self.bind('C-a', lambda: self.manager.enable_minor_mode(TileManagerMode(self.window)))
 
     def scroll_zoom(self, ratio):
         if "scroll-zoom" in self.window.motion_overrides:
