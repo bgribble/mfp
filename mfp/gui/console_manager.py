@@ -7,6 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from abc import ABC, abstractmethod
 import asyncio
+from mfp import log
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 
@@ -108,6 +109,8 @@ class ConsoleManager (BackendInterface):
                 self.continue_buffer = ''
                 if resp.value is not None:
                     self.append(resp.value + '\n')
+            if resp.stdout is not None:
+                self.append(resp.stdout)
 
     async def evaluate(self, cmd):
         return await MFPGUI().mfp.console_eval(cmd)
