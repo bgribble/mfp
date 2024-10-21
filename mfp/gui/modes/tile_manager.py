@@ -8,11 +8,10 @@ import asyncio
 import copy
 import dataclasses
 
-from ..input_mode import InputMode
-from ..colordb import ColorDB
-from ..tile_manager import TileManager
 from mfp import log
 from mfp.gui_main import MFPGUI
+from ..input_mode import InputMode
+from ..tile_manager import TileManager
 
 
 class TileManagerMode (InputMode):
@@ -25,7 +24,7 @@ class TileManagerMode (InputMode):
         InputMode.__init__(self, "Tile control", "Tile")
 
         # window control
-        #self.bind("c", self.create_page, "Create new page")
+        self.bind("c", self.create_page, "Create new page")
         self.bind("n", self.next_page, "Go to next page")
         self.bind("p", self.prev_page, "Go to previous page")
         self.bind("l", self.recent_page, "Go to last-visited page")
@@ -39,7 +38,7 @@ class TileManagerMode (InputMode):
         self.bind("7", lambda: self.select_page(7), "Go to page 7")
         self.bind("8", lambda: self.select_page(8), "Go to page 8")
         self.bind("9", lambda: self.select_page(9), "Go to page 9")
-        #self.bind("&", self.close_window, "Close window and all tiles")
+        self.bind("&", self.close_window, "Close window and all tiles")
 
         # tile control
         self.bind("-", self.split_vertical, "Split tile vertically")
@@ -49,15 +48,13 @@ class TileManagerMode (InputMode):
         self.bind("}", self.swap_tile_right, "Swap tile to the left")
         self.bind("<", self.swap_tile_up, "Swap tile upward")
         self.bind(">", self.swap_tile_down, "Swap tile downward")
-        #self.bind(",", self.rotate_tiles_ccw, "Rotate tiles counter-clockwise")
-        #self.bind(".", self.rotate_tiles_cw, "Rotate tiles clockwise")
         self.bind("UP", self.select_up, "Select tile above")
         self.bind("DOWN", self.select_down, "Select tile below")
         self.bind("LEFT", self.select_left, "Select tile to the left")
         self.bind("RIGHT", self.select_right, "Select tile to the right")
         self.bind("'", self.select_next, "Select next tile by number")
         self.bind(";", self.select_prev, "Select previous tile by number")
-        #self.bind("x", self.close_tile, "Close tile")
+        self.bind("x", self.close_tile, "Close tile")
 
         self.bind(None, self.dismiss_mode, "End tile management mode")
 
@@ -199,29 +196,46 @@ class TileManagerMode (InputMode):
         return True
 
     def next_page(self):
-        allowed_pages = sorted(list(set(t.page_id for t in self.window.canvas_tile_manager.tiles)))
+        allowed_pages = sorted(list(set(
+            t.page_id
+            for t in self.window.canvas_tile_manager.tiles
+            if t.page_id is not None
+        )))
         try:
             next_page = next(a for a in allowed_pages if a > self.window.canvas_tile_page)
             self.recent_page_id = self.window.canvas_tile_page
             self.window.canvas_tile_page = next_page
         except StopIteration:
-            pass
+            if len(allowed_pages) > 0:
+                self.recent_page_id = self.window.canvas_tile_page
+                self.window.canvas_tile_page = allowed_pages[0]
+
         self.manager.disable_minor_mode(self)
         return True
 
     def prev_page(self):
-        allowed_pages = reversed(sorted(list(set(t.page_id for t in self.window.canvas_tile_manager.tiles))))
+        allowed_pages = list(reversed(sorted(list(set(
+            t.page_id
+            for t in self.window.canvas_tile_manager.tiles
+            if t.page_id is not None
+        )))))
+
         try:
             next_page = next(a for a in allowed_pages if a < self.window.canvas_tile_page)
             self.recent_page_id = self.window.canvas_tile_page
             self.window.canvas_tile_page = next_page
         except StopIteration:
-            pass
+            if len(allowed_pages) > 0:
+                self.recent_page_id = self.window.canvas_tile_page
+                self.window.canvas_tile_page = allowed_pages[-1]
+
         self.manager.disable_minor_mode(self)
         return True
 
     def recent_page(self):
-        allowed_pages = set(t.page_id for t in self.window.canvas_tile_manager.tiles)
+        allowed_pages = set(
+            t.page_id for t in self.window.canvas_tile_manager.tiles if t.page_id is not None
+        )
         if self.recent_page_id in allowed_pages:
             dest_page_id = self.recent_page_id
             self.recent_page_id = self.window.canvas_tile_page
@@ -230,7 +244,10 @@ class TileManagerMode (InputMode):
         return True
 
     def select_page(self, page_num):
-        allowed_pages = set(t.page_id for t in self.window.canvas_tile_manager.tiles)
+        allowed_pages = set(
+            t.page_id for t in self.window.canvas_tile_manager.tiles
+            if t.page_id is not None
+        )
         if page_num in allowed_pages:
             self.recent_page_id = self.window.canvas_tile_page
             self.window.canvas_tile_page = page_num
@@ -253,8 +270,83 @@ class TileManagerMode (InputMode):
         await self.window.patch_new()
         return True
 
+    async def create_page(self):
+        tile = self.window.canvas_tile_manager.init_tile()
+        self.recent_page_id = self.window.canvas_tile_page
+        self.window.canvas_tile_page = tile.page_id
+        await self.window.patch_new()
+        self.manager.disable_minor_mode(self)
+        return True
+
     def create_page_from_tile(self):
         current_tile = self.window.selected_patch.display_info
         self.window.canvas_tile_manager.convert_to_page(current_tile)
+        self.recent_page_id = self.window.canvas_tile_page
+        self.window.canvas_tile_page = current_tile.page_id
+        self.manager.disable_minor_mode(self)
+        return True
+
+    async def close_window(self):
+        page_id = self.window.selected_patch.display_info.page_id
+        page_patches = [
+            p for p in self.window.patches
+            if p.display_info.page_id == page_id
+        ]
+
+        async def close_confirm(answer):
+            if answer is not None:
+                aa = answer.strip().lower()
+                if aa in ['y', 'yes']:
+                    await asyncio.wait([
+                        asyncio.create_task(self.window.patch_close(p))
+                        for p in page_patches
+                    ])
+
+        some_unsaved = [
+            await MFPGUI().mfp.has_unsaved_changes(p.obj_id)
+            for p in page_patches
+        ]
+
+        log.debug(f"page_patches: {page_patches}")
+        log.debug(f"some_unsaved: {some_unsaved}")
+
+        if some_unsaved and any(x for x in some_unsaved):
+            await self.window.cmd_get_input(
+                "Some patches have unsaved changes. Close anyway? [yN]",
+                close_confirm,
+                ''
+            )
+        else:
+            await asyncio.wait([
+                asyncio.create_task(self.window.patch_close(p))
+                for p in page_patches
+            ])
+
+        return self.prev_page()
+
+    async def close_tile(self):
+        async def close_confirm(answer):
+            if answer is not None:
+                aa = answer.strip().lower()
+                if aa in ['y', 'yes']:
+                    await self.window.patch_close()
+
+        p = self.window.selected_patch
+        page_id = p.display_info.page_id
+        if await MFPGUI().mfp.has_unsaved_changes(p.obj_id):
+            await self.window.cmd_get_input(
+                "Patch has unsaved changes. Close anyway? [yN]",
+                close_confirm,
+                ''
+            )
+        else:
+            await self.window.patch_close()
+
+        if not any(
+            p for p in self.window.patches
+            if p.display_info.page_id and p.display_info.page_id == page_id
+        ):
+            return self.prev_page()
+
         self.manager.disable_minor_mode(self)
         return True

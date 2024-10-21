@@ -69,6 +69,8 @@ class TileManager:
     def init_tile(self, **kwargs):
         t = Tile(
             title="Initial tile",
+            origin_x=0,
+            origin_y=0,
             width=self.total_width,
             height=self.total_height,
             page_id=self.next_page_id,

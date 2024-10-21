@@ -521,6 +521,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.viewport_pos_set = True
         super().add_patch(patch)
 
+    async def patch_close(self, patch=None):
+        if patch is None:
+            patch = self.selected_patch
+        self.canvas_tile_manager.remove_tile(patch.display_info)
+        return await super().patch_close(patch)
+
     #####################
     # log output
     def log_write(self, message, level):

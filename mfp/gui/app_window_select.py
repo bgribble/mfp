@@ -36,8 +36,11 @@ def patch_select_next(self):
 
 
 @extends(AppWindow)
-async def patch_close(self):
-    p = self.selected_patch
+async def patch_close(self, patch=None):
+    if patch:
+        p = patch
+    else:
+        p = self.selected_patch
     if p and p.deletable:
         self.patch_select_next()
         self.patches.remove(p)
@@ -50,6 +53,12 @@ async def patch_close(self):
 
 @extends(AppWindow)
 async def patch_new(self):
+    """
+    patch_new creates a new patch starting from the UI.
+
+    The flow is that we ask the main app to create a new (empty) file,
+    then it requests that the app create a new patch display.
+    """
     await MFPGUI().mfp.open_file(None)
 
 
