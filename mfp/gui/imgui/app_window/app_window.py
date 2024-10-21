@@ -65,6 +65,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.canvas_panel_height
         )
 
+        self.autoplace_x = None
+        self.autoplace_y = None
+
         self.frame_count = 0
         self.frame_timestamps = []
         self.viewport_box_nodes = None
@@ -461,10 +464,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     # autoplace
 
     def show_autoplace_marker(self, x, y):
-        pass
+        self.autoplace_x = x
+        self.autoplace_y = y
 
     def hide_autoplace_marker(self):
-        pass
+        self.autoplace_x = None
+        self.autoplace_y = None
 
     #####################
     # HUD/console

@@ -132,6 +132,19 @@ def render_tile(app_window, patch):
             if obj.layer == patch.selected_layer and isinstance(obj, ConnectionElement):
                 obj.render()
 
+    if app_window.selected_patch == patch and app_window.autoplace_x is not None:
+        autoplace_window_pos = [
+            app_window.autoplace_x,
+            app_window.autoplace_y
+        ]
+        draw_list = imgui.get_window_draw_list()
+        draw_list.add_text(
+            autoplace_window_pos,
+            imgui.IM_COL32(0, 0, 0, 255),
+            "+"
+        )
+
+
     #############################
     # viewport management
     # this is janky. We create an invisible upper-left and lower-right
