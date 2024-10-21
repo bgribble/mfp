@@ -31,7 +31,7 @@ class EnumEditMode (InputMode):
             else:
                 value = float(value)
             self.enum.set_bounds(self.enum.min_value, value)
-        await self.window.get_prompted_input("Number upper bound: ", cb)
+        await self.window.cmd_get_input("Number upper bound: ", cb)
         return True
 
     async def set_lower(self):
@@ -41,7 +41,7 @@ class EnumEditMode (InputMode):
             else:
                 value = float(value)
             self.enum.set_bounds(value, self.enum.max_value)
-        await self.window.get_prompted_input("Number lower bound: ", cb)
+        await self.window.cmd_get_input("Number lower bound: ", cb)
         return True
 
     async def add_digit(self):

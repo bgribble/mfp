@@ -357,7 +357,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ########################################
 
         ########################################
-        # status line at bottom
+        # status line and command input at bottom
         status_line.render(self)
 
         # status line at bottom
@@ -475,8 +475,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def hud_write(self, message, display_time=3.0):
         pass
 
-    def hud_set_prompt(self, prompt, default=''):
-        pass
+    def cmd_set_prompt(self, prompt, default='', space=True):
+        self.cmd_prompt = prompt
+        if space and prompt:
+            self.cmd_prompt += ' '
 
     def console_activate(self):
         pass

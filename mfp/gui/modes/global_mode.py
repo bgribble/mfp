@@ -170,7 +170,7 @@ class GlobalMode (InputMode):
                     await MFPGUI().mfp.set_params(patch.obj_id, prms)
                     self.window.refresh(patch)
                 await MFPGUI().mfp.save_file(patch.obj_name, fname)
-        await self.window.get_prompted_input("File name to save: ", cb, default_filename)
+        await self.window.cmd_get_input("File name to save: ", cb, default_filename)
 
     async def save_as_lv2(self):
         patch = self.window.selected_patch
@@ -179,12 +179,12 @@ class GlobalMode (InputMode):
         async def cb(plugname):
             if plugname:
                 await MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
-        await self.window.get_prompted_input("Plugin name to save: ", cb, default_plugname)
+        await self.window.cmd_get_input("Plugin name to save: ", cb, default_plugname)
 
     async def open_file(self):
         async def cb(fname):
             await MFPGUI().mfp.open_file(fname)
-        await self.window.get_prompted_input("File name to load: ", cb)
+        await self.window.cmd_get_input("File name to load: ", cb)
 
     def drag_start(self):
         self.drag_started = True
@@ -325,7 +325,7 @@ class GlobalMode (InputMode):
 
         p = self.window.selected_patch
         if await MFPGUI().mfp.has_unsaved_changes(p.obj_id):
-            await self.window.get_prompted_input("Patch has unsaved changes. Close anyway? [yN]",
+            await self.window.cmd_get_input("Patch has unsaved changes. Close anyway? [yN]",
                                            close_confirm, '')
         else:
             await self.window.patch_close()
@@ -343,7 +343,7 @@ class GlobalMode (InputMode):
             if await MFPGUI().mfp.has_unsaved_changes(p):
                 clean = False
         if not clean:
-            await self.window.get_prompted_input(
+            await self.window.cmd_get_input(
                 "There are patches with unsaved changes. Quit anyway? [yN]",
                 quit_confirm,
                 ''

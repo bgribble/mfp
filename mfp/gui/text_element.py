@@ -104,7 +104,7 @@ class TextElement (BaseElement):
             self.value = txt or ''
             self.set_text()
         if self.selected and self.clickchange:
-            await self.app_window.get_prompted_input("New text:", newtext, self.value)
+            await self.app_window.cmd_get_input("New text:", newtext, self.value)
         return True
 
     def set_text(self):

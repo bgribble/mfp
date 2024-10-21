@@ -15,6 +15,18 @@ def render(app_window):
         ),
     )
 
+    if app_window.cmd_prompt:
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 3.0))
+        imgui.text(app_window.cmd_prompt)
+        imgui.same_line()
+        imgui.push_item_width(-1)
+        app_window.cmd_input.render()
+        imgui.pop_item_width()
+        imgui.pop_style_var()
+
+        imgui.end()
+        return
+
     if len(app_window.frame_timestamps) > 1:
         if app_window.input_mgr and app_window.input_mgr.major_mode:
             mgr = app_window.input_mgr

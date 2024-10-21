@@ -93,13 +93,9 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         # The HUD is the text overlay at the bottom/top of the window that
         # fades after a short display
         self.hud_history = []
+        self.hud_mode_text = None
         self.hud_banner_text = None
         self.hud_banner_anim = None
-
-        self.hud_prompt = None
-        self.hud_prompt_input = None
-        self.hud_mode_txt = None
-
         self.previous_console_position = 0
         self.next_tree_position = 1
 
@@ -257,17 +253,17 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         def resize_cb(widget, rect):
             try:
                 self.stage.set_size(rect.width, rect.height)
-                if self.hud_mode_txt:
-                    self.hud_mode_txt.set_position(
+                if self.hud_mode_text:
+                    self.hud_mode_text.set_position(
                         self.stage.get_width()-80, self.stage.get_height()-25
                     )
 
-                if self.hud_prompt:
-                    self.hud_prompt.set_position(10, self.stage.get_height() - 25)
+                if self.cmd_prompt:
+                    self.cmd_prompt.set_position(10, self.stage.get_height() - 25)
 
-                if self.hud_prompt_input:
-                    self.hud_prompt_input.set_position(
-                        15 + self.hud_prompt.get_width(), self.stage.get_height() - 25
+                if self.cmd_input:
+                    self.cmd_input.set_position(
+                        15 + self.cmd_prompt.get_width(), self.stage.get_height() - 25
                     )
             except Exception as e:
                 log.error("Error handling resize event", e)
@@ -373,13 +369,13 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         m = self.input_mgr.major_mode
         lines.append("\nMajor mode: " + m.description)
 
-        if self.hud_mode_txt is None:
-            self.hud_mode_txt = Clutter.Text()
-            self.stage.add_actor(self.hud_mode_txt)
+        if self.hud_mode_text is None:
+            self.hud_mode_text = Clutter.Text()
+            self.stage.add_actor(self.hud_mode_text)
 
-        self.hud_mode_txt.set_position(self.stage.get_width()-80,
+        self.hud_mode_text.set_position(self.stage.get_width()-80,
                                        self.stage.get_height()-25)
-        self.hud_mode_txt.set_markup("<b>%s</b>" % m.short_description)
+        self.hud_mode_text.set_markup("<b>%s</b>" % m.short_description)
 
         for b in m.directory():
             lines.append("%s\t%s" % (b[0], b[1]))
@@ -396,33 +392,32 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         buf.delete(buf.get_start_iter(), buf.get_end_iter())
         buf.insert(buf.get_end_iter(), txt)
 
-    def hud_set_prompt(self, prompt, default=''):
+    def cmd_set_prompt(self, prompt, default=''):
         from gi.repository import Clutter
 
-        if (prompt is None) and self.hud_prompt_input:
-            htxt = self.hud_prompt_input.get_text()
-            self.hud_prompt.hide()
-            self.hud_prompt_input.hide()
+        if (prompt is None) and self.cmd_input:
+            htxt = self.cmd_input.get_text()
+            self.cmd_prompt.hide()
+            self.cmd_input.hide()
             if htxt:
                 self.hud_write(htxt)
             return
 
-        if self.hud_prompt is None:
+        if self.cmd_prompt is None:
             for actor, anim, oldmsg in self.hud_history:
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
 
-            self.hud_prompt = Clutter.Text()
-            self.hud_prompt_input = TextWidget.build(self)
-            self.stage.add_actor(self.hud_prompt)
-            self.hud_prompt.set_position(10, self.stage.get_height() - 25)
-            self.hud_prompt.set_property("opacity", 255)
+            self.cmd_prompt = Clutter.Text()
+            self.stage.add_actor(self.cmd_prompt)
+            self.cmd_prompt.set_position(10, self.stage.get_height() - 25)
+            self.cmd_prompt.set_property("opacity", 255)
         else:
-            self.hud_prompt.show()
-            self.hud_prompt_input.show()
+            self.cmd_prompt.show()
+            self.cmd_input.show()
 
-        self.hud_prompt.set_markup(prompt)
-        self.hud_prompt_input.set_text(default)
-        self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
+        self.cmd_prompt.set_markup(prompt)
+        self.cmd_input.set_text(default)
+        self.cmd_input.set_position(15 + self.cmd_prompt.get_width(),
                                            self.stage.get_height() - 25)
 
     def hud_write(self, message, disp_time=3.0):
@@ -448,7 +443,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
         actor = Clutter.Text()
         self.stage.add_actor(actor)
-        if self.hud_prompt is None:
+        if self.cmd_prompt is None:
             actor.set_position(10, self.stage.get_height() - 25)
         else:
             actor.set_position(10, self.stage.get_height() - 45)

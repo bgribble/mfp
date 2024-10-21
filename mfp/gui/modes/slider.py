@@ -111,14 +111,14 @@ class SliderEditMode (InputMode):
         async def hud_cb(value): 
             if value is not None:
                 await self.slider.set_bounds(float(value), self.slider.max_value)
-        await self.window.get_prompted_input("Slider lower bound: ", hud_cb)
+        await self.window.cmd_get_input("Slider lower bound: ", hud_cb)
         return True 
 
     async def set_hi(self): 
         async def hud_cb(value): 
             if value is not None:
                 await self.slider.set_bounds(self.slider.min_value, float(value))
-        await self.window.get_prompted_input("Slider upper bound: ", hud_cb)
+        await self.window.cmd_get_input("Slider upper bound: ", hud_cb)
         return True 
 
     async def set_zero(self): 
@@ -128,7 +128,7 @@ class SliderEditMode (InputMode):
                     await self.slider.set_zeropoint(float(value))
                 else: 
                     await self.slider.set_zeropoint(None)
-        await self.window.get_prompted_input("Slider zero point: ", hud_cb)
+        await self.window.cmd_get_input("Slider zero point: ", hud_cb)
         return True 
 
     async def toggle_scale(self):

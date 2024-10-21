@@ -135,7 +135,7 @@ class ConnectionMode (InputMode):
         else:
             dirspec = "source output"
 
-        await self.window.get_prompted_input("Enter %s port:" % dirspec, callback)
+        await self.window.cmd_get_input("Enter %s port:" % dirspec, callback)
         return True
 
     async def make_connection(self):

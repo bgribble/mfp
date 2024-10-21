@@ -17,6 +17,7 @@ from .console_manager import ConsoleManager
 from .prompter import Prompter
 from .colordb import ColorDB, RGBAColor
 from .base_element import BaseElement
+from .text_widget import TextWidget
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
@@ -100,7 +101,7 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     #####################
-    # HUD/console
+    # HUD/cmd prompt/console
 
     @abstractmethod
     def hud_banner(self, message, display_time=3.0):
@@ -111,7 +112,7 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     @abstractmethod
-    def hud_set_prompt(self, prompt, default=''):
+    def cmd_set_prompt(self, prompt, default=''):
         pass
 
     @abstractmethod
@@ -201,17 +202,22 @@ class AppWindow (SignalMixin):
         # impl-specific mapping of widgets to MFP display elements
         self.event_sources = {}
 
+        # command line entry / prompted response
+        self.cmd_prompt = None
+        self.cmd_input = None
+
         # set up key and mouse handling
         self.input_mgr = InputManager(self)
         self.init_input()
 
-        self.hud_prompt_mgr = Prompter(self)
-
         self.initialize()
 
+        self.cmd_input = TextWidget.build(self)
+        self.cmd_manager = Prompter(self, self.cmd_input)
+
+        # Python REPL
         self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
-
 
     @classmethod
     def get_backend(cls, backend_name):
@@ -382,8 +388,8 @@ class AppWindow (SignalMixin):
         self.console_manager.show_prompt(msg)
         self.console_activate()
 
-    async def get_prompted_input(self, prompt, callback, default=''):
-        await self.hud_prompt_mgr.get_input(prompt, callback, default)
+    async def cmd_get_input(self, prompt, callback, default=''):
+        await self.cmd_manager.get_input(prompt, callback, default)
 
     async def clipboard_cut(self, pointer_pos):
         if self.selected:
