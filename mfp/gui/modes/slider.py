@@ -54,9 +54,13 @@ class SliderControlMode (InputMode):
             if self.slider not in self.window.selected:
                 await self.window.select(self.slider)
 
-            if (self.slider.slider_enable 
-                and self.slider.point_in_slider(self.manager.pointer_x, 
-                                                self.manager.pointer_y)):
+            if (
+                self.slider.slider_enable
+                and self.slider.point_in_slider(
+                    self.manager.pointer_x,
+                    self.manager.pointer_y
+                )
+            ):
                 self.drag_started = True
                 self.drag_start_x = self.manager.pointer_x
                 self.drag_start_y = self.manager.pointer_y
@@ -74,7 +78,7 @@ class SliderControlMode (InputMode):
 
         dx = self.manager.pointer_x - self.drag_last_x
         dy = self.manager.pointer_y - self.drag_last_y
-        
+
         new_value = self.slider.add_pixdelta(delta * dx, -1.0 * delta * dy)
 
         self.drag_last_x = self.manager.pointer_x
@@ -107,74 +111,72 @@ class SliderEditMode (InputMode):
         self.bind("C-]", self.set_hi, "Enter upper bound")
         self.bind("C-|", self.set_zero, "Enter zero point")
 
-    async def set_low(self): 
-        async def hud_cb(value): 
+    async def set_low(self):
+        async def hud_cb(value):
             if value is not None:
                 await self.slider.set_bounds(float(value), self.slider.max_value)
         await self.window.cmd_get_input("Slider lower bound: ", hud_cb)
-        return True 
+        return True
 
-    async def set_hi(self): 
-        async def hud_cb(value): 
+    async def set_hi(self):
+        async def hud_cb(value):
             if value is not None:
                 await self.slider.set_bounds(self.slider.min_value, float(value))
         await self.window.cmd_get_input("Slider upper bound: ", hud_cb)
-        return True 
+        return True
 
-    async def set_zero(self): 
-        async def hud_cb(value): 
+    async def set_zero(self):
+        async def hud_cb(value):
             if value is not None:
                 if value != "None":
                     await self.slider.set_zeropoint(float(value))
-                else: 
+                else:
                     await self.slider.set_zeropoint(None)
         await self.window.cmd_get_input("Slider zero point: ", hud_cb)
-        return True 
+        return True
 
     async def toggle_scale(self):
         await self.slider.set_show_scale(not self.slider.show_scale)
         await self.slider.update()
         self.slider.send_params()
-        return True 
+        return True
 
     async def toggle_orient(self):
         if self.slider.orientation == self.slider.HORIZONTAL:
-            self.slider.set_orientation(self.slider.VERTICAL)
-        else: 
-            self.slider.set_orientation(self.slider.HORIZONTAL)
+            await self.slider.set_orientation(self.slider.VERTICAL)
+        else:
+            await self.slider.set_orientation(self.slider.HORIZONTAL)
 
         await self.slider.update()
         self.slider.send_params()
-        return True 
+        return True
 
     async def toggle_direction(self):
         if self.slider.direction == self.slider.POSITIVE:
             self.slider.direction = self.slider.NEGATIVE
-        else: 
+        else:
             self.slider.direction = self.slider.POSITIVE
 
         await self.slider.update()
         self.slider.send_params()
-        return True 
+        return True
 
     async def toggle_side(self):
         if self.slider.scale_position == self.slider.RIGHT:
             self.slider.scale_position = self.slider.LEFT
-        else: 
-            self.slider.scale_position = self.slider.RIGHT 
+        else:
+            self.slider.scale_position = self.slider.RIGHT
 
         await self.slider.update()
         self.slider.send_params()
-        return True 
+        return True
 
     async def end_edits(self):
         await self.slider.end_edit()
-        return True 
+        return True
 
 class DialControlMode(SliderControlMode):
     pass
 
 class DialEditMode(SliderEditMode):
-    pass 
-
-
+    pass

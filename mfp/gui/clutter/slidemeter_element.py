@@ -41,6 +41,7 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
 
         self.group.set_position(x, y)
 
+
     def redraw(self):
         self.texture.invalidate()
 
@@ -173,15 +174,6 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
 
         fraction = delta / float(total)
         return self.scale.value(fraction)
-
-    def add_pixdelta(self, dx, dy):
-        if self.orientation == self.VERTICAL:
-            delta = dy / float(self.hot_y_max - self.hot_y_min)
-        else:
-            delta = dx / float(self.hot_x_max - self.hot_x_min)
-
-        scalepos = self.scale.fraction(self.value) + delta
-        return self.scale.value(scalepos)
 
 
 class ClutterFaderElementImpl(

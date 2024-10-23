@@ -8,6 +8,8 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import math
 from abc import ABCMeta
+from flopsy import mutates
+
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .base_element import BaseElement, ParamInfo
@@ -41,7 +43,8 @@ class SlideMeterElement (BaseElement):
 
     style_defaults = {
         'font-size-scale': 8,
-        'meter-color': 'default-alt-fill-color'
+        'meter-color': 'default-alt-fill-color',
+        'padding': dict(top=0, bottom=0, left=0, right=0)
     }
 
     SCALE_SPACE = 30
@@ -84,6 +87,12 @@ class SlideMeterElement (BaseElement):
         # request update when value changes
         self.update_required = True
 
+    def get_width(self):
+        return self.width
+
+    def get_height(self):
+        return self.height
+
     @property
     def scale_type(self):
         return self.scale.scale_type if self.scale else 0
@@ -100,6 +109,15 @@ class SlideMeterElement (BaseElement):
             pmax = self.zeropoint
         return (pmin, pmax)
 
+    def add_pixdelta(self, dx, dy):
+        if self.orientation == self.VERTICAL:
+            delta = dy / float(self.hot_y_max - self.hot_y_min)
+        else:
+            delta = dx / float(self.hot_x_max - self.hot_x_min)
+
+        scalepos = self.scale.fraction(self.value) + delta
+        return self.scale.value(scalepos)
+
     def update_value(self, value):
         if value >= self.max_value:
             value = self.max_value
@@ -112,10 +130,11 @@ class SlideMeterElement (BaseElement):
             self.redraw()
             MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.value))
 
+    @mutates('width', 'height', 'orientation')
     async def set_orientation(self, orient):
         if orient != self.orientation:
             await self.set_size(self.height, self.width)
-        await self.dispatch(self.action(self.SET_ORIENTATION, value=orient))
+        self.orientation = orient
 
     async def set_show_scale(self, show_scale):
         if show_scale == self.show_scale:
@@ -285,6 +304,9 @@ class BarMeterElementImpl(BackendInterface, metaclass=ABCMeta):
 
 
 class BarMeterElement(SlideMeterElement):
+    DEFAULT_W = 20
+    DEFAULT_H = 100
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 

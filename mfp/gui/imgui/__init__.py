@@ -10,6 +10,10 @@ from .connection_element import ImguiConnectionElementImpl
 from .enum_element import ImguiEnumElementImpl
 from .text_widget import ImguiTextWidgetImpl
 from .text_element import ImguiTextElementImpl
+from .slidemeter_element import (
+    ImguiFaderElementImpl,
+    ImguiBarMeterElementImpl
+)
 from .via_element import (
     ImguiSendViaElementImpl,
     ImguiReceiveViaElementImpl,

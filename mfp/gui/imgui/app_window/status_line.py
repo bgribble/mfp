@@ -1,6 +1,6 @@
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
-CHAR_PIXELS = 10
+CHAR_PIXELS = 8
 
 def render(app_window):
     imgui.set_next_window_size((app_window.window_width, app_window.menu_height + 5))
@@ -43,7 +43,7 @@ def render(app_window):
 
         elapsed = (app_window.frame_timestamps[-1] - app_window.frame_timestamps[0]).total_seconds()
         fps = int((len(app_window.frame_timestamps)-1) / elapsed)
-        right_corner_text = f"FPS: {fps} Pointer: ({app_window.input_mgr.pointer_ev_x}, {app_window.input_mgr.pointer_ev_y})"
+        right_corner_text = f"FPS: {fps} Pointer: screen=({app_window.input_mgr.pointer_ev_x:.1f}, {app_window.input_mgr.pointer_ev_y:.1f}) canvas=({app_window.input_mgr.pointer_x:.1f}, {app_window.input_mgr.pointer_y:.1f})"
         cur = imgui.get_cursor_pos()
         imgui.set_cursor_pos((
             app_window.window_width - len(right_corner_text) * CHAR_PIXELS,
