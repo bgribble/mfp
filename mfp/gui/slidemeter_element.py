@@ -29,7 +29,6 @@ class SlideMeterElement (BaseElement):
         'max_value': ParamInfo(label="Max value", param_type=float),
         'show_scale': ParamInfo(label="Show scale", param_type=bool),
         'scale': ParamInfo(label="Scale", param_type=int),
-        'scale_font_size': ParamInfo(label="Scale font size", param_type=float),
         'scale_position': ParamInfo(label="Scale position", param_type=int),
         'orientation': ParamInfo(label="Orientation", param_type=int),
         'zeropoint': ParamInfo(label="Zero point", param_type=float),
@@ -42,7 +41,7 @@ class SlideMeterElement (BaseElement):
     proc_type = "slidemeter"
 
     style_defaults = {
-        'font-size-scale': 8,
+        'scale-font-size': 8,
         'meter-color': 'default-alt-fill-color',
         'padding': dict(top=0, bottom=0, left=0, right=0)
     }
@@ -136,6 +135,7 @@ class SlideMeterElement (BaseElement):
             await self.set_size(self.height, self.width)
         self.orientation = orient
 
+    @mutates('show_scale')
     async def set_show_scale(self, show_scale):
         if show_scale == self.show_scale:
             return

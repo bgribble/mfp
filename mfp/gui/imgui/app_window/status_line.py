@@ -43,7 +43,14 @@ def render(app_window):
 
         elapsed = (app_window.frame_timestamps[-1] - app_window.frame_timestamps[0]).total_seconds()
         fps = int((len(app_window.frame_timestamps)-1) / elapsed)
-        right_corner_text = f"FPS: {fps} Pointer: screen=({app_window.input_mgr.pointer_ev_x:.1f}, {app_window.input_mgr.pointer_ev_y:.1f}) canvas=({app_window.input_mgr.pointer_x:.1f}, {app_window.input_mgr.pointer_y:.1f})"
+        
+        fps_text = f"FPS: {fps}"
+        pointer_text = ''
+
+        if app_window.input_mgr.pointer_ev_x:
+            pointer_text = f"Pointer: screen=({app_window.input_mgr.pointer_ev_x:.1f}, {app_window.input_mgr.pointer_ev_y:.1f}) canvas=({app_window.input_mgr.pointer_x:.1f}, {app_window.input_mgr.pointer_y:.1f})"
+
+        right_corner_text = ' '.join([fps_text, pointer_text])
         cur = imgui.get_cursor_pos()
         imgui.set_cursor_pos((
             app_window.window_width - len(right_corner_text) * CHAR_PIXELS,

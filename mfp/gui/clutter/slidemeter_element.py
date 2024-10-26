@@ -103,7 +103,7 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
 
         # draw the scale if required
         if self.show_scale:
-            fontsize = self.get_style('font-size-scale')
+            fontsize = self.get_style('scale-font-size')
             c = ColorDB().normalize(self.get_color('text-color'))
             ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
             ct.set_font_size(fontsize)

@@ -1,10 +1,12 @@
 """
 imgui/slidemeter_element.py -- imgui backend for fader and dial elements
 """
+import math
+
 from mfp import log
 from flopsy import mutates
 from imgui_bundle import imgui, imgui_node_editor as nedit
-
+from ..colordb import ColorDB
 from ..slidemeter_element import (
     FaderElement,
     FaderElementImpl,
@@ -12,9 +14,69 @@ from ..slidemeter_element import (
     BarMeterElementImpl,
     # DialElement,
     # DialElementImpl,
-    SlideMeterElement,
+    #SlideMeterElement,
 )
 from .base_element import ImguiBaseElementImpl
+
+
+class rotated:
+    def __init__(self, theta=90, origin_x=0.5, origin_y=0.5):
+        self.theta = theta
+        self.origin_x = origin_x
+        self.origin_y = origin_y
+        self.initial_drawlist_pos = None
+
+    def rotate_point(self, x, y, about_x, about_y):
+        # remember: this is a gfx coord system, Y increases going down!
+        delta = math.pi * self.theta / 180.0
+        dx = x - about_x
+        dy = about_y - y
+        orig_angle = math.atan2(dy, dx)
+        orig_mag = math.sqrt(dx*dx + dy*dy)
+        new_angle = orig_angle + delta
+        new_pt = (
+            about_x + orig_mag * math.cos(new_angle),
+            about_y - orig_mag * math.sin(new_angle)
+        )
+        return new_pt
+
+    def __enter__(self):
+        self.initial_drawlist_pos = imgui.get_window_draw_list().vtx_buffer.size()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        buffer = imgui.get_window_draw_list().vtx_buffer
+        final_drawlist_pos = buffer.size()
+
+        if final_drawlist_pos == self.initial_drawlist_pos:
+            return
+
+        # find the bounding box
+        min_x = None
+        min_y = None
+        max_x = None
+        max_y = None
+
+        for i in range(self.initial_drawlist_pos, final_drawlist_pos):
+            pt = buffer[i]
+            if min_x is None or pt.pos[0] < min_x:
+                min_x = pt.pos[0]
+            if min_y is None or pt.pos[1] < min_y:
+                min_y = pt.pos[1]
+            if max_x is None or pt.pos[0] > max_x:
+                max_x = pt.pos[0]
+            if max_y is None or pt.pos[1] > max_y:
+                max_y = pt.pos[1]
+
+        center_x = min_x + self.origin_x * (max_x - min_x)
+        center_y = min_y + self.origin_y * (max_y - min_y)
+
+        for i in range(self.initial_drawlist_pos, final_drawlist_pos):
+            pt = buffer[i]
+            new_pos = self.rotate_point(
+                pt.pos[0], pt.pos[1],
+                center_x, center_y
+            )
+            pt.pos = new_pos
 
 
 class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
@@ -25,9 +87,10 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         self.node_id = None
         self.min_width = 10
         self.min_height = 10
-        self.width = 22
+        self.width = 24
         self.height = 100
         self.position_set = False
+        self.show_scale_set = False
 
     def redraw(self):
         pass
@@ -41,7 +104,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         right portion of the scale
         """
         border_width = 1.25
-        border_round = 3
+        border_round = 2
 
         # style
         padding = self.get_style('padding')
@@ -63,9 +126,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         )
         nedit.push_style_color(
             nedit.StyleColor.node_border,
-            self.get_color(
-                'stroke-color:selected' if self.selected else 'stroke-color'
-            ).to_rgbaf()
+            ColorDB().find('transparent').to_rgbaf()
         )
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 
@@ -87,29 +148,64 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
 
         # node content: nothing really, we are just going to draw on it
         imgui.begin_group()
-        imgui.dummy([self.width, 1])
-        imgui.dummy([1, self.height-1])
 
+        # draw the bar
         pmin, pmax = self.fill_interval()
         draw_list = imgui.get_window_draw_list()
 
+        scale_bef = 0
+        scale_aft = 0
+        if self.show_scale and self.scale_position == self.LEFT:
+            scale_bef = self.SCALE_SPACE
+        if self.show_scale and self.scale_position == self.RIGHT:
+            scale_aft = self.SCALE_SPACE
+
         if self.orientation == self.VERTICAL:
+            if self.show_scale_set:
+                self.width += self.SCALE_SPACE * (1 if self.show_scale else -1)
+                self.show_scale_set = False
+
+            bar_width = self.width - (self.SCALE_SPACE if self.show_scale else 0)
+
+            c_tl = (
+                scale_bef + self.position_x,
+                self.position_y
+            )
+            c_br = (
+                scale_bef + self.position_x + bar_width,
+                self.position_y + self.height
+            )
+
             p_tl = (
-                self.position_x + border_width,
+                scale_bef + self.position_x + border_width,
                 self.position_y + (self.height - 2*border_width) * (1 - pmax) + border_width,
             )
             p_br = (
-                self.position_x + (self.width - border_width),
+                scale_bef + self.position_x + (bar_width - border_width),
                 self.position_y + (self.height - border_width) * (1 - pmin)
             )
         else:
+            if self.show_scale_set:
+                self.height += self.SCALE_SPACE * (1 if self.show_scale else -1)
+                self.show_scale_set = False
+
+            bar_height = self.height - (self.SCALE_SPACE if self.show_scale else 0)
+
+            c_tl = (
+                self.position_x,
+                scale_bef + self.position_y
+            )
+            c_br = (
+                self.position_x + self.width,
+                scale_bef + self.position_y + bar_height
+            )
             p_tl = (
                 self.position_x + (self.width - border_width) * pmin + border_width,
-                self.position_y + border_width
+                scale_bef + self.position_y + border_width
             )
             p_br = (
                 self.position_x + (self.width - border_width) * pmax,
-                self.position_y + (self.height - border_width)
+                scale_bef + self.position_y + (bar_height - border_width)
             )
 
         self.hot_x_min = self.position_x
@@ -117,11 +213,100 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         self.hot_y_min = self.position_y
         self.hot_y_max = self.position_y + self.height
 
+        imgui.dummy([self.width, 1])
+        imgui.dummy([1, self.height-1])
+
+        color = self.get_color(
+            'stroke-color:selected' if self.selected else 'stroke-color'
+        )
         draw_list.add_rect_filled(
             p_tl, p_br,
-            imgui.IM_COL32(155, 155, 155, 255),
+            ColorDB().backend.im_col32(color),
             border_round
         )
+        draw_list.add_rect(
+            c_tl, c_br,
+            ColorDB().backend.im_col32(color),
+            border_round
+        )
+
+        # draw the scale if required
+        if self.show_scale:
+            font_size = self.get_style('scale-font-size')
+
+            if self.scale_ticks is None:
+                if self.orientation == self.VERTICAL:
+                    num_ticks = self.height / self.TICK_SPACE
+                else:
+                    num_ticks = self.width / self.TICK_SPACE
+
+                self.scale_ticks = self.scale.ticks(num_ticks)
+
+            for tick in self.scale_ticks:
+                if self.orientation == self.VERTICAL:
+                    tick_y = (
+                        c_br[1] - border_width
+                        - (c_br[1] - c_tl[1] - border_width) * self.scale.fraction(tick)
+                    )
+                    text_y = (
+                        c_br[1]
+                        - (0.75 * font_size)
+                        - border_width
+                        - (c_br[1] - c_tl[1] - font_size) * self.scale.fraction(tick)
+                    )
+                    if self.scale_position == self.LEFT:
+                        tick_x = c_tl[0]
+                    else:
+                        tick_x = c_br[0] + self.TICK_LEN
+
+                    draw_list.add_line(
+                        (tick_x - self.TICK_LEN, tick_y),
+                        (tick_x, tick_y),
+                        ColorDB().backend.im_col32(color),
+                        1.5
+                    )
+                    draw_list.add_text(
+                        imgui.get_font(),
+                        font_size,
+                        [
+                            tick_x - self.TICK_LEN - 2.5*font_size,
+                            text_y
+                        ],
+                        ColorDB().backend.im_col32(color),
+                        f"{tick:>3.3g}"
+                    )
+
+                else:
+                    tick_x = c_tl[0] + (c_br[0] - c_tl[0] - border_width) * self.scale.fraction(tick)
+                    text_x = (
+                        c_tl[0]
+                        - 0.75 * font_size
+                        + (c_br[0] - c_tl[0] - font_size) * self.scale.fraction(tick)
+                    )
+                    if self.scale_position == self.LEFT:
+                        tick_y = c_tl[1]
+                    else:
+                        tick_y = c_br[1] + self.TICK_LEN
+
+                    draw_list.add_line(
+                        (tick_x, tick_y - self.TICK_LEN),
+                        (tick_x, tick_y),
+                        ColorDB().backend.im_col32(color),
+                        1.5
+                    )
+
+                    with rotated(theta=-90, origin_x=1, origin_y=0):
+                        draw_list.add_text(
+                            imgui.get_font(),
+                            font_size,
+                            [
+                                text_x,
+                                tick_y - self.TICK_LEN - font_size,
+                            ],
+                            ColorDB().backend.im_col32(color),
+                            f"{tick:>3.3g}"
+                        )
+
         imgui.end_group()
 
         # connections
@@ -162,11 +347,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
             self.hot_x_min <= x <= self.hot_x_max
             and self.hot_y_min <= y <= self.hot_y_max
         )
-        log.debug(f"[point_in_slider] canvas=({x}, {y}) in={is_in_slider}")
-        log.debug(f"[point_in_slider] x={self.hot_x_min} {self.hot_x_max} y={self.hot_y_min} {self.hot_y_max}")
-
         return is_in_slider
-
 
     def redraw(self):
         pass

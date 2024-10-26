@@ -417,8 +417,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         di = self.selected_patch.display_info
         screen_x_delta = x - di.origin_x
         screen_y_delta = y - di.origin_y - self.menu_height - 20
-        canvas_x = di.view_x + di.view_zoom * screen_x_delta
-        canvas_y = di.view_y + di.view_zoom * screen_y_delta
+        canvas_x = di.view_x + screen_x_delta / di.view_zoom
+        canvas_y = di.view_y + screen_y_delta / di.view_zoom
         return (canvas_x, canvas_y)
 
     def canvas_to_screen(self, x, y):

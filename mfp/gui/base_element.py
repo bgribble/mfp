@@ -264,13 +264,13 @@ class BaseElement (Store):
 
     def combine_styles(self):
         styles = {}
-        for styleset in (
-            MFPGUI().style_defaults,
-            BaseElement.style_defaults,
-            type(self).style_defaults,
-            self.style
-        ):
-            styles.update(styleset)
+        styles.update(
+            MFPGUI().style_defaults
+        )
+        for base_type in reversed(type(self).mro()):
+            if hasattr(base_type, 'style_defaults'):
+                styles.update(base_type.style_defaults)
+        styles.update(self.style)
         return styles
 
     async def update(self):

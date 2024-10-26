@@ -67,6 +67,7 @@ class MFPGUI (Singleton):
             'porthole-height': ParamInfo(label="Inlet/outlet port width", param_type=float),
             'porthole-width': ParamInfo(label="Inlet/outlet port width", param_type=float),
             'porthole-minspace': ParamInfo(label="Inlet/outlet min space", param_type=float),
+            'scale-font-size': ParamInfo(label="Scale font size", param_type=float),
             'stroke-color': ParamInfo(label="Element outline color", param_type=RGBAColor),
             'stroke-color:debug': ParamInfo(label="Element outline color (debug)", param_type=RGBAColor),
             'stroke-color:selected': ParamInfo(label="Element outline color (selected)", param_type=RGBAColor),
