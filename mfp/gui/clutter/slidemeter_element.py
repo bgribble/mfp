@@ -207,18 +207,6 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
         self.group.set_size(self.width, self.height)
         self.redraw()
 
-    def p2r(self, r, theta):
-        x = (self.width / 2.0) + r * math.cos(theta)
-        y = (self.height / 2.0) + r * math.sin(theta)
-        return (x, y)
-
-    def r2p(self, x, y):
-        dx = x - self.width/2.0
-        dy = y - self.height/2.0
-        theta = math.atan2(dy, dx)
-        r = (x*x + y*y)**0.5
-        return (r, theta)
-
     def point_in_slider(self, x, y):
         orig_x, orig_y = self.get_stage_position()
         x -= orig_x
@@ -242,21 +230,6 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
         theta -= self.THETA_MIN
         scale_fraction = theta / (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
         return self.scale.value(scale_fraction)
-
-    def add_pixdelta(self, dx, dy):
-        delta = 0.01 * dy
-
-        scalepos = self.scale.fraction(self.value) + delta
-        return self.scale.value(scalepos)
-
-    def val2theta(self, value):
-        scale_fraction = self.scale.fraction(value)
-        if scale_fraction > 1.0:
-            scale_fraction = 1.0
-        elif scale_fraction < 0:
-            scale_fraction = 0
-        theta = self.THETA_MIN + scale_fraction * (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
-        return theta
 
     @catchall
     def draw_cb(self, texture, ct, width, height):

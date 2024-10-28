@@ -12,8 +12,8 @@ from ..slidemeter_element import (
     FaderElementImpl,
     BarMeterElement,
     BarMeterElementImpl,
-    # DialElement,
-    # DialElementImpl,
+    DialElement,
+    DialElementImpl,
     #SlideMeterElement,
 )
 from .base_element import ImguiBaseElementImpl
@@ -151,14 +151,13 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
 
         # draw the bar
         pmin, pmax = self.fill_interval()
+        pmin = self.scale.fraction(pmin)
+        pmax = self.scale.fraction(pmax)
         draw_list = imgui.get_window_draw_list()
 
         scale_bef = 0
-        scale_aft = 0
         if self.show_scale and self.scale_position == self.LEFT:
             scale_bef = self.SCALE_SPACE
-        if self.show_scale and self.scale_position == self.RIGHT:
-            scale_aft = self.SCALE_SPACE
 
         if self.orientation == self.VERTICAL:
             if self.show_scale_set:
@@ -273,7 +272,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                             text_y
                         ],
                         ColorDB().backend.im_col32(color),
-                        f"{tick:>3.3g}"
+                        self.scale_format(tick)
                     )
 
                 else:
@@ -304,7 +303,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                                 tick_y - self.TICK_LEN - font_size,
                             ],
                             ColorDB().backend.im_col32(color),
-                            f"{tick:>3.3g}"
+                            self.scale_format(tick)
                         )
 
         imgui.end_group()
@@ -369,3 +368,194 @@ class ImguiBarMeterElementImpl(
     BarMeterElementImpl, ImguiSlideMeterElementImpl, BarMeterElement
 ):
     backend_name = "imgui"
+
+
+class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElement):
+
+    def __init__(self, window, x, y):
+        super().__init__(window, x, y)
+        self.min_width = 15
+        self.min_height = 15
+        self.width = self.DEFAULT_W
+        self.height = self.DEFAULT_H
+
+    @mutates('position_x', 'position_y', 'width', 'height')
+    def render(self):
+        """
+        dial element ("rotating" fader and meter)
+
+        outline is a polyline, filling is a thick polyline
+        """
+        border_width = 1.25
+
+        # style
+        padding = self.get_style('padding')
+        padding_tpl = (
+            padding.get('left', 0),
+            padding.get('top', 0),
+            padding.get('right', 0),
+            padding.get('bottom', 0)
+        )
+        nedit.push_style_var(nedit.StyleVar.node_rounding, 0)
+        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_border_width, border_width)
+
+        nedit.push_style_color(
+            nedit.StyleColor.node_bg,
+            self.get_color(
+                'fill-color:selected' if self.selected else 'fill-color'
+            ).to_rgbaf()
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.node_border,
+            ColorDB().find('transparent').to_rgbaf()
+        )
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
+
+        ##########################
+        # render
+        if self.node_id is None:
+            self.node_id = nedit.NodeId.create()
+            self.position_set = False
+            nedit.set_node_position(
+                self.node_id,
+                (self.position_x, self.position_y)
+            )
+            nedit.set_node_z_position(self.node_id, self.position_z)
+
+        self.render_sync_with_imgui()
+
+        nedit.begin_node(self.node_id)
+
+        # node content: nothing really, we are just going to draw on it
+        imgui.begin_group()
+
+        if self.show_scale_set:
+            self.height += self.scale_font_size * (1 if self.show_scale else -1)
+            self.width += self.scale_font_size * (2 if self.show_scale else -2)
+            self.show_scale_set = False
+
+        # draw the bar
+        pmin, pmax = self.fill_interval()
+        pmin = self.scale.fraction(pmin)
+        pmax = self.scale.fraction(pmax)
+        draw_list = imgui.get_window_draw_list()
+
+        self.hot_x_min = self.position_x
+        self.hot_x_max = self.position_x + self.width
+        self.hot_y_min = self.position_y
+        self.hot_y_max = self.position_y + self.height
+
+        imgui.dummy([self.width, 1])
+        imgui.dummy([1, self.height-1])
+
+        color = self.get_color(
+            'stroke-color:selected' if self.selected else 'stroke-color'
+        )
+        outer_radius = self.dial_radius
+        inner_radius = self.dial_radius / 4
+        theta_range = 2 * math.pi - (self.THETA_MIN - self.THETA_MAX)
+
+        draw_list.path_arc_to(
+            [self.position_x + self.width / 2,
+             self.position_y + self.height / 2],
+            outer_radius,
+            self.THETA_MIN,
+            2*math.pi + self.THETA_MAX,
+            35
+        )
+        draw_list.path_line_to(
+            [
+                self.position_x + self.width / 2 + inner_radius*math.cos(self.THETA_MAX),
+                self.position_y + self.height / 2 + inner_radius*math.sin(self.THETA_MAX)
+            ]
+        )
+        draw_list.path_arc_to(
+            [self.position_x + self.width / 2,
+             self.position_y + self.height / 2],
+            inner_radius,
+            self.THETA_MAX,
+            self.THETA_MIN - 2*math.pi,
+            35
+        )
+        draw_list.path_stroke(
+            ColorDB().backend.im_col32(color),
+            imgui.ImDrawFlags_.closed,
+            1.0
+        )
+
+        # the tasty filling
+        draw_list.path_arc_to(
+            [self.position_x + self.width / 2,
+             self.position_y + self.height / 2],
+            (outer_radius + inner_radius) / 2,
+            self.THETA_MIN + pmin * theta_range,
+            self.THETA_MIN + pmax * theta_range,
+            35
+        )
+
+        draw_list.path_stroke(
+            ColorDB().backend.im_col32(color),
+            0,
+            (outer_radius - inner_radius) * 0.95
+        )
+
+        # draw the scale if required
+        if self.show_scale:
+            font_size = self.get_style('scale-font-size')
+            if self.scale_ticks is None:
+                num_ticks = int(self.dial_radius / 10)
+                if not num_ticks % 2:
+                    num_ticks += 1
+                self.scale_ticks = self.scale.ticks(num_ticks)
+
+            for tick in self.scale_ticks:
+                tick_theta = self.val2theta(tick)
+                tick_x0, tick_y0 = self.p2r(self.dial_radius, tick_theta)
+                tick_x1, tick_y1 = self.p2r(self.dial_radius + self.TICK_LEN, tick_theta)
+                draw_list.add_line(
+                    (tick_x0 + self.position_x, tick_y0 + self.position_y),
+                    (tick_x1 + self.position_x, tick_y1 + self.position_y),
+                    ColorDB().backend.im_col32(color),
+                    1.0
+                )
+
+                txt_x, txt_y = self.p2r(
+                    self.dial_radius + self.TICK_LEN + 0.5*self.scale_font_size,
+                    tick_theta)
+
+                label = self.scale_format(tick).strip()
+                txt_x += 0.25 * self.scale_font_size * len(label) * (math.cos(tick_theta) - 1)
+                txt_y -= 0.5*self.scale_font_size
+                draw_list.add_text(
+                    imgui.get_font(),
+                    font_size,
+                    (txt_x + self.position_x, txt_y + self.position_y),
+                    ColorDB().backend.im_col32(color),
+                    label
+                )
+
+        imgui.end_group()
+
+        # connections
+        self.render_ports()
+
+        # status badge
+        self.render_badge()
+
+        nedit.end_node()
+
+        # update size and position after render
+        p_tl = imgui.get_item_rect_min()
+        p_br = imgui.get_item_rect_max()
+
+        self.width = p_br[0] - p_tl[0]
+        self.height = p_br[1] - p_tl[1]
+        self.position_x, self.position_y = (p_tl[0], p_tl[1])
+
+        # render
+        ##########################
+
+        imgui.pop_style_var()
+        nedit.pop_style_color(2)  # color
+        nedit.pop_style_var(3)  # padding, rounding

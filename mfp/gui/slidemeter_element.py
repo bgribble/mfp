@@ -92,6 +92,24 @@ class SlideMeterElement (BaseElement):
     def get_height(self):
         return self.height
 
+    def scale_format(self, value):
+        marks = {
+            1: "k", 2: "M", 3: "G", -1: "m", -2: "u", -3: "n" 
+        }
+
+        if not value:
+            return f"{value:>3.3g}"
+
+        expo = math.floor(math.log10(abs(value)))
+        bucket = int(expo / 3)
+        mark = marks.get(bucket)
+        if mark:
+            mant = value / 10**(3*bucket)
+            fval = f"{mant:3.3g}{mark}"
+        else:
+            fval = f"{value:>3.3g}"
+        return fval
+
     @property
     def scale_type(self):
         return self.scale.scale_type if self.scale else 0
@@ -345,6 +363,33 @@ class DialElement(SlideMeterElement):
 
     def set_orientation(self, orient):
         pass
+
+    def p2r(self, r, theta):
+        x = (self.width / 2.0) + r * math.cos(theta)
+        y = (self.height / 2.0) + r * math.sin(theta)
+        return (x, y)
+
+    def r2p(self, x, y):
+        dx = x - self.width/2.0
+        dy = y - self.height/2.0
+        theta = math.atan2(dy, dx)
+        r = (x*x + y*y)**0.5
+        return (r, theta)
+
+    def add_pixdelta(self, dx, dy):
+        delta = 0.01 * dy
+
+        scalepos = self.scale.fraction(self.value) + delta
+        return self.scale.value(scalepos)
+
+    def val2theta(self, value):
+        scale_fraction = self.scale.fraction(value)
+        if scale_fraction > 1.0:
+            scale_fraction = 1.0
+        elif scale_fraction < 0:
+            scale_fraction = 0
+        theta = self.THETA_MIN + scale_fraction * (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
+        return theta
 
     async def set_show_scale(self, show_scale):
         if show_scale == self.show_scale:
