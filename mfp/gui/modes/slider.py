@@ -7,6 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from ..input_mode import InputMode
 
+
 class SliderControlMode (InputMode):
     def __init__(self, window, element, descrip):
         self.manager = window.input_mgr
@@ -67,10 +68,7 @@ class SliderControlMode (InputMode):
                 self.drag_last_x = self.manager.pointer_x
                 self.drag_last_y = self.manager.pointer_y
                 return True
-            else:
-                return False
-        else:
-            return False
+        return False
 
     def drag_selected(self, delta=1.0):
         if self.drag_started is False:
@@ -114,69 +112,58 @@ class SliderEditMode (InputMode):
     async def set_low(self):
         async def hud_cb(value):
             if value is not None:
-                await self.slider.set_bounds(float(value), self.slider.max_value)
+                await self.slider.dispatch_setter("min_value", float(value))
         await self.window.cmd_get_input("Slider lower bound: ", hud_cb)
         return True
 
     async def set_hi(self):
         async def hud_cb(value):
             if value is not None:
-                await self.slider.set_bounds(self.slider.min_value, float(value))
+                await self.slider.dispatch_setter("max_value", float(value))
         await self.window.cmd_get_input("Slider upper bound: ", hud_cb)
         return True
 
     async def set_zero(self):
         async def hud_cb(value):
             if value is not None:
-                if value != "None":
-                    await self.slider.set_zeropoint(float(value))
-                else:
-                    await self.slider.set_zeropoint(None)
+                value = float(value)
+                await self.slider.dispatch_setter("zeropoint", value)
         await self.window.cmd_get_input("Slider zero point: ", hud_cb)
         return True
 
     async def toggle_scale(self):
-        await self.slider.set_show_scale(not self.slider.show_scale)
-        await self.slider.update()
-        self.slider.send_params()
+        await self.slider.dispatch_setter("show_scale", (not self.slider.show_scale))
         return True
 
     async def toggle_orient(self):
-        if self.slider.orientation == self.slider.HORIZONTAL:
-            await self.slider.set_orientation(self.slider.VERTICAL)
-        else:
-            await self.slider.set_orientation(self.slider.HORIZONTAL)
-
-        await self.slider.update()
-        self.slider.send_params()
-        return True
-
-    async def toggle_direction(self):
-        if self.slider.direction == self.slider.POSITIVE:
-            self.slider.direction = self.slider.NEGATIVE
-        else:
-            self.slider.direction = self.slider.POSITIVE
-
-        await self.slider.update()
-        self.slider.send_params()
+        from mfp.gui.slidemeter_element import SlideMeterElement
+        new_orient = (
+            SlideMeterElement.VERTICAL
+            if self.slider.orientation == SlideMeterElement.HORIZONTAL
+            else SlideMeterElement.HORIZONTAL
+        )
+        await self.slider.dispatch_setter("orientation", new_orient)
         return True
 
     async def toggle_side(self):
-        if self.slider.scale_position == self.slider.RIGHT:
-            self.slider.scale_position = self.slider.LEFT
-        else:
-            self.slider.scale_position = self.slider.RIGHT
+        from mfp.gui.slidemeter_element import SlideMeterElement
+        new_side = (
+            SlideMeterElement.RIGHT
+            if self.slider.scale_position == SlideMeterElement.LEFT
+            else SlideMeterElement.RIGHT
+        )
 
-        await self.slider.update()
-        self.slider.send_params()
+        await self.slider.dispatch_setter("scale_position", new_side)
         return True
 
     async def end_edits(self):
         await self.slider.end_edit()
         return True
 
+
 class DialControlMode(SliderControlMode):
     pass
+
 
 class DialEditMode(SliderEditMode):
     pass

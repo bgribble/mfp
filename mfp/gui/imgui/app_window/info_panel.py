@@ -412,7 +412,6 @@ def render_object_tab(app_window):
                         elem.dispatch_setter(param, old_val + delta)
                     )
 
-
 def render_params_tab(app_window, param_list):
     if len(app_window.selected) != 1 or len(param_list) == 0:
         return

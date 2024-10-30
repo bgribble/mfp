@@ -7,6 +7,9 @@ import math
 from gi.repository import Clutter
 import cairo
 
+from flopsy import saga, mutates
+
+from mfp import log
 from mfp.utils import catchall
 from ..colordb import ColorDB
 from .base_element import ClutterBaseElementImpl
@@ -41,18 +44,40 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
 
         self.group.set_position(x, y)
 
+    @saga('width', 'height', 'orientation')
+    async def shape_changed(self, action, state_diff, previous):
+        await self.set_size(self.width, self.height)
+        self.draw_ports()
+
+    async def update(self):
+        await super().update()
+        self.texture.invalidate()
 
     def redraw(self):
         self.texture.invalidate()
+
+    @saga('min_value', 'max_value')
+    async def needs_redraw(self, action, state_diff, previous):
+        await self.update()
 
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
         self.texture.set_size(width, height)
         self.texture.invalidate()
 
+    def select(self):
+        super().select()
+        self.texture.invalidate()
+
+    def unselect(self):
+        super().unselect()
+        self.texture.invalidate()
+
     @catchall
     def draw_cb(self, texture, ct, width, height):
-        c = ColorDB().normalize(self.get_color('stroke-color'))
+        c = ColorDB().normalize(
+            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+        )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         lw = 1
 
@@ -127,7 +152,7 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
 
                 txt_y = fontsize + (tick_y / bar_h)*(bar_h - fontsize)
                 ct.move_to(txt_x, txt_y)
-                ct.show_text("%.3g" % tick)
+                ct.show_text(self.scale_format(tick))
 
         def val2pixels(val):
             scale_fraction = self.scale.fraction(val)
@@ -144,7 +169,9 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
         if self.zeropoint is not None and h < self.MIN_BARSIZE:
             h = self.MIN_BARSIZE
 
-        c = ColorDB().normalize(self.get_color('meter-color'))
+        c = ColorDB().normalize(
+            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+        )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.rectangle(x_min+lw/2, y_max + lw/2 - val2pixels(max_fillval), bar_w-lw, h-lw)
         ct.fill()
@@ -205,7 +232,6 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
         self.height = self.DEFAULT_H
         self.texture.set_size(self.width, self.height)
         self.group.set_size(self.width, self.height)
-        self.redraw()
 
     def point_in_slider(self, x, y):
         orig_x, orig_y = self.get_stage_position()
@@ -233,7 +259,9 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
 
     @catchall
     def draw_cb(self, texture, ct, width, height):
-        c = ColorDB().normalize(self.get_color('stroke-color'))
+        c = ColorDB().normalize(
+            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+        )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
 
@@ -266,7 +294,7 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
                 txt_x -= 2*self.scale_font_size * math.sin(tick_theta/2.0)
                 txt_y += self.scale_font_size * (math.cos(tick_theta-math.pi/2.0)+1)/2.0
                 ct.move_to(txt_x, txt_y)
-                ct.show_text("%.3g" % tick)
+                ct.show_text(self.scale_format(tick))
 
         # Draw the outline of the dial
         ct.move_to(*self.p2r(self.dial_radius, self.THETA_MIN))
@@ -279,7 +307,9 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
         ct.stroke()
 
         # and the tasty filling
-        c = ColorDB().normalize(self.get_color('meter-color'))
+        c = ColorDB().normalize(
+            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+        )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         min_val, max_val = self.fill_interval()
         min_theta = self.val2theta(min_val)

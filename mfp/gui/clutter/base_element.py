@@ -6,7 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import math
 from gi.repository import Clutter
-from flopsy import mutates
+from flopsy import mutates, saga
 
 from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement, BaseElementImpl

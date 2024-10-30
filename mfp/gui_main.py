@@ -11,7 +11,6 @@ import asyncio
 
 from datetime import datetime
 
-import gbulb
 
 from carp.channel import UnixSocketChannel
 from carp.host import Host
@@ -60,6 +59,7 @@ class MFPGUI (Singleton):
             'font-size': ParamInfo(label="Font size", param_type=float),
             'grid-color:edit': ParamInfo(label="Grid color (edit)", param_type=RGBAColor),
             'grid-color:operate': ParamInfo(label="Grid color (operate)", param_type=RGBAColor),
+            'meter-color': ParamInfo(label="Meter bar color", param_type=RGBAColor),
             'padding': ParamInfo(label="Element padding", param_type=dict),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
             'porthole-color': ParamInfo(label="Inlet/outlet color", param_type=RGBAColor),
@@ -159,28 +159,18 @@ def setup_default_colors():
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
 
-async def main():
+async def main(cmdline):
     from mfp.gui.app_window import AppWindow
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--logstart", default=None,
-                        help="Reference time for log messages")
-    parser.add_argument("-s", "--socketpath", default="/tmp/mfp_rpcsock",
-                        help="Path to Unix-domain socket for RPC")
-    parser.add_argument("-d", "--debug", action="store_true",
-                        help="Enable debugging behaviors")
-    parser.add_argument("-b", "--backend", default="clutter",
-                        help="UI framework to use")
-    args = vars(parser.parse_args())
-    socketpath = args.get("socketpath")
-    debug = args.get('debug')
-    backend = args.get('backend')
+    socketpath = cmdline.get("socketpath")
+    debug = cmdline.get('debug')
+    backend = cmdline.get('backend')
 
     log.log_module = "gui"
     log.log_func = log.rpclog
     log.log_debug = True
 
-    if args.get("logstart"):
-        st = datetime.strptime(args.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f")
+    if cmdline.get("logstart"):
+        st = datetime.strptime(cmdline.get("logstart"), "%Y-%m-%dT%H:%M:%S.%f")
         if st:
             log.log_time_base = st
 
@@ -227,9 +217,9 @@ async def main():
     await channel.close()
 
 
-async def main_error_wrapper():
-    main_task = asyncio.create_task(main())
+async def main_error_wrapper(cmdline):
     try:
+        main_task = asyncio.create_task(main(cmdline))
         await main_task
     except Exception as e:
         import traceback
@@ -243,7 +233,24 @@ async def main_error_wrapper():
     else:
         print("[LOG] ERROR: quit: task exited normally")
 
+def setup_gtk_asyncio():
+    import gbulb
+    gbulb.install(gtk=True)
+
 
 def main_sync_wrapper():
-    gbulb.install(gtk=True)
-    asyncio.run(main_error_wrapper())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", "--logstart", default=None,
+                        help="Reference time for log messages")
+    parser.add_argument("-s", "--socketpath", default="/tmp/mfp_rpcsock",
+                        help="Path to Unix-domain socket for RPC")
+    parser.add_argument("-d", "--debug", action="store_true",
+                        help="Enable debugging behaviors")
+    parser.add_argument("-b", "--backend", default="clutter",
+                        help="UI framework to use")
+    cmdline = vars(parser.parse_args())
+
+    if cmdline.get("backend") == "clutter":
+        setup_gtk_asyncio()
+
+    asyncio.run(main_error_wrapper(cmdline))

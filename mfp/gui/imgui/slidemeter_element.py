@@ -92,9 +92,6 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         self.position_set = False
         self.show_scale_set = False
 
-    def redraw(self):
-        pass
-
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         """
@@ -140,7 +137,6 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                 (self.position_x, self.position_y)
             )
             nedit.set_node_z_position(self.node_id, self.position_z)
-
 
         self.render_sync_with_imgui()
 
@@ -347,9 +343,6 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
             and self.hot_y_min <= y <= self.hot_y_max
         )
         return is_in_slider
-
-    def redraw(self):
-        pass
 
     async def label_changed_cb(self, *args):
         pass

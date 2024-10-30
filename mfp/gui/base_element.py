@@ -7,7 +7,7 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
-from flopsy import Store, mutates, saga
+from flopsy import Action, Store, mutates, reducer, saga
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB, RGBAColor
@@ -50,6 +50,7 @@ class BaseElementImpl(metaclass=ABCMeta):
 
 
 BASE_STORE_ATTRS = {
+    'obj_id': ParamInfo(label="Object ID", param_type=int, editable=False),
     'obj_type': ParamInfo(label="Type", param_type=str),
     'obj_args': ParamInfo(label="Creation args", param_type=str),
     'display_type': ParamInfo(label="Display type", param_type=str, editable=False),
@@ -195,8 +196,8 @@ class BaseElement (Store):
 
     async def set_size(self, width, height, **kwargs):
         update_state = kwargs.get("update_state", True)
-        prev_width = kwargs.get('width', self.width)
-        prev_height = kwargs.get('height', self.height)
+        prev_width = kwargs.get('previous_width', self.width)
+        prev_height = kwargs.get('previous_height', self.height)
         changed_w = not self.width or abs(width - self.width) > BaseElement.TINY_DELTA
         changed_h = not self.height or abs(height - self.height) > BaseElement.TINY_DELTA
 
@@ -387,16 +388,12 @@ class BaseElement (Store):
             self.connections_in = connections_in
             return None
 
-        # FIXME flopsy
-        self.obj_id = objinfo.get('obj_id')
-        self.obj_name = objinfo.get('name')
-        self.obj_args = objinfo.get('initargs')
-        self.obj_type = obj_type
-        self.scope = objinfo.get('scope')
-        self.num_inlets = objinfo.get("num_inlets")
-        self.num_outlets = objinfo.get("num_outlets")
-        self.dsp_inlets = objinfo.get("dsp_inlets", [])
-        self.dsp_outlets = objinfo.get("dsp_outlets", [])
+        objinfo['obj_type'] = obj_type
+
+        # init state from objinfo
+        await self.dispatch(
+            Action(self, self.CREATE_OBJECT, objinfo)
+        )
 
         if self.obj_id is not None:
             MFPGUI().remember(self)
@@ -436,6 +433,26 @@ class BaseElement (Store):
         self.app_window.refresh(self)
 
         return self.obj_id
+
+    @reducer(
+        'obj_id', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
+        'obj_type', 'obj_name', 'obj_args'
+    )
+    def CREATE_OBJECT(self, action, state, previous_value):
+        """
+        Initialize store from creation payload
+        """
+        objinfo = action.payload
+        if state in (
+            'obj_id', 'obj_type', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets'
+        ):
+            return objinfo.get(state, previous_value)
+
+        if state == 'obj_name':
+            return objinfo.get('name', previous_value)
+        if state == 'obj_args':
+            return objinfo.get('initargs', previous_value)
+        return previous_value
 
     def synced_params(self):
         prms = {}
