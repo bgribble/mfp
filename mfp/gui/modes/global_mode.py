@@ -38,6 +38,7 @@ class GlobalMode (InputMode):
         self.bind("!", self.transient_msg, "Send message to selection")
         self.bind("~", self.toggle_console, "Show/hide log and console")
         self.bind("`", self.toggle_tree, "Show/hide left side info")
+        self.bind(":", self.cmdline, "Enter a command")
 
         self.bind("PGUP", self.window.layer_select_up, "Select higher layer")
         self.bind("PGDN", self.window.layer_select_down, "Select lower layer")
@@ -91,6 +92,14 @@ class GlobalMode (InputMode):
         if window.backend_name == "imgui":
             self.tile_manager_mode = TileManagerMode(self.window)
             self.bind('C-a', lambda: self.manager.enable_minor_mode(self.tile_manager_mode))
+
+    async def cmdline(self):
+        async def cb(cmdline):
+            if cmdline.startswith("eval "):
+                resp = eval(cmdline[5:])
+                log.debug(f"cmdline eval: {resp}")
+
+        await self.window.cmd_get_input(":", cb, '')
 
     def scroll_zoom(self, ratio):
         if "scroll-zoom" in self.window.motion_overrides:

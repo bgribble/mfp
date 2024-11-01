@@ -45,8 +45,7 @@ class Prompter (object):
                 if inspect.isawaitable(rv):
                     await rv
             except Exception as e:
-                print("Prompter exception in callback:", e)
-                pass
+                log.error(f"Prompter exception in callback: {e}")
 
     async def end_edit(self):
         if self.mode:

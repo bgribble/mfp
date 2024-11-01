@@ -8,19 +8,34 @@ from ..input_mode import InputMode
 
 
 class PatchControlMode (InputMode):
+
     def __init__(self, window):
         self.manager = window.input_mgr
         self.window = window
 
-        InputMode.__init__(self, "Operate patch", "Operate")
-
-        self.bind("C- ", self.window.edit_major_mode, "Enter edit mode")
-        self.bind("TAB", self.select_next, "Select next element")
-        self.bind("S-TAB", self.select_prev, "Select previous element")
-        self.bind("C-TAB", self.select_mru, "Select most-recent element")
+        super().__init__("Operate patch", "Operate")
 
         self.window.signal_listen("select", self.begin_control)
         self.window.signal_listen("unselect", self.end_control)
+
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind(
+            "select-next", cls.select_next, helptext="Select next element",
+            keysym="TAB", menupath="Edit > |Select next"
+        )
+        cls.cl_bind(
+            "select-previous", cls.select_prev, helptext="Select previous element",
+            keysym="S-TAB", menupath="Edit > |Select previous"
+        )
+        cls.cl_bind(
+            "select-recent", cls.select_mru, helptext="Select most-recent element",
+            keysym="C-TAB", menupath="Edit > |Select recent"
+        )
+        cls.cl_bind(
+            "edit-mode", cls.edit_mode, helptext="Enter edit mode",
+            keysym="C- ", menupath="Edit > ||Edit mode"
+        )
 
     def enable(self):
         self.enabled = True
@@ -31,7 +46,9 @@ class PatchControlMode (InputMode):
             return False
 
         if obj is not None:
-            obj.begin_control()
+            return obj.begin_control()
+
+        return False
 
     def end_control(self, window, signal, obj):
         if not self.enabled:
@@ -39,6 +56,9 @@ class PatchControlMode (InputMode):
 
         if obj is not None:
             obj.end_control()
+
+    def edit_mode(self):
+        return self.window.edit_major_mode()
 
     async def select_next(self):
         await self.window.select_next()

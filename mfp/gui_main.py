@@ -19,6 +19,7 @@ from flopsy import Store
 from mfp import log
 from mfp.utils import AsyncTaskManager
 
+from mfp.gui import modes
 from mfp.gui.colordb import ColorDB, RGBAColor
 from mfp.gui.param_info import ParamInfo, ListOfInt
 from .singleton import Singleton

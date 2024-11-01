@@ -30,58 +30,137 @@ class PatchEditMode (InputMode):
         self.selection_edit_mode = None
 
         InputMode.__init__(self, "Edit patch", "Edit")
-        self.bind('ESC', self.window.control_major_mode, "Exit edit mode")
-
-        self.bind("p", self.add_element(ProcessorElement),
-                  "Add processor box")
-        self.bind("m", self.add_element(MessageElement),
-                  "Add message box")
-        self.bind("n", self.add_element(EnumElement),
-                  "Add number box")
-        self.bind("t", self.add_element(TextElement),
-                  "Add text comment")
-        self.bind("u", self.add_element(ToggleButtonElement),
-                  "Add toggle button")
-        self.bind("g", self.add_element(BangButtonElement),
-                  "Add bang button")
-        self.bind("i", self.add_element(ToggleIndicatorElement),
-                  "Add on/off indicator")
-        self.bind("s", self.add_element(FaderElement),
-                  "Add slider")
-        self.bind("b", self.add_element(BarMeterElement),
-                  "Add bar meter")
-        self.bind("d", self.add_element(DialElement),
-                  "Add dial control")
-        self.bind("x", self.add_element(PlotElement),
-                  "Add X/Y plot")
-        self.bind("v", self.add_element(SendViaElement),
-                  "Add send message via")
-        self.bind("V", self.add_element(ReceiveViaElement),
-                  "Add receive message via")
-        self.bind("A-v", self.add_element(SendSignalViaElement),
-                  "Add send signal via")
-        self.bind("A-V", self.add_element(ReceiveSignalViaElement),
-                  "Add receive signal via")
-
-        self.bind("C-x", self.cut, "Cut selection to clipboard")
-        self.bind("C-c", self.copy, "Copy selection to clipboard")
-        self.bind("C-v", self.paste, "Paste clipboard to selection")
-        self.bind("C-d", self.duplicate, "Duplicate selection")
-
-        self.bind("C-n", self.window.layer_new, "Create new layer")
-        self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
-        self.bind("C-U", self.window.layer_move_up, "Move current layer up")
-        self.bind("C-D", self.window.layer_move_down, "Move current layer down")
-
-        self.bind("TAB", self.select_next, "Select next element")
-        self.bind("S-TAB", self.select_prev, "Select previous element")
-        self.bind("C-TAB", self.select_mru, "Select most-recent element")
-
-        self.bind("a", self.auto_place_below, "Auto-place below")
-        self.bind("A", self.auto_place_above, "Auto-place above")
-
         self.window.signal_listen("select", self.selection_changed_cb)
         self.window.signal_listen("unselect", self.selection_changed_cb)
+
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind(
+            "edit-cut", cls.cut, helptext="Cut selection to clipboard",
+            keysym="C-x", menupath="Edit > Cut"
+        )
+        cls.cl_bind(
+            "edit-copy", cls.copy, helptext="Copy selection to clipboard",
+            keysym="C-c", menupath="Edit > Copy"
+        )
+        cls.cl_bind(
+            "edit-paste", cls.paste, helptext="Paste clipboard to selection",
+            keysym="C-v", menupath="Edit > Paste"
+        )
+        cls.cl_bind(
+            "edit-duplicate", cls.duplicate, helptext="Duplicate selection",
+            keysym="C-d", menupath="Edit > Duplicate"
+        )
+        cls.cl_bind(
+            "autoplace-below", cls.auto_place_below, helptext="Auto-place below",
+            keysym="a", menupath="Edit > Autoplace below"
+        )
+        cls.cl_bind(
+            "autoplace-above", cls.auto_place_above, helptext="Auto-place above",
+            keysym="A", menupath="Edit > Autoplace above"
+        )
+        cls.cl_bind(
+            "add-processor", cls.add_element(ProcessorElement), helptext="Add processor box",
+            keysym="p", menupath="Edit > Add element > Processor"
+        )
+        cls.cl_bind(
+            "add-message", cls.add_element(MessageElement), helptext="Add message box",
+            keysym="m", menupath="Edit > Add element > Message (data)"
+        )
+        cls.cl_bind(
+            "add-number", cls.add_element(EnumElement), helptext="Add number box",
+            keysym="n", menupath="Edit > Add element > Number"
+        )
+        cls.cl_bind(
+            "add-text", cls.add_element(TextElement), helptext="Add text comment",
+            keysym="t", menupath="Edit > Add element > Text comment"
+        )
+        cls.cl_bind(
+            "add-toggle", cls.add_element(ToggleButtonElement), helptext="Add toggle button",
+            keysym="u", menupath="Edit > Add element > Toggle button"
+        )
+        cls.cl_bind(
+            "add-bang-button", cls.add_element(BangButtonElement), helptext="Add bang button",
+            keysym="g", menupath="Edit > Add element > Bang button"
+        )
+        cls.cl_bind(
+            "add-indicator", cls.add_element(ToggleIndicatorElement), helptext="Add on/off indicator",
+            keysym="i", menupath="Edit > Add element > Indicator (on/off)"
+        )
+        cls.cl_bind(
+            "add-slider", cls.add_element(FaderElement), helptext="Add slider",
+            keysym="s", menupath="Edit > Add element > Slider"
+        )
+        cls.cl_bind(
+            "add-bar-meter", cls.add_element(BarMeterElement), helptext="Add bar meter",
+            keysym="b", menupath="Edit > Add element > Bar meter"
+        )
+        cls.cl_bind(
+            "add-dial", cls.add_element(DialElement), helptext="Add dial control",
+            keysym="d", menupath="Edit > Add element > Dial"
+        )
+        cls.cl_bind(
+            "add-xyplot", cls.add_element(PlotElement), helptext="Add X/Y plot",
+            keysym="x", menupath="Edit > Add element > X/Y plot"
+        )
+        cls.cl_bind(
+            "add-sendvia", cls.add_element(SendViaElement), helptext="Add send message via",
+            keysym="v", menupath="Edit > Add element > Send via"
+        )
+        cls.cl_bind(
+            "add-recvvia", cls.add_element(ReceiveViaElement), helptext="Add receive message via",
+            keysym="V", menupath="Edit > Add element > Receive via"
+        )
+        cls.cl_bind(
+            "add-sendsigvia", cls.add_element(SendSignalViaElement), helptext="Add send signal via",
+            keysym="A-v", menupath="Edit > Add element > Send signal via"
+        )
+        cls.cl_bind(
+            "add-recvsigvia", cls.add_element(ReceiveSignalViaElement), helptext="Add receive signal via",
+            keysym="A-V", menupath="Edit > Add element > Receive signal via"
+        )
+
+        cls.cl_bind(
+            "layer-new", lambda mode: mode.window.layer_new(),
+            helptext="Create new layer",
+            keysym="C-n", menupath="Layers > New layer"
+        )
+        cls.cl_bind(
+            "layer-new-scope", lambda mode: mode.window.layer_new_scope(),
+            helptext="Create new layer in a new scope",
+            keysym="C-N", menupath="Layers > New layer in new scope"
+        )
+        cls.cl_bind(
+            "layer-move-up", lambda mode: mode.window.layer_move_up(),
+            helptext="Move current layer up",
+            keysym="C-U", menupath="Layers > Move layer up"
+        )
+        cls.cl_bind(
+            "layer-move-down", lambda mode: mode.window.layer_move_down(),
+            helptext="Move current layer down",
+            keysym="C-D", menupath="Layers > Move layer down"
+        )
+
+        cls.cl_bind(
+            "select-next", cls.select_next, helptext="Select next element",
+            keysym="TAB", menupath="Edit > |Select next"
+        )
+        cls.cl_bind(
+            "select-previous", cls.select_prev, helptext="Select previous element",
+            keysym="S-TAB", menupath="Edit > |Select previous"
+        )
+        cls.cl_bind(
+            "select-recent", cls.select_mru, helptext="Select most-recent element",
+            keysym="C-TAB", menupath="Edit > |Select recent"
+        )
+
+        cls.cl_bind(
+            "control-mode", cls.control_mode, "Exit edit mode",
+            keysym="ESC", menupath="Edit > ||Control mode"
+        )
+
+    async def control_mode(self):
+        await self.window.control_major_mode()
 
     def selection_changed_cb(self, window, signal, obj):
         if not self.enabled:
@@ -92,9 +171,10 @@ class PatchEditMode (InputMode):
         else:
             self.disable_selection_mode()
 
-    def add_element(self, element_type):
-        async def helper():
-            return await self._add_element(element_type)
+    @classmethod
+    def add_element(cls, element_type):
+        async def helper(mode):
+            return await mode._add_element(element_type)
         return helper
 
     async def _add_element(self, element_type):

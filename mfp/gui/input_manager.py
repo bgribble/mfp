@@ -96,13 +96,16 @@ class InputManager:
                 retry_count += 1
                 offset = -1
             except Exception as e:
-                log.error(f"[run_handlers] Exception while handling key command {keysym}: {e} {current_handler}")
+                log.error(
+                    f"[run_handlers] Exception while handling key command {keysym}: {e} {current_handler}"
+                )
                 log.debug_traceback(e)
                 return False
 
     def handle_keysym(self, keysym):
         if not keysym:
             return True
+
         handlers = self.get_handlers(keysym)
         current_handler = None
         retry_count = 0
@@ -127,7 +130,9 @@ class InputManager:
                 handlers = self.get_handlers(keysym)
                 retry_count += 1
             except Exception as e:
-                log.error(f"[handle_keysym] Exception while handling key command {keysym}: {e} {current_handler}")
+                log.error(
+                    f"[handle_keysym] Exception while handling key command {keysym}: {e} {current_handler}"
+                )
                 log.debug_traceback(e)
                 return False
         return False
@@ -200,6 +205,15 @@ class InputManager:
         self.major_mode = mode
         mode.enable()
         self.window.display_bindings()
+
+    def mode_enabled(self, mode_type):
+        if (
+            isinstance(self.global_mode, mode_type)
+            or isinstance(self.major_mode, mode_type)
+            or any(isinstance(m, mode_type) for m in self.minor_modes)
+        ):
+            return True
+        return False
 
     def enable_minor_mode(self, mode):
         def modekey(a):
