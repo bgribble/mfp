@@ -41,17 +41,17 @@ class GlobalMode (InputMode):
         cls.cl_bind(
             "toggle-console", cls.toggle_console, helptext="Show/hide log and console",
             keysym="~",
-            menupath="Window > |[x]Log/Python console"
+            menupath="Window > |||[x]Log/Python console"
         )
         cls.cl_bind(
             "toggle-info", cls.toggle_tree, helptext="Show/hide info panel",
             keysym="`",
-            menupath="Window > |[x]Info panel"
+            menupath="Window > |||[x]Info panel"
         )
         cls.cl_bind(
             "toggle-inspector", cls.inspect, helptext="Open state inspector",
             keysym="C-i",
-            menupath="Window > |UI debugger"
+            menupath="Window > |||UI debugger"
         )
         cls.cl_bind(
             "layer-select-up", lambda mode: mode.window.layer_select_up(), helptext="Select higher layer",

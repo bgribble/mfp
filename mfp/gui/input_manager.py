@@ -260,17 +260,17 @@ class InputManager:
             for minor in self.minor_modes:
                 handler = minor.lookup(keysym)
                 if handler is not None:
-                    handlers.append(self._wrap_handler(handler[0], minor))
+                    handlers.append(self._wrap_handler(handler.action, minor))
 
             # then major mode
             if self.major_mode is not None and self.major_mode.enabled:
                 handler = self.major_mode.lookup(keysym)
                 if handler is not None:
-                    handlers.append(self._wrap_handler(handler[0], self.major_mode))
+                    handlers.append(self._wrap_handler(handler.action, self.major_mode))
 
             # then global
             handler = self.global_mode.lookup(keysym)
             if handler is not None:
-                handlers.append(self._wrap_handler(handler[0], self.global_mode))
+                handlers.append(self._wrap_handler(handler.action, self.global_mode))
 
         return handlers

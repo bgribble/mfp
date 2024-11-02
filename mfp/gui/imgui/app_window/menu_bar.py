@@ -5,10 +5,11 @@ menu_bar.py -- main menu
 import re
 from imgui_bundle import imgui
 from mfp import log
-from mfp.gui.input_mode import InputMode
+from mfp.gui.input_mode import InputMode, Binding
 
 # items with checkmarks maintain their state here
 toggle_items_state = {}
+
 
 def splitsep(itemname):
     m = re.search(r"^(\|+)", itemname)
@@ -17,6 +18,7 @@ def splitsep(itemname):
 
     separators = m.group(0)
     return separators, itemname[len(separators):]
+
 
 def add_menu_items(app_window, itemdict):
     """
@@ -32,8 +34,8 @@ def add_menu_items(app_window, itemdict):
                 add_menu_items(app_window, value)
                 imgui.end_menu()
         else:
-            keysym = value[4]
-            menu_path = value[5]
+            keysym = value.keysym
+            menu_path = value.menupath
 
             # items with [] or [x] preceding name (ie File > []Pause/unpause")
             # will have a checkmark when selected. Default is no check.
@@ -47,12 +49,20 @@ def add_menu_items(app_window, itemdict):
                     itemname = itemname[2:]
                 toggle_state = toggle_items_state.setdefault(menu_path, default_toggle)
 
+            # make the actual menu item
+            item_selected, item_toggled = imgui.menu_item(
+                itemname, keysym, toggle_state, value.enabled
+            )
 
-            item_selected, item_toggled = imgui.menu_item(itemname, keysym, toggle_state, value[6])
+            # send synthesized keypress(es) if selected
             if item_selected:
                 if toggle_state is not None:
                     toggle_items_state[menu_path] = item_toggled
-                app_window.input_mgr.handle_keysym(keysym)
+                keys = [keysym]
+                if ' ' in keysym and '- ' not in keysym:
+                    keys = keysym.split(' ')
+                for key in keys:
+                    app_window.input_mgr.handle_keysym(key)
 
     # iterate over separators
     for separators in range(1, 10):
@@ -62,6 +72,7 @@ def add_menu_items(app_window, itemdict):
         imgui.separator()
         add_menu_items(app_window, sep_items)
 
+
 def render(app_window):
     quit_selected = False
 
@@ -70,9 +81,14 @@ def render(app_window):
     # get all the input mode items
     for name, mode in InputMode._registry.items():
         for keysym, binding in mode._bindings.items():
-            if binding[5]:
-                menupath = binding[5].split(" > ")
+            if binding.menupath:
+                menupath = binding.menupath.split(" > ")
                 submenu = by_menu
+                keysym = binding.keysym
+                always_on = False
+                if mode._mode_prefix:
+                    keysym = f"{mode._mode_prefix} {keysym}"
+                    always_on = True
                 for menu in menupath[:-1]:
                     sep, item = splitsep(menu)
                     if not sep:
@@ -88,10 +104,11 @@ def render(app_window):
                 # if there are multiple items with the same text,
                 # one that's enabled wins
                 enabled = app_window.input_mgr.mode_enabled(mode)
-                if enabled:
-                    submenu[item] = (*binding, True)
+
+                if enabled or always_on:
+                    submenu[item] = Binding(*binding[:-3], keysym, binding.menupath, True)
                 elif item not in submenu:
-                    submenu[item] = (*binding, False)
+                    submenu[item] = Binding(*binding[:-3], keysym, binding.menupath, False)
 
     if imgui.begin_menu("File"):
         add_menu_items(app_window, by_menu.get("File", {}))

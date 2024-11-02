@@ -5,8 +5,14 @@ input_mode.py: InputMode parent class for managing key/mouse bindings and intera
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 import inspect
+from collections import namedtuple
 from mfp import log
 
+Binding = namedtuple(
+    'Binding', 
+    ['label', 'action', 'index', 'helptext', 'keysym', 'menupath', 'enabled'],
+    defaults=[True]
+)
 
 class InputMode:
     _registry = {}
@@ -15,6 +21,7 @@ class InputMode:
     _bindings = {}
     _default = None
     _num_bindings = 0
+    _mode_prefix = ''
 
     def __init__(self, description='', short_description=None):
         self.description = description
@@ -26,7 +33,7 @@ class InputMode:
         self.enabled = False
         self.affinity = 0
         self.seqno = None
-
+        
         # FIXME
         self.default = None
         self.bindings = {}
@@ -52,17 +59,23 @@ class InputMode:
 
     @classmethod
     def cl_bind(cls, label, action, helptext=None, keysym=None, menupath=None):
+        """
+        after migrating all modes to cl_bind, will rename this to bind
+
+        binding at the class level lets us know what the mode's
+        bindings are before we create an instance of it
+        """
         if keysym is None:
-            cls._default = (action, helptext, cls._num_bindings)
+            cls._default = Binding("default", action, helptext, cls._num_bindings, None, None)
         else:
-            cls._bindings[keysym] = (label, action, helptext, cls._num_bindings, keysym, menupath)
+            cls._bindings[keysym] = Binding(label, action, helptext, cls._num_bindings, keysym, menupath)
         cls._num_bindings += 1
 
     def bind(self, keysym, action, helptext=None):
         if keysym is None:
-            self.default = (action, helptext, type(self)._num_bindings, keysym, None)
+            self.default = Binding(None, action, helptext, type(self)._num_bindings, keysym, None)
         else:
-            self.bindings[keysym] = (action, helptext, type(self)._num_bindings, keysym, None)
+            self.bindings[keysym] = Binding(None, action, helptext, type(self)._num_bindings, keysym, None)
         type(self)._num_bindings += 1
 
     def directory(self):
@@ -84,11 +97,11 @@ class InputMode:
         if binding is not None:
             return binding
 
-        # class bindings (tuple is different)
+        # class bindings (action is not bound to instance yet)
         binding = type(self)._bindings.get(keysym)
         if binding is not None:
-            return (
-                lambda: binding[1](self), *binding[2:]
+            return Binding(
+                binding[0], lambda: binding.action(self), *binding[2:]
             )
 
         # if any extensions are specified, look in them
@@ -100,19 +113,21 @@ class InputMode:
 
         # do we have a default? They get an extra arg (the keysym)
         if self.default is not None:
-            newfunc = lambda: self.default[0](keysym)
-            return (newfunc, *self.default[1:])
+            newfunc = lambda: self.default.action(keysym)
+            return Binding(None, newfunc, *self.default[2:])
 
         # class default
         if type(self)._default is not None:
-            newfunc = lambda: type(self)._default[1](self, keysym)
-            return (newfunc, *self.default[2:])
+            binding = type(self)._default
+            newfunc = lambda: binding.action(self, keysym)
+            return Binding(binding[0], newfunc, *binding.default[2:])
 
         # do extensions have a default:
         for ext in self.extensions:
             if ext.default is not None:
-                newfunc = lambda: ext.default[0](keysym)
-                return (newfunc, *ext.default[1:])
+                binding = ext.default
+                newfunc = lambda: binding.action(keysym)
+                return Binding(binding[0], newfunc, *ext.default[1:])
 
         return None
 

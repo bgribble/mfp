@@ -23,40 +23,130 @@ class TileManagerMode (InputMode):
 
         InputMode.__init__(self, "Tile control", "Tile")
 
+    @classmethod
+    def init_bindings(cls):
         # window control
-        self.bind("c", self.create_page, "Create new page")
-        self.bind("n", self.next_page, "Go to next page")
-        self.bind("p", self.prev_page, "Go to previous page")
-        self.bind("l", self.recent_page, "Go to last-visited page")
-        self.bind("0", lambda: self.select_page(0), "Go to page 0")
-        self.bind("1", lambda: self.select_page(1), "Go to page 1")
-        self.bind("2", lambda: self.select_page(2), "Go to page 2")
-        self.bind("3", lambda: self.select_page(3), "Go to page 3")
-        self.bind("4", lambda: self.select_page(4), "Go to page 4")
-        self.bind("5", lambda: self.select_page(5), "Go to page 5")
-        self.bind("6", lambda: self.select_page(6), "Go to page 6")
-        self.bind("7", lambda: self.select_page(7), "Go to page 7")
-        self.bind("8", lambda: self.select_page(8), "Go to page 8")
-        self.bind("9", lambda: self.select_page(9), "Go to page 9")
-        self.bind("&", self.close_window, "Close window and all tiles")
-
+        cls._mode_prefix = "C-a"
         # tile control
-        self.bind("-", self.split_vertical, "Split tile vertically")
-        self.bind("|", self.split_horizontal, "Split tile horizontally")
-        self.bind("!", self.create_page_from_tile, "Convert tile to page")
-        self.bind("{", self.swap_tile_left, "Swap tile to the left")
-        self.bind("}", self.swap_tile_right, "Swap tile to the left")
-        self.bind("<", self.swap_tile_up, "Swap tile upward")
-        self.bind(">", self.swap_tile_down, "Swap tile downward")
-        self.bind("UP", self.select_up, "Select tile above")
-        self.bind("DOWN", self.select_down, "Select tile below")
-        self.bind("LEFT", self.select_left, "Select tile to the left")
-        self.bind("RIGHT", self.select_right, "Select tile to the right")
-        self.bind("'", self.select_next, "Select next tile by number")
-        self.bind(";", self.select_prev, "Select previous tile by number")
-        self.bind("x", self.close_tile, "Close tile")
+        cls.cl_bind(
+            "split-tile-vert", cls.split_vertical, "Split tile vertically",
+            keysym="-", menupath="Window > |Split tile vertically"
+        )
+        cls.cl_bind(
+            "split-tile-horiz", cls.split_horizontal, "Split tile horizontally",
+            keysym="|", menupath="Window > |Split tile horizontally"
+        )
+        cls.cl_bind(
+            "convert-tile-to-page", cls.create_page_from_tile, "Convert tile to page",
+            keysym="!", menupath="Window > |Convert tile to page"
+        )
+        cls.cl_bind(
+            "swap-tile-left", cls.swap_tile_left, "Swap tile to the left",
+            keysym="{", menupath="Window > |Swap tile left"
+        )
+        cls.cl_bind(
+            "swap-tile-right", cls.swap_tile_right, "Swap tile to the left",
+            keysym="}", menupath="Window > |Swap tile right"
+        )
+        cls.cl_bind(
+            "swap-tile-up", cls.swap_tile_up, "Swap tile upward",
+            keysym="<", menupath="Window > |Swap tile upward"
+        )
+        cls.cl_bind(
+            "swap-tile-down", cls.swap_tile_down, "Swap tile downward",
+            keysym=">", menupath="Window > |Swap tile downward"
+        )
+        cls.cl_bind(
+            "close-tile", cls.close_tile, "Close tile",
+            keysym="x", menupath="Window > |Close tile"
+        )
+        cls.cl_bind(
+            "create-tile-page", cls.create_page, "Create new page",
+            keysym="c", menupath="Window > ||Create new page"
+        )
+        cls.cl_bind(
+            "next-tile-page", cls.next_page, "Go to next page",
+            keysym="n", menupath="Window > ||Go to next page"
+        )
+        cls.cl_bind(
+            "prev-tile-page", cls.prev_page, "Go to previous page",
+            keysym="p", menupath="Window > ||Go to prev page"
+        )
+        cls.cl_bind(
+            "recent-tile-page", cls.recent_page, "Go to last-visited page",
+            keysym="l", menupath="Window > ||Go to recent page"
+        )
+        cls.cl_bind(
+            "go-tile-page-0", lambda mode: mode.select_page(0), "Go to page 0",
+            keysym="0"
+        )
+        cls.cl_bind(
+            "go-tile-page-1", lambda mode: mode.select_page(1), "Go to page 1",
+            keysym="1"
+        )
+        cls.cl_bind(
+            "go-tile-page-2", lambda mode: mode.select_page(2), "Go to page 2",
+            keysym="2"
+        )
+        cls.cl_bind(
+            "go-tile-page-3", lambda mode: mode.select_page(3), "Go to page 3",
+            keysym="3"
+        )
+        cls.cl_bind(
+            "go-tile-page-4", lambda mode: mode.select_page(4), "Go to page 4",
+            keysym="4"
+        )
+        cls.cl_bind(
+            "go-tile-page-5", lambda mode: mode.select_page(5), "Go to page 5",
+            keysym="5"
+        )
+        cls.cl_bind(
+            "go-tile-page-6", lambda mode: mode.select_page(6), "Go to page 6",
+            keysym="6"
+        )
+        cls.cl_bind(
+            "go-tile-page-7", lambda mode: mode.select_page(7), "Go to page 7",
+            keysym="7"
+        )
+        cls.cl_bind(
+            "go-tile-page-8", lambda mode: mode.select_page(8), "Go to page 8",
+            keysym="8"
+        )
+        cls.cl_bind(
+            "go-tile-page-9", lambda mode: mode.select_page(9), "Go to page 9",
+            keysym="9"
+        )
+        cls.cl_bind(
+            "go-tile-page-10", cls.close_window, "Close window and all tiles",
+            keysym="&"
+        )
 
-        self.bind(None, self.dismiss_mode, "End tile management mode")
+        cls.cl_bind(
+            "select-tile-up", cls.select_up, "Select tile above",
+            keysym="UP"
+        )
+        cls.cl_bind(
+            "select-tile-down", cls.select_down, "Select tile below",
+            keysym="DOWN"
+        )
+        cls.cl_bind(
+            "select-tile-left", cls.select_left, "Select tile to the left",
+            keysym="LEFT"
+        )
+        cls.cl_bind(
+            "select-tile-right", cls.select_right, "Select tile to the right",
+            keysym="RIGHT"
+        )
+        cls.cl_bind(
+            "select-tile-next", cls.select_next, "Select next tile by number",
+            keysym="'"
+        )
+        cls.cl_bind(
+            "select-tile-prev", cls.select_prev, "Select previous tile by number",
+            keysym=";"
+        )
+        cls.cl_bind(cls.dismiss_mode, "End tile management mode", keysym=None)
+
 
     def dismiss_mode(self, *args):
         self.manager.disable_minor_mode(self)

@@ -241,6 +241,8 @@ def setup_gtk_asyncio():
 
 
 def main_sync_wrapper():
+    global backend_name
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--logstart", default=None,
                         help="Reference time for log messages")
