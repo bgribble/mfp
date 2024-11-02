@@ -123,22 +123,22 @@ class PatchEditMode (InputMode):
         cls.cl_bind(
             "layer-new", lambda mode: mode.window.layer_new(),
             helptext="Create new layer",
-            keysym="C-n", menupath="Layers > New layer"
+            keysym="C-n", menupath="Layer > New layer"
         )
         cls.cl_bind(
             "layer-new-scope", lambda mode: mode.window.layer_new_scope(),
             helptext="Create new layer in a new scope",
-            keysym="C-N", menupath="Layers > New layer in new scope"
+            keysym="C-N", menupath="Layer > New layer in new scope"
         )
         cls.cl_bind(
             "layer-move-up", lambda mode: mode.window.layer_move_up(),
             helptext="Move current layer up",
-            keysym="C-U", menupath="Layers > Move layer up"
+            keysym="C-U", menupath="Layer > Move layer up"
         )
         cls.cl_bind(
             "layer-move-down", lambda mode: mode.window.layer_move_down(),
             helptext="Move current layer down",
-            keysym="C-D", menupath="Layers > Move layer down"
+            keysym="C-D", menupath="Layer > Move layer down"
         )
 
         cls.cl_bind(

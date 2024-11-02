@@ -31,6 +31,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('GtkClutter', '1.0')
 gi.require_version('Clutter', '1.0')
 
+backend_name = None
 
 class MFPGUI (Singleton):
     def __init__(self):
@@ -250,6 +251,8 @@ def main_sync_wrapper():
     parser.add_argument("-b", "--backend", default="clutter",
                         help="UI framework to use")
     cmdline = vars(parser.parse_args())
+
+    backend_name = cmdline.get("backend")
 
     if cmdline.get("backend") == "clutter":
         setup_gtk_asyncio()

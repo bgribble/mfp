@@ -246,6 +246,13 @@ class InputManager:
     def synthesize(self, key):
         self.keyseq.sequences.append(key)
 
+    def _wrap_handler(self, func, mode):
+        def inner(*args, **kwargs):
+            if len(inspect.signature(func).parameters):
+                return func(mode)
+            return func()
+        return inner
+
     def get_handlers(self, keysym):
         handlers = []
         if keysym is not None:
@@ -253,17 +260,17 @@ class InputManager:
             for minor in self.minor_modes:
                 handler = minor.lookup(keysym)
                 if handler is not None:
-                    handlers.append(handler[0])
+                    handlers.append(self._wrap_handler(handler[0], minor))
 
             # then major mode
             if self.major_mode is not None and self.major_mode.enabled:
                 handler = self.major_mode.lookup(keysym)
                 if handler is not None:
-                    handlers.append(handler[0])
+                    handlers.append(self._wrap_handler(handler[0], self.major_mode))
 
             # then global
             handler = self.global_mode.lookup(keysym)
             if handler is not None:
-                handlers.append(handler[0])
+                handlers.append(self._wrap_handler(handler[0], self.global_mode))
 
         return handlers

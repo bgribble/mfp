@@ -7,6 +7,8 @@ from imgui_bundle import imgui
 from mfp import log
 from mfp.gui.input_mode import InputMode
 
+# items with checkmarks maintain their state here
+toggle_items_state = {}
 
 def splitsep(itemname):
     m = re.search(r"^(\|+)", itemname)
@@ -20,7 +22,8 @@ def add_menu_items(app_window, itemdict):
     """
     Add items, separators, and submenus to the current menu
     """
-    # first: items with no separator
+    # items with no separator. "value" could be either a binding
+    # or a dict of bindings for a separator section or a submenu.
     for itemname, value in itemdict.items():
         if itemname.startswith("|"):
             continue
@@ -29,11 +32,29 @@ def add_menu_items(app_window, itemdict):
                 add_menu_items(app_window, value)
                 imgui.end_menu()
         else:
-            item_selected, _ = imgui.menu_item(itemname, value[4], False, value[6])
-            if item_selected:
-                app_window.input_mgr.handle_keysym(value[4])
+            keysym = value[4]
+            menu_path = value[5]
 
-    # then iterate over separators
+            # items with [] or [x] preceding name (ie File > []Pause/unpause")
+            # will have a checkmark when selected. Default is no check.
+            toggle_state = None
+            if itemname.startswith("["):
+                default_toggle = False
+                if itemname[1] == "x":
+                    default_toggle = True
+                    itemname = itemname[3:]
+                else:
+                    itemname = itemname[2:]
+                toggle_state = toggle_items_state.setdefault(menu_path, default_toggle)
+
+
+            item_selected, item_toggled = imgui.menu_item(itemname, keysym, toggle_state, value[6])
+            if item_selected:
+                if toggle_state is not None:
+                    toggle_items_state[menu_path] = item_toggled
+                app_window.input_mgr.handle_keysym(keysym)
+
+    # iterate over separators
     for separators in range(1, 10):
         sep_items = itemdict.get(separators * '|')
         if not sep_items:
@@ -74,18 +95,16 @@ def render(app_window):
 
     if imgui.begin_menu("File"):
         add_menu_items(app_window, by_menu.get("File", {}))
-
-        # Quit
-        imgui.separator()
-        quit_selected, _ = imgui.menu_item("Quit", "Ctrl+Q", False)
         imgui.end_menu()
 
     if imgui.begin_menu("Edit"):
         add_menu_items(app_window, by_menu.get("Edit", {}))
         imgui.end_menu()
 
-    if app_window.selected_patch and len(app_window.selected_patch.layers) > 0:
-        if imgui.begin_menu("Layers"):
+    if imgui.begin_menu("Layer"):
+        add_menu_items(app_window, by_menu.get("Layer", {}))
+        if app_window.selected_patch and len(app_window.selected_patch.layers) > 0:
+            imgui.separator()
             for layer_num, layer in enumerate(app_window.selected_patch.layers):
                 imgui.push_id(layer_num)
                 layer_selected, _ = imgui.menu_item(
@@ -97,5 +116,9 @@ def render(app_window):
                     app_window.layer_select(layer)
                 imgui.pop_id()
             imgui.end_menu()
+
+    if imgui.begin_menu("Window"):
+        add_menu_items(app_window, by_menu.get("Window", {}))
+        imgui.end_menu()
 
     return quit_selected
