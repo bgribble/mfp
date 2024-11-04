@@ -241,7 +241,9 @@ def render_tile(app_window, patch):
                 start_obj, start_port_id = all_pins.get(start_pin.id(), (None, None))
                 end_obj, end_port_id = all_pins.get(end_pin.id(), (None, None))
                 MFPGUI().async_task(
-                    app_window.render_make_connection(start_obj, start_port_id[1], end_obj, end_port_id[1])
+                    app_window.render_make_connection(
+                        start_obj, start_port_id[1], end_obj, end_port_id[1]
+                    )
                 )
         nedit.end_create()
 
@@ -249,7 +251,7 @@ def render_tile(app_window, patch):
     # context menu
     nedit.suspend()
     imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
-    imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 3))
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (3, 3))
     node_id = nedit.NodeId.create()
     if nedit.show_node_context_menu(node_id):
         imgui.open_popup("##context menu popup")

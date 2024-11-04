@@ -8,6 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode
 from .connection import ConnectionMode
 
+
 class SelectionEditMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
@@ -47,10 +48,22 @@ class SingleSelectionEditMode (InputMode):
 
         self.affinity = -10
 
-        self.bind("c", self.connect_fwd, "Connect from element")
-        self.bind("C", self.connect_rev, "Connect to element")
-        self.bind("RET", self.edit_selected, "Edit element")
         self.extend(SelectionEditMode(window))
+
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind(
+            "connect-from", cls.connect_fwd, "Connect from element", "c",
+            menupath="Context > Connect from element"
+        )
+        cls.cl_bind(
+            "connect-to", cls.connect_rev, "Connect to element", "C",
+            menupath="Context > Connect to element"
+        )
+        cls.cl_bind(
+            "edit-selected", cls.edit_selected, "Edit element", "RET",
+            menupath="Context > Edit element"
+        )
 
     async def edit_selected(self):
         await self.window.selected[0].begin_edit()
@@ -71,6 +84,7 @@ class SingleSelectionEditMode (InputMode):
                     return True
         return False
 
+
 class MultiSelectionEditMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
@@ -80,4 +94,3 @@ class MultiSelectionEditMode (InputMode):
         self.affinity = -10
 
         self.extend(SelectionEditMode(window))
-

@@ -1,6 +1,6 @@
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
-CHAR_PIXELS = 8
+CHAR_PIXELS = 7
 
 def render(app_window):
     imgui.set_next_window_size((app_window.window_width, app_window.menu_height + 5))

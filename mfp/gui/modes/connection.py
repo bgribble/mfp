@@ -32,23 +32,31 @@ class ConnectionMode (InputMode):
 
         InputMode.__init__(self, "Connect")
 
-        self.bind("RET", self.make_connection, "Accept connection")
-        self.bind("ESC", self.abort_connection, "Discard connection")
-
-        self.bind("C-p", self.get_port_key, "Enter port to connect")
-        self.bind("0", lambda: self.set_port_key(0), "Connect port 0")
-        self.bind("1", lambda: self.set_port_key(1), "Connect port 1")
-        self.bind("2", lambda: self.set_port_key(2), "Connect port 2")
-        self.bind("3", lambda: self.set_port_key(3), "Connect port 3")
-        self.bind("4", lambda: self.set_port_key(4), "Connect port 4")
-        self.bind("5", lambda: self.set_port_key(5), "Connect port 5")
-        self.bind("6", lambda: self.set_port_key(6), "Connect port 6")
-        self.bind("7", lambda: self.set_port_key(7), "Connect port 7")
-        self.bind("8", lambda: self.set_port_key(8), "Connect port 8")
-        self.bind("9", lambda: self.set_port_key(9), "Connect port 9")
-
         self.select_cbid = self.window.signal_listen("select", self.select_cb)
         self.remove_cbid = self.window.signal_listen("remove", self.remove_cb)
+
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind(
+            "connect-accept", cls.make_connection, "Accept connection", "RET",
+            menupath="Context > Accept connection"
+        )
+        cls.cl_bind(
+            "connect-abort", cls.abort_connection, "Discard connection", "ESC",
+            menupath="Context > Discard connection"
+        )
+
+        cls.cl_bind("connect-port", cls.get_port_key, "Enter port to connect", "C-p")
+        cls.cl_bind("connect-port-0", lambda mode: mode.set_port_key(0), "Connect port 0", "0")
+        cls.cl_bind("connect-port-1", lambda mode: mode.set_port_key(1), "Connect port 1", "1")
+        cls.cl_bind("connect-port-2", lambda mode: mode.set_port_key(2), "Connect port 2", "2")
+        cls.cl_bind("connect-port-3", lambda mode: mode.set_port_key(3), "Connect port 3", "3")
+        cls.cl_bind("connect-port-4", lambda mode: mode.set_port_key(4), "Connect port 4", "4")
+        cls.cl_bind("connect-port-5", lambda mode: mode.set_port_key(5), "Connect port 5", "5")
+        cls.cl_bind("connect-port-6", lambda mode: mode.set_port_key(6), "Connect port 6", "6")
+        cls.cl_bind("connect-port-7", lambda mode: mode.set_port_key(7), "Connect port 7", "7")
+        cls.cl_bind("connect-port-8", lambda mode: mode.set_port_key(8), "Connect port 8", "8")
+        cls.cl_bind("connect-port-9", lambda mode: mode.set_port_key(9), "Connect port 9", "9")
 
     async def update_connection(self):
         from ..connection_element import ConnectionElement

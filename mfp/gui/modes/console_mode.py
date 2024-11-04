@@ -7,10 +7,7 @@ Not used by Clutter backend
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
-from mfp.gui_main import MFPGUI
-from mfp import log
 from ..input_mode import InputMode
-from ..input_manager import InputManager
 
 
 class ConsoleMode (InputMode):
@@ -21,17 +18,52 @@ class ConsoleMode (InputMode):
 
         InputMode.__init__(self, "Console input bindings", "Console")
 
+    @classmethod
+    def init_bindings(cls):
         # global keybindings
-        self.bind("RET", self.console.handle_enter, "Evaluate current line")
-        self.bind("UP", self.console.handle_cursor_up, "Cursor up")
-        self.bind("DOWN", self.console.handle_cursor_down, "Cursor down")
-        self.bind("LEFT", self.console.handle_cursor_left, "Cursor left")
-        self.bind("RIGHT", self.console.handle_cursor_right, "Cursor right")
-        self.bind("BS", self.console.handle_backspace, "Backspace")
-        self.bind("DEL", self.console.handle_delete, "Delete")
-        self.bind("C-a", self.console.handle_start_of_line, "Move to start of line")
-        self.bind("C-e", self.console.handle_end_of_line, "Move to end of line")
-        self.bind("C-k", self.console.handle_delete_to_end, "Delete to end of line")
+        cls.cl_bind(
+            "console-ret", lambda mode: mode.console.handle_enter(),
+            "Evaluate current line", "RET",
+        )
+        cls.cl_bind(
+            "console-up", lambda mode: mode.console.handle_cursor_up(),
+            "Cursor up", "UP",
+        )
+        cls.cl_bind(
+            "console-down", lambda mode: mode.console.handle_cursor_down(),
+            "Cursor down", "DOWN",
+        )
+        cls.cl_bind(
+            "console-left", lambda mode: mode.console.handle_cursor_left(),
+            "Cursor left", "LEFT",
+        )
+        cls.cl_bind(
+            "console-right", lambda mode: mode.console.handle_cursor_right(),
+            "Cursor right", "RIGHT",
+        )
+        cls.cl_bind(
+            "console-bs", lambda mode: mode.console.handle_backspace(),
+            "Backspace", "BS",
+        )
+        cls.cl_bind(
+            "console-del", lambda mode: mode.console.handle_delete(),
+            "Delete", "DEL",
+        )
+        cls.cl_bind(
+            "start-of-line", lambda mode: mode.console.handle_start_of_line(),
+            "Move to start of line", "C-a",
+        )
+        cls.cl_bind(
+            "end-of-line", lambda mode: mode.console.handle_end_of_line(),
+            "Move to end of line", "C-e",
+        )
+        cls.cl_bind(
+            "delete-to-end", lambda mode: mode.console.handle_delete_to_end(),
+            "Delete to end of line", "C-k",
+        )
 
         # catchall -- warning, this gets ALL keysyms, not just text
-        self.bind(None, self.console.handle_insert_text, "Insert text")
+        cls.cl_bind(
+            "default", lambda mode, keysym: mode.console.handle_insert_text(keysym),
+            "Insert text", None,
+        )
