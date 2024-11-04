@@ -10,7 +10,7 @@ from mfp.gui_main import MFPGUI
 from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.modes.patch_edit import PatchEditMode
 from mfp.gui.modes.global_mode import GlobalMode
-
+from . import menu_bar
 
 def render_tile(app_window, patch):
     """
@@ -244,6 +244,31 @@ def render_tile(app_window, patch):
                     app_window.render_make_connection(start_obj, start_port_id[1], end_obj, end_port_id[1])
                 )
         nedit.end_create()
+
+    #################
+    # context menu
+    nedit.suspend()
+    imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 3))
+    node_id = nedit.NodeId.create()
+    if nedit.show_node_context_menu(node_id):
+        imgui.open_popup("##context menu popup")
+
+    if imgui.begin_popup("##context menu popup"):
+        mouse_pos = imgui.get_mouse_pos_on_opening_current_popup()
+        cursor_pos = (mouse_pos[0] + 8, mouse_pos[1] + 8)
+        imgui.set_cursor_screen_pos(cursor_pos)
+        app_window.context_menu_open = True
+        menu_items = menu_bar.load_menupaths(app_window, only_enabled=True)
+        context_items = menu_items.get("Context", {})
+        menu_bar.add_menu_items(app_window, context_items)
+        imgui.end_popup()
+    else:
+        app_window.context_menu_open = False
+    imgui.pop_style_var(2)
+    nedit.resume()
+    # context menu
+    #################
 
     nedit.end()  # node_editor
     nedit.pop_style_color(5)

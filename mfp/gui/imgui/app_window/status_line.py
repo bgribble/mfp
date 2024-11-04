@@ -4,7 +4,7 @@ CHAR_PIXELS = 8
 
 def render(app_window):
     imgui.set_next_window_size((app_window.window_width, app_window.menu_height + 5))
-    imgui.set_next_window_pos((0, app_window.window_height - app_window.menu_height -5 ))
+    imgui.set_next_window_pos((0, app_window.window_height - app_window.menu_height - 5))
     imgui.begin(
         "status_line",
         flags=(
@@ -23,7 +23,6 @@ def render(app_window):
         app_window.cmd_input.render()
         imgui.pop_item_width()
         imgui.pop_style_var()
-
         imgui.end()
         return
 

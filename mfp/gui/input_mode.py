@@ -5,17 +5,33 @@ input_mode.py: InputMode parent class for managing key/mouse bindings and intera
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 import inspect
-from collections import namedtuple
+import dataclasses
+from dataclasses import dataclass
 from mfp import log
 
-Binding = namedtuple(
-    'Binding', 
-    ['label', 'action', 'index', 'helptext', 'keysym', 'menupath', 'enabled'],
-    defaults=[True]
-)
+@dataclass
+class Binding:
+    label: str
+    action: callable
+    index: int
+    helptext: str
+    keysym: str
+    menupath: str = ''
+    mode: any = None
+    enabled: bool = False
+
+    def copy(self, **kwargs):
+        return Binding(**{
+            **{field.name: getattr(self, field.name) for field in dataclasses.fields(self)},
+            **kwargs
+        })
+
 
 class InputMode:
     _registry = {}
+
+    # global for all modes
+    _bindings_by_label = {}
 
     # will be separate for each subclass
     _bindings = {}
@@ -33,7 +49,7 @@ class InputMode:
         self.enabled = False
         self.affinity = 0
         self.seqno = None
-        
+
         # FIXME
         self.default = None
         self.bindings = {}
@@ -66,9 +82,16 @@ class InputMode:
         bindings are before we create an instance of it
         """
         if keysym is None:
-            cls._default = Binding("default", action, helptext, cls._num_bindings, None, None)
+            cls._default = Binding(
+                "default", action, helptext, cls._num_bindings, None, None, cls
+            )
         else:
-            cls._bindings[keysym] = Binding(label, action, helptext, cls._num_bindings, keysym, menupath)
+            binding = Binding(
+                label, action, helptext, cls._num_bindings, keysym, menupath, cls
+            )
+            cls._bindings[keysym] = binding
+            InputMode._bindings_by_label[label] = binding
+
         cls._num_bindings += 1
 
     def bind(self, keysym, action, helptext=None):
@@ -91,6 +114,16 @@ class InputMode:
             listing.extend(e.directory())
         return listing
 
+    def lookup_by_label(self, label):
+        """
+        look up class bindings by label. Used for commandline eval.
+        """
+        binding = type(self)._bindings.get(label)
+        if binding is not None:
+            return binding.copy(
+                action=lambda: binding.action(self)
+            )
+
     def lookup(self, keysym):
         # first check our direct bindings
         binding = self.bindings.get(keysym)
@@ -100,8 +133,8 @@ class InputMode:
         # class bindings (action is not bound to instance yet)
         binding = type(self)._bindings.get(keysym)
         if binding is not None:
-            return Binding(
-                binding[0], lambda: binding.action(self), *binding[2:]
+            return binding.copy(
+                action=lambda: binding.action(self)
             )
 
         # if any extensions are specified, look in them
@@ -113,25 +146,29 @@ class InputMode:
 
         # do we have a default? They get an extra arg (the keysym)
         if self.default is not None:
-            newfunc = lambda: self.default.action(keysym)
-            return Binding(None, newfunc, *self.default[2:])
+            return self.default.copy(
+                action=lambda: self.default.action(keysym)
+            )
 
         # class default
         if type(self)._default is not None:
             binding = type(self)._default
-            newfunc = lambda: binding.action(self, keysym)
-            return Binding(binding[0], newfunc, *binding.default[2:])
+            return binding.copy(
+                action=lambda: binding.action(self, keysym)
+            )
 
         # do extensions have a default:
         for ext in self.extensions:
             if ext.default is not None:
                 binding = ext.default
-                newfunc = lambda: binding.action(keysym)
-                return Binding(binding[0], newfunc, *ext.default[1:])
+                return binding.copy(
+                    action=lambda: binding.action(keysym)
+                )
 
         return None
 
     def enable(self):
+        from mfp.gui_main import MFPGUI
         self.enabled = True
         for ext in self.extensions:
             cb = ext.enable()
@@ -139,6 +176,7 @@ class InputMode:
                 MFPGUI().async_task(cb)
 
     def disable(self):
+        from mfp.gui_main import MFPGUI
         self.enabled = False
         for ext in self.extensions:
             cb = ext.disable()

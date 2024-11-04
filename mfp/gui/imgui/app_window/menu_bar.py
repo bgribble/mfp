@@ -4,8 +4,7 @@ menu_bar.py -- main menu
 
 import re
 from imgui_bundle import imgui
-from mfp import log
-from mfp.gui.input_mode import InputMode, Binding
+from mfp.gui.input_mode import InputMode
 
 # items with checkmarks maintain their state here
 toggle_items_state = {}
@@ -73,9 +72,7 @@ def add_menu_items(app_window, itemdict):
         add_menu_items(app_window, sep_items)
 
 
-def render(app_window):
-    quit_selected = False
-
+def load_menupaths(app_window, only_enabled=False):
     by_menu = {}
 
     # get all the input mode items
@@ -106,19 +103,38 @@ def render(app_window):
                 enabled = app_window.input_mgr.mode_enabled(mode)
 
                 if enabled or always_on:
-                    submenu[item] = Binding(*binding[:-3], keysym, binding.menupath, True)
-                elif item not in submenu:
-                    submenu[item] = Binding(*binding[:-3], keysym, binding.menupath, False)
+                    submenu[item] = binding.copy(
+                        keysym=keysym,
+                        menupath=binding.menupath,
+                        enabled=True
+                    )
+                elif item not in submenu and not only_enabled:
+                    submenu[item] = binding.copy(
+                        keysym=keysym,
+                        menupath=binding.menupath,
+                        enabled=False
+                    )
+    return by_menu
+
+
+def render(app_window):
+    quit_selected = False
+
+    by_menu = load_menupaths(app_window)
+    menu_open = False
 
     if imgui.begin_menu("File"):
+        menu_open = True
         add_menu_items(app_window, by_menu.get("File", {}))
         imgui.end_menu()
 
     if imgui.begin_menu("Edit"):
+        menu_open = True
         add_menu_items(app_window, by_menu.get("Edit", {}))
         imgui.end_menu()
 
     if imgui.begin_menu("Layer"):
+        menu_open = True
         add_menu_items(app_window, by_menu.get("Layer", {}))
         if app_window.selected_patch and len(app_window.selected_patch.layers) > 0:
             imgui.separator()
@@ -135,7 +151,10 @@ def render(app_window):
             imgui.end_menu()
 
     if imgui.begin_menu("Window"):
+        menu_open = True
         add_menu_items(app_window, by_menu.get("Window", {}))
         imgui.end_menu()
+
+    app_window.main_menu_open = menu_open
 
     return quit_selected

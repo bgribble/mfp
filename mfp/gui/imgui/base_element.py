@@ -14,6 +14,7 @@ from mfp.gui_main import MFPGUI
 from mfp.gui.event import EnterEvent, LeaveEvent
 from mfp.gui.base_element import BaseElement, BaseElementImpl
 from ..colordb import ColorDB
+from .app_window.menu_bar import load_menupaths, add_menu_items
 
 
 class ImguiBaseElementImpl(BaseElementImpl):
@@ -202,12 +203,12 @@ class ImguiBaseElementImpl(BaseElementImpl):
             draw_list.add_polyline(
                 points,
                 ColorDB().backend.im_col32(pcolor),
-                imgui.ImDrawFlags_.closed, 
+                imgui.ImDrawFlags_.closed,
                 1.0,
             )
         else:
             draw_list.add_convex_poly_filled(
-                points, 
+                points,
                 ColorDB().backend.im_col32(pcolor)
             )
 

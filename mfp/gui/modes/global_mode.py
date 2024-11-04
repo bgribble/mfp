@@ -37,6 +37,12 @@ class GlobalMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
+        # Always in node context menu
+        cls.cl_bind(
+            "send-message", cls.transient_msg, helptext="Send message to selection",
+            keysym="!",
+            menupath="Context > Send message"
+        )
         # global keybindings
         cls.cl_bind(
             "toggle-console", cls.toggle_console, helptext="Show/hide log and console",
@@ -90,11 +96,6 @@ class GlobalMode (InputMode):
             "save-lv2", cls.save_as_lv2, helptext="Save patch as LV2 plugin",
             keysym="C-p",
             menupath="File > |Save as LV2..."
-        )
-        cls.cl_bind(
-            "bang-message", cls.transient_msg, helptext="Send message to selection",
-            keysym="!",
-            menupath="File > ||Send message to selected"
         )
         cls.cl_bind(
             "cmd-entry", cls.cmdline, helptext="Enter a command",
@@ -228,10 +229,14 @@ class GlobalMode (InputMode):
         return self.manager.enable_minor_mode(self.tile_manager_mode)
 
     async def cmdline(self):
-        async def cb(cmdline):
-            if cmdline.startswith("eval "):
-                resp = eval(cmdline[5:])
+        async def cb(txt):
+            if txt.startswith("eval "):
+                resp = eval(txt[5:])
                 log.debug(f"cmdline eval: {resp}")
+            else:
+                cmd, args = txt.split(' ', 1)
+                binding = InputMode._bindings_by_label.get(cmd.strip())
+                log.debug(f"[cmd] {cmd} {args} {binding}")
 
         await self.window.cmd_get_input(":", cb, '')
 
@@ -272,7 +277,7 @@ class GlobalMode (InputMode):
         self.manager.keyseq.mouse_buttons = set()
         self.manager.keyseq.mod_keys = set()
 
-    async def transient_msg(self):
+    async def transient_msg(self, message=None):
         from ..message_element import TransientMessageElement
         if self.window.selected:
             return await self.window.add_element(TransientMessageElement.build)
@@ -366,7 +371,11 @@ class GlobalMode (InputMode):
         px = self.manager.pointer_x
         py = self.manager.pointer_y
 
-        if self.window.selected_window != "canvas":
+        if (
+            self.window.selected_window != "canvas"
+            or self.window.main_menu_open
+            or self.window.context_menu_open
+        ):
             return
 
         if select_mode is None:

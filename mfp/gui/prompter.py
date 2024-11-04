@@ -51,7 +51,7 @@ class Prompter (object):
         if self.mode:
             self.window.input_mgr.disable_minor_mode(self.mode)
             self.mode = None
-
+        self.label.text = ''
         self.window.cmd_set_prompt(None)
         if len(self.queue):
             nextitem = self.queue[0]

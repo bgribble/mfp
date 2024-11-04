@@ -46,6 +46,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.nedit_config = None
 
         self.menu_height = self.INIT_MENU_HEIGHT
+        self.context_menu_open = False
+        self.main_menu_open = False
 
         self.info_panel_id = None
         self.info_panel_visible = True
@@ -344,6 +346,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # bottom panel
         ########################################
+
 
         imgui.pop_style_var()  # padding
         imgui.pop_style_var()  # border
