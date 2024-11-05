@@ -38,187 +38,187 @@ class GlobalMode (InputMode):
     @classmethod
     def init_bindings(cls):
         # Always in node context menu
-        cls.cl_bind(
+        cls.bind(
             "send-message", cls.transient_msg, helptext="Send message to selection",
             keysym="!",
             menupath="Context > Send message"
         )
         # global keybindings
-        cls.cl_bind(
+        cls.bind(
             "toggle-console", cls.toggle_console, helptext="Show/hide log and console",
             keysym="~",
             menupath="Window > |||[x]Log/Python console"
         )
-        cls.cl_bind(
+        cls.bind(
             "toggle-info", cls.toggle_tree, helptext="Show/hide info panel",
             keysym="`",
             menupath="Window > |||[x]Info panel"
         )
-        cls.cl_bind(
+        cls.bind(
             "toggle-inspector", cls.inspect, helptext="Open state inspector",
             keysym="C-i",
             menupath="Window > |||UI debugger"
         )
-        cls.cl_bind(
+        cls.bind(
             "layer-select-up", lambda mode: mode.window.layer_select_up(), helptext="Select higher layer",
             keysym="PGUP",
             menupath="Layer > Select up"
         )
-        cls.cl_bind(
+        cls.bind(
             "layer-select-down", lambda mode: mode.window.layer_select_down(), helptext="Select lower layer",
             keysym="PGDN",
             menupath="Layer > Select down"
         )
-        cls.cl_bind(
+        cls.bind(
             "patch-select-prev", lambda mode: mode.window.patch_select_prev(), helptext="Select higher patch",
             keysym="C-PGUP",
         )
-        cls.cl_bind(
+        cls.bind(
             "patch-select-next", lambda mode: mode.window.patch_select_next(), helptext="Select lower patch",
             keysym="C-PGDN"
         )
-        cls.cl_bind(
+        cls.bind(
             "new-patch", lambda mode: mode.window.patch_new(), helptext="Create a new patch",
             keysym="C-f",
             menupath="File > New"
         )
-        cls.cl_bind(
+        cls.bind(
             "open-patch", cls.open_file, helptext="Load file into new patch",
             keysym="C-o",
             menupath="File > Open..."
         )
-        cls.cl_bind(
+        cls.bind(
             "save-patch", cls.save_file, helptext="Save patch to file",
             keysym="C-s",
             menupath="File > |Save..."
         )
-        cls.cl_bind(
+        cls.bind(
             "save-lv2", cls.save_as_lv2, helptext="Save patch as LV2 plugin",
             keysym="C-p",
             menupath="File > |Save as LV2..."
         )
-        cls.cl_bind(
+        cls.bind(
             "cmd-entry", cls.cmdline, helptext="Enter a command",
             keysym=":", menupath="File > ||Command line"
         )
-        cls.cl_bind(
+        cls.bind(
             "toggle-pause", cls.toggle_pause, helptext="Pause/unpause execution",
             keysym="C-A-.", menupath="File > ||[]Pause/unpause execution"
         )
-        cls.cl_bind(
+        cls.bind(
             "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
             keysym="C-.", menupath="File > ||Reset input modes"
         )
-        cls.cl_bind(
+        cls.bind(
             "close-patch", cls.patch_close, helptext="Close current patch",
             keysym="C-w",
             menupath="File > |||Close"
         )
-        cls.cl_bind(
+        cls.bind(
             "q", cls.quit, helptext="Quit", keysym="C-q", menupath="File > |||Quit"
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-in", lambda mode: mode.window.relative_zoom(1.25), helptext="Zoom view in",
             keysym="+", menupath="Window > Zoom in"
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-in-alt", lambda mode: mode.window.relative_zoom(1.25), helptext="Zoom view in",
             keysym="="
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-out", lambda mode: mode.window.relative_zoom(0.8), helptext="Zoom view out",
             keysym="-", menupath="Window > Zoom out"
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-reset", cls.reset_zoom, helptext="Reset view position and zoom",
             keysym="C-0", menupath="Window > Reset zoom + position"
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-start", lambda mode: mode.selbox_start(None), helptext="Start selection box",
             keysym="M1DOWN"
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-motion", lambda mode: mode.selbox_motion(True), helptext="Drag selection box",
             keysym="M1-MOTION"
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-end", cls.selbox_end, helptext="End selection box",
             keysym="M1UP"
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-add-start", lambda mode: mode.selbox_start(True), helptext="Start add-to-selection box",
             keysym="S-M1DOWN"
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-add-motion", lambda mode: mode.selbox_motion(True), helptext="Drag add-to-selection box",
             keysym="S-M1-MOTION"
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-add-end", cls.selbox_end, helptext="End selection box",
             keysym="S-M1UP"
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-toggle-start", lambda mode: mode.selbox_start(False),
             helptext="Start toggle-selection box",
             keysym="C-M1DOWN",
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-toggle-drag", lambda mode: mode.selbox_motion(False),
             helptext="Drag toggle-selection box",
             keysym="C-M1-MOTION",
         )
-        cls.cl_bind(
+        cls.bind(
             "selbox-toggle-end", cls.selbox_end, helptext="End toggle-selection box",
             keysym="C-M1UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "viewport-drag-start", cls.drag_start, helptext="Begin dragging viewport",
             keysym="S-C-M1DOWN"
         )
-        cls.cl_bind(
+        cls.bind(
             "viewport-drag-motion", cls.drag_motion, helptext="Drag viewport",
             keysym="S-C-M1-MOTION"
         )
-        cls.cl_bind(
+        cls.bind(
             "viewport-drag-end", cls.drag_end, helptext="End drag viewport",
             keysym="S-C-M1UP"
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-in-scroll", lambda mode: mode.scroll_zoom(1.06), helptext="Zoom view in",
             keysym="SCROLLUP"
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-out-scroll", lambda mode: mode.scroll_zoom(0.95), helptext="Zoom view out",
             keysym="SCROLLDOWN"
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-in-scroll-fine", lambda mode: mode.scroll_zoom(1.015), helptext="Zoom view in",
             keysym="SCROLLSMOOTHUP"
         )
-        cls.cl_bind(
+        cls.bind(
             "zoom-out-scroll-fine", lambda mode: mode.scroll_zoom(0.985), helptext="Zoom view out",
             keysym="SCROLLSMOOTHDOWN"
         )
-        cls.cl_bind(
+        cls.bind(
             "hover", lambda mode: mode.hover(False),
             keysym="HOVER"
         )
-        cls.cl_bind(
+        cls.bind(
             "hover-alt", lambda mode: mode.hover(True),
             keysym="S-HOVER"
         )
-        cls.cl_bind(
+        cls.bind(
             "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
             keysym="S-C-."
         )
-        cls.cl_bind(
+        cls.bind(
             "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
             keysym="M1-C-."
         )
 
         # imgui only
         if backend_name == "imgui":
-            cls.cl_bind(
+            cls.bind(
                 "tile-control", cls.tile_manager_prefix,
                 keysym="C-a"
             )

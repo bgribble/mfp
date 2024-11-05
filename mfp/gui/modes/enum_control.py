@@ -21,19 +21,19 @@ class EnumEditMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind(
+        cls.bind(
             "enum-add-digit", cls.add_digit, "Increase displayed digits", "C->",
             menupath="Context > ||Params > Increase displayed digits"
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-del-digit", cls.del_digit, "Decrease displayed digits", "C-<",
             menupath="Context > ||Params > Decrease displayed digits"
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-lower-bound", cls.set_lower, "Set lower bound on value", "C-[",
             menupath="Context > ||Params > Set lower bound"
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-upper-bound", cls.set_upper, "Set upper bound on value", "C-]",
             menupath="Context > ||Params > Set upper bound"
         )
@@ -95,28 +95,28 @@ class EnumControlMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind(
+        cls.bind(
             "enum-drag-start", cls.drag_start, "M1DOWN",
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-drag-motion", lambda mode: mode.drag_selected(1.0),
             "Change value (1x speed)", "M1-MOTION",
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-drag-motion", lambda mode: mode.drag_selected(10.0),
             "Change value (10x speed)", "S-M1-MOTION",
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-drag-motion", lambda mode: mode.drag_selected(100.0),
             "Change value (100x speed)", "C-M1-MOTION",
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-drag-end", cls.drag_end, "M1UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-val-up", lambda mode: mode.changeval(1.0), "UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "enum-val-down", lambda mode: mode.changeval(-1.0), "DOWN",
         )
 

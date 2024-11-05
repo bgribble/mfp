@@ -78,34 +78,34 @@ class LabelEditMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind("label-enter-key", cls.enter_key, "Accept edits", "RET", )
-        cls.cl_bind("label-accept-edits", cls.commit_edits, "Accept edits", "C-RET",
+        cls.bind("label-enter-key", cls.enter_key, "Accept edits", "RET", )
+        cls.bind("label-accept-edits", cls.commit_edits, "Accept edits", "C-RET",
                     menupath="Context > Accept edits")
-        cls.cl_bind("label-discard-edits", cls.rollback_edits, "Discard edits", "ESC",
+        cls.bind("label-discard-edits", cls.rollback_edits, "Discard edits", "ESC",
                     menupath="Context > Discard edits")
-        cls.cl_bind("label-cursor-left", cls.move_left, "Move cursor left", "LEFT", )
-        cls.cl_bind("label-cursor-right", cls.move_right, "Move cursor right", "RIGHT", )
-        cls.cl_bind("label-cursor-up", cls.move_up, "Move cursor up one line", "UP", )
-        cls.cl_bind("label-cursor-down", cls.move_down, "Move cursor down one line", "DOWN", )
-        cls.cl_bind("label-select-left", cls.select_left, "Grow/shrink selection left", "S-LEFT", )
-        cls.cl_bind("label-select-right", cls.select_right, "Grow/shrink selection right", "S-RIGHT", )
-        cls.cl_bind("label-select-up", cls.select_up, "Grow/shrink selection up one line", "S-UP", )
-        cls.cl_bind("label-select-down", cls.select_down, "Gro/shrink selection down one line", "S-DOWN", )
-        cls.cl_bind("label-delete-left", cls.delete_left, "Delete to the left", "BS", )
-        cls.cl_bind("label-delete-right", cls.delete_right, "Delete to the right", "DEL", )
-        cls.cl_bind("label-select-all", cls.select_all, "Select all text", "C-a",
+        cls.bind("label-cursor-left", cls.move_left, "Move cursor left", "LEFT", )
+        cls.bind("label-cursor-right", cls.move_right, "Move cursor right", "RIGHT", )
+        cls.bind("label-cursor-up", cls.move_up, "Move cursor up one line", "UP", )
+        cls.bind("label-cursor-down", cls.move_down, "Move cursor down one line", "DOWN", )
+        cls.bind("label-select-left", cls.select_left, "Grow/shrink selection left", "S-LEFT", )
+        cls.bind("label-select-right", cls.select_right, "Grow/shrink selection right", "S-RIGHT", )
+        cls.bind("label-select-up", cls.select_up, "Grow/shrink selection up one line", "S-UP", )
+        cls.bind("label-select-down", cls.select_down, "Gro/shrink selection down one line", "S-DOWN", )
+        cls.bind("label-delete-left", cls.delete_left, "Delete to the left", "BS", )
+        cls.bind("label-delete-right", cls.delete_right, "Delete to the right", "DEL", )
+        cls.bind("label-select-all", cls.select_all, "Select all text", "C-a",
                     menupath="Context > Select all")
-        cls.cl_bind("label-undo-typing", cls.undo_edit, "Undo typing", "C-z",
+        cls.bind("label-undo-typing", cls.undo_edit, "Undo typing", "C-z",
                     menupath="Context > Undo typing")
-        cls.cl_bind("label-redo-typing", cls.redo_edit, "Redo typing", "C-r",
+        cls.bind("label-redo-typing", cls.redo_edit, "Redo typing", "C-r",
                     menupath="Context > Redo typing")
-        cls.cl_bind("label-cut", cls.cut, "Cut selection into clipboard", "C-x",
+        cls.bind("label-cut", cls.cut, "Cut selection into clipboard", "C-x",
                     menupath="Context > Cut")
-        cls.cl_bind("label-copy", cls.copy, "Copy selection into clipboard", "C-c",
+        cls.bind("label-copy", cls.copy, "Copy selection into clipboard", "C-c",
                     menupath="Context > Copy")
-        cls.cl_bind("label-paste", cls.paste, "Paste from clipboard into label", "C-v",
+        cls.bind("label-paste", cls.paste, "Paste from clipboard into label", "C-v",
                     menupath="Context > Paste")
-        cls.cl_bind("label-insert-text", cls.insert_text, "Insert text", None)
+        cls.bind("label-insert-text", cls.insert_text, "Insert text", None)
 
     async def setup(self):
         inittxt = await self.element.label_edit_start()

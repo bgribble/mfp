@@ -24,15 +24,15 @@ class ClickableControlMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind("clickable-down", cls.click, "Send click down", cls.MOD_PREFIX + "M1DOWN", )
-        cls.cl_bind("clickable-doubledown", cls.click, "Send click down", cls.MOD_PREFIX + "M1DOUBLEDOWN", )
-        cls.cl_bind("clickable-tripledown", cls.click, "Send click down", cls.MOD_PREFIX + "M1TRIPLEDOWN", )
+        cls.bind("clickable-down", cls.click, "Send click down", cls.MOD_PREFIX + "M1DOWN", )
+        cls.bind("clickable-doubledown", cls.click, "Send click down", cls.MOD_PREFIX + "M1DOUBLEDOWN", )
+        cls.bind("clickable-tripledown", cls.click, "Send click down", cls.MOD_PREFIX + "M1TRIPLEDOWN", )
 
-        cls.cl_bind("clickable-up", cls.unclick, "Send click up", cls.MOD_PREFIX + "M1UP", )
-        cls.cl_bind("clickable-doubleup", cls.unclick, "Send click up",  cls.MOD_PREFIX + "M1DOUBLEUP", )
-        cls.cl_bind("clickable-tripleup", cls.unclick, "Send click up", cls.MOD_PREFIX + "M1TRIPLEUP", )
+        cls.bind("clickable-up", cls.unclick, "Send click up", cls.MOD_PREFIX + "M1UP", )
+        cls.bind("clickable-doubleup", cls.unclick, "Send click up",  cls.MOD_PREFIX + "M1DOUBLEUP", )
+        cls.bind("clickable-tripleup", cls.unclick, "Send click up", cls.MOD_PREFIX + "M1TRIPLEUP", )
 
-        cls.cl_bind(
+        cls.bind(
             "clickable-ret", cls.quick_click, "Send click", "RET",
             menupath="Context > Send click"
         )

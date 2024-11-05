@@ -48,14 +48,10 @@ class InputMode:
         else:
             self.short_description = self.description
 
+        self.extensions = []
         self.enabled = False
         self.affinity = 0
         self.seqno = None
-
-        # FIXME
-        self.default = None
-        self.bindings = {}
-        self.extensions = []
 
     @classmethod
     def __init_subclass__(cls, **kwargs):
@@ -72,17 +68,21 @@ class InputMode:
             await mode.setup()
 
     def extend(self, mode):
+        """
+        extend associates mode objects
+        """
         self.extensions.append(mode)
 
     @classmethod
     def extend_mode(cls, mode_type):
+        """
+        extend_mode associates the mode TYPES so we can find bindings
+        """
         cls._extensions.append(mode_type)
 
     @classmethod
-    def cl_bind(cls, label, action, helptext=None, keysym=None, menupath=None):
+    def bind(cls, label, action, helptext=None, keysym=None, menupath=None):
         """
-        after migrating all modes to cl_bind, will rename this to bind
-
         binding at the class level lets us know what the mode's
         bindings are before we create an instance of it
         """
@@ -99,16 +99,9 @@ class InputMode:
 
         InputMode._num_bindings += 1
 
-    def bind(self, keysym, action, helptext=None):
-        if keysym is None:
-            self.default = Binding(None, action, helptext, InputMode._num_bindings, keysym, None)
-        else:
-            self.bindings[keysym] = Binding(None, action, helptext, InputMode._num_bindings, keysym, None)
-        InputMode._num_bindings += 1
-
     def directory(self):
         listing = []
-        items = list(self.bindings.items())
+        items = list(self._bindings.items())
         items.sort(key=lambda e: e[1][2])
         for keysym, value in items:
             if value[1] is not None:
@@ -130,11 +123,6 @@ class InputMode:
             )
 
     def lookup(self, keysym):
-        # first check our direct bindings
-        binding = self.bindings.get(keysym)
-        if binding is not None:
-            return binding
-
         # class bindings (action is not bound to instance yet)
         binding = type(self)._bindings.get(keysym)
         if binding is not None:
@@ -149,12 +137,6 @@ class InputMode:
             if binding is not None:
                 return binding
 
-        # do we have a default? They get an extra arg (the keysym)
-        if self.default is not None:
-            return self.default.copy(
-                action=lambda: self.default.action(keysym)
-            )
-
         # class default
         if type(self)._default is not None:
             binding = type(self)._default
@@ -164,10 +146,10 @@ class InputMode:
 
         # do extensions have a default:
         for ext in self.extensions:
-            if ext.default is not None:
-                binding = ext.default
+            if ext._default is not None:
+                binding = ext._default
                 return binding.copy(
-                    action=lambda: binding.action(keysym)
+                    action=lambda: binding.action(self, keysym)
                 )
 
         return None

@@ -24,49 +24,49 @@ class SliderControlMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind(
+        cls.bind(
             "slider-set-value", cls.set_value, "Set fader value", keysym="M1DOUBLEDOWN",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-start", cls.drag_start, "Adjust fader or move element", keysym="M1DOWN",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-start", cls.drag_start, keysym="S-M1DOWN",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-start", cls.drag_start, keysym="C-M1DOWN",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-motion", lambda mode: mode.drag_selected(1.0),
             "Change value (1x speed)", keysym="M1-MOTION"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-motion", lambda mode: mode.drag_selected(0.25),
             "Change value (1/4 speed)", keysym="S-M1-MOTION"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-motion", lambda mode: mode.drag_selected(0.05),
             "Change value (1/20 speed)", keysym="C-M1-MOTION"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-end", cls.drag_end, "Release fader", keysym="M1UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-end", cls.drag_end, keysym="S-M1UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-drag-end", cls.drag_end, keysym="C-M1UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-value-up", lambda mode: mode.change_value(0.01), keysym="UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-value-down", lambda mode: mode.change_value(-0.01), keysym="DOWN",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-value-up", lambda mode: mode.change_value(0.001), keysym="S-UP",
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-value-down", lambda mode: mode.change_value(-0.001), keysym="S-DOWN",
         )
 
@@ -133,31 +133,31 @@ class SliderEditMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind(
+        cls.bind(
             "slider-toggle-scale", cls.toggle_scale, "Toggle scale display (on/off)", keysym="s",
             menupath="Context > ||Params > []Toggle scale display"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-toggle-orient", cls.toggle_orient, "Toggle orientation (vert/horiz)", keysym="o",
             menupath="Context > ||Params > [x]Toggle vertical orient"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-toggle-side", cls.toggle_side, "Toggle scale side (right/left)", keysym="r",
             menupath="Context > ||Params > [x]Toggle scale on left"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-set-lower", cls.set_low, "Enter lower bound", keysym="C-[",
             menupath="Context > ||Params > Set lower bound"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-set-upper", cls.set_hi, "Enter upper bound", keysym="C-]",
             menupath="Context > ||Params > Set upper bound"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-set-zero", cls.set_zero, "Enter zero point", keysym="C-|",
             menupath="Context > ||Params > Set zero point"
         )
-        cls.cl_bind(
+        cls.bind(
             "slider-end-edit", cls.end_edits, "End editing", keysym="RET",
             menupath="Context > End edits"
         )

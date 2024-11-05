@@ -57,15 +57,15 @@ class AutoplaceMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind(
+        cls.bind(
             "autoplace-below", cls.autoplace_below, "Choose next (below)", "a",
             menupath="Context > |Next auto-place below"
         )
-        cls.cl_bind(
+        cls.bind(
             "autoplace-above", cls.autoplace_above, "Choose next (above)", "A",
             menupath="Context > |Next auto-place above"
         )
-        cls.cl_bind(
+        cls.bind(
             "autoplace-disable", cls.autoplace_disable, "Return to manual positioning", "ESC",
             menupath="Context > |Disable auto-place"
         )

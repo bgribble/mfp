@@ -20,19 +20,19 @@ class PatchControlMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.cl_bind(
+        cls.bind(
             "select-next", cls.select_next, helptext="Select next element",
             keysym="TAB", menupath="Edit > |Select next"
         )
-        cls.cl_bind(
+        cls.bind(
             "select-previous", cls.select_prev, helptext="Select previous element",
             keysym="S-TAB", menupath="Edit > |Select previous"
         )
-        cls.cl_bind(
+        cls.bind(
             "select-recent", cls.select_mru, helptext="Select most-recent element",
             keysym="C-TAB", menupath="Edit > |Select recent"
         )
-        cls.cl_bind(
+        cls.bind(
             "edit-mode", cls.edit_mode, helptext="Enter edit mode",
             keysym="C- ", menupath="Edit > ||Edit mode"
         )
