@@ -39,11 +39,11 @@ class ConnectionMode (InputMode):
     def init_bindings(cls):
         cls.cl_bind(
             "connect-accept", cls.make_connection, "Accept connection", "RET",
-            menupath="Context > Accept connection"
+            menupath="Context > |Accept connection"
         )
         cls.cl_bind(
             "connect-abort", cls.abort_connection, "Discard connection", "ESC",
-            menupath="Context > Discard connection"
+            menupath="Context > |Discard connection"
         )
 
         cls.cl_bind("connect-port", cls.get_port_key, "Enter port to connect", "C-p")

@@ -12,7 +12,9 @@ from mfp import log
 
 
 class ClickableControlMode (InputMode):
-    def __init__(self, window, element, descrip, mod=''):
+    MOD_PREFIX = ''
+
+    def __init__(self, window, element, descrip):
         self.manager = window.input_mgr
         self.window = window
         self.widget = element
@@ -20,15 +22,20 @@ class ClickableControlMode (InputMode):
 
         InputMode.__init__(self, descrip)
 
-        self.bind(mod + "M1DOWN", self.click, "Send click down")
-        self.bind(mod + "M1DOUBLEDOWN", self.click, "Send click down")
-        self.bind(mod + "M1TRIPLEDOWN", self.click, "Send click down")
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind("clickable-down", cls.click, "Send click down", cls.MOD_PREFIX + "M1DOWN", )
+        cls.cl_bind("clickable-doubledown", cls.click, "Send click down", cls.MOD_PREFIX + "M1DOUBLEDOWN", )
+        cls.cl_bind("clickable-tripledown", cls.click, "Send click down", cls.MOD_PREFIX + "M1TRIPLEDOWN", )
 
-        self.bind(mod + "M1UP", self.unclick, "Send click up")
-        self.bind(mod + "M1DOUBLEUP", self.unclick, "Send click up")
-        self.bind(mod + "M1TRIPLEUP", self.unclick, "Send click up")
+        cls.cl_bind("clickable-up", cls.unclick, "Send click up", cls.MOD_PREFIX + "M1UP", )
+        cls.cl_bind("clickable-doubleup", cls.unclick, "Send click up",  cls.MOD_PREFIX + "M1DOUBLEUP", )
+        cls.cl_bind("clickable-tripleup", cls.unclick, "Send click up", cls.MOD_PREFIX + "M1TRIPLEUP", )
 
-        self.bind("RET", self.quick_click, "Send click")
+        cls.cl_bind(
+            "clickable-ret", cls.quick_click, "Send click", "RET",
+            menupath="Context > Send click"
+        )
 
     def disable(self):
         if self.clickstate:
@@ -38,10 +45,9 @@ class ClickableControlMode (InputMode):
         if self.manager.pointer_obj is self.widget:
             self.clickstate = True
             return self.widget.clicked()
-        else:
-            self.clickstate = False
-            self.widget.unclicked()
-            return False
+        self.clickstate = False
+        self.widget.unclicked()
+        return False
 
     def unclick(self):
         self.clickstate = False
@@ -54,3 +60,7 @@ class ClickableControlMode (InputMode):
         self.clickstate = False
         self.widget.unclicked()
         return True
+
+
+class AltClickableControlMode (ClickableControlMode):
+    MOD_PREFIX = 'A-'

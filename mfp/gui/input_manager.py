@@ -206,6 +206,53 @@ class InputManager:
         mode.enable()
         self.window.display_bindings()
 
+    def binding_enabled(self, mode_type, keysym):
+        """
+        Check if a binding is active or superseded
+
+        There can be multiple bindings with the same keysym,
+        where "nested modes" intercept the keystroke when active.
+        For menus, we only want to show the one that is actually
+        'live'
+        """
+        # find the handlers that would be activated
+        handlers = self.get_handlers_unwrapped(keysym)
+        if not handlers:
+            return False
+        active_binding = handlers[0]
+
+        # find the enabled mode of the specified type
+        active_mode = None
+        for ext in self.global_mode.extensions:
+            if isinstance(ext, mode_type):
+                active_mode = ext
+        if isinstance(self.global_mode, mode_type):
+            active_mode = self.global_mode
+        for ext in self.major_mode.extensions:
+            if isinstance(ext, mode_type):
+                active_mode = ext
+        if isinstance(self.major_mode, mode_type):
+            active_mode = self.major_mode
+        for minor in reversed(self.minor_modes):
+            for ext in minor.extensions:
+                if isinstance(ext, mode_type):
+                    active_mode = ext
+            if isinstance(minor, mode_type):
+                active_mode = minor
+        if not active_mode:
+            return False
+
+        # find the binding in that mode specifically
+        mode_binding = active_mode.lookup(keysym)
+        if not mode_binding:
+            return False
+
+        # if the actual handler is the same as the one for the mode,
+        # we can say that it's not superseded.
+        if mode_binding.index == active_binding.index:
+            return True
+        return False
+
     def mode_enabled(self, mode_type):
         if (
             isinstance(self.global_mode, mode_type)
@@ -252,6 +299,28 @@ class InputManager:
                 return func(mode)
             return func()
         return inner
+
+    def get_handlers_unwrapped(self, keysym):
+        handlers = []
+        if keysym is not None:
+            # check minor modes first
+            for minor in self.minor_modes:
+                handler = minor.lookup(keysym)
+                if handler is not None:
+                    handlers.append(handler)
+
+            # then major mode
+            if self.major_mode is not None and self.major_mode.enabled:
+                handler = self.major_mode.lookup(keysym)
+                if handler is not None:
+                    handlers.append(handler)
+
+            # then global
+            handler = self.global_mode.lookup(keysym)
+            if handler is not None:
+                handlers.append(handler)
+
+        return handlers
 
     def get_handlers(self, keysym):
         handlers = []

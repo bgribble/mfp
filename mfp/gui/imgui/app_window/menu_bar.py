@@ -71,6 +71,21 @@ def add_menu_items(app_window, itemdict):
         imgui.separator()
         add_menu_items(app_window, sep_items)
 
+def prune_paths(pathdict):
+    new_pathdict = {}
+    for path, content in pathdict.items():
+        if content == {}:
+            continue
+        elif isinstance(content, dict):
+            new_content = prune_paths(content)
+            if new_content == {}:
+                continue
+            else:
+                new_pathdict[path] = new_content
+        else:
+            new_pathdict[path] = content
+    return new_pathdict
+
 
 def load_menupaths(app_window, only_enabled=False):
     by_menu = {}
@@ -83,6 +98,8 @@ def load_menupaths(app_window, only_enabled=False):
                 submenu = by_menu
                 keysym = binding.keysym
                 always_on = False
+                enabled = app_window.input_mgr.binding_enabled(mode, keysym)
+
                 if mode._mode_prefix:
                     keysym = f"{mode._mode_prefix} {keysym}"
                     always_on = True
@@ -100,7 +117,6 @@ def load_menupaths(app_window, only_enabled=False):
 
                 # if there are multiple items with the same text,
                 # one that's enabled wins
-                enabled = app_window.input_mgr.mode_enabled(mode)
 
                 if enabled or always_on:
                     submenu[item] = binding.copy(
@@ -114,7 +130,7 @@ def load_menupaths(app_window, only_enabled=False):
                         menupath=binding.menupath,
                         enabled=False
                     )
-    return by_menu
+    return prune_paths(by_menu)
 
 
 def render(app_window):

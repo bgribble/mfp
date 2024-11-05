@@ -23,20 +23,21 @@ class EnumEditMode (InputMode):
     def init_bindings(cls):
         cls.cl_bind(
             "enum-add-digit", cls.add_digit, "Increase displayed digits", "C->",
-            menupath="Context > Params > Increase displayed digits"
+            menupath="Context > ||Params > Increase displayed digits"
         )
         cls.cl_bind(
             "enum-del-digit", cls.del_digit, "Decrease displayed digits", "C-<",
-            menupath="Context > Params > Decrease displayed digits"
+            menupath="Context > ||Params > Decrease displayed digits"
         )
         cls.cl_bind(
             "enum-lower-bound", cls.set_lower, "Set lower bound on value", "C-[",
-            menupath="Context > Params > Set lower bound"
+            menupath="Context > ||Params > Set lower bound"
         )
         cls.cl_bind(
             "enum-upper-bound", cls.set_upper, "Set upper bound on value", "C-]",
-            menupath="Context > Params > Set upper bound"
+            menupath="Context > ||Params > Set upper bound"
         )
+        cls.extend_mode(LabelEditMode)
 
     async def set_upper(self):
         def cb(value):

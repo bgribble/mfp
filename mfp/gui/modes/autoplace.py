@@ -31,10 +31,6 @@ class AutoplaceMode (InputMode):
 
         InputMode.__init__(self, "Auto-place next element")
 
-        self.bind("a", self.autoplace_below, "Choose next (below)")
-        self.bind("A", self.autoplace_above, "Choose next (above)")
-        self.bind("ESC", self.autoplace_disable, "Return to manual positioning")
-
         if self.window.selected and self.window.selected[0].layer == self.window.selected_layer:
             self.key_widget = self.window.selected[0]
 
@@ -58,6 +54,21 @@ class AutoplaceMode (InputMode):
             self.autoplace_below()
         else:
             self.autoplace_above()
+
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind(
+            "autoplace-below", cls.autoplace_below, "Choose next (below)", "a",
+            menupath="Context > |Next auto-place below"
+        )
+        cls.cl_bind(
+            "autoplace-above", cls.autoplace_above, "Choose next (above)", "A",
+            menupath="Context > |Next auto-place above"
+        )
+        cls.cl_bind(
+            "autoplace-disable", cls.autoplace_disable, "Return to manual positioning", "ESC",
+            menupath="Context > |Disable auto-place"
+        )
 
     def _set_autoplace(self, x, y):
         self.window.show_autoplace_marker(x, y)
@@ -197,6 +208,8 @@ class AutoplaceMode (InputMode):
         self.window.hide_autoplace_marker()
         if self.callback:
             self.callback(None, None)
+        return True
 
     def disable(self):
         self.window.hide_autoplace_marker()
+        return True

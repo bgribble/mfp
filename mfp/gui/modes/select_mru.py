@@ -22,12 +22,15 @@ class SelectMRUMode (InputMode):
 
         InputMode.__init__(self, "Select Most-Recent")
 
-        self.bind("C-TAB", self.select_next, "Select most-recent element")
         SelectMRUMode.touch_enabled = False
         self.select_next()
 
         self.select_cbid = self.window.signal_listen("select", self.touch)
         self.remove_cbid = self.window.signal_listen("remove", self.forget)
+
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind("C-TAB", cls.select_next, "Select most-recent element")
 
     async def select_next(self):
         try:

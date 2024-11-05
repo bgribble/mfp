@@ -13,8 +13,8 @@ from mfp import log
 class Binding:
     label: str
     action: callable
-    index: int
     helptext: str
+    index: int
     keysym: str
     menupath: str = ''
     mode: any = None
@@ -32,11 +32,13 @@ class InputMode:
 
     # global for all modes
     _bindings_by_label = {}
+    _num_bindings = 0
 
     # will be separate for each subclass
     _bindings = {}
+    _extensions = []
+
     _default = None
-    _num_bindings = 0
     _mode_prefix = ''
 
     def __init__(self, description='', short_description=None):
@@ -61,7 +63,6 @@ class InputMode:
         super().__init_subclass__(**kwargs)
         cls._bindings = {}
         cls._default = None
-        cls._num_bindings = 0
 
         if hasattr(cls, "init_bindings"):
             cls.init_bindings()
@@ -74,6 +75,10 @@ class InputMode:
         self.extensions.append(mode)
 
     @classmethod
+    def extend_mode(cls, mode_type):
+        cls._extensions.append(mode_type)
+
+    @classmethod
     def cl_bind(cls, label, action, helptext=None, keysym=None, menupath=None):
         """
         after migrating all modes to cl_bind, will rename this to bind
@@ -83,23 +88,23 @@ class InputMode:
         """
         if keysym is None:
             cls._default = Binding(
-                "default", action, helptext, cls._num_bindings, None, None, cls
+                "default", action, helptext, InputMode._num_bindings, None, None, cls
             )
         else:
             binding = Binding(
-                label, action, helptext, cls._num_bindings, keysym, menupath, cls
+                label, action, helptext, InputMode._num_bindings, keysym, menupath, cls
             )
             cls._bindings[keysym] = binding
             InputMode._bindings_by_label[label] = binding
 
-        cls._num_bindings += 1
+        InputMode._num_bindings += 1
 
     def bind(self, keysym, action, helptext=None):
         if keysym is None:
-            self.default = Binding(None, action, helptext, type(self)._num_bindings, keysym, None)
+            self.default = Binding(None, action, helptext, InputMode._num_bindings, keysym, None)
         else:
-            self.bindings[keysym] = Binding(None, action, helptext, type(self)._num_bindings, keysym, None)
-        type(self)._num_bindings += 1
+            self.bindings[keysym] = Binding(None, action, helptext, InputMode._num_bindings, keysym, None)
+        InputMode._num_bindings += 1
 
     def directory(self):
         listing = []
@@ -140,7 +145,7 @@ class InputMode:
         # if any extensions are specified, look in them
         # (but don't use extension defaults)
         for ext in self.extensions:
-            binding = ext.bindings.get(keysym)
+            binding = ext.lookup(keysym)
             if binding is not None:
                 return binding
 

@@ -13,7 +13,7 @@ from .base_element import BaseElement
 from .backend_interfaces import BackendInterface
 from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
-from .modes.clickable import ClickableControlMode
+from .modes.clickable import AltClickableControlMode
 from .text_widget import TextWidget
 
 
@@ -136,7 +136,7 @@ class TextElement (BaseElement):
         )
 
     def make_control_mode(self):
-        return ClickableControlMode(self.app_window, self, "Change text", 'A-')
+        return AltClickableControlMode(self.app_window, self, "Change text")
 
     async def configure(self, params):
         if params.get('value') is not None:

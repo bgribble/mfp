@@ -135,31 +135,31 @@ class SliderEditMode (InputMode):
     def init_bindings(cls):
         cls.cl_bind(
             "slider-toggle-scale", cls.toggle_scale, "Toggle scale display (on/off)", keysym="s",
-            menupath="Context > Params > []Toggle scale display"
+            menupath="Context > ||Params > []Toggle scale display"
         )
         cls.cl_bind(
             "slider-toggle-orient", cls.toggle_orient, "Toggle orientation (vert/horiz)", keysym="o",
-            menupath="Context > Params > [x]Toggle vertical orient"
+            menupath="Context > ||Params > [x]Toggle vertical orient"
         )
         cls.cl_bind(
             "slider-toggle-side", cls.toggle_side, "Toggle scale side (right/left)", keysym="r",
-            menupath="Context > Params > [x]Toggle scale on left"
+            menupath="Context > ||Params > [x]Toggle scale on left"
         )
         cls.cl_bind(
             "slider-set-lower", cls.set_low, "Enter lower bound", keysym="C-[",
-            menupath="Context > Params > Set lower bound"
+            menupath="Context > ||Params > Set lower bound"
         )
         cls.cl_bind(
             "slider-set-upper", cls.set_hi, "Enter upper bound", keysym="C-]",
-            menupath="Context > Params > Set upper bound"
+            menupath="Context > ||Params > Set upper bound"
         )
         cls.cl_bind(
             "slider-set-zero", cls.set_zero, "Enter zero point", keysym="C-|",
-            menupath="Context > Params > Set zero point"
+            menupath="Context > ||Params > Set zero point"
         )
         cls.cl_bind(
             "slider-end-edit", cls.end_edits, "End editing", keysym="RET",
-            menupath="Context > Params > End edits"
+            menupath="Context > End edits"
         )
 
     async def set_low(self):

@@ -145,7 +145,7 @@ class TileManagerMode (InputMode):
             "select-tile-prev", cls.select_prev, "Select previous tile by number",
             keysym=";"
         )
-        cls.cl_bind(cls.dismiss_mode, "End tile management mode", keysym=None)
+        cls.cl_bind("dismiss-tile-management", cls.dismiss_mode, "End tile management mode", keysym=None)
 
 
     def dismiss_mode(self, *args):

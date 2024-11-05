@@ -76,31 +76,36 @@ class LabelEditMode (InputMode):
 
         InputMode.__init__(self, mode_desc)
 
-        if not self.multiline:
-            self.bind("RET", self.commit_edits, "Accept edits")
-        else:
-            self.bind("RET", lambda: self.insert_text("\n"), "Insert newline")
-            self.bind("C-RET", self.commit_edits, "Accept edits")
-
-        self.bind("ESC", self.rollback_edits, "Discard edits")
-        self.bind("LEFT", self.move_left, "Move cursor left")
-        self.bind("RIGHT", self.move_right, "Move cursor right")
-        self.bind("UP", self.move_up, "Move cursor up one line")
-        self.bind("DOWN", self.move_down, "Move cursor down one line")
-        self.bind("S-LEFT", self.select_left, "Grow/shrink selection left")
-        self.bind("S-RIGHT", self.select_right, "Grow/shrink selection right")
-        self.bind("S-UP", self.select_up, "Grow/shrink selection up one line")
-        self.bind("S-DOWN", self.select_down, "Gro/shrink selection down one line")
-        self.bind("BS", self.delete_left, "Delete to the left")
-        self.bind("DEL", self.delete_right, "Delete to the right")
-        self.bind("C-a", self.select_all, "Select all text")
-        self.bind("C-z", self.undo_edit, "Undo typing")
-        self.bind("C-r", self.redo_edit, "Redo typing")
-        self.bind("C-v", self.paste, "Paste from clipboard into label")
-        self.bind("C-c", self.copy, "Copy selection into clipboard")
-        self.bind("C-x", self.cut, "Cut selection into clipboard")
-
-        self.bind(None, self.insert_text, "Insert text")
+    @classmethod
+    def init_bindings(cls):
+        cls.cl_bind("label-enter-key", cls.enter_key, "Accept edits", "RET", )
+        cls.cl_bind("label-accept-edits", cls.commit_edits, "Accept edits", "C-RET",
+                    menupath="Context > Accept edits")
+        cls.cl_bind("label-discard-edits", cls.rollback_edits, "Discard edits", "ESC",
+                    menupath="Context > Discard edits")
+        cls.cl_bind("label-cursor-left", cls.move_left, "Move cursor left", "LEFT", )
+        cls.cl_bind("label-cursor-right", cls.move_right, "Move cursor right", "RIGHT", )
+        cls.cl_bind("label-cursor-up", cls.move_up, "Move cursor up one line", "UP", )
+        cls.cl_bind("label-cursor-down", cls.move_down, "Move cursor down one line", "DOWN", )
+        cls.cl_bind("label-select-left", cls.select_left, "Grow/shrink selection left", "S-LEFT", )
+        cls.cl_bind("label-select-right", cls.select_right, "Grow/shrink selection right", "S-RIGHT", )
+        cls.cl_bind("label-select-up", cls.select_up, "Grow/shrink selection up one line", "S-UP", )
+        cls.cl_bind("label-select-down", cls.select_down, "Gro/shrink selection down one line", "S-DOWN", )
+        cls.cl_bind("label-delete-left", cls.delete_left, "Delete to the left", "BS", )
+        cls.cl_bind("label-delete-right", cls.delete_right, "Delete to the right", "DEL", )
+        cls.cl_bind("label-select-all", cls.select_all, "Select all text", "C-a",
+                    menupath="Context > Select all")
+        cls.cl_bind("label-undo-typing", cls.undo_edit, "Undo typing", "C-z",
+                    menupath="Context > Undo typing")
+        cls.cl_bind("label-redo-typing", cls.redo_edit, "Redo typing", "C-r",
+                    menupath="Context > Redo typing")
+        cls.cl_bind("label-cut", cls.cut, "Cut selection into clipboard", "C-x",
+                    menupath="Context > Cut")
+        cls.cl_bind("label-copy", cls.copy, "Copy selection into clipboard", "C-c",
+                    menupath="Context > Copy")
+        cls.cl_bind("label-paste", cls.paste, "Paste from clipboard into label", "C-v",
+                    menupath="Context > Paste")
+        cls.cl_bind("label-insert-text", cls.insert_text, "Insert text", None)
 
     async def setup(self):
         inittxt = await self.element.label_edit_start()
@@ -114,6 +119,11 @@ class LabelEditMode (InputMode):
         self.set_selection(0, len(self.text))
 
         await super().setup()
+
+    def enter_key(self):
+        if self.multiline:
+            return self.insert_text("\n")
+        return self.commit_edits()
 
     def cut(self):
         sel = self.text[self.selection_start:self.selection_end]
@@ -141,19 +151,22 @@ class LabelEditMode (InputMode):
         self.selection_end = end
         self.update_label(raw=True)
         self.widget.set_selection(start, end)
+        return True
 
     def delete_selection(self):
         if self.selection_start == self.selection_end:
-            return
+            return True
 
         self.editpos = self.selection_start
         self.text = self.text[:self.selection_start] + self.text[self.selection_end:]
         self.update_label(raw=True)
         self.set_selection(self.editpos, self.editpos)
+        return True
 
     def select_all(self):
         self.set_selection(0, len(self.text))
         self.editpos = 0
+        return True
 
     def insert_text(self, keysym):
         if len(keysym) > 1:
@@ -201,6 +214,7 @@ class LabelEditMode (InputMode):
     def disable(self):
         self.end_editing()
         self.update_label(raw=False)
+        return True
 
     def start_editing(self):
         def synth_ret(*args):
@@ -222,6 +236,7 @@ class LabelEditMode (InputMode):
 
         if self.widget.blink_cursor:
             self.blinker.start(self.widget)
+        return True
 
     def end_editing(self):
         self.widget.set_editable(False)
@@ -243,6 +258,7 @@ class LabelEditMode (InputMode):
 
         if self.widget.blink_cursor:
             self.blinker.stop(self.widget)
+        return True
 
     def text_changed(self, *args):
         new_text = self.widget.get_text()
