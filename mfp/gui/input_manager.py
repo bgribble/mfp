@@ -228,17 +228,20 @@ class InputManager:
                 active_mode = ext
         if isinstance(self.global_mode, mode_type):
             active_mode = self.global_mode
+
         for ext in self.major_mode.extensions:
             if isinstance(ext, mode_type):
                 active_mode = ext
         if isinstance(self.major_mode, mode_type):
             active_mode = self.major_mode
+
         for minor in reversed(self.minor_modes):
             for ext in minor.extensions:
                 if isinstance(ext, mode_type):
                     active_mode = ext
             if isinstance(minor, mode_type):
                 active_mode = minor
+
         if not active_mode:
             return False
 
@@ -250,7 +253,7 @@ class InputManager:
         # if the actual handler is the same as the one for the mode,
         # we can say that it's not superseded.
         if mode_binding.index == active_binding.index:
-            return True
+            return mode_binding
         return False
 
     def mode_enabled(self, mode_type):
@@ -295,7 +298,11 @@ class InputManager:
 
     def _wrap_handler(self, func, mode):
         def inner(*args, **kwargs):
-            if len(inspect.signature(func).parameters):
+            named_args = [
+                vname for vname, p in inspect.signature(func).parameters.items()
+                if p.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+            ]
+            if len(named_args) > 0:
                 return func(mode)
             return func()
         return inner

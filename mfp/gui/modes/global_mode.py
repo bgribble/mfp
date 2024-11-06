@@ -5,6 +5,7 @@ global_mode.py: Global input mode bindings
 Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
+import inspect
 from mfp.gui_main import MFPGUI, backend_name
 from mfp import log
 from ..input_mode import InputMode
@@ -229,16 +230,31 @@ class GlobalMode (InputMode):
         return self.manager.enable_minor_mode(self.tile_manager_mode)
 
     async def cmdline(self):
+        """
+        look up actions by their label and execute them.
+        Pass args as additional binding args (may replace
+        params the action usually gets by interactive prompt)
+        """
         async def cb(txt):
             if txt.startswith("eval "):
                 resp = eval(txt[5:])
-                log.debug(f"cmdline eval: {resp}")
+                log.debug(f"[eval] {txt[5:]} --> {resp}")
             else:
-                cmd, args = txt.split(' ', 1)
+                cmd, *rest = txt.split(' ', 1)
                 binding = InputMode._bindings_by_label.get(cmd.strip())
-                log.debug(f"[cmd] {cmd} {args} {binding}")
+                mode_binding = self.window.input_mgr.binding_enabled(
+                    binding.mode, binding.keysym
+                )
+                argtpl = ()
+                if rest and rest[0]:
+                    argtpl = eval(f"({rest[0]},)")
+                if mode_binding:
+                    result = mode_binding.action(*argtpl)
+                    if inspect.isawaitable(result):
+                        await result
 
         await self.window.cmd_get_input(":", cb, '')
+        return True
 
     def reset_zoom(self):
         self.window.reset_zoom()
@@ -279,9 +295,16 @@ class GlobalMode (InputMode):
 
     async def transient_msg(self, message=None):
         from ..message_element import TransientMessageElement
+        rv = False
         if self.window.selected:
-            return await self.window.add_element(TransientMessageElement.build)
-        return False
+            rv = await self.window.add_element(TransientMessageElement.build)
+
+        # if message is not none, this binding is being invoked from
+        # the cmdline
+        if message is not None:
+            for key in list(f"{message!r}") + ["RET"]:
+                self.window.input_mgr.handle_keysym(key)
+        return rv
 
     async def hover(self, details):
         from ..base_element import BaseElement

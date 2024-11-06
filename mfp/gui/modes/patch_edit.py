@@ -4,7 +4,7 @@ patch_edit.py: PatchEdit major mode
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-
+from mfp import log
 from ..input_mode import InputMode
 from .autoplace import AutoplaceMode
 from .selection import SingleSelectionEditMode, MultiSelectionEditMode
@@ -173,7 +173,7 @@ class PatchEditMode (InputMode):
 
     @classmethod
     def add_element(cls, element_type):
-        async def helper(mode):
+        async def helper(mode, *args):
             return await mode._add_element(element_type)
         return helper
 

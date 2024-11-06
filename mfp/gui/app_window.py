@@ -12,6 +12,7 @@ from mfp.utils import SignalMixin
 from ..gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .input_manager import InputManager
+from .input_mode import InputMode
 from .layer import Layer
 from .console_manager import ConsoleManager
 from .prompter import Prompter
@@ -213,7 +214,10 @@ class AppWindow (SignalMixin):
         self.initialize()
 
         self.cmd_input = TextWidget.build(self)
-        self.cmd_manager = Prompter(self, self.cmd_input)
+        self.cmd_manager = Prompter(
+            self, self.cmd_input,
+            completions=InputMode._bindings_by_label.keys()
+        )
 
         # Python REPL
         self.console_manager = ConsoleManager.build("MFP interactive console", self)

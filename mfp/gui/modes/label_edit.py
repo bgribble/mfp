@@ -6,10 +6,11 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 import asyncio
-from ..input_mode import InputMode
-from ..colordb import ColorDB
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.trie import Trie
+from ..input_mode import InputMode
+from ..colordb import ColorDB
 
 
 def editpoint(s1, s2):
@@ -53,8 +54,10 @@ class Blinker:
 
 
 class LabelEditMode (InputMode):
-    def __init__(self, window, element, label, multiline=False, markup=False,
-                 mode_desc="Edit text", initial=None):
+    def __init__(
+        self, window, element, label, multiline=False, markup=False,
+        mode_desc="Edit text", initial=None, completions=None, history=None
+    ):
         self.window = window
         self.manager = window.input_mgr
         self.element = element
@@ -73,6 +76,12 @@ class LabelEditMode (InputMode):
         self.selection_start = 0
         self.selection_end = 0
         self.blinker = Blinker()
+        self.completions = completions
+        self.completions_cache = []
+        self.history = history
+        self.history_root = ''
+        self.history_cache = []
+        self.history_position = None
 
         InputMode.__init__(self, mode_desc)
 
@@ -80,9 +89,9 @@ class LabelEditMode (InputMode):
     def init_bindings(cls):
         cls.bind("label-enter-key", cls.enter_key, "Accept edits", "RET", )
         cls.bind("label-accept-edits", cls.commit_edits, "Accept edits", "C-RET",
-                    menupath="Context > Accept edits")
+                 menupath="Context > Accept edits")
         cls.bind("label-discard-edits", cls.rollback_edits, "Discard edits", "ESC",
-                    menupath="Context > Discard edits")
+                 menupath="Context > Discard edits")
         cls.bind("label-cursor-left", cls.move_left, "Move cursor left", "LEFT", )
         cls.bind("label-cursor-right", cls.move_right, "Move cursor right", "RIGHT", )
         cls.bind("label-cursor-up", cls.move_up, "Move cursor up one line", "UP", )
@@ -94,17 +103,18 @@ class LabelEditMode (InputMode):
         cls.bind("label-delete-left", cls.delete_left, "Delete to the left", "BS", )
         cls.bind("label-delete-right", cls.delete_right, "Delete to the right", "DEL", )
         cls.bind("label-select-all", cls.select_all, "Select all text", "C-a",
-                    menupath="Context > Select all")
+                 menupath="Context > Select all")
         cls.bind("label-undo-typing", cls.undo_edit, "Undo typing", "C-z",
-                    menupath="Context > Undo typing")
+                 menupath="Context > Undo typing")
         cls.bind("label-redo-typing", cls.redo_edit, "Redo typing", "C-r",
-                    menupath="Context > Redo typing")
+                 menupath="Context > Redo typing")
         cls.bind("label-cut", cls.cut, "Cut selection into clipboard", "C-x",
-                    menupath="Context > Cut")
+                 menupath="Context > Cut")
         cls.bind("label-copy", cls.copy, "Copy selection into clipboard", "C-c",
-                    menupath="Context > Copy")
+                 menupath="Context > Copy")
         cls.bind("label-paste", cls.paste, "Paste from clipboard into label", "C-v",
-                    menupath="Context > Paste")
+                 menupath="Context > Paste")
+        cls.bind("label-tab-complete", cls.complete, "Complete entry", "TAB")
         cls.bind("label-insert-text", cls.insert_text, "Insert text", None)
 
     async def setup(self):
@@ -119,6 +129,32 @@ class LabelEditMode (InputMode):
         self.set_selection(0, len(self.text))
 
         await super().setup()
+
+    def complete(self):
+        if not self.completions:
+            return False
+
+        # if there are completions, cycle through them
+        if self.completions_cache:
+            comp = self.completions_cache[0]
+            all_completions = self.completions_cache[1:] + [comp]
+            self.text = comp
+            self.editpos = len(self.text)
+            self.set_selection(self.editpos, self.editpos)
+            self.update_label(raw=True)
+            self.completions_cache = all_completions
+            return True
+
+        candidates, root = self.completions.find(self.text)
+        if candidates:
+            if self.text not in candidates:
+                candidates.append(self.text)
+            self.text = root
+            self.editpos = len(self.text)
+            self.set_selection(self.editpos, self.editpos)
+            self.update_label(raw=True)
+            self.completions_cache = candidates
+        return True
 
     def enter_key(self):
         if self.multiline:
@@ -141,7 +177,6 @@ class LabelEditMode (InputMode):
         self.delete_selection()
         newtext = self.text[:self.editpos] + newtext + self.text[self.editpos:]
         self.text = newtext
-
         self.update_label(raw=True)
         self.set_selection(self.editpos, self.editpos + len(newtext))
         return True
@@ -154,6 +189,7 @@ class LabelEditMode (InputMode):
         return True
 
     def delete_selection(self):
+        self.history_position = None
         if self.selection_start == self.selection_end:
             return True
 
@@ -179,7 +215,6 @@ class LabelEditMode (InputMode):
 
         self.editpos += 1
         self.set_selection(self.editpos, self.editpos)
-
         return True
 
     def delete_left(self):
@@ -374,6 +409,31 @@ class LabelEditMode (InputMode):
         return 0
 
     def move_up(self):
+        if self.multiline is False and self.history:
+            if self.history_position is None:
+                self.history_cache, _ = self.history.find(
+                    self.text, sort_by=Trie.SORT_INSERT_ORDER
+                )
+                if self.history_cache:
+                    self.history_root = self.text
+                    self.history_position = 0
+                    self.history_cache.append(self.text)
+                else:
+                    self.history_position = None
+                    self.history_cache = []
+            else:
+                if self.history_position + 1 < len(self.history_cache):
+                    self.history_position += 1
+                else:
+                    self.history_position = 0
+
+            if self.history_position is not None:
+                self.text = self.history_cache[self.history_position]
+                self.editpos = len(self.text)
+                self.set_selection(self.editpos, self.editpos)
+                self.update_label(raw=True)
+                return True
+
         self.editpos = self._one_line_up(self.editpos)
         self.set_selection(self.editpos, self.editpos)
         return True
@@ -410,6 +470,30 @@ class LabelEditMode (InputMode):
         return len(self.text)
 
     def move_down(self):
+        if self.multiline is False and self.history:
+            if self.history_position is None:
+                self.history_cache, _ = self.history.find(
+                    self.text, sort_by=Trie.SORT_INSERT_ORDER
+                )
+                if self.history_cache:
+                    self.history_root = self.text
+                    self.history_position = 0
+                    self.history_cache.append(self.text)
+                else:
+                    self.history_position = None
+            else:
+                if self.history_position - 1 >= 0:
+                    self.history_position -= 1
+                else:
+                    self.history_position = len(self.history_cache) - 1
+
+            if self.history_position is not None:
+                self.text = self.history_cache[self.history_position]
+                self.editpos = len(self.text)
+                self.set_selection(self.editpos, self.editpos)
+                self.update_label(raw=True)
+                return True
+
         self.editpos = self._one_line_down(self.editpos)
         self.set_selection(self.editpos, self.editpos)
         return True
@@ -458,5 +542,6 @@ class LabelEditMode (InputMode):
         else:
             self.widget.set_markup(self.text)
         self.update_cursor()
+        self.completions_cache = []
         return True
 

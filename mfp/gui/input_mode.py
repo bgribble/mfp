@@ -119,7 +119,7 @@ class InputMode:
         binding = type(self)._bindings.get(label)
         if binding is not None:
             return binding.copy(
-                action=lambda: binding.action(self)
+                action=lambda *args, **kwargs: binding.action(self, *args, **kwargs)
             )
 
     def lookup(self, keysym):
@@ -127,7 +127,7 @@ class InputMode:
         binding = type(self)._bindings.get(keysym)
         if binding is not None:
             return binding.copy(
-                action=lambda: binding.action(self)
+                action=lambda *args, **kwargs: binding.action(self, *args, **kwargs)
             )
 
         # if any extensions are specified, look in them
@@ -141,7 +141,7 @@ class InputMode:
         if type(self)._default is not None:
             binding = type(self)._default
             return binding.copy(
-                action=lambda: binding.action(self, keysym)
+                action=lambda *args, **kwargs: binding.action(self, keysym, *args, **kwargs)
             )
 
         # do extensions have a default:
@@ -149,7 +149,7 @@ class InputMode:
             if ext._default is not None:
                 binding = ext._default
                 return binding.copy(
-                    action=lambda: binding.action(self, keysym)
+                    action=lambda *args, **kwargs: binding.action(self, keysym, *args, **kwargs)
                 )
 
         return None
