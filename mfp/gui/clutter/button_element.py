@@ -54,6 +54,10 @@ def rounded_box(ctx, xorig, yorig, w, h, rad):
 class ClutterButtonElementImpl(ButtonElementImpl, ClutterBaseElementImpl, ButtonElement):
     backend_name = "clutter"
 
+    style_defaults = {
+        'padding': dict(left=8, top=6, right=8, bottom=6)
+    }
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 
@@ -118,11 +122,14 @@ class ClutterButtonElementImpl(ButtonElementImpl, ClutterBaseElementImpl, Button
         else:
             ct.stroke()
 
+
 class ClutterBangButtonElementImpl(BangButtonElement, BangButtonElementImpl, ClutterButtonElementImpl):
     backend_name = "clutter"
 
+
 class ClutterToggleButtonElementImpl(ToggleButtonElement, ToggleButtonElementImpl, ClutterButtonElementImpl):
     backend_name = "clutter"
+
 
 class ClutterToggleIndicatorElementImpl(
     ToggleIndicatorElement, ToggleIndicatorElementImpl, ClutterButtonElementImpl

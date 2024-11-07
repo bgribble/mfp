@@ -56,6 +56,7 @@ class MFPGUI (Singleton):
             'draw-ports': ParamInfo(label="When to draw inlet/outlet ports", param_type=str),
             'fill-color': ParamInfo(label="Element fill color", param_type=RGBAColor),
             'fill-color:debug': ParamInfo(label="Element fill color (debug)", param_type=RGBAColor),
+            'fill-color:lit': ParamInfo(label="Element fill color (lit indicator)", param_type=RGBAColor),
             'fill-color:selected':ParamInfo(label="Element fill color (selected)", param_type=RGBAColor),
             'font-face': ParamInfo(label="Font faces", param_type=str),
             'font-size': ParamInfo(label="Font size", param_type=float),
@@ -76,6 +77,7 @@ class MFPGUI (Singleton):
             'stroke-color:hover': ParamInfo(label="Element outline color (hover)", param_type=RGBAColor),
             'text-color': ParamInfo(label="Text color", param_type=RGBAColor),
             'text-color:selected': ParamInfo(label="Text color (selected)", param_type=RGBAColor),
+            'text-color:lit': ParamInfo(label="Text color (lit indicator)", param_type=RGBAColor),
             'text-cursor-color': ParamInfo(label="Text cursor color", param_type=RGBAColor),
         }
 
@@ -84,6 +86,7 @@ class MFPGUI (Singleton):
             'canvas-color': ColorDB().find('default-canvas-color'),
             'fill-color': ColorDB().find('default-fill-color'),
             'fill-color:selected': ColorDB().find('default-fill-color-selected'),
+            'fill-color:lit': ColorDB().find('default-alt-fill-color'),
             'fill-color:debug': ColorDB().find('default-fill-color-debug'),
             'font-face': 'Cantarell,Sans',
             'font-size': 16,
@@ -97,6 +100,7 @@ class MFPGUI (Singleton):
             'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
             'text-color': ColorDB().find('default-text-color'),
             'text-color:selected': ColorDB().find('default-text-color-selected'),
+            'text-color:lit': ColorDB().find('default-light-text-color'),
             'text-cursor-color': ColorDB().find('default-text-cursor-color'),
         }
         self.appwin = None

@@ -6,7 +6,6 @@ import re
 from imgui_bundle import imgui
 # from imgui_bundle import imgui_md as markdown
 
-from mfp import log
 from ..text_widget import TextWidget, TextWidgetImpl
 
 
@@ -27,7 +26,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.position_set = False
         self.font_width = 6
         self.font_height = 11
-
+        self.font_color = None
         self.multiline = False
 
         self.selection_start = 0
@@ -47,17 +46,25 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         if self.markdown_text and self.use_markup:
             # markdown.render(self.markdown_text)
             # strip tags
-            stripped_text = re.sub(r'<[^>]*?>', '', self.text)
-
-            imgui.text(stripped_text + extra_bit)
-
+            label_text = re.sub(r'<[^>]*?>', '', self.text)
         else:
-            imgui.text(self.text + extra_bit)
+            label_text = self.text
+
+        if self.font_color:
+            imgui.text_colored(
+                self.font_color.to_rgbaf(),
+                label_text + extra_bit
+            )
+        else:
+            imgui.text(label_text + extra_bit)
 
         self.font_width, self.font_height = imgui.calc_text_size("M")
 
         w, h = imgui.get_item_rect_size()
         left_x, top_y = imgui.get_item_rect_min()
+
+        self.width = w
+        self.height = h
 
         if not self.editable or len(self.text) == 0:
             return
@@ -135,7 +142,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         pass
 
     def set_color(self, color):
-        pass
+        self.font_color = color
 
     def set_font_name(self, font_name):
         pass

@@ -256,7 +256,6 @@ class ImguiBaseElementImpl(BaseElementImpl):
         padding = self.get_style('padding')
         p_tl = imgui.get_item_rect_min()
 
-        # FIXME hardcoded padding
         x_orig = p_tl[0] - padding.get('left', 0)
         y_orig = p_tl[1] - padding.get('top', 0)
 

@@ -102,12 +102,12 @@ class InputMode:
     def directory(self):
         listing = []
         items = list(self._bindings.items())
-        items.sort(key=lambda e: e[1][2])
-        for keysym, value in items:
-            if value[1] is not None:
-                listing.append((keysym, value[1]))
-        if self.default is not None:
-            listing.append(("[default]", self.default[1]))
+        items.sort(key=lambda e: e[1].index)
+        for keysym, binding in items:
+            if binding.keysym is not None:
+                listing.append((keysym, binding.helptext))
+        if self._default is not None:
+            listing.append(("[default]", self._default.helptext))
         for e in self.extensions:
             listing.extend(e.directory())
         return listing

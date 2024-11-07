@@ -395,9 +395,12 @@ class GlobalMode (InputMode):
         py = self.manager.pointer_y
 
         if (
-            self.window.selected_window != "canvas"
-            or self.window.main_menu_open
-            or self.window.context_menu_open
+            self.window.backend_name == "imgui"
+            and (
+                self.window.selected_window != "canvas"
+                or self.window.main_menu_open
+                or self.window.context_menu_open
+            )
         ):
             return
 

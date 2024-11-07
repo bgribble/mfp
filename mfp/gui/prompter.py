@@ -5,10 +5,10 @@ prompter.py -- Prompted input manager for MFP patch window
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 import inspect
-import asyncio
 from .modes.label_edit import LabelEditMode
 from mfp import log
 from mfp.trie import Trie
+
 
 class Prompter (object):
     def __init__(self, window, label, completions=None):
