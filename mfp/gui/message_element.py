@@ -8,6 +8,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from abc import ABCMeta, abstractmethod
 from flopsy import saga
+
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -180,9 +181,13 @@ class TransientMessageElement (MessageElement):
         return True
 
     async def end_edit(self):
+        from .modes.patch_edit import PatchEditMode
         await BaseElement.end_edit(self)
         if self.obj_state == self.OBJ_COMPLETE:
+            await self.app_window.unselect(self)
             await self.delete()
+            if isinstance(self.app_window.input_mgr.major_mode, PatchEditMode):
+                self.app_window.input_mgr.major_mode.update_selection_mode()
 
     async def label_edit_start(self):
         self.label.set_text(self.message_text)
@@ -190,6 +195,7 @@ class TransientMessageElement (MessageElement):
         await self.update()
 
     async def label_edit_finish(self, widget=None, text=None):
+        from .modes.patch_edit import PatchEditMode
         if text is not None:
             self.message_text = text
             for to in self.target_obj:
@@ -202,7 +208,10 @@ class TransientMessageElement (MessageElement):
         for to in self.target_obj:
             await self.app_window.select(to)
         self.message_text = None
+        await self.app_window.unselect(self)
         await self.delete()
+        if isinstance(self.app_window.input_mgr.major_mode, PatchEditMode):
+            self.app_window.input_mgr.major_mode.update_selection_mode()
 
     async def make_edit_mode(self):
         return TransientMessageEditMode(self.app_window, self, self.label)
