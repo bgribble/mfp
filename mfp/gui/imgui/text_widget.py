@@ -6,6 +6,8 @@ import re
 from imgui_bundle import imgui
 # from imgui_bundle import imgui_md as markdown
 
+from mfp import log
+from mfp.gui_main import MFPGUI
 from ..text_widget import TextWidget, TextWidgetImpl
 
 
@@ -132,9 +134,17 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         return self.text
 
     def set_text(self, text):
+        if self.text != text:
+            MFPGUI().async_task(self.signal_emit(
+                'text-changed', self.text, text, imgui.calc_text_size(self.text), imgui.calc_text_size(text)
+            ))
         self.text = text
 
     def set_markup(self, text):
+        if self.markdown_text != text:
+            MFPGUI().async_task(self.signal_emit(
+                'text-changed', self.text, text, imgui.calc_text_size(self.markdown_text), imgui.calc_text_size(text)
+            ))
         self.markdown_text = text
         self.use_markup = True
 

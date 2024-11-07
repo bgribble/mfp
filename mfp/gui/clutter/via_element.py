@@ -56,7 +56,7 @@ class ClutterBaseViaElementImpl(ClutterBaseElementImpl):
     def redraw(self):
         self.texture.invalidate()
 
-    def recenter_label(self):
+    def recenter_label(self, *args):
         w = self.label.get_width()
         _, y = self.label.get_position()
         self.label.set_position((self.texture.get_width() - w) / 2.0, y)

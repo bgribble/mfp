@@ -46,7 +46,7 @@ class ViaElement (BaseElement):
         self.height = self.VIA_SIZE + self.LABEL_HEIGHT + self.LABEL_FUDGE + 2 * self.VIA_FUDGE
 
     def text_changed_cb(self, *args):
-        self.recenter_label()
+        self.recenter_label(*args)
 
     def parse_label(self, txt):
         parts = txt.split('/')

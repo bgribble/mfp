@@ -106,7 +106,6 @@ class AutoplaceMode (InputMode):
 
         if self.placement < kw.num_inlets:
             x, y = kw.port_center(BaseElement.PORT_IN, self.placement)
-            x -= kw.get_style('porthole-border') + kw.get_style('porthole-width') / 2.0
             y = self.find_free_space_up(x, y - self.ABOVE_SPACING)
 
         self._set_autoplace(x, y)
@@ -130,7 +129,6 @@ class AutoplaceMode (InputMode):
             self.placement = 0
 
         x, y = kw.port_center(BaseElement.PORT_OUT, self.placement)
-        x -= kw.get_style('porthole-border') + kw.get_style('porthole-width') / 2.0
         y = self.find_free_space_down(x, y + self.BELOW_SPACING)
 
         self._set_autoplace(x, y)

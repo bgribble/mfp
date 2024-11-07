@@ -47,12 +47,14 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         self.position_y = y
         self.position_set = False
 
-    def recenter_label(self):
-        """
-        w = self.label.get_width()
-        _, y = self.label.get_position()
-        self.label.set_position((self.texture.get_width() - w) / 2.0, y)
-        """
+    @mutates('position_x')
+    def recenter_label(self, *args):
+        if not args:
+            return
+        widget, signal, old_text, new_text, old_size, new_size = args
+        if old_size[0] != new_size[0]:
+            self.position_x += (old_size[0] - new_size[0]) / 2.0
+            self.position_set = True
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):

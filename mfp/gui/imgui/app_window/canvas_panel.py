@@ -3,14 +3,17 @@ canvas_pane -- render the 'imgui node editor' canvas pane
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
+import math
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.colordb import ColorDB
 from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.modes.patch_edit import PatchEditMode
 from mfp.gui.modes.global_mode import GlobalMode
 from . import menu_bar
+
 
 def render_tile(app_window, patch):
     """
@@ -133,17 +136,30 @@ def render_tile(app_window, patch):
                 obj.render()
 
     if app_window.selected_patch == patch and app_window.autoplace_x is not None:
+        color = ColorDB().backend.im_col32(app_window.get_color('stroke-color:selected'))
+
         autoplace_window_pos = [
             app_window.autoplace_x,
             app_window.autoplace_y
         ]
         draw_list = imgui.get_window_draw_list()
-        draw_list.add_text(
+        mark_radius = 6
+        draw_list.add_circle(autoplace_window_pos, mark_radius, color, 21, 1.0)
+        draw_list.path_arc_to(
             autoplace_window_pos,
-            imgui.IM_COL32(0, 0, 0, 255),
-            "+"
+            mark_radius,
+            0, math.pi/2, 13
         )
+        draw_list.path_line_to(autoplace_window_pos)
+        draw_list.path_fill_convex(color)
 
+        draw_list.path_arc_to(
+            autoplace_window_pos,
+            mark_radius,
+            math.pi, 1.5*math.pi, 13
+        )
+        draw_list.path_line_to(autoplace_window_pos)
+        draw_list.path_fill_convex(color)
 
     #############################
     # viewport management

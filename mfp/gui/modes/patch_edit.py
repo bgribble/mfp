@@ -5,6 +5,7 @@ patch_edit.py: PatchEdit major mode
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 from mfp import log
+from mfp.gui_main import MFPGUI
 from ..input_mode import InputMode
 from .autoplace import AutoplaceMode
 from .selection import SingleSelectionEditMode, MultiSelectionEditMode
@@ -177,16 +178,33 @@ class PatchEditMode (InputMode):
             return await mode._add_element(element_type)
         return helper
 
+    def _style_default(self, element_type, style, default=None):
+        for c in element_type.mro():
+            if hasattr(c, 'style_defaults'):
+                if style in c.style_defaults:
+                    return c.style_defaults[style]
+        return default
+
     async def _add_element(self, element_type):
         await self.window.unselect_all()
+        backend = element_type.get_backend(MFPGUI().backend_name)
         factory = element_type.build
         if self.autoplace_mode is None:
             obj = await self.window.add_element(factory)
         else:
-            dx = element_type.style_defaults.get('autoplace-dx', 0)
-            dy = element_type.style_defaults.get('autoplace-dy', 0)
+            dx = self._style_default(backend, 'autoplace-dx', 0)
+            dy = self._style_default(backend, 'autoplace-dy', 0)
 
-            obj = await self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
+            port_off_x = (
+                self._style_default(backend, 'porthole-border', 0)
+                + self._style_default(backend, 'porthole-width', 0) / 2.0
+            )
+
+            obj = await self.window.add_element(
+                factory,
+                self.autoplace_x + dx - port_off_x,
+                self.autoplace_y + dy
+            )
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
         if obj:
