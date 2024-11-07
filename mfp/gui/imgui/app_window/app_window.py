@@ -30,10 +30,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
     motion_overrides = ["drag", "scroll-zoom", "canvas-pos"]
 
-    INIT_WIDTH = 900
-    INIT_HEIGHT = 700
+    INIT_WIDTH = 1200
+    INIT_HEIGHT = 900
 
-    INIT_INFO_PANEL_WIDTH = 300
+    INIT_INFO_PANEL_WIDTH = 350
     INIT_CONSOLE_PANEL_HEIGHT = 150
     INIT_MENU_HEIGHT = 21
 
@@ -286,12 +286,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             _, self.console_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    dockspace_id, imgui.Dir_.down, 0.30
+                    dockspace_id, imgui.Dir_.down, 0.20
                 )
             )
             _, self.info_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    self.canvas_panel_id, imgui.Dir_.right, 0.33
+                    self.canvas_panel_id, imgui.Dir_.right, 0.30
                 )
             )
 

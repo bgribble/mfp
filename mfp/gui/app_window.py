@@ -346,8 +346,6 @@ class AppWindow (SignalMixin):
         try:
             b = factory(self, x, y)
         except Exception as e:
-            log.warning("add_element: Error while creating with factory", factory)
-            log.debug_traceback(e)
             return True
 
         self.active_layer().add(b)

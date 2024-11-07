@@ -176,8 +176,7 @@ class BaseElement (Store):
     def build(cls, *args, **kwargs):
         backend = cls.get_backend(MFPGUI().backend_name)
         if not backend:
-            log.error(f"[BaseElement.build] No '{MFPGUI().backend_name}' backend found for {cls}")
-            log.debug(BackendInterface._registry)
+            log.error(f"[build] No '{MFPGUI().backend_name}' backend found for {cls}")
             raise ValueError
         return backend(*args, **kwargs)
 

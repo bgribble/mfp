@@ -4,6 +4,7 @@ mfp_app.py
 Declare the main MFPApp object that holds app state in the GUI process
 """
 
+import asyncio
 import inspect
 import os
 import os.path
@@ -171,10 +172,16 @@ class MFPApp (Singleton, SignalMixin):
 
             # crawl plugins
             log.debug("Collecting information about installed plugins...")
-            self.pluginfo.samplerate = self.samplerate
-            self.pluginfo.index_ladspa()
-            log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo),
-                                                               len(self.pluginfo.libinfo)))
+            self.async_task(self.index_plugins())
+
+
+    async def index_plugins(self):
+        self.pluginfo.samplerate = self.samplerate
+        await asyncio.to_thread(self.pluginfo.index_ladspa)
+        log.debug(
+            "Found %d LADSPA plugins in %d files" % (
+                len(self.pluginfo.pluginfo), len(self.pluginfo.libinfo))
+        )
 
     async def exec_batch(self):
         # configure logging
