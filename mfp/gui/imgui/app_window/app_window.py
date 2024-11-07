@@ -156,6 +156,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     break
                 if Store.last_activity_time() > loop_start_time:
                     break
+                if self.last_activity_time and self.last_activity_time > loop_start_time:
+                    break
                 await asyncio.sleep(0.01)
 
             self.imgui_renderer.process_inputs()

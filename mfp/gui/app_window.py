@@ -188,6 +188,7 @@ class AppWindow (SignalMixin):
 
         self.load_in_progress = 0
         self.close_in_progress = False
+        self.last_activity_time = None
 
         # dumb colors
         self.color_unselected = self.get_color('stroke-color')

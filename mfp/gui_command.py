@@ -1,3 +1,4 @@
+from datetime import datetime
 from carp.service import apiclass, noresp
 
 
@@ -13,6 +14,7 @@ class GUICommand:
     @noresp
     def log_write(self, msg, level):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         window = MFPGUI().appwin
         if window:
             MFPGUI().appwin.log_write(msg, level)
@@ -21,33 +23,40 @@ class GUICommand:
 
     def console_set_prompt(self, prompt):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.console_manager.ps1 = prompt
         return True
 
     def console_show_prompt(self, prompt):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.console_show_prompt(prompt)
         return True
 
     def console_write(self, msg):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.console_write(msg)
 
     def hud_write(self, msg):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.hud_write(msg)
 
     def finish(self):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().finish()
 
     def command(self, obj_id, action, args):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         obj = MFPGUI().recall(obj_id)
         obj.command(action, args)
 
     async def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         obj = MFPGUI().recall(obj_id)
         if params is not None:
             await obj.configure(params)
@@ -73,6 +82,8 @@ class GUICommand:
         from .gui.button_element import ToggleIndicatorElement
         from .gui.button_element import BangButtonElement
         from mfp import log
+
+        MFPGUI().appwin.last_activity_time = datetime.now()
 
         elementtype = params.get('display_type', 'processor')
 
@@ -139,6 +150,7 @@ class GUICommand:
         from .gui.connection_element import ConnectionElement
         from .gui.patch_display import PatchDisplay
         from mfp import log
+        MFPGUI().appwin.last_activity_time = datetime.now()
 
         obj_1 = MFPGUI().recall(obj_1_id)
         obj_2 = MFPGUI().recall(obj_2_id)
@@ -166,6 +178,7 @@ class GUICommand:
         from mfp import log
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay
+        MFPGUI().appwin.last_activity_time = datetime.now()
 
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchDisplay):
@@ -178,6 +191,7 @@ class GUICommand:
     async def select(self, obj_id):
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay
+        MFPGUI().appwin.last_activity_time = datetime.now()
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchDisplay) and len(obj.layers) > 0:
             MFPGUI().appwin.layer_select(obj.layers[0])
@@ -186,14 +200,17 @@ class GUICommand:
 
     def load_start(self):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.load_start()
 
     def load_complete(self):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.load_complete()
 
     def set_undeletable(self, val):
         from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.deletable = val
 
     def clear(self):
