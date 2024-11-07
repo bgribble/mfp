@@ -50,15 +50,26 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
             if self.selected:
                 MFPGUI().async_task(self.app_window.unselect(self))
                 self.selected = False
-        complete_color = (0, 0, 1, 1)
-        dashed_color = (0.2, 0.2, 0.8, 1.0)
+
+        complete_color = self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+        dashed_color = (0, 0, 0, 0.35)
+
+        if self.dashed:
+            thickness = 0.5
+            color = dashed_color
+        elif self.dsp_connect:
+            thickness = 3
+            color = complete_color.to_rgbaf()
+        else:
+            thickness = 1.5
+            color = complete_color.to_rgbaf()
 
         nedit.link(
             self.node_id,
             from_port_obj,
             to_port_obj,
-            dashed_color if self.dashed else complete_color,
-            1 if not self.dsp_connect else 3,
+            color,
+            thickness
         )
 
     def draw_ports(self):

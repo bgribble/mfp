@@ -117,7 +117,7 @@ class BaseElement (Store):
         self.obj_args = None
         self.obj_state = self.OBJ_COMPLETE
         self.scope = None
-        self.num_inlets = 0
+        self.num_inlets = 1
         self.num_outlets = 0
         self.dsp_inlets = []
         self.dsp_outlets = []
