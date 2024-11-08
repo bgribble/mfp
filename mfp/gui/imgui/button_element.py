@@ -33,10 +33,10 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
         self.node_id = None
-        self.min_width = 10
-        self.min_height = 10
-        self.width = 10
-        self.height = 10
+        self.min_width = 16
+        self.min_height = 16
+        self.width = 16
+        self.height = 16
         self.position_set = False
 
     @mutates('position_x', 'position_y', 'width', 'height')
@@ -117,24 +117,24 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
             )
 
         # render the label. It gets moved around to be centered.
-        imgui.set_cursor_pos((
-            self.position_x + self.label.position_x,
-            self.position_y + self.label.position_y
-        ))
         if self.indicator:
             self.label.set_color(self.get_color('text-color:lit'))
         else:
             self.label.set_color(self.get_color('text-color'))
 
+        imgui.set_cursor_pos((
+            self.position_x + self.label.position_x,
+            self.position_y + self.label.position_y
+        ))
         self.label.render()
-
         content_w, content_h = imgui.get_item_rect_size()
-        if content_w < self.min_width:
-            imgui.same_line()
-            imgui.dummy([self.min_width - content_w, 1])
 
-        if content_h < self.min_height:
-            imgui.dummy([1, self.min_height - content_h])
+        if content_w + self.label.position_x < self.min_width:
+            imgui.same_line()
+            imgui.dummy([self.min_width - self.label.position_x - content_w, 1])
+
+        if content_h + self.label.position_y < self.min_height:
+            imgui.dummy([1, self.min_height - self.label.position_y - content_h])
         imgui.end_group()
 
         # connections

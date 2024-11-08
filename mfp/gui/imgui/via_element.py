@@ -45,6 +45,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         super().__init__(window, x, y)
         self.position_x = x
         self.position_y = y
+        self.position_remainder = 0.0
         self.position_set = False
 
     @mutates('position_x')
@@ -53,7 +54,10 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
             return
         widget, signal, old_text, new_text, old_size, new_size = args
         if old_size[0] != new_size[0]:
-            self.position_x += (old_size[0] - new_size[0]) / 2.0
+            desired = self.position_x + (old_size[0] - new_size[0]) / 2.0
+            desired += self.position_remainder
+            self.position_remainder = desired % 1.0
+            self.position_x = float(int(desired))
             self.position_set = True
 
     @mutates('position_x', 'position_y', 'width', 'height')

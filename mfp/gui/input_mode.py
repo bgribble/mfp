@@ -87,7 +87,6 @@ class InputMode:
         bindings are before we create an instance of it
         """
         if keysym is None:
-            log.debug(f"[bind] defaulting for {cls} to {label} {action} {helptext} {keysym} {menupath}")
             cls._default = Binding(
                 "default", action, helptext, InputMode._num_bindings, None, None, cls
             )
