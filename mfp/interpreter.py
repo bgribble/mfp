@@ -8,7 +8,7 @@ the GUI or text-mode console
 import ast
 import io
 from code import InteractiveInterpreter
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 from carp.serializer import Serializable
 from .evaluator import Evaluator
 
@@ -39,14 +39,19 @@ class Interpreter (InteractiveInterpreter):
         # we will capture stdout with this
         f = io.StringIO()
         resp = None
+        results = []
 
         with redirect_stdout(f):
-            try:
-                code = self.compile(source, filename, symbol)
-            except (OverflowError, SyntaxError, ValueError):
-                # Case 1
-                self.showsyntaxerror(filename)
-                return False
+            with redirect_stderr(f):
+                code = False
+                try:
+                    code = self.compile(source, filename, symbol)
+                except (OverflowError, SyntaxError, ValueError):
+                    # Case 1
+                    self.showsyntaxerror(filename)
+
+                if code is False:
+                    return InterpreterResponse(continued=False, value=None, stdout=f.getvalue())
 
             if code is None:
                 # Case 2
@@ -57,7 +62,6 @@ class Interpreter (InteractiveInterpreter):
 
             if not resp:
                 output = []
-                results = []
                 try:
                     stree = ast.parse(source)
                     for obj in stree.body:
@@ -77,6 +81,8 @@ class Interpreter (InteractiveInterpreter):
                     raise
                 except Exception:
                     self.showtraceback()
+        if resp:
+            return resp
 
         if results == [None]:
             resp_output = None

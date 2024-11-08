@@ -85,14 +85,14 @@ class Send (Processor):
         async def send_recheck():
             return await self._connect(self.dest_name, self.dest_inlet, False)
         conn = None
-        while conn is None:
+        while not conn:
             await asyncio.sleep(0.1)
             conn = await send_recheck()
 
     async def _connect(self, dest_name, dest_inlet, wait=True):
         # short-circuit if already conected
         if (
-            self.dest_name == dest_name 
+            self.dest_name == dest_name
             and self.dest_inlet == dest_inlet
             and self.dest_obj is not None
         ):
@@ -110,9 +110,23 @@ class Send (Processor):
         obj = MFPApp().resolve(self.dest_name, self, True)
 
         if obj is None:
-            # usually we create a bus if needed.  but if it's a reference to
-            # another top-level patch, no.
-            if ':' in self.dest_name or self.dest_inlet != 0:
+            # usually we create a bus if needed.  if it's a reference to
+            # another top-level patch, create it there
+            if ':' in self.dest_name:
+                patch_name, rest = self.dest_name.split(':', 1)
+                patch = MFPApp().patches.get(patch_name)
+
+                if patch:
+                    self.dest_obj = await MFPApp().create(
+                        self.bus_type, "",
+                        patch, patch.default_scope, rest
+                    )
+                    self.dest_obj_owned = True
+                else:
+                    if wait:
+                        await self._wait_connect()
+                    return False
+            elif self.dest_inlet != 0:
                 if wait:
                     await self._wait_connect()
                 return False
@@ -132,8 +146,6 @@ class Send (Processor):
                 or [self, 0] not in self.dest_obj.connections_in[self.dest_inlet]
             ):
                 await self.connect(0, self.dest_obj, self.dest_inlet, False)
-        else:
-            log.warning("[send] can't find dest object and not still looking")
 
         self.init_args = '"%s",%s' % (self.dest_name, self.dest_inlet)
         self.conf(label_text=self._mkdispname())

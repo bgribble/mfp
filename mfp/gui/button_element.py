@@ -8,6 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from abc import ABCMeta, abstractmethod
 
+from mfp import log
 from mfp.utils import catchall
 from .text_widget import TextWidget
 from .backend_interfaces import BackendInterface

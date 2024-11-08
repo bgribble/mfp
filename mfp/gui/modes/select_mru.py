@@ -30,7 +30,7 @@ class SelectMRUMode (InputMode):
 
     @classmethod
     def init_bindings(cls):
-        cls.bind("C-TAB", cls.select_next, "Select most-recent element")
+        cls.bind("mru-select-next", cls.select_next, "Select most-recent element", "C-TAB")
 
     async def select_next(self):
         try:

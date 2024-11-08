@@ -14,7 +14,7 @@ from mfp import log
 class AutoplaceMode (InputMode):
     NONE_SPACING = 50
     BELOW_SPACING = 25
-    ABOVE_SPACING = 50
+    ABOVE_SPACING = 45
     CLOSE_SPACING = 10
     X_CLEAR = 50
     Y_CLEAR = 35

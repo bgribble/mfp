@@ -52,10 +52,10 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
                 self.selected = False
 
         complete_color = self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
-        dashed_color = (0, 0, 0, 0.35)
+        dashed_color = (1, 1, 1, 0.25)
 
         if self.dashed:
-            thickness = 0.5
+            thickness = 1
             color = dashed_color
         elif self.dsp_connect:
             thickness = 3

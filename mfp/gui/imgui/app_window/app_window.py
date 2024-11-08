@@ -225,7 +225,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # global style setup
-        imgui.style_colors_light()
+        imgui.style_colors_classic()
         imgui.push_style_color(imgui.Col_.text_selected_bg, (200, 200, 255, 255))
 
         ########################################
@@ -239,7 +239,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             _, menu_height = imgui.get_cursor_pos()
             self.menu_height = menu_height - 5
-
         # menu bar
         ########################################
 

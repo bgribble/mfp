@@ -96,7 +96,7 @@ class EnumControlMode (InputMode):
     @classmethod
     def init_bindings(cls):
         cls.bind(
-            "enum-drag-start", cls.drag_start, "M1DOWN",
+            "enum-drag-start", cls.drag_start, "Start number control", "M1DOWN",
         )
         cls.bind(
             "enum-drag-motion", lambda mode: mode.drag_selected(1.0),
@@ -111,13 +111,13 @@ class EnumControlMode (InputMode):
             "Change value (100x speed)", "C-M1-MOTION",
         )
         cls.bind(
-            "enum-drag-end", cls.drag_end, "M1UP",
+            "enum-drag-end", cls.drag_end, "End number control", "M1UP",
         )
         cls.bind(
-            "enum-val-up", lambda mode: mode.changeval(1.0), "UP",
+            "enum-val-up", lambda mode: mode.changeval(1.0), "Increase value", "UP",
         )
         cls.bind(
-            "enum-val-down", lambda mode: mode.changeval(-1.0), "DOWN",
+            "enum-val-down", lambda mode: mode.changeval(-1.0), "Decrease value", "DOWN",
         )
 
     async def changeval(self, delta):

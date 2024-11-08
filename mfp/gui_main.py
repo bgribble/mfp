@@ -127,8 +127,52 @@ class MFPGUI (Singleton):
 
 def setup_default_colors():
     from .gui.colordb import ColorDB
+    # canvas background and grid
+    ColorDB().insert('default-canvas-color',
+                     ColorDB().find(0x3b, 0x3b, 0x3b, 0xff))
+    ColorDB().insert('default-grid-color',
+                     ColorDB().find(0x4f, 0x4f, 0x4f, 0xff))
+
+    # elements
+    ColorDB().insert('default-stroke-color',
+                     ColorDB().find(0x74, 0x74, 0x74, 0xff))
+    ColorDB().insert('default-stroke-color-selected',
+                     ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
+    ColorDB().insert('default-stroke-color-hover',
+                     ColorDB().find(0x99, 0x99, 0x99, 0x0d))
+    ColorDB().insert('default-stroke-color-debug',
+                     ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
+    ColorDB().insert('default-fill-color',
+                     ColorDB().find(0x1f, 0x1f, 0x1f, 0xff))
+    ColorDB().insert('default-fill-color-selected',
+                     ColorDB().find(0x2f, 0x2f, 0x2f, 0xff))
+    ColorDB().insert('default-fill-color-debug',
+                     ColorDB().find(0xcd, 0xf8, 0xec, 0xff))
+    ColorDB().insert('default-alt-fill-color',
+                     ColorDB().find(0x7d, 0x83, 0xff, 0xff))
+    ColorDB().insert('default-text-color',
+                     ColorDB().find(0xde, 0xde, 0xde, 0xff))
+    ColorDB().insert('default-light-text-color',
+                     ColorDB().find(0xf7, 0xf9, 0xf9, 0xff))
+    ColorDB().insert('default-text-color-selected',
+                     ColorDB().find(0xde, 0xde, 0xde, 0xff))
+    ColorDB().insert('default-edit-badge-color',
+                     ColorDB().find(0x74, 0x4b, 0x94, 0xff))
+    ColorDB().insert('default-learn-badge-color',
+                     ColorDB().find(0x19, 0xff, 0x90, 0xff))
+    ColorDB().insert('default-error-badge-color',
+                     ColorDB().find(0xb7, 0x21, 0x21, 0xff))
+    ColorDB().insert('default-text-cursor-color',
+                     ColorDB().find(0xff, 0xff, 0xff, 0x40))
+    ColorDB().insert('transparent',
+                     ColorDB().find(0x00, 0x00, 0x00, 0x00))
+
+def orig_setup_default_colors():
+    from .gui.colordb import ColorDB
     ColorDB().insert('default-canvas-color',
                      ColorDB().find(0xf7, 0xf9, 0xf9, 0))
+    ColorDB().insert('default-grid-color',
+                     ColorDB().find(0xd0, 0xd0, 0xd0, 0xff))
     ColorDB().insert('default-stroke-color',
                      ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
     ColorDB().insert('default-stroke-color-selected',
@@ -139,8 +183,6 @@ def setup_default_colors():
                      ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
     ColorDB().insert('default-fill-color',
                      ColorDB().find(0xd4, 0xdc, 0xff, 0xff))
-    ColorDB().insert('default-grid-color',
-                     ColorDB().find(0xd0, 0xd0, 0xd0, 0xff))
     ColorDB().insert('default-fill-color-selected',
                      ColorDB().find(0xe4, 0xec, 0xff, 0xff))
     ColorDB().insert('default-fill-color-debug',

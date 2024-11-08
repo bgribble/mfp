@@ -624,7 +624,8 @@ class BaseElement (Store):
 
         if not self.edit_mode:
             self.edit_mode = await self.make_edit_mode()
-            await self.edit_mode.setup()
+            if self.edit_mode:
+                await self.edit_mode.setup()
 
         if self.edit_mode:
             self.app_window.input_mgr.enable_minor_mode(self.edit_mode)
