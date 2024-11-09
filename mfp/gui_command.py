@@ -21,6 +21,11 @@ class GUICommand:
         else:
             print(msg)
 
+    def dsp_info(self, info):
+        from .gui_main import MFPGUI
+        MFPGUI().appwin.last_activity_time = datetime.now()
+        MFPGUI().appwin.dsp_info = info
+
     def console_set_prompt(self, prompt):
         from .gui_main import MFPGUI
         MFPGUI().appwin.last_activity_time = datetime.now()

@@ -145,10 +145,16 @@ class TileManagerMode (InputMode):
             "select-tile-prev", cls.select_prev, "Select previous tile by number",
             keysym=";"
         )
-        cls.bind("dismiss-tile-management", cls.dismiss_mode, "End tile management mode", keysym=None)
+        cls.bind("dismiss-tile-management", cls.dismiss_mode, "End tile management mode", keysym="ESC")
+        cls.bind("dismiss-tile-default", cls.dismiss_mode, "End tile management mode", keysym=None)
 
 
     def dismiss_mode(self, *args):
+        # this is the default handler, don't want to dismiss on 
+        # hover, mouse motion, etc
+        if args and len(args[0]) > 3:
+            return False
+
         self.manager.disable_minor_mode(self)
         return True
 

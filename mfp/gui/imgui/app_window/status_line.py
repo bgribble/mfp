@@ -1,4 +1,6 @@
 from imgui_bundle import imgui, imgui_node_editor as nedit
+from mfp import log
+from mfp.gui.modes.global_mode import GlobalMode
 
 CHAR_PIXELS = 7
 
@@ -16,6 +18,13 @@ def render(app_window):
     )
 
     if app_window.cmd_prompt:
+        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+            app_window.selected_window = "canvas"
+            if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
+                app_window.input_mgr.global_mode = GlobalMode(app_window)
+                app_window.input_mgr.major_mode.enable()
+                app_window.input_mgr.enable_minor_mode(app_window.cmd_manager.mode)
+
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 3.0))
         imgui.text(app_window.cmd_prompt)
         imgui.same_line()
@@ -42,17 +51,24 @@ def render(app_window):
 
         elapsed = (app_window.frame_timestamps[-1] - app_window.frame_timestamps[0]).total_seconds()
         fps = int((len(app_window.frame_timestamps)-1) / elapsed)
-        
+
         fps_text = f"FPS: {fps}"
-        pointer_text = ''
+        dsp_text = ''
+        if app_window.dsp_info:
+            dsp_info = app_window.dsp_info
+            srate = dsp_info.get("samplerate")
+            latency_in = dsp_info.get("latency_in")
+            latency_out = dsp_info.get("latency_out")
+            channels_in = dsp_info.get("channels_in")
+            channels_out = dsp_info.get("channels_out")
+            dsp_text = f"DSP: {srate},io={channels_in}/{channels_out}"
 
-        if app_window.input_mgr.pointer_ev_x:
-            pointer_text = f"Pointer: screen=({app_window.input_mgr.pointer_ev_x:.1f}, {app_window.input_mgr.pointer_ev_y:.1f}) canvas=({app_window.input_mgr.pointer_x:.1f}, {app_window.input_mgr.pointer_y:.1f})"
-
-        right_corner_text = ' '.join([fps_text, pointer_text])
+        right_corner_text = ' '.join([
+            fps_text, dsp_text
+        ])
         cur = imgui.get_cursor_pos()
         imgui.set_cursor_pos((
-            app_window.window_width - len(right_corner_text) * CHAR_PIXELS,
+            app_window.window_width - len(right_corner_text) * CHAR_PIXELS - 24,
             cur[1]
         ))
         imgui.text(right_corner_text)

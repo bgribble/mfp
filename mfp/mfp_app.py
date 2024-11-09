@@ -55,8 +55,6 @@ class MFPApp (Singleton, SignalMixin):
         self.samplerate = 44100
         self.blocksize = 256
         self.max_blocksize = 2048
-        self.in_latency = 0
-        self.out_latency = 0
         self.socket_path = "/tmp/mfp_rpcsock"
         self.batch_mode = False
         self.batch_obj = None
@@ -374,6 +372,16 @@ class MFPApp (Singleton, SignalMixin):
         if patch is None:
             patch = Patch(name, '', None, self.app_scope, name, context)
             patch.gui_params['layers'] = [('Layer 0', '__patch__')]
+
+        if not self.no_dsp and not self.no_gui:
+            context = patch.context
+            await self.gui_command.dsp_info(dict(
+                samplerate=self.samplerate,
+                latency_in=context.input_latency,
+                latency_out=context.output_latency,
+                channels_in=self.dsp_inputs,
+                channels_out=self.dsp_outputs
+            ))
 
         self.patches[patch.name] = patch
         if show_gui:

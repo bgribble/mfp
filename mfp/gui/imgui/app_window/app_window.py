@@ -118,6 +118,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     async def _render_task(self):
         keep_going = True
+        next_frame_latest_delay = 10000
 
         io = imgui.get_io()
         io.config_flags |= imgui.ConfigFlags_.docking_enable
@@ -150,13 +151,17 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             while True:
                 keep_going, events_processed = await self.imgui_impl.process_events()
-                if events_processed or not keep_going:
+                if datetime.now() > loop_start_time + timedelta(microseconds=next_frame_latest_delay):
+                    next_frame_latest_delay = (next_frame_latest_delay + MAX_RENDER_US) / 2.0
                     break
-                if datetime.now() > loop_start_time + timedelta(microseconds=MAX_RENDER_US):
+                if events_processed or not keep_going:
+                    next_frame_latest_delay = 10000
                     break
                 if Store.last_activity_time() > loop_start_time:
+                    next_frame_latest_delay = 10000
                     break
                 if self.last_activity_time and self.last_activity_time > loop_start_time:
+                    next_frame_latest_delay = 10000
                     break
                 await asyncio.sleep(0.01)
 

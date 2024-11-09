@@ -55,40 +55,32 @@ reorder_cb (void * ctxt_arg)
     jack_recompute_total_latencies(ctxt->info.jack->client);
     maxval = 0;
     for (portno = 0; portno < num_inports; portno++) {
-        jack_port_get_latency_range(g_array_index(ctxt->info.jack->input_ports,
-                                                  jack_port_t *, portno),
-                                    JackCaptureLatency, & range);
+        jack_port_get_latency_range(
+            g_array_index(ctxt->info.jack->input_ports, jack_port_t *, portno),
+            JackCaptureLatency, &range
+        );
         if (range.max > maxval) {
             maxval = range.max;
         }
-
-        lastval = jack_port_get_total_latency(ctxt->info.jack->client,
-                                              g_array_index(ctxt->info.jack->input_ports,
-                                                            jack_port_t *, portno));
-        if (lastval > maxval) {
-            maxval = lastval;
-        }
-
     }
-    mfp_in_latency = 1000.0 * maxval / ctxt->samplerate;
+    if (maxval > 0) {
+        mfp_in_latency = 1000.0 * maxval / ctxt->samplerate;
+    }
 
     maxval = 0;
     for (portno = 0; portno < num_outports; portno++) {
-        jack_port_get_latency_range(g_array_index(ctxt->info.jack->output_ports,
-                                                  jack_port_t *,  portno),
-                                    JackPlaybackLatency, & range);
+        jack_port_get_latency_range(
+            g_array_index(ctxt->info.jack->output_ports, jack_port_t *,  portno),
+            JackPlaybackLatency, &range
+        );
         if (range.max > maxval) {
             maxval = range.max;
         }
-        lastval = jack_port_get_total_latency(ctxt->info.jack->client,
-                                              g_array_index(ctxt->info.jack->output_ports,
-                                                            jack_port_t *, portno));
-        if (lastval > maxval) {
-            maxval = lastval;
-        }
     }
 
-    mfp_out_latency = 1000.0 * maxval / ctxt->samplerate;
+    if (maxval > 0) {
+        mfp_out_latency = 1000.0 * maxval / ctxt->samplerate;
+    }
 
     return 0;
 }
@@ -148,7 +140,7 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
     mfp_in_latency = 3000.0 * ctxt->blocksize / ctxt->samplerate;
     mfp_out_latency = 3000.0 * ctxt->blocksize / ctxt->samplerate;
 
-    mfp_log_debug("JACK started: samplerate=%d, blocksize=%d, in_latency=%.1f, out_latency = %.1f\n",
+    mfp_log_debug("JACK started: samplerate=%d, blocksize=%d, in_latency=%.1f, out_latency=%.1f\n",
             ctxt->samplerate, ctxt->blocksize, mfp_in_latency, mfp_out_latency);
 
     /* tell the JACK server that we are ready to roll */

@@ -242,6 +242,8 @@ class GlobalMode (InputMode):
             else:
                 cmd, *rest = txt.split(' ', 1)
                 binding = InputMode._bindings_by_label.get(cmd.strip())
+                if not binding:
+                    return
                 mode_binding = self.window.input_mgr.binding_enabled(
                     binding.mode, binding.keysym
                 )

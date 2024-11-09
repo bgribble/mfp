@@ -53,34 +53,30 @@ class Interpreter (InteractiveInterpreter):
                 if code is False:
                     return InterpreterResponse(continued=False, value=None, stdout=f.getvalue())
 
-            if code is None:
-                # Case 2
-                resp = InterpreterResponse(continued=True)
+                if code is None:
+                    # Case 2
+                    resp = InterpreterResponse(continued=True)
 
-            if not resp and not len(source.strip()):
-                resp = InterpreterResponse(continued=False, value=None)
+                if not resp and not len(source.strip()):
+                    resp = InterpreterResponse(continued=False, value=None)
 
-            if not resp:
-                output = []
-                try:
-                    stree = ast.parse(source)
-                    for obj in stree.body:
-                        if isinstance(obj, ast.Expr):
-                            results.append(
-                                # in the interactive console, 'print' should return its
-                                # args as a string since stdout is useless
-                                #
-                                # FIXME do something about input
-                                await self.evaluator.eval_async(source)
-                            )
-                        else:
-                            self.evaluator.exec_str(source)
-                    for r in results:
-                        output.append(repr(r))
-                except SystemExit:
-                    raise
-                except Exception:
-                    self.showtraceback()
+                if not resp:
+                    output = []
+                    try:
+                        stree = ast.parse(source)
+                        for obj in stree.body:
+                            if isinstance(obj, ast.Expr):
+                                results.append(
+                                    await self.evaluator.eval_async(source)
+                                )
+                            else:
+                                self.evaluator.exec_str(source)
+                        for r in results:
+                            output.append(repr(r))
+                    except SystemExit:
+                        raise
+                    except Exception:
+                        self.showtraceback()
         if resp:
             return resp
 

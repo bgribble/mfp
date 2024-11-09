@@ -117,8 +117,8 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
 
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            self.get_color(
-                'fill-color:selected' if self.selected else 'fill-color'
+            ColorDB().find(
+                'transparent'
             ).to_rgbaf()
         )
         nedit.push_style_color(
@@ -395,8 +395,8 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
 
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            self.get_color(
-                'fill-color:selected' if self.selected else 'fill-color'
+            ColorDB().find(
+                'transparent'
             ).to_rgbaf()
         )
         nedit.push_style_color(
