@@ -42,6 +42,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_renderer = None
         self.imgui_repeating_keys = {}
         self.imgui_needs_reselect = []
+        self.imgui_prevent_idle = False
 
         self.nedit_config = None
 
@@ -163,6 +164,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 if self.last_activity_time and self.last_activity_time > loop_start_time:
                     next_frame_latest_delay = 10000
                     break
+                if self.imgui_prevent_idle:
+                    break
                 await asyncio.sleep(0.01)
 
             self.imgui_renderer.process_inputs()
@@ -226,12 +229,16 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # renderer
     def render(self):
+        self.imgui_prevent_idle = False
         keep_going = True
 
         ########################################
         # global style setup
         imgui.style_colors_classic()
         imgui.push_style_color(imgui.Col_.text_selected_bg, (200, 200, 255, 255))
+
+        nedit.push_style_color(nedit.StyleColor.flow_marker, (1, 1, 1, 0.2))
+        nedit.push_style_color(nedit.StyleColor.flow, (1, 1, 1, 0.5))
 
         ########################################
         # menu bar
@@ -364,6 +371,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.pop_style_var()  # spacing
 
         imgui.pop_style_color()  # text selected bg
+        nedit.pop_style_color(2)
 
         # full-screen window
         ########################################

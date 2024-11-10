@@ -62,6 +62,8 @@ class MFPGUI (Singleton):
             'font-size': ParamInfo(label="Font size", param_type=float),
             'grid-color:edit': ParamInfo(label="Grid color (edit)", param_type=RGBAColor),
             'grid-color:operate': ParamInfo(label="Grid color (operate)", param_type=RGBAColor),
+            'link-color': ParamInfo(label="Connection color", param_type=RGBAColor),
+            'link-color:selected': ParamInfo(label="Connection color (selected)", param_type=RGBAColor),
             'meter-color': ParamInfo(label="Meter bar color", param_type=RGBAColor),
             'padding': ParamInfo(label="Element padding", param_type=dict),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
@@ -81,7 +83,6 @@ class MFPGUI (Singleton):
             'text-cursor-color': ParamInfo(label="Text cursor color", param_type=RGBAColor),
         }
 
-
         self.style_defaults = {
             'canvas-color': ColorDB().find('default-canvas-color'),
             'fill-color': ColorDB().find('default-fill-color'),
@@ -92,6 +93,8 @@ class MFPGUI (Singleton):
             'font-size': 16,
             'grid-color:edit': ColorDB().find('default-grid-color'),
             'grid-color:operate': ColorDB().find('transparent'),
+            'link-color': ColorDB().find('default-link-color'),
+            'link-color:selected': ColorDB().find('default-link-color-selected'),
             'porthole-color': ColorDB().find('default-stroke-color'),
             'porthole-color:selected': ColorDB().find('default-stroke-color-selected'),
             'stroke-color': ColorDB().find('default-stroke-color'),
@@ -125,7 +128,7 @@ class MFPGUI (Singleton):
             self.appwin = None
 
 
-def setup_default_colors():
+def setup_default_colors_dark():
     from .gui.colordb import ColorDB
     # canvas background and grid
     ColorDB().insert('default-canvas-color',
@@ -137,6 +140,10 @@ def setup_default_colors():
     ColorDB().insert('default-stroke-color',
                      ColorDB().find(0x74, 0x74, 0x74, 0xff))
     ColorDB().insert('default-stroke-color-selected',
+                     ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
+    ColorDB().insert('default-link-color',
+                     ColorDB().find(0x84, 0x84, 0x84, 0xff))
+    ColorDB().insert('default-link-color-selected',
                      ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
     ColorDB().insert('default-stroke-color-hover',
                      ColorDB().find(0x99, 0x99, 0x99, 0x0d))
@@ -167,7 +174,7 @@ def setup_default_colors():
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
-def orig_setup_default_colors():
+def setup_default_colors_light():
     from .gui.colordb import ColorDB
     ColorDB().insert('default-canvas-color',
                      ColorDB().find(0xf7, 0xf9, 0xf9, 0))
@@ -181,6 +188,10 @@ def orig_setup_default_colors():
                      ColorDB().find(0x00, 0x20, 0x40, 0x0d))
     ColorDB().insert('default-stroke-color-debug',
                      ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
+    ColorDB().insert('default-link-color',
+                     ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
+    ColorDB().insert('default-link-color-selected',
+                     ColorDB().find(0x00, 0x7f, 0xff, 0xff))
     ColorDB().insert('default-fill-color',
                      ColorDB().find(0xd4, 0xdc, 0xff, 0xff))
     ColorDB().insert('default-fill-color-selected',
@@ -247,7 +258,10 @@ async def main(cmdline):
 
     ColorDB.backend_name = backend
 
-    setup_default_colors()
+    if backend == "imgui":
+        setup_default_colors_dark()
+    else:
+        setup_default_colors_light()
 
     gui = MFPGUI()
     gui.mfp = mfp_connection

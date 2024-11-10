@@ -7,7 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from imgui_bundle import imgui, imgui_node_editor as nedit
 
 from flopsy import mutates
-
+from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from mfp.gui.base_element import BaseElement
@@ -51,12 +51,15 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
                 MFPGUI().async_task(self.app_window.unselect(self))
                 self.selected = False
 
-        complete_color = self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
-        dashed_color = (1, 1, 1, 0.25)
+        complete_color = self.get_color('link-color:selected' if self.selected else 'link-color')
+        dashed_color = (1, 1, 1, 0.5)
 
         if self.dashed:
             thickness = 1
             color = dashed_color
+            nedit.push_style_var(nedit.StyleVar.flow_marker_distance, 30)
+            nedit.push_style_var(nedit.StyleVar.flow_speed, 25)
+            nedit.push_style_var(nedit.StyleVar.flow_duration, 0.1)
         elif self.dsp_connect:
             thickness = 3
             color = complete_color.to_rgbaf()
@@ -71,6 +74,11 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
             color,
             thickness
         )
+
+        if self.dashed:
+            nedit.flow(self.node_id)
+            nedit.pop_style_var(3)
+            self.app_window.imgui_prevent_idle = True
 
     def draw_ports(self):
         super().draw_ports()
