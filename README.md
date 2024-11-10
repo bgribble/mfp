@@ -18,18 +18,17 @@ ImGUI](https://github.com/ocornut/imgui) for the UI, via the excellent
 pass the command-line arg `--gui-backend=imgui` (Clutter is still the default).
 
 The new UI looks quite a bit different. It's more like Max in the
-visual presentation of patches and the addition of a pretty
-extensive right-side parameter editing panel. It's already
-better than the Clutter UI in important ways. Some big
-differences:
+visual presentation of patches and the addition of a right-side
+parameter editing panel. It's already better than the Clutter UI
+in important ways. Some big differences:
 
 * A tiled patch display area, to allow multiple patches to be
   viewed/edited at once
-* A menu bar that should reflect most available actions (still not built out)
+* A menu bar that should reflect most available actions
 * Ability to directly edit object parameters and style in the
   "Info" panel
 
-Many display elements and app features are still not implemented,
+Some display elements and app features are still not implemented,
 so some patches won't work properly and you can expect to see
 some errors if you try to add unimplemented elements to the
 patch.
@@ -56,7 +55,7 @@ using just the keyboard.  You do need a pointer to activate it.
 
 You type | What happens
 ---------|----------------
-a | Autoplace mode.  A + appears where the next object will go
+a | Autoplace mode.  A symbol appears where the next object will go
 m | Create message (literal data)
 "hello world" RET| Put the string "hello, world" in the message
 c | Connect mode (will connect selected object to something)
@@ -71,21 +70,25 @@ Now click on the message box to send the "hello, world" string.
 Below the patch editing area, in the "Log" tab, you will see the message
 appear.
 
-At any time, the "Keybindings" tab to the left of the patch editing area
-will show you all the active key bindings.  Bindings nearer the top are
-chosen first, so if there are 2 listings for RET for instance the top one will
-be used.
+Clutter backend: the "Keybindings" tab to the left of the patch
+editing area will show you all the active key bindings. If you
+hover the mouse over any object, a tooltip with some
+documentation will appear at the top of the canvas area.  Hold
+down SHIFT to expand the tooltip to show current information
+about the object, including assigned MIDI and OSC controllers.
 
-If you hover the mouse over any object, a tooltip with some
-documentation will appear at the top of the canvas area.  Hold down
-SHIFT to expand the tooltip to show current information about the
-object, including assigned MIDI and OSC controllers.
+
+Imgui backend: the status line at the bottom of the window shows the
+currently active input modes, and the menus should reflect which
+actions are available. Information about the selected object is
+visible in the info panel on the right side.
+
 
 ## KNOWN BROKEN
 
-There are a number of bugs that I hoped to get fixed by this
-release (0.7) but have not.  Here are some that I will just have
-to ask for your patience with:
+There are a number of bugs, mostly in the Clutter backend, that I
+hoped to get fixed by this release (0.7) but have not.  Here are
+some that I will just have to ask for your patience with:
 
 Ticket | Description
 -------| --------------
