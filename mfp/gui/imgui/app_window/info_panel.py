@@ -33,6 +33,7 @@ any_params = [
 TAB_PADDING_X = 12
 TAB_PADDING_Y = 4
 
+
 # info panel is the layer/patch list and the object inspector
 def render(app_window):
     imgui.begin(
@@ -101,27 +102,23 @@ def render(app_window):
 logged_errors = set()
 
 
-def render_param(app_window, param_name, param_type, param_value):
-    if param_type.editable is False:
-        imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
-    else:
-        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 4.0))
-
+def render_param(
+    app_window, param_name, param_type, param_value, readonly=False, override=None
+):
     item_spacing = 12
+
+    # parameter name
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 4.0))
     imgui.text(param_type.label)
-
-    newval = param_value
+    newval = param_value if override is None else override
     changed = False
-    try:
-        if param_type.editable is False:
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, item_spacing))
-            imgui.text(
-                str(param_value),
-            )
-            imgui.pop_style_var()
 
-        elif param_type.param_type is str:
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, item_spacing))
+    try:
+        if readonly or param_type.editable is False:
+            imgui.begin_disabled()
+
+        if param_type.param_type is str:
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             changed, newval = imgui.input_text(
                 f"##{param_name}",
                 str(param_value),
@@ -130,7 +127,7 @@ def render_param(app_window, param_name, param_type, param_value):
             imgui.pop_style_var()
 
         elif param_type.param_type is ListOfInt:
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, item_spacing))
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             changed, newval = imgui.input_text(
                 f"##{param_name}",
                 str(param_value),
@@ -139,22 +136,14 @@ def render_param(app_window, param_name, param_type, param_value):
             imgui.pop_style_var()
 
         elif param_type.param_type is bool:
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, item_spacing))
-            imgui.begin_group()
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (6, 0))
-            imgui.same_line()
-            changed, newval = imgui.checkbox(
-                f"##{param_name}",
-                bool(param_value),
-            )
-            imgui.pop_style_var()
-            imgui.end_group()
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+            changed, newval = imgui.checkbox(f"##{param_name}", bool(param_value))
             imgui.pop_style_var()
 
         elif param_type.param_type is int:
             show_input = True
             show_input_changed = False
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, item_spacing))
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             imgui.begin_group()
             if param_type.null:
                 imgui.push_style_var(imgui.StyleVar_.item_spacing, (6, 0))
@@ -186,7 +175,7 @@ def render_param(app_window, param_name, param_type, param_value):
         elif param_type.param_type is float:
             show_input = True
             show_input_changed = False
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, item_spacing))
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             imgui.begin_group()
             if param_type.null:
                 imgui.push_style_var(imgui.StyleVar_.item_spacing, (6, 0))
@@ -225,6 +214,8 @@ def render_param(app_window, param_name, param_type, param_value):
                 param_value.blue / 255.0,
                 param_value.alpha / 255.0
             ]
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+            imgui.begin_group()
             txt_changed, txt_newval = imgui.input_text(
                 f"##{param_name}_txt",
                 str(param_value),
@@ -248,13 +239,18 @@ def render_param(app_window, param_name, param_type, param_value):
                 newval = RGBAColor(
                     red=red*255.0, green=green*255.0, blue=blue*255.0, alpha=alpha*255.0
                 )
+            imgui.end_group()
+            imgui.pop_style_var()
 
         elif param_type.param_type is ListOfPairs:
             newval = []
             changed = False
 
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+            imgui.begin_group()
             if param_value and len(param_value) > 0:
                 flags = 0
+                imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 4.0))
                 if imgui.begin_table(f"##{param_name}_table", 3, flags):
                     imgui.table_setup_column("Display")
                     imgui.table_setup_column("Value")
@@ -291,14 +287,18 @@ def render_param(app_window, param_name, param_type, param_value):
                         changed = changed or val_changed or display_changed
                         newval.append(new_item)
                     imgui.end_table()
+                imgui.pop_style_var()
             if imgui.button("Add"):
                 newval.append(("", ""))
                 changed = True
+            imgui.end_group()
+            imgui.pop_style_var()
 
         elif param_type.param_type is dict:
             newval = {}
             changed = False
 
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             if param_value and len(param_value) > 0:
                 flags = 0
                 if imgui.begin_table(f"##{param_name}_table", 2, flags):
@@ -327,9 +327,23 @@ def render_param(app_window, param_name, param_type, param_value):
                         else:
                             newval[row_key] = row_value
                     imgui.end_table()
+            imgui.pop_style_var()
+
+        if readonly or param_type.editable is False:
+            imgui.end_disabled()
+
+        if override is not None:
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+            imgui.same_line()
+            param_value = override
+            changed, newval = imgui.checkbox(f"##{param_name}_override", override)
+            imgui.same_line()
+            imgui.text("Change")
+            imgui.pop_style_var()
 
         if param_name in logged_errors:
             logged_errors.remove(param_name)
+
     except Exception as e:
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
         imgui.text(
@@ -411,6 +425,7 @@ def render_patch_tab(app_window):
 
     imgui.end_group()
 
+
 def render_object_tab(app_window):
     ######################
     # a little padding
@@ -451,6 +466,7 @@ def render_object_tab(app_window):
                     )
     imgui.end_group()
 
+
 def render_params_tab(app_window, param_list):
     if len(app_window.selected) != 1 or len(param_list) == 0:
         return
@@ -473,10 +489,13 @@ def render_params_tab(app_window, param_list):
 
     imgui.end_group()
 
+
 def render_style_tab(app_window):
     if imgui.begin_tab_bar("styles_tab_bar", imgui.TabBarFlags_.none):
         style = None
         style_changed = False
+
+        override_params = []
 
         # always show info about selection
         if len(app_window.selected) == 1:
@@ -484,6 +503,9 @@ def render_style_tab(app_window):
             style = {**sel.style}
             style_changed = False
 
+            override_params = list(style.keys())
+
+            # the Element tab is the only on where params can be edited
             if imgui.begin_tab_item("Element")[0]:
                 imgui.dummy([1, TAB_PADDING_Y])
                 imgui.dummy([TAB_PADDING_X, 1])
@@ -498,6 +520,8 @@ def render_style_tab(app_window):
                         style_changed = True
                 imgui.end_group()
                 imgui.end_tab_item()
+
+            # defaults for this type of element
             if imgui.begin_tab_item("Type")[0]:
                 imgui.dummy([1, TAB_PADDING_Y])
                 imgui.dummy([TAB_PADDING_X, 1])
@@ -506,12 +530,21 @@ def render_style_tab(app_window):
                 imgui.begin_group()
                 for propname, value in type(sel).style_defaults.items():
                     pp = MFPGUI().style_vars[propname]
-                    newval = render_param(app_window, propname, pp, value)
-                    if newval != value:
-                        style[propname] = newval
+                    override = propname in override_params
+                    newval = render_param(
+                        app_window, propname, pp, value,
+                        readonly=True, override=override
+                    )
+                    if newval != override:
+                        if newval:
+                            style[propname] = value
+                        elif propname in style:
+                            del style[propname]
                         style_changed = True
                 imgui.end_group()
                 imgui.end_tab_item()
+
+            # style shared by all element types
             if imgui.begin_tab_item("Base")[0]:
                 imgui.dummy([1, TAB_PADDING_Y])
                 imgui.dummy([TAB_PADDING_X, 1])
@@ -520,9 +553,17 @@ def render_style_tab(app_window):
                 imgui.begin_group()
                 for propname, value in BaseElement.style_defaults.items():
                     pp = MFPGUI().style_vars[propname]
-                    newval = render_param(app_window, propname, pp, value)
-                    if newval != value:
-                        style[propname] = newval
+                    override = propname in override_params
+                    newval = render_param(
+                        app_window, propname, pp, value,
+                        readonly=True, override=override
+                    )
+                    if newval != override:
+                        if newval:
+                            style[propname] = value
+                        elif propname in style:
+                            del style[propname]
+
                         style_changed = True
                 imgui.end_group()
                 imgui.end_tab_item()
@@ -535,9 +576,16 @@ def render_style_tab(app_window):
             imgui.begin_group()
             for propname, value in MFPGUI().style_defaults.items():
                 pp = MFPGUI().style_vars[propname]
-                newval = render_param(app_window, propname, pp, value)
-                if style and newval != value:
-                    style[propname] = newval
+                override = propname in override_params
+                newval = render_param(
+                    app_window, propname, pp, value, readonly=True, override=override
+                )
+                if newval != override:
+                    if newval:
+                        style[propname] = value
+                    else:
+                        if propname in style:
+                            del style[propname]
                     style_changed = True
             imgui.end_group()
             imgui.end_tab_item()
@@ -553,11 +601,11 @@ def render_style_tab(app_window):
                 # these should be readonly
                 for propname, value in sel._all_styles.items():
                     pp = MFPGUI().style_vars[propname]
-                    render_param(app_window, propname, pp, value)
+                    render_param(app_window, propname, pp, value, readonly=True)
                 imgui.end_group()
                 imgui.end_tab_item()
 
-        if style and style_changed:
+        if style is not None and style_changed:
             MFPGUI().async_task(sel.dispatch_setter('style', style))
 
         imgui.end_tab_bar()
