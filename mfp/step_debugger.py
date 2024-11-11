@@ -7,6 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 import asyncio
 import threading
 import inspect
+from mfp import log
 
 help_message = """Step debugger help
 
@@ -80,8 +81,14 @@ class StepDebugger:
 
             if b in self.shadowed_bindings:
                 evaluator.local_names[b] = self.shadowed_bindings[b]
-            else:
+            elif b in evaluator.local_names:
                 del evaluator.local_names[b]
+
+        # cancel pending tasks
+        for t in self.tasklist:
+            task = t[0]
+            task.close()
+        self.tasklist = []
 
     def prepend_tasks(self, tasklist):
         self.tasklist[:0] = tasklist
@@ -159,7 +166,8 @@ class StepDebugger:
             await MFPApp().gui_command.console_write("\n" + message + "\n")
 
         await MFPApp().gui_command.console_write(
-            "Step mode started\nn=next, r=run, h=help\n"
+            "Step mode started\nn=next, r=run, h=help\n",
+            bring_to_front=True
         )
 
     async def show_leave(self):
@@ -186,15 +194,9 @@ class StepDebugger:
 
     async def step_run(self):
         await self.show_leave()
-        while self.tasklist and len(self.tasklist) > 1:
+        while self.tasklist and len(self.tasklist) > 0:
             await self.step_next()
 
-        if len(self.tasklist) > 0:
-            task, _, _ = self.tasklist[0]
-            self.disable()
-            await task
-        else:
-            self.disable()
-
+        self.disable()
         self.set_target(None)
         return None

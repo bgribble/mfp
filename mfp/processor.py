@@ -858,6 +858,8 @@ class Processor:
             else:
                 send_tasks = await self._send__propagate()
 
+        # step mode could be activated or deactivated in activate
+        debug = self.step_debug_manager().enabled
         if debug:
             if step_execute:
                 self.step_debug_manager().prepend_tasks(debug_tasks)

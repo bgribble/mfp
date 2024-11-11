@@ -50,6 +50,8 @@ class ConsoleManager (BackendInterface):
         self.last_ps = self.ps1
         self.continue_buffer = ''
 
+        self.bring_to_front = False
+
     @classmethod
     def build(cls, *args, **kwargs):
         return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)

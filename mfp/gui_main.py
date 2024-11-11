@@ -154,7 +154,7 @@ def setup_default_colors_dark():
     ColorDB().insert('default-fill-color-selected',
                      ColorDB().find(0x2f, 0x2f, 0x2f, 0xff))
     ColorDB().insert('default-fill-color-debug',
-                     ColorDB().find(0xcd, 0xf8, 0xec, 0xff))
+                     ColorDB().find(0x2f, 0x4f, 0x2f, 0xff))
     ColorDB().insert('default-alt-fill-color',
                      ColorDB().find(0x7d, 0x83, 0xff, 0xff))
     ColorDB().insert('default-text-color',

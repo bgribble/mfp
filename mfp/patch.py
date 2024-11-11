@@ -553,6 +553,10 @@ class Patch(Processor):
         for obj in list(to_delete):
             await obj.delete()
 
+        if self.step_debugger:
+            self.step_debugger.disable()
+            self.step_debugger = None
+
         await Processor.delete(self)
 
 # load extension methods

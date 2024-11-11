@@ -38,10 +38,11 @@ class GUICommand:
         MFPGUI().appwin.console_show_prompt(prompt)
         return True
 
-    def console_write(self, msg):
+    def console_write(self, msg, bring_to_front=False):
         from .gui_main import MFPGUI
         MFPGUI().appwin.last_activity_time = datetime.now()
-        MFPGUI().appwin.console_write(msg)
+        MFPGUI().appwin.console_write(msg, bring_to_front)
+
 
     def hud_write(self, msg):
         from .gui_main import MFPGUI

@@ -13,14 +13,6 @@ def render(app_window):
             | imgui.WindowFlags_.no_bring_to_front_on_focus
         ),
     )
-    if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.selected_window = "console"
-        if not isinstance(app_window.input_mgr.global_mode, ConsoleMode):
-            app_window.input_mgr.global_mode = ConsoleMode(app_window)
-            app_window.input_mgr.major_mode.disable()
-            for m in list(app_window.input_mgr.minor_modes):
-                app_window.input_mgr.disable_minor_mode(m)
-
     if imgui.begin_tab_bar("console_tab_bar", imgui.TabBarFlags_.none):
         if imgui.begin_tab_item("Log")[0]:
             imgui.input_text_multiline(
@@ -30,7 +22,22 @@ def render(app_window):
                 imgui.InputTextFlags_.read_only
             )
             imgui.end_tab_item()
-        if imgui.begin_tab_item("Console")[0]:
+
+        if app_window.console_manager.bring_to_front:
+            tabflags = imgui.TabItemFlags_.set_selected
+            app_window.console_manager.bring_to_front = False
+        else:
+            tabflags = 0
+
+        if imgui.begin_tab_item("Console", None, tabflags)[0]:
+            if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+                app_window.selected_window = "console"
+                if not isinstance(app_window.input_mgr.global_mode, ConsoleMode):
+                    app_window.input_mgr.global_mode = ConsoleMode(app_window)
+                    app_window.input_mgr.major_mode.disable()
+                    for m in list(app_window.input_mgr.minor_modes):
+                        app_window.input_mgr.disable_minor_mode(m)
+
             app_window.console_manager.render(
                 app_window.window_width,
                 app_window.console_panel_height - app_window.menu_height

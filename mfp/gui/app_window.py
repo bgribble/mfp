@@ -385,8 +385,10 @@ class AppWindow (SignalMixin):
         log.debug("quit: shutdown complete")
         return True
 
-    def console_write(self, msg):
+    def console_write(self, msg, bring_to_front=False):
         self.console_manager.append(msg)
+        if bring_to_front:
+            self.console_manager.bring_to_front = True
 
     def console_show_prompt(self, msg):
         self.console_manager.show_prompt(msg)
