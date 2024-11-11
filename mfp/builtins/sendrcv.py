@@ -409,7 +409,7 @@ class RecvSignal (Recv):
             await self.src_obj.connect(self.src_outlet, self, 0, False)
             return True
         elif wait:
-            self._wait_connect()
+            await self._wait_connect()
 
         return False
 
