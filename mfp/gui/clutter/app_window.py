@@ -12,6 +12,7 @@ from mfp.gui.app_window import AppWindow, AppWindowImpl
 from mfp.gui.collision import collision_check
 from mfp.gui.colordb import ColorDB
 from mfp.gui.text_widget import TextWidget
+from mfp.gui.tile_manager import Tile
 from mfp.gui_main import MFPGUI
 
 from ..connection_element import ConnectionElement
@@ -24,6 +25,7 @@ from .tree_display import TreeDisplay
 
 class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
     backend_name = "clutter"
+    motion_overrides = []
 
     def render(self):
         # clutter backend does not need a render call
@@ -45,9 +47,9 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             # explicit init seems to avoid strange thread sync/blocking issues
             GtkClutter.init([])
 
-        except Exception:
+        except Exception as e:
             log.error("Fatal error during GUI startup")
-            log.debug_traceback()
+            log.debug_traceback(e)
             return
 
         try:
@@ -55,7 +57,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
         except Exception as e:
             log.error("Caught GUI exception:", e)
-            log.debug_traceback()
+            log.debug_traceback(e)
             sys.stdout.flush()
 
     def ready(self):
@@ -63,6 +65,18 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             return True
         else:
             return False
+
+    @property
+    def view_x(self):
+        return self.selected_patch.display_info.view_x
+
+    @property
+    def view_y(self):
+        return self.selected_patch.display_info.view_y
+
+    @property
+    def zoom(self):
+        return self.selected_patch.display_info.view_zoom
 
     def _init_window(self):
         from gi.repository import Clutter, Gtk, GtkClutter
@@ -79,13 +93,9 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         # The HUD is the text overlay at the bottom/top of the window that
         # fades after a short display
         self.hud_history = []
+        self.hud_mode_text = None
         self.hud_banner_text = None
         self.hud_banner_anim = None
-
-        self.hud_prompt = None
-        self.hud_prompt_input = None
-        self.hud_mode_txt = None
-
         self.previous_console_position = 0
         self.next_tree_position = 1
 
@@ -189,7 +199,21 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         return layer_view
 
     def add_patch(self, patch_display):
+        patch_display.display_info = Tile(
+            title=patch_display.obj_name,
+            origin_x=0,
+            origin_y=0,
+            width=0,
+            height=0,
+            view_x=0,
+            view_y=0,
+            view_zoom=1.0,
+            page_id=0,
+            tile_id=0,
+            neighbors={}
+        )
         super().add_patch(patch_display)
+
         self.layer_view.insert(patch_display, None)
         for s in patch_display.scopes:
             if not self.object_view.in_tree((s, patch_display)):
@@ -229,22 +253,22 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         def resize_cb(widget, rect):
             try:
                 self.stage.set_size(rect.width, rect.height)
-                if self.hud_mode_txt:
-                    self.hud_mode_txt.set_position(
+                if self.hud_mode_text:
+                    self.hud_mode_text.set_position(
                         self.stage.get_width()-80, self.stage.get_height()-25
                     )
 
-                if self.hud_prompt:
-                    self.hud_prompt.set_position(10, self.stage.get_height() - 25)
+                if self.cmd_prompt:
+                    self.cmd_prompt.set_position(10, self.stage.get_height() - 25)
 
-                if self.hud_prompt_input:
-                    self.hud_prompt_input.set_position(
-                        15 + self.hud_prompt.get_width(), self.stage.get_height() - 25
+                if self.cmd_input:
+                    self.cmd_input.set_position(
+                        15 + self.cmd_prompt.get_width(), self.stage.get_height() - 25
                     )
             except Exception as e:
-                log.error("Error handling UI event", e)
+                log.error("Error handling resize event", e)
                 log.debug(e)
-                log.debug_traceback()
+                log.debug_traceback(e)
 
             return False
 
@@ -345,13 +369,13 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         m = self.input_mgr.major_mode
         lines.append("\nMajor mode: " + m.description)
 
-        if self.hud_mode_txt is None:
-            self.hud_mode_txt = Clutter.Text()
-            self.stage.add_actor(self.hud_mode_txt)
+        if self.hud_mode_text is None:
+            self.hud_mode_text = Clutter.Text()
+            self.stage.add_actor(self.hud_mode_text)
 
-        self.hud_mode_txt.set_position(self.stage.get_width()-80,
+        self.hud_mode_text.set_position(self.stage.get_width()-80,
                                        self.stage.get_height()-25)
-        self.hud_mode_txt.set_markup("<b>%s</b>" % m.short_description)
+        self.hud_mode_text.set_markup("<b>%s</b>" % m.short_description)
 
         for b in m.directory():
             lines.append("%s\t%s" % (b[0], b[1]))
@@ -368,33 +392,32 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         buf.delete(buf.get_start_iter(), buf.get_end_iter())
         buf.insert(buf.get_end_iter(), txt)
 
-    def hud_set_prompt(self, prompt, default=''):
+    def cmd_set_prompt(self, prompt, default=''):
         from gi.repository import Clutter
 
-        if (prompt is None) and self.hud_prompt_input:
-            htxt = self.hud_prompt_input.get_text()
-            self.hud_prompt.hide()
-            self.hud_prompt_input.hide()
+        if (prompt is None) and self.cmd_input:
+            htxt = self.cmd_input.get_text()
+            self.cmd_prompt.hide()
+            self.cmd_input.hide()
             if htxt:
                 self.hud_write(htxt)
             return
 
-        if self.hud_prompt is None:
+        if self.cmd_prompt is None:
             for actor, anim, oldmsg in self.hud_history:
                 actor.set_position(actor.get_x(), actor.get_y() - 20)
 
-            self.hud_prompt = Clutter.Text()
-            self.hud_prompt_input = TextWidget.build(self)
-            self.stage.add_actor(self.hud_prompt)
-            self.hud_prompt.set_position(10, self.stage.get_height() - 25)
-            self.hud_prompt.set_property("opacity", 255)
+            self.cmd_prompt = Clutter.Text()
+            self.stage.add_actor(self.cmd_prompt)
+            self.cmd_prompt.set_position(10, self.stage.get_height() - 25)
+            self.cmd_prompt.set_property("opacity", 255)
         else:
-            self.hud_prompt.show()
-            self.hud_prompt_input.show()
+            self.cmd_prompt.show()
+            self.cmd_input.show()
 
-        self.hud_prompt.set_markup(prompt)
-        self.hud_prompt_input.set_text(default)
-        self.hud_prompt_input.set_position(15 + self.hud_prompt.get_width(),
+        self.cmd_prompt.set_markup(prompt)
+        self.cmd_input.set_text(default)
+        self.cmd_input.set_position(15 + self.cmd_prompt.get_width(),
                                            self.stage.get_height() - 25)
 
     def hud_write(self, message, disp_time=3.0):
@@ -420,7 +443,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
         actor = Clutter.Text()
         self.stage.add_actor(actor)
-        if self.hud_prompt is None:
+        if self.cmd_prompt is None:
             actor.set_position(10, self.stage.get_height() - 25)
         else:
             actor.set_position(10, self.stage.get_height() - 45)
@@ -519,47 +542,6 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         if cliptxt:
             clipboard.set_text(cliptxt, -1)
 
-    async def clipboard_cut(self, pointer_pos):
-        if self.selected:
-            await self.clipboard_copy(pointer_pos)
-            await self.delete_selected()
-            return True
-        return False
-
-    async def clipboard_copy(self, pointer_pos):
-        if self.selected:
-            cliptxt = await MFPGUI().mfp.clipboard_copy(
-                pointer_pos,
-                [o.obj_id for o in self.selected if o.obj_id is not None]
-            )
-            self.clipboard_set(cliptxt)
-            return True
-        return False
-
-    async def clipboard_paste(self, pointer_pos=None):
-        cliptxt = self.clipboard_get()
-        if not cliptxt:
-            return False
-
-        newobj = await MFPGUI().mfp.clipboard_paste(
-            cliptxt, self.selected_patch.obj_id,
-            self.selected_layer.scope, None
-        )
-
-        if newobj is not None:
-            await self.unselect_all()
-            for o in newobj:
-                obj = MFPGUI().recall(o)
-                if obj is None:
-                    return True
-                if not isinstance(obj, PatchDisplay):
-                    obj.move_to_layer(self.selected_layer)
-                    if obj not in self.selected:
-                        await self.select(MFPGUI().recall(o))
-            return False
-        else:
-            return False
-
     def screen_to_canvas(self, x, y):
         success, new_x, new_y = self.group.transform_stage_point(x, y)
         if success:
@@ -573,10 +555,12 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             self.view_y + y / self.zoom,
         )
 
-    def rezoom(self):
+    def rezoom(self, **kwargs):
         w, h = self.group.get_size()
         self.group.set_scale_full(self.zoom, self.zoom, w / 2.0, h / 2.0)
         self.group.set_position(self.view_x, self.view_y)
+        self.viewport_pos_set = True
+        self.viewport_zoom_set = True
 
     def get_size(self):
         return self.stage.get_size()

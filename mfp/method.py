@@ -42,7 +42,7 @@ class MethodCall(object):
             except Exception as e:
                 log.debug("Error calling", self.method, "on", target)
                 log.debug( "args=%s, kwargs=%s" % (self.args, self.kwargs))
-                log.debug_traceback()
+                log.debug_traceback(e)
                 raise MethodCallError("Method '%s' for type '%s' raised exception '%s' %s"
                                       % (self.method, target.init_type, e, type(e)))
         elif self.fallback:

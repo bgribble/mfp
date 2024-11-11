@@ -11,26 +11,32 @@ enough there that I use it in my own music-making.  As of now
 it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
-**What's happening now?** I have started working on MFP again and
-I have a few projects that I want to work on.
+**What's happening now?** I am working on MFP pretty actively. The main
+branch currently contains a WIP backend that uses [Dear
+ImGUI](https://github.com/ocornut/imgui) for the UI, via the excellent
+[imgui-bundle](https://github.com/pthom/imgui_bundle) bindings. To try it out,
+pass the command-line arg `--gui-backend=imgui` (Clutter is still the default).
 
-Recent progress:
-* Switch to using [carp](https://github.com/bgribble/carp)
-instead of the `mfp/rpc/` RPC subsystem.
-* Add a step debugger using the [bp] processor and/or the
-@bp message to the patch
+The new UI looks quite a bit different. It's more like Max in the
+visual presentation of patches and the addition of a right-side
+parameter editing panel. It's already better than the Clutter UI
+in important ways. Some big differences:
 
-Up next:
-* Refactor UI actions to support undo/redo
-* Loading audio files into [buffer~]
-* Named presets for patches
-* Port to Dear ImGUI, making UI improvements along the way
-* Self-contained save format including sample and image files
+* A tiled patch display area, to allow multiple patches to be
+  viewed/edited at once
+* A menu bar that should reflect most available actions
+* Ability to directly edit object parameters and style in the
+  "Info" panel
 
-This release (0.7) is the last release that will exclusively
-support Gtk/Clutter for the UI. I plan to branch immediately 
-after the release and start working on the Dear ImGUI port; 
-Clutter is too bitrotted to keep using it. 
+Some display elements and app features are still not implemented,
+so some patches won't work properly and you can expect to see
+some errors if you try to add unimplemented elements to the
+patch.
+
+The most recent release (0.7) is the last release that will
+exclusively support Gtk/Clutter for the UI. I will release 0.8 when I
+feel that the Dear Imgui backend is at parity with the Clutter backend,
+and then 0.9 will likely remove the Clutter backend.
 
 ### BUILDING
 
@@ -49,7 +55,7 @@ using just the keyboard.  You do need a pointer to activate it.
 
 You type | What happens
 ---------|----------------
-a | Autoplace mode.  A + appears where the next object will go
+a | Autoplace mode.  A symbol appears where the next object will go
 m | Create message (literal data)
 "hello world" RET| Put the string "hello, world" in the message
 c | Connect mode (will connect selected object to something)
@@ -64,27 +70,31 @@ Now click on the message box to send the "hello, world" string.
 Below the patch editing area, in the "Log" tab, you will see the message
 appear.
 
-At any time, the "Keybindings" tab to the left of the patch editing area
-will show you all the active key bindings.  Bindings nearer the top are
-chosen first, so if there are 2 listings for RET for instance the top one will
-be used.
+Clutter backend: the "Keybindings" tab to the left of the patch
+editing area will show you all the active key bindings. If you
+hover the mouse over any object, a tooltip with some
+documentation will appear at the top of the canvas area.  Hold
+down SHIFT to expand the tooltip to show current information
+about the object, including assigned MIDI and OSC controllers.
 
-If you hover the mouse over any object, a tooltip with some
-documentation will appear at the top of the canvas area.  Hold down
-SHIFT to expand the tooltip to show current information about the
-object, including assigned MIDI and OSC controllers.
+
+Imgui backend: the status line at the bottom of the window shows the
+currently active input modes, and the menus should reflect which
+actions are available. Information about the selected object is
+visible in the info panel on the right side.
+
 
 ## KNOWN BROKEN
 
-There are a number of bugs that I hoped to get fixed by this
-release (0.7) but have not.  Here are some that I will just have
-to ask for your patience with:
+There are a number of bugs, mostly in the Clutter backend, that I
+hoped to get fixed by this release (0.7) but have not.  Here are
+some that I will just have to ask for your patience with:
 
 Ticket | Description
 -------| --------------
  #299 | If JACK isn't running and can't be started, launch fails ugly
  #298 | Occasional retry loop on quit
- #297 | Bad behavior on abort of file load 
+ #297 | Bad behavior on abort of file load
  #292 | In larger patches, selection and interaction may get messed up
  #291 | When editing a label, the cursor disappears
  #204 | Logging is broken when loaded as LV2 plugin

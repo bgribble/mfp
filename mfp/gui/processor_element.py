@@ -6,6 +6,10 @@ A patch element corresponding to a signal or control processor
 '''
 
 from abc import ABCMeta, abstractmethod
+
+from flopsy import saga
+
+from mfp import log
 from .text_widget import TextWidget
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
@@ -66,24 +70,6 @@ class ProcessorElement (BaseElement):
     def get_backend(cls, backend_name):
         return ProcessorElementImpl.get_backend(backend_name)
 
-    async def update(self):
-        if self.show_label or self.obj_state == self.OBJ_HALFCREATED:
-            label_width = self.label.get_property('width') + 14
-        else:
-            label_width = 0
-
-        box_width = self.export_w or 0
-
-        new_w = None
-        num_ports = max(self.num_inlets, self.num_outlets)
-        port_width = (num_ports * self.get_style('porthole_minspace')
-                      + 2*self.get_style('porthole_border'))
-
-        new_w = max(35, port_width, label_width, box_width)
-
-        await self.set_size(new_w, self.texture.get_property('height'))
-        self.redraw()
-
     def get_label(self):
         return self.label
 
@@ -92,6 +78,17 @@ class ProcessorElement (BaseElement):
         if not self.show_label:
             self.label.show()
         await self.update()
+
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff, previous):
+        if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+            return
+
+        if self.obj_type:
+            args = f" {self.obj_args}" if self.obj_args is not None else ''
+            yield await self.label_edit_finish(
+                None, f"{self.obj_type}{args}"
+            )
 
     async def label_edit_finish(self, widget, text=None):
         if text is not None:

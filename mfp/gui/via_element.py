@@ -7,6 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from flopsy import saga
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -20,8 +21,8 @@ class ViaElement (BaseElement):
     proc_type = None
 
     style_defaults = {
-        'porthole_width': 0,
-        'porthole_height': 0,
+        'porthole-width': 0,
+        'porthole-height': 0,
         'autoplace-dx': -2.5
     }
 
@@ -45,7 +46,7 @@ class ViaElement (BaseElement):
         self.height = self.VIA_SIZE + self.LABEL_HEIGHT + self.LABEL_FUDGE + 2 * self.VIA_FUDGE
 
     def text_changed_cb(self, *args):
-        self.recenter_label()
+        self.recenter_label(*args)
 
     def parse_label(self, txt):
         parts = txt.split('/')
@@ -64,6 +65,17 @@ class ViaElement (BaseElement):
             (name, port) = self.parse_label(label_text)
             await self.create(self.proc_type, '"%s",%s' % (name, port))
 
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff, previous):
+        if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+            return
+
+        if self.obj_type:
+            args = f" {self.obj_args}" if self.obj_args is not None else ''
+            yield await self.label_edit_finish(
+                None, f"{self.obj_type}{args}"
+            )
+
     async def label_edit_start(self, *args):
         pass
 
@@ -81,11 +93,6 @@ class ViaElement (BaseElement):
         self.label.set_text(self.label_text)
         self.recenter_label()
         await super().configure(params)
-
-    def port_position(self, port_dir, port_num):
-        # vias connect to the center of the texture
-        return ((self.VIA_SIZE + self.VIA_FUDGE) / 2.0,
-                self.TEXTURE_Y + (self.VIA_SIZE + self.VIA_FUDGE) / 2.0)
 
     def select(self):
         BaseElement.select(self)

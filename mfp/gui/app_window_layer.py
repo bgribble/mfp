@@ -41,6 +41,8 @@ def layer_select(self, layer):
     if self.selected_layer is not None:
         self.selected_layer.hide()
 
+    layer.patch.selected_layer = layer
+
     if layer != self.selected_layer:
         sname = layer.scope
         if sname == "__patch__":
@@ -52,6 +54,7 @@ def layer_select(self, layer):
     self.selected_layer.show()
     if self.selected_layer.patch != self.selected_patch:
         self.selected_patch = self.selected_layer.patch
+    self.viewport_selection_set = True
 
 
 @extends(AppWindow)

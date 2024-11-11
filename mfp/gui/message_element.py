@@ -7,6 +7,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from flopsy import saga
+
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -51,6 +53,14 @@ class MessageElement (BaseElement):
     @classmethod
     def get_backend(cls, backend_name):
         return MessageElementImpl.get_backend(backend_name)
+
+    @saga('obj_args')
+    async def recreate_element(self, action, state_diff, previous):
+        if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+            return
+
+        if self.obj_type:
+            yield await self.label_edit_finish(None, f"{self.obj_args}")
 
     async def update(self):
         self.redraw()
@@ -101,13 +111,6 @@ class MessageElement (BaseElement):
             self.obj_state = self.OBJ_COMPLETE
             await self.update()
         await super().configure(params)
-
-    def port_position(self, port_dir, port_num):
-        # tweak the right input port display to be left of the "kick"
-        if port_dir == BaseElement.PORT_IN and port_num == 1:
-            default = BaseElement.port_position(self, port_dir, port_num)
-            return (default[0] - self.PORT_TWEAK, default[1])
-        return BaseElement.port_position(self, port_dir, port_num)
 
     def select(self):
         BaseElement.select(self)
@@ -178,9 +181,13 @@ class TransientMessageElement (MessageElement):
         return True
 
     async def end_edit(self):
+        from .modes.patch_edit import PatchEditMode
         await BaseElement.end_edit(self)
         if self.obj_state == self.OBJ_COMPLETE:
+            await self.app_window.unselect(self)
             await self.delete()
+            if isinstance(self.app_window.input_mgr.major_mode, PatchEditMode):
+                self.app_window.input_mgr.major_mode.update_selection_mode()
 
     async def label_edit_start(self):
         self.label.set_text(self.message_text)
@@ -188,6 +195,7 @@ class TransientMessageElement (MessageElement):
         await self.update()
 
     async def label_edit_finish(self, widget=None, text=None):
+        from .modes.patch_edit import PatchEditMode
         if text is not None:
             self.message_text = text
             for to in self.target_obj:
@@ -200,7 +208,10 @@ class TransientMessageElement (MessageElement):
         for to in self.target_obj:
             await self.app_window.select(to)
         self.message_text = None
+        await self.app_window.unselect(self)
         await self.delete()
+        if isinstance(self.app_window.input_mgr.major_mode, PatchEditMode):
+            self.app_window.input_mgr.major_mode.update_selection_mode()
 
     async def make_edit_mode(self):
         return TransientMessageEditMode(self.app_window, self, self.label)

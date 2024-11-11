@@ -7,11 +7,13 @@ Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
-from flopsy import Store, mutates
+from flopsy import Action, Store, mutates, reducer, saga
 from mfp.gui_main import MFPGUI
 from mfp import log
-from .colordb import ColorDB
+from .colordb import ColorDB, RGBAColor
 from .backend_interfaces import BackendInterface
+from .param_info import ParamInfo, ListOfInt
+
 
 class BaseElementImpl(metaclass=ABCMeta):
     @abstractmethod
@@ -47,27 +49,48 @@ class BaseElementImpl(metaclass=ABCMeta):
         pass
 
 
+BASE_STORE_ATTRS = {
+    'obj_id': ParamInfo(label="Object ID", param_type=int, editable=False),
+    'obj_type': ParamInfo(label="Type", param_type=str),
+    'obj_args': ParamInfo(label="Creation args", param_type=str),
+    'display_type': ParamInfo(label="Display type", param_type=str, editable=False),
+    'obj_name': ParamInfo(label="Name", param_type=str),
+    'obj_state': ParamInfo(label="State", param_type=int, editable=False),
+    'scope': ParamInfo(label="Lexical scope", param_type=str),
+    'layername': ParamInfo(label="Layer", param_type=str),
+    'position_x': ParamInfo(label="X position", param_type=float),
+    'position_y': ParamInfo(label="Y position", param_type=float),
+    'position_z': ParamInfo(label="Z position", param_type=float),
+    'width': ParamInfo(label="Width", param_type=float, editable=False),
+    'height': ParamInfo(label="Height", param_type=float, editable=False),
+    'min_width': ParamInfo(label="Min width", param_type=float),
+    'min_height': ParamInfo(label="Min height", param_type=float),
+    'update_required': ParamInfo(label="Update required", param_type=bool),
+    'no_export': ParamInfo(label="No export", param_type=bool),
+    'is_export': ParamInfo(label="Is export", param_type=bool),
+    'num_inlets': ParamInfo(label="# inlets", param_type=int, editable=False),
+    'num_outlets': ParamInfo(label="# outlets", param_type=int, editable=False),
+    'dsp_inlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
+    'dsp_outlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
+    'style': ParamInfo(label="Style variables", param_type=dict),
+    'export_offset_x': ParamInfo(label="Export offset X", param_type=float),
+    'export_offset_y': ParamInfo(label="Export offset Y", param_type=float),
+    'debug': ParamInfo(label="Enable debugging", param_type=bool),
+}
+
+
 class BaseElement (Store):
     '''
     Parent class of elements represented in the patch window
     '''
-    store_attrs = [
-        'position_x', 'position_y', 'position_z', 'width', 'height',
-        'update_required', 'display_type', 'name', 'layername',
-        'no_export', 'is_export', 'num_inlets', 'num_outlets', 'dsp_inlets',
-        'dsp_outlets', 'scope', 'style', 'export_offset_x',
-        'export_offset_y', 'debug', 'obj_name', 'obj_state'
-    ]
-
+    store_attrs = BASE_STORE_ATTRS
     style_defaults = {
-        'porthole_width': 8,
-        'porthole_height': 4,
-        'porthole_border': 1,
-        'porthole_minspace': 11,
-        'badge_size': 15,
-        'badge-edit-color': 'default-edit-badge-color',
-        'badge-learn-color': 'default-learn-badge-color',
-        'badge-error-color': 'default-error-badge-color'
+        'porthole-width': 8,
+        'porthole-height': 4,
+        'porthole-border': 1,
+        'porthole-minspace': 11,
+        'padding': dict(left=4, top=2, right=4, bottom=2),
+        'badge-size': 15,
     }
 
     PORT_IN = 0
@@ -80,8 +103,11 @@ class BaseElement (Store):
     OBJ_DELETED = 4
     TINY_DELTA = .0001
 
+    last_id = 0
+
     def __init__(self, window, x, y):
-        self.id = None
+        self.id = BaseElement.last_id + 1
+        BaseElement.last_id = self.id
 
         # MFP object and UI descriptors
         self.obj_id = None
@@ -91,7 +117,7 @@ class BaseElement (Store):
         self.obj_args = None
         self.obj_state = self.OBJ_COMPLETE
         self.scope = None
-        self.num_inlets = 0
+        self.num_inlets = 1
         self.num_outlets = 0
         self.dsp_inlets = []
         self.dsp_outlets = []
@@ -112,12 +138,21 @@ class BaseElement (Store):
 
         self.tags = {}
 
+        # these can't be initialized until there's a backend
+        BaseElement.style_defaults.update({
+            'badge-edit-color': ColorDB().find('default-edit-badge-color'),
+            'badge-learn-color': ColorDB().find('default-learn-badge-color'),
+            'badge-error-color': ColorDB().find('default-error-badge-color')
+        })
+
         # UI state
         self.position_x = x
         self.position_y = y
         self.position_z = 0
         self.export_offset_x = 0
         self.export_offset_y = 0
+        self.min_width = 0
+        self.min_height = 0
         self.width = None
         self.height = None
         self.drag_start_x = None
@@ -141,8 +176,7 @@ class BaseElement (Store):
     def build(cls, *args, **kwargs):
         backend = cls.get_backend(MFPGUI().backend_name)
         if not backend:
-            log.error(f"[BaseElement.build] No '{MFPGUI().backend_name}' backend found for {cls}")
-            log.debug(BackendInterface._registry)
+            log.error(f"[build] No '{MFPGUI().backend_name}' backend found for {cls}")
             raise ValueError
         return backend(*args, **kwargs)
 
@@ -161,13 +195,16 @@ class BaseElement (Store):
 
     async def set_size(self, width, height, **kwargs):
         update_state = kwargs.get("update_state", True)
-        prev_width = kwargs.get('width', self.width)
-        prev_height = kwargs.get('height', self.height)
+        prev_width = kwargs.get('previous_width', self.width)
+        prev_height = kwargs.get('previous_height', self.height)
         changed_w = not self.width or abs(width - self.width) > BaseElement.TINY_DELTA
         changed_h = not self.height or abs(height - self.height) > BaseElement.TINY_DELTA
 
         if self.width and self.height and not changed_w and not changed_h:
             return
+
+        width = max(width, self.min_width)
+        height = max(height, self.min_height)
 
         if update_state:
             if changed_w:
@@ -219,20 +256,21 @@ class BaseElement (Store):
         if not rgba:
             log.error('Could not find color %s in %s' % (colorspec, self._all_styles))
             return ColorDB().find(64, 64, 64, 255)
-        elif isinstance(rgba, str):
+        if isinstance(rgba, str):
             return ColorDB().find(rgba)
-        else:
+        if isinstance(rgba, (list, tuple)):
             return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
+        return rgba
 
     def combine_styles(self):
         styles = {}
-        for styleset in (
-            MFPGUI().style_defaults,
-            BaseElement.style_defaults,
-            type(self).style_defaults,
-            self.style
-        ):
-            styles.update(styleset)
+        styles.update(
+            MFPGUI().style_defaults
+        )
+        for base_type in reversed(type(self).mro()):
+            if hasattr(base_type, 'style_defaults'):
+                styles.update(base_type.style_defaults)
+        styles.update(self.style)
         return styles
 
     async def update(self):
@@ -264,7 +302,8 @@ class BaseElement (Store):
         )
 
     async def drag(self, dx, dy):
-        await self.move(self.position_x + dx, self.position_y + dy, update_state=False)
+        if "drag" not in self.app_window.motion_overrides:
+            await self.move(self.position_x + dx, self.position_y + dy, update_state=False)
 
     async def move(self, x, y, **kwargs):
         update_state = kwargs.get("update_state", True)
@@ -307,6 +346,11 @@ class BaseElement (Store):
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED
 
+    @saga('style')
+    async def update_all_styles(self, action, state_diff, previous):
+        self._all_styles = self.combine_styles()
+        yield None
+
     async def create(self, obj_type, init_args):
         scopename = self.layer.scope
         patchname = self.layer.patch.obj_name
@@ -343,16 +387,12 @@ class BaseElement (Store):
             self.connections_in = connections_in
             return None
 
-        # FIXME flopsy
-        self.obj_id = objinfo.get('obj_id')
-        self.obj_name = objinfo.get('name')
-        self.obj_args = objinfo.get('initargs')
-        self.obj_type = obj_type
-        self.scope = objinfo.get('scope')
-        self.num_inlets = objinfo.get("num_inlets")
-        self.num_outlets = objinfo.get("num_outlets")
-        self.dsp_inlets = objinfo.get("dsp_inlets", [])
-        self.dsp_outlets = objinfo.get("dsp_outlets", [])
+        objinfo['obj_type'] = obj_type
+
+        # init state from objinfo
+        await self.dispatch(
+            Action(self, self.CREATE_OBJECT, objinfo)
+        )
 
         if self.obj_id is not None:
             MFPGUI().remember(self)
@@ -393,6 +433,26 @@ class BaseElement (Store):
 
         return self.obj_id
 
+    @reducer(
+        'obj_id', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
+        'obj_type', 'obj_name', 'obj_args'
+    )
+    def CREATE_OBJECT(self, action, state, previous_value):
+        """
+        Initialize store from creation payload
+        """
+        objinfo = action.payload
+        if state in (
+            'obj_id', 'obj_type', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets'
+        ):
+            return objinfo.get(state, previous_value)
+
+        if state == 'obj_name':
+            return objinfo.get('name', previous_value)
+        if state == 'obj_args':
+            return objinfo.get('initargs', previous_value)
+        return previous_value
+
     def synced_params(self):
         prms = {}
         for k in self.param_list:
@@ -414,53 +474,57 @@ class BaseElement (Store):
     def get_stage_position(self):
         if not self.container or not self.layer or self.container == self.layer:
             return (self.position_x, self.position_y)
-        else:
-            pos_x = self.position_x
-            pos_y = self.position_y
 
-            c = self.container
-            while isinstance(c, BaseElement):
-                pos_x += c.position_x
-                pos_y += c.position_y
-                c = c.container
+        pos_x = self.position_x
+        pos_y = self.position_y
 
-            return (pos_x, pos_y)
+        c = self.container
+        while isinstance(c, BaseElement):
+            pos_x += c.position_x
+            pos_y += c.position_y
+            c = c.container
+
+        return (pos_x, pos_y)
 
     def port_center(self, port_dir, port_num):
         ppos = self.port_position(port_dir, port_num)
         pos_x, pos_y = self.get_stage_position()
 
-        return (pos_x + ppos[0] + 0.5 * self.get_style('porthole_width'),
-                pos_y + ppos[1] + 0.5 * self.get_style('porthole_height'))
+        return (pos_x + ppos[0], pos_y + ppos[1])
 
     def port_size(self):
-        return (self.get_style('porthole_width'), self.get_style('porthole_height'))
+        return (self.get_style('porthole-width'), self.get_style('porthole-height'))
 
     def port_position(self, port_dir, port_num):
+        """
+        port_position returns the (x,y) position of the center of the
+        porthole, on the object bounding box. If the rendered box is
+        offset from that position, that can be handled in the renderer.
+        """
         w = self.width
         h = self.height
-
+        port_width = self.get_style('porthole-width')
         # inlet
         if port_dir == BaseElement.PORT_IN:
             if self.num_inlets < 2:
                 spc = 0
             else:
-                spc = max(self.get_style('porthole_minspace'),
-                          ((w - self.get_style('porthole_width')
-                            - 2.0 * self.get_style('porthole_border'))
+                spc = max(self.get_style('porthole-minspace'),
+                          ((w
+                            - port_width
+                            - 2.0 * self.get_style('porthole-border'))
                            / (self.num_inlets - 1.0)))
-            return (self.get_style('porthole_border') + spc * port_num, 0)
+            return (self.get_style('porthole-border') + spc * port_num + port_width / 2.0, 0)
 
         # outlet
         if self.num_outlets < 2:
             spc = 0
         else:
-            spc = max(self.get_style('porthole_minspace'),
-                      ((w - self.get_style('porthole_width')
-                        - 2.0 * self.get_style('porthole_border'))
+            spc = max(self.get_style('porthole-minspace'),
+                      ((w - port_width
+                        - 2.0 * self.get_style('porthole-border'))
                        / (self.num_outlets - 1.0)))
-        return (self.get_style('porthole_border') + spc * port_num,
-                h - self.get_style('porthole_height'))
+        return (self.get_style('porthole-border') + spc * port_num + port_width / 2.0, h)
 
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
@@ -528,7 +592,8 @@ class BaseElement (Store):
         layer_child = False
         if layer and layer == self.layer:
             return
-        elif self.layer:
+
+        if self.layer:
             if self.container == self.layer:
                 self.container = None
                 layer_child = True
@@ -550,6 +615,7 @@ class BaseElement (Store):
         return None
 
     def make_control_mode(self):
+        # should be overridden
         return None
 
     async def begin_edit(self):
@@ -558,7 +624,8 @@ class BaseElement (Store):
 
         if not self.edit_mode:
             self.edit_mode = await self.make_edit_mode()
-            await self.edit_mode.setup()
+            if self.edit_mode:
+                await self.edit_mode.setup()
 
         if self.edit_mode:
             self.app_window.input_mgr.enable_minor_mode(self.edit_mode)

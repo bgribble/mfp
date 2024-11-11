@@ -30,8 +30,8 @@ class ClutterColorDBBackend(ColorDBBackend):
             rv = RGBAColor(
                 red=(color.red / 255.0),
                 green=(color.green / 255.0),
-                blue=(color.blue/255.0),
-                alpha=color.alpha/255.0
+                blue=(color.blue / 255.0),
+                alpha=color.alpha / 255.0
             )
         else:
             rv = RGBAColor(red=0, green=0, blue=0, alpha=1)

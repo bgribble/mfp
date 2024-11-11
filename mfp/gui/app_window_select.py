@@ -36,20 +36,29 @@ def patch_select_next(self):
 
 
 @extends(AppWindow)
-async def patch_close(self):
-    p = self.selected_patch
+async def patch_close(self, patch=None):
+    if patch:
+        p = patch
+    else:
+        p = self.selected_patch
     if p and p.deletable:
         self.patch_select_next()
         self.patches.remove(p)
         await p.delete()
     else:
         log.debug("Cannot close window. Close UI via plugin host Edit button")
-    if not len(self.patches):
+    if not len(self.patches) > 0:
         await self.quit()
 
 
 @extends(AppWindow)
 async def patch_new(self):
+    """
+    patch_new creates a new patch starting from the UI.
+
+    The flow is that we ask the main app to create a new (empty) file,
+    then it requests that the app create a new patch display.
+    """
     await MFPGUI().mfp.open_file(None)
 
 
@@ -166,8 +175,8 @@ async def move_selected(self, dx, dy):
     for obj in self.selected:
         if obj.editable and obj.display_type != 'connection':
             await obj.move(
-                max(0, obj.position_x + dx * self.zoom),
-                max(0, obj.position_y + dy * self.zoom)
+                max(0, obj.position_x + dx * self.selected_patch.display_info.view_zoom),
+                max(0, obj.position_y + dy * self.selected_patch.display_info.view_zoom)
             )
             if obj.obj_id is not None:
                 obj.send_params()
@@ -189,32 +198,34 @@ async def delete_selected(self):
 
 @extends(AppWindow)
 def reset_zoom(self):
-    self.zoom = 1.0
-    self.view_x = 0
-    self.view_y = 0
+    di = self.selected_patch.display_info
+    di.view_zoom = 1.0
+    di.view_x = 0
+    di.view_y = 0
+    self.viewport_pos_set = True
+    self.viewport_zoom_set = True
     self.rezoom()
     return True
 
 
 @extends(AppWindow)
-def zoom_out(self, ratio):
-    if self.zoom >= 0.1:
-        self.zoom *= ratio
-        self.rezoom()
-    return True
-
-
-@extends(AppWindow)
-def zoom_in(self, ratio):
-    if self.zoom < 20:
-        self.zoom *= ratio
-        self.rezoom()
+def relative_zoom(self, ratio):
+    di = self.selected_patch.display_info
+    candidate_zoom = ratio * di.view_zoom
+    if 0.1 <= candidate_zoom <= 20:
+        orig_zoom = di.view_zoom
+        di.view_zoom = candidate_zoom
+        self.rezoom(previous=orig_zoom)
+        self.viewport_pos_set = True
+        self.viewport_zoom_set = True
     return True
 
 
 @extends(AppWindow)
 def move_view(self, dx, dy):
-    self.view_x += dx
-    self.view_y += dy
+    di = self.selected_patch.display_info
+    di.view_x += dx
+    di.view_y += dy
+    self.viewport_pos_set = True
     self.rezoom()
     return True

@@ -8,6 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from ..input_mode import InputMode
 from .connection import ConnectionMode
 
+
 class SelectionEditMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
@@ -17,26 +18,24 @@ class SelectionEditMode (InputMode):
 
         self.affinity = -10
 
-        self.bind("UP", lambda: self.window.move_selected(0, -1),
-                  "Move selection up 1 unit")
-        self.bind("DOWN", lambda: self.window.move_selected(0, 1),
-                  "Move selection down 1 unit")
-        self.bind("LEFT", lambda: self.window.move_selected(-1, 0),
-                  "Move selection left one unit")
-        self.bind("RIGHT", lambda: self.window.move_selected(1, 0),
-                  "Move selection right one unit")
+    @classmethod
+    def init_bindings(cls):
+        cls.bind("selection-UP", lambda mode: mode.window.move_selected(0, -1), "Move selection up 1 unit", "UP", )
+        cls.bind("selection-DOWN", lambda mode: mode.window.move_selected(0, 1), "Move selection down 1 unit", "DOWN", )
+        cls.bind("selection-LEFT", lambda mode: mode.window.move_selected(-1, 0), "Move selection left one unit", "LEFT", )
+        cls.bind("selection-RIGHT", lambda mode: mode.window.move_selected(1, 0), "Move selection right one unit", "RIGHT", )
 
-        self.bind("S-UP", lambda: self.window.move_selected(0, -5), "Move selection up 5")
-        self.bind("S-DOWN", lambda: self.window.move_selected(0, 5), "Move selection down 5")
-        self.bind("S-LEFT", lambda: self.window.move_selected(-5, 0), "Move selection left 5")
-        self.bind("S-RIGHT", lambda: self.window.move_selected(5, 0), "Move selection right 5")
+        cls.bind("selection-S-UP", lambda mode: mode.window.move_selected(0, -5), "Move selection up 5", "S-UP", )
+        cls.bind("selection-S-DOWN", lambda mode: mode.window.move_selected(0, 5), "Move selection down 5", "S-DOWN", )
+        cls.bind("selection-S-LEFT", lambda mode: mode.window.move_selected(-5, 0), "Move selection left 5", "S-LEFT", )
+        cls.bind("selection-S-RIGHT", lambda mode: mode.window.move_selected(5, 0), "Move selection right 5", "S-RIGHT", )
 
-        self.bind("C-UP", lambda: self.window.move_selected(0, -25), "Move selection up 25")
-        self.bind("C-DOWN", lambda: self.window.move_selected(0, 25), "Move selection down 25")
-        self.bind("C-LEFT", lambda: self.window.move_selected(-25, 0), "Move selection left 25")
-        self.bind("C-RIGHT", lambda: self.window.move_selected(25, 0), "Move selection right 25")
-        self.bind("DEL", self.window.delete_selected, "Delete selection")
-        self.bind("BS", self.window.delete_selected, "Delete selection")
+        cls.bind("selection-C-UP", lambda mode: mode.window.move_selected(0, -25), "Move selection up 25", "C-UP", )
+        cls.bind("selection-C-DOWN", lambda mode: mode.window.move_selected(0, 25), "Move selection down 25", "C-DOWN", )
+        cls.bind("selection-C-LEFT", lambda mode: mode.window.move_selected(-25, 0), "Move selection left 25", "C-LEFT", )
+        cls.bind("selection-C-RIGHT", lambda mode: mode.window.move_selected(25, 0), "Move selection right 25", "C-RIGHT", )
+        cls.bind("selection-DEL", lambda mode: mode.window.delete_selected(), "Delete selection", "DEL", )
+        cls.bind("selection-BS", lambda mode: mode.window.delete_selected(), "Delete selection", "BS", )
 
 
 class SingleSelectionEditMode (InputMode):
@@ -47,10 +46,23 @@ class SingleSelectionEditMode (InputMode):
 
         self.affinity = -10
 
-        self.bind("c", self.connect_fwd, "Connect from element")
-        self.bind("C", self.connect_rev, "Connect to element")
-        self.bind("RET", self.edit_selected, "Edit element")
         self.extend(SelectionEditMode(window))
+
+    @classmethod
+    def init_bindings(cls):
+        cls.bind(
+            "edit-selected", cls.edit_selected, "Edit element", "RET",
+            menupath="Context > Edit element"
+        )
+        cls.bind(
+            "connect-from", cls.connect_fwd, "Connect from element", "c",
+            menupath="Context > |Connect from element"
+        )
+        cls.bind(
+            "connect-to", cls.connect_rev, "Connect to element", "C",
+            menupath="Context > |Connect to element"
+        )
+        cls.extend_mode(SelectionEditMode)
 
     async def edit_selected(self):
         await self.window.selected[0].begin_edit()
@@ -71,6 +83,7 @@ class SingleSelectionEditMode (InputMode):
                     return True
         return False
 
+
 class MultiSelectionEditMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
@@ -81,3 +94,6 @@ class MultiSelectionEditMode (InputMode):
 
         self.extend(SelectionEditMode(window))
 
+    @classmethod
+    def init_bindings(cls):
+        cls.extend_mode(SelectionEditMode)

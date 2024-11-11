@@ -4,6 +4,7 @@ Version=1.0
 Type=Application
 Terminal=false
 Exec=${PREFIX}/bin/mfp
+StartupWMClass=mfp
 Name=mfp
 X-NSM-Capable=true
 X-NSM-Exec=mfp

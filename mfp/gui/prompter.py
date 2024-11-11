@@ -5,17 +5,22 @@ prompter.py -- Prompted input manager for MFP patch window
 Copyright (c) 2013 Bill Gribble <grib@billgribble.com>
 '''
 import inspect
-import asyncio
 from .modes.label_edit import LabelEditMode
 from mfp import log
+from mfp.trie import Trie
+
 
 class Prompter (object):
-    def __init__(self, window):
+    def __init__(self, window, label, completions=None):
         self.window = window
         self.queue = []
         self.current_prompt = None
         self.current_callback = None
         self.mode = None
+        self.label = label
+        self.completions = Trie()
+        self.history = Trie()
+        self.completions.populate(completions or [])
 
     async def get_input(self, prompt, callback, default):
         if self.mode is None:
@@ -26,10 +31,12 @@ class Prompter (object):
     async def _begin(self, prompt, callback, default):
         self.current_prompt = prompt
         self.current_callback = callback
-        self.window.hud_set_prompt(prompt, default)
+        self.window.cmd_set_prompt(prompt, default)
         self.mode = LabelEditMode(
-            self.window, self, self.window.hud_prompt_input,
-            mode_desc="Prompted input"
+            self.window, self, self.label,
+            mode_desc="Command input",
+            completions=self.completions,
+            history=self.history
         )
         await self.mode.setup()
         self.window.input_mgr.enable_minor_mode(self.mode)
@@ -38,21 +45,23 @@ class Prompter (object):
         pass
 
     async def label_edit_finish(self, widget, text):
+        self.history.populate([text])
+        self.window.input_mgr.disable_minor_mode(self.mode)
+
         if self.current_callback:
             try:
                 rv = self.current_callback(text)
                 if inspect.isawaitable(rv):
                     await rv
             except Exception as e:
-                print("Prompter exception in callback:", e)
-                pass
+                log.debug_traceback(e)
 
     async def end_edit(self):
         if self.mode:
             self.window.input_mgr.disable_minor_mode(self.mode)
             self.mode = None
-
-        self.window.hud_set_prompt(None)
+        self.label.text = ''
+        self.window.cmd_set_prompt(None)
         if len(self.queue):
             nextitem = self.queue[0]
             self.queue = self.queue[1:]

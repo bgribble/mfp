@@ -2,12 +2,13 @@
 '''
 enum_control.py: EnumControl major mode
 
-Copyright (c) 2010-2013 Bill Gribble <grib@billgribble.com>
+Copyright Bill Gribble <grib@billgribble.com>
 '''
 
 import math
 from ..input_mode import InputMode
 from .label_edit import LabelEditMode
+
 
 class EnumEditMode (InputMode):
     def __init__(self, window, element, label):
@@ -16,12 +17,27 @@ class EnumEditMode (InputMode):
         self.enum = element
         self.value = element.value
         InputMode.__init__(self, "Number box config")
-
-        self.bind("C->", self.add_digit, "Increase displayed digits")
-        self.bind("C-<", self.del_digit, "Decrease displayed digits")
-        self.bind("C-[", self.set_lower, "Set lower bound on value")
-        self.bind("C-]", self.set_upper, "Set upper bound on value")
         self.extend(LabelEditMode(window, element, label))
+
+    @classmethod
+    def init_bindings(cls):
+        cls.bind(
+            "enum-add-digit", cls.add_digit, "Increase displayed digits", "C->",
+            menupath="Context > ||Params > Increase displayed digits"
+        )
+        cls.bind(
+            "enum-del-digit", cls.del_digit, "Decrease displayed digits", "C-<",
+            menupath="Context > ||Params > Decrease displayed digits"
+        )
+        cls.bind(
+            "enum-lower-bound", cls.set_lower, "Set lower bound on value", "C-[",
+            menupath="Context > ||Params > Set lower bound"
+        )
+        cls.bind(
+            "enum-upper-bound", cls.set_upper, "Set upper bound on value", "C-]",
+            menupath="Context > ||Params > Set upper bound"
+        )
+        cls.extend_mode(LabelEditMode)
 
     async def set_upper(self):
         def cb(value):
@@ -30,7 +46,7 @@ class EnumEditMode (InputMode):
             else:
                 value = float(value)
             self.enum.set_bounds(self.enum.min_value, value)
-        await self.window.get_prompted_input("Number upper bound: ", cb)
+        await self.window.cmd_get_input("Number upper bound: ", cb)
         return True
 
     async def set_lower(self):
@@ -40,7 +56,7 @@ class EnumEditMode (InputMode):
             else:
                 value = float(value)
             self.enum.set_bounds(value, self.enum.max_value)
-        await self.window.get_prompted_input("Number lower bound: ", cb)
+        await self.window.cmd_get_input("Number lower bound: ", cb)
         return True
 
     async def add_digit(self):
@@ -61,6 +77,7 @@ class EnumEditMode (InputMode):
         self.enum.edit_mode = None
         return False
 
+
 class EnumControlMode (InputMode):
     def __init__(self, window, element):
         self.manager = window.input_mgr
@@ -76,16 +93,32 @@ class EnumControlMode (InputMode):
 
         InputMode.__init__(self, "Number box control")
 
-        self.bind("M1DOWN", self.drag_start)
-        self.bind("M1-MOTION", lambda: self.drag_selected(1.0),
-                  "Change value (1x speed)")
-        self.bind("S-M1-MOTION", lambda: self.drag_selected(10.0),
-                  "Change value (10x speed)")
-        self.bind("C-M1-MOTION", lambda: self.drag_selected(100.0),
-                  "Change value (100x speed)")
-        self.bind("M1UP", self.drag_end)
-        self.bind("UP", lambda: self.changeval(1.0))
-        self.bind("DOWN", lambda: self.changeval(-1.0))
+    @classmethod
+    def init_bindings(cls):
+        cls.bind(
+            "enum-drag-start", cls.drag_start, "Start number control", "M1DOWN",
+        )
+        cls.bind(
+            "enum-drag-motion", lambda mode: mode.drag_selected(1.0),
+            "Change value (1x speed)", "M1-MOTION",
+        )
+        cls.bind(
+            "enum-drag-motion", lambda mode: mode.drag_selected(10.0),
+            "Change value (10x speed)", "S-M1-MOTION",
+        )
+        cls.bind(
+            "enum-drag-motion", lambda mode: mode.drag_selected(100.0),
+            "Change value (100x speed)", "C-M1-MOTION",
+        )
+        cls.bind(
+            "enum-drag-end", cls.drag_end, "End number control", "M1UP",
+        )
+        cls.bind(
+            "enum-val-up", lambda mode: mode.changeval(1.0), "Increase value", "UP",
+        )
+        cls.bind(
+            "enum-val-down", lambda mode: mode.changeval(-1.0), "Decrease value", "DOWN",
+        )
 
     async def changeval(self, delta):
         if self.enum.scientific:
@@ -102,7 +135,6 @@ class EnumControlMode (InputMode):
         await self.enum.update_value(self.value)
         return True
 
-
     async def drag_start(self):
         if self.manager.pointer_obj == self.enum:
             if self.manager.pointer_obj not in self.window.selected:
@@ -115,14 +147,12 @@ class EnumControlMode (InputMode):
             self.drag_last_y = self.manager.pointer_y
             self.value = self.enum.value
             return True
-        else:
-            return False
+        return False
 
     async def drag_selected(self, delta=1.0):
         if self.drag_started is False:
             return False
 
-        dx = self.manager.pointer_x - self.drag_last_x
         dy = self.manager.pointer_y - self.drag_last_y
 
         self.drag_last_x = self.manager.pointer_x
@@ -135,5 +165,4 @@ class EnumControlMode (InputMode):
         if self.drag_started:
             self.drag_started = False
             return True
-        else:
-            return False
+        return False

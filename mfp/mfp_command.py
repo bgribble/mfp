@@ -137,6 +137,14 @@ class MFPCommand:
         else:
             return ''
 
+    def get_tooltip_info(self, obj_id, direction=None, portno=None, details=False):
+        from .mfp_app import MFPApp
+        obj = MFPApp().recall(obj_id)
+        if isinstance(obj, Processor):
+            return obj.tooltip_info(direction, portno, details)
+        else:
+            return ''
+
     @noresp
     def log_write(self, msg):
         from .mfp_app import MFPApp

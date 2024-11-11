@@ -7,12 +7,15 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from flopsy import saga, mutates
 
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .text_widget import TextWidget
 from .base_element import BaseElement
 from .modes.enum_control import EnumEditMode, EnumControlMode
+
+from .param_info import ParamInfo, ListOfPairs
 
 
 class EnumElementImpl(BackendInterface, metaclass=ABCMeta):
@@ -24,7 +27,15 @@ class EnumElementImpl(BackendInterface, metaclass=ABCMeta):
 class EnumElement (BaseElement):
     display_type = "enum"
     proc_type = "enum"
-
+    store_attrs = {
+        **BaseElement.store_attrs,
+        **{
+            'digits': ParamInfo(label="Digits", param_type=int, show=True),
+            'min_value': ParamInfo(label="Min value", param_type=float, show=True, null=True),
+            'max_value': ParamInfo(label="Max value", param_type=float, show=True, null=True),
+            'scientific': ParamInfo(label="Use scientific notation", param_type=bool, show=True),
+        }
+    }
     PORT_TWEAK = 7
 
     def __init__(self, window, x, y):
@@ -36,11 +47,10 @@ class EnumElement (BaseElement):
         self.max_value = None
         self.scientific = False
         self.format_str = "%.1f"
+
         self.connections_out = []
         self.connections_in = []
         self.update_required = True
-
-        self.param_list.extend(['digits', 'min_value', 'max_value', 'scientific'])
 
         self.obj_state = self.OBJ_HALFCREATED
 
@@ -55,6 +65,22 @@ class EnumElement (BaseElement):
     @classmethod
     def get_backend(cls, backend_name):
         return EnumElementImpl.get_backend(backend_name)
+
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff, previous):
+        if "obj_state" in state_diff and state_diff['obj_state'][0] is None:
+            return
+
+        if self.obj_type:
+            args = f" {self.obj_args}" if self.obj_args is not None else ''
+            yield await self.label_edit_finish(
+                None, f"{self.obj_type}{args}"
+            )
+
+    @saga('min_value', 'max_value', 'digits', 'scientific')
+    async def reformat_label(self, action, state_diff, previous):
+        self.format_update()
+        yield await self.update_value(self.value)
 
     def format_update(self):
         if self.scientific:
@@ -95,6 +121,7 @@ class EnumElement (BaseElement):
         self.draw_ports()
         self.redraw()
 
+    @mutates('min_value', 'max_value')
     async def set_bounds(self, lower, upper):
         self.min_value = lower
         self.max_value = upper
@@ -172,14 +199,6 @@ class EnumElement (BaseElement):
 
         await super().configure(params)
         self.redraw()
-
-    def port_position(self, port_dir, port_num):
-        # tweak the right input port display to be left of the slant
-        if port_dir == BaseElement.PORT_IN and port_num == 1:
-            default = BaseElement.port_position(self, port_dir, port_num)
-            return (default[0] - self.PORT_TWEAK, default[1])
-        else:
-            return BaseElement.port_position(self, port_dir, port_num)
 
     def select(self):
         BaseElement.select(self)

@@ -8,6 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from abc import ABCMeta, abstractmethod
 
+from mfp import log
 from mfp.utils import catchall
 from .text_widget import TextWidget
 from .backend_interfaces import BackendInterface
@@ -40,15 +41,12 @@ class ButtonElement (BaseElement):
     proc_type = "var"
 
     style_defaults = {
-        'porthole_height': 2,
-        'porthole_width': 6,
-        'porthole_minspace': 8,
-        'porthole_border': 3,
-        'fill-color:lit': 'default-alt-fill-color',
-        'text-color:lit': 'default-light-text-color'
+        'porthole-height': 3,
+        'porthole-width': 6,
+        'porthole-minspace': 8,
+        'porthole-border': 2,
+        'padding': dict(top=0, bottom=0, left=0, right=0),
     }
-
-    PORT_TWEAK = 5
 
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
@@ -56,14 +54,16 @@ class ButtonElement (BaseElement):
         self.indicator = False
         self.message = None
 
+        padding = self.get_style('padding') or {}
         self.label = TextWidget.build(self)
         self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.signal_listen('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
         self.label.set_use_markup(True)
-        self.label_text = ''
+        self.label.set_position(padding.get('left', 0), padding.get('top', 0))
 
+        self.label_text = ''
         self.param_list.append('label_text')
 
         # request update when value changes
@@ -77,15 +77,21 @@ class ButtonElement (BaseElement):
         label_halfwidth = self.label.get_property('width')/2.0
         label_halfheight = self.label.get_property('height')/2.0
 
+        padding = self.get_style('padding') or {}
+        nwidth = self.width
+        nheight = self.height
+
         if label_halfwidth > 1:
-            nwidth = max(self.width, 2*label_halfwidth + 10)
-            nheight = max(self.height, 2*label_halfheight + 10)
+            nwidth = max(self.width, 2*label_halfwidth + padding.get('left', 0) + padding.get('right', 0))
+            nheight = max(self.height, 2*label_halfheight + padding.get('top', 0) + padding.get('bottom', 0))
             if nwidth != self.width or nheight != self.height:
                 await self.set_size(nwidth, nheight)
 
-        if self.width and self.height:
-            self.label.set_position(self.width/2.0-label_halfwidth,
-                                    self.height/2.0-label_halfheight-2)
+        if nwidth and nheight:
+            self.label.set_position(
+                nwidth/2.0-label_halfwidth,
+                nheight/2.0-label_halfheight
+            )
 
     @catchall
     async def label_changed_cb(self, *args):
@@ -103,6 +109,7 @@ class ButtonElement (BaseElement):
             else:
                 self.label.set_markup(self.label_text)
 
+            await self.center_label()
             self.redraw()
 
     async def configure(self, params):

@@ -13,6 +13,9 @@ from ..delegate import DelegateMixin, delegatemethod
 
 
 class RGBAColor(Serializable):
+    """
+    RGBAColor represents colors on a (0, 255) interval for each element
+    """
     def __init__(self, *, red=0, green=0, blue=0, alpha=0):
         self.red = red
         self.green = green
@@ -27,6 +30,18 @@ class RGBAColor(Serializable):
             blue=self.blue,
             alpha=self.alpha
         )
+    def to_rgba(self):
+        return (self.red, self.green, self.blue, self.alpha)
+
+    def to_rgbaf(self):
+        return (self.red / 255, self.green / 255, self.blue / 255, self.alpha / 255)
+
+    def to_int(self):
+        return (
+            (int(self.red) << 12) | (int(self.green) << 8) | (int(self.blue) << 4) | int(self.alpha)
+        )
+    def __str__(self):
+        return f"{int(self.red):02x}{int(self.green):02x}{int(self.blue):02x}{int(self.alpha):02x}"
 
     @classmethod
     def load(cls, propdict):
@@ -36,31 +51,45 @@ class RGBAColor(Serializable):
 class ColorDBBackend(BackendInterface, DelegateMixin, metaclass=ABCMeta):
     @abstractmethod
     @delegatemethod
-    def create_from_rgba(self, red, green, blue, alpha):
+    def create_from_rgba(self, red: int, green: int, blue: int, alpha: int):
+        """
+        create_from_rgba assumes (0, 255) for each element and returns a
+        native color object
+        """
         pass
 
     @abstractmethod
     @delegatemethod
-    def create_from_name(self, name):
+    def create_from_name(self, name) -> RGBAColor:
+        """
+        Native color object from name (color name DB is backend specific)
+        """
         pass
 
     @abstractmethod
     @delegatemethod
-    def normalize(self, color):
+    def normalize(self, color) -> RGBAColor:
+        """
+        Takes a native color type and converts to RGBAColor
+        """
         pass
 
 
 class ColorDB (Singleton):
     named_colors = {}
     rgba_colors = {}
+    backend_name = None
 
     def __init__(self):
         from ..gui_main import MFPGUI
-        factory = ColorDBBackend.get_backend(MFPGUI().backend_name)
+        factory = ColorDBBackend.get_backend(ColorDB.backend_name)
         self.backend = factory(self)
         super().__init__()
 
     def find(self, *colorinfo):
+        if not isinstance(self, ColorDB):
+            raise ValueError("ColorDB methods must be called with ColorDB().method()")
+
         ll = len(colorinfo)
         if ll > 2:
             # RGB or RGBA color values

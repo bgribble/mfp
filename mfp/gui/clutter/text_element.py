@@ -57,7 +57,7 @@ class ClutterTextElementImpl(TextElementImpl, ClutterBaseElementImpl, TextElemen
             ct.translate(0.5, 0.5)
             ct.set_antialias(cairo.ANTIALIAS_NONE)
             ct.rectangle(0, 0, width-1, height-1)
-            color = ColorDB().normalize(self.get_color('border-color'))
+            color = ColorDB().normalize(self.get_color('stroke-color'))
             ct.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             ct.stroke()
         return True

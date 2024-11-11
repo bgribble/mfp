@@ -4,7 +4,8 @@ patch_edit.py: PatchEdit major mode
 
 Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
-
+from mfp import log
+from mfp.gui_main import MFPGUI
 from ..input_mode import InputMode
 from .autoplace import AutoplaceMode
 from .selection import SingleSelectionEditMode, MultiSelectionEditMode
@@ -30,59 +31,137 @@ class PatchEditMode (InputMode):
         self.selection_edit_mode = None
 
         InputMode.__init__(self, "Edit patch", "Edit")
-        self.bind('ESC', self.window.control_major_mode, "Exit edit mode")
-
-        self.bind("p", self.add_element(ProcessorElement),
-                  "Add processor box")
-        self.bind("m", self.add_element(MessageElement),
-                  "Add message box")
-        self.bind("n", self.add_element(EnumElement),
-                  "Add number box")
-        self.bind("t", self.add_element(TextElement),
-                  "Add text comment")
-        self.bind("u", self.add_element(ToggleButtonElement),
-                  "Add toggle button")
-        self.bind("g", self.add_element(BangButtonElement),
-                  "Add bang button")
-        self.bind("i", self.add_element(ToggleIndicatorElement),
-                  "Add on/off indicator")
-        self.bind("s", self.add_element(FaderElement),
-                  "Add slider")
-        self.bind("b", self.add_element(BarMeterElement),
-                  "Add bar meter")
-        self.bind("d", self.add_element(DialElement),
-                  "Add dial control")
-        self.bind("x", self.add_element(PlotElement),
-                  "Add X/Y plot")
-        self.bind("v", self.add_element(SendViaElement),
-                  "Add send message via")
-        self.bind("V", self.add_element(ReceiveViaElement),
-                  "Add receive message via")
-        self.bind("A-v", self.add_element(SendSignalViaElement),
-                  "Add send signal via")
-        self.bind("A-V", self.add_element(ReceiveSignalViaElement),
-                  "Add receive signal via")
-
-        self.bind("C-x", self.cut, "Cut selection to clipboard")
-        self.bind("C-c", self.copy, "Copy selection to clipboard")
-        self.bind("C-v", self.paste, "Paste clipboard to selection")
-        self.bind("C-d", self.duplicate, "Duplicate selection")
-
-        self.bind("C-n", self.window.layer_new, "Create new layer")
-        self.bind("C-N", self.window.layer_new_scope, "Create new layer in a new scope")
-        self.bind("C-U", self.window.layer_move_up, "Move current layer up")
-        self.bind("C-D", self.window.layer_move_down, "Move current layer down")
-
-        self.bind("TAB", self.select_next, "Select next element")
-        self.bind("S-TAB", self.select_prev, "Select previous element")
-        self.bind("C-TAB", self.select_mru, "Select most-recent element")
-        self.bind("C-a", self.select_all, "Select all (in this layer)")
-
-        self.bind("a", self.auto_place_below, "Auto-place below")
-        self.bind("A", self.auto_place_above, "Auto-place above")
-
         self.window.signal_listen("select", self.selection_changed_cb)
         self.window.signal_listen("unselect", self.selection_changed_cb)
+
+    @classmethod
+    def init_bindings(cls):
+        cls.bind(
+            "edit-cut", cls.cut, helptext="Cut selection to clipboard",
+            keysym="C-x", menupath="Edit > Cut"
+        )
+        cls.bind(
+            "edit-copy", cls.copy, helptext="Copy selection to clipboard",
+            keysym="C-c", menupath="Edit > Copy"
+        )
+        cls.bind(
+            "edit-paste", cls.paste, helptext="Paste clipboard to selection",
+            keysym="C-v", menupath="Edit > Paste"
+        )
+        cls.bind(
+            "edit-duplicate", cls.duplicate, helptext="Duplicate selection",
+            keysym="C-d", menupath="Edit > Duplicate"
+        )
+        cls.bind(
+            "autoplace-below", cls.auto_place_below, helptext="Auto-place below",
+            keysym="a", menupath="Edit > Autoplace below"
+        )
+        cls.bind(
+            "autoplace-above", cls.auto_place_above, helptext="Auto-place above",
+            keysym="A", menupath="Edit > Autoplace above"
+        )
+        cls.bind(
+            "add-processor", cls.add_element(ProcessorElement), helptext="Add processor box",
+            keysym="p", menupath="Edit > Add element > Processor"
+        )
+        cls.bind(
+            "add-message", cls.add_element(MessageElement), helptext="Add message box",
+            keysym="m", menupath="Edit > Add element > Message (data)"
+        )
+        cls.bind(
+            "add-number", cls.add_element(EnumElement), helptext="Add number box",
+            keysym="n", menupath="Edit > Add element > Number"
+        )
+        cls.bind(
+            "add-text", cls.add_element(TextElement), helptext="Add text comment",
+            keysym="t", menupath="Edit > Add element > Text comment"
+        )
+        cls.bind(
+            "add-toggle", cls.add_element(ToggleButtonElement), helptext="Add toggle button",
+            keysym="u", menupath="Edit > Add element > Toggle button"
+        )
+        cls.bind(
+            "add-bang-button", cls.add_element(BangButtonElement), helptext="Add bang button",
+            keysym="g", menupath="Edit > Add element > Bang button"
+        )
+        cls.bind(
+            "add-indicator", cls.add_element(ToggleIndicatorElement), helptext="Add on/off indicator",
+            keysym="i", menupath="Edit > Add element > Indicator (on/off)"
+        )
+        cls.bind(
+            "add-slider", cls.add_element(FaderElement), helptext="Add slider",
+            keysym="s", menupath="Edit > Add element > Slider"
+        )
+        cls.bind(
+            "add-bar-meter", cls.add_element(BarMeterElement), helptext="Add bar meter",
+            keysym="b", menupath="Edit > Add element > Bar meter"
+        )
+        cls.bind(
+            "add-dial", cls.add_element(DialElement), helptext="Add dial control",
+            keysym="d", menupath="Edit > Add element > Dial"
+        )
+        cls.bind(
+            "add-xyplot", cls.add_element(PlotElement), helptext="Add X/Y plot",
+            keysym="x", menupath="Edit > Add element > X/Y plot"
+        )
+        cls.bind(
+            "add-sendvia", cls.add_element(SendViaElement), helptext="Add send message via",
+            keysym="v", menupath="Edit > Add element > Send via"
+        )
+        cls.bind(
+            "add-recvvia", cls.add_element(ReceiveViaElement), helptext="Add receive message via",
+            keysym="V", menupath="Edit > Add element > Receive via"
+        )
+        cls.bind(
+            "add-sendsigvia", cls.add_element(SendSignalViaElement), helptext="Add send signal via",
+            keysym="A-v", menupath="Edit > Add element > Send signal via"
+        )
+        cls.bind(
+            "add-recvsigvia", cls.add_element(ReceiveSignalViaElement), helptext="Add receive signal via",
+            keysym="A-V", menupath="Edit > Add element > Receive signal via"
+        )
+
+        cls.bind(
+            "layer-new", lambda mode: mode.window.layer_new(),
+            helptext="Create new layer",
+            keysym="C-n", menupath="Layer > New layer"
+        )
+        cls.bind(
+            "layer-new-scope", lambda mode: mode.window.layer_new_scope(),
+            helptext="Create new layer in a new scope",
+            keysym="C-N", menupath="Layer > New layer in new scope"
+        )
+        cls.bind(
+            "layer-move-up", lambda mode: mode.window.layer_move_up(),
+            helptext="Move current layer up",
+            keysym="C-U", menupath="Layer > Move layer up"
+        )
+        cls.bind(
+            "layer-move-down", lambda mode: mode.window.layer_move_down(),
+            helptext="Move current layer down",
+            keysym="C-D", menupath="Layer > Move layer down"
+        )
+
+        cls.bind(
+            "select-next", cls.select_next, helptext="Select next element",
+            keysym="TAB", menupath="Edit > |Select next"
+        )
+        cls.bind(
+            "select-previous", cls.select_prev, helptext="Select previous element",
+            keysym="S-TAB", menupath="Edit > |Select previous"
+        )
+        cls.bind(
+            "select-recent", cls.select_mru, helptext="Select most-recent element",
+            keysym="C-TAB", menupath="Edit > |Select recent"
+        )
+
+        cls.bind(
+            "control-mode", cls.control_mode, "Exit edit mode",
+            keysym="ESC", menupath="Edit > ||Control mode"
+        )
+
+    async def control_mode(self):
+        await self.window.control_major_mode()
 
     def selection_changed_cb(self, window, signal, obj):
         if not self.enabled:
@@ -93,21 +172,39 @@ class PatchEditMode (InputMode):
         else:
             self.disable_selection_mode()
 
-    def add_element(self, element_type):
-        async def helper():
-            return await self._add_element(element_type)
+    @classmethod
+    def add_element(cls, element_type):
+        async def helper(mode, *args):
+            return await mode._add_element(element_type)
         return helper
+
+    def _style_default(self, element_type, style, default=None):
+        for c in element_type.mro():
+            if hasattr(c, 'style_defaults'):
+                if style in c.style_defaults:
+                    return c.style_defaults[style]
+        return default
 
     async def _add_element(self, element_type):
         await self.window.unselect_all()
+        backend = element_type.get_backend(MFPGUI().backend_name)
         factory = element_type.build
         if self.autoplace_mode is None:
             obj = await self.window.add_element(factory)
         else:
-            dx = element_type.style_defaults.get('autoplace-dx', 0)
-            dy = element_type.style_defaults.get('autoplace-dy', 0)
+            dx = self._style_default(backend, 'autoplace-dx', 0)
+            dy = self._style_default(backend, 'autoplace-dy', 0)
 
-            obj = await self.window.add_element(factory, self.autoplace_x + dx, self.autoplace_y + dy)
+            port_off_x = (
+                self._style_default(backend, 'porthole-border', 0)
+                + self._style_default(backend, 'porthole-width', 0) / 2.0
+            )
+
+            obj = await self.window.add_element(
+                factory,
+                self.autoplace_x + dx - port_off_x,
+                self.autoplace_y + dy
+            )
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
         if obj:

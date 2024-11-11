@@ -5,7 +5,6 @@ Imports here make sure the backends are registered
 """
 
 from .app_window import ClutterAppWindowImpl  # noqa
-from .input_manager import ClutterInputManagerImpl  # noqa
 from .console_manager import ClutterConsoleManagerImpl  # noqa
 from .layer import ClutterLayerImpl  # noqa
 from .text_widget import ClutterTextWidgetImpl  # noqa

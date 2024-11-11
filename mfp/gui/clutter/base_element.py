@@ -6,7 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import math
 from gi.repository import Clutter
-from flopsy import mutates
+from flopsy import mutates, saga
 
 from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement, BaseElementImpl
@@ -84,7 +84,7 @@ class ClutterBaseElementImpl(BaseElementImpl):
         if self.badge_current is None:
             return
         btext, bcolor = self.badge_current
-        halfbadge = self.get_style('badge_size') / 2.0
+        halfbadge = self.get_style('badge-size') / 2.0
 
         color = ColorDB().normalize(bcolor)
         ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
@@ -105,14 +105,14 @@ class ClutterBaseElementImpl(BaseElementImpl):
         if self.group is None:
             return
 
-        badgesize = self.get_style('badge_size')
+        badgesize = self.get_style('badge-size')
         if self.badge is None:
             self.badge = Clutter.CairoTexture.new(badgesize, badgesize)
             self.app_window.event_sources[self.badge] = self
             self.group.add_actor(self.badge)
             self.badge.connect("draw", self.draw_badge_cb)
 
-        ypos = min(self.get_style('porthole_height') + self.get_style('porthole_border'),
+        ypos = min(self.get_style('porthole-height') + self.get_style('porthole-border'),
                    self.height - badgesize / 2.0)
         self.badge.set_position(self.width - badgesize/2.0, ypos)
         tagged = False
@@ -158,7 +158,9 @@ class ClutterBaseElementImpl(BaseElementImpl):
             return
 
         ports_done = []
-
+        port_height = self.get_style('porthole-height')
+        port_width = self.get_style('porthole-width')
+        
         def confport(pid, px, py):
             pobj = self.port_elements.get(pid)
             dsp_port = False
@@ -170,10 +172,7 @@ class ClutterBaseElementImpl(BaseElementImpl):
 
             if pobj is None:
                 pobj = Clutter.Rectangle()
-                pobj.set_size(
-                    self.get_style('porthole_width'),
-                    self.get_style('porthole_height')
-                )
+                pobj.set_size(port_width, port_height)
                 self.group.add_actor(pobj)
                 self.port_elements[pid] = pobj
 
@@ -192,12 +191,12 @@ class ClutterBaseElementImpl(BaseElementImpl):
         for i in range(self.num_inlets):
             x, y = self.port_position(BaseElement.PORT_IN, i)
             pid = (BaseElement.PORT_IN, i)
-            confport(pid, x, y)
+            confport(pid, x - port_width / 2, y)
 
         for i in range(self.num_outlets):
             x, y = self.port_position(BaseElement.PORT_OUT, i)
             pid = (BaseElement.PORT_OUT, i)
-            confport(pid, x, y)
+            confport(pid, x - port_width / 2, y - port_height)
 
         # clean up -- ports may need to be deleted if
         # the object resizes smaller

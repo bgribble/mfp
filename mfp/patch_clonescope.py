@@ -41,7 +41,7 @@ async def clonescope(self, scopename, num_copies, **kwargs):
             basename = '_'.join(parts[:-1])
         except Exception as e:
             log.error("clonescope: caught exception", e)
-            log.debug_traceback()
+            log.debug_traceback(e)
 
     # find bounding box of any interface elements
     bbox_min_x = bbox_max_x = bbox_min_y = bbox_max_y = bbox_w = bbox_h = None

@@ -4,6 +4,7 @@ mfp_app.py
 Declare the main MFPApp object that holds app state in the GUI process
 """
 
+import asyncio
 import inspect
 import os
 import os.path
@@ -40,6 +41,7 @@ class MFPApp (Singleton, SignalMixin):
         self.no_dsp = False
         self.no_restart = False
         self.no_onload = False
+        self.gui_backend = None
         self.debug = False
         self.debug_remote = False
         self.osc_port = None
@@ -53,8 +55,6 @@ class MFPApp (Singleton, SignalMixin):
         self.samplerate = 44100
         self.blocksize = 256
         self.max_blocksize = 2048
-        self.in_latency = 0
-        self.out_latency = 0
         self.socket_path = "/tmp/mfp_rpcsock"
         self.batch_mode = False
         self.batch_obj = None
@@ -134,7 +134,7 @@ class MFPApp (Singleton, SignalMixin):
 
         if not self.no_gui:
             logstart = log.log_time_base.strftime("%Y-%m-%dT%H:%M:%S.%f")
-            guicmd = ["mfpgui", "-s", self.socket_path, "-l", logstart]
+            guicmd = ["mfpgui", "-s", self.socket_path, "-l", logstart, '--backend', self.gui_backend]
             if self.debug:
                 guicmd.append('--debug')
 
@@ -170,10 +170,16 @@ class MFPApp (Singleton, SignalMixin):
 
             # crawl plugins
             log.debug("Collecting information about installed plugins...")
-            self.pluginfo.samplerate = self.samplerate
-            self.pluginfo.index_ladspa()
-            log.debug("Found %d LADSPA plugins in %d files" % (len(self.pluginfo.pluginfo),
-                                                               len(self.pluginfo.libinfo)))
+            self.async_task(self.index_plugins())
+
+
+    async def index_plugins(self):
+        self.pluginfo.samplerate = self.samplerate
+        await asyncio.to_thread(self.pluginfo.index_ladspa)
+        log.debug(
+            "Found %d LADSPA plugins in %d files" % (
+                len(self.pluginfo.pluginfo), len(self.pluginfo.libinfo))
+        )
 
     async def exec_batch(self):
         # configure logging
@@ -367,6 +373,16 @@ class MFPApp (Singleton, SignalMixin):
             patch = Patch(name, '', None, self.app_scope, name, context)
             patch.gui_params['layers'] = [('Layer 0', '__patch__')]
 
+        if not self.no_dsp and not self.no_gui:
+            context = patch.context
+            await self.gui_command.dsp_info(dict(
+                samplerate=self.samplerate,
+                latency_in=context.input_latency,
+                latency_out=context.output_latency,
+                channels_in=self.dsp_inputs,
+                channels_out=self.dsp_outputs
+            ))
+
         self.patches[patch.name] = patch
         if show_gui:
             await patch.create_gui()
@@ -449,8 +465,7 @@ class MFPApp (Singleton, SignalMixin):
         except Exception as e:
             log.error("Caught exception while trying to create %s (%s)"
                       % (init_type, init_args))
-            log.debug(e)
-            log.debug_traceback()
+            log.debug_traceback(e)
             await self.cleanup()
             return None
 

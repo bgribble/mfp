@@ -14,7 +14,7 @@ from mfp import log
 class AutoplaceMode (InputMode):
     NONE_SPACING = 50
     BELOW_SPACING = 25
-    ABOVE_SPACING = 50
+    ABOVE_SPACING = 45
     CLOSE_SPACING = 10
     X_CLEAR = 50
     Y_CLEAR = 35
@@ -30,10 +30,6 @@ class AutoplaceMode (InputMode):
         self.placement = 0
 
         InputMode.__init__(self, "Auto-place next element")
-
-        self.bind("a", self.autoplace_below, "Choose next (below)")
-        self.bind("A", self.autoplace_above, "Choose next (above)")
-        self.bind("ESC", self.autoplace_disable, "Return to manual positioning")
 
         if self.window.selected and self.window.selected[0].layer == self.window.selected_layer:
             self.key_widget = self.window.selected[0]
@@ -58,6 +54,21 @@ class AutoplaceMode (InputMode):
             self.autoplace_below()
         else:
             self.autoplace_above()
+
+    @classmethod
+    def init_bindings(cls):
+        cls.bind(
+            "autoplace-below", cls.autoplace_below, "Choose next (below)", "a",
+            menupath="Context > |Next auto-place below"
+        )
+        cls.bind(
+            "autoplace-above", cls.autoplace_above, "Choose next (above)", "A",
+            menupath="Context > |Next auto-place above"
+        )
+        cls.bind(
+            "autoplace-disable", cls.autoplace_disable, "Return to manual positioning", "ESC",
+            menupath="Context > |Disable auto-place"
+        )
 
     def _set_autoplace(self, x, y):
         self.window.show_autoplace_marker(x, y)
@@ -95,7 +106,6 @@ class AutoplaceMode (InputMode):
 
         if self.placement < kw.num_inlets:
             x, y = kw.port_center(BaseElement.PORT_IN, self.placement)
-            x -= kw.get_style('porthole_border') + kw.get_style('porthole_width') / 2.0
             y = self.find_free_space_up(x, y - self.ABOVE_SPACING)
 
         self._set_autoplace(x, y)
@@ -119,7 +129,6 @@ class AutoplaceMode (InputMode):
             self.placement = 0
 
         x, y = kw.port_center(BaseElement.PORT_OUT, self.placement)
-        x -= kw.get_style('porthole_border') + kw.get_style('porthole_width') / 2.0
         y = self.find_free_space_down(x, y + self.BELOW_SPACING)
 
         self._set_autoplace(x, y)
@@ -197,6 +206,8 @@ class AutoplaceMode (InputMode):
         self.window.hide_autoplace_marker()
         if self.callback:
             self.callback(None, None)
+        return True
 
     def disable(self):
         self.window.hide_autoplace_marker()
+        return True

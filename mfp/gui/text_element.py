@@ -6,13 +6,14 @@ A text element (comment) in a patch
 
 from abc import ABCMeta, abstractmethod
 
+from flopsy import saga
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .base_element import BaseElement
 from .backend_interfaces import BackendInterface
-
+from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
-from .modes.clickable import ClickableControlMode
+from .modes.clickable import AltClickableControlMode
 from .text_widget import TextWidget
 
 
@@ -29,11 +30,7 @@ class TextElement (BaseElement):
     ELBOW_ROOM = 5
 
     style_defaults = {
-        'fill-color': 'transparent',
-        'fill-color:selected': 'transparent',
         'border': False,
-        'border-color': 'default-stroke-color',
-        'canvas-size': None,
         'draw-ports': 'selected'
     }
 
@@ -44,6 +41,12 @@ class TextElement (BaseElement):
         self.default = ''
 
         self.param_list.extend(['value', 'clickchange', 'default'])
+
+        # these can't be initialized until there's a backend
+        type(self).style_defaults.update({
+            'fill-color': ColorDB().find('transparent'),
+            'fill-color:selected': ColorDB().find('transparent'),
+        })
 
         self.label = TextWidget.build(self)
         self.label.set_color(self.get_color('text-color'))
@@ -56,12 +59,22 @@ class TextElement (BaseElement):
     def get_backend(cls, backend_name):
         return TextElementImpl.get_backend(backend_name)
 
-    async def update(self):
-        if not self.get_style('canvas-size'):
-            await self.set_size(
-                self.label.get_width() + 2*self.ELBOW_ROOM,
-                self.label.get_height() + self.ELBOW_ROOM
+    @saga('obj_type', 'obj_args')
+    async def recreate_element(self, action, state_diff, previous):
+        if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+            return
+
+        if self.obj_type:
+            args = f" {self.obj_args}" if self.obj_args is not None else ''
+            yield await self.label_edit_finish(
+                None, f"{self.obj_type}{args}"
             )
+
+    async def update(self):
+        await self.set_size(
+            self.label.get_width() + 2*self.ELBOW_ROOM,
+            self.label.get_height() + self.ELBOW_ROOM
+        )
         self.redraw()
         self.draw_ports()
 
@@ -91,15 +104,14 @@ class TextElement (BaseElement):
             self.value = txt or ''
             self.set_text()
         if self.selected and self.clickchange:
-            await self.app_window.get_prompted_input("New text:", newtext, self.value)
+            await self.app_window.cmd_get_input("New text:", newtext, self.value)
         return True
 
     def set_text(self):
         if len(self.value) > 0:
             self.label.set_markup(self.value)
         else:
-            size_set = self.get_style('canvas-size')
-            self.value = self.default or (not size_set and '...') or ''
+            self.value = self.default or '...'
             self.label.set_markup(self.value)
 
     def unclicked(self):
@@ -124,7 +136,7 @@ class TextElement (BaseElement):
         )
 
     def make_control_mode(self):
-        return ClickableControlMode(self.app_window, self, "Change text", 'A-')
+        return AltClickableControlMode(self.app_window, self, "Change text")
 
     async def configure(self, params):
         if params.get('value') is not None:
@@ -142,10 +154,6 @@ class TextElement (BaseElement):
         newsize = None
         if 'style' in params:
             newstyle = params.get('style')
-            if 'canvas-size' in newstyle:
-                newsize = newstyle.get('canvas-size')
-                params['width'] = newsize[0]
-                params['height'] = newsize[1]
 
         await super().configure(params)
 

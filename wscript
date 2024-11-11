@@ -1,7 +1,5 @@
 #! /usr/bin/env python3
 
-from __future__ import print_function
-
 from waflib import Utils
 from waflib.Configure import conf
 from waflib.Build import BuildContext, InstallContext, CleanContext, CFG_FILES
@@ -421,8 +419,15 @@ def configure(conf):
         uselibs.append(uname)
     conf.env.PKGCONF_LIBS = uselibs
 
-    pip_libs = ["posix_ipc", "simplejson", ("cairo", "pycairo"), "numpy",
-                "pynose", "yappi", "cython", "pyliblo", "gbulb", "carp-rpc", "flopsy"]
+    pip_libs = [
+        "posix_ipc", "simplejson", "numpy",
+        "pynose", "yappi", "cython", "pyliblo",
+        ("cairo", "pycairo"), "gbulb",               # clutter only
+        "pyopengl", "sdl", "imgui_bundle", "Pillow", # imgui only
+        "carp-rpc", "flopsy",                        # my other libs
+    ]
+
+    # all only needed for clutter backend
     gi_libs = ["Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
     pip_notfound = []
@@ -525,7 +530,7 @@ def build(bld):
         "share/mfp/icons/hicolor/scalable/actions/",
         "mfp.svg"
     )
-    
+
     if bld.cmd == "install":
         desktop_dir = Utils.subst_vars("${PREFIX}/share/mfp", bld.env)
         desktop_filename = "mfp.desktop"

@@ -15,7 +15,7 @@ from mfp import log
 class PatchDisplay:
     display_type = "patch"
 
-    def __init__(self, window, x, y):
+    def __init__(self, window, x, y, **kwargs):
         self.app_window = window
         self.obj_id = None
         self.obj_type = None
@@ -26,6 +26,8 @@ class PatchDisplay:
         self.last_filename = None
         self.layers = []
         self.scopes = []
+        self.selected_layer = None
+        self.display_info = kwargs.get('display_info')
 
         self.app_window.add_patch(self)
 

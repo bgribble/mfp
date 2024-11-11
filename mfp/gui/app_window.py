@@ -12,11 +12,13 @@ from mfp.utils import SignalMixin
 from ..gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .input_manager import InputManager
+from .input_mode import InputMode
 from .layer import Layer
 from .console_manager import ConsoleManager
 from .prompter import Prompter
-from .colordb import ColorDB
+from .colordb import ColorDB, RGBAColor
 from .base_element import BaseElement
+from .text_widget import TextWidget
 from .modes.global_mode import GlobalMode
 from .modes.patch_edit import PatchEditMode
 from .modes.patch_control import PatchControlMode
@@ -81,11 +83,11 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     @abstractmethod
-    def select(self, element):
+    async def select(self, element):
         pass
 
     @abstractmethod
-    def unselect(self, element):
+    async def unselect(self, element):
         pass
 
     #####################
@@ -100,7 +102,7 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     #####################
-    # HUD/console
+    # HUD/cmd prompt/console
 
     @abstractmethod
     def hud_banner(self, message, display_time=3.0):
@@ -111,7 +113,7 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     @abstractmethod
-    def hud_set_prompt(self, prompt, default=''):
+    def cmd_set_prompt(self, prompt, default=''):
         pass
 
     @abstractmethod
@@ -122,23 +124,11 @@ class AppWindowImpl(BackendInterface, ABC):
     # clipboard
 
     @abstractmethod
-    def clipboard_get(self, pointer_pos):
+    def clipboard_get(self):
         pass
 
     @abstractmethod
-    def clipboard_set(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    def clipboard_cut(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    def clipboard_copy(self, pointer_pos):
-        pass
-
-    @abstractmethod
-    def clipboard_paste(self, pointer_pos=None):
+    def clipboard_set(self, cliptext):
         pass
 
     #####################
@@ -150,6 +140,19 @@ class AppWindowImpl(BackendInterface, ABC):
 
     @abstractmethod
     def hide_selection_box(self):
+        pass
+
+    #####################
+    # layers
+    def layer_create(self, layer, patch):
+        pass
+
+    def layer_update(self, layer, patch):
+        pass
+
+    #####################
+    # patches / MDI
+    def add_patch(self, patch):
         pass
 
     #####################
@@ -179,10 +182,14 @@ class AppWindow (SignalMixin):
 
         self.selected_patch = None
         self.selected_layer = None
+        self.selected_window = "canvas"
+
         self.selected = []
 
         self.load_in_progress = 0
         self.close_in_progress = False
+        self.last_activity_time = None
+        self.dsp_info = {}
 
         # dumb colors
         self.color_unselected = self.get_color('stroke-color')
@@ -190,25 +197,33 @@ class AppWindow (SignalMixin):
         self.color_selected = self.get_color('stroke-color:selected')
         self.color_bg = self.get_color('canvas-color')
 
-        # viewport info
-        self.zoom = 1.0
-        self.view_x = 0
-        self.view_y = 0
+        # viewport info has been modified by code (not a backend lib)
+        self.viewport_zoom_set = False
+        self.viewport_pos_set = False
+        self.viewport_selection_set = False
 
         # impl-specific mapping of widgets to MFP display elements
         self.event_sources = {}
 
-        # set up key and mouse handling
-        self.input_mgr = InputManager.build(self)
-        self.init_input()
+        # command line entry / prompted response
+        self.cmd_prompt = None
+        self.cmd_input = None
 
-        self.hud_prompt_mgr = Prompter(self)
+        # set up key and mouse handling
+        self.input_mgr = InputManager(self)
+        self.init_input()
 
         self.initialize()
 
+        self.cmd_input = TextWidget.build(self)
+        self.cmd_manager = Prompter(
+            self, self.cmd_input,
+            completions=InputMode._bindings_by_label.keys()
+        )
+
+        # Python REPL
         self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
-
 
     @classmethod
     def get_backend(cls, backend_name):
@@ -218,32 +233,32 @@ class AppWindow (SignalMixin):
     def build(cls, *args, **kwargs):
         return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
+    def input_handler(self, target, signal, event, *rest):
+        try:
+            rv = self.input_mgr.handle_event(target, event)
+            self.grab_focus()
+            return rv
+        except Exception as e:
+            log.error("Error handling UI event", event)
+            log.debug(e)
+            log.debug_traceback(e)
+            return False
+
     def init_input(self):
         # set initial major mode
         self.input_mgr.global_mode = GlobalMode(self)
         self.input_mgr.major_mode = PatchEditMode(self)
         self.input_mgr.major_mode.enable()
 
-        def handler(obj, signal, event, *rest):
-            try:
-                rv = self.input_mgr.handle_event(obj, event)
-                self.grab_focus()
-                return rv
-            except Exception as e:
-                log.error("Error handling UI event", event)
-                log.debug(e)
-                log.debug_traceback()
-                return False
-
         # hook up input signals
-        self.signal_listen('button-press-event', handler)
-        self.signal_listen('button-release-event', handler)
-        self.signal_listen('key-press-event', handler)
-        self.signal_listen('key-release-event', handler)
-        self.signal_listen('motion-event', handler)
-        self.signal_listen('scroll-event', handler)
-        self.signal_listen('enter-event', handler)
-        self.signal_listen('leave-event', handler)
+        self.signal_listen('button-press-event', self.input_handler)
+        self.signal_listen('button-release-event', self.input_handler)
+        self.signal_listen('key-press-event', self.input_handler)
+        self.signal_listen('key-release-event', self.input_handler)
+        self.signal_listen('motion-event', self.input_handler)
+        self.signal_listen('scroll-event', self.input_handler)
+        self.signal_listen('enter-event', self.input_handler)
+        self.signal_listen('leave-event', self.input_handler)
         self.signal_listen('quit', self.quit)
 
     def get_color(self, colorspec):
@@ -253,8 +268,10 @@ class AppWindow (SignalMixin):
             return None
         elif isinstance(rgba, str):
             return ColorDB().find(rgba)
-        else:
+        elif isinstance(rgba, (list, tuple)):
             return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
+        else:
+            return rgba
 
     def load_start(self):
         self.load_in_progress += 1
@@ -331,9 +348,6 @@ class AppWindow (SignalMixin):
         try:
             b = factory(self, x, y)
         except Exception as e:
-            log.warning("add_element: Error while creating with factory", factory)
-            log.warning(e)
-            log.debug_traceback()
             return True
 
         self.active_layer().add(b)
@@ -378,8 +392,50 @@ class AppWindow (SignalMixin):
         self.console_manager.show_prompt(msg)
         self.console_activate()
 
-    async def get_prompted_input(self, prompt, callback, default=''):
-        await self.hud_prompt_mgr.get_input(prompt, callback, default)
+    async def cmd_get_input(self, prompt, callback, default=''):
+        await self.cmd_manager.get_input(prompt, callback, default)
+
+    async def clipboard_cut(self, pointer_pos):
+        if self.selected:
+            await self.clipboard_copy(pointer_pos)
+            await self.delete_selected()
+            return True
+        return False
+
+    async def clipboard_copy(self, pointer_pos):
+        if self.selected:
+            cliptxt = await MFPGUI().mfp.clipboard_copy(
+                pointer_pos,
+                [o.obj_id for o in self.selected if o.obj_id is not None]
+            )
+            self.clipboard_set(cliptxt)
+            return True
+        return False
+
+    async def clipboard_paste(self, pointer_pos=None):
+        from .patch_display import PatchDisplay
+        cliptxt = self.clipboard_get()
+        if not cliptxt:
+            return False
+
+        newobj = await MFPGUI().mfp.clipboard_paste(
+            cliptxt, self.selected_patch.obj_id,
+            self.selected_layer.scope, None
+        )
+
+        if newobj is not None:
+            await self.unselect_all()
+            for o in newobj:
+                obj = MFPGUI().recall(o)
+                if obj is None:
+                    return True
+                if not isinstance(obj, PatchDisplay):
+                    obj.move_to_layer(self.selected_layer)
+                    if obj not in self.selected:
+                        await self.select(MFPGUI().recall(o))
+            return False
+        else:
+            return False
 
 # additional methods in @extends wrappers
 from . import app_window_layer  # noqa
