@@ -134,7 +134,6 @@ init(mfp_processor * proc)
 {
     builtin_hold_data * d = g_malloc(sizeof(builtin_hold_data));
     proc->data = d;
-    
     d->hold_value = 0.0;
     d->param_track = FALSE;
     d->param_response = FALSE;

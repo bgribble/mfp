@@ -548,7 +548,8 @@ class Processor:
                 self.obj_id,
                 proc_name,
                 len(self.dsp_inlets),
-                len(self.dsp_outlets), params,
+                len(self.dsp_outlets),
+                params,
                 self.patch.context,
                 self.patch.obj_id
             )

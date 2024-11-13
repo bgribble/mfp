@@ -4,7 +4,6 @@ hold.py: Track-and-hold
 
 Copyright (c) 2020 Bill Gribble <grib@billgribble.com>
 '''
-
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..bang import Uninit
@@ -22,7 +21,7 @@ class TrackHold(Processor):
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
-        self.init_response = "response" in kwargs
+        self.init_response = "response" in kwargs and kwargs["response"]
 
     async def setup(self):
         if self.init_response:
@@ -55,11 +54,11 @@ class SampleHold(Processor):
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
-        self.init_response = "response" in kwargs
+        self.init_response = "response" in kwargs and kwargs["response"]
 
     async def setup(self):
         if self.init_response:
-            await self.dsp_init("hold~", response=True)
+            await self.dsp_init("hold~", response=1.0)
         else:
             await self.dsp_init("hold~")
 

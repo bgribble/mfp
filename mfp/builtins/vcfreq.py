@@ -11,7 +11,7 @@ from ..bang import Uninit
 
 
 class VCFreq(Processor):
-    doc_tooltip_obj = "Convert frequency (Hz) to V/oct signal"
+    doc_tooltip_obj = "Convert V/oct signal to frequency (Hz)"
     doc_tooltip_inlet = ["Signal input", "Reference frequency (A4, default=440)"]
     doc_tooltip_outlet = ["Signal output"]
 

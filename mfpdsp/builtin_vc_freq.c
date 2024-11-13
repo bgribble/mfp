@@ -5,9 +5,6 @@
 
 #include "mfp_dsp.h"
 
-#define NUM_SEMITONES 12
-#define VOCT_SEMITONE ((mfp_sample)(1.0 / 12.0))
-
 typedef struct {
     mfp_sample const_signal;
     double base_freq;
@@ -99,6 +96,3 @@ init_builtin_vc_freq(void) {
 
     return p;
 }
-
-
-

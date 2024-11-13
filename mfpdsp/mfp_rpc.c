@@ -115,6 +115,9 @@ extract_param_value(mfp_processor * proc, const char * param_name, Carp__PythonV
                 case CARP__PYTHON_VALUE__VALUE_TYPES__INT:
                     dval = (double)(param_value->_int);
                     break;
+                case CARP__PYTHON_VALUE__VALUE_TYPES__BOOL:
+                    dval = (double)(param_value->_bool);
+                    break;
             }
             rval = (gpointer)g_malloc0(sizeof(double));
             *(double *)rval = dval;
@@ -189,6 +192,7 @@ dispatch_create(Carp__PythonArray * args, Carp__PythonDict * kwargs, Carp__Pytho
         }
 
         proc = mfp_proc_alloc(pinfo, num_inlets, num_outlets, ctxt);
+        mfp_proc_init(proc, rpc_id, patch_id);
 
         for(int prm=0; prm < createprms->n_items; prm++) {
             init_param_helper(
@@ -198,7 +202,6 @@ dispatch_create(Carp__PythonArray * args, Carp__PythonDict * kwargs, Carp__Pytho
             );
 
         }
-        mfp_proc_init(proc, rpc_id, patch_id);
         response->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__INT;
         response->_int = proc->rpc_id;
 
