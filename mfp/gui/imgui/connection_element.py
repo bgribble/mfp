@@ -51,7 +51,7 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
                 MFPGUI().async_task(self.app_window.unselect(self))
                 self.selected = False
 
-        complete_color = self.get_color('link-color:selected' if self.selected else 'link-color')
+        complete_color = self.get_color('link-color')
         dashed_color = (1, 1, 1, 0.5)
 
         if self.dashed:

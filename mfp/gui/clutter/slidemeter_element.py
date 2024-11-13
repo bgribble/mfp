@@ -76,7 +76,7 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
     @catchall
     def draw_cb(self, texture, ct, width, height):
         c = ColorDB().normalize(
-            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+            self.get_color('stroke-color')
         )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         lw = 1
@@ -170,7 +170,7 @@ class ClutterSlideMeterElementImpl(ClutterBaseElementImpl):
             h = self.MIN_BARSIZE
 
         c = ColorDB().normalize(
-            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+            self.get_color('stroke-color')
         )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.rectangle(x_min+lw/2, y_max + lw/2 - val2pixels(max_fillval), bar_w-lw, h-lw)
@@ -260,7 +260,7 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
     @catchall
     def draw_cb(self, texture, ct, width, height):
         c = ColorDB().normalize(
-            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+            self.get_color('stroke-color')
         )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         ct.set_line_width(1.0)
@@ -308,7 +308,7 @@ class ClutterDialElementImpl(DialElementImpl, ClutterSlideMeterElementImpl, Dial
 
         # and the tasty filling
         c = ColorDB().normalize(
-            self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+            self.get_color('stroke-color')
         )
         ct.set_source_rgba(c.red, c.green, c.blue, c.alpha)
         min_val, max_val = self.fill_interval()

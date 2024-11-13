@@ -114,6 +114,9 @@ class ImguiBaseElementImpl(BaseElementImpl):
         for c in self.connections_out + self.connections_in:
             bump(c)
 
+    def get_stage_position(self):
+        return (self.position_x, self.position_y)
+
     async def tooltip_update(self):
         info = await MFPGUI().mfp.get_tooltip_info(self.obj_id)
         self.tooltip_info = info
@@ -224,9 +227,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
         pw = self.get_style('porthole-width')
         ph = self.get_style('porthole-height')
-        pcolor = self.get_color(
-            'porthole-color:selected' if self.selected else 'porthole-color'
-        )
+        pcolor = self.get_color('porthole-color')
 
         points = semicircle_points(
             px,
@@ -286,7 +287,9 @@ class ImguiBaseElementImpl(BaseElementImpl):
         nedit.pop_style_var()
 
     def render_ports(self):
-        if self.editable is False or self.node_id is None:
+        if self.node_id is None:
+            return
+        if not self.selected and not self.editable:
             return
 
         padding = self.get_style('padding')

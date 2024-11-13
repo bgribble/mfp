@@ -138,7 +138,7 @@ class TransientMessageElementImpl(BackendInterface, metaclass=ABCMeta):
 
 
 class TransientMessageElement (MessageElement):
-    ELBOW_ROOM = 50
+    ELBOW_ROOM = 40
 
     def __init__(self, window, x, y):
         self.target_obj = [t for t in window.selected if t is not self]
@@ -147,6 +147,7 @@ class TransientMessageElement (MessageElement):
         pos_x, pos_y = self.target_obj[0].get_stage_position()
         super().__init__(window, pos_x, pos_y - self.ELBOW_ROOM)
 
+        self.position_z = self.target_obj[0].position_z + 0.2
         self.message_text = "Bang"
         self.num_inlets = 0
         self.num_outlets = 1

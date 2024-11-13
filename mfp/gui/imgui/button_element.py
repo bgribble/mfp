@@ -63,16 +63,15 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
 
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            self.get_color(
-                'fill-color:selected' if self.selected else 'fill-color'
-            ).to_rgbaf()
+            self.get_color('fill-color').to_rgbaf()
         )
-        stroke_color = self.get_color('stroke-color:selected' if self.selected else 'stroke-color')
+        stroke_color = self.get_color('stroke-color')
 
         nedit.push_style_color(
             nedit.StyleColor.node_border,
             stroke_color.to_rgbaf()
         )
+        need_recenter = False
 
         ##########################
         # render
@@ -84,6 +83,8 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
                 (self.position_x, self.position_y)
             )
             nedit.set_node_z_position(self.node_id, self.position_z)
+            need_recenter = True
+
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
 
         self.render_sync_with_imgui()
@@ -152,6 +153,9 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         self.width = p_br[0] - p_tl[0]
         self.height = p_br[1] - p_tl[1]
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
+
+        if need_recenter:
+            self.center_label()
 
         # render
         ##########################

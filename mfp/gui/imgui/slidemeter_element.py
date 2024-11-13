@@ -211,9 +211,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         imgui.dummy([self.width, 1])
         imgui.dummy([1, self.height-1])
 
-        color = self.get_color(
-            'stroke-color:selected' if self.selected else 'stroke-color'
-        )
+        color = self.get_color('stroke-color')
         draw_list.add_rect_filled(
             p_tl, p_br,
             ColorDB().backend.im_col32(color),
@@ -442,9 +440,7 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
         imgui.dummy([self.width, 1])
         imgui.dummy([1, self.height-1])
 
-        color = self.get_color(
-            'stroke-color:selected' if self.selected else 'stroke-color'
-        )
+        color = self.get_color('stroke-color')
         outer_radius = self.dial_radius
         inner_radius = self.dial_radius / 4
         theta_range = 2 * math.pi - (self.THETA_MIN - self.THETA_MAX)

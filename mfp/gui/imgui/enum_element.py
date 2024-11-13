@@ -49,15 +49,11 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            self.get_color(
-                'fill-color:selected' if self.selected else 'fill-color'
-            ).to_rgbaf()
+            self.get_color('fill-color').to_rgbaf()
         )
         nedit.push_style_color(
             nedit.StyleColor.node_border,
-            self.get_color(
-                'stroke-color:selected' if self.selected else 'stroke-color'
-            ).to_rgbaf()
+            self.get_color('stroke-color').to_rgbaf()
         )
 
         ##########################

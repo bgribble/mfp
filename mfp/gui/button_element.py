@@ -90,7 +90,7 @@ class ButtonElement (BaseElement):
         if nwidth and nheight:
             self.label.set_position(
                 nwidth/2.0-label_halfwidth,
-                nheight/2.0-label_halfheight
+                nheight/2.0-label_halfheight-2
             )
 
     @catchall
