@@ -135,7 +135,7 @@ class GUICommand:
                     # FIXME: don't hardcode GOP offsets
                     if not parent.export_x:
                         log.debug(
-                            f"_create: parent {parent.scope.name}.{parent.name} has no export_x\n",
+                            f"[create] parent {parent.scope.name}.{parent.name} has no export_x",
                         )
                     o.editable = False
                     o.container = parent
@@ -150,6 +150,8 @@ class GUICommand:
             MFPGUI().appwin.refresh(o)
             await o.update()
             await MFPGUI().appwin.signal_emit("created", o)
+        else:
+            log.debug(f"[create] no ctor found for {elementtype}")
 
     async def connect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
         from .gui_main import MFPGUI

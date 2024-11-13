@@ -224,6 +224,7 @@ class Patch(Processor):
             return
 
         self.objects[obj.obj_id] = obj
+        obj.patch = self
         if obj.init_type in ('inlet', 'inlet~'):
             num = obj.inletnum
             if num >= len(self.inlet_objects):

@@ -461,6 +461,7 @@ class MFPApp (Singleton, SignalMixin):
             if obj and obj.obj_id:
                 await obj.setup()
                 obj.mark_ready()
+
             return obj
         except Exception as e:
             log.error("Caught exception while trying to create %s (%s)"

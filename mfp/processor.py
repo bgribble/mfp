@@ -339,7 +339,7 @@ class Processor:
 
         name = name or "%s_%s" % (self.init_type, str(self.obj_id))
 
-        if patch is not None and self.patch is None or self.patch != patch:
+        if (patch is not None and self.patch is None) or self.patch != patch:
             if self.patch:
                 self.patch.remove(self)
             self.patch = patch
@@ -1028,21 +1028,26 @@ class Processor:
     async def create_gui(self, **kwargs):
         from .mfp_app import MFPApp
         parent_id = self.patch.obj_id if self.patch is not None else None
+
         for param, value in kwargs.items():
             self.gui_params[param] = value
 
         if kwargs.get('is_export'):
-            xoff = (
-                self.patch.gui_params.get('export_frame_xoff', 2)
-                - (self.patch.gui_params.get('export_x') or 0)
-            )
+            if self.patch:
+                xoff = (
+                    self.patch.gui_params.get('export_frame_xoff', 2)
+                    - (self.patch.gui_params.get('export_x') or 0)
+                )
+                yoff = (
+                    self.gui_params.get('export_frame_yoff', 20)
+                    - (self.patch.gui_params.get('export_y') or 0)
+                )
+            else:
+                xoff = 2
+                yoff = 20
 
             self.gui_params['export_offset_x'] = xoff
             self.gui_params['position_x'] += xoff
-            yoff = (
-                self.gui_params.get('export_frame_yoff', 20)
-                - (self.patch.gui_params.get('export_y') or 0)
-            )
 
             self.gui_params['export_offset_y'] = yoff
             self.gui_params['position_y'] += yoff

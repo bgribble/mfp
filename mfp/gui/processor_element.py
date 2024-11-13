@@ -139,6 +139,7 @@ class ProcessorElement (BaseElement):
         self.export_y = params.get("export_y")
         self.export_w = params.get("export_w")
         self.export_h = params.get("export_h")
+
         if self.export_x is not None and self.export_y is not None:
             self.export_created = True
 

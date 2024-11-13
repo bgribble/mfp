@@ -28,7 +28,7 @@ PEAK_FPS = 60
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
-    motion_overrides = ["drag", "scroll-zoom", "canvas-pos"]
+    motion_overrides = ["scroll-zoom", "canvas-pos"]
 
     INIT_WIDTH = 1200
     INIT_HEIGHT = 900
@@ -235,7 +235,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ########################################
         # global style setup
         imgui.style_colors_classic()
-        imgui.push_style_color(imgui.Col_.text_selected_bg, (200, 200, 255, 255))
 
         nedit.push_style_color(nedit.StyleColor.flow_marker, (1, 1, 1, 0.2))
         nedit.push_style_color(nedit.StyleColor.flow, (1, 1, 1, 0.5))
@@ -339,7 +338,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # canvas panel
+        imgui.push_style_color(imgui.Col_.text_selected_bg, (200, 200, 255, 255))
         canvas_panel.render(self)
+        imgui.pop_style_color()  # text selected bg
 
         # canvas panel
         ########################################
@@ -370,7 +371,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.pop_style_var()  # rounding
         imgui.pop_style_var()  # spacing
 
-        imgui.pop_style_color()  # text selected bg
         nedit.pop_style_color(2)
 
         # full-screen window

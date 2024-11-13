@@ -160,7 +160,7 @@ class ClutterBaseElementImpl(BaseElementImpl):
         ports_done = []
         port_height = self.get_style('porthole-height')
         port_width = self.get_style('porthole-width')
-        
+
         def confport(pid, px, py):
             pobj = self.port_elements.get(pid)
             dsp_port = False

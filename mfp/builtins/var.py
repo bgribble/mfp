@@ -16,7 +16,7 @@ class Var (Processor):
 
     Used as the backend for several different GUI elements,
     slightly different behaviors, created with the appropriate name:
-            [message], [text], [var], [slider], [enum], [slidemeter]
+    [message], [text], [var], [slider], [enum], [slidemeter]
     '''
 
     doc_tooltip_obj = "Store a variable message (any type)"

@@ -348,6 +348,7 @@ class AppWindow (SignalMixin):
         try:
             b = factory(self, x, y)
         except Exception as e:
+            log.debug(f"Error in factory: {e}")
             return True
 
         self.active_layer().add(b)

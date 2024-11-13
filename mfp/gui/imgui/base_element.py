@@ -35,9 +35,14 @@ class ImguiBaseElementImpl(BaseElementImpl):
             self.height = None
             self.min_width = 0
             self.min_height = 0
+            self.position_x = None
+            self.position_y = None
             self.position_z = None
             self.edit_mode = None
             self.editable = None
+            self.container = None
+            self.export_offset_x = None
+            self.export_offset_y = None
 
         self.node_id = None
 
@@ -51,8 +56,12 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
         self.selection_set = False
         self.position_set = False
+        self.export_position_init = True
+        self.export_container_x = None
+        self.export_container_y = None
 
         self.hovered_state = False
+        self.child_elements = []
 
         super().__init__(window, x, y)
 
@@ -105,6 +114,26 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
     # every subclass should call this somewhere in the render method
     def render_sync_with_imgui(self):
+        if isinstance(self.container, BaseElement):
+            if self.export_position_init:
+                self.export_position_init = False
+                self.position_x = self.container.position_x + self.position_x
+                self.position_y = self.container.position_y + self.position_y
+                self.position_z = self.container.position_z + 0.1
+                self.position_set = True
+                self.export_container_x = self.container.position_x
+                self.export_container_y = self.container.position_y
+            elif (
+                self.container.position_x != self.export_container_x
+                or self.container.position_y != self.export_container_y
+            ):
+                self.position_x = (self.container.position_x - self.export_container_x) + self.position_x
+                self.position_y = (self.container.position_y - self.export_container_y) + self.position_y
+                self.position_z = self.container.position_z + 0.1
+                self.position_set = True
+                self.export_container_x = self.container.position_x
+                self.export_container_y = self.container.position_y
+
         if self.position_set:
             self.position_set = False
             nedit.set_node_position(

@@ -108,11 +108,8 @@ def render_tile(app_window, patch):
 
     conf = nedit.get_config()
 
-    # disable NodeEditor dragging of nodes when not in edit mode
-    if isinstance(app_window.input_mgr.major_mode, PatchEditMode):
-        conf.drag_button_index = 0
-    else:
-        conf.drag_button_index = 3
+    # disable NodeEditor dragging
+    conf.drag_button_index = 3
 
     # reselect nodes if needed (part of the hack to resize the viewport)
     if app_window.imgui_needs_reselect:

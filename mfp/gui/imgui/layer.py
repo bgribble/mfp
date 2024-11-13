@@ -1,4 +1,4 @@
-
+from mfp import log
 from mfp.gui.base_element import BaseElement
 from mfp.gui.layer import Layer, LayerImpl
 
@@ -21,6 +21,8 @@ class ImguiLayerImpl(Layer, LayerImpl):
 
     def add(self, obj, container=None):
         super().add(obj, container=container)
+        if container and hasattr(container, "child_elements"):
+            container.child_elements.append(obj)
 
     def delete(self):
         pass

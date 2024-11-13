@@ -26,7 +26,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
         self.node_id = None
-        self.min_width = self.width = 25
+        self.min_width = self.width = 20
         self.min_height = self.height = 12
         self.position_set = False
 
@@ -85,14 +85,25 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         imgui.begin_group()
         self.label.render()
 
+        # if there are child elements, save room
         content_w, content_h = imgui.get_item_rect_size()
 
-        if content_w < self.min_width:
-            imgui.same_line()
-            imgui.dummy([self.min_width - content_w, 1])
+        if self.export_w is not None:
+            min_w = max(self.min_width, self.export_w + 2)
+        else:
+            min_w = self.min_width
 
-        if content_h < self.min_height:
-            imgui.dummy([1, self.min_height - content_h])
+        if self.export_h is not None:
+            min_h = max(self.min_height, self.export_h + 12)
+        else:
+            min_h = self.min_height
+
+        if content_w < min_w:
+            imgui.same_line()
+            imgui.dummy([min_w - content_w, 1])
+
+        if content_h < min_h:
+            imgui.dummy([1, min_h - content_h])
         imgui.end_group()
 
         # connections
@@ -109,6 +120,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         self.width = p_br[0] - p_tl[0]
         self.height = p_br[1] - p_tl[1]
+
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
 
         # render

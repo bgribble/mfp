@@ -91,7 +91,6 @@ class MFPCommand:
         if isinstance(obj, Processor):
             await obj.send(m, port)
 
-    @noresp
     async def delete(self, obj_id):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -102,7 +101,6 @@ class MFPCommand:
     def set_params(self, obj_id, params):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
-
         if isinstance(obj, Processor):
             obj.gui_params = params
 

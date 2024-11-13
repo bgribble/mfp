@@ -48,7 +48,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         if self.markdown_text and self.use_markup:
             # markdown.render(self.markdown_text)
             # strip tags
-            label_text = re.sub(r'<[^>]*?>', '', self.text)
+            label_text = re.sub(r'<[^>]*?>', '', self.markdown_text)
         else:
             label_text = self.text
 
@@ -68,11 +68,11 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.width = w
         self.height = h
 
-        if not self.editable or len(self.text) == 0:
+        if not self.editable or len(label_text) == 0:
             return
 
         draw_list = imgui.get_window_draw_list()
-        lines = self.text.split("\n")
+        lines = label_text.split("\n")
         line_start_pos = 0
 
         for line in lines:
@@ -84,8 +84,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 # draw cursor
                 draw_list.add_rect_filled(
                     (left_x + box_start * self.font_width, top_y),
-                    (left_x + box_end * self.font_width + 1.0, top_y + self.font_height),
-                    imgui.IM_COL32(0, 0, 0, 90)
+                    (left_x + box_end * self.font_width + 1.0, top_y + self.font_height + 2),
+                    imgui.IM_COL32(255, 255, 255, 70)
                 )
             line_start_pos += len(line) + 1
             top_y += self.font_height
