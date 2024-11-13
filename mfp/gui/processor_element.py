@@ -81,7 +81,10 @@ class ProcessorElement (BaseElement):
 
     @saga('obj_type', 'obj_args')
     async def recreate_element(self, action, state_diff, previous):
+        # don't recreate if this is the initial creation
         if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+            return
+        if "obj_id" in state_diff and state_diff['obj_id'][0] == None:
             return
 
         if self.obj_type:

@@ -367,12 +367,18 @@ class BaseElement (Store):
             name_index = self.app_window.object_counts_by_type.get(self.display_type, 0)
             name = "%s_%03d" % (self.display_type, name_index)
 
+        if self.obj_id is not None:
+            await MFPGUI().mfp.set_gui_created(self.obj_id, False)
+            await MFPGUI().mfp.delete(self.obj_id)
+            self.obj_id = None
+
         # need to emit this signal before creating so that if
         # create() makes sub-objects with visible elements they
         # get put in the correct place in the object tree
         await MFPGUI().appwin.signal_emit("created", self)
 
         objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name)
+
         if self.layer is not None and objinfo:
             objinfo["layername"] = self.layer.name
 

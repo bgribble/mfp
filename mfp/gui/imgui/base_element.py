@@ -73,6 +73,13 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.selection_set = True
         return super().unselect()
 
+    async def delete(self, **kwargs):
+        children = self.child_elements
+        self.child_elements = []
+        for child in children:
+            await child.delete(**kwargs)
+        await super().delete(**kwargs)
+
     # position_x and position_y need special handling because
     # the imgui canvas can change them independently
     def _SET_POSITION_X(self, new_pos, previous=None):
@@ -371,8 +378,6 @@ class ImguiBaseElementImpl(BaseElementImpl):
     async def redraw_connections(self):
         pass
 
-
     @mutates('position_z')
     def move_z(self, z):
         self.position_z = z
-        self.group.set_z_position(z)
