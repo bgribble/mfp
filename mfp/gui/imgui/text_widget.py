@@ -4,6 +4,7 @@ imgui/text_widget.py -- backend implementation of TextWidget for Imgui
 
 import re
 from imgui_bundle import imgui
+from imgui_bundle import imgui_node_editor as nedit
 # from imgui_bundle import imgui_md as markdown
 
 from mfp import log
@@ -39,6 +40,14 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         self.visible = True
         self.use_markup = False
+
+    def set_editable(self, value):
+        super().set_editable(value)
+        if value:
+            nedit.enable_shortcuts(False)
+        else:
+            nedit.enable_shortcuts(True)
+
 
     def render(self):
         extra_bit = ''
