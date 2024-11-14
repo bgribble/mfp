@@ -68,7 +68,7 @@ async def clonescope(self, scopename, num_copies, **kwargs):
         bbox_h = bbox_max_y - bbox_min_y
 
     if MFPApp().gui_command:
-        MFPApp().gui_command.load_start()
+        await MFPApp().gui_command.load_start()
 
     need_gui = []
     all_clones = []
@@ -97,7 +97,7 @@ async def clonescope(self, scopename, num_copies, **kwargs):
         for name, srcobj in scope.bindings.items():
             if not srcobj.save_to_patch:
                 continue
-            newobj = srcobj.clone(self, newscope, name)
+            newobj = await srcobj.clone(self, newscope, name)
             all_clones.append(newobj)
             obj_copied[name] = newobj
             obj_idmap[srcobj.obj_id] = newobj
@@ -126,7 +126,7 @@ async def clonescope(self, scopename, num_copies, **kwargs):
                         else:
                             continue
                     if (newobj, port_num) not in tobj_newid.connections_out[tport]:
-                        tobj_newid.connect(tport, newobj, port_num)
+                        await tobj_newid.connect(tport, newobj, port_num)
 
             for port_num, port_conn in enumerate(srcobj.connections_out):
                 for tobj, tport in port_conn:
@@ -137,7 +137,7 @@ async def clonescope(self, scopename, num_copies, **kwargs):
                         else:
                             continue
                     if (tobj_newid, tport) not in newobj.connections_out[port_num]:
-                        newobj.connect(port_num, tobj_newid, tport)
+                        await newobj.connect(port_num, tobj_newid, tport)
 
     for name, srcobj in ui_items.items():
         # kludge -- change labels in the UI template objects

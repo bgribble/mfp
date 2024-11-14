@@ -261,10 +261,10 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
                 if self.cmd_prompt:
                     self.cmd_prompt.set_position(10, self.stage.get_height() - 25)
 
-                if self.cmd_input:
-                    self.cmd_input.set_position(
-                        15 + self.cmd_prompt.get_width(), self.stage.get_height() - 25
-                    )
+                    if self.cmd_input:
+                        self.cmd_input.set_position(
+                            15 + self.cmd_prompt.get_width(), self.stage.get_height() - 25
+                        )
             except Exception as e:
                 log.error("Error handling resize event", e)
                 log.debug(e)

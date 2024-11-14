@@ -38,7 +38,7 @@ class Inlet(Processor):
         else:
             self.doc_tooltip_obj = self.doc_tooltip_cold
 
-    def clone(self, patch, scope, name):
+    async def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is
         # selected automatically
         prms = self.save()
@@ -47,7 +47,7 @@ class Inlet(Processor):
         else:
             hot = False
 
-        newobj = MFPApp().create(prms.get("type"), None, patch, scope, name)
+        newobj = await MFPApp().create(prms.get("type"), None, patch, scope, name)
         newobj.load(prms)
         if hot:
             newobj.hot()
@@ -102,12 +102,12 @@ class Outlet(Processor):
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
 
-    def clone(self, patch, scope, name):
+    async def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is
         # selected automatically
 
         prms = self.save()
-        newobj = MFPApp().create(prms.get("type"), None, patch, scope, name)
+        newobj = await MFPApp().create(prms.get("type"), None, patch, scope, name)
         newobj.load(prms)
         return newobj
 

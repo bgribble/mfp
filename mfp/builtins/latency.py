@@ -22,10 +22,10 @@ class Latency(Processor):
     def _latency_cb(self, app, signal):
         self.send(Bang)
 
-    def delete(self):
+    async def delete(self):
         if self.callback is not None:
             MFPApp().signal_unlisten(self.callback)
-        Processor.delete(self)
+        await Processor.delete(self)
 
     async def trigger(self):
         in_latency, out_latency = self.patch.context.get_latency()

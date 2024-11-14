@@ -340,7 +340,7 @@ class TaskNibbler:
 
             if retry:
                 self.failed.append((retry, datetime.utcnow()))
-            await asyncio.wait_for(self.new_work.wait(), 0.26)
+            await asyncio.wait_for(self.new_work.wait(), 1)
 
     def add_task(self, task, retry, *data):
         self.queue.append((task, retry, data))
