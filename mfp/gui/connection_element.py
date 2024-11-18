@@ -95,3 +95,10 @@ class ConnectionElement(BaseElement):
         self.obj_1 = None
         self.obj_2 = None
         await super().delete()
+
+    def corners(self):
+        if self.obj_1 and self.obj_2:
+            p1 = self.obj_1.port_center(BaseElement.PORT_OUT, self.port_1)
+            p2 = self.obj_2.port_center(BaseElement.PORT_IN, self.port_2)
+            return [p1, p2]
+        return None

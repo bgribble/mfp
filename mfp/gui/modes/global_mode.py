@@ -370,12 +370,14 @@ class GlobalMode (InputMode):
 
         self.drag_last_x = px
         self.drag_last_y = py
+        self.window.viewport_drag_active = True
         return True
 
     def drag_motion(self):
         if self.drag_started is False:
             return False
 
+        self.window.viewport_drag_active = True
         px = self.manager.pointer_ev_x
         py = self.manager.pointer_ev_y
 
@@ -390,6 +392,7 @@ class GlobalMode (InputMode):
 
     def drag_end(self):
         self.drag_started = False
+        self.window.viewport_drag_active = False
         return True
 
     async def selbox_start(self, select_mode):

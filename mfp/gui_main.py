@@ -73,6 +73,9 @@ class MFPGUI (Singleton):
             'porthole-width': ParamInfo(label="Inlet/outlet port width", param_type=float),
             'porthole-minspace': ParamInfo(label="Inlet/outlet min space", param_type=float),
             'scale-font-size': ParamInfo(label="Scale font size", param_type=float),
+            'selbox-stroke-color': ParamInfo(label="Selection box outline", param_type=RGBAColor),
+            'selbox-fill-color': ParamInfo(label="Selection box fill", param_type=RGBAColor),
+            'stroke-color': ParamInfo(label="Element outline color", param_type=RGBAColor),
             'stroke-color': ParamInfo(label="Element outline color", param_type=RGBAColor),
             'stroke-color:debug': ParamInfo(label="Element outline color (debug)", param_type=RGBAColor),
             'stroke-color:selected': ParamInfo(label="Element outline color (selected)", param_type=RGBAColor),
@@ -97,6 +100,8 @@ class MFPGUI (Singleton):
             'link-color:selected': ColorDB().find('default-link-color-selected'),
             'porthole-color': ColorDB().find('default-stroke-color'),
             'porthole-color:selected': ColorDB().find('default-stroke-color-selected'),
+            'selbox-stroke-color': ColorDB().find('default-selbox-stroke-color'),
+            'selbox-fill-color': ColorDB().find('default-selbox-fill-color'),
             'stroke-color': ColorDB().find('default-stroke-color'),
             'stroke-color:selected': ColorDB().find('default-stroke-color-selected'),
             'stroke-color:hover': ColorDB().find('default-stroke-color-hover'),
@@ -141,6 +146,10 @@ def setup_default_colors_dark():
                      ColorDB().find(0x74, 0x74, 0x74, 0xff))
     ColorDB().insert('default-stroke-color-selected',
                      ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
+    ColorDB().insert('default-selbox-stroke-color',
+                     ColorDB().find(0x33, 0xcc, 0xff, 0xff))
+    ColorDB().insert('default-selbox-fill-color',
+                     ColorDB().find(0x33, 0xcc, 0xff, 0x20))
     ColorDB().insert('default-link-color',
                      ColorDB().find(0x84, 0x84, 0x84, 0xff))
     ColorDB().insert('default-link-color-selected',
@@ -173,6 +182,7 @@ def setup_default_colors_dark():
                      ColorDB().find(0xff, 0xff, 0xff, 0x40))
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
+
 
 def setup_default_colors_light():
     from .gui.colordb import ColorDB

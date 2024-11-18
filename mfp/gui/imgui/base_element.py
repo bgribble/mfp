@@ -178,15 +178,6 @@ class ImguiBaseElementImpl(BaseElementImpl):
             else:
                 if nedit.is_node_selected(self.node_id):
                     nedit.deselect_node(self.node_id)
-        else:
-            if nedit.is_node_selected(self.node_id):
-                if not self.selected:
-                    MFPGUI().async_task(self.app_window.select(self))
-                    self.selected = True
-            else:
-                if self.selected:
-                    MFPGUI().async_task(self.app_window.unselect(self))
-                    self.selected = False
 
     def render_badge(self):
         if not self.badge_current:

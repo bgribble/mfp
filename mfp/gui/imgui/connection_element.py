@@ -42,14 +42,14 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
             return
 
         # check selection status
-        if nedit.is_link_selected(self.node_id):
-            if not self.selected:
-                MFPGUI().async_task(self.app_window.select(self))
-                self.selected = True
-        else:
+        if self.selection_set:
+            self.selection_set = False
             if self.selected:
-                MFPGUI().async_task(self.app_window.unselect(self))
-                self.selected = False
+                if not nedit.is_link_selected(self.node_id):
+                    nedit.select_link(self.node_id)
+            else:
+                if nedit.is_link_selected(self.node_id):
+                    nedit.deselect_link(self.node_id)
 
         complete_color = self.get_color('link-color')
         dashed_color = (1, 1, 1, 0.5)
@@ -78,7 +78,7 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
         if self.dashed:
             nedit.flow(self.node_id)
             nedit.pop_style_var(3)
-            self.app_window.imgui_prevent_idle = True
+            self.app_window.imgui_prevent_idle = 1
 
     def draw_ports(self):
         super().draw_ports()

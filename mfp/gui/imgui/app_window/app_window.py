@@ -14,9 +14,9 @@ import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.collision import collision_check
 from mfp.gui.event import EnterEvent, LeaveEvent
 from mfp.gui.app_window import AppWindow, AppWindowImpl
-from mfp.gui.patch_display import PatchDisplay
 from mfp.gui.tile_manager import TileManager, Tile
 from ..inputs import imgui_process_inputs, imgui_key_map
 from ..sdl2_renderer import ImguiSDL2Renderer as ImguiRenderer
@@ -42,7 +42,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_renderer = None
         self.imgui_repeating_keys = {}
         self.imgui_needs_reselect = []
-        self.imgui_prevent_idle = False
+        self.imgui_prevent_idle = 0
 
         self.nedit_config = None
 
@@ -70,6 +70,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.autoplace_x = None
         self.autoplace_y = None
+        self.selection_box_bounds = None
 
         self.frame_count = 0
         self.frame_timestamps = []
@@ -229,7 +230,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # renderer
     def render(self):
-        self.imgui_prevent_idle = False
+        self.imgui_prevent_idle = max(0, self.imgui_prevent_idle - 1)
         keep_going = True
 
         ########################################
@@ -516,10 +517,29 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # selection box
     def show_selection_box(self, x0, y0, x1, y1):
-        return []
+        if x0 > x1:
+            x0, x1 = x1, x0
+        if y0 > y1:
+            y0, y1 = y1, y0
+
+        self.selection_box_bounds = (x0, y0, x1, y1)
+
+        enclosed = []
+        selection_corners = [
+            (x0, y0), (x1, y0), (x0, y1), (x1, y1)
+        ]
+        for obj in self.selected_layer.objects:
+            if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
+                continue
+            corners = obj.corners()
+
+            if corners and collision_check(selection_corners, corners):
+                enclosed.append(obj)
+
+        return enclosed
 
     def hide_selection_box(self):
-        pass
+        self.selection_box_bounds = None
 
     #####################
     # layers

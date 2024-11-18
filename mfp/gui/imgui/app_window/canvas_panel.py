@@ -6,13 +6,66 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 import math
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
-from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.modes.patch_edit import PatchEditMode
 from mfp.gui.modes.global_mode import GlobalMode
 from . import menu_bar
+
+
+def render_selection_box(app_window, pane_origin, canvas_origin, tile):
+    draw_list = imgui.get_foreground_draw_list()
+    outline_color = app_window.get_color('selbox-stroke-color')
+    fill_color = app_window.get_color('selbox-fill-color')
+
+    # in canvas coordinates
+    x0, y0, x1, y1 = app_window.selection_box_bounds
+
+    pmin = (
+        pane_origin[0]
+        + canvas_origin[0]
+        + tile.origin_x
+        - tile.view_x * tile.view_zoom
+        + x0 * tile.view_zoom,
+        pane_origin[1]
+        + canvas_origin[1]
+        + tile.origin_y
+        - tile.view_y * tile.view_zoom
+        + y0 * tile.view_zoom
+    )
+
+    pmax = (
+        pane_origin[0]
+        + canvas_origin[0]
+        + tile.origin_x
+        - tile.view_x * tile.view_zoom
+        + x1 * tile.view_zoom,
+        pane_origin[1]
+        + canvas_origin[1]
+        + tile.origin_y
+        - tile.view_y * tile.view_zoom
+        + y1 * tile.view_zoom
+    )
+
+    draw_list.push_clip_rect(
+        (pane_origin[0] + canvas_origin[0] + tile.origin_x,
+         pane_origin[1] + canvas_origin[1] + tile.origin_y),
+        (pane_origin[0] + canvas_origin[0] + tile.origin_x + tile.width,
+         pane_origin[1] + canvas_origin[1] + tile.origin_y + tile.height),
+    )
+
+    draw_list.add_rect_filled(
+        pmin, pmax,
+        ColorDB().backend.im_col32(fill_color),
+        0, 0
+    )
+    draw_list.add_rect(
+        pmin, pmax,
+        ColorDB().backend.im_col32(outline_color),
+        0, 0, 1.0
+    )
+    draw_list.pop_clip_rect()
 
 
 def render_tile(app_window, patch):
@@ -108,14 +161,18 @@ def render_tile(app_window, patch):
 
     conf = nedit.get_config()
 
-    # disable NodeEditor dragging
+    # disable NodeEditor dragging and selecting
     conf.drag_button_index = 3
+    conf.select_button_index = 3
 
     # reselect nodes if needed (part of the hack to resize the viewport)
     if app_window.imgui_needs_reselect:
         nedit.clear_selection()
         for obj in app_window.imgui_needs_reselect:
-            nedit.select_node(obj.node_id, True)
+            if isinstance(obj, ConnectionElement):
+                nedit.select_link(obj.node_id, True)
+            else:
+                nedit.select_node(obj.node_id, True)
         app_window.imgui_needs_reselect = []
 
     if patch.selected_layer:
@@ -132,6 +189,7 @@ def render_tile(app_window, patch):
             if obj.layer == patch.selected_layer and isinstance(obj, ConnectionElement):
                 obj.render()
 
+    # draw the autoplace target
     if app_window.selected_patch == patch and app_window.autoplace_x is not None:
         color = ColorDB().backend.im_col32(app_window.get_color('stroke-color:selected'))
 
@@ -157,6 +215,15 @@ def render_tile(app_window, patch):
         )
         draw_list.path_line_to(autoplace_window_pos)
         draw_list.path_fill_convex(color)
+
+    # draw the selection rectangle if needed
+    if app_window.selected_patch == patch and app_window.selection_box_bounds is not None:
+        render_selection_box(
+            app_window,
+            canvas_pane_origin,
+            canvas_origin,
+            tile
+        )
 
     #############################
     # viewport management
@@ -190,7 +257,7 @@ def render_tile(app_window, patch):
     if tile.view_x != viewport_x or tile.view_y != viewport_y:
         if app_window.viewport_pos_set:
             need_navigate = True
-        else:
+        elif not app_window.viewport_drag_active:
             tile.view_x = viewport_x
             tile.view_y = viewport_y
 
@@ -222,11 +289,10 @@ def render_tile(app_window, patch):
         nedit.begin_node(patch.viewport_box_nodes[0])
         nedit.end_node()
 
-        nedit.set_node_position(
-            patch.viewport_box_nodes[1], lower_right
-        )
+        nedit.set_node_position(patch.viewport_box_nodes[1], lower_right)
         nedit.begin_node(patch.viewport_box_nodes[1])
         nedit.end_node()
+
         nedit.pop_style_var(3)
 
         # save the current selection, then clear it
@@ -234,7 +300,10 @@ def render_tile(app_window, patch):
             obj for obj in app_window.objects if obj.selected
         ]
         for obj in selection:
-            nedit.deselect_node(obj.node_id)
+            if isinstance(obj, ConnectionElement):
+                nedit.deselect_link(obj.node_id)
+            else:
+                nedit.deselect_node(obj.node_id)
 
         # select the upper-left and lower-right nodes
         for obj_id in patch.viewport_box_nodes:
@@ -242,7 +311,9 @@ def render_tile(app_window, patch):
 
         # navigate to them
         nedit.navigate_to_selection(need_zoom, 0)
+        app_window.imgui_prevent_idle = 10
         app_window.imgui_needs_reselect = selection
+
 
     #############################
     # creation of links (by click-drag)

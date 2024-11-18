@@ -201,6 +201,7 @@ class AppWindow (SignalMixin):
         self.viewport_zoom_set = False
         self.viewport_pos_set = False
         self.viewport_selection_set = False
+        self.viewport_drag_active = False
 
         # impl-specific mapping of widgets to MFP display elements
         self.event_sources = {}
