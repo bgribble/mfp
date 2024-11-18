@@ -433,11 +433,13 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def screen_to_canvas(self, x, y):
         if not self.selected_patch or not self.selected_patch.display_info:
             return (x, y)
+
         di = self.selected_patch.display_info
-        screen_x_delta = x - di.origin_x
-        screen_y_delta = y - di.origin_y - self.menu_height - 20
+        screen_x_delta = x - di.origin_x - 1
+        screen_y_delta = y - di.origin_y - self.menu_height - 1
         canvas_x = di.view_x + screen_x_delta / di.view_zoom
         canvas_y = di.view_y + screen_y_delta / di.view_zoom
+
         return (canvas_x, canvas_y)
 
     def canvas_to_screen(self, x, y):

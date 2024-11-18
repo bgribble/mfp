@@ -446,15 +446,19 @@ class GlobalMode (InputMode):
 
         px = self.manager.pointer_x
         py = self.manager.pointer_y
-        dx = px - self.drag_last_x
-        dy = py - self.drag_last_y
+        dx = px - self.drag_start_x
+        dy = py - self.drag_start_y
+
         self.drag_last_x = px
         self.drag_last_y = py
 
         if self.selection_drag_started:
             for obj in self.window.selected:
                 if obj.editable and obj.display_type != 'connection':
-                    await obj.drag(dx, dy)
+                    await obj.move(
+                        obj.drag_start_x + dx,
+                        obj.drag_start_y + dy
+                    )
             return True
 
         enclosed = self.window.show_selection_box(
