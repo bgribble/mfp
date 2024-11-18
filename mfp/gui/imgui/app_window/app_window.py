@@ -43,6 +43,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_repeating_keys = {}
         self.imgui_needs_reselect = []
         self.imgui_prevent_idle = 0
+        self.imgui_tile_selected = False
 
         self.nedit_config = None
 

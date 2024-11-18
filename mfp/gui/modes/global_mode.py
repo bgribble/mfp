@@ -399,15 +399,14 @@ class GlobalMode (InputMode):
         px = self.manager.pointer_x
         py = self.manager.pointer_y
 
-        if (
-            self.window.backend_name == "imgui"
-            and (
+        if self.window.backend_name == "imgui":
+            if (
                 self.window.selected_window != "canvas"
                 or self.window.main_menu_open
                 or self.window.context_menu_open
-            )
-        ):
-            return
+            ):
+                return
+            self.window.imgui_tile_selected = True
 
         if select_mode is None:
             if self.manager.pointer_obj is not None:

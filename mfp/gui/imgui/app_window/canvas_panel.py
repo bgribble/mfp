@@ -101,6 +101,9 @@ def render_tile(app_window, patch):
         if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
             app_window.input_mgr.global_mode = GlobalMode(app_window)
             app_window.input_mgr.major_mode.enable()
+        if app_window.imgui_tile_selected:
+            app_window.layer_select(patch.selected_layer)
+            app_window.imgui_tile_selected = False
 
     if app_window.viewport_selection_set:
         if app_window.selected_patch == patch:
@@ -393,6 +396,8 @@ def render(app_window):
     app_window.viewport_pos_set = False
 
     imgui.end()
+
+    app_window.imgui_selection_started = False
 
     # nothing in here can make us exit
     return True
