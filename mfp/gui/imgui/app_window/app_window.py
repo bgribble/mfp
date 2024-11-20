@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flopsy import Store
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
-# from imgui_bundle imgui_md as markdown
+from imgui_bundle import imgui_md as markdown
 import OpenGL.GL as gl
 
 from mfp import log
@@ -120,6 +120,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.info_panel_visible = not self.info_panel_visible
 
     async def _render_task(self):
+        from mfp.gui.imgui.text_widget import ImguiTextWidgetImpl
+
         keep_going = True
         next_frame_latest_delay = 10000
 
@@ -128,10 +130,21 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         io.config_input_trickle_event_queue = True
         io.config_input_text_cursor_blink = False
 
-        # FIXME can't use imgui_md -- it depends on immmap
-        # markdown.initialize_markdown()
-        # font_loader = markdown.get_font_loader_function()
-        # font_loader()
+        # set up fonts and markdown
+        imgui.backends.opengl3_init("#version 100")
+        io.fonts.clear()
+        io.fonts.add_font_default()
+
+        md_options = markdown.MarkdownOptions()
+        md_options.callbacks.on_html_div = ImguiTextWidgetImpl.markdown_div_callback
+        md_options.font_options.regular_size = 16
+        md_options.font_options.size_diff_between_levels = 4
+        md_options.font_options.max_header_level = 5
+        markdown.initialize_markdown(md_options)
+        font_loader = markdown.get_font_loader_function()
+        font_loader()
+
+        imgui.backends.opengl3_new_frame()
 
         self.nedit_config = nedit.Config()
         self.nedit_config.settings_file = "/dev/null"

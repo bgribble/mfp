@@ -619,7 +619,15 @@ def render_bindings_tab(app_window):
     if not sel.tooltip_info:
         return
 
+    ######################
+    # a little padding
+    imgui.dummy([1, TAB_PADDING_Y])
+    imgui.dummy([TAB_PADDING_X, 1])
+    imgui.same_line()
+
+    imgui.begin_group()
     imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
+
     imgui.text("OSC bindings")
     if imgui.begin_table(
         "##osc_bindings",
@@ -645,12 +653,17 @@ def render_bindings_tab(app_window):
             imgui.table_set_column_index(1)
             imgui.text(str(handler))
         imgui.end_table()
-    imgui.text("MIDI bindings")
 
+    imgui.text("MIDI bindings")
     if imgui.begin_table(
         "##midi_bindings",
         3,
-        imgui.TableFlags_.row_bg | imgui.TableFlags_.borders | imgui.TableFlags_.borders_h | imgui.TableFlags_.borders_v
+        (
+            imgui.TableFlags_.row_bg
+            | imgui.TableFlags_.borders
+            | imgui.TableFlags_.borders_h
+            | imgui.TableFlags_.borders_v
+        )
     ):
         # headers
         imgui.table_setup_column("Chan")
@@ -668,6 +681,7 @@ def render_bindings_tab(app_window):
             imgui.text(binding["type"])
         imgui.end_table()
     imgui.pop_style_var()
+    imgui.end_group()
 
 
 def render_activity_tab(app_window):
@@ -677,6 +691,13 @@ def render_activity_tab(app_window):
         return
     info = sel.tooltip_info
 
+    ######################
+    # a little padding
+    imgui.dummy([1, TAB_PADDING_Y])
+    imgui.dummy([TAB_PADDING_X, 1])
+    imgui.same_line()
+
+    imgui.begin_group()
     imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
 
     imgui.text(f"Messages in: {info.get('messages_in')}")
@@ -711,3 +732,4 @@ def render_activity_tab(app_window):
         imgui.end_table()
 
     imgui.pop_style_var()
+    imgui.end_group()
