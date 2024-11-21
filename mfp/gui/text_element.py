@@ -14,6 +14,7 @@ from .backend_interfaces import BackendInterface
 from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
 from .modes.clickable import AltClickableControlMode
+from .param_info import ParamInfo
 from .text_widget import TextWidget
 
 
@@ -29,6 +30,17 @@ class TextElement (BaseElement):
 
     ELBOW_ROOM = 5
 
+    extra_params = {
+        'clickchange': ParamInfo(label="Click to change", param_type=bool, show=True),
+        'max_width': ParamInfo(label="Max width", param_type=float, show=True),
+        'value': ParamInfo(label="Text value", param_type=str, show=False),
+        'default': ParamInfo(label="Default value", param_type=str, show=False),
+    }
+
+    store_attrs = {
+        **BaseElement.store_attrs, **extra_params
+    }
+
     style_defaults = {
         'border': False,
         'draw-ports': 'selected'
@@ -39,8 +51,9 @@ class TextElement (BaseElement):
         self.value = ''
         self.clickchange = False
         self.default = ''
+        self.max_width = 600
 
-        self.param_list.extend(['value', 'clickchange', 'default'])
+        self.param_list.extend([*self.extra_params])
 
         # these can't be initialized until there's a backend
         type(self).style_defaults.update({

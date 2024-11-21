@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from flopsy import mutates
 
+from mfp import log
 from mfp.utils import catchall
 from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit
@@ -65,8 +66,25 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
 
         # node content: just the label
         imgui.begin_group()
-        self.label.render()
 
+        tile = self.layer.patch.display_info
+
+        clip_width = min(
+            self.max_width / tile.view_zoom,
+            (tile.width / tile.view_zoom) - (self.position_x - tile.view_x) - (10 / tile.view_zoom)
+        )
+        
+        imgui.begin_table(
+            f"##{self.node_id}__table",
+            1, 
+            imgui.TableFlags_.sizing_fixed_fit,
+            (clip_width, 0)
+        )
+        imgui.table_setup_column("content", 0, clip_width)
+        imgui.table_next_row()
+        imgui.table_set_column_index(0)
+        self.label.render()
+        imgui.end_table()
         content_w, content_h = imgui.get_item_rect_size()
 
         if content_w < self.min_width:

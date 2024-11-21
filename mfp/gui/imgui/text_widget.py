@@ -45,6 +45,10 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.visible = True
         self.use_markup = False
 
+        # cached transformed text
+        self.transform_in = None
+        self.transform_out = None
+
     def set_editable(self, value):
         super().set_editable(value)
         if value:
@@ -124,10 +128,110 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                         )
                     else:
                         imgui.pop_style_color()
+    
+    def split_blocks(self, md_text):
+        """
+        we want to split out code blocks, since we don't do anything to 
+        their content
+
+        code blocks are either ``` - delimited or start with exactly
+        4 leading spaces and run until there are fewer than 4 leading
+        spaces
+        """
+        match_pos = 0
+        blocks = [] 
+        for match in re.finditer(
+            r'(^```(.*?)\n```)|(^    [^ ].*?\n(^    .*?\n)+)',
+            md_text,
+            re.MULTILINE | re.DOTALL
+        ):
+            if match_pos < match.span()[0]:
+                blocks.append((False, md_text[match_pos:match.span()[0]]))
+            codeblock = match.group(0)
+            blocks.append((True, codeblock))
+            match_pos = match.span()[1]
+    
+        if match_pos != len(md_text):
+            blocks.append((False, md_text[match_pos:]))
+
+        return blocks
+
+    def transform_codeblock(self, md_text):
+        """
+        code blocks are not working right now, so just change to a
+        series of `escaped` lines
+        """
+        code_lines = []
+        fenced = md_text.startswith('```')
+    
+        for line_num, line in enumerate(md_text.split('\n')):
+            if fenced:
+                if line_num == 0:
+                    continue
+                line = f"`{re.sub('```', '', line)}`"
+            else:
+                line = f"`{re.sub('^    ', '', line)}`"
+
+            if line == "``":
+                code_lines.append('')
+            else:
+                code_lines.append(line)
+
+        if code_lines[-1] == '':
+            code_lines = code_lines[:-1]
+
+        return '\n<br>'.join(code_lines)
 
     def transform_md(self, md_text):
-        # short circuit
+        # pango/html escape char replacements
+        md_text = re.sub('&lt;', '<', md_text)
+        md_text = re.sub('&gt;', '>', md_text)
+        md_text = re.sub(
+            '&#([0-9]*);',
+            lambda match: chr(int(match.group(1))),
+            md_text)
+
+        # exactly 4 spaces is a code block; 3 or 5 is a misguided blockquote
+        md_text = re.sub(
+            r'^   ([^ ]|  +)',
+            lambda match: ('> ' + (match.group(1) if len(match.group(1)) == 1 else '')),
+            md_text,
+            flags=re.MULTILINE
+        )
+        # add a newline before a block quote
+        md_text = re.sub(
+            '^([^>][^\n]*?)\n> ',
+            '\\1\n\n> ',
+            md_text,
+            flags=re.MULTILINE
+        )
+        # add linebreaks between lines 
+        md_text = re.sub(
+            '^(> [^\n]*?)(?<!<br>)\n> ',
+            '\\1<br>\n> ',
+            md_text,
+            flags=re.MULTILINE
+        )
+        # twice because sequential lines will overlap, and sub only gets non-overlapping
+        md_text = re.sub(
+            '^(> [^\n]*?)(?<!<br>)\n> ',
+            '\\1<br>\n> ',
+            md_text,
+            flags=re.MULTILINE
+        )
+
+        # single newlines with non-newline after are part of the
+        # preceding paragraph, so replace newline with space
+        md_text = re.sub(
+            '([^\n])\n([^>\n])',
+            r'\1 \2',
+            md_text,
+            flags=re.MULTILINE
+        )
+
+        # short circuit on tag changes
         if '<' not in md_text:
+            self.transform_out = md_text
             return md_text
 
         # <span size="smol">text</span> --> <div class="size-smol">text</div>
@@ -158,7 +262,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         # for some reason imgui_md doesn't parse divs that start at the
         # beginning of the line. luckily it also doesn't render &nbsp;
-        md_text = re.sub(r'^<', r'&nbsp;<', md_text, flags=re.MULTILINE)
+        md_text = re.sub(r'^( *)<', r'\1&nbsp;<', md_text, flags=re.MULTILINE)
 
         return md_text
 
@@ -208,7 +312,20 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
             # transform converts to better-renderable form
             # and also has some Pango compatibility shims
-            md_text = self.transform_md(self.markdown_text)
+            if self.transform_in == self.markdown_text:
+                md_text = self.transform_out
+            else:
+                self.transform_in = self.markdown_text
+                blocks = self.split_blocks(self.markdown_text)
+                transformed_blocks = []
+                for is_codeblock, b in blocks:
+                    if is_codeblock:
+                        transformed_blocks.append(self.transform_codeblock(b))
+                    else:
+                        transformed_blocks.append(self.transform_md(b))
+                md_text = '\n'.join(transformed_blocks)
+                self.transform_out = md_text
+
             markdown.render(md_text)
 
             # check for stray fonts on the stack and get rid of them
