@@ -11,6 +11,7 @@ from mfp.utils import catchall
 from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from ..colordb import ColorDB
+from mfp.gui.base_element import BaseElement
 from .base_element import ImguiBaseElementImpl
 from ..text_element import (
     TextElement,
@@ -67,25 +68,40 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         # node content: just the label
         imgui.begin_group()
 
-        tile = self.layer.patch.display_info
+        if isinstance(self.container, BaseElement):
+            parent = self.container
+            total = parent.width
+            available = total - self.export_container_x
+            padding = 0
+        else:
+            tile = self.layer.patch.display_info
+            total = tile.width / tile.view_zoom
+            available = total - (self.position_x - tile.view_x)
+            padding = 10 / tile.view_zoom
 
-        clip_width = min(
-            self.max_width / tile.view_zoom,
-            (tile.width / tile.view_zoom) - (self.position_x - tile.view_x) - (10 / tile.view_zoom)
+        wrap_width = max(
+            min(self.max_width, available - padding),
+            self.min_width
         )
-        
+
         imgui.begin_table(
             f"##{self.node_id}__table",
-            1, 
+            1,
             imgui.TableFlags_.sizing_fixed_fit,
-            (clip_width, 0)
+            (wrap_width, 0)
         )
-        imgui.table_setup_column("content", 0, clip_width)
+        imgui.table_setup_column("content", 0, wrap_width)
         imgui.table_next_row()
         imgui.table_set_column_index(0)
+
+        # render the content and measure it. hopefully smaller
+        # than the wrap-table
+        imgui.begin_group()
         self.label.render()
-        imgui.end_table()
+        imgui.end_group()
         content_w, content_h = imgui.get_item_rect_size()
+
+        imgui.end_table()
 
         if content_w < self.min_width:
             imgui.same_line()
@@ -93,6 +109,9 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
 
         if content_h < self.min_height:
             imgui.dummy([1, self.min_height - content_h])
+
+        eff_width = min(max(content_w, self.min_width), self.max_width)
+
         imgui.end_group()
 
         # connections
@@ -108,7 +127,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         p_tl = imgui.get_item_rect_min()
         p_br = imgui.get_item_rect_max()
 
-        self.width = p_br[0] - p_tl[0]
+        self.width = eff_width + 8
         self.height = p_br[1] - p_tl[1]
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
 

@@ -422,9 +422,8 @@ def render_patch_tab(app_window):
     if newval != oldval:
         layer.name = newval
         patch.send_params()
-        for lobj in patch.objects:
-            if lobj.layer == layer:
-                lobj.send_params()
+        for lobj in layer.objects:
+            lobj.send_params()
 
     imgui.end_group()
 
