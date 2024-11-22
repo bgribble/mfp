@@ -71,7 +71,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         if isinstance(self.container, BaseElement):
             parent = self.container
             total = parent.width
-            available = total - self.export_container_x
+            available = total - (self.position_x - parent.position_x)
             padding = 0
         else:
             tile = self.layer.patch.display_info

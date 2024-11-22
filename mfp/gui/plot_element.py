@@ -12,6 +12,7 @@ from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
 from .modes.label_edit import LabelEditMode
+from .param_info import ParamInfo
 from .text_widget import TextWidget
 
 
@@ -22,6 +23,19 @@ class PlotElementImpl(BackendInterface, metaclass=ABCMeta):
 class PlotElement (BaseElement):
     display_type = "plot"
     proc_type = "plot"
+
+    extra_params = {
+        'x_min': ParamInfo(label="X axis min value", param_type=float, show=True),
+        'y_min': ParamInfo(label="Y axis min value", param_type=float, show=True),
+        'x_max': ParamInfo(label="X axis max value", param_type=float, show=True),
+        'y_max': ParamInfo(label="Y axis max value", param_type=float, show=True),
+        'plot_type': ParamInfo(label="Plot type", param_type=float, show=True),
+        'plot_style': ParamInfo(label="Plot style", param_type=dict, show=True),
+    }
+
+    store_attrs = {
+        **BaseElement.store_attrs, **extra_params
+    }
 
     # constants
     INIT_WIDTH = 320
@@ -42,16 +56,15 @@ class PlotElement (BaseElement):
 
         super().__init__(window, x, y)
 
-        self.param_list.extend([
-            'x_min', 'x_max', 'y_min', 'y_max',
-            'plot_style', 'plot_type'
-        ])
+        self.param_list.extend([*PlotElement.extra_params])
 
         # display bounds
         self.x_min = 0.0
         self.x_max = 6.28
         self.y_min = -1.0
         self.y_max = 1.0
+        self.plot_type = "none"
+        self.plot_style = {}
 
         self.min_interval = 75
         self.last_draw = None

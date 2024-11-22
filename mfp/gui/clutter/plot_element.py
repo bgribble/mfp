@@ -43,20 +43,6 @@ class ClutterPlotElementImpl(PlotElementImpl, ClutterBaseElementImpl, PlotElemen
         self.group.set_position(x, y)
         self.draw_ports()
 
-    @property
-    def plot_style(self):
-        if self.xyplot:
-            return self.xyplot.save_style()
-        return {}
-
-    @property
-    def plot_type(self):
-        if isinstance(self.xyplot, ScatterPlot):
-            return "scatter"
-        if isinstance(self.xyplot, ScopePlot):
-            return "scope"
-        return "none"
-
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
         self.rect.set_size(width, height)
@@ -154,8 +140,10 @@ class ClutterPlotElementImpl(PlotElementImpl, ClutterBaseElementImpl, PlotElemen
             if self.xyplot:
                 self.group.add_actor(self.xyplot)
                 self.xyplot.set_position(3, self.LABEL_SPACE)
+            self.plot_type = params["plot_type"]
 
         if self.xyplot is not None:
             await self.xyplot.configure(params)
+            self.plot_style = self.xyplot.save_style()
 
         await super().configure(params)
