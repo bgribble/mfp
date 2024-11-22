@@ -26,8 +26,8 @@ from ..event import KeyPressEvent, ScrollEvent, MotionEvent
 # keys that are often remapped at the OS level. Check for these
 # and manage them.
 SDL_REMAPPABLE = {
-    SDLK_LCTRL: (SDL_SCANCODE_LCTRL, imgui.Key.im_gui_mod_ctrl),
-    SDLK_RCTRL: (SDL_SCANCODE_RCTRL, imgui.Key.im_gui_mod_ctrl),
+    SDLK_LCTRL: (SDL_SCANCODE_LCTRL, imgui.Key.mod_ctrl),
+    SDLK_RCTRL: (SDL_SCANCODE_RCTRL, imgui.Key.mod_ctrl),
     SDLK_CAPSLOCK: (SDL_SCANCODE_CAPSLOCK, None),
     SDLK_ESCAPE: (SDL_SCANCODE_ESCAPE, imgui.Key.escape),
 }

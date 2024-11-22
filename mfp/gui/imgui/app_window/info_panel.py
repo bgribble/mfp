@@ -197,7 +197,7 @@ def render_param(
                     step=1,
                     step_fast=10,
                     format="%.2f",
-                    flags=imgui.InputTextFlags_.enter_returns_true
+                    # flags=imgui.InputTextFlags_.enter_returns_true
                 )
                 imgui.pop_style_var()
                 changed = changed or show_input_changed

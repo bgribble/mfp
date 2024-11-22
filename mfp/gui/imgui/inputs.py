@@ -38,10 +38,10 @@ def imgui_key_map():
         imgui.Key.enter: key_defs.KEY_ENTER,
         imgui.Key.escape: key_defs.KEY_ESC,
         imgui.Key.home: key_defs.KEY_HOME,
-        imgui.Key.im_gui_mod_ctrl: key_defs.MOD_CTRL,
-        imgui.Key.im_gui_mod_shift: key_defs.MOD_SHIFT,
-        imgui.Key.im_gui_mod_alt: key_defs.MOD_ALT,
-        imgui.Key.im_gui_mod_super: key_defs.MOD_WIN,
+        imgui.Key.mod_ctrl: key_defs.MOD_CTRL,
+        imgui.Key.mod_shift: key_defs.MOD_SHIFT,
+        imgui.Key.mod_alt: key_defs.MOD_ALT,
+        imgui.Key.mod_super: key_defs.MOD_WIN,
         imgui.Key.insert: key_defs.KEY_INS,
         imgui.Key.left_arrow: key_defs.KEY_LEFT,
         imgui.Key.mouse_left: key_defs.MOUSE_LEFT,
@@ -81,7 +81,7 @@ def imgui_key_map():
 
 def keys_down():
     keys = []
-    for index in range(512, int(imgui.Key.count)):
+    for index in range(512, int(imgui.Key.named_key_end)):
         key = imgui.Key(index)
         key_down = imgui.is_key_down(key)
         if key_down:
