@@ -163,8 +163,8 @@ def render_param(
                     int(param_value),
                     step=1,
                     step_fast=10,
-                    flags=imgui.InputTextFlags_.enter_returns_true
                 )
+                changed = changed and imgui.is_item_deactivated_after_edit()
                 changed = changed or show_input_changed
             else:
                 changed = show_input_changed
@@ -197,8 +197,8 @@ def render_param(
                     step=1,
                     step_fast=10,
                     format="%.2f",
-                    # flags=imgui.InputTextFlags_.enter_returns_true
                 )
+                changed = changed and imgui.is_item_deactivated_after_edit()
                 imgui.pop_style_var()
                 changed = changed or show_input_changed
             else:
