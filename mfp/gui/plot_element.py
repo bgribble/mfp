@@ -29,7 +29,7 @@ class PlotElement (BaseElement):
         'y_min': ParamInfo(label="Y axis min value", param_type=float, show=True),
         'x_max': ParamInfo(label="X axis max value", param_type=float, show=True),
         'y_max': ParamInfo(label="Y axis max value", param_type=float, show=True),
-        'plot_type': ParamInfo(label="Plot type", param_type=float, show=True),
+        'plot_type': ParamInfo(label="Plot type", param_type=str, null=True, show=True),
         'plot_style': ParamInfo(label="Plot style", param_type=dict, show=True),
     }
 
@@ -128,6 +128,8 @@ class PlotElement (BaseElement):
         x_max = params.get('x_max', self.x_max)
         y_min = params.get('y_min', self.y_min)
         y_max = params.get('y_max', self.y_max)
+
+        self.plot_type = params.get('plot_type', self.plot_type)
 
         self.set_bounds(x_min, y_min, x_max, y_max)
 

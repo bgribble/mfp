@@ -12,6 +12,7 @@ from .console_manager import ImguiConsoleManagerImpl
 from .enum_element import ImguiEnumElementImpl
 from .layer import ImguiLayerImpl
 from .message_element import ImguiMessageElementImpl
+from .plot_element import ImguiPlotElementImpl
 from .processor_element import ImguiProcessorElementImpl
 from .slidemeter_element import (
     ImguiFaderElementImpl,

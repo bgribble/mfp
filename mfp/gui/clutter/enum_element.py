@@ -8,6 +8,7 @@ from gi.repository import Clutter
 import cairo
 
 from ..colordb import ColorDB
+from mfp.gui.base_element import BaseElement
 from .base_element import ClutterBaseElementImpl
 from ..enum_element import (
     EnumElement,
