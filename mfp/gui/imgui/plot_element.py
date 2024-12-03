@@ -301,6 +301,11 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
 
     def render_scatter(self, x_min, y_min, x_max, y_max):
         for curve, points in self.message_data.items():
+            mark_name = self.mark_type.get(curve, None)
+            mark = None
+            if mark_name and hasattr(implot.Marker_, mark_name):
+                mark = getattr(implot.Marker_, mark_name)
+
             time_adjusted = [
                 p[1]
                 if self.scroll_timebase is None
@@ -320,6 +325,9 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
                 if ((x_min is None or p[0] >= x_min) and (x_max is None or p[0] <= x_max))
             ]
             title = self.curve_label.get(curve, f"Curve {curve}")
+            if mark:
+                implot.set_next_marker_style(mark)
+
             implot.plot_scatter(
                 title, np.array(x_data), np.array(y_data)
             )
