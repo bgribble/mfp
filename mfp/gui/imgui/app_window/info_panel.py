@@ -248,9 +248,11 @@ def render_param(
 
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             imgui.begin_group()
+            imgui.push_id(param_name)
             if param_value and len(param_value) > 0:
                 flags = 0
                 imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 4.0))
+                imgui.push_id(param_name)
                 if imgui.begin_table(f"##{param_name}_table", 3, flags):
                     imgui.table_setup_column("Display")
                     imgui.table_setup_column("Value")
@@ -291,6 +293,7 @@ def render_param(
             if imgui.button("Add"):
                 newval.append(("", ""))
                 changed = True
+            imgui.pop_id()
             imgui.end_group()
             imgui.pop_style_var()
 
@@ -298,6 +301,7 @@ def render_param(
             newval = {}
             changed = False
 
+            imgui.push_id(param_name)
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             if param_value and len(param_value) > 0:
                 flags = 0
@@ -308,7 +312,7 @@ def render_param(
 
                         imgui.table_set_column_index(0)
                         imgui.push_id(row_num)
-                        imgui.text("  " + row_key)
+                        imgui.text("  " + str(row_key))
 
                         imgui.table_set_column_index(1)
                         val_changed, val_newval = imgui.input_text(
@@ -323,11 +327,11 @@ def render_param(
                                 changed = True
                             except Exception:
                                 newval[row_key] = row_value
-
                         else:
                             newval[row_key] = row_value
                     imgui.end_table()
             imgui.pop_style_var()
+            imgui.pop_id()
 
         if readonly or param_type.editable is False:
             imgui.end_disabled()

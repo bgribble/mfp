@@ -86,7 +86,7 @@ class Scatter (Processor):
         else:
             channels = 1
         self.hot_inlets = list(range(channels))
-        self.gui_params = dict(plot_type="scatter")
+        self.gui_params = dict(plot_type="scatter", channels=channels)
 
         self.doc_tooltip_inlet = []
         for i in range(channels):

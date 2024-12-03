@@ -233,8 +233,8 @@ class BaseElement (Store):
     def description(self):
         return self.obj_name
 
-    def get_style(self, propname):
-        return self._all_styles.get(propname)
+    def get_style(self, propname, default=None):
+        return self._all_styles.get(propname, default)
 
     def get_position(self):
         return (self.position_x, self.position_y)

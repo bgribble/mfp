@@ -25,12 +25,17 @@ class PlotElement (BaseElement):
     proc_type = "plot"
 
     extra_params = {
-        'x_min': ParamInfo(label="X axis min value", param_type=float, show=True),
-        'y_min': ParamInfo(label="Y axis min value", param_type=float, show=True),
-        'x_max': ParamInfo(label="X axis max value", param_type=float, show=True),
-        'y_max': ParamInfo(label="Y axis max value", param_type=float, show=True),
+        'x_min': ParamInfo(label="X axis min value", param_type=float, null=True, show=True),
+        'y_min': ParamInfo(label="Y axis min value", param_type=float, null=True, show=True),
+        'x_max': ParamInfo(label="X axis max value", param_type=float, null=True, show=True),
+        'y_max': ParamInfo(label="Y axis max value", param_type=float, null=True, show=True),
+        'x_label': ParamInfo(label="X axis label", param_type=str, show=True),
+        'y_label': ParamInfo(label="Y axis label", param_type=str, show=True),
         'plot_type': ParamInfo(label="Plot type", param_type=str, null=True, show=True),
-        'plot_style': ParamInfo(label="Plot style", param_type=dict, show=True),
+        'plot_style': ParamInfo(label="Plot style", param_type=dict, show=False),
+        'curve_label': ParamInfo(label="Curve labels", param_type=dict, show=True),
+        'mark_type': ParamInfo(label="Mark types", param_type=dict, show=True),
+        'stroke_type': ParamInfo(label="Stroke types", param_type=dict, show=True),
     }
 
     store_attrs = {
@@ -59,12 +64,23 @@ class PlotElement (BaseElement):
         self.param_list.extend([*PlotElement.extra_params])
 
         # display bounds
-        self.x_min = 0.0
-        self.x_max = 6.28
-        self.y_min = -1.0
-        self.y_max = 1.0
+        # self.x_min = 0.0
+        # self.x_max = 6.28
+        # self.y_min = -1.0
+        # self.y_max = 1.0
+        self.x_min = None
+        self.x_max = None
+        self.x_label = None
+
+        self.y_min = None
+        self.y_max = None
+        self.y_label = None
+
         self.plot_type = "none"
         self.plot_style = {}
+        self.mark_type = {}
+        self.stroke_type = {}
+        self.curve_label = {}
 
         self.min_interval = 75
         self.last_draw = None
@@ -132,5 +148,13 @@ class PlotElement (BaseElement):
         self.plot_type = params.get('plot_type', self.plot_type)
 
         self.set_bounds(x_min, y_min, x_max, y_max)
+
+        for c in range(params.get("channels", 1)):
+            if c not in self.curve_label:
+                self.curve_label[c] = f"Curve {c}"
+            if c not in self.mark_type:
+                self.mark_type[c] = "default"
+            if c not in self.stroke_type:
+                self.stroke_type[c] = "default"
 
         await super().configure(params)

@@ -72,6 +72,9 @@ class StepDebugger:
     def disable(self):
         from .mfp_app import MFPApp
         self.enabled = False
+        if not MFPApp().console:
+            return
+
         evaluator = MFPApp().console.evaluator
 
         for b in ["n", "r", "i", "h", "next", "run", "info", "help"]:
