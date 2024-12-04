@@ -11,8 +11,9 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
+from .colordb import ColorDB
 from .modes.label_edit import LabelEditMode
-from .param_info import ParamInfo
+from .param_info import ParamInfo, DictOfRGBAColor
 from .text_widget import TextWidget
 
 
@@ -34,6 +35,7 @@ class PlotElement (BaseElement):
         'plot_type': ParamInfo(label="Plot type", param_type=str, null=True, show=True),
         'plot_style': ParamInfo(label="Plot style", param_type=dict, show=False),
         'curve_label': ParamInfo(label="Curve labels", param_type=dict, show=True),
+        'curve_color': ParamInfo(label="Curve colors", param_type=DictOfRGBAColor, show=True),
         'mark_type': ParamInfo(label="Mark types", param_type=dict, show=True),
         'stroke_type': ParamInfo(label="Stroke types", param_type=dict, show=True),
     }
@@ -81,6 +83,7 @@ class PlotElement (BaseElement):
         self.mark_type = {}
         self.stroke_type = {}
         self.curve_label = {}
+        self.curve_color = {}
 
         self.min_interval = 75
         self.last_draw = None
@@ -156,5 +159,7 @@ class PlotElement (BaseElement):
                 self.mark_type[c] = "default"
             if c not in self.stroke_type:
                 self.stroke_type[c] = "default"
+            if c not in self.curve_color:
+                self.curve_color[c] = ColorDB().find(f'default-data-color-{c}')
 
         await super().configure(params)

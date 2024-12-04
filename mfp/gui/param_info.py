@@ -36,3 +36,6 @@ class ListOfInt(list):
 
 class ListOfPairs(list):
     pass
+
+class DictOfRGBAColor(dict):
+    pass

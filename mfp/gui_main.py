@@ -180,6 +180,18 @@ def setup_default_colors_dark():
                      ColorDB().find(0xb7, 0x21, 0x21, 0xff))
     ColorDB().insert('default-text-cursor-color',
                      ColorDB().find(0xff, 0xff, 0xff, 0x40))
+    ColorDB().insert('default-data-color-0',
+                     ColorDB().find(0x88, 0x52, 0x7f, 0xff))
+    ColorDB().insert('default-data-color-1',
+                     ColorDB().find(0x4c, 0x60, 0x85, 0xff))
+    ColorDB().insert('default-data-color-2',
+                     ColorDB().find(0x39, 0xa0, 0xed, 0xff))
+    ColorDB().insert('default-data-color-3',
+                     ColorDB().find(0x36, 0xf1, 0xcd, 0xff))
+    ColorDB().insert('default-data-color-4',
+                     ColorDB().find(0x13, 0xc4, 0xa3, 0xff))
+    ColorDB().insert('default-data-color-5',
+                     ColorDB().find(0xd3, 0x61, 0x35, 0xff))
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
@@ -224,6 +236,18 @@ def setup_default_colors_light():
                      ColorDB().find(0xb7, 0x21, 0x21, 0xff))
     ColorDB().insert('default-text-cursor-color',
                      ColorDB().find(0x0, 0x0, 0x0, 0x40))
+    ColorDB().insert('default-data-color-0',
+                     ColorDB().find(0x88, 0x52, 0x7f, 0xff))
+    ColorDB().insert('default-data-color-1',
+                     ColorDB().find(0x4c, 0x60, 0x85, 0xff))
+    ColorDB().insert('default-data-color-2',
+                     ColorDB().find(0x39, 0xa0, 0xed, 0xff))
+    ColorDB().insert('default-data-color-3',
+                     ColorDB().find(0x36, 0xf1, 0xcd, 0xff))
+    ColorDB().insert('default-data-color-4',
+                     ColorDB().find(0x13, 0xc4, 0xa3, 0xff))
+    ColorDB().insert('default-data-color-5',
+                     ColorDB().find(0xd3, 0x61, 0x35, 0xff))
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 

@@ -305,6 +305,11 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             mark = None
             if mark_name and hasattr(implot.Marker_, mark_name):
                 mark = getattr(implot.Marker_, mark_name)
+            color = self.curve_color.get(curve, None)
+            if color:
+                implot.push_style_color(implot.Col_.marker_fill, color.to_rgbaf())
+                implot.push_style_color(implot.Col_.marker_outline, color.to_rgbaf())
+                implot.push_style_color(implot.Col_.line, color.to_rgbaf())
 
             time_adjusted = [
                 p[1]
@@ -331,6 +336,8 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             implot.plot_scatter(
                 title, np.array(x_data), np.array(y_data)
             )
+            if color:
+                implot.pop_style_color(3)
 
     def draw_ports(self):
         super().draw_ports()

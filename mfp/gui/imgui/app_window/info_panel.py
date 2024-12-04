@@ -10,7 +10,7 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import RGBAColor
 from mfp.gui.base_element import BaseElement
-from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs
+from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs, DictOfRGBAColor
 
 single_params = [
     'obj_type',
@@ -249,6 +249,7 @@ def render_param(
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             imgui.begin_group()
             imgui.push_id(param_name)
+
             if param_value and len(param_value) > 0:
                 flags = 0
                 imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 4.0))
@@ -297,6 +298,64 @@ def render_param(
             imgui.end_group()
             imgui.pop_style_var()
 
+        elif param_type.param_type is DictOfRGBAColor:
+            newval = {}
+            changed = False
+
+            imgui.push_id(param_name)
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+            if param_value and len(param_value) > 0:
+                flags = 0
+                if imgui.begin_table("##table", 2, flags):
+                    for row_num, row_key in enumerate(param_value):
+                        row_value = param_value.get(row_key)
+                        imgui.table_next_row()
+
+                        imgui.table_set_column_index(0)
+                        imgui.push_id(row_num)
+                        imgui.text("  " + str(row_key))
+
+                        imgui.table_set_column_index(1)
+
+                        components = [
+                            row_value.red / 255.0,
+                            row_value.green / 255.0,
+                            row_value.blue / 255.0,
+                            row_value.alpha / 255.0
+                        ]
+                        imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+                        imgui.begin_group()
+                        txt_changed, txt_newval = imgui.input_text(
+                            "##color_txt",
+                            str(row_value),
+                            imgui.InputTextFlags_.enter_returns_true
+                        )
+                        imgui.same_line()
+                        pick_changed, pick_newval = imgui.color_edit4(
+                            "##color_pick",
+                            components,
+                            imgui.ColorEditFlags_.no_inputs | imgui.ColorEditFlags_.no_label
+                        )
+                        if txt_changed:
+                            changed = True
+                            red, green, blue, alpha = txt_newval
+                            newval[row_key] = RGBAColor(
+                                red=red*255.0, green=green*255.0, blue=blue*255.0, alpha=alpha*255.0
+                            )
+                        elif pick_changed:
+                            changed = True
+                            red, green, blue, alpha = pick_newval
+                            newval[row_key] = RGBAColor(
+                                red=red*255.0, green=green*255.0, blue=blue*255.0, alpha=alpha*255.0
+                            )
+                        else:
+                            newval[row_key] = row_value
+                        imgui.end_group()
+                        imgui.pop_style_var()
+                        imgui.pop_id()
+                    imgui.end_table()
+            imgui.pop_style_var()
+            imgui.pop_id()
         elif param_type.param_type is dict:
             newval = {}
             changed = False

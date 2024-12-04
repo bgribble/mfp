@@ -38,7 +38,7 @@ def add_menu_items(app_window, itemdict):
 
             # items with [] or [x] preceding name (ie File > []Pause/unpause")
             # will have a checkmark when selected. Default is no check.
-            toggle_state = None
+            toggle_state = False
             if itemname.startswith("["):
                 default_toggle = False
                 if itemname[1] == "x":
