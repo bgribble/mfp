@@ -164,24 +164,32 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         implot.set_current_context(self.implot_context)
 
         if implot.begin_plot(f"##{self.obj_id}__plot", [self.plot_width, self.plot_height]):
+            flags = 0
+            if self.plot_type == "histo":
+                flags = implot.AxisFlags_.auto_fit.value
+
             implot.setup_axes(
-                self.x_label or '', self.y_label or '', 0, 0
+                self.x_label or '', self.y_label or '', flags, flags
             )
 
             x_min, y_min, x_max, y_max = self.find_axis_bounds()
 
-            if x_min is not None and x_max is not None:
-                implot.setup_axis_limits(
-                    implot.ImAxis_.x1.value, x_min, x_max, implot.Cond_.always.value
-                )
-            if y_min is not None and y_max is not None:
-                implot.setup_axis_limits(
-                    implot.ImAxis_.y1.value, y_min, y_max, implot.Cond_.always.value
-                )
+            if self.plot_type != "histo":
+                if x_min is not None and x_max is not None:
+                    implot.setup_axis_limits(
+                        implot.ImAxis_.x1.value, x_min, x_max, implot.Cond_.always.value
+                    )
+                if y_min is not None and y_max is not None:
+                    implot.setup_axis_limits(
+                        implot.ImAxis_.y1.value, y_min, y_max, implot.Cond_.always.value
+                    )
 
             if self.plot_type == "scatter":
                 self.render_scatter(x_min, y_min, x_max, y_max)
-
+            if self.plot_type == "bars":
+                self.render_bars(x_min, y_min, x_max, y_max)
+            if self.plot_type == "histo":
+                self.render_histo(x_min, y_min, x_max, y_max)
             if self.plot_type == "scope":
                 self.render_scope(x_min, y_min, x_max, y_max)
 
@@ -250,7 +258,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
     def find_axis_bounds(self):
         data_x_min = data_x_max = data_y_min = data_y_max = None
 
-        if self.plot_type == "scatter":
+        if self.plot_type in ("scatter", "bars", "histo"):
             if self.last_message and self.last_bounds and self.last_bounds > self.last_message:
                 return self.last_bounds_cache
 
@@ -298,6 +306,94 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
                 xstart=0,
                 flags=0
             )
+
+    def render_histo(self, x_min, y_min, x_max, y_max):
+        """
+        Histogram in a bar chart. Uses auto binning, should set up to have this
+        parameterized
+        """
+        if not self.message_data:
+            return
+        data = self.message_data[0]
+        bin_data = [
+            p[1] if isinstance(p[1], (int, float, str)) else p[1][1]
+            for p in data
+        ]
+        title = self.curve_label.get(0, f"Curve {0}")
+        color = self.curve_color.get(0, None)
+        if color:
+            implot.push_style_color(implot.Col_.marker_fill, color.to_rgbaf())
+            implot.push_style_color(implot.Col_.marker_outline, color.to_rgbaf())
+            implot.push_style_color(implot.Col_.line, color.to_rgbaf())
+
+        implot.plot_histogram(
+            title, np.array(bin_data)
+        )
+        if color:
+            implot.pop_style_color(3)
+        return
+
+    def render_bars(self, x_min, y_min, x_max, y_max):
+        """
+        Multi-curve bar chart. Each curve must have the same
+        number of items. If only one curve, render more compactly
+        """
+
+        if not self.message_data:
+            return
+
+        # single set of bars
+        if len(self.message_data) == 1:
+            data = self.message_data[0]
+            x_data = np.array([p[1][0] for p in data])
+            y_data = np.array([p[1][1] for p in data])
+            title = self.curve_label.get(0, f"Curve {0}")
+            color = self.curve_color.get(0, None)
+            if color:
+                implot.push_style_color(implot.Col_.marker_fill, color.to_rgbaf())
+                implot.push_style_color(implot.Col_.marker_outline, color.to_rgbaf())
+                implot.push_style_color(implot.Col_.line, color.to_rgbaf())
+
+            implot.plot_bars(
+                title, x_data, y_data, 0.9,
+            )
+            if color:
+                implot.pop_style_color(3)
+            return
+
+        # multiple sets of bars
+        groups = {}
+        num_curves = len(self.curve_label)
+        for curve, points in self.message_data.items():
+            for p in points:
+                px = p[1][0]
+                py = p[1][1]
+                bargroup = groups.setdefault(px, num_curves * [0])
+                bargroup[curve] = py
+
+        equal_bars = {}
+        for x_val in sorted(groups):
+            y_vals = groups[x_val]
+            for curve, val in enumerate(y_vals):
+                curve_data = equal_bars.setdefault(curve, [])
+                curve_data.append(val)
+        plot_data = []
+        for curve, data in equal_bars.items():
+            plot_data.extend(data)
+
+        all_x_values = list(groups.keys())
+        implot.setup_axis_ticks(
+            implot.ImAxis_.y1.value,
+            all_x_values[0],
+            all_x_values[-1],
+            len(all_x_values),
+            [str(v) for v in all_x_values],
+            True
+        )
+        implot.plot_bar_groups(
+            list(self.curve_label.values()),
+            np.array(plot_data),
+        )
 
     def render_scatter(self, x_min, y_min, x_max, y_max):
         for curve, points in self.message_data.items():

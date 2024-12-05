@@ -66,10 +66,6 @@ class PlotElement (BaseElement):
         self.param_list.extend([*PlotElement.extra_params])
 
         # display bounds
-        # self.x_min = 0.0
-        # self.x_max = 6.28
-        # self.y_min = -1.0
-        # self.y_max = 1.0
         self.x_min = None
         self.x_max = None
         self.x_label = None
