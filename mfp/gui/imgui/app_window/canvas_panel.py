@@ -119,6 +119,8 @@ def render_tile(app_window, patch):
     # canvas_origin is the screen offset of the upper-left of the canvas
     # relative to the tile (accounting for the tile title bar)
     canvas_origin = (cursor_pos[0], cursor_pos[1])
+    tile.frame_offset_x = cursor_pos[0]
+    tile.frame_offset_y = cursor_pos[1]
 
     ###################
     # set up for imgui-node-editor

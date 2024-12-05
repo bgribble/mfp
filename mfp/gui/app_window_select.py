@@ -175,8 +175,8 @@ async def move_selected(self, dx, dy):
     for obj in self.selected:
         if obj.editable and obj.display_type != 'connection':
             await obj.move(
-                max(0, obj.position_x + dx * self.selected_patch.display_info.view_zoom),
-                max(0, obj.position_y + dy * self.selected_patch.display_info.view_zoom)
+                obj.position_x + dx * self.selected_patch.display_info.view_zoom,
+                obj.position_y + dy * self.selected_patch.display_info.view_zoom
             )
             if obj.obj_id is not None:
                 obj.send_params()

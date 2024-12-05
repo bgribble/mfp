@@ -17,6 +17,8 @@ class Tile:
     origin_y: float = 0
     width: float = 0
     height: float = 0
+    frame_offset_x: float = 0
+    frame_offset_y: float = 0
     view_x: float = 0
     view_y: float = 0
     view_zoom: float = 1.0
