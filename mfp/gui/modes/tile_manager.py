@@ -150,7 +150,7 @@ class TileManagerMode (InputMode):
 
 
     def dismiss_mode(self, *args):
-        # this is the default handler, don't want to dismiss on 
+        # this is the default handler, don't want to dismiss on
         # hover, mouse motion, etc
         if args and len(args[0]) > 3:
             return False
@@ -402,9 +402,6 @@ class TileManagerMode (InputMode):
             await MFPGUI().mfp.has_unsaved_changes(p.obj_id)
             for p in page_patches
         ]
-
-        log.debug(f"page_patches: {page_patches}")
-        log.debug(f"some_unsaved: {some_unsaved}")
 
         if some_unsaved and any(x for x in some_unsaved):
             await self.window.cmd_get_input(

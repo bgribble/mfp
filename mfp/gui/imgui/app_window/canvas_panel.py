@@ -169,6 +169,7 @@ def render_tile(app_window, patch):
     # disable NodeEditor dragging and selecting
     conf.drag_button_index = 3
     conf.select_button_index = 3
+    conf.canvas_size_mode = nedit.CanvasSizeMode.center_only
 
     # reselect nodes if needed (part of the hack to resize the viewport)
     if app_window.imgui_needs_reselect:
@@ -236,10 +237,8 @@ def render_tile(app_window, patch):
     # node that we will use wth zoom_to_selection()
 
     # create nodes if needed
-    if not hasattr(patch, 'viewport_box_nodes'):
-        min_node_id = nedit.NodeId.create()
-        max_node_id = nedit.NodeId.create()
-        patch.viewport_box_nodes = (min_node_id, max_node_id)
+    if not hasattr(patch, 'viewport_box_node'):
+        patch.viewport_box_node = nedit.NodeId.create()
 
     current_zoom = 1.0 / nedit.get_current_zoom()
 
@@ -250,52 +249,40 @@ def render_tile(app_window, patch):
     ))
 
     need_navigate = False
-    need_zoom = False
 
-    if current_zoom != tile.view_zoom:
-        if app_window.viewport_zoom_set:
-            need_navigate = True
-            need_zoom = True
-        else:
-            tile.view_zoom = current_zoom
-
-    if tile.view_x != viewport_x or tile.view_y != viewport_y:
-        if app_window.viewport_pos_set:
-            need_navigate = True
-        elif not app_window.viewport_drag_active:
-            tile.view_x = viewport_x
-            tile.view_y = viewport_y
+    if app_window.viewport_zoom_set or app_window.viewport_pos_set:
+        need_navigate = True
 
     if need_navigate:
-        window_size = (tile.width - canvas_origin[0], tile.height - canvas_origin[1])
-
-        # navigate_to_selection expands the selection box by 10%
-        EXP = 1.10
-        dw = 0.5 * (1.0 - 1.0/EXP) * window_size[0]
-        dh = 0.5 * (1.0 - 1.0/EXP) * window_size[1]
-
-        upper_left = (
-            tile.view_x + dw,
-            tile.view_y + dh
+        window_size = (
+            tile.width - 2*canvas_origin[0],
+            tile.height - canvas_origin[1] - canvas_origin[0]
         )
+
+        # navigate_to_selection expands the selection box by 5%
+        EXP = .05
         canvas_dimensions = (
             (1.0 / tile.view_zoom) * window_size[0],
             (1.0 / tile.view_zoom) * window_size[1]
         )
-        lower_right = (
-            tile.view_x + canvas_dimensions[0] - 2*dw,
-            tile.view_y + canvas_dimensions[1] - 2*dh
+        margin = max(canvas_dimensions) / (2 + 1.0/EXP)
+
+        upper_left = (
+            tile.view_x + margin,
+            tile.view_y + margin
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0)
         nedit.push_style_var(nedit.StyleVar.node_padding, (0, 0, 0, 0))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 0)
 
-        nedit.set_node_position(patch.viewport_box_nodes[0], upper_left)
-        nedit.begin_node(patch.viewport_box_nodes[0])
-        nedit.end_node()
-
-        nedit.set_node_position(patch.viewport_box_nodes[1], lower_right)
-        nedit.begin_node(patch.viewport_box_nodes[1])
+        # position the dummy node to cover the intended canvas area,
+        # less the margin for selection box expansion
+        nedit.set_node_position(patch.viewport_box_node, upper_left)
+        nedit.begin_node(patch.viewport_box_node)
+        imgui.dummy([
+            canvas_dimensions[0] - 2*margin,
+            canvas_dimensions[1] - 2*margin
+        ])
         nedit.end_node()
 
         nedit.pop_style_var(3)
@@ -310,15 +297,20 @@ def render_tile(app_window, patch):
             else:
                 nedit.deselect_node(obj.node_id)
 
-        # select the upper-left and lower-right nodes
-        for obj_id in patch.viewport_box_nodes:
-            nedit.select_node(obj_id, True)
+        nedit.select_node(patch.viewport_box_node)
 
         # navigate to them
-        nedit.navigate_to_selection(need_zoom, 0)
+        nedit.navigate_to_selection(tile.view_zoom != current_zoom, 0)
         app_window.imgui_prevent_idle = 10
         app_window.imgui_needs_reselect = selection
+    else:
+        if current_zoom != tile.view_zoom:
+            tile.view_zoom = current_zoom
 
+        if tile.view_x != viewport_x or tile.view_y != viewport_y:
+            if not app_window.viewport_drag_active:
+                tile.view_x = viewport_x
+                tile.view_y = viewport_y
 
     #############################
     # creation of links (by click-drag)

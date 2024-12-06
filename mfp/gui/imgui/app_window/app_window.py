@@ -75,7 +75,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.frame_count = 0
         self.frame_timestamps = []
-        self.viewport_box_nodes = None
+        self.viewport_box_node = None
 
         self.selected_window = "canvas"
         self.inspector = None
