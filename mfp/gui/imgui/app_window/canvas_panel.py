@@ -275,6 +275,14 @@ def render_tile(app_window, patch):
         nedit.push_style_var(nedit.StyleVar.node_padding, (0, 0, 0, 0))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 0)
 
+        nedit.push_style_color(
+            nedit.StyleColor.node_bg,
+            ColorDB().find('transparent').to_rgbaf()
+        )
+        nedit.push_style_color(
+            nedit.StyleColor.node_border,
+            ColorDB().find('transparent').to_rgbaf()
+        )
         # position the dummy node to cover the intended canvas area,
         # less the margin for selection box expansion
         nedit.set_node_position(patch.viewport_box_node, upper_left)
@@ -285,6 +293,7 @@ def render_tile(app_window, patch):
         ])
         nedit.end_node()
 
+        nedit.pop_style_color(2)
         nedit.pop_style_var(3)
 
         # save the current selection, then clear it
