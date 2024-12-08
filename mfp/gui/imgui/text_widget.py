@@ -128,10 +128,39 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                         )
                     else:
                         imgui.pop_style_color()
-    
+
+    def simple_wrap(self, text, max_columns):
+        lines = []
+        line_words = []
+        line_col = 0
+        for line in text.split('\n'):
+            if line == '':
+                lines.append(line)
+                continue
+            for word_num, word in enumerate(line.split()):
+                if not word_num or (line_col + len(word) < max_columns):
+                    line_words.append(word)
+                    line_col += len(word) + 1
+
+                    if line_col >= max_columns:
+                        lines.append(" ".join(line_words))
+                        line_col = 0
+                        line_words = []
+                else:
+                    lines.append(" ".join(line_words))
+                    line_col = len(word)
+                    line_words = [word]
+
+            if len(line_words) > 0:
+                lines.append(" ".join(line_words))
+                line_col = 0
+                line_words = []
+
+        return "\n".join(lines)
+
     def split_blocks(self, md_text):
         """
-        we want to split out code blocks, since we don't do anything to 
+        we want to split out code blocks, since we don't do anything to
         their content
 
         code blocks are either ``` - delimited or start with exactly
@@ -139,7 +168,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         spaces
         """
         match_pos = 0
-        blocks = [] 
+        blocks = []
         for match in re.finditer(
             r'(^```(.*?)\n```)|(^    [^ ].*?\n(^    .*?\n)+)',
             md_text,
@@ -150,7 +179,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             codeblock = match.group(0)
             blocks.append((True, codeblock))
             match_pos = match.span()[1]
-    
+
         if match_pos != len(md_text):
             blocks.append((False, md_text[match_pos:]))
 
@@ -163,7 +192,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         """
         code_lines = []
         fenced = md_text.startswith('```')
-    
+
         for line_num, line in enumerate(md_text.split('\n')):
             if fenced:
                 if line_num == 0:
@@ -205,7 +234,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             md_text,
             flags=re.MULTILINE
         )
-        # add linebreaks between lines 
+        # add linebreaks between lines
         md_text = re.sub(
             '^(> [^\n]*?)(?<!<br>)\n> ',
             '\\1<br>\n> ',
@@ -266,7 +295,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         return md_text
 
-    def render(self):
+    def render(self, wrap_width=None):
         extra_bit = ''
         if self.multiline and self.text[:-1] == '\n':
             extra_bit = ' '
@@ -302,7 +331,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             draw_list = imgui.get_window_draw_list()
             draw_list.push_clip_rect(
                 (my_x, my_y),
-                (my_x + self.width, my_y + self.height + 4)
+                (my_x + self.width, my_y + self.height + 4),
+                True
             )
 
             # sometimes imgui_md doesn't call the div-callback
@@ -339,6 +369,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 imgui.pop_font()
         else:
             label_text = self.text
+            if self.multiline and wrap_width:
+                label_text = self.simple_wrap(self.text, int(wrap_width / self.font_width))
 
             if self.font_color:
                 imgui.text_colored(

@@ -5,12 +5,9 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from flopsy import mutates
+from imgui_bundle import imgui, imgui_node_editor as nedit
 
 from mfp import log
-from mfp.utils import catchall
-from mfp.gui_main import MFPGUI
-from imgui_bundle import imgui, imgui_node_editor as nedit
-from ..colordb import ColorDB
 from mfp.gui.base_element import BaseElement
 from .base_element import ImguiBaseElementImpl
 from ..text_element import (
@@ -32,6 +29,8 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
+        from mfp.gui.modes.patch_edit import PatchEditMode
+
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 1.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 2))
@@ -72,12 +71,21 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
             parent = self.container
             total = parent.width
             available = total - (self.position_x - parent.position_x)
+            clip_w = available
             padding = 0
-        else:
+        elif self.edit_mode and self.edit_mode.enabled:
             tile = self.layer.patch.display_info
             total = tile.width / tile.view_zoom
             available = total - (self.position_x - tile.view_x)
+            clip_w = available
             padding = 10 / tile.view_zoom
+        else:
+            tile = self.layer.patch.display_info
+            total = tile.width / tile.view_zoom
+            available = self.max_width
+            clip_w = total - (self.position_x - tile.view_x)
+            padding = 10 / tile.view_zoom
+        clip_h = (tile.height / tile.view_zoom) - (self.position_y - tile.view_y)
 
         wrap_width = max(
             min(self.max_width, available - padding),
@@ -97,7 +105,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         # render the content and measure it. hopefully smaller
         # than the wrap-table
         imgui.begin_group()
-        self.label.render()
+        self.label.render(wrap_width=wrap_width)
         imgui.end_group()
         content_w, content_h = imgui.get_item_rect_size()
 
