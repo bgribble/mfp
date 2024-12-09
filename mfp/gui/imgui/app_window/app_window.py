@@ -81,6 +81,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.inspector = None
 
         self.log_text = ""
+        self.log_text_timestamp = None
+        self.log_scroll_follow = True
+        self.log_filter_text = ''
+        self.log_filter_timestamp = None
 
         super().__init__(*args, **kwargs)
 
@@ -589,6 +593,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     # log output
     def log_write(self, message, level):
         self.log_text = self.log_text + message
+        self.log_text_timestamp = datetime.now()
 
     #####################
     # key bindings display
