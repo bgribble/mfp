@@ -67,6 +67,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         # node content: just the label
         imgui.begin_group()
 
+        tile = self.layer.patch.display_info
         if isinstance(self.container, BaseElement):
             parent = self.container
             total = parent.width
@@ -74,17 +75,16 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
             clip_w = available
             padding = 0
         elif self.edit_mode and self.edit_mode.enabled:
-            tile = self.layer.patch.display_info
             total = tile.width / tile.view_zoom
             available = total - (self.position_x - tile.view_x)
             clip_w = available
             padding = 10 / tile.view_zoom
         else:
-            tile = self.layer.patch.display_info
             total = tile.width / tile.view_zoom
-            available = self.max_width
+            available = min(self.width, self.max_width)
             clip_w = total - (self.position_x - tile.view_x)
-            padding = 10 / tile.view_zoom
+            padding = 0
+
         clip_h = (tile.height / tile.view_zoom) - (self.position_y - tile.view_y)
 
         wrap_width = max(

@@ -139,7 +139,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             if line == '':
                 lines.append(line)
                 continue
-            for word_num, word in enumerate(line.split()):
+            for word_num, word in enumerate(line.split(' ')):
                 if not word_num or (line_col + len(word) < max_columns):
                     line_words.append(word)
                     line_col += len(word) + 1
