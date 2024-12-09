@@ -165,7 +165,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
 
         if implot.begin_plot(f"##{self.obj_id}__plot", [self.plot_width, self.plot_height]):
             flags = 0
-            if self.plot_type == "histo":
+            if self.plot_type == "histogram":
                 flags = implot.AxisFlags_.auto_fit.value
 
             implot.setup_axes(
@@ -174,7 +174,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
 
             x_min, y_min, x_max, y_max = self.find_axis_bounds()
 
-            if self.plot_type != "histo":
+            if self.plot_type != "histogram":
                 if x_min is not None and x_max is not None:
                     implot.setup_axis_limits(
                         implot.ImAxis_.x1.value, x_min, x_max, implot.Cond_.always.value
@@ -188,7 +188,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
                 self.render_scatter(x_min, y_min, x_max, y_max)
             if self.plot_type == "bars":
                 self.render_bars(x_min, y_min, x_max, y_max)
-            if self.plot_type == "histo":
+            if self.plot_type == "histogram":
                 self.render_histo(x_min, y_min, x_max, y_max)
             if self.plot_type == "scope":
                 self.render_scope(x_min, y_min, x_max, y_max)
@@ -258,7 +258,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
     def find_axis_bounds(self):
         data_x_min = data_x_max = data_y_min = data_y_max = None
 
-        if self.plot_type in ("scatter", "bars", "histo"):
+        if self.plot_type in ("scatter", "bars", "histogram"):
             if self.last_message and self.last_bounds and self.last_bounds > self.last_message:
                 return self.last_bounds_cache
 

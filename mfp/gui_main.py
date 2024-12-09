@@ -192,6 +192,8 @@ def setup_default_colors_dark():
                      ColorDB().find(0x13, 0xc4, 0xa3, 0xff))
     ColorDB().insert('default-data-color-5',
                      ColorDB().find(0xd3, 0x61, 0x35, 0xff))
+    ColorDB().insert('default-cursor-color',
+                     ColorDB().find(0xff, 0xff, 0xff, 0x70))
     ColorDB().insert('transparent',
                      ColorDB().find(0x00, 0x00, 0x00, 0x00))
 
@@ -200,6 +202,8 @@ def setup_default_colors_light():
     from .gui.colordb import ColorDB
     ColorDB().insert('default-canvas-color',
                      ColorDB().find(0xf7, 0xf9, 0xf9, 0))
+    ColorDB().insert('default-cursor-color',
+                     ColorDB().find(0xff, 0xff, 0xff, 0x70))
     ColorDB().insert('default-grid-color',
                      ColorDB().find(0xd0, 0xd0, 0xd0, 0xff))
     ColorDB().insert('default-stroke-color',

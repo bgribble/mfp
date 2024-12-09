@@ -709,6 +709,9 @@ class Processor:
             # flag it (Patch.connect wil retry)
             return False
 
+        if len(target.connections_in) <= inlet:
+            log.debug(f"[connect] error connecting {(self.obj_id, outlet)} [{self.init_type} {self.init_args}] {self.name} to {(target.obj_id, inlet)} -- target has {target.connections_in}")
+
         existing = target.connections_in[inlet]
         if (self, outlet) not in existing:
             existing.append((self, outlet))

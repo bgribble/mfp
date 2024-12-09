@@ -179,5 +179,5 @@ class Scatter (Processor):
 def register():
     MFPApp().register("scatter", Scatter)
     MFPApp().register("bars", Scatter)
-    MFPApp().register("histo", Scatter)
+    MFPApp().register("histogram", Scatter)
     MFPApp().register("scope", Scope)

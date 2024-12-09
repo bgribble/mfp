@@ -9,6 +9,7 @@ from imgui_bundle import imgui_md as markdown
 
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.colordb import ColorDB
 from ..text_widget import TextWidget, TextWidgetImpl
 
 
@@ -41,6 +42,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         self.cursor_pos = 0
         self.cursor_visible = False
+        self.cursor_color = ColorDB().find('default-cursor-color')
 
         self.visible = True
         self.use_markup = False
@@ -389,7 +391,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.width = w
         self.height = h
 
-        if not self.editable or len(label_text) == 0:
+        if not self.editable:
             return
 
         draw_list = imgui.get_window_draw_list()
@@ -404,9 +406,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
                 # draw cursor
                 draw_list.add_rect_filled(
-                    (left_x + box_start * self.font_width, top_y),
-                    (left_x + box_end * self.font_width + 1.0, top_y + self.font_height + 2),
-                    imgui.IM_COL32(255, 255, 255, 70)
+                    (left_x + box_start * self.font_width - 1, top_y),
+                    (left_x + box_end * self.font_width + 1, top_y + self.font_height + 2),
+                    ColorDB().backend.im_col32(self.cursor_color)
                 )
             line_start_pos += len(line) + 1
             top_y += self.font_height
