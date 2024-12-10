@@ -239,8 +239,6 @@ class TileManager:
                         self._remove_neighbor(potential_neighbor, tile, neighbor_dir)
                 made_space = True
                 break
-        if not made_space:
-            log.debug("[remove_tile] Couldn't find a friend to expand")
 
         for ndir, neighbors in tile.neighbors.items():
             for n in neighbors:
@@ -371,3 +369,75 @@ class TileManager:
         self.add_tile(new_tile)
 
         return (tile, new_tile)
+
+    def resize_tile(self, tile, target_w, target_h, target_x, target_y):
+        """
+        resize_tile: shuffle other tiles to change target tile
+        """
+        def tiny(v1):
+            return abs(v1) < .001
+
+        def change_tile(t, side, amount):
+            if side == "top":
+                t.origin_y += amount
+                t.height -= amount
+            elif side == "bottom":
+                t.height += amount
+            elif side == "left":
+                t.origin_x += amount
+                t.width -= amount
+            elif side == "right":
+                t.width += amount
+
+        changes = dict(left=0, right=0, top=0, bottom=0)
+        opposites = dict(left="right", right="left", top="bottom", bottom="top")
+
+        delta_w = target_w - tile.width
+        delta_h = target_h - tile.height
+        delta_x = target_x - tile.origin_x
+        delta_y = target_y - tile.origin_y
+
+        if not tiny(delta_w):
+            if not tiny(delta_x):
+                changes["left"] = -delta_w
+                target_x = tile.origin_x - delta_w
+                target_y = tile.origin_y
+            else:
+                changes["right"] = delta_w
+                target_x = tile.origin_x
+                target_y = tile.origin_y
+        if not tiny(delta_h):
+            if not tiny(delta_y):
+                changes["top"] = -delta_h
+                target_x = tile.origin_x
+                target_y = tile.origin_y - delta_h
+            else:
+                changes["bottom"] = delta_h
+                target_y = tile.origin_y
+                target_x = tile.origin_x
+
+        made_changes = False
+        for direction, amount in changes.items():
+            if tiny(amount):
+                # don't make insignificant changes
+                continue
+            if not tile.neighbors.get(direction):
+                # ignore changes on sides that border the window frame
+                continue
+            made_changes = True
+
+            # resize neighbors in the direction we are growing/shrinking
+            my_neighbors = tile.neighbors.get(direction)
+            for neighbor in my_neighbors:
+                oppo = opposites[direction]
+                change_tile(neighbor, oppo, amount)
+                their_neighbors = neighbor.neighbors.get(oppo)
+                for theirs in their_neighbors:
+                    if theirs != tile:
+                        change_tile(theirs, direction, amount)
+
+        if made_changes:
+            tile.width = target_w
+            tile.height = target_h
+            tile.origin_x = target_x
+            tile.origin_y = target_y

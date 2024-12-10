@@ -13,6 +13,8 @@ from mfp.gui.modes.patch_edit import PatchEditMode
 from mfp.gui.modes.global_mode import GlobalMode
 from . import menu_bar
 
+ALLOWED_DELTA_PIX = 0.1
+
 
 def render_selection_box(app_window, pane_origin, canvas_origin, tile):
     draw_list = imgui.get_foreground_draw_list()
@@ -92,7 +94,6 @@ def render_tile(app_window, patch):
         flags=(
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
-            | imgui.WindowFlags_.no_resize
         ),
     )
 
@@ -115,6 +116,17 @@ def render_tile(app_window, patch):
 
     # get_cursor_pos appears to be relative to the origin of the current window
     cursor_pos = imgui.get_cursor_pos()
+
+    # handle tile resize
+    if app_window.selected_patch == patch:
+        actual_w, actual_h = imgui.get_window_size()
+        if abs(actual_w - tile.width) > ALLOWED_DELTA_PIX or abs(actual_h - tile.height) > ALLOWED_DELTA_PIX:
+            actual_x, actual_y = imgui.get_window_pos()
+            app_window.canvas_tile_manager.resize_tile(
+                tile,
+                actual_w, actual_h,
+                actual_x - cursor_pos[0], actual_y - cursor_pos[1]
+            )
 
     # canvas_origin is the screen offset of the upper-left of the canvas
     # relative to the tile (accounting for the tile title bar)

@@ -44,6 +44,7 @@ def render(app_window):
 
             imgui.push_style_var(imgui.StyleVar_.item_spacing, [2, 2])
 
+            imgui.dummy((1, 1))
             imgui.begin_group()
             imgui.dummy((1, 1))
             imgui.text(" Filter regex:")
