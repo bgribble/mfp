@@ -22,16 +22,16 @@ class Prompter (object):
         self.history = Trie()
         self.completions.populate(completions or [])
 
-    async def get_input(self, prompt, callback, default):
+    async def get_input(self, prompt, callback, default, filename):
         if self.mode is None:
-            await self._begin(prompt, callback, default)
+            await self._begin(prompt, callback, default, filename)
         else:
-            self.queue.append([prompt, callback, default])
+            self.queue.append([prompt, callback, default, filename])
 
-    async def _begin(self, prompt, callback, default):
+    async def _begin(self, prompt, callback, default, filename):
         self.current_prompt = prompt
         self.current_callback = callback
-        self.window.cmd_set_prompt(prompt, default)
+        self.window.cmd_set_prompt(prompt, default, filename=filename)
         self.mode = LabelEditMode(
             self.window, self, self.label,
             mode_desc="Command input",

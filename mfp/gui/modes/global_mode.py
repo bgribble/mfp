@@ -347,7 +347,9 @@ class GlobalMode (InputMode):
                     await MFPGUI().mfp.set_params(patch.obj_id, prms)
                     self.window.refresh(patch)
                 await MFPGUI().mfp.save_file(patch.obj_name, fname)
-        await self.window.cmd_get_input("File name to save: ", cb, default_filename)
+        await self.window.cmd_get_input(
+            "File name to save: ", cb, default_filename, filename="save"
+        )
 
     async def save_as_lv2(self):
         patch = self.window.selected_patch
@@ -356,12 +358,16 @@ class GlobalMode (InputMode):
         async def cb(plugname):
             if plugname:
                 await MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
-        await self.window.cmd_get_input("Plugin name to save: ", cb, default_plugname)
+        await self.window.cmd_get_input(
+            "Plugin name to save: ", cb, default_plugname, filename="save"
+        )
 
     async def open_file(self):
         async def cb(fname):
             await MFPGUI().mfp.open_file(fname)
-        await self.window.cmd_get_input("File name to load: ", cb)
+        await self.window.cmd_get_input(
+            "File name to load: ", cb, filename="open"
+        )
 
     def drag_start(self):
         self.drag_started = True

@@ -69,6 +69,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.canvas_panel_height
         )
 
+        self.cmd_file_dialog = None
+
         self.autoplace_x = None
         self.autoplace_y = None
         self.selection_box_bounds = None
@@ -276,7 +278,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # full-screen window containing the dockspace
-        imgui.set_next_window_size((self.window_width, self.window_height - 2*self.menu_height - 5))
+        imgui.set_next_window_size((self.window_width, self.window_height - 2*self.menu_height - 8))
         imgui.set_next_window_pos((0, self.menu_height))
 
         # main window is plain, no border, no padding
@@ -518,10 +520,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def hud_write(self, message, display_time=3.0):
         pass
 
-    def cmd_set_prompt(self, prompt, default='', space=True):
+    def cmd_set_prompt(self, prompt, default='', space=True, filename=False):
         self.cmd_prompt = prompt
         if space and prompt:
             self.cmd_prompt += ' '
+        self.cmd_input.set_text(default)
+        self.cmd_input_filename = filename
 
     def console_activate(self):
         pass

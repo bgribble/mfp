@@ -1,12 +1,15 @@
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from mfp import log
 from mfp.gui.modes.global_mode import GlobalMode
+from imgui_bundle import im_file_dialog as ifd
+from imgui_bundle import portable_file_dialogs as pfd
 
 CHAR_PIXELS = 7
 
+
 def render(app_window):
-    imgui.set_next_window_size((app_window.window_width, app_window.menu_height + 5))
-    imgui.set_next_window_pos((0, app_window.window_height - app_window.menu_height - 5))
+    imgui.set_next_window_size((app_window.window_width, app_window.menu_height + 8))
+    imgui.set_next_window_pos((0, app_window.window_height - app_window.menu_height - 8))
     imgui.begin(
         "status_line",
         flags=(
@@ -27,10 +30,47 @@ def render(app_window):
 
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 3.0))
         imgui.text(app_window.cmd_prompt)
+
         imgui.same_line()
+        window_w = imgui.get_window_width()
         imgui.push_item_width(-1)
         app_window.cmd_input.render()
         imgui.pop_item_width()
+
+        if app_window.cmd_input_filename:
+            imgui.same_line()
+            cursor_x, cursor_y = imgui.get_cursor_pos()
+            imgui.set_cursor_pos([window_w - 100, cursor_y])
+            if imgui.button("Select..."):
+                """
+                ifd.FileDialog.instance().open(
+                    "cmdline_choose_file",
+                    "Select a file",
+                    "",
+                )
+                """
+                if app_window.cmd_input_filename == "open":
+                    app_window.cmd_file_dialog = pfd.open_file("Select file")
+                elif app_window.cmd_input_filename == "save":
+                    app_window.cmd_file_dialog = pfd.save_file("Save as")
+                elif app_window.cmd_input_filename == "folder":
+                    app_window.cmd_file_dialog = pfd.select_filder("Select folder")
+
+        if app_window.cmd_file_dialog is not None and app_window.cmd_file_dialog.ready():
+            results = app_window.cmd_file_dialog.result()
+            app_window.cmd_file_dialog = None
+            if results:
+                app_window.cmd_input.set_text(results[0])
+
+        """
+        if ifd.FileDialog.instance().is_done("cmdline_choose_file"):
+            if ifd.FileDialog.instance().has_result():
+                result = ifd.FileDialog.instance().get_results()
+                if result:
+                    filename = result[0].path()
+                    log.debug(f"[dialog] got path {filename} for result {result}")
+            ifd.FileDialog.instance().close()
+        """
         imgui.pop_style_var()
         imgui.end()
         return

@@ -392,7 +392,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         buf.delete(buf.get_start_iter(), buf.get_end_iter())
         buf.insert(buf.get_end_iter(), txt)
 
-    def cmd_set_prompt(self, prompt, default=''):
+    def cmd_set_prompt(self, prompt, default='', filename=False):
         from gi.repository import Clutter
 
         if (prompt is None) and self.cmd_input:

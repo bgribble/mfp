@@ -113,7 +113,7 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     @abstractmethod
-    def cmd_set_prompt(self, prompt, default=''):
+    def cmd_set_prompt(self, prompt, default='', filename=False):
         pass
 
     @abstractmethod
@@ -209,6 +209,7 @@ class AppWindow (SignalMixin):
         # command line entry / prompted response
         self.cmd_prompt = None
         self.cmd_input = None
+        self.cmd_input_filename = False
 
         # set up key and mouse handling
         self.input_mgr = InputManager(self)
@@ -396,8 +397,8 @@ class AppWindow (SignalMixin):
         self.console_manager.show_prompt(msg)
         self.console_activate()
 
-    async def cmd_get_input(self, prompt, callback, default=''):
-        await self.cmd_manager.get_input(prompt, callback, default)
+    async def cmd_get_input(self, prompt, callback, default='', filename=False):
+        await self.cmd_manager.get_input(prompt, callback, default, filename)
 
     async def clipboard_cut(self, pointer_pos):
         if self.selected:
