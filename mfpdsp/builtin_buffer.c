@@ -227,7 +227,7 @@ process(mfp_processor * proc)
                 inptr = (float *)(d->buf_base) + (channel*d->chan_size);
                 inpos = d->buf_pos;
                 for(outpos = 0; outpos < proc->context->blocksize; outpos++) {
-                    if (inpos < d->region_end) {
+                    if ((inpos < d->region_end) || (d->buf_mode == PLAY_BANG)) {
                         outptr[outpos] = inptr[inpos++];
                     }
                     else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
@@ -286,10 +286,21 @@ process(mfp_processor * proc)
             d->buf_pos += tocopy;
         }
         else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
-            d->buf_pos =
-                d->region_start + ((d->buf_pos - d->region_start + tocopy)
-                        % (d->region_end - d->region_start));
+            d->buf_pos = (
+                d->region_start
+                + ((d->buf_pos - d->region_start + tocopy) % (d->region_end - d->region_start))
+            );
             loopstart = 1;
+        }
+        else if (d->buf_mode == PLAY_BANG) {
+            d->buf_pos = MIN(d->buf_pos + proc->context->blocksize, d->chan_size);
+            if (d->buf_pos == d->chan_size) {
+                d->buf_pos = 0;
+                d->buf_state = BUF_IDLE;
+                d->rec_enabled = 0;
+                d->trig_pretrigger = 0;
+                mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
+            }
         }
         else {
             /* we have reached the end of the buffer in a 1-shot mode.  Stop. */
@@ -475,7 +486,8 @@ config(mfp_processor * proc)
                 d->buf_mode = PLAY_LOOP;
             }
             else {
-                d->buf_mode == PLAY_BANG;
+                d->buf_mode = PLAY_BANG;
+                mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 1);
             }
         }
     }

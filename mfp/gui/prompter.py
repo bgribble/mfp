@@ -65,6 +65,6 @@ class Prompter (object):
         if len(self.queue):
             nextitem = self.queue[0]
             self.queue = self.queue[1:]
-            await self._begin(nextitem[0], nextitem[1], nextitem[2])
+            await self._begin(*nextitem)
 
 

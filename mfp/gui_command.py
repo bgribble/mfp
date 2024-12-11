@@ -1,3 +1,5 @@
+import asyncio
+
 from datetime import datetime
 from carp.service import apiclass, noresp
 
@@ -43,7 +45,6 @@ class GUICommand:
         MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.console_write(msg, bring_to_front)
 
-
     def hud_write(self, msg):
         from .gui_main import MFPGUI
         MFPGUI().appwin.last_activity_time = datetime.now()
@@ -59,6 +60,27 @@ class GUICommand:
         MFPGUI().appwin.last_activity_time = datetime.now()
         obj = MFPGUI().recall(obj_id)
         obj.command(action, args)
+
+    async def cmd_get_input(self, prompt, default, filename):
+        from .gui_main import MFPGUI
+        from mfp import log
+        event = asyncio.Event()
+        result = []
+
+        async def cb(response):
+            result.append(response)
+            event.set()
+
+        await MFPGUI().appwin.cmd_get_input(prompt, cb, default, filename)
+
+        try:
+            await event.wait()
+        except asyncio.exceptions.CancelledError:
+            pass
+
+        if result:
+            return result[0]
+        return None
 
     async def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI

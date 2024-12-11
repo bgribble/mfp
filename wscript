@@ -422,6 +422,7 @@ def configure(conf):
     pip_libs = [
         "posix_ipc", "simplejson", "numpy",
         "pynose", "yappi", "cython", "pyliblo",
+        "soundfile",
         ("cairo", "pycairo"), "gbulb",               # clutter only
         "pyopengl", "sdl", "imgui_bundle", "Pillow", # imgui only
         "carp-rpc", "flopsy",                        # my other libs

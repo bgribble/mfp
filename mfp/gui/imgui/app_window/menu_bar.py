@@ -158,7 +158,7 @@ def render(app_window):
                 imgui.push_id(layer_num)
                 layer_selected, _ = imgui.menu_item(
                     layer.name,
-                    None,
+                    '',
                     app_window.selected_layer == layer
                 )
                 if layer_selected and app_window.selected_layer != layer:

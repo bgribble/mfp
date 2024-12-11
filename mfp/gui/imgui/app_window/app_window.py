@@ -524,7 +524,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.cmd_prompt = prompt
         if space and prompt:
             self.cmd_prompt += ' '
-        self.cmd_input.set_text(default)
+        self.cmd_input.set_text(default or '')
         self.cmd_input_filename = filename
 
     def console_activate(self):

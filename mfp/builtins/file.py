@@ -9,6 +9,35 @@ class EOF:
     pass
 
 
+class FileName(Processor):
+    doc_tooltip_obj = "Prompt for a filename"
+    doc_tooltip_inlet = ["Prompt or bang to trigger"]
+    doc_tooltip_outlet = ["Filename output"]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        self.filename = None
+        self.prompt = "Filename:"
+        self.mode = "open"
+
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        initargs, kwargs = self.parse_args(init_args)
+
+    async def _await_response(self):
+        self.filename = await MFPApp().gui_command.cmd_get_input(
+            self.prompt, default=self.filename, filename=self.mode
+        )
+        await self.send(self.filename)
+
+    async def trigger(self):
+        if isinstance(self.inlets[0], str):
+            self.filename = self.inlets[0]
+            self.outlets[0] = self.filename
+        elif MFPApp().gui_command:
+            MFPApp().async_task(self._await_response())
+        else:
+            self.outlets[0] = self.filename
+
+
 class FileIO(Processor):
     doc_tooltip_obj = "File I/O processor"
     doc_tooltip_inlet = ["Message data or method call input"]
@@ -90,5 +119,7 @@ class FileIO(Processor):
             self.fileobj = None
 
 
+
 def register():
     MFPApp().register("file", FileIO)
+    MFPApp().register("filename", FileName)
