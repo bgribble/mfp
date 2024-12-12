@@ -5,6 +5,7 @@ Main window class for ImGui backend
 
 import asyncio
 import sys
+import re
 from datetime import datetime, timedelta
 from flopsy import Store
 
@@ -70,6 +71,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         )
 
         self.cmd_file_dialog = None
+        self.cmd_hud_text = None
+        self.cmd_hud_expiry = None
 
         self.autoplace_x = None
         self.autoplace_y = None
@@ -513,12 +516,13 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     #####################
     # HUD/console
-
     def hud_banner(self, message, display_time=3.0):
-        pass
+        self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message)
+        self.cmd_hud_expiry = datetime.now() + timedelta(seconds=display_time)
 
     def hud_write(self, message, display_time=3.0):
-        pass
+        self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message)
+        self.cmd_hud_expiry = datetime.now() + timedelta(seconds=display_time)
 
     def cmd_set_prompt(self, prompt, default='', space=True, filename=False):
         self.cmd_prompt = prompt

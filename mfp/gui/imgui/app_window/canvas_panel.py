@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 import math
 
 from imgui_bundle import imgui, imgui_node_editor as nedit
+from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from mfp.gui.connection_element import ConnectionElement
@@ -178,9 +179,15 @@ def render_tile(app_window, patch):
 
     conf = nedit.get_config()
 
-    # disable NodeEditor dragging and selecting
-    conf.drag_button_index = 3
-    conf.select_button_index = 3
+    # disable NodeEditor dragging and selecting unless we are hovering on
+    # a pin (want to be able to click-drag to create links)
+    if nedit.get_hovered_pin().id():
+        conf.select_button_index = 0
+        conf.drag_button_index = 0
+    else:
+        conf.select_button_index = 3
+        conf.drag_button_index = 3
+
     conf.canvas_size_mode = nedit.CanvasSizeMode.center_only
 
     # reselect nodes if needed (part of the hack to resize the viewport)

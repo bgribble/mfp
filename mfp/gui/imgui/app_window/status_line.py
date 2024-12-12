@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from imgui_bundle import imgui, imgui_node_editor as nedit
 from mfp import log
 from mfp.gui.modes.global_mode import GlobalMode
-from imgui_bundle import im_file_dialog as ifd
 from imgui_bundle import portable_file_dialogs as pfd
 
 CHAR_PIXELS = 7
@@ -42,13 +43,6 @@ def render(app_window):
             cursor_x, cursor_y = imgui.get_cursor_pos()
             imgui.set_cursor_pos([window_w - 100, cursor_y])
             if imgui.button("Select..."):
-                """
-                ifd.FileDialog.instance().open(
-                    "cmdline_choose_file",
-                    "Select a file",
-                    "",
-                )
-                """
                 if app_window.cmd_input_filename == "open":
                     app_window.cmd_file_dialog = pfd.open_file("Select file")
                 elif app_window.cmd_input_filename == "save":
@@ -62,16 +56,16 @@ def render(app_window):
             if results:
                 app_window.cmd_input.set_text(results[0])
 
-        """
-        if ifd.FileDialog.instance().is_done("cmdline_choose_file"):
-            if ifd.FileDialog.instance().has_result():
-                result = ifd.FileDialog.instance().get_results()
-                if result:
-                    filename = result[0].path()
-                    log.debug(f"[dialog] got path {filename} for result {result}")
-            ifd.FileDialog.instance().close()
-        """
         imgui.pop_style_var()
+        imgui.end()
+        return
+
+    if (
+        app_window.cmd_hud_text
+        and app_window.cmd_hud_expiry
+        and app_window.cmd_hud_expiry > datetime.now()
+    ):
+        imgui.text(app_window.cmd_hud_text)
         imgui.end()
         return
 

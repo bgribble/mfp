@@ -406,12 +406,14 @@ class GlobalMode (InputMode):
         py = self.manager.pointer_y
 
         if self.window.backend_name == "imgui":
+            from imgui_bundle import imgui_node_editor as nedit
             if (
                 self.window.selected_window != "canvas"
                 or self.window.main_menu_open
                 or self.window.context_menu_open
+                or nedit.get_hovered_pin().id()
             ):
-                return
+                return False
             self.window.imgui_tile_selected = True
 
         if select_mode is None:

@@ -354,20 +354,6 @@ class ImguiBaseElementImpl(BaseElementImpl):
 
     def hide_ports(self):
         return
-    """
-            def hideport(pid):
-                pobj = self.port_elements.get(pid)
-                if pobj:
-                    pobj.hide()
-
-            for i in range(self.num_inlets):
-                pid = (BaseElement.PORT_IN, i)
-                hideport(pid)
-
-            for i in range(self.num_outlets):
-                pid = (BaseElement.PORT_OUT, i)
-                hideport(pid)
-    """
 
     async def redraw_connections(self):
         pass
