@@ -42,17 +42,23 @@ class Buffer(Processor):
     ]
 
     def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = patch.parse_args(init_args)
+        self.init_args, self.init_kwargs = patch.parse_args(init_args)
 
         self.init_size = 0
         self.init_channels = 1
 
-        if len(initargs):
-            self.init_size = initargs[0]*MFPApp().samplerate/1000.0
-        if len(initargs) > 1:
-            self.init_channels = initargs[1]
-        if "channels" in kwargs:
-            self.init_channels = kwargs["channels"]
+        if len(self.init_args):
+            self.init_size = self.init_args[0]*MFPApp().samplerate/1000.0
+        if len(self.init_args) > 1:
+            self.init_channels = self.init_args[1]
+        if "channels" in self.init_kwargs:
+            self.init_channels = self.init_kwargs.pop("channels")
+
+        # convert can be 'best', 'medium' or 'fastest'
+        # there is about a 8-10x runtime difference between best and fastest
+        self.file_convert = 'sinc_fastest'
+        if "convert" in self.init_kwargs:
+            self.file_convert = f'sinc_{self.init_kwargs.pop("convert")}'
 
         Processor.__init__(
             self, self.init_channels, self.init_channels+2, init_type, init_args,
@@ -61,6 +67,8 @@ class Buffer(Processor):
 
         self.buf_id = None
         self.buf_offset = 0
+        self.buf_ready = False
+
         self.channels = 0
         self.size = 0
         self.rate = None
@@ -68,7 +76,6 @@ class Buffer(Processor):
 
         self.file_name = None
         self.file_channels = None
-        self.file_samplerate = None
         self.file_len = None
         self.file_data = None
         self.file_ready = False
@@ -78,6 +85,8 @@ class Buffer(Processor):
 
     async def setup(self):
         await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
+        for key, value in self.init_kwargs.items():
+            await self.dsp_setparam(key, value)
 
     def offset(self, channel, start):
         return (channel * self.size + start) * self.FLOAT_SIZE
@@ -87,12 +96,19 @@ class Buffer(Processor):
 
         def _read_helper():
             import soundfile as sf
+            import samplerate as rateconv
             self.file_ready = False
-            data, samplerate = sf.read(self.file_name)
-            self.file_channels = len(data.shape)
-            self.file_len = data.shape[0]
-            self.file_samplerate = samplerate
-            self.file_data = data.astype(numpy.float32)
+            log.debug(f"[buffer] Reading from file '{self.file_name}'")
+            data, samplerate = sf.read(self.file_name, dtype=numpy.float32)
+            self.file_channels = 1 if len(data.shape) == 1 else data.shape[1]
+
+            # sample rate convert if needed
+            mfp_samplerate = MFPApp().samplerate
+            if samplerate != mfp_samplerate:
+                log.debug(f"[buffer] Converting samplerate from {samplerate} to {mfp_samplerate}")
+                self.file_data = rateconv.resample(data, mfp_samplerate / samplerate, 'sinc_fastest')
+
+            self.file_len = self.file_data.shape[0]
             self.file_ready = True
             ready.set()
 
@@ -101,8 +117,13 @@ class Buffer(Processor):
         await ready.wait()
         thread.join()
 
-        await self.dsp_setparam("channels", self.file_channels)
-        await self.dsp_setparam("size", self.file_len)
+        if self.channels == self.file_channels and self.size == self.file_len:
+            self.file_ready = False
+            self._transfer_file_data()
+        else:
+            self.buffer_ready = False
+            await self.dsp_setparam("channels", self.file_channels)
+            await self.dsp_setparam("size", self.file_len)
 
     def _transfer_file_data(self):
         if self.shm_obj is None:
@@ -116,6 +137,7 @@ class Buffer(Processor):
 
             os.lseek(self.shm_obj.fd, self.offset(channel, 0), os.SEEK_SET)
             os.write(self.shm_obj.fd, byte_data)
+        log.debug("[buffer] Sample data ready")
 
     def dsp_response(self, resp_id, resp_value):
         if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
@@ -134,6 +156,7 @@ class Buffer(Processor):
         elif resp_id == self.RESP_OFFSET:
             self.buf_offset = resp_value
         elif resp_id == self.RESP_BUFRDY:
+            self.buffer_ready = True
             self.outlets[2] = BufferInfo(
                 buf_id=self.buf_id,
                 size=self.size,
