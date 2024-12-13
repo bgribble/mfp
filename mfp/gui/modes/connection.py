@@ -122,7 +122,6 @@ class ConnectionMode (InputMode):
             if not self.reverse:
                 self.manager.disable_minor_mode(self)
 
-
     async def disable(self):
         self.window.signal_unlisten(self.select_cbid)
         self.select_cbid = None
@@ -163,8 +162,10 @@ class ConnectionMode (InputMode):
                 self.dest_port
             ):
                 self.connection.dashed = False
-                self.source_obj.connections_out.append(self.connection)
-                self.dest_obj.connections_in.append(self.connection)
+                if self.connection not in self.source_obj.connections_out:
+                    self.source_obj.connections_out.append(self.connection)
+                if self.connection not in self.dest_obj.connections_in:
+                    self.dest_obj.connections_in.append(self.connection)
                 await self.connection.draw()
                 self.connection = None
             else:

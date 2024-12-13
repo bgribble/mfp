@@ -143,20 +143,30 @@ class GlobalMode (InputMode):
             keysym="M1-MOTION"
         )
         cls.bind(
+            "selbox-alt-insert", lambda mode: mode.selbox_end("insert"),
+            helptext="Insert selection into connection",
+            keysym="A-M1UP"
+        )
+        cls.bind(
             "selbox-end", cls.selbox_end, helptext="End selection box",
             keysym="M1UP"
         )
         cls.bind(
-            "selbox-add-start", lambda mode: mode.selbox_start(True), helptext="Start add-to-selection box",
+            "selbox-add-start", lambda mode: mode.selbox_start(True),
+            helptext="Start add-to-selection box",
             keysym="S-M1DOWN"
+        )
+        cls.bind(
+            "selbox-alt-start", lambda mode: mode.selbox_start("insert"), helptext="Start auto-connect",
+            keysym="A-M1DOWN"
         )
         cls.bind(
             "selbox-add-motion", lambda mode: mode.selbox_motion(True), helptext="Drag add-to-selection box",
             keysym="S-M1-MOTION"
         )
         cls.bind(
-            "selbox-add-end", cls.selbox_end, helptext="End selection box",
-            keysym="S-M1UP"
+            "selbox-alt-motion", lambda mode: mode.selbox_motion("insert"), helptext="Drag auto-connect node",
+            keysym="A-M1-MOTION"
         )
         cls.bind(
             "selbox-toggle-start", lambda mode: mode.selbox_start(False),
@@ -434,6 +444,12 @@ class GlobalMode (InputMode):
             if (self.manager.pointer_obj and self.manager.pointer_obj not in self.window.selected):
                 await self.window.select(self.manager.pointer_obj)
             self.selbox_started = True
+        elif select_mode == "insert":
+            if self.allow_selection_drag:
+                self.selection_drag_started = True
+                for obj in self.window.selected:
+                    if obj.editable and obj.display_type != 'connection':
+                        obj.drag_start()
         else:
             if self.manager.pointer_obj in self.window.selected:
                 await self.window.unselect(self.manager.pointer_obj)
@@ -461,6 +477,40 @@ class GlobalMode (InputMode):
         self.drag_last_y = py
 
         if self.selection_drag_started:
+            if (
+                select_mode == "insert"
+                and len(self.window.selected) == 1
+            ):
+                sel = self.window.selected[0]
+                src_obj = src_port = dest_obj = dest_port = None
+                src_conn = dest_conn = None
+                for c in sel.connections_in:
+                    if c.port_2 == 0:
+                        if src_obj is None:
+                            src_obj = c.obj_1
+                            src_port = c.port_1
+                            src_conn = c
+                        elif src_obj != c.obj_1:
+                            src_obj = False
+                    else:
+                        src_obj = False
+                for c in sel.connections_out:
+                    if c.port_1 == 0:
+                        if dest_obj is None:
+                            dest_obj = c.obj_2
+                            dest_port = c.port_2
+                            dest_conn = c
+                        elif dest_obj != c.obj_2:
+                            dest_obj = False
+                    else:
+                        dest_obj = False
+                if src_obj and dest_obj:
+                    sel.connections_in = []
+                    sel.connections_out = []
+                    await dest_conn.delete()
+                    await src_conn.delete()
+                    await self._connect(src_obj, src_port, dest_obj, dest_port)
+
             for obj in self.window.selected:
                 if obj.editable and obj.display_type != 'connection':
                     await obj.move(
@@ -475,7 +525,7 @@ class GlobalMode (InputMode):
         )
 
         for obj in enclosed:
-            if select_mode:
+            if select_mode is True:
                 if obj not in self.window.selected:
                     if obj not in self.selbox_changed:
                         self.selbox_changed.append(obj)
@@ -500,12 +550,61 @@ class GlobalMode (InputMode):
 
         return True
 
-    async def selbox_end(self):
+    async def _connect(self, src_obj, src_port, dest_obj, dest_port):
+        from ..connection_element import ConnectionElement
+        connection = ConnectionElement.build(
+            self.window,
+            src_obj, src_port,
+            dest_obj, dest_port
+        )
+        self.window.register(connection)
+        src_obj.connections_out.append(connection)
+        dest_obj.connections_in.append(connection)
+
+        await MFPGUI().mfp.connect(
+            src_obj.obj_id, src_port, dest_obj.obj_id, dest_port
+        )
+
+    async def selbox_end(self, select_mode=None):
+        from ..connection_element import ConnectionElement
         if self.selection_drag_started:
+            if (
+                select_mode == "insert"
+                and len(self.window.selected) == 1
+                and self.window.selected[0].num_outlets > 0
+                and self.window.selected[0].editable
+                and not isinstance(self.window.selected[0], ConnectionElement)
+            ):
+                selected = self.window.selected[0]
+                overlapped = self.window.find_contained(
+                    selected.position_x, selected.position_y,
+                    selected.position_x + selected.width,
+                    selected.position_y + selected.height
+                )
+                overlapped_connections = [
+                    o for o in overlapped
+                    if (
+                        isinstance(o, ConnectionElement)
+                        and o.obj_state == ConnectionElement.OBJ_COMPLETE
+                        and o not in selected.connections_in
+                        and o not in selected.connections_out
+                    )
+                ]
+                if len(overlapped_connections) == 1:
+                    conn = overlapped_connections[0]
+                    source_obj = conn.obj_1
+                    source_port = conn.port_1
+                    dest_obj = conn.obj_2
+                    dest_port = conn.port_2
+                    await conn.delete()
+                    await self._connect(source_obj, source_port, selected, 0)
+                    await self._connect(selected, 0, dest_obj, dest_port)
+
             for obj in self.window.selected:
                 if obj.editable and obj.display_type != 'connection':
                     await obj.drag_end()
                 obj.send_params()
+
         self.selbox_started = False
         self.selection_drag_started = False
         self.selbox_changed = []

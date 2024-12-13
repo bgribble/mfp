@@ -15,7 +15,6 @@ import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
-from mfp.gui.collision import collision_check
 from mfp.gui.event import EnterEvent, LeaveEvent
 from mfp.gui.app_window import AppWindow, AppWindowImpl
 from mfp.gui.tile_manager import TileManager, Tile
@@ -517,11 +516,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # HUD/console
     def hud_banner(self, message, display_time=3.0):
-        self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message)
+        self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message).split("\n")[0]
         self.cmd_hud_expiry = datetime.now() + timedelta(seconds=display_time)
 
     def hud_write(self, message, display_time=3.0):
-        self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message)
+        self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message).split("\n")[0]
         self.cmd_hud_expiry = datetime.now() + timedelta(seconds=display_time)
 
     def cmd_set_prompt(self, prompt, default='', space=True, filename=False):
@@ -551,20 +550,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             y0, y1 = y1, y0
 
         self.selection_box_bounds = (x0, y0, x1, y1)
-
-        enclosed = []
-        selection_corners = [
-            (x0, y0), (x1, y0), (x0, y1), (x1, y1)
-        ]
-        for obj in self.selected_layer.objects:
-            if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
-                continue
-            corners = obj.corners()
-
-            if corners and collision_check(selection_corners, corners):
-                enclosed.append(obj)
-
-        return enclosed
+        return self.find_contained(x0, y0, x1, y1)
 
     def hide_selection_box(self):
         self.selection_box_bounds = None

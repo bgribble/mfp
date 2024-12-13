@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from mfp import log
 
 from mfp.utils import SignalMixin
+from mfp.gui.collision import collision_check
 from ..gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .input_manager import InputManager
@@ -438,9 +439,27 @@ class AppWindow (SignalMixin):
                     obj.move_to_layer(self.selected_layer)
                     if obj not in self.selected:
                         await self.select(MFPGUI().recall(o))
-            return False
-        else:
-            return False
+        return False
+
+    def find_contained(self, x0, y0, x1, y1):
+        if x0 > x1:
+            x0, x1 = x1, x0
+        if y0 > y1:
+            y0, y1 = y1, y0
+
+        enclosed = []
+        selection_corners = [
+            (x0, y0), (x1, y0), (x0, y1), (x1, y1)
+        ]
+        for obj in self.selected_layer.objects:
+            if obj.parent_id and MFPGUI().recall(obj.parent_id).parent_id:
+                continue
+            corners = obj.corners()
+
+            if corners and collision_check(selection_corners, corners):
+                enclosed.append(obj)
+
+        return enclosed
 
 # additional methods in @extends wrappers
 from . import app_window_layer  # noqa
