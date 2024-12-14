@@ -87,6 +87,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.log_text = ""
         self.log_text_timestamp = None
         self.log_scroll_follow = True
+        self.log_scroll_timestamp = None
         self.log_filter_text = ''
         self.log_filter_timestamp = None
 
@@ -174,6 +175,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             loop_start_time = datetime.now()
 
             while True:
+                await asyncio.sleep(0.01)
                 keep_going, events_processed = await self.imgui_impl.process_events()
                 if datetime.now() > loop_start_time + timedelta(microseconds=next_frame_latest_delay):
                     next_frame_latest_delay = (next_frame_latest_delay + MAX_RENDER_US) / 2.0
@@ -188,8 +190,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     next_frame_latest_delay = 10000
                     break
                 if self.imgui_prevent_idle:
+                    await asyncio.sleep(0.01)
                     break
-                await asyncio.sleep(0.01)
 
             self.imgui_renderer.process_inputs()
 

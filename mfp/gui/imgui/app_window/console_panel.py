@@ -3,7 +3,6 @@ from datetime import datetime
 
 from imgui_bundle import imgui
 
-from mfp import log
 from mfp.gui.modes.console_mode import ConsoleMode
 
 
@@ -11,7 +10,7 @@ def filter_logs(filter_text, raw_log):
     filtered = []
     try:
         filter_re = re.compile(filter_text)
-    except Exception as e:
+    except Exception:
         return raw_log
 
     for entry in raw_log.split('\n'):
@@ -73,7 +72,16 @@ def render(app_window):
 
             # this is hacky hacky
             # https://github.com/ocornut/imgui/issues/5484
-            if app_window.log_scroll_follow:
+            text_timestamp = app_window.log_text_timestamp
+            if (
+                app_window.log_scroll_follow
+                and text_timestamp
+                and (
+                    not app_window.log_scroll_timestamp
+                    or text_timestamp > app_window.log_scroll_timestamp
+                )
+            ):
+                app_window.log_scroll_timestamp = text_timestamp or datetime.now()
                 main_window = imgui.internal.get_current_window()
                 child_name = f"{main_window.name}/log_output_text_{imgui.get_id('log_output_text'):08X}"
                 child_window = imgui.internal.find_window_by_name(child_name)
