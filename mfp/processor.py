@@ -802,8 +802,12 @@ class Processor:
                       (self.patch.name, self.name, self.init_type, inlet, value))
             log.error("Exception: %s" % e.args)
             log.debug_traceback(e)
+            error_target = self
             if w_target:
-                w_target.error("%s" % e.args, tb)
+                error_target = w_target
+
+            error_target.error(f"{e.args}", tb)
+            error_target.conf()
 
     async def _send(self, value, inlet=0, step_execute=False):
         """

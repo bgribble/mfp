@@ -47,6 +47,11 @@ class GlobalMode (InputMode):
             keysym="!",
             menupath="Context > Send message"
         )
+        cls.bind(
+            "clear-counters", cls.clear_counters, helptext="Clear error counters",
+            keysym="C-k",
+            menupath="Context > Clear counters"
+        )
         # global keybindings
         cls.bind(
             "toggle-console", cls.toggle_console, helptext="Show/hide log and console",
@@ -276,6 +281,11 @@ class GlobalMode (InputMode):
 
         await self.window.cmd_get_input(":", cb, '')
         return True
+
+    async def clear_counters(self):
+        if self.window.selected:
+            for elt in self.window.selected:
+                await MFPGUI().mfp.send_methodcall(elt.obj_id, 0, "reset_counts")
 
     def reset_zoom(self):
         self.window.reset_zoom()
