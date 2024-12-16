@@ -258,13 +258,15 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                         ColorDB().backend.im_col32(color),
                         1.5
                     )
+                    if self.scale_position == self.LEFT:
+                        text_x = tick_x - self.TICK_LEN - 2.5*font_size
+                    else:
+                        text_x = tick_x + self.TICK_LEN
+
                     draw_list.add_text(
                         imgui.get_font(),
                         font_size,
-                        [
-                            tick_x - self.TICK_LEN - 2.5*font_size,
-                            text_y
-                        ],
+                        [text_x, text_y],
                         ColorDB().backend.im_col32(color),
                         self.scale_format(tick)
                     )
@@ -288,14 +290,16 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                         1.5
                     )
 
+                    if self.scale_position == self.LEFT:
+                        text_y = tick_y - self.TICK_LEN - font_size
+                    else:
+                        text_y = tick_y + 1.5 * self.TICK_LEN + font_size
+
                     with rotated(theta=-90, origin_x=1, origin_y=0):
                         draw_list.add_text(
                             imgui.get_font(),
                             font_size,
-                            [
-                                text_x,
-                                tick_y - self.TICK_LEN - font_size,
-                            ],
+                            [text_x, text_y],
                             ColorDB().backend.im_col32(color),
                             self.scale_format(tick)
                         )
