@@ -457,7 +457,16 @@ class BaseElement (Store):
     def synced_params(self):
         prms = {}
         for k in self.param_list:
-            prms[k] = getattr(self, k)
+            val = getattr(self, k)
+            if isinstance(val, BaseElement):
+                val = val.obj_id
+            prms[k] = val
+
+        outbound = []
+        for c in self.connections_out:
+            outbound.append(c.synced_params())
+        prms["connection_info"] = outbound
+
         return prms
 
     def send_params(self, **extras):

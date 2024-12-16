@@ -52,6 +52,7 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
                     nedit.deselect_link(self.node_id)
 
         complete_color = self.get_color('link-color')
+        snoop_color = self.get_color('link-color:snoop')
         dashed_color = (1, 1, 1, 0.5)
 
         if self.dashed:
@@ -63,6 +64,9 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
         elif self.dsp_connect:
             thickness = 3
             color = complete_color.to_rgbaf()
+        elif self.snoop:
+            thickness = 2
+            color = snoop_color.to_rgbaf()
         else:
             thickness = 1.5
             color = complete_color.to_rgbaf()

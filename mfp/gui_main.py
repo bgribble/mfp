@@ -64,6 +64,7 @@ class MFPGUI (Singleton):
             'grid-color:operate': ParamInfo(label="Grid color (operate)", param_type=RGBAColor),
             'link-color': ParamInfo(label="Connection color", param_type=RGBAColor),
             'link-color:selected': ParamInfo(label="Connection color (selected)", param_type=RGBAColor),
+            'link-color:snoop': ParamInfo(label="Connection color (snoop mode)", param_type=RGBAColor),
             'meter-color': ParamInfo(label="Meter bar color", param_type=RGBAColor),
             'padding': ParamInfo(label="Element padding", param_type=dict),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
@@ -98,6 +99,7 @@ class MFPGUI (Singleton):
             'grid-color:operate': ColorDB().find('transparent'),
             'link-color': ColorDB().find('default-link-color'),
             'link-color:selected': ColorDB().find('default-link-color-selected'),
+            'link-color:snoop': ColorDB().find('default-link-color-snoop'),
             'porthole-color': ColorDB().find('default-stroke-color'),
             'porthole-color:selected': ColorDB().find('default-stroke-color-selected'),
             'selbox-stroke-color': ColorDB().find('default-selbox-stroke-color'),
@@ -154,6 +156,8 @@ def setup_default_colors_dark():
                      ColorDB().find(0x84, 0x84, 0x84, 0xff))
     ColorDB().insert('default-link-color-selected',
                      ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
+    ColorDB().insert('default-link-color-snoop',
+                     ColorDB().find(0xaa, 0xff, 0xaa, 0xff))
     ColorDB().insert('default-stroke-color-hover',
                      ColorDB().find(0x99, 0x99, 0x99, 0x0d))
     ColorDB().insert('default-stroke-color-debug',

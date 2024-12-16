@@ -89,9 +89,12 @@ def render_tile(app_window, patch):
     if not hasattr(patch, 'nedit_editor'):
         patch.nedit_editor = nedit.create_editor(app_window.nedit_config)
     nedit.set_current_editor(patch.nedit_editor)
+    layer_name = ''
+    if patch.selected_layer:
+        layer_name = patch.selected_layer.name
 
     imgui.begin(
-        f"{patch.obj_name} ({tile.page_id}.{tile.tile_id})",
+        f"{patch.obj_name} ({tile.page_id}.{tile.tile_id}) {layer_name}",
         flags=(
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move

@@ -102,7 +102,7 @@ class MFPCommand:
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            obj.gui_params = params
+            obj.set_gui_params(params)
 
     def set_gui_created(self, obj_id, value):
         from .mfp_app import MFPApp

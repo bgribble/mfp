@@ -32,6 +32,9 @@ class GlobalMode (InputMode):
         self.drag_last_y = None
         self.drag_target = None
 
+        self.snoop_conn = None
+        self.snoop_source = None
+
         self.tile_manager_mode = None
 
         InputMode.__init__(self, "Global input bindings", "Global")
@@ -225,6 +228,12 @@ class GlobalMode (InputMode):
         cls.bind(
             "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
             keysym="M1-C-."
+        )
+        cls.bind(
+            "toggle-snoop",
+            lambda mode: mode.toggle_snoop(),
+            helptext="Toggle snooping messages on connection",
+            keysym="?"
         )
 
         # imgui only
@@ -657,3 +666,22 @@ class GlobalMode (InputMode):
                 log.warning("Execution of all patches resumed")
         except Exception as e:
             print("Caught exception", e)
+
+    async def toggle_snoop(self):
+        from mfp.gui.connection_element import ConnectionElement
+
+        if not self.snoop_conn:
+            if self.window.selected:
+                cc = [c for c in self.window.selected if isinstance(c, ConnectionElement)]
+                if len(cc) == 1:
+                    self.snoop_conn = cc[0]
+                    self.snoop_conn.snoop = True
+                    self.snoop_source = self.snoop_conn.obj_1
+                    self.snoop_source.send_params()
+                    self.window.hud_write(f"Snooping on connection {self.snoop_conn}")
+        else:
+            self.snoop_conn.snoop = False
+            self.snoop_source.send_params()
+            self.snoop_conn = None
+            self.snoop_source = None
+            self.window.hud_write("Snooping disabled")

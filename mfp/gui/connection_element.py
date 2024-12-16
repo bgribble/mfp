@@ -30,7 +30,8 @@ class ConnectionElement(BaseElement):
         "obj_1": ParamInfo(label="From object", param_type=int),
         "port_1": ParamInfo(label="From port", param_type=int),
         "obj_2": ParamInfo(label="To object", param_type=int),
-        "port_2": ParamInfo(label="To port", param_type=int)
+        "port_2": ParamInfo(label="To port", param_type=int),
+        "snoop": ParamInfo(label="Snoop messages", param_type=bool),
     }
 
     def __init__(self, window, position_x, position_y):
@@ -43,6 +44,7 @@ class ConnectionElement(BaseElement):
         self.rotation = 0.0
         self.dashed = False
         self.dsp_connect = False
+        self.snoop = False
 
         super().__init__(window, position_x, position_y)
 

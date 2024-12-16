@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 '''
-selection_edit.py: Minor mode with active selection
+selection.py: Minor mode with active selection
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from ..input_mode import InputMode

@@ -151,7 +151,7 @@ class MFPApp (Singleton, SignalMixin):
 
             self.gui_command = await GUICommandFactory()
 
-            log.debug("GUI is ready. Switching logging to GUI...")
+            log.debug("Switching logging to GUI. Start with -v to always log to console.")
             log.log_func = self.gui_command.log_write
 
             self.console = Interpreter(dict(app=self))

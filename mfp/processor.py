@@ -91,6 +91,10 @@ class Processor:
         self.osc_pathbase = None
         self.osc_methods = []
 
+        self.snoop_outlet = None
+        self.snoop_target = None
+        self.snoop_inlet = None
+
         self.gui_created = False
 
         # gui_params are passed back and forth to the UI process
@@ -128,7 +132,23 @@ class Processor:
         self.assign(patch, scope, name)
 
     async def setup(self):
-        # called after constructor
+        # Override in Processor subclass
+        pass
+
+    def tooltip_extra(self):
+        # override in Processor subclass
+        return False
+
+    async def onload(self, phase):
+        # override in Processor subclass
+        pass
+
+    async def trigger(self):
+        # override in Processor subclass
+        pass
+
+    def dsp_response(self, resp_id, resp_value):
+        # override in Processor subclass
         pass
 
     def info(self):
@@ -315,19 +335,13 @@ class Processor:
                     )
         return '\n'.join(lines)
 
-    def tooltip_extra(self):
-        return False
-
     def call_onload(self, value=True):
         self.do_onload = value
 
-    async def onload(self, phase):
-        pass
-
-    async def trigger(self):
-        pass
-
     def assign(self, patch, scope, name):
+        """
+        bind a processor to a name in the given scope
+        """
         # null case
         if (self.patch == patch) and (self.scope == scope) and (self.name == name):
             return None
@@ -364,10 +378,6 @@ class Processor:
         self.conf(name=self.name, scope=self.scope.name)
         self.osc_init()
         return self.name
-
-    def dsp_response(self, resp_id, resp_value):
-        # override in Processor subclass
-        pass
 
     def rename(self, new_name):
         self.assign(self.patch, self.scope, new_name)
@@ -622,6 +632,9 @@ class Processor:
         self.status = self.DELETED
 
     def resize(self, inlets, outlets):
+        """
+        Change the number of inlets or outlets but preserve connections
+        """
         inlets = max(inlets, 1)
         if inlets > len(self.inlets):
             newin = inlets - len(self.inlets)
@@ -776,7 +789,6 @@ class Processor:
             return
 
         w_target = None
-
         try:
             work = await self._send(value, inlet)
 
@@ -903,7 +915,9 @@ class Processor:
         output_pairs = list(zip(self.connections_out, self.outlets))
         work = []
 
-        for conns, val in [output_pairs[i] for i in self.outlet_order]:
+        for outlet_num, output_val in [(i, output_pairs[i]) for i in self.outlet_order]:
+            conns, val = output_val
+
             if val is Uninit:
                 continue
 
@@ -926,6 +940,16 @@ class Processor:
                             ))
                         else:
                             work.append((target, val, tinlet))
+                        if (
+                            self.snoop_target
+                            and self.snoop_target.obj_id == target.obj_id
+                            and tinlet == self.snoop_inlet
+                            and outlet_num == self.snoop_outlet
+                        ):
+                            from .mfp_app import MFPApp
+                            MFPApp().async_task(
+                                MFPApp().gui_command.hud_write(f"[snoop] {str(val)}")
+                            )
                     else:
                         log.warning("Bad output connection: obj_id=%s" % self.obj_id)
 
@@ -998,6 +1022,21 @@ class Processor:
 
         e = Evaluator()
         return e.eval(pystr, **extra_bindings)
+
+    def set_gui_params(self, params):
+        from .mfp_app import MFPApp
+        self.gui_params = params
+        self.snoop_target = None
+        self.snoop_inlet = None
+        self.snoop_outlet = None
+
+        if "connection_info" in params:
+            cinfo = params["connection_info"]
+            for connection in cinfo:
+                if connection.get("snoop"):
+                    self.snoop_target = MFPApp().recall(connection.get("obj_2"))
+                    self.snoop_outlet = connection.get("port_1")
+                    self.snoop_inlet = connection.get("port_2")
 
     async def method(self, message, inlet):
         '''
