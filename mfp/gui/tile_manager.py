@@ -243,7 +243,10 @@ class TileManager:
         for ndir, neighbors in tile.neighbors.items():
             for n in neighbors:
                 reverse_neighbors = n.neighbors.setdefault(opps[ndir], [])
-                reverse_neighbors.remove(tile)
+                if tile in reverse_neighbors:
+                    reverse_neighbors.remove(tile)
+                else:
+                    log.debug(f"[tile] While removing {tile} - neighbor {n} not in reverse")
 
         tile.page_id = None
         tile.neighbors = {}
@@ -281,13 +284,13 @@ class TileManager:
         old_neighbors = {}
 
         if direction == TileManager.HORIZ:
-            old_neighbors['left'] = tile.neighbors.get('left') or []
+            old_neighbors['left'] = [*tile.neighbors.get('left', [])]
             old_neighbors['right'] = [new_tile]
 
             new_neighbors['left'] = [tile]
-            new_neighbors['right'] = tile.neighbors.get('right') or []
+            new_neighbors['right'] = [*tile.neighbors.get('right', [])]
 
-            for nbr in tile.neighbors.get('right') or []:
+            for nbr in new_neighbors.get('right'):
                 nbr.neighbors['left'] = [
                     n for n in (nbr.neighbors['left'] or [])
                     if n is not tile
@@ -322,20 +325,20 @@ class TileManager:
                     new.append(nbr)
                     nbr.neighbors['top'].append(new_tile)
         else:
-            old_neighbors['top'] = tile.neighbors.get('top') or []
+            old_neighbors['top'] = [*tile.neighbors.get('top', [])]
             old_neighbors['bottom'] = [new_tile]
 
             new_neighbors['top'] = [tile]
-            new_neighbors['bottom'] = tile.neighbors.get('bottom') or []
+            new_neighbors['bottom'] = [*tile.neighbors.get('bottom', [])]
 
-            for nbr in tile.neighbors.get('bottom') or []:
+            for nbr in new_neighbors.get('bottom'):
                 nbr.neighbors['top'] = [
-                    n for n in (nbr.neighbors['top'] or [])
+                    n for n in nbr.neighbors.get('top', [])
                     if n is not tile
                 ]
                 nbr.neighbors['top'].append(new_tile)
 
-            for nbr in tile.neighbors.get('left') or []:
+            for nbr in tile.neighbors.get('left', []):
                 if self._check_neighbor(tile, nbr, 'left'):
                     old = old_neighbors.setdefault('left', [])
                     old.append(nbr)
@@ -355,7 +358,7 @@ class TileManager:
                     old.append(nbr)
                 else:
                     nbr.neighbors['left'] = [
-                        n for n in (nbr.neighbors['left'] or [])
+                        n for n in nbr.neighbors.get('left', [])
                         if n is not tile
                     ]
                 if self._check_neighbor(new_tile, nbr, 'right'):
@@ -398,7 +401,7 @@ class TileManager:
         delta_y = target_y - tile.origin_y
 
         if not tiny(delta_w):
-            if not tiny(delta_x):
+            if abs(delta_w) <= abs(delta_x):
                 changes["left"] = -delta_w
                 target_x = tile.origin_x - delta_w
                 target_y = tile.origin_y
@@ -406,8 +409,8 @@ class TileManager:
                 changes["right"] = delta_w
                 target_x = tile.origin_x
                 target_y = tile.origin_y
-        if not tiny(delta_h):
-            if not tiny(delta_y):
+        if abs(delta_h) :
+            if abs(delta_h) <= abs(delta_y):
                 changes["top"] = -delta_h
                 target_x = tile.origin_x
                 target_y = tile.origin_y - delta_h
@@ -431,7 +434,7 @@ class TileManager:
             for neighbor in my_neighbors:
                 oppo = opposites[direction]
                 change_tile(neighbor, oppo, amount)
-                their_neighbors = neighbor.neighbors.get(oppo)
+                their_neighbors = neighbor.neighbors.get(oppo, [])
                 for theirs in their_neighbors:
                     if theirs != tile:
                         change_tile(theirs, direction, amount)

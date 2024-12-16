@@ -7,7 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from flopsy import mutates
 from mfp import log
 from mfp.gui_main import MFPGUI
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from .base_element import ImguiBaseElementImpl
 from ..message_element import (
     MessageElement,
@@ -49,7 +49,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
             padding.get('bottom', 0)
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 4.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
         nedit.push_style_color(
             nedit.StyleColor.node_bg,

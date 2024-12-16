@@ -12,7 +12,7 @@ from flopsy import mutates, saga
 import numpy as np
 from posix_ipc import SharedMemory
 
-from imgui_bundle import imgui_node_editor as nedit, implot, imgui
+from imgui_bundle import imgui_node_editor as nedit, ImVec4, implot, imgui
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .base_element import ImguiBaseElementImpl
@@ -128,7 +128,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             padding.get('bottom', 0)
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0.25)
-        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
 
         nedit.push_style_color(

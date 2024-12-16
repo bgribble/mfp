@@ -4,7 +4,7 @@ imgui/enum_element.py -- imgui backend for numeric/enumerated elements
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from flopsy import mutates
 
 from .base_element import ImguiBaseElementImpl
@@ -45,7 +45,7 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
             padding.get('bottom', 0)
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
         nedit.push_style_color(
             nedit.StyleColor.node_bg,

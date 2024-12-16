@@ -5,7 +5,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 import math
 
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
@@ -126,7 +126,8 @@ def render_tile(app_window, patch):
             app_window.canvas_tile_manager.resize_tile(
                 tile,
                 actual_w, actual_h,
-                actual_x - cursor_pos[0], actual_y - cursor_pos[1]
+                actual_x - canvas_pane_origin[0],
+                actual_y - canvas_pane_origin[1]
             )
 
     # canvas_origin is the screen offset of the upper-left of the canvas
@@ -291,7 +292,7 @@ def render_tile(app_window, patch):
             tile.view_y + margin
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (0, 0, 0, 0))
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(0, 0, 0, 0))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 0)
 
         nedit.push_style_color(

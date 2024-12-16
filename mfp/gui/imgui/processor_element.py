@@ -8,7 +8,7 @@ from mfp import log
 from flopsy import mutates
 
 from mfp.gui_main import MFPGUI
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from .base_element import ImguiBaseElementImpl
 from ..processor_element import (
     ProcessorElement,
@@ -49,7 +49,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
             padding.get('bottom', 0)
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0.25)
-        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
 
         nedit.push_style_color(

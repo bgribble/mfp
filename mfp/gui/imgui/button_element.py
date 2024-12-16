@@ -4,7 +4,7 @@ imgui/button_element.py -- imgui backend for button elements
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 
 from flopsy import mutates
 from mfp import log
@@ -58,7 +58,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
             padding.get('bottom', 0)
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, border_round)
-        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, border_width)
 
         nedit.push_style_color(

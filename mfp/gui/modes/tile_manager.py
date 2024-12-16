@@ -223,36 +223,40 @@ class TileManagerMode (InputMode):
         neighbor_fields = {
             k.name: copy.copy(getattr(neighbor_tile, k.name))
             for k in dataclasses.fields(neighbor_tile)
-            if k.name != 'tile_id'
+            if k.name not in ('tile_id', 'neighbors')
         }
         target_fields = {
             k.name: copy.copy(getattr(target_tile, k.name))
             for k in dataclasses.fields(target_tile)
-            if k.name != 'tile_id'
+            if k.name not in ('tile_id', 'neighbors')
         }
-        for key, value in target_fields.items():
-            setattr(neighbor_tile, key, value)
-
+        target_neighbors = {}
         for ndir, nlist in neighbor_tile.neighbors.items():
-            new_list = []
-            for neighbor in nlist:
-                if neighbor is neighbor_tile:
-                    new_list.append(target_tile)
-                else:
-                    new_list.append(neighbor)
-            neighbor_tile.neighbors[ndir] = new_list
-
-        for key, value in neighbor_fields.items():
-            setattr(target_tile, key, value)
-
-        for ndir, nlist in target_tile.neighbors.items():
             new_list = []
             for neighbor in nlist:
                 if neighbor is target_tile:
                     new_list.append(neighbor_tile)
                 else:
                     new_list.append(neighbor)
-            target_tile.neighbors[ndir] = new_list
+            target_neighbors[ndir] = new_list
+
+        neighbor_neighbors = {}
+        for ndir, nlist in target_tile.neighbors.items():
+            new_list = []
+            for neighbor in nlist:
+                if neighbor is neighbor_tile:
+                    new_list.append(target_tile)
+                else:
+                    new_list.append(neighbor)
+            neighbor_neighbors[ndir] = new_list
+
+        for key, value in neighbor_fields.items():
+            setattr(target_tile, key, value)
+        target_tile.neighbors = target_neighbors
+
+        for key, value in target_fields.items():
+            setattr(neighbor_tile, key, value)
+        neighbor_tile.neighbors = neighbor_neighbors
 
     def swap_tile_left(self):
         target_tile = self.window.selected_patch.display_info

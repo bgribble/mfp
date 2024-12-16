@@ -5,7 +5,7 @@ import math
 
 from mfp import log
 from flopsy import mutates
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from ..colordb import ColorDB
 from ..slidemeter_element import (
     FaderElement,
@@ -112,7 +112,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
             padding.get('bottom', 0)
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, border_round)
-        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, border_width)
 
         nedit.push_style_color(
@@ -388,7 +388,7 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
             padding.get('bottom', 0)
         )
         nedit.push_style_var(nedit.StyleVar.node_rounding, 0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, padding_tpl)
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, border_width)
 
         nedit.push_style_color(
