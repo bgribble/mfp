@@ -35,6 +35,9 @@ class GlobalMode (InputMode):
         self.snoop_conn = None
         self.snoop_source = None
 
+        self.search_interactive_matches = []
+        self.search_interactive_position = 0
+
         self.tile_manager_mode = None
 
         InputMode.__init__(self, "Global input bindings", "Global")
@@ -53,6 +56,26 @@ class GlobalMode (InputMode):
             menupath="Context > Clear counters"
         )
         # global keybindings
+        cls.bind(
+            "search-interactive", cls.search_interactive,
+            helptext="Find elements matching search string",
+            keysym="/",
+        )
+        cls.bind(
+            "search-interactive-select-next", cls.search_interactive_next,
+            helptext="Select next element matching search string",
+            keysym="S-RET",
+        )
+        cls.bind(
+            "search-interactive-select-prev", cls.search_interactive_prev,
+            helptext="Select previous element matching search string",
+            keysym="S-C-RET",
+        )
+        cls.bind(
+            "search-interactive-select-all", cls.search_interactive_all,
+            helptext="Next elements matching search string",
+            keysym="A-RET"
+        )
         cls.bind(
             "toggle-console", cls.toggle_console, helptext="Show/hide log and console",
             keysym="~",
@@ -695,3 +718,57 @@ class GlobalMode (InputMode):
             self.snoop_conn = None
             self.snoop_source = None
             self.window.hud_write("Snooping disabled")
+
+    async def search_interactive(self):
+        async def search_changed(newval, incremental=True):
+            matches = []
+            for element in self.window.objects:
+                if not newval:
+                    element.highlight_text = None
+                    continue
+                if (
+                    newval in (element.obj_type or '')
+                    or newval in (element.obj_name or '')
+                    or newval in (element.obj_args or '')
+                ):
+                    matches.append(element)
+                    element.highlight_text = newval
+                else:
+                    element.highlight_text = None
+
+            if incremental:
+                if matches != self.search_interactive_matches:
+                    self.search_interactive_position = 0
+                    self.search_interactive_matches = matches
+            else:
+                if len(self.search_interactive_matches):
+                    await self.window.select(
+                        self.search_interactive_matches[
+                            min(self.search_interactive_position, len(self.search_interactive_matches))
+                        ]
+                    )
+
+        await self.window.cmd_get_input(
+            "/", search_changed, '', incremental=True, space=False
+        )
+
+    async def search_interactive_next(self, forward=True):
+        if not self.search_interactive_matches:
+            return
+        offset = 1
+        if not forward:
+            offset = -1
+        self.search_interactive_position = (
+            (self.search_interactive_position + offset) % len(self.search_interactive_matches)
+        )
+        await self.window.unselect_all()
+        await self.window.select(
+            self.search_interactive_matches[self.search_interactive_position]
+        )
+
+    async def search_interactive_prev(self):
+        self.search_interactive_next(forward=False)
+
+    async def search_interactive_all(self):
+        for e in self.search_interactive_matches:
+            await self.window.select(e)

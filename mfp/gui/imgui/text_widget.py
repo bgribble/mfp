@@ -3,7 +3,7 @@ imgui/text_widget.py -- backend implementation of TextWidget for Imgui
 """
 
 import re
-from imgui_bundle import imgui
+from imgui_bundle import imgui, ImVec4
 from imgui_bundle import imgui_node_editor as nedit
 from imgui_bundle import imgui_md as markdown
 
@@ -46,6 +46,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         self.visible = True
         self.use_markup = False
+
+        self.highlight_text = None
+        self.highlight_color = self.container.get_color("text-color:match")
 
         # cached transformed text
         self.transform_in = None
@@ -102,8 +105,22 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 elif font_weight == 'italic' and c == 'bold':
                     font_weight = 'bolditalic'
                 else:
-                    font_weight=c
+                    font_weight = c
                 new_font_key = '__'.join([font_name, font_weight, font_size])
+                new_font = cls.imgui_font_atlas.get(
+                    new_font_key, None
+                )
+                if new_font:
+                    if is_opening_div:
+                        font_key_stack.append(new_font_key)
+                        imgui.push_font(new_font)
+                    else:
+                        font_key_stack = font_key_stack[:-1]
+                        imgui.pop_font()
+            if c == "tt":
+                new_font_key = '__'.join([
+                    "ProggyClean.ttf, 13px", "regular", "13.0"
+                ])
                 new_font = cls.imgui_font_atlas.get(
                     new_font_key, None
                 )
@@ -126,7 +143,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
                     if is_opening_div:
                         imgui.push_style_color(
-                            imgui.Col_.text, [r, g, b, a]
+                            imgui.Col_.text, imgui.IM_COL32(r, g, b, a)
                         )
                     else:
                         imgui.pop_style_color()
@@ -260,6 +277,15 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             flags=re.MULTILINE
         )
 
+        # block highlight text with a different color
+        if self.highlight_text:
+            md_text = re.sub(
+                f'(<.+?>[^<>]*?)({self.highlight_text})([^<>]*?<.+?>)',
+                f'\\1<div class="color-{self.highlight_color}">{self.highlight_text}</div>\\3',
+                md_text,
+                flags=re.MULTILINE
+            )
+
         # short circuit on tag changes
         if '<' not in md_text:
             self.transform_out = md_text
@@ -297,7 +323,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         return md_text
 
-    def render(self, wrap_width=None):
+    def render(self, wrap_width=None, highlight=None):
         extra_bit = ''
         if self.multiline and self.text[:-1] == '\n':
             extra_bit = ' '
@@ -325,7 +351,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         type(self).imgui_currently_rendering = self
 
         imgui.begin_group()
-        if self.markdown_text and self.use_markup:
+        label_text = self.text
+        if highlight or self.markdown_text and self.use_markup:
             # imgui_md draws underlines for H1 and H2 that need to
             # be clipped
             my_x = self.position_x + self.container.position_x
@@ -336,6 +363,10 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 (my_x + self.width, my_y + self.height + 4),
                 True
             )
+            if self.use_markup and self.markdown_text:
+                md_text_in = self.markdown_text
+            else:
+                md_text_in = f"<div class='tt'>{self.text}</div>"
 
             # sometimes imgui_md doesn't call the div-callback
             # so we need to be defensive about the font stack
@@ -344,11 +375,12 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
             # transform converts to better-renderable form
             # and also has some Pango compatibility shims
-            if self.transform_in == self.markdown_text:
+            if self.transform_in == md_text_in and highlight == self.highlight_text:
                 md_text = self.transform_out
             else:
-                self.transform_in = self.markdown_text
-                blocks = self.split_blocks(self.markdown_text)
+                self.transform_in = md_text_in
+                self.highlight_text = highlight
+                blocks = self.split_blocks(md_text_in)
                 transformed_blocks = []
                 for is_codeblock, b in blocks:
                     if is_codeblock:
@@ -358,6 +390,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 md_text = '\n'.join(transformed_blocks)
                 self.transform_out = md_text
 
+            imgui.dummy((1, 3))
             markdown.render(md_text)
 
             # check for stray fonts on the stack and get rid of them
@@ -370,7 +403,6 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             for _ in range(font_depth_before, font_depth_after):
                 imgui.pop_font()
         else:
-            label_text = self.text
             if self.multiline and wrap_width:
                 label_text = self.simple_wrap(self.text, int(wrap_width / self.font_width))
 
@@ -381,6 +413,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 )
             else:
                 imgui.text(label_text + extra_bit)
+
+            # text bounding box does not account for descenders
+            imgui.dummy([1, 3])
 
         self.font_width, self.font_height = imgui.calc_text_size("M")
         imgui.end_group()

@@ -22,7 +22,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
 
     style_defaults = {
         'porthole-border': 6,  # allow for rounded corners
-        'padding': dict(left=4, top=2, right=4, bottom=4)
+        'padding': dict(left=4, top=2, right=4, bottom=2)
     }
 
     def __init__(self, window, x, y):
@@ -79,7 +79,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
 
         # node content: just the label
         imgui.begin_group()
-        self.label.render()
+        self.label.render(highlight=self.highlight_text)
 
         content_w, content_h = imgui.get_item_rect_size()
 

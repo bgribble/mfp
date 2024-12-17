@@ -61,7 +61,7 @@ class GUICommand:
         obj = MFPGUI().recall(obj_id)
         obj.command(action, args)
 
-    async def cmd_get_input(self, prompt, default, filename):
+    async def cmd_get_input(self, prompt, default, filename, space=True):
         from .gui_main import MFPGUI
         from mfp import log
         event = asyncio.Event()
@@ -71,7 +71,7 @@ class GUICommand:
             result.append(response)
             event.set()
 
-        await MFPGUI().appwin.cmd_get_input(prompt, cb, default, filename)
+        await MFPGUI().appwin.cmd_get_input(prompt, cb, default, filename, space)
 
         try:
             await event.wait()

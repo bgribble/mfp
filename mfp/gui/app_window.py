@@ -398,8 +398,10 @@ class AppWindow (SignalMixin):
         self.console_manager.show_prompt(msg)
         self.console_activate()
 
-    async def cmd_get_input(self, prompt, callback, default='', filename=False):
-        await self.cmd_manager.get_input(prompt, callback, default, filename)
+    async def cmd_get_input(
+        self, prompt, callback, default='', filename=False, incremental=False, space=True
+    ):
+        await self.cmd_manager.get_input(prompt, callback, default, filename, incremental, space)
 
     async def clipboard_cut(self, pointer_pos):
         if self.selected:

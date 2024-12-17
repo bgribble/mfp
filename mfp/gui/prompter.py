@@ -16,22 +16,24 @@ class Prompter (object):
         self.queue = []
         self.current_prompt = None
         self.current_callback = None
+        self.callback_incremental = False
         self.mode = None
         self.label = label
         self.completions = Trie()
         self.history = Trie()
         self.completions.populate(completions or [])
 
-    async def get_input(self, prompt, callback, default, filename):
+    async def get_input(self, prompt, callback, default, filename, incremental=False, space=True):
         if self.mode is None:
-            await self._begin(prompt, callback, default, filename)
+            await self._begin(prompt, callback, default, filename, incremental, space)
         else:
-            self.queue.append([prompt, callback, default, filename])
+            self.queue.append([prompt, callback, default, filename, incremental, space])
 
-    async def _begin(self, prompt, callback, default, filename):
+    async def _begin(self, prompt, callback, default, filename, incremental, space):
         self.current_prompt = prompt
         self.current_callback = callback
-        self.window.cmd_set_prompt(prompt, default, filename=filename)
+        self.callback_incremental = incremental
+        self.window.cmd_set_prompt(prompt, default, filename=filename, space=space)
         self.mode = LabelEditMode(
             self.window, self, self.label,
             mode_desc="Command input",
@@ -44,13 +46,26 @@ class Prompter (object):
     async def label_edit_start(self):
         pass
 
+    async def label_edit_changed(self, widget, text):
+        if self.callback_incremental and self.current_callback:
+            try:
+                rv = self.current_callback(text, incremental=True)
+                if inspect.isawaitable(rv):
+                    await rv
+            except Exception as e:
+                log.debug_traceback(e)
+
     async def label_edit_finish(self, widget, text):
         self.history.populate([text])
         self.window.input_mgr.disable_minor_mode(self.mode)
 
         if self.current_callback:
             try:
-                rv = self.current_callback(text)
+                incr = {}
+                if self.callback_incremental:
+                    incr = dict(incremental=False)
+
+                rv = self.current_callback(text, **incr)
                 if inspect.isawaitable(rv):
                     await rv
             except Exception as e:
@@ -66,5 +81,3 @@ class Prompter (object):
             nextitem = self.queue[0]
             self.queue = self.queue[1:]
             await self._begin(*nextitem)
-
-

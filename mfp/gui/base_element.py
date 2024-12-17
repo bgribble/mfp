@@ -167,6 +167,9 @@ class BaseElement (Store):
         self.style = {}
         self._all_styles = self.combine_styles()
 
+        # for interactive search
+        self.highlight_text = None
+
         super().__init__(window, x, y)
 
     def __repr__(self):

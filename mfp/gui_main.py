@@ -84,6 +84,7 @@ class MFPGUI (Singleton):
             'text-color': ParamInfo(label="Text color", param_type=RGBAColor),
             'text-color:selected': ParamInfo(label="Text color (selected)", param_type=RGBAColor),
             'text-color:lit': ParamInfo(label="Text color (lit indicator)", param_type=RGBAColor),
+            'text-color:match': ParamInfo(label="Text color (search match)", param_type=RGBAColor),
             'text-cursor-color': ParamInfo(label="Text cursor color", param_type=RGBAColor),
         }
 
@@ -111,6 +112,7 @@ class MFPGUI (Singleton):
             'text-color': ColorDB().find('default-text-color'),
             'text-color:selected': ColorDB().find('default-text-color-selected'),
             'text-color:lit': ColorDB().find('default-light-text-color'),
+            'text-color:match': ColorDB().find('default-match-text-color'),
             'text-cursor-color': ColorDB().find('default-text-cursor-color'),
         }
         self.appwin = None
@@ -174,6 +176,8 @@ def setup_default_colors_dark():
                      ColorDB().find(0xde, 0xde, 0xde, 0xff))
     ColorDB().insert('default-light-text-color',
                      ColorDB().find(0xf7, 0xf9, 0xf9, 0xff))
+    ColorDB().insert('default-match-text-color',
+                     ColorDB().find(0xaa, 0xff, 0xaa, 0xff))
     ColorDB().insert('default-text-color-selected',
                      ColorDB().find(0xde, 0xde, 0xde, 0xff))
     ColorDB().insert('default-edit-badge-color',

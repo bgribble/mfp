@@ -5,7 +5,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from flopsy import mutates
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 
 from mfp import log
 from mfp.gui.base_element import BaseElement
@@ -33,7 +33,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
 
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 1.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 2))
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(4, 2, 4, 2))
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
             self.get_color('fill-color').to_rgbaf()

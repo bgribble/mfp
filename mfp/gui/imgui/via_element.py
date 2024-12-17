@@ -6,7 +6,7 @@ send/receive, signal/control - 4 types total
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 from flopsy import mutates
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 
 from mfp import log
 
@@ -70,7 +70,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         nedit.push_style_var(nedit.StyleVar.node_border_width, 0)
         nedit.push_style_var(nedit.StyleVar.hovered_node_border_width, 0.0)
         nedit.push_style_var(nedit.StyleVar.selected_node_border_width, 0.0)
-        nedit.push_style_var(nedit.StyleVar.node_padding, (4, 2, 4, 2))
+        nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(4, 2, 4, 2))
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 0.0))
         nedit.push_style_color(
             nedit.StyleColor.node_bg,

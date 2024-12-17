@@ -363,7 +363,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # canvas panel
-        imgui.push_style_color(imgui.Col_.text_selected_bg, (200, 200, 255, 255))
+        imgui.push_style_color(
+            imgui.Col_.text_selected_bg,
+            imgui.IM_COL32(200, 200, 255, 255)
+        )
         canvas_panel.render(self)
         imgui.pop_style_color()  # text selected bg
 

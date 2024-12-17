@@ -295,20 +295,19 @@ class LabelEditMode (InputMode):
             self.blinker.stop(self.widget)
         return True
 
-    def text_changed(self, *args):
-        new_text = self.widget.get_text()
-        if new_text == self.text:
+    async def text_changed(self, widget, signal, old_text, new_text, *rest):
+        if new_text == old_text:
             return True
 
         # FIXME - this can be wrong, for example editing fooooo to foooo the
         # edit point can't be known just from the text change
-        change_at = editpoint(self.text, new_text)
-        change_dir = len(new_text) - len(self.text)
+        change_at = editpoint(old_text, new_text)
+        change_dir = len(new_text) - len(old_text)
         if self.undo_pos < -1:
             self.undo_stack[self.undo_pos:] = []
             self.undo_pos = -1
 
-        self.undo_stack.append((self.text, self.editpos))
+        self.undo_stack.append((old_text, self.editpos))
         self.text = new_text
 
         editpos = self.widget.get_cursor_position()
@@ -319,6 +318,8 @@ class LabelEditMode (InputMode):
         else:
             self.editpos = change_at
 
+        if hasattr(self.element, "label_edit_changed"):
+            await self.element.label_edit_changed(self.widget, self.text)
         return True
 
     async def commit_edits(self):

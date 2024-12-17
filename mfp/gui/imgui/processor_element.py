@@ -20,7 +20,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
     backend_name = "imgui"
 
     style_defaults = {
-        'padding': dict(left=4, top=2, right=4, bottom=6)
+        'padding': dict(left=4, top=2, right=4, bottom=2)
     }
 
     def __init__(self, window, x, y):
@@ -79,7 +79,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         # node content: just the label
         imgui.begin_group()
-        self.label.render()
+        self.label.render(highlight=self.highlight_text)
 
         # if there are child elements, save room
         content_w, content_h = imgui.get_item_rect_size()
