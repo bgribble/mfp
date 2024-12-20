@@ -27,6 +27,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.parent = None
         self.text = ""
         self.markdown_text = ""
+        self.wrapped_text = ""
         self.width = 0
         self.height = 0
         self.position_x = 0
@@ -405,6 +406,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         else:
             if self.multiline and wrap_width:
                 label_text = self.simple_wrap(self.text, int(wrap_width / self.font_width))
+                self.wrapped_text = label_text
+            else:
+                self.wrapped_text = self.text
 
             if self.font_color:
                 imgui.text_colored(

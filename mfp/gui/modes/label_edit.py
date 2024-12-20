@@ -398,7 +398,11 @@ class LabelEditMode (InputMode):
         return True
 
     def _one_line_up(self, pos):
-        lines_above = self.text[:pos].split("\n")
+        if hasattr(self.widget, 'wrapped_text'):
+            lines_above = self.widget.wrapped_text[:pos].split("\n")
+        else:
+            lines_above = self.text[:pos].split("\n")
+
         line_pos = len(lines_above[-1])
         if len(lines_above) > 2:
             return (
@@ -456,8 +460,12 @@ class LabelEditMode (InputMode):
         return True
 
     def _one_line_down(self, pos):
-        lines_above = self.text[:pos].split("\n")
-        lines_below = self.text[pos:].split("\n")
+        if hasattr(self.widget, 'wrapped_text'):
+            lines_above = self.widget.wrapped_text[:pos].split("\n")
+            lines_below = self.widget.wrapped_text[pos:].split("\n")
+        else:
+            lines_above = self.text[:pos].split("\n")
+            lines_below = self.text[pos:].split("\n")
         line_pos = len(lines_above[-1])
         line_start = pos
 
