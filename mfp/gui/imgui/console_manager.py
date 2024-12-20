@@ -40,8 +40,12 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
         self.append(banner + '\n')
 
     def render(self, width, height):
+        buffer_text = self.textbuffer.buffer
+        current_line = self.linebuf
+        cursor_pos = self.cursor_pos
+
         def callback(cb_data):
-            bufpos = len(self.textbuffer.buffer) + self.cursor_pos
+            bufpos = len(buffer_text) + cursor_pos
             cb_data.selection_start = bufpos
             cb_data.selection_end = bufpos
             cb_data.cursor_pos = bufpos
@@ -49,7 +53,7 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
 
         imgui.input_text_multiline(
             'console_input_text',
-            self.textbuffer.buffer + self.linebuf,
+            buffer_text + current_line,
             (width, height),
             imgui.InputTextFlags_.read_only | imgui.InputTextFlags_.callback_always,
             callback=callback
@@ -73,14 +77,12 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
             self.linebuf = (
                 self.linebuf[:self.cursor_pos - 1] + self.linebuf[self.cursor_pos:])
             self.cursor_pos -= 1
-            self.redisplay()
         return True
 
     def handle_delete(self):
         if self.cursor_pos < len(self.linebuf):
             self.linebuf = (
                 self.linebuf[:self.cursor_pos] + self.linebuf[self.cursor_pos + 1:])
-            self.redisplay()
         return True
 
     def handle_cursor_up(self):
@@ -90,7 +92,6 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
             self.history_pos += 1
             self.linebuf = self.history[self.history_pos]
             self.cursor_pos = len(self.linebuf)
-            self.redisplay()
         return True
 
     def handle_cursor_down(self):
@@ -101,33 +102,27 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
             else:
                 self.linebuf = self.history[self.history_pos]
             self.cursor_pos = len(self.linebuf)
-            self.redisplay()
         return True
 
     def handle_cursor_left(self):
         if self.cursor_pos > 0:
             self.cursor_pos -= 1
-        self.redisplay()
         return True
 
     def handle_cursor_right(self):
         if self.cursor_pos < len(self.linebuf):
             self.cursor_pos += 1
-        self.redisplay()
         return True
 
     def handle_start_of_line(self):
         self.cursor_pos = 0
-        self.redisplay()
         return True
 
     def handle_end_of_line(self):
         self.cursor_pos = len(self.linebuf)
-        self.redisplay()
 
     def handle_delete_to_end(self):
         self.linebuf = self.linebuf[:self.cursor_pos]
-        self.redisplay()
 
     def handle_insert_text(self, keysym):
         if len(keysym) > 1:
@@ -139,7 +134,6 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
             + self.linebuf[self.cursor_pos:]
         )
         self.cursor_pos += 1
-        self.redisplay()
 
     def scroll_to_end(self):
         return True
