@@ -246,8 +246,8 @@ class PatchEditMode (InputMode):
         self.update_selection_mode()
         return True
 
-    def select_mru(self):
-        self.window.select_mru()
+    async def select_mru(self):
+        await self.window.select_mru()
         self.update_selection_mode()
         return True
 

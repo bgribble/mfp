@@ -28,6 +28,7 @@ class MessageElementImpl(BackendInterface, metaclass=ABCMeta):
 class MessageElement (BaseElement):
     display_type = "message"
     proc_type = "message"
+    help_patch = "message.help.mfp"
 
     label_off_x = 4
     label_off_y = 1

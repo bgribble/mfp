@@ -480,8 +480,8 @@ class BaseElement (Store):
         for k, v in extras.items():
             prms[k] = v
 
-        MFPGUI().mfp.set_params.task(
-            self.obj_id, prms
+        MFPGUI().async_task(
+            MFPGUI().mfp.set_params(self.obj_id, prms)
         )
 
     def get_stage_position(self):
@@ -662,6 +662,9 @@ class BaseElement (Store):
         if self.control_mode:
             self.app_window.input_mgr.disable_minor_mode(self.control_mode)
             self.control_mode = None
+
+    async def get_help_patch(self):
+        return self.help_patch
 
     async def show_tip(self, xpos, ypos, details):
         tiptxt = None

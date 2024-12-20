@@ -186,7 +186,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
         badgesize = self.get_style('badge-size')
         halfbadge = badgesize / 2.0
         ypos = 0
-        xpos = self.width
+        xpos = self.width or self.min_width
         btext, bcolor = self.badge_current
 
         draw_list = imgui.get_window_draw_list()

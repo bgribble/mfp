@@ -47,8 +47,10 @@ class PatchDisplay:
         return scope_name in [ll.scope for ll in self.layers]
 
     def synced_params(self):
-        return dict(display_type=self.display_type, name=self.obj_name,
-                    layers=[(ll.name, ll.scope) for ll in self.layers])
+        return dict(
+            display_type=self.display_type, name=self.obj_name,
+            layers=[(ll.name, ll.scope) for ll in self.layers]
+        )
 
     def send_params(self, **extras):
         prms = self.synced_params()

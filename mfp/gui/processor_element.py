@@ -24,6 +24,7 @@ class ProcessorElementImpl(BackendInterface, metaclass=ABCMeta):
 
 
 class ProcessorElement (BaseElement):
+    help_patch = "processor.help.mfp"
     display_type = "processor"
     proc_type = None
 

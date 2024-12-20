@@ -55,6 +55,11 @@ class GlobalMode (InputMode):
             keysym="C-k",
             menupath="Context > Clear counters"
         )
+        cls.bind(
+            "open-help", cls.open_help, helptext="Clear error counters",
+            keysym="F1",
+            menupath="Context > ||Help"
+        )
         # global keybindings
         cls.bind(
             "search-interactive", cls.search_interactive,
@@ -69,11 +74,11 @@ class GlobalMode (InputMode):
         cls.bind(
             "search-interactive-select-prev", cls.search_interactive_prev,
             helptext="Select previous element matching search string",
-            keysym="S-C-RET",
+            keysym="?",
         )
         cls.bind(
             "search-interactive-select-all", cls.search_interactive_all,
-            helptext="Next elements matching search string",
+            helptext="Select all elements matching search string",
             keysym="A-RET"
         )
         cls.bind(
@@ -82,7 +87,7 @@ class GlobalMode (InputMode):
             menupath="Window > |||[x]Log/Python console"
         )
         cls.bind(
-            "toggle-info", cls.toggle_tree, helptext="Show/hide info panel",
+            "toggle-info", cls.toggle_info, helptext="Show/hide info panel",
             keysym="`",
             menupath="Window > |||[x]Info panel"
         )
@@ -261,7 +266,7 @@ class GlobalMode (InputMode):
             "toggle-snoop",
             lambda mode: mode.toggle_snoop(),
             helptext="Toggle snooping messages on connection",
-            keysym="?"
+            keysym="%"
         )
 
         # imgui only
@@ -334,7 +339,7 @@ class GlobalMode (InputMode):
         await self.window.signal_emit("toggle-console")
         return False
 
-    async def toggle_tree(self):
+    async def toggle_info(self):
         await self.window.signal_emit("toggle-info-panel")
         return False
 
@@ -378,7 +383,7 @@ class GlobalMode (InputMode):
             pass
         return False
 
-    async def save_file(self):
+    async def save_file(self, filename=None):
         import os.path
         patch = self.window.selected_patch
         if patch.last_filename is None:
@@ -399,27 +404,37 @@ class GlobalMode (InputMode):
                     await MFPGUI().mfp.set_params(patch.obj_id, prms)
                     self.window.refresh(patch)
                 await MFPGUI().mfp.save_file(patch.obj_name, fname)
-        await self.window.cmd_get_input(
-            "File name to save: ", cb, default_filename, filename="save"
-        )
+        if filename is None:
+            await self.window.cmd_get_input(
+                "File name to save: ", cb, default_filename, filename="save"
+            )
+        else:
+            await cb(filename)
 
-    async def save_as_lv2(self):
+    async def save_as_lv2(self, filename=None):
         patch = self.window.selected_patch
         default_plugname = 'mfp_' + patch.obj_name
 
         async def cb(plugname):
             if plugname:
                 await MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
-        await self.window.cmd_get_input(
-            "Plugin name to save: ", cb, default_plugname, filename="save"
-        )
+        if filename is None:
+            await self.window.cmd_get_input(
+                "Plugin name to save: ", cb, default_plugname, filename="save"
+            )
+        else:
+            await cb(filename)
 
-    async def open_file(self):
+    async def open_file(self, filename=None):
         async def cb(fname):
             await MFPGUI().mfp.open_file(fname)
-        await self.window.cmd_get_input(
-            "File name to load: ", cb, filename="open"
-        )
+
+        if filename is None:
+            await self.window.cmd_get_input(
+                "File name to load: ", cb, filename="open"
+            )
+        else:
+            await cb(filename)
 
     def drag_start(self):
         self.drag_started = True
@@ -772,3 +787,9 @@ class GlobalMode (InputMode):
     async def search_interactive_all(self):
         for e in self.search_interactive_matches:
             await self.window.select(e)
+
+    async def open_help(self):
+        if len(self.window.selected) == 1:
+            help_patch = self.window.selected[0].get_help_patch()
+            log.debug("Opening help patch {help_patch}")
+            await MFPGUI().mfp.open_file(help_patch)
