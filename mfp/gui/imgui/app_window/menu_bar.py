@@ -68,7 +68,9 @@ def add_menu_items(app_window, itemdict):
         sep_items = itemdict.get(separators * '|')
         if not sep_items:
             continue
+        imgui.dummy([1, 2])
         imgui.separator()
+        imgui.dummy([1, 2])
         add_menu_items(app_window, sep_items)
 
 def prune_paths(pathdict):
