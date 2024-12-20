@@ -62,6 +62,15 @@ class ClutterTextElementImpl(TextElementImpl, ClutterBaseElementImpl, TextElemen
             ct.stroke()
         return True
 
+    async def update(self):
+        await super().update()
+        await self.set_size(
+            self.label.get_width() + 2*self.ELBOW_ROOM,
+            self.label.get_height() + self.ELBOW_ROOM
+        )
+        self.redraw()
+        self.draw_ports()
+
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
 

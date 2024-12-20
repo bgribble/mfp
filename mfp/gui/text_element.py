@@ -6,7 +6,7 @@ A text element (comment) in a patch
 
 from abc import ABCMeta, abstractmethod
 
-from flopsy import saga
+from flopsy import saga, mutates
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .base_element import BaseElement
@@ -84,12 +84,7 @@ class TextElement (BaseElement):
             )
 
     async def update(self):
-        await self.set_size(
-            self.label.get_width() + 2*self.ELBOW_ROOM,
-            self.label.get_height() + self.ELBOW_ROOM
-        )
-        self.redraw()
-        self.draw_ports()
+        pass
 
     async def label_edit_start(self):
         return self.value
@@ -156,6 +151,7 @@ class TextElement (BaseElement):
     def make_control_mode(self):
         return AltClickableControlMode(self.app_window, self, "Change text")
 
+    @mutates('clickchange')
     async def configure(self, params):
         if params.get('value') is not None:
             new_text = params.get('value')
@@ -169,14 +165,7 @@ class TextElement (BaseElement):
         if params.get('default') is not None:
             self.default = params['default']
 
-        newsize = None
-        if 'style' in params:
-            newstyle = params.get('style')
-
         await super().configure(params)
-
-        if newsize:
-            await self.set_size(*newsize)
 
         if 'style' in params:
             newstyle = params['style']

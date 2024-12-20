@@ -23,8 +23,8 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         super().__init__(window, x, y)
 
         self.update_required = True
-        self.min_width = self.width = 12
-        self.min_height = self.height = 12
+        self.min_width = 12
+        self.min_height = 12
         self.position_set = False
 
     @mutates('position_x', 'position_y', 'width', 'height')
