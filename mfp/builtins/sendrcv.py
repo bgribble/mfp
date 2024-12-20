@@ -196,7 +196,7 @@ class SendSignal (Send):
         self.dest_obj = None
         self.dest_obj_owned = False
 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        super().__init__(init_type, init_args, patch, scope, name)
 
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
@@ -372,7 +372,7 @@ class RecvSignal (Recv):
     doc_tooltip_obj = "Receive signals to the specified name"
 
     def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        super().__init__(init_type, init_args, patch, scope, name)
         initargs, kwargs = self.parse_args(init_args)
 
         self.src_name = None
