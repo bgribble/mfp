@@ -91,10 +91,10 @@ def render_tile(app_window, patch):
     nedit.set_current_editor(patch.nedit_editor)
     layer_name = ''
     if patch.selected_layer:
-        layer_name = patch.selected_layer.name
+        layer_name = ' - ' + patch.selected_layer.name
 
     imgui.begin(
-        f"{patch.obj_name} ({tile.page_id}.{tile.tile_id}) {layer_name}",
+        f"{patch.obj_name}{layer_name} ({tile.page_id}.{tile.tile_id})",
         flags=(
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
