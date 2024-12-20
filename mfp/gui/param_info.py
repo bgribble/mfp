@@ -12,6 +12,7 @@ class ParamInfo:
     show: Optional[bool] = False
     null: Optional[bool] = False
     tooltip: Optional[str] = ""
+    choices: Optional[callable] = None
     param_type: Optional[type] = str
     extra_args: Optional[dict] = field(default_factory=dict)
 

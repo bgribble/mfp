@@ -38,7 +38,6 @@ class Layer(BackendInterface):
     def add(self, obj, container=None):
         BAD = 1000000
         obj.layer = self
-        obj.layername = self.name
 
         def distance(left, right):
             d1 = ((obj.position_x - left.position_x) ** 2

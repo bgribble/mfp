@@ -18,7 +18,7 @@ single_params = [
     'display_type',
     'obj_name',
     'scope',
-    'layername',
+    'layer',
     'min_width',
     'min_height',
 ]
@@ -103,7 +103,7 @@ logged_errors = set()
 
 
 def render_param(
-    app_window, param_name, param_type, param_value, readonly=False, override=None
+    app_window, param_name, param_type, param_value, target=None, readonly=False, override=None
 ):
     item_spacing = 12
 
@@ -117,7 +117,34 @@ def render_param(
         if readonly or param_type.editable is False:
             imgui.begin_disabled()
 
-        if param_type.param_type is str:
+        if callable(param_type.choices) and target:
+            choices = {
+                c[0]: c[1]
+                for c in param_type.choices(target)
+            }
+            current_choice = next((c for c in choices.items() if c[1] == param_value), None)
+            if not current_choice:
+                current_choice = (choices[0], choices[choices[0]])
+            if imgui.button(current_choice[0]):
+                imgui.open_popup("##param_choices_popup")
+            imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (3, 3))
+            if imgui.begin_popup("##param_choices_popup"):
+                mouse_pos = imgui.get_mouse_pos_on_opening_current_popup()
+                cursor_pos = (mouse_pos[0] + 8, mouse_pos[1] + 8)
+                imgui.set_cursor_screen_pos(cursor_pos)
+                for choice_label, choice_value in choices.items():
+                    item_selected, _ = imgui.menu_item(
+                        choice_label, '', False, True
+                    )
+                    if item_selected and choice_label != current_choice[0]:
+                        changed = True
+                        newval = choice_value
+                imgui.dummy([1, 4])
+                imgui.end_popup()
+            imgui.pop_style_var(2)
+
+        elif param_type.param_type is str:
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             changed, newval = imgui.input_text(
                 f"##{param_name}",
@@ -505,7 +532,7 @@ def render_object_tab(app_window):
             ptype = BaseElement.store_attrs.get(param)
             sel = app_window.selected[0]
             pvalue = getattr(sel, param)
-            newval = render_param(app_window, param, ptype, pvalue)
+            newval = render_param(app_window, param, ptype, pvalue, sel)
             if newval != pvalue:
                 MFPGUI().async_task(sel.dispatch_setter(param, newval))
 
@@ -514,7 +541,7 @@ def render_object_tab(app_window):
         if len(app_window.selected) == 1:
             sel = app_window.selected[0]
             pvalue = getattr(sel, param)
-            newval = render_param(app_window, param, ptype, pvalue)
+            newval = render_param(app_window, param, ptype, pvalue, sel)
             if newval != pvalue:
                 MFPGUI().async_task(sel.dispatch_setter(param, newval))
         elif len(app_window.selected) > 1:
@@ -548,7 +575,7 @@ def render_params_tab(app_window, param_list):
         sel = app_window.selected[0]
         ptype = sel.store_attrs.get(param)
         pvalue = getattr(sel, param)
-        newval = render_param(app_window, param, ptype, pvalue)
+        newval = render_param(app_window, param, ptype, pvalue, sel)
         if newval != pvalue:
             MFPGUI().async_task(sel.dispatch_setter(param, newval))
 
@@ -579,7 +606,7 @@ def render_style_tab(app_window):
                 imgui.begin_group()
                 for propname, value in sel.style.items():
                     pp = MFPGUI().style_vars[propname]
-                    newval = render_param(app_window, propname, pp, value)
+                    newval = render_param(app_window, propname, pp, value, sel)
                     if newval != value:
                         style[propname] = newval
                         style_changed = True
@@ -597,7 +624,7 @@ def render_style_tab(app_window):
                     pp = MFPGUI().style_vars[propname]
                     override = propname in override_params
                     newval = render_param(
-                        app_window, propname, pp, value,
+                        app_window, propname, pp, value, sel,
                         readonly=True, override=override
                     )
                     if newval != override:
@@ -620,7 +647,7 @@ def render_style_tab(app_window):
                     pp = MFPGUI().style_vars[propname]
                     override = propname in override_params
                     newval = render_param(
-                        app_window, propname, pp, value,
+                        app_window, propname, pp, value, sel,
                         readonly=True, override=override
                     )
                     if newval != override:

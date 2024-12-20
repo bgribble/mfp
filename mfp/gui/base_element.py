@@ -13,6 +13,7 @@ from mfp import log
 from .colordb import ColorDB, RGBAColor
 from .backend_interfaces import BackendInterface
 from .param_info import ParamInfo, ListOfInt
+from .layer import Layer
 
 
 class BaseElementImpl(metaclass=ABCMeta):
@@ -57,7 +58,11 @@ BASE_STORE_ATTRS = {
     'obj_name': ParamInfo(label="Name", param_type=str),
     'obj_state': ParamInfo(label="State", param_type=int, editable=False),
     'scope': ParamInfo(label="Lexical scope", param_type=str),
-    'layername': ParamInfo(label="Layer", param_type=str),
+    'layer': ParamInfo(
+        label="Layer",
+        choices=lambda obj: [(l.name, l) for l in obj.layer.patch.layers],
+        param_type=Layer
+    ),
     'position_x': ParamInfo(label="X position", param_type=float),
     'position_y': ParamInfo(label="Y position", param_type=float),
     'position_z': ParamInfo(label="Z position", param_type=float),
@@ -134,7 +139,6 @@ class BaseElement (Store):
 
         # could be the same as self.container but is definitely a layer
         self.layer = None
-        self.layername = None
 
         self.tags = {}
 
@@ -349,6 +353,12 @@ class BaseElement (Store):
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED
 
+    @reducer('layer')
+    def SET_LAYER(self, action, state, previous):
+        new_layer = action.payload['value']
+        self.move_to_layer(new_layer)
+        return new_layer
+
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
@@ -463,6 +473,8 @@ class BaseElement (Store):
             val = getattr(self, k)
             if isinstance(val, BaseElement):
                 val = val.obj_id
+            if isinstance(val, Layer):
+                val = val.name
             prms[k] = val
 
         outbound = []
@@ -542,7 +554,7 @@ class BaseElement (Store):
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
         'obj_name', 'no_export', 'is_export', 'export_offset_x',
-        'export_offset_y', 'debug', 'layername'
+        'export_offset_y', 'debug', 'layer'
     )
     async def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
@@ -566,8 +578,10 @@ class BaseElement (Store):
 
         layer_name = params.get("layername") or params.get("layer")
 
-        mypatch = ((self.layer and self.layer.patch)
-                   or (self.app_window and self.app_window.selected_patch))
+        mypatch = (
+            (self.layer and self.layer.patch)
+            or (self.app_window and self.app_window.selected_patch)
+        )
         layer = None
         if mypatch:
             layer = mypatch.find_layer(layer_name)
@@ -600,7 +614,7 @@ class BaseElement (Store):
         self.draw_ports()
         self.app_window.refresh(self)
 
-    @mutates('layername')
+    @mutates('layer')
     def move_to_layer(self, layer):
         layer_child = False
         if layer and layer == self.layer:
@@ -610,8 +624,8 @@ class BaseElement (Store):
             if self.container == self.layer:
                 self.container = None
                 layer_child = True
-            elif self.get_parent() is None:
-                layer_child = True
+            #elif self.get_parent() is None:
+            #    layer_child = True
             self.layer.remove(self)
         else:
             layer_child = True
