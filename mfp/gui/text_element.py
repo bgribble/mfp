@@ -90,17 +90,15 @@ class TextElement (BaseElement):
         return self.value
 
     async def label_edit_finish(self, widget, new_text, aborted=False):
-        widget_w = widget.width
-        widget_h = widget.height
-
         if self.obj_id is None:
             await self.create(self.proc_type, None)
         if self.obj_id is None:
             log.warning("TextElement: could not create obj")
         elif new_text != self.value and not aborted:
             self.value = new_text
-            self.width = widget_w
-            self.height = widget_h
+            if widget:
+                self.width = widget.width
+                self.height = widget.height
             self.set_text()
             await MFPGUI().mfp.send(self.obj_id, 0, self.value)
         await self.update()

@@ -3,6 +3,7 @@ menu_bar.py -- main menu
 """
 
 import re
+from mfp import log
 from imgui_bundle import imgui
 from mfp.gui.input_mode import InputMode
 
@@ -135,6 +136,26 @@ def load_menupaths(app_window, only_enabled=False):
     return prune_paths(by_menu)
 
 
+def render_help_menu(app_window, items):
+    from mfp.gui_main import MFPGUI
+    selected, _ = imgui.menu_item("About MFP...", "", False)
+    if selected:
+        app_window.imgui_popup_open = "About MFP##popup"
+
+    selected, _ = imgui.menu_item("Tutorial", "", False)
+    if selected:
+        MFPGUI().async_task(
+            MFPGUI().mfp.open_file("tutorial.mfp")
+        )
+    selected, _ = imgui.menu_item("List of builtins", "", False)
+    if selected:
+        MFPGUI().async_task(
+            MFPGUI().mfp.open_file("list_of_builtins.mfp")
+        )
+
+    add_menu_items(app_window, items)
+
+
 def render(app_window):
     quit_selected = False
 
@@ -171,6 +192,11 @@ def render(app_window):
     if imgui.begin_menu("Window"):
         menu_open = True
         add_menu_items(app_window, by_menu.get("Window", {}))
+        imgui.end_menu()
+
+    if imgui.begin_menu("Help"):
+        menu_open = True
+        render_help_menu(app_window, by_menu.get("Help", {}))
         imgui.end_menu()
 
     app_window.main_menu_open = menu_open

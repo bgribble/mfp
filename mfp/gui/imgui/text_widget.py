@@ -12,6 +12,43 @@ from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from ..text_widget import TextWidget, TextWidgetImpl
 
+# parse the get_debug_name() output to get shape and size info
+def _fontinfo(info):
+    family = None
+    shape = None
+    size = None
+
+    parts = info.split(' ')
+    if len(parts) > 1:
+        try:
+            size = float(re.sub("[^0-9]", "", parts[-1]))
+            parts = parts[:-1]
+        except:
+            pass
+
+    parts = ' '.join(parts).split('-')
+    if len(parts) > 1:
+        shape = parts[-1].lower()
+        parts = parts[:-1]
+
+    family = '-'.join(parts)
+    return family, shape, size
+
+
+def _font_key(f):
+    font_shapes = dict(
+        regular='regular',
+        medium='regular',
+        bold='bold',
+        italic='italic',
+        regularitalic='italic',
+        bolditalic='bolditalic'
+    )
+    family, shape, _ = _fontinfo(f.get_debug_name())
+    shape_name = font_shapes.get(shape, 'regular')
+    fkey = f"{family or 'unnamed'}__{shape_name}__{f.font_size}"
+    return fkey
+
 
 class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     backend_name = "imgui"
@@ -74,10 +111,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             "size-xx-large": 28.0,
         }
         current_font = imgui.get_current_context().font
-        current_font_key = next(
-            (key for key, value in cls.imgui_font_atlas.items() if value == current_font),
-            "unnamed__regular__16.0"
-        )
+        current_font_key = _font_key(current_font)
 
         font_key_stack = [current_font_key]
 
@@ -232,6 +266,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         return '\n<br>'.join(code_lines)
 
     def transform_md(self, md_text):
+        initial = md_text
         # pango/html escape char replacements
         md_text = re.sub('&lt;', '<', md_text)
         md_text = re.sub('&gt;', '>', md_text)
@@ -324,30 +359,18 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         return md_text
 
+
     def render(self, wrap_width=None, highlight=None):
         extra_bit = ''
         if self.multiline and self.text[:-1] == '\n':
             extra_bit = ' '
 
         if type(self).imgui_font_atlas == {}:
-            font_styles = [
-                'regular', 'bold', 'italic', 'bolditalic'
-            ]
             atlas = imgui.get_io().fonts
             fonts = atlas.fonts
-            font_size = None
-            font_index = 0
             for f in fonts:
-                if f.font_size != font_size:
-                    font_index = 0
-                    font_size = f.font_size
-                if font_index >= len(font_styles):
-                    continue
-
-                style = font_styles[font_index]
-                fkey = f"{f.get_debug_name() or 'unnamed'}__{style}__{f.font_size}"
+                fkey = _font_key(f)
                 type(self).imgui_font_atlas[fkey] = f
-                font_index += 1
 
         type(self).imgui_currently_rendering = self
 

@@ -13,13 +13,21 @@ from ..input_mode import InputMode
 from ..colordb import ColorDB
 
 
-def editpoint(s1, s2):
+def editpoint(s1, s2, editpos=None):
+    """
+    Return the first point at which s1 and s2 differ, or
+    the proposed editpoint if provided
+
+    fooobar, foobar, 2 --> 2
+    foobar, followme, 3 --> 2
+    fooobar, foobar, None --> 3
+    """
     l1 = len(s1)
     l2 = len(s2)
     if s1 == s2:
         return None
     for ept in range(min(l1, l2)):
-        if s1[ept] != s2[ept]:
+        if s1[ept] != s2[ept] or editpos and ept == editpos:
             return ept
     return min(l1, l2)
 
@@ -141,7 +149,6 @@ class LabelEditMode (InputMode):
             self.text = comp
             self.editpos = len(self.text)
             self.set_selection(self.editpos, self.editpos)
-            self.update_label(raw=True)
             self.completions_cache = all_completions
             return True
 
@@ -152,7 +159,6 @@ class LabelEditMode (InputMode):
             self.text = root
             self.editpos = len(self.text)
             self.set_selection(self.editpos, self.editpos)
-            self.update_label(raw=True)
             self.completions_cache = candidates
         return True
 
@@ -299,9 +305,7 @@ class LabelEditMode (InputMode):
         if new_text == old_text:
             return True
 
-        # FIXME - this can be wrong, for example editing fooooo to foooo the
-        # edit point can't be known just from the text change
-        change_at = editpoint(old_text, new_text)
+        change_at = editpoint(old_text, new_text, self.editpos)
         change_dir = len(new_text) - len(old_text)
         if self.undo_pos < -1:
             self.undo_stack[self.undo_pos:] = []
@@ -314,7 +318,7 @@ class LabelEditMode (InputMode):
         if editpos == -1:
             self.editpos = len(self.text)
         elif change_dir > 0:
-            self.editpos = change_at + 1
+            self.editpos = change_at + change_dir
         else:
             self.editpos = change_at
 

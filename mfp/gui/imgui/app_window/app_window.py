@@ -44,6 +44,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_needs_reselect = []
         self.imgui_prevent_idle = 0
         self.imgui_tile_selected = False
+        self.imgui_popup_open = None
 
         self.nedit_config = None
 
@@ -266,6 +267,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # menu bar
+        self.imgui_popup_open = False
         if imgui.begin_main_menu_bar():
             quit_selected = menu_bar.render(self)
             if quit_selected:
@@ -276,6 +278,44 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             _, menu_height = imgui.get_cursor_pos()
             self.menu_height = menu_height - 5
         # menu bar
+        ########################################
+
+        ########################################
+        # popups from menu items
+
+        if self.imgui_popup_open:
+            imgui.open_popup(self.imgui_popup_open)
+
+        popup_open = None
+        center = imgui.get_main_viewport().get_center()
+        imgui.set_next_window_pos(
+            center, imgui.Cond_.appearing, (0.5, 0.5)
+        )
+        if imgui.begin_popup("About MFP##popup"):
+            from mfp.mfp_main import mfp_banner, mfp_footer, version
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 8))
+            imgui.dummy([1, 4])
+            imgui.dummy([8, 1])
+            imgui.same_line()
+            imgui.begin_group()
+            imgui.text(mfp_banner % version())
+            imgui.text(
+                "MFP is an environment for visually composing computer programs,\n"
+                "with an emphasis on music and real-time audio synthesis and analysis."
+            )
+            imgui.text(mfp_footer)
+            imgui.end_group()
+            imgui.same_line()
+            imgui.dummy([8, 1])
+            imgui.dummy([1, 4])
+            imgui.pop_style_var()
+            imgui.end_popup()
+            popup_open = True
+
+        if not popup_open:
+            self.imgui_popup_open = False
+
+        # popups
         ########################################
 
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 0))
