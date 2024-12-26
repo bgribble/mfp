@@ -396,7 +396,11 @@ class Patch(Processor):
         for _, obj in self.objects.items():
             obj.gui_created = False
 
-        await Processor.delete_gui(self)
+        try:
+            await Processor.delete_gui(self)
+        except ConnectionError:
+            log.debug(f"GUI already closed for {self.name}")
+            pass
         return True
 
     async def has_unsaved_changes(self):
