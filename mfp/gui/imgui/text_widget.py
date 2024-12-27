@@ -518,15 +518,15 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     def get_text(self):
         return self.text
 
-    def set_text(self, text):
-        if self.text != text:
+    def set_text(self, text, notify=True):
+        if self.text != text and notify:
             MFPGUI().async_task(self.signal_emit(
                 'text-changed', self.text, text, imgui.calc_text_size(self.text), imgui.calc_text_size(text)
             ))
         self.text = text
 
-    def set_markup(self, text):
-        if self.markdown_text != text:
+    def set_markup(self, text, notify=True):
+        if self.markdown_text != text and notify:
             MFPGUI().async_task(self.signal_emit(
                 'text-changed', self.text, text, imgui.calc_text_size(self.markdown_text), imgui.calc_text_size(text)
             ))

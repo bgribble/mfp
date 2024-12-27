@@ -33,6 +33,7 @@ class ViaElement (BaseElement):
         self.connections_out = []
         self.connections_in = []
 
+        self.label_text_set = False
         self.label_text = None
         self.label = TextWidget.build(self)
         self.label.set_position(0, self.LABEL_Y)
@@ -90,9 +91,14 @@ class ViaElement (BaseElement):
 
     async def configure(self, params):
         self.label_text = params.get("label_text", "")
-        self.label.set_text(self.label_text)
-        self.recenter_label()
+
+        # don't call the recenter callback on initial setup
+        self.label.set_text(self.label_text, notify=self.label_text_set)
+
+        if "position_x" not in params:
+            self.recenter_label()
         await super().configure(params)
+        self.label_text_set = True
 
     def select(self):
         BaseElement.select(self)

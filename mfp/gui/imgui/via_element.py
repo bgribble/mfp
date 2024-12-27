@@ -8,8 +8,6 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from flopsy import mutates
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 
-from mfp import log
-
 from ..colordb import ColorDB
 from ..base_element import BaseElement
 from ..via_element import (
