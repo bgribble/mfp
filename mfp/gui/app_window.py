@@ -12,6 +12,7 @@ from mfp.utils import SignalMixin
 from mfp.gui.collision import collision_check
 from ..gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
+from .event import PatchSelectEvent
 from .input_manager import InputManager
 from .input_mode import InputMode
 from .layer import Layer
@@ -255,6 +256,7 @@ class AppWindow (SignalMixin):
 
         # hook up input signals
         self.signal_listen('button-press-event', self.input_handler)
+        self.signal_listen('patch-select', self.input_handler)
         self.signal_listen('button-release-event', self.input_handler)
         self.signal_listen('key-press-event', self.input_handler)
         self.signal_listen('key-release-event', self.input_handler)
@@ -282,16 +284,20 @@ class AppWindow (SignalMixin):
     def load_complete(self):
         self.load_in_progress -= 1
         if (self.load_in_progress <= 0):
-            if self.selected_patch is None and len(self.patches):
-                self.selected_patch = self.patches[0]
             if self.selected_layer is None and self.selected_patch is not None:
                 self.layer_select(self.selected_patch.layers[0])
+            if self.selected_patch is None and len(self.patches):
+                self.layer_select(self.patches[0].layers[0])
 
     def add_patch(self, patch_display):
         self.patches.append(patch_display)
-        self.selected_patch = patch_display
         if len(patch_display.layers):
             self.layer_select(self.selected_patch.layers[0])
+        else:
+            self.selected_patch = patch_display
+            MFPGUI().async_task(
+                self.signal_emit("patch-select", PatchSelectEvent(target=patch_display))
+            )
 
     def object_visible(self, obj):
         if obj and hasattr(obj, 'layer'):

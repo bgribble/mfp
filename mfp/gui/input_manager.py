@@ -18,6 +18,7 @@ from .event import (
     KeyReleaseEvent,
     ButtonPressEvent,
     ButtonReleaseEvent,
+    PatchSelectEvent,
     ScrollEvent,
     MotionEvent,
     EnterEvent,
@@ -152,7 +153,10 @@ class InputManager:
                 raise
             if len(self.keyseq.sequences) > 0:
                 keysym = self.keyseq.pop()
-
+        elif isinstance(event, PatchSelectEvent):
+            self.pointer_x, self.pointer_y = (
+                self.window.screen_to_canvas(self.pointer_ev_x, self.pointer_ev_y)
+            )
         elif isinstance(event, MotionEvent):
             self.pointer_ev_x = event.x
             self.pointer_ev_y = event.y

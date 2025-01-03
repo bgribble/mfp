@@ -4,10 +4,12 @@ app_window_layer.py
 Extra methods to manage the layer display in the main window
 '''
 
+from mfp import log
 from ..utils import extends
+from ..gui_main import MFPGUI
+from .event import PatchSelectEvent
 from .app_window import AppWindow
 from .layer import Layer
-from ..gui_main import MFPGUI
 
 
 @extends(AppWindow)
@@ -54,6 +56,10 @@ def layer_select(self, layer):
     self.selected_layer.show()
     if self.selected_layer.patch != self.selected_patch:
         self.selected_patch = self.selected_layer.patch
+        MFPGUI().async_task(
+            self.signal_emit("patch-select", PatchSelectEvent(target=self.selected_patch))
+        )
+
     self.viewport_selection_set = True
 
 

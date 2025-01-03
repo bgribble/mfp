@@ -49,3 +49,7 @@ class EnterEvent:
 @dataclass
 class LeaveEvent:
     target: any = None
+
+@dataclass
+class PatchSelectEvent:
+    target: any = None
