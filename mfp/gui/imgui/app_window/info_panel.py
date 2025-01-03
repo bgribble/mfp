@@ -491,6 +491,26 @@ def render_patch_tab(app_window):
     view_zoom = render_param(
         app_window, 'viewport_zoom', ParamInfo(label="Zoom", param_type=float), di.view_zoom
     )
+    view_position_x = render_param(
+        app_window, 'viewport_pos_x',
+        ParamInfo(label="Tile X position", param_type=float, editable=False),
+        di.origin_x
+    )
+    view_position_y = render_param(
+        app_window, 'viewport_pos_y',
+        ParamInfo(label="Tile Y position", param_type=float, editable=False),
+        di.origin_y
+    )
+    view_width = render_param(
+        app_window, 'viewport_width',
+        ParamInfo(label="Tile width", param_type=float, editable=False),
+        di.width
+    )
+    view_height = render_param(
+        app_window, 'viewport_height',
+        ParamInfo(label="Tile height", param_type=float, editable=False),
+        di.height
+    )
 
     if view_x != di.view_x or view_y != di.view_y:
         di.view_x = view_x
