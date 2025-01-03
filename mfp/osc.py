@@ -7,7 +7,11 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 
 from .utils import QuittableThread
 from . import log
-import liblo
+
+try:
+    import liblo
+except:
+    import pyliblo3 as liblo
 
 
 class MFPOscManager(QuittableThread):
