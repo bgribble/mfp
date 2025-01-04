@@ -150,7 +150,7 @@ class GUICommand:
                     if "layername" in params:
                         layer = parent.find_layer(params["layername"])
                     if not layer:
-                        layer = MFPGUI().appwin.active_layer()
+                        layer = parent.selected_layer or parent.layers[0]
                     o.container = layer
                     layer.add(o)
                 elif isinstance(parent, BaseElement):
