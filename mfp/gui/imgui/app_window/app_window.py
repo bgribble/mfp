@@ -501,6 +501,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             return (x, y)
 
         di = self.selected_patch.display_info
+        if di.origin_x is None or di.origin_y is None:
+            return (x, y)
+
         screen_x_delta = x - di.origin_x - di.frame_offset_x - 1
         screen_y_delta = y - di.origin_y - di.frame_offset_y - self.menu_height - 1
         canvas_x = di.view_x + screen_x_delta / di.view_zoom
