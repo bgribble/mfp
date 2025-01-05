@@ -14,7 +14,9 @@ WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
 out = 'wafbuild'
-pkgconf_libs = ["glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2", "libprotobuf-c"]
+pkgconf_libs = [
+    "glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2", "libprotobuf-c"
+]
 
 
 allwheels = []
@@ -421,7 +423,7 @@ def configure(conf):
 
     pip_libs = [
         "posix_ipc", "simplejson", "numpy",
-        "pynose", "yappi", "cython", "pyliblo",
+        "pynose", "yappi", "cython", "pyliblo3",
         "soundfile", "samplerate",
         ("cairo", "pycairo"), "gbulb",               # clutter only
         "pyopengl", "sdl", "imgui_bundle", "Pillow", # imgui only
