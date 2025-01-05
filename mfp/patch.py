@@ -471,6 +471,7 @@ class Patch(Processor):
             await self.json_deserialize(jsdata)
             self.file_origin = filepath
             self.gui_params["dsp_context"] = self.context.context_name
+            self.gui_params["file_origin"] = filepath
             if not MFPApp().no_onload:
                 await self._run_onload(list(self.objects.values()))
 

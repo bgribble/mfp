@@ -88,6 +88,8 @@ class PatchDisplay:
             if layer.scope not in self.scopes:
                 self.scopes.append(layer.scope)
 
+        self.last_filename = self.last_filename or params.get("file_origin")
+
         self.app_window.refresh(self)
 
     async def delete(self, delete_obj=True):
