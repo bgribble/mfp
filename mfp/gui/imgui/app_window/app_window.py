@@ -497,6 +497,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # coordinate transforms and zoom
     def screen_to_canvas(self, x, y):
+        if not x or not y:
+            return (x, y)
+
         if not self.selected_patch or not self.selected_patch.display_info:
             return (x, y)
 
