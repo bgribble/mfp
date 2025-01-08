@@ -63,27 +63,20 @@ class Patch(Processor):
         else:
             self.gui_params['top_level'] = False
 
+    #############################
+    # API methods used in patches by @methodname
+    #############################
+
     async def bp(self):
         await self.step_execute_start(self, "@bp message to patch")
 
-    async def step_execute_start(self, target, message):
-        if self.step_debugger.enabled:
-            return
-        await self.step_debugger.enable(target)
-        await self.step_debugger.show_banner(message)
-        await self.step_debugger.show_prompt()
-
-    async def step_execute_stop(self):
-        if not self.step_debugger.enabled:
-            return
-        self.step_debugger.disable()
-        await self.step_debugger.show_leave()
-
-    def init_bindings(self):
+    async def show(self, name):
+        """
+        (@show "Layer name") to jump to a layer
+        """
         from .mfp_app import MFPApp
-        self.default_scope.bind("self", self)
-        self.default_scope.bind("patch", self)
-        self.default_scope.bind("app", MFPApp())
+        log.debug(f"[patch] @show({name})")
+        await MFPApp().gui_command.select(self.obj_id, name)
 
     def args(self, index=None):
         if index is None:
@@ -103,8 +96,31 @@ class Patch(Processor):
         log.debug("ping:", self.name)
 
     #############################
+    # step execution (breakpoints)
+    #############################
+
+    async def step_execute_start(self, target, message):
+        if self.step_debugger.enabled:
+            return
+        await self.step_debugger.enable(target)
+        await self.step_debugger.show_banner(message)
+        await self.step_debugger.show_prompt()
+
+    async def step_execute_stop(self):
+        if not self.step_debugger.enabled:
+            return
+        self.step_debugger.disable()
+        await self.step_debugger.show_leave()
+
+    #############################
     # name management
     #############################
+
+    def init_bindings(self):
+        from .mfp_app import MFPApp
+        self.default_scope.bind("self", self)
+        self.default_scope.bind("patch", self)
+        self.default_scope.bind("app", MFPApp())
 
     def bind(self, name, scope, obj):
         if isinstance(scope, Patch):
@@ -189,6 +205,7 @@ class Patch(Processor):
     #############################
     # patch contents management
     #############################
+
     async def trigger(self):
         inlist = list(range(len(self.inlets)))
         inlist.reverse()
@@ -254,6 +271,8 @@ class Patch(Processor):
                 self.gui_params['dsp_outlets'] = self.dsp_outlets
 
         elif obj.init_type == 'dispatch':
+            # dispatch objects are a partially built mechanism for supporting
+            # user patches handling @method calls
             self.dispatch_objects.append(obj)
 
     def remove(self, obj):

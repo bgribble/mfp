@@ -9,6 +9,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from abc import ABCMeta, abstractmethod
 from flopsy import saga
 
+from mfp import log
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
@@ -54,6 +55,10 @@ class MessageElement (BaseElement):
     @classmethod
     def get_backend(cls, backend_name):
         return MessageElementImpl.get_backend(backend_name)
+
+    @classmethod
+    def build(cls, parent, *args, **kwargs):
+        return cls.get_backend(MFPGUI().backend_name)(parent, *args, **kwargs)
 
     @saga('obj_args')
     async def recreate_element(self, action, state_diff, previous):
@@ -131,6 +136,33 @@ class MessageElement (BaseElement):
     def make_control_mode(self):
         return ClickableControlMode(self.app_window, self, "Message control")
 
+
+class PatchMessageElementImpl(BackendInterface, metaclass=ABCMeta):
+    @abstractmethod
+    def redraw(self):
+        pass
+
+
+class PatchMessageElement (MessageElement):
+    display_type = "patch_message"
+    proc_type = "patch_message"
+
+    style_defaults = {
+        'draw-ports': 'never'
+    }
+
+    def __init__(self, window, x, y):
+        super().__init__(window, x, y)
+
+        self.message_text = ""
+        self.num_inlets = 2
+        self.num_outlets = 1
+        self.label.set_text(self.message_text)
+        self.obj_state = self.OBJ_COMPLETE
+
+    @classmethod
+    def get_backend(cls, backend_name):
+        return PatchMessageElementImpl.get_backend(backend_name)
 
 class TransientMessageElementImpl(BackendInterface, metaclass=ABCMeta):
     @abstractmethod

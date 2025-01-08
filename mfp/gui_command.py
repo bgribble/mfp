@@ -99,7 +99,7 @@ class GUICommand:
         from .gui.patch_display import PatchDisplay
         from .gui.base_element import BaseElement
         from .gui.processor_element import ProcessorElement
-        from .gui.message_element import MessageElement
+        from .gui.message_element import MessageElement, PatchMessageElement
         from .gui.text_element import TextElement
         from .gui.enum_element import EnumElement
         from .gui.plot_element import PlotElement
@@ -118,6 +118,7 @@ class GUICommand:
         ctors = {
             'processor': ProcessorElement,
             'message': MessageElement,
+            'patch_message': PatchMessageElement,
             'text': TextElement,
             'enum': EnumElement,
             'plot': PlotElement,
@@ -205,7 +206,6 @@ class GUICommand:
         await c.update()
 
     async def delete(self, obj_id):
-        from mfp import log
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay
         MFPGUI().appwin.last_activity_time = datetime.now()
@@ -218,13 +218,16 @@ class GUICommand:
         elif obj is not None:
             await obj.delete(delete_obj=False)
 
-    async def select(self, obj_id):
+    async def select(self, obj_id, layer_name=None):
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay
         MFPGUI().appwin.last_activity_time = datetime.now()
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchDisplay) and len(obj.layers) > 0:
-            MFPGUI().appwin.layer_select(obj.layers[0])
+            layer = obj.layers[0]
+            if layer_name:
+                layer = next((l for l in obj.layers if l.name == layer_name), None)
+            MFPGUI().appwin.layer_select(layer)
         else:
             await MFPGUI().appwin.select(obj)
 

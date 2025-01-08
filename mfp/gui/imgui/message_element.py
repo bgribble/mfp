@@ -12,6 +12,8 @@ from .base_element import ImguiBaseElementImpl
 from ..message_element import (
     MessageElement,
     MessageElementImpl,
+    PatchMessageElement,
+    PatchMessageElementImpl,
     TransientMessageElement,
     TransientMessageElementImpl
 )
@@ -133,6 +135,14 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
     @mutates('width', 'height')
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
+
+
+class ImguiPatchMessageElementImpl(
+    PatchMessageElement,
+    ImguiMessageElementImpl,
+    PatchMessageElementImpl,
+):
+    backend_name = "imgui"
 
 
 class ImguiTransientMessageElementImpl(

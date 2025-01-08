@@ -127,6 +127,34 @@ class Message (Var):
             self.conf(value=self.value)
 
 
+class PatchMessage (Var):
+    doc_tooltip_obj = "Store literal Python data as a message to send the patch when clicked/triggered"
+    doc_tooltip_inlet = [
+        "Emit message on any input",
+        "Load new message but do not emit"
+    ]
+
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Var.__init__(self, init_type, init_args, patch, scope, name)
+        self.hot_inlets = (0, 1)
+
+    async def trigger(self):
+        do_update = False
+        if self.inlets[1] is not Uninit:
+            self.value = self.inlets[1]
+            self.inlets[1] = Uninit
+            do_update = True
+
+        if self.inlets[0] is not Uninit:
+            self.outlets[0] = self.value
+            self.inlets[0] = Uninit
+            await self.patch.send(self.value)
+
+        if do_update and self.gui_params.get("update_required"):
+            self.gui_params['value'] = self.value
+            self.conf(value=self.value)
+
+
 class Text (Var):
     doc_tooltip_obj = "Comment using SGML-type markup for style"
 
@@ -200,6 +228,7 @@ class SlideMeter (Var):
 def register():
     MFPApp().register("var", Var)
     MFPApp().register("message", Message)
+    MFPApp().register("patch_message", PatchMessage)
     MFPApp().register("enum", Enum)
     MFPApp().register("slidemeter", SlideMeter)
     MFPApp().register("text", Text)

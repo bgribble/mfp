@@ -12,7 +12,7 @@ from .selection import SingleSelectionEditMode, MultiSelectionEditMode
 
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
-from ..message_element import MessageElement
+from ..message_element import MessageElement, PatchMessageElement
 from ..enum_element import EnumElement
 from ..plot_element import PlotElement
 from ..slidemeter_element import FaderElement, BarMeterElement, DialElement
@@ -120,6 +120,11 @@ class PatchEditMode (InputMode):
             "add-recvsigvia", cls.add_element(ReceiveSignalViaElement), helptext="Add receive signal via",
             keysym="A-V", menupath="Edit > Add element > Receive signal via"
         )
+        cls.bind(
+            "add-patch-message", cls.add_element(PatchMessageElement), helptext="Add message to patch",
+            keysym="%", menupath="Edit > Add element > Message to patch"
+        )
+
 
         cls.bind(
             "layer-new", lambda mode: mode.window.layer_new(),
