@@ -154,7 +154,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                         imgui.pop_font()
             if c == "tt":
                 new_font_key = '__'.join([
-                    "ProggyClean.ttf, 13px", "regular", "13.0"
+                    "ProggyClean.ttf,", "regular", "13.0"
                 ])
                 new_font = cls.imgui_font_atlas.get(
                     new_font_key, None
@@ -374,6 +374,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         type(self).imgui_currently_rendering = self
 
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 0))
         imgui.begin_group()
         label_text = self.text
         if highlight or self.markdown_text and self.use_markup:
@@ -446,6 +447,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         self.font_width, self.font_height = imgui.calc_text_size("M")
         imgui.end_group()
+        imgui.pop_style_var()
 
         w, h = imgui.get_item_rect_size()
         left_x, top_y = imgui.get_item_rect_min()
