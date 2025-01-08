@@ -75,6 +75,8 @@ class Evaluator (object):
 
         # Method call special form:
         #   @method(arg1, arg2, ..., kwarg=val, kwarg2=val)
+        # *or*
+        #   @method arg1, arg2...
         # rewrites to:
         #   MethodCall("method", arg1, arg2, ... kwarg=val, kwarg2=val
         #
@@ -85,9 +87,19 @@ class Evaluator (object):
                 str2eval = ''.join(["MethodCall(", '"', methname, '"', ')'])
             else:
                 if tokens[2][1] != '(':
-                    raise SyntaxError()
-                str2eval = ''.join(["MethodCall(", '"', methname, '",']
-                                   + [t[1] for t in tokens[3:]])
+                    str2eval = ''.join(
+                        [
+                            "MethodCall(", '"', methname, '",'
+                        ]
+                        + [t[1] for t in tokens[2:]] + [")"]
+                    )
+                else:
+                    str2eval = ''.join(
+                        [
+                            "MethodCall(", '"', methname, '",'
+                        ]
+                        + [t[1] for t in tokens[3:]]
+                    )
 
         if collect:
             str2eval = "_eval_collect_args(%s)" % str2eval
