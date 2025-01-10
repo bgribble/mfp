@@ -147,7 +147,7 @@ class SlideMeterElement (BaseElement):
 
         if value != self.value:
             self.value = value
-            # FIXME 
+            # FIXME
             MFPGUI().async_task(self.update())
             MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.value))
 
@@ -213,13 +213,13 @@ class SlideMeterElement (BaseElement):
             v is not None and v in (1, "h", "horiz", "horizontal")
             and not (self.orientation == SlideMeterElement.HORIZONTAL)
         ):
-            self.set_orientation(SlideMeterElement.HORIZONTAL)
+            self.orientation = SlideMeterElement.HORIZONTAL
             changes = True
         elif (
             v is not None and v in (0, "v", "vert", "vertical")
             and (self.orientation == SlideMeterElement.HORIZONTAL)
         ):
-            self.set_orientation(SlideMeterElement.VERTICAL)
+            self.orientation = SlideMeterElement.VERTICAL
             changes = True
 
         v = params.get("zeropoint")
@@ -366,9 +366,6 @@ class DialElement(SlideMeterElement):
     @classmethod
     def get_backend(cls, backend_name):
         return DialElementImpl.get_backend(backend_name)
-
-    def set_orientation(self, orient):
-        pass
 
     def p2r(self, r, theta):
         x = (self.width / 2.0) + r * math.cos(theta)

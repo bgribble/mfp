@@ -8,6 +8,7 @@ from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 
 from flopsy import mutates
 from mfp import log
+from mfp.gui_main import MFPGUI
 from ..colordb import ColorDB
 from .base_element import ImguiBaseElementImpl
 
@@ -155,7 +156,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
 
         if need_recenter:
-            self.center_label()
+            MFPGUI().async_task(self.center_label())
 
         # render
         ##########################

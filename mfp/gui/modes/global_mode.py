@@ -790,6 +790,6 @@ class GlobalMode (InputMode):
 
     async def open_help(self):
         if len(self.window.selected) == 1:
-            help_patch = self.window.selected[0].get_help_patch()
+            help_patch = await self.window.selected[0].get_help_patch()
             log.debug("Opening help patch {help_patch}")
             await MFPGUI().mfp.open_file(help_patch)

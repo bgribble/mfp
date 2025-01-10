@@ -18,12 +18,11 @@ class SelectMRUMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
         self.window = window
-        self.keyhandler = self.window.stage.connect("key-release-event", self.key_release)
+        self.keyhandler = self.window.signal_listen("key-release-event", self.key_release)
 
         InputMode.__init__(self, "Select Most-Recent")
 
         SelectMRUMode.touch_enabled = False
-        self.select_next()
 
         self.select_cbid = self.window.signal_listen("select", self.touch)
         self.remove_cbid = self.window.signal_listen("remove", self.forget)
@@ -46,17 +45,20 @@ class SelectMRUMode (InputMode):
         return True
 
     def key_release(self, stage, event):
+        # key 66 is the capslock key in Gnome
+        # tbh I don't remember what this code is even for
+        log.debug(f"[mru] release: {event} {event.keyval}")
         if event.keyval == 66:
             SelectMRUMode.touch_enabled = True
             SelectMRUMode.touch(self.window, "select", self.window.selected)
-            self.window.stage.disconnect(self.keyhandler)
+            self.window.signal_unlisten(self.keyhandler)
             self.window.input_mgr.disable_minor_mode(self)
 
-    def disable(self): 
+    def disable(self):
         self.window.signal_unlisten(self.select_cbid)
-        self.select_cbid = None 
+        self.select_cbid = None
         self.window.signal_unlisten(self.remove_cbid)
-        self.remove_cbid = None 
+        self.remove_cbid = None
 
     @classmethod
     def touch(self, window, signal, obj):

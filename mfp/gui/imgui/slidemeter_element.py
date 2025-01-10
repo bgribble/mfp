@@ -346,6 +346,16 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         )
         return is_in_slider
 
+    def pixpos2value(self, x, y):
+        if self.orientation == self.VERTICAL:
+            delta = self.hot_y_max - y
+            total = self.hot_y_max - self.hot_y_min
+        else:
+            delta = x - self.hot_x_min
+            total = self.hot_x_max - self.hot_x_min
+        fraction = delta / float(total)
+        return self.scale.value(fraction)
+
     async def label_changed_cb(self, *args):
         pass
 
@@ -552,3 +562,15 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
         imgui.pop_style_var()
         nedit.pop_style_color(2)  # color
         nedit.pop_style_var(3)  # padding, rounding
+
+    def pixpos2value(self, x, y):
+        _, theta = self.r2p(x - self.position_x, y - self.position_y)
+
+        if theta > self.THETA_MAX and theta < self.THETA_MIN:
+            return None
+        if theta < self.THETA_MIN:
+            theta += 2*math.pi
+
+        theta -= self.THETA_MIN
+        scale_fraction = theta / (2*math.pi-(self.THETA_MIN-self.THETA_MAX))
+        return self.scale.value(scale_fraction)
