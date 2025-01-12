@@ -211,11 +211,11 @@ class LabelEditMode (InputMode):
         return True
 
     def insert_text(self, keysym):
+
         if len(keysym) > 1:
             return False
 
         self.delete_selection()
-
         newtext = self.text[:self.editpos] + keysym + self.text[self.editpos:]
         self.text = newtext
 
@@ -312,15 +312,17 @@ class LabelEditMode (InputMode):
             self.undo_pos = -1
 
         self.undo_stack.append((old_text, self.editpos))
-        self.text = new_text
 
-        editpos = self.widget.get_cursor_position()
-        if editpos == -1:
-            self.editpos = len(self.text)
-        elif change_dir > 0:
-            self.editpos = change_at + change_dir
-        else:
-            self.editpos = change_at
+        if self.text != new_text:
+            self.text = new_text
+
+            editpos = self.widget.get_cursor_position()
+            if editpos == -1:
+                self.editpos = len(self.text)
+            elif change_dir > 0:
+                self.editpos = change_at + change_dir
+            else:
+                self.editpos = change_at
 
         if hasattr(self.element, "label_edit_changed"):
             await self.element.label_edit_changed(self.widget, self.text)
