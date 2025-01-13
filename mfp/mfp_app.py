@@ -408,8 +408,9 @@ class MFPApp (Singleton, SignalMixin):
             filepath = utils.find_file_in_path(filename, self.searchpath)
 
             if filepath:
-                log.debug("create: will load from file", filepath)
                 (_, ctor) = Patch.register_file(filepath)
+                if not ctor:
+                    log.debug(f"[create] Failed to load {init_type} from {filepath}")
 
         # third try: can we autowrap a python function?
         if ctor is None:
@@ -418,11 +419,10 @@ class MFPApp (Singleton, SignalMixin):
                 if callable(thunk):
                     ctor = builtins.pyfunc.PyAutoWrap
             except Exception as e:
-                log.error("Cannot autowrap %s as a Python callable" % init_type)
-                log.error(e)
+                pass
 
         if ctor is None:
-            log.error(f"create: No factory found for {init_type}")
+            log.error(f"[create] Could not find a build method for {init_type}")
             return None
 
         # create intervening scope if needed

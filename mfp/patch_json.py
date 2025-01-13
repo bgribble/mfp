@@ -129,7 +129,7 @@ async def json_deserialize(self, json_data):
 
             obj = idmap.get(oid)
             if obj is None:
-                log.debug("Error in patch (object %d not found), continuing anyway" % oid)
+                continue
             else:
                 dumb_scope.unbind(obj.name)
                 self.bind(name, s, obj)
@@ -168,6 +168,8 @@ async def json_unpack_connections(self, data, idmap):
         oid = int(oid)
         conn = prms.get("connections", [])
         srcobj = idmap.get(oid)
+        if srcobj is None:
+            continue
         for outlet in range(0, len(conn)):
             connlist = conn[outlet]
             for c in connlist:
@@ -185,6 +187,8 @@ async def json_unpack_objects(self, data, scope):
     idlist.sort(key=lambda x: int(x))
     need_gui = []
 
+    skipped_objects = 0
+
     for oid in idlist:
         prms = data.get('objects')[oid]
 
@@ -193,6 +197,10 @@ async def json_unpack_objects(self, data, scope):
         oname = prms.get('name')
 
         newobj = await MFPApp().create(otype, oargs, self, scope, oname)
+        if not newobj:
+            skipped_objects += 1
+            continue
+
         newobj.patch = self
         newobj.load(prms)
         if self.gui_created:
@@ -209,6 +217,8 @@ async def json_unpack_objects(self, data, scope):
     for obj in need_gui:
         await obj.create_gui()
 
+    if skipped_objects:
+        log.debug(f"[{self.init_type}] Could not create {skipped_objects} component objects. Check your search path (-p option)")
     return idmap
 
 
