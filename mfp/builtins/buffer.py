@@ -71,7 +71,7 @@ class Buffer(Processor):
 
         self.channels = 0
         self.size = 0
-        self.rate = None
+        self.rate = MFPApp().samplerate
         self.shm_obj = None
 
         self.file_name = None
