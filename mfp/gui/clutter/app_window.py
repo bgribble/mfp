@@ -198,7 +198,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
 
         return layer_view
 
-    def add_patch(self, patch_display):
+    def add_patch(self, patch_display, **kwargs):
         patch_display.display_info = Tile(
             title=patch_display.obj_name,
             origin_x=0,

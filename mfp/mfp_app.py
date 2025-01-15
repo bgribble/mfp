@@ -335,7 +335,7 @@ class MFPApp (Singleton, SignalMixin):
                 await p.delete()
             log.debug("Finished cleaning up patches")
 
-    async def open_file(self, file_name, context=None, show_gui=True):
+    async def open_file(self, file_name, context=None, show_gui=True, **kwargs):
         from datetime import datetime
 
         starttime = datetime.now()
@@ -385,7 +385,7 @@ class MFPApp (Singleton, SignalMixin):
 
         self.patches[patch.name] = patch
         if show_gui:
-            await patch.create_gui()
+            await patch.create_gui(**kwargs)
         patch.mark_ready()
 
         loadtime = datetime.now() - starttime

@@ -154,7 +154,7 @@ class AppWindowImpl(BackendInterface, ABC):
 
     #####################
     # patches / MDI
-    def add_patch(self, patch):
+    def add_patch(self, patch, **kwargs):
         pass
 
     #####################
@@ -289,10 +289,10 @@ class AppWindow (SignalMixin):
             if self.selected_patch is None and len(self.patches):
                 self.layer_select(self.patches[0].layers[0])
 
-    def add_patch(self, patch_display):
+    def add_patch(self, patch_display, **kwargs):
         self.patches.append(patch_display)
         if len(patch_display.layers):
-            self.layer_select(self.selected_patch.layers[0])
+            self.layer_select(patch_display.layers[0])
         else:
             self.selected_patch = patch_display
             MFPGUI().async_task(

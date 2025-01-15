@@ -38,6 +38,21 @@ class TileManager:
         self.next_tile_id = 0
 
     def find_tile(self, **kwargs):
+        if kwargs.get("new_page"):
+            page_id = self.next_page_id
+            tile_id = self.next_tile_id
+            self.next_page_id += 1
+            self.next_tile_id += 1
+            tile = Tile(
+                title=kwargs.get("title", "Mew tile"),
+                tile_id=tile_id,
+                page_id=page_id,
+                width=self.total_width,
+                height=self.total_height
+            )
+            self.add_tile(tile)
+            return tile
+
         # are there any free tiles?
         for tile in self.tiles:
             if tile.in_use:

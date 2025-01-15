@@ -191,9 +191,9 @@ class MFPCommand:
         obj.assign(obj.patch, scope, obj.name)
 
     @noresp
-    async def open_file(self, file_name, context=None):
+    async def open_file(self, file_name, context=None, **kwargs):
         from .mfp_app import MFPApp
-        patch = await MFPApp().open_file(file_name)
+        patch = await MFPApp().open_file(file_name, **kwargs)
         return patch.obj_id
 
     @noresp

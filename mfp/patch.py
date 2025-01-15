@@ -75,8 +75,14 @@ class Patch(Processor):
         (@show "Layer name") to jump to a layer
         """
         from .mfp_app import MFPApp
-        log.debug(f"[patch] @show({name})")
         await MFPApp().gui_command.select(self.obj_id, name)
+
+    async def close(self):
+        """
+        @close to close a patch, just means delete but doesn't look as scary
+        """
+        from .mfp_app import MFPApp
+        await self.delete()
 
     def args(self, index=None):
         if index is None:

@@ -145,12 +145,21 @@ def render_help_menu(app_window, items):
     selected, _ = imgui.menu_item("Tutorial", "", False)
     if selected:
         MFPGUI().async_task(
-            MFPGUI().mfp.open_file("tutorial.mfp")
+            MFPGUI().mfp.open_file("tutorial.mfp", new_page=True)
         )
-    selected, _ = imgui.menu_item("List of builtins", "", False)
+        MFPGUI().async_task(
+            app_window.control_major_mode()
+        )
+    selected, _ = imgui.menu_item("Reference", "", False)
     if selected:
         MFPGUI().async_task(
-            MFPGUI().mfp.open_file("list_of_builtins.mfp")
+            MFPGUI().mfp.open_file(
+                "reference-patching.help.mfp",
+                new_page=True
+            )
+        )
+        MFPGUI().async_task(
+            app_window.control_major_mode()
         )
 
     add_menu_items(app_window, items)

@@ -29,8 +29,6 @@ class PatchDisplay:
         self.selected_layer = None
         self.display_info = kwargs.get('display_info')
 
-        self.app_window.add_patch(self)
-
     @classmethod
     def get_factory(cls):
         return cls
@@ -89,6 +87,8 @@ class PatchDisplay:
                 self.scopes.append(layer.scope)
 
         self.last_filename = self.last_filename or params.get("file_origin")
+        if not self.display_info:
+            self.app_window.add_patch(self, new_page=params.get("new_page", False))
 
         self.app_window.refresh(self)
 

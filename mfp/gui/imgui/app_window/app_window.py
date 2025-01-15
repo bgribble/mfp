@@ -616,12 +616,21 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     #####################
     # patches / MDI
-    def add_patch(self, patch):
+    def add_patch(self, patch, new_page=False):
         if isinstance(patch.display_info, Tile):
             patch.display_info.in_use = True
             self.canvas_tile_manager.add_tile(patch.display_info)
+        elif new_page:
+            tile = self.canvas_tile_manager.find_tile(
+                new_page=True
+            )
+            tile.in_use = True
+            patch.display_info = tile
+            self.canvas_tile_page = tile.page_id
         else:
-            tile = self.canvas_tile_manager.find_tile(page_id=self.canvas_tile_page)
+            tile = self.canvas_tile_manager.find_tile(
+                page_id=self.canvas_tile_page,
+            )
             tile.in_use = True
             patch.display_info = tile
         self.viewport_zoom_set = True

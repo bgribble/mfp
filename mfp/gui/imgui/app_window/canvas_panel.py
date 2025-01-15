@@ -412,6 +412,20 @@ def render(app_window):
         p for p in app_window.patches
         if p.display_info.page_id == app_window.canvas_tile_page
     ]
+    if len(displayed_patches) == 0:
+        allowed_pages = list(reversed(sorted(list(set(
+            t.page_id
+            for t in app_window.canvas_tile_manager.tiles
+            if t.page_id is not None
+        )))))
+
+        next_page = next((a for a in allowed_pages if a < app_window.canvas_tile_page), -1)
+        if next_page >= 0:
+            app_window.canvas_tile_page = next_page
+            displayed_patches = [
+                p for p in app_window.patches
+                if p.display_info.page_id == app_window.canvas_tile_page
+            ]
 
     for tile_num, patch in enumerate(displayed_patches):
         imgui.push_id(tile_num)
