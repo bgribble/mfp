@@ -88,6 +88,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.highlight_text = None
         self.highlight_color = self.container.get_color("text-color:match")
 
+        self.font_key_stack = []
+
         # cached transformed text
         self.transform_in = None
         self.transform_out = None
@@ -103,36 +105,31 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     def markdown_div_callback(cls, div_class, is_opening_div):
         classes = div_class.split(' ')
         sizes = {
-            "size-x-small": 8.0,
-            "size-small": 12.0,
-            "size-normal": 16.0,
-            "size-large": 20.0,
-            "size-x-large": 24.0,
-            "size-xx-large": 28.0,
+            "size-x-small": "8.0",
+            "size-small": "12.0",
+            "size-normal": "16.0",
+            "size-large": "20.0",
+            "size-x-large": "24.0",
+            "size-xx-large": "28.0",
         }
-        current_font = imgui.get_current_context().font
-        current_font_key = _font_key(current_font)
 
-        font_key_stack = [current_font_key]
+        font_key_stack = cls.imgui_currently_rendering.font_key_stack
+        if not font_key_stack:
+            font_key_stack.append(_font_key(imgui.get_current_context().font))
+        font_key = list(f for f in font_key_stack if f)[-1]
+        font_name, font_weight, font_size = font_key.split('__')
 
+        font_changed = False
+        color = None
+
+        # classes possible:
+        # size-*, bold, italic, bolditalic, tt, color-rrggbbaa
         for c in classes:
-            font_key = font_key_stack[-1]
             if c in sizes:
-                font_base = '__'.join(font_key.split('__')[:-1])
-                new_font_key = f"{font_base}__{sizes[c]}"
-                new_font = cls.imgui_font_atlas.get(
-                    new_font_key, None
-                )
-                if new_font:
-                    if is_opening_div:
-                        font_key_stack.append(new_font_key)
-                        imgui.push_font(new_font)
-                    else:
-                        font_key_stack = font_key_stack[:-1]
-                        imgui.pop_font()
+                font_size = sizes.get(c, font_size)
+                font_changed = True
 
             if c in ['bold', 'italic', 'bolditalic', 'regular']:
-                font_name, font_weight, font_size = font_key.split('__')
                 if c in ["regular", "bolditalic"]:
                     font_weight = c
                 elif font_weight == 'bold' and c == 'italic':
@@ -141,31 +138,13 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                     font_weight = 'bolditalic'
                 else:
                     font_weight = c
-                new_font_key = '__'.join([font_name, font_weight, font_size])
-                new_font = cls.imgui_font_atlas.get(
-                    new_font_key, None
-                )
-                if new_font:
-                    if is_opening_div:
-                        font_key_stack.append(new_font_key)
-                        imgui.push_font(new_font)
-                    else:
-                        font_key_stack = font_key_stack[:-1]
-                        imgui.pop_font()
+                font_changed = True
+
             if c == "tt":
-                new_font_key = '__'.join([
-                    "ProggyClean.ttf,", "regular", "13.0"
-                ])
-                new_font = cls.imgui_font_atlas.get(
-                    new_font_key, None
-                )
-                if new_font:
-                    if is_opening_div:
-                        font_key_stack.append(new_font_key)
-                        imgui.push_font(new_font)
-                    else:
-                        font_key_stack = font_key_stack[:-1]
-                        imgui.pop_font()
+                font_name = "ProggyClean.ttf,"
+                font_weight = "regular"
+                font_size = "13.0"
+                font_changed = True
 
             if c.startswith('color'):
                 colorparts = c.split('-')
@@ -175,13 +154,29 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                     g = int(hexcolor[2:4], 16) if len(hexcolor) >= 4 else 255
                     b = int(hexcolor[4:6], 16) if len(hexcolor) >= 6 else 255
                     a = int(hexcolor[6:8], 16) if len(hexcolor) >= 8 else 255
+                    color = imgui.IM_COL32(r, g, b, a)
 
-                    if is_opening_div:
-                        imgui.push_style_color(
-                            imgui.Col_.text, imgui.IM_COL32(r, g, b, a)
-                        )
-                    else:
-                        imgui.pop_style_color()
+        if is_opening_div:
+            if font_changed:
+                new_font_key = f"{font_name}__{font_weight}__{font_size}"
+                new_font = cls.imgui_font_atlas.get(
+                    new_font_key, None
+                )
+                font_key_stack.append(
+                    new_font_key if new_font else None
+                )
+                if new_font:
+                    imgui.push_font(new_font)
+            if color:
+                imgui.push_style_color(imgui.Col_.text, color)
+        else:
+            if font_changed:
+                old_font_key = font_key_stack[-1]
+                font_key_stack[-1:] = []
+                if old_font_key:
+                    imgui.pop_font()
+            if color:
+                imgui.pop_style_color()
 
     def simple_wrap(self, text, max_columns):
         lines = []
@@ -359,7 +354,6 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         return md_text
 
-
     def render(self, wrap_width=None, highlight=None):
         extra_bit = ''
         if self.multiline and self.text[:-1] == '\n':
@@ -373,6 +367,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 type(self).imgui_font_atlas[fkey] = f
 
         type(self).imgui_currently_rendering = self
+        self.font_key_stack = []
 
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 0))
         imgui.begin_group()
