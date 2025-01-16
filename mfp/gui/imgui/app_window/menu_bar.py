@@ -145,7 +145,7 @@ def render_help_menu(app_window, items):
     selected, _ = imgui.menu_item("Tutorial", "", False)
     if selected:
         MFPGUI().async_task(
-            MFPGUI().mfp.open_file("tutorial.mfp", new_page=True)
+            MFPGUI().mfp.open_file("tutorial.help.mfp", new_page=True)
         )
         MFPGUI().async_task(
             app_window.control_major_mode()
