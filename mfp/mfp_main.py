@@ -201,6 +201,16 @@ async def main():
     log.log_thread = threading.get_ident()
     log.log_loop = asyncio.get_event_loop()
 
+    # add installed patch folders to path
+    installed_patch_path = f"{sys.prefix}/share/mfp/patches"
+    patch_dirs = [installed_patch_path]
+    for f in os.listdir(installed_patch_path):
+        subdir = f"{installed_patch_path}/{f}"
+        if os.path.isdir(subdir):
+            patch_dirs.append(subdir)
+
+    app.searchpath += ':' + ':'.join(patch_dirs)
+
     if args.get('batch'):
         app.batch_mode = True
         app.batch_args = args.get("args")

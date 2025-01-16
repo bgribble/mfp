@@ -531,7 +531,11 @@ def build(bld):
 
     bld.install_files(
         "share/mfp/icons/hicolor/scalable/actions/",
-        "mfp.svg"
+        ["mfp.svg"]
+    )
+    bld.install_files(
+        "share/mfp/patches/help/",
+        bld.path.ant_glob('help/*.mfp')
     )
 
     if bld.cmd == "install":
