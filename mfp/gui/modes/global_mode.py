@@ -266,7 +266,7 @@ class GlobalMode (InputMode):
             "toggle-snoop",
             lambda mode: mode.toggle_snoop(),
             helptext="Toggle snooping messages on connection",
-            keysym="%"
+            keysym="$"
         )
 
         # imgui only
