@@ -185,7 +185,9 @@ def render(app_window):
         menu_open = True
         add_menu_items(app_window, by_menu.get("Layer", {}))
         if app_window.selected_patch and len(app_window.selected_patch.layers) > 0:
+            imgui.dummy([1, 2])
             imgui.separator()
+            imgui.dummy([1, 2])
             for layer_num, layer in enumerate(app_window.selected_patch.layers):
                 imgui.push_id(layer_num)
                 layer_selected, _ = imgui.menu_item(
@@ -196,11 +198,28 @@ def render(app_window):
                 if layer_selected and app_window.selected_layer != layer:
                     app_window.layer_select(layer)
                 imgui.pop_id()
-            imgui.end_menu()
+        imgui.end_menu()
 
     if imgui.begin_menu("Window"):
         menu_open = True
         add_menu_items(app_window, by_menu.get("Window", {}))
+
+        if len(app_window.patches) > 0:
+            imgui.dummy([1, 2])
+            imgui.separator()
+            imgui.dummy([1, 2])
+            for patch in app_window.patches:
+                imgui.push_id(str(id(patch)))
+                patch_selected, _ = imgui.menu_item(
+                    patch.obj_name,
+                    '',
+                    app_window.selected_patch == patch
+                )
+                if patch_selected and app_window.selected_patch != patch:
+                    app_window.canvas_tile_page = patch.display_info.page_id
+                    app_window.layer_select(patch.layers[0])
+                imgui.pop_id()
+
         imgui.end_menu()
 
     if imgui.begin_menu("Help"):

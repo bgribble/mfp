@@ -93,6 +93,14 @@ def render_tile(app_window, patch):
     if patch.selected_layer:
         layer_name = ' - ' + patch.selected_layer.name
 
+    if app_window.viewport_selection_set:
+        if app_window.selected_patch == patch:
+            imgui.set_next_window_focus()
+    elif imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
+        if app_window.selected_patch != patch:
+            app_window.selected_patch = patch
+            app_window.selected_layer = patch.selected_layer
+
     imgui.begin(
         f"{patch.obj_name}{layer_name} ({tile.page_id}.{tile.tile_id})",
         flags=(
@@ -109,14 +117,6 @@ def render_tile(app_window, patch):
         if app_window.imgui_tile_selected:
             app_window.layer_select(patch.selected_layer)
             app_window.imgui_tile_selected = False
-
-    if app_window.viewport_selection_set:
-        if app_window.selected_patch == patch:
-            imgui.set_window_focus()
-            app_window.viewport_selection_set = False
-    elif imgui.is_window_focused(imgui.FocusedFlags_.child_windows):
-        app_window.selected_patch = patch
-        app_window.selected_layer = patch.selected_layer
 
     # get_cursor_pos appears to be relative to the origin of the current window
     cursor_pos = imgui.get_cursor_pos()
@@ -426,12 +426,12 @@ def render(app_window):
                 p for p in app_window.patches
                 if p.display_info.page_id == app_window.canvas_tile_page
             ]
-
     for tile_num, patch in enumerate(displayed_patches):
         imgui.push_id(tile_num)
         render_tile(app_window, patch)
         imgui.pop_id()
 
+    app_window.viewport_selection_set = False
     app_window.viewport_zoom_set = False
     app_window.viewport_pos_set = False
 

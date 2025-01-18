@@ -49,8 +49,9 @@ def layer_select(self, layer):
         sname = layer.scope
         if sname == "__patch__":
             sname = "Patch"
-        self.hud_write("Layer: <b>%s</b> (lexical scope '%s')"
-                       % (layer.name, sname))
+        self.hud_write(
+            "Layer: <b>%s</b> (lexical scope '%s')" % (layer.name, sname)
+        )
         self.selected_layer = layer
 
     self.selected_layer.show()
