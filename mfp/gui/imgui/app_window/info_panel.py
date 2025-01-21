@@ -837,7 +837,9 @@ def render_activity_tab(app_window):
             imgui.table_set_column_index(0)
             imgui.text(str(count))
             imgui.table_set_column_index(1)
+            imgui.push_text_wrap_pos(350)
             imgui.text(message)
+            imgui.pop_text_wrap_pos()
         imgui.end_table()
 
     imgui.pop_style_var()

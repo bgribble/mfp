@@ -121,6 +121,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
         info = await MFPGUI().mfp.get_tooltip_info(self.obj_id)
         self.tooltip_info = info
         self.tooltip_timestamp = datetime.now()
+        self.update_badge()
 
     # every subclass should call this somewhere in the render method
     def render_sync_with_imgui(self):

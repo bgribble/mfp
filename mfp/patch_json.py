@@ -199,7 +199,12 @@ async def json_unpack_objects(self, data, scope):
         newobj = await MFPApp().create(otype, oargs, self, scope, oname)
         if not newobj:
             skipped_objects += 1
+            error = f"Could not create element '{otype}' with args '{oargs}'"
+            self.error(error)
             continue
+
+        if newobj.count_errors:
+            self.error(f"Error while creating element '{otype}' with args '{oargs}'")
 
         newobj.patch = self
         newobj.load(prms)
