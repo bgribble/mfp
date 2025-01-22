@@ -5,7 +5,7 @@
         "export_w": null,
         "export_x": null,
         "export_y": null,
-        "file_origin": "/home/grib/devel/mfp/help/reference-patching.help.mfp",
+        "file_origin": "/home/grib/devel/mfp/.virtual/share/mfp/patches/help/reference-patching.help.mfp",
         "height": 20,
         "layers": [
             [
@@ -37,7 +37,7 @@
         "new_page": true,
         "num_inlets": 1,
         "num_outlets": 0,
-        "obj_id": 41,
+        "obj_id": 137,
         "top_level": true,
         "width": 0
     },
@@ -45,7 +45,7 @@
         0
     ],
     "objects": {
-        "42": {
+        "138": {
             "connections": [
                 []
             ],
@@ -75,7 +75,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching",
+                "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help.\n\nFor a general overview of MFP, try the Tutorial (in the Help menu)\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching",
                 "width": 456.0
             },
             "initargs": null,
@@ -85,9 +85,9 @@
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching"
+            "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help.\n\nFor a general overview of MFP, try the Tutorial (in the Help menu)\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching"
         },
-        "43": {
+        "139": {
             "connections": [
                 []
             ],
@@ -98,7 +98,7 @@
                 "display_type": "patch_message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 12,
+                "height": 20.0,
                 "is_export": false,
                 "layer": "Table of Contents",
                 "min_height": 12,
@@ -109,12 +109,12 @@
                 "obj_state": 3,
                 "obj_type": "patch_message",
                 "position_x": 490.0,
-                "position_y": 152.0,
+                "position_y": 183.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 25
+                "width": 232.0
             },
             "initargs": "@show \"Graphical patch elements\"",
             "midi_filters": null,
@@ -124,7 +124,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "44": {
+        "140": {
             "connections": [
                 []
             ],
@@ -135,7 +135,7 @@
                 "display_type": "patch_message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 12,
+                "height": 20.0,
                 "is_export": false,
                 "layer": "Table of Contents",
                 "min_height": 12,
@@ -146,12 +146,12 @@
                 "obj_state": 3,
                 "obj_type": "patch_message",
                 "position_x": 489.0,
-                "position_y": 184.0,
+                "position_y": 215.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 25
+                "width": 190.0
             },
             "initargs": "@show \"Message processors\"",
             "midi_filters": null,
@@ -161,7 +161,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "45": {
+        "141": {
             "connections": [
                 []
             ],
@@ -172,7 +172,7 @@
                 "display_type": "patch_message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 12,
+                "height": 20.0,
                 "is_export": false,
                 "layer": "Table of Contents",
                 "min_height": 12,
@@ -183,12 +183,12 @@
                 "obj_state": 3,
                 "obj_type": "patch_message",
                 "position_x": 489.0,
-                "position_y": 217.0,
+                "position_y": 248.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 25
+                "width": 183.0
             },
             "initargs": "@show \"Signal processors\"",
             "midi_filters": null,
@@ -198,7 +198,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "46": {
+        "142": {
             "connections": [
                 []
             ],
@@ -209,7 +209,7 @@
                 "display_type": "patch_message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 12,
+                "height": 20.0,
                 "is_export": false,
                 "layer": "Table of Contents",
                 "min_height": 12,
@@ -220,12 +220,12 @@
                 "obj_state": 3,
                 "obj_type": "patch_message",
                 "position_x": 489.0,
-                "position_y": 248.0,
+                "position_y": 279.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 25
+                "width": 127.0
             },
             "initargs": "@show \"Debugging\"",
             "midi_filters": null,
@@ -235,7 +235,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "47": {
+        "143": {
             "connections": [
                 []
             ],
@@ -277,7 +277,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">Graphical patch elements</div></div>"
         },
-        "48": {
+        "144": {
             "connections": [
                 []
             ],
@@ -319,7 +319,7 @@
             "type": "text",
             "value": "Nodes in patches are represented by different kinds of graphical elements.\n\nChoose \"Help\" in each element's context menu (right mouse  button) to see details about each element type."
         },
-        "49": {
+        "145": {
             "connections": [
                 []
             ],
@@ -356,7 +356,7 @@
             "properties": {},
             "type": "message"
         },
-        "50": {
+        "146": {
             "connections": [
                 []
             ],
@@ -398,7 +398,7 @@
             "type": "text",
             "value": "message: Literal Python data, emitted when clicked"
         },
-        "51": {
+        "147": {
             "connections": [
                 []
             ],
@@ -440,7 +440,7 @@
             "properties": {},
             "type": "print"
         },
-        "52": {
+        "148": {
             "connections": [
                 []
             ],
@@ -482,7 +482,7 @@
             "type": "text",
             "value": "processor: The generic element type, processes inputs to outputs"
         },
-        "53": {
+        "149": {
             "connections": [
                 []
             ],
@@ -524,7 +524,7 @@
             "type": "enum",
             "value": 100.5
         },
-        "54": {
+        "150": {
             "connections": [
                 []
             ],
@@ -566,7 +566,7 @@
             "type": "text",
             "value": "number: A number; click and drag to change"
         },
-        "55": {
+        "151": {
             "connections": [
                 []
             ],
@@ -608,7 +608,7 @@
             "type": "text",
             "value": "Text"
         },
-        "56": {
+        "152": {
             "connections": [
                 []
             ],
@@ -650,7 +650,7 @@
             "type": "text",
             "value": "text: Markdown-enabled text comment"
         },
-        "57": {
+        "153": {
             "connections": [
                 []
             ],
@@ -690,7 +690,7 @@
             "properties": {},
             "type": "var"
         },
-        "58": {
+        "154": {
             "connections": [
                 []
             ],
@@ -732,7 +732,7 @@
             "type": "text",
             "value": "button: Emit a value when clicked, sometimes with toggle indicator"
         },
-        "59": {
+        "155": {
             "connections": [
                 []
             ],
@@ -777,7 +777,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "60": {
+        "156": {
             "connections": [
                 []
             ],
@@ -819,7 +819,7 @@
             "type": "text",
             "value": "slider: display/control a value with a slider and oprional scale display"
         },
-        "61": {
+        "157": {
             "connections": [
                 []
             ],
@@ -865,7 +865,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "62": {
+        "158": {
             "connections": [
                 []
             ],
@@ -907,7 +907,7 @@
             "type": "text",
             "value": "dial: like a slider but round"
         },
-        "63": {
+        "159": {
             "connections": [
                 []
             ],
@@ -944,7 +944,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "64": {
+        "160": {
             "connections": [
                 []
             ],
@@ -986,7 +986,7 @@
             "type": "text",
             "value": "Click to see info about X-Y plots "
         },
-        "65": {
+        "161": {
             "connections": [
                 []
             ],
@@ -1028,7 +1028,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">X-Y Plots</div></div>"
         },
-        "66": {
+        "162": {
             "connections": [
                 []
             ],
@@ -1070,7 +1070,7 @@
             "type": "text",
             "value": "You can plot data using points, lines, or bars. Data can come from individual messages that are sent to the plot, or from signal data in shared buffers."
         },
-        "67": {
+        "163": {
             "connections": [
                 []
             ],
@@ -1134,7 +1134,7 @@
             "properties": {},
             "type": "scatter"
         },
-        "68": {
+        "164": {
             "connections": [
                 []
             ],
@@ -1176,7 +1176,7 @@
             "type": "text",
             "value": "scatter - plot individual (x, y) points"
         },
-        "69": {
+        "165": {
             "connections": [
                 []
             ],
@@ -1218,13 +1218,13 @@
             "type": "text",
             "value": "scope - plot audio signals (requires a [buffer~] ... see buffer help for details)"
         },
-        "70": {
+        "166": {
             "connections": [
                 [],
                 [],
                 [
                     [
-                        71,
+                        167,
                         0
                     ]
                 ]
@@ -1267,11 +1267,11 @@
             "properties": {},
             "type": "buffer~"
         },
-        "71": {
+        "167": {
             "connections": [
                 [
                     [
-                        70,
+                        166,
                         0
                     ]
                 ]
@@ -1336,7 +1336,7 @@
             "properties": {},
             "type": "scope"
         },
-        "72": {
+        "168": {
             "connections": [
                 []
             ],
@@ -1378,7 +1378,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">Message processors</div></div>"
         },
-        "73": {
+        "169": {
             "connections": [
                 []
             ],
@@ -1420,7 +1420,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">Signal processors</div></div>"
         },
-        "74": {
+        "170": {
             "connections": [
                 []
             ],
@@ -1457,7 +1457,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "75": {
+        "171": {
             "connections": [
                 []
             ],
@@ -1494,7 +1494,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "76": {
+        "172": {
             "connections": [
                 []
             ],
@@ -1531,7 +1531,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "77": {
+        "173": {
             "connections": [
                 []
             ],
@@ -1568,7 +1568,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "78": {
+        "174": {
             "connections": [
                 []
             ],
@@ -1610,7 +1610,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">Debugging</div></div>"
         },
-        "79": {
+        "175": {
             "connections": [
                 []
             ],
@@ -1647,7 +1647,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "80": {
+        "176": {
             "connections": [
                 []
             ],
@@ -1658,7 +1658,7 @@
                 "display_type": "patch_message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
                 "layer": "Table of Contents",
                 "min_height": 12,
@@ -1674,7 +1674,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 50.0
+                "width": 25
             },
             "initargs": "@close",
             "midi_filters": null,
@@ -1684,7 +1684,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "81": {
+        "177": {
             "connections": [
                 []
             ],
@@ -1705,7 +1705,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_039",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 90.0,
@@ -1729,48 +1729,48 @@
     },
     "scopes": {
         "__patch__": {
-            "dial_002": 61,
-            "enum_004": 53,
-            "message_025": 49,
-            "patch": 41,
-            "patch_message_001": 43,
-            "patch_message_002": 44,
-            "patch_message_003": 45,
-            "patch_message_004": 46,
-            "patch_message_005": 63,
-            "patch_message_006": 74,
-            "patch_message_007": 75,
-            "patch_message_008": 76,
-            "patch_message_009": 77,
-            "patch_message_010": 79,
-            "patch_message_022": 80,
-            "plot_001": 67,
-            "plot_003": 71,
-            "processor_002": 70,
-            "processor_040": 51,
-            "self": 41,
-            "slidemeter_002": 59,
-            "text_001": 42,
-            "text_002": 65,
-            "text_003": 72,
-            "text_004": 73,
-            "text_005": 78,
-            "text_014": 66,
-            "text_015": 68,
-            "text_016": 69,
-            "text_039": 81,
-            "text_063": 47,
-            "text_064": 48,
-            "text_065": 50,
-            "text_066": 52,
-            "text_067": 54,
-            "text_068": 55,
-            "text_069": 56,
-            "text_070": 58,
-            "text_071": 60,
-            "text_072": 62,
-            "text_073": 64,
-            "toggle_002": 57
+            "dial_002": 157,
+            "enum_004": 149,
+            "message_025": 145,
+            "patch": 137,
+            "patch_message_001": 139,
+            "patch_message_002": 140,
+            "patch_message_003": 141,
+            "patch_message_004": 142,
+            "patch_message_005": 159,
+            "patch_message_006": 170,
+            "patch_message_007": 171,
+            "patch_message_008": 172,
+            "patch_message_009": 173,
+            "patch_message_010": 175,
+            "patch_message_022": 176,
+            "plot_001": 163,
+            "plot_003": 167,
+            "processor_002": 166,
+            "processor_040": 147,
+            "self": 137,
+            "slidemeter_002": 155,
+            "text_001": 138,
+            "text_002": 161,
+            "text_003": 168,
+            "text_004": 169,
+            "text_005": 174,
+            "text_014": 162,
+            "text_015": 164,
+            "text_016": 165,
+            "text_039": 177,
+            "text_063": 143,
+            "text_064": 144,
+            "text_065": 146,
+            "text_066": 148,
+            "text_067": 150,
+            "text_068": 151,
+            "text_069": 152,
+            "text_070": 154,
+            "text_071": 156,
+            "text_072": 158,
+            "text_073": 160,
+            "toggle_002": 153
         }
     },
     "type": "reference-patching.help"

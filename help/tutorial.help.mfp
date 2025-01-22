@@ -133,161 +133,6 @@
         },
         "100": {
             "connections": [
-                [
-                    [
-                        102,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "13. Pattern: Conditionals 3",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "\"hello\"",
-                "obj_name": "message_019",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 146.7159881591797,
-                "position_y": 199.30589294433594,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "\"hello\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_019",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "101": {
-            "connections": [
-                [
-                    [
-                        102,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "13. Pattern: Conditionals 3",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "(1,2,3)",
-                "obj_name": "message_020",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 278.56463623046875,
-                "position_y": 201.72451782226562,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "(1,2,3)",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_020",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "102": {
-            "connections": [
-                [
-                    [
-                        103,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        104,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        105,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        106,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        107,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layer": "13. Pattern: Conditionals 3",
-                "min_height": 12,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "\"hello\", str, tuple, float",
-                "obj_name": "processor_021",
-                "obj_state": 3,
-                "obj_type": "case",
-                "position_x": 105.8345718383789,
-                "position_y": 266.13958740234375,
-                "position_z": 0,
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"hello\", str, tuple, float",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_021",
-            "osc_methods": [],
-            "properties": {},
-            "type": "case"
-        },
-        "103": {
-            "connections": [
                 []
             ],
             "do_onload": true,
@@ -328,7 +173,7 @@
             "properties": {},
             "type": "print"
         },
-        "104": {
+        "101": {
             "connections": [
                 []
             ],
@@ -370,7 +215,7 @@
             "properties": {},
             "type": "print"
         },
-        "105": {
+        "102": {
             "connections": [
                 []
             ],
@@ -412,7 +257,7 @@
             "properties": {},
             "type": "print"
         },
-        "106": {
+        "103": {
             "connections": [
                 []
             ],
@@ -454,7 +299,7 @@
             "properties": {},
             "type": "print"
         },
-        "107": {
+        "104": {
             "connections": [
                 []
             ],
@@ -496,11 +341,11 @@
             "properties": {},
             "type": "print"
         },
-        "108": {
+        "105": {
             "connections": [
                 [
                     [
-                        102,
+                        99,
                         0
                     ]
                 ]
@@ -538,11 +383,11 @@
             "properties": {},
             "type": "message"
         },
-        "109": {
+        "106": {
             "connections": [
                 [
                     [
-                        102,
+                        99,
                         0
                     ]
                 ]
@@ -576,6 +421,132 @@
             "midi_filters": null,
             "midi_mode": null,
             "name": "message_022",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "107": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 33.0,
+                "is_export": false,
+                "layer": "14: Pattern: Metronome",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_059",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Metronome</b></span>",
+                "width": 221.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_059",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Metronome</b></span>"
+        },
+        "108": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 105.0,
+                "is_export": false,
+                "layer": "14: Pattern: Metronome",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_060",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 60.35821533203125,
+                "position_y": 91.02922058105469,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "If you want things to happen in a rhythm, you can use a <b>[metro]</b> \nto do it.  <b>[metro]</b> outputs a Bang periodically.  The interval between \nBangs is specified either in the init args or on the right inlet, in milliseconds \nin either case.  The metronome is started with a True or Bang on its left inlet\nand stopped with a False.",
+                "width": 544.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_060",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "If you want things to happen in a rhythm, you can use a <b>[metro]</b> \nto do it.  <b>[metro]</b> outputs a Bang periodically.  The interval between \nBangs is specified either in the init args or on the right inlet, in milliseconds \nin either case.  The metronome is started with a True or Bang on its left inlet\nand stopped with a False."
+        },
+        "109": {
+            "connections": [
+                [
+                    [
+                        111,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "14: Pattern: Metronome",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "True",
+                "obj_name": "message_023",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 155.76284790039062,
+                "position_y": 232.83914184570312,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "True",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_023",
             "osc_methods": [],
             "properties": {},
             "type": "message"
@@ -624,135 +595,9 @@
         },
         "110": {
             "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 33.0,
-                "is_export": false,
-                "layer": "14: Pattern: Metronome",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_059",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<span size=\"x-large\"><b>Pattern: Metronome</b></span>",
-                "width": 221.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_059",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"x-large\"><b>Pattern: Metronome</b></span>"
-        },
-        "111": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 105.0,
-                "is_export": false,
-                "layer": "14: Pattern: Metronome",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_060",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 60.35821533203125,
-                "position_y": 91.02922058105469,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "If you want things to happen in a rhythm, you can use a <b>[metro]</b> \nto do it.  <b>[metro]</b> outputs a Bang periodically.  The interval between \nBangs is specified either in the init args or on the right inlet, in milliseconds \nin either case.  The metronome is started with a True or Bang on its left inlet\nand stopped with a False.",
-                "width": 544.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_060",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "If you want things to happen in a rhythm, you can use a <b>[metro]</b> \nto do it.  <b>[metro]</b> outputs a Bang periodically.  The interval between \nBangs is specified either in the init args or on the right inlet, in milliseconds \nin either case.  The metronome is started with a True or Bang on its left inlet\nand stopped with a False."
-        },
-        "112": {
-            "connections": [
                 [
                     [
-                        114,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "14: Pattern: Metronome",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "True",
-                "obj_name": "message_023",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 155.76284790039062,
-                "position_y": 232.83914184570312,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "True",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_023",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "113": {
-            "connections": [
-                [
-                    [
-                        114,
+                        111,
                         0
                     ]
                 ]
@@ -790,11 +635,11 @@
             "properties": {},
             "type": "message"
         },
-        "114": {
+        "111": {
             "connections": [
                 [
                     [
-                        115,
+                        112,
                         0
                     ]
                 ]
@@ -837,7 +682,7 @@
             "properties": {},
             "type": "metro"
         },
-        "115": {
+        "112": {
             "connections": [
                 []
             ],
@@ -879,11 +724,11 @@
             "properties": {},
             "type": "print"
         },
-        "116": {
+        "113": {
             "connections": [
                 [
                     [
-                        117,
+                        114,
                         0
                     ]
                 ]
@@ -926,17 +771,17 @@
             "type": "enum",
             "value": 1000
         },
-        "117": {
+        "114": {
             "connections": [
                 [
                     [
-                        114,
+                        111,
                         1
                     ]
                 ],
                 [
                     [
-                        118,
+                        115,
                         0
                     ]
                 ]
@@ -979,7 +824,7 @@
             "properties": {},
             "type": "trigger"
         },
-        "118": {
+        "115": {
             "connections": [
                 []
             ],
@@ -1021,7 +866,7 @@
             "properties": {},
             "type": "print"
         },
-        "119": {
+        "116": {
             "connections": [
                 []
             ],
@@ -1062,6 +907,158 @@
             "properties": {},
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Functions</b></span>"
+        },
+        "117": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 205.0,
+                "is_export": false,
+                "layer": "15. Pattern: Functions",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_062",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 55.81477355957031,
+                "position_y": 76.21011352539062,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Mathematical functions can be defined in dataflow style or using the <b>[func]</b> \nbuiltin.  <b>[func]</b> will be slightly more efficient and may be clearer to read, but \nboth work fine.\n\nSay we have a number coming in and need to take that value <i>x</i> and compute the \nfunction: \n\n  y = 3*x^2 + 4*x + 5\n\nTwo ways to do it: ",
+                "width": 575.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_062",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Mathematical functions can be defined in dataflow style or using the <b>[func]</b> \nbuiltin.  <b>[func]</b> will be slightly more efficient and may be clearer to read, but \nboth work fine.\n\nSay we have a number coming in and need to take that value <i>x</i> and compute the \nfunction: \n\n  y = 3*x^2 + 4*x + 5\n\nTwo ways to do it: "
+        },
+        "118": {
+            "connections": [
+                [
+                    [
+                        119,
+                        0
+                    ],
+                    [
+                        125,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "digits": 1,
+                "display_type": "enum",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "15. Pattern: Functions",
+                "max_value": null,
+                "min_height": 12,
+                "min_value": null,
+                "min_width": 24,
+                "no_export": false,
+                "obj_args": "0.0",
+                "obj_name": "enum_003",
+                "obj_state": 3,
+                "obj_type": "enum",
+                "position_x": 341.5330810546875,
+                "position_y": 262.64605712890625,
+                "position_z": 0,
+                "scientific": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 24
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "enum_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "enum",
+            "value": 0.0
+        },
+        "119": {
+            "connections": [
+                [
+                    [
+                        122,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        122,
+                        1
+                    ]
+                ],
+                [
+                    [
+                        120,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20,
+                "is_export": false,
+                "layer": "15. Pattern: Functions",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "3",
+                "obj_name": "processor_031",
+                "obj_state": 3,
+                "obj_type": "trigger",
+                "position_x": 404.4472351074219,
+                "position_y": 295.7294616699219,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "3",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_031",
+            "osc_methods": [],
+            "properties": {},
+            "type": "trigger"
         },
         "12": {
             "connections": [
@@ -1107,161 +1104,9 @@
         },
         "120": {
             "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 205.0,
-                "is_export": false,
-                "layer": "15. Pattern: Functions",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_062",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 55.81477355957031,
-                "position_y": 76.21011352539062,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Mathematical functions can be defined in dataflow style or using the <b>[func]</b> \nbuiltin.  <b>[func]</b> will be slightly more efficient and may be clearer to read, but \nboth work fine.\n\nSay we have a number coming in and need to take that value <i>x</i> and compute the \nfunction: \n\n  y = 3*x^2 + 4*x + 5\n\nTwo ways to do it: ",
-                "width": 575.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_062",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Mathematical functions can be defined in dataflow style or using the <b>[func]</b> \nbuiltin.  <b>[func]</b> will be slightly more efficient and may be clearer to read, but \nboth work fine.\n\nSay we have a number coming in and need to take that value <i>x</i> and compute the \nfunction: \n\n  y = 3*x^2 + 4*x + 5\n\nTwo ways to do it: "
-        },
-        "121": {
-            "connections": [
                 [
                     [
-                        122,
-                        0
-                    ],
-                    [
-                        128,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "digits": 1,
-                "display_type": "enum",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "15. Pattern: Functions",
-                "max_value": null,
-                "min_height": 12,
-                "min_value": null,
-                "min_width": 24,
-                "no_export": false,
-                "obj_args": "0.0",
-                "obj_name": "enum_003",
-                "obj_state": 3,
-                "obj_type": "enum",
-                "position_x": 341.5330810546875,
-                "position_y": 262.64605712890625,
-                "position_z": 0,
-                "scientific": false,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 24
-            },
-            "initargs": "0.0",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "enum_003",
-            "osc_methods": [],
-            "properties": {},
-            "type": "enum",
-            "value": 0.0
-        },
-        "122": {
-            "connections": [
-                [
-                    [
-                        125,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        125,
-                        1
-                    ]
-                ],
-                [
-                    [
-                        123,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layer": "15. Pattern: Functions",
-                "min_height": 12,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "3",
-                "obj_name": "processor_031",
-                "obj_state": 3,
-                "obj_type": "trigger",
-                "position_x": 404.4472351074219,
-                "position_y": 295.7294616699219,
-                "position_z": 0,
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "3",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_031",
-            "osc_methods": [],
-            "properties": {},
-            "type": "trigger"
-        },
-        "123": {
-            "connections": [
-                [
-                    [
-                        124,
+                        121,
                         0
                     ]
                 ]
@@ -1304,11 +1149,11 @@
             "properties": {},
             "type": "*"
         },
-        "124": {
+        "121": {
             "connections": [
                 [
                     [
-                        127,
+                        124,
                         1
                     ]
                 ]
@@ -1351,11 +1196,11 @@
             "properties": {},
             "type": "+"
         },
-        "125": {
+        "122": {
             "connections": [
                 [
                     [
-                        126,
+                        123,
                         0
                     ]
                 ]
@@ -1398,11 +1243,11 @@
             "properties": {},
             "type": "*"
         },
-        "126": {
+        "123": {
             "connections": [
                 [
                     [
-                        127,
+                        124,
                         0
                     ]
                 ]
@@ -1445,11 +1290,11 @@
             "properties": {},
             "type": "*"
         },
-        "127": {
+        "124": {
             "connections": [
                 [
                     [
-                        130,
+                        127,
                         0
                     ]
                 ]
@@ -1492,11 +1337,11 @@
             "properties": {},
             "type": "+"
         },
-        "128": {
+        "125": {
             "connections": [
                 [
                     [
-                        129,
+                        126,
                         0
                     ]
                 ]
@@ -1539,7 +1384,7 @@
             "properties": {},
             "type": "func"
         },
-        "129": {
+        "126": {
             "connections": [
                 []
             ],
@@ -1580,6 +1425,132 @@
             "osc_methods": [],
             "properties": {},
             "type": "print"
+        },
+        "127": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20,
+                "is_export": false,
+                "layer": "15. Pattern: Functions",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "\"dataflow says y=%s\"",
+                "obj_name": "processor_039",
+                "obj_state": 3,
+                "obj_type": "print",
+                "position_x": 405.4403991699219,
+                "position_y": 459.25360107421875,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"dataflow says y=%s\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_039",
+            "osc_methods": [],
+            "properties": {},
+            "type": "print"
+        },
+        "128": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "0. Introduction",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_003",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 616.0,
+                "position_y": 614.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Updated for mfp version 0.8",
+                "width": 181.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Updated for mfp version 0.8"
+        },
+        "129": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "1. Command line",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_063",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 69.0,
+                "position_y": 416.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<i>--> Press the Page Down key to advance... you get the idea, I won't mention it again</i>",
+                "width": 510.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_063",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<i>--> Press the Page Down key to advance... you get the idea, I won't mention it again</i>"
         },
         "13": {
             "connections": [
@@ -1627,132 +1598,6 @@
             "connections": [
                 []
             ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layer": "15. Pattern: Functions",
-                "min_height": 12,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "\"dataflow says y=%s\"",
-                "obj_name": "processor_039",
-                "obj_state": 3,
-                "obj_type": "print",
-                "position_x": 405.4403991699219,
-                "position_y": 459.25360107421875,
-                "position_z": 0,
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "\"dataflow says y=%s\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_039",
-            "osc_methods": [],
-            "properties": {},
-            "type": "print"
-        },
-        "131": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layer": "0. Introduction",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_003",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 616.0,
-                "position_y": 614.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Updated for mfp version 0.8",
-                "width": 181.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_003",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Updated for mfp version 0.8"
-        },
-        "132": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layer": "1. Command line",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_063",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 69.0,
-                "position_y": 416.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<i>--> Press the Page Down key to advance... you get the idea, I won't mention it again</i>",
-                "width": 510.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_063",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<i>--> Press the Page Down key to advance... you get the idea, I won't mention it again</i>"
-        },
-        "133": {
-            "connections": [
-                []
-            ],
             "do_onload": false,
             "gui_params": {
                 "clickchange": false,
@@ -1791,7 +1636,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>App layout</b></span>"
         },
-        "134": {
+        "131": {
             "connections": [
                 []
             ],
@@ -1833,7 +1678,7 @@
             "type": "text",
             "value": "\n<b>The canvas</b>\n\n* The area this text is displayed in is the canvas. This is where you edit and operate patches. \n\n* The canvas is a stack of <b>pages</b> (only one page is visible at a time) with each page being made up of <b>tiles</b> that will always exactly fill the window. \n\n* Each tile can display a <b>patch</b>. There's only one kind of patch in mfp, and it corresponds to a single <tt>.mfp</tt> file.\n\n* Each patch can have <b>layers</b>. Only one layer can be displayed at a time in a patch."
         },
-        "135": {
+        "132": {
             "connections": [
                 []
             ],
@@ -1858,7 +1703,7 @@
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 65.0,
-                "position_y": 412.0,
+                "position_y": 409.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
@@ -1875,7 +1720,7 @@
             "type": "text",
             "value": "<b>Log and Console</b>\n\nThe Log tab shows program output, status, and error messages. \n\nThe Console tab contains an interactive Python REPL that can be used for debugging and live-coding.\n\nToggle display of the Log and Console with the ~ (tilde) key or in the Window menu.\n\n<b>Status and Command Line</b>\n\nBelow the Log panel is a status line that shows status and notifications, and when input is needed from you the prompt will appear there. The default display shows tooltips from hovered items, or a summary of the current input mode if nothing is hovered."
         },
-        "136": {
+        "133": {
             "connections": [
                 []
             ],
@@ -1917,7 +1762,7 @@
             "type": "text",
             "value": "<b>Menu bar</b>\n\nMFP is first and foremost a keyboard-driven app, but most keyboard actions have menu entries as well. Note that individual items in a patch will also have a context menu that you can pop up with the right button or two-finger click. "
         },
-        "137": {
+        "134": {
             "connections": [
                 []
             ],
@@ -1959,7 +1804,7 @@
             "type": "text",
             "value": "<b>Info panel</b>\n\nThe right side of the app window is the info panel. It has a number of tabs to display and edit information about the current patch and selected object(s). Toggle display of the info panel with the \\` (backtick) key or in the Window menu."
         },
-        "138": {
+        "135": {
             "connections": [
                 []
             ],
@@ -2001,7 +1846,7 @@
             "type": "text",
             "value": "-------------->"
         },
-        "139": {
+        "136": {
             "connections": [
                 []
             ],
@@ -2022,7 +1867,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_034",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 65.0,
@@ -2442,7 +2287,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_032",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 61.0,
@@ -2484,7 +2329,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_033",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 64.0,
@@ -2505,7 +2350,7 @@
             "type": "text",
             "value": "<i>--> Type the following in your working patch to create a \"Hello, world\" patch::</i>\n\n| **You type** | **Action taken** |\n|-|-|\n| m | Create a message element |\n| \"hello, world\" RET | Enter message data |\n| c | Enter connection mode |\n| a | Show Autoplace marker | \n| p | Create a Processor element | \n| print RET | Make it a print element |\n| RET | Accept the proposed connection |\n"
         },
-        "27": {
+        "24": {
             "connections": [
                 []
             ],
@@ -2535,7 +2380,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. ",
+                "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. \n\nIf you don't want to use the mouse, TAB until the message box is selected, and then RET to trigger it.",
                 "width": 433.0
             },
             "initargs": null,
@@ -2545,62 +2390,25 @@
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. "
+            "value": "<i>--> Hit ESC to enter Operate mode, then click on the message box</i>\n\nObserve that the message \"hello, world\" appears in the log tab below. \n\nIf you don't want to use the mouse, TAB until the message box is selected, and then RET to trigger it."
         },
-        "28": {
+        "25": {
             "connections": [
                 [
                     [
-                        29,
+                        26,
                         0
                     ]
                 ]
             ],
             "do_onload": false,
             "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layer": "5. Hello, world",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 28,
-                        "obj_2": 29,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 450.0,
-                        "position_y": 167.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
+                "connection_info": [],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
                 "layer": "5. Hello, world",
                 "min_height": 12,
@@ -2616,7 +2424,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 106.0
+                "width": 25
             },
             "initargs": "\"hello, world\"",
             "midi_filters": null,
@@ -2626,7 +2434,7 @@
             "properties": {},
             "type": "message"
         },
-        "29": {
+        "26": {
             "connections": [
                 []
             ],
@@ -2641,7 +2449,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20.0,
+                "height": 20,
                 "is_export": false,
                 "layer": "5. Hello, world",
                 "min_height": 12,
@@ -2658,7 +2466,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 43.0
+                "width": 20
             },
             "initargs": null,
             "midi_filters": null,
@@ -2667,6 +2475,127 @@
             "osc_methods": [],
             "properties": {},
             "type": "print"
+        },
+        "27": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 33.0,
+                "is_export": false,
+                "layer": "6. Creating elements",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_041",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
+                "width": 201.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_041",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Creating elements</b></span>"
+        },
+        "28": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 360.0,
+                "is_export": false,
+                "layer": "6. Creating elements",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_044",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 43.0,
+                "position_y": 62.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  ",
+                "width": 541.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_044",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  "
+        },
+        "29": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "6. Creating elements",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "\"hello\"",
+                "obj_name": "message_002",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 506.0,
+                "position_y": 128.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
         },
         "3": {
             "connections": [
@@ -2714,127 +2643,6 @@
             "connections": [
                 []
             ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 33.0,
-                "is_export": false,
-                "layer": "6. Creating elements",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_041",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<span size=\"x-large\"><b>Creating elements</b></span>",
-                "width": 201.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_041",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"x-large\"><b>Creating elements</b></span>"
-        },
-        "31": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 360.0,
-                "is_export": false,
-                "layer": "6. Creating elements",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": null,
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 43.0,
-                "position_y": 62.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  ",
-                "width": 541.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_044",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "In the \"hello, world\" example you used <tt>m</tt> and <tt>p</tt> to create patch \nelements.  All the keys to create elements are part of Patch Edit mode, and they are: \n\nBasics: \n   <tt>m</tt>     Create a message box\n   <tt>p</tt>     Create a processor (user patch or builtin with no special UI)\n   <tt>n</tt>     Create a number box\n   <tt>t</tt>     Create a text comment\n\nControls: \n   <tt>u</tt>     Create a toggle button \n   <tt>g</tt>     Create a \"bang\" (momentary) button \n   <tt>s</tt>     Create a slider\n   <tt>d</tt>    Create a dial (round slider)\n\nDisplay:\n   <tt>b</tt>    Create a bar meter\n   <tt>i</tt>    Create an indicator (on/off toggle display)\n   <tt>x</tt>    X/Y plot (oscilloscope or scatter style)  "
-        },
-        "32": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layer": "6. Creating elements",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "\"hello\"",
-                "obj_name": "message_002",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 506.0,
-                "position_y": 128.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 57.0
-            },
-            "initargs": "\"hello\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "33": {
-            "connections": [
-                []
-            ],
             "do_onload": true,
             "gui_params": {
                 "connection_info": [],
@@ -2873,7 +2681,7 @@
             "properties": {},
             "type": "print"
         },
-        "34": {
+        "31": {
             "connections": [
                 []
             ],
@@ -2915,7 +2723,7 @@
             "type": "enum",
             "value": 0.0
         },
-        "35": {
+        "32": {
             "connections": [
                 []
             ],
@@ -2957,7 +2765,7 @@
             "type": "text",
             "value": "Message"
         },
-        "36": {
+        "33": {
             "connections": [
                 []
             ],
@@ -2999,7 +2807,7 @@
             "type": "text",
             "value": "Processor"
         },
-        "37": {
+        "34": {
             "connections": [
                 []
             ],
@@ -3041,7 +2849,7 @@
             "type": "text",
             "value": "Number"
         },
-        "38": {
+        "35": {
             "connections": [
                 []
             ],
@@ -3083,7 +2891,7 @@
             "type": "text",
             "value": "Hello!"
         },
-        "39": {
+        "36": {
             "connections": [
                 []
             ],
@@ -3124,6 +2932,127 @@
             "properties": {},
             "type": "text",
             "value": "Comment"
+        },
+        "37": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "toggle",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20,
+                "is_export": false,
+                "label_text": "",
+                "layer": "6. Creating elements",
+                "min_height": 16,
+                "min_width": 16,
+                "no_export": false,
+                "obj_args": "False",
+                "obj_name": "toggle_001",
+                "obj_state": 3,
+                "obj_type": "var",
+                "off_message": false,
+                "on_message": true,
+                "position_x": 518.8341674804688,
+                "position_y": 258.73150634765625,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 20
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "toggle_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var"
+        },
+        "38": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 25.0,
+                "is_export": false,
+                "layer": "6. Creating elements",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_050",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 589.8136596679688,
+                "position_y": 259.7294921875,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Toggle",
+                "width": 58.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_050",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Toggle"
+        },
+        "39": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "button",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20,
+                "is_export": false,
+                "label_text": "",
+                "layer": "6. Creating elements",
+                "message": null,
+                "min_height": 16,
+                "min_width": 16,
+                "no_export": false,
+                "obj_args": "False",
+                "obj_name": "button_013",
+                "obj_state": 3,
+                "obj_type": "var",
+                "position_x": 518.8341674804688,
+                "position_y": 290.6846008300781,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 20
+            },
+            "initargs": "False",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "button_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var"
         },
         "4": {
             "connections": [
@@ -3171,127 +3100,6 @@
             "connections": [
                 []
             ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "toggle",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20,
-                "is_export": false,
-                "label_text": "",
-                "layer": "6. Creating elements",
-                "min_height": 16,
-                "min_width": 16,
-                "no_export": false,
-                "obj_args": "False",
-                "obj_name": "toggle_001",
-                "obj_state": 3,
-                "obj_type": "var",
-                "off_message": false,
-                "on_message": true,
-                "position_x": 518.8341674804688,
-                "position_y": 258.73150634765625,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 20
-            },
-            "initargs": "False",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "toggle_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "var"
-        },
-        "41": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 25.0,
-                "is_export": false,
-                "layer": "6. Creating elements",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_050",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 589.8136596679688,
-                "position_y": 259.7294921875,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Toggle",
-                "width": 58.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_050",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Toggle"
-        },
-        "42": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "button",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20,
-                "is_export": false,
-                "label_text": "",
-                "layer": "6. Creating elements",
-                "message": null,
-                "min_height": 16,
-                "min_width": 16,
-                "no_export": false,
-                "obj_args": "False",
-                "obj_name": "button_013",
-                "obj_state": 3,
-                "obj_type": "var",
-                "position_x": 518.8341674804688,
-                "position_y": 290.6846008300781,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 20
-            },
-            "initargs": "False",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "button_013",
-            "osc_methods": [],
-            "properties": {},
-            "type": "var"
-        },
-        "43": {
-            "connections": [
-                []
-            ],
             "do_onload": false,
             "gui_params": {
                 "clickchange": false,
@@ -3330,7 +3138,7 @@
             "type": "text",
             "value": "Bang"
         },
-        "44": {
+        "41": {
             "connections": [
                 []
             ],
@@ -3375,7 +3183,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "45": {
+        "42": {
             "connections": [
                 []
             ],
@@ -3417,7 +3225,7 @@
             "type": "text",
             "value": "Slider"
         },
-        "46": {
+        "43": {
             "connections": [
                 []
             ],
@@ -3463,7 +3271,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "47": {
+        "44": {
             "connections": [
                 []
             ],
@@ -3505,7 +3313,7 @@
             "type": "text",
             "value": "Dial"
         },
-        "48": {
+        "45": {
             "connections": [
                 []
             ],
@@ -3547,7 +3355,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Edit and Operate modes</b></span>"
         },
-        "49": {
+        "46": {
             "connections": [
                 []
             ],
@@ -3588,6 +3396,132 @@
             "properties": {},
             "type": "text",
             "value": "On the left side of the status line corner of the canvas, find the <b>mode indicator</b>.  It will say something like <b>Global > Edit</b> or <b>Global > Operate</b>. You may need to move the mouse pointer to an empty spoty of the Canvas if a tooltip is showing instead. \n\nThis is the stack of \"input modes\" that MFP uses to interpret your key presses and mouse activity. \"Global\" mode is always active and includes actions that are always applicable, such as opening and saving files. The next mode after Global is the \"major mode\", which is always Edit or Operate. After that are \"minor modes\" which are enabled and disabled as needed. \n\n<b>Edit</b> mode allows you to create, move, and edit objects in the patch.  Your key presses and mouse activity are interpreted as editing operations.  MFP starts in <b>Edit</b> mode.  To re-enter <b>Edit</b> mode, type C-SPC (control-space). In Edit mode, the background of the currently-selected patch shows a grid pattern.\n\n<b>Operate</b> mode allows you to operate the patch.  Your inputs are interpreted as\ncontrol operations, and will not alter the patch.  You need to be in <b>Operate</b> mode to click buttons or messages, drag sliders, etc.  To enter <b>Operate</b> mode, hit ESC (escape). In Operate mode, the background of the selected patch is plain (no grid).\n\n<i>--> Hit ESC to enter <b>Operate</b> mode.  Note the change in the Mode Indicator</i>\n\n<i>--> Hit C-SPC to return to <b>Edit</b> mode.</i>"
+        },
+        "47": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 33.0,
+                "is_export": false,
+                "layer": "7. Zoom and scroll",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_008",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Zoom and Scroll</b></span>",
+                "width": 180.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Zoom and Scroll</b></span>"
+        },
+        "48": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 305.0,
+                "is_export": false,
+                "layer": "7. Zoom and scroll",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_043",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 66.5006103515625,
+                "position_y": 88.23711395263672,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Zoom and scroll on the canvas are handled without scrollbars, using a \"drag\nto scroll and scroll to zoom\" model something like Google Maps.  \n\n<b>C-S-M1MOTION</b> is the keybinding to drag the canvas.  That is, hold \ndown the Control and Shift keys while clicking mouse button 1 (usually left) \nand dragging.  \n\n  <i>--> Use <b>C-S-M1MOTION</b> to drag the canvas around.</i> \n\nThe scroll wheel zooms in and out.\n\n  <i>--> Zoom!</i>  \n\n<b>C-0</b> (control-zero) resets the zoom to 1, and the position of the canvas \nto its starting point. ",
+                "width": 542.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_043",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Zoom and scroll on the canvas are handled without scrollbars, using a \"drag\nto scroll and scroll to zoom\" model something like Google Maps.  \n\n<b>C-S-M1MOTION</b> is the keybinding to drag the canvas.  That is, hold \ndown the Control and Shift keys while clicking mouse button 1 (usually left) \nand dragging.  \n\n  <i>--> Use <b>C-S-M1MOTION</b> to drag the canvas around.</i> \n\nThe scroll wheel zooms in and out.\n\n  <i>--> Zoom!</i>  \n\n<b>C-0</b> (control-zero) resets the zoom to 1, and the position of the canvas \nto its starting point. "
+        },
+        "49": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 33.0,
+                "is_export": false,
+                "layer": "9. Pattern: Sequencing",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_009",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Pattern: Sequencing</b></span>",
+                "width": 218.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_009",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Pattern: Sequencing</b></span>"
         },
         "5": {
             "connections": [
@@ -3644,132 +3578,6 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 33.0,
-                "is_export": false,
-                "layer": "7. Zoom and scroll",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_008",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<span size=\"x-large\"><b>Zoom and Scroll</b></span>",
-                "width": 180.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_008",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"x-large\"><b>Zoom and Scroll</b></span>"
-        },
-        "51": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 305.0,
-                "is_export": false,
-                "layer": "7. Zoom and scroll",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_043",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 66.5006103515625,
-                "position_y": 88.23711395263672,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Zoom and scroll on the canvas are handled without scrollbars, using a \"drag\nto scroll and scroll to zoom\" model something like Google Maps.  \n\n<b>C-S-M1MOTION</b> is the keybinding to drag the canvas.  That is, hold \ndown the Control and Shift keys while clicking mouse button 1 (usually left) \nand dragging.  \n\n  <i>--> Use <b>C-S-M1MOTION</b> to drag the canvas around.</i> \n\nThe scroll wheel zooms in and out.\n\n  <i>--> Zoom!</i>  \n\n<b>C-0</b> (control-zero) resets the zoom to 1, and the position of the canvas \nto its starting point. ",
-                "width": 542.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_043",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Zoom and scroll on the canvas are handled without scrollbars, using a \"drag\nto scroll and scroll to zoom\" model something like Google Maps.  \n\n<b>C-S-M1MOTION</b> is the keybinding to drag the canvas.  That is, hold \ndown the Control and Shift keys while clicking mouse button 1 (usually left) \nand dragging.  \n\n  <i>--> Use <b>C-S-M1MOTION</b> to drag the canvas around.</i> \n\nThe scroll wheel zooms in and out.\n\n  <i>--> Zoom!</i>  \n\n<b>C-0</b> (control-zero) resets the zoom to 1, and the position of the canvas \nto its starting point. "
-        },
-        "52": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 33.0,
-                "is_export": false,
-                "layer": "9. Pattern: Sequencing",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_009",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<span size=\"x-large\"><b>Pattern: Sequencing</b></span>",
-                "width": 218.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_009",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"x-large\"><b>Pattern: Sequencing</b></span>"
-        },
-        "53": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
                 "height": 85.0,
                 "is_export": false,
                 "layer": "9. Pattern: Sequencing",
@@ -3799,11 +3607,11 @@
             "type": "text",
             "value": "Think of a patch as a graph where messages are passed between nodes \n<i>depth first</i> and outputs of a processor (generally) occur \nin <i>right to left</i> order.   The <b>[trigger]</b> object does nothing \nexcept repeat its input to multiple outputs in right-to-left order."
         },
-        "54": {
+        "51": {
             "connections": [
                 [
                     [
-                        55,
+                        52,
                         0
                     ]
                 ]
@@ -3841,23 +3649,23 @@
             "properties": {},
             "type": "message"
         },
-        "55": {
+        "52": {
             "connections": [
                 [
                     [
-                        56,
+                        53,
                         0
                     ]
                 ],
                 [
                     [
-                        57,
+                        54,
                         0
                     ]
                 ],
                 [
                     [
-                        58,
+                        55,
                         0
                     ]
                 ]
@@ -3900,7 +3708,7 @@
             "properties": {},
             "type": "trigger"
         },
-        "56": {
+        "53": {
             "connections": [
                 []
             ],
@@ -3942,7 +3750,7 @@
             "properties": {},
             "type": "print"
         },
-        "57": {
+        "54": {
             "connections": [
                 []
             ],
@@ -3984,7 +3792,7 @@
             "properties": {},
             "type": "print"
         },
-        "58": {
+        "55": {
             "connections": [
                 []
             ],
@@ -4026,7 +3834,7 @@
             "properties": {},
             "type": "print"
         },
-        "59": {
+        "56": {
             "connections": [
                 []
             ],
@@ -4067,6 +3875,132 @@
             "properties": {},
             "type": "text",
             "value": "This is the essential pattern to use when you need to execute steps \nin a certain order."
+        },
+        "57": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 33.0,
+                "is_export": false,
+                "layer": "8. Hot and Cold",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_016",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 39.7034912109375,
+                "position_y": 28.57501220703125,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<span size=\"x-large\"><b>Hot and Cold</b></span>",
+                "width": 145.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<span size=\"x-large\"><b>Hot and Cold</b></span>"
+        },
+        "58": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 56.0,
+                "is_export": false,
+                "layer": "8. Hot and Cold",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_017",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 65.0,
+                "position_y": 80.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Messages coming into a processor only trigger the processor if the inlet is \"hot\". Usually, only the leftmost inlet is \"hot\".  To marshal a set of inputs (arguments) to the processor, send to all the other inlets first, then to the leftmost inlet.",
+                "width": 586.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_017",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Messages coming into a processor only trigger the processor if the inlet is \"hot\". Usually, only the leftmost inlet is \"hot\".  To marshal a set of inputs (arguments) to the processor, send to all the other inlets first, then to the leftmost inlet."
+        },
+        "59": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 45.0,
+                "is_export": false,
+                "layer": "8. Hot and Cold",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_029",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 67.91510009765625,
+                "position_y": 165.6861572265625,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "In the example below, <b>[pack]</b> builds a Python array from its inputs.  \nClick in different orders and see what comes out and when it comes out.  ",
+                "width": 523.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_029",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "In the example below, <b>[pack]</b> builds a Python array from its inputs.  \nClick in different orders and see what comes out and when it comes out.  "
         },
         "6": {
             "connections": [
@@ -4112,135 +4046,9 @@
         },
         "60": {
             "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 33.0,
-                "is_export": false,
-                "layer": "8. Hot and Cold",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_016",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 39.7034912109375,
-                "position_y": 28.57501220703125,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<span size=\"x-large\"><b>Hot and Cold</b></span>",
-                "width": 145.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_016",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<span size=\"x-large\"><b>Hot and Cold</b></span>"
-        },
-        "61": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 65.0,
-                "is_export": false,
-                "layer": "8. Hot and Cold",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_017",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 65.73871612548828,
-                "position_y": 80.26740264892578,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Data coming into a processor only trigger the processor if the inlet is \"hot\". Usually,\nonly the leftmost inlet is \"hot\".  To marshal a set of inputs (arguments) to the \nprocessor, send to all the other inlets first, then to the leftmost inlet.",
-                "width": 595.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_017",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Data coming into a processor only trigger the processor if the inlet is \"hot\". Usually,\nonly the leftmost inlet is \"hot\".  To marshal a set of inputs (arguments) to the \nprocessor, send to all the other inlets first, then to the leftmost inlet."
-        },
-        "62": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 45.0,
-                "is_export": false,
-                "layer": "8. Hot and Cold",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_029",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 67.91510009765625,
-                "position_y": 165.6861572265625,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "In the example below, <b>[pack]</b> builds a Python array from its inputs.  \nClick in different orders and see what comes out and when it comes out.  ",
-                "width": 523.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_029",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "In the example below, <b>[pack]</b> builds a Python array from its inputs.  \nClick in different orders and see what comes out and when it comes out.  "
-        },
-        "63": {
-            "connections": [
                 [
                     [
-                        67,
+                        64,
                         0
                     ]
                 ]
@@ -4278,11 +4086,11 @@
             "properties": {},
             "type": "message"
         },
-        "64": {
+        "61": {
             "connections": [
                 [
                     [
-                        67,
+                        64,
                         1
                     ]
                 ]
@@ -4320,11 +4128,11 @@
             "properties": {},
             "type": "message"
         },
-        "65": {
+        "62": {
             "connections": [
                 [
                     [
-                        67,
+                        64,
                         2
                     ]
                 ]
@@ -4362,11 +4170,11 @@
             "properties": {},
             "type": "message"
         },
-        "66": {
+        "63": {
             "connections": [
                 [
                     [
-                        67,
+                        64,
                         3
                     ]
                 ]
@@ -4404,11 +4212,11 @@
             "properties": {},
             "type": "message"
         },
-        "67": {
+        "64": {
             "connections": [
                 [
                     [
-                        68,
+                        65,
                         0
                     ]
                 ]
@@ -4451,7 +4259,7 @@
             "properties": {},
             "type": "pack"
         },
-        "68": {
+        "65": {
             "connections": [
                 []
             ],
@@ -4493,7 +4301,7 @@
             "properties": {},
             "type": "print"
         },
-        "69": {
+        "66": {
             "connections": [
                 []
             ],
@@ -4534,6 +4342,137 @@
             "properties": {},
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Iteration</b></span>"
+        },
+        "67": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 165.0,
+                "is_export": false,
+                "layer": "10. Pattern: Iteration",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_039",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 62.799190521240234,
+                "position_y": 82.15888214111328,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "The <b>[for]</b> object is key to iteration.  It splits a list of inputs into \nits elements and outputs them one at a time.  The items to iterate over \ncan be either init args (in the processor box) or received either inlet.\n\nIteration starts when a Bang, True, or an iterable is received on the left (hot) inlet.\n\nIteration will stop when the current list is traversed or a False is receved on\nthe left inlet. ",
+                "width": 580.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_039",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "The <b>[for]</b> object is key to iteration.  It splits a list of inputs into \nits elements and outputs them one at a time.  The items to iterate over \ncan be either init args (in the processor box) or received either inlet.\n\nIteration starts when a Bang, True, or an iterable is received on the left (hot) inlet.\n\nIteration will stop when the current list is traversed or a False is receved on\nthe left inlet. "
+        },
+        "68": {
+            "connections": [
+                [
+                    [
+                        69,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "10. Pattern: Iteration",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "Bang",
+                "obj_name": "message_008",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 127.87886810302734,
+                "position_y": 271.86598205566406,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "Bang",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "69": {
+            "connections": [
+                [
+                    [
+                        70,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20,
+                "is_export": false,
+                "layer": "10. Pattern: Iteration",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "range(3,10)",
+                "obj_name": "processor_004",
+                "obj_state": 3,
+                "obj_type": "for",
+                "position_x": 192.7921371459961,
+                "position_y": 345.80487060546875,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "range(3,10)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "for"
         },
         "7": {
             "connections": [
@@ -4581,137 +4520,6 @@
             "connections": [
                 []
             ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 165.0,
-                "is_export": false,
-                "layer": "10. Pattern: Iteration",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_039",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 62.799190521240234,
-                "position_y": 82.15888214111328,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "The <b>[for]</b> object is key to iteration.  It splits a list of inputs into \nits elements and outputs them one at a time.  The items to iterate over \ncan be either init args (in the processor box) or received either inlet.\n\nIteration starts when a Bang, True, or an iterable is received on the left (hot) inlet.\n\nIteration will stop when the current list is traversed or a False is receved on\nthe left inlet. ",
-                "width": 580.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_039",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "The <b>[for]</b> object is key to iteration.  It splits a list of inputs into \nits elements and outputs them one at a time.  The items to iterate over \ncan be either init args (in the processor box) or received either inlet.\n\nIteration starts when a Bang, True, or an iterable is received on the left (hot) inlet.\n\nIteration will stop when the current list is traversed or a False is receved on\nthe left inlet. "
-        },
-        "71": {
-            "connections": [
-                [
-                    [
-                        72,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "10. Pattern: Iteration",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "Bang",
-                "obj_name": "message_008",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 127.87886810302734,
-                "position_y": 271.86598205566406,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "Bang",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_008",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "72": {
-            "connections": [
-                [
-                    [
-                        73,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layer": "10. Pattern: Iteration",
-                "min_height": 12,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "range(3,10)",
-                "obj_name": "processor_004",
-                "obj_state": 3,
-                "obj_type": "for",
-                "position_x": 192.7921371459961,
-                "position_y": 345.80487060546875,
-                "position_z": 0,
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "range(3,10)",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_004",
-            "osc_methods": [],
-            "properties": {},
-            "type": "for"
-        },
-        "73": {
-            "connections": [
-                []
-            ],
             "do_onload": true,
             "gui_params": {
                 "connection_info": [],
@@ -4750,11 +4558,11 @@
             "properties": {},
             "type": "print"
         },
-        "74": {
+        "71": {
             "connections": [
                 [
                     [
-                        72,
+                        69,
                         1
                     ]
                 ]
@@ -4792,11 +4600,11 @@
             "properties": {},
             "type": "message"
         },
-        "75": {
+        "72": {
             "connections": [
                 [
                     [
-                        72,
+                        69,
                         0
                     ]
                 ]
@@ -4834,7 +4642,7 @@
             "properties": {},
             "type": "message"
         },
-        "76": {
+        "73": {
             "connections": [
                 []
             ],
@@ -4876,7 +4684,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Conditionals 1</b></span>"
         },
-        "77": {
+        "74": {
             "connections": [
                 []
             ],
@@ -4918,11 +4726,11 @@
             "type": "text",
             "value": "The <b>[case]</b> and <b>[route]</b> objects are the building blocks of \nconditional code.  <b>[case]</b> tests its left inlet for equality against a \nseries of values and repeats the input value on the corresponding positional \noutput.   If no test matches, the value is repeated on the rightmost outlet. "
         },
-        "78": {
+        "75": {
             "connections": [
                 [
                     [
-                        82,
+                        79,
                         0
                     ]
                 ]
@@ -4960,11 +4768,11 @@
             "properties": {},
             "type": "message"
         },
-        "79": {
+        "76": {
             "connections": [
                 [
                     [
-                        82,
+                        79,
                         0
                     ]
                 ]
@@ -5001,6 +4809,155 @@
             "osc_methods": [],
             "properties": {},
             "type": "message"
+        },
+        "77": {
+            "connections": [
+                [
+                    [
+                        79,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "11. Pattern: Conditionals 1",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "\"hello\"",
+                "obj_name": "message_013",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 198.69825744628906,
+                "position_y": 174.77963256835938,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "78": {
+            "connections": [
+                [
+                    [
+                        79,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "11. Pattern: Conditionals 1",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "\"goodbye\"",
+                "obj_name": "message_014",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 276.5798645019531,
+                "position_y": 176.2264862060547,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "\"goodbye\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_014",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "79": {
+            "connections": [
+                [
+                    [
+                        83,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        80,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        81,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        82,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20,
+                "is_export": false,
+                "layer": "11. Pattern: Conditionals 1",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "True, False, \"hello\"",
+                "obj_name": "processor_011",
+                "obj_state": 3,
+                "obj_type": "case",
+                "position_x": 98.849853515625,
+                "position_y": 265.6834716796875,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "True, False, \"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_011",
+            "osc_methods": [],
+            "properties": {},
+            "type": "case"
         },
         "8": {
             "connections": [
@@ -5046,155 +5003,6 @@
         },
         "80": {
             "connections": [
-                [
-                    [
-                        82,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "11. Pattern: Conditionals 1",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "\"hello\"",
-                "obj_name": "message_013",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 198.69825744628906,
-                "position_y": 174.77963256835938,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "\"hello\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_013",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "81": {
-            "connections": [
-                [
-                    [
-                        82,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "11. Pattern: Conditionals 1",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "\"goodbye\"",
-                "obj_name": "message_014",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 276.5798645019531,
-                "position_y": 176.2264862060547,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "\"goodbye\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_014",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "82": {
-            "connections": [
-                [
-                    [
-                        86,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        83,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        84,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        85,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layer": "11. Pattern: Conditionals 1",
-                "min_height": 12,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "True, False, \"hello\"",
-                "obj_name": "processor_011",
-                "obj_state": 3,
-                "obj_type": "case",
-                "position_x": 98.849853515625,
-                "position_y": 265.6834716796875,
-                "position_z": 0,
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "True, False, \"hello\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_011",
-            "osc_methods": [],
-            "properties": {},
-            "type": "case"
-        },
-        "83": {
-            "connections": [
                 []
             ],
             "do_onload": true,
@@ -5235,7 +5043,7 @@
             "properties": {},
             "type": "print"
         },
-        "84": {
+        "81": {
             "connections": [
                 []
             ],
@@ -5277,7 +5085,7 @@
             "properties": {},
             "type": "print"
         },
-        "85": {
+        "82": {
             "connections": [
                 []
             ],
@@ -5319,7 +5127,7 @@
             "properties": {},
             "type": "print"
         },
-        "86": {
+        "83": {
             "connections": [
                 []
             ],
@@ -5361,7 +5169,7 @@
             "properties": {},
             "type": "print"
         },
-        "87": {
+        "84": {
             "connections": [
                 []
             ],
@@ -5403,7 +5211,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Conditionals 2</b></span>"
         },
-        "88": {
+        "85": {
             "connections": [
                 []
             ],
@@ -5445,11 +5253,11 @@
             "type": "text",
             "value": "<b>[route]</b> interprets input as a sequence where the first element is\nthe \"address\" that the rest of the sequence is to be delivered to.  Items with\nunmatched addresses are passed through whole. "
         },
-        "89": {
+        "86": {
             "connections": [
                 [
                     [
-                        92,
+                        89,
                         0
                     ]
                 ]
@@ -5486,6 +5294,155 @@
             "osc_methods": [],
             "properties": {},
             "type": "message"
+        },
+        "87": {
+            "connections": [
+                [
+                    [
+                        89,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "12. Pattern: Conditionals 2",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "(\"foo\", 1, 2, 3)",
+                "obj_name": "message_016",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 226.650634765625,
+                "position_y": 184.2687530517578,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "(\"foo\", 1, 2, 3)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "88": {
+            "connections": [
+                [
+                    [
+                        89,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "12. Pattern: Conditionals 2",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "[\"bar\", 4]",
+                "obj_name": "message_017",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 371.427490234375,
+                "position_y": 187.7554931640625,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "[\"bar\", 4]",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_017",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "89": {
+            "connections": [
+                [
+                    [
+                        90,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        91,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        92,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        93,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20,
+                "is_export": false,
+                "layer": "12. Pattern: Conditionals 2",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "1, 2, \"foo\"",
+                "obj_name": "processor_016",
+                "obj_state": 3,
+                "obj_type": "route",
+                "position_x": 135.79067993164062,
+                "position_y": 251.06820678710938,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "1, 2, \"foo\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_016",
+            "osc_methods": [],
+            "properties": {},
+            "type": "route"
         },
         "9": {
             "connections": [
@@ -5531,155 +5488,6 @@
         },
         "90": {
             "connections": [
-                [
-                    [
-                        92,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "12. Pattern: Conditionals 2",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "(\"foo\", 1, 2, 3)",
-                "obj_name": "message_016",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 226.650634765625,
-                "position_y": 184.2687530517578,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "(\"foo\", 1, 2, 3)",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_016",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "91": {
-            "connections": [
-                [
-                    [
-                        92,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "12. Pattern: Conditionals 2",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "[\"bar\", 4]",
-                "obj_name": "message_017",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 371.427490234375,
-                "position_y": 187.7554931640625,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "[\"bar\", 4]",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_017",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "92": {
-            "connections": [
-                [
-                    [
-                        93,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        94,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        95,
-                        0
-                    ]
-                ],
-                [
-                    [
-                        96,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layer": "12. Pattern: Conditionals 2",
-                "min_height": 12,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "1, 2, \"foo\"",
-                "obj_name": "processor_016",
-                "obj_state": 3,
-                "obj_type": "route",
-                "position_x": 135.79067993164062,
-                "position_y": 251.06820678710938,
-                "position_z": 0,
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "1, 2, \"foo\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_016",
-            "osc_methods": [],
-            "properties": {},
-            "type": "route"
-        },
-        "93": {
-            "connections": [
                 []
             ],
             "do_onload": true,
@@ -5720,7 +5528,7 @@
             "properties": {},
             "type": "print"
         },
-        "94": {
+        "91": {
             "connections": [
                 []
             ],
@@ -5762,7 +5570,7 @@
             "properties": {},
             "type": "print"
         },
-        "95": {
+        "92": {
             "connections": [
                 []
             ],
@@ -5804,7 +5612,7 @@
             "properties": {},
             "type": "print"
         },
-        "96": {
+        "93": {
             "connections": [
                 []
             ],
@@ -5846,7 +5654,7 @@
             "properties": {},
             "type": "print"
         },
-        "97": {
+        "94": {
             "connections": [
                 []
             ],
@@ -5888,7 +5696,7 @@
             "type": "text",
             "value": "<span size=\"x-large\"><b>Pattern: Conditionals 3</b></span>"
         },
-        "98": {
+        "95": {
             "connections": [
                 []
             ],
@@ -5930,11 +5738,11 @@
             "type": "text",
             "value": "One last important thing: in both <b>[route]</b> and <b>[case]</b>, if the objects \nto test against are Python <i>type</i> objects, any object of the indicated type \nwill match.  Tests are done in left-to-right order with the first successful match\naccepted.  "
         },
-        "99": {
+        "96": {
             "connections": [
                 [
                     [
-                        102,
+                        99,
                         0
                     ]
                 ]
@@ -5971,97 +5779,252 @@
             "osc_methods": [],
             "properties": {},
             "type": "message"
+        },
+        "97": {
+            "connections": [
+                [
+                    [
+                        99,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "13. Pattern: Conditionals 3",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "\"hello\"",
+                "obj_name": "message_019",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 146.7159881591797,
+                "position_y": 199.30589294433594,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_019",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "98": {
+            "connections": [
+                [
+                    [
+                        99,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "13. Pattern: Conditionals 3",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "(1,2,3)",
+                "obj_name": "message_020",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 278.56463623046875,
+                "position_y": 201.72451782226562,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "(1,2,3)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_020",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "99": {
+            "connections": [
+                [
+                    [
+                        100,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        101,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        102,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        103,
+                        0
+                    ]
+                ],
+                [
+                    [
+                        104,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20,
+                "is_export": false,
+                "layer": "13. Pattern: Conditionals 3",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "\"hello\", str, tuple, float",
+                "obj_name": "processor_021",
+                "obj_state": 3,
+                "obj_type": "case",
+                "position_x": 105.8345718383789,
+                "position_y": 266.13958740234375,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "\"hello\", str, tuple, float",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_021",
+            "osc_methods": [],
+            "properties": {},
+            "type": "case"
         }
     },
     "scopes": {
         "__patch__": {
-            "button_013": 42,
-            "dial_001": 46,
-            "enum_001": 34,
-            "enum_002": 116,
-            "enum_003": 121,
-            "message_001": 28,
-            "message_002": 32,
-            "message_003": 54,
-            "message_004": 63,
-            "message_005": 64,
-            "message_006": 65,
-            "message_007": 66,
-            "message_008": 71,
-            "message_009": 74,
-            "message_010": 75,
-            "message_011": 78,
-            "message_012": 79,
-            "message_013": 80,
-            "message_014": 81,
-            "message_015": 89,
-            "message_016": 90,
-            "message_017": 91,
-            "message_018": 99,
-            "message_019": 100,
-            "message_020": 101,
-            "message_021": 108,
-            "message_022": 109,
-            "message_023": 112,
-            "message_024": 113,
+            "button_013": 39,
+            "dial_001": 43,
+            "enum_001": 31,
+            "enum_002": 113,
+            "enum_003": 118,
+            "message_001": 25,
+            "message_002": 29,
+            "message_003": 51,
+            "message_004": 60,
+            "message_005": 61,
+            "message_006": 62,
+            "message_007": 63,
+            "message_008": 68,
+            "message_009": 71,
+            "message_010": 72,
+            "message_011": 75,
+            "message_012": 76,
+            "message_013": 77,
+            "message_014": 78,
+            "message_015": 86,
+            "message_016": 87,
+            "message_017": 88,
+            "message_018": 96,
+            "message_019": 97,
+            "message_020": 98,
+            "message_021": 105,
+            "message_022": 106,
+            "message_023": 109,
+            "message_024": 110,
             "patch": 1,
-            "processor_001": 29,
-            "processor_002": 33,
-            "processor_003": 55,
-            "processor_004": 72,
-            "processor_005": 56,
-            "processor_006": 57,
-            "processor_007": 58,
-            "processor_008": 67,
-            "processor_009": 68,
-            "processor_010": 73,
-            "processor_011": 82,
-            "processor_012": 86,
-            "processor_013": 83,
-            "processor_014": 84,
-            "processor_015": 85,
-            "processor_016": 92,
-            "processor_017": 93,
-            "processor_018": 94,
-            "processor_019": 95,
-            "processor_020": 96,
-            "processor_021": 102,
-            "processor_022": 103,
-            "processor_023": 104,
-            "processor_024": 105,
-            "processor_025": 106,
-            "processor_026": 107,
-            "processor_027": 114,
-            "processor_028": 115,
-            "processor_029": 117,
-            "processor_030": 118,
-            "processor_031": 122,
-            "processor_032": 124,
-            "processor_033": 123,
-            "processor_034": 125,
-            "processor_035": 126,
-            "processor_036": 127,
-            "processor_037": 128,
-            "processor_038": 129,
-            "processor_039": 130,
+            "processor_001": 26,
+            "processor_002": 30,
+            "processor_003": 52,
+            "processor_004": 69,
+            "processor_005": 53,
+            "processor_006": 54,
+            "processor_007": 55,
+            "processor_008": 64,
+            "processor_009": 65,
+            "processor_010": 70,
+            "processor_011": 79,
+            "processor_012": 83,
+            "processor_013": 80,
+            "processor_014": 81,
+            "processor_015": 82,
+            "processor_016": 89,
+            "processor_017": 90,
+            "processor_018": 91,
+            "processor_019": 92,
+            "processor_020": 93,
+            "processor_021": 99,
+            "processor_022": 100,
+            "processor_023": 101,
+            "processor_024": 102,
+            "processor_025": 103,
+            "processor_026": 104,
+            "processor_027": 111,
+            "processor_028": 112,
+            "processor_029": 114,
+            "processor_030": 115,
+            "processor_031": 119,
+            "processor_032": 121,
+            "processor_033": 120,
+            "processor_034": 122,
+            "processor_035": 123,
+            "processor_036": 124,
+            "processor_037": 125,
+            "processor_038": 126,
+            "processor_039": 127,
             "self": 1,
-            "slidemeter_001": 44,
+            "slidemeter_001": 41,
             "text_002": 2,
-            "text_003": 131,
+            "text_003": 128,
             "text_004": 13,
             "text_005": 3,
-            "text_006": 48,
+            "text_006": 45,
             "text_007": 4,
-            "text_008": 50,
-            "text_009": 52,
+            "text_008": 47,
+            "text_009": 49,
             "text_010": 5,
             "text_011": 6,
-            "text_012": 53,
-            "text_013": 59,
+            "text_012": 50,
+            "text_013": 56,
             "text_014": 7,
             "text_015": 8,
-            "text_016": 60,
-            "text_017": 61,
+            "text_016": 57,
+            "text_017": 58,
             "text_018": 9,
             "text_019": 10,
             "text_020": 11,
@@ -6073,45 +6036,45 @@
             "text_026": 18,
             "text_027": 19,
             "text_028": 20,
-            "text_029": 62,
-            "text_030": 69,
+            "text_029": 59,
+            "text_030": 66,
             "text_031": 21,
             "text_032": 22,
             "text_033": 23,
-            "text_034": 139,
-            "text_038": 27,
-            "text_039": 70,
-            "text_040": 76,
-            "text_041": 30,
-            "text_042": 49,
-            "text_043": 51,
-            "text_044": 31,
-            "text_045": 35,
-            "text_046": 36,
-            "text_047": 37,
-            "text_048": 38,
-            "text_049": 39,
-            "text_050": 41,
-            "text_051": 43,
-            "text_052": 45,
-            "text_053": 47,
-            "text_054": 77,
-            "text_055": 87,
-            "text_056": 88,
-            "text_057": 97,
-            "text_058": 98,
-            "text_059": 110,
-            "text_060": 111,
-            "text_061": 119,
-            "text_062": 120,
-            "text_063": 132,
-            "text_064": 133,
-            "text_065": 134,
-            "text_066": 135,
-            "text_067": 136,
-            "text_068": 137,
-            "text_069": 138,
-            "toggle_001": 40
+            "text_034": 136,
+            "text_038": 24,
+            "text_039": 67,
+            "text_040": 73,
+            "text_041": 27,
+            "text_042": 46,
+            "text_043": 48,
+            "text_044": 28,
+            "text_045": 32,
+            "text_046": 33,
+            "text_047": 34,
+            "text_048": 35,
+            "text_049": 36,
+            "text_050": 38,
+            "text_051": 40,
+            "text_052": 42,
+            "text_053": 44,
+            "text_054": 74,
+            "text_055": 84,
+            "text_056": 85,
+            "text_057": 94,
+            "text_058": 95,
+            "text_059": 107,
+            "text_060": 108,
+            "text_061": 116,
+            "text_062": 117,
+            "text_063": 129,
+            "text_064": 130,
+            "text_065": 131,
+            "text_066": 132,
+            "text_067": 133,
+            "text_068": 134,
+            "text_069": 135,
+            "toggle_001": 37
         }
     },
     "type": "tutorial.help"
