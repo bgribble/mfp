@@ -155,6 +155,11 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                     b = int(hexcolor[4:6], 16) if len(hexcolor) >= 6 else 255
                     a = int(hexcolor[6:8], 16) if len(hexcolor) >= 8 else 255
                     color = imgui.IM_COL32(r, g, b, a)
+            if c == "table":
+                if is_opening_div:
+                    imgui.push_style_var(imgui.StyleVar_.item_spacing, (12, 4))
+                else:
+                    imgui.pop_style_var()
 
         if is_opening_div:
             if font_changed:
@@ -300,12 +305,41 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         )
 
         # single newlines with non-newline after are part of the
-        # preceding paragraph, so replace newline with space
+        # preceding paragraph, so replace newline with space -- unless it's
+        # part of a table (starts with |)
         md_text = re.sub(
-            '([^\n])\n([^>\n])',
+            '([^\n])\n([^>|\n])',
             r'\1 \2',
             md_text,
             flags=re.MULTILINE
+        )
+
+        # tables need a wrapper to set item spacing and the header needs
+        # to have padding to set the column width
+        def proctable(match):
+            pieces = ['<div class="table">\n']
+            column_len = {}
+            for table_row in match.group(4).split('\n'):
+                cols = table_row.split('|')[1:-1]
+                for col_num, val in enumerate(cols):
+                    column_len[col_num] = max(len(val), column_len.get(col_num, 0))
+            headers = match.group(3).split('|')[1:-1]
+            padded = []
+            for col_num, val in enumerate(headers):
+                spaces = max(column_len.get(col_num, 0) - len(val), 0)
+                padded.append(
+                    f"{val}{''.join(['&nbsp;']) * spaces}"
+                )
+            padded = ['', *padded, '']
+            pieces.append('|'.join(padded))
+            pieces.append(match.group(4))
+            pieces.append('\n</div>')
+            return '\n'.join(pieces)
+
+        md_text = re.sub(
+            r'(^|(\n\n))(\|[^\n]+\n)((\|[^\n]+\n)+)(\n|$)',
+            proctable,
+            md_text,
         )
 
         # block highlight text with a different color
@@ -392,12 +426,14 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             # so we need to be defensive about the font stack
             context = imgui.get_current_context()
             font_depth_before = len(context.font_stack)
+            text_changed = False
 
             # transform converts to better-renderable form
             # and also has some Pango compatibility shims
             if self.transform_in == md_text_in and highlight == self.highlight_text:
                 md_text = self.transform_out
             else:
+                text_changed = True
                 self.transform_in = md_text_in
                 self.highlight_text = highlight
                 blocks = self.split_blocks(md_text_in)
@@ -407,6 +443,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                         transformed_blocks.append(self.transform_codeblock(b))
                     else:
                         transformed_blocks.append(self.transform_md(b))
+
                 md_text = '\n'.join(transformed_blocks)
                 self.transform_out = md_text
 
