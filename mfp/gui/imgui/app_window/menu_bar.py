@@ -216,8 +216,10 @@ def render(app_window):
                     app_window.selected_patch == patch
                 )
                 if patch_selected and app_window.selected_patch != patch:
-                    app_window.canvas_tile_page = patch.display_info.page_id
-                    app_window.layer_select(patch.layers[0])
+                    if patch.selected_layer:
+                        app_window.layer_select(patch.selected_layer)
+                    else:
+                        app_window.layer_select(patch.layers[0])
                 imgui.pop_id()
 
         imgui.end_menu()

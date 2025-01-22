@@ -18,21 +18,33 @@ from mfp import log
 @extends(AppWindow)
 def patch_select_prev(self):
     if not self.selected_patch:
-        self.layer_select(self.patches[0].layers[0])
+        patch = self.patches[0]
     else:
         pnum = self.patches.index(self.selected_patch)
         pnum -= 1
-        self.layer_select(self.patches[pnum].layers[0])
+        patch = self.patches[pnum]
+
+    if patch.selected_layer:
+        layer = patch.selected_layer
+    else:
+        layer = patch.layers[0]
+    self.layer_select(layer)
 
 
 @extends(AppWindow)
 def patch_select_next(self):
     if not self.selected_patch:
-        self.layer_select(self.patches[0].layers[0])
+        patch = self.patches[0]
     else:
         pnum = self.patches.index(self.selected_patch)
         pnum = (pnum + 1) % len(self.patches)
-        self.layer_select(self.patches[pnum].layers[0])
+        patch = self.patches[pnum]
+
+    if patch.selected_layer:
+        layer = patch.selected_layer
+    else:
+        layer = patch.layers[0]
+    self.layer_select(layer)
 
 
 @extends(AppWindow)

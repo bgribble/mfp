@@ -614,6 +614,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def layer_update(self, layer, patch):
         pass
 
+    def layer_select(self, layer):
+        self.canvas_tile_page = layer.patch.display_info.page_id
+        super().layer_select(layer)
+
     #####################
     # patches / MDI
     def add_patch(self, patch, new_page=False):
