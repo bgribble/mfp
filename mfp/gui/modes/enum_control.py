@@ -99,19 +99,31 @@ class EnumControlMode (InputMode):
             "enum-drag-start", cls.drag_start, "Start number control", "M1DOWN",
         )
         cls.bind(
+            "enum-drag-start-10x", cls.drag_start, "Start number control", "S-M1DOWN",
+        )
+        cls.bind(
+            "enum-drag-start-100x", cls.drag_start, "Start number control", "C-M1DOWN",
+        )
+        cls.bind(
             "enum-drag-motion", lambda mode: mode.drag_selected(1.0),
             "Change value (1x speed)", "M1-MOTION",
         )
         cls.bind(
-            "enum-drag-motion", lambda mode: mode.drag_selected(10.0),
+            "enum-drag-motion-10x", lambda mode: mode.drag_selected(10.0),
             "Change value (10x speed)", "S-M1-MOTION",
         )
         cls.bind(
-            "enum-drag-motion", lambda mode: mode.drag_selected(100.0),
+            "enum-drag-motion-100x", lambda mode: mode.drag_selected(100.0),
             "Change value (100x speed)", "C-M1-MOTION",
         )
         cls.bind(
             "enum-drag-end", cls.drag_end, "End number control", "M1UP",
+        )
+        cls.bind(
+            "enum-drag-end-10x", cls.drag_end, "End number control", "S-M1UP",
+        )
+        cls.bind(
+            "enum-drag-end-100x", cls.drag_end, "End number control", "C-M1UP",
         )
         cls.bind(
             "enum-val-up", lambda mode: mode.changeval(1.0), "Increase value", "UP",

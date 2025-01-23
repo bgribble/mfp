@@ -5,6 +5,7 @@
         "export_w": null,
         "export_x": null,
         "export_y": null,
+        "file_origin": "/home/grib/devel/mfp/.virtual/share/mfp/patches/help/message.help.mfp",
         "height": 20,
         "layers": [
             [
@@ -21,13 +22,54 @@
             ]
         ],
         "name": "message.help",
+        "num_inlets": 1,
+        "num_outlets": 0,
+        "obj_id": 42,
+        "top_level": true,
         "width": 0
     },
     "hot_inlets": [
         0
     ],
     "objects": {
-        "10": {
+        "43": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "\"message\"",
+                "obj_name": "message_001",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 14.0,
+                "position_y": 13.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "\"message\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "44": {
             "connections": [
                 []
             ],
@@ -42,13 +84,307 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_001",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 92.0,
+                "position_y": 11.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "-- a box for literal data (messages)",
+                "width": 219.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "-- a box for literal data (messages)"
+        },
+        "45": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 120.0,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_002",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 17.0,
+                "position_y": 50.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Message boxes hold a Python object and emit it when clicked in Operate mode.\n\nThe text inside the message box is evaluated as a Python expression when the box is created. The evaluator recognizes some special syntax forms that extend the capabilities of the object.",
+                "width": 360.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Message boxes hold a Python object and emit it when clicked in Operate mode.\n\nThe text inside the message box is evaluated as a Python expression when the box is created. The evaluator recognizes some special syntax forms that extend the capabilities of the object."
+        },
+        "46": {
+            "connections": [
+                [
+                    [
+                        52,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "\"hello, world\"",
+                "obj_name": "message_002",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 28.0,
+                "position_y": 180.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "\"hello, world\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "47": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_003",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 155.0,
+                "position_y": 177.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": " a string",
+                "width": 55.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": " a string"
+        },
+        "48": {
+            "connections": [
+                [
+                    [
+                        52,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "[1, 2, 3, 4]",
+                "obj_name": "message_003",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 52.0,
+                "position_y": 206.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "[1, 2, 3, 4]",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "49": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_004",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 156.0,
+                "position_y": 202.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "an array",
+                "width": 60.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "an array"
+        },
+        "50": {
+            "connections": [
+                [
+                    [
+                        52,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "12 + 23",
+                "obj_name": "message_004",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 82.0,
+                "position_y": 233.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "12 + 23",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
+        },
+        "51": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Page 1: Message basics",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_005",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 157.0,
@@ -69,7 +405,7 @@
             "type": "text",
             "value": "the result of a computation"
         },
-        "11": {
+        "52": {
             "connections": [
                 []
             ],
@@ -84,9 +420,9 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20.0,
+                "height": 20,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 1: Message basics",
                 "min_height": 12,
                 "min_width": 20,
                 "no_export": false,
@@ -101,7 +437,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 43.0
+                "width": 20
             },
             "initargs": null,
             "midi_filters": null,
@@ -111,7 +447,7 @@
             "properties": {},
             "type": "print"
         },
-        "18": {
+        "53": {
             "connections": [
                 []
             ],
@@ -126,13 +462,13 @@
                 "export_offset_y": 0,
                 "height": 40.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_008",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 4.0,
@@ -153,7 +489,7 @@
             "type": "text",
             "value": "<hr>"
         },
-        "19": {
+        "54": {
             "connections": [
                 []
             ],
@@ -168,13 +504,13 @@
                 "export_offset_y": 0,
                 "height": 88.0,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_006",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 30.0,
@@ -195,9 +531,14 @@
             "type": "text",
             "value": "**Special syntax forms**\n\nA comma before the expression is a \"pause\" marker which causes the evaluation to be deferred until the message is emitted."
         },
-        "2": {
+        "55": {
             "connections": [
-                []
+                [
+                    [
+                        56,
+                        0
+                    ]
+                ]
             ],
             "do_onload": false,
             "gui_params": {
@@ -206,88 +547,9 @@
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "\"message\"",
-                "obj_name": "message_001",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 14.0,
-                "position_y": 13.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 71.0
-            },
-            "initargs": "\"message\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "20": {
-            "connections": [
-                [
-                    [
-                        21,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 2: Special syntax forms",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 20,
-                        "obj_2": 21,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 30.0,
-                        "position_y": 432.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
@@ -301,7 +563,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 113.0
+                "width": 25
             },
             "initargs": ",datetime.now()",
             "midi_filters": null,
@@ -311,7 +573,7 @@
             "properties": {},
             "type": "message"
         },
-        "21": {
+        "56": {
             "connections": [
                 []
             ],
@@ -326,9 +588,9 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20.0,
+                "height": 20,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "min_height": 12,
                 "min_width": 20,
                 "no_export": false,
@@ -343,7 +605,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 43.0
+                "width": 20
             },
             "initargs": null,
             "midi_filters": null,
@@ -353,7 +615,7 @@
             "properties": {},
             "type": "print"
         },
-        "22": {
+        "57": {
             "connections": [
                 []
             ],
@@ -368,7 +630,7 @@
                 "export_offset_y": 0,
                 "height": 40.0,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
@@ -395,62 +657,25 @@
             "type": "text",
             "value": "If the message is a series of name=value pairs, it is interpreted as a dictionary"
         },
-        "23": {
+        "58": {
             "connections": [
                 [
                     [
-                        24,
+                        59,
                         0
                     ]
                 ]
             ],
             "do_onload": false,
             "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 2: Special syntax forms",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 23,
-                        "obj_2": 24,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 26.0,
-                        "position_y": 570.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
+                "connection_info": [],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
@@ -464,7 +689,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 183.0
+                "width": 25
             },
             "initargs": "hello=True, goodbye=False",
             "midi_filters": null,
@@ -474,7 +699,7 @@
             "properties": {},
             "type": "message"
         },
-        "24": {
+        "59": {
             "connections": [
                 []
             ],
@@ -489,9 +714,9 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20.0,
+                "height": 20,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "min_height": 12,
                 "min_width": 20,
                 "no_export": false,
@@ -506,7 +731,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 43.0
+                "width": 20
             },
             "initargs": null,
             "midi_filters": null,
@@ -516,7 +741,7 @@
             "properties": {},
             "type": "print"
         },
-        "25": {
+        "60": {
             "connections": [
                 []
             ],
@@ -531,13 +756,13 @@
                 "export_offset_y": 0,
                 "height": 120.0,
                 "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_011",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 20.0,
@@ -558,62 +783,25 @@
             "type": "text",
             "value": "Any message received on the left inlet causes the message box to emit its content. The received message itself is ignored.\n\nAny message received on the right inlet replaces the contents of the message box but does not cause it to be emitted."
         },
-        "26": {
+        "61": {
             "connections": [
                 [
                     [
-                        43,
+                        76,
                         0
                     ]
                 ]
             ],
             "do_onload": false,
             "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 1 of 2",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 26,
-                        "obj_2": 43,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 35.0,
-                        "position_y": 507.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
+                "connection_info": [],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
@@ -627,7 +815,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 33.0
+                "width": 25
             },
             "initargs": "123",
             "midi_filters": null,
@@ -637,7 +825,7 @@
             "properties": {},
             "type": "message"
         },
-        "28": {
+        "62": {
             "connections": [
                 []
             ],
@@ -652,9 +840,9 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20.0,
+                "height": 20,
                 "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "min_height": 12,
                 "min_width": 20,
                 "no_export": false,
@@ -669,7 +857,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 43.0
+                "width": 20
             },
             "initargs": null,
             "midi_filters": null,
@@ -679,62 +867,25 @@
             "properties": {},
             "type": "print"
         },
-        "29": {
+        "63": {
             "connections": [
                 [
                     [
-                        43,
+                        76,
                         1
                     ]
                 ]
             ],
             "do_onload": false,
             "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 1 of 2",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 29,
-                        "obj_2": 43,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 1,
-                        "position_x": 124.0,
-                        "position_y": 509.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
+                "connection_info": [],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
@@ -748,7 +899,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 120.0
+                "width": 25
             },
             "initargs": "\"goodbye, world\"",
             "midi_filters": null,
@@ -758,49 +909,7 @@
             "properties": {},
             "type": "message"
         },
-        "3": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layername": "Page 1: Message basics",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": null,
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 92.0,
-                "position_y": 11.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "-- a box for literal data (messages)",
-                "width": 219.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "-- a box for literal data (messages)"
-        },
-        "30": {
+        "64": {
             "connections": [
                 []
             ],
@@ -815,13 +924,13 @@
                 "export_offset_y": 0,
                 "height": 40.0,
                 "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_012",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 11.0,
@@ -842,7 +951,7 @@
             "type": "text",
             "value": "<hr>"
         },
-        "31": {
+        "65": {
             "connections": [
                 []
             ],
@@ -857,13 +966,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_013",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 279.0,
@@ -884,7 +993,7 @@
             "type": "text",
             "value": "updated for mfp 0.8"
         },
-        "32": {
+        "66": {
             "connections": [
                 []
             ],
@@ -899,13 +1008,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_014",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 13.0,
@@ -926,7 +1035,7 @@
             "type": "text",
             "value": "Page 1 of 3"
         },
-        "33": {
+        "67": {
             "connections": [
                 []
             ],
@@ -941,7 +1050,7 @@
                 "export_offset_y": 0,
                 "height": 40.0,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
@@ -968,7 +1077,7 @@
             "type": "text",
             "value": "<hr>"
         },
-        "34": {
+        "68": {
             "connections": [
                 []
             ],
@@ -983,7 +1092,7 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
@@ -1010,7 +1119,7 @@
             "type": "text",
             "value": "updated for mfp 0.8"
         },
-        "35": {
+        "69": {
             "connections": [
                 []
             ],
@@ -1025,13 +1134,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_015",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 13.0,
@@ -1052,430 +1161,25 @@
             "type": "text",
             "value": "Page 2 of 3"
         },
-        "36": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 120.0,
-                "is_export": false,
-                "layername": "Page 2 of 2",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": null,
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 30.0,
-                "position_y": 333.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "If a message begins with the @ symbol, it creates a special \"apply\" object. When this object is received, the receiver will call the named function on itself. The function specifier may be either a bare word (the name of the function) or it may have an optional argument list if the function needs it. See documentation of specific objects to know what APIs they support.",
-                "width": 376.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_018",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "If a message begins with the @ symbol, it creates a special \"apply\" object. When this object is received, the receiver will call the named function on itself. The function specifier may be either a bare word (the name of the function) or it may have an optional argument list if the function needs it. See documentation of specific objects to know what APIs they support."
-        },
-        "37": {
+        "76": {
             "connections": [
                 [
                     [
-                        38,
+                        62,
                         0
                     ]
                 ]
             ],
             "do_onload": false,
             "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 2 of 2",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 37,
-                        "obj_2": 38,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 43.0,
-                        "position_y": 477.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
+                "connection_info": [],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
-                "layername": "Page 2 of 2",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "1",
-                "obj_name": "message_012",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 35.0,
-                "position_y": 471.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 33.0
-            },
-            "initargs": "1",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_012",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "38": {
-            "connections": [
-                []
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20.0,
-                "is_export": false,
-                "layername": "Page 2 of 2",
-                "min_height": 12,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "0",
-                "obj_name": null,
-                "obj_state": 3,
-                "obj_type": "/",
-                "position_x": 40.0,
-                "position_y": 542.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 29.0
-            },
-            "initargs": "0",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_007",
-            "osc_methods": [],
-            "properties": {},
-            "type": "/"
-        },
-        "39": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layername": "Page 2 of 2",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": null,
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 78.0,
-                "position_y": 469.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "click first to cause a divide-by-zero error",
-                "width": 252.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_019",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "click first to cause a divide-by-zero error"
-        },
-        "4": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 120.0,
-                "is_export": false,
-                "layername": "Page 1: Message basics",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": null,
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 17.0,
-                "position_y": 50.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Message boxes hold a Python object and emit it when clicked in Operate mode.\n\nThe text inside the message box is evaluated as a Python expression when the box is created. The evaluator recognizes some special syntax forms that extend the capabilities of the object.",
-                "width": 360.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Message boxes hold a Python object and emit it when clicked in Operate mode.\n\nThe text inside the message box is evaluated as a Python expression when the box is created. The evaluator recognizes some special syntax forms that extend the capabilities of the object."
-        },
-        "40": {
-            "connections": [
-                [
-                    [
-                        38,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 2 of 2",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 40,
-                        "obj_2": 38,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 78.0,
-                        "position_y": 505.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layername": "Page 2 of 2",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "@reset_counts",
-                "obj_name": "message_013",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 70.0,
-                "position_y": 504.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 99.0
-            },
-            "initargs": "@reset_counts",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_013",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "42": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layername": "Page 2 of 2",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": null,
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 187.0,
-                "position_y": 501.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "click to clear error count",
-                "width": 156.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_020",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "click to clear error count"
-        },
-        "43": {
-            "connections": [
-                [
-                    [
-                        28,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 1 of 2",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 43,
-                        "obj_2": 28,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 35.0,
-                        "position_y": 552.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layername": "Page 1 of 2",
+                "layer": "Page 1: Message basics",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
@@ -1489,7 +1193,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 106.0
+                "width": 25
             },
             "initargs": "\"hello, world\"",
             "midi_filters": null,
@@ -1499,7 +1203,7 @@
             "properties": {},
             "type": "message"
         },
-        "44": {
+        "77": {
             "connections": [
                 []
             ],
@@ -1514,13 +1218,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_021",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 65.0,
@@ -1541,7 +1245,7 @@
             "type": "text",
             "value": "The 123 is ignored but emits \"hello, world\""
         },
-        "45": {
+        "78": {
             "connections": [
                 []
             ],
@@ -1556,13 +1260,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_022",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 242.0,
@@ -1583,7 +1287,7 @@
             "type": "text",
             "value": "Change box contents"
         },
-        "46": {
+        "79": {
             "connections": [
                 []
             ],
@@ -1598,13 +1302,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 2: Special syntax forms",
+                "layer": "Page 2: Special syntax forms",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_023",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 160.0,
@@ -1625,11 +1329,11 @@
             "type": "text",
             "value": "Expr evaluated on each click"
         },
-        "47": {
+        "80": {
             "connections": [
                 [
                     [
-                        11,
+                        52,
                         0
                     ]
                 ]
@@ -1641,9 +1345,9 @@
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 1: Message basics",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
@@ -1657,7 +1361,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 36.0
+                "width": 25
             },
             "initargs": "Bang",
             "midi_filters": null,
@@ -1667,7 +1371,7 @@
             "properties": {},
             "type": "message"
         },
-        "48": {
+        "81": {
             "connections": [
                 []
             ],
@@ -1682,13 +1386,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 1: Message basics",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_024",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 158.0,
@@ -1709,7 +1413,7 @@
             "type": "text",
             "value": "the special object Bang"
         },
-        "49": {
+        "82": {
             "connections": [
                 []
             ],
@@ -1724,7 +1428,7 @@
                 "export_offset_y": 0,
                 "height": 40.0,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
@@ -1751,86 +1455,7 @@
             "type": "text",
             "value": "<hr>"
         },
-        "5": {
-            "connections": [
-                [
-                    [
-                        11,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 1: Message basics",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 5,
-                        "obj_2": 11,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 32.0,
-                        "position_y": 237.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layername": "Page 1: Message basics",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "\"hello, world\"",
-                "obj_name": "message_002",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 28.0,
-                "position_y": 180.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 106.0
-            },
-            "initargs": "\"hello, world\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "50": {
+        "83": {
             "connections": [
                 []
             ],
@@ -1845,7 +1470,7 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
@@ -1872,7 +1497,7 @@
             "type": "text",
             "value": "updated for mfp 0.8"
         },
-        "51": {
+        "84": {
             "connections": [
                 []
             ],
@@ -1887,13 +1512,13 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_025",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 13.0,
@@ -1914,7 +1539,7 @@
             "type": "text",
             "value": "Page 3 of 3"
         },
-        "52": {
+        "85": {
             "connections": [
                 []
             ],
@@ -1929,13 +1554,13 @@
                 "export_offset_y": 0,
                 "height": 152.0,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_028",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 31.0,
@@ -1956,7 +1581,7 @@
             "type": "text",
             "value": "**Transient messages**\n\nIn either Edit or Operate mode, you can send a special one-time \"transient\" message to any object.\n\nSelect an object in the UI and press the ! (exclamation point) key. Enter the contents of the message box and press Return. The message will be sent to the selected object(s)."
         },
-        "53": {
+        "86": {
             "connections": [
                 []
             ],
@@ -1971,9 +1596,9 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20.0,
+                "height": 20,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "min_height": 12,
                 "min_width": 20,
                 "no_export": false,
@@ -1988,7 +1613,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 43.0
+                "width": 20
             },
             "initargs": null,
             "midi_filters": null,
@@ -1998,7 +1623,7 @@
             "properties": {},
             "type": "print"
         },
-        "54": {
+        "87": {
             "connections": [
                 []
             ],
@@ -2013,13 +1638,13 @@
                 "export_offset_y": 0,
                 "height": 40.0,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_029",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 100.0,
@@ -2040,7 +1665,7 @@
             "type": "text",
             "value": "Select the [print] and type !, then type the message \"hello, world\""
         },
-        "55": {
+        "88": {
             "connections": [
                 []
             ],
@@ -2055,13 +1680,13 @@
                 "export_offset_y": 0,
                 "height": 72.0,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_030",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 37.0,
@@ -2082,7 +1707,7 @@
             "type": "text",
             "value": "When you create a transient message, it is initially connected to inlet 0 of the selected object. You can change the inlet by holding the control key and typing the number of the desired inlet"
         },
-        "57": {
+        "89": {
             "connections": [
                 []
             ],
@@ -2097,13 +1722,13 @@
                 "export_offset_y": 0,
                 "height": 40.0,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_031",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 158.0,
@@ -2124,7 +1749,7 @@
             "type": "text",
             "value": "Type !, then C-1 to change to inlet 1 before hitting Return on your message"
         },
-        "58": {
+        "90": {
             "connections": [
                 []
             ],
@@ -2135,9 +1760,9 @@
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 20.0,
+                "height": 12,
                 "is_export": false,
-                "layername": "Page 3: Transient messages",
+                "layer": "Page 3: Transient messages",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
@@ -2151,7 +1776,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 106.0
+                "width": 25
             },
             "initargs": "\"hello, world\"",
             "midi_filters": null,
@@ -2161,7 +1786,49 @@
             "properties": {},
             "type": "message"
         },
-        "6": {
+        "91": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 120.0,
+                "is_export": false,
+                "layer": "Page 2: Special syntax forms",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_018",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 30.0,
+                "position_y": 333.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "If a message begins with the @ symbol, it creates a special \"apply\" object. When this object is received, the receiver will call the named function on itself. The function specifier may be either a bare word (the name of the function) or it may have an optional argument list if the function needs it. See documentation of specific objects to know what APIs they support.",
+                "width": 376.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_018",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "If a message begins with the @ symbol, it creates a special \"apply\" object. When this object is received, the receiver will call the named function on itself. The function specifier may be either a bare word (the name of the function) or it may have an optional argument list if the function needs it. See documentation of specific objects to know what APIs they support."
+        },
+        "92": {
             "connections": [
                 []
             ],
@@ -2176,229 +1843,197 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 2: Special syntax forms",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_019",
                 "obj_state": 3,
                 "obj_type": "text",
-                "position_x": 155.0,
-                "position_y": 177.0,
+                "position_x": 78.0,
+                "position_y": 469.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": " a string",
-                "width": 55.0
+                "value": "click first to cause a divide-by-zero error",
+                "width": 252.0
             },
             "initargs": null,
             "midi_filters": null,
             "midi_mode": null,
-            "name": "text_003",
+            "name": "text_019",
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": " a string"
+            "value": "click first to cause a divide-by-zero error"
         },
-        "7": {
+        "93": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Page 2: Special syntax forms",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_020",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 187.0,
+                "position_y": 501.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "click to clear error count",
+                "width": 156.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_020",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "click to clear error count"
+        },
+        "94": {
             "connections": [
                 [
                     [
-                        11,
+                        95,
                         0
                     ]
                 ]
             ],
             "do_onload": false,
             "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 1: Message basics",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 7,
-                        "obj_2": 11,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 56.0,
-                        "position_y": 263.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
+                "connection_info": [],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
                 "height": 20.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 2: Special syntax forms",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
-                "obj_args": "[1, 2, 3, 4]",
-                "obj_name": "message_003",
+                "obj_args": "@reset_counts",
+                "obj_name": "message_013",
                 "obj_state": 3,
                 "obj_type": "message",
-                "position_x": 52.0,
-                "position_y": 206.0,
+                "position_x": 70.0,
+                "position_y": 504.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 92.0
+                "width": 99.0
             },
-            "initargs": "[1, 2, 3, 4]",
+            "initargs": "@reset_counts",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "message_003",
+            "name": "message_013",
             "osc_methods": [],
             "properties": {},
             "type": "message"
         },
-        "8": {
+        "95": {
             "connections": [
                 []
             ],
-            "do_onload": false,
+            "do_onload": true,
             "gui_params": {
-                "clickchange": false,
                 "connection_info": [],
                 "debug": false,
-                "default": "",
-                "display_type": "text",
+                "display_type": "processor",
+                "export_h": null,
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
-                "max_width": 600,
+                "layer": "Page 2: Special syntax forms",
                 "min_height": 12,
-                "min_width": 12,
+                "min_width": 20,
                 "no_export": false,
-                "obj_args": null,
-                "obj_name": null,
+                "obj_args": "0",
+                "obj_name": "processor_007",
                 "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 156.0,
-                "position_y": 202.0,
+                "obj_type": "/",
+                "position_x": 40.0,
+                "position_y": 542.0,
                 "position_z": 0,
                 "scope": "__patch__",
+                "show_label": true,
                 "style": {},
-                "update_required": true,
-                "value": "an array",
-                "width": 60.0
+                "update_required": false,
+                "width": 29.0
             },
-            "initargs": null,
+            "initargs": "0",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "text_004",
+            "name": "processor_007",
             "osc_methods": [],
             "properties": {},
-            "type": "text",
-            "value": "an array"
+            "type": "/"
         },
-        "9": {
+        "96": {
             "connections": [
                 [
                     [
-                        11,
+                        95,
                         0
                     ]
                 ]
             ],
             "do_onload": false,
             "gui_params": {
-                "connection_info": [
-                    {
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Page 1: Message basics",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 9,
-                        "obj_2": 11,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 86.0,
-                        "position_y": 290.0,
-                        "position_z": 0,
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
+                "connection_info": [],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
                 "height": 20.0,
                 "is_export": false,
-                "layername": "Page 1: Message basics",
+                "layer": "Page 2: Special syntax forms",
                 "min_height": 12,
                 "min_width": 25,
                 "no_export": false,
-                "obj_args": "12 + 23",
-                "obj_name": "message_004",
+                "obj_args": "1",
+                "obj_name": "message_012",
                 "obj_state": 3,
                 "obj_type": "message",
-                "position_x": 82.0,
-                "position_y": 233.0,
+                "position_x": 35.0,
+                "position_y": 471.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 57.0
+                "width": 33.0
             },
-            "initargs": "12 + 23",
+            "initargs": "1",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "message_004",
+            "name": "message_012",
             "osc_methods": [],
             "properties": {},
             "type": "message"
@@ -2406,56 +2041,56 @@
     },
     "scopes": {
         "__patch__": {
-            "message_001": 2,
-            "message_002": 5,
-            "message_003": 7,
-            "message_004": 9,
-            "message_005": 20,
-            "message_006": 23,
-            "message_007": 43,
-            "message_009": 26,
-            "message_011": 29,
-            "message_012": 37,
-            "message_013": 40,
-            "message_014": 47,
-            "message_019": 58,
-            "patch": 1,
-            "processor_001": 11,
-            "processor_002": 21,
-            "processor_003": 24,
-            "processor_006": 28,
-            "processor_007": 38,
-            "processor_008": 53,
-            "self": 1,
-            "text_001": 3,
-            "text_002": 4,
-            "text_003": 6,
-            "text_004": 8,
-            "text_005": 10,
-            "text_006": 19,
-            "text_007": 22,
-            "text_008": 18,
-            "text_009": 33,
-            "text_010": 34,
-            "text_011": 25,
-            "text_012": 30,
-            "text_013": 31,
-            "text_014": 32,
-            "text_015": 35,
-            "text_016": 49,
-            "text_017": 50,
-            "text_018": 36,
-            "text_019": 39,
-            "text_020": 42,
-            "text_021": 44,
-            "text_022": 45,
-            "text_023": 46,
-            "text_024": 48,
-            "text_025": 51,
-            "text_028": 52,
-            "text_029": 54,
-            "text_030": 55,
-            "text_031": 57
+            "message_001": 43,
+            "message_002": 46,
+            "message_003": 48,
+            "message_004": 50,
+            "message_005": 55,
+            "message_006": 58,
+            "message_007": 76,
+            "message_009": 61,
+            "message_011": 63,
+            "message_012": 96,
+            "message_013": 94,
+            "message_014": 80,
+            "message_019": 90,
+            "patch": 42,
+            "processor_001": 52,
+            "processor_002": 56,
+            "processor_003": 59,
+            "processor_006": 62,
+            "processor_007": 95,
+            "processor_008": 86,
+            "self": 42,
+            "text_001": 44,
+            "text_002": 45,
+            "text_003": 47,
+            "text_004": 49,
+            "text_005": 51,
+            "text_006": 54,
+            "text_007": 57,
+            "text_008": 53,
+            "text_009": 67,
+            "text_010": 68,
+            "text_011": 60,
+            "text_012": 64,
+            "text_013": 65,
+            "text_014": 66,
+            "text_015": 69,
+            "text_016": 82,
+            "text_017": 83,
+            "text_018": 91,
+            "text_019": 92,
+            "text_020": 93,
+            "text_021": 77,
+            "text_022": 78,
+            "text_023": 79,
+            "text_024": 81,
+            "text_025": 84,
+            "text_028": 85,
+            "text_029": 87,
+            "text_030": 88,
+            "text_031": 89
         }
     },
     "type": "message.help"

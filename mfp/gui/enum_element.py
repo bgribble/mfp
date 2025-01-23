@@ -27,6 +27,7 @@ class EnumElementImpl(BackendInterface, metaclass=ABCMeta):
 class EnumElement (BaseElement):
     display_type = "enum"
     proc_type = "enum"
+    help_patch = "number.help.mfp"
     store_attrs = {
         **BaseElement.store_attrs,
         **{
