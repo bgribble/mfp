@@ -15,7 +15,7 @@ from .text_widget import TextWidget
 from .base_element import BaseElement
 from .modes.enum_control import EnumEditMode, EnumControlMode
 
-from .param_info import ParamInfo, ListOfPairs
+from .param_info import ParamInfo
 
 
 class EnumElementImpl(BackendInterface, metaclass=ABCMeta):

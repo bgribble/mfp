@@ -167,6 +167,10 @@ class Text (Var):
 class Enum (Var):
     doc_tooltip_obj = "Enter and update a numeric message"
 
+    def __init__(self, init_type, init_args, patch, scope, name):
+        Var.__init__(self, init_type, init_args, patch, scope, name)
+        self.hot_inlets = (0, 1)
+
     def save(self):
         base_dict = super().save()
         base_dict["value"] = self.value
@@ -193,7 +197,6 @@ class Enum (Var):
         else:
             vv = None
         return [vv, Var.tooltip_extra(self)]
-
 
 class SlideMeter (Var):
     doc_tooltip_obj = "Display/control a number with a slider"
