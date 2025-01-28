@@ -27,91 +27,49 @@
         0
     ],
     "objects": {
+        "1": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 40.0,
+                "is_export": false,
+                "layer": "Text basics",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_008",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 4.0,
+                "position_y": 37.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<hr>",
+                "width": 608.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<hr>"
+        },
         "10": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layer": "Color",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_003",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 279.0,
-                "position_y": 613.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "updated for mfp 0.8",
-                "width": 132.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_003",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "updated for mfp 0.8"
-        },
-        "11": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layer": "Color",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_004",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 13.0,
-                "position_y": 612.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Page 2 of 3",
-                "width": 78.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_004",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Page 2 of 3"
-        },
-        "12": {
             "connections": [
                 []
             ],
@@ -153,7 +111,7 @@
             "type": "text",
             "value": "<div class=\"size-large bold\">Color</div>\n\n**Text color**\n\nText color can be affected either at the object level (setting the default color for a text element) or inline using a `<div>`.\n\n**Style**: In the Info panel, the Style tab will have a line in the Global sub-tab for `text-color`. Click the \"Change\" checkbox, then select the desired color for that element.\n\n**div + class**: A `class` in the format `color-rrggbbaa` will color the enclosed text the specified RGBA color.\n\n```\n<div class=\"bold color-ff8800ff\">Color set with class/div>\n```\n\n<div class=\"bold color-ff8800ff\">Color set with class</div>"
         },
-        "13": {
+        "11": {
             "connections": [
                 []
             ],
@@ -212,7 +170,7 @@
             "type": "text",
             "value": "**Color set in style tab**\n"
         },
-        "14": {
+        "12": {
             "connections": [
                 []
             ],
@@ -254,7 +212,7 @@
             "type": "text",
             "value": "**Background color**\n\n\nBackground color for a text element can be set in the Style tab with the \"Element fill color\" and \"Element fill color (selected)\" styles.\n\nYou can use a text comment as a grouping background by setting the \"Min width\" and \"Min height\" attributes under the Object tab of the Info panel.  \n"
         },
-        "15": {
+        "13": {
             "connections": [
                 []
             ],
@@ -271,8 +229,8 @@
                 "is_export": false,
                 "layer": "Color",
                 "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
+                "min_height": 100.0,
+                "min_width": 150.0,
                 "no_export": false,
                 "obj_args": null,
                 "obj_name": "text_062",
@@ -313,7 +271,7 @@
             "type": "text",
             "value": "A group of elements"
         },
-        "16": {
+        "14": {
             "connections": [
                 []
             ],
@@ -339,7 +297,7 @@
                 "obj_state": 3,
                 "obj_type": "print",
                 "position_x": 135.0,
-                "position_y": 563.0007638801485,
+                "position_y": 563.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "show_label": true,
@@ -355,11 +313,11 @@
             "properties": {},
             "type": "print"
         },
-        "17": {
+        "15": {
             "connections": [
                 [
                     [
-                        16,
+                        14,
                         0
                     ]
                 ]
@@ -382,7 +340,7 @@
                 "obj_state": 3,
                 "obj_type": "message",
                 "position_x": 135.0,
-                "position_y": 522.0007638801485,
+                "position_y": 522.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
@@ -397,7 +355,7 @@
             "properties": {},
             "type": "message"
         },
-        "18": {
+        "16": {
             "connections": [
                 []
             ],
@@ -439,7 +397,7 @@
             "type": "text",
             "value": "<hr>"
         },
-        "19": {
+        "17": {
             "connections": [
                 []
             ],
@@ -481,7 +439,7 @@
             "type": "text",
             "value": "updated for mfp 0.8"
         },
-        "20": {
+        "18": {
             "connections": [
                 []
             ],
@@ -523,7 +481,7 @@
             "type": "text",
             "value": "Page 3 of 3"
         },
-        "21": {
+        "19": {
             "connections": [
                 []
             ],
@@ -544,7 +502,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_018",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 33.0,
@@ -565,49 +523,7 @@
             "type": "text",
             "value": "<div class=\"size-large bold\">Tables</div>\n\nTables are entered as Markdown-standard, but with some restrictions.\n\n* Blank line is required before and after the table\n\n* Rows must start and and with the `|` character\n\n* Columns are always auto-sized based on the widest row\n\nBasic table: \n\n```\n| **Column 1** | **Column 2** |\n|-----------------|-----------------|\n| Row 1, col 1 | Row 1, col 2|\n| next row | next row |\n```\n\n| **Column 1** | **Column 2** |\n|-----------------|-----------------|\n| Row 1, col 1 | Row 1, col 2|\n| next row | next row |\n\n\n"
         },
-        "3": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 40.0,
-                "is_export": false,
-                "layer": "Text basics",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_008",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 4.0,
-                "position_y": 37.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<hr>",
-                "width": 608.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_008",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<hr>"
-        },
-        "4": {
+        "2": {
             "connections": [
                 []
             ],
@@ -649,7 +565,7 @@
             "type": "text",
             "value": "<hr>"
         },
-        "5": {
+        "3": {
             "connections": [
                 []
             ],
@@ -691,7 +607,7 @@
             "type": "text",
             "value": "updated for mfp 0.8"
         },
-        "6": {
+        "4": {
             "connections": [
                 []
             ],
@@ -733,7 +649,7 @@
             "type": "text",
             "value": "Page 1 of 3"
         },
-        "7": {
+        "5": {
             "connections": [
                 []
             ],
@@ -775,7 +691,7 @@
             "type": "text",
             "value": "**Text**  -- Markdown-enabled text comment object"
         },
-        "8": {
+        "6": {
             "connections": [
                 []
             ],
@@ -796,7 +712,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": "text_092",
+                "obj_name": null,
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 31.0,
@@ -805,8 +721,8 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": "Text objects display styled text blocks, lists, and tables to help document and label patches.\n\nWhen being edited, the text appears in a monospace font with no formatting applied. Once saved, the text is processed with a Markdown rendering engine for display.\n\n\n**Basic styling**\n\n\n| **Markdown** | **Rendered** |\n|--------------|--------------|\n| `**bold**` | **bold** |\n| `*italic*` | *italic* |\n| `~strikethrough~` | ~strikethrough~ |\n| `_underline_` | _underline_ |\n| `` `monospace` `` | `monospace` |\n| `[links](http://www.google.com)` | [links](http://www.google.com) | \n\nSee [the markdown guide](https://www.markdownguide.org/basic-syntax) for more details\n\n**Text size**\n\nTo change the text size, enclose it in an HTML div block with the attribute `class=\"size-<text-size>\"`. The `text-size` is one of `x-small`, `small`, `normal`, `large`, `x-large`, and `xx-large`\n\n\nMarkdown:\n```\n<div class=\"size-x-large\">Extra large</div>\n```\n\nAs rendered: <div class=\"size-x-large\">Extra large</div>\n\n\n",
-                "width": 608
+                "value": "Text objects display styled text blocks, lists, and tables to help document and label patches.\n\nWhen being edited, the text appears in a monospace font with no formatting applied. Once saved, the text is processed with a Markdown rendering engine for display.\n\n\n**Basic styling**\n\n\n| **Markdown** | **Rendered** |\n|--------------|--------------|\n| `**bold**` | **bold** |\n| `*italic*` | *italic* |\n| `~strikethrough~` | ~strikethrough~ |\n| `_underline_` | _underline_ |\n| `` `monospace` `` | `monospace` |\n| `[links](http://google.com)` | [links](http://google.com) | \n\nSee [the markdown guide](https://www.markdownguide.org/basic-syntax) for more details\n\n**Text size**\n\nTo change the text size, enclose it in an HTML div block with the attribute `class=\"size-<text-size>\"`. The `text-size` is one of `x-small`, `small`, `normal`, `large`, `x-large`, and `xx-large`\n\n\nMarkdown:\n```\n<div class=\"size-x-large\">Extra large</div>\n```\n\nAs rendered: <div class=\"size-x-large\">Extra large</div>\n\n\n",
+                "width": 574.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -815,9 +731,9 @@
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "Text objects display styled text blocks, lists, and tables to help document and label patches.\n\nWhen being edited, the text appears in a monospace font with no formatting applied. Once saved, the text is processed with a Markdown rendering engine for display.\n\n\n**Basic styling**\n\n\n| **Markdown** | **Rendered** |\n|--------------|--------------|\n| `**bold**` | **bold** |\n| `*italic*` | *italic* |\n| `~strikethrough~` | ~strikethrough~ |\n| `_underline_` | _underline_ |\n| `` `monospace` `` | `monospace` |\n| `[links](http://www.google.com)` | [links](http://www.google.com) | \n\nSee [the markdown guide](https://www.markdownguide.org/basic-syntax) for more details\n\n**Text size**\n\nTo change the text size, enclose it in an HTML div block with the attribute `class=\"size-<text-size>\"`. The `text-size` is one of `x-small`, `small`, `normal`, `large`, `x-large`, and `xx-large`\n\n\nMarkdown:\n```\n<div class=\"size-x-large\">Extra large</div>\n```\n\nAs rendered: <div class=\"size-x-large\">Extra large</div>\n\n\n"
+            "value": "Text objects display styled text blocks, lists, and tables to help document and label patches.\n\nWhen being edited, the text appears in a monospace font with no formatting applied. Once saved, the text is processed with a Markdown rendering engine for display.\n\n\n**Basic styling**\n\n\n| **Markdown** | **Rendered** |\n|--------------|--------------|\n| `**bold**` | **bold** |\n| `*italic*` | *italic* |\n| `~strikethrough~` | ~strikethrough~ |\n| `_underline_` | _underline_ |\n| `` `monospace` `` | `monospace` |\n| `[links](http://google.com)` | [links](http://google.com) | \n\nSee [the markdown guide](https://www.markdownguide.org/basic-syntax) for more details\n\n**Text size**\n\nTo change the text size, enclose it in an HTML div block with the attribute `class=\"size-<text-size>\"`. The `text-size` is one of `x-small`, `small`, `normal`, `large`, `x-large`, and `xx-large`\n\n\nMarkdown:\n```\n<div class=\"size-x-large\">Extra large</div>\n```\n\nAs rendered: <div class=\"size-x-large\">Extra large</div>\n\n\n"
         },
-        "9": {
+        "7": {
             "connections": [
                 []
             ],
@@ -858,31 +774,115 @@
             "properties": {},
             "type": "text",
             "value": "<hr>"
+        },
+        "8": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Color",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_003",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 279.0,
+                "position_y": 613.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "updated for mfp 0.8",
+                "width": 132.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "updated for mfp 0.8"
+        },
+        "9": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Color",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_004",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 13.0,
+                "position_y": 612.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Page 2 of 3",
+                "width": 78.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Page 2 of 3"
         }
     },
     "scopes": {
         "__patch__": {
-            "message_015": 17,
-            "patch": 2,
-            "processor_009": 16,
-            "self": 2,
-            "text_002": 9,
-            "text_003": 10,
-            "text_004": 11,
-            "text_005": 18,
-            "text_006": 19,
-            "text_007": 20,
-            "text_008": 3,
-            "text_012": 4,
-            "text_013": 5,
-            "text_014": 6,
-            "text_018": 21,
-            "text_060": 13,
-            "text_061": 14,
-            "text_062": 15,
-            "text_091": 7,
-            "text_092": 8,
-            "text_096": 12
+            "message_015": 15,
+            "patch": 0,
+            "processor_009": 14,
+            "self": 0,
+            "text_002": 7,
+            "text_003": 8,
+            "text_004": 9,
+            "text_005": 16,
+            "text_006": 17,
+            "text_007": 18,
+            "text_008": 1,
+            "text_012": 2,
+            "text_013": 3,
+            "text_014": 4,
+            "text_018": 19,
+            "text_060": 11,
+            "text_061": 12,
+            "text_062": 13,
+            "text_091": 5,
+            "text_092": 6,
+            "text_096": 10
         }
     },
     "type": "text.help"

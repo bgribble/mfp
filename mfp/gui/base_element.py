@@ -594,6 +594,9 @@ class BaseElement (Store):
 
         self._all_styles = self.combine_styles()
 
+        self.min_width = params.get('min_width', self.min_width)
+        self.min_height = params.get('min_height', self.min_height)
+
         w_orig, h_orig = self.get_size()
 
         w = params.get("width") or w_orig

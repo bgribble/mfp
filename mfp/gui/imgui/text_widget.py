@@ -314,6 +314,27 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             flags=re.MULTILINE
         )
 
+        def displayable_width(val):
+            vtxt = val
+            # links just display the link text
+            if "`" in val:
+                return len(val)
+
+            vtxt = re.sub(
+                r'\[([^]]*?)\]\([^)]*?\)',
+                r'\1',
+                vtxt
+            )
+            # HTML tags only display the content
+            vtxt = re.sub(
+                r'<[^>]*?>',
+                '',
+                vtxt
+            )
+            # markdown **items** don't display the markers
+            vtxt = re.sub(r'[`*_~]', '', vtxt)
+            return len(vtxt) + 2
+
         # tables need a wrapper to set item spacing and the header needs
         # to have padding to set the column width
         def proctable(match):
@@ -322,13 +343,14 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             for table_row in match.group(4).split('\n'):
                 cols = table_row.split('|')[1:-1]
                 for col_num, val in enumerate(cols):
-                    column_len[col_num] = max(len(val), column_len.get(col_num, 0))
+                    val_len = displayable_width(val)
+                    column_len[col_num] = max(val_len, column_len.get(col_num, 0))
             headers = match.group(3).split('|')[1:-1]
             padded = []
             for col_num, val in enumerate(headers):
                 spaces = max(column_len.get(col_num, 0) - len(val), 0)
                 padded.append(
-                    f"{val}{''.join(['&nbsp;']) * spaces}"
+                    f"{val}{''.join(['&nbsp;'] * spaces)}"
                 )
             padded = ['', *padded, '']
             pieces.append('|'.join(padded))
