@@ -406,6 +406,10 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 0))
         imgui.begin_group()
         label_text = self.text
+        if self.font_color:
+            color = ColorDB().backend.im_col32(self.font_color)
+            imgui.push_style_color(imgui.Col_.text, color)
+
         if highlight or self.markdown_text and self.use_markup:
             # imgui_md draws underlines for H1 and H2 that need to
             # be clipped
@@ -466,16 +470,13 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             else:
                 self.wrapped_text = self.text
 
-            if self.font_color:
-                imgui.text_colored(
-                    self.font_color.to_rgbaf(),
-                    label_text + extra_bit
-                )
-            else:
-                imgui.text(label_text + extra_bit)
+            imgui.text(label_text + extra_bit)
 
             # text bounding box does not account for descenders
             imgui.dummy([1, 3])
+
+        if self.font_color:
+            imgui.pop_style_color()
 
         self.font_width, self.font_height = imgui.calc_text_size("M")
         imgui.end_group()

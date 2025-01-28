@@ -5,8 +5,8 @@ A text element (comment) in a patch
 '''
 
 from abc import ABCMeta, abstractmethod
-
 from flopsy import saga, mutates
+
 from mfp.gui_main import MFPGUI
 from mfp import log
 from .base_element import BaseElement
@@ -27,6 +27,7 @@ class TextElementImpl(BackendInterface, metaclass=ABCMeta):
 class TextElement (BaseElement):
     display_type = "text"
     proc_type = "text"
+    help_patch = "text.help.mfp"
 
     ELBOW_ROOM = 5
 
@@ -82,6 +83,12 @@ class TextElement (BaseElement):
             yield await self.label_edit_finish(
                 None, f"{self.obj_type}{args}"
             )
+
+    @saga('style')
+    async def update_all_styles(self, action, state_diff, previous):
+        self._all_styles = self.combine_styles()
+        self.label.set_color(self.get_color('text-color'))
+        yield None
 
     async def update(self):
         pass

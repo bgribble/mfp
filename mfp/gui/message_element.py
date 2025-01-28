@@ -68,6 +68,12 @@ class MessageElement (BaseElement):
         if self.obj_type:
             yield await self.label_edit_finish(None, f"{self.obj_args}")
 
+    @saga('style')
+    async def update_all_styles(self, action, state_diff, previous):
+        self._all_styles = self.combine_styles()
+        self.label.set_color(self.get_color('text-color'))
+        yield None
+
     async def update(self):
         self.redraw()
         self.draw_ports()

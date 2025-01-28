@@ -254,9 +254,16 @@ def render_param(
                 components,
                 imgui.ColorEditFlags_.no_inputs | imgui.ColorEditFlags_.no_label
             )
+            imgui.end_group()
+            imgui.pop_style_var()
             if txt_changed:
                 changed = True
-                red, green, blue, alpha = txt_newval
+                txt_newval = txt_newval.replace("#", "")
+                parts = [
+                    txt_newval[2*i:2*i+1]
+                    for i in range(len(txt_newval) // 2)
+                ]
+                red, green, blue, alpha = parts
                 newval = RGBAColor(
                     red=red*255.0, green=green*255.0, blue=blue*255.0, alpha=alpha*255.0
                 )
@@ -266,8 +273,6 @@ def render_param(
                 newval = RGBAColor(
                     red=red*255.0, green=green*255.0, blue=blue*255.0, alpha=alpha*255.0
                 )
-            imgui.end_group()
-            imgui.pop_style_var()
 
         elif param_type.param_type is ListOfPairs:
             newval = []

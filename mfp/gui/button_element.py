@@ -7,6 +7,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
+from flopsy import saga
 
 from mfp import log
 from mfp.utils import catchall
@@ -141,6 +142,12 @@ class ButtonElement (BaseElement):
     def unselect(self):
         BaseElement.unselect(self)
         self.redraw()
+
+    @saga('style')
+    async def update_all_styles(self, action, state_diff, previous):
+        self._all_styles = self.combine_styles()
+        self.label.set_color(self.get_color('text-color'))
+        yield None
 
     async def make_edit_mode(self):
         if self.obj_id is None:

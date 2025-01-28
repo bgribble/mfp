@@ -83,6 +83,12 @@ class EnumElement (BaseElement):
         self.format_update()
         yield await self.update_value(self.value)
 
+    @saga('style')
+    async def update_all_styles(self, action, state_diff, previous):
+        self._all_styles = self.combine_styles()
+        self.label.set_color(self.get_color('text-color'))
+        yield None
+
     def format_update(self):
         if self.scientific:
             oper = "e"

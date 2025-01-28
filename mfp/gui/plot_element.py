@@ -6,6 +6,7 @@ A patch element corresponding to an XY scatter or line plot
 
 
 from abc import ABCMeta
+from flopsy import saga
 
 from mfp import log
 from mfp.gui_main import MFPGUI
@@ -129,6 +130,12 @@ class PlotElement (BaseElement):
 
     def label_changed_cb(self, *args):
         pass
+
+    @saga('style')
+    async def update_all_styles(self, action, state_diff, previous):
+        self._all_styles = self.combine_styles()
+        self.label.set_color(self.get_color('text-color'))
+        yield None
 
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
