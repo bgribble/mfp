@@ -310,6 +310,17 @@ class TileManagerMode (InputMode):
                 self.recent_page_id = self.window.canvas_tile_page
                 self.window.canvas_tile_page = allowed_pages[0]
 
+        if (
+            not self.window.selected_patch
+            or self.window.selected_patch.display_info.page_id != self.window.canvas_tile_page
+        ):
+            patch = next(
+                (p for p in self.window.patches if p.display_info.page_id == self.window.canvas_tile_page),
+                None
+            )
+            if patch:
+                self._select_tile(patch.display_info)
+
         self.manager.disable_minor_mode(self)
         return True
 
@@ -328,6 +339,16 @@ class TileManagerMode (InputMode):
             if len(allowed_pages) > 0:
                 self.recent_page_id = self.window.canvas_tile_page
                 self.window.canvas_tile_page = allowed_pages[-1]
+        if (
+            not self.window.selected_patch
+            or self.window.selected_patch.display_info.page_id != self.window.canvas_tile_page
+        ):
+            patch = next(
+                (p for p in self.window.patches if p.display_info.page_id == self.window.canvas_tile_page),
+                None
+            )
+            if patch:
+                self._select_tile(patch.display_info)
 
         self.manager.disable_minor_mode(self)
         return True
@@ -340,6 +361,18 @@ class TileManagerMode (InputMode):
             dest_page_id = self.recent_page_id
             self.recent_page_id = self.window.canvas_tile_page
             self.window.canvas_tile_page = dest_page_id
+
+        if (
+            not self.window.selected_patch
+            or self.window.selected_patch.display_info.page_id != self.window.canvas_tile_page
+        ):
+            patch = next(
+                (p for p in self.window.patches if p.display_info.page_id == self.window.canvas_tile_page),
+                None
+            )
+            if patch:
+                self._select_tile(patch.display_info)
+
         self.manager.disable_minor_mode(self)
         return True
 
@@ -351,6 +384,18 @@ class TileManagerMode (InputMode):
         if page_num in allowed_pages:
             self.recent_page_id = self.window.canvas_tile_page
             self.window.canvas_tile_page = page_num
+
+        if (
+            not self.window.selected_patch
+            or self.window.selected_patch.display_info.page_id != self.window.canvas_tile_page
+        ):
+            patch = next(
+                (p for p in self.window.patches if p.display_info.page_id == self.window.canvas_tile_page),
+                None
+            )
+            if patch:
+                self._select_tile(patch.display_info)
+
         self.manager.disable_minor_mode(self)
         return True
 
@@ -438,12 +483,6 @@ class TileManagerMode (InputMode):
             )
         else:
             await self.window.patch_close()
-
-        if not any(
-            p for p in self.window.patches
-            if p.display_info.page_id and p.display_info.page_id == page_id
-        ):
-            return self.prev_page()
 
         self.manager.disable_minor_mode(self)
         return True

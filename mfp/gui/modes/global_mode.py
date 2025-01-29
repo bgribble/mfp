@@ -175,6 +175,10 @@ class GlobalMode (InputMode):
             keysym="M1DOWN"
         )
         cls.bind(
+            "selbox-start-M3", lambda mode: mode.selbox_start(None), helptext="Context menu",
+            keysym="M3DOWN"
+        )
+        cls.bind(
             "selbox-motion", lambda mode: mode.selbox_motion(True), helptext="Drag selection box",
             keysym="M1-MOTION"
         )
