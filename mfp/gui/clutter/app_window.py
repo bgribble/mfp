@@ -392,7 +392,7 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
         buf.delete(buf.get_start_iter(), buf.get_end_iter())
         buf.insert(buf.get_end_iter(), txt)
 
-    def cmd_set_prompt(self, prompt, default='', filename=False):
+    def cmd_set_prompt(self, prompt, default='', space=True, filename=False):
         from gi.repository import Clutter
 
         if (prompt is None) and self.cmd_input:
@@ -543,6 +543,9 @@ class ClutterAppWindowImpl (AppWindow, AppWindowImpl):
             clipboard.set_text(cliptxt, -1)
 
     def screen_to_canvas(self, x, y):
+        if x is None or y is None:
+            return (x, y)
+
         success, new_x, new_y = self.group.transform_stage_point(x, y)
         if success:
             return (new_x, new_y)

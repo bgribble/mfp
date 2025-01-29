@@ -115,7 +115,7 @@ class AppWindowImpl(BackendInterface, ABC):
         pass
 
     @abstractmethod
-    def cmd_set_prompt(self, prompt, default='', filename=False):
+    def cmd_set_prompt(self, prompt, default='', space=True, filename=False):
         pass
 
     @abstractmethod

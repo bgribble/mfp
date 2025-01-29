@@ -3,6 +3,8 @@ clutter/text_widget.py -- backend implementation of TextWidget for Clutter
 """
 
 from gi.repository import Clutter
+from mfp import log
+from mfp.gui_main import MFPGUI
 from mfp.gui.base_element import BaseElement
 
 from ..text_widget import TextWidget, TextWidgetImpl
@@ -27,6 +29,7 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
             self.parent = self.container.container
 
         self.label = Clutter.Text()
+        self.last_text = ""
         self.parent.add_actor(self.label)
 
         if hasattr(self.container, 'app_window'):
@@ -41,9 +44,15 @@ class ClutterTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         # repeat the Clutter signals to MFP signals on the TextWidget
         self.label.connect("activate", repeat_event(self, "activate"))
-        self.label.connect("text-changed", repeat_event(self, "text-changed"))
+        self.label.connect("text-changed", self.text_changed_cb)
         self.label.connect("key-focus-out", repeat_event(self, "key-focus-out"))
         self.label.connect("key-focus-in", repeat_event(self, "key-focus-in"))
+
+    def text_changed_cb(self, widget):
+        new_text = self.label.get_text() or ""
+        old_text = self.last_text
+        self.last_text = new_text
+        MFPGUI().async_task(self.signal_emit("text-changed", old_text, new_text))
 
     async def delete(self):
         if self.label:

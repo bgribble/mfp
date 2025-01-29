@@ -174,9 +174,7 @@ class InputManager:
                 self.pointer_leave_time is not None
                 and (now - self.pointer_leave_time) > timedelta(milliseconds=100)
             ):
-                self.keyseq.mod_keys = set()
                 self.window.grab_focus()
-
             if (
                 src
                 and src != self.window

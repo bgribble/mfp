@@ -129,13 +129,15 @@ class KeySequencer (object):
                 key += "%d" % ks
             return key
 
-        if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
-            key = 'S-' + key
-
         if isinstance(event, (ButtonPressEvent, ButtonReleaseEvent)):
             button = event.button
             clicks = event.click_count
-            key += "M%d" % button
+
+            prefix = ''
+            if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
+                prefix = 'S-'
+
+            key += f"{prefix}M{button}"
 
             if clicks == 2:
                 key += "DOUBLE"
@@ -151,9 +153,13 @@ class KeySequencer (object):
                     self.mouse_buttons.remove(button)
 
         elif isinstance(event, MotionEvent):
+            prefix = ''
+            if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):
+                prefix = 'S-'
+
             for b in (1, 2, 3):
                 if b in self.mouse_buttons:
-                    key += 'M%d-' % b
+                    key += f'{prefix}M{b}-'
             key += 'MOTION'
 
         elif isinstance(event, ScrollEvent):

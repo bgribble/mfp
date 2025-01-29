@@ -28,6 +28,10 @@ def get_key_unicode(ev):
 
 
 def transform_event(clutter_event, mfp_target):
+
+    if not clutter_event:
+        return None
+
     if clutter_event.type == Clutter.EventType.BUTTON_PRESS:
         return ButtonPressEvent(
             target=mfp_target,
