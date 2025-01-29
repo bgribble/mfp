@@ -40,7 +40,7 @@ class ToggleIndicatorElementImpl(BackendInterface, metaclass=ABCMeta):
 
 class ButtonElement (BaseElement):
     proc_type = "var"
-
+    help_patch = "button.help.mfp"
     style_defaults = {
         'porthole-height': 3,
         'porthole-width': 6,
