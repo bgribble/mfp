@@ -19,7 +19,7 @@
         0
     ],
     "objects": {
-        "22": {
+        "45": {
             "connections": [
                 []
             ],
@@ -40,7 +40,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_091",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 62.0,
@@ -61,7 +61,7 @@
             "type": "text",
             "value": "-- Multi-purpose button object"
         },
-        "23": {
+        "46": {
             "connections": [
                 []
             ],
@@ -72,7 +72,7 @@
                 "display_type": "toggle",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 25.0,
+                "height": 24.0,
                 "is_export": false,
                 "label_text": "",
                 "layer": "Layer 0",
@@ -101,7 +101,7 @@
             "properties": {},
             "type": "var"
         },
-        "24": {
+        "47": {
             "connections": [
                 []
             ],
@@ -143,7 +143,7 @@
             "type": "text",
             "value": "<hr>"
         },
-        "25": {
+        "48": {
             "connections": [
                 []
             ],
@@ -164,7 +164,7 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_021",
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 33.0,
@@ -173,7 +173,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": "Button elements, like Message elements. hold a value that is emitted when they are clicked. Where Message elements display their values, Buttons generally show either a text label or an \"on/off\" state indicator.\n\n**Variations**",
+                "value": "Button elements, like Message elements. hold a value that is emitted when they are clicked. Where Message elements display their values, Buttons generally show either a text label or an \"on/off\" state indicator.\n\n**Variations**\n\nSee the Edit > Add element menu for key shortcuts",
                 "width": 368.0
             },
             "initargs": null,
@@ -183,9 +183,9 @@
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "Button elements, like Message elements. hold a value that is emitted when they are clicked. Where Message elements display their values, Buttons generally show either a text label or an \"on/off\" state indicator.\n\n**Variations**"
+            "value": "Button elements, like Message elements. hold a value that is emitted when they are clicked. Where Message elements display their values, Buttons generally show either a text label or an \"on/off\" state indicator.\n\n**Variations**\n\nSee the Edit > Add element menu for key shortcuts"
         },
-        "26": {
+        "49": {
             "connections": [
                 []
             ],
@@ -209,13 +209,13 @@
                 "obj_type": "var",
                 "off_message": false,
                 "on_message": true,
-                "position_x": 41.0,
-                "position_y": 210.0,
+                "position_x": 36.0,
+                "position_y": 230.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 107.00088500976562
+                "width": 105.0
             },
             "initargs": "False",
             "midi_filters": null,
@@ -225,7 +225,7 @@
             "properties": {},
             "type": "var"
         },
-        "27": {
+        "50": {
             "connections": [
                 []
             ],
@@ -248,13 +248,13 @@
                 "obj_name": null,
                 "obj_state": 3,
                 "obj_type": "var",
-                "position_x": 41.0,
-                "position_y": 273.0007638801485,
+                "position_x": 36.0,
+                "position_y": 293.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 93.11334228515625
+                "width": 96.0
             },
             "initargs": "False",
             "midi_filters": null,
@@ -264,7 +264,7 @@
             "properties": {},
             "type": "var"
         },
-        "28": {
+        "51": {
             "connections": [
                 []
             ],
@@ -283,11 +283,11 @@
                 "min_width": 16,
                 "no_export": false,
                 "obj_args": "False",
-                "obj_name": null,
+                "obj_name": "indicator_001",
                 "obj_state": 3,
                 "obj_type": "var",
-                "position_x": 41.0,
-                "position_y": 329.9992361198515,
+                "position_x": 36.0,
+                "position_y": 349.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
@@ -302,7 +302,7 @@
             "properties": {},
             "type": "var"
         },
-        "29": {
+        "52": {
             "connections": [
                 []
             ],
@@ -315,7 +315,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 40.0,
+                "height": 56.0,
                 "is_export": false,
                 "layer": "Layer 0",
                 "max_width": 600,
@@ -323,17 +323,17 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_022",
                 "obj_state": 3,
                 "obj_type": "text",
-                "position_x": 175.0,
-                "position_y": 205.0,
+                "position_x": 170.0,
+                "position_y": 225.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
                 "value": "Emit True or False alternately when clicked, indicate current state with color",
-                "width": 207.0
+                "width": 190.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -344,7 +344,7 @@
             "type": "text",
             "value": "Emit True or False alternately when clicked, indicate current state with color"
         },
-        "30": {
+        "53": {
             "connections": [
                 []
             ],
@@ -365,11 +365,11 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_023",
                 "obj_state": 3,
                 "obj_type": "text",
-                "position_x": 175.0,
-                "position_y": 274.0007638801485,
+                "position_x": 170.0,
+                "position_y": 294.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
@@ -386,7 +386,7 @@
             "type": "text",
             "value": "Emit Bang when clicked"
         },
-        "31": {
+        "54": {
             "connections": [
                 []
             ],
@@ -407,11 +407,11 @@
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": null,
+                "obj_name": "text_024",
                 "obj_state": 3,
                 "obj_type": "text",
-                "position_x": 173.0,
-                "position_y": 324.9992361198515,
+                "position_x": 168.0,
+                "position_y": 344.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
@@ -431,18 +431,18 @@
     },
     "scopes": {
         "__patch__": {
-            "button_001": 27,
-            "indicator_001": 28,
-            "patch": 0,
-            "self": 0,
-            "text_008": 24,
-            "text_021": 25,
-            "text_022": 29,
-            "text_023": 30,
-            "text_024": 31,
-            "text_091": 22,
-            "toggle_001": 23,
-            "toggle_002": 26
+            "button_001": 50,
+            "indicator_001": 51,
+            "patch": 44,
+            "self": 44,
+            "text_008": 47,
+            "text_021": 48,
+            "text_022": 52,
+            "text_023": 53,
+            "text_024": 54,
+            "text_091": 45,
+            "toggle_001": 46,
+            "toggle_002": 49
         }
     },
     "type": "button.help"

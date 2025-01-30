@@ -90,6 +90,10 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
 
         self.render_sync_with_imgui()
 
+        imgui.set_cursor_pos((
+            self.position_x + self.label.position_x,
+            self.position_y + self.label.position_y
+        ))
         nedit.begin_node(self.node_id)
 
         # node content: nothing really, we are just going to draw on it
@@ -124,11 +128,9 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         else:
             self.label.set_color(self.get_color('text-color'))
 
-        imgui.set_cursor_pos((
-            self.position_x + self.label.position_x,
-            self.position_y + self.label.position_y
-        ))
+        imgui.begin_group()
         self.label.render()
+        imgui.end_group()
         content_w, content_h = imgui.get_item_rect_size()
 
         if content_w + self.label.position_x < self.min_width:

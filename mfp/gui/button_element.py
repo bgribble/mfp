@@ -16,6 +16,7 @@ from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
 from .modes.clickable import ClickableControlMode
 from .modes.label_edit import LabelEditMode
+from .param_info import ParamInfo
 from ..gui_main import MFPGUI
 from ..bang import Bang
 
@@ -48,7 +49,12 @@ class ButtonElement (BaseElement):
         'porthole-border': 2,
         'padding': dict(top=0, bottom=0, left=0, right=0),
     }
-
+    extra_params = {
+        'label_text': ParamInfo(label="Button label", param_type=str, show=True),
+    }
+    store_attrs = {
+        **BaseElement.store_attrs, **extra_params
+    }
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 
@@ -61,7 +67,6 @@ class ButtonElement (BaseElement):
         self.label.set_font_name(self.get_fontspec())
         self.label.signal_listen('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
-        self.label.set_use_markup(True)
         self.label.set_position(padding.get('left', 0), padding.get('top', 0))
 
         self.label_text = ''
@@ -93,6 +98,11 @@ class ButtonElement (BaseElement):
                 nwidth/2.0-label_halfwidth,
                 nheight/2.0-label_halfheight-2
             )
+
+    @saga("label_text")
+    async def label_text_changed(self, action, state_diff, previous):
+        self.label.set_markup(self.label_text, notify=True)
+        yield None
 
     @catchall
     async def label_changed_cb(self, *args):
