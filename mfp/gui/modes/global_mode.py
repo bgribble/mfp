@@ -224,15 +224,15 @@ class GlobalMode (InputMode):
         )
         cls.bind(
             "viewport-drag-start", cls.drag_start, helptext="Begin dragging viewport",
-            keysym="S-C-M1DOWN"
+            keysym="C-S-M1DOWN"
         )
         cls.bind(
             "viewport-drag-motion", cls.drag_motion, helptext="Drag viewport",
-            keysym="S-C-M1-MOTION"
+            keysym="C-S-M1-MOTION"
         )
         cls.bind(
             "viewport-drag-end", cls.drag_end, helptext="End drag viewport",
-            keysym="S-C-M1UP"
+            keysym="C-S-M1UP"
         )
         cls.bind(
             "zoom-in-scroll", lambda mode: mode.scroll_zoom(1.06), helptext="Zoom view in",
@@ -260,7 +260,7 @@ class GlobalMode (InputMode):
         )
         cls.bind(
             "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
-            keysym="S-C-."
+            keysym="C->"
         )
         cls.bind(
             "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
