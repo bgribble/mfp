@@ -23,14 +23,17 @@ class LinearScale (ScaleType):
         self.min_value = minv
         self.max_value = maxv
 
-    # given a linear fraction of the scale (pixel pos as a fraction of size)), 
-    # return the value 
+    # given a linear fraction of the scale (pixel pos as a fraction of size)),
+    # return the value
     def value(self, fraction):
         value = (self.min_value + (fraction * (self.max_value - self.min_value)))
         return value
 
     # given a value, return the linear scale fraction
     def fraction(self, value):
+        if self.min_value >= self.max_value:
+            return 0
+
         val = (value - self.min_value) / float(self.max_value - self.min_value)
         return val
 
@@ -46,11 +49,14 @@ class LinearScale (ScaleType):
         # interv is the target interval between ticks.  We want the
         # nearest .1, .25, .5, or 1 to that.  This calculation is based on
         # the chart as a whole, not the target range
-        interv = float(self.max_value - self.min_value) / numticks
-        logbase = pow(10, math.floor(math.log10(interv)))
-        choices = [logbase, logbase * 2.5, logbase * 5.0, logbase * 10]
-        diffs = [abs(interv - c) for c in choices]
-        tickint = choices[diffs.index(min(*diffs))]
+        try:
+            interv = float(self.max_value - self.min_value) / numticks
+            logbase = pow(10, math.floor(math.log10(interv)))
+            choices = [logbase, logbase * 2.5, logbase * 5.0, logbase * 10]
+            diffs = [abs(interv - c) for c in choices]
+            tickint = choices[diffs.index(min(*diffs))]
+        except ValueError:
+            return []
 
         # tickint now has the interval between ticks.  Use the target range
         # to generate the ticks
@@ -58,22 +64,53 @@ class LinearScale (ScaleType):
         numticks = int(float(tick_max - tick_min) / tickint) + 2
         ticks = [first_tick + n * tickint for n in range(numticks)]
         filtered = [t for t in ticks if t >= tick_min and t <= tick_max]
-        return filtered 
+        return filtered
 
 
-class DecadeScale (ScaleType): 
-    def __init__(self, min_value=-40, max_value=0):
+class DecadeScale (ScaleType):
+    def __init__(self, min_value=0.01, max_value=10000):
         self.min_value = min_value
         self.max_value = max_value
 
     def __repr__(self):
         return "decade"
 
+    def set_bounds(self, minv, maxv):
+        if minv == 0:
+            minv = 0.01
+
+        self.min_value = minv
+        self.max_value = maxv
+
     def fraction(self, value):
-        pass
+        try:
+            log_val = math.log10(value)
+            log_min = math.log10(self.min_value)
+            log_max = math.log10(self.max_value)
+        except ValueError:
+            return 0
+
+        if log_min >= log_max:
+            return 0
+        elif log_val < log_min:
+            return 0
+        elif log_val > log_max:
+            return 1.0
+        else:
+            return (log_val - log_min) / (log_max - log_min)
 
     def value(self, fraction):
-        pass
+        if self.min_value >= self.max_value:
+            return self.min_value
+        else:
+            try:
+                log_min = math.log10(self.min_value)
+                log_max = math.log10(self.max_value)
+            except ValueError:
+                return self.min_value
+
+            log_value = log_min + fraction * (log_max - log_min)
+            return math.pow(10, log_value)
 
     def ticks(self, numticks, tick_min=None, tick_max=None):
         # generate ticks for a decade log-scaled axis
@@ -84,22 +121,26 @@ class DecadeScale (ScaleType):
         if tick_min <= 0:
             tick_min = min(tick_max / 100.0, 0.1)
 
-        interv = math.log10(float(self.max_value)/float(self.min_value)) / numticks 
-        logbase = math.ceil(interv)
-        first_tick_pow = math.ceil(math.log10(tick_min))
-        ticks = [ pow(10, first_tick_pow + n*logbase) for n in range(int(numticks)+1) ]
+        try:
+            first_tick_pow = math.ceil(math.log10(tick_min))
+            interv = math.log10(float(self.max_value)/float(self.min_value)) / numticks
+            logbase = math.ceil(interv)
+            ticks = [ pow(10, first_tick_pow + n*logbase) for n in range(int(numticks)+1) ]
+        except ValueError:
+            return []
+
         filtered = [t for t in ticks if t >= tick_min and t <= tick_max]
-        return filtered 
+        return filtered
 
 
 class AudioScale (ScaleType):
     '''
-    The audio scale is modeled on large-console mixer faders.  
-    Scale increments are dB, with basically 3 different slopes: 
+    The audio scale is modeled on large-console mixer faders.
+    Scale increments are dB, with basically 3 different slopes:
         +10 dB -- -10 dB (a 20 dB range) at slope M
         -10 dB -- -50 dB (a 40 dB range) at slope 2M
         -50 dB -- -inf dB over a short range at the bottom
-    ticks would be evenly spaced, at 5dB intervals on the top and 
+    ticks would be evenly spaced, at 5dB intervals on the top and
     10 db on the bottom
     '''
 
@@ -112,7 +153,7 @@ class AudioScale (ScaleType):
         self.value_hi = 10
         self.value_med = -10
         self.value_low = -50
-        pass 
+        pass
 
     def __repr__(self):
         return "audio"
@@ -140,7 +181,7 @@ class AudioScale (ScaleType):
             top = self.value_med
         if top > self.value_low and top > self.min_value:
             nunits += top - max(self.value_low, self.min_value)
-            
+
         unitsize = split_range / nunits
         if self.max_value > self.value_hi:
             self.thresh_hi = 1.0 - unitsize*(self.max_value-self.value_hi)
@@ -149,44 +190,53 @@ class AudioScale (ScaleType):
         self.thresh_low = self.thresh_hi - 2*unitsize*(self.value_hi - self.value_med)
 
     def value(self, fraction):
-        if fraction < self.thresh_inf: 
-            return (self.min_value 
-                    + fraction * (self.value_low - self.min_value)/self.thresh_inf)
-        elif fraction < self.thresh_low: 
+        if fraction < self.thresh_inf:
+            return (
+                self.min_value
+                + fraction * (self.value_low - self.min_value)/self.thresh_inf
+            )
+        elif fraction < self.thresh_low:
             delta = fraction - self.thresh_inf
-            return (self.value_low
-                    + delta * (self.value_med - self.value_low)
-                    /(self.thresh_low - self.thresh_inf))
-        elif fraction < self.thresh_hi: 
+            return (
+                self.value_low
+                + delta * (self.value_med - self.value_low) / (self.thresh_low - self.thresh_inf)
+            )
+        elif fraction < self.thresh_hi:
             delta = fraction - self.thresh_low
-            return (self.value_med  
-                    + delta * (self.value_hi - self.value_med)
-                    /(self.thresh_hi - self.thresh_low) )
+            return (
+                self.value_med
+                + delta * (self.value_hi - self.value_med) / (self.thresh_hi - self.thresh_low)
+            )
         else:
             delta = fraction - self.thresh_hi
-            return (self.value_hi  + delta * (self.value_med - self.value_low)
-                    /(self.thresh_low - self.thresh_inf)) 
+            return (
+                self.value_hi
+                + delta * (self.value_med - self.value_low) / (self.thresh_low - self.thresh_inf)
+            )
 
     def fraction(self, value):
+        if self.min_value >= self.max_value:
+            return 0
+
         if value < self.min_value:
-            return 0 
+            return 0
         elif value < self.value_low:
             delta = value - self.min_value
             return self.thresh_inf * delta / (self.value_low - self.min_value)
         elif value < self.value_med:
-            delta = value - self.value_low 
-            return (self.thresh_inf + (self.thresh_low - self.thresh_inf) 
+            delta = value - self.value_low
+            return (self.thresh_inf + (self.thresh_low - self.thresh_inf)
                     * delta / (self.value_med - self.value_low))
         elif value < self.value_hi:
             delta = value - self.value_med
-            return (self.thresh_low + (self.thresh_hi - self.thresh_low) 
+            return (self.thresh_low + (self.thresh_hi - self.thresh_low)
                     * delta / (self.value_hi - self.value_med))
         else:
             delta = value - 10.0
-            return (self.thresh_hi + (self.thresh_hi - self.thresh_low) 
+            return (self.thresh_hi + (self.thresh_hi - self.thresh_low)
                     * delta / (self.value_med - self.value_low))
 
     def ticks(self, numticks, tick_min=None, tick_max=None):
         allticks = [-50, -40, -30, -20, -10, -5, 0, 5, 10, 20]
-        
+
         return [t for t in allticks if t >= self.min_value and t <= self.max_value]

@@ -113,6 +113,8 @@ def render_param(
     newval = param_value if override is None else override
     changed = False
 
+    imgui.push_id(param_name)
+
     try:
         if readonly or param_type.editable is False:
             imgui.begin_disabled()
@@ -449,6 +451,7 @@ def render_param(
             log.warning(f"[render] Error in param {param_name}: {type(e)} {e}")
             logged_errors.add(param_name)
 
+    imgui.pop_id()
     imgui.pop_style_var()
     if changed:
         return newval

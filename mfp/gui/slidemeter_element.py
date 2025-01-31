@@ -30,9 +30,28 @@ class SlideMeterElement (BaseElement):
         'min_value': ParamInfo(label="Min value", param_type=float, show=True),
         'max_value': ParamInfo(label="Max value", param_type=float, show=True),
         'show_scale': ParamInfo(label="Show scale", param_type=bool, show=True),
-        'scale': ParamInfo(label="Scale", param_type=str, show=False),
-        'scale_position': ParamInfo(label="Scale position", param_type=str, show=True),
-        'orientation': ParamInfo(label="Orientation", param_type=str, show=True),
+        'scale_type': ParamInfo(
+            label="Scale type", 
+            param_type=str, 
+            choices=lambda _: [
+                ("Linear", "linear"),
+                ("Log", "log"),
+                ("Audio", "audio")
+            ],
+            show=True
+        ),
+        'scale_position': ParamInfo(
+            label="Scale position",
+            choices=lambda _: [("Left/top", "left"), ("Right/bottom", "right")],
+            param_type=str,
+            show=True
+        ),
+        'orientation': ParamInfo(
+            label="Orientation", 
+            choices=lambda _: [("Vertical", "vertical"), ("Horizontal", "horizontal")],
+            param_type=str, 
+            show=True
+        ),
         'zeropoint': ParamInfo(label="Zero point", param_type=float, show=True),
     }
 
@@ -41,6 +60,7 @@ class SlideMeterElement (BaseElement):
     }
     display_type = "slidemeter"
     proc_type = "slidemeter"
+    help_patch = "slider.help.mfp"
 
     style_defaults = {
         'scale-font-size': 8,
@@ -71,6 +91,7 @@ class SlideMeterElement (BaseElement):
         self.show_scale = False
         self.slider_enable = True
         self.scale = ticks.LinearScale()
+        self.scale_type = "linear"
         self.scale_position = self.LEFT
         self.scale_font_size = 7
         self.orientation = SlideMeterElement.VERTICAL
@@ -113,10 +134,6 @@ class SlideMeterElement (BaseElement):
             fval = f"{value:>3.3g}"
         return fval
 
-    @property
-    def scale_type(self):
-        return self.scale.scale_type if self.scale else 0
-
     def fill_interval(self):
         if self.zeropoint is None:
             return (self.min_value, self.value)
@@ -150,6 +167,18 @@ class SlideMeterElement (BaseElement):
             # FIXME
             MFPGUI().async_task(self.update())
             MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.value))
+
+    @saga("scale_type")
+    async def scale_type_changed(self, action, state_diff, previous):
+        if self.scale_type == "linear" and not isinstance(self.scale, ticks.LinearScale):
+            self.scale = ticks.LinearScale()
+        elif self.scale_type == "log" and not isinstance(self.scale, ticks.DecadeScale):
+            self.scale = ticks.DecadeScale()
+        elif self.scale_type == "audio" and not isinstance(self.scale, ticks.AudioScale):
+            self.scale = ticks.AudioScale()
+        self.scale_ticks = None
+        self.scale.set_bounds(self.min_value, self.max_value)
+        yield None
 
     @saga("orientation", "show_scale")
     async def shape_changed(self, action, state_diff, previous):
@@ -229,13 +258,19 @@ class SlideMeterElement (BaseElement):
 
         v = params.get("scale")
         if v == "linear" and not isinstance(self.scale, ticks.LinearScale):
+            self.scale_type = v
             self.scale = ticks.LinearScale(self.min_value, self.max_value)
+            self.scale_ticks = None
             changes = True
         elif v in ("log", "log10", "decade") and not isinstance(self.scale, ticks.LogScale):
+            self.scale_type = v
             self.scale = ticks.LogScale(self.min_value, self.max_value)
+            self.scale_ticks = None
             changes = True
         elif v == 'audio' and not isinstance(self.scale, ticks.AudioScale):
+            self.scale_type = v
             self.scale = ticks.AudioScale(self.min_value, self.max_value)
+            self.scale_ticks = None
             changes = True
 
         v = params.get("scale_position")

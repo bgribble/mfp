@@ -156,7 +156,7 @@ class PatchMessage (Var):
 
 
 class Text (Var):
-    doc_tooltip_obj = "Comment using SGML-type markup for style"
+    doc_tooltip_obj = "Comment using Markdown to style text"
 
     def save(self):
         base_dict = super().save()
