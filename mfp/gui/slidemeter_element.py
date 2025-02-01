@@ -29,6 +29,8 @@ class SlideMeterElement (BaseElement):
     extra_params = {
         'min_value': ParamInfo(label="Min value", param_type=float, show=True),
         'max_value': ParamInfo(label="Max value", param_type=float, show=True),
+        'bar_width': ParamInfo(label="Meter width", param_type=float, show=True),
+        'bar_height': ParamInfo(label="Meter height", param_type=float, show=True),
         'show_scale': ParamInfo(label="Show scale", param_type=bool, show=True),
         'scale_type': ParamInfo(
             label="Scale type", 
@@ -87,6 +89,8 @@ class SlideMeterElement (BaseElement):
         self.value = 0.0
         self.min_value = 0.0
         self.max_value = 1.0
+        self.bar_width = 24
+        self.bar_height = 100
         self.scale_ticks = None
         self.show_scale = False
         self.slider_enable = True
@@ -229,7 +233,7 @@ class SlideMeterElement (BaseElement):
         await self.update()
         self.send_params()
 
-    @saga('zeropoint')
+    @saga('zeropoint', 'bar_width', 'bar_height', 'scale_type', 'orientation', 'show_scale')
     async def params_changed(self, action, state_diff, previous):
         await self.update()
         self.send_params()

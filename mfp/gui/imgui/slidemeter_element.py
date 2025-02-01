@@ -87,6 +87,8 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         self.node_id = None
         self.min_width = 10
         self.min_height = 10
+        self.bar_width = 24
+        self.bar_height = 100
         self.width = 24
         self.height = 100
         self.position_set = False
@@ -152,15 +154,20 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         draw_list = imgui.get_window_draw_list()
 
         scale_bef = 0
-        if self.show_scale and self.scale_position == self.LEFT:
-            scale_bef = self.SCALE_SPACE
+        if self.show_scale:
+            if self.scale_position == self.LEFT:
+                scale_bef = self.SCALE_SPACE
 
         if self.orientation == self.VERTICAL:
             if self.show_scale_set:
                 self.width += self.SCALE_SPACE * (1 if self.show_scale else -1)
                 self.show_scale_set = False
 
-            bar_width = self.width - (self.SCALE_SPACE if self.show_scale else 0)
+            #bar_width = self.width - (self.SCALE_SPACE if self.show_scale else 0)
+            bar_width = self.bar_width
+            bar_height = self.bar_height
+            total_width = self.bar_width + (self.SCALE_SPACE if self.show_scale else 0)
+            total_height = self.bar_height
 
             c_tl = (
                 scale_bef + self.position_x,
@@ -168,50 +175,54 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
             )
             c_br = (
                 scale_bef + self.position_x + bar_width,
-                self.position_y + self.height
+                self.position_y + bar_height
             )
 
             p_tl = (
                 scale_bef + self.position_x + border_width,
-                self.position_y + (self.height - 2*border_width) * (1 - pmax) + border_width,
+                self.position_y + (bar_height - 2*border_width) * (1 - pmax) + border_width,
             )
             p_br = (
                 scale_bef + self.position_x + (bar_width - border_width),
-                self.position_y + (self.height - border_width) * (1 - pmin)
+                self.position_y + (bar_height - border_width) * (1 - pmin)
             )
         else:
             if self.show_scale_set:
                 self.height += self.SCALE_SPACE * (1 if self.show_scale else -1)
                 self.show_scale_set = False
 
-            bar_height = self.height - (self.SCALE_SPACE if self.show_scale else 0)
+            #bar_height = self.height - (self.SCALE_SPACE if self.show_scale else 0)
+            bar_height = self.bar_width
+            bar_width = self.bar_height
+            total_height = self.bar_width + (self.SCALE_SPACE if self.show_scale else 0)
+            total_width = self.bar_height
 
             c_tl = (
                 self.position_x,
                 scale_bef + self.position_y
             )
             c_br = (
-                self.position_x + self.width,
+                self.position_x + bar_width,
                 scale_bef + self.position_y + bar_height
             )
             p_tl = (
-                self.position_x + (self.width - border_width) * pmin + border_width,
+                self.position_x + (bar_width - border_width) * pmin + border_width,
                 scale_bef + self.position_y + border_width
             )
             p_br = (
-                self.position_x + (self.width - border_width) * pmax,
+                self.position_x + (bar_width - border_width) * pmax,
                 scale_bef + self.position_y + (bar_height - border_width)
             )
 
         self.hot_x_min = self.position_x
-        self.hot_x_max = self.position_x + self.width
+        self.hot_x_max = self.position_x + total_width
         self.hot_y_min = self.position_y
-        self.hot_y_max = self.position_y + self.height
+        self.hot_y_max = self.position_y + total_height
 
-        imgui.dummy([self.width, 1])
-        imgui.dummy([1, self.height-1])
+        imgui.dummy([total_width, 1])
+        imgui.dummy([1, total_height-1])
 
-        color = self.get_color('stroke-color')
+        color = self.get_color(f'stroke-color')
         draw_list.add_rect_filled(
             p_tl, p_br,
             ColorDB().backend.im_col32(color),
