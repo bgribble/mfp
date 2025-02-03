@@ -5,7 +5,6 @@
         "export_w": null,
         "export_x": null,
         "export_y": null,
-        "file_origin": "/home/grib/devel/mfp/.virtual/share/mfp/patches/help/reference-patching.help.mfp",
         "height": 20,
         "layers": [
             [
@@ -34,329 +33,13 @@
             ]
         ],
         "name": "reference-patching.help",
-        "new_page": true,
-        "num_inlets": 1,
-        "num_outlets": 0,
-        "obj_id": 137,
-        "top_level": true,
         "width": 0
     },
     "hot_inlets": [
         0
     ],
     "objects": {
-        "138": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 248.0,
-                "is_export": false,
-                "layer": "Table of Contents",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_001",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 26.0,
-                "position_y": 19.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help.\n\nFor a general overview of MFP, try the Tutorial (in the Help menu)\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching",
-                "width": 456.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help.\n\nFor a general overview of MFP, try the Tutorial (in the Help menu)\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching"
-        },
-        "139": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "patch_message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layer": "Table of Contents",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "@show \"Graphical patch elements\"",
-                "obj_name": "patch_message_001",
-                "obj_state": 3,
-                "obj_type": "patch_message",
-                "position_x": 490.0,
-                "position_y": 183.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 232.0
-            },
-            "initargs": "@show \"Graphical patch elements\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "patch_message_001",
-            "osc_methods": [],
-            "properties": {},
-            "type": "patch_message"
-        },
-        "140": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "patch_message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layer": "Table of Contents",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "@show \"Message processors\"",
-                "obj_name": "patch_message_002",
-                "obj_state": 3,
-                "obj_type": "patch_message",
-                "position_x": 489.0,
-                "position_y": 215.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 190.0
-            },
-            "initargs": "@show \"Message processors\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "patch_message_002",
-            "osc_methods": [],
-            "properties": {},
-            "type": "patch_message"
-        },
-        "141": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "patch_message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layer": "Table of Contents",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "@show \"Signal processors\"",
-                "obj_name": "patch_message_003",
-                "obj_state": 3,
-                "obj_type": "patch_message",
-                "position_x": 489.0,
-                "position_y": 248.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 183.0
-            },
-            "initargs": "@show \"Signal processors\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "patch_message_003",
-            "osc_methods": [],
-            "properties": {},
-            "type": "patch_message"
-        },
-        "142": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "patch_message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 20.0,
-                "is_export": false,
-                "layer": "Table of Contents",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "@show \"Debugging\"",
-                "obj_name": "patch_message_004",
-                "obj_state": 3,
-                "obj_type": "patch_message",
-                "position_x": 489.0,
-                "position_y": 279.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 127.0
-            },
-            "initargs": "@show \"Debugging\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "patch_message_004",
-            "osc_methods": [],
-            "properties": {},
-            "type": "patch_message"
-        },
-        "143": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 32.0,
-                "is_export": false,
-                "layer": "Graphical patch elements",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_063",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 31.0,
-                "position_y": 32.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "<div class=\"size-x-large\"><div class=\"bold\">Graphical patch elements</div></div>",
-                "width": 241.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_063",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "<div class=\"size-x-large\"><div class=\"bold\">Graphical patch elements</div></div>"
-        },
-        "144": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 72.0,
-                "is_export": false,
-                "layer": "Graphical patch elements",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_064",
-                "obj_state": 3,
-                "obj_type": "text",
-                "position_x": 32.0,
-                "position_y": 82.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "Nodes in patches are represented by different kinds of graphical elements.\n\nChoose \"Help\" in each element's context menu (right mouse  button) to see details about each element type.",
-                "width": 567.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_064",
-            "osc_methods": [],
-            "properties": {},
-            "type": "text",
-            "value": "Nodes in patches are represented by different kinds of graphical elements.\n\nChoose \"Help\" in each element's context menu (right mouse  button) to see details about each element type."
-        },
-        "145": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "connection_info": [],
-                "debug": false,
-                "display_type": "message",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 12,
-                "is_export": false,
-                "layer": "Graphical patch elements",
-                "min_height": 12,
-                "min_width": 25,
-                "no_export": false,
-                "obj_args": "\"message\"",
-                "obj_name": "message_025",
-                "obj_state": 3,
-                "obj_type": "message",
-                "position_x": 38.0,
-                "position_y": 173.0,
-                "position_z": 0,
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "width": 25
-            },
-            "initargs": "\"message\"",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "message_025",
-            "osc_methods": [],
-            "properties": {},
-            "type": "message"
-        },
-        "146": {
+        "10": {
             "connections": [
                 []
             ],
@@ -398,7 +81,7 @@
             "type": "text",
             "value": "message: Literal Python data, emitted when clicked"
         },
-        "147": {
+        "11": {
             "connections": [
                 []
             ],
@@ -440,7 +123,7 @@
             "properties": {},
             "type": "print"
         },
-        "148": {
+        "12": {
             "connections": [
                 []
             ],
@@ -482,7 +165,7 @@
             "type": "text",
             "value": "processor: The generic element type, processes inputs to outputs"
         },
-        "149": {
+        "13": {
             "connections": [
                 []
             ],
@@ -524,7 +207,7 @@
             "type": "enum",
             "value": 100.5
         },
-        "150": {
+        "14": {
             "connections": [
                 []
             ],
@@ -566,7 +249,7 @@
             "type": "text",
             "value": "number: A number; click and drag to change"
         },
-        "151": {
+        "15": {
             "connections": [
                 []
             ],
@@ -608,7 +291,7 @@
             "type": "text",
             "value": "Text"
         },
-        "152": {
+        "16": {
             "connections": [
                 []
             ],
@@ -650,7 +333,7 @@
             "type": "text",
             "value": "text: Markdown-enabled text comment"
         },
-        "153": {
+        "17": {
             "connections": [
                 []
             ],
@@ -690,7 +373,7 @@
             "properties": {},
             "type": "var"
         },
-        "154": {
+        "18": {
             "connections": [
                 []
             ],
@@ -732,12 +415,14 @@
             "type": "text",
             "value": "button: Emit a value when clicked, sometimes with toggle indicator"
         },
-        "155": {
+        "19": {
             "connections": [
                 []
             ],
             "do_onload": true,
             "gui_params": {
+                "bar_height": 100,
+                "bar_width": 24,
                 "connection_info": [],
                 "debug": false,
                 "display_type": "slidemeter",
@@ -759,8 +444,8 @@
                 "position_x": 45.0,
                 "position_y": 420.0,
                 "position_z": 0,
-                "scale": null,
                 "scale_position": "left",
+                "scale_type": "linear",
                 "scope": "__patch__",
                 "show_scale": false,
                 "style": {},
@@ -777,7 +462,49 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "156": {
+        "2": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 248.0,
+                "is_export": false,
+                "layer": "Table of Contents",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_001",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 26.0,
+                "position_y": 19.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help.\n\nFor a general overview of MFP, try the Tutorial (in the Help menu)\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching",
+                "width": 456.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "## MFP Reference: Patching\n\n\nClick on the button on the right of a topic to navigate to help.\n\nFor a general overview of MFP, try the Tutorial (in the Help menu)\n\n<hr>\n\n**Graphical patch elements** - the objects you see in a patch\n\n**Message processors** - objects that operate on Python data (messages)\n\n**Signal processors** - objects that input or output audio signals\n\n**Debugging and the console** - tools for patching"
+        },
+        "20": {
             "connections": [
                 []
             ],
@@ -819,12 +546,14 @@
             "type": "text",
             "value": "slider: display/control a value with a slider and oprional scale display"
         },
-        "157": {
+        "21": {
             "connections": [
                 []
             ],
             "do_onload": true,
             "gui_params": {
+                "bar_height": 100,
+                "bar_width": 24,
                 "connection_info": [],
                 "debug": false,
                 "dial_radius": 24,
@@ -847,8 +576,8 @@
                 "position_x": 47.0,
                 "position_y": 472.0,
                 "position_z": 0,
-                "scale": null,
                 "scale_position": "left",
+                "scale_type": "linear",
                 "scope": "__patch__",
                 "show_scale": false,
                 "style": {},
@@ -865,7 +594,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "158": {
+        "22": {
             "connections": [
                 []
             ],
@@ -907,7 +636,7 @@
             "type": "text",
             "value": "dial: like a slider but round"
         },
-        "159": {
+        "23": {
             "connections": [
                 []
             ],
@@ -918,7 +647,7 @@
                 "display_type": "patch_message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 12,
+                "height": 20.0,
                 "is_export": false,
                 "layer": "Graphical patch elements",
                 "min_height": 12,
@@ -929,12 +658,12 @@
                 "obj_state": 3,
                 "obj_type": "patch_message",
                 "position_x": 44.0,
-                "position_y": 565.0,
+                "position_y": 610.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 25
+                "width": 127.0
             },
             "initargs": "@show \"X-Y Plots\"",
             "midi_filters": null,
@@ -944,7 +673,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "160": {
+        "24": {
             "connections": [
                 []
             ],
@@ -969,7 +698,7 @@
                 "obj_state": 3,
                 "obj_type": "text",
                 "position_x": 189.0,
-                "position_y": 562.0,
+                "position_y": 607.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
@@ -986,7 +715,7 @@
             "type": "text",
             "value": "Click to see info about X-Y plots "
         },
-        "161": {
+        "25": {
             "connections": [
                 []
             ],
@@ -1028,7 +757,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">X-Y Plots</div></div>"
         },
-        "162": {
+        "26": {
             "connections": [
                 []
             ],
@@ -1070,7 +799,7 @@
             "type": "text",
             "value": "You can plot data using points, lines, or bars. Data can come from individual messages that are sent to the plot, or from signal data in shared buffers."
         },
-        "163": {
+        "27": {
             "connections": [
                 []
             ],
@@ -1134,7 +863,7 @@
             "properties": {},
             "type": "scatter"
         },
-        "164": {
+        "28": {
             "connections": [
                 []
             ],
@@ -1147,7 +876,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 104.0,
                 "is_export": false,
                 "layer": "X-Y Plots",
                 "max_width": 600,
@@ -1158,14 +887,14 @@
                 "obj_name": "text_015",
                 "obj_state": 3,
                 "obj_type": "text",
-                "position_x": 412.0,
-                "position_y": 163.0,
+                "position_x": 410.0,
+                "position_y": 161.0,
                 "position_z": 0,
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": "scatter - plot individual (x, y) points",
-                "width": 226.0
+                "value": "scatter - plot individual (x, y) points. Input is (x, y) pairs (lists or tuples).\n\nCan also be created as [bars] for an X-Y bar chart or as [histogram] for a bar-style histogram with automatic bin selection.\n\nCan have either a static X-Y coordinate frame or act as a \"rolling\" time-dependent chart.",
+                "width": 277.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1174,9 +903,9 @@
             "osc_methods": [],
             "properties": {},
             "type": "text",
-            "value": "scatter - plot individual (x, y) points"
+            "value": "scatter - plot individual (x, y) points. Input is (x, y) pairs (lists or tuples).\n\nCan also be created as [bars] for an X-Y bar chart or as [histogram] for a bar-style histogram with automatic bin selection.\n\nCan have either a static X-Y coordinate frame or act as a \"rolling\" time-dependent chart."
         },
-        "165": {
+        "29": {
             "connections": [
                 []
             ],
@@ -1218,13 +947,50 @@
             "type": "text",
             "value": "scope - plot audio signals (requires a [buffer~] ... see buffer help for details)"
         },
-        "166": {
+        "3": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Table of Contents",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Graphical patch elements\"",
+                "obj_name": "patch_message_001",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 490.0,
+                "position_y": 183.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "@show \"Graphical patch elements\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "30": {
             "connections": [
                 [],
                 [],
                 [
                     [
-                        167,
+                        31,
                         0
                     ]
                 ]
@@ -1267,11 +1033,11 @@
             "properties": {},
             "type": "buffer~"
         },
-        "167": {
+        "31": {
             "connections": [
                 [
                     [
-                        166,
+                        30,
                         0
                     ]
                 ]
@@ -1336,7 +1102,7 @@
             "properties": {},
             "type": "scope"
         },
-        "168": {
+        "32": {
             "connections": [
                 []
             ],
@@ -1378,7 +1144,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">Message processors</div></div>"
         },
-        "169": {
+        "33": {
             "connections": [
                 []
             ],
@@ -1420,7 +1186,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">Signal processors</div></div>"
         },
-        "170": {
+        "34": {
             "connections": [
                 []
             ],
@@ -1431,7 +1197,7 @@
                 "display_type": "patch_message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 12,
+                "height": 20.0,
                 "is_export": false,
                 "layer": "Graphical patch elements",
                 "min_height": 12,
@@ -1447,7 +1213,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 25
+                "width": 183.0
             },
             "initargs": "@show \"Table of Contents\"",
             "midi_filters": null,
@@ -1457,7 +1223,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "171": {
+        "35": {
             "connections": [
                 []
             ],
@@ -1494,7 +1260,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "172": {
+        "36": {
             "connections": [
                 []
             ],
@@ -1531,7 +1297,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "173": {
+        "37": {
             "connections": [
                 []
             ],
@@ -1568,7 +1334,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "174": {
+        "38": {
             "connections": [
                 []
             ],
@@ -1610,7 +1376,7 @@
             "type": "text",
             "value": "<div class=\"size-x-large\"><div class=\"bold\">Debugging</div></div>"
         },
-        "175": {
+        "39": {
             "connections": [
                 []
             ],
@@ -1647,7 +1413,44 @@
             "properties": {},
             "type": "patch_message"
         },
-        "176": {
+        "4": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Table of Contents",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Message processors\"",
+                "obj_name": "patch_message_002",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 489.0,
+                "position_y": 215.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "@show \"Message processors\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_002",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "40": {
             "connections": [
                 []
             ],
@@ -1684,7 +1487,7 @@
             "properties": {},
             "type": "patch_message"
         },
-        "177": {
+        "41": {
             "connections": [
                 []
             ],
@@ -1725,52 +1528,995 @@
             "properties": {},
             "type": "text",
             "value": "<--- Click to close help"
+        },
+        "42": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 200.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_021",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 36.0,
+                "position_y": 82.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Message processors are patch elements that operate on discrete messages rather than continuous signal data. This section is for message processors that appear with the generic \"processor\" graphical element (a plain box with the name and creation arguments of the processor).\n\nMessage processors are very similar in appearance to signal processors, but they can be distinguished in two ways: \n\n* The input and output ports of the processor are rendered as solid semicircles for message ports, and as outlines for signal ports. Note that signal ports can also accept single numeric values.\n\n* By convention, the names of signal processors end with the ~ character.\n\nSelect an element below and use the Help context menu item to view detailed help. ",
+                "width": 594.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_021",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Message processors are patch elements that operate on discrete messages rather than continuous signal data. This section is for message processors that appear with the generic \"processor\" graphical element (a plain box with the name and creation arguments of the processor).\n\nMessage processors are very similar in appearance to signal processors, but they can be distinguished in two ways: \n\n* The input and output ports of the processor are rendered as solid semicircles for message ports, and as outlines for signal ports. Note that signal ports can also accept single numeric values.\n\n* By convention, the names of signal processors end with the ~ character.\n\nSelect an element below and use the Help context menu item to view detailed help. "
+        },
+        "43": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_023",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 36.0,
+                "position_y": 327.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "**Essentials**",
+                "width": 77.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_023",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "**Essentials**"
+        },
+        "44": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "\"hello\"",
+                "obj_name": "processor_003",
+                "obj_state": 3,
+                "obj_type": "var",
+                "position_x": 55.0,
+                "position_y": 374.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 85.0
+            },
+            "initargs": "\"hello\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "var"
+        },
+        "45": {
+            "connections": [
+                [],
+                [],
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "b, a, f",
+                "obj_name": "processor_004",
+                "obj_state": 3,
+                "obj_type": "trigger",
+                "position_x": 54.0,
+                "position_y": 422.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 113.0
+            },
+            "initargs": "b, a, f",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "trigger"
+        },
+        "46": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "range(10)",
+                "obj_name": "processor_006",
+                "obj_state": 3,
+                "obj_type": "for",
+                "position_x": 54.0,
+                "position_y": 469.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 99.0
+            },
+            "initargs": "range(10)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "for"
+        },
+        "47": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_024",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 189.0,
+                "position_y": 370.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "[var] -- Hold a Python value\n",
+                "width": 177.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_024",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "[var] -- Hold a Python value\n"
+        },
+        "48": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_025",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 189.0,
+                "position_y": 419.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "[trigger] -- repeat an input to all outputs in a knwon sequece, with optional type conversions",
+                "width": 573.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_025",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "[trigger] -- repeat an input to all outputs in a knwon sequece, with optional type conversions"
+        },
+        "49": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_026",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 189.0,
+                "position_y": 467.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "[for] -- iterate over a sequence by emitting one element at a time",
+                "width": 402.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_026",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "[for] -- iterate over a sequence by emitting one element at a time"
+        },
+        "5": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Table of Contents",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Signal processors\"",
+                "obj_name": "patch_message_003",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 489.0,
+                "position_y": 248.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "@show \"Signal processors\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_003",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "50": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "1",
+                "obj_name": "processor_007",
+                "obj_state": 3,
+                "obj_type": "+",
+                "position_x": 55.0,
+                "position_y": 513.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 29.0
+            },
+            "initargs": "1",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_007",
+            "osc_methods": [],
+            "properties": {},
+            "type": "+"
+        },
+        "51": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "processor_008",
+                "obj_state": 3,
+                "obj_type": "-",
+                "position_x": 95.0,
+                "position_y": 512.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 28.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_008",
+            "osc_methods": [],
+            "properties": {},
+            "type": "-"
+        },
+        "52": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": null,
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 191.0,
+                "position_y": 509.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Arithmetic -- wrap Python operators",
+                "width": 232.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_006",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Arithmetic -- wrap Python operators"
+        },
+        "53": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Strings\"",
+                "obj_name": "patch_message_012",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 54.0,
+                "position_y": 584.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 113.0
+            },
+            "initargs": "@show \"Strings\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_012",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "54": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Type conversions\"",
+                "obj_name": "patch_message_013",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 183.0,
+                "position_y": 584.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 176.0
+            },
+            "initargs": "@show \"Type conversions\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_013",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "55": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Arrays/lists\"",
+                "obj_name": "patch_message_014",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 391.0,
+                "position_y": 583.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 148.0
+            },
+            "initargs": "@show \"Arrays/lists\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_014",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "57": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20.0,
+                "is_export": false,
+                "layer": "Message processors",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Conditionals\"",
+                "obj_name": "patch_message_015",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 571.0,
+                "position_y": 582.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 148.0
+            },
+            "initargs": "@show \"Conditionals\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_015",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "58": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "sendvia",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20.0,
+                "is_export": false,
+                "label_text": "foo",
+                "layer": "Graphical patch elements",
+                "min_height": 0,
+                "min_width": 0,
+                "no_export": false,
+                "obj_args": "\"foo\",0",
+                "obj_name": "sendvia_001",
+                "obj_state": 3,
+                "obj_type": "send",
+                "position_x": 41.0,
+                "position_y": 550.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": false,
+                "width": 29.0
+            },
+            "initargs": "\"foo\",0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "send"
+        },
+        "6": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "patch_message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Table of Contents",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@show \"Debugging\"",
+                "obj_name": "patch_message_004",
+                "obj_state": 3,
+                "obj_type": "patch_message",
+                "position_x": 489.0,
+                "position_y": 279.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "@show \"Debugging\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "patch_message_004",
+            "osc_methods": [],
+            "properties": {},
+            "type": "patch_message"
+        },
+        "60": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "recvvia",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20.0,
+                "is_export": false,
+                "label_text": "foo",
+                "layer": "Graphical patch elements",
+                "min_height": 0,
+                "min_width": 0,
+                "no_export": false,
+                "obj_args": "\"foo\",0",
+                "obj_name": "recvvia_001",
+                "obj_state": 3,
+                "obj_type": "recv",
+                "position_x": 89.0,
+                "position_y": 534.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": false,
+                "width": 29.0
+            },
+            "initargs": "\"foo\",0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "recvvia_001",
+            "osc_methods": [],
+            "properties": {},
+            "type": "recv"
+        },
+        "61": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layer": "Graphical patch elements",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": null,
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 164.0,
+                "position_y": 537.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "via -- send and receive messages/signals",
+                "width": 262.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_028",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "via -- send and receive messages/signals"
+        },
+        "7": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 32.0,
+                "is_export": false,
+                "layer": "Graphical patch elements",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_063",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 31.0,
+                "position_y": 32.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<div class=\"size-x-large\"><div class=\"bold\">Graphical patch elements</div></div>",
+                "width": 241.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_063",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "<div class=\"size-x-large\"><div class=\"bold\">Graphical patch elements</div></div>"
+        },
+        "8": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 72.0,
+                "is_export": false,
+                "layer": "Graphical patch elements",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_064",
+                "obj_state": 3,
+                "obj_type": "text",
+                "position_x": 32.0,
+                "position_y": 82.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Nodes in patches are represented by different kinds of graphical elements.\n\nChoose \"Help\" in each element's context menu (right mouse  button) to see details about each element type.",
+                "width": 550.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_064",
+            "osc_methods": [],
+            "properties": {},
+            "type": "text",
+            "value": "Nodes in patches are represented by different kinds of graphical elements.\n\nChoose \"Help\" in each element's context menu (right mouse  button) to see details about each element type."
+        },
+        "9": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layer": "Graphical patch elements",
+                "min_height": 12,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "\"message\"",
+                "obj_name": "message_025",
+                "obj_state": 3,
+                "obj_type": "message",
+                "position_x": 38.0,
+                "position_y": 173.0,
+                "position_z": 0,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "\"message\"",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_025",
+            "osc_methods": [],
+            "properties": {},
+            "type": "message"
         }
     },
     "scopes": {
         "__patch__": {
-            "dial_002": 157,
-            "enum_004": 149,
-            "message_025": 145,
-            "patch": 137,
-            "patch_message_001": 139,
-            "patch_message_002": 140,
-            "patch_message_003": 141,
-            "patch_message_004": 142,
-            "patch_message_005": 159,
-            "patch_message_006": 170,
-            "patch_message_007": 171,
-            "patch_message_008": 172,
-            "patch_message_009": 173,
-            "patch_message_010": 175,
-            "patch_message_022": 176,
-            "plot_001": 163,
-            "plot_003": 167,
-            "processor_002": 166,
-            "processor_040": 147,
-            "self": 137,
-            "slidemeter_002": 155,
-            "text_001": 138,
-            "text_002": 161,
-            "text_003": 168,
-            "text_004": 169,
-            "text_005": 174,
-            "text_014": 162,
-            "text_015": 164,
-            "text_016": 165,
-            "text_039": 177,
-            "text_063": 143,
-            "text_064": 144,
-            "text_065": 146,
-            "text_066": 148,
-            "text_067": 150,
-            "text_068": 151,
-            "text_069": 152,
-            "text_070": 154,
-            "text_071": 156,
-            "text_072": 158,
-            "text_073": 160,
-            "toggle_002": 153
+            "dial_002": 21,
+            "enum_004": 13,
+            "message_025": 9,
+            "patch": 1,
+            "patch_message_001": 3,
+            "patch_message_002": 4,
+            "patch_message_003": 5,
+            "patch_message_004": 6,
+            "patch_message_005": 23,
+            "patch_message_006": 34,
+            "patch_message_007": 35,
+            "patch_message_008": 36,
+            "patch_message_009": 37,
+            "patch_message_010": 39,
+            "patch_message_012": 53,
+            "patch_message_013": 54,
+            "patch_message_014": 55,
+            "patch_message_015": 57,
+            "patch_message_022": 40,
+            "plot_001": 27,
+            "plot_003": 31,
+            "processor_002": 30,
+            "processor_003": 44,
+            "processor_004": 45,
+            "processor_006": 46,
+            "processor_007": 50,
+            "processor_008": 51,
+            "processor_040": 11,
+            "recvvia_001": 60,
+            "self": 1,
+            "sendvia_001": 58,
+            "slidemeter_002": 19,
+            "text_001": 2,
+            "text_002": 25,
+            "text_003": 32,
+            "text_004": 33,
+            "text_005": 38,
+            "text_006": 52,
+            "text_014": 26,
+            "text_015": 28,
+            "text_016": 29,
+            "text_021": 42,
+            "text_023": 43,
+            "text_024": 47,
+            "text_025": 48,
+            "text_026": 49,
+            "text_028": 61,
+            "text_039": 41,
+            "text_063": 7,
+            "text_064": 8,
+            "text_065": 10,
+            "text_066": 12,
+            "text_067": 14,
+            "text_068": 15,
+            "text_069": 16,
+            "text_070": 18,
+            "text_071": 20,
+            "text_072": 22,
+            "text_073": 24,
+            "toggle_002": 17
         }
     },
     "type": "reference-patching.help"

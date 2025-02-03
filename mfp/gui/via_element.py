@@ -19,6 +19,7 @@ from .backend_interfaces import BackendInterface
 class ViaElement (BaseElement):
     display_type = None
     proc_type = None
+    help_patch = "via.help.mfp"
 
     style_defaults = {
         'porthole-width': 0,
