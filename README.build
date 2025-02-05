@@ -63,8 +63,14 @@ The basic form:
     $ ./waf configure [options]
 
 A full list of options is shown by ./waf --help, under
-"Configuration options".  --virtualenv is the only "custom"
-option.
+"Configuration options". Most of these are waf builtin options. The custom
+options for MFP are:
+
+| Option | Purpose |
+|--------|---------|
+| `--virtualenv` | Build in a virtualenv (default: false) |
+| `--with-clutter` | Enable Clutter backend (default: don't build) |
+| `--without-imgui` | Disable Dear ImGUI backend (default: build) |
 
 
 LIBRARIES
@@ -105,6 +111,8 @@ In Debian, these are packaged as:
     gir1.2-gtk-3.0
     python-gi
 
+They are only needed if you are building the Clutter UI.
+
 BUILDING
 -----------------------
 
@@ -140,13 +148,13 @@ DESKTOP FILE
 
 The template desktop file `mfp.desktop` will be populated with
 paths and installed to ${PREFIX}/share/mfp/mfp.desktop. You will
-need to copy it to wherever such things go on your system. 
+need to copy it to wherever such things go on your system.
 
 The icon path is what I needed to get icons working on my Gnome
 system. You may need to change it. If you need to do something
 manual, the actual icon image is the one in mfp.svg. I can't
 express how crabby I am about how messed up icons are on the
-Linux desktop. 
+Linux desktop.
 
 For what it's worth, on my system the desktop file should be
 ~/.local/share/applications/mfp.desktop
@@ -175,4 +183,4 @@ with current Python versions, and the "new" version of nosetests
 --exe option needed to point nose to the libmfpdsp.so file. So I
 switched over to "pynose", which is a fork of the original
 nosetests, just updated to work with contemporary Python. It gets
-installed by install_deps. 
+installed by install_deps.
