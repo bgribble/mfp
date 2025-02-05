@@ -13,6 +13,7 @@ from ..bang import Uninit, Bang
 class Trigger (Processor):
     doc_tooltip_obj = "Pass through input to N outputs, in right-to-left order"
     doc_tooltip_inlet = ["Passthru input"]
+    doc_help_patch = "trigger.help.mfp"
 
     '''
     [trigger {n}] or
