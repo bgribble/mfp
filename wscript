@@ -580,7 +580,7 @@ def build(bld):
         desktop_content = Utils.subst_vars(desktop_template, bld.env)
         if not os.path.exists(desktop_dir):
             os.makedirs(desktop_dir)
-        Utils.writef(f"{desktop_dir}/{desktop_filename}", desktop_content)
+        Utils.writef(f"{desktop_dir}/com.billgribble.{desktop_filename}", desktop_content)
 
     # must make virtualenv "relocatable" after all packages added
     bld.fix_virtualenv()

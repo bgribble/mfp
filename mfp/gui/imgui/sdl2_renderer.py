@@ -15,7 +15,6 @@ import ctypes
 import os
 
 from sdl2 import *  # noqa
-
 from imgui_bundle import imgui
 from imgui_bundle.python_backends.sdl_backend import SDL2Renderer
 
@@ -71,7 +70,7 @@ class ImguiSDL2Renderer:
             renderer.key_map[SDL_SCANCODE_F1 + index] = imgui.Key(572 + index)
 
     def create_sdl2_window(self, name, width, height, icon_path):
-        os.environ['SDL_VIDEO_X11_WMCLASS'] = "mfp"
+        os.environ['SDL_VIDEO_X11_WMCLASS'] = "com.billgribble.mfp"
 
         if SDL_Init(SDL_INIT_EVERYTHING) < 0:
             mfplog.error(
