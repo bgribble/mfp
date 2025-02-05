@@ -55,7 +55,8 @@ async def patch_close(self, patch=None):
         p = self.selected_patch
     if p and p.deletable:
         self.patch_select_next()
-        self.patches.remove(p)
+        if p in self.patches:
+            self.patches.remove(p)
         await p.delete()
     else:
         log.debug("Cannot close window. Close UI via plugin host Edit button")
