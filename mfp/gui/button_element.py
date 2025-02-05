@@ -121,7 +121,7 @@ class ButtonElement (BaseElement):
                 self.label.set_markup(self.label_text)
 
             await self.center_label()
-            self.redraw()
+        self.redraw()
 
     async def configure(self, params):
         set_text = False

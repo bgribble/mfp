@@ -55,9 +55,10 @@ class Prompter (object):
             except Exception as e:
                 log.debug_traceback(e)
 
-    async def label_edit_finish(self, widget, text):
-        self.history.populate([text])
+    async def label_edit_finish(self, widget, text, aborted=False):
         self.window.input_mgr.disable_minor_mode(self.mode)
+        if text and not aborted:
+            self.history.populate([text])
 
         if self.current_callback:
             try:
@@ -65,7 +66,11 @@ class Prompter (object):
                 if self.callback_incremental:
                     incr = dict(incremental=False)
 
-                rv = self.current_callback(text, **incr)
+                cb_text = text
+                if aborted:
+                    cb_text = None
+
+                rv = self.current_callback(cb_text, **incr)
                 if inspect.isawaitable(rv):
                     await rv
             except Exception as e:
@@ -77,7 +82,7 @@ class Prompter (object):
             self.mode = None
         self.label.text = ''
         self.window.cmd_set_prompt(None)
-        if len(self.queue):
+        if len(self.queue) > 0:
             nextitem = self.queue[0]
             self.queue = self.queue[1:]
             await self._begin(*nextitem)

@@ -161,13 +161,14 @@ class EnumElement (BaseElement):
     async def label_edit_start(self):
         pass
 
-    async def label_edit_finish(self, *args):
+    async def label_edit_finish(self, widget=None, text=None, aborted=False):
         # called by labeleditmode
         t = self.label.get_text()
-        await self.update_value(float(t))
-        if self.obj_id is None:
-            await self.create_obj()
-        await MFPGUI().mfp.send(self.obj_id, 0, self.value)
+        if t and not aborted:
+            await self.update_value(float(t))
+            if self.obj_id is None:
+                await self.create_obj()
+            await MFPGUI().mfp.send(self.obj_id, 0, self.value)
         self.redraw()
 
     async def configure(self, params):

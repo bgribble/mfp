@@ -341,7 +341,7 @@ class LabelEditMode (InputMode):
         self.text = txt or ''
         self.end_editing()
         self.update_label(raw=False)
-        await self.element.label_edit_finish(self.widget, self.text)
+        await self.element.label_edit_finish(self.widget, self.text, aborted=True)
         await self.element.end_edit()
         return True
 

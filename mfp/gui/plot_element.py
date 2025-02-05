@@ -108,10 +108,10 @@ class PlotElement (BaseElement):
         # FIXME set label to editing style
         pass
 
-    async def label_edit_finish(self, *args):
+    async def label_edit_finish(self, widget=None, text=None, aborted=False):
         t = self.label.get_text()
 
-        if t != self.label_text:
+        if not aborted and t != self.label_text:
             parts = t.split(' ', 1)
             self.obj_type = parts[0]
             if len(parts) > 1:

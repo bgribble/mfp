@@ -87,14 +87,15 @@ class ViaElement (BaseElement):
     async def label_edit_start(self, *args):
         pass
 
-    async def label_edit_finish(self, *args):
+    async def label_edit_finish(self, widget=None, text=None, aborted=False):
         # called by labeleditmode
         t = self.label.get_text()
-        self.label_text = t
-        if self.obj_id is None:
-            await self.create_obj(t)
-        self.recenter_label()
-        await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
+        if not aborted:
+            self.label_text = t
+            if self.obj_id is None:
+                await self.create_obj(t)
+            self.recenter_label()
+            await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
 
     async def configure(self, params):
         self.label_text = params.get("label_text", "")

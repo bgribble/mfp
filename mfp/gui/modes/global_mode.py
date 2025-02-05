@@ -408,6 +408,8 @@ class GlobalMode (InputMode):
                     await MFPGUI().mfp.set_params(patch.obj_id, prms)
                     self.window.refresh(patch)
                 await MFPGUI().mfp.save_file(patch.obj_name, fname)
+            else:
+                self.window.hud_write("Save file canceled")
         if filename is None:
             await self.window.cmd_get_input(
                 "File name to save: ", cb, default_filename, filename="save"
@@ -422,6 +424,9 @@ class GlobalMode (InputMode):
         async def cb(plugname):
             if plugname:
                 await MFPGUI().mfp.save_lv2(patch.obj_name, plugname)
+            else:
+                self.window.hud_write("Save as LV2 canceled")
+
         if filename is None:
             await self.window.cmd_get_input(
                 "Plugin name to save: ", cb, default_plugname, filename="save"
@@ -431,7 +436,10 @@ class GlobalMode (InputMode):
 
     async def open_file(self, filename=None):
         async def cb(fname):
-            await MFPGUI().mfp.open_file(fname)
+            if fname:
+                await MFPGUI().mfp.open_file(fname)
+            else:
+                self.window.hud_write("File open canceled")
 
         if filename is None:
             await self.window.cmd_get_input(

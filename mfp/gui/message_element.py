@@ -97,8 +97,8 @@ class MessageElement (BaseElement):
         self.obj_state = self.OBJ_HALFCREATED
         await self.update()
 
-    async def label_edit_finish(self, widget=None, text=None):
-        if text is not None and text != self.message_text:
+    async def label_edit_finish(self, widget=None, text=None, aborted=False):
+        if text is not None and not aborted and text != self.message_text:
             self.message_text = text
             await self.create(self.proc_type, self.message_text)
 
@@ -234,9 +234,9 @@ class TransientMessageElement (MessageElement):
         self.label.set_selection(0, len(self.message_text))
         await self.update()
 
-    async def label_edit_finish(self, widget=None, text=None):
+    async def label_edit_finish(self, widget=None, text=None, aborted=False):
         from .modes.patch_edit import PatchEditMode
-        if text is not None:
+        if text is not None and not aborted:
             self.message_text = text
             for to in self.target_obj:
                 if to is not self:

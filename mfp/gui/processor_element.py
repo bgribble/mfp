@@ -94,8 +94,8 @@ class ProcessorElement (BaseElement):
                 None, f"{self.obj_type}{args}"
             )
 
-    async def label_edit_finish(self, widget, text=None):
-        if text is not None:
+    async def label_edit_finish(self, widget, text=None, aborted=False):
+        if text is not None and not aborted:
             parts = text.split(' ', 1)
             obj_type = parts[0]
             if len(parts) > 1:
