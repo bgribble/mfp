@@ -55,6 +55,7 @@ class Processor:
     doc_tooltip_obj = "No documentation found"
     doc_tooltip_inlet = []
     doc_tooltip_outlet = []
+    doc_help_patch = None
 
     def __init__(self, inlets, outlets, init_type, init_args, patch, scope, name):
         from .mfp_app import MFPApp
@@ -201,6 +202,9 @@ class Processor:
 
         # basic one-liner
         info['tooltip'] = ('[%s]: ' + self.doc_tooltip_obj) % self.init_type
+
+        if self.doc_help_patch:
+            info['help_patch'] = self.doc_help_patch
 
         info['messages_in'] = self.count_in
         info['messages_out'] = self.count_out

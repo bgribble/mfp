@@ -681,7 +681,8 @@ class BaseElement (Store):
             self.control_mode = None
 
     async def get_help_patch(self):
-        return self.help_patch
+        info = await MFPGUI().mfp.get_tooltip_info(self.obj_id)
+        return info.get("help_patch", self.help_patch)
 
     async def show_tip(self, xpos, ypos, details):
         tiptxt = None

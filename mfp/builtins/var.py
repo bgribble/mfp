@@ -23,6 +23,7 @@ class Var (Processor):
     doc_tooltip_inlet = ["Save input and emit from outlet, or only emit if input is Bang",
                          "Save input but do not emit (default: initarg 0)" ]
     doc_tooltip_outlet = ["Value output"]
+    doc_help_patch = "var.help.mfp"
 
     do_onload = False
 

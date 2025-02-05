@@ -56,7 +56,7 @@ class GlobalMode (InputMode):
             menupath="Context > Clear counters"
         )
         cls.bind(
-            "open-help", cls.open_help, helptext="Clear error counters",
+            "open-help", cls.open_help, helptext="Open help patch",
             keysym="F1",
             menupath="Context > ||Help"
         )
