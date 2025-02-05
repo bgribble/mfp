@@ -11,11 +11,13 @@ enough there that I use it in my own music-making.  As of now
 it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
-**What's happening now?** I am working on MFP pretty actively. The main
-branch currently contains a WIP backend that uses [Dear
-ImGUI](https://github.com/ocornut/imgui) for the UI, via the excellent
-[imgui-bundle](https://github.com/pthom/imgui_bundle) bindings. To try it out,
-pass the command-line arg `--gui-backend=imgui` (Clutter is still the default).
+**What's happening now?** I am working on MFP pretty actively.
+The main branch currently contains a WIP backend that uses [Dear
+ImGUI](https://github.com/ocornut/imgui) for the UI, via the
+excellent [imgui-bundle](https://github.com/pthom/imgui_bundle)
+bindings. The ImGUI UI is now the default; to use the old Clutter
+UI, be sure to build with it (see README.build) and launch with
+the option `--gui-backend=clutter`.
 
 The new UI looks quite a bit different. It's more like Max in the
 visual presentation of patches and the addition of a right-side
@@ -24,14 +26,12 @@ in important ways. Some big differences:
 
 * A tiled patch display area, to allow multiple patches to be
   viewed/edited at once
-* A menu bar that should reflect most available actions
+* A menu bar that should reflect most available actions, and a
+  popup context menu for the current selection
 * Ability to directly edit object parameters and style in the
   "Info" panel
-
-Some display elements and app features are still not implemented,
-so some patches won't work properly and you can expect to see
-some errors if you try to add unimplemented elements to the
-patch.
+* Better plot support via
+  [ImPlot](https://github.com/epezent/implot)
 
 The most recent release (0.7) is the last release that will
 exclusively support Gtk/Clutter for the UI. I will release 0.8 when I
@@ -51,7 +51,7 @@ Try:
 
 
 **Hello, world:** Follow these steps to create a helloworld patch
-using just the keyboard.  You do need a pointer to activate it.
+using just the keyboard.  
 
 You type | What happens
 ---------|----------------
@@ -64,8 +64,8 @@ p | Create a processor
 print RET | Make it a [print] processor
 RET | Make the connection
 ESC | Enter Operate major mode
-
-Now click on the message box to send the "hello, world" string.
+TAB | Select the message box
+RET | Activate the message box
 
 Below the patch editing area, in the "Log" tab, you will see the message
 appear.
@@ -78,16 +78,17 @@ down SHIFT to expand the tooltip to show current information
 about the object, including assigned MIDI and OSC controllers.
 
 
-Imgui backend: the status line at the bottom of the window shows the
-currently active input modes, and the menus should reflect which
-actions are available. Information about the selected object is
-visible in the info panel on the right side.
+Imgui backend: the status line at the bottom of the window shows
+the currently active input modes, and the menus should reflect
+which actions are available. Object tooltips will temporarily
+overlay the status line at the bottom. Information about the
+selected object is visible in the info panel on the right side.
 
 
 ## KNOWN BROKEN
 
 There are a number of bugs, mostly in the Clutter backend, that I
-hoped to get fixed by this release (0.7) but have not.  Here are
+hoped to get fixed by the last release (0.7) but have not.  Here are
 some that I will just have to ask for your patience with:
 
 Ticket | Description
@@ -106,7 +107,23 @@ other potential workarounds.
 
 ## DOCUMENTATION
 
-There's some documentation in the doc/ directory of this
+There is in-app help/documentation via the Help menu (a tutorial
+and a reference doc) and context menus on patch elements. It's
+not complete, but mostly what I am doing now is writing help
+patches (they are great at flushing out bugs!) so the in-app help
+will continue to improve. 
+
+The Tutorial from the Help menu is probably the best place to
+start to understand how to get around the program.
+
+It covers basics about how to create, close, and open files
+and make simple patches.  It also covers "patching patterns" for
+things like iteration, conditionals, etc. 
+
+(If you are using the Clutter backend, there's no Help menu; you
+can find a Clutter version of the tutorial in `doc/tutorial.mfp`)
+
+There's also some documentation in the doc/ directory of this
 repository.
 
 **LAC 2013 paper:** This paper (doc/lac2013/lac2013.pdf) gives a
@@ -117,15 +134,6 @@ discussion about what it can do.
 useful if you want to know more about how MFP works.  Especially
 note README.lv2 which describes how MFP patches can be saved as
 LV2 plugins and loaded into an LV2 host.
-
-**Tutorial:**  The file "tutorial.mfp" is a basic intro to
-getting around the program.
-
-    $ mfp doc/tutorial.mfp
-
-It's not very complete, but it does cover a few basics about how
-to create, close, and open files and make simple patches.  It also covers
-"patching patterns" for things like iteration, conditionals, etc.
 
 **Demo patches:** There are a few demo patches in doc/.
 

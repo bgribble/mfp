@@ -88,22 +88,35 @@ def exit_sighandler(signum, frame):
     sys.exit(-signum)
 
 
-def test_imports():
+def test_imports(cmdline_args):
+    """
+    Fail with an actionable error message if a
+    dependency is not installed
+    """
+    backend = cmdline_args.get("gui_backend")
+
     try:
-        import gi
-        gi.require_version('Gtk', '3.0')
-        gi.require_version('GtkClutter', '1.0')
-        gi.require_version('Clutter', '1.0')
+        if backend == "clutter":
+            import gi
+            gi.require_version('Gtk', '3.0')
+            gi.require_version('GtkClutter', '1.0')
+            gi.require_version('Clutter', '1.0')
+            from gi.repository import Clutter, GObject, Gtk, Gdk, GtkClutter, Pango  # noqa: F401
+
+        if backend == "imgui":
+            import imgui_bundle
+
         import simplejson  # noqa: F401
         import numpy  # noqa: F401
         import nose  # noqa: F401
-        from gi.repository import Clutter, GObject, Gtk, Gdk, GtkClutter, Pango  # noqa: F401
         import posix_ipc  # noqa: F401
     except Exception:
         import traceback
         traceback.print_exc()
         print()
-        print("FATAL: Required package not installed.  Please run 'waf install_deps'")
+        print("FATAL: Required package cannot be imported.")
+        print("If you installed into a virtualenv, make sure it is activated.")
+        print("Run 'waf install_deps' if packages are not installed.")
         print()
         sys.exit(-1)
 
@@ -140,9 +153,8 @@ async def main():
                         help="Log all messages to console")
     parser.add_argument("--verbose-remote", action="store_true",
                         help="Log all child console output")
-    parser.add_argument("-g", "--gui-backend", default="clutter", type=str,
-                        help="GUI backend type (clutter or imgui). Imgui is incomplete."
-                        )
+    parser.add_argument("-g", "--gui-backend", default="imgui", type=str,
+                        help="GUI backend type (clutter or imgui). Clutter is deprecated.")
     parser.add_argument("--max-bufsize", default=2048,
                         help="Maximum JACK buffer size to support (default: 2048 frames)")
     parser.add_argument("--no-gui", action="store_true",
@@ -175,7 +187,7 @@ async def main():
     args = vars(parser.parse_args())
 
     # test imports to make sure everything is installed properly
-    test_imports()
+    test_imports(args)
 
     # create the app object
     app = MFPApp()

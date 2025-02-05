@@ -16,7 +16,6 @@ top = '.'
 out = 'wafbuild'
 pkgconf_libs = [
     "glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2", "libprotobuf-c",
-    "cairo"
 ]
 
 
@@ -352,6 +351,14 @@ def options(opt):
         "--virtualenv", action="store_true", dest="USE_VIRTUALENV",
         help="Install into a virtualenv"
     )
+    optgrp.add_option(
+        "--with-clutter", action="store_true", dest="WITH_CLUTTER",
+        help="Enable build support for Clutter UI backend (default: do not build)"
+    )
+    optgrp.add_option(
+        "--without-imgui", action="store_false", dest="WITH_IMGUI",
+        help="Disable build support for Dear Imgui UI backend (default: build)"
+    )
 
     # "egg" targets race to update the .pth file.  Must build them one at a time.
     opt.parser.set_defaults(jobs=1)
@@ -378,6 +385,15 @@ def configure(conf):
         conf.env.DEBIAN_STYLE = True
     else:
         conf.end_msg("site-packages")
+
+    # backend builds. Defaults: imgui yes, clutter no
+    conf.env.WITH_CLUTTER = False
+    conf.env.WITH_IMGUI = True
+
+    if conf.options.WITH_CLUTTER is True:
+        conf.env.WITH_CLUTTER = True
+    if conf.options.WITH_IMGUI is False:
+        conf.env.WITH_IMGUI = False
 
     # virtualenv and setuptools
     installer = None
@@ -425,13 +441,22 @@ def configure(conf):
         "posix_ipc", "simplejson", "numpy",
         "pynose", "yappi", "cython", "pyliblo3",
         "soundfile", "samplerate",
-        ("cairo", "pycairo"), "gbulb",               # clutter only
-        "pyopengl", "sdl", "imgui_bundle", "Pillow", # imgui only
         "carp-rpc", "flopsy",                        # my other libs
     ]
+    gi_libs = []
 
-    # all only needed for clutter backend
-    gi_libs = ["Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
+    if conf.env.WITH_CLUTTER:
+        pip_libs.extend([
+            ("cairo", "pycairo"), "gbulb",
+        ])
+
+        # all only needed for clutter backend
+        gi_libs = ["Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
+
+    if conf.env.WITH_IMGUI:
+        pip_libs.extend([
+            "pyopengl", "sdl", "imgui_bundle", "Pillow", # imgui only
+        ])
 
     pip_notfound = []
 
@@ -471,6 +496,16 @@ def configure(conf):
     print("MFP version", conf.env.GITVERSION, "configured.")
     if conf.env.USE_VIRTUALENV:
         print("Will build into virtualenv", conf.env.PREFIX)
+    if conf.env.WITH_IMGUI:
+        print("Will build Dear Imgui UI")
+    else:
+        print("Will not build Dear Imgui UI")
+
+    if conf.env.WITH_CLUTTER:
+        print("Will build Clutter UI")
+    else:
+        print("Will not build Clutter UI")
+
     print()
 
 
