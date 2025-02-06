@@ -116,6 +116,8 @@ class KeySequencer (object):
                 key += 'PGUP'
             elif ks == key_defs.KEY_PGDN:
                 key += 'PGDN'
+            elif ks and ks >= key_defs.KEY_F1 and ks <= key_defs.KEY_F12:
+                key += f"F{ks - key_defs.KEY_F1 + 1}"
             elif not ks or ks < 256:
                 if event.unicode and event.unicode.islower():
                     if (key_defs.MOD_SHIFT in self.mod_keys) or (key_defs.MOD_RSHIFT in self.mod_keys):

@@ -2,14 +2,16 @@
 
 MFP is an environment for visually composing computer programs, with
 an emphasis on music and real-time audio synthesis and analysis.  It's
-very much inspired by Miller Puckette's Pure Data (pd) and MAX/MSP,
-with a bit of LabView and TouchOSC for good measure.
+very much inspired by Miller Puckette's [Pure Data](https://puredata.info/) (pd) 
+and Cycling 74's [MAX/MSP](https://cycling74.com/products/max),
+with a bit of [LabView](https://www.ni.com/en/shop/labview.html) and 
+[TouchOSC](https://hexler.net/touchosc) for good measure.
 
 Development of MFP has been ambling along at a part-time pace for
-several years now.  It's by no means "1.0" but definitely there's
-enough there that I use it in my own music-making.  As of now
-it's pretty much a solo project but I welcome any feedback,
-questions, or pull requests.
+coming up on 15 years now.  Still, it's by no means "1.0" but
+definitely there's enough there that I use it in my own
+music-making.  As of now it's pretty much a solo project but I
+welcome any feedback, questions, or pull requests.
 
 **What's happening now?** I am working on MFP pretty actively.
 The main branch currently contains a WIP backend that uses [Dear
@@ -32,6 +34,8 @@ in important ways. Some big differences:
   "Info" panel
 * Better plot support via
   [ImPlot](https://github.com/epezent/implot)
+* A help system, not comprehensive but getting better coverage 
+  all the time
 
 The most recent release (0.7) is the last release that will
 exclusively support Gtk/Clutter for the UI. I will release 0.8 when I
