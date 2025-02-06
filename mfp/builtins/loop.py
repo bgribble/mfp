@@ -23,6 +23,7 @@ class For(Processor):
     doc_tooltip_inlet = ["List or control input (True/Bang to start, False to stop)",
                          "List to iterate (default: initarg 0)"]
     doc_tooltip_outlet = ["List item output"]
+    doc_help_patch = "for.help.mfp"
 
     def __init__(self, init_type, init_args, patch, scope, name):
         self.iterating = False
