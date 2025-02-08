@@ -34,7 +34,7 @@ class TileManagerMode (InputMode):
         )
         cls.bind(
             "split-tile-horiz", cls.split_horizontal, "Split tile horizontally",
-            keysym="|", menupath="Window > |Split tile horizontally"
+            keysym="\\", menupath="Window > |Split tile horizontally"
         )
         cls.bind(
             "convert-tile-to-page", cls.create_page_from_tile, "Convert tile to page",
