@@ -215,6 +215,9 @@ async def main():
 
     # add installed patch folders to path
     installed_patch_path = f"{sys.prefix}/share/mfp/patches"
+    if not os.path.isdir(installed_patch_path):
+        installed_patch_path = f"{sys.prefix}/../patches"
+
     patch_dirs = [installed_patch_path]
     for f in os.listdir(installed_patch_path):
         subdir = f"{installed_patch_path}/{f}"

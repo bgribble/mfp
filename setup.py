@@ -22,6 +22,6 @@ setup (name = 'mfp',
            'mfp.gui.imgui', 'mfp.gui.imgui.app_window',
            'mfp.gui.clutter', 'mfp.gui.clutter.xyplot'
        ],
-       entry_points = { 'console_scripts': ['mfp=mfp.mfp_main:main_sync_wrapper',
+       entry_points = { 'console_scripts': ['mfpmain=mfp.mfp_main:main_sync_wrapper',
                                             'mfpgui=mfp.gui_main:main_sync_wrapper'] },
        package_data = { 'mfp.gui': ['mfp.glade'] })

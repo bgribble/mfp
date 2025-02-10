@@ -1,12 +1,27 @@
 #! /usr/bin/env python3
+"""
+wscript is like the Makefile for a waf project.
 
-from waflib import Utils
-from waflib.Configure import conf
-from waflib.Build import BuildContext, InstallContext, CleanContext, CFG_FILES
-import waflib
+The waf commands configure and build map to the
+functions with the same name in here.
 
+The waf command install is a special case of build,
+and uses the MFPInstallContext.execute() method. Don't ask,
+I don't understand it either.
+
+Copyright (c) Bill Gribble <grib@billgrible.com>
+"""
+
+from functools import wraps
+import re
 import os
 import os.path
+import tarfile
+
+# pylint: disable=import-error
+from waflib.Configure import conf
+from waflib.Build import InstallContext, CleanContext, CFG_FILES
+import waflib
 
 APPNAME = "mfp"
 VERSION = "0.7"
@@ -14,14 +29,13 @@ WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
 out = 'wafbuild'
-pkgconf_libs = [
-    "glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2", "libprotobuf-c",
-]
-
 
 allwheels = []
 allwheeltargets = []
 
+#####################
+# helper funcs
+#####################
 
 def wheelname(pkgname, pkgver, pyver, arch):
     if arch:
@@ -43,178 +57,120 @@ def git_version():
     return str(int(vers, 16))
 
 
-def activate_virtualenv(ctxt):
-    activate = "%s/virtual/bin/activate_this.py" % ctxt.out_dir
-    exec(open(activate).read())
-
-
-@conf
-def make_virtualenv(ctxt, *args, **kwargs):
-    if ctxt.env.USE_VIRTUALENV:
-        python_name = ctxt.env.PYTHON[0].split('/')[-1]
-        targetfile = ".waf-built-virtual"
-        vrule = ' && '.join([
-            f"cd {ctxt.out_dir}",
-            f"{ctxt.env.VIRTUALENV[0]} -p {python_name} --system-site-packages virtual",
-            f"(find {ctxt.out_dir}/virtual/ -type f -o -type l > {targetfile})",
-            "cp virtual/bin/activate virtual/bin/activate.orig"
-        ])
-        ctxt(rule=vrule, target=targetfile, shell=True)
-
+#####################
+# custom rules
+#####################
 
 @conf
-def fix_virtualenv(ctxt, *args, **kwargs):
-    if ctxt.env.USE_VIRTUALENV:
-        targetfile = ".waf-relo-virtual"
-        python_name = ctxt.env.PYTHON[0].split('/')[-1]
-        cmds = [
-            "cd %s" % ctxt.out_dir,
-            "echo 'Making virtualenv relocatable'",
-            "%s -p %s --system-site-packages virtual" % (
-                ctxt.env.VIRTUALENV[0], python_name
-            ),
-            "rm -rf virtual/local",
-            ((
-                "cat virtual/bin/activate "
-                + "| sed -e 's/^VIRTUAL_ENV=.*$/VIRTUAL_ENV=\"%s\\/\"/' "
-                + "> activate.edited"
-            ) % ctxt.env.PREFIX.replace("/", "\\/")),
-            "echo 'if echo $LD_LIBRARY_PATH | grep -vq :%s/lib64:' >> activate.edited" % ctxt.env.PREFIX,
-            "echo 'then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/lib64:' >> activate.edited" % ctxt.env.PREFIX,
-            "echo 'fi' >> activate.edited",
-            "echo 'if echo $LD_LIBRARY_PATH | grep -vq :%s/lib:' >> activate.edited" % ctxt.env.PREFIX,
-            "echo 'then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/lib:' >> activate.edited" % ctxt.env.PREFIX,
-            "echo 'fi' >> activate.edited",
-            "mv activate.edited virtual/bin/activate",
-            "touch %s" % targetfile
-        ]
-        vrule = ' && '.join(cmds)
-        ctxt.add_group()
-        ctxt(rule=vrule, source=allwheeltargets, target=targetfile)
+def template(ctxt, *args, **kwargs):
+    source = kwargs.get("source")
+    target = f"wafbuild/{kwargs.get('target')}"
+    variables = kwargs.get("variables")
 
-
-@conf
-def wheel(ctxt, *args, **kwargs):
-    srcdir = kwargs.get("srcdir", ctxt.run_dir)
-    pkgname = kwargs.get("pkgname")
-    extname = kwargs.get("extname")
-    pyver = kwargs.get("pyver", ctxt.env.PYTHON_VERSION)
-    pkgversion = kwargs.get("version", "")
-    arch = kwargs.get("arch")
-
-    pkglibdir = ctxt.env.PYTHON_PKGLIBDIR
-
-    if ctxt.env.USE_VIRTUALENV:
-        pkglibdir = "virtual/%s" % pkglibdir
-    abs_pkglibdir = os.path.abspath(ctxt.out_dir + "/" + pkglibdir)
-
-    srcfiles = []
-    if extname:
-        srcfiles.extend(ctxt.path.ant_glob("%s/**/*.{c,h}" % (pkgname,)))
-
-    pkgwheelname = srcdir.replace("/", "-")
-    if pkgname:
-        srcfiles.extend(ctxt.path.ant_glob("%s/**/*.py" % pkgname))
-        pkgwheelname = wheelname(pkgname, pkgversion, pyver, arch)
-
-    if ctxt.env.USE_VIRTUALENV:
-        prefix = ""
-    else:
-        ddir = os.path.abspath(ctxt.out_dir)
-
-    if ctxt.env.DEBIAN_STYLE:
-        style = "--config-settings=install-layout=deb"
-        pkg_path = "dist-packages"
-    else:
-        style = ""
-        pkg_path = "site-packages"
-
-    wheeldir = f"{ctxt.out_dir}/wheel"
-    targetfile = f"wheel/{pkgwheelname}"
+    source_stat = os.stat(source)
+    source_mode = oct(source_stat.st_mode & 0o777)
 
     actions = [
-        "cd %s" % os.path.abspath(srcdir),
-        f"mkdir -p {wheeldir}",
-        f"pip3 wheel -w {wheeldir} .",
-        f"pip3 install --no-index --find-links={wheeldir} {wheeldir}/{pkgwheelname}"
+        f"cp {source} {target}",
     ]
 
-    wheelrule = (
-        f"echo Building {kwargs['pkgname']} && "
-        + ' && '.join([
-            f"echo ': {action}' && {action}"
-            for action in actions
-        ])
-    )
+    for varname, value in variables.items():
+        escaped_value = re.sub("/", r"\/", value)
+        actions.append(f"(cat {target} | sed -e 's/\\${{{varname}}}/{escaped_value}/g' > {target}.fixed) ")
+        actions.append(f"mv {target}.fixed {target}")
 
-    if ctxt.env.USE_VIRTUALENV:
-        srcfiles.append(".waf-built-virtual")
-        wheelrule = (". %s/virtual/bin/activate.orig && %s"
-                   % (os.path.abspath(ctxt.out_dir), wheelrule))
+    actions.append(f"chmod {source_mode[2:]} {target}")
 
-    # ensure that eggs are build sequentially.  Updating the .pth files
-    # gets racy otherwise
-    ctxt.post_mode = waflib.Build.POST_LAZY
-    ctxt.add_group()
-
-    tgen = ctxt(rule=wheelrule, source=srcfiles, target=targetfile)
-    tgen.env.env = dict(os.environ)
-
-    if targetfile not in allwheeltargets:
-        allwheeltargets.append(targetfile)
-
-    if pkgname not in allwheels:
-        allwheels.append(pkgname)
-
-    if 'PYTHONPATH' in tgen.env.env:
-        tgen.env.env['PYTHONPATH'] += ':' + abs_pkglibdir
-    else:
-        tgen.env.env['PYTHONPATH'] = abs_pkglibdir
+    ctxt.exec_command(" && ".join(actions))
 
 
-def gitversion(ctxt):
-    ctxt.env.GITVERSION = VERSION + "." + git_version()
+@conf
+def tarball(ctxt, *args, **kwargs):
+    """
+    helper to build a tar file for distribution/install
+    Modified from https://www.phy.bnl.gov/~bviren/pub/topics/waf-latex-arxiv/index.html
+    """
+    files = kwargs.get("files")
+    target = kwargs.get("target")
+
+    if not files or not target:
+        raise ValueError
+
+    ext = os.path.splitext(target)[1][1:]
+    target_abspath = os.path.abspath(f"{ctxt.out_dir}/{target}")
+
+    with tarfile.open(target_abspath, f"w:{ext}") as tf:
+        for node_glob, tar_path in files:
+            nodes = ctxt.path.ant_glob(node_glob)
+
+            # generally the file keeps the same name, but
+            # not always
+            rename_file = False
+            if len(nodes) == 1 and tar_path[-1] != '/':
+                rename_file = True
+
+            for node in nodes:
+                old_name = node.name
+                if rename_file:
+                    old_name = ''
+                tf.add(node.abspath(), f"{tar_path}{old_name}")
 
 
-def install_deps(ctxt):
-    ctxt.load(WAFTOOLS)
-    print()
-    print("=======================================")
-    print("Fetching Python library dependencies...")
-    print("=======================================")
-    print()
+def wheel(*args, **kwargs):
+    pkgname = kwargs.get("pkgname", None)
+    pyver = kwargs.get("pyver", None)
+    pkgversion = kwargs.get("version", "")
+    arch = kwargs.get("arch", None)
+    pkgwheelname = wheelname(pkgname, pkgversion, pyver, arch)
+    allwheels.append(pkgwheelname)
 
-    if ctxt.env.USE_VIRTUALENV:
-        virt = "virtualenv "
-    else:
-        virt = ""
-    libs = ctxt.env.PIPLIBS_NOTFOUND
+    @wraps(wheel)
+    def _inner(task):
+        gen = task.generator
+        ctxt = gen.bld
 
-    print(" * Will install to %s%s" % (virt, ctxt.env.PREFIX))
-    print(" * Installing packages: %s" % ', '.join(libs))
-    print()
+        srcdir = kwargs.get("srcdir", ctxt.run_dir)
+        pkgname = kwargs.get("pkgname", None)
+        extname = kwargs.get("extname", None)
 
-    installer = ctxt.env.PYTHON_INSTALLER
-    if not installer:
-        print("ERROR: no installer program (pip or easy_install) found")
-        print("Install one and run ./waf configure")
+        pkglibdir = ctxt.env.PYTHON_PKGLIBDIR
 
-    if ctxt.env.USE_VIRTUALENV:
-        env = ". %s/bin/activate && " % ctxt.env.PREFIX
-        prefix = ""
-    else:
-        env = ''
+        if ctxt.env.USE_VIRTUALENV:
+            pkglibdir = "virtual/%s" % pkglibdir
 
-        if installer == "pip install":
-            prefix = '--install-option="--prefix=%s"' % ctxt.env.PREFIX
-        else:
-            print("INSTALLER = '%s'" % installer)
-            prefix = '--prefix=%s' % ctxt.env.PREFIX
+        installer = ctxt.env.PYTHON_INSTALLER
 
-    for lib in libs:
-        print("%s %s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, lib))
+        srcfiles = []
+        if extname:
+            srcfiles.extend(ctxt.path.ant_glob("%s/**/*.{c,h}" % (pkgname,)))
 
-        ctxt.exec_command("%s %s %s %s" % (env, ctxt.env.PYTHON_INSTALLER, prefix, lib))
+        if pkgname:
+            srcfiles.extend(ctxt.path.ant_glob("%s/**/*.py" % pkgname))
+
+        wheeldir = f"{ctxt.out_dir}/wheel"
+
+        actions = [
+            "cd %s" % os.path.abspath(srcdir),
+            f"mkdir -p {wheeldir}",
+            f"{installer} wheel -w {wheeldir} .",
+        ]
+
+        wheelrule = (
+            f"echo Building {pkgname} && "
+            + ' && '.join([
+                f"echo ': {action}' && {action}"
+                for action in actions
+            ])
+        )
+
+        # ensure that eggs are build sequentially.  Updating the .pth files
+        # gets racy otherwise
+        ctxt.post_mode = waflib.Build.POST_LAZY
+        ctxt.add_group()
+
+        ctxt.exec_command(wheelrule)
+
+    return _inner
 
 
 class MFPInstallContext (InstallContext):
@@ -226,39 +182,63 @@ class MFPInstallContext (InstallContext):
             self.load_envs()
 
         self.recurse([self.run_dir])
+        self.add_group()
         try:
-            self.install_virtualenv()
+            if self.env.USE_VIRTUALENV:
+                self.install_virtualenv()
+                self.add_group()
+            self.install_dependencies()
+            self.add_group()
             self.install_wheels()
-            self.rewrite_shebang()
+            self.add_group()
+            self.install_static()
         finally:
             self.store()
 
         super().execute()
 
-    def install_virtualenv(self):
-        allfiles = open(f"{self.out_dir}/.waf-built-virtual", "r").read().split("\n")
-        topdir_chunk = len(f"{self.out_dir}/virtual")
-        self.exec_command(f"echo Installing virtualenv files to {self.env.PREFIX}")
-
-        for file in allfiles:
-            if not file:
-                continue
-            destfile = f"{self.env.PREFIX}{file[topdir_chunk:]}"
-            destdir = os.path.dirname(destfile)
-            self.exec_command(f"mkdir -p '{destdir}' && cp -a '{file}' '{destfile}'")
-
-    def install_wheels(self):
-        srcroot = os.path.abspath(out)
+    def activate_virtualenv(self):
         if self.env.USE_VIRTUALENV:
-            srcroot += "/virtual/"
+            return f". {self.env.PREFIX}/share/mfp/venv/bin/activate"
+        else:
+            return "/bin/true"
 
-        actions = [
-            f". {self.env.PREFIX}/bin/activate",
-            f"cd {os.path.abspath(self.out_dir)}",
+    def install_virtualenv(self):
+        python_name = self.env.PYTHON[0].split('/')[-1]
+        vrule = ' && '.join([
+            f"mkdir -p {self.env.PREFIX}/share/mfp/",
+            f"cd {self.env.PREFIX}",
+            "cd share/mfp/",
+            f"{python_name} -m venv --system-site-packages venv",
+            "cp venv/bin/activate venv/bin/activate.orig"
+        ])
+        print(f"[build_virtualenv] {vrule}")
+        self.exec_command(vrule)
+
+    def install_dependencies(self):
+        cmds = [
+            self.activate_virtualenv(),
+            f"{self.env.PYTHON_INSTALLER} install -r {self.run_dir}/requirements.txt"
         ]
 
-        for wheel in allwheeltargets:
-            actions.append(f"pip install --force-reinstall --prefix={self.env.PREFIX} --no-index {wheel}")
+        self.exec_command(" && ".join(cmds))
+
+    def install_wheels(self):
+        wheelroot = os.path.abspath(out)
+        wheeldir = f"{wheelroot}/wheel"
+
+        actions = [
+            self.activate_virtualenv()
+        ]
+
+        installer = self.env.PYTHON_INSTALLER
+
+        actions.append(
+            f"cd {wheeldir}",
+        )
+
+        for wheel in allwheels:
+            actions.append(f"{installer} install --force-reinstall --no-index {wheel}")
 
         rule = (
             f"echo Installing wheels {allwheels} && "
@@ -269,27 +249,10 @@ class MFPInstallContext (InstallContext):
         )
         self.exec_command(rule)
 
-    def rewrite_shebang(self):
-        if not self.env.USE_VIRTUALENV:
-            return
-        build_bindir = f"{self.out_dir}/virtual/bin/".replace("/", "\\/")
-        inst_bindir = f"{self.env.PREFIX}/bin/".replace("/", "\\/")
-
-        action = (
-            "echo Cleaning up wheel install && "
-            + f"echo : Rewrite {build_bindir} to {inst_bindir} ; "
-            + f"for f in {inst_bindir}/* ; "
-            + "do "
-            + f"cat $f | sed -e 's/{build_bindir}/{inst_bindir}/g' > $f.fixed; "
-            + "mv $f.fixed $f; "
-            + "chmod a+x $f; "
-            + "done; "
+    def install_static(self):
+        self.exec_command(
+            f"cd {self.env.PREFIX} && tar zxf {self.out_dir}/static.tar.gz"
         )
-        self.exec_command(action)
-
-class MFPBuildContext (BuildContext):
-    fun = 'install_deps'
-    cmd = 'install_deps'
 
 
 class MFPCleanContext (CleanContext):
@@ -309,7 +272,7 @@ class MFPCleanContext (CleanContext):
     def clean(self):
         if self.bldnode != self.srcnode:
             # would lead to a disaster if top == out
-            lst=[]
+            lst = []
             symlinks = []
             for e in self.all_envs.values():
                 exclfiles = '.lock* *conf_check_*/** config.log c4che/*'
@@ -364,15 +327,15 @@ def options(opt):
     opt.parser.set_defaults(jobs=1)
 
 
-def configure(conf):
-    conf.load(WAFTOOLS)
+def configure(ctxt):
+    ctxt.load(WAFTOOLS)
 
     # Python and dev files
-    conf.check_python_version((3, 5))
-    conf.check_python_headers()
+    ctxt.check_python_version((3, 5))
+    ctxt.check_python_headers()
 
     # check for Debian style
-    conf.start_msg("Checking for site-packages vs. dist-packages (Debian-style)")
+    ctxt.start_msg("Checking for site-packages vs. dist-packages (Debian-style)")
     debstyle = False
     import sys
     for d in sys.path:
@@ -381,71 +344,75 @@ def configure(conf):
             break
 
     if debstyle:
-        conf.end_msg("dist-packages")
-        conf.env.DEBIAN_STYLE = True
+        ctxt.end_msg("dist-packages")
+        ctxt.env.DEBIAN_STYLE = True
     else:
-        conf.end_msg("site-packages")
+        ctxt.end_msg("site-packages")
 
     # backend builds. Defaults: imgui yes, clutter no
-    conf.env.WITH_CLUTTER = False
-    conf.env.WITH_IMGUI = True
+    ctxt.env.WITH_CLUTTER = False
+    ctxt.env.WITH_IMGUI = True
 
-    if conf.options.WITH_CLUTTER is True:
-        conf.env.WITH_CLUTTER = True
-    if conf.options.WITH_IMGUI is False:
-        conf.env.WITH_IMGUI = False
+    if ctxt.options.WITH_CLUTTER is True:
+        ctxt.env.WITH_CLUTTER = True
+    if ctxt.options.WITH_IMGUI is False:
+        ctxt.env.WITH_IMGUI = False
 
     # virtualenv and setuptools
     installer = None
-    if conf.options.USE_VIRTUALENV:
-        conf.env.USE_VIRTUALENV = True
-        conf.find_program("virtualenv")
-        installer = "pip install"
-    else:
-        try:
-            conf.find_program("pip")
-            installer = "pip install"
-        except waflib.Errors.ConfigurationError:
-            pass
+    if ctxt.options.USE_VIRTUALENV:
+        ctxt.env.USE_VIRTUALENV = True
+        # venv is part of the standard python distro, but at least on
+        # Debian needs to be installed separately.
+        ctxt.check_python_module("venv")
 
-        if installer is None:
-            conf.find_program("easy_install")
-            installer = "easy_install"
-    conf.env.PYTHON_INSTALLER = installer
+    try:
+        ctxt.find_program("pip")
+        installer = "pip"
+    except waflib.Errors.ConfigurationError:
+        ctxt.find_program("pip3")
+        installer = "pip3"
+    finally:
+        if not installer:
+            print("The 'pip' package installer is required for the build.")
+
+    ctxt.env.PYTHON_INSTALLER = installer
 
     # python lib-install prefix
-    conf.start_msg("Finding Python lib install prefix...")
-    py_major = conf.env.PYTHON_VERSION.split(".")[0]
+    ctxt.start_msg("Finding Python lib install prefix...")
+    py_major = ctxt.env.PYTHON_VERSION.split(".")[0]
     pkglibdir = f"lib/python{py_major}"
-    conf.end_msg(pkglibdir)
-    conf.env.PYTHON_PKGLIBDIR = pkglibdir
+    ctxt.end_msg(pkglibdir)
+    ctxt.env.PYTHON_PKGLIBDIR = pkglibdir
 
     # build-time dependencies
-    conf.find_program("git")
-    conf.find_program("jackd")
-    conf.find_program("cmake")
-
-    # C libraries with pkg-config support (listed at top of file)
-    uselibs = []
-
-    for lib in pkgconf_libs:
-        uname = lib.split("-")[0].upper()
-        conf.check_cfg(
-            package=lib, args="--libs --cflags",
-            uselib_store=uname
-        )
-        uselibs.append(uname)
-    conf.env.PKGCONF_LIBS = uselibs
+    ctxt.find_program("git")
+    ctxt.find_program("cmake")
 
     pip_libs = [
         "posix_ipc", "simplejson", "numpy",
         "pynose", "yappi", "cython", "pyliblo3",
         "soundfile", "samplerate",
-        "carp-rpc", "flopsy",                        # my other libs
+        # my other libs
+        "carp-rpc", "flopsy",
     ]
     gi_libs = []
 
-    if conf.env.WITH_CLUTTER:
+    pkgconf_libs = [
+        "glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2", "libprotobuf-c",
+    ]
+    uselibs = []
+
+    for lib in pkgconf_libs:
+        uname = lib.split("-")[0].upper()
+        ctxt.check_cfg(
+            package=lib, args="--libs --cflags",
+            uselib_store=uname
+        )
+        uselibs.append(uname)
+    ctxt.env.PKGCONF_LIBS = uselibs
+
+    if ctxt.env.WITH_CLUTTER:
         pip_libs.extend([
             ("cairo", "pycairo"), "gbulb",
         ])
@@ -453,16 +420,16 @@ def configure(conf):
         # all only needed for clutter backend
         gi_libs = ["Clutter", "GObject", "Gtk", "Gdk", "GLib", "GtkClutter", "Pango"]
 
-    if conf.env.WITH_IMGUI:
+    if ctxt.env.WITH_IMGUI:
         pip_libs.extend([
-            "pyopengl", "sdl", "imgui_bundle", "Pillow", # imgui only
+            "pyopengl", "sdl", "imgui_bundle", "Pillow",  # imgui only
         ])
 
     pip_notfound = []
 
     # LADSPA header
-    conf.check_cc(header_name="ladspa.h")
-    conf.check_cc(header_name="asoundlib.h")
+    ctxt.check_cc(header_name="ladspa.h")
+    ctxt.check_cc(header_name="asoundlib.h")
 
     # pip-installable libs we just mark them as not available
     for lib in pip_libs:
@@ -472,16 +439,16 @@ def configure(conf):
             modulename = pipname = lib
 
         try:
-            conf.check_python_module(modulename)
+            ctxt.check_python_module(modulename)
         except waflib.Errors.ConfigurationError:
             pip_notfound.append(pipname)
 
-    conf.env.PIPLIBS_NOTFOUND = pip_notfound
+    ctxt.env.PIPLIBS_NOTFOUND = pip_notfound
 
     # GObject bindings for libraries are mandatory
     for lib in gi_libs:
         try:
-            conf.check_python_module('gi.repository.' + lib)
+            ctxt.check_python_module('gi.repository.' + lib)
         except waflib.Errors.ConfigurationError:
             print()
             print("FATAL: GObject language bindings for %s not installed" % lib)
@@ -490,18 +457,18 @@ def configure(conf):
             print()
             raise
 
-    conf.env.GITVERSION = VERSION + "." + git_version()
+    ctxt.env.GITVERSION = VERSION + "." + git_version()
 
     print()
-    print("MFP version", conf.env.GITVERSION, "configured.")
-    if conf.env.USE_VIRTUALENV:
-        print("Will build into virtualenv", conf.env.PREFIX)
-    if conf.env.WITH_IMGUI:
+    print("MFP version", ctxt.env.GITVERSION, "configured.")
+    if ctxt.env.USE_VIRTUALENV:
+        print("Will build into virtualenv", ctxt.env.PREFIX)
+    if ctxt.env.WITH_IMGUI:
         print("Will build Dear Imgui UI")
     else:
         print("Will not build Dear Imgui UI")
 
-    if conf.env.WITH_CLUTTER:
+    if ctxt.env.WITH_CLUTTER:
         print("Will build Clutter UI")
     else:
         print("Will not build Clutter UI")
@@ -518,69 +485,98 @@ def build(bld):
     version_extensions = f'{version_extensions}-{version_extensions}'
     arch = f'{sys.platform}_{platform.machine()}'
 
-    # only gets built if USE_VIRTUALENV is set
-    bld.make_virtualenv()
+    bld(
+        rule=wheel(
+            pkgname="mfp",
+            version=bld.env.GITVERSION,
+            pyver=version_python_only
+        ),
+        source=bld.path.ant_glob("mfp/**/*.py"),
+        target=f"wheel/{wheelname('mfp', bld.env.GITVERSION, version_python_only, 'none-any')}"
+    )
+    bld(
+        rule=wheel(
+            srcdir="pluginfo",
+            pkgname="pluginfo",
+            pyver=version_extensions,
+            arch=arch,
+            version="1.0"
+        ),
+        source=bld.path.ant_glob("pluginfo/**/*.{c,py}"),
+        target=f"wheel/{wheelname('pluginfo', '1.0', version_extensions, arch)}"
+    )
+    bld(
+        rule=wheel(
+            srcdir="testext",
+            pkgname="testext",
+            pyver=version_extensions,
+            arch=arch,
+            version="1.0"
+        ),
+        source=bld.path.ant_glob("testext/**/*.{c,py}"),
+        target=f"wheel/{wheelname('testext', '1.0', version_extensions, arch)}"
+    )
+    bld(
+        rule=wheel(
+            srcdir="lib/alsaseq-0.4.1",
+            pkgname="alsaseq",
+            extname="alsaseq",
+            pyver=version_extensions,
+            arch=arch,
+            version="0.4.1"
+        ),
+        source=bld.path.ant_glob("lib/alsaseq-0.4.1/*.{c,py}"),
+        target=f"wheel/{wheelname('alsaseq', '0.4.1', version_extensions, arch)}"
+    )
 
-    bld.wheel(
-        pkgname="mfp",
-        version=bld.env.GITVERSION,
-        pyver=version_python_only
+    bld.template(
+        source="mfp.launcher",
+        target="mfp",
+        variables=dict(
+            PREFIX=bld.env.PREFIX,
+            VIRTUAL_PREFIX=f"{bld.env.PREFIX}/share/mfp/venv" if bld.env.USE_VIRTUALENV else "",
+        )
     )
-    bld.wheel(
-        srcdir="pluginfo",
-        pkgname="pluginfo",
-        pyver=version_extensions,
-        arch=arch,
-        version="1.0"
+
+    bld.template(
+        source="mfp.desktop",
+        target="com.billgribble.mfp.desktop",
+        variables=dict(
+            PREFIX=bld.env.PREFIX,
+        )
     )
-    bld.wheel(
-        srcdir="testext",
-        pkgname="testext",
-        pyver=version_extensions,
-        arch=arch,
-        version="1.0"
-    )
-    bld.wheel(
-        srcdir="lib/alsaseq-0.4.1",
-        pkgname="alsaseq",
-        extname="alsaseq",
-        pyver=version_extensions,
-        arch=arch,
-        version="0.4.1"
+    bld.tarball(
+        files=[
+            ("wafbuild/mfp", "bin/"),
+            ("mfp.svg", "share/mfp/icons/hicolor/scalable/actions/"),
+            ("mfp.png", "share/mfp/icons/hicolor/96x96/actions/"),
+            ("help/*.mfp", "share/mfp/patches/help/"),
+            ("wafbuild/com.billgribble.mfp.desktop", "share/mfp/"),
+        ],
+        target="static.tar.gz"
     )
 
     cflags = ["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE"]
     if 'x86' in arch:
         cflags.append("-DMFP_USE_SSE")
 
-    bld.shlib(source=bld.path.ant_glob("mfpdsp/*.c"),
-              target="mfpdsp",
-              cflags=cflags,
-              uselib=bld.env.PKGCONF_LIBS)
+    bld.shlib(
+        source=bld.path.ant_glob("mfpdsp/*.c"),
+        target="mfpdsp",
+        cflags=cflags,
+        uselib=bld.env.PKGCONF_LIBS
+    )
 
-    bld.program(source="mfpdsp/main.c", target="mfpdsp/mfpdsp",
-                cflags=cflags,
-                uselib=bld.env.PKGCONF_LIBS,
-                use=['mfpdsp'])
+    bld.program(
+        source="mfpdsp/main.c",
+        target="mfpdsp/mfpdsp",
+        cflags=cflags,
+        uselib=bld.env.PKGCONF_LIBS,
+        use=['mfpdsp']
+    )
     bld.add_group()
 
-    bld.install_files(
-        "share/mfp/icons/hicolor/scalable/actions/",
-        ["mfp.svg"]
-    )
-    bld.install_files(
-        "share/mfp/patches/help/",
-        bld.path.ant_glob('help/*.mfp')
-    )
 
-    if bld.cmd == "install":
-        desktop_dir = Utils.subst_vars("${PREFIX}/share/mfp", bld.env)
-        desktop_filename = "mfp.desktop"
-        desktop_template = Utils.readf(desktop_filename)
-        desktop_content = Utils.subst_vars(desktop_template, bld.env)
-        if not os.path.exists(desktop_dir):
-            os.makedirs(desktop_dir)
-        Utils.writef(f"{desktop_dir}/com.billgribble.{desktop_filename}", desktop_content)
-
-    # must make virtualenv "relocatable" after all packages added
-    bld.fix_virtualenv()
+# helper waf command ("./waf gitversion")
+def gitversion(ctxt):
+    ctxt.env.GITVERSION = VERSION + "." + git_version()

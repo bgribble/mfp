@@ -8,8 +8,7 @@ TL;DR
 
    $ ./waf configure --python=python3 --virtualenv --prefix ~/mfpvirt build install install_deps
      [...]
-   $ . ~/mfpvirt/bin/activate
-   (mfpvirt)$ mfp -v
+   $ ~/mfpvirt/bin/mfp -v
 
 THINGS TO KNOW
 ---------------------
@@ -22,21 +21,20 @@ python: MFP requires Python 3.x at this time.
 waf: MFP uses 'waf', which you can think of as a replacement for
 autotools and make.  You do not need to install waf; the correct
 version is supplied in the MFP source tree.  That's the way waf
-is designed to work; more information can be found at
+is designed to work  More information can be found at
 https://code.google.com/p/waf/.  MFP's "Makefile" or
 "configure.in" equivalent is the file "wscript", which is a plain
 Python file.  The entry points used by waf are the functions
 "configure" and "build", defined near the bottom of the file.
 
-virtualenv: At this phase of MFP's development you should
-probably build it in a "virtualenv" sandbox.  The waf scripts
-support this, but you have to install the "virtualenv" tool
-(packaged as 'python-virtualenv' on Debian and Ubuntu). Then you
-configure with --virtualenv as in the TL;DR above and the build
-will go into the virtual environment.  When you specify
---virtualenv, the install prefix (--prefix) is the path to the
-virtual environment, so you shouldn't let this default to
-/usr/local.
+venv: Python dependencies for MFP can either be installed globally
+with your installed "pip" or into a virtual environment created
+at install time. I recommend using the virtual environment. This
+requires the Python "venv" module, which is part of the standard
+Python library but Debian and others have it packaged separately.
+If you see a configure error about this you may need to install
+python3-venv or similar. Configure to use venv with the "--virtualenv"
+arg to "waf configure"
 
 setuptools: The build process depends on Python setuptools.  If
 you have virtualenv installed, you have setuptools already, but
@@ -44,12 +42,8 @@ if you aren't using virtualenv you may need to install setuptools
 separately.  It's packaged as "python-setuptools" on Debian and
 Ubuntu.
 
-pip:  The modern replacement for "easy_install" to install Python
-packages is called pip.  If (1) you are using Debian or Ubuntu, (2)
-you do not want to use a --virtualenv install, and (3) you want to use
-the './waf install_deps' feature to install some Python dependencies,
-you need the Debian package 'python-pip', or your distro's equivalent,
-installed.
+pip: Pip is still the default package installer for Python. You
+will need it installed to build the "wheel" packages.
 
 gcc: The C components of mfp (mfpdsp, pluginfo, and testext) are
 straightforward C but include some c99-isms, mainly due to LV2.  I
@@ -89,13 +83,7 @@ development headers and pkg-config files installed:
 
 You'll get errors in the "./waf configure" process if these aren't installed.
 
-Python runtime dependencies are checked for in "configure" and many of
-them can be automagically installed by "./waf install_deps" if you
-wish.
-
-install_deps must be run after "./waf install".  If you
-are using a virtualenv, the installed Python libraries will also
-be installed into the virtualenv.
+Python runtime dependencies will be installed automatically.
 
 Note that the Python language bindings for Gtk+/GLib and Clutter libraries
 CANNOT be automatically installed by this build process.  You need to
@@ -129,25 +117,26 @@ INSTALLING
     $ ./waf install
 
 The installation root defaults to /usr/local and can be modified
-by passing in the --prefix argument to "./waf configure".
+by passing in the --prefix argument to "./waf configure". You can use a
+shared area like /opt/ or /usr/local/ or specify a MFP-specific dir
+such as /opt/mfp or ~/mfp/. There will be a couple of things in $prefix/bin,
+one shared library in $prefix/lib, and then a bunch of stuff in
+$prefix/share/mfp/.
 
-If you get errors on the install step to the effect of os.symlink
-failing to make a link because the file already exists -- see GitHub
-issue #220 and please add a comment indicating your Linux distribution
-and that you are having this problem.
+You don't have to add anything to any paths to launch MFP;
+$prefix/bin/mfp is a wrapper which does that for you. Just run it
+and you should be good to go.
 
-Note that the instances of #220 I have seen are failing at the
-very tail end of the install process, and are trying to install
-files that are already there... which means that you can probably
-ignore this error.  Try activating the virtualenv and running
-mfp.  If it launches, you are good to go.
-
+Note that once you have installed MFP to a $prefix, there's some
+stuff hardcoded into the launcher so you can't just move the
+whole directory to another location. You will need to install
+again to the new location.
 
 DESKTOP FILE
 --------------------------
 
 The template desktop file `mfp.desktop` will be populated with
-paths and installed to ${PREFIX}/share/mfp/mfp.desktop. You will
+paths and installed to ${PREFIX}/share/mfp/com.billgribble.mfp.desktop. You will
 need to copy it to wherever such things go on your system.
 
 The icon path is what I needed to get icons working on my Gnome
@@ -157,7 +146,7 @@ express how crabby I am about how messed up icons are on the
 Linux desktop.
 
 For what it's worth, on my system the desktop file should be
-~/.local/share/applications/mfp.desktop
+~/.local/share/applications/com.billgribble.mfp.desktop
 
 
 RUNNING TESTS

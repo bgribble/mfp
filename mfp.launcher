@@ -1,0 +1,12 @@
+#! /bin/sh
+
+export PATH=${PREFIX}/bin/:${PATH}
+export LD_LIBRARY_PATH=${PREFIX}/lib:${LD_LIBRARY_PATH}
+
+if [ -n "${VIRTUAL_PREFIX}" ]; then
+    export PATH=${VIRTUAL_PREFIX}/bin/:${PATH}
+    export LD_LIBRARY_PATH=${VIRTUAL_PREFIX}/lib/:${LD_LIBRARY_PATH}
+    . ${VIRTUAL_PREFIX}/bin/activate
+fi
+
+mfpmain "$@" 
