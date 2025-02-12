@@ -1,0 +1,314 @@
+#! /usr/bin/env python
+"""
+install_mfp.py -- installer for MFP binary distribution
+"""
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+
+from datetime import datetime
+
+version = "0.1"
+logfile = "install_mfp.log"
+
+
+def logprint(msg=''):
+    """
+    logprint: print message and log it
+    """
+    print(msg)
+    with open(logfile, "a") as log:
+        log.write(msg + '\n')
+
+
+def shellcmd(cmd, return_stdout=False):
+    """
+    shellcmd: run a command in a shell and log stdout and stderr
+    """
+    with open(logfile, "a") as log:
+        print("   " + cmd)
+        log.write("\n-- shell command -----------\n")
+        log.write(f"{cmd}\n")
+        proc = subprocess.run(cmd, shell=True, capture_output=True)
+        if proc.stdout:
+            log.write(">>>>> stdout\n")
+            log.write(proc.stdout.decode())
+        if proc.stderr:
+            log.write(">>>>> stderr\n")
+            log.write(proc.stderr.decode())
+        log.write(f">>>>> return code {proc.returncode}\n")
+        log.write("----------------------------\n")
+        if return_stdout:
+            return proc.stdout.decode()
+        return proc.returncode == 0
+
+
+def template(source, target, variables):
+    """
+    template: Expand ${VARIABLES} in a template file
+    """
+    source_stat = os.stat(source)
+    source_mode = oct(source_stat.st_mode & 0o777)
+
+    logprint(f"    {source} --> {target}")
+    actions = [
+        f"cp {source} {target}",
+    ]
+
+    for varname, value in variables.items():
+        escaped_value = re.sub("/", r"\/", value)
+        actions.append(f"(cat {target} | sed -e 's/\\${{{varname}}}/{escaped_value}/g' > {target}.fixed) ")
+        actions.append(f"mv {target}.fixed {target}")
+
+    actions.append(f"chmod {source_mode[2:]} {target}")
+
+    shellcmd(" && ".join(actions))
+
+
+def test_requirements(virtualenv):
+    """
+    requirements for the install:
+      * python 3.5 or greater
+      * venv if --virtualenv
+      * pip if not --virtualenv (venv provides it automatically)
+    """
+
+    all_good = True
+    logprint("Checking for install requirements...")
+    # python version
+    py_ver = sys.version_info
+    py_status = "ok ✅"
+    if (py_ver.major != 3) or (py_ver.minor < 5):
+        py_status = "FAIL ❌"
+        all_good = False
+    logprint(f"   Python version >= 3.5... {py_ver.major}.{py_ver.minor}.{py_ver.micro} {py_status}")
+
+    # can import venv
+    if virtualenv:
+        venv_status = "FAIL ❌"
+        try:
+            import venv
+            venv_status = "ok ✅"
+        except:
+            all_good = False
+        logprint(f"   Can import venv module... {venv_status}")
+
+    if not virtualenv:
+        pip_status = "FAIL ❌"
+        try:
+            import pip
+            pip_status = "ok ✅"
+        except:
+            all_good = False
+        logprint(f"   Can import pip module... {pip_status}")
+
+    if all_good:
+        logprint("   All requirements present and accounted for 🎉\n")
+    return all_good
+
+
+def install_virtualenv(prefix):
+    """
+    install_virtualenv: create the base venv under the install prefix
+
+    note that the virtualenv is NOT at the prefix location, it's in
+    ${prefix}/share/mfp/venv,
+    """
+    import venv
+    python = sys.executable
+    venv_loc = f"{prefix}/share/mfp/venv"
+
+    logprint("Preparing virtualenv for install")
+    status = shellcmd(
+        f"mkdir -p {venv_loc} && {python} -m venv {venv_loc}"
+    )
+    if status:
+        logprint("   virtualenv created successfully 🎉")
+    else:
+        logprint("   Error while creating virtualenv, see logfile ❌")
+
+    return status
+
+
+def install_depends(virtualenv, prefix, datadir):
+    """
+    install_depends: apply requirements.txt
+    """
+    venv_loc = f"{prefix}/share/mfp/venv"
+    activate = ""
+    if virtualenv:
+        activate = f". {venv_loc}/bin/activate && "
+
+    logprint("Installing required Python libraries")
+    status = shellcmd(
+        f"{activate}pip install -r {datadir}/requirements.txt"
+    )
+
+    if status:
+        logprint("   Requirements installed successfully 🎉")
+    else:
+        logprint("   Error while installing requirements, see logfile ❌")
+
+    return status
+
+
+def install_wheels(virtualenv, prefix, datadir):
+    """
+    install_wheels: install the MFP built wheel files
+    """
+    venv_loc = f"{prefix}/share/mfp/venv"
+    activate = ""
+    if virtualenv:
+        activate = f". {venv_loc}/bin/activate && "
+
+    logprint("Installing MFP code")
+    status = shellcmd(
+        f"{activate}pip install {datadir}/*.whl"
+    )
+
+    if status:
+        logprint("   MFP wheels installed successfully 🎉")
+    else:
+        logprint("   Error while installing wheels, see logfile ❌")
+
+    return status
+
+
+def install_static(prefix, datadir):
+    """
+    install_static: Unpack data tarfiles into the prefix
+    """
+    logprint("Installing data files")
+
+    status_1 = shellcmd(
+        f"tar zxf {datadir}/static.tar.gz -C {prefix}"
+    )
+    status_2 = shellcmd(
+        f"tar zxf {datadir}/mfpdsp.tar.gz -C {prefix}"
+    )
+
+    if status_1 and status_2:
+        logprint("   Data files installed successfully 🎉")
+    else:
+        logprint("   Error while installing data files, see logfile ❌")
+
+    return status_1 and status_2
+
+
+def install_templated_files(virtualenv, prefix, datadir):
+    logprint("Expanding template files and installing")
+    template(
+        source=f"{datadir}/mfp.launcher",
+        target=f"{prefix}/bin/mfp",
+        variables=dict(
+            PREFIX=prefix,
+            VIRTUAL_PREFIX=f"{prefix}/share/mfp/venv" if virtualenv else "",
+        )
+    )
+
+    template(
+        source=f"{datadir}/mfp.desktop",
+        target=f"{prefix}/share/mfp/com.billgribble.mfp.desktop",
+        variables=dict(
+            PREFIX=prefix,
+        )
+    )
+    return True
+
+
+def check_runtime_depends(prefix):
+    logprint("Checking for runtime dependencies of libmfpdsp.so ...")
+
+    libinfo = shellcmd(f"ldd {prefix}/lib/libmfpdsp.so", return_stdout=True)
+
+    all_good = True
+    for libline in libinfo.split("\n"):
+        libline = libline.strip()
+        if " => " not in libline:
+            continue
+        line_parts = libline.split(" => ")
+        if ".so" not in line_parts[1]:
+            all_good = False
+            logprint(f"   Can't find library {line_parts[0]}, see logfile ❌")
+    return all_good
+
+
+def main():
+    installer_dir = os.path.dirname(os.path.abspath(__file__))
+
+    parser = argparse.ArgumentParser(
+        description="install_mfp: installer for MFP"
+    )
+    parser.add_argument(
+        "--prefix", action="store", default="/opt/",
+        help="Base directory to install into"
+    )
+    parser.add_argument(
+        "--virtualenv", action="store_true",
+        help="Install Python dependencies into a virtualenv (recommended)"
+    )
+    parser.add_argument(
+        "--datadir", action="store", default=f"{installer_dir}/files/",
+        help="Location of built files to install"
+    )
+
+    args = vars(parser.parse_args())
+
+    with open(logfile, "a") as log:
+        log.write(f"\n==== starting installer run at {datetime.now().isoformat()}\n")
+
+    print()
+    logprint(f"MFP installer v{version}")
+    virtualenv = args.get("virtualenv", False)
+    prefix = os.path.abspath(args.get("prefix"))
+    datadir = args.get("datadir")
+
+    logprint(f"- Installing into {prefix}")
+    logprint(f"- Will {'' if virtualenv else 'not '}use a virtualenv for Python packages")
+    logprint(f"- Data for installation comes from {datadir}")
+    logprint(f"- Installer is logging to {os.getcwd()}/{logfile}")
+    logprint()
+
+    confirm = input("Does that look ok? (Y/n) ")
+    if confirm not in ('', 'y', 'yes', 'Y', 'YES'):
+        logprint("ok, canceling install.")
+        return
+
+    logprint("ok, beginning install.\n")
+    requirements_met = test_requirements(virtualenv)
+    if not requirements_met:
+        logprint("Unable to complete install. Make sure requirements are present and try again.")
+        return
+
+    if virtualenv:
+        status = install_virtualenv(prefix)
+        if not status:
+            return
+    status = install_depends(virtualenv, prefix, datadir)
+    if not status:
+        return
+    status = install_wheels(virtualenv, prefix, datadir)
+    if not status:
+        return
+    status = install_static(prefix, datadir)
+    if not status:
+        return
+    status = install_templated_files(virtualenv, prefix, datadir)
+    if not status:
+        return
+
+    logprint(f"\nInstallation complete! 🎉\n")
+
+    status = check_runtime_depends(prefix)
+    if not status:
+        logprint("Install the missing dependencies with your system package manager.")
+        return
+
+    logprint(f"\nEverything looks good! Launch with {prefix}/bin/mfp")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,38 @@
+INSTALLING MFP FROM BUILT BINARIES
+=========================================
+
+If you want to quickly install MFP without building it yourself,
+and you happen to be using Linux on the x86_64 architecture, 
+you are in luck.
+
+* Unpack the tar distribution file, doesn't matter where you are:
+
+    tar zxf mfp_${version}_x86_64.tar.gz
+
+* Decide if you want to install Python dependencies using the
+  system Python or in a virtual environment. I strongly recommend
+  the virtual environment. It will have no impact on you as a user
+  but could save significant pain. 
+
+* Find a nice prefix location for the install. Everything that MFP needs
+  will be installed under the prefix:
+
+  * The MFP launcher in $prefix/bin/mfp
+  * A C shared library in $prefix/lib/
+  * Basically everything else under $prefix/share/mfp/
+
+  It's OK to use a shared prefix like /opt or /usr/local, and also OK to use 
+  an app-specific one like /opt/mfp. The launcher will take care of setting up 
+  library search paths and such.
+
+* Run the installer: 
+
+    cd mfp_${version}/
+    python install_mfp.py --virtualenv --prefix=/my/prefix/
+
+The installer will print a summary of what it is going to do 
+and ask for confirmation before actually doing it. 
+
+The only requirement is Python greater than 3.5, with the 
+`venv` package available (it's part of the standard Python 
+library, but some distros have it packaged separately).

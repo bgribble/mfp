@@ -61,60 +61,72 @@ def git_version():
 # custom rules
 #####################
 
-@conf
-def template(ctxt, *args, **kwargs):
-    source = kwargs.get("source")
-    target = f"wafbuild/{kwargs.get('target')}"
+def template(*args, **kwargs):
     variables = kwargs.get("variables")
 
-    source_stat = os.stat(source)
-    source_mode = oct(source_stat.st_mode & 0o777)
+    @wraps(template)
+    def _inner(task):
+        gen = task.generator
+        ctxt = gen.bld
 
-    actions = [
-        f"cp {source} {target}",
-    ]
+        source = task.inputs[0]
+        target = task.outputs[0]
 
-    for varname, value in variables.items():
-        escaped_value = re.sub("/", r"\/", value)
-        actions.append(f"(cat {target} | sed -e 's/\\${{{varname}}}/{escaped_value}/g' > {target}.fixed) ")
-        actions.append(f"mv {target}.fixed {target}")
+        print(f"[template] source={source} dest={target}")
 
-    actions.append(f"chmod {source_mode[2:]} {target}")
+        source_stat = os.stat(str(source))
+        source_mode = oct(source_stat.st_mode & 0o777)
 
-    ctxt.exec_command(" && ".join(actions))
+        actions = [
+            f"cp {source} {target}",
+        ]
+
+        for varname, value in variables.items():
+            escaped_value = re.sub("/", r"\/", value)
+            actions.append(f"(cat {target} | sed -e 's/\\${{{varname}}}/{escaped_value}/g' > {target}.fixed) ")
+            actions.append(f"mv {target}.fixed {target}")
+
+        actions.append(f"chmod {source_mode[2:]} {target}")
+
+        ctxt.exec_command(" && ".join(actions))
+
+    return _inner
 
 
-@conf
-def tarball(ctxt, *args, **kwargs):
+def tarball(*args, **kwargs):
     """
     helper to build a tar file for distribution/install
-    Modified from https://www.phy.bnl.gov/~bviren/pub/topics/waf-latex-arxiv/index.html
+    inspired by https://www.phy.bnl.gov/~bviren/pub/topics/waf-latex-arxiv/index.html
     """
     files = kwargs.get("files")
-    target = kwargs.get("target")
 
-    if not files or not target:
-        raise ValueError
+    @wraps(tarball)
+    def _inner(task):
+        target = str(task.outputs[0])
+        gen = task.generator
+        ctxt = gen.bld
 
-    ext = os.path.splitext(target)[1][1:]
-    target_abspath = os.path.abspath(f"{ctxt.out_dir}/{target}")
+        if not files or not target:
+            raise ValueError
 
-    with tarfile.open(target_abspath, f"w:{ext}") as tf:
-        for node_glob, tar_path in files:
-            nodes = ctxt.path.ant_glob(node_glob)
+        ext = os.path.splitext(target)[1][1:]
 
-            # generally the file keeps the same name, but
-            # not always
-            rename_file = False
-            if len(nodes) == 1 and tar_path[-1] != '/':
-                rename_file = True
+        with tarfile.open(target, f"w:{ext}") as tf:
+            for node_glob, tar_path in files:
+                nodes = ctxt.path.ant_glob(node_glob)
 
-            for node in nodes:
-                old_name = node.name
-                if rename_file:
-                    old_name = ''
-                tf.add(node.abspath(), f"{tar_path}{old_name}")
+                # generally the file keeps the same name, but
+                # not always
+                rename_file = False
+                if len(nodes) == 1 and tar_path[-1] != '/':
+                    rename_file = True
 
+                for node in nodes:
+                    old_name = node.name
+                    if rename_file:
+                        old_name = ''
+                    tf.add(node.abspath(), f"{tar_path}{old_name}")
+    return _inner
 
 def wheel(*args, **kwargs):
     pkgname = kwargs.get("pkgname", None)
@@ -252,6 +264,9 @@ class MFPInstallContext (InstallContext):
     def install_static(self):
         self.exec_command(
             f"cd {self.env.PREFIX} && tar zxf {self.out_dir}/static.tar.gz"
+        )
+        self.exec_command(
+            f"cd {self.env.PREFIX} && tar zxf {self.out_dir}/templated.tar.gz"
         )
 
 
@@ -491,7 +506,9 @@ def build(bld):
             version=bld.env.GITVERSION,
             pyver=version_python_only
         ),
-        source=bld.path.ant_glob("mfp/**/*.py"),
+        source=[
+            bld.path.ant_glob("**/*.py"),
+        ],
         target=f"wheel/{wheelname('mfp', bld.env.GITVERSION, version_python_only, 'none-any')}"
     )
     bld(
@@ -529,33 +546,26 @@ def build(bld):
         target=f"wheel/{wheelname('alsaseq', '0.4.1', version_extensions, arch)}"
     )
 
-    bld.template(
+    bld(
+        rule=template(
+            variables=dict(
+                PREFIX=bld.env.PREFIX,
+                VIRTUAL_PREFIX=f"{bld.env.PREFIX}/share/mfp/venv" if bld.env.USE_VIRTUALENV else "",
+            )
+        ),
         source="mfp.launcher",
         target="mfp",
-        variables=dict(
-            PREFIX=bld.env.PREFIX,
-            VIRTUAL_PREFIX=f"{bld.env.PREFIX}/share/mfp/venv" if bld.env.USE_VIRTUALENV else "",
-        )
     )
 
-    bld.template(
+    bld(
+        rule=template(
+            variables=dict(
+                PREFIX=bld.env.PREFIX,
+            )
+        ),
         source="mfp.desktop",
         target="com.billgribble.mfp.desktop",
-        variables=dict(
-            PREFIX=bld.env.PREFIX,
-        )
     )
-    bld.tarball(
-        files=[
-            ("wafbuild/mfp", "bin/"),
-            ("mfp.svg", "share/mfp/icons/hicolor/scalable/actions/"),
-            ("mfp.png", "share/mfp/icons/hicolor/96x96/actions/"),
-            ("help/*.mfp", "share/mfp/patches/help/"),
-            ("wafbuild/com.billgribble.mfp.desktop", "share/mfp/"),
-        ],
-        target="static.tar.gz"
-    )
-
     cflags = ["-std=gnu99", "-fpic", "-g", "-O2", "-D_GNU_SOURCE"]
     if 'x86' in arch:
         cflags.append("-DMFP_USE_SSE")
@@ -576,6 +586,64 @@ def build(bld):
     )
     bld.add_group()
 
+
+    bld(
+        rule=tarball(
+            files=[
+                ("wafbuild/mfp", "bin/"),
+                ("wafbuild/com.billgribble.mfp.desktop", "share/mfp/"),
+            ],
+        ),
+        source=["mfp", "com.billgribble.mfp.desktop"],
+        target="templated.tar.gz"
+    )
+
+    bld(
+        rule=tarball(
+            files=[
+                ("wafbuild/libmfpdsp.so", "lib/"),
+                ("wafbuild/mfpdsp/mfpdsp", "bin/"),
+            ],
+        ),
+        source=["mfpdsp/mfpdsp"],
+        target="mfpdsp.tar.gz"
+    )
+
+    bld(
+        rule=tarball(
+            files=[
+                ("wafbuild/mfp", "bin/"),
+                ("mfp.svg", "share/mfp/icons/hicolor/scalable/actions/"),
+                ("mfp.png", "share/mfp/icons/hicolor/96x96/actions/"),
+                ("help/*.mfp", "share/mfp/patches/help/"),
+            ],
+        ),
+        source=["mfp.svg", "mfp.png", bld.path.ant_glob("help/*.mfp")],
+        target="static.tar.gz"
+    )
+    
+    ver = f"mfp_{bld.env.GITVERSION}"
+    bld(
+        rule=tarball(
+            files=[
+                ("wafbuild/*.tar.gz", f"{ver}/files/"),
+                ("wafbuild/wheel/*.whl", f"{ver}/files/"),
+                ("requirements.txt", f"{ver}/files/"),
+                ("mfp.launcher", f"{ver}/files/"),
+                ("mfp.desktop", f"{ver}/files/"),
+                ("mfp.installer", f"{ver}/install_mfp.py"),
+                ("README.install", f"{ver}/")
+            ]
+        ),
+        source=[
+            "static.tar.gz", "mfpdsp.tar.gz", 
+            "templated.tar.gz", "mfp.installer", "requirements.txt",
+            "mfp.launcher", "mfp.desktop", "README.install",
+            [f"wheel/{wheel}" for wheel in allwheels]
+        ],
+        target=f"mfp_{bld.env.GITVERSION}_{arch}.tar.gz"
+    )
+    bld.add_group()
 
 # helper waf command ("./waf gitversion")
 def gitversion(ctxt):
