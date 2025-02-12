@@ -85,10 +85,11 @@ def render(app_window):
                 main_window = imgui.internal.get_current_window()
                 child_name = f"{main_window.name}/log_output_text_{imgui.get_id('log_output_text'):08X}"
                 child_window = imgui.internal.find_window_by_name(child_name)
-                imgui.internal.set_scroll_y(
-                    child_window,
-                    child_window.scroll_max[1]
-                )
+                if child_window:
+                    imgui.internal.set_scroll_y(
+                        child_window,
+                        child_window.scroll_max[1]
+                    )
 
             if filter_changed:
                 app_window.log_filter_text = filter_text
