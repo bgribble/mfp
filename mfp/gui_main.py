@@ -26,12 +26,8 @@ from .singleton import Singleton
 from .mfp_command import MFPCommand
 from .gui_command import GUICommand
 
-import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GtkClutter', '1.0')
-gi.require_version('Clutter', '1.0')
-
 backend_name = None
+
 
 class MFPGUI (Singleton):
     def __init__(self):
@@ -300,7 +296,10 @@ async def main(cmdline):
     MFPCommandFactory = await host.require(MFPCommand)
     mfp_connection = await MFPCommandFactory()
 
-    from mfp.gui import backends  # noqa
+    if backend == "clutter":
+        import mfp.gui.clutter  # noqa
+    if backend == "imgui":
+        import mfp.gui.imgui  # noqa
 
     ColorDB.backend_name = backend
 
@@ -343,6 +342,11 @@ async def main_error_wrapper(cmdline):
 
 def setup_gtk_asyncio():
     import gbulb
+    import gi
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('GtkClutter', '1.0')
+    gi.require_version('Clutter', '1.0')
+
     gbulb.install(gtk=True)
 
 
