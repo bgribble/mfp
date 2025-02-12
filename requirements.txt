@@ -16,9 +16,10 @@ pydantic_core==2.27.2
 pyliblo3==0.16.3
 pynose==1.5.3
 PyOpenGL==3.1.9
+PySDL2==0.9.17
 python-dateutil==2.9.0.post0
 samplerate==0.2.1
-sdl==0.0.0
+setuptools==75.8.0
 simplejson==3.19.3
 six==1.17.0
 soundfile==0.13.1
