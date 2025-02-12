@@ -1,5 +1,5 @@
-name: Build release files
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+name: Build and archive files
+run-name: Build MFP binary distfiles
 on: [push]
 jobs:
   build_release:
@@ -27,3 +27,8 @@ jobs:
         run: ./waf configure
       - name: Build MFP
         run: ./waf build
+      - name: Save built archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFP binary dist
+          path: wafbuild/mfp_*.tar.gz
