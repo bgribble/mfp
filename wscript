@@ -24,7 +24,7 @@ from waflib.Build import InstallContext, CleanContext, CFG_FILES
 import waflib
 
 APPNAME = "mfp"
-VERSION = "0.7"
+VERSION = "0.7.2"
 WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
@@ -43,18 +43,6 @@ def wheelname(pkgname, pkgver, pyver, arch):
     else:
         archstr = "-none-any"
     return "%s-%s-%s%s.whl" % (pkgname, pkgver, pyver, archstr)
-
-
-def git_version():
-    import subprocess
-
-    vers = subprocess.check_output(['git', 'rev-parse', '--verify', '--short', 'HEAD'])
-    if not isinstance(vers, str):
-        vers = vers.decode()
-
-    vers = vers.strip()
-
-    return str(int(vers, 16))
 
 
 #####################
@@ -472,7 +460,7 @@ def configure(ctxt):
             print()
             raise
 
-    ctxt.env.GITVERSION = VERSION + "." + git_version()
+    ctxt.env.GITVERSION = VERSION
 
     print()
     print("MFP version", ctxt.env.GITVERSION, "configured.")
@@ -621,7 +609,7 @@ def build(bld):
         source=["mfp.svg", "mfp.png", bld.path.ant_glob("help/*.mfp")],
         target="static.tar.gz"
     )
-    
+
     ver = f"mfp_{bld.env.GITVERSION}"
     bld(
         rule=tarball(
@@ -636,7 +624,7 @@ def build(bld):
             ]
         ),
         source=[
-            "static.tar.gz", "mfpdsp.tar.gz", 
+            "static.tar.gz", "mfpdsp.tar.gz",
             "templated.tar.gz", "mfp.installer", "requirements.txt",
             "mfp.launcher", "mfp.desktop", "README.install",
             [f"wheel/{wheel}" for wheel in allwheels]
@@ -647,4 +635,4 @@ def build(bld):
 
 # helper waf command ("./waf gitversion")
 def gitversion(ctxt):
-    ctxt.env.GITVERSION = VERSION + "." + git_version()
+    ctxt.env.GITVERSION = VERSION
