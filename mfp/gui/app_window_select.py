@@ -53,6 +53,9 @@ async def patch_close(self, patch=None):
         p = patch
     else:
         p = self.selected_patch
+    if not p.obj_id:
+        return
+
     if p and p.deletable:
         self.patch_select_next()
         if p in self.patches:
