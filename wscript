@@ -334,7 +334,7 @@ def configure(ctxt):
     ctxt.load(WAFTOOLS)
 
     # Python and dev files
-    ctxt.check_python_version((3, 5))
+    ctxt.check_python_version((3, 10))
     ctxt.check_python_headers()
 
     # check for Debian style

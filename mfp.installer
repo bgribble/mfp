@@ -71,7 +71,7 @@ def template(source, target, variables):
 def test_requirements(virtualenv):
     """
     requirements for the install:
-      * python 3.5 or greater
+      * python 3.10 or greater
       * venv if --virtualenv
       * pip if not --virtualenv (venv provides it automatically)
     """
@@ -81,10 +81,10 @@ def test_requirements(virtualenv):
     # python version
     py_ver = sys.version_info
     py_status = "ok ✅"
-    if (py_ver.major != 3) or (py_ver.minor < 5):
+    if (py_ver.major != 3) or (py_ver.minor < 10):
         py_status = "FAIL ❌"
         all_good = False
-    logprint(f"   Python version >= 3.5... {py_ver.major}.{py_ver.minor}.{py_ver.micro} {py_status}")
+    logprint(f"   Python version >= 3.10... {py_ver.major}.{py_ver.minor}.{py_ver.micro} {py_status}")
 
     # can import venv
     if virtualenv:
