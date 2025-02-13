@@ -3,8 +3,10 @@
 # build with 'python ./setup.py install'
 from setuptools import setup
 
+VERSION = "0.7.2"
+
 setup (name = 'mfp',
-       version = '0.7.2',
+       version = VERSION,
        description = 'Music for programmers',
        packages = [
            'mfp', 'mfp.builtins',

@@ -629,7 +629,7 @@ def build(bld):
             "mfp.launcher", "mfp.desktop", "README.install",
             [f"wheel/{wheel}" for wheel in allwheels]
         ],
-        target=f"mfp_{bld.env.GITVERSION}_{arch}.tar.gz"
+        target=f"mfp_{bld.env.GITVERSION}_{version_extensions}_{arch}.tar.gz"
     )
     bld.add_group()
 
