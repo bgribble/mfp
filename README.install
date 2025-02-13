@@ -2,37 +2,57 @@ INSTALLING MFP FROM BUILT BINARIES
 =========================================
 
 If you want to quickly install MFP without building it yourself,
-and you happen to be using Linux on the x86_64 architecture, 
+and you happen to be using Linux on the x86_64 architecture,
 you are in luck.
+
+You will need to have Python 3.10 or higher available. If that's
+not your system Python, you will need to install a newer version
+somewhere (it doesn't have to be the system Python) and then use
+the new version to run the installer.
+
+You will also need to have the Python "venv" package available.
+It's part of the standard Python library, but some distributions
+(like Debian/Ubuntu) package it separately.
 
 * Unpack the tar distribution file, doesn't matter where you are:
 
     tar zxf mfp_${version}_x86_64.tar.gz
 
-* Decide if you want to install Python dependencies using the
-  system Python or in a virtual environment. I strongly recommend
-  the virtual environment. It will have no impact on you as a user
-  but could save significant pain. 
+* Decide if you want to install Python dependencies system-wide
+  or in a virtual environment. I strongly recommend the virtual
+  environment. It will have no impact on you as a user but could
+  save significant pain.
 
-* Find a nice prefix location for the install. Everything that MFP needs
-  will be installed under the prefix:
+* Find a nice prefix location for the install. Everything that
+  MFP needs will be installed under the prefix:
 
-  * The MFP launcher in $prefix/bin/mfp
-  * A C shared library in $prefix/lib/
-  * Basically everything else under $prefix/share/mfp/
+  * The MFP launcher in ${PREFIX}/bin/mfp
+  * A C shared library in ${PREFIX}/lib/
+  * Basically everything else under ${PREFIX}/share/mfp/
 
-  It's OK to use a shared prefix like /opt or /usr/local, and also OK to use 
-  an app-specific one like /opt/mfp. The launcher will take care of setting up 
-  library search paths and such.
+  It's OK to use a shared prefix like /opt or /usr/local, and
+  also OK to use an app-specific one like /opt/mfp. The launcher
+  will take care of setting up library search paths and such.
 
-* Run the installer: 
+* Run the installer:
 
     cd mfp_${version}/
     python install_mfp.py --virtualenv --prefix=/my/prefix/
 
-The installer will print a summary of what it is going to do 
-and ask for confirmation before actually doing it. 
+The installer will print a summary of what it is going to do
+and ask for confirmation before actually doing it.
 
-The only requirement is Python greater than 3.5, with the 
-`venv` package available (it's part of the standard Python 
-library, but some distros have it packaged separately).
+* Install the .desktop file
+
+A .desktop file is installed to
+${PREFIX}/share/mfp/com.billgribble.mfp.desktop. You will need to
+copy it to wherever such things go on your system.
+
+The icon path in the .desktop file is what I needed to get icons
+working on my Gnome system. You may need to change it. If you
+need to do something manual, the actual icon images are installed
+under ${PREFIX}/share/mfp/icons/hicolor/.
+
+For what it's worth, on my system the desktop file should be
+~/.local/share/applications/com.billgribble.mfp.desktop
+
