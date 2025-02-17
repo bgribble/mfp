@@ -142,6 +142,7 @@ class ImguiSDL2Renderer:
         width = ctypes.c_int()
         height = ctypes.c_int()
         events_processed = False
+        unhandled_windows = ["info", "editor"]
 
         while SDL_PollEvent(ctypes.byref(event)) != 0:
             events_processed = True
@@ -164,7 +165,7 @@ class ImguiSDL2Renderer:
                     keyval=None,
                     unicode=event.text.text.decode('utf-8')
                 )
-                if self.app_window.selected_window != "info":
+                if self.app_window.selected_window not in unhandled_windows:
                     MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
                 # for some reason SDL forces ALT-v to be ALT-INSERT
@@ -174,7 +175,7 @@ class ImguiSDL2Renderer:
                         keyval=None,
                         unicode="v"
                     )
-                    if self.app_window.selected_window != "info":
+                    if self.app_window.selected_window not in unhandled_windows:
                         MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
                     skip_event = True
 

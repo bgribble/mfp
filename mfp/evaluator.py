@@ -126,8 +126,14 @@ class Evaluator (object):
         rv = eval(str2eval, environ)
         return rv
 
-    def exec_str(self, pystr):
-        exec(pystr, self.global_names)
+    def exec_str(self, pystr, global_vars=None):
+        if global_vars is not None:
+            for name, value in self.global_names.items():
+                if name not in global_vars:
+                    global_vars[name] = value
+            exec(pystr, global_vars)
+        else:
+            exec(pystr, self.global_names)
 
     def exec_file(self, filename):
         import os.path

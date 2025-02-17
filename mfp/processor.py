@@ -57,7 +57,7 @@ class Processor:
     doc_tooltip_outlet = []
     doc_help_patch = None
 
-    def __init__(self, inlets, outlets, init_type, init_args, patch, scope, name):
+    def __init__(self, inlets, outlets, init_type, init_args, patch, scope, name, defs=None):
         from .mfp_app import MFPApp
 
         self.init_type = init_type

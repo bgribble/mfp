@@ -344,10 +344,11 @@ class PyFunc(Processor):
 
 
 class PyAutoWrap(Processor):
-    def __init__(self, init_type, init_args, patch, scope, name):
-        self.thunk = patch.parse_obj(init_type)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra = defs or {}
+        self.thunk = patch.parse_obj(init_type, **extra)
         self.argcount = 0
-        initargs, kwargs = patch.parse_args(init_args)
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         arguments = get_arglist(self.thunk)
 

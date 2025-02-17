@@ -15,6 +15,7 @@ from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
+from .param_info import ParamInfo, CodeBlock
 
 
 class ProcessorElementImpl(BackendInterface, metaclass=ABCMeta):
@@ -28,6 +29,13 @@ class ProcessorElement (BaseElement):
     display_type = "processor"
     proc_type = None
 
+    extra_params = {
+        'code': ParamInfo(label="Custom code", param_type=CodeBlock, show=True),
+    }
+    store_attrs = {
+        **BaseElement.store_attrs, **extra_params
+    }
+
     # constants
     label_off_x = 3
     label_off_y = 0
@@ -38,6 +46,7 @@ class ProcessorElement (BaseElement):
 
         super().__init__(window, x, y)
 
+        # FIXME
         self.param_list.extend([
             "show_label",
             "export_x",
@@ -59,6 +68,7 @@ class ProcessorElement (BaseElement):
         if not self.show_label:
             self.label.hide()
 
+        self.code = None
         self.export_x = None
         self.export_y = None
         self.export_w = None
@@ -80,19 +90,24 @@ class ProcessorElement (BaseElement):
             self.label.show()
         await self.update()
 
-    @saga('obj_type', 'obj_args')
+    @saga('obj_type', 'obj_args', 'code')
     async def recreate_element(self, action, state_diff, previous):
         # don't recreate if this is the initial creation
-        if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
-            return
-        if "obj_id" in state_diff and state_diff['obj_id'][0] == None:
-            return
+        if "code" not in state_diff:
+            if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+                return
+            if "obj_id" in state_diff and state_diff['obj_id'][0] == None:
+                return
 
         if self.obj_type:
             args = f" {self.obj_args}" if self.obj_args is not None else ''
             yield await self.label_edit_finish(
                 None, f"{self.obj_type}{args}"
             )
+
+    @saga('code')
+    def params_changed(self, action, state_diff, previous):
+        self.send_params()
 
     async def label_edit_finish(self, widget, text=None, aborted=False):
         if text is not None and not aborted:
@@ -125,7 +140,6 @@ class ProcessorElement (BaseElement):
             self.label.set_text("%s" % (self.obj_type,))
         else:
             self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
-
         need_update = False
 
         labelheight = 20

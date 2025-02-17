@@ -387,7 +387,6 @@ class MFPApp (Singleton, SignalMixin):
         if show_gui:
             await patch.create_gui(**kwargs)
         patch.mark_ready()
-
         loadtime = datetime.now() - starttime
         log.debug("Patch loaded, elapsed time %s" % loadtime)
         if show_gui and patch.gui_created:
@@ -398,9 +397,17 @@ class MFPApp (Singleton, SignalMixin):
         fullpath = utils.find_file_in_path(libname, self.extpath)
         log.warning(f"mfp_app.load_extension: not implemented completely, path={fullpath}")
 
-    async def create(self, init_type, init_args, patch, scope, name):
+    async def create(self, init_type, init_args, patch, scope, name, params=None):
         # first try: is a factory registered?
         ctor = self.registry.get(init_type)
+
+        # try to compile code to get extra defs
+        defs = {}
+        if params and "code" in params:
+            code = params.get("code")
+            if code and code.get("lang") == "python":
+                codestr = code.get("body")
+                patch.evaluator.exec_str(codestr, defs)
 
         # second try: is there a .mfp patch file in the search path?
         if ctor is None:
@@ -415,7 +422,7 @@ class MFPApp (Singleton, SignalMixin):
         # third try: can we autowrap a python function?
         if ctor is None:
             try:
-                thunk = patch.parse_obj(init_type)
+                thunk = patch.parse_obj(init_type, **defs)
                 if callable(thunk):
                     ctor = builtins.pyfunc.PyAutoWrap
             except Exception as e:
@@ -437,12 +444,14 @@ class MFPApp (Singleton, SignalMixin):
                 if testobj is patch:
                     scope = None
                 elif isinstance(testobj, Patch):
-                    log.error("Cannot deep-create object {} in patch {}".format(
-                        name, testobj))
+                    log.error(
+                        "Cannot deep-create object {} in patch {}".format(name, testobj)
+                    )
                     return None
                 elif not isinstance(scope, LexicalScope):
-                    log.error("Cannot deep-create object {} in another object {}".format(
-                        name, testobj))
+                    log.error(
+                        "Cannot deep-create object {} in another object {}".format(name, testobj)
+                    )
                     return None
                 else:
                     scope = testobj
@@ -454,7 +463,11 @@ class MFPApp (Singleton, SignalMixin):
 
         # factory found, use it
         try:
-            obj = ctor(init_type, init_args, patch, scope, name)
+            if defs != {}:
+                obj = ctor(init_type, init_args, patch, scope, name, defs)
+            else:
+                obj = ctor(init_type, init_args, patch, scope, name)
+
             if inspect.isawaitable(obj):
                 obj = await obj
 

@@ -418,6 +418,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if self.info_panel_visible:
             info_panel.render(self)
 
+        # code editors are popups and can be displayed even when the
+        # info panel is hidden
+        info_panel.render_code_editors(self)
+
         # right-side info display
         ########################################
 

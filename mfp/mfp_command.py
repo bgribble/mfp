@@ -16,12 +16,12 @@ from .processor import Processor
 
 @apiclass
 class MFPCommand:
-    async def create(self, objtype, initargs, patch_name, scope_name, obj_name):
+    async def create(self, objtype, initargs, patch_name, scope_name, obj_name, params=None):
         from .mfp_app import MFPApp
         patch = MFPApp().patches.get(patch_name)
         scope = patch.scopes.get(scope_name) or patch.default_scope
 
-        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name)
+        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, params)
         if obj is None:
             log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name}")
             return None
