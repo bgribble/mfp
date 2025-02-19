@@ -18,7 +18,7 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
     char ** strings;
     int nptrs, j;
 
-    mfp_log_error("Fatal signal %s in C code, backend is dying", sig);
+    mfp_log_error("Fatal signal %d in C code, backend is dying", sig);
     nptrs = backtrace(buffer, 100);
     strings = backtrace_symbols(buffer, nptrs);
 
