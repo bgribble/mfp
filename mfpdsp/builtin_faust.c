@@ -16,13 +16,22 @@ typedef struct {
     FAUSTFLOAT ** faust_inbufs;
     FAUSTFLOAT ** faust_outbufs;
     FAUSTFLOAT * faust_buffers;
+    gpointer faust_params;
     int sig_inputs;
     int sig_outputs;
 } builtin_faust_data;
 
+typedef struct {
+    char * prm_label;
+    FAUSTFLOAT * prm_zoneptr;
+    FAUSTFLOAT prm_value;
+    FAUSTFLOAT prm_min;
+    FAUSTFLOAT prm_max;
+} faust_prm_data;
 
-char argv_buf[] = "---empty---";
-
+#define RESP_PARAM 0
+#define RESP_DSP_INLETS 1
+#define RESP_DSP_OUTLETS 2
 
 static int
 process(mfp_processor * proc)
@@ -64,6 +73,7 @@ init(mfp_processor * proc)
 {
     builtin_faust_data * d = g_malloc0(sizeof(builtin_faust_data));
     d->faust_code = NULL;
+    d->faust_params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 
     proc->data = (void *)d;
     return;
@@ -93,9 +103,95 @@ destroy(mfp_processor * proc)
         g_free(d->faust_buffers);
         d->faust_buffers = NULL;
     }
+    if (d->faust_params) {
+        g_hash_table_destroy(d->faust_params);
+        d->faust_params = NULL;
+    }
 
     return;
 }
+
+static void
+faust_prm_ignore_box(void * interface, const char * label) {
+    return;
+}
+
+static void
+faust_prm_ignore_close(void * interface) {
+    return;
+}
+
+static void
+faust_prm_ignore_number(
+    void * interface, const char * label,
+    FAUSTFLOAT * zone, FAUSTFLOAT min, FAUSTFLOAT max
+) {
+    return;
+}
+
+static void
+faust_prm_ignore_declare(
+    void * interface, FAUSTFLOAT * zone,  const char * key, const char * value
+) {
+    return;
+}
+
+static void
+faust_prm_number(
+    void * proc, const char * label,
+    FAUSTFLOAT * zone, FAUSTFLOAT init, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT step
+) {
+    builtin_faust_data * d = (builtin_faust_data *)(((mfp_processor *)proc)->data);
+    faust_prm_data * prm = g_malloc0(sizeof(faust_prm_data));
+    prm->prm_label = g_strdup(label);
+    prm->prm_zoneptr = zone;
+    prm->prm_value = init;
+    prm->prm_min = min;
+    prm->prm_max = max;
+    g_hash_table_insert(d->faust_params, prm->prm_label, prm);
+    g_hash_table_insert(((mfp_processor *)proc)->typeinfo->params, g_strdup(label), (gpointer)PARAMTYPE_FLT);
+    mfp_dsp_send_response_str(proc, RESP_PARAM, g_strdup(label));
+}
+
+static void
+faust_prm_bool(
+    void * proc, const char * label, FAUSTFLOAT * zone
+) {
+    builtin_faust_data * d = (builtin_faust_data *)(((mfp_processor *)proc)->data);
+    faust_prm_data * prm = g_malloc0(sizeof(faust_prm_data));
+    prm->prm_label = g_strdup(label);
+    prm->prm_zoneptr = zone;
+    prm->prm_value = 0;
+    prm->prm_min = 0;
+    prm->prm_max = 1;
+    g_hash_table_insert(d->faust_params, prm->prm_label, prm);
+    g_hash_table_insert(((mfp_processor *)proc)->typeinfo->params, label, (gpointer)PARAMTYPE_FLT);
+    mfp_dsp_send_response_str(proc, RESP_PARAM, g_strdup(label));
+}
+
+
+static void
+faust_config_params(mfp_processor * proc) {
+    builtin_faust_data * d = (builtin_faust_data *)(proc->data);
+
+    UIGlue ui_controls;
+    ui_controls.uiInterface = (void *)proc;
+    ui_controls.openHorizontalBox = faust_prm_ignore_box;
+    ui_controls.openVerticalBox = faust_prm_ignore_box;
+    ui_controls.openTabBox = faust_prm_ignore_box;
+    ui_controls.closeBox = faust_prm_ignore_close;
+    ui_controls.addButton = faust_prm_bool;
+    ui_controls.addCheckButton = faust_prm_bool;
+    ui_controls.addVerticalSlider = faust_prm_number;
+    ui_controls.addHorizontalSlider = faust_prm_number;
+    ui_controls.addNumEntry = faust_prm_number;
+    ui_controls.addVerticalBargraph = faust_prm_ignore_number;
+    ui_controls.addHorizontalBargraph = faust_prm_ignore_number;
+    ui_controls.declare = faust_prm_ignore_declare;
+
+    buildUserInterfaceCDSPInstance(d->faust_dsp, &ui_controls);
+}
+
 
 static int
 faust_config(mfp_processor * proc) {
@@ -121,7 +217,7 @@ faust_config(mfp_processor * proc) {
     }
 
     d->faust_factory = createCDSPFactoryFromString(
-        "mfp_faust", d->faust_code, 0, (const char **)argv_buf, "", error_msg, -1
+        "mfp_faust", d->faust_code, 0, NULL, "", error_msg, -1
     );
 
     if (!d->faust_factory) {
@@ -154,11 +250,26 @@ faust_config(mfp_processor * proc) {
 
             /* init the DSP instance */
             initCDSPInstance(d->faust_dsp, proc->context->samplerate);
+
+            /* extract parameters */
+            faust_config_params(proc);
         }
     }
 }
 
 
+static void
+config_faust_param(gpointer key, gpointer value, gpointer user_data) {
+    mfp_processor * proc = (mfp_processor *)user_data;
+    builtin_faust_data * d = (builtin_faust_data *)(proc->data);
+
+    faust_prm_data * prm = (faust_prm_data *)value;
+    gpointer conf_value = g_hash_table_lookup(proc->params, key);
+
+    if (prm != NULL && conf_value != NULL) {
+        *(prm->prm_zoneptr) = (FAUSTFLOAT)(*(double *)conf_value);
+    }
+}
 
 
 static int
@@ -168,23 +279,32 @@ config(mfp_processor * proc)
     gpointer code = g_hash_table_lookup(proc->params, "faust_code");
 
     if (
-        (!code && !d->faust_code)
-        || (code && d->faust_code && !strcmp(code, d->faust_code))
+        (!d->faust_code && code)
+        || (d->faust_code && !code)
+        || (d->faust_code && code && strcmp(d->faust_code, code))
     ) {
-        return 1;
+        if (d->faust_code) {
+            g_free(d->faust_code);
+            d->faust_code = NULL;
+        }
+        if (code) {
+            d->faust_code = g_strdup((char *)code);
+        }
+        faust_config(proc);
+        mfp_dsp_send_response_int(proc, RESP_DSP_INLETS, d->sig_inputs);
+        mfp_dsp_send_response_int(proc, RESP_DSP_OUTLETS, d->sig_outputs);
     }
-
-    if (d->faust_code && (!code || strcmp(code, d->faust_code))) {
-        g_free(d->faust_code);
-        d->faust_code = NULL;
-    }
-    if (code) {
-        d->faust_code = g_strdup((char *)code);
-        return faust_config(proc);
+    else {
+        g_hash_table_foreach(
+            d->faust_params,
+            config_faust_param,
+            (gpointer)proc
+        );
     }
 
     return 1;
 }
+
 
 mfp_procinfo *
 init_builtin_faust(void) {
