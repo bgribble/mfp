@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: Install dev files
-        run: sudo apt install libglib2.0-dev cmake libserd-dev libjson-glib-dev libprotobuf-c-dev libjack-jackd2-dev liblo-dev lv2-dev libasound2-dev ladspa-sdk
+        run: sudo apt install libglib2.0-dev cmake libserd-dev libjson-glib-dev libprotobuf-c-dev libjack-jackd2-dev liblo-dev lv2-dev libasound2-dev ladspa-sdk faust libfaust2t64 llvm-dev libllvmlibc-19-dev libpolly-19-dev
       - name: Configure MFP
         run: ./waf configure
       - name: Build MFP
