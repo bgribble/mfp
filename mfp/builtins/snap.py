@@ -17,10 +17,11 @@ class Snap(Processor):
                          "Snapshot interval (ms) (default: initarg 0)"]
     doc_tooltip_outlet = ["Value output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.retrigger = max(initargs[0], 1.0)
         else:

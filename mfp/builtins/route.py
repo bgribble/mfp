@@ -42,8 +42,8 @@ class Route (Processor):
     creation args.  The last outlet is for unmatched inputs.
     '''
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
         if init_type[-1] == '=':
             self.strict = True
@@ -64,7 +64,8 @@ class Route (Processor):
         self.type_addresses = {}
         self.nomatch = 0
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         self._update_addresses(initargs)
         self.resize(2, self.nomatch + 1)
 

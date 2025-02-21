@@ -18,14 +18,15 @@ class OSCIn (Processor):
     doc_tooltip_inlet = ["Config input"]
     doc_tooltip_outlet = ["OSC data output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.path = None 
         self.types = None 
         self.handler = None 
 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args) 
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra) 
         if len(initargs) > 0:
             self.path = initargs[0] 
         if len(initargs) > 1:
@@ -59,14 +60,15 @@ class OSCOut (Processor):
                          "Destination host:port (UDP) (default: initarg 0)", 
                          "OSC path (default: initarg 1)" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.host = None 
         self.port = None 
         self.path = None 
 
-        Processor.__init__(self, 3, 0, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 3, 0, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args) 
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra) 
         if len(initargs) > 0:
             parts = initargs[0].split(":")
             self.host = parts[0]

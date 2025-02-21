@@ -14,9 +14,10 @@ class BitCombine (Processor):
     doc_tooltip_obj = "Combine bits into a numeric value" 
     doc_tooltip_outlet = [ "Combined" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             num_inlets = initargs[0]
         else:
@@ -42,9 +43,10 @@ class BitSplit(Processor):
     doc_tooltip_obj = "Extract bits from a numeric value" 
     doc_tooltip_outlet = [ "Combined" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             num_outlets = initargs[0]
         else:

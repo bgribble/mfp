@@ -34,8 +34,8 @@ class Trigger (Processor):
     s [str] - output a string
     '''
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
         extra_bindings = dict(
             f=float, i=int, n=float, s=str,

@@ -13,8 +13,8 @@ from mfp import log
 class LoadBang (Processor):
     doc_tooltip_obj = "Emit a Bang message on patch load"
 
-    def __init__(self, init_type, init_args, patch, scope, name): 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None): 
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         self.outlets[0] = self.inlets[0]

@@ -14,13 +14,14 @@ class FileName(Processor):
     doc_tooltip_inlet = ["Prompt or bang to trigger"]
     doc_tooltip_outlet = ["Filename output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.filename = None
         self.prompt = "Filename:"
         self.mode = "open"
 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
     async def _await_response(self):
         self.filename = await MFPApp().gui_command.cmd_get_input(
@@ -43,14 +44,15 @@ class FileIO(Processor):
     doc_tooltip_inlet = ["Message data or method call input"]
     doc_tooltip_outlet = ["File data output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.filename = None
         self.fileobj = None
         self.mode = "r"
         self.need_close = True
 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         if len(initargs) > 1:
             self.mode = initargs[1]

@@ -23,10 +23,10 @@ class Breakpoint(Processor):
     doc_tooltip_inlet = ["Trigger/passthru", "Enable"]
     doc_tooltip_outlet = ["Outlet"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.enabled = True
 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         if self.inlets[1] != Uninit:

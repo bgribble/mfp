@@ -25,8 +25,8 @@ class Throttle (Processor):
 
     _timer = None
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
         self.started = False
         self.interval = False
@@ -36,7 +36,8 @@ class Throttle (Processor):
         if Throttle._timer is None:
             Throttle._timer = MultiTimer()
 
-        parsed_args, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        parsed_args, kwargs = self.parse_args(init_args, **extra)
 
         if len(parsed_args):
             self.interval = timedelta(milliseconds=int(parsed_args[0]))
@@ -74,15 +75,16 @@ class Delay (Processor):
 
     _timer = None
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
         self.delay = False
 
         if Delay._timer is None:
             Delay._timer = MultiTimer()
 
-        parsed_args, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        parsed_args, kwargs = self.parse_args(init_args, **extra)
 
         if len(parsed_args):
             self.delay = timedelta(milliseconds=int(parsed_args[0]))
@@ -109,8 +111,8 @@ class Metro (Processor):
     doc_tooltip_outlet = ["Metronome output"]
     _timer = None
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
         self.started = False
         self.interval = False
@@ -119,7 +121,8 @@ class Metro (Processor):
         if Metro._timer is None:
             Metro._timer = MultiTimer()
 
-        parsed_args, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        parsed_args, kwargs = self.parse_args(init_args, **extra)
 
         if len(parsed_args):
             self.interval = timedelta(milliseconds=int(parsed_args[0]))
@@ -159,8 +162,8 @@ class BeatChase (Processor):
     STARTING = 1
     STOPPED = 0
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
 
         self.run = BeatChase.STOPPED
         self.chase_lastbang = False
@@ -174,7 +177,8 @@ class BeatChase (Processor):
         if BeatChase._timer is None:
             BeatChase._timer = MultiTimer()
 
-        parsed_args, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        parsed_args, kwargs = self.parse_args(init_args, **extra)
         if len(parsed_args) > 1:
             self.slip = timedelta(milliseconds=parsed_args[1])
         if len(parsed_args) > 0:

@@ -41,8 +41,9 @@ class Buffer(Processor):
         "BufferInfo and status output"
     ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        self.init_args, self.init_kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        self.init_args, self.init_kwargs = patch.parse_args(init_args, **extra)
 
         self.init_size = 0
         self.init_channels = 1

@@ -20,9 +20,10 @@ class PulseSel(Processor):
     ]
     doc_tooltip_outlet = ["Signal output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         self.init_period = 2
         self.init_bitmask = 1
         self.init_thresh = 0.25

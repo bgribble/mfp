@@ -14,10 +14,11 @@ class Sig(Processor):
     doc_tooltip_inlet = ["Value to emit (default: initarg 0)"]
     doc_tooltip_outlet = ["Signal output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.init_value = initargs[0]
         else:

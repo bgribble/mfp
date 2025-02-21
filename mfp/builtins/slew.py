@@ -16,10 +16,11 @@ class Slew(Processor):
                          "Fall rate limit (per mS)"]
     doc_tooltip_outlet = ["Signal output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs) > 1:
             rise = initargs[0]
             fall = initargs[1]
