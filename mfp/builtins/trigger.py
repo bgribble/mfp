@@ -36,10 +36,12 @@ class Trigger (Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
-
+        extra = defs or {}
         extra_bindings = dict(
             f=float, i=int, n=float, s=str,
-            a=lambda v: v, b=lambda v: Bang
+            a=lambda v: v,
+            b=lambda v: Bang,
+            **extra
         )
 
         initargs, kwargs = self.parse_args(init_args, **extra_bindings)
