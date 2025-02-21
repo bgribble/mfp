@@ -8,14 +8,14 @@ with a bit of [LabView](https://www.ni.com/en/shop/labview.html) and
 [TouchOSC](https://hexler.net/touchosc) for good measure.
 
 Development of MFP has been ambling along at a part-time pace for
-coming up on 15 years now.  Still, it's by no means "1.0" but
-definitely there's enough there that I use it in my own
-music-making.  As of now it's pretty much a solo project but I
-welcome any feedback, questions, or pull requests.
+coming up on 15 years now.  It's still not "1.0", but definitely
+there's enough there that I use it in my own music-making.  As of
+now it's pretty much a solo project but I welcome any feedback,
+questions, or pull requests.
 
 **What's happening now?** I am working on MFP pretty actively.
-The main branch currently contains a WIP backend that uses [Dear
-ImGUI](https://github.com/ocornut/imgui) for the UI, via the
+The main branch currently contains a new UI backend built with [Dear
+ImGUI](https://github.com/ocornut/imgui), via the
 excellent [imgui-bundle](https://github.com/pthom/imgui_bundle)
 bindings. The ImGUI UI is now the default; to use the old Clutter
 UI, be sure to build with it (see README.build) and launch with
