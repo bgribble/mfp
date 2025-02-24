@@ -5,8 +5,8 @@
 #include <glib.h>
 #include <pthread.h>
 
-#include "faust/dsp/llvm-dsp-c.h"
 #include "faust/dsp/libfaust-c.h"
+#include "faust/dsp/llvm-dsp-c.h"
 
 #include "mfp_dsp.h"
 
