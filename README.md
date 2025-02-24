@@ -2,9 +2,9 @@
 
 MFP is an environment for visually composing computer programs, with
 an emphasis on music and real-time audio synthesis and analysis.  It's
-very much inspired by Miller Puckette's [Pure Data](https://puredata.info/) (pd) 
+very much inspired by Miller Puckette's [Pure Data](https://puredata.info/) (pd)
 and Cycling 74's [MAX/MSP](https://cycling74.com/products/max),
-with a bit of [LabView](https://www.ni.com/en/shop/labview.html) and 
+with a bit of [LabView](https://www.ni.com/en/shop/labview.html) and
 [TouchOSC](https://hexler.net/touchosc) for good measure.
 
 Development of MFP has been ambling along at a part-time pace for
@@ -34,13 +34,54 @@ in important ways. Some big differences:
   "Info" panel
 * Better plot support via
   [ImPlot](https://github.com/epezent/implot)
-* A help system, not comprehensive but getting better coverage 
+* A help system, not comprehensive but getting better coverage
   all the time
 
 The most recent release (0.7) is the last release that will
 exclusively support Gtk/Clutter for the UI. I will release 0.8 when I
 feel that the Dear Imgui backend is at parity with the Clutter backend,
 and then 0.9 will likely remove the Clutter backend.
+
+### NEW FEATURES
+
+I'm working on documentation but there are some really neat
+features that aren't yet documented so here's just a quick
+preview. These are all in the `master` branch.
+
+* **Persistent live coding in Python.** Every processor now has a
+  "Custom code" parameter accessible through the Params tab of
+  the Info panel (right side). Click the Edit button, enter
+  Python code, then select Save from the editor's File menu. This
+  code is executed before the construction of the element and any
+  definitions in it are available when the element is created.
+  It's saved with the patch. To live-code a new kind of processor
+  called `foo` that has 3 inlets, (1) `p foo RET` (this will
+  print an error because there is no `foo` processor, but will
+  create the element anyway) (2) Edit the custom code and define
+  a function called `foo` that takes 3 arguments. Save it. Now
+  the `foo` processor uses your function to process its inputs.
+* **Live coding with embedded Faust.** Create a `faust~`
+  processor. It does nothing by default. You can either pass a
+  `file_name=` keyword arg with a filename, a `code=` keyword arg
+  with a (very short) literal Faust program in a string, or edit
+  the "Custom code". Create a variable in the custom code called
+  `faust_code` and assign it a Faust program in a string. You can use a
+  triple-quote multiline string, or something like
+  `faust_code=open("mycode.faust").read()`
+* **Snooping on connections.** Select a connection and type `$`.
+  Now you are in snoop mode, indicated by a highlight color on the
+  connection, and messages passing through the
+  connection are briefly displayed in the command line area (very
+  bottom of the MFP window). `$` again to toggle the mode off.
+  This currently only works for "message" (not audio)
+  connections.
+* **Messages to this patch.** I mostly made this for the
+  documentation, to allow a relatively clean "Go to page" action.
+  If you create a message with the `%` key, it will always send
+  its content to the current patch when clicked, without needing
+  any connections. A message like `@show "Layer 1"` will send the
+  `@show` method call, which will change the patch's display to
+  the named layer.
 
 ### BUILDING
 
@@ -55,7 +96,7 @@ Try:
 
 
 **Hello, world:** Follow these steps to create a helloworld patch
-using just the keyboard.  
+using just the keyboard.
 
 You type | What happens
 ---------|----------------
@@ -115,14 +156,14 @@ There is in-app help/documentation via the Help menu (a tutorial
 and a reference doc) and context menus on patch elements. It's
 not complete, but mostly what I am doing now is writing help
 patches (they are great at flushing out bugs!) so the in-app help
-will continue to improve. 
+will continue to improve.
 
 The Tutorial from the Help menu is probably the best place to
 start to understand how to get around the program.
 
 It covers basics about how to create, close, and open files
 and make simple patches.  It also covers "patching patterns" for
-things like iteration, conditionals, etc. 
+things like iteration, conditionals, etc.
 
 (If you are using the Clutter backend, there's no Help menu; you
 can find a Clutter version of the tutorial in `doc/tutorial.mfp`)
