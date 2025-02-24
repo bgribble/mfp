@@ -444,7 +444,7 @@ def configure(ctxt):
     ctxt.check_cc(header_name="asoundlib.h")
 
     # FAUST libs and header
-    ctxt.check_cc(header_name="faust/dsp/libfaust-c.h")
+    ctxt.find_program("faust")
     ctxt.find_program("llvm-config")
     ctxt.env.FAUST_LIBS = [
         "-lfaust",
