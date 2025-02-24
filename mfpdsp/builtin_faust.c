@@ -64,13 +64,10 @@ faust_cleanup_dsp(mfp_processor * proc) {
 }
 
 
-
 static int
 process(mfp_processor * proc)
 {
     builtin_faust_data * d = (builtin_faust_data *)(proc->data);
-    mfp_sample * inptr, * outptr;
-
     int blocksize = proc->context->blocksize;
 
     /* to make sure compile output is synced with the execution loop, */
@@ -104,10 +101,20 @@ process(mfp_processor * proc)
         return 0;
     }
 
-    mfp_sample * outbuf = proc->outlet_buf[0]->data;
-
-    if ((outbuf == NULL) || (d->faust_outbufs == NULL)) {
-        return 0;
+    /* copy inputs to Faust buffer */
+    for(int sig=0; sig < d->sig_inputs; sig++) {
+        FAUSTFLOAT * faustin = d->faust_inbufs[sig];
+        if (mfp_proc_has_input(proc, sig)) {
+            mfp_sample * inbuf = proc->inlet_buf[sig]->data;
+            for(int scount=0; scount < blocksize; scount++) {
+                *faustin++ = (FAUSTFLOAT)(*inbuf++);
+            }
+        }
+        else {
+            for(int scount=0; scount < blocksize; scount++) {
+                *faustin++ = (FAUSTFLOAT)(0.0);
+            }
+        }
     }
 
     /* run the faust process */
@@ -118,10 +125,13 @@ process(mfp_processor * proc)
         d->faust_outbufs
     );
 
-    /* copy output to mfp buffer */
-    FAUSTFLOAT * faustout = d->faust_outbufs[0];
-    for(int scount=0; scount < blocksize; scount++) {
-        *outbuf++ = (mfp_sample)(*faustout++);
+    /* copy outputs to mfp buffers */
+    for(int sig=0; sig < d->sig_outputs; sig++) {
+        FAUSTFLOAT * faustout = d->faust_outbufs[sig];
+        mfp_sample * outbuf = proc->outlet_buf[sig]->data;
+        for(int scount=0; scount < blocksize; scount++) {
+            *outbuf++ = (mfp_sample)(*faustout++);
+        }
     }
 
     return 1;
