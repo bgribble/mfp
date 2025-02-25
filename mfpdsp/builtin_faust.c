@@ -13,7 +13,7 @@
 typedef struct {} CTree;
 typedef CTree* Signal;
 typedef CTree* Box;
-enum SType { kSInt, kSReal };
+typedef enum SType { kSInt, kSReal } SType;
 enum SOperator { kAdd, kSub, kMul, kDiv, kRem, kLsh, kARsh, kLRsh, kGT, kLT, kGE, kLE, kEQ, kNE, kAND, kOR, kXOR };
 
 LIBFAUST_API char* CprintSignal(Signal sig, bool shared, int max_size);
