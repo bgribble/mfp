@@ -40,3 +40,6 @@ class ListOfPairs(list):
 
 class DictOfRGBAColor(dict):
     pass
+
+class CodeBlock (dict):
+    pass

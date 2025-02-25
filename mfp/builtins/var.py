@@ -27,11 +27,12 @@ class Var (Processor):
 
     do_onload = False
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.gui_type = init_type
 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         self.value = Uninit
 
@@ -108,8 +109,8 @@ class Message (Var):
         "Load new message but do not emit"
     ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Var.__init__(self, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Var.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.hot_inlets = (0, 1)
 
     async def trigger(self):
@@ -135,8 +136,8 @@ class PatchMessage (Var):
         "Load new message but do not emit"
     ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Var.__init__(self, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Var.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.hot_inlets = (0, 1)
 
     async def trigger(self):
@@ -168,8 +169,8 @@ class Text (Var):
 class Enum (Var):
     doc_tooltip_obj = "Enter and update a numeric message"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Var.__init__(self, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Var.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.hot_inlets = (0, 1)
 
     def save(self):

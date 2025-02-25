@@ -22,8 +22,9 @@ class RadioGroup (Processor):
 
     doc_tooltip_obj = "Control a radio group of toggle buttons"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         num_inlets = initargs[0]
         if len(initargs) > 1:
@@ -43,7 +44,7 @@ class RadioGroup (Processor):
             self.doc_tooltip_outlet.append("Button %(port_num)d output")
 
         Processor.__init__(self, num_inlets, num_inlets+1,
-                           init_type, init_args, patch, scope, name)
+                           init_type, init_args, patch, scope, name, defs)
 
     async def onload(self, phase):
         if phase == 1:

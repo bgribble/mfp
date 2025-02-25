@@ -25,12 +25,13 @@ class For(Processor):
     doc_tooltip_outlet = ["List item output"]
     doc_help_patch = "for.help.mfp"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.iterating = False
         self.startval = False
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.inlets[1] = initargs[0]
             self.startval = initargs[0]

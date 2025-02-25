@@ -17,13 +17,14 @@ class Ampl2DB(Processor):
                          "0dB reference level (default: initarg 0, or 1.0)"]
     doc_tooltip_outlet = ["dB value"] 
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.dbref = 1.0 
         self.lowlow = -1000
 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.dbref = initargs[0]
 
@@ -43,11 +44,12 @@ class DB2Ampl(Processor):
                          "0dB reference level (default: initarg 0, or 1.0)"]
     doc_tooltip_outlet = ["Amplitude value"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.dbref = 1.0 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.dbref = initargs[0]
 

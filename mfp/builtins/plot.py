@@ -23,7 +23,7 @@ class Scope (Processor):
 
     display_type = "plot"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.buffer = None
         self.retrig_value = True
         self.need_buffer_send = False
@@ -32,7 +32,7 @@ class Scope (Processor):
             log.debug("scope: Does not accept init args")
 
         self.gui_params = dict(plot_type="scope")
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         if isinstance(self.inlets[0], BufferInfo):
@@ -76,11 +76,12 @@ class Scatter (Processor):
 
     display_type = "plot"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.points = {}
         self.time_base = None
 
-        initargs, kwargs = patch.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
         if len(initargs) > 0:
             channels = initargs[0]
         else:
@@ -92,7 +93,7 @@ class Scatter (Processor):
         for i in range(channels):
             self.doc_tooltip_inlet.append("Curve %d data/config input" % i)
 
-        Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, channels, 1, init_type, init_args, patch, scope, name, defs)
 
     async def method(self, message, inlet):
         # magic inlet argument makes messages simpler

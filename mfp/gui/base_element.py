@@ -93,7 +93,7 @@ class BaseElement (Store):
         'porthole-width': 8,
         'porthole-height': 4,
         'porthole-border': 1,
-        'porthole-minspace': 11,
+        'porthole-minspace': 14,
         'padding': dict(left=4, top=2, right=4, bottom=2),
         'badge-size': 15,
     }
@@ -390,7 +390,10 @@ class BaseElement (Store):
         # get put in the correct place in the object tree
         await MFPGUI().appwin.signal_emit("created", self)
 
-        objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name)
+        self.obj_type = obj_type
+        self.obj_args = init_args
+
+        objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, self.synced_params())
 
         if self.layer is not None and objinfo:
             objinfo["layername"] = self.layer.name
@@ -550,6 +553,11 @@ class BaseElement (Store):
                         - 2.0 * self.get_style('porthole-border'))
                        / (self.num_outlets - 1.0)))
         return (self.get_style('porthole-border') + spc * port_num + port_width / 2.0, h)
+
+    def port_alloc(self):
+        space = self.get_style('porthole-minspace')
+        border = self.get_style('porthole-border')
+        return (max(self.num_inlets, self.num_outlets) - 1) * space + 2*border
 
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',

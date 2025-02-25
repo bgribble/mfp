@@ -13,9 +13,10 @@ class AudioOut(Processor):
     doc_tooltip_obj = "Output to JACK port"
     doc_tooltip_inlet = [ "Signal input", "JACK output port number (default: initarg 0)" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 0, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 0, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         if len(initargs):
             self.channel = initargs[0]
@@ -39,9 +40,10 @@ class AudioIn(Processor):
     doc_tooltip_inlet = [ "JACK input port number (default: initarg 0)" ]
     doc_tooltip_outlet = [ "Signal output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         if len(initargs):
             self.channel = initargs[0]

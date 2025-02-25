@@ -5,12 +5,12 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from datetime import datetime
-from imgui_bundle import imgui
+from imgui_bundle import imgui, imgui_md, imgui_color_text_edit as ed
 from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import RGBAColor
 from mfp.gui.base_element import BaseElement
-from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs, DictOfRGBAColor
+from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs, DictOfRGBAColor, CodeBlock
 
 single_params = [
     'obj_type',
@@ -32,6 +32,82 @@ any_params = [
 
 TAB_PADDING_X = 12
 TAB_PADDING_Y = 4
+
+open_code_editors = {}
+
+
+def open_code_editor(app_window, param_name, param_type, param_value, target):
+    def _ensure_editor():
+        editor = target.imgui_code_editor
+        if not editor:
+            editor = ed.TextEditor()
+            target.imgui_code_editor = editor
+            init_text = ""
+            if param_value:
+                init_text = param_value.get("body", "")
+            editor.set_text(init_text)
+            editor.set_language_definition(ed.TextEditor.LanguageDefinition.python())
+
+        return editor
+    editor = _ensure_editor()
+    open_code_editors[target] = (editor, param_name)
+
+
+def render_code_editors(app_window):
+    to_close = []
+    for target, info in open_code_editors.items():
+        editor, param_name = info
+        if target.name:
+            label = f"{target.obj_type} {target.name}"
+        else:
+            label = f"{target.obj_type} {id(target)}"
+
+        imgui.set_next_window_size(
+            (350, 400),
+            cond=imgui.Cond_.once
+        )
+        _, window_open = imgui.begin(
+            f"{label}##code_editor",
+            True,
+            imgui.WindowFlags_.menu_bar
+        )
+        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+            app_window.selected_window = "editor"
+
+        imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 4))
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, (8.0, 4.0))
+        if imgui.begin_menu_bar():
+            if imgui.begin_menu("File"):
+                selected, _ = imgui.menu_item("Save", "", False)
+                if selected:
+                    new_val = target.code or {}
+                    new_val["body"] = editor.get_text()
+                    new_val["lang"] = "python"
+
+                    MFPGUI().async_task(target.dispatch_setter(param_name, new_val))
+                selected, _ = imgui.menu_item("Close", "", False)
+                if selected:
+                    window_open = False
+
+                imgui.end_menu()
+            if imgui.begin_menu("Edit"):
+                imgui.menu_item("Undo", "", False)
+                imgui.menu_item("Redo", "", False)
+                imgui.end_menu()
+            if imgui.begin_menu("View"):
+                imgui.end_menu()
+            imgui.end_menu_bar()
+        imgui.pop_style_var()
+        imgui.pop_style_var()
+
+        editor.render(label)
+        imgui.end()
+
+        if not window_open:
+            to_close.append(target)
+
+    for target in to_close:
+        del open_code_editors[target]
 
 
 # info panel is the layer/patch list and the object inspector
@@ -390,6 +466,36 @@ def render_param(
                     imgui.end_table()
             imgui.pop_style_var()
             imgui.pop_id()
+
+        elif param_type.param_type is CodeBlock:
+            show_input = True
+            show_input_changed = False
+
+            imgui.push_id(param_name)
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+            imgui.begin_group()
+
+            if param_type.null:
+                imgui.push_style_var(imgui.StyleVar_.item_spacing, (6, 0))
+                imgui.same_line()
+                show_input_changed, none_val = imgui.checkbox(
+                    f"##{param_name}_none",
+                    param_value is None
+                )
+                imgui.same_line()
+                imgui.text(" None")
+                imgui.pop_style_var()
+                if none_val:
+                    show_input = False
+
+            if show_input:
+                clicked = imgui.button("Edit")
+                if clicked:
+                    open_code_editor(app_window, param_name, param_type, param_value, target)
+            imgui.end_group()
+            imgui.pop_style_var()
+            imgui.pop_id()
+
         elif param_type.param_type is dict:
             newval = {}
             changed = False

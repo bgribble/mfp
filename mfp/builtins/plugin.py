@@ -14,8 +14,9 @@ from ..bang import Uninit
 class Plugin(Processor):
     doc_tooltip_obj = "LADSPA plugin host"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         self.lib_name = None
         self.lib_index = None

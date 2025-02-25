@@ -13,8 +13,8 @@ class Latency(Processor):
     doc_tooltip_obj = "Report DSP latency changes (in milliseconds)"
     doc_tooltip_outlet = ["Input latency", "Output latency" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 2, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 2, init_type, init_args, patch, scope, name, defs)
 
         self.callback = MFPApp().signal_listen("latency", self._latency_cb)
         self.outlet_order = [1, 0]

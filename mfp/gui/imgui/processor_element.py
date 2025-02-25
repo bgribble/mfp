@@ -30,6 +30,9 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         self.min_height = self.height = 12
         self.position_set = False
 
+        # data for code editor
+        self.imgui_code_editor = None
+
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         """
@@ -83,11 +86,13 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         # if there are child elements, save room
         content_w, content_h = imgui.get_item_rect_size()
+        port_alloc_w = self.port_alloc()
 
         if self.export_w is not None:
             min_w = max(self.min_width, self.export_w + 2)
         else:
             min_w = self.min_width
+        min_w = max(min_w, port_alloc_w)
 
         if self.export_h is not None:
             min_h = max(self.min_height, self.export_h + 12)

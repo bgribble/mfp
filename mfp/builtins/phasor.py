@@ -18,9 +18,10 @@ class Phasor(Processor):
                          "Amplitude (default: initarg 1 or 1)"]
     doc_tooltip_outlet = ["Signal output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.init_freq = initargs[0]
         else:

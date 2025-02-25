@@ -18,10 +18,11 @@ class VCFreq(Processor):
     A4_C0_RATIO = 26.908692
     DEFAULT_C0 = 16.35159375
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.base_freq = float(initargs[0])/self.A4_C0_RATIO
         else:

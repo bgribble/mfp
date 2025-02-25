@@ -36,9 +36,10 @@ class CallFunction(Processor):
     doc_tooltip_inlet = ["Callable to set and call or Bang to call"]
     doc_tooltip_outlet = ["Call result"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         self.arity = 0
         self.thunk = lambda: None
 
@@ -61,11 +62,12 @@ class ApplyMethod(Processor):
 
     doc_tooltip_outlet = ["MethodCall object output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.method_name = None
-        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.method_name = str(initargs[0])
 
@@ -98,9 +100,10 @@ class GetElement(Processor):
                          "Element to get (default: initarg 0)"]
     doc_tooltip_outlet = ["Specified element output", "Passthru of source"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         self.default_element = None
         if "default" in kwargs:
             self.default_element = kwargs["default"]
@@ -165,9 +168,10 @@ class SetElement(Processor):
                          "Value to set (default: initarg 1)"]
     doc_tooltip_outlet = ["Modified object"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
-        initargs, _ = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, _ = self.parse_args(init_args, **extra)
         self.element = None
         self.newval = None
 
@@ -212,9 +216,10 @@ class DeleteElement(Processor):
                          "Element to get (default: initarg 0)"]
     doc_tooltip_outlet = ["Object after deletion"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         self.elements = None
         if len(initargs):
@@ -252,9 +257,10 @@ class GetSlice(Processor):
                          ]
     doc_tooltip_outlet = ["Slice output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
-        initargs, _ = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, _ = self.parse_args(init_args, **extra)
         self.slice_end = None
         self.slice_start = 0
         self.stride = 1
@@ -289,11 +295,12 @@ class PyEval(Processor):
     doc_tooltip_inlet = ["Expression to evaluate"]
     doc_tooltip_outlet = ["Result of evaluation"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.bindings = {}
 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.bindings = initargs[0]
 
@@ -313,7 +320,7 @@ class PyEval(Processor):
 class PyFunc(Processor):
     doc_tooltip_obj = "Evaluate function"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         if init_args:
             thunktxt = "lambda " + init_args
         else:
@@ -332,7 +339,7 @@ class PyFunc(Processor):
             self.argcount = None
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
 
-        Processor.__init__(self, self.argcount or 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, self.argcount or 1, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         if isinstance(self.inlets[0], MethodCall):
@@ -344,10 +351,11 @@ class PyFunc(Processor):
 
 
 class PyAutoWrap(Processor):
-    def __init__(self, init_type, init_args, patch, scope, name):
-        self.thunk = patch.parse_obj(init_type)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra = defs or {}
+        self.thunk = patch.parse_obj(init_type, **extra)
         self.argcount = 0
-        initargs, kwargs = patch.parse_args(init_args)
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         arguments = get_arglist(self.thunk)
 
@@ -362,7 +370,7 @@ class PyAutoWrap(Processor):
             self.argcount = 0
             self.doc_tooltip_inlet = ["List or tuple of arguments"]
 
-        Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, max(1, self.argcount), 1, init_type, init_args, patch, scope, name, defs)
 
         for index, arg in enumerate(initargs):
             if index < len(self.inlets):
@@ -387,10 +395,11 @@ class PyCompareRoute(Processor):
 
     doc_tooltip_inlet = ["Argument 1", "Argument 2 (default: initarg 0)"]
 
-    def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
+    def __init__(self, pyfunc, init_type, init_args, patch, scope, name, defs=None):
         self.function = pyfunc
-        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         if self.function.__doc__:
             self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
@@ -413,10 +422,11 @@ class PyCompareRoute(Processor):
 class PyBinary(Processor):
     doc_tooltip_inlet = ["Argument 1", "Argument 2 (default: initarg 0)"]
 
-    def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
+    def __init__(self, pyfunc, init_type, init_args, patch, scope, name, defs=None):
         self.function = pyfunc
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         if self.function.__doc__:
             self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
@@ -434,9 +444,9 @@ class PyBinary(Processor):
 class PyUnary(Processor):
     doc_tooltip_inlet = ["Argument"]
 
-    def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
+    def __init__(self, pyfunc, init_type, init_args, patch, scope, name, defs=None):
         self.function = pyfunc
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
         if self.function.__doc__:
             self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]
@@ -445,9 +455,9 @@ class PyUnary(Processor):
         self.outlets[0] = self.function(self.inlets[0])
 
 class PyNullary(Processor):
-    def __init__(self, pyfunc, init_type, init_args, patch, scope, name):
+    def __init__(self, pyfunc, init_type, init_args, patch, scope, name, defs=None):
         self.function = pyfunc
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
         if self.function.__doc__:
             self.doc_tooltip_obj = self.function.__doc__.split("\n")[0]

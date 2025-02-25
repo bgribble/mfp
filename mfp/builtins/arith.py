@@ -14,13 +14,14 @@ class ArithProcessor(Processor):
     doc_tooltip_inlet = ["Input signal", "Input signal (default: initarg 0)"]
     doc_tooltip_outlet = ["Output signal"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.arith_op = init_type
 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
         self.init_const = 0.0
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.init_const = initargs[0]
 

@@ -93,6 +93,8 @@ def imgui_process_inputs(app_window):
     now = datetime.now()
     keys_currently_pressed = keys_down()
 
+    unhandled_windows = ["info", "editor"]
+
     key_presses = keys_currently_pressed - app_window.keys_pressed
     key_releases = app_window.keys_pressed - keys_currently_pressed
 
@@ -129,7 +131,7 @@ def imgui_process_inputs(app_window):
                     keyval=mfp_key,
                     unicode=None
                 )
-                if app_window.selected_window != "info":
+                if app_window.selected_window not in unhandled_windows:
                     MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
             elif mfp_key in key_defs.MOUSE_BUTTONS:
                 clickinfo = app_window.mouse_clicks.get(mfp_key)
@@ -145,7 +147,7 @@ def imgui_process_inputs(app_window):
                     button=1 + mfp_key - key_defs.MOUSE_LEFT,
                     click_count=click_count
                 )
-                if app_window.selected_window != "info":
+                if app_window.selected_window not in unhandled_windows:
                     MFPGUI().async_task(app_window.signal_emit("button-press-event", ev))
             elif any_dead_keys and mfp_key is not None:
                 # this is the case where a mod key is held down and another
@@ -174,7 +176,7 @@ def imgui_process_inputs(app_window):
                         keyval=mfp_key,
                         unicode=chr(mfp_key)
                     )
-                    if app_window.selected_window != "info":
+                    if app_window.selected_window not in unhandled_windows:
                         MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
 
     if key_releases:
@@ -189,7 +191,7 @@ def imgui_process_inputs(app_window):
                     keyval=mfp_key,
                     unicode=None
                 )
-                if app_window.selected_window != "info":
+                if app_window.selected_window not in unhandled_windows:
                     MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
             elif mfp_key in key_defs.MOUSE_BUTTONS:
                 clickinfo = app_window.mouse_clicks.get(mfp_key)
