@@ -4,7 +4,20 @@
 #include <string.h>
 #include <glib.h>
 #include <pthread.h>
+
+/* HACK -- force some definitions before including any Faust code */
+#define LIBFAUSTCOMMON_C_H
+#include "faust/export.h"
 #include <stdbool.h>
+
+typedef struct {} CTree;
+typedef CTree* Signal;
+typedef CTree* Box;
+enum SType { kSInt, kSReal };
+enum SOperator { kAdd, kSub, kMul, kDiv, kRem, kLsh, kARsh, kLRsh, kGT, kLT, kGE, kLE, kEQ, kNE, kAND, kOR, kXOR };
+
+LIBFAUST_API char* CprintSignal(Signal sig, bool shared, int max_size);
+/* END HACK */
 
 #include "faust/dsp/libfaust-c.h"
 #include "faust/dsp/llvm-dsp-c.h"
