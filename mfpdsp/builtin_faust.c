@@ -4,7 +4,8 @@
 #include <string.h>
 #include <glib.h>
 #include <pthread.h>
-
+#include <stdbool.h>
+#include "faust/dsp/libfaust-signal-c.h"
 #include "faust/dsp/libfaust-c.h"
 #include "faust/dsp/llvm-dsp-c.h"
 
