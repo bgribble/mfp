@@ -5,6 +5,13 @@
 #include <glib.h>
 #include <pthread.h>
 #include <stdbool.h>
+
+#include "faust/export.h"
+
+#if (FAUSTMINORVERSION == 70)
+  enum SType { kSInt, kSReal };
+#endif  
+
 #include "faust/dsp/libfaust-signal-c.h"
 #include "faust/dsp/libfaust-c.h"
 #include "faust/dsp/llvm-dsp-c.h"
