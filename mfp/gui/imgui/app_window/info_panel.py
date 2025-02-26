@@ -34,9 +34,12 @@ TAB_PADDING_X = 12
 TAB_PADDING_Y = 4
 
 open_code_editors = {}
+focused_editor = None
 
 
 def open_code_editor(app_window, param_name, param_type, param_value, target):
+    global focused_editor
+
     def _ensure_editor():
         editor = target.imgui_code_editor
         if not editor:
@@ -51,9 +54,11 @@ def open_code_editor(app_window, param_name, param_type, param_value, target):
         return editor
     editor = _ensure_editor()
     open_code_editors[target] = (editor, param_name)
+    focused_editor = target
 
 
 def render_code_editors(app_window):
+    global focused_editor
     to_close = []
     for target, info in open_code_editors.items():
         editor, param_name = info
@@ -66,6 +71,10 @@ def render_code_editors(app_window):
             (350, 400),
             cond=imgui.Cond_.once
         )
+        if focused_editor == target:
+            imgui.set_next_window_focus()
+            focused_editor = None
+
         _, window_open = imgui.begin(
             f"{label}##code_editor",
             True,
@@ -83,6 +92,7 @@ def render_code_editors(app_window):
                     new_val = target.code or {}
                     new_val["body"] = editor.get_text()
                     new_val["lang"] = "python"
+                    new_val["errorinfo"] = None
 
                     MFPGUI().async_task(target.dispatch_setter(param_name, new_val))
                 selected, _ = imgui.menu_item("Close", "", False)
@@ -99,6 +109,14 @@ def render_code_editors(app_window):
             imgui.end_menu_bar()
         imgui.pop_style_var()
         imgui.pop_style_var()
+
+        if target.code and "errorinfo" in target.code and target.code["errorinfo"]:
+            errinfo = target.code["errorinfo"]
+            editor.set_error_markers(
+                { errinfo["lineno"]: errinfo["message"]}
+            )
+        else:
+            editor.set_error_markers({})
 
         editor.render(label)
         imgui.end()

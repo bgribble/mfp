@@ -106,7 +106,7 @@ class ProcessorElement (BaseElement):
             )
 
     @saga('code')
-    def params_changed(self, action, state_diff, previous):
+    async def params_changed(self, action, state_diff, previous):
         self.send_params()
 
     async def label_edit_finish(self, widget, text=None, aborted=False):

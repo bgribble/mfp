@@ -393,17 +393,24 @@ class BaseElement (Store):
         self.obj_type = obj_type
         self.obj_args = init_args
 
+        self.tags = {}
+        self.update_badge()
         objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, self.synced_params())
 
-        if self.layer is not None and objinfo:
-            objinfo["layername"] = self.layer.name
-
-        if objinfo is None:
+        if not objinfo or "obj_id" not in objinfo:
             self.app_window.hud_write("ERROR: Could not create, see log for details")
+
+            if objinfo and "code" in objinfo:
+                self.code = objinfo["code"]
+
             self.connections_out = connections_out
             self.connections_in = connections_in
+            self.tags['errorcount'] = 1
+            self.update_badge()
             return None
 
+        if self.layer is not None and objinfo and isinstance(objinfo, dict):
+            objinfo["layername"] = self.layer.name
         objinfo['obj_type'] = obj_type
 
         # init state from objinfo
@@ -562,7 +569,7 @@ class BaseElement (Store):
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
         'obj_name', 'no_export', 'is_export', 'export_offset_x',
-        'export_offset_y', 'debug', 'layer'
+        'export_offset_y', 'debug', 'layer', 'code'
     )
     async def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
@@ -575,6 +582,7 @@ class BaseElement (Store):
         self.export_offset_x = params.get("export_offset_x", 0)
         self.export_offset_y = params.get("export_offset_y", 0)
         self.debug = params.get("debug", False)
+        self.code = params.get("code", None)
 
         newscope = params.get("scope", "__patch__")
         if (not self.scope) or newscope != self.scope:

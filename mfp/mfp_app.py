@@ -398,6 +398,9 @@ class MFPApp (Singleton, SignalMixin):
         log.warning(f"mfp_app.load_extension: not implemented completely, path={fullpath}")
 
     async def create(self, init_type, init_args, patch, scope, name, params=None):
+        create_params = {}
+        rval = None
+
         # first try: is a factory registered?
         ctor = self.registry.get(init_type)
 
@@ -407,7 +410,10 @@ class MFPApp (Singleton, SignalMixin):
             code = params.get("code")
             if code and code.get("lang") == "python":
                 codestr = code.get("body")
-                patch.evaluator.exec_str(codestr, defs)
+                errinfo = patch.evaluator.exec_str(codestr, defs)
+                if errinfo:
+                    create_params["code"] = dict(body=codestr, lang="python", errorinfo=errinfo)
+                    rval = create_params
 
         # second try: is there a .mfp patch file in the search path?
         if ctor is None:
@@ -430,14 +436,14 @@ class MFPApp (Singleton, SignalMixin):
 
         if ctor is None:
             log.error(f"[create] Could not find a build method for {init_type}")
-            return None
+            return rval
 
         # create intervening scope if needed
         if '.' in name:
             parts = name.split('.')
             if len(parts) > 2:
                 log.error("Cannot deep-create name {}".format(name))
-                return None
+                return rval
 
             testobj = self.resolve(parts[0], patch, True)
             if testobj:
@@ -447,12 +453,12 @@ class MFPApp (Singleton, SignalMixin):
                     log.error(
                         "Cannot deep-create object {} in patch {}".format(name, testobj)
                     )
-                    return None
+                    return rval
                 elif not isinstance(scope, LexicalScope):
                     log.error(
                         "Cannot deep-create object {} in another object {}".format(name, testobj)
                     )
-                    return None
+                    return rval
                 else:
                     scope = testobj
             else:
@@ -473,6 +479,10 @@ class MFPApp (Singleton, SignalMixin):
 
             if obj and obj.obj_id:
                 await obj.setup()
+
+                for attr, val in create_params.items():
+                    obj.gui_params[attr] = val
+
                 obj.mark_ready()
 
             return obj

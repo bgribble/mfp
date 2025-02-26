@@ -381,7 +381,7 @@ class GlobalMode (InputMode):
 
         o = self.manager.pointer_obj
         try:
-            if o is not None and o.obj_state == BaseElement.OBJ_COMPLETE:
+            if not self.snoop_conn and o is not None and o.obj_state == BaseElement.OBJ_COMPLETE:
                 await o.show_tip(self.manager.pointer_x, self.manager.pointer_y, details)
         except Exception:
             pass

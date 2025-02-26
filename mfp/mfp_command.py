@@ -25,6 +25,9 @@ class MFPCommand:
         if obj is None:
             log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name}")
             return None
+        elif isinstance(obj, dict):
+            log.warning(f"Error in creating {objtype} {obj}")
+            return obj
         return obj.gui_params
 
     async def create_export_gui(self, obj_id):

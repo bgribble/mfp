@@ -127,13 +127,37 @@ class Evaluator (object):
         return rv
 
     def exec_str(self, pystr, global_vars=None):
-        if global_vars is not None:
-            for name, value in self.global_names.items():
-                if name not in global_vars:
-                    global_vars[name] = value
-            exec(pystr, global_vars)
-        else:
-            exec(pystr, self.global_names)
+        try:
+            if global_vars is not None:
+                for name, value in self.global_names.items():
+                    if name not in global_vars:
+                        global_vars[name] = value
+                exec(pystr, global_vars)
+            else:
+                exec(pystr, self.global_names)
+        except SyntaxError as syn:
+            return dict(
+                lineno=syn.lineno,
+                offset=syn.offset,
+                code=syn.text,
+                message=str(syn)
+            )
+        except NameError as name_err:
+            import sys
+            _, _, exc_tb = sys.exc_info()
+            return dict(
+                lineno=exc_tb.tb_next.tb_lineno,
+                offset=0,
+                code=name_err.name,
+                message=str(name_err)
+            )
+        except Exception as e:
+            return dict(
+                lineno=1,
+                offset=0,
+                code="",
+                message=str(e)
+            )
 
     def exec_file(self, filename):
         import os.path
