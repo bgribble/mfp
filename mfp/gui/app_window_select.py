@@ -118,11 +118,11 @@ async def select_all(self):
 
 @extends(AppWindow)
 async def unselect_all(self):
-    oldsel = self.selected
-    self.selected = []
+    oldsel = [*self.selected]
     for obj in oldsel:
         obj.end_control()
         await self.unselect(obj)
+    self.selected = []
     return True
 
 

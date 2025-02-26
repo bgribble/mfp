@@ -82,6 +82,9 @@ preview. These are all in the `master` branch.
   any connections. A message like `@show "Layer 1"` will send the
   `@show` method call, which will change the patch's display to
   the named layer.
+* **Interactive search.** The `/` key starts an interactive search which 
+  highlights matching text. C-RET to cycle the selection between 
+  matching items, or C-A-RET to select all matching.
 
 ### BUILDING
 

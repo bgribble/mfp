@@ -69,7 +69,7 @@ class GlobalMode (InputMode):
         cls.bind(
             "search-interactive-select-next", cls.search_interactive_next,
             helptext="Select next element matching search string",
-            keysym="S-RET",
+            keysym="C-RET",
         )
         cls.bind(
             "search-interactive-select-prev", cls.search_interactive_prev,
@@ -79,7 +79,7 @@ class GlobalMode (InputMode):
         cls.bind(
             "search-interactive-select-all", cls.search_interactive_all,
             helptext="Select all elements matching search string",
-            keysym="A-RET"
+            keysym="C-A-RET"
         )
         cls.bind(
             "toggle-console", cls.toggle_console, helptext="Show/hide log and console",
@@ -794,6 +794,7 @@ class GlobalMode (InputMode):
         )
 
     async def search_interactive_prev(self):
+        await self.window.unselect_all()
         self.search_interactive_next(forward=False)
 
     async def search_interactive_all(self):
