@@ -53,7 +53,7 @@ class MFPGUI (Singleton):
             'fill-color': ParamInfo(label="Element fill color", param_type=RGBAColor),
             'fill-color:debug': ParamInfo(label="Element fill color (debug)", param_type=RGBAColor),
             'fill-color:lit': ParamInfo(label="Element fill color (lit indicator)", param_type=RGBAColor),
-            'fill-color:selected':ParamInfo(label="Element fill color (selected)", param_type=RGBAColor),
+            'fill-color:selected':ParamInfo(label="Elem4ent fill color (selected)", param_type=RGBAColor),
             'font-face': ParamInfo(label="Font faces", param_type=str),
             'font-size': ParamInfo(label="Font size", param_type=float),
             'grid-color:edit': ParamInfo(label="Grid color (edit)", param_type=RGBAColor),
@@ -93,7 +93,7 @@ class MFPGUI (Singleton):
             'font-face': 'Cantarell,Sans',
             'font-size': 16,
             'grid-color:edit': ColorDB().find('default-grid-color'),
-            'grid-color:operate': ColorDB().find('transparent'),
+            'grid-color:operate': ColorDB().find('default-operate-grid-color'),
             'link-color': ColorDB().find('default-link-color'),
             'link-color:selected': ColorDB().find('default-link-color-selected'),
             'link-color:snoop': ColorDB().find('default-link-color-snoop'),
@@ -137,23 +137,25 @@ def setup_default_colors_dark():
     from .gui.colordb import ColorDB
     # canvas background and grid
     ColorDB().insert('default-canvas-color',
-                     ColorDB().find(0x3b, 0x3b, 0x3b, 0xff))
+                     ColorDB().find(0x5b, 0x5b, 0x5b, 0xff))
     ColorDB().insert('default-grid-color',
-                     ColorDB().find(0x4f, 0x4f, 0x4f, 0xff))
+                     ColorDB().find(0x75, 0x75, 0x75, 0xff))
+    ColorDB().insert('default-operate-grid-color',
+                     ColorDB().find(0x75, 0x75, 0x75, 0x60))
 
     # elements
     ColorDB().insert('default-stroke-color',
-                     ColorDB().find(0x74, 0x74, 0x74, 0xff))
-    ColorDB().insert('default-stroke-color-selected',
                      ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
+    ColorDB().insert('default-stroke-color-selected',
+                     ColorDB().find(0xdd, 0xdd, 0xdd, 0xff))
     ColorDB().insert('default-selbox-stroke-color',
                      ColorDB().find(0x33, 0xcc, 0xff, 0xff))
     ColorDB().insert('default-selbox-fill-color',
                      ColorDB().find(0x33, 0xcc, 0xff, 0x20))
     ColorDB().insert('default-link-color',
-                     ColorDB().find(0x84, 0x84, 0x84, 0xff))
-    ColorDB().insert('default-link-color-selected',
                      ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
+    ColorDB().insert('default-link-color-selected',
+                     ColorDB().find(0xdd, 0xdd, 0xdd, 0xff))
     ColorDB().insert('default-link-color-snoop',
                      ColorDB().find(0xaa, 0xff, 0xaa, 0xff))
     ColorDB().insert('default-stroke-color-hover',
