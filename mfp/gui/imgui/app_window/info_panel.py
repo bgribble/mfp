@@ -93,8 +93,6 @@ def render_code_editors(app_window):
                     new_val["body"] = editor.get_text()
                     new_val["lang"] = "python"
                     new_val["errorinfo"] = None
-
-                    log.debug(f"Dispatching setter for {target} {param_name} {new_val}")
                     MFPGUI().async_task(target.dispatch_setter(param_name, new_val))
                 selected, _ = imgui.menu_item("Close", "", False)
                 if selected:
