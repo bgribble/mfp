@@ -415,6 +415,15 @@ def configure(ctxt):
         uselibs.append(uname)
     ctxt.env.PKGCONF_LIBS = uselibs
 
+    # LLVM needs special args
+    ctxt.check_cfg(
+        path="llvm-config",
+        package="",
+        args="--link-static --ldflags --libs all --system-libs",
+        uselib_store="LLVM"
+    )
+    ctxt.env.PKGCONF_LIBS.append("LLVM")
+
     if ctxt.env.WITH_CLUTTER:
         pip_libs.extend([
             ("cairo", "pycairo"), "gbulb",
@@ -433,6 +442,14 @@ def configure(ctxt):
     # LADSPA header
     ctxt.check_cc(header_name="ladspa.h")
     ctxt.check_cc(header_name="asoundlib.h")
+
+    # FAUST libs and header
+    ctxt.find_program("faust")
+    ctxt.find_program("llvm-config")
+    ctxt.env.FAUST_LIBS = [
+        "-lfaust",
+    ]
+
 
     # pip-installable libs we just mark them as not available
     for lib in pip_libs:
@@ -494,9 +511,7 @@ def build(bld):
             version=bld.env.GITVERSION,
             pyver=version_python_only
         ),
-        source=[
-            bld.path.ant_glob("**/*.py"),
-        ],
+        source=bld.path.find_node("mfp").ant_glob("**/*.py"),
         target=f"wheel/{wheelname('mfp', bld.env.GITVERSION, version_python_only, 'none-any')}"
     )
     bld(
@@ -507,7 +522,7 @@ def build(bld):
             arch=arch,
             version="1.0"
         ),
-        source=bld.path.ant_glob("pluginfo/**/*.{c,py}"),
+        source=bld.path.find_node("pluginfo").ant_glob("**/*.{c,py}"),
         target=f"wheel/{wheelname('pluginfo', '1.0', version_extensions, arch)}"
     )
     bld(
@@ -518,7 +533,7 @@ def build(bld):
             arch=arch,
             version="1.0"
         ),
-        source=bld.path.ant_glob("testext/**/*.{c,py}"),
+        source=bld.path.find_node("testext").ant_glob("**/*.{c,py}"),
         target=f"wheel/{wheelname('testext', '1.0', version_extensions, arch)}"
     )
     bld(
@@ -530,7 +545,7 @@ def build(bld):
             arch=arch,
             version="0.4.1"
         ),
-        source=bld.path.ant_glob("lib/alsaseq-0.4.1/*.{c,py}"),
+        source=bld.path.find_node("lib/alsaseq-0.4.1").ant_glob("**/*.{c,py}"),
         target=f"wheel/{wheelname('alsaseq', '0.4.1', version_extensions, arch)}"
     )
 
@@ -562,13 +577,14 @@ def build(bld):
         source=bld.path.ant_glob("mfpdsp/*.c"),
         target="mfpdsp",
         cflags=cflags,
-        uselib=bld.env.PKGCONF_LIBS
+        uselib=bld.env.PKGCONF_LIBS,
     )
 
     bld.program(
         source="mfpdsp/main.c",
         target="mfpdsp/mfpdsp",
         cflags=cflags,
+        ldflags="-lfaust",
         uselib=bld.env.PKGCONF_LIBS,
         use=['mfpdsp']
     )

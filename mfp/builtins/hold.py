@@ -14,10 +14,11 @@ class TrackHold(Processor):
     doc_tooltip_inlet = ["Signal input", "Hold signal"]
     doc_tooltip_outlet = ["Signal output", "Sample output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
@@ -47,10 +48,11 @@ class SampleHold(Processor):
     doc_tooltip_inlet = ["Signal input", "Hold signal"]
     doc_tooltip_outlet = ["Signal output", "Sample output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name, defs)
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]

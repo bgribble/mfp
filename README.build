@@ -80,6 +80,9 @@ development headers and pkg-config files installed:
  * jack           (duh)
  * liblo          (OSC library, needed by pyliblo)
  * lv2 headers    (LV2 load/save)
+ * libfaust       ([faust~] for embedded Faust DSP)
+ * llvm           (LLVM, for Faust live compilation and linking)
+ * libpolly       (LLVM helper library needed for Faust+LLVM)
 
 You'll get errors in the "./waf configure" process if these aren't installed.
 

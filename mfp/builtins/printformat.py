@@ -16,9 +16,10 @@ class Print (Processor):
     doc_tooltip_inlet = [ "Object to print", "Format string (default: initarg 0)" ]
     doc_tooltip_outlet = [ "Object formatted as a string" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.format_string = initargs[0]
         else:

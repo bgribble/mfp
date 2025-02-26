@@ -15,9 +15,10 @@ class Ampl(Processor):
     doc_tooltip_inlet = [ "Input signal" ]
     doc_tooltip_outlet = [ "RMS amplitude", "Peak amplitude" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 2, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 2, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         self.dsp_inlets = [0]
         self.dsp_outlets = [0, 1]

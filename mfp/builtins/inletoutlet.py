@@ -17,9 +17,10 @@ class Inlet(Processor):
 
     do_onload = False
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
         if patch:
-            initargs, kwargs = patch.parse_args(init_args)
+            initargs, kwargs = patch.parse_args(init_args, **extra)
         else:
             initargs = []
 
@@ -32,7 +33,7 @@ class Inlet(Processor):
             self.inletnum = 0
             init_args = "0"
 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
         if self.inletnum in patch.hot_inlets:
             self.doc_tooltip_obj = self.doc_tooltip_hot
         else:
@@ -71,8 +72,8 @@ class Inlet(Processor):
 class SignalInlet(Inlet):
     doc_tooltip_obj = "Signal input to patch"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Inlet.__init__(self, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Inlet.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0]
 
@@ -85,9 +86,10 @@ class Outlet(Processor):
     do_onload = False
     clear_outlets = False
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
         if patch:
-            initargs, kwargs = patch.parse_args(init_args)
+            initargs, kwargs = patch.parse_args(init_args, **extra)
         else:
             initargs = []
 
@@ -100,7 +102,7 @@ class Outlet(Processor):
             self.outletnum = 0
             init_args = "0"
 
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
     async def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is
@@ -121,8 +123,8 @@ class Outlet(Processor):
 class SignalOutlet(Outlet):
     doc_tooltip_obj = "Signal output from patch"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Outlet.__init__(self, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Outlet.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0]
 

@@ -21,18 +21,19 @@ class Send (Processor):
 
     bus_type = "bus"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.dest_name = None
         self.dest_inlet = 0
         self.dest_obj = None
         self.dest_obj_owned = False
 
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 
         # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs) > 1:
             self.dest_inlet = initargs[1]
         if len(initargs):
@@ -190,13 +191,13 @@ class SendSignal (Send):
     display_type = "sendsignalvia"
     bus_type = "bus~"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.dest_name = None
         self.dest_inlet = 0
         self.dest_obj = None
         self.dest_obj_owned = False
 
-        super().__init__(init_type, init_args, patch, scope, name)
+        super().__init__(init_type, init_args, patch, scope, name, defs)
 
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
@@ -204,7 +205,8 @@ class SendSignal (Send):
         # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs) > 1:
             self.dest_inlet = initargs[1]
         if len(initargs):
@@ -221,9 +223,9 @@ class MessageBus (Processor):
     do_onload = False
     save_to_patch = False
 
-    def __init__(self, init_type, init_args, patch, scope, name):
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.last_value = Uninit
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         self.outlets[0] = self.last_value = self.inlets[0]
@@ -250,8 +252,8 @@ class SignalBus (Processor):
     do_onload = False
     save_to_patch = False
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
 
@@ -269,9 +271,10 @@ class Recv (Processor):
     doc_tooltip_inlet = ["Passthru input"]
     doc_tooltip_outlet = ["Passthru output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         self.src_name = self.name
         self.src_name_provided = False
@@ -371,9 +374,10 @@ class RecvSignal (Recv):
     display_type = "recvsignalvia"
     doc_tooltip_obj = "Receive signals to the specified name"
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        super().__init__(init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        super().__init__(init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         self.src_name = None
         self.src_obj = None

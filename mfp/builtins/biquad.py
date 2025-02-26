@@ -16,9 +16,10 @@ class Biquad(Processor):
     doc_tooltip_inlet = [ "Signal in or parameter dictionary with keys a1, a2, b0, b1, b2" ]
     doc_tooltip_outlet = [ "Signal out" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
@@ -82,9 +83,10 @@ class BiquadWrapper(Processor):
                          "Q (filter steepness) (default: initarg 1)"]
     doc_tooltip_outlet = ["Signal out"]
 
-    def __init__(self, bq_func, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, bq_func, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         if len(initargs) > 0:
             self.freq = initargs[0]
@@ -122,7 +124,7 @@ class BiquadWrapper(Processor):
 
 def mk_biquad(thunk, filter_name):
     def factory(init_type, init_args, patch, scope, name):
-        bq = BiquadWrapper(thunk, init_type, init_args, patch, scope, name)
+        bq = BiquadWrapper(thunk, init_type, init_args, patch, scope, name, defs)
         bq.doc_tooltip_obj = BiquadWrapper.doc_tooltip_obj % filter_name
         return bq
 

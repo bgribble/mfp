@@ -21,8 +21,8 @@ class Replay (Processor):
 
     _timer = None
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
         self.buffer = []
         self.playing = False
@@ -36,7 +36,8 @@ class Replay (Processor):
         if Replay._timer is None:
             Replay._timer = MultiTimer()
 
-        parsed_args, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        parsed_args, kwargs = self.parse_args(init_args, **extra)
 
     def record(self):
         self.recording = True

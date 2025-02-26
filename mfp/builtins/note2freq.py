@@ -24,8 +24,9 @@ class Note2Freq(Processor):
                          "Tuning (note name to frequency) (default: Equal Temperament A4=440"]
     doc_tooltip_outlet = ["Frequency output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
         if kwargs.get('scale'):
             self.scale = kwargs.get('scale')
         else:
@@ -35,7 +36,7 @@ class Note2Freq(Processor):
             self.tuning = kwargs.get('tuning')
         else:
             self.tuning = scale.EqualTemper()
-        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         if self.inlets[1] is not Uninit:

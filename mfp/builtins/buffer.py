@@ -41,8 +41,9 @@ class Buffer(Processor):
         "BufferInfo and status output"
     ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        self.init_args, self.init_kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        self.init_args, self.init_kwargs = patch.parse_args(init_args, **extra)
 
         self.init_size = 0
         self.init_channels = 1
@@ -82,6 +83,8 @@ class Buffer(Processor):
 
         self.dsp_inlets = list(range(self.init_channels))
         self.dsp_outlets = list(range(self.init_channels))
+
+        self.set_channel_tooltips()
 
     async def setup(self):
         await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
@@ -137,11 +140,26 @@ class Buffer(Processor):
 
             os.lseek(self.shm_obj.fd, self.offset(channel, 0), os.SEEK_SET)
             os.write(self.shm_obj.fd, byte_data)
-        log.debug("[buffer] Sample data ready")
+
+    def set_channel_tooltips(self):
+        self.doc_tooltip_inlet = [
+            Buffer.doc_tooltip_inlet[0],
+            *[
+                f"Signal input {n}"
+                for n in range(1, self.channels)
+            ]
+        ]
+        self.doc_tooltip_outlet = [
+            *[
+                f"Signal output {n}"
+                for n in range(self.channels)
+            ],
+            *Buffer.doc_tooltip_outlet[-2:]
+        ]
 
     def dsp_response(self, resp_id, resp_value):
         if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
-            self.outlets[2] = resp_value
+            self.outlets[-1] = resp_value
         elif resp_id == self.RESP_BUFID:
             if self.shm_obj:
                 self.shm_obj.close_fd()
@@ -151,13 +169,14 @@ class Buffer(Processor):
             self.size = resp_value
         elif resp_id == self.RESP_BUFCHAN:
             self.channels = resp_value
+            self.set_channel_tooltips()
         elif resp_id == self.RESP_RATE:
             self.rate = resp_value
         elif resp_id == self.RESP_OFFSET:
             self.buf_offset = resp_value
         elif resp_id == self.RESP_BUFRDY:
             self.buffer_ready = True
-            self.outlets[2] = BufferInfo(
+            self.outlets[-1] = BufferInfo(
                 buf_id=self.buf_id,
                 size=self.size,
                 channels=self.channels,
@@ -167,7 +186,7 @@ class Buffer(Processor):
             if self.file_ready:
                 self.file_ready = False
                 self._transfer_file_data()
-        self.outlets[2] = (resp_id, resp_value)
+        self.outlets[-1] = (resp_id, resp_value)
 
     async def trigger(self):
         incoming = self.inlets[0]
@@ -207,7 +226,7 @@ class Buffer(Processor):
         try:
             os.lseek(self.shm_obj.fd, self.offset(channel, start), os.SEEK_SET)
             slc = os.read(self.shm_obj.fd, (end - start) * self.FLOAT_SIZE)
-            self.outlets[1] = list(numpy.fromstring(slc, dtype=numpy.float32))
+            self.outlets[-2] = list(numpy.fromstring(slc, dtype=numpy.float32))
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
@@ -216,7 +235,7 @@ class Buffer(Processor):
             return None
 
     def bufinfo(self):
-        self.outlets[2] = BufferInfo(
+        self.outlets[-1] = BufferInfo(
             buf_id=self.buf_id,
             size=self.size,
             channels=self.channels,

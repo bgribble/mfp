@@ -19,13 +19,14 @@ class MidiIn (Processor):
     doc_tooltip_inlet = ["Config/MIDI passthru input"]
     doc_tooltip_outlet = ["MIDI event output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
         self.port = 0
         self.channels = []
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if kwargs:
             self.handler = MFPApp().midi_mgr.register(
                 lambda event, data: asyncio.run_coroutine_threadsafe(
@@ -67,12 +68,13 @@ class MidiOut (Processor):
     doc_tooltip_obj = "Send MIDI events to ALSA sequencer"
     doc_tooltip_inlet = ["Config/MIDI data input"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name, defs)
         self.port = 0
         self.channel = None
 
-        initargs, kwargs = self.parse_args(init_args)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.channel = initargs[0]
 

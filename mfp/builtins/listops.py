@@ -13,9 +13,10 @@ class Pack (Processor):
     doc_tooltip_obj = "Collect inputs into a list"
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             num_inlets = initargs[0]
         else:
@@ -34,14 +35,15 @@ class Unpack (Processor):
     doc_tooltip_obj = "Break list into items"
     doc_tooltip_inlet = [ "List input"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         if len(initargs):
             num_outlets = initargs[0] + 1
         else:
             num_outlets = 1
-        Processor.__init__(self, 1, num_outlets, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, 1, num_outlets, init_type, init_args, patch, scope, name, defs)
         self.doc_tooltip_outlet = []
         for i in range(num_outlets-1):
             self.doc_tooltip_outlet.append("List item %d output" % i)
@@ -62,8 +64,8 @@ class Hodor (Processor):
     doc_tooltip_inlet = [ "Inlet 0", "Inlet 1" ]
     doc_tooltip_outlet = [ "Outlet 0", "Outlet 1" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name, defs)
         self.hot_inlets = [1]
 
     async def trigger(self):
@@ -76,9 +78,10 @@ class Append (Processor):
     doc_tooltip_inlet = [ "List to append to", "Item to append"]
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.inlets[1] = initargs[0]
         else:
@@ -96,8 +99,9 @@ class Zip (Processor):
     doc_tooltip_obj = "Merge input lists by item"
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         if len(initargs):
             num_inlets = initargs[0]
@@ -107,7 +111,7 @@ class Zip (Processor):
         for i in range(num_inlets):
             self.doc_tooltip_inlet.append("List %d input" % i)
 
-        Processor.__init__(self, num_inlets, 1, init_type, init_args, patch, scope, name)
+        Processor.__init__(self, num_inlets, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         if len(self.inlets) == 1:
@@ -120,9 +124,10 @@ class Sort (Processor):
     doc_tooltip_inlet = [ "List", "Key function (default: element)" ]
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         self.func = lambda x: x
         if len(initargs):
@@ -139,9 +144,10 @@ class Map (Processor):
     doc_tooltip_inlet = [ "List", "Function to apply (default: initarg 1)"]
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         self.func = lambda x: x
         if len(initargs):
@@ -157,9 +163,10 @@ class Filter (Processor):
     doc_tooltip_inlet = [ "List", "Function to apply (default: initarg 1)"]
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         self.func = lambda x: x
         if len(initargs):
@@ -178,9 +185,10 @@ class Slice (Processor):
                          "Stride (default: initarg 2)"]
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         self.func = lambda x: x
         if len(initargs) > 2:
@@ -205,9 +213,10 @@ class Range (Processor):
     ]
     doc_tooltip_outlet = [ "List output" ]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
-        initargs, kwargs = patch.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
 
         self.default_start = 0
         self.default_stride = 1

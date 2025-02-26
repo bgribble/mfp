@@ -1,5 +1,5 @@
 
-/* builtin DSP unit initializers */ 
+/* builtin DSP unit initializers */
 extern mfp_procinfo * init_builtin_osc(void);
 extern mfp_procinfo * init_builtin_in(void);
 extern mfp_procinfo * init_builtin_out(void);
@@ -31,3 +31,4 @@ extern mfp_procinfo * init_builtin_stepseq(void);
 extern mfp_procinfo * init_builtin_vc_quantize12(void);
 extern mfp_procinfo * init_builtin_vc_freq(void);
 extern mfp_procinfo * init_builtin_hold(void);
+extern mfp_procinfo * init_builtin_faust(void);

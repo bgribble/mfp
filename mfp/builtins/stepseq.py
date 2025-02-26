@@ -14,9 +14,10 @@ class StepSeq(Processor):
     doc_tooltip_inlet = ["Step values", "Clock"]
     doc_tooltip_outlet = ["Step value output", "Trigger output"]
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name)
-        initargs, kwargs = self.parse_args(init_args)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 2, 2, init_type, init_args, patch, scope, name, defs)
+        extra=defs or {}
+        initargs, kwargs = self.parse_args(init_args, **extra)
 
         self.init_steps = []
         if len(initargs):

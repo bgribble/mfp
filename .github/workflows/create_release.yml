@@ -1,0 +1,50 @@
+name: Make release
+run-name: Make release
+on: [workflow_dispatch]
+jobs:
+  build_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        # This is the version of the action for setting up Python, not the Python version.
+        uses: actions/setup-python@v5
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: '3.x'
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: 'x64'
+      # Set up the build environment 
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Update apt cache
+        run: sudo apt update
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: Install dev files
+        run: sudo apt install libglib2.0-dev cmake libserd-dev libjson-glib-dev libprotobuf-c-dev libjack-jackd2-dev liblo-dev lv2-dev libasound2-dev ladspa-sdk
+      # Configure and build the binary artifacts
+      - name: Configure MFP 
+        run: ./waf configure
+      - name: Build MFP
+        run: ./waf build
+      - name: Save built archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfp_build_release
+          path: wafbuild/mfp_*.tar.gz
+      # get the MFP version for the release
+      - name: version
+        run: python ./setup.py --version
+        id: version
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: mfp ${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}
+          body_path: doc/ANNOUNCE-${{ steps.version.outputs.version }}.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

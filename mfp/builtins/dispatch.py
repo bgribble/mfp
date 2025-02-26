@@ -20,8 +20,8 @@ class Dispatch (Processor):
     objects for handling within the patch.
     '''
 
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
     async def method(self, value, inlet):
         await self.trigger()
@@ -41,8 +41,8 @@ class BaseClass (Processor):
     Use as the default handler after a [dispatch] - [route] block.  Will attempt
     to call the method on Patch/Processor.
     '''
-    def __init__(self, init_type, init_args, patch, scope, name):
-        Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
         if isinstance(self.inlets[0], (list, tuple)):
