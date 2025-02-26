@@ -63,6 +63,9 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.hovered_state = False
         self.child_elements = []
 
+        # data for code editor
+        self.imgui_code_editor = None
+
         super().__init__(window, x, y)
 
     def select(self):

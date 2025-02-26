@@ -30,9 +30,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         self.min_height = self.height = 12
         self.position_set = False
 
-        # data for code editor
-        self.imgui_code_editor = None
-
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
         """

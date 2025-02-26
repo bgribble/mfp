@@ -12,7 +12,7 @@ from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB, RGBAColor
 from .backend_interfaces import BackendInterface
-from .param_info import ParamInfo, ListOfInt
+from .param_info import ParamInfo, ListOfInt, CodeBlock
 from .layer import Layer
 
 
@@ -81,6 +81,7 @@ BASE_STORE_ATTRS = {
     'export_offset_x': ParamInfo(label="Export offset X", param_type=float),
     'export_offset_y': ParamInfo(label="Export offset Y", param_type=float),
     'debug': ParamInfo(label="Enable debugging", param_type=bool),
+    'code': ParamInfo(label="Custom code", param_type=CodeBlock, show=True),
 }
 
 
@@ -131,6 +132,7 @@ class BaseElement (Store):
         self.connections_in = []
         self.is_export = False
         self.param_list = [a for a in self.store_attrs]
+        self.code = None
 
         self.app_window = window
 
@@ -338,6 +340,10 @@ class BaseElement (Store):
             self.position_x = x
             self.position_y = y
 
+    @saga('code')
+    async def code_changed(self, action, state_diff, previous):
+        self.send_params()
+
     @mutates('obj_state')
     async def delete(self, delete_obj=True):
         # FIXME this is because self.app_window is the backend, not the app window
@@ -396,7 +402,6 @@ class BaseElement (Store):
         self.tags = {}
         self.update_badge()
         objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, self.synced_params())
-
         if not objinfo or "obj_id" not in objinfo:
             self.app_window.hud_write("ERROR: Could not create, see log for details")
 

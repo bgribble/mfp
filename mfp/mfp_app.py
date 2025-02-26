@@ -414,6 +414,8 @@ class MFPApp (Singleton, SignalMixin):
                 if errinfo:
                     create_params["code"] = dict(body=codestr, lang="python", errorinfo=errinfo)
                     rval = create_params
+                else:
+                    create_params["code"] = dict(body=codestr, lang="python")
 
         # second try: is there a .mfp patch file in the search path?
         if ctor is None:

@@ -15,7 +15,7 @@ from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
 from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
-from .param_info import ParamInfo, CodeBlock
+from .param_info import ParamInfo
 
 
 class ProcessorElementImpl(BackendInterface, metaclass=ABCMeta):
@@ -28,13 +28,6 @@ class ProcessorElement (BaseElement):
     help_patch = "processor.help.mfp"
     display_type = "processor"
     proc_type = None
-
-    extra_params = {
-        'code': ParamInfo(label="Custom code", param_type=CodeBlock, show=True),
-    }
-    store_attrs = {
-        **BaseElement.store_attrs, **extra_params
-    }
 
     # constants
     label_off_x = 3
@@ -68,7 +61,6 @@ class ProcessorElement (BaseElement):
         if not self.show_label:
             self.label.hide()
 
-        self.code = None
         self.export_x = None
         self.export_y = None
         self.export_w = None
@@ -104,10 +96,6 @@ class ProcessorElement (BaseElement):
             yield await self.label_edit_finish(
                 None, f"{self.obj_type}{args}"
             )
-
-    @saga('code')
-    async def params_changed(self, action, state_diff, previous):
-        self.send_params()
 
     async def label_edit_finish(self, widget, text=None, aborted=False):
         if text is not None and not aborted:

@@ -23,7 +23,7 @@ class MFPCommand:
 
         obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, params)
         if obj is None:
-            log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name}")
+            log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name} {params}")
             return None
         elif isinstance(obj, dict):
             log.warning(f"Error in creating {objtype} {obj}")
