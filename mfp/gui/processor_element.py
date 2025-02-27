@@ -87,9 +87,9 @@ class ProcessorElement (BaseElement):
         # don't recreate if this is the initial creation
         if "code" not in state_diff:
             if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
-                return
+                yield None
             if "obj_id" in state_diff and state_diff['obj_id'][0] == None:
-                return
+                yield None
 
         if self.obj_type:
             args = f" {self.obj_args}" if self.obj_args is not None else ''

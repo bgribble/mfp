@@ -329,7 +329,6 @@ class PyFunc(Processor):
         self.thunk = patch.parse_obj(thunktxt)
 
         arguments = get_arglist(self.thunk)
-
         if arguments is not None:
             self.argcount = len(arguments)
             self.doc_tooltip_inlet = []

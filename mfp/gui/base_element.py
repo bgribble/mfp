@@ -342,7 +342,7 @@ class BaseElement (Store):
 
     @saga('code')
     async def code_changed(self, action, state_diff, previous):
-        self.send_params()
+        yield self.send_params()
 
     @mutates('obj_state')
     async def delete(self, delete_obj=True):

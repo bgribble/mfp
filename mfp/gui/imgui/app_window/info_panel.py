@@ -89,7 +89,7 @@ def render_code_editors(app_window):
             if imgui.begin_menu("File"):
                 selected, _ = imgui.menu_item("Save", "", False)
                 if selected:
-                    new_val = target.code or {}
+                    new_val = {**target.code} if target.code else {}
                     new_val["body"] = editor.get_text()
                     new_val["lang"] = "python"
                     new_val["errorinfo"] = None
