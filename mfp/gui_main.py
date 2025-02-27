@@ -22,6 +22,7 @@ from mfp.utils import AsyncTaskManager
 from mfp.gui import modes
 from mfp.gui.colordb import ColorDB, RGBAColor
 from mfp.gui.param_info import ParamInfo, ListOfInt
+from mfp.interpreter import InterpreterResponse
 from .singleton import Singleton
 from .mfp_command import MFPCommand
 from .gui_command import GUICommand
