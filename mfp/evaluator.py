@@ -165,4 +165,4 @@ class Evaluator (object):
         self.local_names["__name__"] = os.path.basename(filename)
         fileobj = open(filename, "r")
         if fileobj:
-            exec(fileobj, self.global_names)
+            exec(fileobj.read(), self.global_names)
