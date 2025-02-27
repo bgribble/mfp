@@ -204,7 +204,7 @@ async def move_selected(self, dx, dy):
 
 @extends(AppWindow)
 async def delete_selected(self):
-    olist = self.selected
+    olist = [*self.selected]
     await self.unselect_all()
     for o in olist:
         if o.editable:
