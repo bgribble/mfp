@@ -1,50 +1,65 @@
-name: Make release
-run-name: Make release
+name: Create release
+run-name: Create release
 on: [workflow_dispatch]
 jobs:
-  build_release:
+
+  # First, get the version we are releasing
+  make_release:
     runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{steps.version.outputs.VERSION}}
+      upload_url: ${{steps.create_release.outputs.upload_url}}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        # This is the version of the action for setting up Python, not the Python version.
-        uses: actions/setup-python@v5
-        with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: '3.x'
-          # Optional - x64 or x86 architecture, defaults to x64
-          architecture: 'x64'
-      # Set up the build environment 
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
-      - name: Update apt cache
-        run: sudo apt update
-      - name: Install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel
-      - name: Install dev files
-        run: sudo apt install libglib2.0-dev cmake libserd-dev libjson-glib-dev libprotobuf-c-dev libjack-jackd2-dev liblo-dev lv2-dev libasound2-dev ladspa-sdk
-      # Configure and build the binary artifacts
-      - name: Configure MFP 
-        run: ./waf configure
-      - name: Build MFP
-        run: ./waf build
-      - name: Save built archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: mfp_build_release
-          path: wafbuild/mfp_*.tar.gz
-      # get the MFP version for the release
-      - name: version
-        run: python ./setup.py --version
+      # get the version for the release
+      - name: Version
+        run: python ./setup.py --version >> "$GITHUB_OUTPUT"
         id: version
-      - name: release
+      - name: Release
         uses: actions/create-release@v1
         id: create_release
         with:
           draft: false
           prerelease: false
-          release_name: mfp ${{ steps.version.outputs.version }}
-          tag_name: v${{ steps.version.outputs.version }}
-          body_path: doc/ANNOUNCE-${{ steps.version.outputs.version }}.md
+          release_name: mfp ${{ steps.version.outputs.VERSION }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          body_path: doc/ANNOUNCE-${{ steps.version.outputs.VERSION }}.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+  build_matrix:
+    runs-on: ubuntu-latest
+    needs: make_release
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: 'x64'
+      - name: Get short Python version
+        run: echo PYV=cp${{matrix.python_version}} | sed -e 's/\.//' >> $GITHUB_ENV
+      - name: Get release asset filename
+        run: echo RELEASE_FILE=mfp_${{ needs.make_release.outputs.VERSION }}_${{ env.PYV }}-${{ env.PYV }}_linux_x86_64.tar.gz >> $GITHUB_ENV
+      - name: Update apt cache
+        run: sudo apt update
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: Install dev files
+        run: sudo apt install gcc-14 libglib2.0-dev cmake libserd-dev libjson-glib-dev libprotobuf-c-dev libjack-jackd2-dev liblo-dev lv2-dev libasound2-dev ladspa-sdk faust faust-common libfaust2t64 llvm-dev libllvmlibc-19-dev libpolly-18-dev
+      - name: Configure MFP
+        run: CC=gcc-14 ./waf configure
+      - name: Build MFP
+        run: ./waf -v -v build
+      - name: Save built archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.make_release.outputs.upload_url }}
+          asset_name: ${{ env.RELEASE_FILE }}
+          asset_path: wafbuild/${{ env.RELEASE_FILE }}
+          asset_content_type: application/gzip
