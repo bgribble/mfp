@@ -96,6 +96,7 @@ class Buffer(Processor):
 
     async def _init_file_read(self):
         ready = asyncio.Event()
+        loop = asyncio.get_event_loop()
 
         def _read_helper():
             import soundfile as sf
@@ -113,7 +114,7 @@ class Buffer(Processor):
 
             self.file_len = self.file_data.shape[0]
             self.file_ready = True
-            ready.set()
+            loop.call_soon_threadsafe(ready.set)
 
         thread = Thread(target=_read_helper)
         thread.start()

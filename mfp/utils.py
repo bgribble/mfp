@@ -216,7 +216,6 @@ class QuittableThread(Thread):
                     t for t in QuittableThread._all_threads
                     if t.is_alive()
                 ]
-
                 if len(living_threads) > 0:
                     next_victim = living_threads[0]
                 else:
@@ -225,10 +224,11 @@ class QuittableThread(Thread):
     @classmethod
     async def await_all(klass):
         all_dead = asyncio.Event()
+        loop = asyncio.get_event_loop()
 
         def _killer_thread():
             klass.wait_for_all()
-            all_dead.set()
+            loop.call_soon_threadsafe(all_dead.set)
 
         t = Thread(target=_killer_thread)
         t.start()

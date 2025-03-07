@@ -343,14 +343,13 @@ async def main():
             log.log_force_console = True
             await app.finish()
 
-        for thread in app.leftover_threads:
+        for thread in [*app.leftover_threads]:
             thread.join()
 
     if app.debug:
         import yappi
         yappi.stop()
         yappi.convert2pstats(yappi.get_func_stats()).dump_stats('mfp-main-funcstats.pstats')
-
 
 def main_sync_wrapper():
     import asyncio
