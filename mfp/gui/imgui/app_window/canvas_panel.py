@@ -101,6 +101,9 @@ def render_tile(app_window, patch):
             app_window.selected_patch = patch
             app_window.selected_layer = patch.selected_layer
 
+    if app_window.selected_window == "canvas":
+        imgui.set_next_window_focus()
+
     imgui.begin(
         f"{patch.obj_name}{layer_name} ({tile.page_id}.{tile.tile_id})",
         flags=(

@@ -33,13 +33,8 @@ any_params = [
 TAB_PADDING_X = 12
 TAB_PADDING_Y = 4
 
-open_code_editors = {}
-focused_editor = None
 
-
-def open_code_editor(app_window, param_name, param_type, param_value, target):
-    global focused_editor
-
+def render_code_editor(app_window, param_name, param_type, param_value, target):
     def _ensure_editor():
         editor = target.imgui_code_editor
         if not editor:
@@ -52,79 +47,29 @@ def open_code_editor(app_window, param_name, param_type, param_value, target):
             editor.set_language_definition(ed.TextEditor.LanguageDefinition.python())
 
         return editor
+
+    if target.name:
+        label = f"{target.obj_type} {target.name}"
+    else:
+        label = f"{target.obj_type} {id(target)}"
+
     editor = _ensure_editor()
-    open_code_editors[target] = (editor, param_name)
-    focused_editor = target
+    imgui.set_next_window_size(
+        (app_window.info_panel_width - 24, 350)
+    )
+    editor.render(label)
 
+    if imgui.button("Save"):
+        new_val = {**target.code} if target.code else {}
+        new_val["body"] = editor.get_text()
+        new_val["lang"] = "python"
+        new_val["errorinfo"] = None
+        MFPGUI().async_task(target.dispatch_setter(param_name, new_val))
+    imgui.same_line()
 
-def render_code_editors(app_window):
-    global focused_editor
-    to_close = []
-    for target, info in open_code_editors.items():
-        editor, param_name = info
-        if target.name:
-            label = f"{target.obj_type} {target.name}"
-        else:
-            label = f"{target.obj_type} {id(target)}"
-
-        imgui.set_next_window_size(
-            (350, 400),
-            cond=imgui.Cond_.once
-        )
-        if focused_editor == target:
-            imgui.set_next_window_focus()
-            focused_editor = None
-
-        _, window_open = imgui.begin(
-            f"{label}##code_editor",
-            True,
-            imgui.WindowFlags_.menu_bar
-        )
-        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-            app_window.selected_window = "editor"
-
-        imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 4))
-        imgui.push_style_var(imgui.StyleVar_.item_spacing, (8.0, 4.0))
-        if imgui.begin_menu_bar():
-            if imgui.begin_menu("File"):
-                selected, _ = imgui.menu_item("Save", "", False)
-                if selected:
-                    new_val = {**target.code} if target.code else {}
-                    new_val["body"] = editor.get_text()
-                    new_val["lang"] = "python"
-                    new_val["errorinfo"] = None
-                    MFPGUI().async_task(target.dispatch_setter(param_name, new_val))
-                selected, _ = imgui.menu_item("Close", "", False)
-                if selected:
-                    window_open = False
-
-                imgui.end_menu()
-            if imgui.begin_menu("Edit"):
-                imgui.menu_item("Undo", "", False)
-                imgui.menu_item("Redo", "", False)
-                imgui.end_menu()
-            if imgui.begin_menu("View"):
-                imgui.end_menu()
-            imgui.end_menu_bar()
-        imgui.pop_style_var()
-        imgui.pop_style_var()
-
-        if target.code and "errorinfo" in target.code and target.code["errorinfo"]:
-            errinfo = target.code["errorinfo"]
-            editor.set_error_markers(
-                { errinfo["lineno"]: errinfo["message"]}
-            )
-        else:
-            editor.set_error_markers({})
-
-        editor.render(label)
-        imgui.end()
-
-        if not window_open:
-            to_close.append(target)
-
-    for target in to_close:
-        del open_code_editors[target]
+    if imgui.button("Revert"):
+        prev_code = target.code or {}
+        editor.set_text(prev_code.get("body", ""))
 
 
 # info panel is the layer/patch list and the object inspector
@@ -506,9 +451,7 @@ def render_param(
                     show_input = False
 
             if show_input:
-                clicked = imgui.button("Edit")
-                if clicked:
-                    open_code_editor(app_window, param_name, param_type, param_value, target)
+                render_code_editor(app_window, param_name, param_type, param_value, target)
             imgui.end_group()
             imgui.pop_style_var()
             imgui.pop_id()
