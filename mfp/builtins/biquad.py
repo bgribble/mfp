@@ -123,7 +123,7 @@ class BiquadWrapper(Processor):
 
 
 def mk_biquad(thunk, filter_name):
-    def factory(init_type, init_args, patch, scope, name):
+    def factory(init_type, init_args, patch, scope, name, defs=None):
         bq = BiquadWrapper(thunk, init_type, init_args, patch, scope, name, defs)
         bq.doc_tooltip_obj = BiquadWrapper.doc_tooltip_obj % filter_name
         return bq
