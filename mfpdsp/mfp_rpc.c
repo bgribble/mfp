@@ -124,8 +124,13 @@ extract_param_value(mfp_processor * proc, const char * param_name, Carp__PythonV
             break;
 
         case PARAMTYPE_STRING:
-            strval = param_value->_string;
-            rval = (gpointer)g_strdup(strval);
+            if (param_value == NULL) {
+                rval = NULL;
+            }
+            else {
+                strval = param_value->_string;
+                rval = (gpointer)g_strdup(strval);
+            }
             break;
 
         case PARAMTYPE_FLTARRAY:
@@ -200,7 +205,6 @@ dispatch_create(Carp__PythonArray * args, Carp__PythonDict * kwargs, Carp__Pytho
                 createprms->items[prm]->value,
                 (gpointer)proc
             );
-
         }
         response->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__INT;
         response->_int = proc->rpc_id;

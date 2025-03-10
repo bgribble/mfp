@@ -589,6 +589,7 @@ class Processor:
     async def delete(self):
         from .mfp_app import MFPApp
         from .patch import Patch
+
         if hasattr(self, "patch") and self.patch is not None:
             self.patch.unbind(self.name, self.scope)
             self.patch.remove(self)
@@ -628,8 +629,7 @@ class Processor:
             self.midi_cbid = None
 
         if hasattr(self, "dsp_obj") and self.dsp_obj is not None:
-            if self.patch and self.patch.context is not None:
-                await self.dsp_obj.delete()
+            await self.dsp_obj.delete()
             self.dsp_obj = None
 
         MFPApp().forget(self)

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <glib.h>
 #include <ladspa.h>
@@ -39,8 +40,9 @@ ladspa_setup(mfp_processor * proc)
     int signal_ins=0, signal_outs=0;
     void * dllib;
 
-    if (p_lib_name == NULL)
+    if (p_lib_name == NULL || !strlen(p_lib_name)) {
         return;
+    }
 
     if (p_lib_index == NULL) {
         lib_index = 0;
@@ -52,6 +54,12 @@ ladspa_setup(mfp_processor * proc)
     d->lib_name = g_strdup((char *)p_lib_name);
     dllib = dlopen((char *)p_lib_name, RTLD_NOW);
     d->lib_dlptr = dllib;
+
+    if (d->lib_dlptr == NULL) {
+        mfp_proc_error(proc, "Cannot dlopen file");
+        mfp_log_error("Can't open file '%s'", d->lib_name);
+        return;
+    }
 
     /* get the plugin descriptor */
     descrip_func = dlsym(dllib, "ladspa_descriptor");
@@ -197,7 +205,7 @@ config(mfp_processor * proc)
     float newval;
 
     /* copy plugin control values */
-    if (control_p != NULL) {
+    if (d->plug_control != NULL && control_p != NULL) {
         for (portnum=0; portnum < ((GArray *)control_p)->len; portnum++) {
             newval =  g_array_index((GArray *)control_p, double, portnum);
             d->plug_control[portnum] = newval;
@@ -205,7 +213,7 @@ config(mfp_processor * proc)
     }
 
     /* activate the plugin if necessary */
-    if (d->plug_activated != 1) {
+    if (d->plug_descrip != NULL && d->plug_activated != 1) {
         if (d->plug_descrip->activate != NULL)
             d->plug_descrip->activate(d->plug_handle);
         d->plug_activated = 1;

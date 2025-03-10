@@ -18,7 +18,7 @@ class Plugin(Processor):
         extra=defs or {}
         initargs, kwargs = patch.parse_args(init_args, **extra)
 
-        self.lib_name = None
+        self.lib_name = ""
         self.lib_index = None
         self.plug_info = None
         self.plug_name = None
@@ -32,19 +32,21 @@ class Plugin(Processor):
         if len(initargs):
             self.init_plugin(initargs[0])
 
-        Processor.__init__(self, self.plug_inlets, self.plug_outlets, init_type, init_args,
-                           patch, scope, name)
+        Processor.__init__(
+            self, self.plug_inlets, self.plug_outlets, init_type, init_args,
+            patch, scope, name
+        )
         self.hot_inlets = list(range(self.plug_inlets))
 
     async def setup(self):
         await self.dsp_init(
             "ladspa~",
-            lib_name=self.lib_name, lib_index=self.lib_index,
+            lib_name=self.lib_name,
+            lib_index=self.lib_index,
             plug_control=self.plug_control
         )
 
     def init_plugin(self, pname):
-
         pinfo = MFPApp().pluginfo.find(pname)
         self.plug_info = pinfo
         self.lib_name = pinfo.get("lib_name")
