@@ -139,12 +139,12 @@ class PatchEditMode (InputMode):
         cls.bind(
             "layer-move-up", lambda mode: mode.window.layer_move_up(),
             helptext="Move current layer up",
-            keysym="C-U", menupath="Layer > Move layer up"
+            keysym="A-UP", menupath="Layer > Move layer up"
         )
         cls.bind(
             "layer-move-down", lambda mode: mode.window.layer_move_down(),
             helptext="Move current layer down",
-            keysym="C-D", menupath="Layer > Move layer down"
+            keysym="A-DOWN", menupath="Layer > Move layer down"
         )
 
         cls.bind(

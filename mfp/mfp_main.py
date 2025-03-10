@@ -169,6 +169,8 @@ async def main():
                         help="Do not run onload/loadbang functions")
     parser.add_argument("--help-builtins", action="store_true",
                         help="Display help on builtin objects and exit")
+    parser.add_argument("--help-bindings", action="store_true",
+                        help="Display help on keyboard bindings and exit")
     parser.add_argument("-s", "--socket-path", default="/tmp/mfp_rpcsock",
                         help="Path to create Unix-domain socket for RPC")
     parser.add_argument("-d", "--debug", action="store_true",
@@ -193,8 +195,10 @@ async def main():
     app = MFPApp()
 
     # configure some things from command line
-    app.no_gui = args.get("no_gui") or args.get("help_builtins") or args.get("help")
-    app.no_dsp = args.get("no_dsp") or args.get("help_builtins") or args.get("help")
+    help_only = args.get("help_builtins") or args.get("help") or args.get("help_bindings")
+
+    app.no_gui = args.get("no_gui") or help_only
+    app.no_dsp = args.get("no_dsp") or help_only
     app.gui_backend = args.get("gui_backend")
     app.no_default = args.get("no_default")
     app.no_restart = args.get("no_restart")
@@ -314,6 +318,16 @@ async def main():
                     print("(caught exception trying to create %s)" % name, e)
                     traceback.print_exc()
                     print("%-12s : No documentation found" % ("[%s]" % name,))
+        await app.finish()
+    elif args.get("help_bindings"):
+        from mfp.gui.input_mode import InputMode
+        from mfp.gui import modes
+        log.log_debug = None
+        log.log_file = None
+        await app.open_file(None)
+        for mode_name, mode in sorted(InputMode._registry.items()):
+            for keysym, binding in sorted(mode._bindings.items()):
+                print(f"   {mode_name} {binding.label} {keysym}")
         await app.finish()
     else:
         patchfiles = args.get("patchfile")

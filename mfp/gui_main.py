@@ -19,7 +19,6 @@ from flopsy import Store
 from mfp import log
 from mfp.utils import AsyncTaskManager
 
-from mfp.gui import modes
 from mfp.gui.colordb import ColorDB, RGBAColor
 from mfp.gui.param_info import ParamInfo, ListOfInt
 from mfp.interpreter import InterpreterResponse
@@ -264,6 +263,7 @@ def setup_default_colors_light():
 
 
 async def main(cmdline):
+    from mfp.gui import modes
     from mfp.gui.app_window import AppWindow
     socketpath = cmdline.get("socketpath")
     debug = cmdline.get('debug')
