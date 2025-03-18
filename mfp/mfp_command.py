@@ -292,6 +292,9 @@ class MFPCommand:
     async def has_unsaved_changes(self, obj_id):
         from .mfp_app import MFPApp
         patch = MFPApp().recall(obj_id)
+
+        if patch is None:
+            return False
         return await patch.has_unsaved_changes()
 
     @noresp

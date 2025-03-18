@@ -633,7 +633,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.canvas_tile_page = tile.page_id
         else:
             tile = self.canvas_tile_manager.find_tile(
-                page_id=self.canvas_tile_page,
+                page_id=self.canvas_tile_page or 0,
             )
             tile.in_use = True
             patch.display_info = tile
@@ -641,19 +641,24 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.viewport_pos_set = True
         super().add_patch(patch)
 
-    async def patch_close(self, patch=None):
+    async def patch_close(self, patch=None, delete_obj=True, allow_quit=True):
         if patch is None:
             patch = self.selected_patch
+        rv = await super().patch_close(patch, delete_obj=delete_obj, allow_quit=allow_quit)
         tile = patch.display_info
-        rv = await super().patch_close(patch)
-        self.canvas_tile_manager.remove_tile(tile)
+        if tile:
+            patch.display_info = None
+            self.canvas_tile_manager.remove_tile(tile)
         return rv
 
     def patch_select_next(self):
+        if not self.patches:
+            return None
+
         patch = None
-        if not self.selected_patch:
+        if len(self.patches) == 1 or not self.selected_patch:
             patch = self.patches[0]
-        else:
+        elif self.selected_patch:
             page_id = self.selected_patch.display_info.page_id
             page_patches = [
                 p
@@ -663,10 +668,13 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             if len(page_patches) > 0:
                 patch = page_patches[0]
 
-        if not patch:
+        if not patch and self.selected_patch in self.patches:
             pnum = self.patches.index(self.selected_patch)
             pnum = (pnum + 1) % len(self.patches)
             patch = self.patches[pnum]
+
+        if not patch:
+            return
 
         if patch.selected_layer:
             layer = patch.selected_layer

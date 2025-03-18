@@ -114,11 +114,12 @@ class MFPApp (Singleton, SignalMixin):
             label="MFP Master",
         )
         self.rpc_host.on("disconnect", self.on_host_disconnect)
-        self.rpc_host.on("connect", self.on_host_connect)
+        self.rpc_host.on("accept", self.on_host_connect)
         self.rpc_host.on("exports", self.on_host_exports)
+        self.rpc_host.on("debug", lambda event, msg: log.debug(msg))
 
-        def _exception(exc, tbinfo, traceback):
-            log.error(f"[carp] Exception: {tbinfo}")
+        def _exception(exc, tbinfo, traceback=""):
+            log.error(f"[rpc] Exception: {tbinfo}")
             for ll in traceback.split('\n'):
                 log.error(ll)
 
@@ -137,8 +138,6 @@ class MFPApp (Singleton, SignalMixin):
             guicmd = ["mfpgui", "-s", self.socket_path, "-l", logstart, '--backend', self.gui_backend]
             if self.debug:
                 guicmd.append('--debug')
-
-            log.debug(f"Launching GUI: {guicmd}")
 
             self.gui_process = AsyncExecMonitor(
                 *guicmd,
@@ -260,7 +259,7 @@ class MFPApp (Singleton, SignalMixin):
             Patch.default_context = DSPContext.lookup(
                 self.rpc_host.services_remote["DSPObject"][0], 0
             )
-            log.debug("DSP backend started")
+            log.debug(f"DSP backend started, context={Patch.default_context}")
 
     def remember(self, obj):
         oi = self.next_obj_id
@@ -271,7 +270,7 @@ class MFPApp (Singleton, SignalMixin):
         return oi
 
     def recall(self, obj_id):
-        return self.objects.get(obj_id, self)
+        return self.objects.get(obj_id, None)
 
     def forget(self, obj):
         try:
@@ -289,11 +288,12 @@ class MFPApp (Singleton, SignalMixin):
             context.input_latency, context.output_latency = metadata
 
     async def on_host_connect(self, event, peer_id):
-        log.debug(f"Got manage callback for {peer_id} {event}")
+        log.debug(f"Got connect callback for {peer_id} {event}")
 
     async def on_host_disconnect(self, event, peer_id):
         # if we lost a DSP host, try to restart
-        log.debug(f"Got unmanage callback for {peer_id}")
+        log.debug(f"Got disconnect callback for {peer_id}")
+
         dead_patches = [
             p for p in self.patches.values()
             if p.context is None or p.context.node_id == peer_id
@@ -302,7 +302,7 @@ class MFPApp (Singleton, SignalMixin):
             Patch.default_context and (peer_id == Patch.default_context.node_id)
             and not self.no_restart
         ):
-            log.warning("Relaunching default backend (id=%s)" % peer_id)
+            log.warning("Relaunching default backend (old id=%s)" % peer_id)
             patch_json = []
 
             for p in dead_patches:
@@ -316,6 +316,7 @@ class MFPApp (Singleton, SignalMixin):
 
             # delete and restart dsp backend
             await self.start_dsp()
+            log.debug(f"relaunch: {len(patch_json)} patches to recreate")
 
             # recreate patches
             for jdata in patch_json:
@@ -324,8 +325,10 @@ class MFPApp (Singleton, SignalMixin):
                 patch = Patch(name, '', None, self.app_scope, name, Patch.default_context)
                 self.patches[patch.name] = patch
 
-                # FIXME -- need to call onload
                 await patch.json_deserialize(jdata)
+                patch.gui_params["dsp_context"] = patch.context.context_name
+                if not MFPApp().no_onload:
+                    await patch._run_onload(list(patch.objects.values()))
                 await patch.create_gui()
 
         else:
@@ -573,35 +576,33 @@ class MFPApp (Singleton, SignalMixin):
             self.console.write_cb = None
 
         Patch.default_context = None
-        if self.rpc_host:
-            log.debug("MFPApp.finish: reaping RPC host...")
-            pp = self.rpc_host
-            self.rpc_host = None
-            await pp.stop()
-
         if self.dsp_process:
-            log.debug("MFPApp.finish: reaping DSP process...")
             pp = self.dsp_process
             self.dsp_process = None
             await pp.cancel()
 
         if self.gui_process:
-            log.debug("MFPApp.finish: reaping GUI process...")
             pp = self.gui_process
             self.gui_process = None
             await pp.cancel()
 
-        log.debug("MFPApp.finish: reaping threads...")
-        QuittableThread.finish_all()
+        if self.rpc_host:
+            pp = self.rpc_host
+            self.rpc_host = None
+            await pp.stop()
 
-        log.debug("MFPApp.finish: all children reaped, good-bye!")
+        if QuittableThread._all_threads:
+            QuittableThread.finish_all()
+
+        if self.async_task:
+            await self.async_task.finish()
+            self.async_task = None
 
     async def finish_soon(self):
         import asyncio
 
         await asyncio.sleep(0.5)
         await self.finish()
-        log.debug("MFPApp.finish_soon: done with app.finish")
         return True
 
     def send(self, msg, port):

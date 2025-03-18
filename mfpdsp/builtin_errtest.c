@@ -14,43 +14,42 @@ typedef struct {
 
 #define SEGFAULT() *(int *)0 = 0xdeadbeef
 
-static int 
-process(mfp_processor * proc) 
+static int
+process(mfp_processor * proc)
 {
     errtest_data * d = (errtest_data *)proc->data;
 
     if (d->err_process) {
-        printf("errtest~: About to segfault in process(), PID=%d\n", getpid());
+        mfp_log_debug("errtest~: About to intentionally segfault in process(), PID=%d\n", getpid());
         SEGFAULT();
     }
     return 0;
 }
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     errtest_data * d = (errtest_data *)g_malloc0(sizeof(errtest_data));
-    proc->data = (void *)d; 
-    
+    proc->data = (void *)d;
+
     return;
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     errtest_data * d = (errtest_data *)proc->data;
 
     if (d->err_destroy) {
-        printf("errtest~: About to segfault in destroy(), PID=%d\n", getpid());
+        mfp_log_debug("errtest~: About to intentionally segfault in destroy(), PID=%d\n", getpid());
         SEGFAULT();
     }
     return;
 }
 
 static int
-config(mfp_processor * proc) 
+config(mfp_processor * proc)
 {
-    printf("mfpdsp: errtest~ config enter\n");
     errtest_data * d = (errtest_data *)(proc->data);
     gpointer err_config = g_hash_table_lookup(proc->params, "err_config");
     gpointer err_process = g_hash_table_lookup(proc->params, "err_process");
@@ -58,8 +57,8 @@ config(mfp_processor * proc)
     int errconf;
 
     if (err_config != NULL) {
-        if ((int)(*(double *)err_config)) { 
-            printf("errtest~: About to segfault in config(), PID=%d\n", getpid());
+        if ((int)(*(double *)err_config)) {
+            mfp_log_debug("errtest~: About to intentionally segfault in config(), PID=%d\n", getpid());
             SEGFAULT();
         }
     }
@@ -75,7 +74,7 @@ config(mfp_processor * proc)
     return 1;
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_errtest(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
     p->name = strdup("errtest~");

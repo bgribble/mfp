@@ -153,8 +153,10 @@ class Processor:
         pass
 
     def info(self):
-        log.debug("Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
-                  % (self.obj_id, self.name, self.init_type, self.init_args))
+        log.debug(
+            "Object info: obj_id=%d, name=%s, init_type=%s, init_args=%s"
+            % (self.obj_id, self.name, self.init_type, self.init_args)
+        )
         return True
 
     def tooltip_info(self, port_dir=None, port_num=None, details=False):
@@ -590,6 +592,8 @@ class Processor:
         from .mfp_app import MFPApp
         from .patch import Patch
 
+        has_dsp_context = self.patch and (self.patch.context is not None)
+
         if hasattr(self, "patch") and self.patch is not None:
             self.patch.unbind(self.name, self.scope)
             self.patch.remove(self)
@@ -628,9 +632,9 @@ class Processor:
             MFPApp().midi_mgr.unregister(self.midi_cbid)
             self.midi_cbid = None
 
-        if hasattr(self, "dsp_obj") and self.dsp_obj is not None:
+        if hasattr(self, "dsp_obj") and self.dsp_obj is not None and has_dsp_context:
             await self.dsp_obj.delete()
-            self.dsp_obj = None
+        self.dsp_obj = None
 
         MFPApp().forget(self)
         self.status = self.DELETED
@@ -1080,6 +1084,8 @@ class Processor:
         from .mfp_app import MFPApp
         parent_id = self.patch.obj_id if self.patch is not None else None
 
+        self.gui_created = True
+
         for param, value in kwargs.items():
             self.gui_params[param] = value
 
@@ -1107,7 +1113,6 @@ class Processor:
             self.init_type, self.init_args, self.obj_id,
             parent_id, self.gui_params
         )
-        self.gui_created = True
 
     async def delete_gui(self):
         from .mfp_app import MFPApp

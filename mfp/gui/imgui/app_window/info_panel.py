@@ -528,7 +528,7 @@ def render_patch_tab(app_window):
     patch = app_window.selected_patch
     layer = app_window.selected_layer
 
-    if not patch or not layer:
+    if not patch or not layer or not patch.display_info:
         return
 
     ######################

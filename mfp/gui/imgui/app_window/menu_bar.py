@@ -209,6 +209,8 @@ def render(app_window):
             imgui.separator()
             imgui.dummy([1, 2])
             for patch in app_window.patches:
+                if not patch.display_info:
+                    continue
                 imgui.push_id(str(id(patch)))
                 patch_selected, _ = imgui.menu_item(
                     patch.obj_name,

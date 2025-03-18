@@ -414,7 +414,7 @@ def render(app_window):
 
     displayed_patches = [
         p for p in app_window.patches
-        if p.display_info.page_id == app_window.canvas_tile_page
+        if p.display_info and p.display_info.page_id == app_window.canvas_tile_page
     ]
     if len(displayed_patches) == 0:
         allowed_pages = list(reversed(sorted(list(set(

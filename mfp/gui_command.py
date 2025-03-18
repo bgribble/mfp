@@ -212,7 +212,7 @@ class GUICommand:
 
         obj = MFPGUI().recall(obj_id)
         if isinstance(obj, PatchDisplay):
-            await MFPGUI().appwin.patch_close(obj)
+            await MFPGUI().appwin.patch_close(obj, delete_obj=False, allow_quit=False)
         elif obj is not None:
             await obj.delete(delete_obj=False)
 

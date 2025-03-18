@@ -38,13 +38,13 @@ class TileManager:
         self.next_tile_id = 0
 
     def find_tile(self, **kwargs):
-        if kwargs.get("new_page"):
+        if kwargs.get("new_page") or not self.tiles:
             page_id = self.next_page_id
             tile_id = self.next_tile_id
             self.next_page_id += 1
             self.next_tile_id += 1
             tile = Tile(
-                title=kwargs.get("title", "Mew tile"),
+                title=kwargs.get("title", "New tile"),
                 tile_id=tile_id,
                 page_id=page_id,
                 width=self.total_width,
@@ -265,9 +265,11 @@ class TileManager:
 
         tile.page_id = None
         tile.neighbors = {}
+        self.tiles = [t for t in self.tiles if t != tile]
 
     def convert_to_page(self, tile):
         self.remove_tile(tile)
+        self.add_tile(tile)
         tile.page_id = self.next_page_id
         self.next_page_id += 1
         self.maximize_tile(tile)

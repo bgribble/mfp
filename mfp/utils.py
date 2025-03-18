@@ -416,6 +416,17 @@ class AsyncTaskManager:
         else:
             return coro
 
+    async def finish(self):
+        tasks = self.asyncio_tasks.values()
+        if not tasks:
+            return
+
+        done, pending = await asyncio.wait(tasks, timeout=1, return_when=asyncio.FIRST_EXCEPTION)
+        for task in done:
+            if task.exception() is not None:
+                log.error(f"Task exited with exception: {task} {task.exception()}")
+        for task in pending:
+            task.cancel()
 
 class AsyncExecMonitor:
     '''
@@ -442,6 +453,7 @@ class AsyncExecMonitor:
 
     async def start(self):
         import shutil
+        from mfp import log
 
         execfile = shutil.which(self.exec_file)
         self.callback = log_monitor
@@ -457,10 +469,10 @@ class AsyncExecMonitor:
         while True:
             try:
                 nextline = await self.process.stdout.readline()
-                nextline = nextline.decode().strip()
-
                 if not nextline:
-                    continue
+                    break
+
+                nextline = nextline.decode().strip()
 
                 cb_return = self.callback(nextline, self.log_module, self.log_raw)
                 if inspect.isawaitable(cb_return):
@@ -470,11 +482,14 @@ class AsyncExecMonitor:
                 break
 
             except Exception as e:
-                log.debug("AsyncExecMonitor: exiting with error", e)
+                print("AsyncExecMonitor: exiting with error", e)
                 break
 
     async def cancel(self):
-        self.process.terminate()
-        self.monitor_task.cancel()
-        await self.process.wait()
-        await self.monitor_task
+        try:
+            self.monitor_task.cancel()
+            self.process.terminate()
+            await self.process.wait()
+            await self.monitor_task
+        except:
+            pass

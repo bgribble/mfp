@@ -189,6 +189,7 @@ class AppWindow (SignalMixin):
         self.selected = []
 
         self.load_in_progress = 0
+        self.quit_in_progress = False
         self.close_in_progress = False
         self.last_activity_time = None
         self.dsp_info = {}
@@ -369,22 +370,27 @@ class AppWindow (SignalMixin):
 
     async def quit(self, *rest):
         from .patch_display import PatchDisplay
-        log.debug("quit: received command from GUI or WM")
+        if self.quit_in_progress:
+            return
 
+        log.debug("quit: received command from GUI or WM")
+        self.quit_in_progress = True
         self.close_in_progress = True
         try:
             to_delete = [p for p in self.patches if p.deletable]
             for p in to_delete:
-                await p.delete()
+                await self.patch_close(p, allow_quit=False)
             allpatches = await MFPGUI().mfp.open_patches()
             guipatches = [p.obj_id for p in self.objects if isinstance(p, PatchDisplay)]
         except Exception as e:
             log.debug(f"Error while quitting: {e}")
             raise
+
         for a in allpatches:
             if a not in guipatches:
                 log.debug("Some patches cannot be deleted, not quitting")
                 log.debug(f"{allpatches} {guipatches}")
+                self.close_in_progress = False
                 return False
 
         if hasattr(self, 'console_manager') and self.console_manager:
@@ -392,6 +398,7 @@ class AppWindow (SignalMixin):
 
         await MFPGUI().mfp.quit()
         self.close_in_progress = False
+        self.quit_in_progress = False
         log.debug("quit: shutdown complete")
         return True
 

@@ -284,12 +284,15 @@ async def main(cmdline):
     host = Host(
         label="MFP GUI",
     )
-    def _exception(exc, tbinfo, traceback):
-        log.error(f"[carp] Exception: {tbinfo}")
-        for ll in traceback.split('\n'):
-            log.error(ll)
 
-    host.on("exception", _exception)
+    host.on(
+        "exception",
+        lambda exc, tbinfo: log.error(f"[rpc] Exception: {tbinfo}")
+    )
+    host.on(
+        "debug",
+        lambda event, msg: log.debug(f"[rpc] {msg}")
+    )
 
     await host.connect(channel)
 

@@ -576,9 +576,6 @@ class Patch(Processor):
         if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:
             del MFPApp().patches[self.name]
 
-        if self.gui_created:
-            await self.delete_gui()
-
         # first pass: everything but inlets/outlets
         to_delete = self.objects.values()
         for obj in list(to_delete):
@@ -589,6 +586,9 @@ class Patch(Processor):
             self.step_debugger = None
 
         await Processor.delete(self)
+
+        if self.gui_created:
+            await self.delete_gui()
 
 # load extension methods
 from . import patch_json  # noqa

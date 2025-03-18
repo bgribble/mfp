@@ -33,12 +33,19 @@ def patch_select_prev(self):
 
 @extends(AppWindow)
 def patch_select_next(self):
-    if not self.selected_patch:
+    if not self.patches:
+        return None
+
+    patch = None
+    if len(self.patches) == 1 or not self.selected_patch:
         patch = self.patches[0]
-    else:
+    elif self.selected_patch in self.patches:
         pnum = self.patches.index(self.selected_patch)
         pnum = (pnum + 1) % len(self.patches)
         patch = self.patches[pnum]
+
+    if not patch:
+        return
 
     if patch.selected_layer:
         layer = patch.selected_layer
@@ -48,22 +55,21 @@ def patch_select_next(self):
 
 
 @extends(AppWindow)
-async def patch_close(self, patch=None):
+async def patch_close(self, patch=None, delete_obj=True, allow_quit=True):
     if patch:
         p = patch
     else:
         p = self.selected_patch
-    if not p.obj_id:
-        return
 
     if p and p.deletable:
         self.patch_select_next()
         if p in self.patches:
             self.patches.remove(p)
-        await p.delete()
+        await p.delete(delete_obj=delete_obj)
     else:
         log.debug("Cannot close window. Close UI via plugin host Edit button")
-    if not len(self.patches) > 0:
+
+    if allow_quit and not len(self.patches) > 0:
         await self.quit()
 
 

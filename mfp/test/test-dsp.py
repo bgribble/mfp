@@ -21,6 +21,7 @@ class DSPObjectTests (IsolatedAsyncioTestCase):
         MFPApp().no_restart = True
         MFPApp().next_obj_id = 0
         MFPApp().objects = {}
+
         log.log_quiet = True
         log.log_thread = threading.get_ident()
         log.log_loop = asyncio.get_event_loop()

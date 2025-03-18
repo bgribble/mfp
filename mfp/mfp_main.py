@@ -353,8 +353,9 @@ async def main():
 
         try:
             await QuittableThread.await_all()
-        except (KeyboardInterrupt, SystemExit):
+        except (KeyboardInterrupt, SystemExit) as e:
             log.log_force_console = True
+            log.debug(f"Shutting down, got {type(e)}")
             await app.finish()
 
         for thread in [*app.leftover_threads]:
