@@ -474,7 +474,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 self.transform_out = md_text
 
             imgui.dummy((1, 3))
-            markdown.render(md_text)
+            if self.markdown_text or self.text:
+                markdown.render(md_text)
 
             # check for stray fonts on the stack and get rid of them
             context = imgui.get_current_context()
@@ -492,7 +493,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             else:
                 self.wrapped_text = self.text
 
-            if label_text:
+            if self.text:
                 imgui.text(label_text + extra_bit)
 
             # text bounding box does not account for descenders

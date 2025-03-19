@@ -16,7 +16,7 @@ from .backend_interfaces import BackendInterface
 from .base_element import BaseElement
 from .modes.clickable import ClickableControlMode
 from .modes.label_edit import LabelEditMode
-from .param_info import ParamInfo
+from .param_info import ParamInfo, PyLiteral
 from ..gui_main import MFPGUI
 from ..bang import Bang
 
@@ -55,6 +55,7 @@ class ButtonElement (BaseElement):
     store_attrs = {
         **BaseElement.store_attrs, **extra_params
     }
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 
@@ -115,10 +116,10 @@ class ButtonElement (BaseElement):
         if not aborted:
             self.label_text = new_text
             self.send_params()
-            if self.indicator:
+            if self.indicator and self.label_text:
                 self.label.set_markup("<b>%s</b>" % self.label_text)
             else:
-                self.label.set_markup(self.label_text)
+                self.label.set_markup(self.label_text or '')
 
             await self.center_label()
         self.redraw()
@@ -128,7 +129,6 @@ class ButtonElement (BaseElement):
 
         if "value" in params:
             self.message = params.get("value")
-            self.indicator = self.message
             set_text = True
 
         if "label_text" in params:
@@ -136,7 +136,7 @@ class ButtonElement (BaseElement):
             set_text = True
 
         if set_text:
-            if self.indicator:
+            if self.indicator and self.label_text:
                 self.label.set_markup("<b>%s</b>" % (self.label_text or ''))
             else:
                 self.label.set_markup(self.label_text or '')
@@ -179,11 +179,17 @@ class ButtonElement (BaseElement):
 class BangButtonElement (ButtonElement):
     display_type = "button"
 
+    extra_params = {
+        'message': ParamInfo(label="Message on click", param_type=str, show=True),
+    }
+    store_attrs = {
+        **ButtonElement.store_attrs,
+        **extra_params
+    }
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
         self.message = Bang
-
-        self.param_list.extend(['message'])
 
     @classmethod
     def get_backend(cls, backend_name):
@@ -216,18 +222,25 @@ class BangButtonElement (ButtonElement):
 class ToggleButtonElement (ButtonElement):
     display_type = "toggle"
 
+    extra_params = {
+        'on_message': ParamInfo(label="Message on enable", param_type=PyLiteral, show=True),
+        'off_message': ParamInfo(label="Message on disable", param_type=PyLiteral, show=True),
+    }
+    store_attrs = {
+        **ButtonElement.store_attrs,
+        **extra_params
+    }
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
         self.off_message = False
         self.on_message = True
 
-        self.param_list.extend(['on_message', 'off_message'])
-
     @classmethod
     def get_backend(cls, backend_name):
         return ToggleButtonElementImpl.get_backend(backend_name)
 
-    async def clicked(self):
+    async def clicked(self, *args):
         message = None
         if self.indicator:
             message = self.off_message
@@ -242,11 +255,14 @@ class ToggleButtonElement (ButtonElement):
         return False
 
     async def configure(self, params):
+        await super().configure(params)
+
         if "on_message" in params:
             self.on_message = params.get("on_message")
         if "off_message" in params:
             self.off_message = params.get("off_message")
-        await super().configure(params)
+        if "message" in params:
+            self.indicator = self.message == self.on_message
 
     async def create(self, init_type, init_args):
         await super().create(init_type, init_args)

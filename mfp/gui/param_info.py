@@ -31,6 +31,8 @@ class ParamInfo:
                 setattr(self, name, info.default_factory())
         self.extra_args = extra_args
 
+class PyLiteral (str):
+    pass
 
 class ListOfInt(list):
     pass
@@ -41,5 +43,5 @@ class ListOfPairs(list):
 class DictOfRGBAColor(dict):
     pass
 
-class CodeBlock (dict):
+class CodeBlock (str):
     pass

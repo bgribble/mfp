@@ -10,7 +10,7 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import RGBAColor
 from mfp.gui.base_element import BaseElement
-from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs, DictOfRGBAColor, CodeBlock
+from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs, DictOfRGBAColor, PyLiteral, CodeBlock
 
 single_params = [
     'obj_type',
@@ -183,6 +183,18 @@ def render_param(
                 imgui.dummy([1, 4])
                 imgui.end_popup()
             imgui.pop_style_var(2)
+
+        elif param_type.param_type is PyLiteral:
+            import ast
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
+            changed, newval = imgui.input_text(
+                f"##{param_name}",
+                repr(param_value),
+                imgui.InputTextFlags_.enter_returns_true
+            )
+            if changed:
+                newval = ast.literal_eval(newval)
+            imgui.pop_style_var()
 
         elif param_type.param_type is str:
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
