@@ -492,7 +492,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             else:
                 self.wrapped_text = self.text
 
-            imgui.text(label_text + extra_bit)
+            if label_text:
+                imgui.text(label_text + extra_bit)
 
             # text bounding box does not account for descenders
             imgui.dummy([1, 3])

@@ -32,7 +32,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         self.node_id = None
         self.min_width = self.width = 25
         self.min_height = self.height = 12
-        self.click_triggered = False
+        self.click_triggered = 0
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
@@ -57,10 +57,10 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         fill_color = "fill-color"
         stroke_color = "stroke-color"
         text_color = "text-color"
-        if self.click_triggered:
+        if self.clickstate or self.click_triggered:
             fill_color = "fill-color:lit"
             text_color = "text-color:lit"
-            self.click_triggered = False
+            self.click_triggered = max(0, self.click_triggered - 1)
 
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
@@ -147,7 +147,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
 
     async def clicked(self, *args):
         await super().clicked(*args)
-        self.click_triggered = True
+        self.click_triggered = 2
         return False
 
 class ImguiPatchMessageElementImpl(

@@ -1120,6 +1120,9 @@ class Processor:
         self.gui_created = False
 
     def conf(self, **kwargs):
+        """
+        shortcut to set just a few settings without changing others
+        """
         from .mfp_app import MFPApp
         for k, v in kwargs.items():
             self.gui_params[k] = v

@@ -180,9 +180,9 @@ class BangButtonElement (ButtonElement):
     display_type = "button"
 
     def __init__(self, window, x, y):
+        super().__init__(window, x, y)
         self.message = Bang
 
-        super().__init__(window, x, y)
         self.param_list.extend(['message'])
 
     @classmethod

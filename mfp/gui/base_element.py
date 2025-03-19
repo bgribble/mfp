@@ -581,7 +581,7 @@ class BaseElement (Store):
         self.num_outlets = params.get("num_outlets", 0)
         self.dsp_inlets = params.get("dsp_inlets", [])
         self.dsp_outlets = params.get("dsp_outlets", [])
-        self.obj_name = params.get("name")
+        self.obj_name = params.get("name") or params.get("obj_name")
         self.no_export = params.get("no_export", False)
         self.is_export = params.get("is_export", False)
         self.export_offset_x = params.get("export_offset_x", 0)

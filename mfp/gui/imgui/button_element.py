@@ -5,9 +5,8 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
-
 from flopsy import mutates
-from mfp import log
+
 from mfp.gui_main import MFPGUI
 from ..colordb import ColorDB
 from .base_element import ImguiBaseElementImpl
@@ -39,6 +38,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         self.width = 16
         self.height = 16
         self.position_set = False
+        self.indicator_triggered = 0
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
@@ -103,8 +103,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
 
         # draw the box
         corner = max(2, 0.1*min(self.width, self.height))
-
-        if self.indicator:
+        if self.indicator or self.indicator_triggered:
             draw_list.add_rect_filled(
                 [self.position_x + inset_size, self.position_y + inset_size],
                 [self.position_x + self.width - inset_size, self.position_y + self.height - inset_size],
@@ -123,7 +122,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
             )
 
         # render the label. It gets moved around to be centered.
-        if self.indicator:
+        if self.indicator or self.indicator_triggered:
             self.label.set_color(self.get_color('text-color:lit'))
         else:
             self.label.set_color(self.get_color('text-color'))
@@ -160,6 +159,8 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         if need_recenter:
             MFPGUI().async_task(self.center_label())
 
+        self.indicator_triggered = max(0, self.indicator_triggered - 1)
+
         # render
         ##########################
 
@@ -172,6 +173,11 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
 
     def redraw(self):
         pass
+
+    async def clicked(self, *args):
+        await super().clicked(*args)
+        self.indicator_triggered = 2
+        return False
 
     @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
@@ -187,15 +193,15 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         await super().set_size(width, height, **kwargs)
 
 
-class ImguiBangButtonElementImpl(BangButtonElement, BangButtonElementImpl, ImguiButtonElementImpl):
+class ImguiBangButtonElementImpl(ImguiButtonElementImpl, BangButtonElement, BangButtonElementImpl):
     backend_name = "imgui"
 
 
-class ImguiToggleButtonElementImpl(ToggleButtonElement, ToggleButtonElementImpl, ImguiButtonElementImpl):
+class ImguiToggleButtonElementImpl(ImguiButtonElementImpl, ToggleButtonElement, ToggleButtonElementImpl):
     backend_name = "imgui"
 
 
 class ImguiToggleIndicatorElementImpl(
-    ToggleIndicatorElement, ToggleIndicatorElementImpl, ImguiButtonElementImpl
+    ImguiButtonElementImpl, ToggleIndicatorElement, ToggleIndicatorElementImpl
 ):
     backend_name = "imgui"
