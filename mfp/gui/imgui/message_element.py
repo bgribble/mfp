@@ -32,6 +32,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         self.node_id = None
         self.min_width = self.width = 25
         self.min_height = self.height = 12
+        self.click_triggered = False
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
@@ -40,7 +41,6 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
 
         * rectangle with rounded corners
         * gradient background
-        * semicircular ports (only in edit mode)
         """
         # style
         padding = self.get_style('padding')
@@ -53,13 +53,22 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         nedit.push_style_var(nedit.StyleVar.node_rounding, 4.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(*padding_tpl))
         nedit.push_style_var(nedit.StyleVar.node_border_width, 1.25)
+
+        fill_color = "fill-color"
+        stroke_color = "stroke-color"
+        text_color = "text-color"
+        if self.click_triggered:
+            fill_color = "fill-color:lit"
+            text_color = "text-color:lit"
+            self.click_triggered = False
+
         nedit.push_style_color(
             nedit.StyleColor.node_bg,
-            self.get_color('fill-color').to_rgbaf()
+            self.get_color(fill_color).to_rgbaf()
         )
         nedit.push_style_color(
             nedit.StyleColor.node_border,
-            self.get_color('stroke-color').to_rgbaf()
+            self.get_color(stroke_color).to_rgbaf()
         )
 
         ##########################
@@ -136,6 +145,10 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
 
+    async def clicked(self, *args):
+        await super().clicked(*args)
+        self.click_triggered = True
+        return False
 
 class ImguiPatchMessageElementImpl(
     PatchMessageElement,

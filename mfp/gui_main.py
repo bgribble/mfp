@@ -77,6 +77,7 @@ class MFPGUI (Singleton):
             'stroke-color:debug': ParamInfo(label="Element outline color (debug)", param_type=RGBAColor),
             'stroke-color:selected': ParamInfo(label="Element outline color (selected)", param_type=RGBAColor),
             'stroke-color:hover': ParamInfo(label="Element outline color (hover)", param_type=RGBAColor),
+            'stroke-color:': ParamInfo(label="Element outline color (hover)", param_type=RGBAColor),
             'text-color': ParamInfo(label="Text color", param_type=RGBAColor),
             'text-color:selected': ParamInfo(label="Text color (selected)", param_type=RGBAColor),
             'text-color:lit': ParamInfo(label="Text color (lit indicator)", param_type=RGBAColor),
@@ -107,7 +108,7 @@ class MFPGUI (Singleton):
             'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
             'text-color': ColorDB().find('default-text-color'),
             'text-color:selected': ColorDB().find('default-text-color-selected'),
-            'text-color:lit': ColorDB().find('default-light-text-color'),
+            'text-color:lit': ColorDB().find('default-alt-text-color'),
             'text-color:match': ColorDB().find('default-match-text-color'),
             'text-cursor-color': ColorDB().find('default-text-cursor-color'),
         }
@@ -169,9 +170,11 @@ def setup_default_colors_dark():
     ColorDB().insert('default-fill-color-debug',
                      ColorDB().find(0x2f, 0x4f, 0x2f, 0xff))
     ColorDB().insert('default-alt-fill-color',
-                     ColorDB().find(0x7d, 0x83, 0xff, 0xff))
+                     ColorDB().find(0x7d, 0x7d, 0x7d, 0xff))
     ColorDB().insert('default-text-color',
                      ColorDB().find(0xde, 0xde, 0xde, 0xff))
+    ColorDB().insert('default-alt-text-color',
+                     ColorDB().find(0x1f, 0x1f, 0x1f, 0xff))
     ColorDB().insert('default-light-text-color',
                      ColorDB().find(0xf7, 0xf9, 0xf9, 0xff))
     ColorDB().insert('default-match-text-color',
