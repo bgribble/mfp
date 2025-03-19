@@ -193,7 +193,10 @@ def render_param(
                 imgui.InputTextFlags_.enter_returns_true
             )
             if changed:
-                newval = ast.literal_eval(newval)
+                try:
+                    newval = ast.literal_eval(newval)
+                except:
+                    log.warning(f"Unable to parse value for parameter {param_type.label}")
             imgui.pop_style_var()
 
         elif param_type.param_type is str:
