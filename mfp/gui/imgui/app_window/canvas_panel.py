@@ -101,7 +101,11 @@ def render_tile(app_window, patch):
             app_window.selected_patch = patch
             app_window.selected_layer = patch.selected_layer
 
-    if app_window.selected_window == "canvas" and not app_window.context_menu_open:
+    if (
+        app_window.selected_window == "canvas"
+        and not app_window.context_menu_open
+        and not app_window.inspector
+    ):
         imgui.set_next_window_focus()
 
     imgui.begin(

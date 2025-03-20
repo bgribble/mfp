@@ -335,8 +335,10 @@ class GlobalMode (InputMode):
         from flopsy import Inspector
         if self.window.inspector is None:
             self.window.inspector = Inspector(
-                title="State inspector", event_loop=MFPGUI().async_task.asyncio_loop
+                title="State inspector",
+                event_loop=MFPGUI().async_task.asyncio_loop,
             )
+        self.selected_window = "inspector"
         self.window.inspector.focus()
 
     async def toggle_console(self):
