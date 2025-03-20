@@ -168,13 +168,23 @@ class ImguiSDL2Renderer:
                 if self.app_window.selected_window not in unhandled_windows:
                     MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
-                # for some reason SDL forces ALT-v to be ALT-INSERT
-                if event.key.keysym.scancode == SDL_SCANCODE_INSERT and event.key.keysym.mod & KMOD_ALT:
-                    ev = KeyPressEvent(
-                        target=self.app_window.input_mgr.pointer_obj,
-                        keyval=None,
-                        unicode="v"
-                    )
+                dead_keys = [
+                    (SDL_SCANCODE_INSERT, KMOD_ALT, "v"),
+                    (SDL_SCANCODE_1, KMOD_CTRL, "1"),
+                    (SDL_SCANCODE_9, KMOD_CTRL, "9"),
+                    (SDL_SCANCODE_0, KMOD_CTRL, "0"),
+                ]
+
+                ev = None
+                for scancode, mod, event_key in dead_keys:
+                    if event.key.keysym.scancode == scancode and event.key.keysym.mod & mod:
+                        ev = KeyPressEvent(
+                            target=self.app_window.input_mgr.pointer_obj,
+                            keyval=None,
+                            unicode=event_key
+                        )
+                        break
+                if ev:
                     if self.app_window.selected_window not in unhandled_windows:
                         MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
                     skip_event = True
