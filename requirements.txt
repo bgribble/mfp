@@ -1,4 +1,3 @@
-alsaseq @ file:///home/grib/devel/mfp/wafbuild/wheel/alsaseq-0.4.1-cp313-cp313-linux_x86_64.whl#sha256=24b6e4f28deaddeef530e541d399078276cce983eb10f0382de84dd5578ab2c4
 annotated-types==0.7.0
 carp-rpc==0.0.6
 cffi==1.17.1
@@ -6,11 +5,9 @@ Cython==3.0.12
 flopsy==0.0.5
 glfw==2.8.0
 imgui-bundle==1.6.2
-mfp @ file:///home/grib/devel/mfp/wafbuild/wheel/mfp-0.7.2-py3-none-any.whl#sha256=77b889aa91c1bf6c9c4cb5ff13b3c3a124adc09cda9919aa48dc334d39504a8e
 munch==4.0.0
 numpy==2.2.4
 pillow==11.1.0
-pluginfo @ file:///home/grib/devel/mfp/wafbuild/wheel/pluginfo-1.0-cp313-cp313-linux_x86_64.whl#sha256=53cb358dacf25bde380a785717241ad1b3fc77216a1b52e09fa221b56631e1ca
 posix_ipc==1.1.1
 protobuf==6.30.1
 pycparser==2.22
@@ -26,6 +23,5 @@ setuptools==77.0.1
 simplejson==3.20.1
 six==1.17.0
 soundfile==0.13.1
-testext @ file:///home/grib/devel/mfp/wafbuild/wheel/testext-1.0-cp313-cp313-linux_x86_64.whl#sha256=c376d889bc31027e9f692b2e50e8dc4449777a169232b7aa2738e8e493513a1a
 typing_extensions==4.12.2
 yappi==1.6.10
