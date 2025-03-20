@@ -719,8 +719,10 @@ class BaseElement (Store):
                 y += orig_y - 1
                 w, h = self.port_size()
                 w += 2
-                h += 2
-                if (xpos >= x) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
+                h += 4
+                if direction == self.PORT_IN:
+                    y -= h-2
+                if (xpos >= x-1) and (xpos <= x+w) and (ypos >= y) and (ypos <= y+h):
                     tiptxt = await MFPGUI().mfp.get_tooltip(self.obj_id, direction, port_num, details)
 
         if tiptxt is None:
