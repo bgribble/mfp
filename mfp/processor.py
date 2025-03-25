@@ -535,7 +535,9 @@ class Processor:
         MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
         self.midi_learn_cbid = None
         self.midi_cbid = MFPApp().midi_mgr.register(
-            lambda event, data: asyncio.run_coroutine_threadsafe(self._midi_handler(event, data)),
+            lambda event, data: MFPApp().async_task(
+                self._midi_handler(event, data)
+            ),
             filters=filters
         )
         self.midi_filters = filters
@@ -1246,6 +1248,6 @@ class Processor:
 
             self.midi_filters["port"] = [tuple(p) for p in ports]
             self.midi_cbid = MFPApp().midi_mgr.register(
-                lambda event, data: asyncio.run_coroutine_threadsafe(self._midi_handler(event, data)),
+                lambda event, data: MFPApp().async_task(self._midi_handler(event, data)),
                 filters=self.midi_filters
             )
