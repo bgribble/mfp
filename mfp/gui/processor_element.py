@@ -29,6 +29,17 @@ class ProcessorElement (BaseElement):
     display_type = "processor"
     proc_type = None
 
+    extra_params = {
+        'show_label': ParamInfo(label="Show label", param_type=bool),
+        'export_x': ParamInfo(label="Exported interface X", param_type=float),
+        'export_y': ParamInfo(label="Exported interface X", param_type=float),
+        'export_w': ParamInfo(label="Exported interface X", param_type=float),
+        'export_h': ParamInfo(label="Exported interface X", param_type=float),
+    }
+    store_attrs = {
+        **BaseElement.store_attrs, **extra_params
+    }
+
     # constants
     label_off_x = 3
     label_off_y = 0
@@ -39,14 +50,6 @@ class ProcessorElement (BaseElement):
 
         super().__init__(window, x, y)
 
-        # FIXME
-        self.param_list.extend([
-            "show_label",
-            "export_x",
-            "export_y",
-            "export_w",
-            "export_h"
-        ])
         self.show_label = params.get("show_label", True)
 
         # display elements

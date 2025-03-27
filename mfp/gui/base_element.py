@@ -486,10 +486,11 @@ class BaseElement (Store):
         prms = {}
         for k in self.param_list:
             val = getattr(self, k)
+            if k == "layer":
+                prms["layername"] = val.name
+                continue
             if isinstance(val, BaseElement):
                 val = val.obj_id
-            if isinstance(val, Layer):
-                val = val.name
             prms[k] = val
 
         outbound = []

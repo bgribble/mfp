@@ -28,6 +28,10 @@ class PatchDisplay:
         self.scopes = []
         self.selected_layer = None
         self.display_info = kwargs.get('display_info')
+        self.export_x = None
+        self.export_y = None
+        self.export_w = None
+        self.export_h = None
 
     @classmethod
     def get_factory(cls):
@@ -46,8 +50,13 @@ class PatchDisplay:
 
     def synced_params(self):
         return dict(
-            display_type=self.display_type, name=self.obj_name,
-            layers=[(ll.name, ll.scope) for ll in self.layers]
+            display_type=self.display_type,
+            name=self.obj_name,
+            layers=[(ll.name, ll.scope) for ll in self.layers],
+            export_x=self.export_x,
+            export_y=self.export_y,
+            export_w=self.export_w,
+            export_h=self.export_h,
         )
 
     def send_params(self, **extras):
@@ -72,7 +81,13 @@ class PatchDisplay:
         self.context_name = params.get("dsp_context")
         self.deletable = params.get("deletable", True)
 
+        self.export_x = params.get("export_x")
+        self.export_y = params.get("export_y")
+        self.export_w = params.get("export_w")
+        self.export_h = params.get("export_h")
+
         layers = params.get("layers", [])
+
         newlayers = []
         for name, scope in layers:
             layer = self.find_layer(name)
