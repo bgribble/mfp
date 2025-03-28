@@ -51,6 +51,8 @@
 % Saves a lot of ouptut space in PDF... after conversion with the distiller
 % Delete if you cannot get PS fonts working on your system.
 
+\def\:{\hskip0pt}
+
 % pdf-tex settings: detect automatically if run by latex or pdflatex
 \newif\ifpdf
 \ifx\pdfoutput\relax
@@ -103,8 +105,8 @@
 MFP is a graphical patching system distinguished by the ready
 availability of Python data types and operations in patches.
 Recent work has added support for live coding of
-message-processing patch elements in Python, and of
-signal-processing patch elements in Faust.  Its extensibility
+message\:-\:processing patch elements in Python, and of
+signal\:-\:processing patch elements in Faust.  Its extensibility
 and rich set of message data types give MFP some nice
 capabilities for interactive patching.
 \end{abstract}
@@ -150,12 +152,12 @@ system. So it's reasonable to expect patching languages to
 support a pretty wide variety of usual programming paradigms and
 patterns.
 
-However, when I started trying to make more complex patches in
+However, when I started trying to make more complex patch\-es in
 Pd, especially ones that leaned into the manipulation of
-non-audio data, I quickly ran into frustrations with the data
+non\:-\:audio data, I quickly ran into frustrations with the data
 model that made it quite difficult to do things that should (in
 my opinion) have been simple. I wondered if breaking out of the
-space-delimited textual syntax and limited type-vocabulary of Pd
+space\:-\:delimited textual syntax and limited type\:-\:vocabulary of Pd
 objects, and using the data types from a dynamic language such as
 Python instead, could give a graphical patcher more of the power
 of a full programming language.
@@ -163,8 +165,8 @@ of a full programming language.
 The result of my explorations is MFP. The patch editor and
 message processing engine are implemented in Python and directly
 expose the Python data model, library, and evaluator to the user.
-The real-time audio engine is implemented in C and is loosely
-coupled to the UI and message-processing system via an RPC
+The real\:-\:time audio engine is implemented in C and is loosely
+coupled to the UI and message\:-\:processing system via an RPC
 mechanism. The overall experience is similar to Pd or Max/MSP,
 but there has been no attempt at compatibility.
 
@@ -173,12 +175,12 @@ When I presented it at the 2013 edition of LAC
 enough that I thought it was worth continuing to develop. Now,
 some 12 years later, it has evolved in various foreseen and
 unforeseen directions and is, I think, worthy of a
-re-introduction to the Linux audio community.
+re\:-\:introduction to the Linux audio community.
 
 
 \section{What is it?}
 
-My vision for MFP is as a multitool for REPL-style incremental
+My vision for MFP is as a multitool for REPL\:-\:style incremental
 development that can fit in to music composition, performance,
 and recording workflows wherever some bespoke functionality is
 needed.
@@ -205,27 +207,28 @@ export a UI of their choice to appear on their placeholder in the
 containing patch. Direct connections between processor nodes are
 represented by lines.
 
-Named message and signal buses, comparable to Pd's `[s]` and
-`[r]`, appear as dots terminating connection lines, called {\it
+Named message and signal buses, comparable to Pd's {\tt [s]} and
+{\tt [r]}, appear as dots terminating connection lines, called {\it
 vias}. Names and scoping are an important part of MFP, and vias
 represent one of the main user-visible aspects of naming: each
 via is paired with its companion(s) by a name, visible in the UI,
 that must be resolved to find the intended connection-partner.
 
-The patch as a whole is modeled as a stack of {\it layers}, which are
-something like Pd {\it subpatches}: they are primarily a visual
-organizational tool to reduce clutter in the patching interface
-Names of buses within any layer of a patch are by default scoped
-to the patch's namespace. One layer of a patch is visible at a
-time. Multiple patches can be displayed simultaneously, using a
-multi-page tiled workspace manager.
+The patch as a whole is modeled as a stack of {\it layers}, which
+are something like Pd {\it subpatches}: they are primarily a
+visual organizational tool to reduce clutter in the patching
+interface. One layer of a patch is visible at a time. Multiple
+patches can be displayed simultaneously, using a multi-page tiled
+workspace manager.
 
-The nomenclature of {\it layers} and {\it vias} comes from electronics
-design, where a printed circuit board is made up of a multi-layer
-sandwich of conductive and nonconductive material. A via is a
-plated conductive hole, effectively a wire, that connects from
-one layer through to another. The visual representation of a via
-as a dot/circle is intended to evoke that.
+The nomenclature of {\it layers} and {\it vias} comes from
+electronics design, where a printed circuit board is made up of a
+multi-layer sandwich of conductive and nonconductive material. To
+me, a dataflow patch looks a bit like a circuit board populated
+with chips and other components. A {\it via} is a plated
+conductive hole, effectively a wire, that connects from one layer
+through to another. The visual representation of a via as a
+dot/circle is intended to evoke that.
 
 \begin{figure*}[ht]
 \centerline{\includegraphics[width=6in]{appview.png}}
@@ -255,41 +258,43 @@ load time. See Figure~\ref{fig:datamodel} for some examples.
 
 {\bf Partial application syntax.} A special syntax allows for
 literals that represent partially-applied functions. When sent as
-a message, `@funcname([args], [kwargs])` will be consumed by its
+a message, {\tt @funcname([args], [kwargs])} will be consumed by its
 first recipient and applied to the recipient as a method call.
 
 {\bf Deferred evaluation syntax.} Another special syntax
 extension allows for literals that are not evaluated until they
 enter the processing network. A initial comma preceding an
-expression will wrap it in a Python `lambda` form that is not
+expression will wrap it in a Python {\tt lambda} form that is not
 called until the message is sent. This allows for time-varying
 results from a "literal" message box.
 
 \begin{figure}[ht]
-\centerline{\includegraphics[width=3.5in]{datamodel.png}}
+\centerline{\includegraphics[width=3.25in]{datamodel.png}}
 \caption{\label{fig:datamodel}{
     \it Patch fragments demonstrating features of the MFP data model,
-    including partial application and deferred evaluation
+    including vias, partial application, and deferred evaluation
 }}
 \end{figure}
 
 
 \subsection{Python live-coding }
 
-The message-passing system at the heart of MFP is implemented in
+The message\:-\:passing system at the heart of MFP is implemented in
 Python, and there are several pathways enabling the user to
 access the standard Python library and/or write Python code
 directly into the patching interface.
 
-{\bf The {\tt func} processor.} `[func]` is a very thin wrapper
+{\bf The {\tt func} processor.} {\tt [func]} is a very thin wrapper
 around Python's {\tt lambda}. It allows you to write a single
-Python expression directly in a processor box.
+Python expression directly in a processor box. The arity of the lambda
+is extracted via Python's {\tt inspect}, and inlets are created for
+each argument.
 
 {\bf Library access.} Any callable Python object can be
 automatically wrapped as a MFP processor element. If you create a
 processor element called {\tt re.split}, which is not an MFP
-builtin, it will look for a callable bound to that name and use
-Python's {\tt inspect} capability to find its argument signature
+builtin, it will look for a callable bound to that name. As with
+{\tt func}, {\tt inspect} is used to find its argument signature
 and create an object with the appropriate inputs.
 
 {\bf Custom processor types.} This enables live coding of new
@@ -299,7 +304,7 @@ function called {\tt myfunc} directly to the processor via its
 "Custom code" parameter, and allow the autowrapping process to
 discover it.
 
-{\bf Offline coding.} A user-provided RC file, loaded at startup,
+{\bf Offline coding.} A user\:-\:provided RC file, loaded at startup,
 can define new data types and builtin processor types using MFP's
 internal framework.
 
@@ -307,7 +312,7 @@ See Figure~\ref{fig:pythonlivecoding} for some examples of these
 mechanisms in use.
 
 \begin{figure}[ht]
-\centerline{\includegraphics[width=3.5in]{python_livecoding.png}}
+\centerline{\includegraphics[width=3.25in]{python_livecoding.png}}
 \caption{\label{fig:pythonlivecoding}{
     \it Several mechanisms for live-coding Python in MFP:
     [func], custom code, and automatically wrapped Python
@@ -317,22 +322,22 @@ mechanisms in use.
 
 \subsection{Faust live-coding }
 
-The [faust~] object supports live coding of DSP algorithms in
-Faust. Code can be typed directly into the UI or loaded from
-files, and can be parameterized or customized via Python at
-compile time.
+The {\tt [faust\textasciitilde]} object supports live coding of
+DSP algorithms in Faust. Code can be typed directly into the UI
+or loaded from files, and can be parameterized or customized via
+Python at compile time.
 
 This is possible via the "Custom code" parameter mentioned above.
-The `[faust~]` processor looks for a special Python variable
-called {\tt faust\_code} in the custom code block. This variable
-can be defined as a constant, literal string (the Python
-triple-quote syntax works well to support a formatted Faust
-program in a Python string), it can be the result of Python file
-operations to load from a named file, or it can be assembled by
-Python string formatting and manipulation operations.
+The {\tt [faust\textasciitilde]} processor looks for a special
+Python variable called {\tt faust\_code} in the custom code
+block. This variable can be defined as a constant, literal string
+(the Python triple\:-\:quote syntax works well to support a formatted
+Faust program in a Python string), it can be the result of Python
+file operations to load from a named file, or it can be assembled
+by Python string formatting and manipulation operations.
 
-Once compiled to LLVM within the `mfpdsp` process, the Faust DSP
-object is inspected to extract parameters and I/O channels so
+Once compiled to LLVM within the {\tt mfpdsp} process, the Faust
+DSP object is inspected to extract parameters and I/O channels so
 that the processor element's input/output profile matches the
 signature of the DSP code.
 
@@ -340,9 +345,9 @@ See Figure~\ref{fig:faustlivecoding} for how this looks in
 practice.
 
 \begin{figure}[ht]
-\centerline{\includegraphics[width=3.5in]{faust_livecoding.png}}
-\caption{\label{fig:pythonlivecoding}{
-    \it Live coding in Faust using the [faust~] object
+\centerline{\includegraphics[width=3.25in]{faust_livecoding.png}}
+\caption{\label{fig:faustlivecoding}{
+    \it Live coding in Faust using the {\tt [faust\textasciitilde]} object
 }}
 \end{figure}
 
@@ -353,25 +358,25 @@ Since MFP is still very much a work in progress, a lot of the
 debugging functionality is built as much to debug MFP as it is to
 debug user patches, but it's useful for both.
 
-{\bf Python console.} There is an always-available Python console
-that can directly access and manipulate the app's data.  For example, the
-default patch that is created when you open MFP with no arguments is
-`app.patches['default']`
+{\bf Python console.} There is an always\:-\:available Python console
+that can directly access and manipulate the app's data.  For
+example, the default patch that is created when you open MFP with
+no arguments is {\tt app.patches['default']}
 
 {\bf Breakpoints and step execution.} MFP supports step debugging
 of patches with the {\tt [bp]} breakpoint setter. A message
-encountering a {\tt [bp]} causes the Python console to enter a simple
-debug mode, inspired by {\tt pdb}, which allows for direct inspection
-of internal processor state and tracing of the marshalling and
-dispatch process.
+encountering a {\tt [bp]} causes the Python console to enter a
+simple debug mode, inspired by {\tt pdb}, which allows for direct
+inspection of internal processor state and tracing of the
+marshalling and dispatch process.
 
 {\bf Snoop mode.} Enabling "snoop mode" on a connection briefly
 displays any messages passing through the connection.
 
 {\bf UI state inspector.} A UI state inspector, modeled after the
 Redux devtools inspector, is provided by the Flopsy state
-management library \cite{Gribble:Flopsy}. It allows for detailed analysis of the
-time-sequence of changes to the UI.
+management library \cite{Gribble:Flopsy}. It allows for detailed
+analysis of the time sequence of changes to the UI.
 
 \subsection{MIDI and OSC}
 
@@ -398,21 +403,23 @@ choose "Learn MIDI controller" from the context menu.
 The next MIDI events received will be analyzed and a filter and
 value accessor will be determined from the properties of the event.
 
-{\bf Explicit message handling.} The builtin processor types
-`[midi\_in]`, `[midi\_out]`, `[osc\_in]`, and `[osc\_out]` enable
-sending and receiving of MIDI and OSC messages outside the
-automatic and learned controllers on specific objects.
+{\bf Explicit message handling.} The builtin processor types {\tt
+[midi\_in]}, {\tt [midi\_out]}, {\tt [osc\_in]}, and {\tt
+[osc\_out]} enable sending and receiving of MIDI and OSC messages
+outside the automatic and learned controllers on specific
+objects. Figure~\ref{fig:appview} shows some of these processors
+in action.
 
 
 \subsection{Plugin hosting}
 
-The `[plugin~]` object enables loading external plugins as MFP DSP
-objects.
+The {\tt [plugin\textasciitilde]} object enables loading external
+plugins as MFP DSP objects. Currently, only LADSPA plugins are
+supported but LV2 and CLAP are planned.
 
-Currently, only LADSPA plugins are supported but LV2 and CLAP are planned.
-
-The audio and control ports of the plugin are determined from the LADSPA
-plugin descriptor and mapped to inlets and outlets on the `[plugin~]` processor.
+The audio and control ports of the plugin are determined from the
+LADSPA plugin descriptor and mapped to inlets and outlets on the
+{\tt [plugin\textasciitilde]} processor.
 
 
 \subsection{Patches as plugins}
@@ -424,19 +431,19 @@ the patch works as normal.
 
 LV2 plugins exist as "bundles" which are (to simplify) a shared
 library implementing the plugin, plus metadata, in the form of
-the `manifest.ttl` file (describing tha plugin) and any
-additional plugin-specific metadata.
+the {\tt manifest.ttl} file (describing tha plugin) and any
+additional plugin\:-\:specific metadata.
 
-For an MFP patch, the shared library is the `libmfpdsp.so`
+For an MFP patch, the shared library is the {\tt libmfpdsp.so}
 library that implements the MFP DSP engine, and the
-plugin-specific metadata includes the MFP patch save file. Since
+plugin\:-\:specific metadata includes the MFP patch save file. Since
 the Python runtime is an essential part of patch loading and
 operation, we need to make sure that it is loaded on plugin
 initialization.
 
 Normally, when MFP is launched, the Python "main" process is
 launched first, and it forks the DSP engine and communicates with
-it through a socket. The LV2 entry points in `libmfpdsp.so`
+it through a socket. The LV2 entry points in {\tt libmfpdsp.so}
 reverse this process, forking the Python main process (if it is
 not already running) in a mode that enables it to know what is
 happening.
@@ -458,8 +465,8 @@ When running, MFP consists of several components working in concert.
 \item[]
 {\bf mfpmain:} A Python program that is the primary execution
 environment of MFP. It handles the processing of discrete
-message data, delegating all real-time signal processing to the
-mfpdsp process
+message data, delegating all real\:-\:time signal processing to the
+mfpdsp process.
 
 \item[]
 {\bf mfpgui:} A Python program that implements the UI. It currently
@@ -479,9 +486,10 @@ so there are "parallel" patches built in the UI process, in the
 main process, and in the DSP engine, using representations
 specific to that process.
 
-The DSP and UI processes are launched by default but may be suppressed
-with command line options. A mfpmain-only "batch mode" is available to run
-a patch with input from `stdin` and write resulting objects to `stdout`.
+The DSP and UI processes are launched by default but may be
+suppressed with command line options. A no\:-\:DSP, no\:-\:UI
+"batch mode" is available to run a patch with input from {\tt
+stdin} and write resulting objects to {\tt stdout}.
 
 Much of the functionality of mfpdsp is built in to a shared
 library called libmfpdsp. This library implements the LV2
@@ -491,12 +499,12 @@ LV2-enabled host.
 \subsection{User interface}
 
 As of version 0.8, the default user interface for MFP is built on
-the `Dear ImGUI` library \cite{DearImGUI}, via the
-`imgui\_bundle` Python bindings \cite{ImguiBundle}. The move to
-ImGUI from the previous implementation in Gtk/Clutter was somewhat
-painful, but worth it. ImGUI's flexibility and the rich ecosystem
-of extensions and addons made things like enabling Markdown in
-comments and making more sophisticated X/Y plots relatively easy.
+the Dear ImGUI library \cite{DearImGUI}, via the ImGUI Bundle
+bindings \cite{ImguiBundle}. The move to ImGUI from the previous
+implementation in Gtk/Clutter was somewhat painful, but worth it.
+ImGUI's flexibility and the rich ecosystem of extensions and
+addons made things like enabling Markdown in comments and making
+more sophisticated X/Y plots relatively easy.
 
 \subsection{Help system}
 
@@ -508,7 +516,7 @@ MFP builtins, but I am working on it.
 In addition to the per-processor help (available in the context menu),
 there are some global help patches available under the app's Help menu.
 A Tutorial patch walks through the basics of creating a patch, and
-a Reference patch attemps to organize information about the
+a Reference patch attempts to organize information about the
 builtins and how to use them.
 
 \section{Status}
@@ -521,15 +529,23 @@ for LAC-2025. Funny how that works!
 A significant amount of the recent work on MFP has been in
 getting the Dear ImGUI UI up to parity with the Clutter UI. A lot
 of new features have been added along the way, but they were not
-my focus. Going forward, I would like to focus on (1) stabilizing
-existing features and (2) implementing items from the priorities
-list below.
+the primary focus. Going forward, I would like to spend my time
+on (1) stabilizing existing features and (2) implementing items
+from the priorities list below.
 
 I use MFP for my own music making and I think it's in good shape
-for others to use as well. I have been fortunate to have time and
-energy to work on it on a regular basis, and I hope to continue
-to do so. There's not really a significant user community at this
-point, but only you can change that!
+for others to use as well. As far as testing its capabilities to
+do more general\:-\:purpose programming, I have tackled the
+Advent of Code \cite{AdventOfCode} challenge for the last 2
+years, creating MFP patches for my solutions
+\cite{Gribble:Advent}. While I have yet to make it all the way
+through a month of puzzles, I blame myself and my holiday travel
+plans more than MFP's capability as a programming environment.
+
+I have been fortunate to have the time and energy to work on MFP
+on a regular basis recently, and I hope to continue to do so.
+There's not really a significant user community at this point,
+but only you can change that!
 
 \subsection{Development priorities}
 
@@ -552,7 +568,7 @@ library of builtin functions in the DSP domain to deal with JACK
 MIDI data.
 
 {\bf LV2 plugin hosting.} LV2 is the current Linux standard for
-plugins. The current LADSPA-only `[plugin~]` is inadequate.
+plugins. The current LADSPA-only {\tt [plugin\textasciitilde]} is inadequate.
 
 {\bf Spectral processing with libfft.} Embedded Faust gets a lot
 of great functionality, but does not enable working in the
@@ -561,6 +577,12 @@ frequency domain. New DSP builtins will be needed for this.
 {\bf Improved file format.} I would like to have a save format
 that includes resources such as sample data. I have done some
 preliminary work on using SQLite as a storage backend.
+
+{\bf Multirate/variable-blocksize DSP operations.} Antialiasing,
+timestretch, and many other DSP algorithms require oversampling,
+decimation, and other primitives that are best implemented using
+variable sized blocks of data, at least internally. Currently MFP
+deals only in blocks that are the size of the JACK buffer.
 
 {\bf Multichannel connections.} Recent versions of Max/MSP
 support multiple channels on single "wires" for easier multivoice
