@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from imgui_bundle import imgui, imgui_node_editor as nedit
+from imgui_bundle import imgui
 from mfp import log
 from mfp.gui.modes.global_mode import GlobalMode
 from imgui_bundle import portable_file_dialogs as pfd
@@ -11,6 +11,7 @@ CHAR_PIXELS = 7
 def render(app_window):
     imgui.set_next_window_size((app_window.window_width, app_window.menu_height + 8))
     imgui.set_next_window_pos((0, app_window.window_height - app_window.menu_height - 8))
+
     imgui.begin(
         "status_line",
         flags=(
@@ -42,6 +43,7 @@ def render(app_window):
             imgui.same_line()
             cursor_x, cursor_y = imgui.get_cursor_pos()
             imgui.set_cursor_pos([window_w - 100, cursor_y])
+            imgui.push_id("file_select")
             if imgui.button("Select..."):
                 if app_window.cmd_input_filename == "open":
                     app_window.cmd_file_dialog = pfd.open_file("Select file")
@@ -49,6 +51,7 @@ def render(app_window):
                     app_window.cmd_file_dialog = pfd.save_file("Save as")
                 elif app_window.cmd_input_filename == "folder":
                     app_window.cmd_file_dialog = pfd.select_filder("Select folder")
+            imgui.pop_id()
 
         if app_window.cmd_file_dialog is not None and app_window.cmd_file_dialog.ready():
             results = app_window.cmd_file_dialog.result()
