@@ -103,6 +103,7 @@ def render_tile(app_window, patch):
 
     if (
         app_window.selected_window == "canvas"
+        and app_window.selected_patch == patch
         and not app_window.context_menu_open
         and not app_window.inspector
     ):
