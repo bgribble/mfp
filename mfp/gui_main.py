@@ -290,7 +290,7 @@ async def main(cmdline):
 
     host.on(
         "exception",
-        lambda exc, tbinfo: log.error(f"[rpc] Exception: {tbinfo}")
+        lambda exc, tbinfo, traceback="": log.error(f"[rpc] Exception: {tbinfo}")
     )
     host.on(
         "debug",

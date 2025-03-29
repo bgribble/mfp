@@ -57,15 +57,15 @@ async def clonescope(self, scopename, num_copies, **kwargs):
             if bbox_min_x is None or xpos < bbox_min_x:
                 bbox_min_x = xpos
             if bbox_max_x is None or (xpos + width) > bbox_max_x:
-                bbox_max_x = xpos+width
+                bbox_max_x = xpos + width
             if bbox_min_y is None or ypos < bbox_min_y:
                 bbox_min_y = ypos
             if bbox_max_y is None or (ypos + height) > bbox_max_y:
-                bbox_max_y = ypos+height
+                bbox_max_y = ypos + height
 
     if bbox_min_x is not None:
-        bbox_w = bbox_max_x - bbox_min_x
-        bbox_h = bbox_max_y - bbox_min_y
+        bbox_w = bbox_max_x - bbox_min_x + 2
+        bbox_h = bbox_max_y - bbox_min_y + 2
 
     if MFPApp().gui_command:
         await MFPApp().gui_command.load_start()
@@ -149,9 +149,8 @@ async def clonescope(self, scopename, num_copies, **kwargs):
     self.update_export_bounds()
 
     if not MFPApp().no_onload:
-        self.task_nibbler.add_task(
-            lambda objects: self._run_onload(objects), False,
-            [obj for obj in all_clones]
+        MFPApp().async_task(
+            self._run_onload([obj for obj in all_clones])
         )
 
     for obj in need_gui:

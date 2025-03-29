@@ -544,10 +544,10 @@ class Patch(Processor):
                     min_x = x
                 if min_y is None or (y < min_y):
                     min_y = y
-                if max_x is None or (x+w > max_x):
-                    max_x = x+w
-                if max_y is None or (y+h > max_y):
-                    max_y = y+h
+                if max_x is None or (x + w > max_x):
+                    max_x = x + w
+                if max_y is None or (y + h > max_y):
+                    max_y = y + h
 
         x = y = w = h = None
         if None not in (min_x, min_y, max_x, max_y):
@@ -555,6 +555,20 @@ class Patch(Processor):
             y = min_y
             w = max_x - min_x + 2
             h = max_y - min_y + 2
+
+        p = dict(
+            export_x=x, export_y=y, export_w=w, export_h=h,
+            width=max(
+                self.gui_params.get('width') or 0,
+                self.gui_params.get('export_w') or 0
+            ),
+            height=max(
+                self.gui_params.get('height') or 0,
+                (self.gui_params.get('export_h') or 0) + 24
+            )
+        )
+        log.debug(f"update_export: {p}")
+        log.debug(f"update_export: gui_params {self.gui_params}")
 
         self.conf(
             export_x=x, export_y=y, export_w=w, export_h=h,
@@ -564,7 +578,7 @@ class Patch(Processor):
             ),
             height=max(
                 self.gui_params.get('height') or 0,
-                (self.gui_params.get('export_h') or 0) + 20
+                (self.gui_params.get('export_h') or 0) + 24
             )
         )
 

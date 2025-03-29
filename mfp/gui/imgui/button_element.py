@@ -46,7 +46,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         button element: similar to a message, but with an inner
         clickable box / state display
         """
-        border_width = 1.25
+        border_width = 1
         border_round = 2
         inset_size = 3
 
@@ -105,16 +105,28 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         corner = max(2, 0.1*min(self.width, self.height))
         if self.indicator or self.indicator_triggered:
             draw_list.add_rect_filled(
-                [self.position_x + inset_size, self.position_y + inset_size],
-                [self.position_x + self.width - inset_size, self.position_y + self.height - inset_size],
+                [
+                    self.position_x + inset_size + border_width,
+                    self.position_y + inset_size + border_width
+                ],
+                [
+                    self.position_x + self.width - inset_size - border_width,
+                    self.position_y + self.height - inset_size - border_width
+                ],
                 ColorDB().backend.im_col32(stroke_color),
                 rounding=corner,
                 flags=0,
             )
         else:
             draw_list.add_rect(
-                [self.position_x + inset_size, self.position_y + inset_size],
-                [self.position_x + self.width - inset_size, self.position_y + self.height - inset_size],
+                [
+                    self.position_x + inset_size,
+                    self.position_y + inset_size
+                ],
+                [
+                    self.position_x + self.width - inset_size,
+                    self.position_y + self.height - inset_size
+                ],
                 ColorDB().backend.im_col32(stroke_color),
                 rounding=corner,
                 flags=0,

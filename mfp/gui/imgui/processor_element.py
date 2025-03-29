@@ -92,7 +92,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         min_w = max(min_w, port_alloc_w)
 
         if self.export_h is not None:
-            min_h = max(self.min_height, self.export_h + 12)
+            min_h = max(self.min_height, self.export_h + 16)
         else:
             min_h = self.min_height
 
