@@ -222,13 +222,17 @@ patches can be displayed simultaneously, using a multi-page tiled
 workspace manager.
 
 The nomenclature of {\it layers} and {\it vias} comes from
-electronics design, where a printed circuit board is made up of a
-multi-layer sandwich of conductive and nonconductive material. To
-me, a dataflow patch looks a bit like a circuit board populated
-with chips and other components. A {\it via} is a plated
-conductive hole, effectively a wire, that connects from one layer
-through to another. The visual representation of a via as a
-dot/circle is intended to evoke that.
+electronics design. A printed circuit board is made up of a
+multi-layer sandwich of conductive and nonconductive material.
+Most of these layers are hidden, with only the components in the
+outermost layer visible to the naked eye. To me, a dataflow patch
+looks a bit like a circuit board populated with chips and other
+components, with most of the layers or "subpatches" being hidden
+until needed. A {\it via} is a plated conductive hole,
+effectively a wire, that connects from one layer through to
+another. When looking at a layer of a circuit board, a via looks
+like a dot at the end of a conductive trace. The visual representation of a
+via as a dot/circle is intended to evoke that.
 
 \begin{figure*}[ht]
 \centerline{\includegraphics[width=6in]{appview.png}}
@@ -411,17 +415,6 @@ objects. Figure~\ref{fig:appview} shows some of these processors
 in action.
 
 
-\subsection{Plugin hosting}
-
-The {\tt [plugin\textasciitilde]} object enables loading external
-plugins as MFP DSP objects. Currently, only LADSPA plugins are
-supported but LV2 and CLAP are planned.
-
-The audio and control ports of the plugin are determined from the
-LADSPA plugin descriptor and mapped to inlets and outlets on the
-{\tt [plugin\textasciitilde]} processor.
-
-
 \subsection{Patches as plugins}
 
 An MFP patch can be saved as an LV2 plugin. There are limits on the
@@ -455,6 +448,70 @@ an "Edit" control added to the plugin causes the MFP graphical editor to
 open the patch. This may change in the future.
 
 
+\subsection{Dynamic object and scope creation}
+
+When creating a patch as a versatile building block, it may be
+important to have flexibility to support dynamic numbers of
+inlets and outlets or other patch resources. For example, there's
+no right number of inputs for an "audio mixer" patch; it depends
+on the application how many channels you want to mix.
+
+This could be accomplished by making separate patches for each
+useful number of channels, like {\tt [mixer4]}, {\tt [mixer8]},
+etc. But a nicer way would be to make a single patch called {\tt
+[mixer]} and create it with the number of channels as an
+argument, i.e. {\tt [mixer 4]} for a 4-channel mixer. If done
+properly, the interface could scale up as well, showing a slider
+or even a full channel strip for each channel.
+
+MFP enables this via a message called {\tt @clonescope}
+that can be sent to the patch at load time. {\tt @clonescope}
+makes a specified number of copies of all the objects in a
+specified {\it lexical scope}, creating a unique new scope for
+each set of copies.
+
+Lexical scopes define how the names used to label processors and
+vias are resolved to actual objects. As in any language, the
+process of turning a name into a value starts looking in the
+local scope and becomes more global until the name can be
+resolved.
+
+Objects in a patch default to their names being in the scope {\tt
+\_\_patch\_\_}, which is the "global" scope in a patch, but each
+layer can set a different default scope for objects in itself,
+and each object can be directly assigned to any other scope via
+the parameter editor.
+
+With multiple scopes existing in a patch, the same name (of a
+processor or send/receive via) can refer to different objects
+depending on the scope in which it is resolved. {\tt @clonescope}
+uses this to make copies of entire scopes at once. The objects,
+their interconnections, and send/receive vias can all be
+duplicated cleanly by just changing the scope name for each
+object when copying.
+
+A patch wanting to take advantage of this can inspect its own
+creation arguments, and then send itself a message to duplicate
+selected parts of its implementation as needed.
+
+See Figure~\ref{fig:clonescope} for how this looks in a patch.
+{\tt togglegrid} is a user-defined patch that creates an NxM grid
+of toggle buttons, each of which has an inlet and an outlet.
+The implementation is more than a single screenshot can capture,
+but the file {\tt doc/togglegrid.mfp} is part of the MFP source
+distribution and can be opened to inspect how lexical scopes,
+layers, and {\tt @clonescope} work together to make this happen.
+
+\begin{figure}[ht]
+\centerline{\includegraphics[width=3in]{togglegrid.png}}
+\caption{\label{fig:clonescope}{
+    \it Dynamic object creation using the {\tt @clonescope} message.
+    {\tt togglegrid} is a user-defined patch that creates an NxM
+    grid of toggle buttons.
+}}
+\end{figure}
+
+
 \section{Implementation}
 
 \subsection{Runtime components}
@@ -478,11 +535,16 @@ built with Dear ImGui.
 client interface.
 \end{itemize}
 
-These three are loosely coupled, communicating via an
+These three are loosely coupled, primarily communicating via an
 asynchronous RPC mechanism implemented in the Carp
-\cite{Gribble:Carp} package. Each runtime component implements
-its own representation of the patch's graph of processing nodes,
-so there are "parallel" patches built in the UI process, in the
+\cite{Gribble:Carp} package. To enable the special case of
+displaying signals and other rapidly-changing values in the UI,
+shared memory buffers are used by the {\tt [buffer\textasciitilde]} object to
+shortcut directly from the DSP engine to the UI.
+
+Each runtime component implements its own representation of the
+patch's graph of processing nodes, so there are "parallel"
+representations of each patch built in the UI process, in the
 main process, and in the DSP engine, using representations
 specific to that process.
 
