@@ -446,10 +446,8 @@ def configure(ctxt):
     # FAUST libs and header
     ctxt.find_program("faust")
     ctxt.find_program("llvm-config")
-    ctxt.env.FAUST_LIBS = [
-        "-lfaust",
-    ]
-
+    ctxt.check(lib="faust", uselib_store="Faust")
+    ctxt.env.PKGCONF_LIBS.append("Faust")
 
     # pip-installable libs we just mark them as not available
     for lib in pip_libs:
