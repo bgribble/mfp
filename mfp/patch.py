@@ -567,8 +567,6 @@ class Patch(Processor):
                 (self.gui_params.get('export_h') or 0) + 24
             )
         )
-        log.debug(f"update_export: {p}")
-        log.debug(f"update_export: gui_params {self.gui_params}")
 
         self.conf(
             export_x=x, export_y=y, export_w=w, export_h=h,
