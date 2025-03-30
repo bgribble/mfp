@@ -129,6 +129,9 @@ class Buffer(Processor):
             await self.dsp_setparam("channels", self.file_channels)
             await self.dsp_setparam("size", self.file_len)
 
+        await self.dsp_setparam("region_start", 0)
+        await self.dsp_setparam("region_end", self.file_len)
+
     def _transfer_file_data(self):
         if self.shm_obj is None:
             self.shm_obj = SharedMemory(self.buf_id)

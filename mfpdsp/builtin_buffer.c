@@ -272,7 +272,6 @@ process(mfp_processor * proc)
     }
 
     if (d->buf_state != BUF_IDLE) {
-
         if (tocopy == 0) {
             tocopy = proc->context->blocksize;
         }
@@ -286,11 +285,18 @@ process(mfp_processor * proc)
             d->buf_pos += tocopy;
         }
         else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
-            d->buf_pos = (
-                d->region_start
-                + ((d->buf_pos - d->region_start + tocopy) % (d->region_end - d->region_start))
-            );
-            loopstart = 1;
+            int pos_from_region_start = d->buf_pos - d->region_start + tocopy;
+            int pos_in_region = pos_from_region_start;
+
+            if (d->region_end - d->region_start > 0) {
+                pos_in_region = pos_from_region_start % (d->region_end - d->region_start);
+            }
+
+            d->buf_pos = (d->region_start + pos_in_region);
+
+            if (pos_from_region_start != pos_in_region) {
+                loopstart = 1;
+            }
         }
         else if (d->buf_mode == PLAY_BANG) {
             d->buf_pos = MIN(d->buf_pos + proc->context->blocksize, d->chan_size);
@@ -413,6 +419,7 @@ config(mfp_processor * proc)
 
     gpointer bufmode_ptr = g_hash_table_lookup(proc->params, "buf_mode");
     gpointer bufstate_ptr = g_hash_table_lookup(proc->params, "buf_state");
+    gpointer bufpos_ptr = g_hash_table_lookup(proc->params, "buf_pos");
     gpointer playchan_ptr = g_hash_table_lookup(proc->params, "play_channels");
 
     gpointer regionstart_ptr = g_hash_table_lookup(proc->params, "region_start");
@@ -466,6 +473,11 @@ config(mfp_processor * proc)
 
     if (bufmode_ptr != NULL) {
         d->buf_mode = *(double *)bufmode_ptr;
+    }
+
+    if (bufpos_ptr != NULL) {
+        d->buf_pos = (int)(*(double *)bufpos_ptr);
+        g_hash_table_remove(proc->params, "buf_pos");
     }
 
     if (bufstate_ptr != NULL) {
@@ -545,10 +557,11 @@ init_builtin_buffer(void) {
     p->alloc = alloc;
     p->params = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
     g_hash_table_insert(p->params, "buf_id", (gpointer)PARAMTYPE_STRING);
-    g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "buf_mode", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "buf_state", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "buf_pos", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_enabled", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "trig_chan", (gpointer)PARAMTYPE_FLT);
