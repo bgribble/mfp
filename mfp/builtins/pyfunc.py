@@ -5,6 +5,7 @@ pyfunc.py: Wrappers for common unary and binary Python functions
 Copyright (c) 2010-2017 Bill Gribble <grib@billgribble.com>
 '''
 import copy
+import inspect
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
@@ -15,12 +16,10 @@ from mfp import log
 
 
 def get_arglist(thunk):
-    if hasattr(thunk, '__code__'):
-        return thunk.__code__.co_varnames
-    elif hasattr(thunk, '__func__'):
-        return thunk.__func__.__code__.co_varnames
-    else:
+    if not callable(thunk):
         return None
+    sig = inspect.signature(thunk)
+    return list(sig.parameters.keys())
 
 
 def isiterable(obj):
