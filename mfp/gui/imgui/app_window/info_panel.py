@@ -865,18 +865,18 @@ def render_bindings_tab(app_window):
     ):
         # headers
         imgui.table_setup_column("Chan")
-        imgui.table_setup_column("Note")
+        imgui.table_setup_column("Note/CC")
         imgui.table_setup_column("Type")
         imgui.table_headers_row()
 
         for binding in sel.tooltip_info.get("midi_handlers", []):
             imgui.table_next_row()
             imgui.table_set_column_index(0)
-            imgui.text(binding["channel"])
+            imgui.text(str(binding["channel"]))
             imgui.table_set_column_index(1)
-            imgui.text(binding["note"])
+            imgui.text(str(binding.get("note") or binding.get("number")))
             imgui.table_set_column_index(2)
-            imgui.text(binding["type"])
+            imgui.text(str(binding.get("type")))
         imgui.end_table()
     imgui.pop_style_var()
     imgui.end_group()

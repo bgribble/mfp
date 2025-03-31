@@ -56,6 +56,16 @@ class GlobalMode (InputMode):
             menupath="Context > Clear counters"
         )
         cls.bind(
+            "learn-midi", cls.learn_midi, helptext="Learn MIDI controller",
+            keysym="C-m",
+            menupath="Context > Learn MIDI controller"
+        )
+        cls.bind(
+            "learn-osc", cls.learn_osc, helptext="Learn OSC controller",
+            keysym="C-o",
+            menupath="Context > Learn OSC controller"
+        )
+        cls.bind(
             "open-help", cls.open_help, helptext="Open help patch",
             keysym="F1",
             menupath="Context > ||Help"
@@ -313,6 +323,16 @@ class GlobalMode (InputMode):
 
         await self.window.cmd_get_input(":", cb, '')
         return True
+
+    async def learn_midi(self):
+        if self.window.selected:
+            for elt in self.window.selected:
+                await MFPGUI().mfp.send_methodcall(elt.obj_id, 0, "midi_learn")
+
+    async def learn_osc(self):
+        if self.window.selected:
+            for elt in self.window.selected:
+                await MFPGUI().mfp.send_methodcall(elt.obj_id, 0, "osc_learn")
 
     async def clear_counters(self):
         if self.window.selected:
