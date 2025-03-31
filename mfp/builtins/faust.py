@@ -5,11 +5,7 @@ faust.py:  Builtin faust DSP object
 Inlets and outlets are dynamically created after the Faust
 compiler runs.
 
-*
-
-
-
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from mfp.processor import Processor
@@ -43,13 +39,14 @@ class Faust(Processor):
         else:
             self.faust_code = extra.get("faust_code", "")
 
-        # info returned after compiling the fause code
+        # info returned after compiling the faust code
         # faust_params are the names of sliders and other UI elements
         # faust_dsp_XXlets are the number of DSP inlets/outlets in the
         # Faust process
         self.faust_params = []
         self.faust_dsp_inlets = 0
         self.faust_dsp_outlets = 0
+        self.faust_initialized = []
 
         # dsp inlets and outlets are dynamically created to match the
         # Faust process
@@ -57,6 +54,40 @@ class Faust(Processor):
         self.dsp_outlets = []
 
         self.set_channel_tooltips()
+
+    def save(self):
+        """
+        faust_params will get set when a new Faust program is
+        compiled, but we want to save it here so that when
+        we reload the patch we configure the processor correctly
+        even though we haven't compiled the code just yet
+        """
+        base_dict = super().save()
+        base_dict['faust_params'] = self.faust_params
+        base_dict['faust_dsp_inlets'] = self.faust_dsp_inlets
+        base_dict['faust_dsp_outlets'] = self.faust_dsp_outlets
+        return base_dict
+
+    def load(self, prms):
+        super().load(prms)
+        self.faust_params = prms.get("faust_params", [])
+        self.faust_dsp_inlets = prms.get("faust_dsp_inlets", 0)
+        self.faust_dsp_outlets = prms.get("faust_dsp_outlets", 0)
+
+        num_inlets = max(1, self.faust_dsp_inlets + len(self.faust_params))
+        num_outlets = self.faust_dsp_outlets
+        self.dsp_inlets = list(range(self.faust_dsp_inlets))
+        self.dsp_outlets = list(range(self.faust_dsp_outlets))
+        self.inlets = [Uninit] * num_inlets
+        self.outlets = [Uninit] * num_outlets
+        self.connections_out = [[] for r in range(num_outlets)]
+        self.connections_in = [[] for r in range(num_inlets)]
+        self.outlet_order = list(reversed(range(num_outlets)))
+
+        self.gui_params['num_inlets'] = num_inlets
+        self.gui_params['num_outlets'] = num_outlets
+        self.gui_params['dsp_inlets'] = self.dsp_inlets
+        self.gui_params['dsp_outlets'] = self.dsp_outlets
 
     async def setup(self):
         await self.dsp_init("faust~", faust_code=self.faust_code)
@@ -81,22 +112,31 @@ class Faust(Processor):
         ]
 
     def dsp_response(self, resp_id, resp_value):
+        need_conf = False
+        if set(self.faust_initialized) != set(['inlets', 'outlets', 'params']):
+            need_conf = True
+
         if resp_id == self.RESP_DSP_INLETS:
             self.faust_dsp_inlets = resp_value
+            self.faust_initialized.append('inlets')
         elif resp_id == self.RESP_DSP_OUTLETS:
             self.faust_dsp_outlets = resp_value
+            self.faust_initialized.append('outlets')
         elif resp_id == self.RESP_PARAM:
-            self.faust_params.append(resp_value)
+            if resp_value not in self.faust_params:
+                self.faust_params.append(resp_value)
+            self.faust_initialized.append('params')
 
         inlets = max(1, self.faust_dsp_inlets + len(self.faust_params))
+        prev_inlets = len(self.inlets)
         self.resize(
             inlets,
             self.faust_dsp_outlets
         )
-        need_conf = False
         if (
             len(self.dsp_inlets) != self.faust_dsp_inlets
             or len(self.dsp_outlets) != self.faust_dsp_outlets
+            or inlets != prev_inlets
         ):
             need_conf = True
 

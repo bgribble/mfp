@@ -196,7 +196,9 @@ async def json_unpack_objects(self, data, scope):
         oargs = prms.get('initargs')
         oname = prms.get('name')
 
-        newobj = await MFPApp().create(otype, oargs, self, scope, oname)
+        newobj = await MFPApp().create(
+            otype, oargs, self, scope, oname, params=prms.get('gui_params'), setup=False
+        )
         if not newobj:
             skipped_objects += 1
             error = f"Could not create element '{otype}' with args '{oargs}'"
@@ -210,6 +212,7 @@ async def json_unpack_objects(self, data, scope):
         newobj.load(prms)
         if self.gui_created:
             need_gui.append(newobj)
+        await newobj.setup()
 
         idmap[int(oid)] = newobj
 

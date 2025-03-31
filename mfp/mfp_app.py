@@ -400,7 +400,7 @@ class MFPApp (Singleton, SignalMixin):
         fullpath = utils.find_file_in_path(libname, self.extpath)
         log.warning(f"mfp_app.load_extension: not implemented completely, path={fullpath}")
 
-    async def create(self, init_type, init_args, patch, scope, name, params=None):
+    async def create(self, init_type, init_args, patch, scope, name, params=None, setup=True):
         create_params = {}
         rval = None
 
@@ -483,7 +483,8 @@ class MFPApp (Singleton, SignalMixin):
                 obj = await obj
 
             if obj and obj.obj_id:
-                await obj.setup()
+                if setup:
+                    await obj.setup()
 
                 for attr, val in create_params.items():
                     obj.gui_params[attr] = val
