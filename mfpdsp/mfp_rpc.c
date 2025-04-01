@@ -364,6 +364,22 @@ dispatch_methodcall(
         );
         mfp_dsp_push_request(rd);
     }
+    else if (!strcmp(service_name, "DSPObject.setparams")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
+        if (!kwargs) {
+            return NULL;
+        }
+        for (int i=0; i < kwargs->n_items; i++) {
+            rd.reqtype = REQTYPE_SETPARAM;
+            rd.src_proc = obj_id;
+            rd.param_name = g_strdup(kwargs->items[i]->key->_string);
+            rd.param_type = mfp_proc_param_type(src_proc, rd.param_name);
+            rd.param_value = (gpointer)extract_param_value(
+                src_proc, rd.param_name, kwargs->items[i]->value
+            );
+            mfp_dsp_push_request(rd);
+        }
+    }
     else if (!strcmp(service_name, "DSPObject.delete")) {
         rd.reqtype = REQTYPE_DESTROY;
         rd.src_proc = obj_id;

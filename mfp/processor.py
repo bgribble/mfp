@@ -587,6 +587,9 @@ class Processor:
     async def dsp_setparam(self, param, value):
         await self.dsp_obj.setparam(param, value)
 
+    async def dsp_setparams(self, **kwargs):
+        await self.dsp_obj.setparams(**kwargs)
+
     async def dsp_getparam(self, param, value):
         return await self.dsp_obj.getparam(param, value)
 

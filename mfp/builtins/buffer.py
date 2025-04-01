@@ -88,8 +88,7 @@ class Buffer(Processor):
 
     async def setup(self):
         await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
-        for key, value in self.init_kwargs.items():
-            await self.dsp_setparam(key, value)
+        await self.dsp_setparams(**self.init_kwargs)
 
     def offset(self, channel, start):
         return (channel * self.size + start) * self.FLOAT_SIZE
@@ -110,7 +109,9 @@ class Buffer(Processor):
             mfp_samplerate = MFPApp().samplerate
             if samplerate != mfp_samplerate:
                 log.debug(f"[buffer] Converting samplerate from {samplerate} to {mfp_samplerate}")
-                self.file_data = rateconv.resample(data, mfp_samplerate / samplerate, 'sinc_fastest')
+                self.file_data = rateconv.resample(data, mfp_samplerate / samplerate, self.file_convert)
+            else:
+                self.file_data = data
 
             self.file_len = self.file_data.shape[0]
             self.file_ready = True
@@ -121,16 +122,19 @@ class Buffer(Processor):
         await ready.wait()
         thread.join()
 
-        if self.channels == self.file_channels and self.size == self.file_len:
+        if self.channels == self.file_channels and self.size >= self.file_len:
             self.file_ready = False
             self._transfer_file_data()
         else:
             self.buffer_ready = False
-            await self.dsp_setparam("channels", self.file_channels)
-            await self.dsp_setparam("size", self.file_len)
+            await self.dsp_setparams(
+                channels=self.file_channels,
+                size=self.file_len
+            )
 
-        await self.dsp_setparam("region_start", 0)
-        await self.dsp_setparam("region_end", self.file_len)
+        await self.dsp_setparams(
+            region_start=0, region_end=self.file_len
+        )
 
     def _transfer_file_data(self):
         if self.shm_obj is None:
@@ -162,6 +166,7 @@ class Buffer(Processor):
         ]
 
     def dsp_response(self, resp_id, resp_value):
+        need_resize = False
         if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
             self.outlets[-1] = resp_value
         elif resp_id == self.RESP_BUFID:
@@ -172,6 +177,8 @@ class Buffer(Processor):
         elif resp_id == self.RESP_BUFSIZE:
             self.size = resp_value
         elif resp_id == self.RESP_BUFCHAN:
+            if self.channels != resp_value:
+                need_resize = True
             self.channels = resp_value
             self.set_channel_tooltips()
         elif resp_id == self.RESP_RATE:
@@ -190,6 +197,15 @@ class Buffer(Processor):
             if self.file_ready:
                 self.file_ready = False
                 self._transfer_file_data()
+
+        if need_resize:
+            # FIXME -- message connections to last ports
+            self.dsp_inlets = list(range(self.channels))
+            self.dsp_outlets = list(range(self.channels))
+            self.resize(self.channels, self.channels + 2)
+            self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
+            self.set_channel_tooltips()
+
         self.outlets[-1] = (resp_id, resp_value)
 
     async def trigger(self):
@@ -204,11 +220,13 @@ class Buffer(Processor):
             self.file_name = incoming
             await self._init_file_read()
         elif isinstance(incoming, dict):
+            prms = {}
             for k, v in incoming.items():
                 if k == "size":
                     v = v*MFPApp().samplerate/1000.0
                 setattr(self, k, v)
-                await self.dsp_obj.setparam(k, v)
+                prms[k] = v
+            await self.dsp_obj.setparams(**prms)
 
     def slice(self, start, end, channel=0):
         """

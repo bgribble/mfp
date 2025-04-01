@@ -59,10 +59,11 @@ class DSPObject:
     def setparam(self, param, value):
         pass
 
+    def setparams(self, **kwargs):
+        pass
+
     def connect(self, outlet, target, inlet):
         pass
 
     def disconnect(self, outlet, target, inlet):
         pass
-
-

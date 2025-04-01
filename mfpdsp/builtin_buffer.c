@@ -322,7 +322,6 @@ process(mfp_processor * proc)
         mfp_dsp_send_response_bool(proc, RESP_LOOPSTART, 1);
     }
 
-
     return 0;
 }
 
@@ -381,6 +380,7 @@ shared_buffer_alloc(buf_info * buf)
 static void
 buffer_activate(builtin_buffer_data * d)
 {
+
     d->buf_to_alloc.buf_ready = ALLOC_IDLE;
     memcpy(&(d->buf_active), &(d->buf_to_alloc), sizeof(buf_info));
     d->chan_count = d->buf_active.buf_chancount;
@@ -429,7 +429,8 @@ config(mfp_processor * proc)
 
     builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
 
-    int new_size=d->chan_size, new_channels=d->chan_count;
+    int new_size = d->chan_size;
+    int new_channels = d->chan_count;
 
     int config_handled = 1;
 
@@ -441,11 +442,18 @@ config(mfp_processor * proc)
     }
 
     if ((new_size != d->chan_size) || (new_channels != d->chan_count)) {
+        int need_more_buffers = (
+            new_channels > d->chan_count || new_size > d->chan_size
+        );
         if(d->buf_to_alloc.buf_ready == ALLOC_READY) {
             buffer_activate(d);
             d->region_start = 0;
             d->region_end = 0;
             d->buf_pos = 0;
+            if (need_more_buffers) {
+                mfp_proc_free_buffers(proc);
+                mfp_proc_alloc_buffers(proc, d->chan_count, d->chan_count, proc->context->blocksize);
+            }
             if (d->buf_active.buf_type == BUFTYPE_SHARED) {
                 mfp_dsp_send_response_str(proc, RESP_BUFID, d->buf_active.shm_id);
                 mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->buf_active.buf_chansize);
