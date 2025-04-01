@@ -33,6 +33,7 @@ class Buffer(Processor):
 
     FLOAT_SIZE = 4
 
+    doc_help_patch = "buffer~.help.mfp"
     doc_tooltip_obj = "Load or capture an audio signal in a shared buffer"
     doc_tooltip_inlet = ["Signal input/control messages"]
     doc_tooltip_outlet = [
