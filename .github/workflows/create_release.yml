@@ -41,7 +41,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
       - name: Get short Python version
-        run: echo PYV=cp${{matrix.python_version}} | sed -e 's/\.//' >> $GITHUB_ENV
+        run: echo PYV=cp${{matrix.python-version}} | sed -e 's/\.//' >> $GITHUB_ENV
       - name: Get release asset filename
         run: echo RELEASE_FILE=mfp_${{ needs.make_release.outputs.VERSION }}_${{ env.PYV }}-${{ env.PYV }}_linux_x86_64.tar.gz >> $GITHUB_ENV
       - name: Update apt cache
