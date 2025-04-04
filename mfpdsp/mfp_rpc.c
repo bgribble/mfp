@@ -14,6 +14,7 @@ static int _next_reqid = 1;
 static GHashTable * request_callbacks = NULL;
 static GHashTable * request_data = NULL;
 static GHashTable * request_waiting = NULL;
+static GHashTable * response_received = NULL;
 static pthread_mutex_t request_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t request_cond = PTHREAD_COND_INITIALIZER;
 
@@ -291,13 +292,22 @@ mfp_rpc_wait(int request_id)
     struct timespec alarmtime;
     struct timeval nowtime;
     gpointer reqwaiting;
+    gpointer respreceived;
 
     if (request_id < 0) {
-        mfp_log_debug("[mfp_rpc] BADREQUEST, not waiting\n");
+        mfp_log_debug("[mfp_rpc] BADREQUEST, not waiting");
         return;
     }
 
     pthread_mutex_lock(&request_lock);
+
+    /* check for response already received */
+    respreceived = g_hash_table_lookup(response_received, GINT_TO_POINTER(request_id));
+    if (respreceived) {
+        g_hash_table_remove(response_received, GINT_TO_POINTER(request_id));
+        pthread_mutex_unlock(&request_lock);
+        return;
+    }
 
     g_hash_table_insert(request_waiting, GINT_TO_POINTER(request_id), GINT_TO_POINTER(1));
 
@@ -455,9 +465,9 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
 
             cbfunc(response->value, cbdata);
         }
-
         pthread_mutex_lock(&request_lock);
         g_hash_table_remove(request_waiting, GINT_TO_POINTER(response->call_id));
+        g_hash_table_insert(response_received, GINT_TO_POINTER(response->call_id), GINT_TO_POINTER(1));
         pthread_cond_broadcast(&request_cond);
         pthread_mutex_unlock(&request_lock);
         carp__call_response__free_unpacked(response, NULL);
@@ -542,6 +552,7 @@ mfp_rpc_init(void)
     request_callbacks = g_hash_table_new(g_direct_hash, g_direct_equal);
     request_data = g_hash_table_new(g_direct_hash, g_direct_equal);
     request_waiting = g_hash_table_new(g_direct_hash, g_direct_equal);
+    response_received = g_hash_table_new(g_direct_hash, g_direct_equal);
 
     pthread_mutex_init(&request_lock, NULL);
     pthread_cond_init(&request_cond, NULL);
