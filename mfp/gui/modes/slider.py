@@ -154,7 +154,7 @@ class SliderEditMode (InputMode):
             menupath="Context > ||Params > Set upper bound"
         )
         cls.bind(
-            "slider-set-zero", cls.set_zero, "Enter zero point", keysym="C-|",
+            "slider-set-zero", cls.set_zero, "Enter zero point", keysym="C-\\",
             menupath="Context > ||Params > Set zero point"
         )
         cls.bind(

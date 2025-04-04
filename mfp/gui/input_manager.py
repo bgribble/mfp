@@ -111,6 +111,9 @@ class InputManager:
         current_handler = None
         retry_count = 0
 
+        if MFPGUI().debug:
+            log.debug(f"[input_manager] keysym={keysym} {len(handlers or [])} handlers")
+
         if not handlers:
             return False
 
