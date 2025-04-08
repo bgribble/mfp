@@ -14,12 +14,13 @@ now it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
 **What's happening now?** I am working on MFP pretty actively.
-The main branch currently contains a new UI backend built with [Dear
-ImGUI](https://github.com/ocornut/imgui), via the
-excellent [imgui-bundle](https://github.com/pthom/imgui_bundle)
-bindings. The ImGUI UI is now the default; to use the old Clutter
-UI, be sure to build with it (see README.build) and launch with
-the option `--gui-backend=clutter`.
+The most recent release (0.8.0) now contains a new UI backend
+built with [Dear ImGUI](https://github.com/ocornut/imgui), via
+the excellent
+[imgui-bundle](https://github.com/pthom/imgui_bundle) bindings.
+The ImGUI UI is now the default; to use the old Clutter UI, be
+sure to build with it (see README.build) and launch with the
+option `--gui-backend=clutter`.
 
 The new UI looks quite a bit different. It's more like Max in the
 visual presentation of patches and the addition of a right-side
@@ -37,10 +38,8 @@ in important ways. Some big differences:
 * A help system, not comprehensive but getting better coverage
   all the time
 
-The most recent release (0.7) is the last release that will
-exclusively support Gtk/Clutter for the UI. I will release 0.8 when I
-feel that the Dear Imgui backend is at parity with the Clutter backend,
-and then 0.9 will likely remove the Clutter backend.
+Development towards 0.9 will focus on stability and adding new
+features.
 
 ### NEW FEATURES
 
@@ -82,8 +81,8 @@ preview. These are all in the `master` branch.
   any connections. A message like `@show "Layer 1"` will send the
   `@show` method call, which will change the patch's display to
   the named layer.
-* **Interactive search.** The `/` key starts an interactive search which 
-  highlights matching text. C-RET to cycle the selection between 
+* **Interactive search.** The `/` key starts an interactive search which
+  highlights matching text. C-RET to cycle the selection between
   matching items, or C-A-RET to select all matching.
 
 ### BUILDING
