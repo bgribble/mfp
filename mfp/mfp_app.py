@@ -106,7 +106,7 @@ class MFPApp (Singleton, SignalMixin):
         from carp.channel import UnixSocketChannel
         from carp.host import Host
 
-        log.info(f"Main thread started, pid = {os.getpid()}")
+        log.info(f"Starting MFP v{version()} pid={os.getpid()}")
 
         # RPC service setup
         self.rpc_channel = UnixSocketChannel(socket_path=self.socket_path)

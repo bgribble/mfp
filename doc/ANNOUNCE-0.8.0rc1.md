@@ -2,7 +2,8 @@
 
 I am pleased to announce a new version of MFP including numerous
 new features and improvements. The major "deliverable" of this
-release is a new UI backend built on [Dear ImGUI](), which
+release is a new UI backend built on 
+[Dear ImGUI](https://github.com/ocornut/imgui), which
 replaces the older UI built on Gtk/Clutter.
 
 A summary of changes is below.  Please see the GitHub project page
@@ -18,15 +19,18 @@ If you simply can't get the build dependencies working, I have
 made a start on a CD process using Github Actions. There is a
 binary package for amd64 architectures (most AMD and Intel
 processors) with an install script that should be built and
-associated with the release. Since MFP includes both Python and C
-components, I am not confident that this binary package will
-work; please let me know if you have success (or failure) with
+associated with the release. Versions of the installable packages
+are built for Python 3.10, 3.11, 3.12, and 3.13; pick whichever
+one is appropriate for you. ince MFP includes both Python and C
+components, I am not very confident that this binary package will
+work. Please let me know if you have success (or failure) with
 it.
 
 
 ### Significant changes since release v0.7
 
-* A new UI built using [Dear ImGUI](). Improvements include:
+* A new UI built using [Dear ImGUI](https://github.com/ocornut/imgui). 
+  Improvements include:
 
   * A menu system reflecting most available keyboard actions
 
@@ -58,7 +62,7 @@ it.
 MFP is an environment for visually composing computer programs,
 with an emphasis on music and real-time audio synthesis and
 analysis.  It's very much inspired by Miller Puckette's Pure Data
-(pd) and Max/MSP, with a bit of LabView and TouchOSC for good
+(Pd) and Max/MSP, with a bit of LabView and TouchOSC for good
 measure.  It is targeted at musicians, recording engineers, and
 software developers who like the "patching" dataflow metaphor for
 coding up audio synthesis, processing, and analysis.
@@ -95,23 +99,23 @@ pretty similar but differs in a few key ways:
    supported.
 
  * MFP has just a fraction of the builtin and addon functionality
-   provided by PD.  It's not up to being a replacement except in
+   provided by Pd.  It's not up to being a replacement except in
    limited cases!
 
 The code and issue tracker are hosted on GitHub:
 
     https://github.com/bgribble/mfp
 
-You can find the LAC-2013 paper and accompanying screenshots,
-some sample patches, and a few other bits of documentation in the
-doc directory of the GitHub repo.  The README files at the top
-level of the source tree contain dependency, build, and
-getting-started information.
+Help can be found in the app; I recommend starting with the
+Tutorial and proceeding to the Reference mentioned in the Help
+menu.
 
-More sample patches are in my personal patch repo:
-
-    https://github.com/bgribble/mfp-patches
-
+You can find two white papers about MFP (one accepted to the 2013
+edition of the Linux Audio Conference, and one submitted for the
+2025 edition), some sample patches, and a few other bits of
+documentation in the doc directory of the GitHub repo.  The
+README files at the top level of the source tree contain
+dependency, build, and getting-started information.
 
 Where's it going?
 ----------------------------------------
