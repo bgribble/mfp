@@ -18,7 +18,7 @@ mfp_context_new(int ctxt_type)
     ctxt->ctype = ctxt_type;
     ctxt->activated = 0;
     ctxt->owner = getpid();
-
+    ctxt->msg_handler = NULL;
 
     if (ctxt_type == CTYPE_JACK) {
         ctxt->info.jack = g_malloc0(sizeof(mfp_jack_info));

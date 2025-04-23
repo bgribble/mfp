@@ -561,7 +561,9 @@ class Processor:
     async def dsp_init(self, proc_name, **params):
         from .mfp_app import MFPApp
         if self.patch.context:
-            DSPObjectFactory = await MFPApp().rpc_host.require(DSPObject)
+            DSPObjectFactory = await MFPApp().rpc_host.require(
+                DSPObject, host_id=self.patch.context.node_id
+            )
             self.dsp_obj = await DSPObjectFactory(
                 self.obj_id,
                 proc_name,
@@ -784,6 +786,8 @@ class Processor:
 
         if self.outlets[outlet_num] is Uninit:
             self.outlets[outlet_num] = value
+        elif isinstance(self.outlets[outlet_num], MultiOutput):
+            self.outlets[outlet_num].values.append(value)
         else:
             mv = MultiOutput()
             mv.values.append(self.outlets[outlet_num])
@@ -811,8 +815,10 @@ class Processor:
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
-            log.error("%s.%s (%s): send to inlet %d failed: '%s'" %
-                      (self.patch.name, self.name, self.init_type, inlet, value))
+            log.error(
+                "%s.%s (%s): send to inlet %d failed: '%s'" %
+                (self.patch.name if self.patch else "patch", self.name, self.init_type, inlet, value)
+            )
             log.error("Exception: %s" % e.args)
             log.debug_traceback(e)
             error_target = self

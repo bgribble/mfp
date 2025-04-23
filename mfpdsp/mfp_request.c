@@ -100,6 +100,8 @@ mfp_dsp_handle_requests(void)
     while(incoming_queue_read != incoming_queue_write) {
         mfp_in_data * cmd = incoming_queue[incoming_queue_read];
         mfp_processor * src_proc, * dest_proc;
+        mfp_context * context = NULL;
+
         int type = cmd->reqtype;
 
         switch (type) {
@@ -141,6 +143,12 @@ mfp_dsp_handle_requests(void)
 
         case REQTYPE_EXTLOAD:
             mfp_ext_init((mfp_extinfo *)cmd->param_value);
+            break;
+
+        case REQTYPE_CONTEXT_MSG:
+            /* FIXME -- this is specific to LV2 MIDI for now */
+            context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cmd->context_id));
+            context->msg_handler(context, cmd->dest_port, (int64_t)(cmd->param_value));
             break;
         }
         incoming_queue_read = (incoming_queue_read+1) % REQ_BUFSIZE;

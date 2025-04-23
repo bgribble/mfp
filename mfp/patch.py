@@ -40,6 +40,7 @@ class Patch(Processor):
             Patch.task_nibbler = TaskNibbler()
 
         self.file_origin = None
+        self.dsp_embed = False   # set to True if in an LV2 host
 
         self.objects = {}
         self.scopes = {'__patch__': LexicalScope('__patch__')}
@@ -81,22 +82,19 @@ class Patch(Processor):
         """
         @close to close a patch, just means delete but doesn't look as scary
         """
-        from .mfp_app import MFPApp
         await self.delete()
 
     def args(self, index=None):
         if index is None:
             return self.parsed_initargs
-        elif self.parsed_initargs is None or index >= len(self.parsed_initargs):
+        if self.parsed_initargs is None or index >= len(self.parsed_initargs):
             return Uninit
-        else:
-            return self.parsed_initargs[index]
+        return self.parsed_initargs[index]
 
     def kwargs(self, name=None):
         if name is None:
             return self.parsed_kwargs
-        else:
-            return self.parsed_kwargs.get(name, Uninit)
+        return self.parsed_kwargs.get(name, Uninit)
 
     def ping(self):
         log.debug("ping:", self.name)
@@ -213,6 +211,11 @@ class Patch(Processor):
     #############################
 
     async def trigger(self):
+        from .mfp_app import MFPApp
+        from .midi import MidiEvent
+        from .dsp_object import DSPObject
+        from .processor import MultiOutput
+
         inlist = list(range(len(self.inlets)))
         inlist.reverse()
 
@@ -225,7 +228,31 @@ class Patch(Processor):
                 self.inlets[i] = Uninit
 
         for o in range(len(self.outlets)):
-            self.add_output(o, self.outlet_objects[o].outlets[0])
+            outlet = self.outlet_objects[o]
+            outval = outlet.outlets[0]
+
+            # FIXME -- need a different approach for forwarding
+            # outputs to the DSP engine, this will work for short term
+            # but will break if we can be hosted as different kinds of
+            # plugin, or need to send MIDI events to JACK
+            if self.context and self.dsp_embed:
+                if isinstance(outval, MultiOutput):
+                    values = outval.values
+                else:
+                    values = [outval]
+
+                DSPObjectFactory = await MFPApp().rpc_host.require(
+                    DSPObject, host_id=self.context.node_id
+                )
+                for v in values:
+                    if isinstance(v, MidiEvent) and outlet.lv2_type == "midi":
+                        v = v.to_lv2()
+                    else:
+                        v = float(v)
+
+                    await DSPObjectFactory.context_msg(self.context.context_id, o, v)
+
+            self.add_output(o, outval)
             self.outlet_objects[o].outlets[0] = Uninit
 
     async def method(self, message, inlet=0):
@@ -317,8 +344,6 @@ class Patch(Processor):
             pass
 
     async def connect(self, outlet, target, inlet, show_gui=True):
-        from .mfp_app import MFPApp
-
         async def _patch_connect_retry(args):
             rv = await Processor.connect(*args)
             return rv

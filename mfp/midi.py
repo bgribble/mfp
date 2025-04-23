@@ -11,11 +11,10 @@ from .utils import QuittableThread
 from threading import Lock
 from datetime import datetime
 from . import appinfo
-
+from . import lv2midi
 from . import log
 from .utils import isiterable
 from .patch_json import ext_encode
-
 
 @ext_encode
 class SeqEvent(object):
@@ -52,6 +51,8 @@ def mk_raw(event, port=0):
 
 @ext_encode
 class MidiEvent (object):
+    _lv2_registry = {}
+
     def __init__(self, seqevent=None):
         self.seqevent = seqevent
         self.channel = 1
@@ -64,6 +65,11 @@ class MidiEvent (object):
                 self.port = self.seqevent.dst[1]
             self.channel = seqevent.data[0] + 1
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, 'lv2_type'):
+            MidiEvent._lv2_registry[cls.lv2_type] = cls
+
     def source(self):
         return (self.seqevent.dst, self.seqevent.etype, self.channel, None)
 
@@ -72,6 +78,18 @@ class MidiEvent (object):
             return self.seqevent.etype
         else:
             return self.alsa_type
+
+    def from_lv2(self, msg):
+        etype = lv2midi.lv2_midi_message_type(msg)
+        ctor = MidiEvent._lv2_registry.get(etype)
+        if ctor:
+            ev = ctor()
+            ev.from_lv2(msg)
+            return ev
+        return self
+
+    def to_lv2(self):
+        return 0
 
     def seq_data(self):
         if self.seqevent is not None:
@@ -97,6 +115,7 @@ class Note (MidiEvent):
 @ext_encode
 class NoteOn (Note):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTEON
+    lv2_type = lv2midi.LV2_MIDI_MSG_NOTE_ON
 
     def __init__(self, seqevent=None):
         super().__init__(seqevent)
@@ -110,6 +129,15 @@ class NoteOn (Note):
     def source(self):
         return (self.seqevent.dst, NoteOn.__name__, self.channel, self.key)
 
+    def from_lv2(self, msg):
+        self.key = (msg & 0xff0000) >> 16
+        self.velocity = (msg & 0xff00) >> 8
+
+    def to_lv2(self):
+        return (
+            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8)
+        )
+
     def __repr__(self):
         return "<NoteOn %s %s %s>" % (self.channel, self.key, self.velocity)
 
@@ -117,6 +145,7 @@ class NoteOn (Note):
 @ext_encode
 class NoteOff (Note):
     alsa_type = alsaseq.SND_SEQ_EVENT_NOTEOFF
+    lv2_type = lv2midi.LV2_MIDI_MSG_NOTE_OFF
 
     def __init__(self, seqevent=None):
         super().__init__(seqevent)
@@ -133,12 +162,23 @@ class NoteOff (Note):
     def source(self):
         return (self.seqevent.dst, NoteOff.__name__, self.channel, self.key)
 
+    def from_lv2(self, msg):
+        self.key = (msg & 0xff0000) >> 16
+        self.velocity = (msg & 0xff00) >> 8
+
+    def to_lv2(self):
+        return (
+            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8)
+        )
+
     def __repr__(self):
         return "<NoteOff %s %s %s>" % (self.channel, self.key, self.velocity)
 
 
 @ext_encode
 class NotePress (Note):
+    lv2_type = lv2midi.LV2_MIDI_MSG_NOTE_PRESSURE
+
     def __init__(self, seqevent=None):
         super().__init__(seqevent)
         self.key = 0
@@ -154,13 +194,28 @@ class NotePress (Note):
     def source(self):
         return (self.seqevent.dst, NotePress.__name__, self.channel, self.key)
 
+    def from_lv2(self, msg):
+        self.key = (msg & 0xff0000) >> 16
+        self.velocity = (msg & 0xff00) >> 8
+
+    def to_lv2(self):
+        return (
+            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8)
+        )
+
     def __repr__(self):
         return "<NotePress %s %s %s>" % (self.channel, self.key, self.velocity)
 
 
 @ext_encode
+class ChannelPress (NotePress):
+    lv2_type = lv2midi.LV2_MIDI_MSG_CHANNEL_PRESSURE
+
+
+@ext_encode
 class MidiPgmChange (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_PGMCHANGE
+    lv2_type = lv2midi.LV2_MIDI_MSG_PGM_CHANGE
 
     def __init__(self, seqevent=None):
         super().__init__(seqevent)
@@ -175,6 +230,14 @@ class MidiPgmChange (MidiEvent):
     def source(self):
         return (self.seqevent.dst, MidiPgmChange.__name__, self.channel, None)
 
+    def from_lv2(self, msg):
+        self.program = (msg & 0xff0000) >> 16
+
+    def to_lv2(self):
+        return (
+            (self.lv2_type << 24) | (self.program << 16)
+        )
+
     def __repr__(self):
         return "<MidiPgmChange %s %s>" % (self.channel, self.program)
 
@@ -182,6 +245,7 @@ class MidiPgmChange (MidiEvent):
 @ext_encode
 class MidiCC (MidiEvent):
     alsa_type = alsaseq.SND_SEQ_EVENT_CONTROLLER
+    lv2_type = lv2midi.LV2_MIDI_MSG_CONTROLLER
 
     def __init__(self, seqevent=None):
         super().__init__(seqevent)
@@ -198,6 +262,15 @@ class MidiCC (MidiEvent):
     def source(self):
         return (self.seqevent.dst, MidiCC.__name__, self.channel, self.controller)
 
+    def from_lv2(self, msg):
+        self.controller = (msg & 0xff0000) >> 16
+        self.value = (msg & 0xff00) >> 8
+
+    def to_lv2(self):
+        return (
+            (self.lv2_type << 24) | (self.controller << 16) | (self.value << 8)
+        )
+
     def __repr__(self):
         return "<MidiCC %s %s %s>" % (self.channel, self.controller, self.value)
 
@@ -205,6 +278,7 @@ class MidiCC (MidiEvent):
 @ext_encode
 class MidiPitchbend (MidiCC):
     alsa_type = alsaseq.SND_SEQ_EVENT_PITCHBEND
+    lv2_type = lv2midi.LV2_MIDI_MSG_BENDER
 
     def __init__(self, seqevent=None):
         super().__init__(seqevent)
@@ -221,11 +295,20 @@ class MidiPitchbend (MidiCC):
     def source(self):
         return (self.seqevent.dst, MidiPitchbend.__name__, self.channel, self.note)
 
+    def from_lv2(self, msg):
+        self.note = (msg & 0xff0000) >> 16
+        self.value = (msg & 0xff00) >> 8
+
+    def to_lv2(self):
+        return (
+            (self.lv2_type << 24) | (self.note << 16) | (self.value << 8)
+        )
+
     def __repr__(self):
         return "<MidiPitchbend %s %s %s>" % (self.channel, self.note, self.value)
 
 
-class MFPMidiManager(QuittableThread):
+def from_alsaseq(raw_event):
     etypemap = {
         alsaseq.SND_SEQ_EVENT_SYSTEM: MidiUndef,
         alsaseq.SND_SEQ_EVENT_RESULT: MidiUndef,
@@ -287,6 +370,55 @@ class MFPMidiManager(QuittableThread):
         alsaseq.SND_SEQ_EVENT_USR_VAR4: MidiUndef,
         alsaseq.SND_SEQ_EVENT_NONE: MidiUndef
     }
+
+    ctor = etypemap.get(raw_event[0])
+    if ctor is None:
+        log.debug("midi: no constructor for", raw_event)
+        ctor = MidiUndef
+    # special case for NoteOn with velocity 0 -- it's a NoteOff,
+    # treat it as such
+    elif ctor is NoteOn:
+        non = ctor(SeqEvent(*raw_event))
+        if non.velocity == 0:
+            return NoteOff(SeqEvent(*raw_event))
+    return ctor(SeqEvent(*raw_event))
+
+
+def from_lv2(raw_event):
+    etypemap = {
+        lv2midi.LV2_MIDI_MSG_INVALID: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_NOTE_OFF: NoteOff,
+        lv2midi.LV2_MIDI_MSG_NOTE_ON: NoteOn,
+        lv2midi.LV2_MIDI_MSG_NOTE_PRESSURE: NotePress,
+        lv2midi.LV2_MIDI_MSG_CONTROLLER: MidiCC,
+        lv2midi.LV2_MIDI_MSG_PGM_CHANGE: MidiPgmChange,
+        lv2midi.LV2_MIDI_MSG_CHANNEL_PRESSURE: NotePress,
+        lv2midi.LV2_MIDI_MSG_BENDER: MidiPitchbend,
+        lv2midi.LV2_MIDI_MSG_SYSTEM_EXCLUSIVE: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_MTC_QUARTER: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_SONG_POS: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_SONG_SELECT: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_TUNE_REQUEST: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_CLOCK: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_START: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_CONTINUE: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_STOP: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_ACTIVE_SENSE: MidiUndef,
+        lv2midi.LV2_MIDI_MSG_RESET: MidiUndef,
+    }
+
+    lv2_type = (raw_event & 0xff000000) >> 24
+    ctor = etypemap.get(lv2_type)
+    if ctor is None:
+        log.debug("midi: no constructor for", raw_event)
+        ctor = MidiUndef
+    ev = ctor()
+    ev.parse_lv2(raw_event)
+    return ev
+
+
+
+class MFPMidiManager(QuittableThread):
 
     def __init__(self, inports, outports):
         self.num_inports = inports
@@ -386,23 +518,10 @@ class MFPMidiManager(QuittableThread):
             select.select([alsafd], [], [], 0.1)
             if alsaseq.inputpending():
                 raw_event = alsaseq.input()
-                new_event = self.create_event(raw_event)
+                new_event = from_alsaseq(raw_event)
                 self.dispatch_event(new_event)
         alsaseq.stop()
         alsaseq.close()
-
-    def create_event(self, raw_event):
-        ctor = self.etypemap.get(raw_event[0])
-        if ctor is None:
-            log.debug("midi: no constructor for", raw_event)
-            ctor = MidiUndef
-        # special case for NoteOn with velocity 0 -- it's a NoteOff,
-        # treat it as such
-        elif ctor is NoteOn:
-            non = ctor(SeqEvent(*raw_event))
-            if non.velocity == 0:
-                return NoteOff(SeqEvent(*raw_event))
-        return ctor(SeqEvent(*raw_event))
 
     def dispatch_event(self, event):
         port, typeinfo, channel, unit = event.source()

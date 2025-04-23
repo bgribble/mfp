@@ -67,3 +67,7 @@ class DSPObject:
 
     def disconnect(self, outlet, target, inlet):
         pass
+
+    @classmethod
+    def context_msg(cls, context_id, port, message):
+        pass

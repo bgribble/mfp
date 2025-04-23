@@ -74,7 +74,6 @@ int
 mfp_api_send_to_outlet(mfp_context * context, int port, float value,
                        char * msgbuf, int * msglen)
 {
-    /* FIXME - this service is not implemented in the MFPCommand API */
     const char service_name[] = "MFPCommand.send_to_outlet";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
@@ -83,6 +82,48 @@ mfp_api_send_to_outlet(mfp_context * context, int port, float value,
     mfp_rpc_args_append_int(arglist, context->default_obj_id);
     mfp_rpc_args_append_int(arglist, port);
     mfp_rpc_args_append_double(arglist, value);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, msglen
+    );
+    return request_id;
+}
+
+int
+mfp_api_send_midi_to_inlet(
+    mfp_context * context, int port, int64_t value,
+    char * msgbuf, int * msglen
+) {
+    const char service_name[] = "MFPCommand.send_midi";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
+
+    mfp_rpc_args_append_int(arglist, context->default_obj_id);
+    mfp_rpc_args_append_int(arglist, port);
+    mfp_rpc_args_append_int(arglist, value);
+
+    int request_id = mfp_rpc_request(
+        service_name, instance_id, arglist,
+        NULL, NULL, msgbuf, msglen
+    );
+    return request_id;
+}
+
+int
+mfp_api_send_midi_to_outlet(
+    mfp_context * context, int port, int64_t value,
+    char * msgbuf, int * msglen
+) {
+    const char service_name[] = "MFPCommand.send_midi_to_outlet";
+    const int instance_id = api_rpcid;
+    mfp_rpc_argblock argblock;
+    mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
+
+    mfp_rpc_args_append_int(arglist, context->default_obj_id);
+    mfp_rpc_args_append_int(arglist, port);
+    mfp_rpc_args_append_int(arglist, value);
 
     int request_id = mfp_rpc_request(
         service_name, instance_id, arglist,

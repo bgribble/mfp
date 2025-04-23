@@ -79,6 +79,40 @@ class MFPCommand:
         return True
 
     @noresp
+    async def send_to_output(self, obj_id, port, data):
+        from .mfp_app import MFPApp
+        obj = MFPApp().recall(obj_id)
+        if isinstance(obj, Processor):
+            await obj.send(
+                MethodCall("add_output", port, data),
+                port
+            )
+        return True
+
+    @noresp
+    async def send_midi(self, obj_id, port, data):
+        from .mfp_app import MFPApp
+        from .midi import MidiEvent
+
+        obj = MFPApp().recall(obj_id)
+        if isinstance(obj, Processor):
+            await obj.send(MidiEvent().from_lv2(data), port)
+        return True
+
+    @noresp
+    async def send_midi_to_output(self, obj_id, port, data):
+        from .mfp_app import MFPApp
+        from .midi import MidiEvent
+        obj = MFPApp().recall(obj_id)
+        event = MidiEvent().from_lv2(data)
+        if isinstance(obj, Processor):
+            await obj.send(
+                MethodCall("add_output", port, event),
+                port
+            )
+        return True
+
+    @noresp
     async def eval_and_send(self, obj_id, port, message):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -262,6 +296,7 @@ class MFPCommand:
         ctxt = DSPContext.lookup(node_id, context_id)
         patch = await MFPApp().open_file(file_name, ctxt, False)
         patch.hot_inlets = list(range(len(patch.inlets)))
+        patch.dsp_embed = True
         patch.gui_params['deletable'] = False
         return patch.obj_id
 
