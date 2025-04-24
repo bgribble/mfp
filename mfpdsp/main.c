@@ -112,7 +112,10 @@ main(int argc, char ** argv)
     mfp_init_all(sockname);
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
 
+    /* start up */
     mfp_context_init(ctxt);
+
+    /* wait for termination */
     mfp_comm_io_wait();
     mfp_jack_shutdown();
     return 0;

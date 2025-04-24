@@ -241,10 +241,13 @@ class Patch(Processor):
                 else:
                     values = [outval]
 
-                DSPObjectFactory = await MFPApp().rpc_host.require(
+                    DSPObjectFactory = await MFPApp().rpc_host.require(
                     DSPObject, host_id=self.context.node_id
                 )
                 for v in values:
+                    if v == Uninit:
+                        continue
+
                     if isinstance(v, MidiEvent) and outlet.lv2_type == "midi":
                         v = v.to_lv2()
                     else:

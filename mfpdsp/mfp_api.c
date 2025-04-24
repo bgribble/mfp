@@ -232,12 +232,12 @@ mfp_api_close_context(mfp_context * context)
     mfp_rpc_wait(request_id);
 
     /* handle any DSP config requests */
-    mfp_dsp_handle_requests();
+    mfp_dsp_handle_requests(context);
 }
 
 /* FIXME make mfp_api_exit_notify nonblocking */
 int
-mfp_api_exit_notify(void)
+mfp_api_exit_notify(mfp_context * context)
 {
     char announce[] =
         "json:{ \"__type__\": \"HostExitNotify\", \"host_id\": \"%s\" }";

@@ -60,10 +60,11 @@ mfp_lv2_instantiate(
     mfp_context * context = NULL;
     mfp_lv2_info * self = NULL;
 
-    /* make sure that the MFP process is running */
     if (!mfp_initialized) {
         mfp_init_all(NULL);
     }
+
+    /* make sure that the MFP process is running */
     context = mfp_context_new(CTYPE_LV2);
     context->samplerate = rate;
     context->msg_handler = mfp_lv2_handle_context_msg;

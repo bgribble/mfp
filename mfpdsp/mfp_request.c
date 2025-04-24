@@ -9,56 +9,50 @@
 
 #include <time.h>
 
-GArray      * incoming_cleanup = NULL;
-mfp_in_data * incoming_queue[REQ_BUFSIZE];
-int         incoming_queue_write = 0;
-int         incoming_queue_read = 0;
-pthread_mutex_t incoming_lock = PTHREAD_MUTEX_INITIALIZER;
-
-mfp_out_data outgoing_queue[REQ_BUFSIZE];
-int          outgoing_queue_write = 0;
-int          outgoing_queue_read = 0;
-
-pthread_mutex_t outgoing_lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t  outgoing_cond = PTHREAD_COND_INITIALIZER;
 
 void
 mfp_dsp_push_request(mfp_in_data rd)
 {
     int count;
     int cleanup = 0;
+    mfp_context * context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(rd.context_id));
+
     gpointer newreq = g_malloc0(sizeof(mfp_in_data));
     struct timespec shorttime;
 
     shorttime.tv_sec = 0; shorttime.tv_nsec = 1000;
     memcpy(newreq, &rd, sizeof(mfp_in_data));
 
+    if (context == NULL) {
+        mfp_log_debug("[push] can't find context %d, for request type %d", rd.context_id, rd.reqtype);
+    }
+
     /* note: this mutex just keeps a single writer thread with access
      * to the requests data, it doesn't block the JACK callback thread */
-    pthread_mutex_lock(&incoming_lock);
-    if (incoming_queue_read == incoming_queue_write) {
+    pthread_mutex_lock(&(context->incoming_lock));
+    if (context->incoming_queue_read == context->incoming_queue_write) {
         cleanup = 1;
     }
 
-    while((incoming_queue_read == 0 && incoming_queue_write == REQ_LASTIND)
-        || (incoming_queue_write + 1 == incoming_queue_read)) {
+    while((context->incoming_queue_read == 0 && context->incoming_queue_write == REQ_LASTIND)
+        || (context->incoming_queue_write + 1 == context->incoming_queue_read)) {
         nanosleep(&shorttime, NULL);
     }
 
-    incoming_queue[incoming_queue_write] = newreq;
-    if(incoming_queue_write == REQ_LASTIND) {
-        incoming_queue_write = 0;
+    context->incoming_queue[context->incoming_queue_write] = newreq;
+    if(context->incoming_queue_write == REQ_LASTIND) {
+        context->incoming_queue_write = 0;
     }
     else {
-        incoming_queue_write += 1;
+        context->incoming_queue_write += 1;
     }
 
     if (cleanup == 1) {
         /* now that JACK has finished with the new data, we can clean up
          * the old data at our leisure.  mfp_dsp_handle_requests will
          * put any old values that need to be freed into cmd.param_value */
-        for(count=0; count < incoming_cleanup->len; count++) {
-            mfp_in_data * cmd = g_array_index(incoming_cleanup, gpointer, count);
+        for(count=0; count < context->incoming_cleanup->len; count++) {
+            mfp_in_data * cmd = g_array_index(context->incoming_cleanup, gpointer, count);
             if (cmd->reqtype == REQTYPE_SETPARAM) {
                 if (cmd->param_value != NULL) {
                     /* FIXME g_free broken for fltarrays */
@@ -83,24 +77,23 @@ mfp_dsp_push_request(mfp_in_data rd)
             g_free(cmd);
         }
 
-        if (incoming_cleanup->len > 0)  {
-            g_array_set_size(incoming_cleanup, 0);
+        if (context->incoming_cleanup->len > 0)  {
+            g_array_set_size(context->incoming_cleanup, 0);
         }
     }
 
     /* we will clean this one up at some time in the future */
-    g_array_append_val(incoming_cleanup, newreq);
+    g_array_append_val(context->incoming_cleanup, newreq);
 
-    pthread_mutex_unlock(&incoming_lock);
+    pthread_mutex_unlock(&(context->incoming_lock));
 }
 
 void
-mfp_dsp_handle_requests(void)
+mfp_dsp_handle_requests(mfp_context * context)
 {
-    while(incoming_queue_read != incoming_queue_write) {
-        mfp_in_data * cmd = incoming_queue[incoming_queue_read];
+    while(context->incoming_queue_read != context->incoming_queue_write) {
+        mfp_in_data * cmd = context->incoming_queue[context->incoming_queue_read];
         mfp_processor * src_proc, * dest_proc;
-        mfp_context * context = NULL;
 
         int type = cmd->reqtype;
 
@@ -151,7 +144,7 @@ mfp_dsp_handle_requests(void)
             context->msg_handler(context, cmd->dest_port, (int64_t)(cmd->param_value));
             break;
         }
-        incoming_queue_read = (incoming_queue_read+1) % REQ_BUFSIZE;
+        context->incoming_queue_read = (context->incoming_queue_read + 1) % REQ_BUFSIZE;
     }
 }
 

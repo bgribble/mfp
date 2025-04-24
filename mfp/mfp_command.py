@@ -274,7 +274,8 @@ class MFPCommand:
         from .dsp_object import DSPContext
         from .mfp_app import MFPApp
         try:
-            ctxt_name = open("/proc/%d/cmdline" % owner_pid, "r").read().split("\x00")[0]
+            exec_name = open("/proc/%d/cmdline" % owner_pid, "r").read().split("\x00")[0]
+            ctxt_name = f"{exec_name.split('/')[-1]}_{owner_pid}_{context_id}"
             log.debug(f"open_context: new context, name={ctxt_name}")
         except Exception:
             ctxt_name = ""

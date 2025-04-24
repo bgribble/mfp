@@ -142,6 +142,9 @@ typedef struct {
 #define CTYPE_JACK 0
 #define CTYPE_LV2 1
 
+#define REQ_BUFSIZE 2048
+#define REQ_LASTIND (REQ_BUFSIZE-1)
+
 typedef struct mfp_context_struct {
     int ctype;
     int id;
@@ -152,6 +155,12 @@ typedef struct mfp_context_struct {
     int activated;
     int needs_reschedule;
     int default_obj_id;
+
+    GArray * incoming_cleanup;
+    mfp_in_data * incoming_queue[REQ_BUFSIZE];
+    int incoming_queue_write;
+    int incoming_queue_read;
+    pthread_mutex_t incoming_lock;
 
     void (* msg_handler)(struct mfp_context_struct *, int port_id, int64_t message);
 
@@ -203,9 +212,6 @@ typedef struct mfp_rpc_argblock_struct {
 #define EXTINFO_LOADED 1
 #define EXTINFO_READY 2
 
-#define REQ_BUFSIZE 2048
-#define REQ_LASTIND (REQ_BUFSIZE-1)
-
 #define MFP_DEFAULT_SOCKET "/tmp/mfp_rpcsock"
 #define MFP_EXEC_NAME "mfp"
 #define MFP_EXEC_SHELLMAX 2048
@@ -234,16 +240,16 @@ extern GHashTable * mfp_contexts;
 extern GHashTable * mfp_extensions;
 
 extern GArray * mfp_proc_list;
-extern GArray * incoming_cleanup;
-
-extern pthread_mutex_t incoming_lock;
-extern pthread_mutex_t outgoing_lock;
-extern pthread_cond_t outgoing_cond;
-extern int outgoing_queue_read;
-extern int outgoing_queue_write;
-extern mfp_out_data outgoing_queue[REQ_BUFSIZE];
 
 extern char rpc_node_id[MAX_PEER_ID_LEN];
+
+extern mfp_out_data outgoing_queue[REQ_BUFSIZE];
+extern int outgoing_queue_write;
+extern int outgoing_queue_read;
+
+extern pthread_mutex_t outgoing_lock;
+extern pthread_cond_t  outgoing_cond;
+
 
 /* main.c */
 extern void mfp_init_all(char * sockname);
@@ -323,7 +329,7 @@ extern void mfp_rpc_init(void);
 
 /* incoming data processing */
 extern void mfp_dsp_push_request(mfp_in_data rd);
-extern void mfp_dsp_handle_requests(void);
+extern void mfp_dsp_handle_requests(mfp_context * context);
 
 /* outgoing data processing */
 extern int mfp_rpc_request(
@@ -370,7 +376,7 @@ extern int mfp_api_send_midi_to_inlet(mfp_context * ctxt, int port, int64_t val,
 extern int mfp_api_send_midi_to_outlet(mfp_context * ctxt, int port, int64_t val, char *, int *);
 extern int mfp_api_show_editor(mfp_context * ctxt, int show, char *, int *);
 extern int mfp_api_dsp_response(int proc_id, char * resp, int mtype, char * mbuf, int * mlen);
-extern int mfp_api_exit_notify(void);
+extern int mfp_api_exit_notify(mfp_context * context);
 
 extern void _mfp_log(const char * , const char *, int, ...);
 #endif

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <glib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include "mfp_dsp.h"
 
@@ -19,6 +20,12 @@ mfp_context_new(int ctxt_type)
     ctxt->activated = 0;
     ctxt->owner = getpid();
     ctxt->msg_handler = NULL;
+
+    ctxt->incoming_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_in_data *));
+    ctxt->incoming_queue_write = 0;
+    ctxt->incoming_queue_read = 0;
+
+    pthread_mutex_init(&ctxt->incoming_lock, NULL);
 
     if (ctxt_type == CTYPE_JACK) {
         ctxt->info.jack = g_malloc0(sizeof(mfp_jack_info));
@@ -43,7 +50,7 @@ mfp_context_destroy(mfp_context * ctxt)
     g_free(ctxt);
 
     if(g_hash_table_size(mfp_contexts) == 0) {
-        mfp_api_exit_notify();
+        mfp_api_exit_notify(ctxt);
         mfp_finish_all();
     }
 }

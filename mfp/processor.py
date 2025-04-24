@@ -570,7 +570,7 @@ class Processor:
                 len(self.dsp_inlets),
                 len(self.dsp_outlets),
                 params,
-                self.patch.context,
+                self.patch.context.context_id,
                 self.patch.obj_id
             )
         else:
