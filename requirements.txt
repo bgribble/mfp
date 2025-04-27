@@ -1,5 +1,5 @@
 annotated-types==0.7.0
-carp-rpc==0.0.6
+carp-rpc==0.0.7
 cffi==1.17.1
 Cython==3.0.12
 flopsy==0.0.5
