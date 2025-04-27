@@ -11,7 +11,17 @@ import copy
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..method import MethodCall
-from ..midi import Note, NoteOn, NoteOff, NotePress, MidiCC, MidiPgmChange, MidiUndef
+from ..midi import (
+    Note, NoteOn, NoteOff, NotePress,
+    MidiCC, MidiPgmChange, MidiUndef,
+    MidiClock, MidiStart, MidiStop, MidiContinue, MidiQFrame, MidiSysex, MidiSPP
+)
+
+event_types = (
+    Note, NoteOn, NoteOff, NotePress,
+    MidiCC, MidiPgmChange, MidiClock, MidiStart, MidiStop, MidiContinue,
+    MidiQFrame, MidiSysex, MidiSPP, MidiUndef
+)
 
 
 class MidiIn (Processor):
@@ -25,8 +35,9 @@ class MidiIn (Processor):
         self.port = 0
         self.channels = []
 
-        extra=defs or {}
+        extra = defs or {}
         initargs, kwargs = self.parse_args(init_args, **extra)
+
         if kwargs:
             self.handler = MFPApp().midi_mgr.register(
                 lambda event, data: asyncio.run_coroutine_threadsafe(
@@ -60,7 +71,7 @@ class MidiIn (Processor):
                 setattr(self, attr, val)
         elif isinstance(event, MethodCall):
             self.method(event, 0)
-        elif isinstance(event, (NoteOn, NoteOff, NotePress, MidiPgmChange, MidiCC, MidiUndef)):
+        elif isinstance(event, event_types):
             self.outlets[0] = event
 
 
@@ -86,7 +97,7 @@ class MidiOut (Processor):
                 setattr(self, attr, val)
         elif isinstance(event, MethodCall):
             self.method(event, 0)
-        elif isinstance(event, (Note, MidiCC, MidiPgmChange, MidiUndef)):
+        elif isinstance(event, event_types):
             event.port = self.port
             if self.channel is not None:
                 event.channel = self.channel
