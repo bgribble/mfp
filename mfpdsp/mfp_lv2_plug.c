@@ -40,7 +40,7 @@ mfp_lv2_handle_context_msg(mfp_context * context, int port, int64_t message) {
     ev.event.body.type = self->uris.midi_MidiEvent;
     ev.event.body.size = 3;
 
-    ev.msg[0] = (message & 0xff000000) >> 24;
+    ev.msg[0] = (message & 0xf0000000) >> 24 | (message & 0x0f);
     ev.msg[1] = (message & 0xff0000) >> 16;
     ev.msg[2] = (message & 0xff00) >> 8;
 
@@ -285,7 +285,7 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
                             (((unsigned int)msg[0]) << 24)
                             | (((unsigned int)msg[1]) << 16)
                             | (((unsigned int)msg[2]) << 8)
-                            | ((unsigned int)msg[3])
+                            | ((unsigned int)msg[0] & 0x0f)
                         );
                     }
                     mfp_lv2_send_midi_input(context, i, val);
