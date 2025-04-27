@@ -11,6 +11,14 @@
 #    define M_PI 3.14159265358979323846
 #endif
 
+#include "lv2/atom/atom.h"
+#include "lv2/atom/util.h"
+#include "lv2/midi/midi.h"
+#include "lv2/urid/urid.h"
+#include "lv2/log/log.h"
+#include "lv2/log/logger.h"
+#include "lv2/core/lv2.h"
+
 typedef jack_default_audio_sample_t mfp_sample;
 
 #include "pytypes.pb-c.h"
@@ -51,6 +59,7 @@ typedef struct {
     int src_port;
     int dest_proc;
     int dest_port;
+    int context_id;
     gpointer param_name;
     int param_type;
     gpointer param_value;
@@ -90,13 +99,25 @@ typedef struct {
     char * object_name;
     char * object_path;
     int port_count;
+
     GArray * port_symbol;
     GArray * port_name;
+
     int port_input_mask;
     int port_output_mask;
     int port_audio_mask;
     int port_control_mask;
     int port_midi_mask;
+
+    /* LV2 "feature" stuff, please don't ask me to explain */
+    LV2_URID_Map*  map;
+    LV2_Log_Logger logger;
+
+    struct {
+        LV2_URID midi_MidiEvent;
+        LV2_URID time_Position;
+        LV2_URID atom_Sequence;
+    } uris;
 
     /* port_data is the LV2 data for each port */
     GArray * port_data;
@@ -108,6 +129,8 @@ typedef struct {
     GArray * input_ports;
     GArray * output_ports;
     GArray * output_buffers;
+    int output_capacity;
+
 } mfp_lv2_info;
 
 typedef struct {
@@ -119,6 +142,9 @@ typedef struct {
 #define CTYPE_JACK 0
 #define CTYPE_LV2 1
 
+#define REQ_BUFSIZE 2048
+#define REQ_LASTIND (REQ_BUFSIZE-1)
+
 typedef struct mfp_context_struct {
     int ctype;
     int id;
@@ -129,6 +155,14 @@ typedef struct mfp_context_struct {
     int activated;
     int needs_reschedule;
     int default_obj_id;
+
+    GArray * incoming_cleanup;
+    mfp_in_data * incoming_queue[REQ_BUFSIZE];
+    int incoming_queue_write;
+    int incoming_queue_read;
+    pthread_mutex_t incoming_lock;
+
+    void (* msg_handler)(struct mfp_context_struct *, int port_id, int64_t message);
 
     union {
         mfp_jack_info * jack;
@@ -164,6 +198,7 @@ typedef struct mfp_rpc_argblock_struct {
 #define REQTYPE_EXTLOAD 6
 #define REQTYPE_GETPARAM 7
 #define REQTYPE_RESET 8
+#define REQTYPE_CONTEXT_MSG 9
 
 #define ALLOC_IDLE 0
 #define ALLOC_WORKING 1
@@ -176,9 +211,6 @@ typedef struct mfp_rpc_argblock_struct {
 #define EXTINFO_NULL 0
 #define EXTINFO_LOADED 1
 #define EXTINFO_READY 2
-
-#define REQ_BUFSIZE 2048
-#define REQ_LASTIND (REQ_BUFSIZE-1)
 
 #define MFP_DEFAULT_SOCKET "/tmp/mfp_rpcsock"
 #define MFP_EXEC_NAME "mfp"
@@ -208,16 +240,16 @@ extern GHashTable * mfp_contexts;
 extern GHashTable * mfp_extensions;
 
 extern GArray * mfp_proc_list;
-extern GArray * incoming_cleanup;
-
-extern pthread_mutex_t incoming_lock;
-extern pthread_mutex_t outgoing_lock;
-extern pthread_cond_t outgoing_cond;
-extern int outgoing_queue_read;
-extern int outgoing_queue_write;
-extern mfp_out_data outgoing_queue[REQ_BUFSIZE];
 
 extern char rpc_node_id[MAX_PEER_ID_LEN];
+
+extern mfp_out_data outgoing_queue[REQ_BUFSIZE];
+extern int outgoing_queue_write;
+extern int outgoing_queue_read;
+
+extern pthread_mutex_t outgoing_lock;
+extern pthread_cond_t  outgoing_cond;
+
 
 /* main.c */
 extern void mfp_init_all(char * sockname);
@@ -297,7 +329,7 @@ extern void mfp_rpc_init(void);
 
 /* incoming data processing */
 extern void mfp_dsp_push_request(mfp_in_data rd);
-extern void mfp_dsp_handle_requests(void);
+extern void mfp_dsp_handle_requests(mfp_context * context);
 
 /* outgoing data processing */
 extern int mfp_rpc_request(
@@ -324,7 +356,7 @@ extern int mfp_rpc_dispatch_request(const char *, int);
 extern mfp_rpc_args * mfp_rpc_args_init(mfp_rpc_argblock * block);
 extern void mfp_rpc_args_append_bool(mfp_rpc_args *, int);
 extern void mfp_rpc_args_append_string(mfp_rpc_args *, const char *);
-extern void mfp_rpc_args_append_int(mfp_rpc_args *, int);
+extern void mfp_rpc_args_append_int(mfp_rpc_args *, int64_t);
 extern void mfp_rpc_args_append_double(mfp_rpc_args *, double);
 
 /* mfp_context.c */
@@ -340,9 +372,11 @@ extern int mfp_api_load_context(mfp_context * ctxt, char * patchname, char *, in
 extern int mfp_api_close_context(mfp_context * ctxt);
 extern int mfp_api_send_to_inlet(mfp_context * ctxt, int port, float val, char *, int *);
 extern int mfp_api_send_to_outlet(mfp_context * ctxt, int port, float val, char *, int *);
+extern int mfp_api_send_midi_to_inlet(mfp_context * ctxt, int port, int64_t val, char *, int *);
+extern int mfp_api_send_midi_to_outlet(mfp_context * ctxt, int port, int64_t val, char *, int *);
 extern int mfp_api_show_editor(mfp_context * ctxt, int show, char *, int *);
 extern int mfp_api_dsp_response(int proc_id, char * resp, int mtype, char * mbuf, int * mlen);
-extern int mfp_api_exit_notify(void);
+extern int mfp_api_exit_notify(mfp_context * context);
 
 extern void _mfp_log(const char * , const char *, int, ...);
 #endif

@@ -339,19 +339,23 @@ dispatch_methodcall(
     void * to_free = NULL;
 
     if(!strcmp(service_name, "DSPObject.connect")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
         rd.reqtype = REQTYPE_CONNECT;
         rd.src_proc = obj_id;
         rd.src_port = args->items[0]->_int;
         rd.dest_proc = args->items[1]->_int;
         rd.dest_port = args->items[2]->_int;
+        rd.context_id = src_proc->context->id;
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(service_name, "DSPObject.disconnect")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
         rd.reqtype = REQTYPE_DISCONNECT;
         rd.src_proc = obj_id;
         rd.src_port = args->items[0]->_int;
         rd.dest_proc = args->items[1]->_int;
         rd.dest_port = args->items[2]->_int;
+        rd.context_id = src_proc->context->id;
 
         mfp_dsp_push_request(rd);
     }
@@ -372,6 +376,7 @@ dispatch_methodcall(
         rd.param_value = (gpointer)extract_param_value(
             src_proc, rd.param_name, args->items[1]
         );
+        rd.context_id = src_proc->context->id;
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(service_name, "DSPObject.setparams")) {
@@ -387,17 +392,33 @@ dispatch_methodcall(
             rd.param_value = (gpointer)extract_param_value(
                 src_proc, rd.param_name, kwargs->items[i]->value
             );
+            rd.context_id = src_proc->context->id;
             mfp_dsp_push_request(rd);
         }
     }
     else if (!strcmp(service_name, "DSPObject.delete")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
         rd.reqtype = REQTYPE_DESTROY;
         rd.src_proc = obj_id;
+        rd.context_id = src_proc->context->id;
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(service_name, "DSPObject.reset")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
         rd.reqtype = REQTYPE_RESET;
         rd.src_proc = obj_id;
+        rd.context_id = src_proc->context->id;
+        mfp_dsp_push_request(rd);
+    }
+    else if (!strcmp(service_name, "DSPObject.context_msg")) {
+        const int context_id = args->items[0]->_int;
+        const int port_id = args->items[1]->_int;
+        const int64_t message = args->items[2]->_int;
+
+        rd.reqtype = REQTYPE_CONTEXT_MSG;
+        rd.context_id = context_id;
+        rd.dest_port = port_id;
+        rd.param_value = (gpointer)(message);
         mfp_dsp_push_request(rd);
     }
     else {
@@ -633,7 +654,7 @@ mfp_rpc_args_append_bool(mfp_rpc_args * arglist, int value) {
 }
 
 void
-mfp_rpc_args_append_int(mfp_rpc_args * arglist, int value) {
+mfp_rpc_args_append_int(mfp_rpc_args * arglist, int64_t value) {
     int prev_count = arglist->n_items;
 
     arglist->items[prev_count]->value_types_case = CARP__PYTHON_VALUE__VALUE_TYPES__INT;

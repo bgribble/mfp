@@ -33,6 +33,10 @@ class Inlet(Processor):
             self.inletnum = 0
             init_args = "0"
 
+        self.lv2_type = "control"
+        if defs and "lv2_type" in defs:
+            self.lv2_type = defs["lv2_type"]
+
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
         if self.inletnum in patch.hot_inlets:
             self.doc_tooltip_obj = self.doc_tooltip_hot
@@ -101,6 +105,10 @@ class Outlet(Processor):
         else:
             self.outletnum = 0
             init_args = "0"
+
+        self.lv2_type = "control"
+        if defs and "lv2_type" in defs:
+            self.lv2_type = defs["lv2_type"]
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 

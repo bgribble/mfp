@@ -30,6 +30,12 @@ typedef struct {
 
 static comm_bufblock comm_buffers[MFP_NUM_BUFFERS];
 
+mfp_out_data outgoing_queue[REQ_BUFSIZE];
+int outgoing_queue_write;
+int outgoing_queue_read;
+pthread_mutex_t outgoing_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  outgoing_cond = PTHREAD_COND_INITIALIZER;
+
 int
 mfp_comm_connect(char * sockname)
 {

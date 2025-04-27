@@ -69,6 +69,8 @@ ttl_template = """
 
 @prefix doap: <http://usefulinc.com/ns/doap#> .
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix midi:  <http://lv2plug.in/ns/ext/midi#> .
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
@@ -111,22 +113,31 @@ def lv2_write_ttl(self, ttlpath, plugname, filename):
                       ttl_description=(self.properties.get("description") or self.name))
     portnum = 0
     for p in self.inlet_objects + self.outlet_objects:
-        port_params = dict(port_number=portnum)
-        port_types = ""
+        port_params = dict(port_number=portnum, port_property='')
+        port_types = []
         if p.init_type in ("inlet~", "outlet~"):
             needs_bounds = False
-            port_types = "lv2:AudioPort"
+            port_types = ["lv2:AudioPort"]
         else:
             needs_bounds = True
-            port_types = "lv2:ControlPort"
+            if p.lv2_type == "midi":
+                port_params['port_property'] = '\n'.join([
+                    'atom:bufferType atom:Sequence ; ',
+                    'atom:supports midi:MidiEvent ; ',
+                ])
+                needs_bounds = False
+                port_types = ["atom:AtomPort"]
+            else:
+                port_types = ["lv2:ControlPort"]
+
         if p.init_type in ("inlet~", "inlet"):
-            port_types += ", lv2:InputPort"
+            port_types.append("lv2:InputPort")
         else:
-            port_types += ", lv2:OutputPort"
-        port_params['port_types'] = port_types
+            port_types.append("lv2:OutputPort")
+
+        port_params['port_types'] = ', '.join(port_types)
         port_params['port_symbol'] = p.name
         port_params['port_name'] = p.properties.get("description") or p.name
-        port_params['port_property'] = ''
         if needs_bounds:
             bounds=dict(bounds_default=p.properties.get('bounds_default', 0.0),
                         bounds_minimum=p.properties.get('bounds_minimum', 0.0),
@@ -166,8 +177,3 @@ def lv2_write_ttl(self, ttlpath, plugname, filename):
 @extends(Patch)
 def lv2_bless(self, plugname):
     pass
-
-
-
-
-

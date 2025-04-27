@@ -46,12 +46,6 @@ mfp_dsp_init(void) {
     mfp_contexts = g_hash_table_new(g_direct_hash, g_direct_equal);
     mfp_extensions = g_hash_table_new(g_str_hash, g_str_equal);
 
-    incoming_cleanup = g_array_new(TRUE, TRUE, sizeof(mfp_in_data *));
-
-    pthread_cond_init(&outgoing_cond, NULL);
-    pthread_mutex_init(&outgoing_lock, NULL);
-    pthread_mutex_init(&incoming_lock, NULL);
-
     mfp_log_info("mfpdsp: initializing %d builtin DSP processors\n", num_initfuncs);
 
     for(i = 0; i < num_initfuncs; i++) {
@@ -287,9 +281,8 @@ mfp_dsp_run(mfp_context * ctxt)
     int chan;
     int chancount = mfp_num_output_buffers(ctxt);
 
-    /* handle any DSP config requests */
-    /* FIXME only handle requests for this context */
-    mfp_dsp_handle_requests();
+    /* handle any messages for this context */
+    mfp_dsp_handle_requests(ctxt);
 
     /* zero output buffers ... out~ will accumulate into them */
     for(chan=0; chan < chancount; chan++) {
