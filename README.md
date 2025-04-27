@@ -249,12 +249,6 @@ use in the repository bgribble/mfp-patches including:
    [QuNexus](https://www.keithmcmillen.com/products/qunexus/)
    keyboard controller
 
-### SAVING FILES
-
-There's no UI for saving yet, but there is a key mapping.
-C-s (control-s) will prompt for a file to save in.  There's no checking for
-overwrite, and the file is saved in the process working directory.
-
 ### REPORTING PROBLEMS
 
 I'm using the GitHub hosted issue tracker.  It seems to be pretty

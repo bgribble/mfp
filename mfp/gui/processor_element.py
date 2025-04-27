@@ -32,9 +32,9 @@ class ProcessorElement (BaseElement):
     extra_params = {
         'show_label': ParamInfo(label="Show label", param_type=bool),
         'export_x': ParamInfo(label="Exported interface X", param_type=float),
-        'export_y': ParamInfo(label="Exported interface X", param_type=float),
-        'export_w': ParamInfo(label="Exported interface X", param_type=float),
-        'export_h': ParamInfo(label="Exported interface X", param_type=float),
+        'export_y': ParamInfo(label="Exported interface Y", param_type=float),
+        'export_w': ParamInfo(label="Exported interface width", param_type=float),
+        'export_h': ParamInfo(label="Exported interface height", param_type=float),
     }
     store_attrs = {
         **BaseElement.store_attrs, **extra_params
