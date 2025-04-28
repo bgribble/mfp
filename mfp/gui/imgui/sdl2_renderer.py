@@ -93,7 +93,9 @@ class ImguiSDL2Renderer:
         SDL_SetHint(SDL_HINT_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK, b"1")
         SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, b"1")
         SDL_SetHint(SDL_HINT_VIDEODRIVER, b"wayland,x11")
-        SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, b"1")
+        if os.environ.get('XDG_SESSION_TYPE') == "wayland":
+            SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, b"1")
+
         SDL_SetHint(SDL_HINT_APP_NAME, name.encode('utf-8'))
 
         window = SDL_CreateWindow(
