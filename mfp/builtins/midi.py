@@ -101,7 +101,7 @@ class MidiOut (Processor):
             event.port = self.port
             if self.channel is not None:
                 event.channel = self.channel
-            MFPApp().midi_mgr.send(self.port, event)
+            await MFPApp().midi_mgr.send(self.port, event)
 
 
 def register():

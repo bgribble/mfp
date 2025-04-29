@@ -9,7 +9,6 @@ import asyncio
 from threading import Lock
 from datetime import datetime
 import alsa_midi
-from . import appinfo
 from . import lv2midi
 from . import log
 from .utils import isiterable
@@ -20,13 +19,13 @@ class LV2MidiEvent:
     def __init__(self, raw_value):
         self.value = raw_value
 
-
 @ext_encode
 class MidiEvent:
     _lv2_registry = {}
     _alsa_registry = {}
 
     alsa_type = None
+    lv2_type = None
 
     def __init__(self, event=None):
         self.event = event
@@ -59,6 +58,9 @@ class MidiEvent:
             self.channel = seqevent.channel
         self.timestamp = seqevent.time
 
+    def to_alsaseq(self):
+        return None
+
     def from_lv2(self, msg):
         self.channel = msg.value & 0xff
 
@@ -81,12 +83,23 @@ class Note (MidiEvent):
     def __init__(self, seqevent=None):
         self.key = 0
         self.velocity = 0
+        self.duration = 0
         super().__init__(seqevent)
 
     def from_alsaseq(self, seqevent):
         super().from_alsaseq(seqevent)
         self.key = seqevent.note
         self.velocity = seqevent.velocity
+        if hasattr(seqevent, 'duration'):
+            self.duration = seqevent.duration
+
+    def to_alsaseq(self):
+        return alsa_midi.NoteEvent(
+            channel=self.channel,
+            note=self.key,
+            velocity=self.velocity,
+            duration=self.duration,
+        )
 
     def seq_data(self):
         return (self.channel-1, self.key, self.velocity, 0, 0)
@@ -111,6 +124,12 @@ class NoteOn (Note):
         self.key = seqevent.note
         self.velocity = seqevent.velocity
 
+    def to_alsaseq(self):
+        return alsa_midi.NoteOnEvent(
+            channel=self.channel,
+            note=self.key,
+            velocity=self.velocity,
+        )
     def from_lv2(self, msg):
         super().from_lv2(msg)
         self.key = (msg & 0xff0000) >> 16
@@ -146,6 +165,13 @@ class NoteOff (Note):
         self.key = seqevent.note
         self.velocity = seqevent.velocity
 
+    def to_alsaseq(self):
+        return alsa_midi.NoteOffEvent(
+            channel=self.channel,
+            note=self.key,
+            velocity=self.velocity,
+        )
+
     def from_lv2(self, msg):
         super().from_lv2(msg)
         self.key = (msg & 0xff0000) >> 16
@@ -166,7 +192,7 @@ class NotePress (Note):
     alsa_type = alsa_midi.EventType.KEYPRESS
 
     def __init__(self, seqevent=None):
-        self.key = 0
+        self.key = -1
         self.velocity = 0
         super().__init__(seqevent)
 
@@ -180,6 +206,19 @@ class NotePress (Note):
             self.velocity = seqevent.velocity
         elif seqevent.type == alsa_midi.EventType.CHANPRESS:
             self.velocity = seqevent.velocity
+
+    def to_alsaseq(self):
+        if self.key >= 0:
+            return alsa_midi.KeyPressureEvent(
+                channel=self.channel,
+                note=self.key,
+                velocity=self.velocity,
+            )
+        else:
+            return alsa_midi.ChannelPressureEvent(
+                channel=self.channel,
+                velocity=self.velocity,
+            )
 
     def from_lv2(self, msg):
         super().from_lv2(msg)
@@ -218,7 +257,10 @@ class MidiPgmChange (MidiEvent):
 
     def from_alsaseq(self, seqevent):
         super().from_alsaseq(seqevent)
-        self.program = seqevent.data[5]
+        self.program = seqevent.value
+
+    def to_alsaseq(self):
+        return alsa_midi.ProgramChangeEvent(channel=self.channel, value=self.program)
 
     def from_lv2(self, msg):
         self.program = (msg & 0xff0000) >> 16
@@ -243,16 +285,21 @@ class MidiCC (MidiEvent):
         self.controller = 0
         self.value = 0
 
-    def from_alsaseq(self, seqevent):
-        super().from_alsaseq(seqevent)
-        self.controller = seqevent.param
-        self.value = seqevent.value
-
     def seq_data(self):
         return (self.channel-1, 0, 0, 0, self.controller, self.value)
 
     def source(self):
         return (self.event.dst, MidiCC.__name__, self.channel, self.controller)
+
+    def from_alsaseq(self, seqevent):
+        super().from_alsaseq(seqevent)
+        self.controller = seqevent.param
+        self.value = seqevent.value
+
+    def to_alsaseq(self):
+        return alsa_midi.ControlChangeEvent(
+            channel=self.channel, param=self.controller, value=self.value
+        )
 
     def from_lv2(self, msg):
         super().from_lv2(msg)
@@ -288,6 +335,9 @@ class MidiPitchbend (MidiEvent):
         super().from_alsaseq(seqevent)
         self.value = seqevent.value
 
+    def to_alsaseq(self):
+        return alsa_midi.PitchBendEvent(channel=self.channel, value=self.value)
+
     def from_lv2(self, msg):
         super().from_lv2(msg)
         self.value = (msg & 0xff0000) >> 16
@@ -307,6 +357,9 @@ class MidiClock(MidiEvent):
     alsa_type = alsa_midi.EventType.CLOCK
     lv2_type = lv2midi.LV2_MIDI_MSG_CLOCK
 
+    def to_alsaseq(self):
+        return alsa_midi.ClockEvent()
+
 
 @ext_encode
 class MidiQFrame(MidiEvent):
@@ -320,14 +373,20 @@ class MidiQFrame(MidiEvent):
 
     def from_alsaseq(self, seqevent):
         super().from_alsaseq(seqevent)
-        payload = seqevent.value
+        payload = seqevent.raw_data[8]
         self.field = payload & 0xf0 >> 4
         self.value = payload & 0xf0
+
+    def to_alsaseq(self):
+        databytes = [0] * 12
+        databytes[8] = (self.field << 4) | self.value
+        return alsa_midi.Event(type=self.alsa_type, raw_data=bytes(bytearray(databytes)))
 
     def from_lv2(self, msg):
         self.field = 0
         self.value = 0
         self.channel = msg & 0xff
+
 
     def to_lv2(self):
         return (
@@ -340,17 +399,26 @@ class MidiStart(MidiEvent):
     alsa_type = alsa_midi.EventType.START
     lv2_type = lv2midi.LV2_MIDI_MSG_START
 
+    def to_alsaseq(self):
+        return alsa_midi.StartEvent()
+
 
 @ext_encode
 class MidiStop(MidiEvent):
     alsa_type = alsa_midi.EventType.STOP
     lv2_type = lv2midi.LV2_MIDI_MSG_STOP
 
+    def to_alsaseq(self):
+        return alsa_midi.StopEvent()
+
 
 @ext_encode
 class MidiContinue(MidiEvent):
     alsa_type = alsa_midi.EventType.CONTINUE
     lv2_type = lv2midi.LV2_MIDI_MSG_CONTINUE
+
+    def to_alsaseq(self):
+        return alsa_midi.ContinueEvent()
 
 
 @ext_encode
@@ -367,7 +435,7 @@ class MidiSPP(MidiEvent):
         self.position = seqevent.value
 
     def from_lv2(self, msg):
-        super().from_lv2(seqevent)
+        super().from_lv2(msg)
         self.position = (msg & 0xffff00) >> 8
         self.channel = msg & 0xff
 
@@ -378,6 +446,7 @@ class MidiSPP(MidiEvent):
 
     def __repr__(self):
         return "<MidiSPP %s %s>" % (self.channel, self.position)
+
 
 @ext_encode
 class MidiTimeSignature(MidiEvent):
@@ -445,6 +514,9 @@ class MFPMidiManager:
         self.handlers_next_id = 0
 
         self.client = None
+        self.port = None
+        self.queue = None
+
         self.quit_req = False
 
     def _filt2paths(self, filters):
@@ -523,32 +595,19 @@ class MFPMidiManager:
 
     async def run(self):
         self.start_time = datetime.now()
-        self.client = alsa_midi.AsyncSequencerClient("mfpmain")
-        q = self.client.create_queue("mfpmain")
 
-        p = self.client.create_port(
-            f"midi",
+        self.client = alsa_midi.AsyncSequencerClient("mfpmain")
+        self.queue = self.client.create_queue("mfpmain")
+        self.port = self.client.create_port(
+            "midi",
             caps=alsa_midi.RW_PORT,
             type=alsa_midi.PortType.APPLICATION,
             timestamping=True,
             timestamp_real=True,
-            timestamp_queue=q
+            timestamp_queue=self.queue,
         )
-        addr = alsa_midi.Address(p)
-        log.debug(f"[midi] created output port {p} {addr}")
 
-        """
-        for portnum in range(self.num_inports):
-            p = self.client.create_port(
-                f"in_{portnum}",
-                caps=alsa_midi.WRITE_PORT,
-                type=alsa_midi.PortType.APPLICATION,
-            )
-            addr = alsa_midi.Address(p)
-            log.debug(f"[midi] created input port {p} {addr}")
-        """
-
-        q.start()
+        self.queue.start()
         await self.client.drain_output()
 
         log.debug("ALSA sequencer started")
@@ -607,18 +666,20 @@ class MFPMidiManager:
                 except Exception as e:
                     log.debug("Error in MIDI event handler:", e)
 
-    def send(self, port, event):
+    async def send(self, port, event):
         from datetime import datetime, timedelta
         starttime = datetime.now()
 
-        raw_tuple = mk_raw(event, port)
         try:
-            alsaseq.output(raw_tuple)
+            seq_event = event.to_alsaseq()
+            if seq_event:
+                await self.client.event_output(seq_event, port=self.port, queue=self.queue)
+            elapsed = datetime.now() - starttime
+
+            if elapsed > timedelta(microseconds=3000):
+                log.debug(f"[midi] send took {elapsed.total_seconds()*1000} milliseconds")
+
         except Exception as e:
-            log.debug("alsaseq: error on output of", raw_tuple, e)
+            log.debug("[midi] error on output of", event, e)
             log.debug_traceback(e)
 
-        elapsed = datetime.now() - starttime
-
-        if elapsed > timedelta(microseconds=2000):
-            log.debug("MIDI send took %s milliseconds" % elapsed.total_seconds() * 1000)
