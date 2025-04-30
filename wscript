@@ -395,7 +395,7 @@ def configure(ctxt):
     pip_libs = [
         "posix_ipc", "simplejson", "numpy",
         "pynose", "yappi", "cython", "pyliblo3",
-        "soundfile", "samplerate",
+        "soundfile", "samplerate", "alsa-midi",
         # my other libs
         "carp-rpc", "flopsy",
     ]
@@ -533,18 +533,6 @@ def build(bld):
         ),
         source=bld.path.find_node("testext").ant_glob("**/*.{c,py}"),
         target=f"wheel/{wheelname('testext', '1.0', version_extensions, arch)}"
-    )
-    bld(
-        rule=wheel(
-            srcdir="lib/alsaseq-0.4.1",
-            pkgname="alsaseq",
-            extname="alsaseq",
-            pyver=version_extensions,
-            arch=arch,
-            version="0.4.1"
-        ),
-        source=bld.path.find_node("lib/alsaseq-0.4.1").ant_glob("**/*.{c,py}"),
-        target=f"wheel/{wheelname('alsaseq', '0.4.1', version_extensions, arch)}"
     )
 
     bld(

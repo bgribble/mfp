@@ -235,7 +235,7 @@ class MFPApp (Singleton, SignalMixin):
         if self.midi_mgr:
             self.midi_mgr.finish()
         self.midi_mgr = midi.MFPMidiManager(self.midi_inputs, self.midi_outputs)
-        self.midi_mgr.start()
+        self.async_task(self.midi_mgr.run())
         log.debug("MIDI started (ALSA Sequencer)")
 
     async def start_dsp(self):

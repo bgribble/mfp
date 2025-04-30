@@ -1,3 +1,4 @@
+alsa-midi==1.0.2
 annotated-types==0.7.0
 carp-rpc==0.0.7
 cffi==1.17.1
