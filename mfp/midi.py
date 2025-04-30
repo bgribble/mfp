@@ -374,8 +374,8 @@ class MidiQFrame(MidiEvent):
     def from_alsaseq(self, seqevent):
         super().from_alsaseq(seqevent)
         payload = seqevent.raw_data[8]
-        self.field = payload & 0xf0 >> 4
-        self.value = payload & 0xf0
+        self.field = (payload & 0xf0) >> 4
+        self.value = payload & 0x0f
 
     def to_alsaseq(self):
         databytes = [0] * 12

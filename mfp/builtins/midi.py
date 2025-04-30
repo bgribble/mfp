@@ -8,19 +8,22 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 import asyncio
 import copy
 
+from mfp import log
+from .. import Bang, Uninit
 from ..processor import Processor
 from ..mfp_app import MFPApp
 from ..method import MethodCall
 from ..midi import (
     Note, NoteOn, NoteOff, NotePress,
     MidiCC, MidiPgmChange, MidiUndef,
-    MidiClock, MidiStart, MidiStop, MidiContinue, MidiQFrame, MidiSysex, MidiSPP
+    MidiClock, MidiStart, MidiStop, MidiContinue,
+    MidiQFrame, MidiSysex, MidiSPP, MidiTimeSignature
 )
 
 event_types = (
     Note, NoteOn, NoteOff, NotePress,
     MidiCC, MidiPgmChange, MidiClock, MidiStart, MidiStop, MidiContinue,
-    MidiQFrame, MidiSysex, MidiSPP, MidiUndef
+    MidiQFrame, MidiSysex, MidiSPP, MidiUndef, MidiTimeSignature
 )
 
 
@@ -104,6 +107,90 @@ class MidiOut (Processor):
             await MFPApp().midi_mgr.send(self.port, event)
 
 
+class MidiTime (Processor):
+    doc_tooltip_obj = "Assemble MIDI and MTC events into full time output"
+    doc_tooltip_inlet = ["MIDI data input"]
+    doc_tooltip_outlet = [
+        "SMPTE time HH:MM:SS:FF",
+        "Song position bar:beat:clock",
+    ]
+
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Processor.__init__(self, 1, 2, init_type, init_args, patch, scope, name, defs)
+        self.frame_rate_values = [
+            "24", "24", "30 drop", "30"
+        ]
+        self.frame_time = [0, 0, 0, 0]
+        self.frame_rate = "30"
+        self.partial_time = [0, 0, 0, 0]  # hours, minutes, seconds, frames
+        self.partial_fields = set()
+
+        self.spp_beats_per_measure = 4
+        self.spp_beats_per_quarter = 1
+
+        self.spp_position = 0  # in quarter notes
+        self.clock_count = 0   # in 24 PPQN
+
+    def _bbm_pos(self):
+        total_beats = self.spp_position // self.spp_beats_per_quarter
+        bars = total_beats // self.spp_beats_per_measure
+        beats = total_beats % self.spp_beats_per_measure
+        return [bars + 1, beats + 1, self.clock_count]
+
+    async def trigger(self):
+        event = self.inlets[0]
+
+        if event == Bang:
+            self.outlets[0] = self.frame_time
+
+        if isinstance(event, MidiQFrame):
+            field = event.field
+            value = event.value
+
+            if field == 0:
+                self.partial_time = [0, 0, 0, 0]
+                self.partial_fields = set()
+
+            self.partial_fields.add(field)
+
+            if field in (1, 3, 5):
+                value = value << 4
+            elif field == 7:
+                value = (value & 0x01) << 4
+                self.frame_rate = self.frame_rate_values[value & 0x06]
+            field = 3 - field // 2
+
+            self.partial_time[field] = self.partial_time[field] + value
+
+            if event.field == 7 and self.partial_fields == set([0, 1, 2, 3, 4, 5, 6, 7]):
+                self.frame_time = self.partial_time
+                self.outlets[0] = self.frame_time
+
+        if isinstance(event, MidiStart):
+            self.spp_position = 0
+            self.clock_count = 0
+            self.outlets[1] = self._bbm_pos()
+
+        if isinstance(event, MidiSPP):
+            self.spp_position = event.position // 4
+            self.clock_count = (event.position % 4) * 8
+            self.outlets[1] = self._bbm_pos()
+
+        if isinstance(event, MidiContinue):
+            self.outlets[1] = self._bbm_pos()
+
+        if isinstance(event, MidiClock):
+            self.clock_count += 1
+            if self.clock_count >= 24:
+                self.clock_count = self.clock_count - 24
+                self.spp_position += 1
+                self.outlets[1] = self._bbm_pos()
+
+        if isinstance(event, MidiTimeSignature):
+            log.debug("[midi_time] signature = {event.value}")
+
+
 def register():
     MFPApp().register("midi_in", MidiIn)
     MFPApp().register("midi_out", MidiOut)
+    MFPApp().register("midi_time", MidiTime)
