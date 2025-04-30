@@ -514,8 +514,8 @@ class MFPMidiManager:
         self.handlers_next_id = 0
 
         self.client = None
-        self.port = None
-        self.queue = None
+        self.input_ports = []
+        self.output_ports = []
 
         self.quit_req = False
 
@@ -597,18 +597,23 @@ class MFPMidiManager:
         self.start_time = datetime.now()
 
         self.client = alsa_midi.AsyncSequencerClient("mfpmain")
-        self.queue = self.client.create_queue("mfpmain")
-        self.port = self.client.create_port(
-            "midi",
-            caps=alsa_midi.RW_PORT,
-            type=alsa_midi.PortType.APPLICATION,
-            timestamping=True,
-            timestamp_real=True,
-            timestamp_queue=self.queue,
-        )
+        for portnum in range(self.num_inports):
+            self.input_ports.append(
+                self.client.create_port(
+                    f"mfp_in_{portnum}",
+                    caps=alsa_midi.WRITE_PORT,
+                    type=alsa_midi.PortType.APPLICATION,
+                )
+            )
 
-        self.queue.start()
-        await self.client.drain_output()
+        for portnum in range(self.num_outports):
+            self.output_ports.append(
+                self.client.create_port(
+                    f"mfp_out_{portnum}",
+                    caps=alsa_midi.READ_PORT,
+                    type=alsa_midi.PortType.APPLICATION,
+                )
+            )
 
         log.debug("ALSA sequencer started")
 
@@ -666,14 +671,18 @@ class MFPMidiManager:
                 except Exception as e:
                     log.debug("Error in MIDI event handler:", e)
 
-    async def send(self, port, event):
+    async def send(self, portnum, event):
         from datetime import datetime, timedelta
         starttime = datetime.now()
 
         try:
+            port = self.output_ports[portnum]
             seq_event = event.to_alsaseq()
             if seq_event:
-                await self.client.event_output(seq_event, port=self.port, queue=self.queue)
+                seq_event.tick = 0
+                seq_event.relative = True
+                await self.client.event_output(seq_event, port=port)
+                await self.client.drain_output()
             elapsed = datetime.now() - starttime
 
             if elapsed > timedelta(microseconds=3000):
