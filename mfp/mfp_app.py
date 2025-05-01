@@ -489,6 +489,9 @@ class MFPApp (Singleton, SignalMixin):
                 for attr, val in create_params.items():
                     obj.gui_params[attr] = val
 
+                if obj.properties:
+                    obj.conf(properties=obj.properties)
+
                 obj.mark_ready()
 
             return obj

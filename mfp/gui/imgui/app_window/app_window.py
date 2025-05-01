@@ -663,7 +663,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             page_patches = [
                 p
                 for p in self.patches
-                if p != self.selected_patch and p.display_info.page_id == page_id
+                if p != self.selected_patch and p.display_info and p.display_info.page_id == page_id
             ]
             if len(page_patches) > 0:
                 patch = page_patches[0]

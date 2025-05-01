@@ -12,7 +12,7 @@ from mfp.gui_main import MFPGUI
 from mfp import log
 from .colordb import ColorDB, RGBAColor
 from .backend_interfaces import BackendInterface
-from .param_info import ParamInfo, ListOfInt, CodeBlock
+from .param_info import ParamInfo, ListOfInt, CodeBlock, DictOfProperty
 from .layer import Layer
 
 
@@ -82,8 +82,31 @@ BASE_STORE_ATTRS = {
     'export_offset_y': ParamInfo(label="Export offset Y", param_type=float),
     'debug': ParamInfo(label="Enable debugging", param_type=bool),
     'code': ParamInfo(label="Custom code", param_type=CodeBlock, show=True),
+    'properties': ParamInfo(label="Properties", param_type=DictOfProperty, show=True),
 }
 
+# these are params that may appear within 'properties' and get
+# their own editors. It's awkward to have type-specific info here 
+# and in the Processor definition but I can't see a way around it
+PROPERTY_ATTRS = {
+    'lv2_type': ParamInfo(
+        label="(lv2) Port type",
+        choices=lambda o: [('MIDI', 'midi'), ('Control', 'control')],
+        param_type=str, show=True
+    ),
+    'lv2_description': ParamInfo(
+        label="(lv2) Description", param_type=str, show=True
+    ),
+    'lv2_default_val': ParamInfo(
+        label="(lv2) Default value [control ports]", param_type=float, show=True
+    ),
+    'lv2_minimum_val': ParamInfo(
+        label="(lv2) Minimum value [control ports]", param_type=float, show=True
+    ),
+    'lv2_maximum_val': ParamInfo(
+        label="(lv2) Maximum value [control ports]", param_type=float, show=True
+    ),
+}
 
 class BaseElement (Store):
     '''
@@ -170,6 +193,7 @@ class BaseElement (Store):
         self.no_export = False
         self.edit_mode = None
         self.control_mode = None
+        self.properties = {}
         self.style = {}
         self._all_styles = self.combine_styles()
 
@@ -340,8 +364,8 @@ class BaseElement (Store):
             self.position_x = x
             self.position_y = y
 
-    @saga('code')
-    async def code_changed(self, action, state_diff, previous):
+    @saga('code', 'properties')
+    async def params_changed(self, action, state_diff, previous):
         yield self.send_params()
 
     @mutates('obj_state')
@@ -464,7 +488,7 @@ class BaseElement (Store):
 
     @reducer(
         'obj_id', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
-        'obj_type', 'obj_name', 'obj_args'
+        'obj_type', 'obj_name', 'obj_args', 'properties'
     )
     def CREATE_OBJECT(self, action, state, previous_value):
         """
@@ -472,7 +496,8 @@ class BaseElement (Store):
         """
         objinfo = action.payload
         if state in (
-            'obj_id', 'obj_type', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets'
+            'obj_id', 'obj_type', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
+            'properties'
         ):
             return objinfo.get(state, previous_value)
 
@@ -575,7 +600,7 @@ class BaseElement (Store):
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
         'obj_name', 'no_export', 'is_export', 'export_offset_x',
-        'export_offset_y', 'debug', 'layer', 'code'
+        'export_offset_y', 'debug', 'layer', 'code', 'properties'
     )
     async def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
@@ -589,6 +614,7 @@ class BaseElement (Store):
         self.export_offset_y = params.get("export_offset_y", 0)
         self.debug = params.get("debug", False)
         self.code = params.get("code", None)
+        self.properties = params.get("properties", {})
 
         newscope = params.get("scope", "__patch__")
         if (not self.scope) or newscope != self.scope:

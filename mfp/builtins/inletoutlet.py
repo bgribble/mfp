@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 from ..processor import Processor, AsyncOutput
 from ..mfp_app import MFPApp
 from .. import Uninit
+from mfp.gui.param_info import ParamInfo
 
 from mfp import log
 
@@ -42,6 +43,14 @@ class Inlet(Processor):
             self.doc_tooltip_obj = self.doc_tooltip_hot
         else:
             self.doc_tooltip_obj = self.doc_tooltip_cold
+
+        self.properties = {
+            "lv2_type": "control",
+            "lv2_description": "Control input",
+            "lv2_default_val": 0,
+            "lv2_minimum_val": 0,
+            "lv2_maximum_val": 1.0
+        }
 
     async def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is
@@ -80,6 +89,9 @@ class SignalInlet(Inlet):
         Inlet.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0]
+        self.properties = {
+            "lv2_description": "Signal inlet"
+        }
 
     async def setup(self):
         await self.dsp_init("inlet~", io_channel=self.inletnum)
@@ -106,11 +118,12 @@ class Outlet(Processor):
             self.outletnum = 0
             init_args = "0"
 
-        self.lv2_type = "control"
-        if defs and "lv2_type" in defs:
-            self.lv2_type = defs["lv2_type"]
-
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+        self.properties = {
+            "lv2_type": "control",
+            "lv2_description": "Control outlet",
+        }
+
 
     async def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is
@@ -135,6 +148,9 @@ class SignalOutlet(Outlet):
         Outlet.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.dsp_outlets = [0]
         self.dsp_inlets = [0]
+        self.properties = {
+            "lv2_description": "Signal outlet"
+        }
 
     async def setup(self):
         await self.dsp_init("outlet~", io_channel=self.outletnum)

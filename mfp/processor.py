@@ -1061,6 +1061,9 @@ class Processor:
                     self.snoop_outlet = connection.get("port_1")
                     self.snoop_inlet = connection.get("port_2")
 
+        if "properties" in params:
+            self.properties = params["properties"]
+
     async def method(self, message, inlet):
         '''
         Default method handler ignores which inlet the message was received on
@@ -1096,9 +1099,9 @@ class Processor:
         parent_id = self.patch.obj_id if self.patch is not None else None
 
         self.gui_created = True
-
+        create_params = {k: v for k, v in self.gui_params.items()}
         for param, value in kwargs.items():
-            self.gui_params[param] = value
+            create_params[param] = value
 
         if kwargs.get('is_export'):
             if self.patch:
@@ -1114,15 +1117,17 @@ class Processor:
                 xoff = 2
                 yoff = 20
 
-            self.gui_params['export_offset_x'] = xoff
-            self.gui_params['position_x'] += xoff
+            create_params['export_offset_x'] = xoff
+            create_params['position_x'] += xoff
 
-            self.gui_params['export_offset_y'] = yoff
-            self.gui_params['position_y'] += yoff
+            create_params['export_offset_y'] = yoff
+            create_params['position_y'] += yoff
+
+            create_params['properties'] = {k: v for k, v in self.properties.items()}
 
         await MFPApp().gui_command.create(
             self.init_type, self.init_args, self.obj_id,
-            parent_id, self.gui_params
+            parent_id, create_params
         )
 
     async def delete_gui(self):
@@ -1135,10 +1140,17 @@ class Processor:
         shortcut to set just a few settings without changing others
         """
         from .mfp_app import MFPApp
+        to_send = {}
         for k, v in kwargs.items():
-            self.gui_params[k] = v
+            if k == "properties":
+                to_send["properties"] = v
+            else:
+                to_send[k] = v
+                self.gui_params[k] = v
         if self.gui_created:
-            MFPApp().async_task(MFPApp().gui_command.configure(self.obj_id, **kwargs))
+            MFPApp().async_task(
+                MFPApp().gui_command.configure(self.obj_id, **to_send)
+            )
 
     def set_tag(self, tag, value):
         self.tags[tag] = value
@@ -1156,6 +1168,7 @@ class Processor:
         if kwargs and len(kwargs) > 0:
             for key, value in kwargs.items():
                 self.properties[key] = value
+            self.conf(properties=self.properties)
             return None
 
         if args and len(args) > 0:
@@ -1167,6 +1180,7 @@ class Processor:
         for a in args:
             if a in self.properties:
                 del self.properties[a]
+        self.conf(properties=self.properties)
 
     async def clone(self, patch, scope, name):
         from .mfp_app import MFPApp

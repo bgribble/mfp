@@ -5,12 +5,20 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
 from datetime import datetime
-from imgui_bundle import imgui, imgui_md, imgui_color_text_edit as ed
+from imgui_bundle import imgui, imgui_color_text_edit as ed
 from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import RGBAColor
-from mfp.gui.base_element import BaseElement
-from mfp.gui.param_info import ParamInfo, ListOfInt, ListOfPairs, DictOfRGBAColor, PyLiteral, CodeBlock
+from mfp.gui.base_element import BaseElement, PROPERTY_ATTRS
+from mfp.gui.param_info import (
+    ParamInfo,
+    ListOfInt,
+    ListOfPairs,
+    DictOfRGBAColor,
+    DictOfProperty,
+    PyLiteral,
+    CodeBlock,
+)
 
 single_params = [
     'obj_type',
@@ -145,9 +153,12 @@ def render_param(
 ):
     item_spacing = 12
 
-    # parameter name
     imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 4.0))
-    imgui.text(param_type.label)
+
+    # parameter name, except for property lists which each have their own name
+    if param_type.param_type != DictOfProperty:
+        imgui.text(param_type.label)
+
     newval = param_value if override is None else override
     changed = False
 
@@ -195,7 +206,7 @@ def render_param(
             if changed:
                 try:
                     newval = ast.literal_eval(newval)
-                except:
+                except Exception:
                     log.warning(f"Unable to parse value for parameter {param_type.label}")
             imgui.pop_style_var()
 
@@ -471,6 +482,25 @@ def render_param(
             imgui.pop_style_var()
             imgui.pop_id()
 
+        elif param_type.param_type is DictOfProperty:
+            newval = {}
+            changed = False
+            imgui.push_id(param_name)
+            if param_value and len(param_value) > 0:
+                for prop_name, prop_value in param_value.items():
+                    pinfo = PROPERTY_ATTRS.get(prop_name)
+                    new_pval = prop_value
+                    if pinfo:
+                        new_pval = render_param(
+                            app_window, prop_name, pinfo, prop_value,
+                            target
+                        )
+                        if new_pval != prop_value:
+                            changed = True
+                    newval[prop_name] = new_pval
+
+            imgui.pop_id()
+
         elif param_type.param_type is dict:
             newval = {}
             changed = False
@@ -580,22 +610,22 @@ def render_patch_tab(app_window):
     view_zoom = render_param(
         app_window, 'viewport_zoom', ParamInfo(label="Zoom", param_type=float), di.view_zoom
     )
-    view_position_x = render_param(
+    render_param(
         app_window, 'viewport_pos_x',
         ParamInfo(label="Tile X position", param_type=float, editable=False),
         di.origin_x
     )
-    view_position_y = render_param(
+    render_param(
         app_window, 'viewport_pos_y',
         ParamInfo(label="Tile Y position", param_type=float, editable=False),
         di.origin_y
     )
-    view_width = render_param(
+    render_param(
         app_window, 'viewport_width',
         ParamInfo(label="Tile width", param_type=float, editable=False),
         di.width
     )
-    view_height = render_param(
+    render_param(
         app_window, 'viewport_height',
         ParamInfo(label="Tile height", param_type=float, editable=False),
         di.height
@@ -644,7 +674,6 @@ def render_object_tab(app_window):
             newval = render_param(app_window, param, ptype, pvalue, sel)
             if newval != pvalue:
                 MFPGUI().async_task(sel.dispatch_setter(param, newval))
-
     for param in any_params:
         ptype = BaseElement.store_attrs.get(param)
         if len(app_window.selected) == 1:

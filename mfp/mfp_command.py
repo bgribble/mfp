@@ -28,7 +28,11 @@ class MFPCommand:
         elif isinstance(obj, dict):
             log.warning(f"Error in creating {objtype} {obj}")
             return obj
-        return obj.gui_params
+        create_params = {
+            **obj.gui_params,
+            'properties': obj.properties
+        }
+        return create_params
 
     async def create_export_gui(self, obj_id):
         from .mfp_app import MFPApp

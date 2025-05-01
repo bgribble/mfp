@@ -110,7 +110,7 @@ def lv2_write_ttl(self, ttlpath, plugname, filename):
     libname = "lib%s_lv2.so" % plugname
     ttl_params = dict(ttl_plugname=plugname, ttl_filename=filename,
                       ttl_libname=libname,
-                      ttl_description=(self.properties.get("description") or self.name))
+                      ttl_description=(self.properties.get("lv2_description") or self.name))
     portnum = 0
     for p in self.inlet_objects + self.outlet_objects:
         port_params = dict(port_number=portnum, port_property='')
@@ -120,7 +120,7 @@ def lv2_write_ttl(self, ttlpath, plugname, filename):
             port_types = ["lv2:AudioPort"]
         else:
             needs_bounds = True
-            if p.lv2_type == "midi":
+            if self.properties.get("lv2_type") == "midi":
                 port_params['port_property'] = '\n'.join([
                     'atom:bufferType atom:Sequence ; ',
                     'atom:supports midi:MidiEvent ; ',
@@ -137,11 +137,11 @@ def lv2_write_ttl(self, ttlpath, plugname, filename):
 
         port_params['port_types'] = ', '.join(port_types)
         port_params['port_symbol'] = p.name
-        port_params['port_name'] = p.properties.get("description") or p.name
+        port_params['port_name'] = p.properties.get("lv2_description") or p.name
         if needs_bounds:
-            bounds=dict(bounds_default=p.properties.get('bounds_default', 0.0),
-                        bounds_minimum=p.properties.get('bounds_minimum', 0.0),
-                        bounds_maximum=p.properties.get('bounds_maximum', 1.0))
+            bounds=dict(bounds_default=p.properties.get('lv2_default_val', 0.0),
+                        bounds_minimum=p.properties.get('lv2_minimum_val', 0.0),
+                        bounds_maximum=p.properties.get('lv2_maximum_val', 1.0))
             port_params['port_bounds'] = bounds_template % bounds
         else:
             port_params['port_bounds'] = ""

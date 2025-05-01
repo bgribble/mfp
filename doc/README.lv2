@@ -38,19 +38,9 @@ The plugin's ports are the patch's [inlet]/[inlet~] and
 is a toggle controlling whether the patch appears in the MFP
 editor GUI.  By default it's off.
 
-For each port, the range of values allowed, default value, and
-port name can be set by the sending the inlet the @property
-method with the following property names:
-
-   bounds_minimum: port minimum value (float)
-   bounds_maximum: port maximum value (float)
-   bounds_default: port default value (float)
-   description: port name (string)
-
-So, for example, to set the default value for an [inlet] object to
-0.5, click to select it, then type:
-
-  ! @property(bounds_default=0.5) RET
+For each port, the type (Control or MIDI), the range of values
+allowed, default value, and port name can be set in the Params 
+tab of the object info inspector. 
 
 The "lv2:symbol" (short name of the port) is the MFP object name,
 which is editable in the Objects tab.  See ticket #203 for an

@@ -43,5 +43,8 @@ class ListOfPairs(list):
 class DictOfRGBAColor(dict):
     pass
 
+class DictOfProperty(dict):
+    pass
+
 class CodeBlock (str):
     pass

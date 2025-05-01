@@ -84,6 +84,7 @@ class GUICommand:
 
     async def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
+        from mfp import log
         MFPGUI().appwin.last_activity_time = datetime.now()
         obj = MFPGUI().recall(obj_id)
         if params is not None:
@@ -163,7 +164,6 @@ class GUICommand:
                     o.editable = False
                     o.container = parent
                     parent.layer.add(o, container=parent)
-
                 await o.configure(params)
                 MFPGUI().appwin.register(o)
             else:
