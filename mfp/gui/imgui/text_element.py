@@ -81,7 +81,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
             padding = 10 / tile.view_zoom
         else:
             total = tile.width / tile.view_zoom
-            available = min(self.width, self.max_width)
+            available = min(self.width or self.min_width, self.max_width)
             clip_w = total - (self.position_x - tile.view_x)
             padding = 0
 
@@ -121,7 +121,10 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         eff_width = min(max(content_w, self.min_width), self.max_width)
 
         imgui.end_group()
+        self.width = eff_width + 8
 
+        if not self.height:
+            self.height = self.min_height
         # connections
         self.render_ports()
 
@@ -135,7 +138,6 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         p_tl = imgui.get_item_rect_min()
         p_br = imgui.get_item_rect_max()
 
-        self.width = eff_width + 8
         self.height = p_br[1] - p_tl[1]
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
 

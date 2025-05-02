@@ -96,22 +96,21 @@ class MFPCommand:
     @noresp
     async def send_midi(self, obj_id, port, data):
         from .mfp_app import MFPApp
-        from .midi import MidiEvent
+        from .midi import from_lv2
 
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            await obj.send(MidiEvent().from_lv2(data), port)
+            await obj.send(from_lv2(data), port)
         return True
 
     @noresp
     async def send_midi_to_output(self, obj_id, port, data):
         from .mfp_app import MFPApp
-        from .midi import MidiEvent
+        from .midi import from_lv2
         obj = MFPApp().recall(obj_id)
-        event = MidiEvent().from_lv2(data)
         if isinstance(obj, Processor):
             await obj.send(
-                MethodCall("add_output", port, event),
+                MethodCall("add_output", port, from_lv2(event)),
                 port
             )
         return True

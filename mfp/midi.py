@@ -36,7 +36,7 @@ class MidiEvent:
         if self.event and isinstance(self.event, alsa_midi.Event):
             self.from_alsaseq(self.event)
         elif self.event and isinstance(self.event, LV2MidiEvent):
-            self.from_lv2(self.event)
+            self.from_lv2(self.event.value)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -62,7 +62,7 @@ class MidiEvent:
         return None
 
     def from_lv2(self, msg):
-        self.channel = msg.value & 0xff
+        self.channel = msg & 0xff
 
     def to_lv2(self):
         return (

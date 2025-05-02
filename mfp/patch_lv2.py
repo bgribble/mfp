@@ -120,7 +120,7 @@ def lv2_write_ttl(self, ttlpath, plugname, filename):
             port_types = ["lv2:AudioPort"]
         else:
             needs_bounds = True
-            if self.properties.get("lv2_type") == "midi":
+            if p.properties.get("lv2_type") == "midi":
                 port_params['port_property'] = '\n'.join([
                     'atom:bufferType atom:Sequence ; ',
                     'atom:supports midi:MidiEvent ; ',
