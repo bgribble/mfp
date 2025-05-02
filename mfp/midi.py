@@ -29,7 +29,7 @@ class MidiEvent:
 
     def __init__(self, event=None):
         self.event = event
-        self.channel = 1
+        self.channel = 0
         self.source = None
         self.dest = None
 
@@ -383,10 +383,10 @@ class MidiQFrame(MidiEvent):
         return alsa_midi.Event(type=self.alsa_type, raw_data=bytes(bytearray(databytes)))
 
     def from_lv2(self, msg):
-        self.field = 0
-        self.value = 0
-        self.channel = msg & 0xff
-
+        payload = (msg & 0xff0000) >> 16
+        self.field = (payload & 0xf0) >> 4
+        self.value = payload & 0x0f
+        self.channel = 0
 
     def to_lv2(self):
         return (

@@ -615,7 +615,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         pass
 
     def layer_select(self, layer):
-        self.canvas_tile_page = layer.patch.display_info.page_id
+        if layer.patch and layer.patch.display_info:
+            self.canvas_tile_page = layer.patch.display_info.page_id
         super().layer_select(layer)
 
     #####################

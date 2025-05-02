@@ -40,7 +40,7 @@ mfp_lv2_handle_context_msg(mfp_context * context, int port, int64_t message) {
     ev.event.body.type = self->uris.midi_MidiEvent;
     ev.event.body.size = 3;
 
-    ev.msg[0] = (message & 0xf0000000) >> 24 | (message & 0x0f);
+    ev.msg[0] = (message & 0xff000000) >> 24 | (message & 0x0f);
     ev.msg[1] = (message & 0xff0000) >> 16;
     ev.msg[2] = (message & 0xff00) >> 8;
 

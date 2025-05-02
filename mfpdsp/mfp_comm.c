@@ -95,7 +95,7 @@ mfp_comm_release_buffer(char * msgbuf)
         }
     }
 
-    mfp_log_error("mfp_comm_release_buffer: no matching buffer found!");
+    mfp_log_error("mfp_comm_release_buffer: no matching buffer found for %p", msgbuf);
     return;
 }
 
@@ -113,6 +113,7 @@ mfp_comm_submit_buffer(char * msgbuf, int msglen)
 
     if((outgoing_queue_read == 0 && outgoing_queue_write == REQ_LASTIND)
         || (outgoing_queue_write + 1 == outgoing_queue_read)) {
+        mfp_log_warning("mfp_comm_submit_buffer: queue full, dropping request");
         return 0;
     }
 
@@ -132,6 +133,10 @@ int
 mfp_comm_send_buffer(char * msg, int msglen)
 {
     char pbuff[11];
+    if (msg == NULL) {
+        mfp_log_warning("mfp_comm_send_buffer: NULL buffer, skipping");
+        return 0;
+    }
     snprintf(pbuff, 10, "% 8d", msglen);
     pthread_mutex_lock(&comm_io_lock);
     send(comm_socket, "[ SYNC ]", 8, 0);
@@ -139,6 +144,7 @@ mfp_comm_send_buffer(char * msg, int msglen)
     send(comm_socket, msg, msglen, 0);
     pthread_mutex_unlock(&comm_io_lock);
     mfp_comm_release_buffer(msg);
+    return 1;
 }
 
 static int
