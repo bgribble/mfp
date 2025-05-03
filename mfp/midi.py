@@ -62,7 +62,8 @@ class MidiEvent:
         return None
 
     def from_lv2(self, msg):
-        self.channel = msg & 0xff
+        if lv2midi.lv2_midi_is_voice_message(msg):
+            self.channel = msg & 0xff
 
     def to_lv2(self):
         return (
@@ -340,7 +341,9 @@ class MidiPitchbend (MidiEvent):
 
     def from_lv2(self, msg):
         super().from_lv2(msg)
-        self.value = (msg & 0xff0000) >> 16
+        least = (msg & 0xff0000) >> 16
+        most = (msg & 0xff00) >> 8
+        self.value = (most << 7) | least
         self.channel = msg & 0xff
 
     def to_lv2(self):
@@ -436,8 +439,10 @@ class MidiSPP(MidiEvent):
 
     def from_lv2(self, msg):
         super().from_lv2(msg)
-        self.position = (msg & 0xffff00) >> 8
-        self.channel = msg & 0xff
+        least = (msg & 0xff0000) >> 16
+        most = (msg & 0xff00) >> 8
+
+        self.position = (most << 7) | least
 
     def to_lv2(self):
         return (

@@ -194,3 +194,7 @@ def register():
     MFPApp().register("midi_in", MidiIn)
     MFPApp().register("midi_out", MidiOut)
     MFPApp().register("midi_time", MidiTime)
+
+    MFPApp().register("midi.in", MidiIn)
+    MFPApp().register("midi.out", MidiOut)
+    MFPApp().register("midi.time", MidiTime)
