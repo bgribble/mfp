@@ -31,7 +31,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         super().__init__(window, x, y)
         self.node_id = None
         self.min_width = self.width = 25
-        self.min_height = self.height = 12
+        self.min_height = self.height = 16
         self.click_triggered = 0
 
     @mutates('position_x', 'position_y', 'width', 'height')

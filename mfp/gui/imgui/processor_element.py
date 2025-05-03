@@ -27,7 +27,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         super().__init__(window, x, y)
         self.node_id = None
         self.min_width = self.width = 20
-        self.min_height = self.height = 12
+        self.min_height = self.height = 16
         self.position_set = False
 
     @mutates('position_x', 'position_y', 'width', 'height')
