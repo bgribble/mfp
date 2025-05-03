@@ -597,6 +597,12 @@ def render_patch_tab(app_window):
         MFPGUI().async_task(MFPGUI().mfp.rename_obj(patch.obj_id, newval))
         patch.send_params()
 
+    render_param(
+        app_window, 'patch_context',
+        ParamInfo(label="DSP context", param_type=str, editable=False),
+        patch.context_name
+    )
+
     ######################
     # viewport params
     imgui.separator_text(" Viewport ")

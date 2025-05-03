@@ -14,7 +14,7 @@ from .. import midi
 
 class Note2Freq(Processor):
     '''
-    [note2freq] converts a note to a frequency
+    [midi.note2freq] converts a MIDI note to a frequency
     Parameters:
             scale: a subclass of Scale (defaults to Chromatic)
             tuning: an instance of Tuning (defaults to EqualTemper)
@@ -60,3 +60,4 @@ class Note2Freq(Processor):
 
 def register():
     MFPApp().register("note2freq", Note2Freq)
+    MFPApp().register("midi.note2freq", Note2Freq)
