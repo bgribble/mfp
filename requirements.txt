@@ -3,7 +3,7 @@ annotated-types==0.7.0
 carp-rpc==0.0.8
 cffi==1.17.1
 Cython==3.0.12
-flopsy==0.0.5
+flopsy==0.0.6
 glfw==2.8.0
 imgui-bundle==1.6.2
 munch==4.0.0

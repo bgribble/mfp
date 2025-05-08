@@ -213,7 +213,18 @@ def render_tile(app_window, patch):
                 nedit.select_node(obj.node_id, True)
         app_window.imgui_needs_reselect = []
 
-    if patch.selected_layer:
+    if patch.panel_mode:
+        panel_objects = []
+        for layer in patch.layers:
+            for obj in layer.objects:
+                if obj.panel_enable:
+                    panel_objects.append(obj)
+
+        for obj in sorted(panel_objects, key=lambda o: o.panel_z):
+            if not isinstance(obj, ConnectionElement):
+                obj.render()
+
+    elif patch.selected_layer:
         # first pass: non-links
         all_pins = {}
         for obj in sorted(patch.selected_layer.objects, key=lambda o: o.position_z):

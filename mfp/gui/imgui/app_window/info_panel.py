@@ -29,6 +29,7 @@ single_params = [
     'layer',
     'min_width',
     'min_height',
+    'panel_enable',
 ]
 
 
