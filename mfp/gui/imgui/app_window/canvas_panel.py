@@ -90,7 +90,9 @@ def render_tile(app_window, patch):
         patch.nedit_editor = nedit.create_editor(app_window.nedit_config)
     nedit.set_current_editor(patch.nedit_editor)
     layer_name = ''
-    if patch.selected_layer:
+    if patch.panel_mode:
+        layer_name = ' (panel)'
+    elif patch.selected_layer:
         layer_name = ' - ' + patch.selected_layer.name
 
     if app_window.viewport_selection_set:
