@@ -153,6 +153,8 @@ class GUICommand:
                         layer = parent.find_layer(params["layername"])
                     if not layer:
                         layer = parent.selected_layer or parent.layers[0]
+                    if not layer:
+                        log.debug(f"[create] NO LAYER! {params} {parent}")
                     o.container = layer
                     layer.add(o)
                 elif isinstance(parent, BaseElement):
@@ -163,6 +165,8 @@ class GUICommand:
                         )
                     o.editable = False
                     o.container = parent
+                    if not parent.layer:
+                        log.debug(f"[create] NO PARENT LAYER! {params} {parent}")
                     parent.layer.add(o, container=parent)
                 await o.configure(params)
                 MFPGUI().appwin.register(o)

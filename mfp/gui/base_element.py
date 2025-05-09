@@ -475,8 +475,11 @@ class BaseElement (Store):
 
         self.tags = {}
         self.update_badge()
-        objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, self.synced_params())
+        params = self.synced_params()
+        objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, params)
+
         if not objinfo or "obj_id" not in objinfo:
+            log.debug(f"[base_element] error: {objinfo}")
             self.app_window.hud_write("ERROR: Could not create, see log for details")
 
             if objinfo and "code" in objinfo:
@@ -490,6 +493,7 @@ class BaseElement (Store):
 
         if self.layer is not None and objinfo and isinstance(objinfo, dict):
             objinfo["layername"] = self.layer.name
+
         objinfo['obj_type'] = obj_type
         objinfo['obj_state'] = self.obj_state
 
@@ -547,7 +551,6 @@ class BaseElement (Store):
         Initialize store from creation payload
         """
         objinfo = action.payload
-        log.debug(f"[CREATE_OBJECT] state={state} previous_value={previous_value} new={objinfo.get(state)}")
         if state in (
             'obj_id', 'obj_type', 'obj_state',
             'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
@@ -566,7 +569,7 @@ class BaseElement (Store):
         prms = {}
         for k in self.param_list:
             val = getattr(self, k)
-            if k == "layer":
+            if k == "layer" and val:
                 prms["layername"] = val.name
                 continue
             if isinstance(val, BaseElement):

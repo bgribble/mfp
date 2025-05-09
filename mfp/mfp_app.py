@@ -404,9 +404,6 @@ class MFPApp (Singleton, SignalMixin):
         create_params = {}
         rval = None
 
-        # first try: is a factory registered?
-        ctor = self.registry.get(init_type)
-
         # try to compile code to get extra defs
         defs = {}
         if params and "code" in params:
@@ -419,6 +416,9 @@ class MFPApp (Singleton, SignalMixin):
                     rval = create_params
                 else:
                     create_params["code"] = dict(body=codestr, lang="python")
+
+        # first try: is a factory registered?
+        ctor = self.registry.get(init_type)
 
         # second try: is there a .mfp patch file in the search path?
         if ctor is None:

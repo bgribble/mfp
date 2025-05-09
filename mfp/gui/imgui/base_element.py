@@ -286,6 +286,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
             return
         if not self.selected and not self.editable:
             return
+        if self.container and self.container.panel_mode and self.panel_enable:
+            return
 
         padding = self.get_style('padding')
         p_tl = imgui.get_item_rect_min()

@@ -546,12 +546,7 @@ class Patch(Processor):
         return True
 
     def obj_is_exportable(self, obj):
-        if (obj.gui_params.get('is_export')
-            or (obj.gui_params.get("layername") == Patch.EXPORT_LAYER
-                and obj.gui_params.get("no_export", False) is not True
-                and "display_type" in obj.gui_params
-                and (obj.gui_params.get("display_type") not in
-                     ("sendvia", "recvvia", "sendsignalvia", "recvsignalvia")))):
+        if obj.gui_params.get('is_export') or obj.gui_params.get("panel_enable"):
             return True
         else:
             return False
@@ -561,10 +556,16 @@ class Patch(Processor):
 
         for obj_id, obj in self.objects.items():
             if self.obj_is_exportable(obj):
-                x = (obj.gui_params.get("position_x")
-                     - obj.gui_params.get('export_offset_x', 0))
-                y = (obj.gui_params.get("position_y")
-                     - obj.gui_params.get('export_offset_y', 0))
+                obj_x = obj.gui_params.get(
+                    "panel_x",
+                    obj.gui_params.get("position_x", 0)
+                )
+                obj_y = obj.gui_params.get(
+                    "panel_y",
+                    obj.gui_params.get("position_y", 0)
+                )
+                x = obj_x - obj.gui_params.get('export_offset_x', 0)
+                y = obj_y - obj.gui_params.get('export_offset_y', 0)
                 w = obj.gui_params.get("width")
                 h = obj.gui_params.get("height")
 

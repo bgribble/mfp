@@ -7,7 +7,7 @@ A patch element corresponding to a signal or control processor
 
 from abc import ABCMeta, abstractmethod
 
-from flopsy import saga
+from flopsy import saga, mutates
 
 from mfp import log
 from .text_widget import TextWidget
@@ -35,6 +35,7 @@ class ProcessorElement (BaseElement):
         'export_y': ParamInfo(label="Exported interface Y", param_type=float),
         'export_w': ParamInfo(label="Exported interface width", param_type=float),
         'export_h': ParamInfo(label="Exported interface height", param_type=float),
+        'panel_mode': ParamInfo(label="Panel mode", param_type=bool),
     }
     store_attrs = {
         **BaseElement.store_attrs, **extra_params
@@ -69,6 +70,7 @@ class ProcessorElement (BaseElement):
         self.export_w = None
         self.export_h = None
         self.export_created = False
+        self.panel_mode = False
 
         self.obj_state = self.OBJ_HALFCREATED
 
@@ -90,12 +92,13 @@ class ProcessorElement (BaseElement):
         # don't recreate if this is the initial creation
         if "code" not in state_diff:
             if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
-                yield None
+                return
             if "obj_id" in state_diff and state_diff['obj_id'][0] == None:
-                yield None
+                return
 
         if self.obj_type:
             args = f" {self.obj_args}" if self.obj_args is not None else ''
+            log.debug(f"[processor] recreating element!! {self.obj_type} {args} {state_diff}")
             yield await self.label_edit_finish(
                 None, f"{self.obj_type}{args}"
             )
@@ -126,6 +129,7 @@ class ProcessorElement (BaseElement):
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
+    @mutates('panel_mode')
     async def configure(self, params):
         if self.obj_args is None:
             self.label.set_text("%s" % (self.obj_type,))
@@ -150,6 +154,7 @@ class ProcessorElement (BaseElement):
         self.export_h = params.get("export_h")
 
         if self.export_x is not None and self.export_y is not None:
+            self.panel_mode = True
             self.export_created = True
 
         params["width"] = max(self.width, params.get("export_w") or 0)

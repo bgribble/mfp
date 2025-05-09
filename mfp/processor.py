@@ -5,7 +5,6 @@ processor.py: Parent class of all processors
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
-import asyncio
 import inspect
 
 from .dsp_object import DSPObject
@@ -1186,8 +1185,9 @@ class Processor:
         from .mfp_app import MFPApp
         prms = self.save()
 
-        newobj = await MFPApp().create(prms.get("type"), prms.get("initargs"),
-                                       patch, scope, name)
+        newobj = await MFPApp().create(
+            prms.get("type"), prms.get("initargs"), patch, scope, name
+        )
         newobj.load(prms)
         return newobj
 
@@ -1238,6 +1238,7 @@ class Processor:
         '''
 
         from .mfp_app import MFPApp
+        from .patch import Patch
 
         # special handling for gui_params
         gp = prms.get('gui_params')
@@ -1255,6 +1256,27 @@ class Processor:
 
         self.do_onload = prms.get('do_onload', False)
         self.properties = prms.get('properties', {})
+
+        # compatibility with older style Interface layer patches
+        if (
+            gp and gp.get("layername") == Patch.EXPORT_LAYER
+            and gp.get("no_export", False) is not True
+            and "display_type" in gp
+            and gp.get("display_type") not in (
+                "sendvia", "recvvia", "sendsignalvia", "recvsignalvia"
+            )
+            and "panel_enable" not in gp
+        ):
+            self.gui_params["panel_enable"] = True
+            self.gui_params["panel_x"] = gp.get("position_x", 0)
+            self.gui_params["panel_y"] = gp.get("position_y", 0)
+            self.gui_params["panel_z"] = gp.get("position_z", 0)
+            log.debug(f"[load] put {self} in the panel {self.gui_params}")
+
+        if gp and "panel_enable" not in gp:
+            self.gui_params["patch_x"] = gp.get("position_x", 0)
+            self.gui_params["patch_y"] = gp.get("position_y", 0)
+            self.gui_params["patch_z"] = gp.get("position_z", 0)
 
         # set up saved OSC controllers
         for path, types in prms.get("osc_methods", []):

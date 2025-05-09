@@ -299,12 +299,10 @@ class GlobalMode (InputMode):
 
     async def toggle_panel_mode(self):
         patch = self.window.selected_patch
-        log.debug(f"[panel] setting panel mode for {patch} to {not patch.panel_mode}")
         await patch.dispatch(
             Action(patch, patch.SET_PANEL_MODE, dict(value=(not patch.panel_mode))),
             previous=dict(panel_mode=patch.panel_mode)
         )
-        log.debug(f"[panel] panel mode is now {patch.panel_mode}")
 
         return True
 
