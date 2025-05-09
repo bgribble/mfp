@@ -1,5 +1,5 @@
 """
-canvas_pane -- render the 'imgui node editor' canvas pane
+canvas_panel -- render the 'imgui node editor' canvas pane
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """

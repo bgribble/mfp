@@ -528,6 +528,7 @@ class GlobalMode (InputMode):
                 self.window.selected_window != "canvas"
                 or self.window.main_menu_open
                 or self.window.context_menu_open
+                or self.window.inspector
                 or nedit.get_hovered_pin().id()
             ):
                 return False

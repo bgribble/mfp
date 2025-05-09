@@ -129,20 +129,22 @@ class ImguiBaseElementImpl(BaseElementImpl):
     # every subclass should call this somewhere in the render method
     def render_sync_with_imgui(self):
         if isinstance(self.container, BaseElement):
+            # we are creating a subobject within a processor_element
             if self.export_position_init:
                 self.export_position_init = False
-                self.position_x = self.container.position_x + self.position_x
-                self.position_y = self.container.position_y + self.position_y
+                self.position_x = self.container.position_x + self.panel_x + self.export_offset_x
+                self.position_y = self.container.position_y + self.panel_y + self.export_offset_y
                 self.position_z = self.container.position_z + 0.1
                 self.position_set = True
                 self.export_container_x = self.container.position_x
                 self.export_container_y = self.container.position_y
+            # the containing processor_element has moved
             elif (
                 self.container.position_x != self.export_container_x
                 or self.container.position_y != self.export_container_y
             ):
-                self.position_x = (self.container.position_x - self.export_container_x) + self.position_x
-                self.position_y = (self.container.position_y - self.export_container_y) + self.position_y
+                self.position_x = self.container.position_x + self.panel_x + self.export_offset_x
+                self.position_y = self.container.position_y + self.panel_y + self.export_offset_y
                 self.position_z = self.container.position_z + 0.1
                 self.position_set = True
                 self.export_container_x = self.container.position_x
