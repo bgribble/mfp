@@ -147,6 +147,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         md_options = markdown.MarkdownOptions()
         md_options.callbacks.on_html_div = ImguiTextWidgetImpl.markdown_div_callback
+        md_options.callbacks.on_image = ImguiTextWidgetImpl.image_callback
         md_options.font_options.regular_size = 16
         md_options.font_options.size_diff_between_levels = 4
         md_options.font_options.max_header_level = 5
