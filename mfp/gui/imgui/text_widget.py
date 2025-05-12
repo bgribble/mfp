@@ -12,6 +12,40 @@ from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from ..text_widget import TextWidget, TextWidgetImpl
 
+
+# markdown images are ![caption](image spec)
+# image spec is not well defined. We are extending it a little
+# to enable passing size params.
+# ![caption](filename\ spaces\ escaped alt_text\ spaces\ escaped width=123 height=123)
+# everything is optional but spaces must always be escaped in the filename
+
+# FIXME looks like we don't get the image arg if there are any spaces
+# in it :/
+def _parse_md_image_arg(arg):
+    if not arg:
+        return "", None, None
+
+    parts = re.split(
+        r'(?<!\\) ',
+        arg
+    )
+
+    path = parts[0]
+    alt_text = None
+    width = None
+    height = None
+
+    for p in parts[1:]:
+        if p.startswith('width='):
+            width = int(p[6:])
+        elif p.startswith('height='):
+            height = int(p[7:])
+        elif not alt_text:
+            alt_text = p
+
+    return path, alt_text, width, height
+
+
 # parse the get_debug_name() output to get shape and size info
 def _fontinfo(info):
     family = None
@@ -23,7 +57,7 @@ def _fontinfo(info):
         try:
             size = float(re.sub("[^0-9]", "", parts[-1]))
             parts = parts[:-1]
-        except:
+        except Exception:
             pass
 
     parts = ' '.join(parts).split('-')
@@ -100,6 +134,26 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             nedit.enable_shortcuts(False)
         else:
             nedit.enable_shortcuts(True)
+
+    @classmethod
+    def url_callback(cls, *args, **kwargs):
+        log.debug(f"[md link] {args} {kwargs}")
+
+    @classmethod
+    def image_callback(cls, filepath):
+        from mfp.gui import image_utils
+
+        texture_id, img_width, img_height = image_utils.load_texture_from_file(filepath)
+
+        img = markdown.MarkdownImage()
+        img.texture_id = texture_id
+        img.col_border = (0, 0, 0, 0)
+        img.col_tint = (1, 1, 1, 1)
+        img.uv0 = (0, 0)
+        img.uv1 = (1, 1)
+        img.size = (img_width, img_height)
+
+        return img
 
     @classmethod
     def markdown_div_callback(cls, div_class, is_opening_div):

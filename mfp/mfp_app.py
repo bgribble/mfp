@@ -135,7 +135,13 @@ class MFPApp (Singleton, SignalMixin):
 
         if not self.no_gui:
             logstart = log.log_time_base.strftime("%Y-%m-%dT%H:%M:%S.%f")
-            guicmd = ["mfpgui", "-s", self.socket_path, "-l", logstart, '--backend', self.gui_backend]
+            guicmd = [
+                "mfpgui",
+                "-s", self.socket_path,
+                "-l", logstart,
+                '--backend', self.gui_backend,
+                "--searchpath", self.searchpath
+            ]
             if self.debug:
                 guicmd.append('--debug')
 
@@ -350,17 +356,16 @@ class MFPApp (Singleton, SignalMixin):
             loadpath = os.path.dirname(file_name)
             loadfile = os.path.basename(file_name)
 
-            # FIXME: should not modify app search path, it should be just for this load
-            self.searchpath += ':' + loadpath
+            searchpath = self.searchpath + ((':' + loadpath) if loadpath else "")
 
             log.debug("Opening patch", loadfile)
-            filepath = utils.find_file_in_path(loadfile, self.searchpath)
+            filepath = utils.find_file_in_path(loadfile, searchpath)
 
             if filepath:
                 log.debug("Found file", filepath)
                 (name, factory) = Patch.register_file(filepath)
             else:
-                log.error("No file '%s' in search path %s" % (loadfile, MFPApp().searchpath))
+                log.error("No file '%s' in search path %s" % (loadfile, searchpath))
                 if "." in loadfile:
                     name = '.'.join(loadfile.split('.')[:-1])
                 else:
