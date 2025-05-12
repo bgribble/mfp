@@ -257,7 +257,11 @@ def render_param(
                     step=1,
                     step_fast=10,
                 )
-                changed = changed and imgui.is_item_deactivated_after_edit()
+                if changed:
+                    delta = abs(newval - param_value)
+                    if delta > 10:
+                        changed = changed and imgui.is_item_deactivated_after_edit()
+
                 changed = changed or show_input_changed
             else:
                 changed = show_input_changed
@@ -291,9 +295,13 @@ def render_param(
                     step_fast=10,
                     format="%.2f",
                 )
-                changed = changed and imgui.is_item_deactivated_after_edit()
-                imgui.pop_style_var()
+                if changed:
+                    delta = abs(newval - param_value)
+                    if delta > 10:
+                        changed = changed and imgui.is_item_deactivated_after_edit()
+
                 changed = changed or show_input_changed
+                imgui.pop_style_var()
             else:
                 changed = show_input_changed
                 newval = None
