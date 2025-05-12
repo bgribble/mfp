@@ -3,7 +3,6 @@ imgui/text_widget.py -- backend implementation of TextWidget for Imgui
 """
 
 import re
-import numpy as np
 from imgui_bundle import imgui, ImVec4
 from imgui_bundle import imgui_node_editor as nedit
 from imgui_bundle import imgui_md as markdown
@@ -14,61 +13,37 @@ from mfp.gui.colordb import ColorDB
 from ..text_widget import TextWidget, TextWidgetImpl
 
 
-image_cache = {}
+# markdown images are ![caption](image spec)
+# image spec is not well defined. We are extending it a little
+# to enable passing size params.
+# ![caption](filename\ spaces\ escaped alt_text\ spaces\ escaped width=123 height=123)
+# everything is optional but spaces must always be escaped in the filename
 
+# FIXME looks like we don't get the image arg if there are any spaces
+# in it :/
+def _parse_md_image_arg(arg):
+    if not arg:
+        return "", None, None
 
-def rgba_image_to_texture(image: np.ndarray) -> int:
-    """Upload an RGBA image to the GPU as a texture, returns the OpenGL texture ID."""
-    from OpenGL import GL
-    assert image.dtype == np.uint8 and image.ndim == 3 and image.shape[2] == 4
-
-    height, width = image.shape[:2]
-
-    # Generate a texture ID
-    texture_id = GL.glGenTextures(1)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, texture_id)
-
-    # Set texture parameters (you may want to adjust this)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
-    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
-
-    # Upload the image
-    GL.glTexImage2D(
-        GL.GL_TEXTURE_2D,
-        0,                  # level
-        GL.GL_RGBA,            # internal format
-        width,
-        height,
-        0,                  # border
-        GL.GL_RGBA,            # input format
-        GL.GL_UNSIGNED_BYTE,   # input type
-        image
+    parts = re.split(
+        r'(?<!\\) ',
+        arg
     )
 
-    GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
-    return texture_id
+    path = parts[0]
+    alt_text = None
+    width = None
+    height = None
 
+    for p in parts[1:]:
+        if p.startswith('width='):
+            width = int(p[6:])
+        elif p.startswith('height='):
+            height = int(p[7:])
+        elif not alt_text:
+            alt_text = p
 
-def img_from_file(filename):
-    from PIL import Image
-    if filename in image_cache:
-        return image_cache[filename]
-
-    image = Image.open(filename).convert("RGBA")
-    np_image = np.array(image)
-
-    img = markdown.MarkdownImage()
-    img.texture_id = rgba_image_to_texture(np_image)
-    img.col_border = (0, 0, 0, 0)
-    img.col_tint = (1, 1, 1, 1)
-    img.uv0 = (0, 0)
-    img.uv1 = (1, 1)
-    img.size = np_image.shape[:2]
-    image_cache[filename] = img
-
-    return img
+    return path, alt_text, width, height
 
 
 # parse the get_debug_name() output to get shape and size info
@@ -82,7 +57,7 @@ def _fontinfo(info):
         try:
             size = float(re.sub("[^0-9]", "", parts[-1]))
             parts = parts[:-1]
-        except:
+        except Exception:
             pass
 
     parts = ' '.join(parts).split('-')
@@ -161,8 +136,24 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             nedit.enable_shortcuts(True)
 
     @classmethod
+    def url_callback(cls, *args, **kwargs):
+        log.debug(f"[md link] {args} {kwargs}")
+
+    @classmethod
     def image_callback(cls, filepath):
-        return img_from_file(filepath)
+        from mfp.gui import image_utils
+
+        texture_id, img_width, img_height = image_utils.load_texture_from_file(filepath)
+
+        img = markdown.MarkdownImage()
+        img.texture_id = texture_id
+        img.col_border = (0, 0, 0, 0)
+        img.col_tint = (1, 1, 1, 1)
+        img.uv0 = (0, 0)
+        img.uv1 = (1, 1)
+        img.size = (img_width, img_height)
+
+        return img
 
     @classmethod
     def markdown_div_callback(cls, div_class, is_opening_div):

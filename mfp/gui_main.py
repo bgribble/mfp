@@ -271,6 +271,7 @@ async def main(cmdline):
     socketpath = cmdline.get("socketpath")
     debug = cmdline.get('debug')
     backend = cmdline.get('backend')
+    searchpath = cmdline.get('searchpath')
 
     log.log_module = "gui"
     log.log_func = log.rpclog
@@ -321,6 +322,7 @@ async def main(cmdline):
     gui.mfp = mfp_connection
     gui.debug = debug
     gui.backend_name = backend
+    gui.searchpath = searchpath
 
     gui.appwin = AppWindow.build()
 
@@ -371,6 +373,8 @@ def main_sync_wrapper():
                         help="Enable debugging behaviors")
     parser.add_argument("-b", "--backend", default="clutter",
                         help="UI framework to use")
+    parser.add_argument("-p", "--searchpath", default="",
+                        help="Paths to search for assets (colon-separated string)")
     cmdline = vars(parser.parse_args())
 
     backend_name = cmdline.get("backend")
