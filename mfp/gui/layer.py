@@ -30,6 +30,10 @@ class Layer(BackendInterface):
     def build(cls, *args, **kwargs):
         return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
+    @property
+    def panel_mode(self):
+        return self.patch.panel_mode if self.patch else False
+
     def resort(self, obj):
         if obj in self.objects:
             self.objects.remove(obj)

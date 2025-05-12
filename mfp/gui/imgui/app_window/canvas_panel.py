@@ -1,5 +1,5 @@
 """
-canvas_pane -- render the 'imgui node editor' canvas pane
+canvas_panel -- render the 'imgui node editor' canvas pane
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
@@ -90,7 +90,9 @@ def render_tile(app_window, patch):
         patch.nedit_editor = nedit.create_editor(app_window.nedit_config)
     nedit.set_current_editor(patch.nedit_editor)
     layer_name = ''
-    if patch.selected_layer:
+    if patch.panel_mode:
+        layer_name = ' (panel)'
+    elif patch.selected_layer:
         layer_name = ' - ' + patch.selected_layer.name
 
     if app_window.viewport_selection_set:
@@ -213,7 +215,18 @@ def render_tile(app_window, patch):
                 nedit.select_node(obj.node_id, True)
         app_window.imgui_needs_reselect = []
 
-    if patch.selected_layer:
+    if patch.panel_mode:
+        panel_objects = []
+        for layer in patch.layers:
+            for obj in layer.objects:
+                if obj.panel_enable:
+                    panel_objects.append(obj)
+
+        for obj in sorted(panel_objects, key=lambda o: o.panel_z):
+            if not isinstance(obj, ConnectionElement):
+                obj.render()
+
+    elif patch.selected_layer:
         # first pass: non-links
         all_pins = {}
         for obj in sorted(patch.selected_layer.objects, key=lambda o: o.position_z):

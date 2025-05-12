@@ -489,13 +489,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def ready(self):
         pass
 
-    def object_visible(self, obj):
-        if obj and hasattr(obj, 'layer'):
-            return obj.layer == self.selected_layer
-        if obj == self.console_manager:
-            return True
-        return True
-
     #####################
     # coordinate transforms and zoom
     def screen_to_canvas(self, x, y):

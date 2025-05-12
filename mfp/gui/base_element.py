@@ -66,6 +66,13 @@ BASE_STORE_ATTRS = {
     'position_x': ParamInfo(label="X position", param_type=float),
     'position_y': ParamInfo(label="Y position", param_type=float),
     'position_z': ParamInfo(label="Z position", param_type=float),
+    'patch_x': ParamInfo(label="X position (patch mode)", param_type=float),
+    'patch_y': ParamInfo(label="Y position (patch mode)", param_type=float),
+    'patch_z': ParamInfo(label="Z position (patch mode)", param_type=float),
+    'panel_x': ParamInfo(label="X position (panel mode)", param_type=float),
+    'panel_y': ParamInfo(label="Y position (panel mode)", param_type=float),
+    'panel_z': ParamInfo(label="Z position (panel mode)", param_type=float),
+    'panel_enable': ParamInfo(label="Enable panel display", param_type=bool, show=True),
     'width': ParamInfo(label="Width", param_type=float, editable=False),
     'height': ParamInfo(label="Height", param_type=float, editable=False),
     'min_width': ParamInfo(label="Min width", param_type=float),
@@ -86,7 +93,7 @@ BASE_STORE_ATTRS = {
 }
 
 # these are params that may appear within 'properties' and get
-# their own editors. It's awkward to have type-specific info here 
+# their own editors. It's awkward to have type-specific info here
 # and in the Processor definition but I can't see a way around it
 PROPERTY_ATTRS = {
     'lv2_type': ParamInfo(
@@ -196,6 +203,14 @@ class BaseElement (Store):
         self.properties = {}
         self.style = {}
         self._all_styles = self.combine_styles()
+
+        self.patch_x = x
+        self.patch_y = y
+        self.patch_z = 0
+        self.panel_x = x
+        self.panel_y = y
+        self.panel_z = 0
+        self.panel_enable = False
 
         # for interactive search
         self.highlight_text = None
@@ -361,12 +376,46 @@ class BaseElement (Store):
                     previous=dict(position_y=previous_y)
                 )
         else:
+            log.debug(f"[move] not updating state from {(previous_x, previous_y)} to {(x, y)}")
             self.position_x = x
             self.position_y = y
 
     @saga('code', 'properties')
     async def params_changed(self, action, state_diff, previous):
         yield self.send_params()
+
+    @saga('position_x', 'position_y', 'position_z')
+    async def position_changed(self, action, state_diff, previous):
+        if not (self.layer and self.layer.patch):
+            return
+
+        if self.layer.patch.panel_mode or not self.panel_enable:
+            if 'position_x' in state_diff:
+                yield self.action(
+                    self.SET_PANEL_X, value=self.position_x
+                )
+            if 'position_y' in state_diff:
+                yield self.action(
+                    self.SET_PANEL_Y, value=self.position_y
+                )
+            if 'position_z' in state_diff:
+                yield self.action(
+                    self.SET_PANEL_Z, value=self.position_z
+                )
+
+        if not self.layer.patch.panel_mode:
+            if 'position_x' in state_diff:
+                yield self.action(
+                    self.SET_PATCH_X, value=self.position_x
+                )
+            if 'position_y' in state_diff:
+                yield self.action(
+                    self.SET_PATCH_Y, value=self.position_y
+                )
+            if 'position_z' in state_diff:
+                yield self.action(
+                    self.SET_PATCH_Z, value=self.position_z
+                )
 
     @mutates('obj_state')
     async def delete(self, delete_obj=True):
@@ -388,6 +437,7 @@ class BaseElement (Store):
         new_layer = action.payload['value']
         self.move_to_layer(new_layer)
         return new_layer
+
 
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
@@ -420,13 +470,16 @@ class BaseElement (Store):
         # get put in the correct place in the object tree
         await MFPGUI().appwin.signal_emit("created", self)
 
-        self.obj_type = obj_type
-        self.obj_args = init_args
+        #self.obj_type = obj_type
+        #self.obj_args = init_args
 
         self.tags = {}
         self.update_badge()
-        objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, self.synced_params())
+        params = self.synced_params()
+        objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, params)
+
         if not objinfo or "obj_id" not in objinfo:
+            log.debug(f"[base_element] error: {objinfo}")
             self.app_window.hud_write("ERROR: Could not create, see log for details")
 
             if objinfo and "code" in objinfo:
@@ -440,11 +493,14 @@ class BaseElement (Store):
 
         if self.layer is not None and objinfo and isinstance(objinfo, dict):
             objinfo["layername"] = self.layer.name
+
         objinfo['obj_type'] = obj_type
+        objinfo['obj_state'] = self.obj_state
 
         # init state from objinfo
         await self.dispatch(
-            Action(self, self.CREATE_OBJECT, objinfo)
+            Action(self, self.CREATE_OBJECT, objinfo),
+            previous=dict(obj_state=None)
         )
 
         if self.obj_id is not None:
@@ -488,7 +544,7 @@ class BaseElement (Store):
 
     @reducer(
         'obj_id', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
-        'obj_type', 'obj_name', 'obj_args', 'properties'
+        'obj_type', 'obj_name', 'obj_args', 'obj_state', 'properties'
     )
     def CREATE_OBJECT(self, action, state, previous_value):
         """
@@ -496,7 +552,8 @@ class BaseElement (Store):
         """
         objinfo = action.payload
         if state in (
-            'obj_id', 'obj_type', 'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
+            'obj_id', 'obj_type', 'obj_state',
+            'scope', 'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
             'properties'
         ):
             return objinfo.get(state, previous_value)
@@ -505,13 +562,14 @@ class BaseElement (Store):
             return objinfo.get('name', previous_value)
         if state == 'obj_args':
             return objinfo.get('initargs', previous_value)
+
         return previous_value
 
     def synced_params(self):
         prms = {}
         for k in self.param_list:
             val = getattr(self, k)
-            if k == "layer":
+            if k == "layer" and val:
                 prms["layername"] = val.name
                 continue
             if isinstance(val, BaseElement):
@@ -600,7 +658,9 @@ class BaseElement (Store):
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
         'obj_name', 'no_export', 'is_export', 'export_offset_x',
-        'export_offset_y', 'debug', 'layer', 'code', 'properties'
+        'export_offset_y', 'debug', 'layer', 'code', 'properties',
+        'panel_x', 'panel_y', 'panel_z', 'panel_enable',
+        'patch_x', 'patch_y', 'patch_z'
     )
     async def configure(self, params):
         self.num_inlets = params.get("num_inlets", 0)
@@ -612,6 +672,13 @@ class BaseElement (Store):
         self.is_export = params.get("is_export", False)
         self.export_offset_x = params.get("export_offset_x", 0)
         self.export_offset_y = params.get("export_offset_y", 0)
+        self.patch_x = params.get("patch_x", self.patch_x)
+        self.patch_y = params.get("patch_y", self.patch_y)
+        self.patch_z = params.get("patch_z", self.patch_z)
+        self.panel_x = params.get("panel_x", self.panel_x)
+        self.panel_y = params.get("panel_y", self.panel_y)
+        self.panel_z = params.get("panel_z", self.panel_z)
+        self.panel_enable = params.get("panel_enable", self.panel_enable)
         self.debug = params.get("debug", False)
         self.code = params.get("code", None)
         self.properties = params.get("properties", {})

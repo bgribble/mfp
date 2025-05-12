@@ -8,6 +8,7 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 import inspect
 from mfp.gui_main import MFPGUI, backend_name
 from mfp import log
+from flopsy import Action
 from ..input_mode import InputMode
 from .label_edit import LabelEditMode
 from .transient import TransientMessageEditMode
@@ -283,12 +284,27 @@ class GlobalMode (InputMode):
             keysym="$"
         )
 
+        cls.bind(
+            "toggle-panel-mode", cls.toggle_panel_mode,
+            helptext="Toggle panel mode",
+            keysym="C-ESC"
+        )
+
         # imgui only
         if backend_name == "imgui":
             cls.bind(
                 "tile-control", cls.tile_manager_prefix,
                 keysym="C-a"
             )
+
+    async def toggle_panel_mode(self):
+        patch = self.window.selected_patch
+        await patch.dispatch(
+            Action(patch, patch.SET_PANEL_MODE, dict(value=(not patch.panel_mode))),
+            previous=dict(panel_mode=patch.panel_mode)
+        )
+
+        return True
 
     def tile_manager_prefix(self):
         if not self.tile_manager_mode:
@@ -512,6 +528,7 @@ class GlobalMode (InputMode):
                 self.window.selected_window != "canvas"
                 or self.window.main_menu_open
                 or self.window.context_menu_open
+                or self.window.inspector
                 or nedit.get_hovered_pin().id()
             ):
                 return False

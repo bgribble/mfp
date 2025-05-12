@@ -7,13 +7,19 @@ a subset of the layers and objects in the app window
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
+from flopsy import Action, Store, mutates, reducer, saga
+from mfp import log
 from ..gui_main import MFPGUI
 from .layer import Layer
-from mfp import log
+from .param_info import ParamInfo, ListOfInt, CodeBlock, DictOfProperty
 
 
-class PatchDisplay:
+class PatchDisplay(Store):
+
     display_type = "patch"
+    store_attrs = {
+        'panel_mode': ParamInfo(label="Panel mode", param_type=bool)
+    }
 
     def __init__(self, window, x, y, **kwargs):
         self.app_window = window
@@ -32,6 +38,9 @@ class PatchDisplay:
         self.export_y = None
         self.export_w = None
         self.export_h = None
+        self.panel_mode = False
+
+        super().__init__()
 
     @classmethod
     def get_factory(cls):
@@ -57,6 +66,7 @@ class PatchDisplay:
             export_y=self.export_y,
             export_w=self.export_w,
             export_h=self.export_h,
+            panel_mode=self.panel_mode,
         )
 
     def send_params(self, **extras):
@@ -72,6 +82,25 @@ class PatchDisplay:
                 return ll
         return None
 
+    @saga("panel_mode")
+    async def panel_mode_changed(self, action, state_diff, previous):
+        if "panel_mode" not in state_diff:
+            return
+
+        for layer in self.layers:
+            for obj in layer.objects:
+                if obj.panel_enable:
+                    new_x = obj.panel_x if self.panel_mode else obj.patch_x
+                    new_y = obj.panel_y if self.panel_mode else obj.patch_y
+                    new_z = obj.panel_z if self.panel_mode else obj.patch_z
+
+                    yield Action(obj, obj.SET_POSITION_X, dict(value=new_x))
+                    yield Action(obj, obj.SET_POSITION_Y, dict(value=new_y))
+                    yield Action(obj, obj.SET_POSITION_Z, dict(value=new_z))
+
+    @mutates(
+        'panel_mode'
+    )
     async def configure(self, params):
         self.num_inlets = params.get("num_inlets")
         self.num_outlets = params.get("num_outlets")
@@ -85,6 +114,13 @@ class PatchDisplay:
         self.export_y = params.get("export_y")
         self.export_w = params.get("export_w")
         self.export_h = params.get("export_h")
+
+        self.panel_x = params.get("panel_x")
+        self.panel_y = params.get("panel_y")
+        self.panel_z = params.get("panel_z")
+
+        if "panel_mode" in params:
+            self.panel_mode = params.get("panel_mode")
 
         layers = params.get("layers", [])
 

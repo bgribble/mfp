@@ -285,7 +285,7 @@ class SlideMeterElement (BaseElement):
             self.scale_position = self.LEFT
             changes = True
 
-        for p in ("show_scale", "slider_enable", "scale_ticks"):
+        for p in ("show_scale", "slider_enable", "scale_ticks", "bar_width", "bar_height"):
             v = params.get(p)
             if v is not None and hasattr(self, p):
                 changes = True

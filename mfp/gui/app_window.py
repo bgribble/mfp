@@ -239,6 +239,7 @@ class AppWindow (SignalMixin):
         return cls.get_backend(MFPGUI().backend_name)(*args, **kwargs)
 
     def input_handler(self, target, signal, event, *rest):
+        from mfp.gui.event import EnterEvent
         try:
             rv = self.input_mgr.handle_event(target, event)
             self.grab_focus()
@@ -301,8 +302,15 @@ class AppWindow (SignalMixin):
             )
 
     def object_visible(self, obj):
+        patch = None
+        if self.selected_layer:
+            patch = self.selected_layer.patch
+        if patch and patch.panel_mode:
+            return obj.panel_enable
         if obj and hasattr(obj, 'layer'):
             return obj.layer == self.selected_layer
+        if obj == self.console_manager:
+            return True
         return True
 
     def active_layer(self):
