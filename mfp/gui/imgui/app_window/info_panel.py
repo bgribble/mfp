@@ -297,7 +297,7 @@ def render_param(
                     format="%.2f",
                 )
                 if changed:
-                    delta = abs(newval - param_value)
+                    delta = abs(newval - (param_value or 0))
                     if delta > 10:
                         changed = changed and imgui.is_item_deactivated_after_edit()
 

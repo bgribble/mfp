@@ -94,7 +94,7 @@ class Faust(Processor):
 
     def set_channel_tooltips(self):
         self.doc_tooltip_inlet = [
-            "Signal input 0/control messages" if self.faust_dsp_inlets else "Control messages",
+            "Control messages",
             *[
                 f"Signal input {n}"
                 for n in range(1, self.faust_dsp_inlets)
@@ -127,7 +127,7 @@ class Faust(Processor):
                 self.faust_params.append(resp_value)
             self.faust_initialized.append('params')
 
-        inlets = max(1, self.faust_dsp_inlets + len(self.faust_params))
+        inlets = self.faust_dsp_inlets + len(self.faust_params) + 1
         prev_inlets = len(self.inlets)
         self.resize(
             inlets,
@@ -152,8 +152,9 @@ class Faust(Processor):
         for inlet_num, value in enumerate(self.inlets):
             if value != Uninit:
                 if inlet_num >= self.faust_dsp_inlets:
-                    param = self.faust_params[inlet_num - self.faust_dsp_inlets]
+                    param = self.faust_params[inlet_num - self.faust_dsp_inlets - 1]
                     await self.dsp_setparam(param, value)
+        self.inlets = [Uninit] * len(self.inlets)
 
 def register():
     MFPApp().register("faust~", Faust)

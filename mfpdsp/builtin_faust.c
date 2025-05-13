@@ -32,6 +32,7 @@ typedef struct {
     FAUSTFLOAT ** faust_outbufs;
     FAUSTFLOAT * faust_buffers;
     gpointer faust_params;
+    int needs_reconfig;
     int sig_inputs;
     int sig_outputs;
 
@@ -47,8 +48,9 @@ typedef struct {
 
 typedef struct {
     char * prm_label;
+    int prm_reset;
     FAUSTFLOAT * prm_zoneptr;
-    FAUSTFLOAT prm_value;
+    FAUSTFLOAT prm_init;
     FAUSTFLOAT prm_min;
     FAUSTFLOAT prm_max;
 } faust_prm_data;
@@ -227,11 +229,31 @@ faust_prm_number(
     faust_prm_data * prm = g_malloc0(sizeof(faust_prm_data));
     prm->prm_label = g_strdup(label);
     prm->prm_zoneptr = zone;
-    prm->prm_value = init;
+    prm->prm_init = init;
     prm->prm_min = min;
     prm->prm_max = max;
+    prm->prm_reset = 0;
     g_hash_table_insert(d->faust_params, prm->prm_label, prm);
     g_hash_table_insert(((mfp_processor *)proc)->typeinfo->params, g_strdup(label), (gpointer)PARAMTYPE_FLT);
+    *(prm->prm_zoneptr) = init;
+    mfp_dsp_send_response_str(proc, RESP_PARAM, g_strdup(label));
+}
+
+static void
+faust_prm_trigger(
+    void * proc, const char * label, FAUSTFLOAT * zone
+) {
+    builtin_faust_data * d = (builtin_faust_data *)(((mfp_processor *)proc)->data);
+    faust_prm_data * prm = g_malloc0(sizeof(faust_prm_data));
+    prm->prm_label = g_strdup(label);
+    prm->prm_zoneptr = zone;
+    prm->prm_init = 0;
+    prm->prm_min = 0;
+    prm->prm_max = 1;
+    prm->prm_reset = 1;
+    g_hash_table_insert(d->faust_params, prm->prm_label, prm);
+    g_hash_table_insert(((mfp_processor *)proc)->typeinfo->params, g_strdup(label), (gpointer)PARAMTYPE_FLT);
+    *(prm->prm_zoneptr) = 0;
     mfp_dsp_send_response_str(proc, RESP_PARAM, g_strdup(label));
 }
 
@@ -243,11 +265,13 @@ faust_prm_bool(
     faust_prm_data * prm = g_malloc0(sizeof(faust_prm_data));
     prm->prm_label = g_strdup(label);
     prm->prm_zoneptr = zone;
-    prm->prm_value = 0;
+    prm->prm_init = 0;
     prm->prm_min = 0;
     prm->prm_max = 1;
+    prm->prm_reset = 0;
     g_hash_table_insert(d->faust_params, prm->prm_label, prm);
     g_hash_table_insert(((mfp_processor *)proc)->typeinfo->params, g_strdup(label), (gpointer)PARAMTYPE_FLT);
+    *(prm->prm_zoneptr) = 0;
     mfp_dsp_send_response_str(proc, RESP_PARAM, g_strdup(label));
 }
 
@@ -262,7 +286,7 @@ faust_config_params(mfp_processor * proc, llvm_dsp * dsp) {
     ui_controls.openVerticalBox = faust_prm_ignore_box;
     ui_controls.openTabBox = faust_prm_ignore_box;
     ui_controls.closeBox = faust_prm_ignore_close;
-    ui_controls.addButton = faust_prm_bool;
+    ui_controls.addButton = faust_prm_trigger;
     ui_controls.addCheckButton = faust_prm_bool;
     ui_controls.addVerticalSlider = faust_prm_number;
     ui_controls.addHorizontalSlider = faust_prm_number;
@@ -373,8 +397,16 @@ config_faust_param(gpointer key, gpointer value, gpointer user_data) {
     gpointer conf_value = g_hash_table_lookup(proc->params, key);
 
     if (prm != NULL && conf_value != NULL) {
+        double delta = fabs(*(double *)conf_value - (double)(prm->prm_init));
         *(prm->prm_zoneptr) = (FAUSTFLOAT)(*(double *)conf_value);
+
+        // on next block, reset to init value
+        if (prm->prm_reset && (delta > 0.001)) {
+            *(double *)conf_value = (double)(prm->prm_init);
+            d->needs_reconfig = 1;
+        }
     }
+
 }
 
 
@@ -384,6 +416,7 @@ config(mfp_processor * proc)
     builtin_faust_data * d = (builtin_faust_data *)(proc->data);
     gpointer code = g_hash_table_lookup(proc->params, "faust_code");
 
+    d->needs_reconfig = 0;
     if (
         (!d->faust_code && code)
         || (d->faust_code && !code)
@@ -400,11 +433,10 @@ config(mfp_processor * proc)
 
     }
     else {
-        g_hash_table_foreach(
-            d->faust_params,
-            config_faust_param,
-            (gpointer)proc
-        );
+        g_hash_table_foreach(d->faust_params, config_faust_param, (gpointer)proc);
+        if (d->needs_reconfig) {
+            return 0;
+        }
     }
 
     return 1;
