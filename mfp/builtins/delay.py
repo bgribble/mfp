@@ -36,7 +36,7 @@ class DelaySig (Processor):
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init(self.dsp_type, bufsize=self.init_bufsize, _sig_1=self.init_size)
 
     async def trigger(self):

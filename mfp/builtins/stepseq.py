@@ -26,7 +26,7 @@ class StepSeq(Processor):
         self.dsp_inlets = [1]
         self.dsp_outlets = [0, 1]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("stepseq~", steps=self.init_steps, trig_ms=10, threshold=0.5)
 
     async def trigger(self):

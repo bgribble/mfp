@@ -24,7 +24,7 @@ class Biquad(Processor):
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("biquad~")
 
     async def trigger(self):
@@ -105,7 +105,7 @@ class BiquadWrapper(Processor):
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("biquad~", **self.biquad_params)
 
     async def trigger(self):

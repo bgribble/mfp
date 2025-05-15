@@ -24,7 +24,7 @@ class TrackHold(Processor):
         self.dsp_outlets = [0]
         self.init_response = "response" in kwargs and kwargs["response"]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         if self.init_response:
             await self.dsp_init("hold~", track=True, response=True)
         else:
@@ -58,7 +58,7 @@ class SampleHold(Processor):
         self.dsp_outlets = [0]
         self.init_response = "response" in kwargs and kwargs["response"]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         if self.init_response:
             await self.dsp_init("hold~", response=1.0)
         else:

@@ -214,7 +214,7 @@ class SendSignal (Send):
 
         self.gui_params["label_text"] = self.dest_name
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("noop~")
 
 
@@ -257,7 +257,7 @@ class SignalBus (Processor):
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("noop~")
 
     async def trigger(self):
@@ -401,7 +401,7 @@ class RecvSignal (Recv):
         self.dsp_inlets = [0]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("noop~")
         if self.init_connect:
             await self._connect(self.src_name, self.src_outlet)

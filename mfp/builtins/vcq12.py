@@ -50,7 +50,7 @@ class VCQ12(Processor):
         self.dsp_outlets = [0]
         self.init_mapvals = [val for pair in self.map for val in pair]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("vcq12~", map=self.init_mapvals)
 
     async def trigger(self):

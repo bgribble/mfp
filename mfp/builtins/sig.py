@@ -26,7 +26,7 @@ class Sig(Processor):
 
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("sig~")
         await self.dsp_obj.setparam("value", self.init_value)
 

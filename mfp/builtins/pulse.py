@@ -62,7 +62,7 @@ class Pulse(Processor):
         self.dsp_inlets = [1, 2, 3]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init(
             "pulse~",
             _sig_1=float(self.init_freq),

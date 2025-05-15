@@ -131,7 +131,7 @@ class Processor:
             name = self.display_type
         self.assign(patch, scope, name)
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         # Override in Processor subclass
         pass
 
@@ -645,34 +645,36 @@ class Processor:
         MFPApp().forget(self)
         self.status = self.DELETED
 
-    def resize(self, inlets, outlets):
+    def resize(self, inlets, outlets, conf=True):
         """
         Change the number of inlets or outlets but preserve connections
         """
+        from .mfp_app import MFPApp
         inlets = max(inlets, 1)
         if inlets > len(self.inlets):
             newin = inlets - len(self.inlets)
             self.inlets += [Uninit] * newin
             self.connections_in += [[] for r in range(newin)]
-        else:
+        elif inlets < len(self.inlets):
             for inlet in range(inlets, len(self.inlets)):
                 for tobj, tport in self.connections_in[inlet]:
-                    tobj.disconnect(tport, self, inlet)
+                    MFPApp().async_task(tobj.disconnect(tport, self, inlet))
             self.inlets[inlets:] = []
 
         if outlets > len(self.outlets):
             newout = outlets - len(self.outlets)
             self.outlets += [Uninit] * newout
             self.connections_out += [[] for r in range(newout)]
-        else:
+        elif outlets < len(self.outlets):
             for outlet in range(outlets, len(self.outlets)):
                 for tobj, tport in self.connections_out[outlet]:
-                    self.disconnect(outlet, tobj, tport)
+                    MFPApp().async_task(self.disconnect(outlet, tobj, tport))
             self.outlets[outlets:] = []
             self.connections_out[outlets:] = []
         self.outlet_order = list(reversed(range(len(self.outlets))))
 
-        self.conf(num_inlets=inlets, num_outlets=outlets)
+        if conf:
+            self.conf(num_inlets=inlets, num_outlets=outlets)
 
     async def connect(self, outlet, target, inlet, show_gui=True):
         from .mfp_app import MFPApp
@@ -731,9 +733,10 @@ class Processor:
                                     inlet, "-->", in_obj, ",", outlet, "-->", out_obj)
 
                 existing.append((target, inlet))
-        except Exception:
+        except Exception as e:
             # this can happen normally in a creation race, don't
             # flag it (Patch.connect wil retry)
+            log.warning(f"[connect] Error in making DSP connection, need retry {e}")
             return False
 
         if len(target.connections_in) <= inlet:

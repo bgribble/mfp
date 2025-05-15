@@ -26,7 +26,7 @@ class AudioOut(Processor):
         self.hot_inlets = [0, 1]
         self.dsp_inlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("out~", channel=self.channel)
 
     async def trigger(self):
@@ -52,7 +52,7 @@ class AudioIn(Processor):
 
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("in~", channel=self.channel)
 
     async def trigger(self):

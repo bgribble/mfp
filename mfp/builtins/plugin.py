@@ -38,7 +38,7 @@ class Plugin(Processor):
         )
         self.hot_inlets = list(range(self.plug_inlets))
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init(
             "ladspa~",
             lib_name=self.lib_name,

@@ -82,8 +82,8 @@ BASE_STORE_ATTRS = {
     'is_export': ParamInfo(label="Is export", param_type=bool),
     'num_inlets': ParamInfo(label="# inlets", param_type=int, editable=False),
     'num_outlets': ParamInfo(label="# outlets", param_type=int, editable=False),
-    'dsp_inlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
-    'dsp_outlets': ParamInfo(label="# outlets", param_type=ListOfInt, editable=False),
+    'dsp_inlets': ParamInfo(label="DSP inlets", param_type=ListOfInt, editable=False),
+    'dsp_outlets': ParamInfo(label="DSP outlets", param_type=ListOfInt, editable=False),
     'style': ParamInfo(label="Style variables", param_type=dict),
     'export_offset_x': ParamInfo(label="Export offset X", param_type=float),
     'export_offset_y': ParamInfo(label="Export offset Y", param_type=float),
@@ -469,9 +469,6 @@ class BaseElement (Store):
         # create() makes sub-objects with visible elements they
         # get put in the correct place in the object tree
         await MFPGUI().appwin.signal_emit("created", self)
-
-        #self.obj_type = obj_type
-        #self.obj_args = init_args
 
         self.tags = {}
         self.update_badge()

@@ -25,7 +25,7 @@ class Line(Processor):
 
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("line~", segments=self.init_segments)
 
     async def trigger(self):

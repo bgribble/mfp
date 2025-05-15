@@ -87,7 +87,7 @@ class Buffer(Processor):
 
         self.set_channel_tooltips()
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
         await self.dsp_setparams(**self.init_kwargs)
 

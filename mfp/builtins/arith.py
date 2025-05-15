@@ -28,7 +28,7 @@ class ArithProcessor(Processor):
         self.dsp_inlets = [0, 1]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init(self.arith_op, _sig_1=self.init_const)
 
     async def trigger(self):

@@ -93,7 +93,7 @@ class SignalInlet(Inlet):
             "lv2_description": "Signal inlet"
         }
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("inlet~", io_channel=self.inletnum)
 
 
@@ -152,7 +152,7 @@ class SignalOutlet(Outlet):
             "lv2_description": "Signal outlet"
         }
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("outlet~", io_channel=self.outletnum)
 
 

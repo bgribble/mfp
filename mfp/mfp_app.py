@@ -488,11 +488,11 @@ class MFPApp (Singleton, SignalMixin):
                 obj = await obj
 
             if obj and obj.obj_id:
-                if setup:
-                    await obj.setup()
-
                 for attr, val in create_params.items():
                     obj.gui_params[attr] = val
+
+                if setup:
+                    await obj.setup(params=params)
 
                 if obj.properties:
                     obj.conf(properties=obj.properties)

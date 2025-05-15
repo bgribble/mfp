@@ -89,7 +89,30 @@ class Faust(Processor):
         self.gui_params['dsp_inlets'] = self.dsp_inlets
         self.gui_params['dsp_outlets'] = self.dsp_outlets
 
-    async def setup(self):
+    async def setup(self, **kwargs):
+        params = kwargs.get("params", {})
+
+        if "num_inlets" in params:
+            self.num_inlets = params['num_inlets']
+            self.inlets = [Uninit] * self.num_inlets
+            self.connections_in = [[] for r in range(self.num_inlets)]
+            self.gui_params['num_inlets'] = self.num_inlets
+
+        if "num_outlets" in params:
+            self.num_outlets = params['num_outlets']
+            self.outlets = [Uninit] * self.num_outlets
+            self.connections_out = [[] for r in range(self.num_outlets)]
+            self.gui_params['num_outlets'] = self.num_outlets
+
+        if "dsp_inlets" in params:
+            self.dsp_inlets = params['dsp_inlets']
+            self.gui_params['dsp_inlets'] = self.dsp_inlets
+
+        if "dsp_outlets" in params:
+            self.dsp_outlets = params['dsp_outlets']
+            self.gui_params['dsp_outlets'] = self.dsp_outlets
+
+        self.faust_initialized = []
         await self.dsp_init("faust~", faust_code=self.faust_code)
 
     def set_channel_tooltips(self):
@@ -111,42 +134,68 @@ class Faust(Processor):
             ]
         ]
 
-    def dsp_response(self, resp_id, resp_value):
-        need_conf = False
-        if set(self.faust_initialized) != set(['inlets', 'outlets', 'params']):
-            need_conf = True
+    async def reconnect_dsp(self):
+        """
+        called after Faust compile is complete. this is racy if there
+        are multiple Faust recompiles going on and they are interconnected?
+        """
+        for inlet in self.dsp_inlets:
+            connections = self.connections_in[inlet]
+            dsp_dest_obj, dsp_dest_inlet = self.dsp_inlet(inlet)
 
+            for src, src_outlet in connections:
+                # a message outlet can connect to a DSP inlet; no
+                # need to reconnect
+                if src_outlet not in src.dsp_outlets:
+                    continue
+
+                dsp_src_obj, dsp_src_outlet = src.dsp_outlet(src_outlet)
+                await dsp_src_obj.connect(dsp_src_outlet, dsp_dest_obj._id, dsp_dest_inlet)
+
+        for outlet in self.dsp_outlets:
+            connections = self.connections_out[outlet]
+            dsp_src_obj, dsp_src_outlet = self.dsp_outlet(outlet)
+
+            for dest, dest_inlet in connections:
+                dsp_dest_obj, dsp_dest_inlet = dest.dsp_inlet(dest_inlet)
+                await dsp_src_obj.connect(dsp_src_outlet, dsp_dest_obj._id, dsp_dest_inlet)
+
+    def dsp_response(self, resp_id, resp_value):
+        io_conf = False
         if resp_id == self.RESP_DSP_INLETS:
             self.faust_dsp_inlets = resp_value
             self.faust_initialized.append('inlets')
+            io_conf = True
         elif resp_id == self.RESP_DSP_OUTLETS:
             self.faust_dsp_outlets = resp_value
             self.faust_initialized.append('outlets')
+            io_conf = True
         elif resp_id == self.RESP_PARAM:
             if resp_value not in self.faust_params:
                 self.faust_params.append(resp_value)
-            self.faust_initialized.append('params')
 
-        inlets = self.faust_dsp_inlets + len(self.faust_params) + 1
-        prev_inlets = len(self.inlets)
-        self.resize(
-            inlets,
-            self.faust_dsp_outlets
-        )
-        if (
-            len(self.dsp_inlets) != self.faust_dsp_inlets
-            or len(self.dsp_outlets) != self.faust_dsp_outlets
-            or inlets != prev_inlets
-        ):
-            need_conf = True
+        if io_conf and "inlets" in self.faust_initialized and "outlets" in self.faust_initialized:
+            inlets = self.faust_dsp_inlets + len(self.faust_params) + 1
+            prev_inlets = len(self.inlets)
+            if (
+                len(self.dsp_inlets) != self.faust_dsp_inlets
+                or len(self.dsp_outlets) != self.faust_dsp_outlets
+                or inlets != prev_inlets
+            ):
+                self.resize(inlets, self.faust_dsp_outlets, conf=False)
 
-        self.dsp_inlets = list(range(self.faust_dsp_inlets))
-        self.dsp_outlets = list(range(self.faust_dsp_outlets))
-        self.hot_inlets = list(range(inlets))
+            self.dsp_inlets = list(range(self.faust_dsp_inlets))
+            self.dsp_outlets = list(range(self.faust_dsp_outlets))
+            self.hot_inlets = list(range(inlets))
 
-        if need_conf:
-            self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
-        self.set_channel_tooltips()
+            self.conf(
+                num_inlets=inlets,
+                num_outlets=self.faust_dsp_outlets,
+                dsp_inlets=self.dsp_inlets,
+                dsp_outlets=self.dsp_outlets
+            )
+            self.set_channel_tooltips()
+            MFPApp().async_task(self.reconnect_dsp())
 
     async def trigger(self):
         for inlet_num, value in enumerate(self.inlets):
@@ -155,6 +204,7 @@ class Faust(Processor):
                     param = self.faust_params[inlet_num - self.faust_dsp_inlets - 1]
                     await self.dsp_setparam(param, value)
         self.inlets = [Uninit] * len(self.inlets)
+
 
 def register():
     MFPApp().register("faust~", Faust)

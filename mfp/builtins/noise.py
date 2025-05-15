@@ -17,7 +17,7 @@ class Noise(Processor):
 
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("noise~")
 
     async def trigger(self):

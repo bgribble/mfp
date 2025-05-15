@@ -35,7 +35,7 @@ class Slew(Processor):
         self.init_rise = rise
         self.init_fall = fall
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("slew~")
         await self.dsp_obj.setparam("rise", self.init_rise)
         await self.dsp_obj.setparam("fall", self.init_fall)

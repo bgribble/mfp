@@ -23,7 +23,7 @@ class Ampl(Processor):
         self.dsp_inlets = [0]
         self.dsp_outlets = [0, 1]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("ampl~")
 
     async def trigger(self):

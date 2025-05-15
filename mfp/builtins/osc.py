@@ -33,7 +33,7 @@ class Osc(Processor):
         self.dsp_inlets = [1, 2]
         self.dsp_outlets = [0]
 
-    async def setup(self):
+    async def setup(self, **kwargs):
         await self.dsp_init("osc~", _sig_1=float(self.init_freq), _sig_2=float(self.init_ampl))
 
     async def trigger(self):
