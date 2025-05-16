@@ -134,7 +134,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
                 self.export_position_init = False
                 self.position_x = self.container.position_x + self.panel_x + self.export_offset_x
                 self.position_y = self.container.position_y + self.panel_y + self.export_offset_y
-                self.position_z = self.container.position_z + 0.1
+                self.position_z = self.container.position_z + self.panel_z + 0.1
                 self.position_set = True
                 self.export_container_x = self.container.position_x
                 self.export_container_y = self.container.position_y
@@ -145,7 +145,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
             ):
                 self.position_x = self.container.position_x + self.panel_x + self.export_offset_x
                 self.position_y = self.container.position_y + self.panel_y + self.export_offset_y
-                self.position_z = self.container.position_z + 0.1
+                self.position_z = self.container.position_z + self.panel_z + 0.1
                 self.position_set = True
                 self.export_container_x = self.container.position_x
                 self.export_container_y = self.container.position_y
@@ -156,7 +156,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
                 self.node_id,
                 (self.position_x, self.position_y)
             )
-        nedit.set_node_z_position(self.node_id, self.position_z)
+            nedit.set_node_z_position(self.node_id, self.position_z)
 
         # check hover
         if nedit.get_hovered_node() == self.node_id:

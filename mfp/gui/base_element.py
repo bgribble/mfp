@@ -376,7 +376,6 @@ class BaseElement (Store):
                     previous=dict(position_y=previous_y)
                 )
         else:
-            log.debug(f"[move] not updating state from {(previous_x, previous_y)} to {(x, y)}")
             self.position_x = x
             self.position_y = y
 
@@ -416,6 +415,7 @@ class BaseElement (Store):
                 yield self.action(
                     self.SET_PATCH_Z, value=self.position_z
                 )
+        yield self.send_params()
 
     @mutates('obj_state')
     async def delete(self, delete_obj=True):
@@ -438,11 +438,10 @@ class BaseElement (Store):
         self.move_to_layer(new_layer)
         return new_layer
 
-
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
-        yield None
+        yield self.send_params()
 
     async def create(self, obj_type, init_args):
         scopename = self.layer.scope
@@ -655,7 +654,7 @@ class BaseElement (Store):
     @mutates(
         'num_inlets', 'num_outlets', 'dsp_inlets', 'dsp_outlets',
         'obj_name', 'no_export', 'is_export', 'export_offset_x',
-        'export_offset_y', 'debug', 'layer', 'code', 'properties',
+        'export_offset_y', 'debug', 'layer', 'code', 'properties', 'style',
         'panel_x', 'panel_y', 'panel_z', 'panel_enable',
         'patch_x', 'patch_y', 'patch_z'
     )

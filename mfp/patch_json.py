@@ -95,7 +95,7 @@ async def json_deserialize(self, json_data):
         # pick out a few things that we need
         gp = f.get('gui_params', {})
         for prm in ('num_inlets', 'num_outlets', 'export_x', 'export_y', 'export_w',
-                    'export_h'):
+                    'export_h', 'panel_mode'):
             if prm in gp:
                 self.gui_params[prm] = gp[prm]
         self.gui_params['top_level'] = False
@@ -212,7 +212,7 @@ async def json_unpack_objects(self, data, scope):
         newobj.load(prms)
         if self.gui_created:
             need_gui.append(newobj)
-        await newobj.setup()
+        await newobj.setup(params=prms.get('gui_params'))
 
         idmap[int(oid)] = newobj
 

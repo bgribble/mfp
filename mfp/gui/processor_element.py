@@ -98,7 +98,6 @@ class ProcessorElement (BaseElement):
 
         if self.obj_type:
             args = f" {self.obj_args}" if self.obj_args is not None else ''
-            log.debug(f"[processor] recreating element!! {self.obj_type} {args} {state_diff}")
             yield await self.label_edit_finish(
                 None, f"{self.obj_type}{args}"
             )
@@ -152,6 +151,8 @@ class ProcessorElement (BaseElement):
         self.export_y = params.get("export_y")
         self.export_w = params.get("export_w")
         self.export_h = params.get("export_h")
+
+        self.panel_mode = params.get("panel_mode", False)
 
         if self.export_x is not None and self.export_y is not None:
             self.panel_mode = True

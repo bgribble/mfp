@@ -66,6 +66,10 @@ class Faust(Processor):
         base_dict['faust_params'] = self.faust_params
         base_dict['faust_dsp_inlets'] = self.faust_dsp_inlets
         base_dict['faust_dsp_outlets'] = self.faust_dsp_outlets
+        base_dict['gui_params']['num_inlets'] = self.num_inlets
+        base_dict['gui_params']['num_outlets'] = self.num_outlets
+        base_dict['gui_params']['dsp_inlets'] = self.dsp_inlets
+        base_dict['gui_params']['dsp_outlets'] = self.dsp_outlets
         return base_dict
 
     def load(self, prms):
