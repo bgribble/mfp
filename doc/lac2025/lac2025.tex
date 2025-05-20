@@ -178,7 +178,7 @@ unforeseen directions and is, I think, worthy of a
 re\:-\:introduction to the Linux audio community.
 
 
-\section{What is it?}
+\section{What Is It?}
 
 My vision for MFP is as a multitool for REPL\:-\:style incremental
 development that can fit in to music composition, performance,
@@ -251,7 +251,7 @@ probably boring. Instead, I would like to highlight a curated set
 of features that might be of interest when trying to decide if
 you want to download MFP and give it a try.
 
-\subsection{Data model}
+\subsection{Data Model}
 
 Message data is plain Python objects of any type. Numbers,
 strings, arrays, dictionaries, sets, custom classes, anything.
@@ -281,7 +281,7 @@ results from a "literal" message box.
 \end{figure}
 
 
-\subsection{Python live-coding }
+\subsection{Python Live-Coding }
 
 The message\:-\:passing system at the heart of MFP is implemented in
 Python, and there are several pathways enabling the user to
@@ -324,7 +324,7 @@ mechanisms in use.
 }}
 \end{figure}
 
-\subsection{Faust live-coding }
+\subsection{Faust Live-Coding }
 
 The {\tt [faust\textasciitilde]} object supports live coding of
 DSP algorithms in Faust. Code can be typed directly into the UI
@@ -334,11 +334,14 @@ Python at compile time.
 This is possible via the "Custom code" parameter mentioned above.
 The {\tt [faust\textasciitilde]} processor looks for a special
 Python variable called {\tt faust\_code} in the custom code
-block. This variable can be defined as a constant, literal string
-(the Python triple\:-\:quote syntax works well to support a formatted
-Faust program in a Python string), it can be the result of Python
-file operations to load from a named file, or it can be assembled
-by Python string formatting and manipulation operations.
+block. Each custom code block is specific to a processor, so each
+instance of {\tt [faust\textasciitilde]} can have its own custom
+Faust code. The {\tt faust\_code} can be defined as a constant,
+literal string (the Python triple\:-\:quote syntax works well to
+support a formatted Faust program in a Python string), it can be
+the result of Python file operations to load from a named file,
+or it can be assembled by Python string formatting and
+manipulation operations.
 
 Once compiled to LLVM within the {\tt mfpdsp} process, the Faust
 DSP object is inspected to extract parameters and I/O channels so
@@ -346,7 +349,14 @@ that the processor element's input/output profile matches the
 signature of the DSP code.
 
 See Figure~\ref{fig:faustlivecoding} for how this looks in
-practice.
+practice. Note that the sliders controlling Faust parameters are
+part of the user-defined patch and are not automatically created
+from the compiled Faust code; only the input ports on the {\tt
+[faust\textasciitilde]} object, and their metadata. are created
+this way. This is different from most Faust implementations,
+which automatically create the control UI from the parameter
+definitions in the Faust code. Automatic creation of the control
+UI is under consideration for future work.
 
 \begin{figure}[ht]
 \centerline{\includegraphics[width=3.25in]{faust_livecoding.png}}
@@ -382,6 +392,7 @@ Redux devtools inspector, is provided by the Flopsy state
 management library \cite{Gribble:Flopsy}. It allows for detailed
 analysis of the time sequence of changes to the UI.
 
+
 \subsection{MIDI and OSC}
 
 Every element in a patch can be controlled with MIDI or OSC
@@ -415,7 +426,7 @@ objects. Figure~\ref{fig:appview} shows some of these processors
 in action.
 
 
-\subsection{Patches as plugins}
+\subsection{Patches as Plugins}
 
 An MFP patch can be saved as an LV2 plugin. There are limits on the
 live editing that can be done (for example, the number of inputs and
@@ -424,7 +435,7 @@ the patch works as normal.
 
 LV2 plugins exist as "bundles" which are (to simplify) a shared
 library implementing the plugin, plus metadata, in the form of
-the {\tt manifest.ttl} file (describing tha plugin) and any
+the {\tt manifest.ttl} file (describing the plugin) and any
 additional plugin\:-\:specific metadata.
 
 For an MFP patch, the shared library is the {\tt libmfpdsp.so}
@@ -447,8 +458,13 @@ control via the normal mechanism of the LV2 UI extension. Rather,
 an "Edit" control added to the plugin causes the MFP graphical editor to
 open the patch. This may change in the future.
 
+A unique, but probably not extremely useful, feature of the
+separation of LV2 backend from the Python main program is that
+messages could be passed between plugin instances hosted in
+different applications.
 
-\subsection{Dynamic object and scope creation}
+
+\subsection{Dynamic Object and Scope Creation}
 
 When creating a patch as a versatile building block, it may be
 important to have flexibility to support dynamic numbers of
@@ -512,9 +528,43 @@ layers, and {\tt @clonescope} work together to make this happen.
 \end{figure}
 
 
+\subsection{Panel Mode}
+
+Panel mode is similar to Max's Presentation Mode. It gives the patch a
+curated user interface that shows only the controls that are important
+to patch performance, hiding the implementation details.
+
+Each graphical element in a patch can be added to the panel via a
+boolean parameter. When panel mode is engaged for the patch (it
+is toggled with C-ESC), all elements that are "panel enabled" are
+displayed, regardless of which layer of the patch they are in.
+Each element can be independently positioned when in panel mode.
+
+When a patch is opened as an element in another patch (by putting the
+patch name in a processor element) the patch's panel is displayed in the
+processor box.
+
+Figure~\ref{fig:karplus} shows the same patch in three ways: in
+patch editing mode, in "panel mode" within the patch window, and
+as an element in another patch. Note that, unlike Max, only the
+position of each element can be different in panel mode; size and
+other attributes are the same. The graphical element in the panel
+is included as a PNG image in a Markdown text element.
+
+\begin{figure*}[ht]
+\centerline{\includegraphics[width=5in]{karplus-three-ways.png}}
+\caption{\label{fig:karplus}{
+    \it A basic Karplus-Strong synthesis patch displayed three ways: (top)
+    in patch editing mode; (lower left) embedded as an element in another
+    patch; (lower right) in panel mode (as might be seen when used as a
+    plugin in another app)
+}}
+\end{figure*}
+
+
 \section{Implementation}
 
-\subsection{Runtime components}
+\subsection{Runtime Components}
 
 When running, MFP consists of several components working in concert.
 
@@ -554,11 +604,11 @@ suppressed with command line options. A no\:-\:DSP, no\:-\:UI
 stdin} and write resulting objects to {\tt stdout}.
 
 Much of the functionality of mfpdsp is built in to a shared
-library called libmfpdsp. This library implements the LV2
+library called {\tt libmfpdsp}. This library implements the LV2
 plugin API, which allows MFP to be used as a plugin in any
 LV2-enabled host.
 
-\subsection{User interface}
+\subsection{User Interface}
 
 As of version 0.8, the default user interface for MFP is built on
 the Dear ImGUI library \cite{DearImGUI}, via the ImGUI Bundle
@@ -568,7 +618,7 @@ ImGUI's flexibility and the rich ecosystem of extensions and
 addons made things like enabling Markdown in comments and making
 more sophisticated X/Y plots relatively easy.
 
-\subsection{Help system}
+\subsection{Help System}
 
 MFP's help system is modeled after Pd's, with builtin processor
 types providing "help patches" that describe and demonstrate
@@ -581,11 +631,80 @@ A Tutorial patch walks through the basics of creating a patch, and
 a Reference patch attempts to organize information about the
 builtins and how to use them.
 
+
+\section{Related work}
+
+MFP's "competitors", if that term is even appropriate when they
+are so far above MFP's capabilities and popularity, are Pd and
+Max/MSP. Both of them are amazing pieces of software that have
+long track records, expansive feature sets, and large ecosystems
+of third-party developers building extensions and functionality
+at a rapid pace. For most users and use cases, either Pd or
+Max/MSP is likely to be a better option than MFP.
+
+That being said, here are a few points of comparison.
+
+{\bf Data types.} MFP supports any Python data type, built-in or
+user-defined, for messages within the patch. Pd supports 6 types
+natively (numbers, symbols, lists of numbers and symbols, the
+special message {\tt bang}, and pointers to data structures),
+with extensions providing support for other data types. Max
+supports a similar set of basic data types, adding Jitter
+matrices for visual data.
+
+{\bf UX.} MFP falls somewhere in the middle ground between Pd's
+stark UI and Max/MSP's polished commercial one. One of the main
+original motivations for MFP was frustration with Pd's UI,
+particularly the requirement to use the mouse to make connections
+between widgets. In my mind, the keyboard-driven emphasis in MFP
+is a plus over both Pd and Max. I also prefer MFP's tiled UI to
+the multiple-window clutter of both Pd and Max. Don't be
+confused, though -- Max's polish is altogether in another league,
+and the ability to customize with Javascript is powerful.
+
+{\bf Feature set.} MFP has a solid basic set of patching
+primitives, processing blocks, and UI elements including buttons,
+sliders, graphs, and comments with typographical formatting and
+image loading. Pd and Max are much more complete, and some of the
+gaps are fairly embarassing for MFP: the table widget, for
+example, is very commonly used in Pd and Max, and has no
+equivalent in MFP; many signal primitives are absent in MFP; many
+very convenient "plumbing" tools are not available in MFP.
+
+{\bf Extensibility.} MFP can be extended via Python code, Faust,
+and C extension libraries. Pd can likewise be extended in various
+ways; I am not up to date, but I believe at least C, Faust, Lua,
+and Tcl/Tk are supported. Max/MSP can be extended with C/C++,
+Javascript, and Gen.
+
+{\bf Embedding in other apps.} MFP can be embedded as an LV2
+plugin in any LV2-capable host, and can communicate via MIDI and
+OSC with the host. Max/MSP famously has "max4live", a deep
+integration with the Ableton Live DAW that gives a structured API
+for patches to interact with Ableton. Pd has Plugdata, a project
+which enables embedding Pd patches as an LV2, VST, or CLAP
+plugin, as well as the Heavy compiler that compiles PureData
+patches directly to C.
+
+{\bf Block size.} MFP is limited to using the JACK block size
+throughout. This can impact implementation of algorithms
+requiring feedback, such as Karplu-Strong synthesis (shown in the
+figure above). Faust code is recommended in such cases. Puredata
+has a {\tt [block~]} primitive that enables smaller blocksizes,
+down to 1 sample, within the scope of a patch. Max/MSP has some
+flexibility for setting blocksizes as well, including use of {\tt
+[gen~]} for sample-by-sample processing.
+
+{\bf Platform.} MFP is Linux-only for the time being. Pd is a
+multiplatform app (Mac, Win, and Linux, I believe) and Max/MSP
+is not available on Linux.
+
+
 \section{Status}
 
 The first public release of MFP, 0.1, was right about the time that the
 submission window for LAC-2013 closed. The most recent release,
-0.8, is happening right around the close of the submission window
+0.8.2, is happening right around the close of the submission window
 for LAC-2025. Funny how that works!
 
 A significant amount of the recent work on MFP has been in
@@ -609,7 +728,7 @@ on a regular basis recently, and I hope to continue to do so.
 There's not really a significant user community at this point,
 but only you can change that!
 
-\subsection{Development priorities}
+\subsection{Development Priorities}
 
 To reach what I would consider to be a "1.0" level of
 functionality for MFP, I would like to implement most or all of
@@ -653,7 +772,7 @@ patching. I think this should be a feasible extension to MFP.
 
 \subsection{Getting MFP}
 
-Source code and issue tracking for MFP are on GitHub:
+MFP is free software. Source code and issue tracking for MFP are on GitHub:
 
 \begin{quote}
 \texttt{https://www.github.com/bgribble/mfp}
