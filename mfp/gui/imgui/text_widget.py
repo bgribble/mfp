@@ -137,7 +137,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
     @classmethod
     def url_callback(cls, *args, **kwargs):
-        log.debug(f"[md link] {args} {kwargs}")
+        pass
 
     @classmethod
     def image_callback(cls, filepath):

@@ -70,7 +70,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         tile = self.layer.patch.display_info
         if isinstance(self.container, BaseElement):
             parent = self.container
-            total = parent.width
+            total = parent.export_w
             available = total - (self.position_x - parent.position_x)
             clip_w = available
             padding = 0
@@ -107,9 +107,8 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         imgui.begin_group()
         self.label.render(wrap_width=wrap_width)
         imgui.end_group()
-        content_w, content_h = imgui.get_item_rect_size()
-
         imgui.end_table()
+        content_w, content_h = imgui.get_item_rect_size()
 
         if content_w < self.min_width:
             imgui.same_line()
@@ -121,10 +120,11 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         eff_width = min(max(content_w, self.min_width), self.max_width)
 
         imgui.end_group()
-        self.width = eff_width + 8
+        self.width = eff_width
 
         if not self.height:
             self.height = self.min_height
+
         # connections
         self.render_ports()
 
@@ -150,7 +150,6 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
     def draw_ports(self):
         super().draw_ports()
 
-    @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):
         await super().move(x, y, **kwargs)
 

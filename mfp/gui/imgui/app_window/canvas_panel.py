@@ -9,6 +9,7 @@ from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
+from mfp.gui.base_element import BaseElement
 from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.modes.patch_edit import PatchEditMode
 from mfp.gui.modes.global_mode import GlobalMode
@@ -219,7 +220,7 @@ def render_tile(app_window, patch):
         panel_objects = []
         for layer in patch.layers:
             for obj in layer.objects:
-                if obj.panel_enable:
+                if obj.show_on_panel():
                     panel_objects.append(obj)
 
         for obj in sorted(panel_objects, key=lambda o: o.panel_z):

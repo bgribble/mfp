@@ -168,6 +168,7 @@ class BaseElement (Store):
 
         # container is either a layer or another BaseElement (graph-on-parent)
         self.container = None
+        self.children = set()
 
         # could be the same as self.container but is definitely a layer
         self.layer = None
@@ -385,7 +386,7 @@ class BaseElement (Store):
 
     @saga('position_x', 'position_y', 'position_z')
     async def position_changed(self, action, state_diff, previous):
-        if not (self.layer and self.layer.patch):
+        if not (self.layer and self.layer.patch) or self.is_export:
             return
 
         if self.layer.patch.panel_mode or not self.panel_enable:
@@ -419,8 +420,10 @@ class BaseElement (Store):
 
     @mutates('obj_state')
     async def delete(self, delete_obj=True):
-        # FIXME this is because self.app_window is the backend, not the app window
         MFPGUI().appwin.unregister(self)
+        if isinstance(self.container, BaseElement) and self in self.container.children:
+            self.container.children.remove(self)
+
         if delete_obj and self.obj_id is not None and not self.is_export:
             await MFPGUI().mfp.delete(self.obj_id)
 

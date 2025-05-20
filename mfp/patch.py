@@ -593,21 +593,10 @@ class Patch(Processor):
             ),
             height=max(
                 self.gui_params.get('height') or 0,
-                (self.gui_params.get('export_h') or 0) + 24
+                (self.gui_params.get('export_h') or 0) + 18
             )
         )
-
-        self.conf(
-            export_x=x, export_y=y, export_w=w, export_h=h,
-            width=max(
-                self.gui_params.get('width') or 0,
-                self.gui_params.get('export_w') or 0
-            ),
-            height=max(
-                self.gui_params.get('height') or 0,
-                (self.gui_params.get('export_h') or 0) + 24
-            )
-        )
+        self.conf(**p)
 
     async def create_export_gui(self):
         from .mfp_app import MFPApp

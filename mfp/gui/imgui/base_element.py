@@ -126,15 +126,51 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.tooltip_timestamp = datetime.now()
         self.update_badge()
 
+    def show_on_panel(self):
+        if isinstance(self.container, BaseElement):
+            return self.panel_enable and self.container.show_on_panel()
+        return self.panel_enable
+
+    def calc_position(self):
+        patch = self.layer.patch
+
+        use_panel_pos = False
+        if isinstance(self.container, BaseElement):
+            use_panel_pos = True
+        elif patch.panel_mode and self.show_on_panel():
+            use_panel_pos = True
+
+        if use_panel_pos:
+            obj_x = self.panel_x
+            obj_y = self.panel_y
+            obj_z = self.panel_z
+        else:
+            obj_x = self.patch_x
+            obj_y = self.patch_y
+            obj_z = self.patch_z
+
+        # element in an exported UI
+        if isinstance(self.container, BaseElement):
+            # subobject within a processor_element
+            position_x = self.container.position_x + obj_x + self.export_offset_x
+            position_y = self.container.position_y + obj_y + self.export_offset_y
+            position_z = self.container.position_z + obj_z + 0.1
+        # standalone top-level
+        else:
+            position_x = obj_x
+            position_y = obj_y
+            position_z = obj_z
+
+        return (position_x, position_y, position_z)
+
     # every subclass should call this somewhere in the render method
     def render_sync_with_imgui(self):
         if isinstance(self.container, BaseElement):
             # we are creating a subobject within a processor_element
             if self.export_position_init:
                 self.export_position_init = False
-                self.position_x = self.container.position_x + self.panel_x + self.export_offset_x
-                self.position_y = self.container.position_y + self.panel_y + self.export_offset_y
-                self.position_z = self.container.position_z + self.panel_z + 0.1
+                self.position_x, self.position_y, self.position_z = self.calc_position()
+
                 self.position_set = True
                 self.export_container_x = self.container.position_x
                 self.export_container_y = self.container.position_y
@@ -143,9 +179,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
                 self.container.position_x != self.export_container_x
                 or self.container.position_y != self.export_container_y
             ):
-                self.position_x = self.container.position_x + self.panel_x + self.export_offset_x
-                self.position_y = self.container.position_y + self.panel_y + self.export_offset_y
-                self.position_z = self.container.position_z + self.panel_z + 0.1
+                self.position_x, self.position_y, self.position_z = self.calc_position()
                 self.position_set = True
                 self.export_container_x = self.container.position_x
                 self.export_container_y = self.container.position_y

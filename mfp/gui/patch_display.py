@@ -86,17 +86,16 @@ class PatchDisplay(Store):
     async def panel_mode_changed(self, action, state_diff, previous):
         if "panel_mode" not in state_diff:
             return
-
+        all_obj = []
         for layer in self.layers:
             for obj in layer.objects:
-                if obj.panel_enable:
-                    new_x = obj.panel_x if self.panel_mode else obj.patch_x
-                    new_y = obj.panel_y if self.panel_mode else obj.patch_y
-                    new_z = obj.panel_z if self.panel_mode else obj.patch_z
+                all_obj.append(obj)
 
-                    yield Action(obj, obj.SET_POSITION_X, dict(value=new_x))
-                    yield Action(obj, obj.SET_POSITION_Y, dict(value=new_y))
-                    yield Action(obj, obj.SET_POSITION_Z, dict(value=new_z))
+        for obj in sorted(all_obj, key=lambda o: o.position_z):
+            new_x, new_y, new_z = obj.calc_position()
+            yield Action(obj, obj.SET_POSITION_X, dict(value=new_x))
+            yield Action(obj, obj.SET_POSITION_Y, dict(value=new_y))
+            yield Action(obj, obj.SET_POSITION_Z, dict(value=new_z))
 
     @mutates(
         'panel_mode'

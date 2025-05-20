@@ -303,14 +303,15 @@ class AppWindow (SignalMixin):
 
     def object_visible(self, obj):
         patch = None
+
+        if obj == self.console_manager:
+            return True
         if self.selected_layer:
             patch = self.selected_layer.patch
         if patch and patch.panel_mode:
             return obj.panel_enable
         if obj and hasattr(obj, 'layer'):
             return obj.layer == self.selected_layer
-        if obj == self.console_manager:
-            return True
         return True
 
     def active_layer(self):

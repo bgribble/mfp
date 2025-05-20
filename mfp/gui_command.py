@@ -165,6 +165,7 @@ class GUICommand:
                         )
                     o.editable = False
                     o.container = parent
+                    parent.children.add(o)
                     if not parent.layer:
                         log.debug(f"[create] NO PARENT LAYER! {params} {parent}")
                     parent.layer.add(o, container=parent)

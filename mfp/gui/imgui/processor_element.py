@@ -30,7 +30,29 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         self.min_height = self.height = 16
         self.position_set = False
 
-    @mutates('position_x', 'position_y', 'width', 'height')
+    def update_export_size(self):
+        min_x = None
+        max_x = None
+        min_y = None
+        max_y = None
+        for c in self.children:
+            child_max_x = (
+                c.position_x + c.width
+            )
+            child_max_y = (
+                c.position_y + c.height
+            )
+            min_x = min(min_x, c.position_x) if min_x is not None else c.position_x
+            max_x = max(max_x, child_max_x) if max_x is not None else child_max_x
+            min_y = min(min_y, c.position_y) if min_y is not None else c.position_y
+            max_y = max(max_y, child_max_y) if max_y is not None else child_max_y
+
+        export_w = max_x - min_x
+        export_h = max_y - min_y
+        self.export_w = export_w
+        self.export_h = export_h
+
+    @mutates('position_x', 'position_y', 'width', 'height', 'export_w', 'export_h')
     def render(self):
         """
         processor element
@@ -39,7 +61,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         * top and bottom "rails" containing ports
         * semicircular ports
         """
-
         # style
         padding = self.get_style('padding')
         padding_tpl = (
@@ -86,13 +107,13 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         port_alloc_w = self.port_alloc()
 
         if self.export_w is not None:
-            min_w = max(self.min_width, self.export_w + 2)
+            min_w = max(self.min_width, self.export_w + 3)
         else:
             min_w = self.min_width
         min_w = max(min_w, port_alloc_w)
 
         if self.export_h is not None:
-            min_h = max(self.min_height, self.export_h + 16)
+            min_h = max(self.min_height, self.export_h + 18)
         else:
             min_h = self.min_height
 
@@ -101,7 +122,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
             imgui.dummy([min_w - content_w, 1])
 
         if content_h < min_h:
-            imgui.dummy([1, min_h - content_h])
+            imgui.dummy([1, min_h - content_h ])
         imgui.end_group()
 
         # connections
@@ -120,6 +141,9 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         self.height = p_br[1] - p_tl[1]
 
         self.position_x, self.position_y = (p_tl[0], p_tl[1])
+
+        if self.export_w is not None:
+            self.update_export_size()
 
         # render
         ##########################
