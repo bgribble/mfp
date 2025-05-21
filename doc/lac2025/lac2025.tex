@@ -642,7 +642,7 @@ of third-party developers building extensions and functionality
 at a rapid pace. For most users and use cases, either Pd or
 Max/MSP is likely to be a better option than MFP.
 
-That being said, here are a few points of comparison.
+That being said, here are a few points of comparison:
 
 {\bf Data types.} MFP supports any Python data type, built-in or
 user-defined, for messages within the patch. Pd supports 6 types
@@ -650,26 +650,54 @@ natively (numbers, symbols, lists of numbers and symbols, the
 special message {\tt bang}, and pointers to data structures),
 with extensions providing support for other data types. Max
 supports a similar set of basic data types, adding Jitter
-matrices for visual data.
+matrices for visual data. MFP's use of Python data is especially
+powerful in areas like string manipulation, native sets and hash
+tables, and the ability to route messages based on their data
+type.
 
-{\bf UX.} MFP falls somewhere in the middle ground between Pd's
-stark UI and Max/MSP's polished commercial one. One of the main
-original motivations for MFP was frustration with Pd's UI,
-particularly the requirement to use the mouse to make connections
-between widgets. In my mind, the keyboard-driven emphasis in MFP
-is a plus over both Pd and Max. I also prefer MFP's tiled UI to
-the multiple-window clutter of both Pd and Max. Don't be
-confused, though -- Max's polish is altogether in another league,
-and the ability to customize with Javascript is powerful.
+{\bf Dataflow language.} MFP, Pd, and Max have many similarities
+as dataflow languages. MFP has a more consistent and flexible
+approach to object name resolution, using explicit scopes and a
+dotted-path syntax as opposed to Max's global/local and Pd's {\tt
+\$0}-prefix approach. MFP's partial-application syntax is, in my
+mind, cleaner than the "append" approach to constructing method
+calls in Max and Pd. The MFP "message" widget, which in Pd has
+its own domain-specific language for specifying multiple messages
+with destinations, is simpler and just does one thing -- emit a
+message.
 
-{\bf Feature set.} MFP has a solid basic set of patching
-primitives, processing blocks, and UI elements including buttons,
-sliders, graphs, and comments with typographical formatting and
-image loading. Pd and Max are much more complete, and some of the
-gaps are fairly embarassing for MFP: the table widget, for
-example, is very commonly used in Pd and Max, and has no
-equivalent in MFP; many signal primitives are absent in MFP; many
-very convenient "plumbing" tools are not available in MFP.
+{\bf Patch UI.} MFP provides a basic set of interactive widgets
+including buttons, sliders, dials, number boxes, message boxes,
+graphs, and comments with typographical formatting and image
+loading. Pd and especially Max are much more complete in this
+area, and some of the gaps are fairly embarrassing for MFP: the
+table/array widgets, for example, are very commonly used in Pd
+and Max, and have no equivalent in MFP; many very convenient
+"plumbing" tools, such as manual connection routing, are not
+available in MFP. Max's more "eye candy" widgets, such as the
+virtual keyboard, staff display of musical notes, and VU meter,
+are also missing.
+
+{\bf UX.} In overall appearance, MFP falls somewhere in the
+middle between Pd's stark black-on-white UI and Max/MSP's
+polished commercial one. The app's UI has a pretty complete menu
+system, a searchable log window, and an info panel to view and
+edit object properties. There are keyboard commands for almost
+every operation. One of the original motivations for MFP was
+frustration with Pd's UI, particularly the requirement to use the
+mouse to make connections between elements. In my mind, the
+keyboard-driven emphasis in MFP is a plus over both Pd and Max. I
+also prefer MFP's tiled UI to the multiple-window clutter of both
+Pd and Max. Don't be confused, though -- Max's polish is
+altogether in another league, and the ability to customize with
+Javascript is powerful.
+
+{\bf Feature set.} MFP has a solid set of patching primitives,
+DSP processing blocks, and UI elements. It is strongest where the
+use of Python data allows patches to be more concise and
+expressive with fewer elements. Both Pd and Max have much larger
+sets of operations, built over years of user feedback and
+experience with building complex patches.
 
 {\bf Extensibility.} MFP can be extended via Python code, Faust,
 and C extension libraries. Pd can likewise be extended in various
@@ -688,16 +716,22 @@ patches directly to C.
 
 {\bf Block size.} MFP is limited to using the JACK block size
 throughout. This can impact implementation of algorithms
-requiring feedback, such as Karplu-Strong synthesis (shown in the
-figure above). Faust code is recommended in such cases. Puredata
-has a {\tt [block~]} primitive that enables smaller blocksizes,
-down to 1 sample, within the scope of a patch. Max/MSP has some
-flexibility for setting blocksizes as well, including use of {\tt
-[gen~]} for sample-by-sample processing.
+requiring feedback, such as Karplus-Strong synthesis (shown in
+the figure above). Faust code is recommended in such cases.
+Puredata has a {\tt [block\textasciitilde]} primitive that
+enables smaller blocksizes, down to 1 sample, within the scope of
+a patch. Max/MSP has some flexibility for setting blocksizes as
+well, including use of {\tt [gen\textasciitilde]} for
+sample-by-sample processing.
 
-{\bf Platform.} MFP is Linux-only for the time being. Pd is a
-multiplatform app (Mac, Win, and Linux, I believe) and Max/MSP
-is not available on Linux.
+{\bf Platform.} MFP has only been tested on Linux, though it
+might work on other platforms since the switch to ImGUI. Pd is
+available on MacOS, Windows, and Linux. Max/MSP is available on
+MacOS, Windows, and iOS.
+
+{\bf Availability.} MFP and Pd are free software with
+publically-available source code. Max/MSP is commercial software
+requiring a paid license and no soource-code distribution.
 
 
 \section{Status}
@@ -748,8 +782,10 @@ more capable LV2 implementation, it's necessary to build a
 library of builtin functions in the DSP domain to deal with JACK
 MIDI data.
 
-{\bf LV2 plugin hosting.} LV2 is the current Linux standard for
-plugins. The current LADSPA-only {\tt [plugin\textasciitilde]} is inadequate.
+{\bf LV2, CLAP, VST3 plugin hosting.} LV2, CLAP, and VST3 are the
+current standards for audio plugins, and they should be loadable
+in MFP. The current LADSPA-only {\tt [plugin\textasciitilde]} is
+inadequate.
 
 {\bf Spectral processing with libfft.} Embedded Faust gets a lot
 of great functionality, but does not enable working in the
@@ -772,14 +808,14 @@ patching. I think this should be a feasible extension to MFP.
 
 \subsection{Getting MFP}
 
-MFP is free software. Source code and issue tracking for MFP are on GitHub:
+MFP is free software. Source code and issue tracking are available on GitHub:
 
 \begin{quote}
 \texttt{https://www.github.com/bgribble/mfp}
 \end{quote}
 
 The project is licensed under the GNU General Public License (GPL) version
-2. Your interest and participation is invited and welcomed.
+2. Your interest and participation are invited and welcomed.
 
 %\newpage
 \nocite{*}
