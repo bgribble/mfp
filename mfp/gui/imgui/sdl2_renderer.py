@@ -16,7 +16,7 @@ import os
 
 from sdl2 import *  # noqa
 from imgui_bundle import imgui
-from imgui_bundle.python_backends.sdl_backend import SDL2Renderer
+from imgui_bundle.python_backends.sdl2_backend import SDL2Renderer
 
 from mfp.gui_main import MFPGUI
 from mfp import log as mfplog
