@@ -24,7 +24,7 @@ from waflib.Build import InstallContext, CleanContext, CFG_FILES
 import waflib
 
 APPNAME = "mfp"
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 WAFTOOLS = "compiler_c gcc python glib2"
 
 top = '.'
