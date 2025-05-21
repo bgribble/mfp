@@ -50,8 +50,8 @@ async def clonescope(self, scopename, num_copies, **kwargs):
     for name, srcobj in scope.bindings.items():
         if self.obj_is_exportable(srcobj):
             ui_items[name] = srcobj
-            xpos = srcobj.gui_params.get("position_x")
-            ypos = srcobj.gui_params.get("position_y")
+            xpos = srcobj.gui_params.get("panel_x")
+            ypos = srcobj.gui_params.get("panel_y")
             width = srcobj.gui_params.get("width")
             height = srcobj.gui_params.get("height")
             if bbox_min_x is None or xpos < bbox_min_x:
@@ -105,8 +105,8 @@ async def clonescope(self, scopename, num_copies, **kwargs):
             if name in ui_items:
                 dx = grid_col * bbox_w
                 dy = grid_row * bbox_h
-                newobj.gui_params["position_x"] += dx
-                newobj.gui_params["position_y"] += dy
+                newobj.gui_params["panel_x"] += dx
+                newobj.gui_params["panel_y"] += dy
 
             if srcobj.gui_created:
                 need_gui.append(newobj)

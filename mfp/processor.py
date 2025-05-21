@@ -1274,7 +1274,6 @@ class Processor:
             self.gui_params["panel_x"] = gp.get("position_x", 0)
             self.gui_params["panel_y"] = gp.get("position_y", 0)
             self.gui_params["panel_z"] = gp.get("position_z", 0)
-            log.debug(f"[load] put {self} in the panel {self.gui_params}")
 
         if gp and "panel_enable" not in gp:
             self.gui_params["patch_x"] = gp.get("position_x", 0)
