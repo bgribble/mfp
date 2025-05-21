@@ -301,12 +301,12 @@ builtin, it will look for a callable bound to that name. As with
 {\tt func}, {\tt inspect} is used to find its argument signature
 and create an object with the appropriate inputs.
 
-{\bf Custom processor types.} This enables live coding of new
-message processors in Python. To create a custom processor type
-called {\tt myfunc}, we can attach the Python code to define a
-function called {\tt myfunc} directly to the processor via its
-"Custom code" parameter, and allow the autowrapping process to
-discover it.
+{\bf Custom processor types.} Automatic callable wrapping enables
+live coding of new message processors in Python. To create a
+custom processor type called {\tt myfunc}, we can attach the
+Python code to define a function called {\tt myfunc} directly to
+a processor via a "Custom code" parameter, and allow the
+autowrapping process to discover it.
 
 {\bf Offline coding.} A user\:-\:provided RC file, loaded at startup,
 can define new data types and builtin processor types using MFP's
@@ -336,12 +336,14 @@ The {\tt [faust\textasciitilde]} processor looks for a special
 Python variable called {\tt faust\_code} in the custom code
 block. Each custom code block is specific to a processor, so each
 instance of {\tt [faust\textasciitilde]} can have its own custom
-Faust code. The {\tt faust\_code} can be defined as a constant,
-literal string (the Python triple\:-\:quote syntax works well to
-support a formatted Faust program in a Python string), it can be
-the result of Python file operations to load from a named file,
-or it can be assembled by Python string formatting and
-manipulation operations.
+Faust code.
+
+The Faust code can be defined as a constant, literal string (the
+Python triple\:-\:quote syntax works well to support a formatted
+Faust program embedded in a Python string), it can be the result
+of Python file operations to load from a named file, or it can be
+assembled by Python string formatting and manipulation
+operations.
 
 Once compiled to LLVM within the {\tt mfpdsp} process, the Faust
 DSP object is inspected to extract parameters and I/O channels so
