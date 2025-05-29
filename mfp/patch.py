@@ -236,19 +236,15 @@ class Patch(Processor):
             # but will break if we can be hosted as different kinds of
             # plugin, or need to send MIDI events to JACK
             if self.context and self.dsp_embed:
-                if isinstance(outval, MultiOutput):
-                    values = outval.values
-                else:
-                    values = [outval]
-
-                    DSPObjectFactory = await MFPApp().rpc_host.require(
+                values = MultiOutput.all_values(outval)
+                DSPObjectFactory = await MFPApp().rpc_host.require(
                     DSPObject, host_id=self.context.node_id
                 )
                 for v in values:
                     if v == Uninit:
                         continue
 
-                    if isinstance(v, MidiEvent) and outlet.lv2_type == "midi":
+                    if isinstance(v, MidiEvent) and outlet.properties.get("lv2_type") == "midi":
                         v = v.to_lv2()
                     else:
                         v = float(v)

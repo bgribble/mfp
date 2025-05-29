@@ -27,6 +27,22 @@ class MultiOutput:
     def __init__(self):
         self.values = []
 
+    @classmethod
+    def all_values(cls, val):
+        """
+        Flatten a MultiOutput to a list of values
+        """
+        values = []
+
+        if isinstance(val, MultiOutput):
+            mo_values = []
+            for v in val.values:
+                mo_values.extend(MultiOutput.all_values(v))
+            values.extend(mo_values)
+        else:
+            values.append(val)
+        return values
+
 
 class Processor:
     """
@@ -948,10 +964,8 @@ class Processor:
 
             if isinstance(val, LazyExpr):
                 val = val.call()
-            if isinstance(val, MultiOutput):
-                values = val.values
-            else:
-                values = [val]
+
+            values = MultiOutput.all_values(val)
 
             for val in values:
                 self.count_out += 1

@@ -34,10 +34,6 @@ class Inlet(Processor):
             self.inletnum = 0
             init_args = "0"
 
-        self.lv2_type = "control"
-        if defs and "lv2_type" in defs:
-            self.lv2_type = defs["lv2_type"]
-
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
         if self.inletnum in patch.hot_inlets:
             self.doc_tooltip_obj = self.doc_tooltip_hot
@@ -45,7 +41,7 @@ class Inlet(Processor):
             self.doc_tooltip_obj = self.doc_tooltip_cold
 
         self.properties = {
-            "lv2_type": "control",
+            "lv2_type": extra.get("lv2_type", "control"),
             "lv2_description": "Control input",
             "lv2_default_val": 0,
             "lv2_minimum_val": 0,
@@ -120,10 +116,9 @@ class Outlet(Processor):
 
         Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
         self.properties = {
-            "lv2_type": "control",
+            "lv2_type": extra.get("lv2_type", "control"),
             "lv2_description": "Control outlet",
         }
-
 
     async def clone(self, patch, scope, name):
         # for inlet and outlet, always clear initargs so an xlet number is
