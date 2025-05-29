@@ -67,7 +67,7 @@ class MidiEvent:
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | self.channel
+            (self.lv2_type << 24) | (self.channel or 0)
         )
 
 
@@ -138,7 +138,7 @@ class NoteOn (Note):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8) | self.channel
+            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8) | (self.channel or 0)
         )
 
     def __repr__(self):
@@ -180,7 +180,7 @@ class NoteOff (Note):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8) | self.channel
+            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8) | (self.channel or 0)
         )
 
     def __repr__(self):
@@ -228,7 +228,7 @@ class NotePress (Note):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8) | self.channel
+            (self.lv2_type << 24) | (self.key << 16) | (self.velocity << 8) | (self.channel or 0)
         )
 
     def __repr__(self):
@@ -269,7 +269,7 @@ class MidiPgmChange (MidiEvent):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | (self.program << 16) | self.channel | self.channel
+            (self.lv2_type << 24) | (self.program << 16) | (self.channel or 0) | (self.channel or 0)
         )
 
     def __repr__(self):
@@ -310,7 +310,7 @@ class MidiCC (MidiEvent):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | (self.controller << 16) | (self.value << 8) | self.channel
+            (self.lv2_type << 24) | (self.controller << 16) | (self.value << 8) | (self.channel or 0)
         )
 
     def __repr__(self):
@@ -348,7 +348,7 @@ class MidiPitchbend (MidiEvent):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | (self.value << 16) | self.channel
+            (self.lv2_type << 24) | (self.value << 16) | (self.channel or 0)
         )
 
     def __repr__(self):
@@ -393,7 +393,7 @@ class MidiQFrame(MidiEvent):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | self.channel
+            (self.lv2_type << 24) | (self.channel or 0)
         )
 
 
@@ -446,7 +446,7 @@ class MidiSPP(MidiEvent):
 
     def to_lv2(self):
         return (
-            (self.lv2_type << 24) | (self.position << 8) | self.channel
+            (self.lv2_type << 24) | (self.position << 8) | (self.channel or 0)
         )
 
     def __repr__(self):
@@ -503,6 +503,8 @@ def from_lv2(raw_event):
     lv2_type = lv2midi.lv2_midi_message_type(raw_event)
     ctor = MidiEvent._lv2_registry.get(lv2_type, MidiUndef)
     ev = ctor(LV2MidiEvent(raw_event))
+    if ctor == MidiUndef:
+        log.debug(f"[from_lv2] can't convert 0x{lv2_type:02x} from 0x{raw_event:08x}")
     return ev
 
 
