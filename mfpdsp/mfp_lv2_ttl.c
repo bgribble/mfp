@@ -85,10 +85,13 @@ ttl_statement(void * data, SerdStatementFlags flags, const SerdNode * graph,
             }
             printf("  found mfp object name: '%s'\n", object->buf);
             pinfo->lv2->object_name = g_strdup(object->buf);
-            pinfo->lv2->object_path = g_malloc0(strlen(object->buf) +
-                                                strlen(pinfo->bundle_path) + 1);
-            sprintf(pinfo->lv2->object_path, "%s/%s", pinfo->bundle_path,
-                    object->buf);
+            pinfo->lv2->object_path = g_malloc0(
+                strlen(object->buf) + strlen(pinfo->bundle_path) + 2
+            );
+            sprintf(
+                pinfo->lv2->object_path, "%s/%s", pinfo->bundle_path,
+                object->buf
+            );
         }
 
         /* lv2:port starts a port definition */
