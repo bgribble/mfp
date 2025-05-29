@@ -53,7 +53,7 @@ def render_code_editor(app_window, param_name, param_type, param_value, target):
             if param_value:
                 init_text = param_value.get("body", "")
             editor.set_text(init_text)
-            editor.set_language_definition(ed.TextEditor.LanguageDefinition.python())
+            editor.set_language_definition(ed.TextEditor.LanguageDefinitionId.python)
 
         return editor
 
