@@ -4,6 +4,7 @@ image_utils.py -- load and convert images
 
 import os
 import numpy as np
+from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.utils import find_file_in_path
 
@@ -14,7 +15,8 @@ texture_cache = {}
 def image_to_texture(pil_image):
     from OpenGL import GL
     np_image = np.array(pil_image)
-    assert np_image.dtype == np.uint8 and np_image.ndim == 3 and np_image.shape[2] == 4
+    if not(np_image.dtype == np.uint8 and np_image.ndim == 3 and np_image.shape[2] == 4):
+        return None, 0, 0
 
     height, width = np_image.shape[:2]
 
