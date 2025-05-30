@@ -87,7 +87,7 @@ class MidiOut (Processor):
         self.port = 0
         self.channel = None
 
-        extra=defs or {}
+        extra = defs or {}
         initargs, kwargs = self.parse_args(init_args, **extra)
         if len(initargs):
             self.channel = initargs[0]
@@ -128,6 +128,7 @@ class MidiTime (Processor):
         self.spp_beats_per_measure = 4
         self.spp_beats_per_quarter = 1
 
+        self.spp_reset_pending = False
         self.spp_position = 0  # in quarter notes
         self.clock_count = 0   # in 24 PPQN
 
@@ -142,6 +143,7 @@ class MidiTime (Processor):
 
         if event == Bang:
             self.outlets[0] = self.frame_time
+            self.outlets[1] = self._bbm_pos()
 
         if isinstance(event, MidiQFrame):
             field = event.field
@@ -167,24 +169,36 @@ class MidiTime (Processor):
                 self.outlets[0] = self.frame_time
 
         if isinstance(event, MidiStart):
+            self.spp_reset_pending = False
             self.spp_position = 0
             self.clock_count = 0
             self.outlets[1] = self._bbm_pos()
 
+        if isinstance(event, MidiStop):
+            self.spp_reset_pending = True
+
         if isinstance(event, MidiSPP):
+            self.spp_reset_pending = False
             self.spp_position = event.position // 4
             self.clock_count = (event.position % 4) * 8
             self.outlets[1] = self._bbm_pos()
 
         if isinstance(event, MidiContinue):
+            self.spp_reset_pending = False
             self.outlets[1] = self._bbm_pos()
 
         if isinstance(event, MidiClock):
-            self.clock_count += 1
-            if self.clock_count >= 24:
-                self.clock_count = self.clock_count - 24
-                self.spp_position += 1
+            if self.spp_reset_pending:
+                self.spp_reset_pending = False
+                self.spp_position = 0
+                self.clock_count = 0
                 self.outlets[1] = self._bbm_pos()
+            else:
+                self.clock_count += 1
+                if self.clock_count >= 24:
+                    self.clock_count = self.clock_count - 24
+                    self.spp_position += 1
+                    self.outlets[1] = self._bbm_pos()
 
         if isinstance(event, MidiTimeSignature):
             log.debug("[midi_time] signature = {event.value}")

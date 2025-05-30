@@ -287,8 +287,8 @@ mfp_lv2_run(LV2_Handle instance, uint32_t nframes)
                             | (((unsigned int)msg[2]) << 8)
                             | ((unsigned int)msg[0] & 0x0f)
                         );
+                        mfp_lv2_send_midi_input(context, i, val);
                     }
-                    mfp_lv2_send_midi_input(context, i, val);
                 }
             }
         }
