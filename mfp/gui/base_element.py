@@ -380,7 +380,7 @@ class BaseElement (Store):
             self.position_x = x
             self.position_y = y
 
-    @saga('code', 'properties')
+    @saga('code', 'properties', 'panel_enable')
     async def params_changed(self, action, state_diff, previous):
         yield self.send_params()
 

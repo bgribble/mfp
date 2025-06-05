@@ -47,10 +47,13 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
             min_y = min(min_y, c.position_y) if min_y is not None else c.position_y
             max_y = max(max_y, child_max_y) if max_y is not None else child_max_y
 
-        export_w = max_x - min_x
-        export_h = max_y - min_y
-        self.export_w = export_w
-        self.export_h = export_h
+        if min_x is not None and max_x is not None:
+            export_w = max_x - min_x
+            self.export_w = export_w
+        if min_y is not None and max_y is not None:
+            export_h = max_y - min_y
+            self.export_h = export_h
+
 
     @mutates('position_x', 'position_y', 'width', 'height', 'export_w', 'export_h')
     def render(self):
@@ -120,7 +123,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         if content_w < min_w:
             imgui.same_line()
             imgui.dummy([min_w - content_w, 1])
-
         if content_h < min_h:
             imgui.dummy([1, min_h - content_h ])
         imgui.end_group()

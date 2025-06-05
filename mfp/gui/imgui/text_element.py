@@ -70,7 +70,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         tile = self.layer.patch.display_info
         if isinstance(self.container, BaseElement):
             parent = self.container
-            total = parent.export_w
+            total = parent.export_w + 2
             available = total - (self.position_x - parent.position_x)
             clip_w = available
             padding = 0
@@ -107,8 +107,8 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         imgui.begin_group()
         self.label.render(wrap_width=wrap_width)
         imgui.end_group()
-        imgui.end_table()
         content_w, content_h = imgui.get_item_rect_size()
+        imgui.end_table()
 
         if content_w < self.min_width:
             imgui.same_line()
