@@ -123,9 +123,14 @@ class GetElement(Processor):
         values = []
 
         for element in self.elements:
-            if isinstance(self.inlets[0], (list, tuple, str)):
+            if isinstance(self.inlets[0], (list, tuple, str, bytes)):
                 try:
-                    val_at_loc = self.inlets[0][int(element)]
+                    if isinstance(element, (float, int)):
+                        val_at_loc = self.inlets[0][int(element)]
+                    elif isinstance(element, slice):
+                        val_at_loc = self.inlets[0][element]
+                    elif isinstance(element, (list, tuple)):
+                        val_at_loc = self.inlets[0][slice(*element)]
                     values.append(val_at_loc)
                 except IndexError:
                     if callable(self.default_element):
@@ -196,15 +201,39 @@ class SetElement(Processor):
         if element is None:
             return
 
-        if isinstance(target, str):
-            element = int(element)
+        orig_type = None
+        if type(target) in (list, tuple, dict, str, bytes):
+            orig_type = type(target)
+
+        if isinstance(target, tuple):
+            target = list(target)
+
+        if isinstance(target, (str, bytes)):
             str_items = list(target)
-            str_items[element] = newval
-            target = ''.join(str_items)
+            if isinstance(element, (int, float)):
+                element = int(element)
+                str_items[element] = newval
+            elif isinstance(element, (list, tuple)):
+                element = slice(*element)
+                str_items[element] = list(newval)
+
+            if isinstance(target, str):
+                target = ''.join(str_items)
+            else:
+                target = bytes(str_items)
+        elif isinstance(target, list):
+            if isinstance(element, (int, float)):
+                element = int(element)
+            elif isinstance(element, (list, tuple)):
+                element = slice(*element)
+            target[element] = newval
         elif isinstance(element, (int, float)) or isinstance(target, dict):
             target[element] = newval
         elif isinstance(element, str):
             setattr(target, element, newval)
+
+        if orig_type:
+            target = orig_type(target)
 
         self.outlets[0] = target
 
@@ -258,7 +287,7 @@ class GetSlice(Processor):
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         Processor.__init__(self, 4, 1, init_type, init_args, patch, scope, name, defs)
-        extra=defs or {}
+        extra = defs or {}
         initargs, _ = self.parse_args(init_args, **extra)
         self.slice_end = None
         self.slice_start = 0
@@ -597,6 +626,7 @@ def register():
     mk_unary(type, "type", "Extract object type")
     mk_unary(dict, "dict", "Convert to dictionary")
     mk_unary(set, "set", "Convert to set")
+    mk_unary(str, "str", "Convert to string")
 
     # string methods
     mk_unary(
