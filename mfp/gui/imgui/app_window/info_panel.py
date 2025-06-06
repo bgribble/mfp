@@ -27,6 +27,8 @@ single_params = [
     'obj_name',
     'scope',
     'layer',
+    'width',
+    'height',
     'min_width',
     'min_height',
     'panel_enable',
@@ -37,6 +39,7 @@ any_params = [
     'position_x',
     'position_y',
     'position_z',
+
 ]
 
 TAB_PADDING_X = 12

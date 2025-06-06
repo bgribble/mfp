@@ -60,7 +60,12 @@ BASE_STORE_ATTRS = {
     'scope': ParamInfo(label="Lexical scope", param_type=str),
     'layer': ParamInfo(
         label="Layer",
-        choices=lambda obj: [(l.name, l) for l in obj.layer.patch.layers],
+        choices=lambda obj: (
+            [
+                (layer.name, layer) for layer in obj.layer.patch.layers
+            ]
+            if obj and obj.layer else []
+        ),
         param_type=Layer
     ),
     'position_x': ParamInfo(label="X position", param_type=float),
@@ -73,8 +78,8 @@ BASE_STORE_ATTRS = {
     'panel_y': ParamInfo(label="Y position (panel mode)", param_type=float),
     'panel_z': ParamInfo(label="Z position (panel mode)", param_type=float),
     'panel_enable': ParamInfo(label="Enable panel display", param_type=bool, show=True),
-    'width': ParamInfo(label="Width", param_type=float, editable=False),
-    'height': ParamInfo(label="Height", param_type=float, editable=False),
+    'width': ParamInfo(label="Width", param_type=float, editable=False, show=True),
+    'height': ParamInfo(label="Height", param_type=float, editable=False, show=True),
     'min_width': ParamInfo(label="Min width", param_type=float),
     'min_height': ParamInfo(label="Min height", param_type=float),
     'update_required': ParamInfo(label="Update required", param_type=bool),
