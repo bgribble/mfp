@@ -97,9 +97,7 @@ class PatchDisplay(Store):
             yield Action(obj, obj.SET_POSITION_Y, dict(value=new_y))
             yield Action(obj, obj.SET_POSITION_Z, dict(value=new_z))
 
-    @mutates(
-        'panel_mode'
-    )
+    @mutates('panel_mode')
     async def configure(self, params):
         self.num_inlets = params.get("num_inlets")
         self.num_outlets = params.get("num_outlets")

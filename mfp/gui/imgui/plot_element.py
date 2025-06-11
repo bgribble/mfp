@@ -15,6 +15,7 @@ from posix_ipc import SharedMemory
 from imgui_bundle import imgui_node_editor as nedit, ImVec4, implot, imgui
 from mfp.gui_main import MFPGUI
 from mfp import log
+from mfp.gui.modes.table_control import TableControlMode
 from .base_element import ImguiBaseElementImpl
 from ..plot_element import (
     PlotElement,
@@ -78,7 +79,14 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         self.scroll_timebase = None
 
         self.plot_type = "none"
+        self.plot_editable = False
+        self.plot_edit_draw = False
         self.plot_style = {}
+
+        self.plot_mouse_x = None
+        self.plot_mouse_y = None
+
+        self.plot_bounds_rect = None
 
         self.implot_context = implot.create_context()
 
@@ -192,6 +200,10 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
                 self.render_histo(x_min, y_min, x_max, y_max)
             if self.plot_type == "scope":
                 self.render_scope(x_min, y_min, x_max, y_max)
+
+            # track pointer
+            self.plot_mouse_x, self.plot_mouse_y = implot.get_plot_mouse_pos()
+            self.plot_bounds_rect = implot.get_plot_limits()
 
             implot.end_plot()
 
@@ -345,15 +357,14 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         # single set of bars
         if len(self.message_data) == 1:
             data = self.message_data[0]
-            x_data = np.array([p[1][0] for p in data])
-            y_data = np.array([p[1][1] for p in data])
+            x_data = np.array([float(p[1][0]) for p in data])
+            y_data = np.array([float(p[1][1]) for p in data])
             title = self.curve_label.get(0, f"Curve {0}")
             color = self.curve_color.get(0, None)
             if color:
                 implot.push_style_color(implot.Col_.marker_fill, color.to_rgbaf())
                 implot.push_style_color(implot.Col_.marker_outline, color.to_rgbaf())
                 implot.push_style_color(implot.Col_.line, color.to_rgbaf())
-
             implot.plot_bars(
                 title, x_data, y_data, 0.9,
             )
@@ -366,8 +377,8 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         num_curves = len(self.curve_label)
         for curve, points in self.message_data.items():
             for p in points:
-                px = p[1][0]
-                py = p[1][1]
+                px = float(p[1][0])
+                py = float(p[1][1])
                 bargroup = groups.setdefault(px, num_curves * [0])
                 bargroup[curve] = py
 
@@ -418,11 +429,11 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             ]
 
             x_data = [
-                p[0] for p in time_adjusted
+                float(p[0]) for p in time_adjusted
                 if ((x_min is None or p[0] >= x_min) and (x_max is None or p[0] <= x_max))
             ]
             y_data = [
-                p[1] for p in time_adjusted
+                float(p[1]) for p in time_adjusted
                 if ((x_min is None or p[0] >= x_min) and (x_max is None or p[0] <= x_max))
             ]
             title = self.curve_label.get(curve, f"Curve {curve}")
@@ -444,6 +455,11 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         pts = self.message_data.setdefault(curve, [])
         ptnum = len(pts)
         pts.append([ptnum, point])
+
+    def replace(self, point, curve=0):
+        curve = int(curve)
+        pts = self.message_data.setdefault(curve, [])
+        pts[point[0]] = [point[0], point]
 
     # grab scope data from buffer
     def buffer_grab(self):
@@ -470,9 +486,6 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             return None
 
     def command(self, action, data):
-        # not sure where this is used
-        # if self.xyplot.command(action, data):
-        #     return True
         if action == "clear":
             self.buffer_data = []
             self.message_data = {}
@@ -486,6 +499,10 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             for c in data:
                 for p in data[c]:
                     self.append(p, c)
+            self.last_message = datetime.now()
+            return True
+        if action == "replace":
+            self.replace(data, 0)
             self.last_message = datetime.now()
             return True
         if action == "buffer":
@@ -514,3 +531,16 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             return True
 
         return False
+
+    async def configure(self, params):
+        await super().configure(params)
+        if self.plot_editable:
+            oldpts = self.message_data.setdefault(0, [])
+            newpts = [[p, (p, 0)] for p in range(self.x_max)]
+            for p in oldpts:
+                newpts[p[0]] = [p[0], p]
+            self.message_data[0] = newpts
+
+    def make_control_mode(self):
+        if self.plot_editable:
+            return TableControlMode(self.app_window, self, "Table control")

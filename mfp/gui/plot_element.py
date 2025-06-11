@@ -6,7 +6,7 @@ A patch element corresponding to an XY scatter or line plot
 
 
 from abc import ABCMeta
-from flopsy import saga
+from flopsy import saga, mutates
 
 from mfp import log
 from mfp.gui_main import MFPGUI
@@ -33,7 +33,15 @@ class PlotElement (BaseElement):
         'y_max': ParamInfo(label="Y axis max value", param_type=float, null=True, show=True),
         'x_label': ParamInfo(label="X axis label", param_type=str, show=True),
         'y_label': ParamInfo(label="Y axis label", param_type=str, show=True),
-        'plot_type': ParamInfo(label="Plot type", param_type=str, null=True, show=True),
+        'plot_editable': ParamInfo(label="Is plot editable", param_type=bool, null=True),
+        'plot_edit_draw': ParamInfo(
+            label="Draw-style editing (table only)", param_type=bool, null=True, show=True
+        ),
+        'plot_type': ParamInfo(
+            label="Plot type",
+            param_type=str,
+            choices=lambda _: [("Scatter", "scatter"), ("Bars", "bars"), ("Histogram", "histo"), ("Scope", "scope")],
+            null=True, show=True),
         'plot_style': ParamInfo(label="Plot style", param_type=dict, show=False),
         'curve_label': ParamInfo(label="Curve labels", param_type=dict, show=True),
         'curve_color': ParamInfo(label="Curve colors", param_type=DictOfRGBAColor, show=True),
@@ -140,6 +148,7 @@ class PlotElement (BaseElement):
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
+    @mutates('x_min', 'x_max', 'y_min', 'y_max', 'plot_type')
     async def configure(self, params):
         if self.obj_args is None:
             self.label.set_text("%s" % (self.obj_type,))
@@ -152,6 +161,8 @@ class PlotElement (BaseElement):
         y_max = params.get('y_max', self.y_max)
 
         self.plot_type = params.get('plot_type', self.plot_type)
+        self.plot_editable = params.get('plot_editable', self.plot_editable)
+        self.plot_edit_draw = params.get('plot_edit_draw', self.plot_edit_draw)
 
         self.set_bounds(x_min, y_min, x_max, y_max)
 

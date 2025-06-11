@@ -115,20 +115,32 @@ class Scatter (Processor):
 
     async def trigger(self):
         points = {}
-        for i, val in zip(range(len(self.inlets)), self.inlets):
+
+        def _normalize_and_add(val):
             v = None
-            if isinstance(val, (tuple, list)):
-                v = tuple(val)
+            if isinstance(val, tuple):
+                v = val
             elif isinstance(val, complex):
                 v = (val.real, val.imag)
             elif isinstance(val, (float, int)):
                 v = (self._time(), val)
-
             if v is not None:
                 cpts = self.points.setdefault(i, [])
                 cpts.append(v)
                 cpts = points.setdefault(i, [])
                 cpts.append(v)
+            return v
+
+        for i, val in zip(range(len(self.inlets)), self.inlets):
+            if val == Bang:
+                self.outlets[0] = self.points[i]
+
+            elif isinstance(val, list):
+                for elt in val:
+                    _normalize_and_add(elt)
+            else:
+                _normalize_and_add(val)
+
             self.inlets[i] = Uninit
 
         if points != {}:
@@ -177,8 +189,97 @@ class Scatter (Processor):
         return self._chartconf('bounds', (x_min, y_min, x_max, y_max))
 
 
+class Table (Processor):
+    doc_tooltip_obj = "Tabular values"
+    doc_tooltip_inlet = ["Point to get/set or command"]
+    doc_tooltip_outlet = ["Point or slice output"]
+
+    display_type = "plot"
+
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        extra=defs or {}
+        initargs, kwargs = patch.parse_args(init_args, **extra)
+        if len(initargs) > 0:
+            self.num_points = initargs[0]
+        else:
+            self.num_points = 0
+        self.points = [0 for p in range(self.num_points)]
+        if self.num_points <= 20:
+            plot_type = "bars"
+            edit_draw = False
+        else:
+            plot_type = "scatter"
+            edit_draw = True
+
+        self.gui_params = dict(
+            plot_type=plot_type,
+            plot_editable=True,
+            plot_edit_draw=edit_draw,
+            channels=1,
+            x_min=0,
+            x_max=self.num_points
+        )
+
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
+
+    async def method(self, message, inlet):
+        # magic inlet argument makes messages simpler
+        if inlet != 0:
+            message.kwargs['inlet'] = inlet
+        rv = message.call(self)
+        if inspect.isawaitable(rv):
+            await rv
+
+    def _chartconf(self, action, data=None):
+        if self.gui_created:
+            MFPApp().async_task(MFPApp().gui_command.command(self.obj_id, action, data))
+        return True
+
+    async def trigger(self):
+        point = None
+        val = self.inlets[0]
+        if val == Bang:
+            self.outlets[0] = self.points
+        elif isinstance(val, int):
+            self.outlets[0] = self.points[val]
+        elif isinstance(val, (list, tuple)):
+            point = [v for v in val]
+            if point[0] >= len(self.points):
+                point[0] = len(self.points) - 1
+            self.points[point[0]] = point[1]
+        elif isinstance(val, slice):
+            self.outlets[0] = self.points[val]
+        self.inlets[0] = Uninit
+
+        if point is not None:
+            self._chartconf('replace', point)
+
+    # methods that the object responds to
+    def clear(self, inlet=0):
+        '''Clear a single curve's points'''
+        if inlet is not None and inlet in self.points:
+            del self.points[inlet]
+        return self._chartconf('clear', inlet)
+
+    def style(self, **kwargs):
+        '''Set style parameters for a curve'''
+        inlet = str(kwargs.get('inlet', 0))
+        style = self.gui_params.get('style', {})
+        instyle = style.setdefault(inlet, {})
+        for k, v in kwargs.items():
+            if k != 'inlet':
+                instyle[k] = v
+        self.conf(style=style)
+        return True
+
+    def bounds(self, x_min, y_min, x_max, y_max):
+        '''Set viewport boundaries in plot coordinates'''
+        return self._chartconf('bounds', (x_min, y_min, x_max, y_max))
+
+
 def register():
     MFPApp().register("scatter", Scatter)
     MFPApp().register("bars", Scatter)
     MFPApp().register("histogram", Scatter)
     MFPApp().register("scope", Scope)
+    MFPApp().register("table", Table)
