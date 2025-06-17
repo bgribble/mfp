@@ -86,6 +86,8 @@ class Processor:
         self.status = Processor.CTOR
         self.tags = {}          # tags are labels shown in notify bubble
         self.properties = {}
+        self.presets = {}
+
         self.name = None
         self.patch = None
         self.scope = None
@@ -173,6 +175,21 @@ class Processor:
             % (self.obj_id, self.name, self.init_type, self.init_args)
         )
         return True
+
+    def preset(self, preset_id, save=False):
+        if save:
+            state = self.save_state()
+            self.presets[preset_id] = state
+        else:
+            state = self.presets.get(preset_id)
+            if state:
+                self.restore_state(state)
+
+    def save_state(self):
+        return {}
+
+    def restore_state(self, state):
+        return None
 
     def tooltip_info(self, port_dir=None, port_num=None, details=False):
         tip = None
@@ -1223,7 +1240,7 @@ class Processor:
         oinfo['name'] = self.name
         oinfo['do_onload'] = self.do_onload
         oinfo['gui_params'] = {}
-
+        oinfo['presets'] = self.presets
         oinfo['properties'] = self.properties
         oinfo['midi_filters'] = self.midi_filters
         oinfo['midi_mode'] = self.midi_mode
@@ -1273,6 +1290,7 @@ class Processor:
 
         self.do_onload = prms.get('do_onload', False)
         self.properties = prms.get('properties', {})
+        self.presets = prms.get('presets', {})
 
         # compatibility with older style Interface layer patches
         if (

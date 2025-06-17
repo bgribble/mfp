@@ -32,7 +32,7 @@ def _dumb_load(ctor, values):
 
 
 def ext_encode(klass):
-    ExtendedEncoder.TYPES['__' + klass.__name__ + '__'] = klass
+    ExtendedEncoder.DICTTYPES['__' + klass.__name__ + '__'] = klass
     return klass
 
 
@@ -41,18 +41,34 @@ class ExtendedEncoder (json.JSONEncoder):
     from .gui.colordb import RGBAColor
     from .gui.ticks import ScaleType
     from .buffer_info import BufferInfo
+    from datetime import datetime, date
 
-    TYPES = {
+    DICTTYPES = {
         '__BangType__': BangType,
         '__UninitType__': UninitType,
         '__RGBAColor__': RGBAColor,
         '__BufferInfo__': BufferInfo,
     }
 
+    ATTRTYPES = {
+        "__datetime__": (
+            datetime,
+            ("year", "month", "day", "hour", "minute", "second", "microsecond", "tzinfo")
+        ),
+        "__date__": (
+            date,
+            ("year", "month", "day")
+        )
+    }
+
     DUMBTYPES = (ScaleType,)
 
     def default(self, obj):
-        if isinstance(obj, tuple(ExtendedEncoder.TYPES.values())):
+        if isinstance(obj, tuple(ExtendedEncoder.ATTRTYPES.values())):
+            key = "__%s__" % obj.__class__.__name__
+            attrs = ExtendedEncoder.ATTRTYPES.get(key)[1]
+            return {key: {a: getattr(obj, a) for a in attrs}}
+        elif isinstance(obj, tuple(ExtendedEncoder.DICTTYPES.values())):
             key = "__%s__" % obj.__class__.__name__
             return {key: obj.__dict__}
         elif isinstance(obj, self.DUMBTYPES):
@@ -69,14 +85,20 @@ def extended_decoder_hook(saved):
             return Bang
         elif tname == "__UninitType__":
             return Uninit
-        else:
-            ctor = ExtendedEncoder.TYPES.get(tname)
+        elif tname in ExtendedEncoder.DICTTYPES:
+            ctor = ExtendedEncoder.DICTTYPES.get(tname)
             if ctor:
                 if hasattr(ctor, 'load'):
                     loaded = ctor.load(tdict)
                     return loaded
                 else:
                     return _dumb_load(ctor, tdict)
+        elif tname in ExtendedEncoder.ATTRTYPES:
+            tinfo = ExtendedEncoder.ATTRTYPES.get(tname)
+            if tinfo:
+                ctor = tinfo[0]
+                loaded = ctor(**tdict)
+                return loaded
     return saved
 
 
@@ -242,6 +264,7 @@ async def json_serialize(self):
     gprms['name'] = self.init_type
     f['gui_params'] = gprms
     f['hot_inlets'] = self.hot_inlets
+    f['presets'] = self.presets
 
     allobj = {}
     keys = list(self.objects.keys())

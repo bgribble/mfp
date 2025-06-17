@@ -7,6 +7,7 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 '''
 
 import os
+from datetime import datetime
 
 from .processor import Processor, AsyncOutput
 from .evaluator import Evaluator
@@ -98,6 +99,23 @@ class Patch(Processor):
 
     def ping(self):
         log.debug("ping:", self.name)
+
+    #############################
+    # preset helpers
+    #############################
+
+    def preset(self, preset_id, save=False):
+        super().preset(preset_id, save)
+        for obj_name, obj in self.objects.items():
+            obj.preset(preset_id, save)
+
+    def save_state(self):
+        # return something so that this preset will appear in
+        # a list of patch presets
+        return dict(saved_on=datetime.now())
+
+    def restore_state(self, state):
+        return None
 
     #############################
     # step execution (breakpoints)

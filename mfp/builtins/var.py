@@ -41,6 +41,14 @@ class Var (Processor):
         elif len(kwargs):
             self.value = kwargs
 
+    def save_state(self):
+        return dict(value=self.value)
+
+    def restore_state(self, state):
+        if "value" in state:
+            MFPApp().async_task(self.send(state["value"], 0))
+        return None
+
     async def onload(self, phase):
         if phase == 1 and self.value is not Uninit:
             await self.send(Bang)
