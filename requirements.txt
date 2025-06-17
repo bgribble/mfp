@@ -10,7 +10,7 @@ munch==4.0.0
 numpy==2.2.4
 pillow==11.1.0
 posix_ipc==1.1.1
-protobuf==6.30.1
+protobuf==6.31.1
 pycparser==2.22
 pydantic==2.10.6
 pydantic_core==2.27.2
