@@ -254,6 +254,28 @@ class Table (Processor):
         if point is not None:
             self._chartconf('replace', point)
 
+    def save_state(self):
+        return dict(
+            num_points=self.num_points,
+            points=[p for p in self.points]
+        )
+
+    def restore_state(self, state):
+        if "num_points" in state:
+            new_size = state['num_points']
+            if new_size > self.num_points:
+                self.points.extend([0] * (new_size - self.num_points))
+            elif new_size < self.num_points:
+                self.points[new_size-self.num_points:] = []
+            self.num_points = new_size
+
+        if "points" in state:
+            self.points = state['points']
+            self._chartconf(
+                "set",
+                {0: list(enumerate(state['points']))},
+            )
+
     # methods that the object responds to
     def clear(self, inlet=0):
         '''Clear a single curve's points'''

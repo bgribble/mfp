@@ -501,6 +501,14 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
                     self.append(p, c)
             self.last_message = datetime.now()
             return True
+        if action == "set":
+            self.buffer_data = []
+            self.message_data = {}
+            for c in data:
+                for p in data[c]:
+                    self.append(p, c)
+            self.last_message = datetime.now()
+            return True
         if action == "replace":
             self.replace(data, 0)
             self.last_message = datetime.now()
