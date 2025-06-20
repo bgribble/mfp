@@ -12,7 +12,7 @@ from threading import Thread
 from posix_ipc import SharedMemory
 
 import numpy
-from mfp import Bang
+from mfp import Bang, Uninit
 from mfp import log
 
 from mfp.processor import Processor
@@ -207,7 +207,8 @@ class Buffer(Processor):
             self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
             self.set_channel_tooltips()
 
-        self.outlets[-1] = (resp_id, resp_value)
+        if self.outlets[-1] == Uninit:
+            self.outlets[-1] = (resp_id, resp_value)
 
     async def trigger(self):
         incoming = self.inlets[0]

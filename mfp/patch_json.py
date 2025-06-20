@@ -64,7 +64,7 @@ class ExtendedEncoder (json.JSONEncoder):
     DUMBTYPES = (ScaleType,)
 
     def default(self, obj):
-        if isinstance(obj, tuple(ExtendedEncoder.ATTRTYPES.values())):
+        if isinstance(obj, tuple([t[0] for t in ExtendedEncoder.ATTRTYPES.values()])):
             key = "__%s__" % obj.__class__.__name__
             attrs = ExtendedEncoder.ATTRTYPES.get(key)[1]
             return {key: {a: getattr(obj, a) for a in attrs}}
