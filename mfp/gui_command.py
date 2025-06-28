@@ -168,7 +168,10 @@ class GUICommand:
                     parent.children.add(o)
                     if not parent.layer:
                         log.debug(f"[create] NO PARENT LAYER! {params} {parent}")
+                    layer = parent.layer
                     parent.layer.add(o, container=parent)
+                if layer:
+                    params["layername"] = layer.name
                 await o.configure(params)
                 MFPGUI().appwin.register(o)
             else:
