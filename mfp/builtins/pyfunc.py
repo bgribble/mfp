@@ -409,6 +409,8 @@ class PyAutoWrap(Processor):
         elif self.argcount:
             args = [ x for x in self.inlets[:self.argcount] if x is not Uninit]
             self.outlets[0] = self.thunk(*args)
+        elif self.inlets[0] == Bang:
+            self.outlets[0] = self.thunk()
         else:
             arg = self.inlets[0]
             self.outlets[0] = self.thunk(arg)
