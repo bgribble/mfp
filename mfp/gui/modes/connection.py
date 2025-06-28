@@ -133,8 +133,8 @@ class ConnectionMode (InputMode):
             self.connection = None
 
     async def get_port_key(self):
-        def callback(txt):
-            self.set_port_key(int(txt))
+        async def callback(txt):
+            await self.set_port_key(int(txt))
 
         if ((self.dest_obj is not None)
             or (self.window.selected and self.window.selected[0] != self.source_obj)):
@@ -181,8 +181,10 @@ class ConnectionMode (InputMode):
 
     async def set_port_key(self, portnum):
         if self.reverse:
-            if (self.source_obj is None and self.window.selected and
-                    self.window.selected[0] != self.dest_obj):
+            if (
+                self.source_obj is None and self.window.selected and
+                self.window.selected[0] != self.dest_obj
+            ):
                 self.source_obj = self.window.selected[0]
 
             if self.source_obj is not None:
@@ -190,8 +192,10 @@ class ConnectionMode (InputMode):
             else:
                 self.dest_port =  max(0, min(portnum, self.dest_obj.num_inlets-1))
         else:
-            if (self.dest_obj is None and self.window.selected and
-                    self.window.selected[0] != self.source_obj):
+            if (
+                self.dest_obj is None and self.window.selected and
+                self.window.selected[0] != self.source_obj
+            ):
                 self.dest_obj = self.window.selected[0]
 
             if self.dest_obj is not None:
