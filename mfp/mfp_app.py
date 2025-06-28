@@ -708,6 +708,9 @@ class MFPApp (Singleton, SignalMixin):
         for o in obj_ids:
             srcobj = self.recall(o)
 
+            if not srcobj:
+                continue
+
             objects[srcobj.obj_id] = srcobj.save()
             objscope = scopes.setdefault(srcobj.scope.name, {})
             objscope[srcobj.name] = srcobj.obj_id
