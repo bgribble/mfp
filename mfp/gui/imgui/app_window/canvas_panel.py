@@ -224,8 +224,7 @@ def render_tile(app_window, patch):
                     panel_objects.append(obj)
 
         for obj in sorted(panel_objects, key=lambda o: o.panel_z):
-            if not isinstance(obj, ConnectionElement):
-                obj.render()
+            obj.render()
 
     elif patch.selected_layer:
         # first pass: non-links

@@ -192,6 +192,7 @@ class TransientMessageElement (MessageElement):
         self.num_outlets = 1
         self.label.set_text(self.message_text)
         self.obj_state = self.OBJ_COMPLETE
+        self.panel_enable = True
         self.draw_ports()
 
         self._make_connections()
@@ -203,6 +204,7 @@ class TransientMessageElement (MessageElement):
     def _make_connections(self):
         for to in self.target_obj:
             c = ConnectionElement.build(self.app_window, self, 0, to, self.target_port)
+            c.panel_enable = True
             c.move_to_layer(self.app_window.active_layer())
             self.app_window.register(c)
             self.connections_out.append(c)
