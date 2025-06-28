@@ -116,7 +116,12 @@ class Route (Processor):
             if self.strict:
                 outlet = self.addresses.get(k)
             else:
-                direct_addr = self.addresses.get(k)
+                direct_addr = None
+                try:
+                    direct_addr = self.addresses.get(k)
+                except TypeError:
+                    pass
+
                 type_addr = None
                 type_matches = [self.type_addresses.get(t) 
                                 for t in self.type_addresses.keys()
