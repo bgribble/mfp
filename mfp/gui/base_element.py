@@ -757,6 +757,9 @@ class BaseElement (Store):
             self.container = self.layer
         self.send_params()
 
+        for c in self.children:
+            c.move_to_layer(layer)
+
         for c in self.connections_out + self.connections_in:
             c.move_to_layer(layer)
 
