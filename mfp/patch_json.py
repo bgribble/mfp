@@ -38,16 +38,19 @@ def ext_encode(klass):
 
 class ExtendedEncoder (json.JSONEncoder):
     from .bang import BangType, UninitType
+    from .evaluator import LazyExpr
     from .gui.colordb import RGBAColor
     from .gui.ticks import ScaleType
     from .buffer_info import BufferInfo
+    from .method import MethodCall
     from datetime import datetime, date
 
     DICTTYPES = {
         '__BangType__': BangType,
-        '__UninitType__': UninitType,
-        '__RGBAColor__': RGBAColor,
         '__BufferInfo__': BufferInfo,
+        '__MethodCall__': MethodCall,
+        '__RGBAColor__': RGBAColor,
+        '__UninitType__': UninitType,
     }
 
     ATTRTYPES = {
@@ -58,7 +61,11 @@ class ExtendedEncoder (json.JSONEncoder):
         "__date__": (
             date,
             ("year", "month", "day")
-        )
+        ),
+        '__LazyExpr__': (
+            LazyExpr,
+            ("text",)
+        ),
     }
 
     DUMBTYPES = (ScaleType,)
@@ -87,6 +94,7 @@ def extended_decoder_hook(saved):
             return Uninit
         elif tname in ExtendedEncoder.DICTTYPES:
             ctor = ExtendedEncoder.DICTTYPES.get(tname)
+            log.debug(f"[decode] decoding {tname} with {ctor}")
             if ctor:
                 if hasattr(ctor, 'load'):
                     loaded = ctor.load(tdict)
@@ -116,8 +124,10 @@ async def json_deserialize(self, json_data):
     else:
         # pick out a few things that we need
         gp = f.get('gui_params', {})
-        for prm in ('num_inlets', 'num_outlets', 'export_x', 'export_y', 'export_w',
-                    'export_h', 'panel_mode'):
+        for prm in (
+            'num_inlets', 'num_outlets', 'export_x', 'export_y', 'export_w',
+            'export_h', 'panel_mode'
+        ):
             if prm in gp:
                 self.gui_params[prm] = gp[prm]
         self.gui_params['top_level'] = False

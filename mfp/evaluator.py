@@ -13,8 +13,13 @@ from mfp import log
 
 
 class LazyExpr(object):
-    def __init__(self, thunk):
+    def __init__(self, thunk=None, text=None):
         self.thunk = thunk
+        self.text = text
+
+        if text and not thunk:
+            e = Evaluator()
+            self.thunk = e.eval(f"lambda: {self.text}")
 
     def call(self):
         return self.thunk()
@@ -64,8 +69,11 @@ class Evaluator (object):
         # will go off after 3 links)
 
         def lazyrecurse(evalstr):
-            return (("LazyExpr(lambda: %s)" % lazyrecurse(evalstr[1:]))
-                    if evalstr[0] == ',' else evalstr)
+            if evalstr[0] == ',':
+                wrapped = evalstr[1:]
+                return f"LazyExpr(lambda: {wrapped}, {repr(wrapped)})"
+            return evalstr
+
         str2eval = lazyrecurse(str2eval)
 
         sio = StringIO(str2eval)

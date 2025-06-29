@@ -46,7 +46,19 @@ class Var (Processor):
 
     def restore_state(self, state):
         if "value" in state:
-            MFPApp().async_task(self.send(state["value"], 0))
+            self.value = state["value"]
+            if self.init_type == "text":
+                self.value = str(self.value)
+
+            # update UI if needed
+            if (
+                self.gui_params.get("update_required")
+                and ('value' not in self.gui_params or self.gui_params['value'] != self.value)
+            ):
+                self.conf(value=self.value)
+
+            if self.init_type != "message":
+                MFPApp().async_task(self.send(Bang))
         return None
 
     async def onload(self, phase):
@@ -207,6 +219,7 @@ class Enum (Var):
         else:
             vv = None
         return [vv, Var.tooltip_extra(self)]
+
 
 class SlideMeter (Var):
     doc_tooltip_obj = "Display/control a number with a slider"
