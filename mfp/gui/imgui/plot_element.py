@@ -181,6 +181,9 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             )
 
             x_min, y_min, x_max, y_max = self.find_axis_bounds()
+            if self.plot_type == "bars":
+                x_min -= 0.5
+                x_max -= 0.5
 
             if self.plot_type != "histogram":
                 if x_min is not None and x_max is not None:

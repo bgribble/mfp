@@ -94,7 +94,6 @@ def extended_decoder_hook(saved):
             return Uninit
         elif tname in ExtendedEncoder.DICTTYPES:
             ctor = ExtendedEncoder.DICTTYPES.get(tname)
-            log.debug(f"[decode] decoding {tname} with {ctor}")
             if ctor:
                 if hasattr(ctor, 'load'):
                     loaded = ctor.load(tdict)
