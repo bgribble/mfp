@@ -33,7 +33,7 @@ class TransientMessageEditMode (InputMode):
         cls.bind("transient-C-7", lambda mode: mode.message.set_port(7), "Send to inlet 7", "C-7")
         cls.bind("transient-C-8", lambda mode: mode.message.set_port(8), "Send to inlet 8", "C-8")
         cls.bind("transient-C-9", lambda mode: mode.message.set_port(9), "Send to inlet 9", "C-9")
-        cls.bind("transient-ESC", lambda mode: mode.cancel, "Cancel message", "ESC")
+        cls.bind("transient-ESC", lambda mode: mode.cancel(), "Cancel message", "ESC")
 
         cls.extend_mode(LabelEditMode)
 
