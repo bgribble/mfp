@@ -104,17 +104,16 @@ class Patch(Processor):
     # preset helpers
     #############################
 
-    def preset(self, preset_id, save=False):
-        super().preset(preset_id, save)
-        for obj_name, obj in self.objects.items():
-            obj.preset(preset_id, save)
-
     def save_state(self):
-        # return something so that this preset will appear in
-        # a list of patch presets
-        return dict(saved_on=datetime.now())
+        state = {}
+        for obj_id, obj in self.objects.items():
+            state[obj.name] = obj.save_state()
+        return state
 
     def restore_state(self, state):
+        for obj_id, obj in self.objects.items():
+            ostate = state.get(obj.name, {})
+            obj.restore_state(ostate)
         return None
 
     #############################

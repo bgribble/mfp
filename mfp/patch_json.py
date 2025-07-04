@@ -143,6 +143,7 @@ async def json_deserialize(self, json_data):
     self.inlet_objects = []
     self.outlet_objects = []
     self.dispatch_objects = []
+    self.presets = f.get("presets", {})
 
     # create new objects
     # dumb_scope will allow multiple objects with a name, we will resolve when
