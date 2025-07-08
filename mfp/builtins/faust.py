@@ -66,8 +66,8 @@ class Faust(Processor):
         base_dict['faust_params'] = self.faust_params
         base_dict['faust_dsp_inlets'] = self.faust_dsp_inlets
         base_dict['faust_dsp_outlets'] = self.faust_dsp_outlets
-        base_dict['gui_params']['num_inlets'] = self.num_inlets
-        base_dict['gui_params']['num_outlets'] = self.num_outlets
+        base_dict['gui_params']['num_inlets'] = len(self.inlets)
+        base_dict['gui_params']['num_outlets'] = len(self.outlets)
         base_dict['gui_params']['dsp_inlets'] = self.dsp_inlets
         base_dict['gui_params']['dsp_outlets'] = self.dsp_outlets
         return base_dict
@@ -97,16 +97,16 @@ class Faust(Processor):
         params = kwargs.get("params", {})
 
         if "num_inlets" in params:
-            self.num_inlets = params['num_inlets']
-            self.inlets = [Uninit] * self.num_inlets
-            self.connections_in = [[] for r in range(self.num_inlets)]
-            self.gui_params['num_inlets'] = self.num_inlets
+            num_inlets = params['num_inlets']
+            self.inlets = [Uninit] * num_inlets
+            self.connections_in = [[] for r in range(num_inlets)]
+            self.gui_params['num_inlets'] = num_inlets
 
         if "num_outlets" in params:
-            self.num_outlets = params['num_outlets']
-            self.outlets = [Uninit] * self.num_outlets
-            self.connections_out = [[] for r in range(self.num_outlets)]
-            self.gui_params['num_outlets'] = self.num_outlets
+            num_outlets = params['num_outlets']
+            self.outlets = [Uninit] * num_outlets
+            self.connections_out = [[] for r in range(num_outlets)]
+            self.gui_params['num_outlets'] = num_outlets
 
         if "dsp_inlets" in params:
             self.dsp_inlets = params['dsp_inlets']
