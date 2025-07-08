@@ -1294,7 +1294,7 @@ class Processor:
 
         # compatibility with older style Interface layer patches
         if (
-            gp and gp.get("layername") == Patch.EXPORT_LAYER
+            gp and (gp.get("layername") or gp.get("layer")) == Patch.EXPORT_LAYER
             and gp.get("no_export", False) is not True
             and "display_type" in gp
             and gp.get("display_type") not in (

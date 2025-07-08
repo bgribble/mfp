@@ -63,7 +63,6 @@ class GUICommand:
 
     async def cmd_get_input(self, prompt, default, filename, space=True):
         from .gui_main import MFPGUI
-        from mfp import log
         event = asyncio.Event()
         result = []
 
@@ -84,7 +83,6 @@ class GUICommand:
 
     async def configure(self, obj_id, params=None, **kwparams):
         from .gui_main import MFPGUI
-        from mfp import log
         MFPGUI().appwin.last_activity_time = datetime.now()
         obj = MFPGUI().recall(obj_id)
         if params is not None:
@@ -149,8 +147,11 @@ class GUICommand:
                 parent = MFPGUI().recall(o.parent_id)
                 layer = None
                 if isinstance(parent, PatchDisplay):
-                    if "layername" in params:
-                        layer = parent.find_layer(params["layername"])
+                    # 'layername' is the correct param, 'layer' for back compat
+                    layername = params.get("layername") or params.get("layer")
+                    if layername:
+                        layer = parent.find_layer(layername)
+
                     if not layer:
                         layer = parent.selected_layer or parent.layers[0]
                     if not layer:
