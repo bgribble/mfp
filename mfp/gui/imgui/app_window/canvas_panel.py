@@ -191,8 +191,8 @@ def render_tile(app_window, patch):
             app_window.get_color('grid-color:operate').to_rgbaf()
         )
 
+    imgui.get_style().font_scale_main = 1.0
     nedit.begin("canvas_editor", (0.0, 0.0))
-
     conf = nedit.get_config()
 
     # disable NodeEditor dragging and selecting unless we are hovering on
@@ -410,6 +410,7 @@ def render_tile(app_window, patch):
 
     nedit.end()  # node_editor
     nedit.pop_style_color(5)
+    imgui.get_style().font_scale_main = app_window.imgui_global_scale
 
     imgui.end()
 

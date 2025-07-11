@@ -47,11 +47,19 @@ def add_menu_items(app_window, itemdict):
                     itemname = itemname[3:]
                 else:
                     itemname = itemname[2:]
-                toggle_state = toggle_items_state.setdefault(menu_path, default_toggle)
+
+                if value.selected and callable(value.selected):
+                    toggle_state = value.selected()
+                elif value.selected is not None:
+                    toggle_state = value.selected
+                else:
+                    toggle_state = toggle_items_state.setdefault(menu_path, default_toggle)
 
             # make the actual menu item
             item_selected, item_toggled = imgui.menu_item(
-                itemname, keysym, toggle_state, value.enabled
+                itemname,
+                '' if keysym.startswith('__') else keysym,
+                toggle_state, value.enabled
             )
 
             # send synthesized keypress(es) if selected
@@ -69,9 +77,9 @@ def add_menu_items(app_window, itemdict):
         sep_items = itemdict.get(separators * '|')
         if not sep_items:
             continue
-        imgui.dummy([1, 2])
+        imgui.dummy(app_window.scaled(1, 2))
         imgui.separator()
-        imgui.dummy([1, 2])
+        imgui.dummy(app_window.scaled(1, 2))
         add_menu_items(app_window, sep_items)
 
 def prune_paths(pathdict):
@@ -185,9 +193,9 @@ def render(app_window):
         menu_open = True
         add_menu_items(app_window, by_menu.get("Layer", {}))
         if app_window.selected_patch and len(app_window.selected_patch.layers) > 0:
-            imgui.dummy([1, 2])
+            imgui.dummy(app_window.scaled(1, 2))
             imgui.separator()
-            imgui.dummy([1, 2])
+            imgui.dummy(app_window.scaled(1, 2))
             for layer_num, layer in enumerate(app_window.selected_patch.layers):
                 imgui.push_id(layer_num)
                 layer_selected, _ = imgui.menu_item(
@@ -205,9 +213,9 @@ def render(app_window):
         add_menu_items(app_window, by_menu.get("Window", {}))
 
         if len(app_window.patches) > 0:
-            imgui.dummy([1, 2])
+            imgui.dummy(app_window.scaled(1, 2))
             imgui.separator()
-            imgui.dummy([1, 2])
+            imgui.dummy(app_window.scaled(1, 2))
             for patch in app_window.patches:
                 if not patch.display_info:
                     continue

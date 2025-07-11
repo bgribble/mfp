@@ -3,7 +3,7 @@ imgui/text_widget.py -- backend implementation of TextWidget for Imgui
 """
 
 import re
-from imgui_bundle import imgui, ImVec4
+from imgui_bundle import imgui
 from imgui_bundle import imgui_node_editor as nedit
 from imgui_bundle import imgui_md as markdown
 
@@ -12,6 +12,8 @@ from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from ..text_widget import TextWidget, TextWidgetImpl
 
+default_tt_font_name = "ProggyClean.ttf"
+default_tt_font_size = 13
 
 # markdown images are ![caption](image spec)
 # image spec is not well defined. We are extending it a little
@@ -80,7 +82,7 @@ def _font_key(f):
     )
     family, shape, _ = _fontinfo(f.get_debug_name())
     shape_name = font_shapes.get(shape, 'regular')
-    fkey = f"{family or 'unnamed'}__{shape_name}__{f.font_size}"
+    fkey = f"{family or 'unnamed'}__{shape_name}"
     return fkey
 
 
@@ -159,19 +161,22 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     def markdown_div_callback(cls, div_class, is_opening_div):
         classes = div_class.split(' ')
         sizes = {
-            "size-x-small": "8.0",
-            "size-small": "12.0",
-            "size-normal": "16.0",
-            "size-large": "20.0",
-            "size-x-large": "24.0",
-            "size-xx-large": "28.0",
+            "size-x-small": 8.0,
+            "size-small": 12.0,
+            "size-normal": 16.0,
+            "size-large": 20.0,
+            "size-x-large": 24.0,
+            "size-xx-large": 28.0,
         }
 
         font_key_stack = cls.imgui_currently_rendering.font_key_stack
         if not font_key_stack:
-            font_key_stack.append(_font_key(imgui.get_current_context().font))
-        font_key = list(f for f in font_key_stack if f)[-1]
-        font_name, font_weight, font_size = font_key.split('__')
+            font_key_stack.append((
+                _font_key(imgui.get_current_context().font),
+                imgui.get_current_context().font_size
+            ))
+        font_key, font_size = list(f for f in font_key_stack if f)[-1]
+        font_name, font_weight = font_key.split('__')
 
         font_changed = False
         color = None
@@ -195,9 +200,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 font_changed = True
 
             if c == "tt":
-                font_name = "ProggyClean.ttf,"
+                font_name = default_tt_font_name
                 font_weight = "regular"
-                font_size = "13.0"
                 font_changed = True
 
             if c.startswith('color'):
@@ -217,15 +221,15 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         if is_opening_div:
             if font_changed:
-                new_font_key = f"{font_name}__{font_weight}__{font_size}"
+                new_font_key = f"{font_name}__{font_weight}"
                 new_font = cls.imgui_font_atlas.get(
                     new_font_key, None
                 )
                 font_key_stack.append(
-                    new_font_key if new_font else None
+                    (new_font_key if new_font else None, font_size)
                 )
                 if new_font:
-                    imgui.push_font(new_font)
+                    imgui.push_font(new_font, font_size)
             if color:
                 imgui.push_style_color(imgui.Col_.text, color)
         else:
@@ -505,7 +509,6 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             # sometimes imgui_md doesn't call the div-callback
             # so we need to be defensive about the font stack
             context = imgui.get_current_context()
-            font_depth_before = len(context.font_stack)
             text_changed = False
 
             # transform converts to better-renderable form
@@ -526,20 +529,12 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
                 md_text = '\n'.join(transformed_blocks)
                 self.transform_out = md_text
-
             imgui.dummy((1, 3))
             if self.markdown_text or self.text:
                 markdown.render(md_text)
 
             # check for stray fonts on the stack and get rid of them
-            context = imgui.get_current_context()
             draw_list.pop_clip_rect()
-            font_depth_after = len(context.font_stack)
-
-            if font_depth_before != font_depth_after:
-                log.debug("[text] Warning: font stack is messed up, doing my best")
-            for _ in range(font_depth_before, font_depth_after):
-                imgui.pop_font()
         else:
             if self.multiline and wrap_width:
                 label_text = self.simple_wrap(self.text, int(wrap_width / self.font_width))
@@ -548,7 +543,15 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 self.wrapped_text = self.text
 
             if self.text:
+                fkey = f"{default_tt_font_name}__regular"
+                new_font = self.imgui_font_atlas.get(fkey)
+                new_size = default_tt_font_size
+
+                if new_font:
+                    imgui.push_font(new_font, new_size)
                 imgui.text(label_text + extra_bit)
+                if new_font:
+                    imgui.pop_font()
 
             # text bounding box does not account for descenders
             imgui.dummy([1, 3])

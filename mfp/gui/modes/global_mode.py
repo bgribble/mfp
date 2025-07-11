@@ -296,6 +296,42 @@ class GlobalMode (InputMode):
                 "tile-control", cls.tile_manager_prefix,
                 keysym="C-a"
             )
+            cls.bind(
+                "app-scale-100",
+                lambda mode: mode.set_app_scale(1.0),
+                menupath="Window > DPI Scale > []100%",
+                keysym=cls.NO_KEY,
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.0
+            )
+            cls.bind(
+                "app-scale-125", lambda mode: mode.set_app_scale(1.25),
+                keysym=cls.NO_KEY,
+                menupath="Window > DPI Scale > []125%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.25
+            )
+            cls.bind(
+                "app-scale-150", lambda mode: mode.set_app_scale(1.50),
+                keysym=cls.NO_KEY,
+                menupath="Window > DPI Scale > []150%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.50
+            )
+            cls.bind(
+                "app-scale-200", lambda mode: mode.set_app_scale(2.0),
+                keysym=cls.NO_KEY,
+                menupath="Window > DPI Scale > []200%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 2.0
+            )
+            cls.bind(
+                "app-scale-250", lambda mode: mode.set_app_scale(2.5),
+                keysym=cls.NO_KEY,
+                menupath="Window > DPI Scale > []250%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 2.5
+            )
+
+
+    def set_app_scale(self, scale_factor):
+        self.window.imgui_global_scale = scale_factor
+        return True
 
     async def toggle_panel_mode(self):
         patch = self.window.selected_patch
