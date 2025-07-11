@@ -133,6 +133,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.info_panel_visible = not self.info_panel_visible
 
     def scaled(self, *args):
+        if len(args) == 1:
+            return args[0] * self.imgui_global_scale
+
         return tuple(
             v * self.imgui_global_scale if v != 1 else 1
             for v in args
