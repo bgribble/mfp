@@ -24,7 +24,9 @@ from . import menu_bar, canvas_panel, info_panel, console_panel, status_line
 
 MAX_RENDER_US = 200000
 PEAK_FPS = 60
-
+BASE_MARKDOWN_FONT_SCALES = [
+    1.42, 1.33, 1.24, 1.15, 1.1, 1.05
+]
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
@@ -45,6 +47,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_prevent_idle = 0
         self.imgui_tile_selected = False
         self.imgui_popup_open = None
+        self.imgui_global_scale = 1.0
 
         self.nedit_config = None
 
@@ -129,6 +132,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     async def handle_toggle_info_panel(self, *rest):
         self.info_panel_visible = not self.info_panel_visible
 
+    def scaled(self, *args):
+        return tuple(
+            v * self.imgui_global_scale if v != 1 else 1
+            for v in args
+        )
+
     async def _render_task(self):
         from mfp.gui.imgui.text_widget import ImguiTextWidgetImpl
 
@@ -150,8 +159,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         md_options.callbacks.on_image = ImguiTextWidgetImpl.image_callback
         md_options.callbacks.on_open_link = ImguiTextWidgetImpl.url_callback
         md_options.font_options.regular_size = 16
-        md_options.font_options.size_diff_between_levels = 4
-        md_options.font_options.max_header_level = 5
+        # md_options.font_options.size_diff_between_levels = 4
+        # md_options.font_options.max_header_level = 5
         markdown.initialize_markdown(md_options)
         font_loader = markdown.get_font_loader_function()
         font_loader()
@@ -203,6 +212,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             # start processing for this frame
             imgui.new_frame()
+
+            # tweak font scalings if magnification has changed
+            md_options.font_options.regular_size = 16 / self.imgui_global_scale
 
             # hard work
             keep_going = self.render()
@@ -257,6 +269,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # renderer
     def render(self):
+
         self.imgui_prevent_idle = max(0, self.imgui_prevent_idle - 1)
         keep_going = True
 
@@ -266,6 +279,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         nedit.push_style_color(nedit.StyleColor.flow_marker, (1, 1, 1, 0.2))
         nedit.push_style_color(nedit.StyleColor.flow, (1, 1, 1, 0.5))
+
+        vp = imgui.get_main_viewport()
+        vp.framebuffer_scale = (self.imgui_global_scale, self.imgui_global_scale)
+        imgui.get_style().font_scale_main = self.imgui_global_scale
 
         ########################################
         # menu bar
@@ -295,9 +312,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         )
         if imgui.begin_popup("About MFP##popup"):
             from mfp.mfp_main import mfp_banner, mfp_footer, version
-            imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 8))
-            imgui.dummy([1, 4])
-            imgui.dummy([8, 1])
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, self.scaled(0, 8))
+            imgui.dummy(self.scaled(1, 4))
+            imgui.dummy(self.scaled(8, 1))
             imgui.same_line()
             imgui.begin_group()
             imgui.text(mfp_banner % version())
@@ -308,8 +325,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             imgui.text(mfp_footer)
             imgui.end_group()
             imgui.same_line()
-            imgui.dummy([8, 1])
-            imgui.dummy([1, 4])
+            imgui.dummy(self.scaled(8, 1))
+            imgui.dummy(self.scaled(1, 4))
             imgui.pop_style_var()
             imgui.end_popup()
             popup_open = True
@@ -430,7 +447,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # bottom panel
         ########################################
-
 
         imgui.pop_style_var()  # padding
         imgui.pop_style_var()  # border
