@@ -331,6 +331,7 @@ class GlobalMode (InputMode):
 
     def set_app_scale(self, scale_factor):
         self.window.imgui_global_scale = scale_factor
+        self.window.reset_zoom()
         return True
 
     async def toggle_panel_mode(self):
