@@ -30,6 +30,8 @@ def add_menu_items(app_window, itemdict):
         if itemname.startswith("|"):
             continue
         if isinstance(value, dict):
+            imgui.dummy(app_window.scaled(1, 1))
+            imgui.same_line()
             if imgui.begin_menu(itemname):
                 add_menu_items(app_window, value)
                 imgui.end_menu()
@@ -56,6 +58,8 @@ def add_menu_items(app_window, itemdict):
                     toggle_state = toggle_items_state.setdefault(menu_path, default_toggle)
 
             # make the actual menu item
+            imgui.dummy(app_window.scaled(1, 1))
+            imgui.same_line()
             item_selected, item_toggled = imgui.menu_item(
                 itemname,
                 '' if keysym.startswith('__') else keysym,
@@ -198,6 +202,8 @@ def render(app_window):
             imgui.dummy(app_window.scaled(1, 2))
             for layer_num, layer in enumerate(app_window.selected_patch.layers):
                 imgui.push_id(layer_num)
+                imgui.dummy(app_window.scaled(1, 1))
+                imgui.same_line()
                 layer_selected, _ = imgui.menu_item(
                     layer.name,
                     '',
@@ -220,6 +226,8 @@ def render(app_window):
                 if not patch.display_info:
                     continue
                 imgui.push_id(str(id(patch)))
+                imgui.dummy(app_window.scaled(1, 1))
+                imgui.same_line()
                 patch_selected, _ = imgui.menu_item(
                     patch.obj_name,
                     '',

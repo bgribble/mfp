@@ -237,6 +237,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
             24
         )
         draw_list.add_text(
+            imgui.get_font(),
+            14,
             (xpos - halfbadge/2.0 + self.position_x + 0.5, ypos - halfbadge + self.position_y + 0.5),
             imgui.IM_COL32(255, 255, 255, 255),
             btext

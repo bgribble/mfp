@@ -28,6 +28,14 @@ BASE_MARKDOWN_FONT_SCALES = [
     1.42, 1.33, 1.24, 1.15, 1.1, 1.05
 ]
 
+def monospace_font():
+    atlas = imgui.get_io().fonts
+    fonts = atlas.fonts
+    for f in fonts:
+        family = f.get_debug_name().split(' ')[0]
+        if family == 'Inconsolata-Medium':
+            return f
+
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
     motion_overrides = ["scroll-zoom", "canvas-pos"]
@@ -137,7 +145,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             return args[0] * self.imgui_global_scale
 
         return tuple(
-            v * self.imgui_global_scale if v != 1 else 1
+            v * self.imgui_global_scale
             for v in args
         )
 
@@ -181,6 +189,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         gl.glClearColor(1.0, 1.0, 1.0, 1)
 
+        default_font = None
+
         sync_time = None
         while (
             keep_going
@@ -219,8 +229,17 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             # tweak font scalings if magnification has changed
             md_options.font_options.regular_size = 16 / self.imgui_global_scale
 
+            if not default_font:
+                default_font = monospace_font()
+
+            if default_font:
+                imgui.push_font(default_font, 16)
+
             # hard work
             keep_going = self.render()
+
+            if default_font:
+                imgui.pop_font()
 
             ######################
             # bottom of loop stuff - hand over the frame to imgui
@@ -284,7 +303,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         nedit.push_style_color(nedit.StyleColor.flow, (1, 1, 1, 0.5))
 
         vp = imgui.get_main_viewport()
-        vp.framebuffer_scale = (self.imgui_global_scale, self.imgui_global_scale)
+        vp.framebuffer_scale = (2*self.imgui_global_scale, 2*self.imgui_global_scale)
         imgui.get_style().font_scale_main = self.imgui_global_scale
 
         ########################################

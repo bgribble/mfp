@@ -76,6 +76,7 @@ def render_tile(app_window, patch):
     """
     render a patch tile
     """
+
     # for some reason this still leaves a gap under the menu bar
     canvas_pane_origin = (1, app_window.menu_height + 1)
 

@@ -12,44 +12,11 @@ from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from ..text_widget import TextWidget, TextWidgetImpl
 
-default_tt_font_name = "ProggyClean.ttf"
-default_tt_font_size = 13
-
-# markdown images are ![caption](image spec)
-# image spec is not well defined. We are extending it a little
-# to enable passing size params.
-# ![caption](filename\ spaces\ escaped alt_text\ spaces\ escaped width=123 height=123)
-# everything is optional but spaces must always be escaped in the filename
-
-# FIXME looks like we don't get the image arg if there are any spaces
-# in it :/
-def _parse_md_image_arg(arg):
-    if not arg:
-        return "", None, None
-
-    parts = re.split(
-        r'(?<!\\) ',
-        arg
-    )
-
-    path = parts[0]
-    alt_text = None
-    width = None
-    height = None
-
-    for p in parts[1:]:
-        if p.startswith('width='):
-            width = int(p[6:])
-        elif p.startswith('height='):
-            height = int(p[7:])
-        elif not alt_text:
-            alt_text = p
-
-    return path, alt_text, width, height
-
+default_tt_font_name = "Inconsolata"
+default_tt_font_size = 16
 
 # parse the get_debug_name() output to get shape and size info
-def _fontinfo(info):
+def _font_info(info):
     family = None
     shape = None
     size = None
@@ -80,7 +47,7 @@ def _font_key(f):
         regularitalic='italic',
         bolditalic='bolditalic'
     )
-    family, shape, _ = _fontinfo(f.get_debug_name())
+    family, shape, _ = _font_info(f.get_debug_name())
     shape_name = font_shapes.get(shape, 'regular')
     fkey = f"{family or 'unnamed'}__{shape_name}"
     return fkey
@@ -549,6 +516,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
                 if new_font:
                     imgui.push_font(new_font, new_size)
+                else:
+                    log.debug(f"[font] can't find {fkey} in {list(self.imgui_font_atlas.keys())}")
+                self.font_width, self.font_height = imgui.calc_text_size("M")
                 imgui.text(label_text + extra_bit)
                 if new_font:
                     imgui.pop_font()
@@ -559,7 +529,6 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         if self.font_color:
             imgui.pop_style_color()
 
-        self.font_width, self.font_height = imgui.calc_text_size("M")
         imgui.end_group()
         imgui.pop_style_var()
 

@@ -299,39 +299,44 @@ class GlobalMode (InputMode):
             cls.bind(
                 "app-scale-100",
                 lambda mode: mode.set_app_scale(1.0),
-                menupath="Window > DPI Scale > []100%",
+                menupath="Window > ||||UI magnify > []100%",
                 keysym=cls.NO_KEY,
                 selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.0
             )
             cls.bind(
                 "app-scale-125", lambda mode: mode.set_app_scale(1.25),
                 keysym=cls.NO_KEY,
-                menupath="Window > DPI Scale > []125%",
+                menupath="Window > ||||UI magnify > []125%",
                 selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.25
             )
             cls.bind(
                 "app-scale-150", lambda mode: mode.set_app_scale(1.50),
                 keysym=cls.NO_KEY,
-                menupath="Window > DPI Scale > []150%",
+                menupath="Window > ||||UI magnify > []150%",
                 selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.50
             )
             cls.bind(
                 "app-scale-200", lambda mode: mode.set_app_scale(2.0),
                 keysym=cls.NO_KEY,
-                menupath="Window > DPI Scale > []200%",
+                menupath="Window > ||||UI magnify > []200%",
                 selected=lambda: MFPGUI().appwin.imgui_global_scale == 2.0
             )
             cls.bind(
                 "app-scale-250", lambda mode: mode.set_app_scale(2.5),
                 keysym=cls.NO_KEY,
-                menupath="Window > DPI Scale > []250%",
+                menupath="Window > ||||UI magnify > []250%",
                 selected=lambda: MFPGUI().appwin.imgui_global_scale == 2.5
             )
 
 
-    def set_app_scale(self, scale_factor):
-        self.window.imgui_global_scale = scale_factor
-        self.window.reset_zoom()
+    async def set_app_scale(self, new_scale):
+        scale_ratio = new_scale / self.window.imgui_global_scale
+        self.window.imgui_global_scale = new_scale
+        for p in self.window.patches:
+            if p.display_info:
+                p.display_info.view_zoom *= scale_ratio
+        self.window.viewport_zoom_set = True
+        self.window.viewport_pos_set = True
         return True
 
     async def toggle_panel_mode(self):
@@ -823,6 +828,12 @@ class GlobalMode (InputMode):
             self.window.hud_write("Snooping disabled")
 
     async def search_interactive(self):
+        def match_sort_key(obj):
+            return (
+                obj.layer != self.window.selected_layer,
+                - obj.obj_id,
+            )
+
         async def search_changed(newval, incremental=True):
             matches = []
             for element in self.window.objects:
@@ -833,12 +844,14 @@ class GlobalMode (InputMode):
                     newval in (element.obj_type or '')
                     or newval in (element.obj_name or '')
                     or newval in (element.obj_args or '')
+                    or (hasattr(element, 'value') and newval in str(element.value))
                 ):
                     matches.append(element)
                     element.highlight_text = newval
                 else:
                     element.highlight_text = None
 
+            matches.sort(key=match_sort_key)
             if incremental:
                 if matches != self.search_interactive_matches:
                     self.search_interactive_position = 0
