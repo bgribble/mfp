@@ -105,7 +105,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         super().__init__(*args, **kwargs)
 
-        self.signal_listen("motion-event", self.handle_motion)
+        self.signal_listen("motion-event", self.handle_motion, prepend=True)
         self.signal_listen("toggle-console", self.handle_toggle_console)
         self.signal_listen("toggle-info-panel", self.handle_toggle_info_panel)
 
