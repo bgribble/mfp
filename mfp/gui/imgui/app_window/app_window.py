@@ -226,9 +226,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             # start processing for this frame
             imgui.new_frame()
 
-            # tweak font scalings if magnification has changed
-            md_options.font_options.regular_size = 16 / self.imgui_global_scale
-
             if not default_font:
                 default_font = monospace_font()
 
