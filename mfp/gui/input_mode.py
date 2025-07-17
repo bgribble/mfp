@@ -18,6 +18,7 @@ class Binding:
     keysym: str
     menupath: str = ''
     mode: any = None
+    selected: any = None
     enabled: bool = False
 
     def copy(self, **kwargs):
@@ -28,6 +29,8 @@ class Binding:
 
 
 class InputMode:
+    NO_KEY = False
+
     _registry = {}
 
     # global for all modes
@@ -81,7 +84,7 @@ class InputMode:
         cls._extensions.append(mode_type)
 
     @classmethod
-    def bind(cls, label, action, helptext=None, keysym=None, menupath=None):
+    def bind(cls, label, action, helptext=None, keysym=None, menupath=None, selected=None):
         """
         binding at the class level lets us know what the mode's
         bindings are before we create an instance of it
@@ -91,8 +94,11 @@ class InputMode:
                 "default", action, helptext, InputMode._num_bindings, None, None, cls
             )
         else:
+            if keysym == cls.NO_KEY:
+                keysym = f"__{len(cls._bindings)}"
+
             binding = Binding(
-                label, action, helptext, InputMode._num_bindings, keysym, menupath, cls
+                label, action, helptext, InputMode._num_bindings, keysym, menupath, cls, selected
             )
             cls._bindings[keysym] = binding
             InputMode._bindings_by_label[label] = binding

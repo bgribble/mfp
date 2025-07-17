@@ -195,7 +195,7 @@ def render_param(
                     if item_selected and choice_label != current_choice[0]:
                         changed = True
                         newval = choice_value
-                imgui.dummy([1, 4])
+                imgui.dummy(app_window.scaled(1, 4))
                 imgui.end_popup()
             imgui.pop_style_var(2)
 
@@ -590,8 +590,8 @@ def render_patch_tab(app_window):
 
     ######################
     # a little padding
-    imgui.dummy([1, TAB_PADDING_Y])
-    imgui.dummy([TAB_PADDING_X, 1])
+    imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+    imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
     imgui.same_line()
 
     imgui.begin_group()
@@ -678,8 +678,8 @@ def render_patch_tab(app_window):
 def render_object_tab(app_window):
     ######################
     # a little padding
-    imgui.dummy([1, TAB_PADDING_Y])
-    imgui.dummy([TAB_PADDING_X, 1])
+    imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+    imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
     imgui.same_line()
 
     imgui.begin_group()
@@ -721,8 +721,8 @@ def render_params_tab(app_window, param_list):
 
     ######################
     # a little padding
-    imgui.dummy([1, TAB_PADDING_Y])
-    imgui.dummy([TAB_PADDING_X, 1])
+    imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+    imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
     imgui.same_line()
 
     imgui.begin_group()
@@ -755,8 +755,8 @@ def render_style_tab(app_window):
 
             # the Element tab is the only on where params can be edited
             if imgui.begin_tab_item("Element")[0]:
-                imgui.dummy([1, TAB_PADDING_Y])
-                imgui.dummy([TAB_PADDING_X, 1])
+                imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+                imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()
 
                 imgui.begin_group()
@@ -771,8 +771,8 @@ def render_style_tab(app_window):
 
             # defaults for this type of element
             if imgui.begin_tab_item("Type")[0]:
-                imgui.dummy([1, TAB_PADDING_Y])
-                imgui.dummy([TAB_PADDING_X, 1])
+                imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+                imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()
 
                 imgui.begin_group()
@@ -794,8 +794,8 @@ def render_style_tab(app_window):
 
             # style shared by all element types
             if imgui.begin_tab_item("Base")[0]:
-                imgui.dummy([1, TAB_PADDING_Y])
-                imgui.dummy([TAB_PADDING_X, 1])
+                imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+                imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()
 
                 imgui.begin_group()
@@ -817,8 +817,8 @@ def render_style_tab(app_window):
                 imgui.end_tab_item()
 
         if imgui.begin_tab_item("Global")[0]:
-            imgui.dummy([1, TAB_PADDING_Y])
-            imgui.dummy([TAB_PADDING_X, 1])
+            imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+            imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
             imgui.same_line()
 
             imgui.begin_group()
@@ -840,8 +840,8 @@ def render_style_tab(app_window):
 
         if len(app_window.selected) == 1:
             if imgui.begin_tab_item("Computed")[0]:
-                imgui.dummy([1, TAB_PADDING_Y])
-                imgui.dummy([TAB_PADDING_X, 1])
+                imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+                imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()
 
                 imgui.begin_group()
@@ -866,12 +866,12 @@ def render_bindings_tab(app_window):
 
     ######################
     # a little padding
-    imgui.dummy([1, TAB_PADDING_Y])
-    imgui.dummy([TAB_PADDING_X, 1])
+    imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+    imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
     imgui.same_line()
 
     imgui.begin_group()
-    imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 8.0))
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, app_window.scaled(4.0, 8.0))
 
     imgui.text("OSC bindings")
     if imgui.begin_table(
@@ -938,8 +938,8 @@ def render_activity_tab(app_window):
 
     ######################
     # a little padding
-    imgui.dummy([1, TAB_PADDING_Y])
-    imgui.dummy([TAB_PADDING_X, 1])
+    imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
+    imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
     imgui.same_line()
 
     imgui.begin_group()
