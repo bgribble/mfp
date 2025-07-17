@@ -224,11 +224,11 @@ class LabelEditMode (InputMode):
         return True
 
     def delete_left(self):
-        if self.editpos == 0:
-            return True
-
         if self.selection_start != self.selection_end:
             self.delete_selection()
+            return True
+
+        if self.editpos == 0:
             return True
 
         newtext = self.text[:self.editpos-1] + self.text[self.editpos:]
@@ -239,11 +239,11 @@ class LabelEditMode (InputMode):
         return True
 
     def delete_right(self):
-        if self.editpos == len(self.text):
-            return True
-
         if self.selection_start != self.selection_end:
             self.delete_selection()
+            return True
+
+        if self.editpos == len(self.text):
             return True
 
         newtext = self.text[:self.editpos] + self.text[self.editpos+1:]
@@ -411,12 +411,16 @@ class LabelEditMode (InputMode):
 
         line_pos = len(lines_above[-1])
         if len(lines_above) > 2:
-            return (
+            return max(
+                0,
                 sum(len(ll) + 1 for ll in lines_above[:-2])
                 + min(len(lines_above[-2]), line_pos)
             )
         if len(lines_above) > 1:
-            return min(len(lines_above[0]), line_pos)
+            return max(
+                0,
+                min(len(lines_above[0]), line_pos)
+            )
         return 0
 
     def move_up(self):
