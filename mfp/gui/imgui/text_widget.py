@@ -509,19 +509,22 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             else:
                 self.wrapped_text = self.text
 
-            if self.text:
-                fkey = f"{default_tt_font_name}__regular"
-                new_font = self.imgui_font_atlas.get(fkey)
-                new_size = default_tt_font_size
+            fkey = f"{default_tt_font_name}__regular"
+            new_font = self.imgui_font_atlas.get(fkey)
+            new_size = default_tt_font_size
 
-                if new_font:
-                    imgui.push_font(new_font, new_size)
-                else:
-                    log.debug(f"[font] can't find {fkey} in {list(self.imgui_font_atlas.keys())}")
-                self.font_width, self.font_height = imgui.calc_text_size("M")
-                imgui.text(label_text + extra_bit)
-                if new_font:
-                    imgui.pop_font()
+            if new_font:
+                imgui.push_font(new_font, new_size)
+            else:
+                log.debug(f"[font] can't find {fkey} in {list(self.imgui_font_atlas.keys())}")
+            self.font_width, self.font_height = imgui.calc_text_size("M")
+            if self.wrapped_text:
+                imgui.text(self.wrapped_text + extra_bit)
+            else:
+                imgui.dummy((1, self.font_height))
+
+            if new_font:
+                imgui.pop_font()
 
             # text bounding box does not account for descenders
             imgui.dummy([1, 3])
