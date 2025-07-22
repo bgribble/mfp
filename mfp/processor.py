@@ -24,8 +24,10 @@ class AsyncOutput:
 
 
 class MultiOutput:
-    def __init__(self):
-        self.values = []
+    def __init__(self, values=None):
+        if values is None:
+            values = []
+        self.values = values
 
     @classmethod
     def all_values(cls, val):
