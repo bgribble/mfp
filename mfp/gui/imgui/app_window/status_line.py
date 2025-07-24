@@ -42,7 +42,7 @@ def render(app_window):
         if app_window.cmd_input_filename:
             imgui.same_line()
             cursor_x, cursor_y = imgui.get_cursor_pos()
-            imgui.set_cursor_pos([window_w - 100, cursor_y])
+            imgui.set_cursor_pos([window_w - app_window.scaled(100), cursor_y])
             imgui.push_id("file_select")
             if imgui.button("Select..."):
                 if app_window.cmd_input_filename == "open":
@@ -105,7 +105,7 @@ def render(app_window):
         ])
         cur = imgui.get_cursor_pos()
         imgui.set_cursor_pos((
-            app_window.window_width - len(right_corner_text) * CHAR_PIXELS - 24,
+            app_window.window_width - app_window.scaled(len(right_corner_text) * CHAR_PIXELS + 24),
             cur[1]
         ))
         imgui.text(right_corner_text)
