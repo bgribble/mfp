@@ -26,6 +26,7 @@ class MessageRec(Processor):
         self.clock_tempo_ts_timestamp = None
         self.clock_tempo_ts_beat = None
         self.clock_tempo_ms = None
+        self.clock_tick_ms = None
         self.clock_beat = 0
         self.rec_state = False
         self.play_state = True
@@ -49,6 +50,7 @@ class MessageRec(Processor):
         rightnow = datetime.now()
         beatnow = self.clock_beat or 0
 
+        logm = False
         if self.inlets[1] is not Uninit:
             if isinstance(self.inlets[1], (float, int)):
                 self.clock_beat = self.inlets[1]
@@ -56,9 +58,11 @@ class MessageRec(Processor):
                 self.clock_beat += 1
 
             if self.clock_tempo_ts_timestamp is None:
+                self.clock_tick_ms = 0
                 self.clock_tempo_ts_timestamp = rightnow
                 self.clock_tempo_ts_beat = self.clock_beat
             else:
+                self.clock_tick_ms = (rightnow - self.clock_tempo_ts_timestamp).total_seconds() * 1000
                 delta_beats = self.clock_beat - self.clock_tempo_ts_beat
                 if delta_beats > 0:
                     self.clock_tempo_ms = (
@@ -68,26 +72,46 @@ class MessageRec(Processor):
                 self.clock_tempo_ts_beat = self.clock_beat
             self.inlets[1] = Uninit
 
+        newevent = None
         if self.inlets[0] is not Uninit:
-            self.messages.append((self.clock_beat, rightnow, self.inlets[0]))
+            beat_fraction = 0
+            if self.clock_tempo_ms:
+                ms_since_clock = 1000 * (rightnow - self.clock_tempo_ts_timestamp).total_seconds()
+                if self.clock_tempo_ts_beat != self.clock_beat:
+                    ms_since_clock = (
+                        ms_since_clock
+                        + self.clock_tempo_ms * (self.clock_tempo_ts_beat - self.clock_beat)
+                    )
+                beat_fraction = ms_since_clock / self.clock_tempo_ms
+            newevent = (self.clock_beat + beat_fraction, rightnow, self.inlets[0])
+            self.messages.append(newevent)
             self.messages.sort()
             self.inlets[0] = Uninit
+            logm = True
 
         if self.clock_beat < beatnow:
             beatnow = -1
 
+        fudge = 0
+        if self.clock_tick_ms and self.clock_tempo_ms:
+            fudge = 0.05 * self.clock_tick_ms / self.clock_tempo_ms
+
         pending = [
-            m[2] for m in self.messages
-            if m[0] > beatnow and m[0] <= self.clock_beat
+            m for m in self.messages
+            if (m[0] > beatnow or (m == newevent and m[0] >= beatnow)) and m[0] <= (self.clock_beat + fudge)
         ]
 
         if not pending:
             return
 
+        # if we grabbed any late events, make sure we don't play them again
+        beat_max = max(m[0] for m in pending)
+        self.clock_beat = max(self.clock_beat, beat_max)
+
         if len(pending) == 1:
-            self.outlets[0] = pending[0]
+            self.outlets[0] = pending[0][2]
         else:
-            self.outlets[0] = MultiOutput(pending)
+            self.outlets[0] = MultiOutput([p[2] for p in pending])
 
 
 def register():
