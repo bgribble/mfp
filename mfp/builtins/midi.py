@@ -16,13 +16,13 @@ from ..method import MethodCall
 from ..midi import (
     Note, NoteOn, NoteOff, NotePress,
     MidiCC, MidiPgmChange, MidiUndef,
-    MidiClock, MidiStart, MidiStop, MidiContinue,
+    MidiClock, MidiPitchbend, MidiStart, MidiStop, MidiContinue,
     MidiQFrame, MidiSysex, MidiSPP, MidiTimeSignature
 )
 
 event_types = (
     Note, NoteOn, NoteOff, NotePress,
-    MidiCC, MidiPgmChange, MidiClock, MidiStart, MidiStop, MidiContinue,
+    MidiCC, MidiPgmChange, MidiClock, MidiPitchbend, MidiStart, MidiStop, MidiContinue,
     MidiQFrame, MidiSysex, MidiSPP, MidiUndef, MidiTimeSignature
 )
 
@@ -76,7 +76,8 @@ class MidiIn (Processor):
             self.method(event, 0)
         elif isinstance(event, event_types):
             self.outlets[0] = event
-
+        else:
+            log.debug(f"[midi_in] unmatched {event}")
 
 class MidiOut (Processor):
     doc_tooltip_obj = "Send MIDI events to ALSA sequencer"
