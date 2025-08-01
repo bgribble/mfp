@@ -247,8 +247,8 @@ class MidiPgmChange (MidiEvent):
     lv2_type = lv2midi.LV2_MIDI_MSG_PGM_CHANGE
 
     def __init__(self, seqevent=None):
-        super().__init__(seqevent)
         self.program = None
+        super().__init__(seqevent)
 
     def seq_data(self):
         return (self.channel-1, 0, 0, 0, 0, self.program)
@@ -282,9 +282,9 @@ class MidiCC (MidiEvent):
     lv2_type = lv2midi.LV2_MIDI_MSG_CONTROLLER
 
     def __init__(self, seqevent=None):
-        super().__init__(seqevent)
         self.controller = 0
         self.value = 0
+        super().__init__(seqevent)
 
     def seq_data(self):
         return (self.channel-1, 0, 0, 0, self.controller, self.value)
@@ -323,8 +323,8 @@ class MidiPitchbend (MidiEvent):
     lv2_type = lv2midi.LV2_MIDI_MSG_BENDER
 
     def __init__(self, seqevent=None):
-        super().__init__(seqevent)
         self.value = 0
+        super().__init__(seqevent)
 
     def seq_data(self):
         return (self.channel-1, self.note, 0, 0, 1, self.value)
