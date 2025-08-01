@@ -48,9 +48,8 @@ class MessageRec(Processor):
 
     async def trigger(self):
         rightnow = datetime.now()
-        beatnow = self.clock_beat or 0
+        clock_starting = self.clock_beat or 0
 
-        logm = False
         if self.inlets[1] is not Uninit:
             if isinstance(self.inlets[1], (float, int)):
                 self.clock_beat = self.inlets[1]
@@ -87,18 +86,34 @@ class MessageRec(Processor):
             self.messages.append(newevent)
             self.messages.sort()
             self.inlets[0] = Uninit
-            logm = True
 
-        if self.clock_beat < beatnow:
-            beatnow = -1
-
+        # we want to emit any events that are "due" when quantized to
+        # the current clock. To make this sound natural, we want to
+        # look ahead in time to find events that aren't due yet but will
+        # be due well before the next clock (ones that were likely "late" when
+        # recorded)
         fudge = 0
         if self.clock_tick_ms and self.clock_tempo_ms:
-            fudge = 0.05 * self.clock_tick_ms / self.clock_tempo_ms
+            # fudge factor is .1 of a clock tick. This is quite conservative,
+            # could probably be as much as .5
+            fudge = 0.1 * self.clock_tick_ms / self.clock_tempo_ms
+
+        def test_beat(beat):
+            if self.clock_beat > clock_starting:
+                # normal case: clock is moving forward
+                return (
+                    clock_starting < beat <= (self.clock_beat + fudge)
+                )
+            else:
+                # edge case: clock wrapped around
+                return (
+                    (beat > clock_starting and beat <= clock_starting + 1)
+                    or beat <= (self.clock_beat + fudge)
+                )
 
         pending = [
             m for m in self.messages
-            if (m[0] > beatnow or (m == newevent and m[0] >= beatnow)) and m[0] <= (self.clock_beat + fudge)
+            if test_beat(m[0]) or (m == newevent and m[0] == clock_starting)
         ]
 
         if not pending:
@@ -106,7 +121,8 @@ class MessageRec(Processor):
 
         # if we grabbed any late events, make sure we don't play them again
         beat_max = max(m[0] for m in pending)
-        self.clock_beat = max(self.clock_beat, beat_max)
+        if (self.clock_beat > clock_starting) or (beat_max <= clock_starting):
+            self.clock_beat = max(self.clock_beat, beat_max)
 
         if len(pending) == 1:
             self.outlets[0] = pending[0][2]
