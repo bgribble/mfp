@@ -59,8 +59,8 @@ class MessageRec(Processor):
         clock_starting = self.clock_beat or 0
         clock_arrived = False
 
-        # inlet 1 is the clock, should be integers representing the
-        # beat number
+        # inlet 1 is the clock, should be numbers representing the
+        # beat number (incl fractions)
         if self.inlets[1] is not Uninit:
             clock_arrived = True
             if isinstance(self.inlets[1], (float, int)):
