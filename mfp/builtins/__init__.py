@@ -88,6 +88,7 @@ def register():
     replay.register()
     from . import breakpoint
     breakpoint.register()
-
     from . import faust
     faust.register()
+    from . import messagerec
+    messagerec.register()

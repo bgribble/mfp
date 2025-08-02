@@ -117,7 +117,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         if content_h < self.min_height:
             imgui.dummy([1, self.min_height - content_h])
 
-        eff_width = min(max(content_w, self.min_width), self.max_width)
+        eff_width = min(max(content_w + 8, self.min_width), self.max_width)
 
         imgui.end_group()
         self.width = eff_width
