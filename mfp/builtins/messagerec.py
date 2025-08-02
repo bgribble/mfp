@@ -35,7 +35,7 @@ class MessageRec(Processor):
         self.clock_tempo_ts_beat = None
         self.clock_tempo_ms = None
         self.clock_tick_ms = None
-        self.clock_beat = 0
+        self.clock_beat = None
         self.rec_state = False
         self.play_state = True
         self.play_state = False
@@ -56,7 +56,7 @@ class MessageRec(Processor):
 
     async def trigger(self):
         rightnow = datetime.now()
-        clock_starting = self.clock_beat or 0
+        clock_starting = self.clock_beat if self.clock_beat is not None else -1
         clock_arrived = False
 
         # inlet 1 is the clock, should be numbers representing the
