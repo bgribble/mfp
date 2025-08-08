@@ -105,7 +105,7 @@ def render(app_window):
         ])
         cur = imgui.get_cursor_pos()
         imgui.set_cursor_pos((
-            app_window.window_width - app_window.scaled(len(right_corner_text) * CHAR_PIXELS + 24),
+            app_window.window_width - app_window.scaled(len(right_corner_text) * CHAR_PIXELS + 32),
             cur[1]
         ))
         imgui.text(right_corner_text)

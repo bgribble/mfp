@@ -56,7 +56,7 @@ def render(app_window):
             imgui.same_line()
             cur = imgui.get_cursor_pos()
             imgui.set_cursor_pos((
-                app_window.window_width - 110*app_window.imgui_global_scale,
+                app_window.window_width - 120*app_window.imgui_global_scale,
                 cur[1]
             ))
             _, app_window.log_scroll_follow = imgui.checkbox(
