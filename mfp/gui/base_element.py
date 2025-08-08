@@ -101,13 +101,13 @@ BASE_STORE_ATTRS = {
 # their own editors. It's awkward to have type-specific info here
 # and in the Processor definition but I can't see a way around it
 PROPERTY_ATTRS = {
+    'lv2_description': ParamInfo(
+        label="Description", param_type=str, show=True
+    ),
     'lv2_type': ParamInfo(
         label="(lv2) Port type",
         choices=lambda o: [('MIDI', 'midi'), ('Control', 'control')],
         param_type=str, show=True
-    ),
-    'lv2_description': ParamInfo(
-        label="(lv2) Description", param_type=str, show=True
     ),
     'lv2_default_val': ParamInfo(
         label="(lv2) Default value [control ports]", param_type=float, show=True

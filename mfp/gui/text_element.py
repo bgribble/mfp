@@ -61,6 +61,7 @@ class TextElement (BaseElement):
             'fill-color': ColorDB().find('transparent'),
             'fill-color:selected': ColorDB().find('transparent'),
         })
+        self._all_styles = self.combine_styles()
 
         self.label = TextWidget.build(self)
         self.label.set_color(self.get_color('text-color'))
