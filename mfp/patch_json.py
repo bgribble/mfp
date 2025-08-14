@@ -141,7 +141,9 @@ async def json_deserialize(self, json_data):
     self.objects = {}
     self.scopes = {}
     self.inlet_objects = []
+    self.doc_tooltip_inlet = []
     self.outlet_objects = []
+    self.doc_tooltip_outlet = []
     self.dispatch_objects = []
     self.presets = f.get("presets", {})
 

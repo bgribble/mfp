@@ -43,9 +43,9 @@ def render(app_window):
 
             imgui.push_style_var(imgui.StyleVar_.item_spacing, [2, 2])
 
-            imgui.dummy((1, 1))
+            imgui.dummy(app_window.scaled(1, 1))
             imgui.begin_group()
-            imgui.dummy((1, 1))
+            imgui.dummy(app_window.scaled(1, 1))
             imgui.text(" Filter regex:")
             imgui.end_group()
             imgui.same_line()
@@ -56,7 +56,7 @@ def render(app_window):
             imgui.same_line()
             cur = imgui.get_cursor_pos()
             imgui.set_cursor_pos((
-                app_window.window_width - 110,
+                app_window.window_width - 120*app_window.imgui_global_scale,
                 cur[1]
             ))
             _, app_window.log_scroll_follow = imgui.checkbox(
