@@ -266,6 +266,7 @@ async def json_unpack_objects(self, data, scope):
 
 @extends(Patch)
 async def json_serialize(self):
+    from .processor import Processor
     from .mfp_app import MFPApp
     f = {}
     f['type'] = self.init_type
@@ -283,7 +284,13 @@ async def json_serialize(self):
     keys.sort()
     for oid in keys:
         o = self.objects.get(oid)
-        if o and (isinstance(o, MFPApp) or not o.save_to_patch):
+        if not o:
+            continue
+        if (
+            isinstance(o, MFPApp)
+            or not o.save_to_patch
+            or not o.status == Processor.READY
+        ):
             continue
         oinfo = o.save()
         allobj[oid] = oinfo
@@ -297,7 +304,11 @@ async def json_serialize(self):
             if not obj:
                 log.warning("json_serialize: name", objname, "has no bound object")
                 continue
-            if obj and (isinstance(obj, MFPApp) or not obj.save_to_patch):
+            if (
+                isinstance(obj, MFPApp)
+                or not obj.save_to_patch
+                or not o.status == Processor.READY
+            ):
                 continue
             bindings[objname] = obj.obj_id
 
