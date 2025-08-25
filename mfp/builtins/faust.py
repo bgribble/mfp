@@ -22,6 +22,7 @@ class Faust(Processor):
     RESP_PARAM = 0
     RESP_DSP_INLETS = 1
     RESP_DSP_OUTLETS = 2
+    RESP_COMPILED =3
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name, defs)
@@ -154,6 +155,7 @@ class Faust(Processor):
                     continue
 
                 dsp_src_obj, dsp_src_outlet = src.dsp_outlet(src_outlet)
+                await dsp_src_obj.disconnect(dsp_src_outlet, dsp_dest_obj._id, dsp_dest_inlet)
                 await dsp_src_obj.connect(dsp_src_outlet, dsp_dest_obj._id, dsp_dest_inlet)
 
         for outlet in self.dsp_outlets:
@@ -162,7 +164,9 @@ class Faust(Processor):
 
             for dest, dest_inlet in connections:
                 dsp_dest_obj, dsp_dest_inlet = dest.dsp_inlet(dest_inlet)
+                await dsp_src_obj.disconnect(dsp_src_outlet, dsp_dest_obj._id, dsp_dest_inlet)
                 await dsp_src_obj.connect(dsp_src_outlet, dsp_dest_obj._id, dsp_dest_inlet)
+
 
     def dsp_response(self, resp_id, resp_value):
         io_conf = False
@@ -199,6 +203,8 @@ class Faust(Processor):
                 dsp_outlets=self.dsp_outlets
             )
             self.set_channel_tooltips()
+
+        if resp_id == self.RESP_COMPILED:
             MFPApp().async_task(self.reconnect_dsp())
 
     async def trigger(self):
