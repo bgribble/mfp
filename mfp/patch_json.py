@@ -141,7 +141,9 @@ async def json_deserialize(self, json_data):
     self.objects = {}
     self.scopes = {}
     self.inlet_objects = []
+    self.doc_tooltip_inlet = []
     self.outlet_objects = []
+    self.doc_tooltip_outlet = []
     self.dispatch_objects = []
     self.presets = f.get("presets", {})
 
@@ -264,6 +266,7 @@ async def json_unpack_objects(self, data, scope):
 
 @extends(Patch)
 async def json_serialize(self):
+    from .processor import Processor
     from .mfp_app import MFPApp
     f = {}
     f['type'] = self.init_type
@@ -281,7 +284,13 @@ async def json_serialize(self):
     keys.sort()
     for oid in keys:
         o = self.objects.get(oid)
-        if o and (isinstance(o, MFPApp) or not o.save_to_patch):
+        if not o:
+            continue
+        if (
+            isinstance(o, MFPApp)
+            or not o.save_to_patch
+            or not o.status == Processor.READY
+        ):
             continue
         oinfo = o.save()
         allobj[oid] = oinfo
