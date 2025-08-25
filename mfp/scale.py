@@ -10,7 +10,7 @@ class Tuning (object):
         pass
 
 
-class EqualTemper (Tuning):
+class EqualTemper12 (Tuning):
     def __init__(self, a4=440.0):
         Tuning.__init__(self)
         self.base_frequencies = [261.63, 277.18, 293.66, 311.13, 329.63,
@@ -30,6 +30,57 @@ class EqualTemper (Tuning):
         return self.frequencies[tone] * octave_scale
 
 
+class MapScale(Scale):
+    MAP = {}
+
+    def __init__(self, transpose=0):
+        Scale.__init__(self)
+        self.transpose_semis = transpose
+
+    def transpose(self, offset):
+        self.transpose_semis = offset
+
+    def from_midi_key(self, keynum):
+        note = keynum + self.transpose_semis
+        octave = int(note) // 12 - 2
+        tone = self.MAP.get(int(note) % 12, note)
+        return (octave, tone)
+
+
+class Major (MapScale):
+    MAP = {
+        0: 0,
+        1: 0,
+        2: 2,
+        3: 2,
+        4: 4,
+        5: 5,
+        6: 5,
+        7: 7,
+        8: 7,
+        9: 9,
+        10: 9,
+        11: 11,
+    }
+
+
+class Minor (MapScale):
+    MAP = {
+        0: 0,
+        1: 0,
+        2: 2,
+        3: 3,
+        4: 3,
+        5: 5,
+        6: 5,
+        7: 7,
+        8: 8,
+        9: 8,
+        10: 10,
+        11: 10,
+    }
+
+
 class Chromatic (Scale):
     def __init__(self, transpose=0):
         Scale.__init__(self)
@@ -38,7 +89,7 @@ class Chromatic (Scale):
     def transpose(self, offset):
         self.transpose_semis = offset
 
-    def midinote(self, keynum):
+    def from_midi_key(self, keynum):
         note = keynum + self.transpose_semis
         octave = int(note) // 12 - 2
         tone = int(note) % 12

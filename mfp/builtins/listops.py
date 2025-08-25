@@ -158,9 +158,10 @@ class Map (Processor):
             self.func = self.inlets[1]
         self.outlets[0] = list(map(self.func, self.inlets[0]))
 
+
 class Filter (Processor):
     doc_tooltip_obj = "Pass through elements if the function returns True"
-    doc_tooltip_inlet = [ "List", "Function to apply (default: initarg 1)"]
+    doc_tooltip_inlet = [ "List", "Function or sequence to apply (default: initarg 1)"]
     doc_tooltip_outlet = [ "List output" ]
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
@@ -175,7 +176,13 @@ class Filter (Processor):
     async def trigger(self):
         if self.inlets[1] != Uninit:
             self.func = self.inlets[1]
-        self.outlets[0] = list(filter(self.func, self.inlets[0]))
+
+        if callable(self.func):
+            self.outlets[0] = list(filter(self.func, self.inlets[0]))
+        elif isinstance(self.func, (list, tuple)):
+            self.outlets[0] = [
+                f for pos, f in enumerate(self.inlets[0]) if self.func[pos]
+            ]
 
 
 class Slice (Processor):

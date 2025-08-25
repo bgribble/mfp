@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 '''
-p_note2freq.py:  Convert a NoteOn or note number to freq in Hz
+quantize.py: Quantize a note number to a scale
 
-Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from ..processor import Processor
@@ -11,33 +11,35 @@ from .. import Bang, Uninit
 from .. import scale
 from .. import midi
 
-class Note2Freq(Processor):
+
+class Quantize(Processor):
     '''
-    [midi.note2freq] converts a MIDI note to a frequency
-    Parameters:
+    [quantize] rounds or truncates a note to a scale
+    Parameters
             scale: a subclass of Scale (defaults to Chromatic)
-            tuning: an instance of Tuning (defaults to EqualTemper12)
+            root: a note representing the octave root
     '''
     doc_tooltip_obj = "Convert a MIDI note or note number to a frequency"
     doc_tooltip_inlet = [
         "Note or note number",
-        "Scale (number to note name) (default: Chromatic 60=C4)"
-        "Tuning (note name to frequency) (default: Equal Temperament A4=440"
+        "Scale (default: Chromatic 60=C4)",
+        "Root (note number of scale root) (default: 0)"
     ]
-    doc_tooltip_outlet = ["Frequency output"]
+    doc_tooltip_outlet = [
+        "Note number"
+    ]
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         extra=defs or {}
         initargs, kwargs = patch.parse_args(init_args, **extra)
-        if kwargs.get('scale'):
-            self.scale = kwargs.get('scale')
-        else:
-            self.scale = scale.Chromatic()
+        self.root = 0
+        self.scale = scale.Chromatic
 
-        if kwargs.get('tuning'):
-            self.tuning = kwargs.get('tuning')
-        else:
-            self.tuning = scale.EqualTemper12()
+        if len(initargs) > 1:
+            self.root = initargs[1]
+        if len(initargs):
+            self.scale = initargs[0]
+
         Processor.__init__(self, 3, 1, init_type, init_args, patch, scope, name, defs)
 
     async def trigger(self):
@@ -46,7 +48,7 @@ class Note2Freq(Processor):
             self.inlets[1] = Uninit
 
         if self.inlets[2] is not Uninit:
-            self.tuning = self.inlets[2]
+            self.root = self.inlets[2]
             self.inlets[2] = Uninit
 
         inval = self.inlets[0]
@@ -57,9 +59,8 @@ class Note2Freq(Processor):
             note = int(inval)
 
         if note is not None:
-            freq = self.tuning.freq(*self.scale.from_midi_key(note))
-            self.outlets[0] = freq
+            octave, note = self.scale.from_midi_key(note - self.root)
+            self.outlets[0] = octave * 12 + note + self.root
 
 def register():
-    MFPApp().register("note2freq", Note2Freq)
-    MFPApp().register("midi.note2freq", Note2Freq)
+    MFPApp().register("quantize", Quantize)

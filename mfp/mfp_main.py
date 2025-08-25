@@ -33,7 +33,7 @@ from .mfp_app import MFPApp, StartupError
 from . import log
 from . import builtins
 from . import utils
-
+from . import scale
 
 mfp_banner = "MFP - Music For Programmers, version %s"
 
@@ -56,6 +56,7 @@ def version():
 
 
 def add_evaluator_defaults():
+
     # default names known to the evaluator
     Evaluator.bind_global("math", math)
     Evaluator.bind_global("random", random)
@@ -87,6 +88,8 @@ def add_evaluator_defaults():
     Evaluator.bind_global("MidiSysex", MidiSysex)
 
     Evaluator.bind_global("builtins", builtins)
+    Evaluator.bind_global("color", lambda v: ColorDB.from_int(v))
+    Evaluator.bind_global("scale", scale)
     Evaluator.bind_global("app", MFPApp())
 
 

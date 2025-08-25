@@ -307,7 +307,7 @@ async def json_serialize(self):
             if (
                 isinstance(obj, MFPApp)
                 or not obj.save_to_patch
-                or not o.status == Processor.READY
+                or not obj.status == Processor.READY
             ):
                 continue
             bindings[objname] = obj.obj_id

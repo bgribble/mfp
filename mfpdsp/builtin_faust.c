@@ -58,7 +58,7 @@ typedef struct {
 #define RESP_PARAM 0
 #define RESP_DSP_INLETS 1
 #define RESP_DSP_OUTLETS 2
-
+#define RESP_COMPILED 3
 
 static void
 faust_cleanup_dsp(mfp_processor * proc) {
@@ -111,6 +111,7 @@ process(mfp_processor * proc)
         /* reconfigure buffers in the processor object */
         mfp_proc_free_buffers(proc);
         mfp_proc_alloc_buffers(proc, d->sig_inputs, d->sig_outputs, proc->context->blocksize);
+        mfp_dsp_send_response_int(proc, RESP_COMPILED, 1);
     }
 
     if ((proc == NULL) || (d->faust_dsp == NULL)){
@@ -127,6 +128,10 @@ process(mfp_processor * proc)
             }
         }
         else {
+            if (proc->inlet_conn->len) {
+                gpointer p = g_array_index(proc->inlet_conn, GArray *, sig);
+            }
+
             for(int scount=0; scount < blocksize; scount++) {
                 *faustin++ = (FAUSTFLOAT)(0.0);
             }
