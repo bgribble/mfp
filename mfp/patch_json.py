@@ -295,7 +295,11 @@ async def json_serialize(self):
             if not obj:
                 log.warning("json_serialize: name", objname, "has no bound object")
                 continue
-            if obj and (isinstance(obj, MFPApp) or not obj.save_to_patch):
+            if (
+                isinstance(obj, MFPApp)
+                or not obj.save_to_patch
+                or not obj.status == Processor.READY
+            ):
                 continue
             bindings[objname] = obj.obj_id
 

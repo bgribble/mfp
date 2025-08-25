@@ -314,6 +314,12 @@ class BaseElement (Store):
             return ColorDB().find(rgba)
         if isinstance(rgba, (list, tuple)):
             return ColorDB().find(rgba[0], rgba[1], rgba[2], rgba[3])
+        if isinstance(rgba, int):
+            return ColorDB().find(
+                (rgba & 0xff000000) >> 24,
+                (rgba & 0xff0000) >> 16,
+                (rgba & 0xff00) >> 8,
+                rgba & 0xff)
         return rgba
 
     def combine_styles(self):
@@ -483,7 +489,6 @@ class BaseElement (Store):
         objinfo = await MFPGUI().mfp.create(obj_type, init_args, patchname, scopename, name, params)
 
         if not objinfo or "obj_id" not in objinfo:
-            log.debug(f"[base_element] error: {objinfo}")
             self.app_window.hud_write("ERROR: Could not create, see log for details")
 
             if objinfo and "code" in objinfo:

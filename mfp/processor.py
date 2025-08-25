@@ -1193,8 +1193,9 @@ class Processor:
 
     def set_style(self, tag, value):
         oldstyle = self.gui_params.get('style', {})
-        oldstyle[tag] = value
-        self.conf(style=oldstyle)
+        if tag not in oldstyle or oldstyle[tag] != value:
+            oldstyle[tag] = value
+            self.conf(style=oldstyle)
 
     def mark_ready(self):
         self.status = Processor.READY
