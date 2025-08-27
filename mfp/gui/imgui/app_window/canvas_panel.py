@@ -380,6 +380,13 @@ def render_tile(app_window, patch):
                         start_obj, start_port_id[1], end_obj, end_port_id[1]
                     )
                 )
+            elif start_pin:
+                start_obj, start_port_id = all_pins.get(start_pin.id(), (None, None))
+                if start_obj not in app_window.selected:
+                    MFPGUI().async_task(
+                        app_window.select(start_obj)
+                    )
+
         nedit.end_create()
 
     #################

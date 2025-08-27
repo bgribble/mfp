@@ -318,11 +318,18 @@ class ImguiBaseElementImpl(BaseElementImpl):
         nedit.pop_style_var()
 
     def render_ports(self):
+        from mfp.gui.via_element import ViaElement
+
         if self.node_id is None:
             return
         if not self.selected and not self.editable:
             return
-        if not self.selected and self.container and self.container.panel_mode and self.panel_enable:
+
+        if (
+            not self.selected and self.container and self.container.panel_mode
+            and self.panel_enable
+            and not isinstance(self, ViaElement)
+        ):
             return
 
         padding = self.get_style('padding')

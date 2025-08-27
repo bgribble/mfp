@@ -10,6 +10,7 @@ from ..input_mode import InputMode
 from .autoplace import AutoplaceMode
 from .selection import SingleSelectionEditMode, MultiSelectionEditMode
 
+from ..base_element import BaseElement
 from ..text_element import TextElement
 from ..processor_element import ProcessorElement
 from ..message_element import MessageElement, PatchMessageElement
@@ -200,16 +201,20 @@ class PatchEditMode (InputMode):
             dx = self._style_default(backend, 'autoplace-dx', 0)
             dy = self._style_default(backend, 'autoplace-dy', 0)
 
-            port_off_x = (
-                self._style_default(backend, 'porthole-border', 0)
-                + self._style_default(backend, 'porthole-width', 0) / 2.0
-            )
-
             obj = await self.window.add_element(
                 factory,
-                self.autoplace_x + dx - port_off_x,
+                self.autoplace_x + dx,
                 self.autoplace_y + dy
             )
+            port_center = obj.port_center(BaseElement.PORT_IN, 0)
+            off = port_center[0] - obj.position_x
+
+            await obj.move(
+                obj.position_x - off,
+                obj.position_y,
+                update_state=True
+            )
+
             self.manager.disable_minor_mode(self.autoplace_mode)
             self.autoplace_mode = None
         if obj:
@@ -218,8 +223,11 @@ class PatchEditMode (InputMode):
         return True
 
     def auto_place_below(self):
-        self.autoplace_mode = AutoplaceMode(self.window, callback=self.set_autoplace,
-                                            initially_below=True)
+        self.autoplace_mode = AutoplaceMode(
+            self.window,
+            callback=self.set_autoplace,
+            initially_below=True
+        )
         self.manager.enable_minor_mode(self.autoplace_mode)
         return True
 

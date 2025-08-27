@@ -95,10 +95,23 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
 
         nedit.begin_node(self.node_id)
 
-        # node content: just the label
+        # node content: label plus space for the via blob
+        imgui.begin_group()
+        if self.display_type in ('sendvia', 'sendsignalvia'):
+            imgui.dummy((1, self.VIA_SIZE -1))
         self.label.render()
+        if self.display_type in ('recvvia', 'recvsignalvia'):
+            imgui.dummy((1, self.VIA_SIZE))
+        imgui.end_group()
 
-        # connections
+        # update size before ports
+        p_tl = imgui.get_item_rect_min()
+        p_br = imgui.get_item_rect_max()
+
+        self.width = p_br[0] - p_tl[0]
+        self.height = p_br[1] - p_tl[1]
+
+        # draw ports
         self.render_ports()
 
         # status badge, if needed
@@ -128,7 +141,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         draw_list = imgui.get_window_draw_list()
 
         outport = False
-        pw = self.VIA_SIZE
+        pw = self.get_style('porthole-width')
         half_height = self.get_style('porthole-height') / 2.0
 
         stroke_color = imgui.IM_COL32(*self.get_color('stroke-color').to_rgba())
@@ -150,7 +163,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
 
         if self.GLYPH_STYLE.startswith("empty"):
             draw_list.add_circle(
-                (px, py + half_height * (1 if outport else -1)),
+                (px + pw / 2, py + half_height * (-1 if outport else 1)),
                 arcsize,
                 stroke_color,
                 24,
@@ -158,7 +171,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
             )
         else:
             draw_list.add_circle_filled(
-                (px, py + half_height * (1 if outport else -1)),
+                (px + pw / 2, py + half_height * (-1 if outport else 1)),
                 arcsize,
                 stroke_color,
                 24
@@ -166,19 +179,77 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
 
         if self.GLYPH_STYLE.endswith("circled"):
             draw_list.add_circle(
-                (px, py + half_height * (1 if outport else -1)),
-                pw / 2.0,
+                (px + pw / 2, py + half_height * (-1 if outport else 1)),
+                self.VIA_SIZE / 2.0,
                 stroke_color,
                 24,
                 linewidth
             )
 
     def port_position(self, port_dir, port_num):
-        px = self.width / 2.0
-        py = 0
-        if port_dir == BaseElement.PORT_OUT:
-            py += self.height
+        if port_num == 0:
+            px = self.width / 2.0
+            py = 0
+            if port_dir == BaseElement.PORT_OUT:
+                py = self.height
+        else:
+            px = self.width
+            py = self.height / 2.0
         return px, py
+
+    def port_center(self, port_dir, port_num):
+        pos_x, pos_y = self.get_stage_position()
+
+        ppos = self.port_position(port_dir, port_num)
+        pw = self.get_style('porthole-width')
+        xoff = 0 if port_dir == BaseElement.PORT_OUT else pw
+        return pos_x + self.width / 2 - xoff, pos_y + ppos[1]
+
+    def render_pin(self, port_id, px, py):
+        pin_id = self.port_elements.get(port_id)
+        dsp_port = False
+        if (port_id[0] == BaseElement.PORT_IN) and port_id[1] in self.dsp_inlets:
+            dsp_port = True
+
+        if (port_id[0] == BaseElement.PORT_OUT) and port_id[1] in self.dsp_outlets:
+            dsp_port = True
+
+        if pin_id is None:
+            pin_id = nedit.PinId.create()
+            self.port_elements[port_id] = pin_id
+
+        nedit.push_style_var(nedit.StyleVar.pin_border_width, 1)
+        nedit.begin_pin(
+            pin_id,
+            nedit.PinKind.input if port_id[0] == BaseElement.PORT_IN else nedit.PinKind.output
+        )
+
+        pw = self.get_style('porthole-width')
+        ph = self.get_style('porthole-height')
+
+        outport = port_id[0] == BaseElement.PORT_OUT
+
+
+        if self.GLYPH_STYLE in ("empty_circled", "filled_circled"):
+            offset = 1 if not outport else -1
+        else:
+            offset = 0
+
+        nedit.pin_rect(
+            (px, py - (ph if outport else 0)),
+            (px + pw, py + ph - (ph if outport else 0)),
+        )
+        nedit.pin_pivot_rect(
+            (px + pw/2, py + offset),
+            (px + pw/2, py + offset)
+        )
+        port_rule = self.get_style("draw-ports") or "always"
+        draw_ports = port_rule != "never" and (port_rule != "selected" or self.selected) and port_id[1] == 0
+        if draw_ports:
+            self.render_port(port_id, px, py, dsp_port)
+        nedit.end_pin()
+        nedit.pop_style_var()
+
 
     @mutates('position_x', 'position_y')
     async def move(self, x, y, **kwargs):

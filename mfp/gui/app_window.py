@@ -375,7 +375,7 @@ class AppWindow (SignalMixin):
         self.refresh(b)
         await self.select(b)
         await b.begin_edit()
-        return True
+        return b
 
     async def quit(self, *rest):
         from .patch_display import PatchDisplay
