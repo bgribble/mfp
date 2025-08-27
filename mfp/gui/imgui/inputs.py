@@ -163,7 +163,6 @@ def imgui_process_inputs(app_window):
                         need_event = False
                 if key_defs.MOD_ALT in mfp_keys_pressed:
                     nontxt_keys = [
-                        ord("x"), ord("c"), ord("v"),
                         key_defs.KEY_ENTER, key_defs.KEY_UP, key_defs.KEY_DN,
                         key_defs.KEY_LEFT, key_defs.KEY_RIGHT
                     ]
