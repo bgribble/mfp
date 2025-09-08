@@ -566,6 +566,19 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def get_size(self):
         return (self.window_width, self.window_height)
 
+    def set_app_scale(self, new_scale):
+        scale_ratio = new_scale / self.imgui_global_scale
+        self.imgui_global_scale = new_scale
+        self.canvas_tile_manager.default_zoom = new_scale
+
+        for p in self.patches:
+            if p.display_info:
+                p.display_info.view_zoom *= scale_ratio
+
+        self.viewport_zoom_set = True
+        self.viewport_pos_set = True
+        return True
+
     #####################
     # element operations
     def register(self, element):

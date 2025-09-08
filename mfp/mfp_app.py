@@ -61,6 +61,7 @@ class MFPApp (Singleton, SignalMixin):
         self.batch_args = None
         self.batch_eval = False
         self.batch_input_file = None
+        self.gui_init_magnification = 1.0
 
         # RPC host
         self.rpc_listener = None
@@ -139,6 +140,7 @@ class MFPApp (Singleton, SignalMixin):
                 "mfpgui",
                 "-s", self.socket_path,
                 "-l", logstart,
+                "-m", self.gui_init_magnification,
                 '--backend', self.gui_backend,
                 "--searchpath", self.searchpath
             ]

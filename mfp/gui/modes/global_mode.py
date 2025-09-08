@@ -330,14 +330,7 @@ class GlobalMode (InputMode):
 
 
     async def set_app_scale(self, new_scale):
-        scale_ratio = new_scale / self.window.imgui_global_scale
-        self.window.imgui_global_scale = new_scale
-        for p in self.window.patches:
-            if p.display_info:
-                p.display_info.view_zoom *= scale_ratio
-        self.window.viewport_zoom_set = True
-        self.window.viewport_pos_set = True
-        return True
+        return self.window.set_app_scale(new_scale)
 
     async def toggle_panel_mode(self):
         patch = self.window.selected_patch
