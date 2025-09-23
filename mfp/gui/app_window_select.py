@@ -91,7 +91,10 @@ async def select(self, obj):
 
     if obj not in self.selected:
         self.selected = [obj] + self.selected
+        obj.layer.patch.selected_layer = obj.layer
+
     obj.select()
+
     await self.signal_emit("select", obj)
     return True
 
@@ -221,7 +224,11 @@ async def delete_selected(self):
 @extends(AppWindow)
 def reset_zoom(self):
     di = self.selected_patch.display_info
-    di.view_zoom = 1.0
+    if self.backend_name == "imgui":
+        di.view_zoom = self.imgui_global_scale
+    else:
+        di.view_zoom = 1.0
+
     di.view_x = 0
     di.view_y = 0
     self.viewport_pos_set = True

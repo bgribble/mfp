@@ -272,6 +272,7 @@ async def main(cmdline):
     debug = cmdline.get('debug')
     backend = cmdline.get('backend')
     searchpath = cmdline.get('searchpath')
+    init_mag = cmdline.get("magnification", 1.0)
 
     log.log_module = "gui"
     log.log_func = log.rpclog
@@ -326,6 +327,9 @@ async def main(cmdline):
 
     gui.appwin = AppWindow.build()
 
+    if backend == "imgui":
+        gui.appwin.set_app_scale(init_mag)
+
     if debug:
         import yappi
         yappi.start()
@@ -375,6 +379,8 @@ def main_sync_wrapper():
                         help="UI framework to use")
     parser.add_argument("-p", "--searchpath", default="",
                         help="Paths to search for assets (colon-separated string)")
+    parser.add_argument("-m", "--magnification", default=1.0, type=float,
+                        help="Initial magnification of UI (HiDPI compensation) (default: 1.0)")
     cmdline = vars(parser.parse_args())
 
     backend_name = cmdline.get("backend")

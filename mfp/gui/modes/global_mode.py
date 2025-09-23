@@ -296,6 +296,41 @@ class GlobalMode (InputMode):
                 "tile-control", cls.tile_manager_prefix,
                 keysym="C-a"
             )
+            cls.bind(
+                "app-scale-100",
+                lambda mode: mode.set_app_scale(1.0),
+                menupath="Window > ||||Magnification (DPI) > []100%",
+                keysym=cls.NO_KEY,
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.0
+            )
+            cls.bind(
+                "app-scale-125", lambda mode: mode.set_app_scale(1.25),
+                keysym=cls.NO_KEY,
+                menupath="Window > ||||Magnification (DPI) > []125%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.25
+            )
+            cls.bind(
+                "app-scale-150", lambda mode: mode.set_app_scale(1.50),
+                keysym=cls.NO_KEY,
+                menupath="Window > ||||Magnification (DPI) > []150%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 1.50
+            )
+            cls.bind(
+                "app-scale-200", lambda mode: mode.set_app_scale(2.0),
+                keysym=cls.NO_KEY,
+                menupath="Window > ||||Magnification (DPI) > []200%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 2.0
+            )
+            cls.bind(
+                "app-scale-250", lambda mode: mode.set_app_scale(2.5),
+                keysym=cls.NO_KEY,
+                menupath="Window > ||||Magnification (DPI) > []250%",
+                selected=lambda: MFPGUI().appwin.imgui_global_scale == 2.5
+            )
+
+
+    async def set_app_scale(self, new_scale):
+        return self.window.set_app_scale(new_scale)
 
     async def toggle_panel_mode(self):
         patch = self.window.selected_patch
@@ -786,6 +821,12 @@ class GlobalMode (InputMode):
             self.window.hud_write("Snooping disabled")
 
     async def search_interactive(self):
+        def match_sort_key(obj):
+            return (
+                obj.layer != self.window.selected_layer,
+                - obj.obj_id,
+            )
+
         async def search_changed(newval, incremental=True):
             matches = []
             for element in self.window.objects:
@@ -796,12 +837,14 @@ class GlobalMode (InputMode):
                     newval in (element.obj_type or '')
                     or newval in (element.obj_name or '')
                     or newval in (element.obj_args or '')
+                    or (hasattr(element, 'value') and newval in str(element.value))
                 ):
                     matches.append(element)
                     element.highlight_text = newval
                 else:
                     element.highlight_text = None
 
+            matches.sort(key=match_sort_key)
             if incremental:
                 if matches != self.search_interactive_matches:
                     self.search_interactive_position = 0

@@ -160,6 +160,8 @@ async def main():
                         help="Number of MIDI output ports")
     parser.add_argument("-u", "--osc-udp-port", default=5555, type=int,
                         help="UDP port to listen for OSC (default: 5555)")
+    parser.add_argument("-m", "--magnification", default=1.0, type=float,
+                        help="Initial magnification of UI (HiDPI compensation) (default: 1.0)")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="Log all messages to console")
     parser.add_argument("--verbose-remote", action="store_true",
@@ -240,6 +242,9 @@ async def main():
             patch_dirs.append(subdir)
 
     app.searchpath += ':' + ':'.join(patch_dirs)
+
+    if args.get("magnification"):
+        app.gui_init_magnification = args.get("magnification")
 
     if args.get('batch'):
         app.batch_mode = True

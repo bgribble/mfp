@@ -251,11 +251,14 @@ class SignalMixin:
         self.handlers_by_id = {}
         self.last_handler_id = 0
 
-    def signal_listen(self, signal, handler, *args):
+    def signal_listen(self, signal, handler, *args, **kwargs):
         new_id = self.last_handler_id + 1
         self.last_handler_id = new_id
         old_handlers = self.signal_handlers[signal]
-        old_handlers.append((new_id, handler, args))
+        if kwargs.get("prepend"):
+            old_handlers[:0] = [(new_id, handler, args)]
+        else:
+            old_handlers.append((new_id, handler, args))
         self.handlers_by_id[new_id] = signal
         return new_id
 

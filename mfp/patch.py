@@ -47,7 +47,8 @@ class Patch(Processor):
         self.scopes = {'__patch__': LexicalScope('__patch__')}
         self.default_scope = self.scopes['__patch__']
         self.evaluator = Evaluator()
-
+        self.doc_tooltip_inlet = []
+        self.doc_tooltip_outlet = []
         self.inlet_objects = []
         self.outlet_objects = []
         self.dispatch_objects = []
@@ -60,10 +61,27 @@ class Patch(Processor):
         self.gui_params['layers'] = []
         self.gui_params['dsp_context'] = self.context.context_name if self.context else ""
 
+        self.properties = {
+            "lv2_description": f"User patch: {init_type}",
+        }
         if patch is None:
             self.gui_params['top_level'] = True
         else:
             self.gui_params['top_level'] = False
+
+    async def setup(self, **kwargs):
+        for inlet in self.inlet_objects:
+            num = inlet.inletnum
+            if num >= len(self.doc_tooltip_inlet):
+                self.doc_tooltip_inlet.extend([''] * (num - len(self.doc_tooltip_inlet) + 1))
+            self.doc_tooltip_inlet[num] = inlet.properties.get('lv2_description', f'Inlet {num}')
+
+        for outlet in self.outlet_objects:
+            num = outlet.outletnum
+            if num >= len(self.doc_tooltip_outlet):
+                self.doc_tooltip_outlet.extend([''] * (num - len(self.doc_tooltip_outlet) + 1))
+            self.doc_tooltip_outlet[num] = outlet.properties.get('lv2_description', f'Outlet {num}')
+        self.doc_tooltip_obj = self.properties.get("lv2_description", "No documentation")
 
     #############################
     # API methods used in patches by @methodname
@@ -295,6 +313,7 @@ class Patch(Processor):
             num = obj.inletnum
             if num >= len(self.inlet_objects):
                 self.inlet_objects.extend([None] * (num - len(self.inlet_objects) + 1))
+
             self.inlet_objects[num] = obj
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
@@ -309,7 +328,10 @@ class Patch(Processor):
             num = obj.outletnum
             if num >= len(self.outlet_objects):
                 self.outlet_objects.extend([None] * (num - len(self.outlet_objects) + 1))
+            if num >= len(self.doc_tooltip_outlet):
+                self.doc_tooltip_outlet.extend([''] * (num - len(self.doc_tooltip_outlet) + 1))
             self.outlet_objects[num] = obj
+            self.doc_tooltip_outlet[num] = obj.properties.get('lv2_description', f'Outlet {num}')
             self.resize(len(self.inlet_objects), len(self.outlet_objects))
 
             if obj.init_type == 'outlet~':

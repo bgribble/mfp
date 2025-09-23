@@ -36,6 +36,7 @@ class TileManager:
         self.tiles = []
         self.next_page_id = 0
         self.next_tile_id = 0
+        self.default_zoom = 1.0
 
     def find_tile(self, **kwargs):
         if kwargs.get("new_page") or not self.tiles:
@@ -48,7 +49,8 @@ class TileManager:
                 tile_id=tile_id,
                 page_id=page_id,
                 width=self.total_width,
-                height=self.total_height
+                height=self.total_height,
+                view_zoom=self.default_zoom,
             )
             self.add_tile(tile)
             return tile
@@ -92,7 +94,7 @@ class TileManager:
             frame_offset_y=0,
             view_x=0,
             view_y=0,
-            view_zoom=1.0,
+            view_zoom=self.default_zoom,
             width=self.total_width,
             height=self.total_height,
             page_id=self.next_page_id,
@@ -284,7 +286,7 @@ class TileManager:
             origin_y=tile.origin_y + dh,
             view_x=0,
             view_y=0,
-            view_zoom=1.0,
+            view_zoom=self.default_zoom,
             frame_offset_x=tile.frame_offset_x,
             frame_offset_y=tile.frame_offset_y,
             width=tile.width - dw,
