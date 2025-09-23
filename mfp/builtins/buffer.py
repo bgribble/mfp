@@ -50,7 +50,7 @@ class Buffer(Processor):
         self.init_channels = 1
 
         if len(self.init_args):
-            self.init_size = self.init_args[0]*MFPApp().samplerate/1000.0
+            self.init_size = self.init_args[0] * MFPApp().samplerate/1000.0
         if len(self.init_args) > 1:
             self.init_channels = self.init_args[1]
         if "channels" in self.init_kwargs:
@@ -213,7 +213,7 @@ class Buffer(Processor):
     async def trigger(self):
         incoming = self.inlets[0]
         if incoming is Bang:
-            await self.dsp_obj.setparam("buf_state", 1)
+            await self.dsp_obj.setparam("trig_trigger", 1)
         elif incoming is True:
             await self.dsp_obj.setparam("rec_enabled", 1)
         elif incoming is False:
