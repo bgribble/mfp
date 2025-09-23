@@ -286,6 +286,7 @@ extern int mfp_proc_ready_to_schedule(mfp_processor * p);
 extern mfp_processor * mfp_proc_create(mfp_procinfo *, int, int, mfp_context *);
 extern mfp_processor * mfp_proc_alloc(mfp_procinfo *, int, int, mfp_context *);
 extern int mfp_proc_alloc_buffers(mfp_processor *, int, int, int);
+extern int mfp_proc_realloc_buffers(mfp_processor *, int, int, int);
 extern void mfp_proc_free_buffers(mfp_processor *);
 extern mfp_processor * mfp_proc_init(mfp_processor *, int rpc_id, int patch_id);
 extern int mfp_proc_error(mfp_processor * self, const char * message);
