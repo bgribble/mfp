@@ -205,7 +205,7 @@ class GUICommand:
             return None
 
         for conn in obj_1.connections_out:
-            if conn.obj_2 == obj_2 and conn.port_2 == obj_2_port:
+            if conn.port_1 == obj_1_port and conn.obj_2 == obj_2 and conn.port_2 == obj_2_port:
                 return
 
         c = ConnectionElement.build(MFPGUI().appwin, obj_1, obj_1_port, obj_2, obj_2_port)

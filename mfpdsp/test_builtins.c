@@ -373,27 +373,28 @@ typedef struct {
     int chan_size;
 
     /* trigger settings (for TRIG_THRESH, TRIG_EXT modes */
-    int trig_pretrigger;
+    int trig_message;
+    int trig_triggered_samples;
+    int trig_xfade_samples;
     int trig_channel;
     int trig_op;
+    int trig_debounce;
+    int trig_xfade;
     mfp_sample trig_thresh;
 
     /* record settings */
-    int rec_mode;
-    int rec_state;
+    int play_channels;
     int rec_channels;
     int rec_enabled;
-    int rec_pos;
-
-    /* play settings */
-    int play_mode;
-    int play_state;
-    int play_channels;
-    int play_pos;
 
     /* region definition (for LOOP modes, set by REC_LOOPSET) */
     int region_start;
     int region_end;
+
+    int buf_pos;
+    int buf_xfade_pos;
+    int buf_mode;
+    int buf_state;
 
 } builtin_buffer_data;
 
@@ -420,6 +421,12 @@ test_buffer_2(void * data)
     int i;
     int fail=0;
     double ft;
+
+    /* build line~ param tuple for the trigger signal: 
+     * - delay by half the blocksize 
+     * - jump to the value 5 
+     * - in 0 milliseconds
+     */
 
     ft = (double)(1000.0*(((mfp_context *)data)->blocksize/2)/((mfp_context *)data)->samplerate);
     g_array_append_val(lparm, ft);
@@ -473,13 +480,13 @@ test_buffer_2(void * data)
     for(i=0; i < blocksize; i++) {
         if (i < blocksize/2.0) {
             if (info->buf_base == NULL || ((mfp_sample *)(info->buf_base))[i] != 5.0) {
-                printf("Fail at %d (%f should be 5.0)\n", i, ((mfp_sample *)(info->buf_base))[i]);
+                printf("Fail at sample %d / %d (%f should be 5.0)\n", i, blocksize, ((mfp_sample *)(info->buf_base))[i]);
                 fail = 1;
             }
         }
         else {
             if (info->buf_base == NULL || ((mfp_sample *)(info->buf_base))[i] != 0.0) {
-                printf("Fail at %d (%f should be 0.0)\n", i, ((mfp_sample *)(info->buf_base))[i]);
+                printf("Fail at sample %d / %d (%f should be 0.0)\n", i, blocksize, ((mfp_sample *)(info->buf_base))[i]);
                 fail = 1;
             }
         }

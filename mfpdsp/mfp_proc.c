@@ -97,8 +97,84 @@ mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int b
     return success;
 }
 
+
+int
+mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int blocksize)
+{
+    int count;
+    int success=0;
+    int prev_num_inlets = p->inlet_conn->len;
+    int prev_num_outlets = p->outlet_conn->len;
+
+    GArray * prev_inlets = p->inlet_conn;
+    GArray * prev_outlets = p->outlet_conn;
+
+    /* create inlet and outlet processor pointer arrays */
+    p->inlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_inlets);
+
+    /* these are arrays of mfp_connection * */
+    for (count = 0; count < num_inlets; count++) {
+        if (count < prev_num_inlets) {
+            g_array_append_val(p->inlet_conn, g_array_index(prev_inlets, GArray *, count));
+        }
+        else {
+            GArray * in = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
+            g_array_append_val(p->inlet_conn, in);
+        }
+    }
+
+    /* free remaining ovld connections that got lost in the resize */
+    if (prev_num_inlets > num_inlets) {
+        for (count=prev_num_inlets; count < num_inlets; count++) {
+            g_array_free(g_array_index(p->inlet_conn, GArray *, count), true);
+        }
+    }
+    g_array_free(prev_inlets, true);
+
+
+    p->outlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_outlets);
+
+    for (count = 0; count < num_outlets; count++) {
+        if (count < prev_num_outlets) {
+            g_array_append_val(p->outlet_conn, g_array_index(prev_outlets, GArray *, count));
+        }
+        else {
+            GArray * out = g_array_new(TRUE, TRUE, sizeof(mfp_connection *));
+            g_array_append_val(p->outlet_conn, out);
+        }
+    }
+
+    /* free remaining old connections that got lost in the resize */
+    if (prev_num_outlets > num_outlets) {
+        for (count=prev_num_outlets; count < num_outlets; count++) {
+            g_array_free(g_array_index(p->outlet_conn, GArray *, count), true);
+        }
+    }
+    g_array_free(prev_outlets, true);
+
+    /* free the input/output buffers */
+    mfp_proc_free_buffers(p);
+
+    /* create input and output buffers (will be reallocated if blocksize changes */
+    p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));
+    p->inlet_buf_alloc = g_malloc0(num_inlets * sizeof(mfp_block *));
+
+    for (count = 0; count < num_inlets; count ++) {
+        p->inlet_buf_alloc[count] = mfp_block_new(mfp_max_blocksize);
+        mfp_block_resize(p->inlet_buf_alloc[count], blocksize);
+    }
+
+    p->outlet_buf = g_malloc(num_outlets * sizeof(mfp_sample *));
+
+    for (count = 0; count < num_outlets; count ++) {
+        p->outlet_buf[count] = mfp_block_new(mfp_max_blocksize);
+        mfp_block_resize(p->outlet_buf[count], blocksize);
+    }
+    return success;
+}
+
 void
-mfp_proc_free_buffers(mfp_processor * self)
+mfp_proc_free_connections(mfp_processor * self)
 {
     int b;
     int num_inlets = self->inlet_conn->len;
@@ -114,6 +190,15 @@ mfp_proc_free_buffers(mfp_processor * self)
         g_array_free(g_array_index(self->outlet_conn, GArray *, b), TRUE);
     }
     g_array_free(self->outlet_conn, TRUE);
+
+}
+
+void
+mfp_proc_free_buffers(mfp_processor * self)
+{
+    int b;
+    int num_inlets = self->inlet_conn->len;
+    int num_outlets = self->outlet_conn->len;
 
     for (b=0; b < num_inlets; b++) {
         mfp_block_free(self->inlet_buf_alloc[b]);
@@ -278,6 +363,7 @@ mfp_proc_destroy(mfp_processor * self)
     self->typeinfo->destroy(self);
     g_hash_table_destroy(self->params);
 
+    mfp_proc_free_connections(self);
     mfp_proc_free_buffers(self);
     self->context->needs_reschedule = 1;
     g_free(self);

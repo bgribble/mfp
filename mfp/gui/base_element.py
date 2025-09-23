@@ -391,6 +391,12 @@ class BaseElement (Store):
             self.position_x = x
             self.position_y = y
 
+    @saga('obj_name')
+    async def name_changed(self, action, state_diff, previous):
+        MFPGUI().async_task(
+            MFPGUI().mfp.rename_obj(self.obj_id, self.obj_name)
+        )
+
     @saga('code', 'properties', 'panel_enable')
     async def params_changed(self, action, state_diff, previous):
         yield self.send_params()

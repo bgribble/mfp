@@ -45,9 +45,13 @@ class DynLibTestCase (TestCase):
 
     def runTest(self):
         import subprocess
-        p = subprocess.Popen(["testext_wrapper", self.libname, self.funcname,
-                              self.setupname or 'None', self.teardownname or 'None'],
-                             stdout=subprocess.PIPE)
+        p = subprocess.Popen(
+            [
+                "testext_wrapper", self.libname, self.funcname,
+                self.setupname or 'None', self.teardownname or 'None'
+            ],
+            stdout=subprocess.PIPE
+        )
         stdout, stderr = p.communicate()
         p.wait()
 
@@ -58,10 +62,10 @@ class DynLibTestCase (TestCase):
             return True
 
         print("---- stdout start ----")
-        print(stdout.decode('utf-8'))
+        print(stdout.decode('utf-8') if stdout else "<no data>")
         print("---- stdout end ----")
         print("---- stderr start ----")
-        print(stderr.decode('utf-8'))
+        print(stderr.decode('utf-8') if stderr else "<no data>")
         print("---- stderr end ----")
 
         if (
