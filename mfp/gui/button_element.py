@@ -9,7 +9,6 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 from abc import ABCMeta, abstractmethod
 from flopsy import saga
 
-from mfp import log
 from mfp.utils import catchall
 from .text_widget import TextWidget
 from .backend_interfaces import BackendInterface
@@ -273,7 +272,7 @@ class ToggleButtonElement (ButtonElement):
         return False
 
 
-class ToggleIndicatorElement (ButtonElement):
+class ToggleIndicatorElement (ToggleButtonElement):
     display_type = "indicator"
 
     @classmethod
