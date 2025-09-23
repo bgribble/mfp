@@ -171,6 +171,9 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         # the plot
         implot.set_current_context(self.implot_context)
 
+        # font
+        imgui.push_font(self.app_window.imgui_default_font, 14)
+
         if implot.begin_plot(f"##{self.obj_id}__plot", [self.plot_width, self.plot_height]):
             flags = 0
             if self.plot_type == "histogram":
@@ -210,6 +213,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
 
             implot.end_plot()
 
+        imgui.pop_font()
         # pad out to min size
         content_w, content_h = imgui.get_item_rect_size()
         if content_w < self.min_width:

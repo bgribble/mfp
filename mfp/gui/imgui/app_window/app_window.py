@@ -56,6 +56,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.imgui_tile_selected = False
         self.imgui_popup_open = None
         self.imgui_global_scale = 1.0
+        self.imgui_default_font = None
 
         self.nedit_config = None
 
@@ -189,8 +190,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         gl.glClearColor(1.0, 1.0, 1.0, 1)
 
-        default_font = None
-
         sync_time = None
         while (
             keep_going
@@ -226,16 +225,16 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             # start processing for this frame
             imgui.new_frame()
 
-            if not default_font:
-                default_font = monospace_font()
+            if not self.imgui_default_font:
+                self.imgui_default_font = monospace_font()
 
-            if default_font:
-                imgui.push_font(default_font, 16)
+            if self.imgui_default_font:
+                imgui.push_font(self.imgui_default_font, 16)
 
             # hard work
             keep_going = self.render()
 
-            if default_font:
+            if self.imgui_default_font:
                 imgui.pop_font()
 
             ######################
