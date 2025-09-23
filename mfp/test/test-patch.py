@@ -28,8 +28,21 @@ class PatchTests (IsolatedAsyncioTestCase):
         pass
 
     async def test_loadsave(self):
+        """
+        initialize a patch from a saved JSON, then re-save it 
+        and compare with the original save data
+        """
         o1 = await mkproc(self, "message", "'hello, world'")
         o2 = await mkproc(self, "print")
+
+        # work around some "smart" compat code
+        o1.gui_params['patch_x'] = 0
+        o1.gui_params['patch_y'] = 0
+        o1.gui_params['patch_z'] = 0
+        o2.gui_params['patch_x'] = 0
+        o2.gui_params['patch_y'] = 0
+        o2.gui_params['patch_z'] = 0
+
         await o1.connect(0, o2, 0)
 
         json_1 = await self.patch.json_serialize()

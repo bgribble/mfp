@@ -102,8 +102,7 @@ ladspa_setup(mfp_processor * proc)
         }
 
         /* reconfigure buffers in the processor object */
-        mfp_proc_free_buffers(proc);
-        mfp_proc_alloc_buffers(proc, signal_ins, signal_outs, proc->context->blocksize);
+        mfp_proc_realloc_buffers(proc, signal_ins, signal_outs, proc->context->blocksize);
 
         /* connect signal outputs to the new buffers, inputs wait until process() */
         signal_outs = 0;
