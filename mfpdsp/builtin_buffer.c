@@ -925,7 +925,7 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "buf_mode", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "buf_state", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "buf_pos", (gpointer)PARAMTYPE_FLT);
-    g_hash_table_insert(p->params, "buf_latency_comp", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "rec_latency_comp", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_overdub", (gpointer)PARAMTYPE_FLT);
