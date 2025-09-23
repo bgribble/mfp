@@ -109,8 +109,7 @@ process(mfp_processor * proc)
         }
 
         /* reconfigure buffers in the processor object */
-        mfp_proc_free_buffers(proc);
-        mfp_proc_alloc_buffers(proc, d->sig_inputs, d->sig_outputs, proc->context->blocksize);
+        mfp_proc_realloc_buffers(proc, d->sig_inputs, d->sig_outputs, proc->context->blocksize);
         mfp_dsp_send_response_int(proc, RESP_COMPILED, 1);
     }
 
