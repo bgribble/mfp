@@ -91,7 +91,8 @@ async def select(self, obj):
 
     if obj not in self.selected:
         self.selected = [obj] + self.selected
-        obj.layer.patch.selected_layer = obj.layer
+        if obj.layer:
+            obj.layer.patch.selected_layer = obj.layer
 
     obj.select()
 

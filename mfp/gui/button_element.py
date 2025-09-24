@@ -224,6 +224,7 @@ class ToggleButtonElement (ButtonElement):
     extra_params = {
         'on_message': ParamInfo(label="Message on enable", param_type=PyLiteral, show=True),
         'off_message': ParamInfo(label="Message on disable", param_type=PyLiteral, show=True),
+        'send_on_click': ParamInfo(label="Emit message when click-toggled", param_type=bool, show=True),
     }
     store_attrs = {
         **ButtonElement.store_attrs,
@@ -234,6 +235,7 @@ class ToggleButtonElement (ButtonElement):
         super().__init__(window, x, y)
         self.off_message = False
         self.on_message = True
+        self.send_on_click = True
 
     @classmethod
     def get_backend(cls, backend_name):
@@ -249,7 +251,10 @@ class ToggleButtonElement (ButtonElement):
             self.indicator = True
 
         if self.obj_id is not None:
-            MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, message))
+            if self.send_on_click:
+                MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, message))
+            else:
+                MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 1, message))
         self.redraw()
         return False
 
@@ -260,6 +265,8 @@ class ToggleButtonElement (ButtonElement):
             self.on_message = params.get("on_message")
         if "off_message" in params:
             self.off_message = params.get("off_message")
+        if "send_on_click" in params:
+            self.send_on_click = params.get("send_on_click")
         if "value" in params or "message" in params:
             self.indicator = self.message == self.on_message
 
