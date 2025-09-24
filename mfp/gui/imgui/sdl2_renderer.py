@@ -27,7 +27,7 @@ from ..event import KeyPressEvent, ScrollEvent, MotionEvent
 SDL_REMAPPABLE = {
     SDLK_LCTRL: (SDL_SCANCODE_LCTRL, imgui.Key.mod_ctrl),
     SDLK_RCTRL: (SDL_SCANCODE_RCTRL, imgui.Key.mod_ctrl),
-    SDLK_CAPSLOCK: (SDL_SCANCODE_CAPSLOCK, None),
+    SDLK_CAPSLOCK: (SDL_SCANCODE_CAPSLOCK, imgui.Key.none),
     SDLK_ESCAPE: (SDL_SCANCODE_ESCAPE, imgui.Key.escape),
 }
 
