@@ -135,58 +135,91 @@ async def unselect_all(self):
     return True
 
 
+def order_for_selection(objects):
+    ordered_list = []
+    remaining_list = [o for o in objects]
+
+    def add_conns(obj):
+        for conn in obj.connections_out:
+            if conn.obj_2 not in ordered_list:
+                ordered_list.append(conn.obj_2)
+                try:
+                    idx = remaining_list.index(conn.obj_2)
+                    remaining_list[idx:idx+1] = []
+                except ValueError:
+                    pass
+                add_conns(conn.obj_2)
+
+    while len(remaining_list):
+        corner_obj = None
+        corner_dist = None
+        corner_index = None
+
+        # find the most upper-left object as the starting point
+        for idx, obj in enumerate(remaining_list):
+            obj_dist = obj.position_x**2 + obj.position_y**2
+            if not corner_obj or obj_dist < corner_dist:
+                corner_obj = obj
+                corner_dist = obj_dist
+                corner_index = idx
+        ordered_list.append(corner_obj)
+        remaining_list[corner_index:corner_index+1] = []
+
+        # recursively add connections
+        add_conns(corner_obj)
+
+    return ordered_list
+
+
 @extends(AppWindow)
-async def select_next(self):
+async def select_delta(self, offset):
     key_obj = None
 
     if len(self.selected_layer.objects) == 0:
         return False
 
+    parents = set([None, self.selected_layer])
+
     for obj in self.selected:
         if obj in self.selected_layer.objects:
+            parents.add(obj.container)
             key_obj = obj
-            break
 
+    # don't select sub-objects in GOP or connections
+    all_obj = [
+        o for o in self.selected_layer.objects
+        if o.container in parents and not isinstance(o, ConnectionElement)
+    ]
+
+    ordered_obj = order_for_selection(all_obj)
     if (not self.selected or (key_obj is None)):
         start = 0
     else:
-        current = self.selected_layer.objects.index(key_obj)
-        start = (current + 1) % len(self.selected_layer.objects)
+        try:
+            current = ordered_obj.index(key_obj)
+        except ValueError:
+            log.debug(f"[select] {key_obj} not in {ordered_obj}")
+            current = 0
+        start = (current + offset) % len(ordered_obj)
     candidate = start
 
-    for count in range(len(self.selected_layer.objects)):
-        if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
+    for _ in range(len(ordered_obj)):
+        if not isinstance(ordered_obj[candidate], ConnectionElement):
             await self.unselect_all()
-            await self.select(self.selected_layer.objects[candidate])
+            await self.select(ordered_obj[candidate])
             return True
-        candidate = (candidate + 1) % len(self.selected_layer.objects)
+        candidate = (candidate + (offset/abs(offset))) % len(ordered_obj)
     return False
+
+
+@extends(AppWindow)
+async def select_next(self):
+    return await self.select_delta(1)
 
 
 @extends(AppWindow)
 async def select_prev(self):
-    key_obj = None
-    if len(self.selected_layer.objects) == 0:
-        return False
-
-    for obj in self.selected:
-        if obj in self.selected_layer.objects:
-            key_obj = obj
-            break
-
-    if (not self.selected or (key_obj is None)):
-        candidate = -1
-    else:
-        candidate = self.selected_layer.objects.index(key_obj) - 1
-
-    while candidate > -len(self.selected_layer.objects):
-        if not isinstance(self.selected_layer.objects[candidate], ConnectionElement):
-            await self.unselect_all()
-            await self.select(self.selected_layer.objects[candidate])
-            return True
-        candidate -= 1
-
-    return False
+    return await self.select_delta(-1)
 
 
 @extends(AppWindow)
