@@ -477,9 +477,9 @@ class GlobalMode (InputMode):
                     newname = parts[0]
                     patch.obj_name = newname
                     await MFPGUI().mfp.rename_obj(patch.obj_id, newname)
-                    prms = patch.synced_params()
-                    await MFPGUI().mfp.set_params(patch.obj_id, prms)
-                    self.window.refresh(patch)
+                prms = patch.synced_params()
+                await MFPGUI().mfp.set_params(patch.obj_id, prms)
+                self.window.refresh(patch)
                 await MFPGUI().mfp.save_file(patch.obj_name, fname)
             else:
                 self.window.hud_write("Save file canceled")
