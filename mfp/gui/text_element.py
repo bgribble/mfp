@@ -130,7 +130,7 @@ class TextElement (BaseElement):
         if len(self.value) > 0:
             self.label.set_markup(self.value)
         else:
-            self.value = self.default or '...'
+            self.value = self.default 
             self.label.set_markup(self.value)
 
     def unclicked(self):

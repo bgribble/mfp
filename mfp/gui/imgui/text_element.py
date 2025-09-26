@@ -29,8 +29,6 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
-        from mfp.gui.modes.patch_edit import PatchEditMode
-
         # style
         nedit.push_style_var(nedit.StyleVar.node_rounding, 1.0)
         nedit.push_style_var(nedit.StyleVar.node_padding, ImVec4(4, 2, 4, 2))
@@ -72,20 +70,15 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
             parent = self.container
             total = parent.export_w + 2
             available = total - (self.position_x - parent.position_x)
-            clip_w = available
             padding = 0
         elif self.edit_mode and self.edit_mode.enabled:
             total = tile.width / tile.view_zoom
             available = total - (self.position_x - tile.view_x)
-            clip_w = available
             padding = 10 / tile.view_zoom
         else:
             total = tile.width / tile.view_zoom
-            available = min(self.width or self.min_width, self.max_width)
-            clip_w = total - (self.position_x - tile.view_x)
-            padding = 0
-
-        clip_h = (tile.height / tile.view_zoom) - (self.position_y - tile.view_y)
+            available = min(max(self.width, self.min_width), self.max_width)
+            padding = 8
 
         wrap_width = max(
             min(self.max_width, available - padding),
@@ -109,15 +102,16 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         imgui.end_group()
         content_w, content_h = imgui.get_item_rect_size()
         imgui.end_table()
+        table_w, table_h = imgui.get_item_rect_size()
 
-        if content_w < self.min_width:
+        if table_w < self.min_width:
             imgui.same_line()
-            imgui.dummy([self.min_width - content_w, 1])
+            imgui.dummy([self.min_width - table_w, 1])
 
-        if content_h < self.min_height:
-            imgui.dummy([1, self.min_height - content_h])
+        if table_h < self.min_height:
+            imgui.dummy([1, self.min_height - table_h])
 
-        eff_width = min(max(content_w + 8, self.min_width), self.max_width)
+        eff_width = min(max(table_w + 8, self.min_width), self.max_width)
 
         imgui.end_group()
         self.width = eff_width
