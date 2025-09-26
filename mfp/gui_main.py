@@ -53,7 +53,7 @@ class MFPGUI (Singleton):
             'fill-color': ParamInfo(label="Element fill color", param_type=RGBAColor),
             'fill-color:debug': ParamInfo(label="Element fill color (debug)", param_type=RGBAColor),
             'fill-color:lit': ParamInfo(label="Element fill color (lit indicator)", param_type=RGBAColor),
-            'fill-color:selected':ParamInfo(label="Elem4ent fill color (selected)", param_type=RGBAColor),
+            'fill-color:selected':ParamInfo(label="Element fill color (selected)", param_type=RGBAColor),
             'font-face': ParamInfo(label="Font faces", param_type=str),
             'font-size': ParamInfo(label="Font size", param_type=float),
             'grid-color:edit': ParamInfo(label="Grid color (edit)", param_type=RGBAColor),

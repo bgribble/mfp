@@ -12,8 +12,11 @@ from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from ..text_widget import TextWidget, TextWidgetImpl
 
+# FIXME -- config
 default_tt_font_name = "Inconsolata"
 default_tt_font_size = 16
+default_prop_font_name = "Roboto"
+default_prop_font_size = 16
 
 # parse the get_debug_name() output to get shape and size info
 def _font_info(info):
@@ -168,6 +171,11 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
             if c == "tt":
                 font_name = default_tt_font_name
+                font_weight = "regular"
+                font_changed = True
+
+            if c == "prop":
+                font_name = default_prop_font_name
                 font_weight = "regular"
                 font_changed = True
 
@@ -457,7 +465,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             color = ColorDB().backend.im_col32(self.font_color)
             imgui.push_style_color(imgui.Col_.text, color)
 
-        if highlight or self.markdown_text and self.use_markup:
+        if highlight or (self.markdown_text and self.use_markup):
             # imgui_md draws underlines for H1 and H2 that need to
             # be clipped
             my_x = self.position_x + self.container.position_x

@@ -254,7 +254,6 @@ class LabelEditMode (InputMode):
 
     def disable(self):
         self.end_editing()
-        self.update_label(raw=False)
         return True
 
     def start_editing(self):
@@ -331,7 +330,6 @@ class LabelEditMode (InputMode):
     async def commit_edits(self):
         self.text = self.widget.get_text()
         self.end_editing()
-        self.update_label(raw=False)
         await self.element.label_edit_finish(self.widget, self.text)
         await self.element.end_edit()
         return True
@@ -340,7 +338,6 @@ class LabelEditMode (InputMode):
         txt, pos = self.undo_stack[0]
         self.text = txt or ''
         self.end_editing()
-        self.update_label(raw=False)
         await self.element.label_edit_finish(self.widget, self.text, aborted=True)
         await self.element.end_edit()
         return True

@@ -7,6 +7,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from flopsy import mutates
 
+from mfp import log
 from mfp.gui_main import MFPGUI
 from ..colordb import ColorDB
 from .base_element import ImguiBaseElementImpl
@@ -33,10 +34,10 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
         self.node_id = None
-        self.min_width = 16
-        self.min_height = 16
-        self.width = 16
-        self.height = 16
+        self.min_width = 20
+        self.min_height = 20
+        self.width = 20
+        self.height = 20
         self.position_set = False
         self.indicator_triggered = 0
 
@@ -90,10 +91,6 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
 
         self.render_sync_with_imgui()
 
-        imgui.set_cursor_pos((
-            self.position_x + self.label.position_x,
-            self.position_y + self.label.position_y
-        ))
         nedit.begin_node(self.node_id)
 
         # node content: nothing really, we are just going to draw on it
@@ -139,17 +136,34 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
         else:
             self.label.set_color(self.get_color('text-color'))
 
+        label_rendered = True
         imgui.begin_group()
-        self.label.render()
+        if self.label_text or (self.edit_mode and self.edit_mode.enabled):
+            imgui.set_cursor_pos((
+                self.position_x + self.label.position_x,
+                self.position_y + self.label.position_y
+            ))
+            self.label.render()
+        else:
+            label_rendered = False
+            imgui.set_cursor_pos((
+                self.position_x,
+                self.position_y
+            ))
+            imgui.dummy([1, 1])
         imgui.end_group()
+
         content_w, content_h = imgui.get_item_rect_size()
 
-        if content_w + self.label.position_x < self.min_width:
-            imgui.same_line()
-            imgui.dummy([self.min_width - self.label.position_x - content_w, 1])
+        # real talk, I don't understand why I have to add these offsets
+        # (16 and 13) to get the padding to work out right. But I do.
+        x_pad = max(self.min_width - (content_w + 16), 0)
+        y_pad = max(self.min_height - (content_h + 13), 0)
 
-        if content_h + self.label.position_y < self.min_height:
-            imgui.dummy([1, self.min_height - self.label.position_y - content_h])
+        imgui.same_line()
+        imgui.dummy([x_pad, 1])
+        imgui.dummy([1, y_pad])
+
         imgui.end_group()
 
         # connections

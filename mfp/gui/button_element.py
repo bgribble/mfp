@@ -101,7 +101,10 @@ class ButtonElement (BaseElement):
 
     @saga("label_text")
     async def label_text_changed(self, action, state_diff, previous):
-        self.label.set_markup(self.label_text, notify=True)
+        if self.label_text:
+            self.label.set_markup(f"<b>{self.label_text}</b>")
+        else:
+            self.label.set_markup('')
         yield None
 
     @catchall
@@ -115,17 +118,13 @@ class ButtonElement (BaseElement):
         if not aborted:
             self.label_text = new_text
             self.send_params()
-            if self.indicator and self.label_text:
-                self.label.set_markup("<b>%s</b>" % self.label_text)
-            else:
-                self.label.set_markup(self.label_text or '')
-
+            if self.label_text:
+                self.label.set_markup(f"<b>{self.label_text}</b>")
             await self.center_label()
         self.redraw()
 
     async def configure(self, params):
         set_text = False
-
         if "value" in params:
             self.message = params.get("value")
             set_text = True
@@ -135,10 +134,8 @@ class ButtonElement (BaseElement):
             set_text = True
 
         if set_text:
-            if self.indicator and self.label_text:
-                self.label.set_markup("<b>%s</b>" % (self.label_text or ''))
-            else:
-                self.label.set_markup(self.label_text or '')
+            if self.label_text:
+                self.label.set_markup(f"<b>{self.label_text}</b>")
             await self.center_label()
 
         await super().configure(params)
@@ -161,7 +158,7 @@ class ButtonElement (BaseElement):
     async def make_edit_mode(self):
         if self.obj_id is None:
             # create object
-            await self.create(self.proc_type, str(self.indicator))
+            await self.create(self.proc_type, str(self.message or self.indicator))
 
             # complete drawing
             if self.obj_id is None:
@@ -169,7 +166,7 @@ class ButtonElement (BaseElement):
             self.draw_ports()
         self.redraw()
 
-        return LabelEditMode(self.app_window, self, self.label)
+        return LabelEditMode(self.app_window, self, self.label, markup=True)
 
     def make_control_mode(self):
         return ClickableControlMode(self.app_window, self, "Button control")
@@ -194,9 +191,14 @@ class BangButtonElement (ButtonElement):
     def get_backend(cls, backend_name):
         return BangButtonElementImpl.get_backend(backend_name)
 
+    @saga('message')
+    def message_changed(self, action, state_diff, previous):
+        if "message" in state_diff and self.message == Bang:
+            MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 1))
+
     async def clicked(self):
         if self.obj_id is not None:
-            if self.message is Bang:
+            if self.message == Bang:
                 MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 0))
             else:
                 MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.message))
@@ -214,7 +216,6 @@ class BangButtonElement (ButtonElement):
     async def configure(self, params):
         if "message" in params:
             self.message = params.get("message")
-
         await super().configure(params)
 
 
