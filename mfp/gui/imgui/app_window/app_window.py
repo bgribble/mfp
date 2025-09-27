@@ -725,6 +725,20 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             layer = patch.layers[0]
         self.layer_select(layer)
 
+    def object_visible(self, obj):
+        if super().object_visible(obj):
+            return True
+
+        displayed_layers = [
+            p.selected_layer for p in self.patches
+            if p.display_info and p.display_info.page_id == self.canvas_tile_page
+        ]
+        if obj and obj.layer and obj.layer in displayed_layers:
+            return True
+
+        return False
+
+
     #####################
     # log output
     def log_write(self, message, level):
