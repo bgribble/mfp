@@ -124,7 +124,11 @@ class MFPApp (Singleton, SignalMixin):
             for ll in traceback.split('\n'):
                 log.error(ll)
 
+        def _error(signal, message):
+            log.error(f"[rpc] Error: {message}")
+
         self.rpc_host.on("exception", _exception)
+        self.rpc_host.on("error", _error)
 
         await self.rpc_host.start(self.rpc_channel)
 
