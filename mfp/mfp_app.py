@@ -62,6 +62,7 @@ class MFPApp (Singleton, SignalMixin):
         self.batch_eval = False
         self.batch_input_file = None
         self.gui_init_magnification = 1.0
+        self.restarts_remaining = 2
 
         # RPC host
         self.rpc_listener = None
@@ -312,7 +313,7 @@ class MFPApp (Singleton, SignalMixin):
         ]
         if (
             Patch.default_context and (peer_id == Patch.default_context.node_id)
-            and not self.no_restart
+            and not self.no_restart and self.restarts_remaining > 0
         ):
             log.warning("Relaunching default backend (old id=%s)" % peer_id)
             patch_json = []
@@ -342,10 +343,10 @@ class MFPApp (Singleton, SignalMixin):
                 if not MFPApp().no_onload:
                     await patch._run_onload(list(patch.objects.values()))
                 await patch.create_gui()
-
+            self.restarts_remaining -= 1
         else:
             log.warning("Cleaning up RPC objects for remote (id=%s)" % peer_id)
-            log.warning("DSP backend exited with no-restart flag, not restarting")
+            log.warning("DSP backend exited with no-restart flag or too many restarts, not restarting")
             for p in dead_patches:
                 await p.delete()
             log.debug("Finished cleaning up patches")
