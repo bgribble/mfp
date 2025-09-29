@@ -1,8 +1,8 @@
 ## MFP -- Music For Programmers, version 0.8.5
 
 I'm happy to announce the next release in the MFP 0.8 series,
-including a new scalable UI for high DPI displays and other new
-features and bug fixes.
+including a new scalable UI for high DPI displays and other
+improvements and bug fixes.
 
 A summary of changes is below.  Please see the GitHub project page
 for complete details:
@@ -28,12 +28,12 @@ it.
 ### Significant changes since release v0.8.4
 
 * Scalable UI for high DPI displays
-    * Port to `imgui_bundle` 1.92.2, which pulls in scalability work
+    * Port to `imgui_bundle` 1.92.3, which pulls in scalability work
       from Dear Imgui
     * Scalable fonts throughout, so no more pixelated ProggyClean
     * Magnification menu setting and command line option to globally
       change UI magnification
-* Fixes for DSP objects with dynamic numbers of inlets/outlets (`[faust~]`, 
+* Fixes for DSP objects with dynamic numbers of inlets/outlets (`[faust~]`,
   `[buffer~]`, `[plugin~]`) to make save/load work consistently
 * Improvements to the [buffer~] processor
     * Allow retrigger before the end of the buffer/region

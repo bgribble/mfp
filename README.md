@@ -14,7 +14,7 @@ now it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
 **What's happening now?** I am working on MFP pretty actively.
-The most recent release (0.8.0) now contains a new UI backend
+The most recent release (0.8.5) now contains a new UI backend
 built with [Dear ImGUI](https://github.com/ocornut/imgui), via
 the excellent
 [imgui-bundle](https://github.com/pthom/imgui_bundle) bindings.
@@ -104,7 +104,7 @@ You type | What happens
 ---------|----------------
 a | Autoplace mode.  A symbol appears where the next object will go
 m | Create message (literal data)
-"hello world" RET| Put the string "hello, world" in the message
+"hello, world" RET| Put the string "hello, world" in the message
 c | Connect mode (will connect selected object to something)
 a | Autoplace mode again
 p | Create a processor
@@ -150,7 +150,7 @@ Ticket | Description
  #220 | 'waf install' can give error messages. Workaround: See the bottom of README.build; possibly no action is required.
 
 See the tickets in GitHub for detail on what I know about these problems, and for
-other potential workarounds.
+other potential workarounds.0
 
 ## DOCUMENTATION
 
@@ -170,12 +170,20 @@ things like iteration, conditionals, etc.
 (If you are using the Clutter backend, there's no Help menu; you
 can find a Clutter version of the tutorial in `doc/tutorial.mfp`)
 
+There are a couple of YouTube videos in my channel:
+
+* [MFP: Extending with Python and Faust](https://youtu.be/1bIXcOFw4t0)
+* [MFP update: Dear Imgui UI](https://youtu.be/4Q14GiwKx6k)
+
 There's also some documentation in the doc/ directory of this
 repository.
 
 **LAC 2013 paper:** This paper (doc/lac2013/lac2013.pdf) gives a
 high-level overview of what MFP is all about and a bit of
 discussion about what it can do.
+
+**LAC 2025 paper:** This paper (doc/lac2025/lac2025.pdf) focuses
+on live-coding support in Faust and Python.
 
 **README files:** There are some READMEs in doc which may be
 useful if you want to know more about how MFP works.  Especially
