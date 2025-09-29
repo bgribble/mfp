@@ -111,7 +111,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         if table_h < self.min_height:
             imgui.dummy([1, self.min_height - table_h])
 
-        eff_width = min(max(table_w + 8, self.min_width), self.max_width)
+        eff_width = min(max(table_w + padding, self.min_width), self.max_width)
 
         imgui.end_group()
         self.width = eff_width
