@@ -85,6 +85,7 @@ mfp_proc_alloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int b
 
     for (count = 0; count < num_inlets; count ++) {
         p->inlet_buf_alloc[count] = mfp_block_new(mfp_max_blocksize);
+        p->inlet_buf[count] = p->inlet_buf_alloc[count];
         mfp_block_resize(p->inlet_buf_alloc[count], blocksize);
     }
 
@@ -161,6 +162,7 @@ mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int
 
     for (count = 0; count < num_inlets; count ++) {
         p->inlet_buf_alloc[count] = mfp_block_new(mfp_max_blocksize);
+        p->inlet_buf[count] = p->inlet_buf_alloc[count];
         mfp_block_resize(p->inlet_buf_alloc[count], blocksize);
     }
 
