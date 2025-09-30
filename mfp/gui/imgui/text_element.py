@@ -69,14 +69,14 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         if isinstance(self.container, BaseElement):
             parent = self.container
             total = parent.export_w + 2
-            available = total - (self.position_x - parent.position_x)
-            padding = 0
+            # available = total - (self.position_x - parent.position_x)
+            available = self.width
+            padding = 8 
         elif self.edit_mode and self.edit_mode.enabled:
             total = tile.width / tile.view_zoom
             available = total - (self.position_x - tile.view_x)
             padding = 10 / tile.view_zoom
         else:
-            total = tile.width / tile.view_zoom
             available = min(max(self.width, self.min_width), self.max_width)
             padding = 8
 
@@ -104,14 +104,17 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         imgui.end_table()
         table_w, table_h = imgui.get_item_rect_size()
 
+        if self.edit_mode and self.edit_mode.enabled:
+            eff_width = min(max(table_w + padding, self.min_width), self.max_width)
+        else:
+            eff_width = min(max(content_w + padding, self.min_width), self.max_width)
+
         if table_w < self.min_width:
             imgui.same_line()
             imgui.dummy([self.min_width - table_w, 1])
 
         if table_h < self.min_height:
             imgui.dummy([1, self.min_height - table_h])
-
-        eff_width = min(max(table_w + padding, self.min_width), self.max_width)
 
         imgui.end_group()
         self.width = eff_width
