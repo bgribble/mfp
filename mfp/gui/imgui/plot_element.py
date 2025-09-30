@@ -239,7 +239,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         self.width = p_br[0] - p_tl[0]
         self.height = p_br[1] - p_tl[1]
 
-        self.position_x, self.position_y = (p_tl[0], p_tl[1])
+        self.render_sync_position(p_tl[0], p_tl[1])
 
         # render
         ##########################

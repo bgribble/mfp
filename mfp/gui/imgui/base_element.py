@@ -219,6 +219,19 @@ class ImguiBaseElementImpl(BaseElementImpl):
                 if nedit.is_node_selected(self.node_id):
                     nedit.deselect_node(self.node_id)
 
+    def render_sync_position(self, candidate_x, candidate_y):
+        """
+        there's something fishy with imgui-node-editor. Sometimes
+        the node position jumps when calling begin_node. This
+        helper checks at the end of the render cycle and filters
+        out suspicious node movement.
+        """
+        if abs(candidate_x - self.position_x) > 5 or abs(candidate_y - self.position_y) > 5:
+            log.debug(f"[render] position jump: was {(self.position_x, self.position_y)} now {(candidate_x, candidate_y)}, ignoring move")
+        else:
+            self.position_x = candidate_x
+            self.position_y = candidate_y
+
     def render_badge(self):
         if not self.badge_current:
             return

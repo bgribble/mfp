@@ -7,7 +7,6 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 from flopsy import mutates
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
-
 from ..colordb import ColorDB
 from ..base_element import BaseElement
 from ..via_element import (
@@ -98,18 +97,19 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
         # node content: label plus space for the via blob
         imgui.begin_group()
         if self.display_type in ('sendvia', 'sendsignalvia'):
-            imgui.dummy((1, self.VIA_SIZE -1))
+            imgui.dummy((1, self.VIA_SIZE - 1))
         self.label.render()
+
         if self.display_type in ('recvvia', 'recvsignalvia'):
             imgui.dummy((1, self.VIA_SIZE))
         imgui.end_group()
 
         # update size before ports
-        p_tl = imgui.get_item_rect_min()
-        p_br = imgui.get_item_rect_max()
+        content_tl = imgui.get_item_rect_min()
+        content_br = imgui.get_item_rect_max()
 
-        self.width = p_br[0] - p_tl[0]
-        self.height = p_br[1] - p_tl[1]
+        self.width = content_br[0] - content_tl[0]
+        self.height = content_br[1] - content_tl[1]
 
         # draw ports
         self.render_ports()
@@ -125,7 +125,7 @@ class ImguiBaseViaElementImpl(ImguiBaseElementImpl):
 
         self.width = p_br[0] - p_tl[0]
         self.height = p_br[1] - p_tl[1]
-        self.position_x, self.position_y = (p_tl[0], p_tl[1])
+        self.render_sync_position(p_tl[0], p_tl[1])
 
         # render
         ##########################

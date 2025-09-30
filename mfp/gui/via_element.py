@@ -69,7 +69,7 @@ class ViaElement (BaseElement):
 
     @saga('obj_type', 'obj_args')
     async def recreate_element(self, action, state_diff, previous):
-        if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+        if "obj_state" in state_diff and state_diff['obj_state'][0] is None:
             return
 
         if self.obj_type:

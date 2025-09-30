@@ -133,7 +133,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         p_br = imgui.get_item_rect_max()
 
         self.height = p_br[1] - p_tl[1]
-        self.position_x, self.position_y = (p_tl[0], p_tl[1])
+        self.render_sync_position(p_tl[0], p_tl[1])
 
         # render
         ##########################
