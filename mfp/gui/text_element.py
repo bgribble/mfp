@@ -130,7 +130,7 @@ class TextElement (BaseElement):
         if len(self.value) > 0:
             self.label.set_markup(self.value)
         else:
-            self.value = self.default 
+            self.value = self.default
             self.label.set_markup(self.value)
 
     def unclicked(self):
@@ -157,7 +157,7 @@ class TextElement (BaseElement):
     def make_control_mode(self):
         return AltClickableControlMode(self.app_window, self, "Change text")
 
-    @mutates('clickchange')
+    @mutates('clickchange', 'max_width', 'value', 'default')
     async def configure(self, params):
         if params.get('value') is not None:
             new_text = params.get('value')
@@ -170,6 +170,9 @@ class TextElement (BaseElement):
 
         if params.get('default') is not None:
             self.default = params['default']
+
+        if params.get('max_width') is not None:
+            self.max_width = params['max_width']
 
         await super().configure(params)
 
