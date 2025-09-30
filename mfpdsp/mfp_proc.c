@@ -203,13 +203,20 @@ mfp_proc_free_buffers(mfp_processor * self)
     int num_outlets = self->outlet_conn->len;
 
     for (b=0; b < num_inlets; b++) {
-        mfp_block_free(self->inlet_buf_alloc[b]);
+        self->inlet_buf[b] = NULL;
+        if (self->inlet_buf_alloc[b] != NULL) {
+            mfp_block_free(self->inlet_buf_alloc[b]);
+            self->inlet_buf_alloc[b] = NULL;
+        }
     }
     g_free(self->inlet_buf);
     g_free(self->inlet_buf_alloc);
 
     for (b=0; b < num_outlets; b++) {
-        mfp_block_free(self->outlet_buf[b]);
+        if (self->outlet_buf[b] != NULL) {
+            mfp_block_free(self->outlet_buf[b]);
+            self->outlet_buf[b] = NULL;
+        }
     }
     g_free(self->outlet_buf);
 }
@@ -365,8 +372,8 @@ mfp_proc_destroy(mfp_processor * self)
     self->typeinfo->destroy(self);
     g_hash_table_destroy(self->params);
 
-    mfp_proc_free_connections(self);
     mfp_proc_free_buffers(self);
+    mfp_proc_free_connections(self);
     self->context->needs_reschedule = 1;
     g_free(self);
     return;
