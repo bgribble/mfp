@@ -3,7 +3,7 @@
 # build with 'python ./setup.py install'
 from setuptools import setup
 
-VERSION = "0.8.4"
+VERSION = "0.8.5"
 
 setup (name = 'mfp',
        version = VERSION,
