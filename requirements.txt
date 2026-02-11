@@ -8,7 +8,7 @@ glfw==2.8.0
 imgui-bundle==1.92.4
 munch==4.0.0
 numpy==2.2.4
-pillow==11.1.0
+pillow==12.1.1
 posix_ipc==1.1.1
 protobuf==6.30.1
 pycparser==2.22
