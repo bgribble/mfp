@@ -415,14 +415,6 @@ def configure(ctxt):
         uselibs.append(uname)
     ctxt.env.PKGCONF_LIBS = uselibs
 
-    # LLVM needs special args
-    ctxt.check_cfg(
-        path="llvm-config",
-        package="",
-        args="--link-static --ldflags --libs all --system-libs",
-        uselib_store="LLVM"
-    )
-    ctxt.env.PKGCONF_LIBS.append("LLVM")
 
     if ctxt.env.WITH_CLUTTER:
         pip_libs.extend([
@@ -445,9 +437,19 @@ def configure(ctxt):
 
     # FAUST libs and header
     ctxt.find_program("faust")
-    ctxt.find_program("llvm-config")
     ctxt.check(lib="faust", uselib_store="Faust")
     ctxt.env.PKGCONF_LIBS.append("Faust")
+
+    # LLVM needs special args
+    ctxt.find_program("llvm-config")
+    ctxt.check_cfg(
+        path="llvm-config",
+        package="",
+        msg="Checking for LLVM libs",
+        args="--link-static --ldflags --libs all --system-libs",
+        uselib_store="LLVM"
+    )
+    ctxt.env.PKGCONF_LIBS.append("LLVM")
 
     # pip-installable libs we just mark them as not available
     for lib in pip_libs:
