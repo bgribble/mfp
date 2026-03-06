@@ -111,6 +111,7 @@ def render_tile(app_window, patch):
         and not app_window.cmd_input_filename
         and not app_window.context_menu_open
         and not app_window.inspector
+        and not app_window.buffer_editor
     ):
         imgui.set_next_window_focus()
 
@@ -123,7 +124,13 @@ def render_tile(app_window, patch):
     )
 
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.selected_window = "canvas"
+        if (
+            app_window.selected_window != "canvas"
+            and not app_window.inspector
+            and not app_window.buffer_editor
+        ):
+            app_window.selected_window = "canvas"
+
         if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
             app_window.input_mgr.global_mode = GlobalMode(app_window)
             app_window.input_mgr.major_mode.enable()

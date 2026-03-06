@@ -97,6 +97,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.selected_window = "canvas"
         self.inspector = None
 
+        self.buffer_editor = None
+        self.buffer_info = [] 
+        self.buffer_selected = None
+
         self.log_text = ""
         self.log_text_timestamp = None
         self.log_scroll_follow = True
@@ -287,7 +291,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # renderer
     def render(self):
-
         self.imgui_prevent_idle = max(0, self.imgui_prevent_idle - 1)
         keep_going = True
 
@@ -446,6 +449,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         )
         canvas_panel.render(self)
         imgui.pop_style_color()  # text selected bg
+
+        if self.buffer_editor is not None:
+            bufedit_keep_going = self.buffer_editor.render()
+            if not bufedit_keep_going:
+                self.buffer_editor = None
 
         # canvas panel
         ########################################

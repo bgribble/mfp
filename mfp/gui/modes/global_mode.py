@@ -297,6 +297,11 @@ class GlobalMode (InputMode):
                 keysym="C-a"
             )
             cls.bind(
+                "open-sample-editor", cls.buffer_edit, helptext="Open buffer editor",
+                keysym="C-b",
+                menupath="Window > |||Buffer editor"
+            )
+            cls.bind(
                 "app-scale-100",
                 lambda mode: mode.set_app_scale(1.0),
                 menupath="Window > ||||Magnification (DPI) > []100%",
@@ -409,8 +414,22 @@ class GlobalMode (InputMode):
                 title="State inspector",
                 event_loop=MFPGUI().async_task.asyncio_loop,
             )
-        self.selected_window = "inspector"
+        self.window.selected_window = "inspector"
         self.window.inspector.focus()
+
+    def buffer_edit(self):
+        """
+        Toggle sample buffer editor
+        """
+        from mfp.gui.imgui.buffer_editor import BufferEditor
+
+        if self.window.buffer_editor is None:
+            self.window.buffer_editor = BufferEditor(self.window)
+            self.window.selected_window = "bufedit"
+            self.window.buffer_editor.focus()
+        else:
+            self.window.buffer_editor.close()
+            self.window.buffer_editor = None
 
     async def toggle_console(self):
         await self.window.signal_emit("toggle-console")

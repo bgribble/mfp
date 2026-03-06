@@ -144,7 +144,7 @@ class ImguiSDL2Renderer:
         width = ctypes.c_int()
         height = ctypes.c_int()
         events_processed = False
-        unhandled_windows = ["info", "editor"]
+        unhandled_windows = ["info"]
 
         while SDL_PollEvent(ctypes.byref(event)) != 0:
             events_processed = True

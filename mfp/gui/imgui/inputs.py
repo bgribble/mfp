@@ -93,7 +93,7 @@ def imgui_process_inputs(app_window):
     now = datetime.now()
     keys_currently_pressed = keys_down()
 
-    unhandled_windows = ["info", "editor"]
+    unhandled_windows = ["info" ]
 
     key_presses = keys_currently_pressed - app_window.keys_pressed
     key_releases = app_window.keys_pressed - keys_currently_pressed
@@ -190,8 +190,7 @@ def imgui_process_inputs(app_window):
                     keyval=mfp_key,
                     unicode=None
                 )
-                if app_window.selected_window not in unhandled_windows:
-                    MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
+                MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
             elif mfp_key in key_defs.MOUSE_BUTTONS:
                 clickinfo = app_window.mouse_clicks.get(mfp_key)
                 click_count = 1
@@ -203,15 +202,13 @@ def imgui_process_inputs(app_window):
                     button=1 + mfp_key - key_defs.MOUSE_LEFT,
                     click_count=click_count
                 )
-                if app_window.selected_window == "canvas":
-                    MFPGUI().async_task(app_window.signal_emit("button-release-event", ev))
+                MFPGUI().async_task(app_window.signal_emit("button-release-event", ev))
             elif any_dead_keys and mfp_key is not None:
                 ev = KeyReleaseEvent(
                     target=app_window.input_mgr.pointer_obj,
                     keyval=mfp_key,
                     unicode=chr(mfp_key)
                 )
-                if app_window.selected_window == "canvas":
-                    MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
+                MFPGUI().async_task(app_window.signal_emit("key-release-event", ev))
 
     app_window.keys_pressed = keys_currently_pressed

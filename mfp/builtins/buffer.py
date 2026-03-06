@@ -22,6 +22,8 @@ from ..buffer_info import BufferInfo
 
 class Buffer(Processor):
 
+    registry = {}
+
     RESP_TRIGGERED = 0
     RESP_BUFID = 1
     RESP_BUFSIZE = 2
@@ -174,7 +176,12 @@ class Buffer(Processor):
             if self.shm_obj:
                 self.shm_obj.close_fd()
                 self.shm_obj = None
+            if self.buf_id and self.buf_id in Buffer.registry:
+                del Buffer.registry[self.buf_id]
+
             self.buf_id = resp_value
+            Buffer.registry[self.buf_id] = self
+
         elif resp_id == self.RESP_BUFSIZE:
             self.size = resp_value
         elif resp_id == self.RESP_BUFCHAN:
@@ -209,6 +216,11 @@ class Buffer(Processor):
 
         if self.outlets[-1] == Uninit:
             self.outlets[-1] = (resp_id, resp_value)
+
+    async def delete(self):
+        if self.buf_id and self.buf_id in Buffer.registry:
+            del Buffer.registry[self.buf_id]
+        return await super().delete()
 
     async def trigger(self):
         incoming = self.inlets[0]

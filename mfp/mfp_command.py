@@ -183,6 +183,24 @@ class MFPCommand:
         else:
             return ''
 
+    def get_buffer_info(self):
+        from mfp.builtins.buffer import Buffer
+        from mfp.buffer_info import BufferInfo
+        response = []
+        for shm_id, buf in Buffer.registry.items():
+            response.append(dict(
+                file_name=buf.file_name,
+                proc_name=buf.name,
+                buf_info=BufferInfo(
+                    buf_id=buf.buf_id,
+                    size=buf.size,
+                    channels=buf.channels,
+                    offset=buf.buf_offset,
+                    rate=buf.rate
+                )
+            ))
+        return response
+
     @noresp
     def log_write(self, msg):
         from .mfp_app import MFPApp
