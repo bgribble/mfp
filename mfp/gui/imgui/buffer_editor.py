@@ -16,13 +16,18 @@ class BufferEditor:
         self.app_window = app_window
         self.needs_focus = False
         self.implot_context = implot.create_context()
-        self.implot_selection = None
+        self.implot_selection = None         # global selection range
+        self.implot_limits = None            # global plot limits
+        self.implot_limits_need_set = None
 
         self.shm_obj = None
         self.buffer_info = None
         self.buffer_data = None
         self.buffer_peaks = {}
         self.last_buffer = None
+
+        self.channel_selections = []         # per-channel select box state (transient)
+        self.channel_selections_active = []  # per-channel select box activity
 
     def focus(self):
         self.needs_focus = True
@@ -40,6 +45,11 @@ class BufferEditor:
 
         self.last_buffer = datetime.now()
         self.buffer_data = []
+        self.channel_selections = [None] * self.buffer_info.channels
+        self.channel_selections_active = [False] * self.buffer_info.channels
+        self.implot_limits = None
+        self.implot_limits_need_set = [None] * self.buffer_info.channels
+
         try:
             for c in range(self.buffer_info.channels):
                 os.lseek(self.shm_obj.fd, offset(c), os.SEEK_SET)
@@ -84,13 +94,35 @@ class BufferEditor:
             )
             last_peaks = next_peaks
 
+    def get_peak_scale(self):
+        """
+        called within a begin_plot()
+        """
+        limits = implot.get_plot_limits()
+        compress = (
+            (max(limits.x.max, 1.0) - limits.x.min)
+            / self.app_window.canvas_panel_width
+        )
+
+        if compress < 10:
+            peak_scale = "1"
+        elif compress < 100:
+            peak_scale = "10"
+        elif compress < 1000:
+            peak_scale = "100"
+        elif compress < 10000:
+            peak_scale = "1000"
+        else:
+            peak_scale = "10000"
+        return peak_scale
+
     ########################################
     # renderer
     def render(self):
         keep_going = True
 
         imgui.set_next_window_size([
-            self.app_window.canvas_panel_width, 
+            self.app_window.canvas_panel_width,
             self.app_window.canvas_panel_height
         ])
         imgui.set_next_window_pos((0, self.app_window.menu_height))
@@ -119,51 +151,86 @@ class BufferEditor:
             self.needs_focus = False
 
         ########################################
-        # the plot
+        # the plots
         implot.set_current_context(self.implot_context)
-        if implot.begin_plot(
-            "##buf_edit_plot",
-            flags=implot.Flags_.crosshairs | implot.Flags_.no_legend
-        ):
-            implot.setup_axes('x', 'y')
-            implot.setup_axis_limits(
-                implot.ImAxis_.y1.value, -1, 1, implot.Cond_.always.value
-            )
 
-            limits = implot.get_plot_limits()
-            compress = (
-                (max(limits.x.max, 1.0) - limits.x.min)
-                / self.app_window.canvas_panel_width
-            )
+        num_channels = len(self.buffer_data or [])
+        peak_scale = None
+        peaks = None
 
-            if compress < 10:
-                peak_scale = "1"
-            elif compress < 100:
-                peak_scale = "10"
-            elif compress < 1000:
-                peak_scale = "100"
-            elif compress < 10000:
-                peak_scale = "1000"
-            else:
-                peak_scale = "10000"
+        for channel in range(num_channels):
+            imgui.push_id(str(channel))
+            if implot.begin_plot(
+                "##buf_edit_plot",
+                flags=implot.Flags_.crosshairs | implot.Flags_.no_legend
+            ):
+                implot.setup_axes(
+                    '', '',
+                    x_flags=implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label,
+                    y_flags=implot.AxisFlags_.no_label,
+                )
+                implot.setup_axis_limits(
+                    implot.ImAxis_.y1.value, -1, 1, implot.Cond_.always.value
+                )
 
-            if self.buffer_peaks:
-                peaks = self.buffer_peaks[peak_scale]
-                y_values = peaks[0]
-                x_values = peaks[1]
-                for curve in y_values:
-                    implot.plot_line(
-                        "Sample plot",
-                        x_values, curve,
-                        flags=0
+                if not self.implot_limits:
+                    self.implot_limits = implot.get_plot_limits()
+
+                # this is to reset limits after the boxselect adjusts zoom
+                if self.implot_limits_need_set[channel]:
+                    implot.setup_axis_limits(
+                        implot.ImAxis_.x1.value,
+                        self.implot_limits.x.min,
+                        self.implot_limits.x.max,
+                        implot.Cond_.always.value
                     )
+                    self.implot_limits_need_set[channel] = False
 
-            sel = implot.get_plot_selection()
-            if sel.x.min != 0 and sel.x.min != sel.x.max:
-                self.implot_selection = sel
-            elif self.implot_selection is not None:
-                self.implot_selection = None
-            implot.end_plot()
+                chan_sel = implot.get_plot_selection()
+                chan_limits = implot.get_plot_limits()
+                if chan_sel.x.min == 0 and chan_sel.x.max == 0:
+                    if self.channel_selections_active[channel]:
+                        self.implot_limits_need_set[channel] = True
+                        self.channel_selections_active[channel] = False
+                if (
+                    not self.implot_limits_need_set[channel]
+                    and (
+                        chan_limits.x.min != self.implot_limits.x.min
+                        or chan_limits.x.max != self.implot_limits.x.max
+                    )
+                ):
+                    self.implot_limits = chan_limits
+                    self.implot_limits_need_set = [True] * num_channels
+                    self.implot_limits_need_set[channel] = False
+
+                # use the right subsampled data
+                if peak_scale is None:
+                    peak_scale = self.get_peak_scale()
+                    peaks = self.buffer_peaks[peak_scale]
+                y_values = peaks[0][channel]
+                x_values = peaks[1]
+
+                # the actual line!
+                implot.plot_line("Buffer edit", x_values, y_values, flags=0)
+
+                # if we have a selection, show it as a drag rect
+                if not self.channel_selections_active[channel] and self.implot_selection:
+                    ss = self.implot_selection
+                    rect = implot.drag_rect(
+                        0, ss.x.min, 1, ss.x.max, -1, [0, 1, 0, 1]
+                    )
+                    if rect[1] != ss.x.min or rect[3] != ss.x.max:
+                        ss.x.min = rect[1]
+                        ss.x.max = rect[3]
+                        self.channel_selections[channel] = ss
+                        self.implot_selection = ss
+
+                if chan_sel.x.min != 0 and chan_sel.x.min != chan_sel.x.max:
+                    self.implot_selection = chan_sel
+                    self.channel_selections[channel] = chan_sel
+                    self.channel_selections_active[channel] = True
+                implot.end_plot()
+            imgui.pop_id()
         imgui.end()
         imgui.pop_style_var(3)
         return keep_going
