@@ -18,7 +18,7 @@ class BufferEditor:
         self.implot_context = implot.create_context()
         self.implot_selection = None         # global selection range
         self.implot_limits = None            # global plot limits
-        self.implot_limits_need_set = None
+        self.implot_limits_need_set = [None]
 
         self.shm_obj = None
         self.buffer_info = None
@@ -26,8 +26,8 @@ class BufferEditor:
         self.buffer_peaks = {}
         self.last_buffer = None
 
-        self.channel_selections = []         # per-channel select box state (transient)
-        self.channel_selections_active = []  # per-channel select box activity
+        self.channel_selections = [None]         # per-channel select box state (transient)
+        self.channel_selections_active = [False]  # per-channel select box activity
 
     def focus(self):
         self.needs_focus = True
@@ -45,10 +45,10 @@ class BufferEditor:
 
         self.last_buffer = datetime.now()
         self.buffer_data = []
-        self.channel_selections = [None] * self.buffer_info.channels
-        self.channel_selections_active = [False] * self.buffer_info.channels
+        self.channel_selections = [None] * (self.buffer_info.channels + 1)
+        self.channel_selections_active = [False] * (self.buffer_info.channels + 1)
         self.implot_limits = None
-        self.implot_limits_need_set = [None] * self.buffer_info.channels
+        self.implot_limits_need_set = [None] * (self.buffer_info.channels + 1)
 
         try:
             for c in range(self.buffer_info.channels):
@@ -68,9 +68,12 @@ class BufferEditor:
             np.pad(chan, (0, padding), mode='constant')
             for chan in self.buffer_data
         ]
+        total_time = len(padded[0]) / self.buffer_info.rate
+        sample_time = 1/self.buffer_info.rate
+
         self.buffer_peaks["1"] = (
             padded,
-            np.arange(len(padded[0]), dtype=np.float32)
+            np.arange(0, total_time, sample_time, dtype=np.float32)
         )
         last_peaks = padded
 
@@ -88,7 +91,10 @@ class BufferEditor:
                 padded = np.pad(combined, (0, padding), mode='constant')
                 next_peaks.append(padded)
 
-            x_values = np.arange(0, len(padded)*peak_factor / 2, peak_factor / 2, dtype=np.float32)
+            x_values = np.arange(
+                0, sample_time * peak_factor * len(padded) / 2,
+                peak_factor * sample_time / 2, dtype=np.float32
+            )
             self.buffer_peaks[str(peak_factor)] = (
                 next_peaks, x_values
             )
@@ -99,10 +105,10 @@ class BufferEditor:
         called within a begin_plot()
         """
         limits = implot.get_plot_limits()
-        compress = (
+        compress = self.buffer_info.rate * (
             (max(limits.x.max, 1.0) - limits.x.min)
             / self.app_window.canvas_panel_width
-        )
+        ) 
 
         if compress < 10:
             peak_scale = "1"
@@ -117,57 +123,48 @@ class BufferEditor:
         return peak_scale
 
     ########################################
-    # renderer
-    def render(self):
-        keep_going = True
+    # toolbar
+    def render_menu_bar(self):
+        pass
 
-        imgui.set_next_window_size([
-            self.app_window.canvas_panel_width,
-            self.app_window.canvas_panel_height
-        ])
-        imgui.set_next_window_pos((0, self.app_window.menu_height))
+    ########################################
+    # toolbar
+    def render_toolbar(self):
+        pass
 
-        imgui.push_style_var(imgui.StyleVar_.window_border_size, 1)
-        imgui.push_style_var(imgui.StyleVar_.window_padding, (2, 2))
-        imgui.push_style_var(imgui.StyleVar_.frame_padding, (2, 2))
-
-        imgui.begin(
-            "Buffer editor",
-            flags=(
-                imgui.WindowFlags_.no_collapse
-                | imgui.WindowFlags_.no_title_bar
-                | imgui.WindowFlags_.no_resize
-                | imgui.WindowFlags_.no_saved_settings
-                | imgui.WindowFlags_.no_move
-            )
-        )
-
-        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-            self.app_window.selected_window = "bufedit"
-
-        if self.needs_focus:
-            imgui.set_window_focus()
-            imgui.set_window_collapsed(False)
-            self.needs_focus = False
-
-        ########################################
-        # the plots
+    ########################################
+    # plots
+    def render_channels(self):
         implot.set_current_context(self.implot_context)
 
         num_channels = len(self.buffer_data or [])
         peak_scale = None
         peaks = None
 
-        for channel in range(num_channels):
+        line_height = imgui.get_text_line_height()
+        implot.begin_aligned_plots("##aligned_plot_group")
+
+        for channel in range(num_channels + 1):
             imgui.push_id(str(channel))
+            if channel == 0:
+                height = line_height * 4
+                plot_flags = implot.Flags_.no_mouse_text
+                x_axis_flags = implot.AxisFlags_.no_label
+                y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
+            else:
+                height = line_height * 10
+                plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
+                x_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
+                y_axis_flags = implot.AxisFlags_.no_label
+
             if implot.begin_plot(
                 "##buf_edit_plot",
-                flags=implot.Flags_.crosshairs | implot.Flags_.no_legend
+                [-1, height],
+                flags=plot_flags
             ):
                 implot.setup_axes(
                     '', '',
-                    x_flags=implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label,
-                    y_flags=implot.AxisFlags_.no_label,
+                    x_flags=x_axis_flags, y_flags=y_axis_flags
                 )
                 implot.setup_axis_limits(
                     implot.ImAxis_.y1.value, -1, 1, implot.Cond_.always.value
@@ -200,18 +197,19 @@ class BufferEditor:
                     )
                 ):
                     self.implot_limits = chan_limits
-                    self.implot_limits_need_set = [True] * num_channels
+                    self.implot_limits_need_set = [True] * (num_channels + 1)
                     self.implot_limits_need_set[channel] = False
 
-                # use the right subsampled data
-                if peak_scale is None:
-                    peak_scale = self.get_peak_scale()
-                    peaks = self.buffer_peaks[peak_scale]
-                y_values = peaks[0][channel]
-                x_values = peaks[1]
+                if channel > 0:
+                    # use the right subsampled data
+                    if peak_scale is None:
+                        peak_scale = self.get_peak_scale()
+                        peaks = self.buffer_peaks[peak_scale]
+                    y_values = peaks[0][channel - 1]
+                    x_values = peaks[1]
 
-                # the actual line!
-                implot.plot_line("Buffer edit", x_values, y_values, flags=0)
+                    # the actual line!
+                    implot.plot_line("Buffer edit", x_values, y_values, flags=0)
 
                 # if we have a selection, show it as a drag rect
                 if not self.channel_selections_active[channel] and self.implot_selection:
@@ -231,6 +229,48 @@ class BufferEditor:
                     self.channel_selections_active[channel] = True
                 implot.end_plot()
             imgui.pop_id()
+        implot.end_aligned_plots()
+
+    ########################################
+    # render wrapper
+    def render(self):
+        keep_going = True
+
+        imgui.set_next_window_size([
+            self.app_window.canvas_panel_width,
+            self.app_window.canvas_panel_height
+        ])
+        imgui.set_next_window_pos((0, self.app_window.menu_height))
+
+        imgui.push_style_var(imgui.StyleVar_.window_border_size, 1)
+        imgui.push_style_var(imgui.StyleVar_.window_padding, (2, 2))
+        imgui.push_style_var(imgui.StyleVar_.frame_padding, (2, 2))
+
+        implot.push_style_var(implot.StyleVar_.plot_padding, (2, 0))
+        imgui.begin(
+            "Buffer editor",
+            flags=(
+                imgui.WindowFlags_.no_collapse
+                | imgui.WindowFlags_.no_title_bar
+                | imgui.WindowFlags_.no_resize
+                | imgui.WindowFlags_.no_saved_settings
+                | imgui.WindowFlags_.no_move
+            )
+        )
+
+        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+            self.app_window.selected_window = "bufedit"
+
+        if self.needs_focus:
+            imgui.set_window_focus()
+            imgui.set_window_collapsed(False)
+            self.needs_focus = False
+
+        self.render_menu_bar()
+        self.render_toolbar()
+        self.render_channels()
+
         imgui.end()
+        implot.pop_style_var()
         imgui.pop_style_var(3)
         return keep_going
