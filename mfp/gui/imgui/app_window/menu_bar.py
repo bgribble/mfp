@@ -178,14 +178,75 @@ def render_help_menu(app_window, items):
     add_menu_items(app_window, items)
 
 
-async def update_buffer_menu(app_window):
-    from mfp.gui_main import MFPGUI
-    log.debug("[menu] async fetching buffer info")
-    app_window.buffer_info = await MFPGUI().mfp.get_buffer_info()
-    log.debug(f"[menu] got buffer info: {app_window.buffer_info}")
-
-
 def render(app_window):
+    if app_window.buffer_editor is not None:
+        return render_bufedit_menu(app_window)
+    return render_canvas_menu(app_window)
+
+def render_bufedit_menu(app_window):
+    from mfp.gui_main import MFPGUI
+    quit_selected = False
+
+    by_menu = load_menupaths(app_window)
+    menu_open = False
+
+    if imgui.begin_menu("File"):
+        menu_open = True
+        add_menu_items(app_window, by_menu.get("File", {}))
+        imgui.end_menu()
+
+    if imgui.begin_menu("Edit"):
+        menu_open = True
+        add_menu_items(app_window, by_menu.get("be:Edit", {}))
+        imgui.end_menu()
+
+    if imgui.begin_menu("Select"):
+        menu_open = True
+        add_menu_items(app_window, by_menu.get("be:Select", {}))
+        imgui.end_menu()
+
+    if imgui.begin_menu("Transport"):
+        menu_open = True
+        add_menu_items(app_window, by_menu.get("be:Transport", {}))
+        imgui.end_menu()
+
+    if imgui.begin_menu("Buffers"):
+        if app_window.buffer_info is None:
+            MFPGUI().async_task(app_window.update_buffer_info())
+            app_window.buffer_info = []
+
+        if app_window.buffer_selected is None and len(app_window.buffer_info):
+            app_window.buffer_selected = 0
+
+        for ind, buffer_info in enumerate(app_window.buffer_info):
+            imgui.push_id(str(id(buffer_info)))
+            imgui.dummy(app_window.scaled(1, 1))
+            imgui.same_line()
+            display_name = f"{buffer_info.get('proc_name')} ({buffer_info.get('file_name') or 'No file'})"
+            buffer_selected, _ = imgui.menu_item(
+                display_name,
+                '',
+                app_window.buffer_selected == ind
+            )
+            if buffer_selected:
+                app_window.buffer_editor.buffer_info = buffer_info.get('buf_info')
+                # update data in chart
+                app_window.buffer_editor.buffer_grab()
+            imgui.pop_id()
+        imgui.end_menu()
+    elif app_window.buffer_info is not None:
+        app_window.buffer_info = None
+
+    if imgui.begin_menu("Help"):
+        menu_open = True
+        render_help_menu(app_window, by_menu.get("Help", {}))
+        imgui.end_menu()
+
+    app_window.main_menu_open = menu_open
+
+    return quit_selected
+
+def render_canvas_menu(app_window):
     from mfp.gui_main import MFPGUI
     quit_selected = False
 
@@ -250,36 +311,6 @@ def render(app_window):
                 imgui.pop_id()
 
         imgui.end_menu()
-
-    if app_window.buffer_editor is not None and imgui.begin_menu("Buffers"):
-        if app_window.buffer_info is None:
-            log.debug("[menu] fetching buffer info")
-            MFPGUI().async_task(update_buffer_menu(app_window))
-            app_window.buffer_info = []
-
-        if app_window.buffer_selected is None and len(app_window.buffer_info):
-            app_window.buffer_selected = 0
-
-        for ind, buffer_info in enumerate(app_window.buffer_info):
-            imgui.push_id(str(id(buffer_info)))
-            imgui.dummy(app_window.scaled(1, 1))
-            imgui.same_line()
-            display_name = f"{buffer_info.get('proc_name')} ({buffer_info.get('file_name') or 'No file'})"
-            buffer_selected, _ = imgui.menu_item(
-                display_name,
-                '',
-                app_window.buffer_selected == ind
-            )
-            if buffer_selected:
-                log.debug(f"[menu] selected {buffer_info}")
-                app_window.buffer_editor.buffer_info = buffer_info.get('buf_info')
-                # update data in chart
-                app_window.buffer_editor.buffer_grab()
-            imgui.pop_id()
-        imgui.end_menu()
-    elif app_window.buffer_info is not None:
-        log.debug("[menu] clearing buffer info")
-        app_window.buffer_info = None
 
     if imgui.begin_menu("Help"):
         menu_open = True

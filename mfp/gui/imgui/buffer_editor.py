@@ -19,6 +19,8 @@ class BufferEditor:
         self.implot_selection = None         # global selection range
         self.implot_limits = None            # global plot limits
         self.implot_limits_need_set = [None]
+        self.implot_playhead = 0
+        self.implot_playhead_needs_set = False
 
         self.shm_obj = None
         self.buffer_info = None
@@ -34,6 +36,9 @@ class BufferEditor:
 
     def close(self):
         pass
+
+    def set_playhead_at_pointer(self):
+        self.implot_playhead_needs_set = True
 
     def buffer_grab(self):
         def offset(channel):
@@ -71,6 +76,10 @@ class BufferEditor:
         total_time = len(padded[0]) / self.buffer_info.rate
         sample_time = 1/self.buffer_info.rate
 
+        self.implot_limits = implot.Rect(
+            x_min=0, x_max=total_time, y_min=-1, y_max=1
+        )
+        self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
         self.buffer_peaks["1"] = (
             padded,
             np.arange(0, total_time, sample_time, dtype=np.float32)
@@ -108,7 +117,7 @@ class BufferEditor:
         compress = self.buffer_info.rate * (
             (max(limits.x.max, 1.0) - limits.x.min)
             / self.app_window.canvas_panel_width
-        ) 
+        )
 
         if compress < 10:
             peak_scale = "1"
@@ -124,13 +133,77 @@ class BufferEditor:
 
     ########################################
     # toolbar
-    def render_menu_bar(self):
-        pass
-
-    ########################################
-    # toolbar
     def render_toolbar(self):
-        pass
+        from mfp.gui import image_utils
+        line_height = imgui.get_text_line_height()
+        imgui.set_next_window_size((self.app_window.canvas_panel_width, 4*line_height))
+        imgui.set_next_window_pos((0, self.app_window.menu_height))
+
+        imgui.begin(
+            "bufedit_toolbar",
+            flags=(
+                imgui.WindowFlags_.no_collapse
+                | imgui.WindowFlags_.no_move
+                | imgui.WindowFlags_.no_title_bar
+                | imgui.WindowFlags_.no_decoration
+            ),
+        )
+        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+            imgui.set_window_focus()
+
+        imgui.push_style_var(
+            imgui.StyleVar_.frame_padding, (0.5 * line_height, 0.5 * line_height)
+        )
+        imgui.push_style_var(
+            imgui.StyleVar_.item_spacing, (0.5 * line_height, 0.5 * line_height)
+        )
+        imgui.set_cursor_pos((0.5 * line_height, 0.5 * line_height))
+
+        pause_tex = image_utils.load_texture_from_file("icons/media-playback-pause.png")
+        pause_clicked = imgui.image_button(
+            "##pause_btn", imgui.ImTextureRef(pause_tex[0]), [2*line_height, 2*line_height]
+        )
+        imgui.same_line()
+
+        play_tex = image_utils.load_texture_from_file("icons/media-playback-start.png")
+        play_clicked = imgui.image_button(
+            "##play_btn", imgui.ImTextureRef(play_tex[0]), [2*line_height, 2*line_height]
+        )
+        imgui.same_line()
+
+        stop_tex = image_utils.load_texture_from_file("icons/media-playback-stop.png")
+        stop_clicked = imgui.image_button(
+            "##stop_btn", imgui.ImTextureRef(stop_tex[0]), [2*line_height, 2*line_height]
+        )
+        imgui.same_line()
+
+        home_tex = image_utils.load_texture_from_file("icons/media-skip-backward.png")
+        home_clicked = imgui.image_button(
+            "##home_btn", imgui.ImTextureRef(home_tex[0]), [2*line_height, 2*line_height]
+        )
+        imgui.same_line()
+
+        end_tex = image_utils.load_texture_from_file("icons/media-skip-forward.png")
+        end_clicked = imgui.image_button(
+            "##end_btn", imgui.ImTextureRef(end_tex[0]), [2*line_height, 2*line_height]
+        )
+        imgui.same_line()
+
+        record_tex = image_utils.load_texture_from_file("icons/media-record.png")
+        record_clicked = imgui.image_button(
+            "##record_btn", imgui.ImTextureRef(record_tex[0]), [2*line_height, 2*line_height]
+        )
+        imgui.same_line()
+
+        loop_tex = image_utils.load_texture_from_file("icons/view-refresh.png")
+        loop_clicked = imgui.image_button(
+            "##loop_btn", imgui.ImTextureRef(loop_tex[0]), [2*line_height, 2*line_height]
+        )
+        imgui.same_line()
+
+        imgui.pop_style_var(2)
+        imgui.end()
+
 
     ########################################
     # plots
@@ -142,99 +215,129 @@ class BufferEditor:
         peaks = None
 
         line_height = imgui.get_text_line_height()
-        implot.begin_aligned_plots("##aligned_plot_group")
+        imgui.set_next_window_size([
+            self.app_window.canvas_panel_width,
+            self.app_window.canvas_panel_height - 4*line_height
+        ])
+        imgui.set_next_window_pos((0, 4*line_height + self.app_window.menu_height))
+        imgui.begin(
+            "##channelsview",
+            flags=(
+                imgui.WindowFlags_.no_collapse
+                | imgui.WindowFlags_.no_title_bar
+                | imgui.WindowFlags_.no_resize
+                | imgui.WindowFlags_.no_saved_settings
+                | imgui.WindowFlags_.no_move
+            )
+        )
+        if implot.begin_aligned_plots("##aligned_plot_group"):
+            implot.push_style_var(implot.StyleVar_.plot_padding, (2, 0))
 
-        for channel in range(num_channels + 1):
-            imgui.push_id(str(channel))
-            if channel == 0:
-                height = line_height * 4
-                plot_flags = implot.Flags_.no_mouse_text
-                x_axis_flags = implot.AxisFlags_.no_label
-                y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
-            else:
-                height = line_height * 10
-                plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
-                x_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
-                y_axis_flags = implot.AxisFlags_.no_label
+            for channel in range(num_channels + 1):
+                imgui.push_id(str(channel))
+                if channel == 0:
+                    height = line_height * 4
+                    plot_flags = implot.Flags_.no_mouse_text
+                    x_axis_flags = implot.AxisFlags_.no_label
+                    y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
+                else:
+                    height = line_height * 10
+                    plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
+                    x_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
+                    y_axis_flags = implot.AxisFlags_.no_label
 
-            if implot.begin_plot(
-                "##buf_edit_plot",
-                [-1, height],
-                flags=plot_flags
-            ):
-                implot.setup_axes(
-                    '', '',
-                    x_flags=x_axis_flags, y_flags=y_axis_flags
-                )
-                implot.setup_axis_limits(
-                    implot.ImAxis_.y1.value, -1, 1, implot.Cond_.always.value
-                )
-
-                if not self.implot_limits:
-                    self.implot_limits = implot.get_plot_limits()
-
-                # this is to reset limits after the boxselect adjusts zoom
-                if self.implot_limits_need_set[channel]:
-                    implot.setup_axis_limits(
-                        implot.ImAxis_.x1.value,
-                        self.implot_limits.x.min,
-                        self.implot_limits.x.max,
-                        implot.Cond_.always.value
-                    )
-                    self.implot_limits_need_set[channel] = False
-
-                chan_sel = implot.get_plot_selection()
-                chan_limits = implot.get_plot_limits()
-                if chan_sel.x.min == 0 and chan_sel.x.max == 0:
-                    if self.channel_selections_active[channel]:
-                        self.implot_limits_need_set[channel] = True
-                        self.channel_selections_active[channel] = False
-                if (
-                    not self.implot_limits_need_set[channel]
-                    and (
-                        chan_limits.x.min != self.implot_limits.x.min
-                        or chan_limits.x.max != self.implot_limits.x.max
-                    )
+                if implot.begin_plot(
+                    "##buf_edit_plot",
+                    [-1, height],
+                    flags=plot_flags
                 ):
-                    self.implot_limits = chan_limits
-                    self.implot_limits_need_set = [True] * (num_channels + 1)
-                    self.implot_limits_need_set[channel] = False
-
-                if channel > 0:
-                    # use the right subsampled data
-                    if peak_scale is None:
-                        peak_scale = self.get_peak_scale()
-                        peaks = self.buffer_peaks[peak_scale]
-                    y_values = peaks[0][channel - 1]
-                    x_values = peaks[1]
-
-                    # the actual line!
-                    implot.plot_line("Buffer edit", x_values, y_values, flags=0)
-
-                # if we have a selection, show it as a drag rect
-                if not self.channel_selections_active[channel] and self.implot_selection:
-                    ss = self.implot_selection
-                    rect = implot.drag_rect(
-                        0, ss.x.min, 1, ss.x.max, -1, [0, 1, 0, 1]
+                    implot.setup_axes(
+                        '', '',
+                        x_flags=x_axis_flags, y_flags=y_axis_flags
                     )
-                    if rect[1] != ss.x.min or rect[3] != ss.x.max:
-                        ss.x.min = rect[1]
-                        ss.x.max = rect[3]
-                        self.channel_selections[channel] = ss
-                        self.implot_selection = ss
+                    implot.setup_axis_limits(
+                        implot.ImAxis_.y1.value, -1, 1, implot.Cond_.always.value
+                    )
 
-                if chan_sel.x.min != 0 and chan_sel.x.min != chan_sel.x.max:
-                    self.implot_selection = chan_sel
-                    self.channel_selections[channel] = chan_sel
-                    self.channel_selections_active[channel] = True
-                implot.end_plot()
-            imgui.pop_id()
-        implot.end_aligned_plots()
+                    if not self.implot_limits:
+                        self.implot_limits = implot.get_plot_limits()
+
+                    # this is to reset limits after the boxselect adjusts zoom
+                    if self.implot_limits_need_set[channel]:
+                        implot.setup_axis_limits(
+                            implot.ImAxis_.x1.value,
+                            self.implot_limits.x.min,
+                            self.implot_limits.x.max,
+                            implot.Cond_.always.value
+                        )
+                        self.implot_limits_need_set[channel] = False
+
+                    chan_sel = implot.get_plot_selection()
+                    chan_limits = implot.get_plot_limits()
+                    if self.implot_playhead_needs_set:
+                        pointer = implot.get_plot_mouse_pos()
+                        if -1 <= pointer[1] <= 1:
+                            self.implot_playhead = pointer[0]
+
+                    if chan_sel.x.min == 0 and chan_sel.x.max == 0:
+                        if self.channel_selections_active[channel]:
+                            self.implot_limits_need_set[channel] = True
+                            self.channel_selections_active[channel] = False
+                    if (
+                        not self.implot_limits_need_set[channel]
+                        and (
+                            chan_limits.x.min != self.implot_limits.x.min
+                            or chan_limits.x.max != self.implot_limits.x.max
+                        )
+                    ):
+                        self.implot_limits = chan_limits
+                        self.implot_limits_need_set = [True] * (num_channels + 1)
+                        self.implot_limits_need_set[channel] = False
+
+                    if channel > 0:
+                        # use the right subsampled data
+                        if peak_scale is None:
+                            peak_scale = self.get_peak_scale()
+                            peaks = self.buffer_peaks[peak_scale]
+                        y_values = peaks[0][channel - 1]
+                        x_values = peaks[1]
+
+                        # the actual line!
+                        implot.plot_line("Buffer edit", x_values, y_values, flags=0)
+
+                    # if we have a selection, show it as a drag rect
+                    if not self.channel_selections_active[channel] and self.implot_selection:
+                        ss = self.implot_selection
+                        rect = implot.drag_rect(
+                            0, ss.x.min, 1, ss.x.max, -1, [0, 1, 0, 1]
+                        )
+                        if rect[1] != ss.x.min or rect[3] != ss.x.max:
+                            ss.x.min = rect[1]
+                            ss.x.max = rect[3]
+                            self.channel_selections[channel] = ss
+                            self.implot_selection = ss
+
+                    # playhead
+                    implot.drag_line_x(0, self.implot_playhead, [1, 1, 1, 1])
+
+                    if chan_sel.x.min != 0 and chan_sel.x.min != chan_sel.x.max:
+                        self.implot_selection = chan_sel
+                        self.channel_selections[channel] = chan_sel
+                        self.channel_selections_active[channel] = True
+                    implot.end_plot()
+                imgui.pop_id()
+            if self.implot_playhead_needs_set:
+                self.implot_playhead_needs_set = False
+
+            implot.pop_style_var()
+            implot.end_aligned_plots()
+        imgui.end()
 
     ########################################
     # render wrapper
     def render(self):
         keep_going = True
+        line_height = imgui.get_text_line_height()
 
         imgui.set_next_window_size([
             self.app_window.canvas_panel_width,
@@ -246,7 +349,6 @@ class BufferEditor:
         imgui.push_style_var(imgui.StyleVar_.window_padding, (2, 2))
         imgui.push_style_var(imgui.StyleVar_.frame_padding, (2, 2))
 
-        implot.push_style_var(implot.StyleVar_.plot_padding, (2, 0))
         imgui.begin(
             "Buffer editor",
             flags=(
@@ -266,11 +368,11 @@ class BufferEditor:
             imgui.set_window_collapsed(False)
             self.needs_focus = False
 
-        self.render_menu_bar()
         self.render_toolbar()
         self.render_channels()
 
         imgui.end()
-        implot.pop_style_var()
+
         imgui.pop_style_var(3)
+
         return keep_going

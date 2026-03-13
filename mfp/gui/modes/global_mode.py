@@ -41,6 +41,8 @@ class GlobalMode (InputMode):
 
         self.tile_manager_mode = None
 
+        self.bufedit_prev_mode = None
+
         InputMode.__init__(self, "Global input bindings", "Global")
 
     @classmethod
@@ -297,7 +299,7 @@ class GlobalMode (InputMode):
                 keysym="C-a"
             )
             cls.bind(
-                "open-sample-editor", cls.buffer_edit, helptext="Open buffer editor",
+                "toggle-buffer-editor", cls.buffer_edit, helptext="Toggle buffer editor",
                 keysym="C-b",
                 menupath="Window > |||Buffer editor"
             )
@@ -417,19 +419,29 @@ class GlobalMode (InputMode):
         self.window.selected_window = "inspector"
         self.window.inspector.focus()
 
-    def buffer_edit(self):
+    async def buffer_edit(self):
         """
         Toggle sample buffer editor
         """
         from mfp.gui.imgui.buffer_editor import BufferEditor
+        from mfp.gui.modes import BufferEditMode
 
         if self.window.buffer_editor is None:
+            await self.window.update_buffer_info()
+            log.debug(f"[global] got buffer info {self.window.buffer_info}")
             self.window.buffer_editor = BufferEditor(self.window)
+            if self.window.buffer_info:
+                self.window.buffer_editor.buffer_info = self.window.buffer_info[0].get('buf_info')
+                self.window.buffer_editor.buffer_grab()
+
             self.window.selected_window = "bufedit"
             self.window.buffer_editor.focus()
+            self.bufedit_prev_mode = self.window.input_mgr.major_mode
+            self.window.input_mgr.set_major_mode(BufferEditMode(self.window))
         else:
             self.window.buffer_editor.close()
             self.window.buffer_editor = None
+            self.window.input_mgr.set_major_mode(self.bufedit_prev_mode)
 
     async def toggle_console(self):
         await self.window.signal_emit("toggle-console")

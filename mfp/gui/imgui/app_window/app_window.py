@@ -98,7 +98,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.inspector = None
 
         self.buffer_editor = None
-        self.buffer_info = [] 
+        self.buffer_info = []
         self.buffer_selected = None
 
         self.log_text = ""
@@ -746,6 +746,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         return False
 
+    #####################
+    # buffer editor
+    async def update_buffer_info(self):
+        self.buffer_info = await MFPGUI().mfp.get_buffer_info()
 
     #####################
     # log output
