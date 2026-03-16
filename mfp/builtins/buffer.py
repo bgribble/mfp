@@ -57,6 +57,8 @@ class Buffer(Processor):
             self.init_channels = self.init_args[1]
         if "channels" in self.init_kwargs:
             self.init_channels = self.init_kwargs.pop("channels")
+        if "buf_id" in self.init_kwargs:
+            self.buf_id = self.init_kwargs.get("buf_id")
 
         # convert can be 'best', 'medium' or 'fastest'
         # there is about a 8-10x runtime difference between best and fastest

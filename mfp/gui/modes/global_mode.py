@@ -427,21 +427,10 @@ class GlobalMode (InputMode):
         from mfp.gui.modes import BufferEditMode
 
         if self.window.buffer_editor is None:
-            await self.window.update_buffer_info()
-            log.debug(f"[global] got buffer info {self.window.buffer_info}")
-            self.window.buffer_editor = BufferEditor(self.window)
-            if self.window.buffer_info:
-                self.window.buffer_editor.buffer_info = self.window.buffer_info[0].get('buf_info')
-                self.window.buffer_editor.buffer_grab()
+            await self.window.start_buffer_editor()
 
-            self.window.selected_window = "bufedit"
-            self.window.buffer_editor.focus()
-            self.bufedit_prev_mode = self.window.input_mgr.major_mode
-            self.window.input_mgr.set_major_mode(BufferEditMode(self.window))
         else:
-            self.window.buffer_editor.close()
-            self.window.buffer_editor = None
-            self.window.input_mgr.set_major_mode(self.bufedit_prev_mode)
+            await self.window.stop_buffer_editor()
 
     async def toggle_console(self):
         await self.window.signal_emit("toggle-console")

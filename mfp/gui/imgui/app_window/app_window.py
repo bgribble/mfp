@@ -98,6 +98,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.inspector = None
 
         self.buffer_editor = None
+        self.buffer_editor_previous_mode = None
         self.buffer_info = []
         self.buffer_selected = None
 
@@ -750,6 +751,31 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     # buffer editor
     async def update_buffer_info(self):
         self.buffer_info = await MFPGUI().mfp.get_buffer_info()
+
+    async def start_buffer_editor(self):
+        from mfp.gui.imgui.buffer_editor import BufferEditor
+        from mfp.gui.modes.buffer_edit import BufferEditMode
+
+        await self.update_buffer_info()
+        log.debug(f"[global] got buffer info {self.buffer_info}")
+        self.buffer_editor = BufferEditor(self)
+        if self.buffer_info:
+            self.buffer_editor.buffer_info = self.buffer_info[0].get('buf_info')
+            self.buffer_editor.buffer_grab()
+
+        self.selected_window = "bufedit"
+        self.buffer_editor.focus()
+        self.buffer_editor_previous_mode = self.input_mgr.major_mode
+        self.input_mgr.set_major_mode(BufferEditMode(self))
+
+        if not self.buffer_editor.working_patch_id:
+            await self.buffer_editor.init_working_patch()
+
+
+    async def stop_buffer_editor(self):
+        self.buffer_editor.close()
+        self.buffer_editor = None
+        self.input_mgr.set_major_mode(self.buffer_editor_previous_mode)
 
     #####################
     # log output

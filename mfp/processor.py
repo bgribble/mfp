@@ -242,6 +242,8 @@ class Processor:
         if self.doc_help_patch:
             info['help_patch'] = self.doc_help_patch
 
+        info['name'] = self.name
+        info['scope'] = self.scope.name
         info['messages_in'] = self.count_in
         info['messages_out'] = self.count_out
         info['trigger_count'] = self.count_trigger

@@ -21,12 +21,18 @@ class BufferEditor:
         self.implot_limits_need_set = [None]
         self.implot_playhead = 0
         self.implot_playhead_needs_set = False
+        self.implot_playhead_start_time = None
+        self.implot_playhead_start_pos = None
 
         self.shm_obj = None
         self.buffer_info = None
         self.buffer_data = None
         self.buffer_peaks = {}
-        self.last_buffer = None
+
+        self.working_patch_id = None
+        self.working_patch_info = None
+        self.working_buffer_id = None
+        self.working_buffer_info = None
 
         self.channel_selections = [None]         # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
@@ -35,10 +41,38 @@ class BufferEditor:
         self.needs_focus = True
 
     def close(self):
-        pass
+        self.window.buffer_info = self.buffer_info
 
     def set_playhead_at_pointer(self):
         self.implot_playhead_needs_set = True
+
+    async def init_working_patch(self):
+        from mfp.gui_main import MFPGUI
+        self.working_patch_id = await MFPGUI().mfp.open_file(None, show_gui=False)
+        self.working_patch_info = await MFPGUI().mfp.get_tooltip_info(self.working_patch_id, details=True)
+        buffer_params = dict(
+            channels=self.buffer_info.channels,
+            buf_id=self.buffer_info.buf_id,
+            size=self.buffer_info.size,
+        )
+
+        self.working_buffer_info = await MFPGUI().mfp.create(
+            "buffer~",
+            ", ".join([f"{key}={value!r}" for key, value in buffer_params.items()]),
+            self.working_patch_info.get("name"),
+            None,
+            "source_buffer"
+        )
+        self.working_buffer_id = self.working_buffer_info.get("obj_id")
+
+        out_0_info = await MFPGUI().mfp.create(
+            "out~", "0", self.working_patch_info.get("name"), None, "audition 0"
+        )
+        out_1_info = await MFPGUI().mfp.create(
+            "out~", "1", self.working_patch_info.get("name"), None, "audition 1"
+        )
+        await MFPGUI().mfp.connect(self.working_buffer_id, 0, out_0_info.get("obj_id"), 0)
+        await MFPGUI().mfp.connect(self.working_buffer_id, 1, out_1_info.get("obj_id"), 0)
 
     def buffer_grab(self):
         def offset(channel):
@@ -48,7 +82,6 @@ class BufferEditor:
         if self.shm_obj is None:
             self.shm_obj = SharedMemory(self.buffer_info.buf_id)
 
-        self.last_buffer = datetime.now()
         self.buffer_data = []
         self.channel_selections = [None] * (self.buffer_info.channels + 1)
         self.channel_selections_active = [False] * (self.buffer_info.channels + 1)
@@ -135,6 +168,7 @@ class BufferEditor:
     # toolbar
     def render_toolbar(self):
         from mfp.gui import image_utils
+        from mfp.gui_main import MFPGUI
         line_height = imgui.get_text_line_height()
         imgui.set_next_window_size((self.app_window.canvas_panel_width, 4*line_height))
         imgui.set_next_window_pos((0, self.app_window.menu_height))
@@ -204,10 +238,16 @@ class BufferEditor:
         imgui.pop_style_var(2)
         imgui.end()
 
+        if play_clicked:
+            MFPGUI().async_task(self.playhead_start())
+
+        if pause_clicked:
+            MFPGUI().async_task(self.playhead_pause())
 
     ########################################
     # plots
     def render_channels(self):
+        from mfp.gui_main import MFPGUI
         implot.set_current_context(self.implot_context)
 
         num_channels = len(self.buffer_data or [])
@@ -277,7 +317,12 @@ class BufferEditor:
                     if self.implot_playhead_needs_set:
                         pointer = implot.get_plot_mouse_pos()
                         if -1 <= pointer[1] <= 1:
-                            self.implot_playhead = pointer[0]
+                            MFPGUI().async_task(self.playhead_move(pointer[0]))
+                    elif self.implot_playhead_start_time:
+                        self.implot_playhead = (
+                            self.implot_playhead_start_pos
+                            + (datetime.now() - self.implot_playhead_start_time).total_seconds()
+                        )
 
                     if chan_sel.x.min == 0 and chan_sel.x.max == 0:
                         if self.channel_selections_active[channel]:
@@ -376,3 +421,48 @@ class BufferEditor:
         imgui.pop_style_var(3)
 
         return keep_going
+
+    ########################################
+    # playhead control
+    async def playhead_start(self):
+        from mfp.gui_main import MFPGUI
+        pos_samples = self.implot_playhead * self.buffer_info.rate
+
+        buffer_params = dict(
+            buf_mode=5,
+            play_channels=0xff,
+            buf_pos=pos_samples
+        )
+
+        await MFPGUI().mfp.send(self.working_buffer_id, 0, buffer_params)
+        await MFPGUI().mfp.send_bang(self.working_buffer_id, 0)
+
+        self.implot_playhead_start_time = datetime.now()
+        self.implot_playhead_start_pos = self.implot_playhead
+
+    async def playhead_move(self, new_pos):
+        from mfp.gui_main import MFPGUI
+        self.implot_playhead = new_pos
+        pos_samples = self.implot_playhead * self.buffer_info.rate
+
+        buffer_params = dict(
+            buf_pos=pos_samples
+        )
+
+        await MFPGUI().mfp.send(self.working_buffer_id, 0, buffer_params)
+
+        if self.implot_playhead_start_time:
+            self.implot_playhead_start_time = datetime.now()
+            self.implot_playhead_start_pos = self.implot_playhead
+
+    async def playhead_pause(self):
+        from mfp.gui_main import MFPGUI
+        buffer_params = dict(
+            buf_state=0,
+        )
+
+        await MFPGUI().mfp.send(
+            self.working_buffer_id, 0, buffer_params
+        )
+
+        self.implot_playhead_start_time = None
