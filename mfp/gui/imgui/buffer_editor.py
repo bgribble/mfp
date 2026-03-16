@@ -241,8 +241,14 @@ class BufferEditor:
         if play_clicked:
             MFPGUI().async_task(self.playhead_start())
 
-        if pause_clicked:
+        if pause_clicked or stop_clicked:
             MFPGUI().async_task(self.playhead_pause())
+
+        if home_clicked:
+            MFPGUI().async_task(self.playhead_move(0))
+
+        if end_clicked:
+            MFPGUI().async_task(self.playhead_move(self.implot_limits.x.max - 0.001))
 
     ########################################
     # plots

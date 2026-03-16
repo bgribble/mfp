@@ -178,11 +178,11 @@ class Buffer(Processor):
             if self.shm_obj:
                 self.shm_obj.close_fd()
                 self.shm_obj = None
-            if self.buf_id and self.buf_id in Buffer.registry:
-                del Buffer.registry[self.buf_id]
+            if self.obj_id in Buffer.registry:
+                del Buffer.registry[self.obj_id]
 
             self.buf_id = resp_value
-            Buffer.registry[self.buf_id] = self
+            Buffer.registry[self.obj_id] = self
 
         elif resp_id == self.RESP_BUFSIZE:
             self.size = resp_value
@@ -220,8 +220,8 @@ class Buffer(Processor):
             self.outlets[-1] = (resp_id, resp_value)
 
     async def delete(self):
-        if self.buf_id and self.buf_id in Buffer.registry:
-            del Buffer.registry[self.buf_id]
+        if self.obj_id and self.obj_id in Buffer.registry:
+            del Buffer.registry[self.obj_id]
         return await super().delete()
 
     async def trigger(self):

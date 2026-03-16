@@ -219,6 +219,9 @@ def render_bufedit_menu(app_window):
             app_window.buffer_selected = 0
 
         for ind, buffer_info in enumerate(app_window.buffer_info):
+            if buffer_info.get('proc_name') == "source_buffer":
+                continue
+
             imgui.push_id(str(id(buffer_info)))
             imgui.dummy(app_window.scaled(1, 1))
             imgui.same_line()
