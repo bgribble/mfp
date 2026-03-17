@@ -23,6 +23,8 @@ class BufferEditor:
         self.implot_playhead_needs_set = False
         self.implot_playhead_start_time = None
         self.implot_playhead_start_pos = None
+        self.implot_playhead_looping = False
+        self.implot_total_time = 0
 
         self.shm_obj = None
         self.buffer_info = None
@@ -108,7 +110,7 @@ class BufferEditor:
         ]
         total_time = len(padded[0]) / self.buffer_info.rate
         sample_time = 1/self.buffer_info.rate
-
+        self.implot_total_time = total_time
         self.implot_limits = implot.Rect(
             x_min=0, x_max=total_time, y_min=-1, y_max=1
         )
@@ -229,11 +231,17 @@ class BufferEditor:
         )
         imgui.same_line()
 
+        if not self.implot_selection:
+            imgui.begin_disabled()
+
         loop_tex = image_utils.load_texture_from_file("icons/view-refresh.png")
         loop_clicked = imgui.image_button(
             "##loop_btn", imgui.ImTextureRef(loop_tex[0]), [2*line_height, 2*line_height]
         )
         imgui.same_line()
+
+        if not self.implot_selection:
+            imgui.end_disabled()
 
         imgui.pop_style_var(2)
         imgui.end()
@@ -249,6 +257,9 @@ class BufferEditor:
 
         if end_clicked:
             MFPGUI().async_task(self.playhead_move(self.implot_limits.x.max - 0.001))
+
+        if loop_clicked:
+            MFPGUI().async_task(self.playhead_loop_selection())
 
     ########################################
     # plots
@@ -325,9 +336,17 @@ class BufferEditor:
                         if -1 <= pointer[1] <= 1:
                             MFPGUI().async_task(self.playhead_move(pointer[0]))
                     elif self.implot_playhead_start_time:
+                        playhead_offset = (
+                            datetime.now() - self.implot_playhead_start_time
+                        ).total_seconds()
+                        if self.implot_playhead_looping:
+                            playhead_offset = (
+                                playhead_offset
+                                % (self.implot_selection.x.max - self.implot_selection.x.min)
+                            )
+
                         self.implot_playhead = (
-                            self.implot_playhead_start_pos
-                            + (datetime.now() - self.implot_playhead_start_time).total_seconds()
+                            self.implot_playhead_start_pos + playhead_offset
                         )
 
                     if chan_sel.x.min == 0 and chan_sel.x.max == 0:
@@ -437,7 +456,9 @@ class BufferEditor:
         buffer_params = dict(
             buf_mode=5,
             play_channels=0xff,
-            buf_pos=pos_samples
+            buf_pos=pos_samples,
+            region_start=0,
+            region_end=self.implot_total_time * self.buffer_info.rate
         )
 
         await MFPGUI().mfp.send(self.working_buffer_id, 0, buffer_params)
@@ -445,6 +466,7 @@ class BufferEditor:
 
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead_start_pos = self.implot_playhead
+        self.implot_playhead_looping = False
 
     async def playhead_move(self, new_pos):
         from mfp.gui_main import MFPGUI
@@ -472,3 +494,26 @@ class BufferEditor:
         )
 
         self.implot_playhead_start_time = None
+        self.implot_playhead_looping = False
+
+    async def playhead_loop_selection(self):
+        from mfp.gui_main import MFPGUI
+        start_samples = self.implot_selection.x.min * self.buffer_info.rate
+        end_samples = self.implot_selection.x.max * self.buffer_info.rate
+        self.implot_playhead = self.implot_selection.x.min
+        self.implot_playhead_looping = True
+
+        buffer_params = dict(
+            buf_mode=6,
+            play_channels=0xff,
+            buf_pos=start_samples,
+            region_start=start_samples,
+            region_end=end_samples
+        )
+
+        await MFPGUI().mfp.send(self.working_buffer_id, 0, buffer_params)
+        await MFPGUI().mfp.send_bang(self.working_buffer_id, 0)
+
+        self.implot_playhead_start_time = datetime.now()
+        self.implot_playhead_start_pos = self.implot_playhead
+

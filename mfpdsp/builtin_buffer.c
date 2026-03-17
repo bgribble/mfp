@@ -424,12 +424,10 @@ process(mfp_processor * proc)
                         section_size = 0;
                     }
                     else if (d->buf_mode == REC_LOOP) {
-                        next_state = BUF_TRIGGERED;
-                        section_size = 0;
+                        next_state = BUF_IDLE;
                     }
                     else if (d->buf_mode == PLAY_LOOP) {
-                        next_state = BUF_TRIGGERED;
-                        section_size = 0;
+                        next_state = BUF_IDLE;
                     }
                     else if (d->buf_mode == REC_LOOPSET) {
                         next_state = BUF_TRIGGERED;
@@ -589,7 +587,7 @@ process(mfp_processor * proc)
             }
 
             /* now advance d->buf_read_pos and d->buf_write_pos */
-            int buf_remainder = (d->buf_read_pos + section_size) % (region_end - d->region_start);
+            int buf_remainder = (d->buf_read_pos - d->region_start + section_size) % (region_end - d->region_start);
             d->buf_read_pos = d->region_start + buf_remainder;
             d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
         }
@@ -649,7 +647,6 @@ process(mfp_processor * proc)
                     mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
                 }
             }
-
         }
 
         section_state = next_state;

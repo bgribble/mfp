@@ -750,7 +750,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # buffer editor
     async def update_buffer_info(self):
-        self.buffer_info = await MFPGUI().mfp.get_buffer_info()
+        buffer_info = await MFPGUI().mfp.get_buffer_info()
+        self.buffer_info = [
+            b for b in buffer_info
+            if b.get("proc_name") != "source_buffer"
+        ]
+
 
     async def start_buffer_editor(self):
         from mfp.gui.imgui.buffer_editor import BufferEditor
