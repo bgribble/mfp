@@ -187,6 +187,12 @@ class Processor:
             if state:
                 self.restore_state(state)
 
+    def load_type(self):
+        ltype = self.init_type
+        if self.init_type[0] == '{' and self.init_type[-1] == '}':
+            ltype = self.patch.parse_obj(self.init_type[1:-1])
+        return ltype
+
     def save_state(self):
         return {}
 
@@ -596,6 +602,7 @@ class Processor:
 
     async def dsp_init(self, proc_name, **params):
         from .mfp_app import MFPApp
+
         if self.patch.context:
             DSPObjectFactory = await MFPApp().rpc_host.require(
                 DSPObject, host_id=self.patch.context.node_id
@@ -1240,7 +1247,6 @@ class Processor:
         '''
 
         oinfo = {}
-        oinfo['type'] = self.init_type
         oinfo['initargs'] = self.init_args
         oinfo['name'] = self.name
         oinfo['do_onload'] = self.do_onload
@@ -1249,6 +1255,11 @@ class Processor:
         oinfo['properties'] = self.properties
         oinfo['midi_filters'] = self.midi_filters
         oinfo['midi_mode'] = self.midi_mode
+
+        if self.gui_params.get("obj_type"):
+            oinfo['type'] = self.gui_params["obj_type"]
+        else:
+            oinfo['type'] = self.init_type
 
         nonstd_osc = []
         for o in self.osc_methods:

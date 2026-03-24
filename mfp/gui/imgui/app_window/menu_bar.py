@@ -219,7 +219,7 @@ def render_bufedit_menu(app_window):
             app_window.buffer_selected = 0
 
         for ind, buffer_info in enumerate(app_window.buffer_info):
-            if buffer_info.get('proc_name') == "source_buffer":
+            if buffer_info.get('proc_name') in ("source_buffer", "sink_buffer"):
                 continue
 
             imgui.push_id(str(id(buffer_info)))
@@ -235,6 +235,7 @@ def render_bufedit_menu(app_window):
                 app_window.buffer_editor.buffer_info = buffer_info.get('buf_info')
                 # update data in chart
                 app_window.buffer_editor.buffer_grab()
+                app_window.buffer_editor.init_working_patch()
             imgui.pop_id()
         imgui.end_menu()
     elif app_window.buffer_info is not None:

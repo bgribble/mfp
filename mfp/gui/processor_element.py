@@ -6,6 +6,7 @@ A patch element corresponding to a signal or control processor
 '''
 
 from abc import ABCMeta, abstractmethod
+import re
 
 from flopsy import saga, mutates
 
@@ -91,9 +92,9 @@ class ProcessorElement (BaseElement):
     async def recreate_element(self, action, state_diff, previous):
         # don't recreate if this is the initial creation
         if "code" not in state_diff:
-            if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+            if "obj_state" in state_diff and state_diff['obj_state'][0] is None:
                 return
-            if "obj_id" in state_diff and state_diff['obj_id'][0] == None:
+            if "obj_id" in state_diff and state_diff['obj_id'][0] is None:
                 return
 
         if self.obj_type:
@@ -104,12 +105,24 @@ class ProcessorElement (BaseElement):
 
     async def label_edit_finish(self, widget, text=None, aborted=False):
         if text is not None and not aborted:
-            parts = text.split(' ', 1)
-            obj_type = parts[0]
-            if len(parts) > 1:
-                obj_args = parts[1]
-            else:
-                obj_args = None
+            obj_type = None
+            obj_args = None
+            # special form to eval for processor name
+            if text[0] == "{":
+                matches = re.search(
+                    "^({.*})( (.*))?$", text
+                )
+                if matches:
+                    obj_type = matches.group(1)
+                    obj_args = matches.group(3)
+
+            if not obj_type:
+                parts = text.split(' ', 1)
+                obj_type = parts[0]
+                if len(parts) > 1:
+                    obj_args = parts[1]
+                else:
+                    obj_args = None
 
             await self.create(obj_type, obj_args)
 

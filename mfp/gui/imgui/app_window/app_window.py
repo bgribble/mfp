@@ -264,6 +264,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         for p in self.patches:
             if hasattr(p, 'nedit_editor'):
                 nedit.destroy_editor(p.nedit_editor)
+
         self.imgui_renderer.shutdown()
         self.imgui_impl.shutdown()
         await self.signal_emit("quit")
@@ -532,6 +533,13 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def ready(self):
         pass
 
+    async def quit(self):
+        log.debug("quit: in imgui window quit")
+        if self.buffer_editor:
+            await self.buffer_editor.close()
+            self.buffer_editor = None
+        return await super().quit()
+
     #####################
     # coordinate transforms and zoom
     def screen_to_canvas(self, x, y):
@@ -753,16 +761,15 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         buffer_info = await MFPGUI().mfp.get_buffer_info()
         self.buffer_info = [
             b for b in buffer_info
-            if b.get("proc_name") != "source_buffer"
+            if b.get("proc_name") not in ("source_buffer", "sink_buffer")
         ]
-
+        return buffer_info
 
     async def start_buffer_editor(self):
         from mfp.gui.imgui.buffer_editor import BufferEditor
         from mfp.gui.modes.buffer_edit import BufferEditMode
 
         await self.update_buffer_info()
-        log.debug(f"[global] got buffer info {self.buffer_info}")
         self.buffer_editor = BufferEditor(self)
         if self.buffer_info:
             self.buffer_editor.buffer_info = self.buffer_info[0].get('buf_info')
@@ -776,9 +783,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if not self.buffer_editor.working_patch_id:
             await self.buffer_editor.init_working_patch()
 
-
     async def stop_buffer_editor(self):
-        self.buffer_editor.close()
+        await self.buffer_editor.close()
         self.buffer_editor = None
         self.input_mgr.set_major_mode(self.buffer_editor_previous_mode)
 

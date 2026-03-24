@@ -1,6 +1,7 @@
 """
 buffer_editor.py -- BufferEditor() class definition
 """
+import asyncio
 import os
 from datetime import datetime
 from posix_ipc import SharedMemory
@@ -33,8 +34,12 @@ class BufferEditor:
 
         self.working_patch_id = None
         self.working_patch_info = None
-        self.working_buffer_id = None
-        self.working_buffer_info = None
+        self.working_buf_id = None
+        self.working_buf_obj = None
+        self.working_source_id = None
+        self.working_source_info = None
+        self.working_sink_id = None
+        self.working_sink_info = None
 
         self.channel_selections = [None]         # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
@@ -42,39 +47,77 @@ class BufferEditor:
     def focus(self):
         self.needs_focus = True
 
-    def close(self):
-        self.window.buffer_info = self.buffer_info
+    async def close(self):
+        self.app_window.buffer_info = self.buffer_info
+        await self.close_working_patch()
 
     def set_playhead_at_pointer(self):
         self.implot_playhead_needs_set = True
 
     async def init_working_patch(self):
         from mfp.gui_main import MFPGUI
+        if self.working_patch_id:
+            log.debug("init_working_patch: closing previous patch")
+            self.close_working_patch()
+
         self.working_patch_id = await MFPGUI().mfp.open_file(None, show_gui=False)
         self.working_patch_info = await MFPGUI().mfp.get_tooltip_info(self.working_patch_id, details=True)
         buffer_params = dict(
-            channels=self.buffer_info.channels,
-            buf_id=self.buffer_info.buf_id,
+            channels=self.buffer_info.channels + 2,
             size=self.buffer_info.size,
         )
 
-        self.working_buffer_info = await MFPGUI().mfp.create(
+        self.working_source_info = await MFPGUI().mfp.create(
             "buffer~",
             ", ".join([f"{key}={value!r}" for key, value in buffer_params.items()]),
             self.working_patch_info.get("name"),
             None,
             "source_buffer"
         )
-        self.working_buffer_id = self.working_buffer_info.get("obj_id")
+        self.working_source_id = self.working_source_info.get("obj_id")
 
+        # wait for buffer to be initialized
+        source = None
+        while source is None:
+            try:
+                all_buffers = await MFPGUI().mfp.get_buffer_info()
+                source = next(b for b in all_buffers if b.get("proc_name") == "source_buffer")
+            except StopIteration:
+                await asyncio.sleep(0.1)
+
+        source_buf = source.get("buf_info")
+        self.working_buf_id = source_buf.buf_id
+        self.working_buf_obj = SharedMemory(source_buf.buf_id)
+        buffer_params["buf_id"] = source_buf.buf_id
+        buffer_params["channels"] = source_buf.channels
+        buffer_params["size"] = source_buf.size
+
+        self.working_sink_info = await MFPGUI().mfp.create(
+            "buffer~",
+            ", ".join([f"{key}={value!r}" for key, value in buffer_params.items()]),
+            self.working_patch_info.get("name"),
+            None,
+            "sink_buffer"
+        )
+        self.working_sink_id = self.working_sink_info.get("obj_id")
         out_0_info = await MFPGUI().mfp.create(
             "out~", "0", self.working_patch_info.get("name"), None, "audition 0"
         )
         out_1_info = await MFPGUI().mfp.create(
             "out~", "1", self.working_patch_info.get("name"), None, "audition 1"
         )
-        await MFPGUI().mfp.connect(self.working_buffer_id, 0, out_0_info.get("obj_id"), 0)
-        await MFPGUI().mfp.connect(self.working_buffer_id, 1, out_1_info.get("obj_id"), 0)
+        await MFPGUI().mfp.connect(self.working_sink_id, 0, out_0_info.get("obj_id"), 0)
+        await MFPGUI().mfp.connect(self.working_sink_id, 1, out_1_info.get("obj_id"), 0)
+
+        self.buffer_sync(self.shm_obj, self.buffer_info, self.working_buf_obj, source_buf)
+        self.buffer_compute_peaks()
+
+    async def close_working_patch(self):
+        from mfp.gui_main import MFPGUI
+
+        if self.working_patch_id:
+            await MFPGUI().mfp.delete(self.working_patch_id)
+            self.working_patch_id = None
 
     def buffer_grab(self):
         def offset(channel):
@@ -95,13 +138,33 @@ class BufferEditor:
                 os.lseek(self.shm_obj.fd, offset(c), os.SEEK_SET)
                 slc = os.read(self.shm_obj.fd, int(self.buffer_info.size * self.FLOAT_SIZE))
                 self.buffer_data.append(np.fromstring(slc, dtype=np.float32))
-                # self.set_bounds(0, None, len(self.buffer_data[0])*1000/self.samplerate, None)
         except Exception as e:
-            log.debug("[editor]: error grabbing data", e)
+            log.debug("[grab]: error grabbing data", e)
             import traceback
             traceback.print_exc()
             return None
+        self.buffer_compute_peaks()
 
+    def buffer_sync(self, from_obj, from_info, to_obj, to_info):
+        def offset(buf_info, channel):
+            return channel * buf_info.size * self.FLOAT_SIZE
+        sync_channels = to_info.channels
+        if from_info:
+            sync_channels = min(from_info.channels, to_info.channels)
+
+        for c in range(sync_channels):
+            if from_obj:
+                os.lseek(from_obj.fd, offset(from_info, c), os.SEEK_SET)
+                slc = os.read(from_obj.fd, int(from_info.size * self.FLOAT_SIZE))
+            else:
+                log.debug(f"[sync] syncing from buffer_data[{c}]")
+                slc = self.buffer_data[c].tobytes(dtype=np.float32)
+            os.lseek(to_obj.fd, offset(to_info, c), os.SEEK_SET)
+            os.write(to_obj.fd, slc)
+
+        log.debug("[sync] sync done")
+
+    def buffer_compute_peaks(self):
         self.buffer_peaks = {}
         padding = 10 - len(self.buffer_data[0]) % 10
         padded = [
@@ -390,7 +453,7 @@ class BufferEditor:
                     # playhead
                     implot.drag_line_x(0, self.implot_playhead, [1, 1, 1, 1])
 
-                    if chan_sel.x.min != 0 and chan_sel.x.min != chan_sel.x.max:
+                    if chan_sel.x.min not in (0, chan_sel.x.max):
                         self.implot_selection = chan_sel
                         self.channel_selections[channel] = chan_sel
                         self.channel_selections_active[channel] = True
@@ -407,7 +470,6 @@ class BufferEditor:
     # render wrapper
     def render(self):
         keep_going = True
-        line_height = imgui.get_text_line_height()
 
         imgui.set_next_window_size([
             self.app_window.canvas_panel_width,
@@ -461,8 +523,8 @@ class BufferEditor:
             region_end=self.implot_total_time * self.buffer_info.rate
         )
 
-        await MFPGUI().mfp.send(self.working_buffer_id, 0, buffer_params)
-        await MFPGUI().mfp.send_bang(self.working_buffer_id, 0)
+        await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+        await MFPGUI().mfp.send_bang(self.working_sink_id, 0)
 
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead_start_pos = self.implot_playhead
@@ -477,7 +539,7 @@ class BufferEditor:
             buf_pos=pos_samples
         )
 
-        await MFPGUI().mfp.send(self.working_buffer_id, 0, buffer_params)
+        await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
 
         if self.implot_playhead_start_time:
             self.implot_playhead_start_time = datetime.now()
@@ -490,7 +552,7 @@ class BufferEditor:
         )
 
         await MFPGUI().mfp.send(
-            self.working_buffer_id, 0, buffer_params
+            self.working_sink_id, 0, buffer_params
         )
 
         self.implot_playhead_start_time = None
@@ -511,9 +573,8 @@ class BufferEditor:
             region_end=end_samples
         )
 
-        await MFPGUI().mfp.send(self.working_buffer_id, 0, buffer_params)
-        await MFPGUI().mfp.send_bang(self.working_buffer_id, 0)
+        await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+        await MFPGUI().mfp.send_bang(self.working_sink_id, 0)
 
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead_start_pos = self.implot_playhead
-

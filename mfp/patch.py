@@ -56,6 +56,7 @@ class Patch(Processor):
         self.step_debugger = StepDebugger()
 
         self.init_bindings()
+        self.parsed_initargs = None
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
 
         self.gui_params['layers'] = []
