@@ -157,12 +157,9 @@ class BufferEditor:
                 os.lseek(from_obj.fd, offset(from_info, c), os.SEEK_SET)
                 slc = os.read(from_obj.fd, int(from_info.size * self.FLOAT_SIZE))
             else:
-                log.debug(f"[sync] syncing from buffer_data[{c}]")
                 slc = self.buffer_data[c].tobytes(dtype=np.float32)
             os.lseek(to_obj.fd, offset(to_info, c), os.SEEK_SET)
             os.write(to_obj.fd, slc)
-
-        log.debug("[sync] sync done")
 
     def buffer_compute_peaks(self):
         self.buffer_peaks = {}
@@ -579,6 +576,12 @@ class BufferEditor:
             region_start=start_samples,
             region_end=end_samples
         )
+        if self.implot_playhead < self.implot_selection.x.min:
+            self.implot_playhead = self.implot_selection.x.min
+            buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
+        elif self.implot_playhead >= self.implot_selection.x.max:
+            self.implot_playhead = self.implot_selection.x.max
+            buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
 
         if self.implot_playhead_start_time:
             self.implot_playhead_start_time = datetime.now()
