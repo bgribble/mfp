@@ -353,6 +353,28 @@ class BufferEditor:
         if implot.begin_aligned_plots("##aligned_plot_group"):
             implot.push_style_var(implot.StyleVar_.plot_padding, (2, 0))
 
+            if self.implot_playhead_start_time and not self.implot_playhead_needs_set:
+                playhead_offset = (
+                    datetime.now() - self.implot_playhead_start_time
+                ).total_seconds()
+                if self.implot_playhead_looping:
+                    raw_offset = self.implot_playhead_start_pos + playhead_offset
+                    if raw_offset < self.implot_selection.x.min:
+                        self.implot_playhead = self.implot_selection.x.min
+                    elif raw_offset <= self.implot_selection.x.max:
+                        self.implot_playhead = raw_offset
+                    else:
+                        window_size = self.implot_selection.x.max - self.implot_selection.x.min
+                        window_offset = raw_offset - self.implot_selection.x.min
+                        self.implot_playhead = (
+                            self.implot_selection.x.min
+                            + (window_offset % window_size)
+                        )
+                else:
+                    self.implot_playhead = (
+                        self.implot_playhead_start_pos + playhead_offset
+                    )
+
             for channel in range(num_channels + 1):
                 imgui.push_id(str(channel))
                 if channel == 0:
@@ -398,19 +420,6 @@ class BufferEditor:
                         pointer = implot.get_plot_mouse_pos()
                         if -1 <= pointer[1] <= 1:
                             MFPGUI().async_task(self.playhead_move(pointer[0]))
-                    elif self.implot_playhead_start_time:
-                        playhead_offset = (
-                            datetime.now() - self.implot_playhead_start_time
-                        ).total_seconds()
-                        if self.implot_playhead_looping:
-                            playhead_offset = (
-                                playhead_offset
-                                % (self.implot_selection.x.max - self.implot_selection.x.min)
-                            )
-
-                        self.implot_playhead = (
-                            self.implot_playhead_start_pos + playhead_offset
-                        )
 
                     if chan_sel.x.min == 0 and chan_sel.x.max == 0:
                         if self.channel_selections_active[channel]:
@@ -449,6 +458,9 @@ class BufferEditor:
                             ss.x.max = rect[3]
                             self.channel_selections[channel] = ss
                             self.implot_selection = ss
+                            MFPGUI().async_task(
+                                self.playhead_update_selection()
+                            )
 
                     # playhead
                     implot.drag_line_x(0, self.implot_playhead, [1, 1, 1, 1])
@@ -471,6 +483,7 @@ class BufferEditor:
     def render(self):
         keep_going = True
 
+        self.app_window.imgui_prevent_idle = 1
         imgui.set_next_window_size([
             self.app_window.canvas_panel_width,
             self.app_window.canvas_panel_height
@@ -519,7 +532,7 @@ class BufferEditor:
             buf_mode=5,
             play_channels=0xff,
             buf_pos=pos_samples,
-            region_start=0,
+            region_start=pos_samples,
             region_end=self.implot_total_time * self.buffer_info.rate
         )
 
@@ -557,6 +570,22 @@ class BufferEditor:
 
         self.implot_playhead_start_time = None
         self.implot_playhead_looping = False
+
+    async def playhead_update_selection(self):
+        from mfp.gui_main import MFPGUI
+        start_samples = self.implot_selection.x.min * self.buffer_info.rate
+        end_samples = self.implot_selection.x.max * self.buffer_info.rate
+        buffer_params = dict(
+            region_start=start_samples,
+            region_end=end_samples
+        )
+
+        if self.implot_playhead_start_time:
+            self.implot_playhead_start_time = datetime.now()
+            self.implot_playhead_start_pos = self.implot_playhead
+
+        await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+
 
     async def playhead_loop_selection(self):
         from mfp.gui_main import MFPGUI
