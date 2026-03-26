@@ -99,6 +99,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.inspector = None
 
         self.buffer_editor = None
+        self.buffer_editor_shown = False
         self.buffer_editor_previous_mode = None
         self.buffer_info = []
         self.buffer_selected = None
@@ -127,10 +128,26 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             new_pointer_obj = None
 
         if self.console_panel_visible:
-            if event.y >= self.window_height - self.console_panel_height:
+            if self.buffer_editor_shown and event.y >= self.window_height - self.console_panel_height:
+                if prev_pointer_obj != self.buffer_editor:
+                    new_pointer_obj = self.buffer_editor
+                    self.selected_window = "bufedit"
+                    self.enable_buffer_editor_input()
+
+            elif event.y >= self.window_height - self.console_panel_height:
                 if prev_pointer_obj != self.console_manager:
                     new_pointer_obj = self.console_manager
                     self.selected_window = "console"
+
+        if (
+            not self.main_menu_open 
+            and event.x <= self.canvas_panel_width 
+            and event.y <= self.canvas_panel_height
+        ):
+            if self.selected_window == "bufedit": 
+                self.disable_buffer_editor_input()
+            self.selected_window = "canvas"
+
         if not new_pointer_obj and self.info_panel_visible:
             if event.y > self.menu_height and event.x < self.canvas_panel_width:
                 new_pointer_obj = self
@@ -473,6 +490,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # bottom panel (console and log)
+        self.buffer_editor_shown = False
         if self.console_panel_visible:
             console_panel.render(self)
 
@@ -768,6 +786,18 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ]
         return buffer_info
 
+    def enable_buffer_editor_input(self):
+        from mfp.gui.modes.buffer_edit import BufferEditMode
+        if not isinstance(self.input_mgr.major_mode, BufferEditMode):
+            self.buffer_editor_previous_mode = self.input_mgr.major_mode
+            self.input_mgr.set_major_mode(BufferEditMode(self))
+
+    def disable_buffer_editor_input(self):
+        from mfp.gui.modes.buffer_edit import BufferEditMode
+        if isinstance(self.input_mgr.major_mode, BufferEditMode):
+            self.input_mgr.set_major_mode(self.buffer_editor_previous_mode)
+
+
     async def start_buffer_editor(self):
         from mfp.gui.imgui.buffer_editor import BufferEditor
         from mfp.gui.modes.buffer_edit import BufferEditMode
@@ -785,8 +815,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.console_panel_height_set = True
 
         self.buffer_editor.focus()
-        self.buffer_editor_previous_mode = self.input_mgr.major_mode
-        self.input_mgr.set_major_mode(BufferEditMode(self))
+        self.enable_buffer_editor_input()
 
         if not self.buffer_editor.working_patch_id:
             await self.buffer_editor.init_working_patch()

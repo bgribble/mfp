@@ -125,8 +125,10 @@ def render(app_window):
                 tabflags = 0
 
             if imgui.begin_tab_item("Buffer Edit", None, tabflags)[0]:
+                app_window.buffer_editor_shown = True
                 if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
                     app_window.selected_window = "bufedit"
+                    app_window.enable_buffer_editor_input()
                 bufedit_keep_going = app_window.buffer_editor.render()
                 if not bufedit_keep_going:
                     app_window.buffer_editor = None

@@ -189,7 +189,7 @@ def render_bufedit_menu(app_window):
 
     imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
     imgui.push_style_var(imgui.StyleVar_.item_spacing, (3, 3))
-    if imgui.begin_popup("##bufedit_popup", imgui.WindowFlags_.no_focus_on_appearing):
+    if imgui.begin_popup("##bufedit_popup"):
         imgui.pop_style_var(2)
         imgui.begin_group()
 

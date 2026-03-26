@@ -52,6 +52,7 @@ class BufferEditor:
         self.app_window.buffer_info = self.buffer_info
         await self.close_working_patch()
 
+
     def set_playhead_at_pointer(self):
         self.implot_playhead_needs_set = True
 
@@ -525,6 +526,7 @@ class BufferEditor:
 
         if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
             self.app_window.selected_window = "bufedit"
+            self.app_window.enable_buffer_editor_input()
 
         if self.needs_focus:
             imgui.set_window_focus()
