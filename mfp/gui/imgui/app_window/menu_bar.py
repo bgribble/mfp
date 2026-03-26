@@ -179,8 +179,6 @@ def render_help_menu(app_window, items):
 
 
 def render(app_window):
-    if app_window.buffer_editor is not None:
-        return render_bufedit_menu(app_window)
     return render_canvas_menu(app_window)
 
 def render_bufedit_menu(app_window):
@@ -188,35 +186,26 @@ def render_bufedit_menu(app_window):
     quit_selected = False
 
     by_menu = load_menupaths(app_window)
-    menu_open = False
 
-    if imgui.begin_menu("File"):
-        menu_open = True
-        add_menu_items(app_window, by_menu.get("File", {}))
-        imgui.end_menu()
+    imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (3, 3))
+    if imgui.begin_popup("##bufedit_popup", imgui.WindowFlags_.no_focus_on_appearing):
+        imgui.pop_style_var(2)
+        imgui.begin_group()
 
-    if imgui.begin_menu("Edit"):
-        menu_open = True
-        add_menu_items(app_window, by_menu.get("be:Edit", {}))
-        imgui.end_menu()
+        add_menu_items(app_window, by_menu.get("BufEdit", {}))
 
-    if imgui.begin_menu("Select"):
-        menu_open = True
-        add_menu_items(app_window, by_menu.get("be:Select", {}))
-        imgui.end_menu()
-
-    if imgui.begin_menu("Transport"):
-        menu_open = True
-        add_menu_items(app_window, by_menu.get("be:Transport", {}))
-        imgui.end_menu()
-
-    if imgui.begin_menu("Buffers"):
         if app_window.buffer_info is None:
+            log.debug("calling update_buffer_info")
             MFPGUI().async_task(app_window.update_buffer_info())
             app_window.buffer_info = []
 
         if app_window.buffer_selected is None and len(app_window.buffer_info):
             app_window.buffer_selected = 0
+
+        imgui.dummy(app_window.scaled(1, 2))
+        imgui.separator()
+        imgui.dummy(app_window.scaled(1, 2))
 
         for ind, buffer_info in enumerate(app_window.buffer_info):
             if buffer_info.get('proc_name') in ("source_buffer", "sink_buffer"):
@@ -237,18 +226,19 @@ def render_bufedit_menu(app_window):
                 app_window.buffer_editor.buffer_grab()
                 app_window.buffer_editor.init_working_patch()
             imgui.pop_id()
-        imgui.end_menu()
-    elif app_window.buffer_info is not None:
-        app_window.buffer_info = None
 
-    if imgui.begin_menu("Help"):
-        menu_open = True
-        render_help_menu(app_window, by_menu.get("Help", {}))
-        imgui.end_menu()
+        imgui.end_group()
+        content_size = imgui.get_item_rect_size()
+        imgui.set_window_pos((
+           app_window.window_width - content_size[0] - 48,
+           app_window.window_height - app_window.console_panel_height
+        ))
 
-    app_window.main_menu_open = menu_open
-
+        imgui.end_popup()
+    else:
+        imgui.pop_style_var(2)
     return quit_selected
+
 
 def render_canvas_menu(app_window):
     from mfp.gui_main import MFPGUI

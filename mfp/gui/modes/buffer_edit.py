@@ -22,15 +22,15 @@ class BufferEditMode (InputMode):
     def init_bindings(cls):
         cls.bind(
             "buffer-edit-cut", cls.cut, helptext="Cut selection to clipboard",
-            keysym="C-x", menupath="be:Edit > Cut"
+            keysym="C-x", menupath="BufEdit > Cut"
         )
         cls.bind(
             "buffer-edit-copy", cls.copy, helptext="Copy selection to clipboard",
-            keysym="C-c", menupath="be:Edit > Copy"
+            keysym="C-c", menupath="BufEdit > Copy"
         )
         cls.bind(
             "buffer-edit-paste", cls.paste, helptext="Paste selection from clipboard",
-            keysym="C-v", menupath="be:Edit > Paste"
+            keysym="C-v", menupath="BufEdit > Paste"
         )
 
         cls.bind(
@@ -55,11 +55,11 @@ class BufferEditMode (InputMode):
         self.mouse_down_pos = None
 
     def cut(self):
-        pass
+        log.debug("[bufedit] cut")
 
     def copy(self):
-        pass
+        log.debug("[bufedit] copy")
 
     def paste(self):
-        pass
+        log.debug("[bufedit] paste")
 

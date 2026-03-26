@@ -44,7 +44,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     INIT_HEIGHT = 900
 
     INIT_INFO_PANEL_WIDTH = 350
-    INIT_CONSOLE_PANEL_HEIGHT = 150
+    INIT_CONSOLE_PANEL_HEIGHT = 180
     INIT_MENU_HEIGHT = 21
 
     def __init__(self, *args, **kwargs):
@@ -71,6 +71,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.console_panel_id = None
         self.console_panel_visible = True
         self.console_panel_height = self.INIT_CONSOLE_PANEL_HEIGHT
+        self.console_panel_height_set = False
 
         self.canvas_panel_id = None
         self.canvas_panel_width = self.INIT_WIDTH - self.INIT_INFO_PANEL_WIDTH
@@ -405,7 +406,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             _, self.console_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    dockspace_id, imgui.Dir_.down, 0.20
+                    dockspace_id, imgui.Dir_.down, 0.25
                 )
             )
             _, self.info_panel_id, self.canvas_panel_id = (
@@ -430,8 +431,15 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             imgui.internal.dock_builder_finish(dockspace_id)
 
         console_node = imgui.internal.dock_builder_get_node(self.console_panel_id)
-        console_size = console_node.size
-        self.console_panel_height = console_size[1]
+        if self.console_panel_height_set:
+            imgui.internal.dock_builder_set_node_size(
+                console_node.id_,
+                (self.window_width, self.console_panel_height)
+            )
+            self.console_panel_height_set = False
+        else:
+            console_size = console_node.size
+            self.console_panel_height = console_size[1]
 
         info_node = imgui.internal.dock_builder_get_node(self.info_panel_id)
         info_size = info_node.size
@@ -451,11 +459,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         )
         canvas_panel.render(self)
         imgui.pop_style_color()  # text selected bg
-
-        if self.buffer_editor is not None:
-            bufedit_keep_going = self.buffer_editor.render()
-            if not bufedit_keep_going:
-                self.buffer_editor = None
 
         # canvas panel
         ########################################
@@ -776,6 +779,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.buffer_editor.buffer_grab()
 
         self.selected_window = "bufedit"
+        self.console_panel_visible = True
+        if self.console_panel_height < 2.5*self.INIT_CONSOLE_PANEL_HEIGHT:
+            self.console_panel_height = 2.5*self.INIT_CONSOLE_PANEL_HEIGHT
+            self.console_panel_height_set = True
+
         self.buffer_editor.focus()
         self.buffer_editor_previous_mode = self.input_mgr.major_mode
         self.input_mgr.set_major_mode(BufferEditMode(self))

@@ -117,6 +117,20 @@ def render(app_window):
                 app_window.console_panel_height - app_window.menu_height
             )
             imgui.end_tab_item()
+
+        if app_window.buffer_editor is not None:
+            if app_window.buffer_editor.needs_focus:
+                tabflags = imgui.TabItemFlags_.set_selected
+            else:
+                tabflags = 0
+
+            if imgui.begin_tab_item("Buffer Edit", None, tabflags)[0]:
+                if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+                    app_window.selected_window = "bufedit"
+                bufedit_keep_going = app_window.buffer_editor.render()
+                if not bufedit_keep_going:
+                    app_window.buffer_editor = None
+                imgui.end_tab_item()
         imgui.end_tab_bar()
 
     imgui.end()

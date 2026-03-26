@@ -5,9 +5,10 @@ import asyncio
 import os
 from datetime import datetime
 from posix_ipc import SharedMemory
+import numpy as np
 from imgui_bundle import implot, imgui
 from mfp import log
-import numpy as np
+from .app_window import menu_bar
 
 
 class BufferEditor:
@@ -57,7 +58,6 @@ class BufferEditor:
     async def init_working_patch(self):
         from mfp.gui_main import MFPGUI
         if self.working_patch_id:
-            log.debug("init_working_patch: closing previous patch")
             self.close_working_patch()
 
         self.working_patch_id = await MFPGUI().mfp.open_file(None, show_gui=False)
@@ -232,8 +232,10 @@ class BufferEditor:
         from mfp.gui import image_utils
         from mfp.gui_main import MFPGUI
         line_height = imgui.get_text_line_height()
-        imgui.set_next_window_size((self.app_window.canvas_panel_width, 4*line_height))
-        imgui.set_next_window_pos((0, self.app_window.menu_height))
+        button_size = 1.5*line_height
+
+        imgui.set_next_window_size((self.app_window.window_width, 2 * button_size))
+        imgui.set_next_window_pos(imgui.get_window_pos())
 
         imgui.begin(
             "bufedit_toolbar",
@@ -244,50 +246,48 @@ class BufferEditor:
                 | imgui.WindowFlags_.no_decoration
             ),
         )
-        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-            imgui.set_window_focus()
 
         imgui.push_style_var(
-            imgui.StyleVar_.frame_padding, (0.5 * line_height, 0.5 * line_height)
+            imgui.StyleVar_.frame_padding, (0.25 * button_size, 0.25 * button_size)
         )
         imgui.push_style_var(
-            imgui.StyleVar_.item_spacing, (0.5 * line_height, 0.5 * line_height)
+            imgui.StyleVar_.item_spacing, (0.25 * button_size, 0.25 * button_size)
         )
-        imgui.set_cursor_pos((0.5 * line_height, 0.5 * line_height))
+        imgui.set_cursor_pos((0.25 * button_size, 0.25 * button_size))
 
         pause_tex = image_utils.load_texture_from_file("icons/media-playback-pause.png")
         pause_clicked = imgui.image_button(
-            "##pause_btn", imgui.ImTextureRef(pause_tex[0]), [2*line_height, 2*line_height]
+            "##pause_btn", imgui.ImTextureRef(pause_tex[0]), [button_size, button_size]
         )
         imgui.same_line()
 
         play_tex = image_utils.load_texture_from_file("icons/media-playback-start.png")
         play_clicked = imgui.image_button(
-            "##play_btn", imgui.ImTextureRef(play_tex[0]), [2*line_height, 2*line_height]
+            "##play_btn", imgui.ImTextureRef(play_tex[0]), [button_size, button_size]
         )
         imgui.same_line()
 
         stop_tex = image_utils.load_texture_from_file("icons/media-playback-stop.png")
         stop_clicked = imgui.image_button(
-            "##stop_btn", imgui.ImTextureRef(stop_tex[0]), [2*line_height, 2*line_height]
+            "##stop_btn", imgui.ImTextureRef(stop_tex[0]), [button_size, button_size]
         )
         imgui.same_line()
 
         home_tex = image_utils.load_texture_from_file("icons/media-skip-backward.png")
         home_clicked = imgui.image_button(
-            "##home_btn", imgui.ImTextureRef(home_tex[0]), [2*line_height, 2*line_height]
+            "##home_btn", imgui.ImTextureRef(home_tex[0]), [button_size, button_size]
         )
         imgui.same_line()
 
         end_tex = image_utils.load_texture_from_file("icons/media-skip-forward.png")
         end_clicked = imgui.image_button(
-            "##end_btn", imgui.ImTextureRef(end_tex[0]), [2*line_height, 2*line_height]
+            "##end_btn", imgui.ImTextureRef(end_tex[0]), [button_size, button_size]
         )
         imgui.same_line()
 
         record_tex = image_utils.load_texture_from_file("icons/media-record.png")
         record_clicked = imgui.image_button(
-            "##record_btn", imgui.ImTextureRef(record_tex[0]), [2*line_height, 2*line_height]
+            "##record_btn", imgui.ImTextureRef(record_tex[0]), [button_size, button_size]
         )
         imgui.same_line()
 
@@ -296,15 +296,31 @@ class BufferEditor:
 
         loop_tex = image_utils.load_texture_from_file("icons/view-refresh.png")
         loop_clicked = imgui.image_button(
-            "##loop_btn", imgui.ImTextureRef(loop_tex[0]), [2*line_height, 2*line_height]
+            "##loop_btn", imgui.ImTextureRef(loop_tex[0]), [button_size, button_size]
         )
         imgui.same_line()
 
         if not self.implot_selection:
             imgui.end_disabled()
 
+        # put menu button on the far right
+        imgui.dummy((
+            imgui.get_window_width() - imgui.get_cursor_pos()[0] - 2*button_size,
+            button_size
+        ))
+        imgui.same_line()
+
+        menu_tex = image_utils.load_texture_from_file("icons/open-menu.png")
+        menu_clicked = imgui.image_button(
+            "##menu_button", imgui.ImTextureRef(menu_tex[0]), [button_size, button_size]
+        )
+
         imgui.pop_style_var(2)
-        imgui.end()
+
+        if menu_clicked:
+            imgui.open_popup("##bufedit_popup")
+
+        menu_bar.render_bufedit_menu(self.app_window)
 
         if play_clicked:
             MFPGUI().async_task(self.playhead_start())
@@ -320,6 +336,7 @@ class BufferEditor:
 
         if loop_clicked:
             MFPGUI().async_task(self.playhead_loop_selection())
+        imgui.end()
 
     ########################################
     # plots
@@ -333,10 +350,11 @@ class BufferEditor:
 
         line_height = imgui.get_text_line_height()
         imgui.set_next_window_size([
-            self.app_window.canvas_panel_width,
-            self.app_window.canvas_panel_height - 4*line_height
+            self.app_window.window_width,
+            self.app_window.console_panel_height - self.app_window.menu_height - 4*line_height
         ])
-        imgui.set_next_window_pos((0, 4*line_height + self.app_window.menu_height))
+        xpos, ypos = imgui.get_window_pos()
+        imgui.set_next_window_pos((xpos, ypos + 4*line_height))
         imgui.begin(
             "##channelsview",
             flags=(
@@ -380,7 +398,7 @@ class BufferEditor:
                     x_axis_flags = implot.AxisFlags_.no_label
                     y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
                 else:
-                    height = line_height * 10
+                    height = line_height * 6
                     plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
                     x_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
                     y_axis_flags = implot.AxisFlags_.no_label
@@ -482,10 +500,13 @@ class BufferEditor:
 
         self.app_window.imgui_prevent_idle = 1
         imgui.set_next_window_size([
-            self.app_window.canvas_panel_width,
-            self.app_window.canvas_panel_height
+            self.app_window.window_width,
+            self.app_window.console_panel_height - self.app_window.menu_height
         ])
-        imgui.set_next_window_pos((0, self.app_window.menu_height))
+        imgui.set_next_window_pos((
+            0,
+            self.app_window.window_height - self.app_window.console_panel_height
+        ))
 
         imgui.push_style_var(imgui.StyleVar_.window_border_size, 1)
         imgui.push_style_var(imgui.StyleVar_.window_padding, (2, 2))
