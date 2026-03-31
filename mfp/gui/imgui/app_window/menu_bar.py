@@ -221,6 +221,7 @@ def render_bufedit_menu(app_window):
                 app_window.buffer_selected == ind
             )
             if buffer_selected:
+                app_window.buffer_editor.buffer_source_info = buffer_info
                 app_window.buffer_editor.buffer_info = buffer_info.get('buf_info')
                 # update data in chart
                 app_window.buffer_editor.buffer_grab()
@@ -230,7 +231,7 @@ def render_bufedit_menu(app_window):
         imgui.end_group()
         content_size = imgui.get_item_rect_size()
         imgui.set_window_pos((
-           app_window.window_width - content_size[0] - 48,
+           app_window.window_width - content_size[0] - 32,
            app_window.window_height - app_window.console_panel_height
         ))
 

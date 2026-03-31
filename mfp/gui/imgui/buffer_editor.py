@@ -11,6 +11,22 @@ from mfp import log
 from .app_window import menu_bar
 
 
+def fmt_time(ttime):
+    minutes = int(ttime // 60)
+    seconds = int(ttime - 60*minutes)
+    sfrac = int(1000 * (ttime % 1.0))
+    return f"{minutes:02d}:{seconds:02d}.{sfrac:03d}"
+
+
+def unfmt_time(strtime):
+    import re
+    matches = re.match(r"^([0-9]+):([0-9.]+)$", strtime)
+    try:
+        return 60 * float(matches.group(1)) + float(matches.group(2))
+    except Exception as e:
+        return None
+
+
 class BufferEditor:
     FLOAT_SIZE = 4
 
@@ -29,6 +45,7 @@ class BufferEditor:
         self.implot_total_time = 0
 
         self.shm_obj = None
+        self.buffer_source_info = None
         self.buffer_info = None
         self.buffer_data = None
         self.buffer_peaks = {}
@@ -49,9 +66,7 @@ class BufferEditor:
         self.needs_focus = True
 
     async def close(self):
-        self.app_window.buffer_info = self.buffer_info
         await self.close_working_patch()
-
 
     def set_playhead_at_pointer(self):
         self.implot_playhead_needs_set = True
@@ -233,10 +248,23 @@ class BufferEditor:
         from mfp.gui import image_utils
         from mfp.gui_main import MFPGUI
         line_height = imgui.get_text_line_height()
-        button_size = 1.5*line_height
+        button_size = 1.25*line_height
 
         imgui.set_next_window_size((self.app_window.window_width, 2 * button_size))
         imgui.set_next_window_pos(imgui.get_window_pos())
+
+        play_tex = image_utils.load_texture_from_file("icons/media-playback-start.png")
+        pause_tex = image_utils.load_texture_from_file("icons/media-playback-pause.png")
+        stop_tex = image_utils.load_texture_from_file("icons/media-playback-stop.png")
+        home_tex = image_utils.load_texture_from_file("icons/media-skip-backward.png")
+        end_tex = image_utils.load_texture_from_file("icons/media-skip-forward.png")
+        record_tex = image_utils.load_texture_from_file("icons/media-record.png")
+        loop_tex = image_utils.load_texture_from_file("icons/view-refresh.png")
+        menu_tex = image_utils.load_texture_from_file("icons/open-menu.png")
+        zoom_in_tex = image_utils.load_texture_from_file("icons/zoom-in.png")
+        zoom_out_tex = image_utils.load_texture_from_file("icons/zoom-out.png")
+        zoom_fit_tex = image_utils.load_texture_from_file("icons/zoom-fit-best.png")
+        center_playhead_tex = image_utils.load_texture_from_file("icons/center-playhead.png")
 
         imgui.begin(
             "bufedit_toolbar",
@@ -247,101 +275,197 @@ class BufferEditor:
                 | imgui.WindowFlags_.no_decoration
             ),
         )
+        padding = (0.25 * button_size, 0.25 * button_size)
+        imgui.push_style_var(imgui.StyleVar_.frame_padding, padding)
+        imgui.push_style_var(imgui.StyleVar_.item_spacing, padding)
 
-        imgui.push_style_var(
-            imgui.StyleVar_.frame_padding, (0.25 * button_size, 0.25 * button_size)
-        )
-        imgui.push_style_var(
-            imgui.StyleVar_.item_spacing, (0.25 * button_size, 0.25 * button_size)
-        )
-        imgui.set_cursor_pos((0.25 * button_size, 0.25 * button_size))
+        imgui.set_cursor_pos(padding)
 
-        pause_tex = image_utils.load_texture_from_file("icons/media-playback-pause.png")
-        pause_clicked = imgui.image_button(
+        #######################
+        # transport control
+
+        if imgui.image_button(
             "##pause_btn", imgui.ImTextureRef(pause_tex[0]), [button_size, button_size]
-        )
+        ):
+            MFPGUI().async_task(self.playhead_pause())
         imgui.same_line()
 
-        play_tex = image_utils.load_texture_from_file("icons/media-playback-start.png")
-        play_clicked = imgui.image_button(
+        if imgui.image_button(
             "##play_btn", imgui.ImTextureRef(play_tex[0]), [button_size, button_size]
-        )
+        ):
+            MFPGUI().async_task(self.playhead_start())
         imgui.same_line()
 
-        stop_tex = image_utils.load_texture_from_file("icons/media-playback-stop.png")
-        stop_clicked = imgui.image_button(
+        if imgui.image_button(
             "##stop_btn", imgui.ImTextureRef(stop_tex[0]), [button_size, button_size]
-        )
+        ):
+            MFPGUI().async_task(self.playhead_pause())
         imgui.same_line()
 
-        home_tex = image_utils.load_texture_from_file("icons/media-skip-backward.png")
-        home_clicked = imgui.image_button(
+        if imgui.image_button(
             "##home_btn", imgui.ImTextureRef(home_tex[0]), [button_size, button_size]
-        )
+        ):
+            MFPGUI().async_task(self.playhead_move(0))
         imgui.same_line()
 
-        end_tex = image_utils.load_texture_from_file("icons/media-skip-forward.png")
-        end_clicked = imgui.image_button(
+        if imgui.image_button(
             "##end_btn", imgui.ImTextureRef(end_tex[0]), [button_size, button_size]
-        )
+        ):
+            MFPGUI().async_task(self.playhead_move(self.implot_limits.x.max - 0.001))
+
         imgui.same_line()
 
-        record_tex = image_utils.load_texture_from_file("icons/media-record.png")
-        record_clicked = imgui.image_button(
+        if imgui.image_button(
             "##record_btn", imgui.ImTextureRef(record_tex[0]), [button_size, button_size]
-        )
+        ):
+            pass
         imgui.same_line()
 
         if not self.implot_selection:
             imgui.begin_disabled()
 
-        loop_tex = image_utils.load_texture_from_file("icons/view-refresh.png")
-        loop_clicked = imgui.image_button(
+        if imgui.image_button(
             "##loop_btn", imgui.ImTextureRef(loop_tex[0]), [button_size, button_size]
-        )
+        ):
+            MFPGUI().async_task(self.playhead_loop_selection())
         imgui.same_line()
 
         if not self.implot_selection:
             imgui.end_disabled()
 
-        # put menu button on the far right
+        imgui.dummy((button_size, 1))
+        imgui.same_line()
+
+        #######################
+        # zoom
+
+        if imgui.image_button(
+            "##zoom_in_btn", imgui.ImTextureRef(zoom_in_tex[0]), [button_size, button_size]
+        ):
+            log.debug("zoom in")
+        imgui.same_line()
+
+        if imgui.image_button(
+            "##zoom_out_btn", imgui.ImTextureRef(zoom_out_tex[0]), [button_size, button_size]
+        ):
+            log.debug("zoom out")
+        imgui.same_line()
+
+        if not self.implot_selection:
+            imgui.begin_disabled()
+
+        if imgui.image_button(
+            "##zoom_selection_btn", imgui.ImTextureRef(zoom_fit_tex[0]), [button_size, button_size]
+        ):
+            log.debug("zoom to selection")
+        imgui.same_line()
+
+        if not self.implot_selection:
+            imgui.end_disabled()
+
+        if imgui.image_button(
+            "##zoom_fit_btn", imgui.ImTextureRef(zoom_fit_tex[0]), [button_size, button_size]
+        ):
+            log.debug("zoom to fit buffer")
+        imgui.same_line()
+
+        if imgui.image_button(
+            "##center_playhead_btn", imgui.ImTextureRef(center_playhead_tex[0]), [button_size, button_size]
+        ):
+            log.debug("center playhead")
+        imgui.same_line()
+
+        imgui.dummy((button_size, 1))
+        imgui.same_line()
+
+        #######################
+        # playhead and selection info
+
+        imgui.begin_group()
+        imgui.dummy((0.1, 0.125 * line_height))
+        imgui.text("Pos:")
+        imgui.end_group()
+        imgui.same_line()
+        imgui.push_font(self.app_window.imgui_default_font, 18)
+        imgui.push_style_var(imgui.StyleVar_.window_border_size, 1)
+        imgui.set_next_item_width(6 * line_height)
+        orig_ph = fmt_time(self.implot_playhead or 0)
+        ph_changed, new_ph = imgui.input_text(
+            "##playhead_pos", orig_ph
+        )
+        if ph_changed:
+            new_time = unfmt_time(new_ph)
+            if new_time is not None:
+                MFPGUI().async_task(self.playhead_move(new_time))
+        imgui.pop_style_var()
+        imgui.pop_font()
+        imgui.same_line()
+
+        if not self.implot_selection:
+            imgui.begin_disabled()
+
+        imgui.begin_group()
+        imgui.dummy((0.1, 0.125 * line_height))
+        imgui.text("Sel:")
+        imgui.end_group()
+        imgui.same_line()
+        imgui.push_font(self.app_window.imgui_default_font, 18)
+        imgui.push_style_var(imgui.StyleVar_.window_border_size, 1)
+
+        imgui.set_next_item_width(6 * line_height)
+        ss_changed, ss_new = imgui.input_text(
+            "##selection_start_pos",
+            fmt_time(self.implot_selection.x.min if self.implot_selection else 0)
+        )
+        if ss_changed:
+            new_time = unfmt_time(ss_new)
+            if new_time is not None:
+                MFPGUI().async_task(
+                    self.playhead_set_selection(new_time, None)
+                )
+        imgui.same_line()
+        imgui.text("-")
+        imgui.same_line()
+        imgui.set_next_item_width(6 * line_height)
+        se_changed, se_new = imgui.input_text(
+            "##selection_end_pos",
+            fmt_time(self.implot_selection.x.max if self.implot_selection else 0)
+        )
+        if se_changed:
+            new_time = unfmt_time(se_new)
+            if new_time is not None:
+                MFPGUI().async_task(
+                    self.playhead_set_selection(None, new_time)
+                )
+        imgui.pop_style_var()
+        imgui.pop_font()
+        imgui.same_line()
+
+        if not self.implot_selection:
+            imgui.end_disabled()
+
+        #######################
+        # menu on far right
+
         imgui.dummy((
             imgui.get_window_width() - imgui.get_cursor_pos()[0] - 2*button_size,
             button_size
         ))
         imgui.same_line()
 
-        menu_tex = image_utils.load_texture_from_file("icons/open-menu.png")
-        menu_clicked = imgui.image_button(
+        if imgui.image_button(
             "##menu_button", imgui.ImTextureRef(menu_tex[0]), [button_size, button_size]
-        )
-
-        imgui.pop_style_var(2)
-
-        if menu_clicked:
+        ):
             imgui.open_popup("##bufedit_popup")
 
+        imgui.pop_style_var(2)
         menu_bar.render_bufedit_menu(self.app_window)
-
-        if play_clicked:
-            MFPGUI().async_task(self.playhead_start())
-
-        if pause_clicked or stop_clicked:
-            MFPGUI().async_task(self.playhead_pause())
-
-        if home_clicked:
-            MFPGUI().async_task(self.playhead_move(0))
-
-        if end_clicked:
-            MFPGUI().async_task(self.playhead_move(self.implot_limits.x.max - 0.001))
-
-        if loop_clicked:
-            MFPGUI().async_task(self.playhead_loop_selection())
         imgui.end()
+        return 2 * button_size
 
     ########################################
     # plots
-    def render_channels(self):
+    def render_channels(self, toolbar_height):
         from mfp.gui_main import MFPGUI
         implot.set_current_context(self.implot_context)
 
@@ -352,15 +476,19 @@ class BufferEditor:
         line_height = imgui.get_text_line_height()
         imgui.set_next_window_size([
             self.app_window.window_width,
-            self.app_window.console_panel_height - self.app_window.menu_height - 4*line_height
+            self.app_window.console_panel_height - self.app_window.menu_height - toolbar_height
         ])
         xpos, ypos = imgui.get_window_pos()
-        imgui.set_next_window_pos((xpos, ypos + 4*line_height))
+        imgui.set_next_window_pos((xpos, ypos + toolbar_height))
+
+        binfo = self.buffer_source_info
+        fname = binfo.get('file_name') or 'No file'
+        ttime = self.buffer_info.size / self.buffer_info.rate
+        display_name = f"{binfo.get('proc_name')} ({fname}) channels={self.buffer_info.channels}"
         imgui.begin(
-            "##channelsview",
+            f"{display_name} time={ttime:.1f}s frames={self.buffer_info.size}##channelsview",
             flags=(
                 imgui.WindowFlags_.no_collapse
-                | imgui.WindowFlags_.no_title_bar
                 | imgui.WindowFlags_.no_resize
                 | imgui.WindowFlags_.no_saved_settings
                 | imgui.WindowFlags_.no_move
@@ -499,7 +627,6 @@ class BufferEditor:
     def render(self):
         keep_going = True
 
-        self.app_window.imgui_prevent_idle = 1
         imgui.set_next_window_size([
             self.app_window.window_width,
             self.app_window.console_panel_height - self.app_window.menu_height
@@ -533,8 +660,11 @@ class BufferEditor:
             imgui.set_window_collapsed(False)
             self.needs_focus = False
 
-        self.render_toolbar()
-        self.render_channels()
+        toolbar_height = self.render_toolbar()
+        self.render_channels(toolbar_height)
+
+        if self.implot_playhead_start_time:
+            self.app_window.imgui_prevent_idle = 1
 
         imgui.end()
 
@@ -591,6 +721,14 @@ class BufferEditor:
         self.implot_playhead_start_time = None
         self.implot_playhead_looping = False
 
+
+    async def playhead_set_selection(self, sel_start, sel_end):
+        if sel_start is not None:
+            self.implot_selection.x.min = sel_start
+        if sel_end is not None:
+            self.implot_selection.x.max = sel_end
+        return await self.playhead_update_selection()
+
     async def playhead_update_selection(self):
         from mfp.gui_main import MFPGUI
         start_samples = self.implot_selection.x.min * self.buffer_info.rate
@@ -599,12 +737,13 @@ class BufferEditor:
             region_start=start_samples,
             region_end=end_samples
         )
-        if self.implot_playhead < self.implot_selection.x.min:
-            self.implot_playhead = self.implot_selection.x.min
-            buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
-        elif self.implot_playhead >= self.implot_selection.x.max:
-            self.implot_playhead = self.implot_selection.x.max
-            buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
+        if self.implot_playhead_looping:
+            if self.implot_playhead < self.implot_selection.x.min:
+                self.implot_playhead = self.implot_selection.x.min
+                buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
+            elif self.implot_playhead >= self.implot_selection.x.max:
+                self.implot_playhead = self.implot_selection.x.max
+                buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
 
         if self.implot_playhead_start_time:
             self.implot_playhead_start_time = datetime.now()

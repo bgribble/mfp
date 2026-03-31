@@ -805,6 +805,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         await self.update_buffer_info()
         self.buffer_editor = BufferEditor(self)
         if self.buffer_info:
+            self.buffer_editor.buffer_source_info = self.buffer_info[0]
             self.buffer_editor.buffer_info = self.buffer_info[0].get('buf_info')
             self.buffer_editor.buffer_grab()
 
