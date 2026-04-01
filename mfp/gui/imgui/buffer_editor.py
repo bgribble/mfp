@@ -342,13 +342,18 @@ class BufferEditor:
         if imgui.image_button(
             "##zoom_in_btn", imgui.ImTextureRef(zoom_in_tex[0]), [button_size, button_size]
         ):
-            log.debug("zoom in")
+            MFPGUI().async_task(self.zoom_change(0.25))
+
+        if imgui.is_item_hovered():
+            imgui.set_tooltip("Zoom in")
         imgui.same_line()
 
         if imgui.image_button(
             "##zoom_out_btn", imgui.ImTextureRef(zoom_out_tex[0]), [button_size, button_size]
         ):
-            log.debug("zoom out")
+            MFPGUI().async_task(self.zoom_change(-0.25))
+        if imgui.is_item_hovered():
+            imgui.set_tooltip("Zoom out")
         imgui.same_line()
 
         if not self.implot_selection:
@@ -357,22 +362,20 @@ class BufferEditor:
         if imgui.image_button(
             "##zoom_selection_btn", imgui.ImTextureRef(zoom_fit_tex[0]), [button_size, button_size]
         ):
-            log.debug("zoom to selection")
+            MFPGUI().async_task(self.zoom_to_selection())
+        if imgui.is_item_hovered() and self.implot_selection:
+            imgui.set_tooltip("Zoom to selection")
         imgui.same_line()
 
         if not self.implot_selection:
             imgui.end_disabled()
 
         if imgui.image_button(
-            "##zoom_fit_btn", imgui.ImTextureRef(zoom_fit_tex[0]), [button_size, button_size]
-        ):
-            log.debug("zoom to fit buffer")
-        imgui.same_line()
-
-        if imgui.image_button(
             "##center_playhead_btn", imgui.ImTextureRef(center_playhead_tex[0]), [button_size, button_size]
         ):
-            log.debug("center playhead")
+            MFPGUI().async_task(self.playhead_center_view())
+        if imgui.is_item_hovered():
+            imgui.set_tooltip("Jump to playhead")
         imgui.same_line()
 
         imgui.dummy((button_size, 1))
@@ -671,6 +674,29 @@ class BufferEditor:
         imgui.pop_style_var(3)
 
         return keep_going
+
+    ########################################
+    # view control
+    async def zoom_change(self, delta):
+        orig_range = self.implot_limits.x.max - self.implot_limits.x.min
+        delta_range = -0.5 * orig_range * delta
+        self.implot_limits.x.max += delta_range
+        self.implot_limits.x.min -= delta_range
+        self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+
+    async def zoom_to_selection(self):
+        self.implot_limits.x.max = self.implot_selection.x.max
+        self.implot_limits.x.min = self.implot_selection.x.min
+        self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+
+    async def playhead_center_view(self):
+        vmin = self.implot_limits.x.min
+        vmax = self.implot_limits.x.max
+        cur_center = (vmax - vmin)*0.5 + vmin
+        delta_center = self.implot_playhead - cur_center
+        self.implot_limits.x.max = vmax + delta_center
+        self.implot_limits.x.min = vmin + delta_center
+        self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
 
     ########################################
     # playhead control
