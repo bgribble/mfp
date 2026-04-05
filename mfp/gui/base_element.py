@@ -580,6 +580,10 @@ class BaseElement (Store):
 
         return previous_value
 
+    @saga("scope")
+    async def update_scope(self, action, state_diff, previous):
+        await MFPGUI().mfp.set_scope(self.obj_id, self.scope)
+
     def synced_params(self):
         prms = {}
         for k in self.param_list:

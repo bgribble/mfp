@@ -676,6 +676,41 @@ class BufferEditor:
         return keep_going
 
     ########################################
+    # fx patch opener
+    async def fx_open_patch(self, fxname):
+        log.debug(f"[bufedit] opening FX patch {fxname}")
+
+        # create new patch wrapping the specified effect
+        fx_patch_id = await MFPGUI().mfp.open_file(
+            "bufedit.fx~", 
+            initargs=f"{fxname}, channels={self.buffer_info.channels}",
+            show_gui=True
+        )
+        # each fx patch needs to take a channels= param
+        # probably best to make the inputlevel and xfade
+        # channels on the left
+
+        # connect source to fx
+        for port in range(self.buffer_info.channels):
+            await MFPGUI().mfp.connect(
+                self.working_source_id, port,
+                fx_patch_id, port + 2
+            )
+            await MFPGUI().mfp.connect(
+                fx_patch_id, port,
+                self.working_sink_id, port
+            )
+
+        # connect input level and xfade
+        for port in [0, 1]:
+            await MFPGUI().mfp.connect(
+                self.working_source_id, self.buffer_info.chanels + port,
+                fx_patch_id, port
+            )
+
+
+
+    ########################################
     # view control
     async def zoom_change(self, delta):
         orig_range = self.implot_limits.x.max - self.implot_limits.x.min
@@ -747,7 +782,6 @@ class BufferEditor:
         self.implot_playhead_start_time = None
         self.implot_playhead_looping = False
 
-
     async def playhead_set_selection(self, sel_start, sel_end):
         if sel_start is not None:
             self.implot_selection.x.min = sel_start
@@ -776,7 +810,6 @@ class BufferEditor:
             self.implot_playhead_start_pos = self.implot_playhead
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
-
 
     async def playhead_loop_selection(self):
         from mfp.gui_main import MFPGUI

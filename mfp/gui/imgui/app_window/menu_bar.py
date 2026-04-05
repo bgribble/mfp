@@ -39,6 +39,7 @@ def add_menu_items(app_window, itemdict):
             keysym = value.keysym
             menu_path = value.menupath
 
+            log.debug(f"Adding {menu_path}")
             # items with [] or [x] preceding name (ie File > []Pause/unpause")
             # will have a checkmark when selected. Default is no check.
             toggle_state = False
@@ -196,7 +197,6 @@ def render_bufedit_menu(app_window):
         add_menu_items(app_window, by_menu.get("BufEdit", {}))
 
         if app_window.buffer_info is None:
-            log.debug("calling update_buffer_info")
             MFPGUI().async_task(app_window.update_buffer_info())
             app_window.buffer_info = []
 
@@ -249,6 +249,7 @@ def render_canvas_menu(app_window):
     menu_open = False
 
     if imgui.begin_menu("File"):
+        log.debug("File menu open")
         menu_open = True
         add_menu_items(app_window, by_menu.get("File", {}))
         imgui.end_menu()
@@ -311,6 +312,11 @@ def render_canvas_menu(app_window):
         menu_open = True
         render_help_menu(app_window, by_menu.get("Help", {}))
         imgui.end_menu()
+
+    if menu_open:
+        log.debug("menubar menu is open")
+    else:
+        log.debug("no menubar menu is open")
 
     app_window.main_menu_open = menu_open
 

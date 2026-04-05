@@ -33,6 +33,12 @@ class BufferEditMode (InputMode):
             keysym="C-v", menupath="BufEdit > Paste"
         )
 
+
+        cls.bind(
+            "buffer-edit-custom-effect", cls.effect_custom, helptext="Apply custom effect",
+            keysym="f", menupath="BufEdit > Effect"
+        )
+
         cls.bind(
             "buffer-click-down", cls.click_start, helptext="Set playhead position",
             keysym="M1DOWN"
@@ -63,3 +69,16 @@ class BufferEditMode (InputMode):
     def paste(self):
         log.debug("[bufedit] paste")
 
+    async def effect_custom(self, filename=None):
+        async def cb(fname):
+            if fname:
+                await self.editor.fx_open_patch(fname)
+            else:
+                self.window.hud_write("Apply effect canceled")
+
+        if filename is None:
+            await self.window.cmd_get_input(
+                "Effect patch to load: ", cb,
+            )
+        else:
+            await cb(filename)
