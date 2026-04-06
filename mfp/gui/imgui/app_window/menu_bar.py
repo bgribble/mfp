@@ -39,7 +39,6 @@ def add_menu_items(app_window, itemdict):
             keysym = value.keysym
             menu_path = value.menupath
 
-            log.debug(f"Adding {menu_path}")
             # items with [] or [x] preceding name (ie File > []Pause/unpause")
             # will have a checkmark when selected. Default is no check.
             toggle_state = False
@@ -312,11 +311,6 @@ def render_canvas_menu(app_window):
         menu_open = True
         render_help_menu(app_window, by_menu.get("Help", {}))
         imgui.end_menu()
-
-    if menu_open:
-        log.debug("menubar menu is open")
-    else:
-        log.debug("no menubar menu is open")
 
     app_window.main_menu_open = menu_open
 

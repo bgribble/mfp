@@ -140,11 +140,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                     self.selected_window = "console"
 
         if (
-            not self.main_menu_open 
-            and event.x <= self.canvas_panel_width 
+            not self.main_menu_open
+            and event.x <= self.canvas_panel_width
             and event.y <= self.canvas_panel_height
+            and event.y > self.menu_height
         ):
-            if self.selected_window == "bufedit": 
+            if self.selected_window == "bufedit":
                 self.disable_buffer_editor_input()
             self.selected_window = "canvas"
 
