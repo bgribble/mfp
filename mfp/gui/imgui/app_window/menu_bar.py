@@ -248,7 +248,6 @@ def render_canvas_menu(app_window):
     menu_open = False
 
     if imgui.begin_menu("File"):
-        log.debug("File menu open")
         menu_open = True
         add_menu_items(app_window, by_menu.get("File", {}))
         imgui.end_menu()
