@@ -133,7 +133,8 @@ class EnumElement (BaseElement):
         self.min_value = lower
         self.max_value = upper
 
-        if ((self.value < self.min_value) or (self.value > self.max_value)):
+        if ((self.min_value is not None and self.value < self.min_value)
+                or (self.max_value is not None and self.value > self.max_value)):
             await self.update_value(self.value)
         self.send_params()
 
