@@ -127,7 +127,7 @@ class ProcessorElement (BaseElement):
             await self.create(obj_type, obj_args)
 
             # obj_args may get forcibly changed on create
-            if self.obj_args and (len(parts) < 2 or self.obj_args != parts[1]):
+            if self.obj_args and self.obj_args != obj_args:
                 self.label.set_text(self.obj_type + ' ' + self.obj_args)
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:

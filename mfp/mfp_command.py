@@ -21,15 +21,19 @@ class MFPCommand:
         patch = MFPApp().patches.get(patch_name)
         scope = patch.scopes.get(scope_name) or patch.default_scope
 
-        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, params)
+        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, {})
         if obj is None:
             log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name} {params}")
             return None
         elif isinstance(obj, dict):
             log.warning(f"Error in creating {objtype} {obj}")
             return obj
+        new_params = {
+            **params,**obj.gui_params
+        }
+        obj.set_gui_params(new_params)
         create_params = {
-            **obj.gui_params,
+            **new_params,
             'properties': obj.properties
         }
         return create_params

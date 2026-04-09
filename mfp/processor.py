@@ -67,6 +67,9 @@ class Processor:
     do_onload = True
     clear_outlets = True
 
+    clone_connect_inbound = True
+    clone_connect_outbound = True
+
     paused = False
 
     doc_tooltip_obj = "No documentation found"

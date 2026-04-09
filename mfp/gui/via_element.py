@@ -8,9 +8,11 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from abc import ABCMeta, abstractmethod
 from flopsy import saga
+from mfp import log
 from mfp.gui_main import MFPGUI
 from .text_widget import TextWidget
 from .base_element import BaseElement
+from .param_info import ParamInfo
 from .modes.label_edit import LabelEditMode
 
 from .backend_interfaces import BackendInterface
@@ -21,6 +23,10 @@ class ViaElement (BaseElement):
     proc_type = None
     help_patch = "via.help.mfp"
 
+    extra_params = {
+        'label_text': ParamInfo(label="Label text", param_type=str, show=False),
+    }
+
     style_defaults = {
         'porthole-width': 0,
         'porthole-height': 0,
@@ -30,7 +36,7 @@ class ViaElement (BaseElement):
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 
-        self.param_list.append("label_text")
+        self.param_list.extend([*self.extra_params])
         self.connections_out = []
         self.connections_in = []
 
@@ -51,12 +57,12 @@ class ViaElement (BaseElement):
         self.recenter_label(*args)
 
     def parse_label(self, txt):
-        parts = txt.split('/')
+        parts = txt.split('/', 1)
         port = 0
         name = txt
         if len(parts) == 2:
             try:
-                port = int(parts[1])
+                port = parts[1]
                 name = parts[0]
             except Exception:
                 pass
@@ -95,7 +101,11 @@ class ViaElement (BaseElement):
             if self.obj_id is None:
                 await self.create_obj(t)
             self.recenter_label()
-            await MFPGUI().mfp.send(self.obj_id, 1, self.parse_label(self.label.get_text()))
+            prms = self.synced_params()
+            await MFPGUI().mfp.set_params(self.obj_id, prms)
+            await MFPGUI().mfp.eval_and_send(
+                self.obj_id, 1, str(self.parse_label(t))
+            )
 
     async def configure(self, params):
         self.label_text = params.get("label_text", "")
