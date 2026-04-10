@@ -608,6 +608,7 @@ def build(bld):
                 ("mfp.svg", "share/mfp/icons/hicolor/scalable/actions/"),
                 ("mfp.png", "share/mfp/icons/hicolor/96x96/actions/"),
                 ("help/*.mfp", "share/mfp/patches/help/"),
+                ("bufedit/*.mfp", "share/mfp/patches/bufedit/"),
             ],
         ),
         source=["mfp.svg", "mfp.png", bld.path.ant_glob("help/*.mfp")],
