@@ -28,8 +28,9 @@ class MFPCommand:
         elif isinstance(obj, dict):
             log.warning(f"Error in creating {objtype} {obj}")
             return obj
+
         new_params = {
-            **params,**obj.gui_params
+            **(params or {}), **obj.gui_params
         }
         obj.set_gui_params(new_params)
         create_params = {

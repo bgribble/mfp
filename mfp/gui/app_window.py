@@ -226,6 +226,9 @@ class AppWindow (SignalMixin):
             completions=InputMode._bindings_by_label.keys()
         )
 
+        # buffer editor 
+        self.buffer_editor = None
+
         # Python REPL
         self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
@@ -305,6 +308,8 @@ class AppWindow (SignalMixin):
         patch = None
 
         if obj == self.console_manager:
+            return True
+        if obj == self.buffer_editor:
             return True
         if self.selected_layer:
             patch = self.selected_layer.patch

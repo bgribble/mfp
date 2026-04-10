@@ -23,7 +23,7 @@ def unfmt_time(strtime):
     matches = re.match(r"^([0-9]+):([0-9.]+)$", strtime)
     try:
         return 60 * float(matches.group(1)) + float(matches.group(2))
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -678,13 +678,17 @@ class BufferEditor:
     ########################################
     # fx patch opener
     async def fx_open_patch(self, fxname):
+        from mfp.gui_main import MFPGUI
+
         log.debug(f"[bufedit] opening FX patch {fxname}")
 
         # create new patch wrapping the specified effect
         fx_patch_id = await MFPGUI().mfp.open_file(
-            "bufedit.fx~", 
-            initargs=f"{fxname}, channels={self.buffer_info.channels}",
-            show_gui=True
+            "bufedit.fx~.mfp",
+            initargs=f"'{fxname}', {self.buffer_info.channels}",
+            show_gui=True,
+            show_label=False,
+            panel_mode=True
         )
         # each fx patch needs to take a channels= param
         # probably best to make the inputlevel and xfade
@@ -704,11 +708,9 @@ class BufferEditor:
         # connect input level and xfade
         for port in [0, 1]:
             await MFPGUI().mfp.connect(
-                self.working_source_id, self.buffer_info.chanels + port,
+                self.working_source_id, self.buffer_info.channels + port,
                 fx_patch_id, port
             )
-
-
 
     ########################################
     # view control

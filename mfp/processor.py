@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 import inspect
+import asyncio
 
 from .dsp_object import DSPObject
 from .method import MethodCall
@@ -727,6 +728,10 @@ class Processor:
         from .mfp_app import MFPApp
         from .patch import Patch
 
+        async def reconnect(*args):
+            await asyncio.sleep(0.1)
+            return await Processor.connect(*args)
+
         # make sure this is a possibility
         if not isinstance(target, Processor):
             log.warning("Error: Can't connect '%s' (obj_id %d) to %s inlet %d"
@@ -741,7 +746,7 @@ class Processor:
         if inlet > len(target.inlets):
             if isinstance(target, Patch):
                 Patch.task_nibbler.add_task(
-                    lambda args: Processor.connect(*args), 20,
+                    lambda args: reconnect(*args), 0,
                     [self, outlet, target, inlet, show_gui]
                 )
                 log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
