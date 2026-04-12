@@ -1157,13 +1157,16 @@ class Processor:
 
         if kwargs.get('is_export'):
             if self.patch:
+                frame_xoff = 2
+                frame_yoff = 20
+                if not self.patch.gui_params.get("show_label"):
+                    frame_yoff = 2
+
                 xoff = (
-                    self.patch.gui_params.get('export_frame_xoff', 2)
-                    - (self.patch.gui_params.get('export_x') or 0)
+                    frame_xoff - (self.patch.gui_params.get('export_x') or 0)
                 )
                 yoff = (
-                    self.gui_params.get('export_frame_yoff', 20)
-                    - (self.patch.gui_params.get('export_y') or 0)
+                    frame_yoff - (self.patch.gui_params.get('export_y') or 0)
                 )
             else:
                 xoff = 2

@@ -611,7 +611,12 @@ def build(bld):
                 ("bufedit/*.mfp", "share/mfp/patches/bufedit/"),
             ],
         ),
-        source=["mfp.svg", "mfp.png", bld.path.ant_glob("help/*.mfp")],
+        source=[
+            "mfp.svg",
+            "mfp.png",
+            bld.path.ant_glob("help/*.mfp"),
+            bld.path.ant_glob("bufedit/*.mfp")
+        ],
         target="static.tar.gz"
     )
 

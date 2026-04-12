@@ -7,7 +7,6 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 from mfp import log
 from flopsy import mutates
 
-from mfp.gui_main import MFPGUI
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from .base_element import ImguiBaseElementImpl
 from ..processor_element import (
@@ -53,7 +52,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         if min_y is not None and max_y is not None:
             export_h = max_y - min_y
             self.export_h = export_h
-
 
     @mutates('position_x', 'position_y', 'width', 'height', 'export_w', 'export_h')
     def render(self):
@@ -103,28 +101,32 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         # node content: just the label
         imgui.begin_group()
-        self.label.render(highlight=self.highlight_text)
+        label_w = 0
+        label_h = 0
+        if self.show_label or not self.children:
+            self.label.render(highlight=self.highlight_text)
+        else:
+            imgui.dummy([2, 2])
+        label_w, label_h = imgui.get_item_rect_size()
 
-        # if there are child elements, save room
-        content_w, content_h = imgui.get_item_rect_size()
         port_alloc_w = self.port_alloc()
 
         if self.export_w is not None:
-            min_w = max(self.min_width, self.export_w + 3)
+            min_w = max(self.min_width, self.export_w)
         else:
             min_w = self.min_width
         min_w = max(min_w, port_alloc_w)
 
         if self.export_h is not None:
-            min_h = max(self.min_height, self.export_h + 18)
+            min_h = max(self.min_height, self.export_h + label_h)
         else:
             min_h = self.min_height
 
-        if content_w < min_w:
+        if label_w < min_w:
             imgui.same_line()
-            imgui.dummy([min_w - content_w, 1])
-        if content_h < min_h:
-            imgui.dummy([1, min_h - content_h ])
+            imgui.dummy([min_w - label_w - 2, 1])
+        if label_h < min_h:
+            imgui.dummy([1, min_h - label_h - 2])
         imgui.end_group()
 
         # connections
@@ -146,7 +148,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         if self.export_w is not None:
             self.update_export_size()
-
         # render
         ##########################
 

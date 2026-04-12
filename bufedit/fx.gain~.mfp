@@ -1,10 +1,10 @@
 {
     "gui_params": {
         "display_type": "patch",
-        "export_h": 91.0,
+        "export_h": 102.0,
         "export_w": 66.0,
-        "export_x": 52.0,
-        "export_y": 49.0,
+        "export_x": 12.0,
+        "export_y": 9.0,
         "height": 109.0,
         "layers": [
             [
@@ -20,11 +20,11 @@
         0
     ],
     "objects": {
-        "25": {
+        "1": {
             "connections": [
                 [
                     [
-                        26,
+                        2,
                         0
                     ]
                 ]
@@ -32,7 +32,53 @@
             "do_onload": true,
             "gui_params": {
                 "code": null,
-                "connection_info": [],
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 1,
+                        "obj_2": 2,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 183.0,
+                        "panel_y": 318.0,
+                        "panel_z": 0,
+                        "patch_x": 183.0,
+                        "patch_y": 318.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 183.0,
+                        "position_y": 318.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
                 "debug": false,
                 "display_type": "processor",
                 "export_h": null,
@@ -41,7 +87,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "Layer 0",
                 "min_height": 16,
@@ -67,7 +113,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 28.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -78,7 +124,111 @@
             "properties": {},
             "type": "*~"
         },
-        "26": {
+        "10": {
+            "connections": [
+                [
+                    [
+                        1,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 10,
+                        "obj_2": 1,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 228.0,
+                        "panel_y": 210.0,
+                        "panel_z": 0,
+                        "patch_x": 228.0,
+                        "patch_y": 210.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 1,
+                        "position_x": 228.0,
+                        "position_y": 210.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 23.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "processor_007",
+                "obj_state": 3,
+                "obj_type": "db2a",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 228.0,
+                "panel_y": 210.0,
+                "panel_z": 0,
+                "patch_x": 228.0,
+                "patch_y": 210.0,
+                "patch_z": 0,
+                "position_x": 228.0,
+                "position_y": 210.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 40.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_007",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "db2a"
+        },
+        "11": {
             "connections": [
                 []
             ],
@@ -94,7 +244,64 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
+                "is_export": false,
+                "layername": "Layer 0",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "0",
+                "obj_name": "processor_006",
+                "obj_state": 3,
+                "obj_type": "inlet~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 72.0,
+                "panel_y": 264.0,
+                "panel_z": 0,
+                "patch_x": 72.0,
+                "patch_y": 264.0,
+                "patch_z": 0,
+                "position_x": 72.0,
+                "position_y": 264.0,
+                "position_z": 0,
+                "properties": {
+                    "lv2_description": "Signal inlet"
+                },
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 72.0
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_006",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {
+                "lv2_description": "Signal inlet"
+            },
+            "type": "inlet~"
+        },
+        "2": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "Layer 0",
                 "min_height": 16,
@@ -122,7 +329,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 184.0
             },
             "initargs": "scope.clonenum",
             "midi_filters": null,
@@ -135,11 +342,11 @@
             },
             "type": "outlet~"
         },
-        "27": {
+        "3": {
             "connections": [
                 [
                     [
-                        25,
+                        1,
                         0
                     ]
                 ]
@@ -147,7 +354,53 @@
             "do_onload": false,
             "gui_params": {
                 "code": null,
-                "connection_info": [],
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 3,
+                        "obj_2": 1,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 182.0,
+                        "panel_y": 266.0,
+                        "panel_z": 0,
+                        "patch_x": 182.0,
+                        "patch_y": 266.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 182.0,
+                        "position_y": 266.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
                 "debug": false,
                 "display_type": "processor",
                 "export_h": null,
@@ -156,7 +409,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "Layer 0",
                 "min_height": 16,
@@ -184,7 +437,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 208.0
             },
             "initargs": "scope.clonenum + 1",
             "midi_filters": null,
@@ -197,11 +450,11 @@
             },
             "type": "inlet~"
         },
-        "28": {
+        "4": {
             "connections": [
                 [
                     [
-                        33,
+                        9,
                         0
                     ]
                 ]
@@ -211,13 +464,59 @@
                 "bar_height": 100,
                 "bar_width": 24,
                 "code": null,
-                "connection_info": [],
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 4,
+                        "obj_2": 9,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 228.0,
+                        "panel_y": 93.0,
+                        "panel_z": 0,
+                        "patch_x": 228.0,
+                        "patch_y": 93.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 228.0,
+                        "position_y": 93.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
                 "debug": false,
                 "dial_radius": 24,
                 "display_type": "dial",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 50,
+                "height": 50.0,
                 "is_export": false,
                 "layername": "Layer 0",
                 "max_value": 100.0,
@@ -231,8 +530,8 @@
                 "obj_type": "slidemeter",
                 "orientation": "vertical",
                 "panel_enable": true,
-                "panel_x": 60.0,
-                "panel_y": 74.0,
+                "panel_x": 20.0,
+                "panel_y": 34.0,
                 "panel_z": 0,
                 "patch_x": 228.0,
                 "patch_y": 93.0,
@@ -247,7 +546,7 @@
                 "show_scale": false,
                 "style": {},
                 "update_required": true,
-                "width": 50,
+                "width": 50.0,
                 "zeropoint": null
             },
             "initargs": "0.0",
@@ -260,7 +559,7 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "29": {
+        "5": {
             "connections": [
                 []
             ],
@@ -286,8 +585,8 @@
                 "obj_state": 3,
                 "obj_type": "text",
                 "panel_enable": true,
-                "panel_x": 52.0,
-                "panel_y": 49.0,
+                "panel_x": 12.0,
+                "panel_y": 9.0,
                 "panel_z": 0,
                 "patch_x": 221.0,
                 "patch_y": 69.0,
@@ -312,15 +611,15 @@
             "type": "text",
             "value": "gain (dB)"
         },
-        "30": {
+        "6": {
             "connections": [
                 [
                     [
-                        31,
+                        7,
                         0
                     ],
                     [
-                        33,
+                        9,
                         0
                     ]
                 ]
@@ -328,7 +627,98 @@
             "do_onload": true,
             "gui_params": {
                 "code": null,
-                "connection_info": [],
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 6,
+                        "obj_2": 7,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 395.0,
+                        "panel_y": 94.0,
+                        "panel_z": 0,
+                        "patch_x": 395.0,
+                        "patch_y": 94.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 395.0,
+                        "position_y": 94.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    },
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 6,
+                        "obj_2": 9,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 395.0,
+                        "panel_y": 94.0,
+                        "panel_z": 0,
+                        "patch_x": 395.0,
+                        "patch_y": 94.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 395.0,
+                        "position_y": 94.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
                 "debug": false,
                 "display_type": "processor",
                 "export_h": null,
@@ -337,7 +727,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "Layer 0",
                 "min_height": 16,
@@ -363,7 +753,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 72.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -374,11 +764,11 @@
             "properties": {},
             "type": "loadbang"
         },
-        "31": {
+        "7": {
             "connections": [
                 [
                     [
-                        32,
+                        8,
                         0
                     ]
                 ]
@@ -386,12 +776,58 @@
             "do_onload": false,
             "gui_params": {
                 "code": null,
-                "connection_info": [],
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 7,
+                        "obj_2": 8,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 390.0,
+                        "panel_y": 142.0,
+                        "panel_z": 0,
+                        "patch_x": 390.0,
+                        "patch_y": 142.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 390.0,
+                        "position_y": 142.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
                 "debug": false,
                 "display_type": "message",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 16,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "Layer 0",
                 "min_height": 16,
@@ -415,7 +851,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 25
+                "width": 305.0
             },
             "initargs": "@clonescope(\"channel\", patch.args(0))",
             "midi_filters": null,
@@ -426,7 +862,7 @@
             "properties": {},
             "type": "message"
         },
-        "32": {
+        "8": {
             "connections": [
                 []
             ],
@@ -474,15 +910,15 @@
             "properties": {},
             "type": "send"
         },
-        "33": {
+        "9": {
             "connections": [
                 [
                     [
-                        28,
+                        4,
                         1
                     ],
                     [
-                        34,
+                        10,
                         0
                     ]
                 ]
@@ -490,13 +926,104 @@
             "do_onload": true,
             "gui_params": {
                 "code": null,
-                "connection_info": [],
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 9,
+                        "obj_2": 4,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 228.0,
+                        "panel_y": 162.0,
+                        "panel_z": 0,
+                        "patch_x": 228.0,
+                        "patch_y": 162.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 1,
+                        "position_x": 228.0,
+                        "position_y": 162.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    },
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Layer 0",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 9,
+                        "obj_2": 10,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 228.0,
+                        "panel_y": 162.0,
+                        "panel_z": 0,
+                        "patch_x": 228.0,
+                        "patch_y": 162.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 228.0,
+                        "position_y": 162.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
                 "debug": false,
                 "digits": 0,
                 "display_type": "enum",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 12,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "Layer 0",
                 "max_value": null,
@@ -509,8 +1036,8 @@
                 "obj_state": 3,
                 "obj_type": "enum",
                 "panel_enable": true,
-                "panel_x": 58.0,
-                "panel_y": 126.0,
+                "panel_x": 18.0,
+                "panel_y": 86.0,
                 "panel_z": 0,
                 "patch_x": 228.0,
                 "patch_y": 162.0,
@@ -523,7 +1050,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 24
+                "width": 56.0
             },
             "initargs": "0.0",
             "midi_filters": null,
@@ -534,141 +1061,26 @@
             "properties": {},
             "type": "enum",
             "value": 0.0
-        },
-        "34": {
-            "connections": [
-                [
-                    [
-                        25,
-                        1
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "code": null,
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layername": "Layer 0",
-                "min_height": 16,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "processor_007",
-                "obj_state": 3,
-                "obj_type": "db2a",
-                "panel_enable": false,
-                "panel_mode": false,
-                "panel_x": 228.0,
-                "panel_y": 210.0,
-                "panel_z": 0,
-                "patch_x": 228.0,
-                "patch_y": 210.0,
-                "patch_z": 0,
-                "position_x": 228.0,
-                "position_y": 210.0,
-                "position_z": 0,
-                "properties": {},
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_007",
-            "osc_methods": [],
-            "presets": {},
-            "properties": {},
-            "type": "db2a"
-        },
-        "35": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "code": null,
-                "connection_info": [],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
-                "is_export": false,
-                "layername": "Layer 0",
-                "min_height": 16,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "0",
-                "obj_name": "processor_006",
-                "obj_state": 3,
-                "obj_type": "inlet~",
-                "panel_enable": false,
-                "panel_mode": false,
-                "panel_x": 72.0,
-                "panel_y": 264.0,
-                "panel_z": 0,
-                "patch_x": 72.0,
-                "patch_y": 264.0,
-                "patch_z": 0,
-                "position_x": 72.0,
-                "position_y": 264.0,
-                "position_z": 0,
-                "properties": {
-                    "lv2_description": "Signal inlet"
-                },
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 20
-            },
-            "initargs": "0",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_006",
-            "osc_methods": [],
-            "presets": {},
-            "properties": {
-                "lv2_description": "Signal inlet"
-            },
-            "type": "inlet~"
         }
     },
     "presets": {},
     "scopes": {
         "__patch__": {
-            "dial_001": 28,
-            "enum_001": 33,
-            "message_007": 31,
-            "patch": 24,
-            "processor_006": 35,
-            "processor_007": 34,
-            "processor_019": 30,
-            "self": 24,
-            "sendvia_001": 32,
-            "text_001": 29
+            "dial_001": 4,
+            "enum_001": 9,
+            "message_007": 7,
+            "patch": 0,
+            "processor_006": 11,
+            "processor_007": 10,
+            "processor_019": 6,
+            "self": 0,
+            "sendvia_001": 8,
+            "text_001": 5
         },
         "channel": {
-            "processor_011": 27,
-            "processor_012": 25,
-            "processor_013": 26
+            "processor_011": 3,
+            "processor_012": 1,
+            "processor_013": 2
         }
     },
     "type": "fx.gain~"

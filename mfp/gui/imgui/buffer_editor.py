@@ -690,6 +690,7 @@ class BufferEditor:
             show_label=False,
             panel_mode=True
         )
+
         # each fx patch needs to take a channels= param
         # probably best to make the inputlevel and xfade
         # channels on the left
@@ -711,6 +712,12 @@ class BufferEditor:
                 self.working_source_id, self.buffer_info.channels + port,
                 fx_patch_id, port
             )
+
+        apply_id = await MFPGUI().mfp.resolve(
+            "apply_button", fx_patch_id,
+        )
+        apply_element = MFPGUI().objects.get(apply_id)
+        log.debug(f"[bufedit] Apply button id {apply_id} is {apply_element}")
 
     ########################################
     # view control

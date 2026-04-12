@@ -31,7 +31,7 @@ class ProcessorElement (BaseElement):
     proc_type = None
 
     extra_params = {
-        'show_label': ParamInfo(label="Show label", param_type=bool),
+        'show_label': ParamInfo(label="Show label", param_type=bool, show=True),
         'export_x': ParamInfo(label="Exported interface X", param_type=float),
         'export_y': ParamInfo(label="Exported interface Y", param_type=float),
         'export_w': ParamInfo(label="Exported interface width", param_type=float),
@@ -53,6 +53,7 @@ class ProcessorElement (BaseElement):
         super().__init__(window, x, y)
 
         self.show_label = params.get("show_label", True)
+        self.panel_mode = params.get("panel_mode", False)
 
         # display elements
         self.label = TextWidget.get_backend(MFPGUI().backend_name)(self)
@@ -63,7 +64,7 @@ class ProcessorElement (BaseElement):
         self.label.set_reactive(False)
         self.label_text = None
 
-        if not self.show_label:
+        if not self.show_label and self.children:
             self.label.hide()
 
         self.export_x = None
@@ -71,7 +72,6 @@ class ProcessorElement (BaseElement):
         self.export_w = None
         self.export_h = None
         self.export_created = False
-        self.panel_mode = False
 
         self.obj_state = self.OBJ_HALFCREATED
 
@@ -103,6 +103,18 @@ class ProcessorElement (BaseElement):
                 None, f"{self.obj_type}{args}"
             )
 
+    @saga('show_label')
+    async def change_label_offset(self, action, state_diff, previous):
+        if "show_label" not in state_diff:
+            return
+        for child in self.children:
+            if self.show_label:
+                child.export_offset_y += 18
+                await child.move(child.position_x, child.position_y + 18)
+            else:
+                child.export_offset_y -= 18
+                await child.move(child.position_x, child.position_y - 18)
+
     async def label_edit_finish(self, widget, text=None, aborted=False):
         if text is not None and not aborted:
             obj_type = None
@@ -133,7 +145,7 @@ class ProcessorElement (BaseElement):
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
 
-        if not self.show_label:
+        if not self.show_label and self.children:
             self.label.hide()
 
         await self.update()
@@ -155,7 +167,7 @@ class ProcessorElement (BaseElement):
             self.show_label = params.get("show_label")
             if oldval ^ self.show_label:
                 need_update = True
-                if self.show_label:
+                if self.show_label or not self.children:
                     self.label.show()
                 else:
                     self.label.hide()

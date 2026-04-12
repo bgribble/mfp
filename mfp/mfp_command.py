@@ -358,11 +358,17 @@ class MFPCommand:
             return False
         return await patch.has_unsaved_changes()
 
+    def resolve(self, name, patch_id, scope=None):
+        from .mfp_app import MFPApp
+        patch = MFPApp().recall(patch_id)
+        obj = patch.resolve(name, scope)
+        if obj:
+            return obj.obj_id
+
     @noresp
     def quit(self):
         from .mfp_app import MFPApp
         MFPApp().async_task(MFPApp().finish())
-        return None
 
     def toggle_pause(self):
         from .mfp_app import MFPApp
