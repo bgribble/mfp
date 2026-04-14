@@ -687,8 +687,6 @@ class BufferEditor:
             "bufedit.fx~.mfp",
             initargs=f"'{fxname}', {self.buffer_info.channels}",
             show_gui=True,
-            show_label=False,
-            panel_mode=True
         )
 
         # each fx patch needs to take a channels= param
