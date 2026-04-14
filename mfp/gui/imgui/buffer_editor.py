@@ -755,7 +755,9 @@ class BufferEditor:
         )
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
         await MFPGUI().mfp.send_bang(self.working_sink_id, 0)
+        await MFPGUI().mfp.send_bang(self.working_source_id, 0)
 
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead_start_pos = self.implot_playhead
@@ -771,6 +773,7 @@ class BufferEditor:
         )
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
         if self.implot_playhead_start_time:
             self.implot_playhead_start_time = datetime.now()
@@ -817,6 +820,7 @@ class BufferEditor:
             self.implot_playhead_start_pos = self.implot_playhead
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
     async def playhead_loop_selection(self):
         from mfp.gui_main import MFPGUI
@@ -834,7 +838,9 @@ class BufferEditor:
         )
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
         await MFPGUI().mfp.send_bang(self.working_sink_id, 0)
+        await MFPGUI().mfp.send_bang(self.working_source_id, 0)
 
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead_start_pos = self.implot_playhead
