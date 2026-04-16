@@ -32,8 +32,6 @@ class BufferEditMode (InputMode):
             "buffer-edit-paste", cls.paste, helptext="Paste selection from clipboard",
             keysym="C-v", menupath="BufEdit > Paste"
         )
-
-
         cls.bind(
             "buffer-edit-custom-effect", cls.effect_custom, helptext="Apply custom effect",
             keysym="f", menupath="BufEdit > Effect"

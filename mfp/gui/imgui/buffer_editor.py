@@ -146,7 +146,7 @@ class BufferEditor:
         from mfp.gui_main import MFPGUI
 
         # create new patch wrapping the specified effect
-        fx_patch_id = await MFPGUI().mfp.open_file(
+        self.fx_patch_id = await MFPGUI().mfp.open_file(
             "bufedit.fx~.mfp",
             initargs=f"'{fxname}', {self.buffer_info.channels}",
             show_gui=True,
@@ -159,10 +159,10 @@ class BufferEditor:
         for port in range(self.buffer_info.channels):
             await MFPGUI().mfp.connect(
                 self.working_source_id, port,
-                fx_patch_id, port + 2
+                self.fx_patch_id, port + 2
             )
             await MFPGUI().mfp.connect(
-                fx_patch_id, port,
+                self.fx_patch_id, port,
                 self.working_sink_id, port
             )
 
@@ -172,29 +172,84 @@ class BufferEditor:
                     self.working_sink_id, port, self.working_aud0_info.get("obj_id"), 0
                 )
                 await MFPGUI().mfp.connect(
-                    fx_patch_id, port, self.working_aud0_info.get("obj_id"), 0
+                    self.fx_patch_id, port, self.working_aud0_info.get("obj_id"), 0
                 )
             else:
                 await MFPGUI().mfp.disconnect(
                     self.working_sink_id, port, self.working_aud1_info.get("obj_id"), 0
                 )
                 await MFPGUI().mfp.connect(
-                    fx_patch_id, port, self.working_aud1_info.get("obj_id"), 0
+                    self.fx_patch_id, port, self.working_aud1_info.get("obj_id"), 0
                 )
 
         # connect input level and xfade
         for port in [0, 1]:
             await MFPGUI().mfp.connect(
                 self.working_source_id, self.buffer_info.channels + port,
-                fx_patch_id, port
+                self.fx_patch_id, port
             )
 
         for element in [
             'apply_button', 'cancel_button', 'selection_toggle',
             'bypass_toggle', 'xfade_enum', 'preroll_enum'
         ]:
-            element_id = await MFPGUI().mfp.resolve(element, fx_patch_id)
+            element_id = await MFPGUI().mfp.resolve(element, self.fx_patch_id)
             self.fx_patch_elements[element] = MFPGUI().objects.get(element_id)
+
+        # add actions for Apply and Cancel buttons
+        cancel = self.fx_patch_elements["cancel_button"]
+        cancel.extra_action = self.fx_close_patch
+
+        apply = self.fx_patch_elements["apply_button"]
+        apply.extra_action = self.fx_apply_patch
+
+    async def fx_apply_patch(self):
+        log.debug("[fx_apply_patch] applying fx")
+
+    async def fx_close_patch(self):
+        from mfp.gui_main import MFPGUI
+
+        # remove actions for Apply and Cancel buttons
+        cancel = self.fx_patch_elements["cancel_button"]
+        cancel.extra_action = None
+
+        # reconnect sink buffer to audition outs, disconnect FX outs
+        for port in range(self.buffer_info.channels):
+            await MFPGUI().mfp.disconnect(
+                self.working_source_id, port,
+                self.fx_patch_id, port + 2
+            )
+            await MFPGUI().mfp.disconnect(
+                self.fx_patch_id, port,
+                self.working_sink_id, port
+            )
+
+            if port % 2 == 0:
+                # reconnect previous outputs
+                await MFPGUI().mfp.connect(
+                    self.working_sink_id, port, self.working_aud0_info.get("obj_id"), 0
+                )
+                await MFPGUI().mfp.disconnect(
+                    self.fx_patch_id, port, self.working_aud0_info.get("obj_id"), 0
+                )
+            else:
+                await MFPGUI().mfp.connect(
+                    self.working_sink_id, port, self.working_aud1_info.get("obj_id"), 0
+                )
+                await MFPGUI().mfp.disconnect(
+                    self.fx_patch_id, port, self.working_aud1_info.get("obj_id"), 0
+                )
+
+        # connect input level and xfade
+        for port in [0, 1]:
+            await MFPGUI().mfp.disconnect(
+                self.working_source_id, self.buffer_info.channels + port,
+                self.fx_patch_id, port
+            )
+
+        # delete FX patch
+        await MFPGUI().mfp.delete(self.fx_patch_id)
+        self.fx_patch_id = None
 
     ########################################
     # buffer operations

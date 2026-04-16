@@ -41,10 +41,12 @@ class ClickableControlMode (InputMode):
         if self.clickstate:
             self.widget.unclicked()
 
-    def click(self):
+    async def click(self):
         if self.manager.pointer_obj is self.widget:
             self.clickstate = True
-            return self.widget.clicked()
+            if hasattr(self.widget, 'extra_action') and self.widget.extra_action:
+                await self.widget.extra_action()
+            return await self.widget.clicked()
         self.clickstate = False
         self.widget.unclicked()
         return False
@@ -56,6 +58,8 @@ class ClickableControlMode (InputMode):
 
     async def quick_click(self):
         self.clickstate = True
+        if hasattr(self.widget, 'extra_action') and self.extra_action:
+            await self.widget.extra_action()
         await self.widget.clicked()
         self.clickstate = False
         self.widget.unclicked()

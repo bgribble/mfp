@@ -72,6 +72,8 @@ class ButtonElement (BaseElement):
         self.label_text = ''
         self.param_list.append('label_text')
 
+        self.extra_action = None
+
         # request update when value changes
         self.update_required = True
 
