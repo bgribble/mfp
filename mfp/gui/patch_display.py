@@ -141,15 +141,30 @@ class PatchDisplay(Store):
         self.app_window.refresh(self)
 
     async def delete(self, delete_obj=True):
+        from mfp.gui.connection_element import ConnectionElement
+
         if self.obj_id is None:
             return
 
         # delete all the processor elements
+        proc_to_delete = []
+        conn_to_delete = []
+
         for layer in self.layers:
-            to_delete = [o for o in layer.objects]
-            for o in to_delete:
-                await o.delete(delete_obj=delete_obj)
+            for o in layer.objects:
+                if isinstance(o, ConnectionElement):
+                    conn_to_delete.append(o)
+                else:
+                    proc_to_delete.append(o)
             layer.hide()
+
+        # delete connections first -- they can cross layers,
+        # leading to some error conditions
+        for o in conn_to_delete:
+            await o.delete(delete_obj=delete_obj)
+        for o in proc_to_delete:
+            await o.delete(delete_obj=delete_obj)
+        for layer in self.layers:
             layer.delete()
 
         # last, delete the patch on the control side

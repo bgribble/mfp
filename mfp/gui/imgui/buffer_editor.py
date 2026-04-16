@@ -8,6 +8,7 @@ from posix_ipc import SharedMemory
 import numpy as np
 from imgui_bundle import implot, imgui
 from mfp import log
+from mfp.buffer_info import BufferInfo
 from .app_window import menu_bar
 
 
@@ -58,6 +59,9 @@ class BufferEditor:
         self.working_source_info = None
         self.working_sink_id = None
         self.working_sink_info = None
+
+        self.fx_patch_id = None
+        self.fx_patch_elements = {}
 
         self.channel_selections = [None]         # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
@@ -116,14 +120,15 @@ class BufferEditor:
             "sink_buffer"
         )
         self.working_sink_id = self.working_sink_info.get("obj_id")
-        out_0_info = await MFPGUI().mfp.create(
+
+        self.working_aud0_info = await MFPGUI().mfp.create(
             "out~", "0", self.working_patch_info.get("name"), None, "audition 0"
         )
-        out_1_info = await MFPGUI().mfp.create(
+        self.working_aud1_info = await MFPGUI().mfp.create(
             "out~", "1", self.working_patch_info.get("name"), None, "audition 1"
         )
-        await MFPGUI().mfp.connect(self.working_sink_id, 0, out_0_info.get("obj_id"), 0)
-        await MFPGUI().mfp.connect(self.working_sink_id, 1, out_1_info.get("obj_id"), 0)
+        await MFPGUI().mfp.connect(self.working_sink_id, 0, self.working_aud0_info.get("obj_id"), 0)
+        await MFPGUI().mfp.connect(self.working_sink_id, 1, self.working_aud1_info.get("obj_id"), 0)
 
         self.buffer_sync(self.shm_obj, self.buffer_info, self.working_buf_obj, source_buf)
         self.buffer_compute_peaks()
@@ -135,6 +140,64 @@ class BufferEditor:
             await MFPGUI().mfp.delete(self.working_patch_id)
             self.working_patch_id = None
 
+    ########################################
+    # fx patch
+    async def fx_open_patch(self, fxname):
+        from mfp.gui_main import MFPGUI
+
+        # create new patch wrapping the specified effect
+        fx_patch_id = await MFPGUI().mfp.open_file(
+            "bufedit.fx~.mfp",
+            initargs=f"'{fxname}', {self.buffer_info.channels}",
+            show_gui=True,
+        )
+
+        # each fx patch needs to take a number param for channel count
+        # input level and xfade channels on the left
+
+        # connect source to fx
+        for port in range(self.buffer_info.channels):
+            await MFPGUI().mfp.connect(
+                self.working_source_id, port,
+                fx_patch_id, port + 2
+            )
+            await MFPGUI().mfp.connect(
+                fx_patch_id, port,
+                self.working_sink_id, port
+            )
+
+            if port % 2 == 0:
+                # disconnect previous outputs
+                await MFPGUI().mfp.disconnect(
+                    self.working_sink_id, port, self.working_aud0_info.get("obj_id"), 0
+                )
+                await MFPGUI().mfp.connect(
+                    fx_patch_id, port, self.working_aud0_info.get("obj_id"), 0
+                )
+            else:
+                await MFPGUI().mfp.disconnect(
+                    self.working_sink_id, port, self.working_aud1_info.get("obj_id"), 0
+                )
+                await MFPGUI().mfp.connect(
+                    fx_patch_id, port, self.working_aud1_info.get("obj_id"), 0
+                )
+
+        # connect input level and xfade
+        for port in [0, 1]:
+            await MFPGUI().mfp.connect(
+                self.working_source_id, self.buffer_info.channels + port,
+                fx_patch_id, port
+            )
+
+        for element in [
+            'apply_button', 'cancel_button', 'selection_toggle',
+            'bypass_toggle', 'xfade_enum', 'preroll_enum'
+        ]:
+            element_id = await MFPGUI().mfp.resolve(element, fx_patch_id)
+            self.fx_patch_elements[element] = MFPGUI().objects.get(element_id)
+
+    ########################################
+    # buffer operations
     def buffer_grab(self):
         def offset(channel):
             return channel * self.buffer_info.size * self.FLOAT_SIZE
@@ -161,21 +224,27 @@ class BufferEditor:
             return None
         self.buffer_compute_peaks()
 
-    def buffer_sync(self, from_obj, from_info, to_obj, to_info):
-        def offset(buf_info, channel):
-            return channel * buf_info.size * self.FLOAT_SIZE
+    def buffer_sync(self, from_obj, from_info, to_obj, to_info, data=None):
         sync_channels = to_info.channels
         if from_info:
             sync_channels = min(from_info.channels, to_info.channels)
-
         for c in range(sync_channels):
-            if from_obj:
-                os.lseek(from_obj.fd, offset(from_info, c), os.SEEK_SET)
-                slc = os.read(from_obj.fd, int(from_info.size * self.FLOAT_SIZE))
-            else:
-                slc = self.buffer_data[c].tobytes(dtype=np.float32)
-            os.lseek(to_obj.fd, offset(to_info, c), os.SEEK_SET)
-            os.write(to_obj.fd, slc)
+            self.buffer_sync_channel(c, from_obj, from_info, to_obj, to_info, data)
+
+    def buffer_sync_channel(self, channel, from_obj, from_info, to_obj, to_info, data=None):
+        def offset(buf_info, channel):
+            return channel * buf_info.size * self.FLOAT_SIZE
+
+        if from_obj:
+            os.lseek(from_obj.fd, offset(from_info, channel), os.SEEK_SET)
+            slc = os.read(from_obj.fd, int(from_info.size * self.FLOAT_SIZE))
+        elif data is not None:
+            slc = data.tobytes()
+        else:
+            slc = self.buffer_data[channel].tobytes()
+
+        os.lseek(to_obj.fd, offset(to_info, channel), os.SEEK_SET)
+        os.write(to_obj.fd, slc)
 
     def buffer_compute_peaks(self):
         self.buffer_peaks = {}
@@ -241,6 +310,61 @@ class BufferEditor:
         else:
             peak_scale = "10000"
         return peak_scale
+
+    def buffer_set_selection(self):
+        preroll = 0
+        xfade = 0
+
+        if "preroll_enum" in self.fx_patch_elements:
+            preroll = self.fx_patch_elements.get('preroll_enum').value
+            xfade = self.fx_patch_elements.get('xfade_enum').value
+
+        working_buf_info = BufferInfo(
+            buf_id=self.working_buf_id,
+            size=self.buffer_info.size,
+            channels=self.buffer_info.channels + 2,
+            rate=self.buffer_info.rate,
+            offset=self.buffer_info.offset
+        )
+        # input level signal
+        startpos = int(
+            (self.implot_selection.x.min - (preroll / 1000.0)) * self.buffer_info.rate
+        )
+        endpos = int(
+            (self.implot_selection.x.max + (preroll / 1000.0)) * self.buffer_info.rate
+        )
+
+        startpos = max(0, startpos)
+        endpos = min(self.buffer_info.size, endpos)
+
+        input_arr = np.zeros(self.buffer_info.size, dtype=np.float32)
+        input_arr[startpos:endpos] = 1
+        self.buffer_sync_channel(
+            self.buffer_info.channels, None, None, self.working_buf_obj, working_buf_info,
+            data=input_arr
+        )
+
+        # crossfade signal
+        inramp_start = int(self.implot_selection.x.min * self.buffer_info.rate)
+        outramp_end = int(self.implot_selection.x.max * self.buffer_info.rate)
+
+        ramp_len = min(
+            int((xfade / 1000) * self.buffer_info.rate),
+            int((outramp_end - inramp_start) / 2)
+        )
+
+        inramp_end = inramp_start + ramp_len
+        outramp_start = outramp_end - ramp_len
+
+        xfade_arr = np.zeros(self.buffer_info.size, dtype=np.float32)
+        xfade_arr[inramp_start:outramp_end] = 1
+        xfade_arr[inramp_start:inramp_end] = np.linspace(0, 1, ramp_len, dtype=np.float32)
+        xfade_arr[outramp_start:outramp_end] = np.linspace(1, 0, ramp_len, dtype=np.float32)
+
+        self.buffer_sync_channel(
+            self.buffer_info.channels + 1, None, None, self.working_buf_obj, working_buf_info,
+            data=xfade_arr
+        )
 
     ########################################
     # toolbar
@@ -616,6 +740,9 @@ class BufferEditor:
                         self.implot_selection = chan_sel
                         self.channel_selections[channel] = chan_sel
                         self.channel_selections_active[channel] = True
+                        MFPGUI().async_task(
+                            self.playhead_update_selection()
+                        )
                     implot.end_plot()
                 imgui.pop_id()
             if self.implot_playhead_needs_set:
@@ -674,48 +801,6 @@ class BufferEditor:
         imgui.pop_style_var(3)
 
         return keep_going
-
-    ########################################
-    # fx patch opener
-    async def fx_open_patch(self, fxname):
-        from mfp.gui_main import MFPGUI
-
-        log.debug(f"[bufedit] opening FX patch {fxname}")
-
-        # create new patch wrapping the specified effect
-        fx_patch_id = await MFPGUI().mfp.open_file(
-            "bufedit.fx~.mfp",
-            initargs=f"'{fxname}', {self.buffer_info.channels}",
-            show_gui=True,
-        )
-
-        # each fx patch needs to take a channels= param
-        # probably best to make the inputlevel and xfade
-        # channels on the left
-
-        # connect source to fx
-        for port in range(self.buffer_info.channels):
-            await MFPGUI().mfp.connect(
-                self.working_source_id, port,
-                fx_patch_id, port + 2
-            )
-            await MFPGUI().mfp.connect(
-                fx_patch_id, port,
-                self.working_sink_id, port
-            )
-
-        # connect input level and xfade
-        for port in [0, 1]:
-            await MFPGUI().mfp.connect(
-                self.working_source_id, self.buffer_info.channels + port,
-                fx_patch_id, port
-            )
-
-        apply_id = await MFPGUI().mfp.resolve(
-            "apply_button", fx_patch_id,
-        )
-        apply_element = MFPGUI().objects.get(apply_id)
-        log.debug(f"[bufedit] Apply button id {apply_id} is {apply_element}")
 
     ########################################
     # view control
@@ -785,9 +870,8 @@ class BufferEditor:
             buf_state=0,
         )
 
-        await MFPGUI().mfp.send(
-            self.working_sink_id, 0, buffer_params
-        )
+        await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
         self.implot_playhead_start_time = None
         self.implot_playhead_looping = False
@@ -797,6 +881,7 @@ class BufferEditor:
             self.implot_selection.x.min = sel_start
         if sel_end is not None:
             self.implot_selection.x.max = sel_end
+
         return await self.playhead_update_selection()
 
     async def playhead_update_selection(self):
@@ -818,6 +903,8 @@ class BufferEditor:
         if self.implot_playhead_start_time:
             self.implot_playhead_start_time = datetime.now()
             self.implot_playhead_start_pos = self.implot_playhead
+
+        self.buffer_set_selection()
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
         await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)

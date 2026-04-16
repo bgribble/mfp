@@ -53,6 +53,8 @@ class MFPCommand:
         obj_2 = MFPApp().recall(obj_2_id)
         if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
             return obj_1.connect(obj_1_port, obj_2, obj_2_port)
+        else:
+            log.debug(f"[connect] can't connect {obj_1} {obj_1_id}:{obj_1_port} --> {obj_2} {obj_2_id}:{obj_2_port}")
         return None
 
     def disconnect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
@@ -62,6 +64,8 @@ class MFPCommand:
 
         if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
             return obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
+        else:
+            log.debug(f"[disconnect] can't disconnect {obj_1} {obj_1_id}:{obj_1_port} --> {obj_2} {obj_2_id}:{obj_2_port}")
         return None
 
     @noresp
