@@ -1,11 +1,11 @@
 {
     "gui_params": {
         "display_type": "patch",
-        "export_h": 140.0,
+        "export_h": 143.0,
         "export_w": 374.0,
         "export_x": 13.0,
         "export_y": 9.0,
-        "height": 154.0,
+        "height": 161.0,
         "layers": [
             [
                 "Layer 0",
@@ -22,7 +22,7 @@
         ],
         "name": "bufedit.fx~",
         "panel_mode": true,
-        "width": 427.0
+        "width": 374.0
     },
     "hot_inlets": [
         0
@@ -31,10 +31,6 @@
         "1": {
             "connections": [
                 [
-                    [
-                        22,
-                        0
-                    ],
                     [
                         44,
                         0
@@ -442,7 +438,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 76.0
+                "width": 60.0
             },
             "initargs": "0.1",
             "midi_filters": null,
@@ -452,7 +448,7 @@
             "presets": {},
             "properties": {},
             "type": "enum",
-            "value": 1.0
+            "value": 5.0
         },
         "16": {
             "connections": [
@@ -546,7 +542,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 76.0
+                "width": 60.0
             },
             "initargs": "0.0",
             "midi_filters": null,
@@ -556,7 +552,7 @@
             "presets": {},
             "properties": {},
             "type": "enum",
-            "value": 0.0
+            "value": 1
         },
         "18": {
             "connections": [
@@ -886,7 +882,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -912,7 +908,7 @@
                 "show_label": false,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 361.0
             },
             "initargs": "patch.args(1) or None",
             "midi_filters": null,
@@ -922,154 +918,6 @@
             "presets": {},
             "properties": {},
             "type": "{self.args(0) or \"+~\"}"
-        },
-        "22": {
-            "connections": [
-                [
-                    [
-                        21,
-                        0
-                    ],
-                    [
-                        25,
-                        1
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "code": null,
-                "connection_info": [
-                    {
-                        "code": null,
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "FX processing",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 22,
-                        "obj_2": 21,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "panel_enable": false,
-                        "panel_x": 353.0,
-                        "panel_y": 148.0,
-                        "panel_z": 0,
-                        "patch_x": 353.0,
-                        "patch_y": 148.0,
-                        "patch_z": 0,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 353.0,
-                        "position_y": 148.0,
-                        "position_z": 0,
-                        "properties": {},
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    },
-                    {
-                        "code": null,
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "FX processing",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 22,
-                        "obj_2": 25,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "panel_enable": false,
-                        "panel_x": 353.0,
-                        "panel_y": 148.0,
-                        "panel_z": 0,
-                        "patch_x": 353.0,
-                        "patch_y": 148.0,
-                        "patch_z": 0,
-                        "port_1": 0,
-                        "port_2": 1,
-                        "position_x": 353.0,
-                        "position_y": 148.0,
-                        "position_z": 0,
-                        "properties": {},
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
-                "debug": false,
-                "display_type": "recvsignalvia",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 35.0,
-                "is_export": false,
-                "label_text": "input_active",
-                "layername": "FX processing",
-                "min_height": 0,
-                "min_width": 0,
-                "no_export": false,
-                "obj_args": "'input_active', 0",
-                "obj_name": "recvsignalvia_002",
-                "obj_state": 3,
-                "obj_type": "recv~",
-                "panel_enable": false,
-                "panel_x": 353.0,
-                "panel_y": 148.0,
-                "panel_z": 0,
-                "patch_x": 353.0,
-                "patch_y": 148.0,
-                "patch_z": 0,
-                "position_x": 353.0,
-                "position_y": 148.0,
-                "position_z": 0,
-                "properties": {},
-                "scope": "__patch__",
-                "style": {},
-                "update_required": false,
-                "width": 104.0
-            },
-            "initargs": "'input_active', 0",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "recvsignalvia_002",
-            "osc_methods": [],
-            "presets": {},
-            "properties": {},
-            "type": "recv~"
         },
         "23": {
             "connections": [
@@ -1226,7 +1074,7 @@
                         0
                     ],
                     [
-                        65,
+                        66,
                         0
                     ]
                 ]
@@ -1299,7 +1147,7 @@
                         "num_inlets": 1,
                         "num_outlets": 0,
                         "obj_1": 25,
-                        "obj_2": 65,
+                        "obj_2": 66,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1334,7 +1182,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -1360,7 +1208,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 26.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1438,7 +1286,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -1464,7 +1312,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 26.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1542,7 +1390,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -1568,7 +1416,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 40.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -1646,7 +1494,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -1672,7 +1520,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 26.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1691,7 +1539,7 @@
                         0
                     ],
                     [
-                        66,
+                        65,
                         0
                     ]
                 ]
@@ -1726,16 +1574,16 @@
                         "obj_state": 3,
                         "obj_type": null,
                         "panel_enable": false,
-                        "panel_x": 179.0,
-                        "panel_y": 326.0,
+                        "panel_x": 181.0,
+                        "panel_y": 327.0,
                         "panel_z": 0,
-                        "patch_x": 179.0,
-                        "patch_y": 326.0,
+                        "patch_x": 181.0,
+                        "patch_y": 327.0,
                         "patch_z": 0,
                         "port_1": 0,
                         "port_2": 0,
-                        "position_x": 179.0,
-                        "position_y": 326.0,
+                        "position_x": 181.0,
+                        "position_y": 327.0,
                         "position_z": 0,
                         "properties": {},
                         "rotation": 0.0,
@@ -1764,23 +1612,23 @@
                         "num_inlets": 1,
                         "num_outlets": 0,
                         "obj_1": 29,
-                        "obj_2": 66,
+                        "obj_2": 65,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
                         "obj_state": 3,
                         "obj_type": null,
                         "panel_enable": false,
-                        "panel_x": 179.0,
-                        "panel_y": 326.0,
+                        "panel_x": 181.0,
+                        "panel_y": 327.0,
                         "panel_z": 0,
-                        "patch_x": 179.0,
-                        "patch_y": 326.0,
+                        "patch_x": 181.0,
+                        "patch_y": 327.0,
                         "patch_z": 0,
                         "port_1": 0,
                         "port_2": 0,
-                        "position_x": 179.0,
-                        "position_y": 326.0,
+                        "position_x": 181.0,
+                        "position_y": 327.0,
                         "position_z": 0,
                         "properties": {},
                         "rotation": 0.0,
@@ -1799,7 +1647,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -1811,21 +1659,21 @@
                 "obj_type": "+~",
                 "panel_enable": false,
                 "panel_mode": false,
-                "panel_x": 179.0,
-                "panel_y": 326.0,
+                "panel_x": 181.0,
+                "panel_y": 327.0,
                 "panel_z": 0,
-                "patch_x": 179.0,
-                "patch_y": 326.0,
+                "patch_x": 181.0,
+                "patch_y": 327.0,
                 "patch_z": 0,
-                "position_x": 179.0,
-                "position_y": 326.0,
+                "position_x": 181.0,
+                "position_y": 327.0,
                 "position_z": 0,
                 "properties": {},
                 "scope": "channel",
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 26.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -2060,7 +1908,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -2088,7 +1936,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 208.0
             },
             "initargs": "scope.clonenum + 2",
             "midi_filters": null,
@@ -2168,7 +2016,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -2194,7 +2042,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 48.0
             },
             "initargs": "-1",
             "midi_filters": null,
@@ -2221,7 +2069,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -2249,7 +2097,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 184.0
             },
             "initargs": "scope.clonenum",
             "midi_filters": null,
@@ -3952,7 +3800,7 @@
                 "show_scale": false,
                 "style": {},
                 "update_required": true,
-                "value": 0.0,
+                "value": 1.0,
                 "width": 12.0,
                 "zeropoint": null
             },
@@ -3964,7 +3812,7 @@
             "presets": {},
             "properties": {},
             "type": "slidemeter",
-            "value": 0.0
+            "value": 1.0
         },
         "54": {
             "connections": [
@@ -4033,7 +3881,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -4059,7 +3907,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 80.0
             },
             "initargs": "100",
             "midi_filters": null,
@@ -4185,7 +4033,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -4211,7 +4059,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 80.0
             },
             "initargs": "100",
             "midi_filters": null,
@@ -5148,13 +4996,13 @@
         },
         "65": {
             "connections": [
+                [],
                 [
                     [
-                        54,
+                        56,
                         0
                     ]
-                ],
-                []
+                ]
             ],
             "do_onload": true,
             "gui_params": {
@@ -5179,6 +5027,111 @@
                         "num_inlets": 1,
                         "num_outlets": 0,
                         "obj_1": 65,
+                        "obj_2": 56,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 76.0,
+                        "panel_y": 372.0,
+                        "panel_z": 0,
+                        "patch_x": 76.0,
+                        "patch_y": 372.0,
+                        "patch_z": 0,
+                        "port_1": 1,
+                        "port_2": 0,
+                        "position_x": 76.0,
+                        "position_y": 372.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 23.0,
+                "is_export": false,
+                "layername": "FX processing",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "processor_029",
+                "obj_state": 3,
+                "obj_type": "ampl~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 76.0,
+                "panel_y": 372.0,
+                "panel_z": 0,
+                "patch_x": 76.0,
+                "patch_y": 372.0,
+                "patch_z": 0,
+                "position_x": 76.0,
+                "position_y": 372.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 48.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_029",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "ampl~"
+        },
+        "66": {
+            "connections": [
+                [],
+                [
+                    [
+                        54,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "FX processing",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 66,
                         "obj_2": 54,
                         "obj_args": null,
                         "obj_id": null,
@@ -5192,7 +5145,7 @@
                         "patch_x": 553.0,
                         "patch_y": 275.0,
                         "patch_z": 0,
-                        "port_1": 0,
+                        "port_1": 1,
                         "port_2": 0,
                         "position_x": 553.0,
                         "position_y": 275.0,
@@ -5214,7 +5167,7 @@
                 "export_w": null,
                 "export_x": null,
                 "export_y": null,
-                "height": 20,
+                "height": 23.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "min_height": 16,
@@ -5240,7 +5193,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 48.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -5251,15 +5204,18 @@
             "properties": {},
             "type": "ampl~"
         },
-        "66": {
+        "69": {
             "connections": [
                 [
                     [
-                        56,
+                        25,
+                        1
+                    ],
+                    [
+                        21,
                         0
                     ]
-                ],
-                []
+                ]
             ],
             "do_onload": true,
             "gui_params": {
@@ -5283,24 +5239,69 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 66,
-                        "obj_2": 56,
+                        "obj_1": 69,
+                        "obj_2": 25,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
                         "obj_state": 3,
                         "obj_type": null,
                         "panel_enable": false,
-                        "panel_x": 78.0,
-                        "panel_y": 372.0,
+                        "panel_x": 356.0,
+                        "panel_y": 153.0,
                         "panel_z": 0,
-                        "patch_x": 78.0,
-                        "patch_y": 372.0,
+                        "patch_x": 356.0,
+                        "patch_y": 153.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 1,
+                        "position_x": 356.0,
+                        "position_y": 153.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    },
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "FX processing",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 69,
+                        "obj_2": 21,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 356.0,
+                        "panel_y": 153.0,
+                        "panel_z": 0,
+                        "patch_x": 356.0,
+                        "patch_y": 153.0,
                         "patch_z": 0,
                         "port_1": 0,
                         "port_2": 0,
-                        "position_x": 78.0,
-                        "position_y": 372.0,
+                        "position_x": 356.0,
+                        "position_y": 153.0,
                         "position_z": 0,
                         "properties": {},
                         "rotation": 0.0,
@@ -5312,49 +5313,44 @@
                     }
                 ],
                 "debug": false,
-                "display_type": "processor",
-                "export_h": null,
+                "display_type": "recvsignalvia",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 20,
+                "height": 35.0,
                 "is_export": false,
+                "label_text": "input_active",
                 "layername": "FX processing",
-                "min_height": 16,
-                "min_width": 20,
+                "min_height": 0,
+                "min_width": 0,
                 "no_export": false,
-                "obj_args": null,
-                "obj_name": "processor_029",
+                "obj_args": "\"input_active\",0",
+                "obj_name": "recvsignalvia_003",
                 "obj_state": 3,
-                "obj_type": "ampl~",
+                "obj_type": "recv~",
                 "panel_enable": false,
-                "panel_mode": false,
-                "panel_x": 78.0,
-                "panel_y": 372.0,
+                "panel_x": 354.0,
+                "panel_y": 153.0,
                 "panel_z": 0,
-                "patch_x": 78.0,
-                "patch_y": 372.0,
+                "patch_x": 354.0,
+                "patch_y": 153.0,
                 "patch_z": 0,
-                "position_x": 78.0,
-                "position_y": 372.0,
+                "position_x": 354.0,
+                "position_y": 153.0,
                 "position_z": 0,
                 "properties": {},
                 "scope": "__patch__",
-                "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 20
+                "width": 104.0
             },
-            "initargs": null,
+            "initargs": "'input_active', 0",
             "midi_filters": null,
             "midi_mode": null,
-            "name": "processor_029",
+            "name": "recvsignalvia_003",
             "osc_methods": [],
             "presets": {},
             "properties": {},
-            "type": "ampl~"
+            "type": "recv~"
         },
         "7": {
             "connections": [
@@ -5593,9 +5589,9 @@
             "processor_020": 46,
             "processor_021": 56,
             "processor_025": 49,
-            "processor_028": 65,
-            "processor_029": 66,
-            "recvsignalvia_002": 22,
+            "processor_028": 66,
+            "processor_029": 65,
+            "recvsignalvia_003": 69,
             "recvsignalvia_004": 41,
             "recvvia_001": 20,
             "recvvia_002": 42,
