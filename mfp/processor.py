@@ -669,6 +669,7 @@ class Processor:
                     await self.disconnect(outport, tobj, tport)
 
                 outport += 1
+            self.connections_out = []
 
         if hasattr(self, "connections_in"):
             inport = 0
@@ -677,6 +678,7 @@ class Processor:
                 for tobj, tport in to_delete:
                     await tobj.disconnect(tport, self, inport)
                 inport += 1
+            self.connections_in = []
 
         if hasattr(self, "midi_learn_cbid") and self.midi_learn_cbid is not None:
             MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
@@ -894,7 +896,8 @@ class Processor:
         if self.paused:
             return []
 
-        debug = self.step_debug_manager().enabled
+        debugger = self.step_debug_manager()
+        debug = debugger and debugger.enabled
         debug_tasks = []
         send_tasks = []
 

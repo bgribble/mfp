@@ -645,13 +645,12 @@ class Patch(Processor):
 
     async def delete(self):
         from .mfp_app import MFPApp
+
+        if self.gui_created:
+            await self.delete_gui()
+
         if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:
             del MFPApp().patches[self.name]
-
-        # first pass: everything but inlets/outlets
-        to_delete = self.objects.values()
-        for obj in list(to_delete):
-            await obj.delete()
 
         if self.step_debugger:
             self.step_debugger.disable()
@@ -659,8 +658,11 @@ class Patch(Processor):
 
         await Processor.delete(self)
 
-        if self.gui_created:
-            await self.delete_gui()
+        # delete all the child objects
+        to_delete = self.objects.values()
+        for obj in list(to_delete):
+            await obj.delete()
+
 
 # load extension methods
 from . import patch_json  # noqa
