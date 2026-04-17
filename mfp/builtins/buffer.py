@@ -32,6 +32,7 @@ class Buffer(Processor):
     RESP_OFFSET = 5
     RESP_BUFRDY = 6
     RESP_LOOPSTART = 7
+    RESP_FREEWHEEL = 8
 
     FLOAT_SIZE = 4
 
@@ -207,6 +208,8 @@ class Buffer(Processor):
             if self.file_ready:
                 self.file_ready = False
                 self._transfer_file_data()
+        elif resp_id == self.RESP_FREEWHEEL:
+            log.debug(f"[buffer] got FREEWHEEL message {resp_value}")
 
         if need_resize:
             # FIXME -- message connections to last ports
@@ -280,7 +283,6 @@ class Buffer(Processor):
             rate=self.rate,
             offset=self.buf_offset
         )
-
 
 def register():
     MFPApp().register("buffer~", Buffer)

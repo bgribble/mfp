@@ -156,6 +156,7 @@ typedef struct mfp_context_struct {
     int needs_reschedule;
     int default_obj_id;
     int freewheel_frames;
+    mfp_processor * freewheel_proc;
 
     GArray * incoming_cleanup;
     mfp_in_data * incoming_queue[REQ_BUFSIZE];
@@ -200,7 +201,7 @@ typedef struct mfp_rpc_argblock_struct {
 #define REQTYPE_GETPARAM 7
 #define REQTYPE_RESET 8
 #define REQTYPE_CONTEXT_MSG 9
-#define REQTYPE_CONTEXT_FREEWHEEL 10
+#define REQTYPE_FREEWHEEL 10
 
 #define ALLOC_IDLE 0
 #define ALLOC_WORKING 1

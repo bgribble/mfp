@@ -290,6 +290,9 @@ class Patch(Processor):
             self.add_output(o, outval)
             self.outlet_objects[o].outlets[0] = Uninit
 
+    def dsp_response(self, resp_id, resp_value):
+        log.debug(f"[patch] DSP response: {resp_id} {resp_value}")
+
     async def method(self, message, inlet=0):
         if len(self.dispatch_objects):
             for d in self.dispatch_objects:

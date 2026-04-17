@@ -227,9 +227,7 @@ class BufferEditor:
         )
         await MFPGUI().mfp.send(self.working_source_id, 0, source_params)
         await MFPGUI().mfp.send(self.working_sink_id, 0, sink_params)
-
-        log.debug(f"[bufedit] calling freewheel_context")
-        await MFPGUI().mfp.freewheel_context(self.fx_patch_id, self.buffer_info.size)
+        await MFPGUI().mfp.freewheel(self.working_sink_id, self.buffer_info.size)
 
     async def fx_close_patch(self):
         from mfp.gui_main import MFPGUI
@@ -278,13 +276,16 @@ class BufferEditor:
 
     ########################################
     # buffer operations
-    def buffer_grab(self):
+    def buffer_grab(self, shm_obj=None):
         def offset(channel):
             return channel * self.buffer_info.size * self.FLOAT_SIZE
         if self.buffer_info is None:
             return None
-        if self.shm_obj is None:
-            self.shm_obj = SharedMemory(self.buffer_info.buf_id)
+
+        if shm_obj is None:
+            if self.shm_obj is None:
+                self.shm_obj = SharedMemory(self.buffer_info.buf_id)
+            shm_obj = self.shm_obj
 
         self.buffer_data = []
         self.channel_selections = [None] * (self.buffer_info.channels + 1)
@@ -294,8 +295,8 @@ class BufferEditor:
 
         try:
             for c in range(self.buffer_info.channels):
-                os.lseek(self.shm_obj.fd, offset(c), os.SEEK_SET)
-                slc = os.read(self.shm_obj.fd, int(self.buffer_info.size * self.FLOAT_SIZE))
+                os.lseek(shm_obj.fd, offset(c), os.SEEK_SET)
+                slc = os.read(shm_obj.fd, int(self.buffer_info.size * self.FLOAT_SIZE))
                 self.buffer_data.append(np.fromstring(slc, dtype=np.float32))
         except Exception as e:
             log.debug("[grab]: error grabbing data", e)

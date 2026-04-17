@@ -68,10 +68,9 @@ class DSPObject:
     def disconnect(self, outlet, target, inlet):
         pass
 
-    @classmethod
-    def context_msg(cls, context_id, port, message):
+    def freewheel(cls, freewheel_frames):
         pass
 
     @classmethod
-    def context_freewheel(cls, context_id, freewheel_frames):
+    def context_msg(cls, context_id, port, message):
         pass

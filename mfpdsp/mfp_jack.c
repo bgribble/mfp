@@ -12,6 +12,8 @@
 
 int jack_is_freewheeling = 0;
 
+#define RESP_JACK_FREEWHEEL 8
+
 static int
 process_cb (jack_nframes_t nframes, void * ctxt_arg)
 {
@@ -33,13 +35,13 @@ process_cb (jack_nframes_t nframes, void * ctxt_arg)
         jack_set_freewheel(ctxt->info.jack->client, 1);
         ctxt->freewheel_frames -= nframes;
         if (!jack_is_freewheeling) {
-            mfp_log_debug("[jack] Freewheeling starting\n");
+            mfp_dsp_send_response_bool(ctxt->freewheel_proc, RESP_JACK_FREEWHEEL, 1);
         }
         jack_is_freewheeling = 1;
     } else {
         jack_set_freewheel(ctxt->info.jack->client, 0);
         if (jack_is_freewheeling) {
-            mfp_log_debug("[jack] Freewheeling complete\n");
+            mfp_dsp_send_response_bool(ctxt->freewheel_proc, RESP_JACK_FREEWHEEL, 0);
         }
         jack_is_freewheeling = 0;
     }

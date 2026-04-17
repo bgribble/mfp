@@ -421,14 +421,15 @@ dispatch_methodcall(
         rd.param_value = (gpointer)(message);
         mfp_dsp_push_request(rd);
     }
-    else if (!strcmp(service_name, "DSPObject.context_freewheel")) {
-        const int context_id = args->items[0]->_int;
-        const int64_t frames = args->items[1]->_int;
+    else if (!strcmp(service_name, "DSPObject.freewheel")) {
+        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
+        rd.reqtype = REQTYPE_FREEWHEEL;
+        rd.src_proc = obj_id;
+        rd.context_id = src_proc->context->id;
 
-        mfp_log_debug("[dsp] context_freewheel for context %d, %d frames\n", context_id, frames);
-        rd.reqtype = REQTYPE_CONTEXT_FREEWHEEL;
-        rd.context_id = context_id;
+        const int64_t frames = args->items[0]->_int;
         rd.param_value = (gpointer)(frames);
+
         mfp_dsp_push_request(rd);
     }
     else {
