@@ -214,6 +214,7 @@ process(mfp_processor * proc)
      * for this block */
     if (
         d->buf_mode == REC_TRIG_EXT
+        || d->buf_mode == REC_BANG
         || d->buf_mode == REC_LOOP
         || d->buf_mode == REC_LOOPSET
         || (d->buf_mode == REC_TRIG_THRESH)
@@ -259,7 +260,7 @@ process(mfp_processor * proc)
     }
 
     /* outer loop: repeat 2 phases:
-     * 1. Look at the trigger channel to find the end of the current
+     * 1. Look at the trigger source (channel or message) to find the end of the current
      *    state block
      * 2. Iterate over channels to process between start and end-of-state */
     total_to_proc = proc->inlet_buf[0]->blocksize;
@@ -834,7 +835,7 @@ config(mfp_processor * proc)
     }
 
     if (bufmode_ptr != NULL) {
-        d->buf_mode = *(double *)bufmode_ptr;
+        d->buf_mode = (int)(*(double *)bufmode_ptr);
     }
 
     if (bufstate_ptr != NULL) {
@@ -969,5 +970,3 @@ init_builtin_buffer(void) {
 
     return p;
 }
-
-

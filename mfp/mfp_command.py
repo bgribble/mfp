@@ -350,6 +350,14 @@ class MFPCommand:
             await MFPApp().finish_soon()
             return None
 
+    async def freewheel_context(self, patch_id, num_frames):
+        from .dsp_object import DSPObject
+        from .mfp_app import MFPApp
+        factory = await MFPApp().rpc_host.require(DSPObject)
+        patch = MFPApp().recall(patch_id)
+        context = patch.context
+        await factory.context_freewheel(context.context_id, num_frames)
+
     def open_patches(self):
         from .mfp_app import MFPApp
         return [p.obj_id for p in MFPApp().patches.values()]

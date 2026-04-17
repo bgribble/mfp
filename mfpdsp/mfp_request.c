@@ -143,6 +143,13 @@ mfp_dsp_handle_requests(mfp_context * context)
             context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cmd->context_id));
             context->msg_handler(context, cmd->dest_port, (int64_t)(cmd->param_value));
             break;
+
+        case REQTYPE_CONTEXT_FREEWHEEL:
+            /* set the number of blocks to freewheel */
+            context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cmd->context_id));
+            context->freewheel_frames =  (int64_t)(cmd->param_value);
+            mfp_log_debug("[mfp_request] setting freewheel frames to %d\n", context->freewheel_frames);
+            break;
         }
         context->incoming_queue_read = (context->incoming_queue_read + 1) % REQ_BUFSIZE;
     }

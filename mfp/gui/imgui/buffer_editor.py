@@ -158,12 +158,10 @@ class BufferEditor:
         # connect source to fx
         for port in range(self.buffer_info.channels):
             await MFPGUI().mfp.connect(
-                self.working_source_id, port,
-                self.fx_patch_id, port + 2
+                self.working_source_id, port, self.fx_patch_id, port + 2
             )
             await MFPGUI().mfp.connect(
-                self.fx_patch_id, port,
-                self.working_sink_id, port
+                self.fx_patch_id, port, self.working_sink_id, port
             )
 
             if port % 2 == 0:
@@ -204,7 +202,34 @@ class BufferEditor:
         apply.extra_action = self.fx_apply_patch
 
     async def fx_apply_patch(self):
-        log.debug("[fx_apply_patch] applying fx")
+        from mfp.gui_main import MFPGUI
+        rec_channels = sum(
+            1 << c for c in range(self.buffer_info.channels)
+        )
+
+        source_params = dict(
+            buf_mode=5,
+            play_channels=0xff,
+            buf_pos=0,
+            region_start=0,
+            region_end=self.buffer_info.size,
+            trig_trigger=1,
+        )
+        sink_params = dict(
+            buf_mode=0,
+            play_channels=0,
+            rec_channels=rec_channels,
+            rec_enabled=1,
+            buf_pos=0,
+            region_start=0,
+            region_end=self.buffer_info.size,
+            trig_trigger=1,
+        )
+        await MFPGUI().mfp.send(self.working_source_id, 0, source_params)
+        await MFPGUI().mfp.send(self.working_sink_id, 0, sink_params)
+
+        log.debug(f"[bufedit] calling freewheel_context")
+        await MFPGUI().mfp.freewheel_context(self.fx_patch_id, self.buffer_info.size)
 
     async def fx_close_patch(self):
         from mfp.gui_main import MFPGUI
@@ -889,6 +914,8 @@ class BufferEditor:
         buffer_params = dict(
             buf_mode=5,
             play_channels=0xff,
+            rec_channels=0,
+            rec_enabled=0,
             buf_pos=pos_samples,
             region_start=pos_samples,
             region_end=self.implot_total_time * self.buffer_info.rate
@@ -923,6 +950,7 @@ class BufferEditor:
         from mfp.gui_main import MFPGUI
         buffer_params = dict(
             buf_state=0,
+            rec_enabled=0,
         )
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
@@ -974,6 +1002,7 @@ class BufferEditor:
         buffer_params = dict(
             buf_mode=6,
             play_channels=0xff,
+            rec_channels=0,
             buf_pos=start_samples,
             region_start=start_samples,
             region_end=end_samples

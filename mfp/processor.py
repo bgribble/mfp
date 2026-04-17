@@ -944,7 +944,8 @@ class Processor:
                 await self._send__activate(value, inlet)
 
             # step mode could be activated or deactivated in activate
-            debug = self.step_debug_manager().enabled
+            debugger = self.step_debug_manager()
+            debug = debugger and debugger.enabled
             if debug:
                 debug_tasks.append((
                     self._send__propagate(),
@@ -955,7 +956,8 @@ class Processor:
                 send_tasks = await self._send__propagate()
 
         # step mode could be activated or deactivated in activate
-        debug = self.step_debug_manager().enabled
+        debugger = self.step_debug_manager()
+        debug = debugger and debugger.enabled
         if debug:
             if step_execute:
                 self.step_debug_manager().prepend_tasks(debug_tasks)
@@ -995,6 +997,8 @@ class Processor:
         output_pairs = list(zip(self.connections_out, self.outlets))
         work = []
 
+        debugger = self.step_debug_manager()
+
         for outlet_num, output_val in [(i, output_pairs[i]) for i in self.outlet_order]:
             conns, val = output_val
 
@@ -1010,7 +1014,7 @@ class Processor:
                 self.count_out += 1
                 for target, tinlet in conns:
                     if target is not None:
-                        if self.step_debug_manager().enabled:
+                        if debugger and debugger.enabled:
                             work.append((
                                 self._send__propagate_value(target, val, tinlet),
                                 f"Send output to {target.name} inlet {tinlet}",
@@ -1031,7 +1035,7 @@ class Processor:
                     else:
                         log.warning("Bad output connection: obj_id=%s" % self.obj_id)
 
-        if self.step_debug_manager().enabled and work:
+        if debugger and debugger.enabled and work:
             self.step_debug_manager().prepend_tasks(work)
             return []
 

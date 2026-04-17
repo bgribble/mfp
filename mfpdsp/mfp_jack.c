@@ -10,6 +10,8 @@
 
 #include "mfp_dsp.h"
 
+int jack_is_freewheeling = 0;
+
 static int
 process_cb (jack_nframes_t nframes, void * ctxt_arg)
 {
@@ -26,6 +28,21 @@ process_cb (jack_nframes_t nframes, void * ctxt_arg)
             trans_info.frame_rate, trans_info.frame_time);
     printf("JACK BBT: %d:%d:%d\n", trans_info.bar, trans_info.beat, trans_info.tick);
     */
+
+    if (ctxt->freewheel_frames > 0) {
+        jack_set_freewheel(ctxt->info.jack->client, 1);
+        ctxt->freewheel_frames -= nframes;
+        if (!jack_is_freewheeling) {
+            mfp_log_debug("[jack] Freewheeling starting\n");
+        }
+        jack_is_freewheeling = 1;
+    } else {
+        jack_set_freewheel(ctxt->info.jack->client, 0);
+        if (jack_is_freewheeling) {
+            mfp_log_debug("[jack] Freewheeling complete\n");
+        }
+        jack_is_freewheeling = 0;
+    }
 
     /* run processing network */
     mfp_dsp_set_blocksize(ctxt, nframes);
