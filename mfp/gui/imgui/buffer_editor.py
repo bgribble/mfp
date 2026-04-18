@@ -78,7 +78,7 @@ class BufferEditor:
     async def init_working_patch(self):
         from mfp.gui_main import MFPGUI
         if self.working_patch_id:
-            self.close_working_patch()
+            await self.close_working_patch()
 
         self.working_patch_id = await MFPGUI().mfp.open_file(None, show_gui=False)
         self.working_patch_info = await MFPGUI().mfp.get_tooltip_info(self.working_patch_id, details=True)
@@ -286,6 +286,7 @@ class BufferEditor:
     def buffer_grab(self, shm_obj=None):
         def offset(channel):
             return channel * self.buffer_info.size * self.FLOAT_SIZE
+
         if self.buffer_info is None:
             return None
 

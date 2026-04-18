@@ -528,7 +528,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             self.font_width, self.font_height = imgui.calc_text_size("M")
             if self.wrapped_text:
                 imgui.text(self.wrapped_text + extra_bit)
-            else: 
+            else:
                 imgui.dummy((1, self.font_height))
 
             if new_font:

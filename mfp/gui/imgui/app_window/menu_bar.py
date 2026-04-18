@@ -200,7 +200,7 @@ def render_bufedit_menu(app_window):
             app_window.buffer_info = []
 
         if app_window.buffer_selected is None and len(app_window.buffer_info):
-            app_window.buffer_selected = 0
+            app_window.buffer_selected = app_window.buffer_info[0]
 
         imgui.dummy(app_window.scaled(1, 2))
         imgui.separator()
@@ -217,14 +217,16 @@ def render_bufedit_menu(app_window):
             buffer_selected, _ = imgui.menu_item(
                 display_name,
                 '',
-                app_window.buffer_selected == ind
+                app_window.buffer_selected == buffer_info
             )
             if buffer_selected:
+                app_window.buffer_selected = buffer_info
                 app_window.buffer_editor.buffer_source_info = buffer_info
                 app_window.buffer_editor.buffer_info = buffer_info.get('buf_info')
                 # update data in chart
+                app_window.buffer_editor.shm_obj = None
                 app_window.buffer_editor.buffer_grab()
-                app_window.buffer_editor.init_working_patch()
+                MFPGUI().async_task(app_window.buffer_editor.init_working_patch())
             imgui.pop_id()
 
         imgui.end_group()
