@@ -243,7 +243,6 @@ def render_bufedit_menu(app_window):
 
 
 def render_canvas_menu(app_window):
-    from mfp.gui_main import MFPGUI
     quit_selected = False
 
     by_menu = load_menupaths(app_window)

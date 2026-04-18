@@ -225,6 +225,10 @@ class SlideMeter (Var):
     doc_tooltip_obj = "Display/control a number with a slider"
     do_onload = True
 
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Var.__init__(self, init_type, init_args, patch, scope, name, defs)
+        self.hot_inlets = (0, 1)
+
     def save(self):
         base_dict = super().save()
         base_dict["value"] = self.value
