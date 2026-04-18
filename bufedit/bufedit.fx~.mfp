@@ -8,7 +8,7 @@
         "height": 161.0,
         "layers": [
             [
-                "Layer 0",
+                "Global inputs",
                 "__patch__"
             ],
             [
@@ -32,7 +32,7 @@
             "connections": [
                 [
                     [
-                        44,
+                        43,
                         0
                     ]
                 ]
@@ -53,14 +53,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
                         "obj_1": 1,
-                        "obj_2": 44,
+                        "obj_2": 43,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -97,7 +97,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -359,9 +359,9 @@
                 "display_type": "button",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 27.0,
+                "height": 26.0,
                 "is_export": false,
-                "label_text": "Cancel",
+                "label_text": "Close",
                 "layername": "Panel",
                 "message": {
                     "__BangType__": {}
@@ -387,7 +387,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 59.0
+                "width": 51.0
             },
             "initargs": "Bang",
             "midi_filters": null,
@@ -438,7 +438,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 60.0
+                "width": 76.0
             },
             "initargs": "0.1",
             "midi_filters": null,
@@ -542,7 +542,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 60.0
+                "width": 76.0
             },
             "initargs": "0.0",
             "midi_filters": null,
@@ -610,7 +610,7 @@
             "connections": [
                 [
                     [
-                        37,
+                        36,
                         0
                     ]
                 ]
@@ -631,14 +631,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
                         "obj_1": 19,
-                        "obj_2": 37,
+                        "obj_2": 36,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -675,7 +675,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -726,7 +726,7 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
@@ -787,7 +787,7 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
@@ -828,7 +828,7 @@
                 "height": 33.0,
                 "is_export": false,
                 "label_text": "bypass_toggle",
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 0,
                 "min_width": 0,
                 "no_export": false,
@@ -865,7 +865,7 @@
             "connections": [
                 [
                     [
-                        24,
+                        23,
                         0
                     ]
                 ]
@@ -919,7 +919,7 @@
             "properties": {},
             "type": "{self.args(0) or \"+~\"}"
         },
-        "23": {
+        "22": {
             "connections": [
                 []
             ],
@@ -967,11 +967,11 @@
             "properties": {},
             "type": "send~"
         },
-        "24": {
+        "23": {
             "connections": [
                 [
                     [
-                        26,
+                        25,
                         0
                     ]
                 ]
@@ -998,8 +998,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 24,
-                        "obj_2": 26,
+                        "obj_1": 23,
+                        "obj_2": 25,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1066,15 +1066,15 @@
             "properties": {},
             "type": "recv~"
         },
-        "25": {
+        "24": {
             "connections": [
                 [
                     [
-                        23,
+                        22,
                         0
                     ],
                     [
-                        66,
+                        65,
                         0
                     ]
                 ]
@@ -1101,8 +1101,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 25,
-                        "obj_2": 23,
+                        "obj_1": 24,
+                        "obj_2": 22,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1146,8 +1146,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 25,
-                        "obj_2": 66,
+                        "obj_1": 24,
+                        "obj_2": 65,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1219,11 +1219,11 @@
             "properties": {},
             "type": "*~"
         },
-        "26": {
+        "25": {
             "connections": [
                 [
                     [
-                        29,
+                        28,
                         0
                     ]
                 ]
@@ -1250,8 +1250,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 26,
-                        "obj_2": 29,
+                        "obj_1": 25,
+                        "obj_2": 28,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1323,11 +1323,11 @@
             "properties": {},
             "type": "*~"
         },
-        "27": {
+        "26": {
             "connections": [
                 [
                     [
-                        31,
+                        30,
                         0
                     ]
                 ]
@@ -1354,8 +1354,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 27,
-                        "obj_2": 31,
+                        "obj_1": 26,
+                        "obj_2": 30,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1427,11 +1427,11 @@
             "properties": {},
             "type": "-~"
         },
-        "28": {
+        "27": {
             "connections": [
                 [
                     [
-                        29,
+                        28,
                         1
                     ]
                 ]
@@ -1458,8 +1458,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 28,
-                        "obj_2": 29,
+                        "obj_1": 27,
+                        "obj_2": 28,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1531,15 +1531,15 @@
             "properties": {},
             "type": "*~"
         },
-        "29": {
+        "28": {
             "connections": [
                 [
                     [
-                        32,
+                        31,
                         0
                     ],
                     [
-                        65,
+                        64,
                         0
                     ]
                 ]
@@ -1566,8 +1566,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 29,
-                        "obj_2": 32,
+                        "obj_1": 28,
+                        "obj_2": 31,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1611,8 +1611,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 29,
-                        "obj_2": 65,
+                        "obj_1": 28,
+                        "obj_2": 64,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1684,123 +1684,15 @@
             "properties": {},
             "type": "+~"
         },
-        "3": {
+        "29": {
             "connections": [
                 [
                     [
-                        60,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "code": null,
-                "connection_info": [
-                    {
-                        "code": null,
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Layer 0",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 3,
-                        "obj_2": 60,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "panel_enable": false,
-                        "panel_x": 361.0,
-                        "panel_y": 101.0,
-                        "panel_z": 0,
-                        "patch_x": 361.0,
-                        "patch_y": 101.0,
-                        "patch_z": 0,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 361.0,
-                        "position_y": 101.0,
-                        "position_z": 0,
-                        "properties": {},
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 23.0,
-                "is_export": false,
-                "layername": "Layer 0",
-                "min_height": 16,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "1",
-                "obj_name": "xfade_inlet",
-                "obj_state": 3,
-                "obj_type": "inlet~",
-                "panel_enable": false,
-                "panel_mode": false,
-                "panel_x": 361.0,
-                "panel_y": 101.0,
-                "panel_z": 0,
-                "patch_x": 361.0,
-                "patch_y": 101.0,
-                "patch_z": 0,
-                "position_x": 361.0,
-                "position_y": 101.0,
-                "position_z": 0,
-                "properties": {
-                    "lv2_description": "Signal inlet"
-                },
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 72.0
-            },
-            "initargs": "1",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "xfade_inlet",
-            "osc_methods": [],
-            "presets": {},
-            "properties": {
-                "lv2_description": "Signal inlet"
-            },
-            "type": "inlet~"
-        },
-        "30": {
-            "connections": [
-                [
-                    [
-                        28,
+                        27,
                         1
                     ],
                     [
-                        25,
+                        24,
                         0
                     ]
                 ]
@@ -1827,8 +1719,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 30,
-                        "obj_2": 28,
+                        "obj_1": 29,
+                        "obj_2": 27,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1872,8 +1764,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 30,
-                        "obj_2": 25,
+                        "obj_1": 29,
+                        "obj_2": 24,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -1949,11 +1841,119 @@
             },
             "type": "inlet~"
         },
-        "31": {
+        "3": {
             "connections": [
                 [
                     [
-                        28,
+                        59,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "code": null,
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Global inputs",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 3,
+                        "obj_2": 59,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 361.0,
+                        "panel_y": 101.0,
+                        "panel_z": 0,
+                        "patch_x": 361.0,
+                        "patch_y": 101.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 361.0,
+                        "position_y": 101.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 23.0,
+                "is_export": false,
+                "layername": "Global inputs",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "1",
+                "obj_name": "xfade_inlet",
+                "obj_state": 3,
+                "obj_type": "inlet~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 361.0,
+                "panel_y": 101.0,
+                "panel_z": 0,
+                "patch_x": 361.0,
+                "patch_y": 101.0,
+                "patch_z": 0,
+                "position_x": 361.0,
+                "position_y": 101.0,
+                "position_z": 0,
+                "properties": {
+                    "lv2_description": "Signal inlet"
+                },
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 72.0
+            },
+            "initargs": "1",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "xfade_inlet",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {
+                "lv2_description": "Signal inlet"
+            },
+            "type": "inlet~"
+        },
+        "30": {
+            "connections": [
+                [
+                    [
+                        27,
                         0
                     ]
                 ]
@@ -1980,8 +1980,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 31,
-                        "obj_2": 28,
+                        "obj_1": 30,
+                        "obj_2": 27,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -2053,7 +2053,7 @@
             "properties": {},
             "type": "*~"
         },
-        "32": {
+        "31": {
             "connections": [
                 []
             ],
@@ -2110,7 +2110,7 @@
             },
             "type": "outlet~"
         },
-        "33": {
+        "32": {
             "connections": [
                 []
             ],
@@ -2162,7 +2162,7 @@
             "type": "text",
             "value": "dry signal in"
         },
-        "34": {
+        "33": {
             "connections": [
                 []
             ],
@@ -2214,7 +2214,7 @@
             "type": "text",
             "value": "fx processor (chan in/out through vias)"
         },
-        "35": {
+        "34": {
             "connections": [
                 []
             ],
@@ -2266,7 +2266,7 @@
             "type": "text",
             "value": "wet"
         },
-        "36": {
+        "35": {
             "connections": [
                 []
             ],
@@ -2318,7 +2318,7 @@
             "type": "text",
             "value": "dry "
         },
-        "37": {
+        "36": {
             "connections": [
                 []
             ],
@@ -2333,7 +2333,7 @@
                 "height": 34.0,
                 "is_export": false,
                 "label_text": "xfade",
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 0,
                 "min_width": 0,
                 "no_export": false,
@@ -2366,6 +2366,58 @@
             "properties": {},
             "type": "send~"
         },
+        "37": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 32.0,
+                "is_export": false,
+                "layername": "Global inputs",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_017",
+                "obj_state": 3,
+                "obj_type": "text",
+                "panel_enable": false,
+                "panel_x": 36.0,
+                "panel_y": 31.0,
+                "panel_z": 0,
+                "patch_x": 36.0,
+                "patch_y": 31.0,
+                "patch_z": 0,
+                "position_x": 36.0,
+                "position_y": 31.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<div class=\"size-x-large\">bufedit.fx~ -- wrapper for effects in buffer editor</div>",
+                "width": 447.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_017",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "text",
+            "value": "<div class=\"size-x-large\">bufedit.fx~ -- wrapper for effects in buffer editor</div>"
+        },
         "38": {
             "connections": [
                 []
@@ -2380,43 +2432,43 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 32.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Panel",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": "text_017",
+                "obj_name": "text_018",
                 "obj_state": 3,
                 "obj_type": "text",
                 "panel_enable": false,
-                "panel_x": 41.0,
-                "panel_y": 37.0,
+                "panel_x": 36.0,
+                "panel_y": 31.0,
                 "panel_z": 0,
-                "patch_x": 41.0,
-                "patch_y": 37.0,
+                "patch_x": 36.0,
+                "patch_y": 31.0,
                 "patch_z": 0,
-                "position_x": 41.0,
-                "position_y": 37.0,
+                "position_x": 36.0,
+                "position_y": 31.0,
                 "position_z": 0,
                 "properties": {},
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": "<div size=\"x-large\">bufedit.fx~ -- wrapper for effects in buffer editor</div>",
-                "width": 301.0
+                "value": "<div class=\"size-x-large\">Panel display elements</div>",
+                "width": 218.0
             },
             "initargs": null,
             "midi_filters": null,
             "midi_mode": null,
-            "name": "text_017",
+            "name": "text_018",
             "osc_methods": [],
             "presets": {},
             "properties": {},
             "type": "text",
-            "value": "<div size=\"x-large\">bufedit.fx~ -- wrapper for effects in buffer editor</div>"
+            "value": "<div class=\"size-x-large\">Panel display elements</div>"
         },
         "39": {
             "connections": [
@@ -2432,43 +2484,43 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 32.0,
                 "is_export": false,
-                "layername": "Panel",
+                "layername": "FX processing",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
                 "no_export": false,
                 "obj_args": null,
-                "obj_name": "text_018",
+                "obj_name": "text_019",
                 "obj_state": 3,
                 "obj_type": "text",
                 "panel_enable": false,
-                "panel_x": 44.0,
-                "panel_y": 37.0,
+                "panel_x": 28.0,
+                "panel_y": 30.0,
                 "panel_z": 0,
-                "patch_x": 44.0,
-                "patch_y": 37.0,
+                "patch_x": 28.0,
+                "patch_y": 30.0,
                 "patch_z": 0,
-                "position_x": 44.0,
-                "position_y": 37.0,
+                "position_x": 28.0,
+                "position_y": 30.0,
                 "position_z": 0,
                 "properties": {},
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "value": "Panel display elements",
-                "width": 146.0
+                "value": "<div class=\"size-x-large\">FX processing</div>",
+                "width": 138.0
             },
             "initargs": null,
             "midi_filters": null,
             "midi_mode": null,
-            "name": "text_018",
+            "name": "text_019",
             "osc_methods": [],
             "presets": {},
             "properties": {},
             "type": "text",
-            "value": "Panel display elements"
+            "value": "<div class=\"size-x-large\">FX processing</div>"
         },
         "4": {
             "connections": [
@@ -2486,7 +2538,7 @@
                 "export_offset_y": 0,
                 "height": 24.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "max_width": 600,
                 "min_height": 12,
                 "min_width": 12,
@@ -2524,65 +2576,13 @@
         },
         "40": {
             "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "code": null,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 24.0,
-                "is_export": false,
-                "layername": "FX processing",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_019",
-                "obj_state": 3,
-                "obj_type": "text",
-                "panel_enable": false,
-                "panel_x": 39.0,
-                "panel_y": 38.0,
-                "panel_z": 0,
-                "patch_x": 39.0,
-                "patch_y": 38.0,
-                "patch_z": 0,
-                "position_x": 39.0,
-                "position_y": 38.0,
-                "position_z": 0,
-                "properties": {},
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "FX processing",
-                "width": 95.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_019",
-            "osc_methods": [],
-            "presets": {},
-            "properties": {},
-            "type": "text",
-            "value": "FX processing"
-        },
-        "41": {
-            "connections": [
                 [
                     [
-                        26,
+                        25,
                         1
                     ],
                     [
-                        27,
+                        26,
                         0
                     ]
                 ]
@@ -2609,8 +2609,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 41,
-                        "obj_2": 26,
+                        "obj_1": 40,
+                        "obj_2": 25,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -2654,8 +2654,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 41,
-                        "obj_2": 27,
+                        "obj_1": 40,
+                        "obj_2": 26,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -2722,15 +2722,15 @@
             "properties": {},
             "type": "recv~"
         },
-        "42": {
+        "41": {
             "connections": [
                 [
                     [
-                        43,
+                        42,
                         0
                     ],
                     [
-                        49,
+                        48,
                         0
                     ]
                 ]
@@ -2751,14 +2751,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 42,
-                        "obj_2": 43,
+                        "obj_1": 41,
+                        "obj_2": 42,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -2796,14 +2796,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 42,
-                        "obj_2": 49,
+                        "obj_1": 41,
+                        "obj_2": 48,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -2837,7 +2837,7 @@
                 "height": 33.0,
                 "is_export": false,
                 "label_text": "selection_toggle",
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 0,
                 "min_width": 0,
                 "no_export": false,
@@ -2870,11 +2870,11 @@
             "properties": {},
             "type": "recv"
         },
-        "43": {
+        "42": {
             "connections": [
                 [
                     [
-                        45,
+                        44,
                         1
                     ]
                 ]
@@ -2895,14 +2895,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 43,
-                        "obj_2": 45,
+                        "obj_1": 42,
+                        "obj_2": 44,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -2939,7 +2939,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -2974,11 +2974,11 @@
             "properties": {},
             "type": "func"
         },
-        "44": {
+        "43": {
             "connections": [
                 [
                     [
-                        48,
+                        47,
                         0
                     ]
                 ]
@@ -2999,14 +2999,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 44,
-                        "obj_2": 48,
+                        "obj_1": 43,
+                        "obj_2": 47,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -3043,7 +3043,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -3078,11 +3078,11 @@
             "properties": {},
             "type": "*~"
         },
-        "45": {
+        "44": {
             "connections": [
                 [
                     [
-                        48,
+                        47,
                         1
                     ]
                 ]
@@ -3103,14 +3103,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 45,
-                        "obj_2": 48,
+                        "obj_1": 44,
+                        "obj_2": 47,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -3147,7 +3147,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -3182,11 +3182,11 @@
             "properties": {},
             "type": "*~"
         },
-        "46": {
+        "45": {
             "connections": [
                 [
                     [
-                        45,
+                        44,
                         0
                     ]
                 ]
@@ -3207,14 +3207,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 46,
-                        "obj_2": 45,
+                        "obj_1": 45,
+                        "obj_2": 44,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -3251,7 +3251,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -3286,7 +3286,7 @@
             "properties": {},
             "type": "sig~"
         },
-        "47": {
+        "46": {
             "connections": [
                 []
             ],
@@ -3301,7 +3301,7 @@
                 "height": 34.0,
                 "is_export": false,
                 "label_text": "input_active",
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 0,
                 "min_width": 0,
                 "no_export": false,
@@ -3334,11 +3334,11 @@
             "properties": {},
             "type": "send~"
         },
-        "48": {
+        "47": {
             "connections": [
                 [
                     [
-                        47,
+                        46,
                         0
                     ]
                 ]
@@ -3359,14 +3359,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 48,
-                        "obj_2": 47,
+                        "obj_1": 47,
+                        "obj_2": 46,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -3403,7 +3403,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -3438,11 +3438,11 @@
             "properties": {},
             "type": "+~"
         },
-        "49": {
+        "48": {
             "connections": [
                 [
                     [
-                        44,
+                        43,
                         1
                     ]
                 ]
@@ -3463,14 +3463,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 49,
-                        "obj_2": 44,
+                        "obj_1": 48,
+                        "obj_2": 43,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -3507,7 +3507,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -3542,59 +3542,7 @@
             "properties": {},
             "type": "int"
         },
-        "5": {
-            "connections": [
-                []
-            ],
-            "do_onload": false,
-            "gui_params": {
-                "clickchange": false,
-                "code": null,
-                "connection_info": [],
-                "debug": false,
-                "default": "",
-                "display_type": "text",
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "height": 264.0,
-                "is_export": false,
-                "layername": "Layer 0",
-                "max_width": 600,
-                "min_height": 12,
-                "min_width": 12,
-                "no_export": false,
-                "obj_args": null,
-                "obj_name": "text_007",
-                "obj_state": 3,
-                "obj_type": "text",
-                "panel_enable": false,
-                "panel_x": 45.0,
-                "panel_y": 421.0,
-                "panel_z": 0,
-                "patch_x": 45.0,
-                "patch_y": 421.0,
-                "patch_z": 0,
-                "position_x": 45.0,
-                "position_y": 421.0,
-                "position_z": 0,
-                "properties": {},
-                "scope": "__patch__",
-                "style": {},
-                "update_required": true,
-                "value": "[bufedit.fx~] is an internal util for\nthe buffer editor.\n\nIt's used with the first arg being the name of the fx patch to use and the second arg trhe number of channels\n\nfor example, \n\n[bufedit.fx~ \"fx.fadein~\", 2]\n\nsignal inputs are\n\n* input level (gain on signal in before fx)\n\n* xfade (0 is all dry, 1 is all wet)\n\n* signal ins 1 to N \n\nSignal inputs and outputs are in the \"FX processing\" layer",
-                "width": 587.0
-            },
-            "initargs": null,
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "text_007",
-            "osc_methods": [],
-            "presets": {},
-            "properties": {},
-            "type": "text",
-            "value": "[bufedit.fx~] is an internal util for\nthe buffer editor.\n\nIt's used with the first arg being the name of the fx patch to use and the second arg trhe number of channels\n\nfor example, \n\n[bufedit.fx~ \"fx.fadein~\", 2]\n\nsignal inputs are\n\n* input level (gain on signal in before fx)\n\n* xfade (0 is all dry, 1 is all wet)\n\n* signal ins 1 to N \n\nSignal inputs and outputs are in the \"FX processing\" layer"
-        },
-        "50": {
+        "49": {
             "connections": [
                 []
             ],
@@ -3652,7 +3600,59 @@
             "type": "slidemeter",
             "value": 0.0
         },
-        "51": {
+        "5": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 264.0,
+                "is_export": false,
+                "layername": "Global inputs",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_007",
+                "obj_state": 3,
+                "obj_type": "text",
+                "panel_enable": false,
+                "panel_x": 31.0,
+                "panel_y": 363.0,
+                "panel_z": 0,
+                "patch_x": 31.0,
+                "patch_y": 363.0,
+                "patch_z": 0,
+                "position_x": 31.0,
+                "position_y": 363.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "[bufedit.fx~] is an internal util for\nthe buffer editor.\n\nIt's used with the first arg being the name of the fx patch to use and the second arg trhe number of channels\n\nfor example, \n\n[bufedit.fx~ \"fx.fadein~\", 2]\n\nsignal inputs are\n\n* input level (gain on signal in before fx)\n\n* xfade (0 is all dry, 1 is all wet)\n\n* signal ins 1 to N \n\nSignal inputs and outputs are in the \"FX processing\" layer",
+                "width": 587.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_007",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "text",
+            "value": "[bufedit.fx~] is an internal util for\nthe buffer editor.\n\nIt's used with the first arg being the name of the fx patch to use and the second arg trhe number of channels\n\nfor example, \n\n[bufedit.fx~ \"fx.fadein~\", 2]\n\nsignal inputs are\n\n* input level (gain on signal in before fx)\n\n* xfade (0 is all dry, 1 is all wet)\n\n* signal ins 1 to N \n\nSignal inputs and outputs are in the \"FX processing\" layer"
+        },
+        "50": {
             "connections": [
                 []
             ],
@@ -3704,7 +3704,7 @@
             "type": "text",
             "value": "in"
         },
-        "52": {
+        "51": {
             "connections": [
                 []
             ],
@@ -3756,7 +3756,7 @@
             "type": "text",
             "value": "out "
         },
-        "53": {
+        "52": {
             "connections": [
                 []
             ],
@@ -3814,11 +3814,11 @@
             "type": "slidemeter",
             "value": 1.0
         },
-        "54": {
+        "53": {
             "connections": [
                 [
                     [
-                        55,
+                        54,
                         0
                     ]
                 ]
@@ -3845,8 +3845,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 54,
-                        "obj_2": 55,
+                        "obj_1": 53,
+                        "obj_2": 54,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -3918,7 +3918,7 @@
             "properties": {},
             "type": "snap~"
         },
-        "55": {
+        "54": {
             "connections": [
                 []
             ],
@@ -3966,11 +3966,11 @@
             "properties": {},
             "type": "send"
         },
-        "56": {
+        "55": {
             "connections": [
                 [
                     [
-                        57,
+                        56,
                         0
                     ]
                 ]
@@ -3997,8 +3997,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 56,
-                        "obj_2": 57,
+                        "obj_1": 55,
+                        "obj_2": 56,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -4070,7 +4070,7 @@
             "properties": {},
             "type": "snap~"
         },
-        "57": {
+        "56": {
             "connections": [
                 []
             ],
@@ -4118,15 +4118,15 @@
             "properties": {},
             "type": "send"
         },
-        "58": {
+        "57": {
             "connections": [
                 [
                     [
-                        59,
+                        58,
                         0
                     ],
                     [
-                        64,
+                        63,
                         0
                     ]
                 ]
@@ -4147,14 +4147,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 58,
-                        "obj_2": 59,
+                        "obj_1": 57,
+                        "obj_2": 58,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -4192,14 +4192,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 58,
-                        "obj_2": 64,
+                        "obj_1": 57,
+                        "obj_2": 63,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -4233,7 +4233,7 @@
                 "height": 33.0,
                 "is_export": false,
                 "label_text": "selection_toggle",
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 0,
                 "min_width": 0,
                 "no_export": false,
@@ -4266,11 +4266,11 @@
             "properties": {},
             "type": "recv"
         },
-        "59": {
+        "58": {
             "connections": [
                 [
                     [
-                        61,
+                        60,
                         1
                     ]
                 ]
@@ -4291,14 +4291,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 59,
-                        "obj_2": 61,
+                        "obj_1": 58,
+                        "obj_2": 60,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -4335,7 +4335,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -4370,6 +4370,110 @@
             "properties": {},
             "type": "func"
         },
+        "59": {
+            "connections": [
+                [
+                    [
+                        62,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "Global inputs",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 59,
+                        "obj_2": 62,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 362.0,
+                        "panel_y": 202.0,
+                        "panel_z": 0,
+                        "patch_x": 362.0,
+                        "patch_y": 202.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 362.0,
+                        "position_y": 202.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 23.0,
+                "is_export": false,
+                "layername": "Global inputs",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "1",
+                "obj_name": "processor_006",
+                "obj_state": 3,
+                "obj_type": "*~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 362.0,
+                "panel_y": 202.0,
+                "panel_z": 0,
+                "patch_x": 362.0,
+                "patch_y": 202.0,
+                "patch_z": 0,
+                "position_x": 362.0,
+                "position_y": 202.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 40.0
+            },
+            "initargs": "1",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_006",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "*~"
+        },
         "6": {
             "connections": [
                 [
@@ -4395,7 +4499,7 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
@@ -4439,7 +4543,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -4478,111 +4582,7 @@
             "connections": [
                 [
                     [
-                        63,
-                        0
-                    ]
-                ]
-            ],
-            "do_onload": true,
-            "gui_params": {
-                "code": null,
-                "connection_info": [
-                    {
-                        "code": null,
-                        "connection_info": [],
-                        "dashed": false,
-                        "debug": false,
-                        "display_type": "connection",
-                        "dsp_inlets": [],
-                        "dsp_outlets": [],
-                        "export_offset_x": 0,
-                        "export_offset_y": 0,
-                        "height": null,
-                        "is_export": false,
-                        "layername": "Layer 0",
-                        "min_height": 0,
-                        "min_width": 0,
-                        "no_export": false,
-                        "num_inlets": 1,
-                        "num_outlets": 0,
-                        "obj_1": 60,
-                        "obj_2": 63,
-                        "obj_args": null,
-                        "obj_id": null,
-                        "obj_name": null,
-                        "obj_state": 3,
-                        "obj_type": null,
-                        "panel_enable": false,
-                        "panel_x": 362.0,
-                        "panel_y": 202.0,
-                        "panel_z": 0,
-                        "patch_x": 362.0,
-                        "patch_y": 202.0,
-                        "patch_z": 0,
-                        "port_1": 0,
-                        "port_2": 0,
-                        "position_x": 362.0,
-                        "position_y": 202.0,
-                        "position_z": 0,
-                        "properties": {},
-                        "rotation": 0.0,
-                        "scope": null,
-                        "snoop": false,
-                        "style": {},
-                        "update_required": false,
-                        "width": null
-                    }
-                ],
-                "debug": false,
-                "display_type": "processor",
-                "export_h": null,
-                "export_offset_x": 0,
-                "export_offset_y": 0,
-                "export_w": null,
-                "export_x": null,
-                "export_y": null,
-                "height": 23.0,
-                "is_export": false,
-                "layername": "Layer 0",
-                "min_height": 16,
-                "min_width": 20,
-                "no_export": false,
-                "obj_args": "1",
-                "obj_name": "processor_006",
-                "obj_state": 3,
-                "obj_type": "*~",
-                "panel_enable": false,
-                "panel_mode": false,
-                "panel_x": 362.0,
-                "panel_y": 202.0,
-                "panel_z": 0,
-                "patch_x": 362.0,
-                "patch_y": 202.0,
-                "patch_z": 0,
-                "position_x": 362.0,
-                "position_y": 202.0,
-                "position_z": 0,
-                "properties": {},
-                "scope": "__patch__",
-                "show_label": true,
-                "style": {},
-                "update_required": false,
-                "width": 40.0
-            },
-            "initargs": "1",
-            "midi_filters": null,
-            "midi_mode": null,
-            "name": "processor_006",
-            "osc_methods": [],
-            "presets": {},
-            "properties": {},
-            "type": "*~"
-        },
-        "61": {
-            "connections": [
-                [
-                    [
-                        63,
+                        62,
                         1
                     ]
                 ]
@@ -4603,14 +4603,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 61,
-                        "obj_2": 63,
+                        "obj_1": 60,
+                        "obj_2": 62,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -4647,7 +4647,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -4682,11 +4682,11 @@
             "properties": {},
             "type": "*~"
         },
-        "62": {
+        "61": {
             "connections": [
                 [
                     [
-                        61,
+                        60,
                         0
                     ]
                 ]
@@ -4707,14 +4707,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 62,
-                        "obj_2": 61,
+                        "obj_1": 61,
+                        "obj_2": 60,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -4751,7 +4751,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -4786,7 +4786,7 @@
             "properties": {},
             "type": "sig~"
         },
-        "63": {
+        "62": {
             "connections": [
                 [
                     [
@@ -4811,13 +4811,13 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 63,
+                        "obj_1": 62,
                         "obj_2": 19,
                         "obj_args": null,
                         "obj_id": null,
@@ -4855,7 +4855,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -4890,11 +4890,11 @@
             "properties": {},
             "type": "+~"
         },
-        "64": {
+        "63": {
             "connections": [
                 [
                     [
-                        60,
+                        59,
                         1
                     ]
                 ]
@@ -4915,14 +4915,14 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 64,
-                        "obj_2": 60,
+                        "obj_1": 63,
+                        "obj_2": 59,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -4959,7 +4959,7 @@
                 "export_y": null,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 20,
                 "no_export": false,
@@ -4994,12 +4994,12 @@
             "properties": {},
             "type": "int"
         },
-        "65": {
+        "64": {
             "connections": [
                 [],
                 [
                     [
-                        56,
+                        55,
                         0
                     ]
                 ]
@@ -5026,8 +5026,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 65,
-                        "obj_2": 56,
+                        "obj_1": 64,
+                        "obj_2": 55,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -5099,12 +5099,12 @@
             "properties": {},
             "type": "ampl~"
         },
-        "66": {
+        "65": {
             "connections": [
                 [],
                 [
                     [
-                        54,
+                        53,
                         0
                     ]
                 ]
@@ -5131,8 +5131,8 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 66,
-                        "obj_2": 54,
+                        "obj_1": 65,
+                        "obj_2": 53,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
@@ -5204,11 +5204,11 @@
             "properties": {},
             "type": "ampl~"
         },
-        "69": {
+        "66": {
             "connections": [
                 [
                     [
-                        25,
+                        24,
                         1
                     ],
                     [
@@ -5239,23 +5239,23 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 69,
-                        "obj_2": 25,
+                        "obj_1": 66,
+                        "obj_2": 24,
                         "obj_args": null,
                         "obj_id": null,
                         "obj_name": null,
                         "obj_state": 3,
                         "obj_type": null,
                         "panel_enable": false,
-                        "panel_x": 356.0,
+                        "panel_x": 354.0,
                         "panel_y": 153.0,
                         "panel_z": 0,
-                        "patch_x": 356.0,
+                        "patch_x": 354.0,
                         "patch_y": 153.0,
                         "patch_z": 0,
                         "port_1": 0,
                         "port_2": 1,
-                        "position_x": 356.0,
+                        "position_x": 354.0,
                         "position_y": 153.0,
                         "position_z": 0,
                         "properties": {},
@@ -5284,7 +5284,7 @@
                         "no_export": false,
                         "num_inlets": 1,
                         "num_outlets": 0,
-                        "obj_1": 69,
+                        "obj_1": 66,
                         "obj_2": 21,
                         "obj_args": null,
                         "obj_id": null,
@@ -5292,15 +5292,15 @@
                         "obj_state": 3,
                         "obj_type": null,
                         "panel_enable": false,
-                        "panel_x": 356.0,
+                        "panel_x": 354.0,
                         "panel_y": 153.0,
                         "panel_z": 0,
-                        "patch_x": 356.0,
+                        "patch_x": 354.0,
                         "patch_y": 153.0,
                         "patch_z": 0,
                         "port_1": 0,
                         "port_2": 0,
-                        "position_x": 356.0,
+                        "position_x": 354.0,
                         "position_y": 153.0,
                         "position_z": 0,
                         "properties": {},
@@ -5323,7 +5323,7 @@
                 "min_height": 0,
                 "min_width": 0,
                 "no_export": false,
-                "obj_args": "\"input_active\",0",
+                "obj_args": "'input_active', 0",
                 "obj_name": "recvsignalvia_003",
                 "obj_state": 3,
                 "obj_type": "recv~",
@@ -5377,7 +5377,7 @@
                         "export_offset_y": 0,
                         "height": null,
                         "is_export": false,
-                        "layername": "Layer 0",
+                        "layername": "Global inputs",
                         "min_height": 0,
                         "min_width": 0,
                         "no_export": false,
@@ -5417,7 +5417,7 @@
                 "export_offset_y": 0,
                 "height": 23.0,
                 "is_export": false,
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 16,
                 "min_width": 25,
                 "no_export": false,
@@ -5465,7 +5465,7 @@
                 "height": 32.0,
                 "is_export": false,
                 "label_text": "self",
-                "layername": "Layer 0",
+                "layername": "Global inputs",
                 "min_height": 0,
                 "min_width": 0,
                 "no_export": false,
@@ -5502,11 +5502,11 @@
             "connections": [
                 [
                     [
-                        42,
+                        41,
                         0
                     ],
                     [
-                        58,
+                        57,
                         0
                     ]
                 ]
@@ -5567,71 +5567,71 @@
             "cancel_button": 14,
             "fx_processor": 21,
             "input_level": 1,
-            "input_meter": 50,
+            "input_meter": 49,
             "message_001": 7,
-            "output_meter": 53,
+            "output_meter": 52,
             "patch": 0,
             "preroll_enum": 17,
-            "processor_002": 48,
-            "processor_003": 54,
-            "processor_004": 31,
-            "processor_005": 59,
-            "processor_006": 60,
-            "processor_007": 61,
-            "processor_008": 62,
-            "processor_009": 63,
-            "processor_010": 64,
+            "processor_002": 47,
+            "processor_003": 53,
+            "processor_004": 30,
+            "processor_005": 58,
+            "processor_006": 59,
+            "processor_007": 60,
+            "processor_008": 61,
+            "processor_009": 62,
+            "processor_010": 63,
             "processor_011": 6,
-            "processor_012": 27,
-            "processor_016": 43,
-            "processor_018": 44,
-            "processor_019": 45,
-            "processor_020": 46,
-            "processor_021": 56,
-            "processor_025": 49,
-            "processor_028": 66,
-            "processor_029": 65,
-            "recvsignalvia_003": 69,
-            "recvsignalvia_004": 41,
+            "processor_012": 26,
+            "processor_016": 42,
+            "processor_018": 43,
+            "processor_019": 44,
+            "processor_020": 45,
+            "processor_021": 55,
+            "processor_025": 48,
+            "processor_028": 65,
+            "processor_029": 64,
+            "recvsignalvia_003": 66,
+            "recvsignalvia_004": 40,
             "recvvia_001": 20,
-            "recvvia_002": 42,
-            "recvvia_003": 58,
+            "recvvia_002": 41,
+            "recvvia_003": 57,
             "selection_toggle": 9,
             "self": 0,
-            "sendsignalvia_002": 47,
-            "sendsignalvia_003": 37,
+            "sendsignalvia_002": 46,
+            "sendsignalvia_003": 36,
             "sendvia_001": 8,
-            "sendvia_002": 55,
-            "sendvia_003": 57,
+            "sendvia_002": 54,
+            "sendvia_003": 56,
             "text_001": 2,
             "text_002": 4,
-            "text_003": 33,
-            "text_004": 51,
-            "text_005": 52,
+            "text_003": 32,
+            "text_004": 50,
+            "text_005": 51,
             "text_007": 5,
             "text_008": 10,
             "text_010": 12,
             "text_011": 16,
             "text_012": 18,
-            "text_014": 34,
-            "text_015": 35,
-            "text_016": 36,
-            "text_017": 38,
-            "text_018": 39,
-            "text_019": 40,
+            "text_014": 33,
+            "text_015": 34,
+            "text_016": 35,
+            "text_017": 37,
+            "text_018": 38,
+            "text_019": 39,
             "xfade_enum": 15,
             "xfade_inlet": 3,
             "xfade_mul": 19
         },
         "channel": {
-            "processor_002": 28,
-            "processor_003": 25,
-            "processor_005": 26,
-            "processor_007": 30,
-            "processor_008": 32,
-            "processor_014": 29,
-            "recvsignalvia_001": 24,
-            "sendsignalvia_001": 23
+            "processor_002": 27,
+            "processor_003": 24,
+            "processor_005": 25,
+            "processor_007": 29,
+            "processor_008": 31,
+            "processor_014": 28,
+            "recvsignalvia_001": 23,
+            "sendsignalvia_001": 22
         }
     },
     "type": "bufedit.fx~"

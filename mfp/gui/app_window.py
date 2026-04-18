@@ -191,6 +191,7 @@ class AppWindow (SignalMixin):
         self.load_in_progress = 0
         self.quit_in_progress = False
         self.close_in_progress = False
+        self.freewheel_in_progress = False
         self.last_activity_time = None
         self.dsp_info = {}
 
@@ -226,7 +227,7 @@ class AppWindow (SignalMixin):
             completions=InputMode._bindings_by_label.keys()
         )
 
-        # buffer editor 
+        # buffer editor
         self.buffer_editor = None
 
         # Python REPL
@@ -270,6 +271,11 @@ class AppWindow (SignalMixin):
         self.signal_listen('enter-event', self.input_handler)
         self.signal_listen('leave-event', self.input_handler)
         self.signal_listen('quit', self.quit)
+        self.signal_listen('freewheel', self.freewheel_handler)
+
+    def freewheel_handler(self, target, signal, status):
+        log.debug(f"[freewheel] Got signal {signal} {status}")
+        self.freewheel_in_progress = status
 
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI

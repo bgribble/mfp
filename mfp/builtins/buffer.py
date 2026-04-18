@@ -209,7 +209,9 @@ class Buffer(Processor):
                 self.file_ready = False
                 self._transfer_file_data()
         elif resp_id == self.RESP_FREEWHEEL:
-            log.debug(f"[buffer] got FREEWHEEL message {resp_value}")
+            MFPApp().async_task(
+                MFPApp().gui_command.signal_emit("freewheel", resp_value)
+            )
 
         if need_resize:
             # FIXME -- message connections to last ports

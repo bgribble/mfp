@@ -225,6 +225,13 @@ class BufferEditor:
             region_end=self.buffer_info.size,
             trig_trigger=1,
         )
+
+        def fw_handler(target, signal, status):
+            if status == 0:
+                log.debug(f"[bufedit] re-grabbing data from {self.working_buf_obj}")
+                self.buffer_grab(self.working_buf_obj)
+
+        MFPGUI().appwin.signal_listen("freewheel", fw_handler)
         await MFPGUI().mfp.send(self.working_source_id, 0, source_params)
         await MFPGUI().mfp.send(self.working_sink_id, 0, sink_params)
         await MFPGUI().mfp.freewheel(self.working_sink_id, self.buffer_info.size)

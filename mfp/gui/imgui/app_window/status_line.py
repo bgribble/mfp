@@ -65,6 +65,7 @@ def render(app_window):
 
     if (
         app_window.cmd_hud_text
+        and not app_window.freewheel_in_progress
         and app_window.cmd_hud_expiry
         and app_window.cmd_hud_expiry > datetime.now()
     ):
@@ -98,7 +99,10 @@ def render(app_window):
             latency_out = dsp_info.get("latency_out")
             channels_in = dsp_info.get("channels_in")
             channels_out = dsp_info.get("channels_out")
-            dsp_text = f"DSP: {srate},io={channels_in}/{channels_out}"
+            freewheel = ""
+            if app_window.freewheel_in_progress:
+                freewheel = ' (freewheel) '
+            dsp_text = f"DSP: {srate},io={channels_in}/{channels_out}{freewheel}"
 
         right_corner_text = ' '.join([
             fps_text, dsp_text

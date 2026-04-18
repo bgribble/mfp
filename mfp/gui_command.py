@@ -253,5 +253,9 @@ class GUICommand:
         MFPGUI().appwin.last_activity_time = datetime.now()
         MFPGUI().appwin.deletable = val
 
+    async def signal_emit(self, signal_name, *args):
+        from .gui_main import MFPGUI
+        await MFPGUI().appwin.signal_emit(signal_name, *args)
+
     def clear(self):
         pass
