@@ -441,13 +441,13 @@ class BaseElement (Store):
         if isinstance(self.container, BaseElement) and self in self.container.children:
             self.container.children.remove(self)
 
-        if delete_obj and self.obj_id is not None and not self.is_export:
-            await MFPGUI().mfp.delete(self.obj_id)
-
         for conn in [c for c in self.connections_out]:
             await conn.delete(delete_obj=delete_obj)
         for conn in [c for c in self.connections_in]:
             await conn.delete(delete_obj=delete_obj)
+
+        if delete_obj and self.obj_id is not None and not self.is_export:
+            await MFPGUI().mfp.delete(self.obj_id)
 
         self.obj_id = None
         self.obj_state = self.OBJ_DELETED

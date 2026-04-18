@@ -214,6 +214,32 @@ class GUICommand:
         obj_2.connections_in.append(c)
         await c.update()
 
+    async def disconnect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
+        from .gui_main import MFPGUI
+        from .gui.patch_display import PatchDisplay
+        from mfp import log
+        MFPGUI().appwin.last_activity_time = datetime.now()
+
+        obj_1 = MFPGUI().recall(obj_1_id)
+        obj_2 = MFPGUI().recall(obj_2_id)
+
+        if obj_1 is None or obj_2 is None:
+            log.debug("ERROR: disconnect: obj_1 (id=%s) --> %s, obj_2 (id=%s) --> %s"
+                      % (obj_1_id, obj_1, obj_2_id, obj_2))
+            return None
+        if isinstance(obj_1, PatchDisplay) or isinstance(obj_2, PatchDisplay):
+            log.debug("Trying to disconnect a PatchDisplay (%s [%s] --> %s [%s])"
+                      % (obj_1.obj_name, obj_1_id, obj_2.obj_name, obj_2_id))
+            return None
+
+        target_connection = None
+        for conn in obj_1.connections_out:
+            if conn.port_1 == obj_1_port and conn.obj_2 == obj_2 and conn.port_2 == obj_2_port:
+                target_connection = conn
+                break
+        if target_connection:
+            await target_connection.delete(delete_obj=False)
+
     async def delete(self, obj_id):
         from .gui_main import MFPGUI
         from .gui.patch_display import PatchDisplay

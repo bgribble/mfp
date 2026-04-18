@@ -140,7 +140,7 @@ class Faust(Processor):
         ]
 
 
-    def dsp_response(self, resp_id, resp_value):
+    async def dsp_response(self, resp_id, resp_value):
         io_conf = False
         if resp_id == self.RESP_DSP_INLETS:
             self.faust_dsp_inlets = resp_value

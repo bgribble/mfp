@@ -171,7 +171,7 @@ class Buffer(Processor):
             *Buffer.doc_tooltip_outlet[-2:]
         ]
 
-    def dsp_response(self, resp_id, resp_value):
+    async def dsp_response(self, resp_id, resp_value):
         need_resize = False
         if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
             self.outlets[-1] = resp_value
@@ -214,13 +214,23 @@ class Buffer(Processor):
             )
 
         if need_resize:
-            # FIXME -- message connections to last ports
+            last_port_conns = [
+                [c for c in outport]
+                for outport in self.connections_out[-2:]
+            ]
+            for outport in (-2, -1):
+                for c in last_port_conns[outport]:
+                    await self.disconnect(len(self.outlets) + outport, *c)
+
             self.dsp_inlets = list(range(self.channels))
             self.dsp_outlets = list(range(self.channels))
             self.resize(self.channels, self.channels + 2)
             self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
             self.set_channel_tooltips()
 
+            for outport in (-2, -1):
+                for c in last_port_conns[outport]:
+                    await self.connect(len(self.outlets) + outport, *c)
         if self.outlets[-1] == Uninit:
             self.outlets[-1] = (resp_id, resp_value)
 

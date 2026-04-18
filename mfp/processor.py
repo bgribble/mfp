@@ -171,7 +171,7 @@ class Processor:
         # override in Processor subclass
         pass
 
-    def dsp_response(self, resp_id, resp_value):
+    async def dsp_response(self, resp_id, resp_value):
         # override in Processor subclass
         pass
 
@@ -814,6 +814,7 @@ class Processor:
         return True
 
     async def disconnect(self, outlet, target, inlet):
+        from .mfp_app import MFPApp
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             out_obj, out_outlet = self.dsp_outlet(outlet)
@@ -833,6 +834,17 @@ class Processor:
         existing = target.connections_in[inlet]
         if (self, outlet) in existing:
             existing.remove((self, outlet))
+        if (
+            self.gui_created
+            and target.display_type not in (
+                "hidden", "sendvia", "sendsignalvia"
+            ) and self.display_type not in (
+                "hidden", "recvvia", "recvsignalvia"
+            )
+        ):
+            MFPApp().async_task(
+                MFPApp().gui_command.disconnect(self.obj_id, outlet, target.obj_id, inlet)
+            )
         return True
 
     def add_output(self, outlet_num, value):
@@ -973,7 +985,7 @@ class Processor:
             self.outlets = [Uninit] * len(self.outlets)
 
         if inlet == -1:
-            self.dsp_response(value[0], value[1])
+            await self.dsp_response(value[0], value[1])
         elif isinstance(value, MethodCall):
             await self.method(value, inlet)
         elif isinstance(value, AsyncOutput):

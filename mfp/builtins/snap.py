@@ -58,7 +58,7 @@ class Snap(Processor):
                     log.debug("snap~: Exception:", str(e))
                     self.error(tb)
 
-    def dsp_response(self, resp_type, resp_value):
+    async def dsp_response(self, resp_type, resp_value):
         self.outlets[0] = resp_value
 
 def register():

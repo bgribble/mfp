@@ -39,7 +39,7 @@ class TrackHold(Processor):
             self.inlets[1] = Uninit
             await self.dsp_obj.setparam("_sig_1", val)
 
-    def dsp_response(self, resp_type, resp_value):
+    async def dsp_response(self, resp_type, resp_value):
         self.outlets[1] = resp_value
 
 
@@ -73,7 +73,7 @@ class SampleHold(Processor):
             self.inlets[1] = Uninit
             await self.dsp_obj.setparam("_sig_1", val)
 
-    def dsp_response(self, resp_type, resp_value):
+    async def dsp_response(self, resp_type, resp_value):
         self.outlets[1] = resp_value
 
 
