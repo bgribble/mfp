@@ -343,10 +343,12 @@ class AppWindow (SignalMixin):
     async def control_major_mode(self):
         for o in self.selected:
             await o.end_edit()
-            o.begin_control()
 
         if isinstance(self.input_mgr.major_mode, PatchEditMode):
             self.input_mgr.set_major_mode(PatchControlMode(self))
+
+        for o in self.selected:
+            o.begin_control()
         return True
 
     def register(self, element):

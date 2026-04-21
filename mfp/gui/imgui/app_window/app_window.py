@@ -807,7 +807,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             return
 
         old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, self.input_mgr.minor_modes)
-        old_zone = self.zone_selected 
+        old_zone = self.zone_selected
 
         self.zone_selected = zone_name
 
