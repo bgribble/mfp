@@ -167,7 +167,7 @@ class ImguiSDL2Renderer:
                     keyval=None,
                     unicode=event.text.text.decode('utf-8')
                 )
-                if self.app_window.selected_window not in unhandled_windows:
+                if self.app_window.zone_selected not in unhandled_windows:
                     MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
                 dead_keys = [
@@ -187,7 +187,7 @@ class ImguiSDL2Renderer:
                         )
                         break
                 if ev:
-                    if self.app_window.selected_window not in unhandled_windows:
+                    if self.app_window.zone_selected not in unhandled_windows:
                         MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
                     skip_event = True
 

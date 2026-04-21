@@ -106,7 +106,7 @@ def render_tile(app_window, patch):
             app_window.selected_layer = patch.selected_layer
 
     if (
-        app_window.selected_window == "canvas"
+        app_window.zone_selected == "canvas"
         and app_window.selected_patch == patch
         and not app_window.cmd_input_filename
         and not app_window.context_menu_open
@@ -124,19 +124,7 @@ def render_tile(app_window, patch):
     )
 
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        if (
-            app_window.selected_window != "canvas"
-            and not app_window.inspector
-            and not app_window.buffer_editor
-        ):
-            app_window.selected_window = "canvas"
-
-        if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
-            app_window.input_mgr.global_mode = GlobalMode(app_window)
-            app_window.input_mgr.major_mode.enable()
-        if app_window.imgui_tile_selected:
-            app_window.layer_select(patch.selected_layer)
-            app_window.imgui_tile_selected = False
+        app_window.zone_hovered("canvas")
 
     # get_cursor_pos appears to be relative to the origin of the current window
     cursor_pos = imgui.get_cursor_pos()
@@ -442,10 +430,7 @@ def render(app_window):
     )
 
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.selected_window = "canvas"
-        if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
-            app_window.input_mgr.global_mode = GlobalMode(app_window)
-            app_window.input_mgr.major_mode.enable()
+        app_window.zone_hovered("canvas")
 
     displayed_patches = [
         p for p in app_window.patches

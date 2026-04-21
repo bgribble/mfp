@@ -95,7 +95,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.frame_timestamps = []
         self.viewport_box_node = None
 
-        self.selected_window = "canvas"
+        self.zone_selected = "canvas"
+        self.zone_current_hover = None
+        self.zone_inhibit = None
+        self.zone_modes = {}
+
         self.inspector = None
 
         self.buffer_editor = None
@@ -123,31 +127,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         """
         prev_pointer_obj = event.target
         new_pointer_obj = prev_pointer_obj
-        if event.y < self.menu_height and self.selected_window != "menu":
-            self.selected_window = "menu"
+        if event.y < self.menu_height and self.zone_selected != "menu":
+            self.zone_hovered("menu")
             new_pointer_obj = None
-
-        if self.console_panel_visible:
-            if self.buffer_editor_shown and event.y >= self.window_height - self.console_panel_height:
-                if prev_pointer_obj != self.buffer_editor:
-                    new_pointer_obj = self.buffer_editor
-                    self.selected_window = "bufedit"
-                    self.enable_buffer_editor_input()
-
-            elif event.y >= self.window_height - self.console_panel_height:
-                if prev_pointer_obj != self.console_manager:
-                    new_pointer_obj = self.console_manager
-                    self.selected_window = "console"
-
-        if (
-            not self.main_menu_open
-            and event.x <= self.canvas_panel_width
-            and event.y <= self.canvas_panel_height
-            and event.y > self.menu_height
-        ):
-            if self.selected_window == "bufedit":
-                self.disable_buffer_editor_input()
-            self.selected_window = "canvas"
 
         if not new_pointer_obj and self.info_panel_visible:
             if event.y > self.menu_height and event.x < self.canvas_panel_width:
@@ -531,7 +513,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # clean up any weirdness from first frame
         if self.frame_count == 0:
-            self.selected_window = "canvas"
+            self.zone_selected = "canvas"
 
         self.frame_count += 1
         self.frame_timestamps.append(datetime.now())
@@ -787,18 +769,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         ]
         return buffer_info
 
-    def enable_buffer_editor_input(self):
-        from mfp.gui.modes.buffer_edit import BufferEditMode
-        if not isinstance(self.input_mgr.major_mode, BufferEditMode):
-            self.buffer_editor_previous_mode = self.input_mgr.major_mode
-            self.input_mgr.set_major_mode(BufferEditMode(self))
-
-    def disable_buffer_editor_input(self):
-        from mfp.gui.modes.buffer_edit import BufferEditMode
-        if isinstance(self.input_mgr.major_mode, BufferEditMode):
-            self.input_mgr.set_major_mode(self.buffer_editor_previous_mode)
-
-
     async def start_buffer_editor(self):
         from mfp.gui.imgui.buffer_editor import BufferEditor
         from mfp.gui.modes.buffer_edit import BufferEditMode
@@ -810,14 +780,13 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.buffer_editor.buffer_info = self.buffer_info[0].get('buf_info')
             self.buffer_editor.buffer_grab()
 
-        self.selected_window = "bufedit"
+        self.zone_select("bufedit")
         self.console_panel_visible = True
         if self.console_panel_height < 2.5*self.INIT_CONSOLE_PANEL_HEIGHT:
             self.console_panel_height = 2.5*self.INIT_CONSOLE_PANEL_HEIGHT
             self.console_panel_height_set = True
 
         self.buffer_editor.focus()
-        self.enable_buffer_editor_input()
 
         if not self.buffer_editor.working_patch_id:
             await self.buffer_editor.init_working_patch()
@@ -825,7 +794,60 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     async def stop_buffer_editor(self):
         await self.buffer_editor.close()
         self.buffer_editor = None
-        self.input_mgr.set_major_mode(self.buffer_editor_previous_mode)
+
+    #####################
+    # zome management
+    def zone_hovered(self, zone_name):
+        self.zone_current_hover = zone_name
+        if self.zone_inhibit != zone_name and self.zone_selected != zone_name:
+            self.zone_select(zone_name)
+
+    def zone_select(self, zone_name):
+        if zone_name == self.zone_selected:
+            return
+
+        old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, self.input_mgr.minor_modes)
+        old_zone = self.zone_selected 
+
+        self.zone_selected = zone_name
+
+        new_mode = False
+        new_global = self.input_mgr.global_mode
+        new_major = None
+        new_minor = []
+
+        save_old = True
+        if old_zone in ('info',):
+            save_old = False
+
+        if zone_name in self.zone_modes:
+            new_global, new_major, new_minor = self.zone_modes.get(zone_name)
+            new_mode = True
+        elif zone_name == "bufedit":
+            from mfp.gui.modes.buffer_edit import BufferEditMode
+            new_major = BufferEditMode(self)
+            new_mode = True
+        elif zone_name == "console":
+            from mfp.gui.modes.console_mode import ConsoleMode, ConsoleMajorMode
+            new_global = ConsoleMode(self)
+            new_major = ConsoleMajorMode(self)
+            new_mode = True
+        elif zone_name == "cmdline":
+            new_minor = [app_window.cmd_manager.mode]
+            new_mode = True
+
+        if new_mode:
+            if save_old:
+                self.zone_modes[old_zone] = old_modes
+            for mode in old_modes[2]:
+                self.input_mgr.disable_minor_mode(mode)
+
+            if new_global:
+                self.input_mgr.global_mode = new_global
+            if new_major:
+                self.input_mgr.set_major_mode(new_major)
+            for mode in new_minor:
+                self.input_mgr.enable_minor_mode(mode)
 
     #####################
     # log output

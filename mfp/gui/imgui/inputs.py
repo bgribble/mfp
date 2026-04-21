@@ -131,7 +131,7 @@ def imgui_process_inputs(app_window):
                     keyval=mfp_key,
                     unicode=None
                 )
-                if app_window.selected_window not in unhandled_windows:
+                if app_window.zone_selected not in unhandled_windows:
                     MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
             elif mfp_key in key_defs.MOUSE_BUTTONS:
                 clickinfo = app_window.mouse_clicks.get(mfp_key)
@@ -147,7 +147,7 @@ def imgui_process_inputs(app_window):
                     button=1 + mfp_key - key_defs.MOUSE_LEFT,
                     click_count=click_count
                 )
-                if app_window.selected_window not in unhandled_windows:
+                if app_window.zone_selected not in unhandled_windows:
                     MFPGUI().async_task(app_window.signal_emit("button-press-event", ev))
             elif any_dead_keys and mfp_key is not None:
                 # this is the case where a mod key is held down and another
@@ -175,7 +175,7 @@ def imgui_process_inputs(app_window):
                         keyval=mfp_key,
                         unicode=chr(mfp_key)
                     )
-                    if app_window.selected_window not in unhandled_windows:
+                    if app_window.zone_selected not in unhandled_windows:
                         MFPGUI().async_task(app_window.signal_emit("key-press-event", ev))
 
     if key_releases:

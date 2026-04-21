@@ -24,11 +24,7 @@ def render(app_window):
 
     if app_window.cmd_prompt:
         if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-            app_window.selected_window = "canvas"
-            if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
-                app_window.input_mgr.global_mode = GlobalMode(app_window)
-                app_window.input_mgr.major_mode.enable()
-                app_window.input_mgr.enable_minor_mode(app_window.cmd_manager.mode)
+            app_window.zone_hovered("cmdline")
 
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 3.0))
         imgui.text(app_window.cmd_prompt)
@@ -84,7 +80,7 @@ def render(app_window):
                 f"{mode_label}{' > ' if minor else ''}{minor}"
             )
             imgui.same_line()
-            imgui.text(f" ({app_window.selected_window})")
+            imgui.text(f" ({app_window.zone_selected})")
             imgui.same_line()
 
         elapsed = (app_window.frame_timestamps[-1] - app_window.frame_timestamps[0]).total_seconds()

@@ -105,12 +105,7 @@ def render(app_window):
 
         if imgui.begin_tab_item("Console", None, tabflags)[0]:
             if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-                app_window.selected_window = "console"
-                if not isinstance(app_window.input_mgr.global_mode, ConsoleMode):
-                    app_window.input_mgr.global_mode = ConsoleMode(app_window)
-                    app_window.input_mgr.major_mode.disable()
-                    for m in list(app_window.input_mgr.minor_modes):
-                        app_window.input_mgr.disable_minor_mode(m)
+                app_window.zone_hovered("console")
 
             app_window.console_manager.render(
                 app_window.window_width,
@@ -127,8 +122,7 @@ def render(app_window):
             if imgui.begin_tab_item("Buffer Edit", None, tabflags)[0]:
                 app_window.buffer_editor_shown = True
                 if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-                    app_window.selected_window = "bufedit"
-                    app_window.enable_buffer_editor_input()
+                    app_window.zone_hovered("bufedit")
                 bufedit_keep_going = app_window.buffer_editor.render()
                 if not bufedit_keep_going:
                     app_window.buffer_editor = None

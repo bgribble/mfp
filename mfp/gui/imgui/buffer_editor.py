@@ -871,8 +871,7 @@ class BufferEditor:
         )
 
         if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-            self.app_window.selected_window = "bufedit"
-            self.app_window.enable_buffer_editor_input()
+            self.app_window.zone_hovered("bufedit")
 
         if self.needs_focus:
             imgui.set_window_focus()

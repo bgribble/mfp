@@ -184,7 +184,7 @@ class AppWindow (SignalMixin):
 
         self.selected_patch = None
         self.selected_layer = None
-        self.selected_window = "canvas"
+        self.zone_selected = "canvas"
 
         self.selected = []
 

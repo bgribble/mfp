@@ -96,7 +96,7 @@ def render(app_window):
         ),
     )
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.selected_window = "info"
+        app_window.zone_hovered("info")
 
     if imgui.begin_tab_bar("inspector_tab_bar", imgui.TabBarFlags_.none):
         if imgui.begin_tab_item("Patch")[0]:

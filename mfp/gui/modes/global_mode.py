@@ -416,7 +416,7 @@ class GlobalMode (InputMode):
                 title="State inspector",
                 event_loop=MFPGUI().async_task.asyncio_loop,
             )
-        self.window.selected_window = "inspector"
+        self.window.zone_selected = "inspector"
         self.window.inspector.focus()
 
     async def buffer_edit(self):
@@ -580,7 +580,7 @@ class GlobalMode (InputMode):
         if self.window.backend_name == "imgui":
             from imgui_bundle import imgui_node_editor as nedit
             if (
-                self.window.selected_window != "canvas"
+                self.window.zone_selected != "canvas"
                 or self.window.main_menu_open
                 or self.window.context_menu_open
                 or self.window.inspector
