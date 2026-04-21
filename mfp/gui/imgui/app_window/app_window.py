@@ -833,7 +833,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             new_major = ConsoleMajorMode(self)
             new_mode = True
         elif zone_name == "cmdline":
-            new_minor = [app_window.cmd_manager.mode]
+            new_minor = [self.cmd_manager.mode]
             new_mode = True
 
         if new_mode:

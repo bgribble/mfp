@@ -1,0 +1,201 @@
+"""
+buffer_editor/buffer_ops.py -- manipulate the shared mem buffers
+
+Copyright (c) Bill Gribble <grib@billgribble.com>
+"""
+
+import os
+import numpy as np
+from posix_ipc import SharedMemory
+from imgui_bundle import implot
+
+from mfp import log
+from mfp.utils import extends
+from mfp.buffer_info import BufferInfo
+from .buffer_editor import BufferEditor
+
+
+########################################
+# buffer operations
+@extends(BufferEditor)
+def buffer_grab(self, shm_obj=None):
+    def offset(channel):
+        return channel * self.buffer_info.size * self.FLOAT_SIZE
+
+    if self.buffer_info is None:
+        return None
+
+    if shm_obj is None:
+        if self.shm_obj is None:
+            self.shm_obj = SharedMemory(self.buffer_info.buf_id)
+        shm_obj = self.shm_obj
+
+    self.buffer_data = []
+    self.channel_selections = [None] * (self.buffer_info.channels + 1)
+    self.channel_selections_active = [False] * (self.buffer_info.channels + 1)
+    self.implot_limits = None
+    self.implot_limits_need_set = [None] * (self.buffer_info.channels + 1)
+
+    try:
+        for c in range(self.buffer_info.channels):
+            os.lseek(shm_obj.fd, offset(c), os.SEEK_SET)
+            slc = os.read(shm_obj.fd, int(self.buffer_info.size * self.FLOAT_SIZE))
+            self.buffer_data.append(np.fromstring(slc, dtype=np.float32))
+    except Exception as e:
+        log.debug("[grab]: error grabbing data", e)
+        import traceback
+        traceback.print_exc()
+        return None
+    self.buffer_compute_peaks()
+
+
+@extends(BufferEditor)
+def buffer_sync(self, from_obj, from_info, to_obj, to_info, data=None):
+    sync_channels = to_info.channels
+    if from_info:
+        sync_channels = min(from_info.channels, to_info.channels)
+    for c in range(sync_channels):
+        self.buffer_sync_channel(c, from_obj, from_info, to_obj, to_info, data)
+
+
+@extends(BufferEditor)
+def buffer_sync_channel(self, channel, from_obj, from_info, to_obj, to_info, data=None):
+    def offset(buf_info, channel):
+        return channel * buf_info.size * self.FLOAT_SIZE
+
+    if from_obj:
+        os.lseek(from_obj.fd, offset(from_info, channel), os.SEEK_SET)
+        slc = os.read(from_obj.fd, int(from_info.size * self.FLOAT_SIZE))
+    elif data is not None:
+        slc = data.tobytes()
+    else:
+        slc = self.buffer_data[channel].tobytes()
+
+    os.lseek(to_obj.fd, offset(to_info, channel), os.SEEK_SET)
+    os.write(to_obj.fd, slc)
+
+
+@extends(BufferEditor)
+def buffer_compute_peaks(self):
+    self.buffer_peaks = {}
+    padding = 10 - len(self.buffer_data[0]) % 10
+    padded = [
+        np.pad(chan, (0, padding), mode='constant')
+        for chan in self.buffer_data
+    ]
+    total_time = len(padded[0]) / self.buffer_info.rate
+    sample_time = 1/self.buffer_info.rate
+    self.implot_total_time = total_time
+    self.implot_limits = implot.Rect(
+        x_min=0, x_max=total_time, y_min=-1, y_max=1
+    )
+    self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+    self.buffer_peaks["1"] = (
+        padded,
+        np.arange(0, total_time, sample_time, dtype=np.float32)
+    )
+    last_peaks = padded
+
+    for peak_factor in (10, 100, 1000, 10000):
+        if peak_factor == 10:
+            shape = 10
+        else:
+            shape = 20
+        next_peaks = []
+        for channel in last_peaks:
+            maxima = channel.reshape(-1, shape).max(axis=1)
+            minima = channel.reshape(-1, shape).min(axis=1)
+            combined = np.ravel(np.column_stack((maxima, minima)))
+            padding = 20 - len(combined) % 20
+            padded = np.pad(combined, (0, padding), mode='constant')
+            next_peaks.append(padded)
+
+        x_values = np.arange(
+            0, sample_time * peak_factor * len(padded) / 2,
+            peak_factor * sample_time / 2, dtype=np.float32
+        )
+        self.buffer_peaks[str(peak_factor)] = (
+            next_peaks, x_values
+        )
+        last_peaks = next_peaks
+
+
+@extends(BufferEditor)
+def get_peak_scale(self):
+    """
+    called within a begin_plot()
+    """
+    limits = implot.get_plot_limits()
+    compress = self.buffer_info.rate * (
+        (max(limits.x.max, 1.0) - limits.x.min)
+        / self.app_window.canvas_panel_width
+    )
+
+    if compress < 10:
+        peak_scale = "1"
+    elif compress < 100:
+        peak_scale = "10"
+    elif compress < 1000:
+        peak_scale = "100"
+    elif compress < 10000:
+        peak_scale = "1000"
+    else:
+        peak_scale = "10000"
+    return peak_scale
+
+
+@extends(BufferEditor)
+def buffer_set_selection(self):
+    preroll = 0
+    xfade = 0
+
+    if "preroll_enum" in self.fx_patch_elements:
+        preroll = self.fx_patch_elements.get('preroll_enum').value
+        xfade = self.fx_patch_elements.get('xfade_enum').value
+
+    working_buf_info = BufferInfo(
+        buf_id=self.working_buf_id,
+        size=self.buffer_info.size,
+        channels=self.buffer_info.channels + 2,
+        rate=self.buffer_info.rate,
+        offset=self.buffer_info.offset
+    )
+    # input level signal
+    startpos = int(
+        (self.implot_selection.x.min - (preroll / 1000.0)) * self.buffer_info.rate
+    )
+    endpos = int(
+        (self.implot_selection.x.max + (preroll / 1000.0)) * self.buffer_info.rate
+    )
+
+    startpos = max(0, startpos)
+    endpos = min(self.buffer_info.size, endpos)
+
+    input_arr = np.zeros(self.buffer_info.size, dtype=np.float32)
+    input_arr[startpos:endpos] = 1
+    self.buffer_sync_channel(
+        self.buffer_info.channels, None, None, self.working_buf_obj, working_buf_info,
+        data=input_arr
+    )
+
+    # crossfade signal
+    inramp_start = int(self.implot_selection.x.min * self.buffer_info.rate)
+    outramp_end = int(self.implot_selection.x.max * self.buffer_info.rate)
+
+    ramp_len = min(
+        int((xfade / 1000) * self.buffer_info.rate),
+        int((outramp_end - inramp_start) / 2)
+    )
+
+    inramp_end = inramp_start + ramp_len
+    outramp_start = outramp_end - ramp_len
+
+    xfade_arr = np.zeros(self.buffer_info.size, dtype=np.float32)
+    xfade_arr[inramp_start:outramp_end] = 1
+    xfade_arr[inramp_start:inramp_end] = np.linspace(0, 1, ramp_len, dtype=np.float32)
+    xfade_arr[outramp_start:outramp_end] = np.linspace(1, 0, ramp_len, dtype=np.float32)
+
+    self.buffer_sync_channel(
+        self.buffer_info.channels + 1, None, None, self.working_buf_obj, working_buf_info,
+        data=xfade_arr
+    )
