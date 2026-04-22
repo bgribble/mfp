@@ -51,6 +51,7 @@ class Buffer(Processor):
 
         self.init_size = 0
         self.init_channels = 1
+        self.gui_notify = False
 
         if len(self.init_args):
             self.init_size = self.init_args[0] * MFPApp().samplerate/1000.0
@@ -60,6 +61,8 @@ class Buffer(Processor):
             self.init_channels = self.init_kwargs.pop("channels")
         if "buf_id" in self.init_kwargs:
             self.buf_id = self.init_kwargs.get("buf_id")
+        if "gui_notify" in self.init_kwargs:
+            self.gui_notify = self.init_kwargs.pop("gui_notify")
 
         # convert can be 'best', 'medium' or 'fastest'
         # there is about a 8-10x runtime difference between best and fastest
@@ -198,20 +201,26 @@ class Buffer(Processor):
             self.buf_offset = resp_value
         elif resp_id == self.RESP_BUFRDY:
             self.buffer_ready = True
-            self.outlets[-1] = BufferInfo(
+            buffer_data = dict(
                 buf_id=self.buf_id,
                 size=self.size,
                 channels=self.channels,
                 rate=self.rate,
                 offset=self.buf_offset
             )
+            self.outlets[-1] = BufferInfo(**buffer_data)
             if self.file_ready:
                 self.file_ready = False
                 self._transfer_file_data()
+            if self.gui_notify and MFPApp().gui_command:
+                MFPApp().async_task(
+                    MFPApp().gui_command.signal_emit("buffer_ready", buffer_data)
+                )
         elif resp_id == self.RESP_FREEWHEEL:
-            MFPApp().async_task(
-                MFPApp().gui_command.signal_emit("freewheel", resp_value)
-            )
+            if self.gui_notify and MFPApp().gui_command:
+                MFPApp().async_task(
+                    MFPApp().gui_command.signal_emit("freewheel", resp_value)
+                )
 
         if need_resize:
             last_port_conns = [

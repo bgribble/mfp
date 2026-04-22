@@ -39,7 +39,7 @@ class BufferEditor:
         self.implot_playhead_looping = False
         self.implot_total_time = 0
 
-        self.shm_obj = None
+        self.shm_obj = None                  # primary (original) buffer
         self.buffer_source_info = None
         self.buffer_info = None
         self.buffer_data = None
@@ -48,7 +48,8 @@ class BufferEditor:
         self.working_patch_id = None
         self.working_patch_info = None
         self.working_buf_id = None
-        self.working_buf_obj = None
+        self.working_buf_obj = None          # working buffer, shared btw source/sink
+        self.working_buf_info = None
         self.working_source_id = None
         self.working_source_info = None
         self.working_sink_id = None
@@ -59,6 +60,10 @@ class BufferEditor:
 
         self.channel_selections = [None]         # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
+
+        self.clipboard_data = None
+        self.clipboard_size = None
+        self.clipboard_pos = None
 
     def focus(self):
         self.needs_focus = True
@@ -641,5 +646,7 @@ class BufferEditor:
         self.implot_playhead_start_pos = self.implot_playhead
 
 from . import buffer_ops
+from . import clipboard_ops
 from . import working_patch
 from . import fx_patch
+

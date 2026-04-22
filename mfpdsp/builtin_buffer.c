@@ -717,13 +717,11 @@ shared_buffer_alloc(buf_info * buf)
 static void
 buffer_activate(builtin_buffer_data * d)
 {
-
     d->buf_to_alloc.buf_ready = ALLOC_IDLE;
     memcpy(&(d->buf_active), &(d->buf_to_alloc), sizeof(buf_info));
     d->chan_count = d->buf_active.buf_chancount;
     d->chan_size = d->buf_active.buf_chansize;
     d->buf_base = d->buf_active.buf_ptr;
-
 }
 
 static void
@@ -806,8 +804,8 @@ config(mfp_processor * proc)
             }
             if (d->buf_active.buf_type == BUFTYPE_SHARED) {
                 mfp_dsp_send_response_str(proc, RESP_BUFID, d->buf_active.shm_id);
-                mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->buf_active.buf_chansize);
-                mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->buf_active.buf_chancount);
+                mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->chan_size);
+                mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->chan_count);
                 mfp_dsp_send_response_int(proc, RESP_RATE, proc->context->samplerate);
                 mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
             }
@@ -818,7 +816,7 @@ config(mfp_processor * proc)
             d->buf_to_alloc.buf_type = d->buf_active.buf_type;
             d->buf_to_alloc.buf_ptr = NULL;
             d->buf_to_alloc.buf_chancount = new_channels ? new_channels : d->chan_count;
-            d->buf_to_alloc.buf_chansize = new_size ? new_size : d->chan_size;
+            d->buf_to_alloc.buf_chansize = new_size;
 
             if (new_buf_id != NULL) {
                 strncpy(d->buf_to_alloc.shm_id, new_buf_id, 64);

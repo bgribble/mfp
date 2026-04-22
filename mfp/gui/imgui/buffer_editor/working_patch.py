@@ -19,10 +19,13 @@ async def init_working_patch(self):
         await self.close_working_patch()
 
     self.working_patch_id = await MFPGUI().mfp.open_file(None, show_gui=False)
-    self.working_patch_info = await MFPGUI().mfp.get_tooltip_info(self.working_patch_id, details=True)
+    self.working_patch_info = await MFPGUI().mfp.get_tooltip_info(
+        self.working_patch_id, details=True
+    )
     buffer_params = dict(
         channels=self.buffer_info.channels + 2,
         size=self.buffer_info.size,
+        gui_notify=True,
     )
 
     self.working_source_info = await MFPGUI().mfp.create(
@@ -46,6 +49,7 @@ async def init_working_patch(self):
     source_buf = source.get("buf_info")
     self.working_buf_id = source_buf.buf_id
     self.working_buf_obj = SharedMemory(source_buf.buf_id)
+    self.working_buf_info = source_buf
     buffer_params["buf_id"] = source_buf.buf_id
     buffer_params["channels"] = source_buf.channels
     buffer_params["size"] = source_buf.size

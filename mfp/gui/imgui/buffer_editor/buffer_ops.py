@@ -4,12 +4,14 @@ buffer_editor/buffer_ops.py -- manipulate the shared mem buffers
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
+import asyncio
 import os
 import numpy as np
 from posix_ipc import SharedMemory
 from imgui_bundle import implot
 
 from mfp import log
+from mfp.gui_main import MFPGUI
 from mfp.utils import extends
 from mfp.buffer_info import BufferInfo
 from .buffer_editor import BufferEditor
@@ -55,7 +57,7 @@ def buffer_sync(self, from_obj, from_info, to_obj, to_info, data=None):
     if from_info:
         sync_channels = min(from_info.channels, to_info.channels)
     for c in range(sync_channels):
-        self.buffer_sync_channel(c, from_obj, from_info, to_obj, to_info, data)
+        self.buffer_sync_channel(c, from_obj, from_info, to_obj, to_info, data[c] if data else None)
 
 
 @extends(BufferEditor)
@@ -68,8 +70,10 @@ def buffer_sync_channel(self, channel, from_obj, from_info, to_obj, to_info, dat
         slc = os.read(from_obj.fd, int(from_info.size * self.FLOAT_SIZE))
     elif data is not None:
         slc = data.tobytes()
-    else:
+    elif len(self.buffer_data) > channel:
         slc = self.buffer_data[channel].tobytes()
+    else:
+        slc = np.zeros(len(self.buffer_data[0]), dtype=np.float32)
 
     os.lseek(to_obj.fd, offset(to_info, channel), os.SEEK_SET)
     os.write(to_obj.fd, slc)
@@ -199,3 +203,31 @@ def buffer_set_selection(self):
         self.buffer_info.channels + 1, None, None, self.working_buf_obj, working_buf_info,
         data=xfade_arr
     )
+
+
+@extends(BufferEditor)
+async def buffer_reshape(self, buffer_proc_id, **params):
+    # to prevent synchronization errors, we let the buffer resize itself.
+    # send it a message, then wait for a signal in response that the buffer
+    # has been reshaped.
+
+    event = asyncio.Event()
+    new_buf = []
+
+    async def buf_ready(target, signal, bufdata):
+        new_buf.append(BufferInfo(**bufdata))
+        event.set()
+        return False
+
+    handler_id = self.app_window.signal_listen("buffer_ready", buf_ready)
+
+    await MFPGUI().mfp.send(
+        buffer_proc_id, 0, params
+    )
+    await asyncio.wait_for(event.wait(), 1)
+
+    self.app_window.signal_unlisten(handler_id)
+
+    if len(new_buf) > 0:
+        return new_buf[0]
+    return None

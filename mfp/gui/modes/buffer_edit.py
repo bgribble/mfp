@@ -58,13 +58,13 @@ class BufferEditMode (InputMode):
             self.editor.set_playhead_at_pointer()
         self.mouse_down_pos = None
 
-    def cut(self):
-        log.debug("[bufedit] cut")
+    async def cut(self):
+        await self.editor.clipboard_cut()
 
-    def copy(self):
-        log.debug("[bufedit] copy")
+    async def copy(self):
+        await self.editor.clipboard_copy()
 
-    def paste(self):
+    async def paste(self):
         log.debug("[bufedit] paste")
 
     async def effect_custom(self, filename=None):
