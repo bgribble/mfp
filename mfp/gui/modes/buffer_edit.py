@@ -65,7 +65,7 @@ class BufferEditMode (InputMode):
         await self.editor.clipboard_copy()
 
     async def paste(self):
-        log.debug("[bufedit] paste")
+        await self.editor.clipboard_paste()
 
     async def effect_custom(self, filename=None):
         async def cb(fname):
