@@ -33,6 +33,14 @@ class BufferEditMode (InputMode):
             keysym="C-v", menupath="BufEdit > Paste"
         )
         cls.bind(
+            "buffer-edit-clear", cls.clear, helptext="Clear selection",
+            keysym="C-k", menupath="BufEdit > Clear"
+        )
+        cls.bind(
+            "buffer-edit-delete", cls.delete, helptext="Delete selection",
+            keysym="DEL", menupath="BufEdit > Delete"
+        )
+        cls.bind(
             "buffer-edit-select-all", cls.select_all, helptext="Select all",
             keysym="C-a", menupath="BufEdit > Select > Select all"
         )
@@ -96,6 +104,12 @@ class BufferEditMode (InputMode):
 
     async def paste(self):
         await self.editor.clipboard_paste()
+
+    async def clear(self):
+        await self.editor.clipboard_clear()
+
+    async def delete(self):
+        await self.editor.clipboard_delete()
 
     async def apply_effect(self, filename):
         await self.editor.fx_open_patch(filename)

@@ -17,9 +17,8 @@ def render_bufedit_menu(app_window):
     by_menu = load_menupaths(app_window)
 
     imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
-    imgui.push_style_var(imgui.StyleVar_.item_spacing, (3, 3))
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 3))
     if imgui.begin_popup("##bufedit_popup"):
-        imgui.pop_style_var(2)
         imgui.begin_group()
 
         add_menu_items(app_window, by_menu.get("BufEdit", {}))
@@ -66,6 +65,7 @@ def render_bufedit_menu(app_window):
         ))
 
         imgui.end_popup()
+        imgui.pop_style_var(2)
     else:
         imgui.pop_style_var(2)
     return quit_selected
