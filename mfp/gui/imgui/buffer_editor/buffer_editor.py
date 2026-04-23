@@ -589,6 +589,10 @@ class BufferEditor:
         self.implot_playhead_looping = False
 
     async def playhead_set_selection(self, sel_start, sel_end):
+        if not self.implot_selection:
+            self.implot_selection = implot.Rect(
+                0, 0, -1, 1
+            )
         if sel_start is not None:
             self.implot_selection.x.min = sel_start
         if sel_end is not None:
