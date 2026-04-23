@@ -186,9 +186,12 @@ def buffer_set_selection(self):
     inramp_start = int(self.implot_selection.x.min * self.buffer_info.rate)
     outramp_end = int(self.implot_selection.x.max * self.buffer_info.rate)
 
-    ramp_len = min(
-        int((xfade / 1000) * self.buffer_info.rate),
-        int((outramp_end - inramp_start) / 2)
+    ramp_len = max(
+        0,
+        min(
+            int((xfade / 1000) * self.buffer_info.rate),
+            int((outramp_end - inramp_start) / 2)
+        )
     )
 
     inramp_end = inramp_start + ramp_len
