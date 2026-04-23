@@ -28,6 +28,7 @@ class BufferEditor:
     def __init__(self, app_window):
         self.app_window = app_window
         self.needs_focus = False
+
         self.implot_context = implot.create_context()
         self.implot_selection = None         # global selection range
         self.implot_limits = None            # global plot limits
@@ -109,6 +110,9 @@ class BufferEditor:
                 | imgui.WindowFlags_.no_decoration
             ),
         )
+        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+            self.app_window.zone_hovered("bufedit")
+
         padding = (0.25 * button_size, 0.25 * button_size)
         imgui.push_style_var(imgui.StyleVar_.frame_padding, padding)
         imgui.push_style_var(imgui.StyleVar_.item_spacing, padding)
@@ -145,7 +149,7 @@ class BufferEditor:
         if imgui.image_button(
             "##end_btn", imgui.ImTextureRef(end_tex[0]), [button_size, button_size]
         ):
-            MFPGUI().async_task(self.playhead_move(self.implot_limits.x.max - 0.001))
+            MFPGUI().async_task(self.playhead_move(self.implot_total_time - 0.001))
 
         imgui.same_line()
 
@@ -331,6 +335,9 @@ class BufferEditor:
                 | imgui.WindowFlags_.no_move
             )
         )
+        if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+            self.app_window.zone_hovered("bufedit")
+
         if implot.begin_aligned_plots("##aligned_plot_group"):
             implot.push_style_var(implot.StyleVar_.plot_padding, (2, 0))
 
