@@ -224,6 +224,7 @@ async def buffer_reshape(self, buffer_proc_id, **params):
 
     handler_id = self.app_window.signal_listen("buffer_ready", buf_ready)
 
+    params["gui_notify"] = True
     await MFPGUI().mfp.send(
         buffer_proc_id, 0, params
     )
@@ -234,3 +235,31 @@ async def buffer_reshape(self, buffer_proc_id, **params):
     if len(new_buf) > 0:
         return new_buf[0]
     return None
+
+
+@extends(BufferEditor)
+async def buffer_apply(self):
+    # transfer working buffer to origin buffer
+    bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
+    buf_info = await self.buffer_reshape(
+        self.buffer_source_info.get('proc_id'),
+        channels=self.buffer_info.channels,
+        size=bufsize,
+        region_start=0,
+        region_end=len(self.buffer_data[0])
+    )
+
+    buf_id = buf_info.buf_id
+    buf_obj = SharedMemory(buf_id)
+
+    self.buffer_sync(None, None, buf_obj, buf_info)
+    return True
+
+@extends(BufferEditor)
+async def buffer_import(self, filename):
+    pass
+
+
+@extends(BufferEditor)
+async def buffer_export(self, filename):
+    pass

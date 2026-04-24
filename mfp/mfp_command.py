@@ -200,6 +200,7 @@ class MFPCommand:
             response.append(dict(
                 file_name=buf.file_name,
                 proc_name=buf.name,
+                proc_id=buf.obj_id,
                 buf_info=BufferInfo(
                     buf_id=buf.buf_id,
                     size=buf.size,

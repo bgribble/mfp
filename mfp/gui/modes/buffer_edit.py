@@ -115,6 +115,21 @@ class BufferEditMode (InputMode):
         )
 
         #####################
+        # File operations
+        cls.bind(
+            "buffer-edit-apply", cls.buffer_apply, helptext="Save changes to buffer",
+            keysym="C-s", menupath="BufEdit > |Save changes to buffer"
+        )
+        cls.bind(
+            "buffer-edit-import", cls.buffer_import, helptext="Import audio file",
+            keysym="C-I", menupath="BufEdit > |Import..."
+        )
+        cls.bind(
+            "buffer-edit-export", cls.buffer_export, helptext="Export audio file",
+            keysym="C-E", menupath="BufEdit > |Export..."
+        )
+
+        #####################
         # Non-menu keybindins
         cls.bind(
             "buffer-click-down", cls.click_start, helptext="Set playhead position",
@@ -128,6 +143,7 @@ class BufferEditMode (InputMode):
     def click_start(self, *args):
         from imgui_bundle import imgui
         self.mouse_down_pos = imgui.get_mouse_pos()
+        return True
 
     def click_end(self, *args):
         from imgui_bundle import imgui
@@ -136,59 +152,110 @@ class BufferEditMode (InputMode):
         if down and abs(pos[0] - down[0]) < 0.1 and abs(pos[1] - down[1]) < 0.1:
             self.editor.set_playhead_at_pointer()
         self.mouse_down_pos = None
+        return True
+
+    async def buffer_apply(self):
+        await self.editor.buffer_apply()
+        return True
+
+    async def buffer_import(self, filename=None):
+        async def cb(fname):
+            if fname:
+                await self.editor.buffer_import(fname)
+            else:
+                self.window.hud_write("Audio file import canceled")
+
+        if filename is None:
+            await self.window.cmd_get_input(
+                "Audio file to import: ", cb, filename=True
+            )
+        else:
+            await cb(filename)
+        return True
+
+    async def buffer_export(self, filename=None):
+        async def cb(fname):
+            if fname:
+                await self.editor.buffer_export(fname)
+            else:
+                self.window.hud_write("Audio file export canceled")
+
+        if filename is None:
+            await self.window.cmd_get_input(
+                "File name for export: ", cb, filename=True
+            )
+        else:
+            await cb(filename)
+        return True
 
     async def toggle_play(self):
         if self.editor.implot_playhead_start_time:
             await self.editor.playhead_pause()
         else:
             await self.editor.playhead_start()
+        return True
 
     async def view_zoom_in(self):
         await self.editor.zoom_change(0.25)
+        return True
 
     async def view_zoom_out(self):
         await self.editor.zoom_change(-0.25)
+        return True
 
     async def view_zoom_selection(self):
         await self.editor.zoom_to_selection()
+        return True
 
     async def view_playhead(self):
         await self.editor.playhead_center_view()
+        return True
 
     async def playhead_home(self):
         await self.editor.playhead_move(0)
+        return True
 
     async def playhead_end(self):
         await self.editor.playhead_move(self.editor.implot_total_time - 0.001)
+        return True
 
     async def playhead_loop_selection(self):
         await self.editor.playhead_loop_selection()
+        return True
 
     async def select_all(self):
         await self.editor.playhead_set_selection(
             0, self.editor.implot_total_time
         )
+        return True
 
     def select_none(self):
         self.editor.implot_selection = None
+        return True
 
     async def cut(self):
         await self.editor.clipboard_cut()
+        return True
 
     async def copy(self):
         await self.editor.clipboard_copy()
+        return True
 
     async def paste(self):
         await self.editor.clipboard_paste()
+        return True
 
     async def clear(self):
         await self.editor.clipboard_clear()
+        return True
 
     async def delete(self):
         await self.editor.clipboard_delete()
+        return True
 
     async def apply_effect(self, filename):
         await self.editor.fx_open_patch(filename)
+        return True
 
     async def effect_custom(self, filename=None):
         async def cb(fname):
@@ -203,3 +270,4 @@ class BufferEditMode (InputMode):
             )
         else:
             await cb(filename)
+        return True

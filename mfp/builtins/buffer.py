@@ -260,6 +260,9 @@ class Buffer(Processor):
             self.file_name = incoming
             await self._init_file_read()
         elif isinstance(incoming, dict):
+            if "gui_notify" in incoming:
+                self.gui_notify = incoming.pop("gui_notify")
+
             prms = {}
             for k, v in incoming.items():
                 if k == "size":
