@@ -40,6 +40,8 @@ class BufferEditor:
         self.implot_playhead_looping = False
         self.implot_total_time = 0
 
+        self.all_buffers = [] 
+
         self.shm_obj = None                  # primary (original) buffer
         self.buffer_source_info = None
         self.buffer_info = None

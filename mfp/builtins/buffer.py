@@ -258,6 +258,7 @@ class Buffer(Processor):
             await self.dsp_obj.setparam("rec_enabled", 0)
         elif isinstance(incoming, str):
             self.file_name = incoming
+            log.debug(f"[buffer] reading {incoming}")
             await self._init_file_read()
         elif isinstance(incoming, dict):
             if "gui_notify" in incoming:

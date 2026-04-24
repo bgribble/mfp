@@ -110,6 +110,9 @@ mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int
     GArray * prev_inlets = p->inlet_conn;
     GArray * prev_outlets = p->outlet_conn;
 
+    /* free the input/output buffers */
+    mfp_proc_free_buffers(p);
+
     /* create inlet and outlet processor pointer arrays */
     p->inlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_inlets);
 
@@ -124,7 +127,7 @@ mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int
         }
     }
 
-    /* free remaining ovld connections that got lost in the resize */
+    /* free remaining old connections that got lost in the resize */
     if (prev_num_inlets > num_inlets) {
         for (count=prev_num_inlets; count < num_inlets; count++) {
             g_array_free(g_array_index(p->inlet_conn, GArray *, count), true);
@@ -152,9 +155,6 @@ mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int
         }
     }
     g_array_free(prev_outlets, true);
-
-    /* free the input/output buffers */
-    mfp_proc_free_buffers(p);
 
     /* create input and output buffers (will be reallocated if blocksize changes */
     p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));

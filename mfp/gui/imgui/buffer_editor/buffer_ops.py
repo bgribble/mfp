@@ -20,28 +20,31 @@ from .buffer_editor import BufferEditor
 ########################################
 # buffer operations
 @extends(BufferEditor)
-def buffer_grab(self, shm_obj=None):
-    def offset(channel):
-        return channel * self.buffer_info.size * self.FLOAT_SIZE
+def buffer_grab(self, shm_obj=None, buffer_info=None):
+    if buffer_info is None:
+        buffer_info = self.buffer_info
 
-    if self.buffer_info is None:
+    def offset(channel):
+        return channel * buffer_info.size * self.FLOAT_SIZE
+
+    if buffer_info is None:
         return None
 
     if shm_obj is None:
         if self.shm_obj is None:
-            self.shm_obj = SharedMemory(self.buffer_info.buf_id)
+            self.shm_obj = SharedMemory(buffer_info.buf_id)
         shm_obj = self.shm_obj
 
     self.buffer_data = []
-    self.channel_selections = [None] * (self.buffer_info.channels + 1)
-    self.channel_selections_active = [False] * (self.buffer_info.channels + 1)
+    self.channel_selections = [None] * (buffer_info.channels + 1)
+    self.channel_selections_active = [False] * (buffer_info.channels + 1)
     self.implot_limits = None
-    self.implot_limits_need_set = [None] * (self.buffer_info.channels + 1)
+    self.implot_limits_need_set = [None] * (buffer_info.channels + 1)
 
     try:
-        for c in range(self.buffer_info.channels):
+        for c in range(buffer_info.channels):
             os.lseek(shm_obj.fd, offset(c), os.SEEK_SET)
-            slc = os.read(shm_obj.fd, int(self.buffer_info.size * self.FLOAT_SIZE))
+            slc = os.read(shm_obj.fd, int(buffer_info.size * self.FLOAT_SIZE))
             self.buffer_data.append(np.fromstring(slc, dtype=np.float32))
     except Exception as e:
         log.debug("[grab]: error grabbing data", e)
@@ -218,6 +221,7 @@ async def buffer_reshape(self, buffer_proc_id, **params):
     new_buf = []
 
     async def buf_ready(target, signal, bufdata):
+        log.debug(f"[reshape] got {bufdata}")
         new_buf.append(BufferInfo(**bufdata))
         event.set()
         return False
@@ -255,9 +259,45 @@ async def buffer_apply(self):
     self.buffer_sync(None, None, buf_obj, buf_info)
     return True
 
+
 @extends(BufferEditor)
 async def buffer_import(self, filename):
-    pass
+    event = asyncio.Event()
+    handler_id = []
+
+    async def buf_ready(target, signal, bufdata):
+        self.buffer_data = None
+        self.buffer_selected = BufferInfo(**bufdata)
+        self.working_buf_id = bufdata.get("buf_id")
+        self.working_buf_obj = SharedMemory(self.working_buf_id)
+        self.buffer_grab(self.working_buf_obj, self.buffer_selected)
+        self.app_window.signal_unlisten(handler_id[0])
+        new_chan = self.buffer_selected.channels + 2
+        new_size = self.buffer_selected.size / (self.buffer_info.rate / 1000.0)
+        working_buf = await self.buffer_reshape(
+            self.working_source_id,
+            channels=new_chan, 
+            size=new_size
+        )
+        self.working_buf_id = working_buf.buf_id
+        self.working_buf_obj = SharedMemory(self.working_buf_id)
+        self.working_buf_info = working_buf
+
+        await self.buffer_reshape(
+            self.working_sink_id,
+            buf_id=self.working_buf_id,
+            channels=new_chan, 
+            size=new_size
+        )
+        self.buffer_sync(None, None, self.working_buf_obj, working_buf)
+        event.set()
+        return False
+
+    handler_id.append(self.app_window.signal_listen("buffer_ready", buf_ready))
+    await MFPGUI().mfp.send(
+        self.working_source_id, 0, filename
+    )
+    await asyncio.wait_for(event.wait(), 5)
 
 
 @extends(BufferEditor)
