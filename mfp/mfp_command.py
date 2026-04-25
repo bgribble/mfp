@@ -198,7 +198,6 @@ class MFPCommand:
         response = []
         for shm_id, buf in Buffer.registry.items():
             response.append(dict(
-                file_name=buf.file_name,
                 proc_name=buf.name,
                 proc_id=buf.obj_id,
                 buf_info=BufferInfo(
@@ -206,7 +205,8 @@ class MFPCommand:
                     size=buf.size,
                     channels=buf.channels,
                     offset=buf.buf_offset,
-                    rate=buf.rate
+                    rate=buf.rate,
+                    file_name=buf.file_name,
                 )
             ))
         return response

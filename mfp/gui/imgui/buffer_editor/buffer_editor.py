@@ -324,12 +324,15 @@ class BufferEditor:
         xpos, ypos = imgui.get_window_pos()
         imgui.set_next_window_pos((xpos, ypos + toolbar_height))
 
-        binfo = self.buffer_source_info
-        fname = binfo.get('file_name') or 'No file'
-        ttime = self.buffer_info.size / self.buffer_info.rate
-        display_name = f"{binfo.get('proc_name')} ({fname}) channels={self.buffer_info.channels}"
+        source_info = self.working_source_info or self.buffer_source_info
+        binfo = self.working_buf_info or self.buffer_info
+        fname = binfo.file_name or 'No file'
+        #log.debug(f"[render] binfo={binfo}")
+        frames = binfo.size
+        ttime = frames / self.buffer_info.rate
+        display_name = f"{source_info.get('name')} ({fname}) channels={self.buffer_info.channels}"
         imgui.begin(
-            f"{display_name} time={ttime:.1f}s frames={self.buffer_info.size}##channelsview",
+            f"{display_name} time={ttime:.1f}s frames={frames}##channelsview",
             flags=(
                 imgui.WindowFlags_.no_collapse
                 | imgui.WindowFlags_.no_resize

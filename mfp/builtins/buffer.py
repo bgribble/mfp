@@ -206,7 +206,8 @@ class Buffer(Processor):
                 size=self.size,
                 channels=self.channels,
                 rate=self.rate,
-                offset=self.buf_offset
+                offset=self.buf_offset,
+                file_name=self.file_name
             )
             self.outlets[-1] = BufferInfo(**buffer_data)
             if self.file_ready:
@@ -258,11 +259,12 @@ class Buffer(Processor):
             await self.dsp_obj.setparam("rec_enabled", 0)
         elif isinstance(incoming, str):
             self.file_name = incoming
-            log.debug(f"[buffer] reading {incoming}")
             await self._init_file_read()
         elif isinstance(incoming, dict):
             if "gui_notify" in incoming:
                 self.gui_notify = incoming.pop("gui_notify")
+            if "file_name" in incoming:
+                self.file_name = incoming.pop("file_name")
 
             prms = {}
             for k, v in incoming.items():

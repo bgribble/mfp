@@ -41,7 +41,7 @@ def render_bufedit_menu(app_window):
             imgui.push_id(str(id(buffer_info)))
             imgui.dummy(app_window.scaled(1, 1))
             imgui.same_line()
-            display_name = f"{buffer_info.get('proc_name')} ({buffer_info.get('file_name') or 'No file'})"
+            display_name = f"{buffer_info.get('proc_name')} ({buffer_info.get('buf_info').file_name or 'No file'})"
             buffer_selected, _ = imgui.menu_item(
                 display_name,
                 '',

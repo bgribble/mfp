@@ -221,7 +221,6 @@ async def buffer_reshape(self, buffer_proc_id, **params):
     new_buf = []
 
     async def buf_ready(target, signal, bufdata):
-        log.debug(f"[reshape] got {bufdata}")
         new_buf.append(BufferInfo(**bufdata))
         event.set()
         return False
@@ -250,7 +249,8 @@ async def buffer_apply(self):
         channels=self.buffer_info.channels,
         size=bufsize,
         region_start=0,
-        region_end=len(self.buffer_data[0])
+        region_end=len(self.buffer_data[0]),
+        file_name=self.working_buf_info.filename
     )
 
     buf_id = buf_info.buf_id
@@ -277,7 +277,8 @@ async def buffer_import(self, filename):
         working_buf = await self.buffer_reshape(
             self.working_source_id,
             channels=new_chan, 
-            size=new_size
+            size=new_size,
+            file_name=filename,
         )
         self.working_buf_id = working_buf.buf_id
         self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -287,7 +288,8 @@ async def buffer_import(self, filename):
             self.working_sink_id,
             buf_id=self.working_buf_id,
             channels=new_chan, 
-            size=new_size
+            size=new_size,
+            file_name=filename,
         )
         self.buffer_sync(None, None, self.working_buf_obj, working_buf)
         event.set()

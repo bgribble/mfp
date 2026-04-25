@@ -47,9 +47,13 @@ async def init_working_patch(self):
             await asyncio.sleep(0.1)
 
     source_buf = source.get("buf_info")
+    source_buf.file_name = self.buffer_info.file_name
+    self.working_source_info['name'] = self.buffer_source_info['proc_name']
+
     self.working_buf_id = source_buf.buf_id
     self.working_buf_obj = SharedMemory(source_buf.buf_id)
     self.working_buf_info = source_buf
+
     buffer_params["buf_id"] = source_buf.buf_id
     buffer_params["channels"] = source_buf.channels
     buffer_params["size"] = source_buf.size
