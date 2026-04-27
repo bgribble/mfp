@@ -159,7 +159,7 @@ class BufferEditor:
         if imgui.image_button(
             "##stop_btn", imgui.ImTextureRef(stop_tex[0]), [button_size, button_size]
         ):
-            MFPGUI().async_task(self.playhead_pause())
+            MFPGUI().async_task(self.playhead_pause(0))
         imgui.same_line()
 
         if imgui.image_button(
@@ -389,6 +389,10 @@ class BufferEditor:
                         self.implot_playhead_start_pos + playhead_offset
                     )
 
+                if self.implot_playhead > self.implot_total_time:
+                    self.implot_playhead_start_time = None
+                    self.implot_playhead_looping = False
+
             for channel in range(num_channels + 1):
                 imgui.push_id(str(channel))
                 if channel == 0:
@@ -608,7 +612,7 @@ class BufferEditor:
             self.implot_playhead_start_time = datetime.now()
             self.implot_playhead_start_pos = self.implot_playhead
 
-    async def playhead_pause(self):
+    async def playhead_pause(self, new_pos=None):
         from mfp.gui_main import MFPGUI
         buffer_params = dict(
             buf_state=0,
@@ -620,6 +624,9 @@ class BufferEditor:
 
         self.implot_playhead_start_time = None
         self.implot_playhead_looping = False
+
+        if new_pos is not None:
+            await self.playhead_move(new_pos)
 
     async def playhead_set_selection(self, sel_start, sel_end):
         if not self.implot_selection:
