@@ -40,7 +40,7 @@ class BufferEditor:
         self.implot_playhead_looping = False
         self.implot_total_time = 0
 
-        self.all_buffers = [] 
+        self.all_buffers = []
 
         self.shm_obj = None                  # primary (original) buffer
         self.buffer_source_info = None
@@ -90,17 +90,17 @@ class BufferEditor:
         imgui.set_next_window_size((self.app_window.window_width, 2 * button_size))
         imgui.set_next_window_pos(imgui.get_window_pos())
 
-        play_tex = image_utils.load_texture_from_file("icons/media-playback-start.png")
-        pause_tex = image_utils.load_texture_from_file("icons/media-playback-pause.png")
-        stop_tex = image_utils.load_texture_from_file("icons/media-playback-stop.png")
-        home_tex = image_utils.load_texture_from_file("icons/media-skip-backward.png")
-        end_tex = image_utils.load_texture_from_file("icons/media-skip-forward.png")
-        record_tex = image_utils.load_texture_from_file("icons/media-record.png")
-        loop_tex = image_utils.load_texture_from_file("icons/view-refresh.png")
+        play_tex = image_utils.load_texture_from_file("icons/playback-start.png")
+        pause_tex = image_utils.load_texture_from_file("icons/playback-pause.png")
+        stop_tex = image_utils.load_texture_from_file("icons/playback-stop.png")
+        home_tex = image_utils.load_texture_from_file("icons/rewind.png")
+        end_tex = image_utils.load_texture_from_file("icons/fast-forward.png")
+        record_tex = image_utils.load_texture_from_file("icons/record.png")
+        loop_tex = image_utils.load_texture_from_file("icons/playback-loop.png")
         menu_tex = image_utils.load_texture_from_file("icons/open-menu.png")
         zoom_in_tex = image_utils.load_texture_from_file("icons/zoom-in.png")
         zoom_out_tex = image_utils.load_texture_from_file("icons/zoom-out.png")
-        zoom_fit_tex = image_utils.load_texture_from_file("icons/zoom-fit-best.png")
+        zoom_fit_tex = image_utils.load_texture_from_file("icons/zoom-to-selection.png")
         center_playhead_tex = image_utils.load_texture_from_file("icons/center-playhead.png")
 
         imgui.begin(
@@ -121,19 +121,39 @@ class BufferEditor:
 
         imgui.set_cursor_pos(padding)
 
+        imgui.push_style_color(
+            imgui.Col_.button, [0.75, 0.75, 0.75, 1]
+        )
+        imgui.push_style_color(
+            imgui.Col_.button_hovered, [0.9, 0.9, 0.9, 1]
+        )
+        imgui.push_style_color(
+            imgui.Col_.button_active, [1, 1, 1, 1]
+        )
+
         #######################
         # transport control
-
         if imgui.image_button(
-            "##pause_btn", imgui.ImTextureRef(pause_tex[0]), [button_size, button_size]
+            "##pause_btn", imgui.ImTextureRef(pause_tex[0]),
+            [button_size, button_size]
         ):
             MFPGUI().async_task(self.playhead_pause())
         imgui.same_line()
 
+        if self.implot_playhead_start_time:
+            imgui.push_style_color(
+                imgui.Col_.button, [0.6, 0.75, 0.6, 1]
+            )
+            imgui.push_style_color(
+                imgui.Col_.button_hovered, [0.7, 0.9, 0.7, 1]
+            )
         if imgui.image_button(
             "##play_btn", imgui.ImTextureRef(play_tex[0]), [button_size, button_size]
         ):
             MFPGUI().async_task(self.playhead_start())
+        if self.implot_playhead_start_time:
+            imgui.pop_style_color(2)
+
         imgui.same_line()
 
         if imgui.image_button(
@@ -215,7 +235,7 @@ class BufferEditor:
         ):
             MFPGUI().async_task(self.playhead_center_view())
         if imgui.is_item_hovered():
-            imgui.set_tooltip("Jump to playhead")
+            imgui.set_tooltip("Center playhead")
         imgui.same_line()
 
         imgui.dummy((button_size, 1))
@@ -301,6 +321,7 @@ class BufferEditor:
         ):
             imgui.open_popup("##bufedit_popup")
 
+        imgui.pop_style_color(3)
         imgui.pop_style_var(2)
         menu_button.render_bufedit_menu(self.app_window)
         imgui.end()
