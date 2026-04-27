@@ -163,7 +163,7 @@ def buffer_set_selection(self):
     working_buf_info = BufferInfo(
         buf_id=self.working_buf_id,
         size=self.buffer_info.size,
-        channels=self.buffer_info.channels + 2,
+        channels=self.buffer_info.channels + 3,
         rate=self.buffer_info.rate,
         offset=self.buffer_info.offset
     )
@@ -181,7 +181,7 @@ def buffer_set_selection(self):
     input_arr = np.zeros(self.buffer_info.size, dtype=np.float32)
     input_arr[startpos:endpos] = 1
     self.buffer_sync_channel(
-        self.buffer_info.channels, None, None, self.working_buf_obj, working_buf_info,
+        self.buffer_info.channels + 1, None, None, self.working_buf_obj, working_buf_info,
         data=input_arr
     )
 
@@ -206,7 +206,7 @@ def buffer_set_selection(self):
     xfade_arr[outramp_start:outramp_end] = np.linspace(1, 0, ramp_len, dtype=np.float32)
 
     self.buffer_sync_channel(
-        self.buffer_info.channels + 1, None, None, self.working_buf_obj, working_buf_info,
+        self.buffer_info.channels + 2, None, None, self.working_buf_obj, working_buf_info,
         data=xfade_arr
     )
 

@@ -354,6 +354,9 @@ class MFPCommand:
     async def freewheel(self, obj_id, num_frames):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
+        if not obj:
+            log.error(f"[freewheel] can't freewheel for obj_id={obj_id}, object not found")
+            return None
         await obj.dsp_obj.freewheel(num_frames)
 
     def open_patches(self):

@@ -4,6 +4,7 @@ buffer_editor/fx_patch.py -- set up and teardown the internal FX patch
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 
+import asyncio
 from mfp import log
 from mfp.utils import extends
 from .buffer_editor import BufferEditor
@@ -53,7 +54,7 @@ async def fx_open_patch(self, fxname):
     # connect input level and xfade
     for port in [0, 1]:
         await MFPGUI().mfp.connect(
-            self.working_source_id, self.buffer_info.channels + port,
+            self.working_source_id, self.buffer_info.channels + port + 1,
             self.fx_patch_id, port
         )
 
@@ -63,6 +64,13 @@ async def fx_open_patch(self, fxname):
     ]:
         element_id = await MFPGUI().mfp.resolve(element, self.fx_patch_id)
         self.fx_patch_elements[element] = MFPGUI().objects.get(element_id)
+
+    # if there's a selection, default to "Selection only"
+    if self.implot_selection:
+        sel_toggle = self.fx_patch_elements.get('selection_toggle')
+        await MFPGUI().mfp.send(
+            sel_toggle.obj_id, 0, True
+        )
 
     # add actions for Apply and Cancel buttons
     cancel = self.fx_patch_elements["cancel_button"]
@@ -80,32 +88,41 @@ async def fx_apply_patch(self):
     )
 
     source_params = dict(
-        buf_mode=5,
+        buf_mode=7,
         play_channels=0xff,
         buf_pos=0,
         region_start=0,
         region_end=self.buffer_info.size,
-        trig_trigger=1,
+        trig_chan=self.buffer_info.channels,
     )
     sink_params = dict(
-        buf_mode=0,
+        buf_mode=3,
         play_channels=0,
         rec_channels=rec_channels,
         rec_enabled=1,
         buf_pos=0,
         region_start=0,
         region_end=self.buffer_info.size,
-        trig_trigger=1,
+        trig_chan=self.buffer_info.channels,
     )
 
-    def fw_handler(target, signal, status):
+    handler_id = []
+    async def fw_handler(target, signal, status):
         if status == 0:
-            log.debug(f"[bufedit] re-grabbing data from {self.working_buf_obj}")
+            MFPGUI().appwin.signal_unlisten(handler_id[0])
             self.buffer_grab(self.working_buf_obj)
+            await MFPGUI().mfp.send(self.working_trigger_id, 0, 0)
+            log.debug(f"[freewheel] done freewheeling")
 
-    MFPGUI().appwin.signal_listen("freewheel", fw_handler)
+    handler_id.append(MFPGUI().appwin.signal_listen("freewheel", fw_handler))
+
     await MFPGUI().mfp.send(self.working_source_id, 0, source_params)
     await MFPGUI().mfp.send(self.working_sink_id, 0, sink_params)
+
+    # sleep a bit to make sure params hit
+    await asyncio.sleep(0.1)
+    await MFPGUI().mfp.send(self.working_trigger_id, 0, 1)
+    log.debug(f"[freewheel] freewheeling for {self.buffer_info.size} frames")
     await MFPGUI().mfp.freewheel(self.working_sink_id, self.buffer_info.size)
 
 

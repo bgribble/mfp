@@ -13,10 +13,13 @@ class BufferEditMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
         self.window = window
-        self.editor = window.buffer_editor
         self.mouse_down_pos = None
 
         InputMode.__init__(self, "Edit buffer", "Buffer")
+
+    @property
+    def editor(self):
+        return self.window.buffer_editor
 
     @classmethod
     def init_bindings(cls):

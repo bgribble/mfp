@@ -58,7 +58,7 @@ class ClickableControlMode (InputMode):
 
     async def quick_click(self):
         self.clickstate = True
-        if hasattr(self.widget, 'extra_action') and self.extra_action:
+        if hasattr(self.widget, 'extra_action') and self.widget.extra_action:
             await self.widget.extra_action()
         await self.widget.clicked()
         self.clickstate = False

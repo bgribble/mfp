@@ -140,7 +140,7 @@ init(mfp_processor * proc)
     d->trig_debounce = 20;
     d->trig_xfade = 20;
     d->trig_op = TRIG_GT;
-    d->trig_thresh = 0.0;
+    d->trig_thresh = 0.1;
 
     d->rec_enabled = 0;
     d->rec_channels = 0;

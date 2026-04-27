@@ -465,7 +465,8 @@ class Patch(Processor):
                 for srcport, connections in enumerate(obj.connections_out):
                     for dstobj, dstport in connections:
                         if (
-                            obj.display_type not in (
+                            dstobj.gui_created
+                            and obj.display_type not in (
                                 "hidden", "sendvia", "sendsignalvia"
                             )
                             and dstobj.display_type not in (

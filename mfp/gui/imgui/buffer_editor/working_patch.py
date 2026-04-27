@@ -14,6 +14,22 @@ from .buffer_editor import BufferEditor
 
 @extends(BufferEditor)
 async def init_working_patch(self):
+    """
+    The working patch has 2 buffer~ objects that are the source and
+    sink for FX chains, sharing the same underlying working shm buffer.
+
+    They are different numbers of channels, which is ugly but should work.
+
+    * the first N channels of each are the equivalent channels of the original
+    buffer
+
+    * the next channel is the trigger channel, same for both buffer~, which should
+    never be recorded to (it's just used as a live input)
+
+    * the source buffer has 2 more channels: the input level and xfade level.
+    These are not recorded from the inputs but are just written to through the
+    shared memory from Python and played from the source buffer to the FX chain.
+    """
     from mfp.gui_main import MFPGUI
     if self.working_patch_id:
         await self.close_working_patch()
@@ -23,7 +39,8 @@ async def init_working_patch(self):
         self.working_patch_id, details=True
     )
     buffer_params = dict(
-        channels=self.buffer_info.channels + 2,
+        channels=self.buffer_info.channels + 3,
+        trig_chan=self.buffer_info.channels,
         size=self.buffer_info.size,
         gui_notify=True,
     )
@@ -55,7 +72,7 @@ async def init_working_patch(self):
     self.working_buf_info = source_buf
 
     buffer_params["buf_id"] = source_buf.buf_id
-    buffer_params["channels"] = source_buf.channels
+    buffer_params["channels"] = source_buf.channels + 1
     buffer_params["size"] = source_buf.size
 
     self.working_sink_info = await MFPGUI().mfp.create(
@@ -73,8 +90,26 @@ async def init_working_patch(self):
     self.working_aud1_info = await MFPGUI().mfp.create(
         "out~", "1", self.working_patch_info.get("name"), None, "audition 1"
     )
-    await MFPGUI().mfp.connect(self.working_sink_id, 0, self.working_aud0_info.get("obj_id"), 0)
-    await MFPGUI().mfp.connect(self.working_sink_id, 1, self.working_aud1_info.get("obj_id"), 0)
+
+    # connect a sig~ to the source and sink triggers for synchronization
+    self.working_trigger_info = await MFPGUI().mfp.create(
+        "sig~", "0", self.working_patch_info.get("name"), None, "buffer trigger"
+    )
+    self.working_trigger_id = self.working_trigger_info.get("obj_id")
+    await MFPGUI().mfp.connect(
+        self.working_trigger_id, 0,
+        self.working_source_id, self.buffer_info.channels,
+    )
+    await MFPGUI().mfp.connect(
+        self.working_trigger_id, 0,
+        self.working_sink_id, self.buffer_info.channels,
+    )
+
+    for port in range(self.buffer_info.channels):
+        if port % 2 == 0:
+            await MFPGUI().mfp.connect(self.working_sink_id, port, self.working_aud0_info.get("obj_id"), 0)
+        else:
+            await MFPGUI().mfp.connect(self.working_sink_id, port, self.working_aud1_info.get("obj_id"), 0)
 
     self.buffer_sync(self.shm_obj, self.buffer_info, self.working_buf_obj, source_buf)
     self.buffer_compute_peaks()
@@ -83,6 +118,8 @@ async def init_working_patch(self):
 @extends(BufferEditor)
 async def close_working_patch(self):
     from mfp.gui_main import MFPGUI
+
+    # FIXME delete shared mem segment
 
     if self.working_patch_id:
         await MFPGUI().mfp.delete(self.working_patch_id)

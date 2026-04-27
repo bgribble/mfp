@@ -801,6 +801,7 @@ class Processor:
             existing.append((self, outlet))
         if (
             self.gui_created
+            and target.gui_created
             and show_gui
             and self.display_type not in (
                 "hidden", "sendvia", "sendsignalvia"
@@ -836,6 +837,7 @@ class Processor:
             existing.remove((self, outlet))
         if (
             self.gui_created
+            and target.gui_created
             and target.display_type not in (
                 "hidden", "sendvia", "sendsignalvia"
             ) and self.display_type not in (

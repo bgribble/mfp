@@ -274,7 +274,6 @@ class AppWindow (SignalMixin):
         self.signal_listen('freewheel', self.freewheel_handler)
 
     def freewheel_handler(self, target, signal, status):
-        log.debug(f"[freewheel] Got signal {signal} {status}")
         self.freewheel_in_progress = status
 
     def get_color(self, colorspec):
