@@ -13,17 +13,17 @@ typedef struct {
     float peak_decay_ms;
     float rms_window_ms;
 
-    /* runtime state */ 
+    /* runtime state */
     mfp_block * rms_buffer;
     mfp_block * rms_alloc;
-    int       rms_alloc_ready; 
+    int       rms_alloc_ready;
     int       rms_pointer;
     double    last_peak;
     double    rms_accum;
 } builtin_ampl_data;
 
-static int 
-process_ampl(mfp_processor * proc) 
+static int
+process_ampl(mfp_processor * proc)
 {
     builtin_ampl_data * pdata = (builtin_ampl_data *)proc->data;
     mfp_sample * in_sample = proc->inlet_buf[0]->data;
@@ -32,18 +32,18 @@ process_ampl(mfp_processor * proc)
     mfp_sample * rms_buffer = pdata->rms_buffer->data + pdata->rms_pointer;
     mfp_sample * rms_bufend = pdata->rms_buffer->data + pdata->rms_buffer->blocksize;
     mfp_sample sample;
-    double peak_slope = 1000.0/((double)pdata->peak_decay_ms * 
+    double peak_slope = 1000.0/((double)pdata->peak_decay_ms *
                                 (double)(proc->context->samplerate));
     double peak = pdata->last_peak;
     double rms_accum = pdata->rms_accum;
     double rms_scale = 1.0 / (pdata->rms_buffer->blocksize);
     double sqr_sample;
-    int scount; 
+    int scount;
 
     if ((in_sample == NULL) || (rms_sample == NULL) || (peak_sample == NULL)) {
         return 0;
     }
-    
+
     for(scount = 0; scount < proc->context->blocksize; scount++) {
         sample = *in_sample++;
 
@@ -56,16 +56,16 @@ process_ampl(mfp_processor * proc)
         }
         *peak_sample++ = (float)peak;
 
-        /* rms (not really, this is super ghetto) */
+        /* rms */
         sqr_sample = sample * sample;
         rms_accum = rms_accum + sqr_sample - *rms_buffer;
-        *rms_buffer++ = sqr_sample; 
+        *rms_buffer++ = sqr_sample;
         if (rms_accum < 0) {
             rms_accum = 0.0;
         }
 
-        *rms_sample++ = (mfp_sample)sqrt(rms_accum * rms_scale); 
-        pdata->rms_pointer ++;             
+        *rms_sample++ = (mfp_sample)sqrt(rms_accum * rms_scale);
+        pdata->rms_pointer ++;
 
         if(rms_buffer >= rms_bufend) {
             rms_buffer = pdata->rms_buffer->data;
@@ -81,25 +81,27 @@ process_ampl(mfp_processor * proc)
     return 0;
 }
 
-static void 
-init(mfp_processor * proc) 
+static void
+init(mfp_processor * proc)
 {
     builtin_ampl_data * p = g_malloc(sizeof(builtin_ampl_data));
     proc->data = p;
-    p->peak_decay_ms = 200;
+    p->peak_decay_ms = 500;
     p->last_peak = 0.0;
-    p->rms_window_ms = 20;
-    p->rms_buffer = mfp_block_new((int)(20 * proc->context->samplerate / 1000.0));
-    p->rms_alloc = mfp_block_new((int)(20 * proc->context->samplerate / 1000.0));
+    p->rms_window_ms = 125;
+    p->rms_buffer = mfp_block_new((int)(125 * proc->context->samplerate / 1000.0));
+    p->rms_alloc = mfp_block_new((int)(125 * proc->context->samplerate / 1000.0));
     p->rms_alloc_ready = ALLOC_IDLE;
     p->rms_accum = 0.0;
     p->rms_pointer = 0;
 
+    mfp_block_zero(p->rms_buffer);
+    mfp_block_zero(p->rms_alloc);
     return;
 }
 
 static void
-destroy(mfp_processor * proc) 
+destroy(mfp_processor * proc)
 {
     if (proc->data != NULL) {
         g_free(proc->data);
@@ -117,13 +119,13 @@ alloc(mfp_processor * proc, void * alloc_data)
 
 
 static int
-config(mfp_processor * proc) 
+config(mfp_processor * proc)
 {
     builtin_ampl_data * pdata = (builtin_ampl_data *)proc->data;
     gpointer peak_decay_ptr = g_hash_table_lookup(proc->params, "peak_decay");
     gpointer rms_window_ptr = g_hash_table_lookup(proc->params, "rms_window");
     mfp_block * tmp;
-    float rms_window; 
+    float rms_window;
     int rms_samples;
     int config_handled = 1;
 
@@ -138,13 +140,13 @@ config(mfp_processor * proc)
             mfp_block_resize(pdata->rms_buffer, rms_samples);
             pdata->rms_accum = 0.0;
             pdata->rms_pointer = 0;
-            pdata->rms_window_ms = rms_window; 
+            pdata->rms_window_ms = rms_window;
         }
         else if (rms_samples > pdata->rms_buffer->allocsize) {
             if (pdata->rms_alloc_ready == ALLOC_READY) {
                 tmp = pdata->rms_buffer;
                 pdata->rms_buffer = pdata->rms_alloc;
-                pdata->rms_alloc = tmp; 
+                pdata->rms_alloc = tmp;
                 pdata->rms_accum = 0.0;
                 pdata->rms_window_ms = rms_window;
                 pdata->rms_pointer = 0;
@@ -165,7 +167,7 @@ config(mfp_processor * proc)
     return config_handled;
 }
 
-mfp_procinfo *  
+mfp_procinfo *
 init_builtin_ampl(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
 

@@ -1,10 +1,14 @@
 """
 buffer_editor.py -- BufferEditor() class definition
 """
+import asyncio
+import os
+import math
 from datetime import datetime
 from imgui_bundle import implot, imgui
+import numpy as np
 from mfp import log
-
+from mfp.gui.colordb import RGBAColor
 
 def fmt_time(ttime):
     minutes = int(ttime // 60)
@@ -57,6 +61,9 @@ class BufferEditor:
         self.working_source_info = None
         self.working_sink_id = None
         self.working_sink_info = None
+        self.working_ampl_buf_id = None
+        self.working_ampl_buf_obj = None
+        self.working_ampl_buf_info = None
 
         self.fx_patch_id = None
         self.fx_patch_elements = {}
@@ -348,7 +355,16 @@ class BufferEditor:
         source_info = self.working_source_info or self.buffer_source_info
         binfo = self.working_buf_info or self.buffer_info
         fname = binfo.file_name or 'No file'
-        #log.debug(f"[render] binfo={binfo}")
+
+        channel_ampls = [0] * (4 * self.buffer_info.channels)
+        if self.working_ampl_buf_obj:
+            os.lseek(self.working_ampl_buf_obj.fd, 0, os.SEEK_SET)
+            slc = os.read(
+                self.working_ampl_buf_obj.fd,
+                int(self.working_ampl_buf_info.channels * self.FLOAT_SIZE)
+            )
+            channel_ampls = [float(f) for f in np.fromstring(slc, dtype=np.float32)]
+
         frames = binfo.size
         ttime = frames / self.buffer_info.rate
         display_name = f"{source_info.get('name')} ({fname}) channels={self.buffer_info.channels}"
@@ -394,6 +410,8 @@ class BufferEditor:
                     self.implot_playhead_looping = False
 
             for channel in range(num_channels + 1):
+                channel_tool_width = 100
+
                 imgui.push_id(str(channel))
                 if channel == 0:
                     height = line_height * 4
@@ -404,7 +422,30 @@ class BufferEditor:
                     height = line_height * 6
                     plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
                     x_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
-                    y_axis_flags = implot.AxisFlags_.no_label
+                    y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
+
+                if channel == 0:
+                    imgui.dummy([channel_tool_width, height])
+                    imgui.same_line()
+                else:
+                    imgui.begin_group()
+                    imgui.dummy([1, height-1])
+                    imgui.same_line()
+                    achan = 4*(channel-1)
+                    self.render_meter_bar(
+                        height, channel_ampls[achan], channel_ampls[achan+1]
+                    )
+                    imgui.same_line()
+                    imgui.dummy([3, 1])
+                    imgui.same_line()
+                    self.render_meter_bar(
+                        height, channel_ampls[achan + 2], channel_ampls[achan + 3]
+                    )
+                    imgui.end_group()
+                    spacer = channel_tool_width - imgui.get_item_rect_size()[0]
+                    imgui.same_line()
+                    imgui.dummy([spacer, 1])
+                    imgui.same_line()
 
                 if implot.begin_plot(
                     "##buf_edit_plot",
@@ -499,6 +540,43 @@ class BufferEditor:
             implot.end_aligned_plots()
         imgui.end()
 
+    def render_meter_bar(self, height, rms_value, peak_value):
+        imgui.begin_group()
+        imgui.dummy([10, 1])
+        imgui.dummy([1, height-1])
+        imgui.end_group()
+        top_left = imgui.get_item_rect_min()
+        bottom_right = imgui.get_item_rect_max()
+        draw_list = imgui.get_window_draw_list()
+
+        meter_max = 0
+        meter_min = -40
+
+        rms_db = min(meter_max, max(meter_min, 20*math.log10(max(0.000001, rms_value))))
+        peak_db = min(meter_max, max(meter_min, 20*math.log10(max(0.000001, peak_value))))
+
+        rms_fraction = (rms_db - meter_min) / (meter_max - meter_min)
+        peak_fraction = (peak_db - meter_min) / (meter_max - meter_min)
+
+        draw_list.add_rect(
+            top_left, bottom_right,
+            imgui.IM_COL32(128, 128, 255, 255),
+            rounding=2,
+            thickness=2,
+        )
+        draw_list.add_rect_filled(
+            [top_left[0], bottom_right[1] - height * rms_fraction],
+            bottom_right,
+            imgui.IM_COL32(255, 255, 255, 255),
+            rounding=2,
+        )
+
+        draw_list.add_rect_filled(
+            [top_left[0], bottom_right[1] - height * peak_fraction - 2],
+            [bottom_right[0], bottom_right[1] - height*peak_fraction + 2],
+            imgui.IM_COL32(255, 0, 0, 255),
+            rounding=2,
+        )
     ########################################
     # render wrapper
     def render(self):
@@ -578,10 +656,9 @@ class BufferEditor:
         pos_samples = self.implot_playhead * self.buffer_info.rate
 
         buffer_params = dict(
-            buf_mode=5,
+            buf_mode=7,
             play_channels=0xff,
             rec_channels=0,
-            rec_enabled=0,
             buf_pos=pos_samples,
             region_start=pos_samples,
             region_end=self.implot_total_time * self.buffer_info.rate
@@ -589,8 +666,9 @@ class BufferEditor:
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
         await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
-        await MFPGUI().mfp.send_bang(self.working_sink_id, 0)
-        await MFPGUI().mfp.send_bang(self.working_source_id, 0)
+
+        await asyncio.sleep(0.2)
+        await MFPGUI().mfp.send(self.working_trigger_id, 0, 1)
 
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead_start_pos = self.implot_playhead
@@ -616,9 +694,9 @@ class BufferEditor:
         from mfp.gui_main import MFPGUI
         buffer_params = dict(
             buf_state=0,
-            rec_enabled=0,
         )
 
+        await MFPGUI().mfp.send(self.working_trigger_id, 0, 0)
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
         await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 

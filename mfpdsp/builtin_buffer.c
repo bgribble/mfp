@@ -85,6 +85,7 @@ typedef struct {
 #define PLAY_BANG 5        /* play buffer once */
 #define PLAY_LOOP 6        /* loop over region */
 #define PLAY_TRIG_THRESH 7 /* When trig_channel crosses trig_thresh, play buffer to end */
+#define REC_CONTINUOUS 8   /* continuously record to buffer */
 
 /* trig_op values */
 #define TRIG_GT 0
@@ -196,7 +197,6 @@ process(mfp_processor * proc)
     int tocopy=0;
     mfp_block * trig_block = NULL;
     mfp_sample * outptr, * inptr, * trigptr;
-    int buf_triggerable = 0;
     int inpos, outpos;
     int loopstart=0;
 
@@ -208,21 +208,6 @@ process(mfp_processor * proc)
 
     if (d->buf_base == NULL) {
         return 0;
-    }
-
-    /* buf_mode will only change in config(), so it's constant
-     * for this block */
-    if (
-        d->buf_mode == REC_TRIG_EXT
-        || d->buf_mode == REC_BANG
-        || d->buf_mode == REC_LOOP
-        || d->buf_mode == REC_LOOPSET
-        || (d->buf_mode == REC_TRIG_THRESH)
-        || (d->buf_mode == PLAY_BANG)
-        || (d->buf_mode == PLAY_LOOP)
-        || (d->buf_mode == PLAY_TRIG_THRESH)
-    ) {
-        buf_triggerable = 1;
     }
 
     /* find the block for the trigger channel, if any */
@@ -264,7 +249,7 @@ process(mfp_processor * proc)
      *    state block
      * 2. Iterate over channels to process between start and end-of-state */
     total_to_proc = proc->inlet_buf[0]->blocksize;
-    while (buf_triggerable && (section_start < total_to_proc)) {
+    while (section_start < total_to_proc) {
         section_size = 0;
 
         /* phase 1 -- find how far the current triggering section runs */
@@ -273,8 +258,8 @@ process(mfp_processor * proc)
         int region_set = (d->region_start != 0) || (d->region_end != 0);
         int overdub = d->rec_overdub;
 
-        if (!region_end) {
-            region_end = d->buf_active.buf_size - 1;
+        if (!region_set && !region_end) {
+            region_end = d->chan_size;
         }
 
         if (trig_block) {
@@ -335,10 +320,10 @@ process(mfp_processor * proc)
                         if (d->buf_mode == REC_LOOPSET) {
                             d->region_end ++;
                         }
-                        else if ((d->buf_mode == REC_LOOP) && (d->buf_read_pos + section_size >= region_end)) {
+                        else if ((d->buf_mode == REC_LOOP) && (d->buf_read_pos + section_size > region_end)) {
                             /* do nothing */
                         }
-                        else if (d->buf_read_pos + section_size >= region_end) {
+                        else if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if (d->trig_triggered_samples >= d->trig_debounce) {
@@ -348,7 +333,7 @@ process(mfp_processor * proc)
                         break;
 
                     case BUF_DEBOUNCED:
-                        if (d->buf_read_pos + section_size >= region_end) {
+                        if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if((d->trig_op == TRIG_GT) && (*trigptr <= d->trig_thresh)) {
@@ -365,7 +350,7 @@ process(mfp_processor * proc)
                         break;
 
                     case BUF_PRE_RETRIGGERED:
-                        if (d->buf_read_pos + section_size >= region_end) {
+                        if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if((d->trig_op == TRIG_GT) && (*trigptr > d->trig_thresh)) {
@@ -381,7 +366,7 @@ process(mfp_processor * proc)
                         break;
 
                     case BUF_XFADE:
-                        if (d->buf_read_pos + section_size >= region_end) {
+                        if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if (d->trig_xfade_samples >= d->trig_xfade) {
@@ -439,6 +424,10 @@ process(mfp_processor * proc)
                         loopstart = 1;
                         section_size = 0;
                     }
+                    else if (d->buf_mode == REC_CONTINUOUS) {
+                        next_state = BUF_TRIGGERED;
+                        section_size = 0;
+                    }
                     break;
 
                 case BUF_TRIGGERED:
@@ -459,21 +448,25 @@ process(mfp_processor * proc)
                          * or the mode is changed */
                         section_size = MIN(
                             section_size,
-                            d->buf_active.buf_size - d->buf_read_pos
+                            d->chan_size - d->buf_read_pos
                         );
                         d->trig_triggered_samples += section_size;
                         d->region_end += section_size;
                     }
-                    else if ((d->buf_mode == REC_LOOP) || (d->buf_mode == PLAY_LOOP)) {
+                    else if (
+                        (d->buf_mode == REC_LOOP)
+                        || (d->buf_mode == PLAY_LOOP)
+                        || (d->buf_mode == REC_CONTINUOUS)
+                    ) {
                         /* start and end should be set, so just stay
                          * in this mode. wraparound happens later. */
                         d->trig_triggered_samples += section_size;
                     }
-                    else if ((d->buf_read_pos + section_size >= MIN(region_end, d->buf_active.buf_size))) {
+                    else if ((d->buf_read_pos + section_size >= MIN(region_end, d->chan_size))) {
                         /* "roll to end and stop" modes running into end */
                         section_size = MIN(
                             section_size,
-                            MIN(region_end, d->buf_active.buf_size) - d->buf_read_pos
+                            MIN(region_end, d->chan_size) - d->buf_read_pos
                         );
                         d->trig_triggered_samples += section_size;
                         next_state = BUF_IDLE;
@@ -514,7 +507,7 @@ process(mfp_processor * proc)
             (section_state == BUF_IDLE)
             || (section_state == BUF_PRETRIGGERED)
         ) {
-            /* ??? */
+            /* do nothing, just move on to next iteration */
         }
         else if (
             (section_state == BUF_TRIGGERED)
@@ -536,14 +529,18 @@ process(mfp_processor * proc)
                 /* if channel is in play set, copy data from buffer to outbuf */
                 if((1 << channel) & d->play_channels) {
                     outptr = proc->outlet_buf[channel]->data;
-                    inptr = (float *)(d->buf_base) + (channel*d->chan_size);
+                    inptr = (mfp_sample *)(d->buf_base) + (channel*d->chan_size);
                     inpos = d->buf_read_pos;
                     for(outpos = section_start; outpos < section_start + section_size; outpos++) {
                         if (inpos < (d->buf_read_pos + buf_fence)) {
                             // normal condition -- playing a region
                             outptr[outpos] = inptr[inpos++];
                         }
-                        else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
+                        else if (
+                            (d->buf_mode == PLAY_LOOP)
+                            || (d->buf_mode == REC_LOOP)
+                            || (d->buf_mode == REC_CONTINUOUS)
+                        ) {
                             // wraparound -- reset inptr to start of region
                             if (d->region_start > region_end) {
                                 inpos = 0;
@@ -567,6 +564,7 @@ process(mfp_processor * proc)
                     outpos = d->buf_write_pos;
                     inptr = proc->inlet_buf[channel]->data;
                     for (inpos = section_start; inpos < section_start + section_size; inpos++) {
+                        /* handle wraparound in buffer */
                         if (outpos < (d->buf_write_pos + buf_fence)) {
                             // do nothing
                         }
@@ -576,6 +574,7 @@ process(mfp_processor * proc)
                         else {
                             outpos = d->region_start;
                         }
+
                         if (overdub) {
                             outptr[outpos++] += inptr[inpos];
                         }
@@ -604,7 +603,7 @@ process(mfp_processor * proc)
                 if((1 << channel) & d->play_channels) {
                     double ramp_gain = ramp_start;
                     outptr = proc->outlet_buf[channel]->data;
-                    inptr = (float *)(d->buf_base) + (channel*d->chan_size);
+                    inptr = (mfp_sample *)(d->buf_base) + (channel*d->chan_size);
                     inpos = d->buf_xfade_pos;
                     for(outpos = section_start; outpos < section_start + section_size; outpos++) {
                         if ((inpos <= region_end) || (d->buf_mode == PLAY_BANG)) {
@@ -706,9 +705,12 @@ shared_buffer_alloc(buf_info * buf)
         munmap(buf->buf_ptr, buf->buf_size);
         buf->buf_ptr = NULL;
     }
-    ftruncate(buf->shm_fd, size);
+    int tval = ftruncate(buf->shm_fd, size);
+    if (tval < 0) {
+        mfp_log_warning("[alloc] ftruncate error '%s'", strerror(errno));
+    }
     buf->buf_size = size;
-    buf->buf_ptr = mmap(NULL,  size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
+    buf->buf_ptr = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
     if (buf->buf_ptr == NULL) {
         mfp_log_debug("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
     }
@@ -789,7 +791,7 @@ config(mfp_processor * proc)
 
     if ((new_buf_id != NULL) || (new_size != d->chan_size) || (new_channels != d->chan_count)) {
         int need_more_buffers = (
-            new_channels > d->chan_count || new_size > d->chan_size
+            (new_channels > d->chan_count) || (new_size > d->chan_size)
         );
 
         if(d->buf_to_alloc.buf_ready == ALLOC_READY) {
@@ -846,7 +848,6 @@ config(mfp_processor * proc)
             d->buf_state_start_pos = 0;
         }
         g_hash_table_remove(proc->params, "buf_state");
-        g_free(bufstate_ptr);
     }
 
     if (reccomp_ptr) {

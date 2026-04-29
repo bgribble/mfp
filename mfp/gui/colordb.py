@@ -38,7 +38,7 @@ class RGBAColor(Serializable):
 
     def to_int(self):
         return (
-            (int(self.red) << 12) | (int(self.green) << 8) | (int(self.blue) << 4) | int(self.alpha)
+            (int(self.red) << 24) | (int(self.green) << 16) | (int(self.blue) << 8) | int(self.alpha)
         )
     def __str__(self):
         return f"{int(self.red):02x}{int(self.green):02x}{int(self.blue):02x}{int(self.alpha):02x}"

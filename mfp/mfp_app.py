@@ -357,7 +357,7 @@ class MFPApp (Singleton, SignalMixin):
         starttime = datetime.now()
         patch = None
         factory = None
-        name = 'default'
+        name = kwargs.get('patch_name', 'default')
 
         if file_name is not None:
             loadpath = os.path.dirname(file_name)
