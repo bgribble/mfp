@@ -176,6 +176,28 @@ class MFPCommand:
                         dsp_outlets=obj.dsp_outlets)
         return {}
 
+    def get_connections(self, obj_id):
+        from .mfp_app import MFPApp
+        obj = MFPApp().recall(obj_id)
+
+        cin = {}
+        cout = {}
+
+        for portnum, connections in enumerate(obj.connections_in):
+            conns = []
+            for src_obj, src_port in connections:
+                is_dsp = src_port in src_obj.dsp_outlets
+                conns.append((src_obj.obj_id, src_port, is_dsp))
+            cin[portnum] = conns
+
+        for portnum, connections in enumerate(obj.connections_out):
+            conns = []
+            for src_obj, src_port in connections:
+                is_dsp = portnum in obj.dsp_outlets
+                conns.append((src_obj.obj_id, src_port, is_dsp))
+            cout[portnum] = conns
+        return [cin, cout]
+
     def get_tooltip(self, obj_id, direction=None, portno=None, details=False):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)

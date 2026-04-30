@@ -70,7 +70,7 @@ class BufferEditor:
 
         self.channel_selections = [None]         # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
-
+        self.channel_options = []
         self.rec_enabled = False
         self.rec_channels = set()
 
@@ -425,6 +425,9 @@ class BufferEditor:
             for channel in range(num_channels + 1):
                 channel_tool_width = 100
 
+                while len(self.channel_options) <= channel:
+                    self.channel_options.append(dict())
+
                 imgui.push_id(str(channel))
                 if channel == 0:
                     height = line_height * 4
@@ -441,25 +444,49 @@ class BufferEditor:
                     imgui.dummy([channel_tool_width, height])
                     imgui.same_line()
                 else:
+                    imgui.push_font(imgui.get_font(), 14)
                     imgui.begin_group()
                     imgui.dummy([1, height-1])
                     imgui.same_line()
+
+                    # config buttons
+                    imgui.begin_group()
+                    for option in ("mute", "solo", "rec"):
+                        changed, checked = imgui.checkbox(
+                            option.upper(),
+                            self.channel_options[channel].get(option, False)
+                        )
+                        if changed:
+                            self.channel_options[channel][option] = checked
+
+                    imgui.end_group()
+                    imgui.same_line()
+                    # meters
+                    imgui.dummy([10, 1])
+                    imgui.same_line()
+                    imgui.begin_group()
                     achan = 4*(channel-1)
+                    imgui.text("I")
+                    th = imgui.get_item_rect_size()[1]
                     self.render_meter_bar(
-                        height, channel_ampls[achan], channel_ampls[achan+1]
+                        height - th - 10, channel_ampls[achan], channel_ampls[achan+1]
                     )
+                    imgui.end_group()
                     imgui.same_line()
                     imgui.dummy([3, 1])
                     imgui.same_line()
+                    imgui.begin_group()
+                    imgui.text("O")
                     self.render_meter_bar(
-                        height, channel_ampls[achan + 2], channel_ampls[achan + 3]
+                        height - th - 10, channel_ampls[achan + 2], channel_ampls[achan + 3]
                     )
+                    imgui.end_group()
                     imgui.end_group()
                     spacer = channel_tool_width - imgui.get_item_rect_size()[0]
                     imgui.same_line()
                     imgui.dummy([spacer, 1])
                     imgui.same_line()
-
+                    imgui.pop_font()
                 if implot.begin_plot(
                     "##buf_edit_plot",
                     [-1, height],

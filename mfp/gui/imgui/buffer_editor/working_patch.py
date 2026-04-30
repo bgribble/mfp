@@ -85,6 +85,14 @@ async def init_working_patch(self):
     self.working_buf_obj = SharedMemory(source_buf.buf_id)
     self.working_buf_info = source_buf
 
+    # copy inputs to the original buffer
+    conn_in, conn_out = await MFPGUI().mfp.get_connections(self.buffer_source_info['proc_id'])
+    for port_num, conns in conn_in.items():
+        for src_id, src_port, is_dsp in conns:
+            if not is_dsp:
+                continue
+            await MFPGUI().mfp.connect(src_id, src_port, self.working_source_id, port_num)
+
     buffer_params["buf_id"] = source_buf.buf_id
     buffer_params["channels"] = source_buf.channels + 1
     buffer_params["size"] = source_buf.size
