@@ -71,6 +71,9 @@ class BufferEditor:
         self.channel_selections = [None]         # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
 
+        self.rec_enabled = False
+        self.rec_channels = set()
+
         self.clipboard_data = None
         self.clipboard_size = None
         self.clipboard_pos = None
@@ -182,10 +185,20 @@ class BufferEditor:
 
         imgui.same_line()
 
+        if self.rec_enabled:
+            imgui.push_style_color(
+                imgui.Col_.button, [0.6, 0.75, 0.6, 1]
+            )
+            imgui.push_style_color(
+                imgui.Col_.button_hovered, [0.7, 0.9, 0.7, 1]
+            )
         if imgui.image_button(
             "##record_btn", imgui.ImTextureRef(record_tex[0]), [button_size, button_size]
         ):
-            pass
+            MFPGUI().async_task(self.playhead_toggle_record())
+
+        if self.rec_enabled:
+            imgui.pop_style_color(2)
         imgui.same_line()
 
         if not self.implot_selection:
@@ -766,6 +779,17 @@ class BufferEditor:
 
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead_start_pos = self.implot_playhead
+
+    async def playhead_toggle_record(self):
+        from mfp.gui_main import MFPGUI
+        if self.rec_enabled:
+            buffer_params = dict(monitor_channels=0)
+        else:
+            buffer_params = dict(monitor_channels=0xff)
+
+        self.rec_enabled = not self.rec_enabled
+        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
+
 
 from . import buffer_ops
 from . import clipboard_ops

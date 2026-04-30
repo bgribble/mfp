@@ -28,6 +28,9 @@ async def fx_open_patch(self, fxname):
 
     # connect source to fx
     for port in range(self.buffer_info.channels):
+        await MFPGUI().mfp.disconnect(
+            self.working_source_id, port, self.working_sink_id, port
+        )
         await MFPGUI().mfp.connect(
             self.working_source_id, port, self.fx_patch_id, port + 2
         )
@@ -35,21 +38,6 @@ async def fx_open_patch(self, fxname):
             self.fx_patch_id, port, self.working_sink_id, port
         )
 
-        if port % 2 == 0:
-            # disconnect previous outputs
-            await MFPGUI().mfp.disconnect(
-                self.working_sink_id, port, self.working_aud0_info.get("obj_id"), 0
-            )
-            await MFPGUI().mfp.connect(
-                self.fx_patch_id, port, self.working_aud0_info.get("obj_id"), 0
-            )
-        else:
-            await MFPGUI().mfp.disconnect(
-                self.working_sink_id, port, self.working_aud1_info.get("obj_id"), 0
-            )
-            await MFPGUI().mfp.connect(
-                self.fx_patch_id, port, self.working_aud1_info.get("obj_id"), 0
-            )
 
     # connect input level and xfade
     for port in [0, 1]:
@@ -144,22 +132,9 @@ async def fx_close_patch(self):
             self.fx_patch_id, port,
             self.working_sink_id, port
         )
-
-        if port % 2 == 0:
-            # reconnect previous outputs
-            await MFPGUI().mfp.connect(
-                self.working_sink_id, port, self.working_aud0_info.get("obj_id"), 0
-            )
-            await MFPGUI().mfp.disconnect(
-                self.fx_patch_id, port, self.working_aud0_info.get("obj_id"), 0
-            )
-        else:
-            await MFPGUI().mfp.connect(
-                self.working_sink_id, port, self.working_aud1_info.get("obj_id"), 0
-            )
-            await MFPGUI().mfp.disconnect(
-                self.fx_patch_id, port, self.working_aud1_info.get("obj_id"), 0
-            )
+        await MFPGUI().mfp.connect(
+            self.working_source_id, port, self.working_sink_id, port
+        )
 
     # connect input level and xfade
     for port in [0, 1]:

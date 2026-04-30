@@ -47,6 +47,10 @@ async def init_working_patch(self):
     if self.working_patch_id:
         await self.close_working_patch()
 
+    audio_channels = sum(
+        1 << c for c in range(self.buffer_info.channels)
+    )
+
     self.working_patch_id = await MFPGUI().mfp.open_file(
         None,
         patch_name="buffer_edit",
@@ -84,6 +88,7 @@ async def init_working_patch(self):
     buffer_params["buf_id"] = source_buf.buf_id
     buffer_params["channels"] = source_buf.channels + 1
     buffer_params["size"] = source_buf.size
+    buffer_params["monitor_channels"] = audio_channels
 
     self.working_sink_info = await MFPGUI().mfp.create(
         "buffer~",
@@ -137,6 +142,10 @@ async def init_working_patch(self):
     self.working_ampl_buf_info = source_buf
 
     for chan in range(self.buffer_info.channels):
+        await MFPGUI().mfp.connect(
+            self.working_source_id, chan, self.working_sink_id, chan
+        )
+
         # ampl~ to monitor source_buf
         a = await MFPGUI().mfp.create(
             "ampl~", "", self.working_patch_info.get("name"), None, f"ampl_in_{chan}"

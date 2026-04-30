@@ -54,6 +54,7 @@ typedef struct {
     /* record settings */
     int play_channels;
     int rec_channels;
+    int monitor_channels;
     int rec_enabled;
     int rec_latency_comp;
     int rec_overdub;
@@ -148,6 +149,7 @@ init(mfp_processor * proc)
     d->rec_latency_comp = 0;
     d->rec_overdub = 0;
     d->play_channels = 0;
+    d->monitor_channels = 0;
 
     d->buf_read_pos = 0;
     d->buf_write_pos = 0;
@@ -653,6 +655,14 @@ process(mfp_processor * proc)
         section_start = section_start + section_size;
     }
 
+    /* monitor_channels just blow away output by overwriting it with the input */
+    for(int channel=0; channel < d->chan_count; channel++) {
+        /* if channel is in monitor set, copy data from inbuf to outbuf */
+        if((1 << channel) & d->monitor_channels) {
+            mfp_block_copy(proc->inlet_buf[channel], proc->outlet_buf[channel]);
+        }
+    }
+
     d->buf_state = section_state;
     block_num ++;
 
@@ -765,6 +775,7 @@ config(mfp_processor * proc)
     gpointer bufpos_ptr = g_hash_table_lookup(proc->params, "buf_pos");
 
     gpointer playchan_ptr = g_hash_table_lookup(proc->params, "play_channels");
+    gpointer monchan_ptr = g_hash_table_lookup(proc->params, "monitor_channels");
 
     gpointer regionstart_ptr = g_hash_table_lookup(proc->params, "region_start");
     gpointer regionend_ptr = g_hash_table_lookup(proc->params, "region_end");
@@ -915,6 +926,10 @@ config(mfp_processor * proc)
         d->play_channels = (int)(*(double *)playchan_ptr);
     }
 
+    if (monchan_ptr != NULL) {
+        d->monitor_channels = (int)(*(double *)monchan_ptr);
+    }
+
     if (clearchan_ptr != NULL) {
         int channel;
         int clear_channels = (int)(*(double *)clearchan_ptr);
@@ -965,6 +980,8 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "region_end", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "play_channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "clear_channels", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "monitor_channels", (gpointer)PARAMTYPE_FLT);
+
 
 
     return p;
