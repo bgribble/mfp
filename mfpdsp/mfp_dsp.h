@@ -3,6 +3,7 @@
 #define MFP_DSP_H
 
 /* #define _POSIX_C_SOURCE 199309L */
+#include <sys/time.h>
 #include <glib.h>
 #include <jack/jack.h>
 #include <pthread.h>
@@ -144,6 +145,7 @@ typedef struct {
 
 #define REQ_BUFSIZE 2048
 #define REQ_LASTIND (REQ_BUFSIZE-1)
+#define CTXT_HISTORY_SIZE 4
 
 typedef struct mfp_context_struct {
     int ctype;
@@ -156,7 +158,8 @@ typedef struct mfp_context_struct {
     int needs_reschedule;
     int default_obj_id;
     int freewheel_frames;
-    mfp_processor * freewheel_proc;
+    int freewheel_listener_id;
+    double dsp_usage_history[CTXT_HISTORY_SIZE];
 
     GArray * incoming_cleanup;
     mfp_in_data * incoming_queue[REQ_BUFSIZE];
@@ -202,6 +205,19 @@ typedef struct mfp_rpc_argblock_struct {
 #define REQTYPE_RESET 8
 #define REQTYPE_CONTEXT_MSG 9
 #define REQTYPE_FREEWHEEL 10
+#define REQTYPE_USAGE 11
+
+/* response types */
+#define RESP_TRIGGERED 0
+#define RESP_BUFID 1
+#define RESP_BUFSIZE 2
+#define RESP_BUFCHAN 3
+#define RESP_RATE 4
+#define RESP_OFFSET 5
+#define RESP_BUFRDY 6
+#define RESP_LOOPSTART 7
+#define RESP_JACK_FREEWHEEL 8
+#define RESP_DSP_LOAD 9
 
 #define ALLOC_IDLE 0
 #define ALLOC_WORKING 1
@@ -278,6 +294,7 @@ extern void mfp_dsp_send_response_str(mfp_processor * proc, int msg_type, char *
 extern void mfp_dsp_send_response_bool(mfp_processor * proc, int msg_type, int response);
 extern void mfp_dsp_send_response_int(mfp_processor * proc, int msg_type, int response);
 extern void mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response);
+extern void mfp_dsp_send_patch_response_float(int obj_id, int msg_type, double response);
 
 extern int mfp_num_input_buffers(mfp_context * ctxt);
 extern int mfp_num_output_buffers(mfp_context * ctxt);
@@ -368,7 +385,7 @@ extern mfp_context * mfp_context_new(int ctype);
 extern int mfp_context_init(mfp_context * context);
 extern void mfp_context_destroy(mfp_context * context);
 extern int mfp_context_default_io(mfp_context * context, int obj_id);
-
+extern void mfp_context_update_usage(mfp_context *, struct timeval *, struct timeval *);
 /* mfp_api.c */
 extern void mfp_api_init(void);
 extern int mfp_api_open_context(mfp_context * ctxt, char *, int *);

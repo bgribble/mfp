@@ -68,9 +68,9 @@ class BufferEditor:
         self.fx_patch_id = None
         self.fx_patch_elements = {}
 
-        self.channel_selections = [None]         # per-channel select box state (transient)
+        self.channel_selections = [None]          # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
-        self.channel_options = []
+        self.channel_options = []                 # switch settings for channels
         self.rec_enabled = False
         self.rec_channels = set()
 
@@ -422,6 +422,7 @@ class BufferEditor:
                     self.implot_playhead_start_time = None
                     self.implot_playhead_looping = False
 
+            options_changed = False
             for channel in range(num_channels + 1):
                 channel_tool_width = 100
 
@@ -458,6 +459,7 @@ class BufferEditor:
                         )
                         if changed:
                             self.channel_options[channel][option] = checked
+                            options_changed = True
 
                     imgui.end_group()
                     imgui.same_line()
@@ -575,6 +577,9 @@ class BufferEditor:
                 imgui.pop_id()
             if self.implot_playhead_needs_set:
                 self.implot_playhead_needs_set = False
+
+            if options_changed:
+                MFPGUI().async_task(self.channel_options_update())
 
             implot.pop_style_var()
             implot.end_aligned_plots()
@@ -816,6 +821,10 @@ class BufferEditor:
 
         self.rec_enabled = not self.rec_enabled
         await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
+
+    async def channel_options_update(self):
+        pass
+
 
 
 from . import buffer_ops

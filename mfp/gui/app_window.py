@@ -4,7 +4,7 @@ app_window.py
 The main MFP window and associated code
 '''
 
-
+import asyncio
 from abc import ABC, abstractmethod
 from mfp import log
 
@@ -194,6 +194,7 @@ class AppWindow (SignalMixin):
         self.freewheel_in_progress = False
         self.last_activity_time = None
         self.dsp_info = {}
+        self.dsp_load = 0.0
 
         # dumb colors
         self.color_unselected = self.get_color('stroke-color')
@@ -234,6 +235,8 @@ class AppWindow (SignalMixin):
         self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
 
+        self.init_loadmeter()
+
     @classmethod
     def get_backend(cls, backend_name):
         return AppWindowImpl.get_backend(backend_name)
@@ -254,6 +257,15 @@ class AppWindow (SignalMixin):
             log.debug_traceback(e)
             return False
 
+    def init_loadmeter(self):
+        async def loadmeter():
+            while not self.quit_in_progress:
+                if self.selected_patch:
+                    await MFPGUI().mfp.dsp_load(self.selected_patch.obj_id)
+                await asyncio.sleep(0.5)
+                
+        MFPGUI().async_task(loadmeter())
+
     def init_input(self):
         # set initial major mode
         self.input_mgr.global_mode = GlobalMode(self)
@@ -272,9 +284,13 @@ class AppWindow (SignalMixin):
         self.signal_listen('leave-event', self.input_handler)
         self.signal_listen('quit', self.quit)
         self.signal_listen('freewheel', self.freewheel_handler)
+        self.signal_listen('dsp_load', self.dsp_load_handler)
 
     def freewheel_handler(self, target, signal, status):
         self.freewheel_in_progress = status
+
+    def dsp_load_handler(self, target, signal, value):
+        self.dsp_load = value
 
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI

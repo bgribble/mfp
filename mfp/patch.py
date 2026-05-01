@@ -25,6 +25,9 @@ class Patch(Processor):
     display_type = "patch"
     default_context = None
 
+    RESP_FREEWHEEL = 8
+    RESP_DSP_LOAD = 9
+
     task_nibbler = None
 
     def __init__(self, init_type, init_args, patch, scope, name, context=None):
@@ -291,7 +294,17 @@ class Patch(Processor):
             self.outlet_objects[o].outlets[0] = Uninit
 
     async def dsp_response(self, resp_id, resp_value):
-        log.debug(f"[patch] DSP response: {resp_id} {resp_value}")
+        from .mfp_app import MFPApp
+        if resp_id == self.RESP_FREEWHEEL:
+            if MFPApp().gui_command:
+                MFPApp().async_task(
+                    MFPApp().gui_command.signal_emit("freewheel", resp_value)
+                )
+        elif resp_id == self.RESP_DSP_LOAD:
+            if MFPApp().gui_command:
+                MFPApp().async_task(
+                    MFPApp().gui_command.signal_emit("dsp_load", resp_value)
+                )
 
     async def method(self, message, inlet=0):
         if len(self.dispatch_objects):

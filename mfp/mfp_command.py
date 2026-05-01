@@ -373,13 +373,25 @@ class MFPCommand:
             await MFPApp().finish_soon()
             return None
 
-    async def freewheel(self, obj_id, num_frames):
+    async def freewheel(self, patch_id, num_frames):
         from .mfp_app import MFPApp
-        obj = MFPApp().recall(obj_id)
-        if not obj:
-            log.error(f"[freewheel] can't freewheel for obj_id={obj_id}, object not found")
-            return None
-        await obj.dsp_obj.freewheel(num_frames)
+        from .dsp_object import DSPObject
+        patch = MFPApp().recall(patch_id)
+        dsp_factory = await MFPApp().rpc_host.require(
+            DSPObject, host_id=patch.context.node_id
+        )
+        context_id = patch.context.context_id
+        await dsp_factory.freewheel(patch_id, context_id, num_frames)
+
+    async def dsp_load(self, patch_id):
+        from .mfp_app import MFPApp
+        from .dsp_object import DSPObject
+        patch = MFPApp().recall(patch_id)
+        dsp_factory = await MFPApp().rpc_host.require(
+            DSPObject, host_id=patch.context.node_id
+        )
+        context_id = patch.context.context_id
+        return await dsp_factory.dsp_load(patch_id, context_id)
 
     def open_patches(self):
         from .mfp_app import MFPApp

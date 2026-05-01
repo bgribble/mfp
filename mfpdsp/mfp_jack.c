@@ -12,7 +12,6 @@
 
 int jack_is_freewheeling = 0;
 
-#define RESP_JACK_FREEWHEEL 8
 
 static int
 process_cb (jack_nframes_t nframes, void * ctxt_arg)
@@ -25,23 +24,17 @@ process_cb (jack_nframes_t nframes, void * ctxt_arg)
     trans_state = jack_transport_query(ctxt->info.jack->client, &trans_info);
     trans_state;
 
-    /*
-    printf("JACK transport: frame %d, rate %d, time %e\n", trans_info.frame,
-            trans_info.frame_rate, trans_info.frame_time);
-    printf("JACK BBT: %d:%d:%d\n", trans_info.bar, trans_info.beat, trans_info.tick);
-    */
-
     if (ctxt->freewheel_frames > 0) {
         jack_set_freewheel(ctxt->info.jack->client, 1);
         ctxt->freewheel_frames -= nframes;
         if (!jack_is_freewheeling) {
-            mfp_dsp_send_response_bool(ctxt->freewheel_proc, RESP_JACK_FREEWHEEL, 1);
+            mfp_dsp_send_patch_response_float(ctxt->freewheel_listener_id, RESP_JACK_FREEWHEEL, 1);
         }
         jack_is_freewheeling = 1;
     } else {
         jack_set_freewheel(ctxt->info.jack->client, 0);
         if (jack_is_freewheeling) {
-            mfp_dsp_send_response_bool(ctxt->freewheel_proc, RESP_JACK_FREEWHEEL, 0);
+            mfp_dsp_send_patch_response_float(ctxt->freewheel_listener_id, RESP_JACK_FREEWHEEL, 0);
         }
         jack_is_freewheeling = 0;
     }

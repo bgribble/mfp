@@ -68,7 +68,12 @@ class DSPObject:
     def disconnect(self, outlet, target, inlet):
         pass
 
-    def freewheel(cls, freewheel_frames):
+    @classmethod
+    def freewheel(cls, patch_id, context_id, freewheel_frames):
+        pass
+
+    @classmethod
+    def dsp_load(cls, patch_id, context_id):
         pass
 
     @classmethod

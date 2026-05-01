@@ -422,14 +422,23 @@ dispatch_methodcall(
         mfp_dsp_push_request(rd);
     }
     else if (!strcmp(service_name, "DSPObject.freewheel")) {
-        mfp_processor * src_proc = mfp_proc_lookup(obj_id);
-        rd.reqtype = REQTYPE_FREEWHEEL;
-        rd.src_proc = obj_id;
-        rd.context_id = src_proc->context->id;
+        const int patch_id = args->items[0]->_int;
+        const int context_id = args->items[1]->_int;
+        const int64_t frames = args->items[2]->_int;
 
-        const int64_t frames = args->items[0]->_int;
+        rd.reqtype = REQTYPE_FREEWHEEL;
+        rd.src_proc = patch_id;
+        rd.context_id = context_id;
         rd.param_value = (gpointer)(frames);
 
+        mfp_dsp_push_request(rd);
+    }
+    else if (!strcmp(service_name, "DSPObject.dsp_load")) {
+        const int patch_id = args->items[0]->_int;
+        const int context_id = args->items[1]->_int;
+        rd.reqtype = REQTYPE_USAGE;
+        rd.src_proc = patch_id;
+        rd.context_id = context_id;
         mfp_dsp_push_request(rd);
     }
     else {

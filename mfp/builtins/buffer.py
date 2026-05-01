@@ -32,7 +32,6 @@ class Buffer(Processor):
     RESP_OFFSET = 5
     RESP_BUFRDY = 6
     RESP_LOOPSTART = 7
-    RESP_FREEWHEEL = 8
 
     FLOAT_SIZE = 4
 
@@ -216,11 +215,6 @@ class Buffer(Processor):
             if self.gui_notify and MFPApp().gui_command:
                 MFPApp().async_task(
                     MFPApp().gui_command.signal_emit("buffer_ready", buffer_data)
-                )
-        elif resp_id == self.RESP_FREEWHEEL:
-            if self.gui_notify and MFPApp().gui_command:
-                MFPApp().async_task(
-                    MFPApp().gui_command.signal_emit("freewheel", resp_value)
                 )
 
         if need_resize:

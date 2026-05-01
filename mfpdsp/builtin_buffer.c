@@ -92,16 +92,6 @@ typedef struct {
 #define TRIG_GT 0
 #define TRIG_LT 1
 
-/* response types */
-#define RESP_TRIGGERED 0
-#define RESP_BUFID 1
-#define RESP_BUFSIZE 2
-#define RESP_BUFCHAN 3
-#define RESP_RATE 4
-#define RESP_OFFSET 5
-#define RESP_BUFRDY 6
-#define RESP_LOOPSTART 7
-
 /* buf_state values */
 #define BUF_IDLE 0
 #define BUF_PRETRIGGERED 1

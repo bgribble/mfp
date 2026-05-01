@@ -97,8 +97,9 @@ def render(app_window):
             channels_out = dsp_info.get("channels_out")
             freewheel = ""
             if app_window.freewheel_in_progress:
-                freewheel = ' (freewheel) '
-            dsp_text = f"DSP: {srate},io={channels_in}/{channels_out}{freewheel}"
+                freewheel = ' (freewheel)'
+            load = f" {app_window.dsp_load:>2.1f}%"
+            dsp_text = f"DSP: {srate},io={channels_in}/{channels_out}{freewheel}{load} "
 
         right_corner_text = ' '.join([
             fps_text, dsp_text

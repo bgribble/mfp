@@ -111,7 +111,7 @@ async def fx_apply_patch(self):
     await asyncio.sleep(0.1)
     await MFPGUI().mfp.send(self.working_trigger_id, 0, 1)
     log.debug(f"[freewheel] freewheeling for {self.buffer_info.size} frames")
-    await MFPGUI().mfp.freewheel(self.working_sink_id, self.buffer_info.size)
+    await MFPGUI().mfp.freewheel(self.working_patch_id, self.buffer_info.size)
 
 
 @extends(BufferEditor)

@@ -8,8 +8,8 @@
 #include <execinfo.h>
 #include <glib.h>
 #include <pthread.h>
-
 #include <time.h>
+#include <sys/time.h>
 
 int mfp_initialized = 0;
 int mfp_max_blocksize = 32768;
@@ -280,6 +280,9 @@ mfp_dsp_run(mfp_context * ctxt)
     mfp_sample * buf;
     int chan;
     int chancount = mfp_num_output_buffers(ctxt);
+    struct timeval start, end;
+
+    gettimeofday(&start, NULL);
 
     /* handle any messages for this context */
     mfp_dsp_handle_requests(ctxt);
@@ -306,6 +309,9 @@ mfp_dsp_run(mfp_context * ctxt)
         }
     }
     ctxt->proc_count ++;
+
+    gettimeofday(&end, NULL);
+    mfp_context_update_usage(ctxt, &start, &end);
 }
 
 void
