@@ -8,7 +8,7 @@ from datetime import datetime
 from imgui_bundle import implot, imgui
 import numpy as np
 from mfp import log
-from mfp.gui.colordb import RGBAColor
+
 
 def fmt_time(ttime):
     minutes = int(ttime // 60)
@@ -43,6 +43,7 @@ class BufferEditor:
         self.implot_playhead_start_pos = None
         self.implot_playhead_looping = False
         self.implot_total_time = 0
+        self.implot_plot_hovered = False
 
         self.all_buffers = []
 
@@ -61,6 +62,7 @@ class BufferEditor:
         self.working_source_info = None
         self.working_sink_id = None
         self.working_sink_info = None
+        self.working_trigger_id = None
         self.working_ampl_buf_id = None
         self.working_ampl_buf_obj = None
         self.working_ampl_buf_info = None
@@ -71,7 +73,7 @@ class BufferEditor:
         self.channel_selections = [None]          # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
         self.channel_options = []                 # switch settings for channels
-        self.rec_enabled = False
+        self.rec_enabled = 0
         self.rec_channels = set()
 
         self.clipboard_data = None
@@ -352,6 +354,7 @@ class BufferEditor:
     def render_channels(self, toolbar_height):
         from mfp.gui_main import MFPGUI
         implot.set_current_context(self.implot_context)
+        plot_hovered = False
 
         num_channels = len(self.buffer_data or [])
         peak_scale = None
@@ -426,7 +429,7 @@ class BufferEditor:
             for channel in range(num_channels + 1):
                 channel_tool_width = 100
 
-                while len(self.channel_options) <= channel:
+                while len(self.channel_options) < channel:
                     self.channel_options.append(dict())
 
                 imgui.push_id(str(channel))
@@ -455,10 +458,10 @@ class BufferEditor:
                     for option in ("mute", "solo", "rec"):
                         changed, checked = imgui.checkbox(
                             option.upper(),
-                            self.channel_options[channel].get(option, False)
+                            self.channel_options[channel - 1].get(option, False)
                         )
                         if changed:
-                            self.channel_options[channel][option] = checked
+                            self.channel_options[channel - 1][option] = checked
                             options_changed = True
 
                     imgui.end_group()
@@ -574,6 +577,9 @@ class BufferEditor:
                             self.playhead_update_selection()
                         )
                     implot.end_plot()
+                    if imgui.is_item_hovered():
+                        plot_hovered = True
+
                 imgui.pop_id()
             if self.implot_playhead_needs_set:
                 self.implot_playhead_needs_set = False
@@ -583,6 +589,8 @@ class BufferEditor:
 
             implot.pop_style_var()
             implot.end_aligned_plots()
+
+        self.implot_plot_hovered = plot_hovered
         imgui.end()
 
     def render_meter_bar(self, height, rms_value, peak_value):
@@ -622,6 +630,7 @@ class BufferEditor:
             imgui.IM_COL32(255, 0, 0, 255),
             rounding=2,
         )
+
     ########################################
     # render wrapper
     def render(self):
@@ -699,18 +708,29 @@ class BufferEditor:
     async def playhead_start(self):
         from mfp.gui_main import MFPGUI
         pos_samples = self.implot_playhead * self.buffer_info.rate
+        rec_channels = self.channel_options_rec_mask()
 
         buffer_params = dict(
             buf_mode=7,
             play_channels=0xff,
             rec_channels=0,
+            monitor_channels=rec_channels if self.rec_enabled else 0,
             buf_pos=pos_samples,
             region_start=pos_samples,
             region_end=self.implot_total_time * self.buffer_info.rate
         )
+        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
+
+        if self.rec_enabled:
+            buffer_params["buf_mode"] = 3
+            buffer_params["rec_channels"] = rec_channels
+            buffer_params["rec_enabled"] = 1
+        else:
+            buffer_params["rec_channels"] = 0
+            buffer_params["rec_enabled"] = 0
+        buffer_params["monitor_channels"] = 0xff
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
-        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
         await asyncio.sleep(0.2)
         await MFPGUI().mfp.send(self.working_trigger_id, 0, 1)
@@ -814,17 +834,47 @@ class BufferEditor:
 
     async def playhead_toggle_record(self):
         from mfp.gui_main import MFPGUI
-        if self.rec_enabled:
-            buffer_params = dict(monitor_channels=0)
-        else:
-            buffer_params = dict(monitor_channels=0xff)
+        self.rec_enabled = int(not self.rec_enabled)
+        rec_channels = self.channel_options_rec_mask()
 
-        self.rec_enabled = not self.rec_enabled
+        # update monitor channels for source buffer
+        if self.rec_enabled:
+            buffer_params = dict(
+                monitor_channels=rec_channels
+            )
+        else:
+            buffer_params = dict(
+                monitor_channels=0,
+            )
         await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
-    async def channel_options_update(self):
-        pass
+        # turn on record mode for sink only if we are "rolling"
+        if self.implot_playhead_start_time:
+            buffer_params = dict(
+                rec_enabled=1 if self.rec_enabled else 0,
+                buf_mode=3 if self.rec_enabled else 7,
+                monitor_channels=0xff
+            )
+            await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
 
+    def channel_options_rec_mask(self):
+        mask = 0
+        for channel, copt in enumerate(self.channel_options):
+            mask = mask + (copt.get("rec", 0) << channel)
+        return mask
+
+    async def channel_options_update(self):
+        from mfp.gui_main import MFPGUI
+        rec_channels = self.channel_options_rec_mask()
+
+        if self.implot_playhead_start_time:
+            await MFPGUI().mfp.send(self.working_source_id, 0, dict(
+                monitor_channels=rec_channels
+            ))
+            await MFPGUI().mfp.send(self.working_sink_id, 0, dict(
+                monitor_channels=0xff,
+                rec_channels=rec_channels
+            ))
 
 
 from . import buffer_ops

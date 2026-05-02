@@ -3,7 +3,9 @@
 .waf*
 
 # build stuff
+build/
 wafbuild/
+PREFIX/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

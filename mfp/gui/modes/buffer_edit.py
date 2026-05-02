@@ -145,11 +145,18 @@ class BufferEditMode (InputMode):
 
     def click_start(self, *args):
         from imgui_bundle import imgui
+        if not self.editor.implot_plot_hovered:
+            self.mouse_down_pos = None
+            return False
+
         self.mouse_down_pos = imgui.get_mouse_pos()
         return True
 
     def click_end(self, *args):
         from imgui_bundle import imgui
+        if not self.editor.implot_plot_hovered:
+            return False
+
         pos = imgui.get_mouse_pos()
         down = self.mouse_down_pos
         if down and abs(pos[0] - down[0]) < 0.1 and abs(pos[1] - down[1]) < 0.1:
