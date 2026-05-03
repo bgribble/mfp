@@ -173,15 +173,26 @@ async def init_working_patch(self):
         a = await MFPGUI().mfp.create(
             "ampl~", "", self.working_patch_info.get("name"), None, f"ampl_out_{chan}"
         )
-        a_id = a.get("obj_id")
+        ampl_id = a.get("obj_id")
+
+
+        g = await MFPGUI().mfp.create(
+            "*~", "1", self.working_patch_info.get("name"), None, f"mon_gain_{chan}"
+        )
+        gain_id = g.get("obj_id")
+        self.working_mon_gain[chan] = gain_id
+
         await MFPGUI().mfp.connect(
-            self.working_sink_id, chan, a_id, 0
+            self.working_sink_id, chan, gain_id, 0
         )
         await MFPGUI().mfp.connect(
-            a_id, 0, self.working_ampl_buf_id, 4*chan + 2
+            gain_id, 0, ampl_id, 0
         )
         await MFPGUI().mfp.connect(
-            a_id, 1, self.working_ampl_buf_id, 4*chan + 3
+            ampl_id, 0, self.working_ampl_buf_id, 4*chan + 2
+        )
+        await MFPGUI().mfp.connect(
+            ampl_id, 1, self.working_ampl_buf_id, 4*chan + 3
         )
 
     # connect the sync source
@@ -197,9 +208,13 @@ async def init_working_patch(self):
     # connect the sink buffer to the audition outputs
     for port in range(self.buffer_info.channels):
         if port % 2 == 0:
-            await MFPGUI().mfp.connect(self.working_sink_id, port, self.working_aud0_info.get("obj_id"), 0)
+            await MFPGUI().mfp.connect(
+                self.working_mon_gain[port], 0, self.working_aud0_info.get("obj_id"), 0
+            )
         else:
-            await MFPGUI().mfp.connect(self.working_sink_id, port, self.working_aud1_info.get("obj_id"), 0)
+            await MFPGUI().mfp.connect(
+                self.working_mon_gain[port], 0, self.working_aud1_info.get("obj_id"), 0
+            )
 
     self.buffer_sync(self.shm_obj, self.buffer_info, self.working_buf_obj, self.working_buf_info)
     self.buffer_compute_peaks()

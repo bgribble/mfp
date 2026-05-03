@@ -66,6 +66,7 @@ class BufferEditor:
         self.working_ampl_buf_id = None
         self.working_ampl_buf_obj = None
         self.working_ampl_buf_info = None
+        self.working_mon_gain = {}
 
         self.fx_patch_id = None
         self.fx_patch_elements = {}
@@ -430,7 +431,7 @@ class BufferEditor:
                 channel_tool_width = 100
 
                 while len(self.channel_options) < channel:
-                    self.channel_options.append(dict())
+                    self.channel_options.append(dict(fx=True))
 
                 imgui.push_id(str(channel))
                 if channel == 0:
@@ -455,7 +456,7 @@ class BufferEditor:
 
                     # config buttons
                     imgui.begin_group()
-                    for option in ("mute", "solo", "rec"):
+                    for option in ("mute", "solo", "rec", "fx"):
                         changed, checked = imgui.checkbox(
                             option.upper(),
                             self.channel_options[channel - 1].get(option, False)
@@ -867,7 +868,6 @@ class BufferEditor:
     async def channel_options_update(self):
         from mfp.gui_main import MFPGUI
         rec_channels = self.channel_options_rec_mask()
-
         await MFPGUI().mfp.send(self.working_source_id, 0, dict(
             monitor_channels=rec_channels
         ))
@@ -875,6 +875,25 @@ class BufferEditor:
             monitor_channels=0xff,
             rec_channels=rec_channels
         ))
+
+        solo_channels = False
+        for channel, copt in enumerate(self.channel_options):
+            solo = copt.get("solo")
+            if solo:
+                solo_channels = True
+
+        for channel, copt in enumerate(self.channel_options):
+            mute = copt.get("mute", False)
+            solo = copt.get("solo", False)
+            gain_id = self.working_mon_gain[channel]
+
+            if (
+                (not solo_channels and not mute)
+                or (solo and not mute)
+            ):
+                await MFPGUI().mfp.send(gain_id, 1, 1)
+            else:
+                await MFPGUI().mfp.send(gain_id, 1, 0)
 
 
 from . import buffer_ops
