@@ -851,9 +851,10 @@ class BufferEditor:
         # turn on record mode for sink only if we are "rolling"
         if self.implot_playhead_start_time:
             buffer_params = dict(
-                rec_enabled=1 if self.rec_enabled else 0,
                 buf_mode=3 if self.rec_enabled else 7,
-                monitor_channels=0xff
+                rec_channels=rec_channels if self.rec_enabled else 0,
+                monitor_channels=0xff,
+                rec_enabled=1 if self.rec_enabled else 0,
             )
             await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
 
@@ -867,14 +868,13 @@ class BufferEditor:
         from mfp.gui_main import MFPGUI
         rec_channels = self.channel_options_rec_mask()
 
-        if self.implot_playhead_start_time:
-            await MFPGUI().mfp.send(self.working_source_id, 0, dict(
-                monitor_channels=rec_channels
-            ))
-            await MFPGUI().mfp.send(self.working_sink_id, 0, dict(
-                monitor_channels=0xff,
-                rec_channels=rec_channels
-            ))
+        await MFPGUI().mfp.send(self.working_source_id, 0, dict(
+            monitor_channels=rec_channels
+        ))
+        await MFPGUI().mfp.send(self.working_sink_id, 0, dict(
+            monitor_channels=0xff,
+            rec_channels=rec_channels
+        ))
 
 
 from . import buffer_ops

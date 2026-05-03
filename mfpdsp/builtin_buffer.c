@@ -515,7 +515,6 @@ process(mfp_processor * proc)
                     ((region_end > d->region_start) ? (region_end - d->buf_read_pos) : d->chan_size)
                 )
             );
-
             /* loop over channels */
             for(int channel=0; channel < d->chan_count; channel++) {
                 /* if channel is in play set, copy data from buffer to outbuf */
@@ -552,7 +551,7 @@ process(mfp_processor * proc)
                 /* if channel is in record set, copy data from inbuf to buffer */
                 if(d->rec_enabled && ((1 << channel) & d->rec_channels)) {
                     /* either copy or accumulate into buffer */
-                    outptr = (float *)d->buf_base + (channel*d->chan_size);
+                    outptr = (mfp_sample *)d->buf_base + (channel*d->chan_size);
                     outpos = d->buf_write_pos;
                     inptr = proc->inlet_buf[channel]->data;
                     for (inpos = section_start; inpos < section_start + section_size; inpos++) {
@@ -575,7 +574,6 @@ process(mfp_processor * proc)
                         }
                     }
                 }
-
             }
 
             /* now advance d->buf_read_pos and d->buf_write_pos */
@@ -837,6 +835,7 @@ config(mfp_processor * proc)
 
     if (bufmode_ptr != NULL) {
         d->buf_mode = (int)(*(double *)bufmode_ptr);
+        g_hash_table_remove(proc->params, "buf_mode");
     }
 
     if (bufstate_ptr != NULL) {
@@ -864,8 +863,9 @@ config(mfp_processor * proc)
     }
 
     if (recenable_ptr != NULL) {
+        int prev_enabled = d->rec_enabled; 
         d->rec_enabled = (int)(*(double *)recenable_ptr);
-        if(!d->rec_enabled) {
+        if(prev_enabled && !d->rec_enabled && bufmode_ptr != NULL) {
             if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOPSET) || (d->buf_mode == REC_LOOP)) {
                 d->buf_mode = PLAY_LOOP;
                 d->trig_message = 0;
