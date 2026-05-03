@@ -431,7 +431,7 @@ class BufferEditor:
                 channel_tool_width = 100
 
                 while len(self.channel_options) < channel:
-                    self.channel_options.append(dict(fx=True))
+                    self.channel_options.append(dict())
 
                 imgui.push_id(str(channel))
                 if channel == 0:
@@ -456,7 +456,7 @@ class BufferEditor:
 
                     # config buttons
                     imgui.begin_group()
-                    for option in ("mute", "solo", "rec", "fx"):
+                    for option in ("mute", "solo", "rec"):
                         changed, checked = imgui.checkbox(
                             option.upper(),
                             self.channel_options[channel - 1].get(option, False)
