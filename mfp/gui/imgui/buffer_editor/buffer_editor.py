@@ -75,7 +75,8 @@ class BufferEditor:
         self.channel_selections_active = [False]  # per-channel select box activity
         self.channel_options = []                 # switch settings for channels
         self.rec_enabled = 0
-        self.rec_channels = set()
+        self.rec_recording = False
+        self.rec_recording_updated = None
 
         self.clipboard_data = None
         self.clipboard_size = None
@@ -189,12 +190,20 @@ class BufferEditor:
         imgui.same_line()
 
         if self.rec_enabled:
-            imgui.push_style_color(
-                imgui.Col_.button, [0.6, 0.75, 0.6, 1]
-            )
-            imgui.push_style_color(
-                imgui.Col_.button_hovered, [0.7, 0.9, 0.7, 1]
-            )
+            if self.rec_recording:
+                imgui.push_style_color(
+                    imgui.Col_.button, [0.9, 0.5, 0.5, 1]
+                )
+                imgui.push_style_color(
+                    imgui.Col_.button_hovered, [1.0, 0.6, 0.6, 1]
+                )
+            else:
+                imgui.push_style_color(
+                    imgui.Col_.button, [0.7, 0.5, 0.5, 1]
+                )
+                imgui.push_style_color(
+                    imgui.Col_.button_hovered, [0.8, 0.6, 0.6, 1]
+                )
         if imgui.image_button(
             "##record_btn", imgui.ImTextureRef(record_tex[0]), [button_size, button_size]
         ):
@@ -679,6 +688,7 @@ class BufferEditor:
 
         imgui.pop_style_var(3)
 
+
         return keep_going
 
     ########################################
@@ -715,7 +725,7 @@ class BufferEditor:
             buf_mode=7,
             play_channels=0xff,
             rec_channels=0,
-            monitor_channels=rec_channels if self.rec_enabled else 0,
+            monitor_channels=rec_channels,
             buf_pos=pos_samples,
             region_start=pos_samples,
             region_end=self.implot_total_time * self.buffer_info.rate
@@ -726,9 +736,12 @@ class BufferEditor:
             buffer_params["buf_mode"] = 3
             buffer_params["rec_channels"] = rec_channels
             buffer_params["rec_enabled"] = 1
+            self.rec_recording = True
         else:
             buffer_params["rec_channels"] = 0
             buffer_params["rec_enabled"] = 0
+            self.rec_recording = False
+
         buffer_params["monitor_channels"] = 0xff
 
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
@@ -766,8 +779,23 @@ class BufferEditor:
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
         await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
+        if self.rec_recording:
+            need_update = 0
+            now = datetime.now()
+            if not self.rec_recording_updated:
+                need_update = 1
+            else:
+                tdelta = (now - self.rec_recording_updated).total_seconds()
+                if tdelta > 2:
+                    need_update = 1
+            if need_update:
+                self.rec_recording_updated = now
+                self.buffer_grab(self.working_buf_obj)
+                self.buffer_compute_peaks()
+
         self.implot_playhead_start_time = None
         self.implot_playhead_looping = False
+        self.rec_recording = False
 
         if new_pos is not None:
             await self.playhead_move(new_pos)
@@ -838,17 +866,6 @@ class BufferEditor:
         self.rec_enabled = int(not self.rec_enabled)
         rec_channels = self.channel_options_rec_mask()
 
-        # update monitor channels for source buffer
-        if self.rec_enabled:
-            buffer_params = dict(
-                monitor_channels=rec_channels
-            )
-        else:
-            buffer_params = dict(
-                monitor_channels=0,
-            )
-        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
-
         # turn on record mode for sink only if we are "rolling"
         if self.implot_playhead_start_time:
             buffer_params = dict(
@@ -858,6 +875,7 @@ class BufferEditor:
                 rec_enabled=1 if self.rec_enabled else 0,
             )
             await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+            self.rec_recording = bool(rec_channels) and self.rec_enabled
 
     def channel_options_rec_mask(self):
         mask = 0
@@ -875,6 +893,8 @@ class BufferEditor:
             monitor_channels=0xff,
             rec_channels=rec_channels
         ))
+
+        self.rec_recording = self.rec_enabled and bool(rec_channels)
 
         solo_channels = False
         for channel, copt in enumerate(self.channel_options):

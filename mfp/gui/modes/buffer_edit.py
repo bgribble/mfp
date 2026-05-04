@@ -142,6 +142,26 @@ class BufferEditMode (InputMode):
             "buffer-click-up", cls.click_end, helptext="Set playhead position",
             keysym="M1UP"
         )
+        cls.bind(
+            "playhead-backward", lambda mode: mode.playhead_move(-1.0), 
+            helptext="Move playhead backward",
+            keysym="LEFT"
+        )
+        cls.bind(
+            "playhead-backward-fast", lambda mode: mode.playhead_move(-5.0), 
+            helptext="Move playhead backward quickly",
+            keysym="C-LEFT"
+        )
+        cls.bind(
+            "playhead-forward", lambda mode: mode.playhead_move(1.0), 
+            helptext="Move playhead forward",
+            keysym="RIGHT"
+        )
+        cls.bind(
+            "playhead-forward-fast", lambda mode: mode.playhead_move(5.0), 
+            helptext="Move playhead forward quickly",
+            keysym="C-RIGHT"
+        )
 
     def click_start(self, *args):
         from imgui_bundle import imgui
@@ -151,6 +171,7 @@ class BufferEditMode (InputMode):
 
         self.mouse_down_pos = imgui.get_mouse_pos()
         return True
+
 
     def click_end(self, *args):
         from imgui_bundle import imgui
@@ -163,6 +184,12 @@ class BufferEditMode (InputMode):
             self.editor.set_playhead_at_pointer()
         self.mouse_down_pos = None
         return True
+
+    async def playhead_move(self, amount):
+        # 1x moves 1/1000 of displayed range
+        lim = self.editor.implot_limits
+        delta_one_x = (lim.x.max - lim.x.min) / 1000.0
+        await self.editor.playhead_move(self.editor.implot_playhead + amount * delta_one_x)
 
     async def buffer_apply(self):
         await self.editor.buffer_apply()
