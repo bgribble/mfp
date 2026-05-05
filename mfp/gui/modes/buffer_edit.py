@@ -56,6 +56,10 @@ class BufferEditMode (InputMode):
             "buffer-edit-select-none", cls.select_none, helptext="Clear selection",
             keysym="C-A", menupath="BufEdit > Select > Clear selection"
         )
+        cls.bind(
+            "buffer-edit-select-silence", cls.select_silence, helptext="Select silence at playhead",
+            keysym="s", menupath="BufEdit > Select > Select silence..."
+        )
 
         #####################
         # FX submenu
@@ -165,7 +169,7 @@ class BufferEditMode (InputMode):
 
     def click_start(self, *args):
         from imgui_bundle import imgui
-        if not self.editor.implot_plot_hovered:
+        if not self.editor or not self.editor.implot_plot_hovered:
             self.mouse_down_pos = None
             return False
 
@@ -175,7 +179,7 @@ class BufferEditMode (InputMode):
 
     def click_end(self, *args):
         from imgui_bundle import imgui
-        if not self.editor.implot_plot_hovered:
+        if not self.editor or not self.editor.implot_plot_hovered:
             return False
 
         pos = imgui.get_mouse_pos()
@@ -259,6 +263,20 @@ class BufferEditMode (InputMode):
     async def playhead_loop_selection(self):
         await self.editor.playhead_loop_selection()
         return True
+
+    async def select_silence(self, threshold=None):
+        async def cb(thresh):
+            if thresh:
+                await self.editor.playhead_select_silence(float(thresh))
+            else:
+                self.window.hud_write("Canceled")
+
+        if threshold is None:
+            await self.window.cmd_get_input(
+                "Silence threshold (dB): ", cb, "-60"
+            )
+        else:
+            await cb(threshold)
 
     async def select_all(self):
         await self.editor.playhead_set_selection(

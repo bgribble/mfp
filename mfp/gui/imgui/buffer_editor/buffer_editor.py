@@ -559,7 +559,7 @@ class BufferEditor:
                         x_values = peaks[1]
 
                         # the actual line!
-                        implot.plot_line("Buffer edit", x_values, y_values, flags=0)
+                        implot.plot_line("Buffer edit", x_values, y_values)
 
                     # if we have a selection, show it as a drag rect
                     if not self.channel_selections_active[channel] and self.implot_selection:
@@ -876,6 +876,32 @@ class BufferEditor:
             )
             await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
             self.rec_recording = bool(rec_channels) and self.rec_enabled
+
+    async def playhead_select_silence(self, thresh_db):
+        """
+        Select silence around playhead
+        """
+        def level(ind):
+            absmax = 1e-6
+            for chan in (self.buffer_data or []):
+                if abs(chan[ind]) > absmax:
+                    absmax = abs(chan[ind])
+            return 20 * math.log10(absmax)
+
+        ph = int(self.implot_playhead * self.buffer_info.rate)
+
+        pos_fwd = ph
+        while pos_fwd < self.buffer_info.size and level(pos_fwd) <= thresh_db:
+            pos_fwd += 1
+
+        pos_rev = ph
+        while pos_rev >= 0 and level(pos_rev) <= thresh_db:
+            pos_rev -= 1
+
+        await self.playhead_set_selection(
+            pos_rev / self.buffer_info.rate,
+            pos_fwd / self.buffer_info.rate
+        )
 
     def channel_options_rec_mask(self):
         mask = 0
