@@ -118,6 +118,9 @@ async def fx_apply_patch(self):
 async def fx_close_patch(self):
     from mfp.gui_main import MFPGUI
 
+    if not self.fx_patch_id:
+        return
+
     # remove actions for Apply and Cancel buttons
     cancel = self.fx_patch_elements["cancel_button"]
     cancel.extra_action = None

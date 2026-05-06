@@ -882,10 +882,8 @@ class BufferEditor:
         Select silence around playhead
         """
         def level(ind):
-            absmax = 1e-6
-            for chan in (self.buffer_data or []):
-                if abs(chan[ind]) > absmax:
-                    absmax = abs(chan[ind])
+            absmax = max(chan[ind] for chan in (self.buffer_data or []))
+            absmax = max(absmax, 1e-6)
             return 20 * math.log10(absmax)
 
         ph = int(self.implot_playhead * self.buffer_info.rate)

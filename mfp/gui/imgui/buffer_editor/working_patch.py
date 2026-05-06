@@ -224,6 +224,8 @@ async def init_working_patch(self):
 async def close_working_patch(self):
     from mfp.gui_main import MFPGUI
 
+    await self.fx_close_patch()
+
     # FIXME delete shared mem segment
 
     if self.working_patch_id:

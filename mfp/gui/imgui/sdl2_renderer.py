@@ -128,7 +128,6 @@ class ImguiSDL2Renderer:
                 "[sdl2] Error: Unable to set VSync! SDL Error: " + SDL_GetError().decode("utf-8")
             )
             return None, None
-        mfplog.debug(f"[sdl2] Created window={window} context={gl_context}")
         return window, gl_context
 
     def swap_window(self):
