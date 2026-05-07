@@ -123,7 +123,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 72.0
+                "width": 69.0
             },
             "initargs": "0",
             "midi_filters": null,
@@ -150,7 +150,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "Panel",
                 "max_width": 600,
@@ -176,7 +176,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "Selection only",
-                "width": 91.0
+                "width": 92.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -258,7 +258,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "Panel",
                 "max_width": 600,
@@ -284,7 +284,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "Bypass ",
-                "width": 52.0
+                "width": 53.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -308,7 +308,7 @@
                 "display_type": "button",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 31.0,
+                "height": 29.0,
                 "is_export": false,
                 "label_text": "Apply",
                 "layername": "Panel",
@@ -336,7 +336,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 56.09375
+                "width": 51.0
             },
             "initargs": "Bang",
             "midi_filters": null,
@@ -359,7 +359,7 @@
                 "display_type": "button",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 31.0,
+                "height": 29.0,
                 "is_export": false,
                 "label_text": "Close",
                 "layername": "Panel",
@@ -387,7 +387,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 56.09375
+                "width": 50.0
             },
             "initargs": "Bang",
             "midi_filters": null,
@@ -464,7 +464,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "Panel",
                 "max_width": 600,
@@ -490,7 +490,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "Xfade time (ms)",
-                "width": 105.0
+                "width": 106.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -568,7 +568,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "Panel",
                 "max_width": 600,
@@ -594,7 +594,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "Preroll (ms)",
-                "width": 79.0
+                "width": 80.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -699,7 +699,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 40.0
+                "width": 39.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -724,7 +724,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 43.0,
                 "is_export": false,
                 "layername": "Global inputs",
                 "max_width": 600,
@@ -750,7 +750,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "input level",
-                "width": 68.0
+                "width": 39.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -850,7 +850,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 112.0
+                "width": 107.0
             },
             "initargs": "'bypass_toggle', 0",
             "midi_filters": null,
@@ -908,7 +908,7 @@
                 "show_label": false,
                 "style": {},
                 "update_required": false,
-                "width": 361.0
+                "width": 343.0
             },
             "initargs": "patch.args(1) or None",
             "midi_filters": null,
@@ -956,7 +956,7 @@
                 "scope": "channel",
                 "style": {},
                 "update_required": false,
-                "width": 240.0
+                "width": 229.0
             },
             "initargs": "'fx_processor', scope.clonenum+1",
             "midi_filters": null,
@@ -1055,7 +1055,7 @@
                 "scope": "channel",
                 "style": {},
                 "update_required": false,
-                "width": 224.0
+                "width": 214.0
             },
             "initargs": "'fx_processor', scope.clonenum",
             "midi_filters": null,
@@ -1159,7 +1159,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 40.0
+                "width": 39.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -1467,7 +1467,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 208.0
+                "width": 199.0
             },
             "initargs": "scope.clonenum + 2",
             "midi_filters": null,
@@ -1573,7 +1573,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 48.0
+                "width": 46.0
             },
             "initargs": "-1",
             "midi_filters": null,
@@ -1628,7 +1628,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 184.0
+                "width": 176.0
             },
             "initargs": "scope.clonenum",
             "midi_filters": null,
@@ -1655,7 +1655,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "max_width": 600,
@@ -1788,7 +1788,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 72.0
+                "width": 69.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -1815,7 +1815,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "max_width": 600,
@@ -1841,7 +1841,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "fx processor (chan in/out through vias)",
-                "width": 248.0
+                "width": 245.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1867,7 +1867,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 59.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "max_width": 600,
@@ -1893,7 +1893,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "wet",
-                "width": 29.0
+                "width": 26.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -1919,7 +1919,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "max_width": 600,
@@ -1994,7 +1994,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 48.0
+                "width": 46.0
             },
             "initargs": "'xfade', 0",
             "midi_filters": null,
@@ -2019,7 +2019,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 32.0,
+                "height": 35.0,
                 "is_export": false,
                 "layername": "Global inputs",
                 "max_width": 600,
@@ -2045,7 +2045,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "<div class=\"size-x-large\">bufedit.fx~ -- wrapper for effects in buffer editor</div>",
-                "width": 447.0
+                "width": 443.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -2071,7 +2071,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 32.0,
+                "height": 35.0,
                 "is_export": false,
                 "layername": "Panel",
                 "max_width": 600,
@@ -2097,7 +2097,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "<div class=\"size-x-large\">Panel display elements</div>",
-                "width": 218.0
+                "width": 217.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -2123,7 +2123,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 32.0,
+                "height": 35.0,
                 "is_export": false,
                 "layername": "FX processing",
                 "max_width": 600,
@@ -2298,7 +2298,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 48.0
+                "width": 46.0
             },
             "initargs": "'xfade', 0",
             "midi_filters": null,
@@ -2446,7 +2446,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 136.0
+                "width": 130.0
             },
             "initargs": "'selection_toggle', 0",
             "midi_filters": null,
@@ -2550,7 +2550,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 152.0
+                "width": 145.0
             },
             "initargs": "x: int(not x)",
             "midi_filters": null,
@@ -2575,7 +2575,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "Global inputs",
                 "max_width": 600,
@@ -2601,7 +2601,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "xfade ",
-                "width": 43.0
+                "width": 42.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -2706,7 +2706,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 40.0
+                "width": 39.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -2810,7 +2810,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 40.0
+                "width": 39.0
             },
             "initargs": "0",
             "midi_filters": null,
@@ -2914,7 +2914,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 56.0
+                "width": 54.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -2962,7 +2962,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 104.0
+                "width": 100.0
             },
             "initargs": "'input_active', 0",
             "midi_filters": null,
@@ -3170,7 +3170,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 32.0
+                "width": 31.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -3253,7 +3253,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "Panel",
                 "max_width": 600,
@@ -3305,7 +3305,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 24.0,
+                "height": 27.0,
                 "is_export": false,
                 "layername": "Panel",
                 "max_width": 600,
@@ -3415,7 +3415,7 @@
                 "display_type": "text",
                 "export_offset_x": 0,
                 "export_offset_y": 0,
-                "height": 264.0,
+                "height": 171.0,
                 "is_export": false,
                 "layername": "Global inputs",
                 "max_width": 600,
@@ -3441,7 +3441,7 @@
                 "style": {},
                 "update_required": true,
                 "value": "[bufedit.fx~] is an internal util for\nthe buffer editor.\n\nIt's used with the first arg being the name of the fx patch to use and the second arg trhe number of channels\n\nfor example, \n\n[bufedit.fx~ \"fx.fadein~\", 2]\n\nsignal inputs are\n\n* input level (gain on signal in before fx)\n\n* xfade (0 is all dry, 1 is all wet)\n\n* signal ins 1 to N \n\nSignal inputs and outputs are in the \"FX processing\" layer",
-                "width": 587.0
+                "width": 585.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -3490,7 +3490,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 96.0
+                "width": 92.0
             },
             "initargs": "'input_meter', 0",
             "midi_filters": null,
@@ -3538,7 +3538,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 104.0
+                "width": 100.0
             },
             "initargs": "'output_meter', 0",
             "midi_filters": null,
@@ -3686,7 +3686,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 136.0
+                "width": 130.0
             },
             "initargs": "'selection_toggle', 0",
             "midi_filters": null,
@@ -3790,7 +3790,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 152.0
+                "width": 145.0
             },
             "initargs": "x: int(not x)",
             "midi_filters": null,
@@ -3894,7 +3894,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 40.0
+                "width": 39.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -3998,7 +3998,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 40.0
+                "width": 39.0
             },
             "initargs": "0",
             "midi_filters": null,
@@ -4102,7 +4102,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 56.0
+                "width": 54.0
             },
             "initargs": "1",
             "midi_filters": null,
@@ -4310,7 +4310,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 32.0
+                "width": 31.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -4415,7 +4415,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 48.0
+                "width": 46.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -4519,7 +4519,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 72.0
+                "width": 69.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -4624,7 +4624,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 48.0
+                "width": 46.0
             },
             "initargs": null,
             "midi_filters": null,
@@ -4772,7 +4772,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 104.0
+                "width": 100.0
             },
             "initargs": "'input_active', 0",
             "midi_filters": null,
@@ -4876,7 +4876,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 72.0
+                "width": 69.0
             },
             "initargs": "50",
             "midi_filters": null,
@@ -4980,7 +4980,7 @@
                 "show_label": true,
                 "style": {},
                 "update_required": false,
-                "width": 72.0
+                "width": 69.0
             },
             "initargs": "50",
             "midi_filters": null,
@@ -5439,7 +5439,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": true,
-                "width": 305.0
+                "width": 290.0
             },
             "initargs": "@clonescope(\"channel\", patch.args(1))",
             "midi_filters": null,
@@ -5487,7 +5487,7 @@
                 "scope": "__patch__",
                 "style": {},
                 "update_required": false,
-                "width": 40.0
+                "width": 39.0
             },
             "initargs": "'self', 0",
             "midi_filters": null,

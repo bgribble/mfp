@@ -28,7 +28,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
     backend_name = "imgui"
 
     style_defaults = {
-        'padding': dict(left=8, top=6, right=8, bottom=6)
+        'padding': dict(left=8, top=10, right=8, bottom=6)
     }
 
     def __init__(self, window, x, y):

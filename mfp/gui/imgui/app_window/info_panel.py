@@ -56,7 +56,9 @@ def render_code_editor(app_window, param_name, param_type, param_value, target):
             if param_value:
                 init_text = param_value.get("body", "")
             editor.set_text(init_text)
-            editor.set_language_definition(ed.TextEditor.LanguageDefinitionId.python)
+            editor.set_language(
+                ed.TextEditor.Language.python()
+            )
 
         return editor
 
@@ -390,15 +392,14 @@ def render_param(
 
                         if del_clicked:
                             changed = True
-                            continue
+                        else: 
+                            new_item = (
+                                display_newval if display_changed else display,
+                                val_newval if val_changed else value
+                            )
 
-                        new_item = (
-                            display_newval if display_changed else display,
-                            val_newval if val_changed else value
-                        )
-
-                        changed = changed or val_changed or display_changed
-                        newval.append(new_item)
+                            changed = changed or val_changed or display_changed
+                            newval.append(new_item)
                     imgui.end_table()
                 imgui.pop_style_var()
             if imgui.button("Add"):

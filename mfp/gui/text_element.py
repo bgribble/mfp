@@ -105,8 +105,9 @@ class TextElement (BaseElement):
         elif new_text != self.value and not aborted:
             self.value = new_text
             if widget:
-                self.width = widget.width
-                self.height = widget.height
+                # just setting text, don't be aggressive about shrinking 
+                self.width = 1.5*widget.width
+                self.height = 1.5*widget.height
             self.set_text()
             await MFPGUI().mfp.send(self.obj_id, 0, self.value)
         await self.update()

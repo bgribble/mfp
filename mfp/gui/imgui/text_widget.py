@@ -527,7 +527,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
                 md_text = '\n'.join(transformed_blocks)
                 self.transform_out = md_text
-            imgui.dummy((1, 3))
+            #imgui.dummy((1, 3))
             if self.markdown_text or self.text:
                 markdown.render(md_text)
 
@@ -573,7 +573,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 imgui.pop_font()
 
             # text bounding box does not account for descenders
-            imgui.dummy([1, 3])
+            imgui.dummy([1, 2])
 
         if self.font_color:
             imgui.pop_style_color()
@@ -632,14 +632,22 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     def set_text(self, text, notify=True):
         if self.text != text and notify:
             MFPGUI().async_task(self.signal_emit(
-                'text-changed', self.text, text, imgui.calc_text_size(self.text), imgui.calc_text_size(text)
+                'text-changed',
+                self.text,
+                text,
+                imgui.calc_text_size(self.text),
+                imgui.calc_text_size(text)
             ))
         self.text = text
 
     def set_markup(self, text, notify=True):
         if self.markdown_text != text and notify:
             MFPGUI().async_task(self.signal_emit(
-                'text-changed', self.text, text, imgui.calc_text_size(self.markdown_text), imgui.calc_text_size(text)
+                'text-changed',
+                self.text,
+                text,
+                imgui.calc_text_size(self.markdown_text),
+                imgui.calc_text_size(text)
             ))
         self.markdown_text = text
         self.use_markup = True
