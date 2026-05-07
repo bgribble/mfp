@@ -10,6 +10,7 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui.colordb import ColorDB
 from mfp.gui.base_element import BaseElement
+from mfp.gui.text_widget import TextWidget
 from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.modes.patch_edit import PatchEditMode
 from mfp.gui.modes.global_mode import GlobalMode
@@ -187,7 +188,9 @@ def render_tile(app_window, patch):
             app_window.get_color('grid-color:operate').to_rgbaf()
         )
 
-    imgui.get_style().font_scale_main = 1.0
+    #imgui.get_style().font_scale_main = 1.0
+    TextWidget.scale_factor = app_window.imgui_global_scale
+
     nedit.begin("canvas_editor", (0.0, 0.0))
     conf = nedit.get_config()
 
@@ -413,7 +416,8 @@ def render_tile(app_window, patch):
 
     nedit.end()  # node_editor
     nedit.pop_style_color(5)
-    imgui.get_style().font_scale_main = app_window.imgui_global_scale
+    #imgui.get_style().font_scale_main = app_window.imgui_global_scale
+    TextWidget.scale_factor = 1.0
 
     imgui.end()
 

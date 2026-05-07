@@ -176,7 +176,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         md_options.callbacks.on_html_div = ImguiTextWidgetImpl.markdown_div_callback
         md_options.callbacks.on_image = ImguiTextWidgetImpl.image_callback
         md_options.callbacks.on_open_link = ImguiTextWidgetImpl.url_callback
-        md_options.font_options.regular_size = 16
+        md_options.font_options.regular_size = 16 / self.imgui_global_scale
+
         # md_options.font_options.size_diff_between_levels = 4
         # md_options.font_options.max_header_level = 5
         markdown.initialize_markdown(md_options)
@@ -195,6 +196,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         nedit.set_current_editor(nedit_editor)
 
         gl.glClearColor(1.0, 1.0, 1.0, 1)
+
+        vp = imgui.get_main_viewport()
+        vp.framebuffer_scale = (2*self.imgui_global_scale, 2*self.imgui_global_scale)
+        imgui.get_style().font_scale_main = self.imgui_global_scale
+        imgui.get_style().scale_all_sizes(self.imgui_global_scale)
+
+        last_scale = self.imgui_global_scale
+        last_net_scale = self.imgui_global_scale
 
         sync_time = None
         while (
@@ -227,6 +236,13 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             if not keep_going:
                 continue
+
+            # reset if scale changes
+            if self.imgui_global_scale != last_scale:
+                vp = imgui.get_main_viewport()
+                vp.framebuffer_scale = (2*self.imgui_global_scale, 2*self.imgui_global_scale)
+                imgui.get_style().font_scale_main = self.imgui_global_scale
+                last_scale = self.imgui_global_scale
 
             # start processing for this frame
             imgui.new_frame()
@@ -273,8 +289,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # backend control
     def initialize(self):
-        self.window_width = self.INIT_WIDTH
-        self.window_height = self.INIT_HEIGHT
+        self.window_width = int(self.INIT_WIDTH * self.imgui_global_scale)
+        self.window_height = int(self.INIT_HEIGHT * self.imgui_global_scale)
         self.icon_path = sys.exec_prefix + '/share/mfp/icons/'
         self.keys_pressed = set()
         self.buttons_pressed = set()
@@ -303,10 +319,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         nedit.push_style_color(nedit.StyleColor.flow_marker, (1, 1, 1, 0.2))
         nedit.push_style_color(nedit.StyleColor.flow, (1, 1, 1, 0.5))
-
-        vp = imgui.get_main_viewport()
-        vp.framebuffer_scale = (2*self.imgui_global_scale, 2*self.imgui_global_scale)
-        imgui.get_style().font_scale_main = self.imgui_global_scale
 
         ########################################
         # menu bar

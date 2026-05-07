@@ -14,7 +14,7 @@ from ..text_widget import TextWidget, TextWidgetImpl
 
 # FIXME -- config
 default_tt_font_name = "Inconsolata"
-default_tt_font_size = 16
+default_tt_font_size = 15
 default_prop_font_name = "Roboto"
 default_prop_font_size = 16
 
@@ -131,12 +131,12 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     def markdown_div_callback(cls, div_class, is_opening_div):
         classes = div_class.split(' ')
         sizes = {
-            "size-x-small": 8.0,
-            "size-small": 12.0,
-            "size-normal": 16.0,
-            "size-large": 20.0,
-            "size-x-large": 24.0,
-            "size-xx-large": 28.0,
+            "size-x-small": 8.0 / TextWidget.scale_factor,
+            "size-small": 12.0 / TextWidget.scale_factor,
+            "size-normal": 16.0 / TextWidget.scale_factor,
+            "size-large": 20.0 / TextWidget.scale_factor,
+            "size-x-large": 24.0 / TextWidget.scale_factor,
+            "size-xx-large": 28.0 / TextWidget.scale_factor,
         }
 
         font_key_stack = cls.imgui_currently_rendering.font_key_stack
@@ -145,9 +145,11 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 _font_key(imgui.get_current_context().font),
                 imgui.get_current_context().font_size
             ))
+
         font_key, font_size = list(f for f in font_key_stack if f)[-1]
         font_name, font_weight = font_key.split('__')
 
+        font_size = font_size / TextWidget.scale_factor
         font_changed = False
         color = None
 
@@ -299,7 +301,6 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         return '\n<br>'.join(code_lines)
 
     def transform_md(self, md_text):
-        initial = md_text
         # pango/html escape char replacements
         md_text = re.sub('&lt;', '<', md_text)
         md_text = re.sub('&gt;', '>', md_text)
@@ -443,6 +444,34 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         return md_text
 
+    def render_selection_box(self, label_text, pos_x, pos_y):
+        if not self.editable:
+            return
+
+        _, font_height = imgui.calc_text_size("M")
+        draw_list = imgui.get_window_draw_list()
+        lines = label_text.split("\n")
+        line_start_pos = 0
+
+        for line in lines:
+            line_end_pos = line_start_pos + len(line)
+            if self.selection_start <= line_end_pos and self.selection_end >= line_start_pos:
+                box_start = max(0, self.selection_start - line_start_pos)
+                box_end = min(len(line), self.selection_end - line_start_pos)
+
+                # draw cursor
+                box_text = line[box_start:box_end]
+                leader_text = line[:box_start]
+                box_start_px, _ = imgui.calc_text_size(leader_text)
+                box_width_px, _ = imgui.calc_text_size(box_text)
+                draw_list.add_rect_filled(
+                    (pos_x + box_start_px - 1, pos_y),
+                    (pos_x + box_start_px + box_width_px + 1, pos_y + self.font_height + 2),
+                    ColorDB().backend.im_col32(self.cursor_color)
+                )
+            line_start_pos += len(line) + 1
+            pos_y += font_height
+
     def render(self, wrap_width=None, highlight=None):
         extra_bit = ''
         if self.multiline and self.text and self.text[-1] == '\n':
@@ -481,17 +510,11 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             else:
                 md_text_in = f"<div class='tt'>{self.text}</div>"
 
-            # sometimes imgui_md doesn't call the div-callback
-            # so we need to be defensive about the font stack
-            context = imgui.get_current_context()
-            text_changed = False
-
             # transform converts to better-renderable form
             # and also has some Pango compatibility shims
             if self.transform_in == md_text_in and highlight == self.highlight_text:
                 md_text = self.transform_out
             else:
-                text_changed = True
                 self.transform_in = md_text_in
                 self.highlight_text = highlight
                 blocks = self.split_blocks(md_text_in)
@@ -508,29 +531,44 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             if self.markdown_text or self.text:
                 markdown.render(md_text)
 
+            if self.editable:
+                txt_x, txt_y = imgui.get_item_rect_min()
+                fkey = f"{default_tt_font_name}__regular"
+                new_font = self.imgui_font_atlas.get(fkey)
+                new_size = default_tt_font_size / self.scale_factor
+
+                imgui.push_font(new_font, new_size)
+                self.render_selection_box(label_text, txt_x, txt_y)
+                imgui.pop_font()
+
             # check for stray fonts on the stack and get rid of them
             draw_list.pop_clip_rect()
         else:
+            fkey = f"{default_tt_font_name}__regular"
+            new_font = self.imgui_font_atlas.get(fkey)
+            new_size = default_tt_font_size / self.scale_factor
+
+            if new_font:
+                imgui.push_font(new_font, new_size)
+            else:
+                log.debug(f"[font] can't find {fkey} in {list(self.imgui_font_atlas.keys())}")
+            w, h = imgui.calc_text_size("M")
+            self.font_width = w
+            self.font_height = h
+
             if self.multiline and wrap_width:
                 label_text = self.simple_wrap(self.text, int(wrap_width / self.font_width))
                 self.wrapped_text = label_text
             else:
                 self.wrapped_text = self.text
 
-            fkey = f"{default_tt_font_name}__regular"
-            new_font = self.imgui_font_atlas.get(fkey)
-            new_size = default_tt_font_size
-
-            if new_font:
-                imgui.push_font(new_font, new_size)
-            else:
-                log.debug(f"[font] can't find {fkey} in {list(self.imgui_font_atlas.keys())}")
-            self.font_width, self.font_height = imgui.calc_text_size("M")
             if self.wrapped_text:
                 imgui.text(self.wrapped_text + extra_bit)
             else:
                 imgui.dummy((1, self.font_height))
 
+            txt_x, txt_y = imgui.get_item_rect_min()
+            self.render_selection_box(label_text, txt_x, txt_y)
             if new_font:
                 imgui.pop_font()
 
@@ -544,32 +582,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         imgui.pop_style_var()
 
         w, h = imgui.get_item_rect_size()
-        left_x, top_y = imgui.get_item_rect_min()
 
         self.width = w
         self.height = h
-
-        if not self.editable:
-            return
-
-        draw_list = imgui.get_window_draw_list()
-        lines = label_text.split("\n")
-        line_start_pos = 0
-
-        for line in lines:
-            line_end_pos = line_start_pos + len(line)
-            if self.selection_start <= line_end_pos and self.selection_end >= line_start_pos:
-                box_start = max(0, self.selection_start - line_start_pos)
-                box_end = min(len(line), self.selection_end - line_start_pos)
-
-                # draw cursor
-                draw_list.add_rect_filled(
-                    (left_x + box_start * self.font_width - 1, top_y),
-                    (left_x + box_end * self.font_width + 1, top_y + self.font_height + 2),
-                    ColorDB().backend.im_col32(self.cursor_color)
-                )
-            line_start_pos += len(line) + 1
-            top_y += self.font_height
 
     def set_single_line_mode(self, val):
         self.multiline = not val

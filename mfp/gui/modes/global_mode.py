@@ -360,6 +360,10 @@ class GlobalMode (InputMode):
         params the action usually gets by interactive prompt)
         """
         async def cb(txt):
+            if not txt:
+                self.window.hud_write("Canceled")
+                return
+
             if txt.startswith("eval "):
                 resp = eval(txt[5:])
                 log.debug(f"[eval] {txt[5:]} --> {resp}")
