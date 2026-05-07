@@ -173,7 +173,7 @@ class AppWindowImpl(BackendInterface, ABC):
 
 
 class AppWindow (SignalMixin):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
 
         # self.objects is BaseElement instances representing the
@@ -215,6 +215,10 @@ class AppWindow (SignalMixin):
         self.cmd_prompt = None
         self.cmd_input = None
         self.cmd_input_filename = False
+
+        for k, v in kwargs.items():
+            if hasattr(self, k):
+                setattr(self, k, v)
 
         # set up key and mouse handling
         self.input_mgr = InputManager(self)

@@ -41,8 +41,6 @@ class GlobalMode (InputMode):
 
         self.tile_manager_mode = None
 
-        self.bufedit_prev_mode = None
-
         InputMode.__init__(self, "Global input bindings", "Global")
 
     @classmethod

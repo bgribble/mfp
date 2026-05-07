@@ -43,7 +43,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     INIT_WIDTH = 1200
     INIT_HEIGHT = 900
 
-    INIT_INFO_PANEL_WIDTH = 350
+    INIT_INFO_PANEL_WIDTH = 200
     INIT_CONSOLE_PANEL_HEIGHT = 180
     INIT_MENU_HEIGHT = 21
 
@@ -116,6 +116,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.log_filter_timestamp = None
 
         super().__init__(*args, **kwargs)
+
+        self.info_panel_width *= self.imgui_global_scale
+        self.console_panel_height *= self.imgui_global_scale
+        self.canvas_panel_width *= self.imgui_global_scale
+        self.canvas_panel_height *= self.imgui_global_scale
 
         self.signal_listen("motion-event", self.handle_motion, prepend=True)
         self.signal_listen("toggle-console", self.handle_toggle_console)
@@ -423,7 +428,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             )
             _, self.info_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    self.canvas_panel_id, imgui.Dir_.right, 0.30
+                    self.canvas_panel_id, imgui.Dir_.right, 0.25
                 )
             )
 
@@ -794,8 +799,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.zone_select("bufedit")
         self.console_panel_visible = True
-        if self.console_panel_height < 2.5*self.INIT_CONSOLE_PANEL_HEIGHT:
-            self.console_panel_height = 2.5*self.INIT_CONSOLE_PANEL_HEIGHT
+        if self.console_panel_height < 3*self.INIT_CONSOLE_PANEL_HEIGHT:
+            self.console_panel_height = 3*self.INIT_CONSOLE_PANEL_HEIGHT
             self.console_panel_height_set = True
 
         self.buffer_editor.focus()

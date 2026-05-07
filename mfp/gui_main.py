@@ -325,7 +325,7 @@ async def main(cmdline):
     gui.backend_name = backend
     gui.searchpath = searchpath
 
-    gui.appwin = AppWindow.build()
+    gui.appwin = AppWindow.build(imgui_global_scale=init_mag)
 
     if backend == "imgui":
         gui.appwin.set_app_scale(init_mag)
