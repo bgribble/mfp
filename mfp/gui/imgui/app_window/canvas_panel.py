@@ -73,7 +73,7 @@ def render_selection_box(app_window, pane_origin, canvas_origin, tile):
     draw_list.pop_clip_rect()
 
 
-def render_tile(app_window, patch):
+def render_tile(app_window, patch, num_patches):
     """
     render a patch tile
     """
@@ -121,6 +121,7 @@ def render_tile(app_window, patch):
         flags=(
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
+            | (imgui.WindowFlags_.no_resize if num_patches == 1 else 0)
         ),
     )
 
@@ -430,6 +431,7 @@ def render(app_window):
             | imgui.WindowFlags_.no_move
             | imgui.WindowFlags_.no_title_bar
             | imgui.WindowFlags_.no_bring_to_front_on_focus
+            | imgui.WindowFlags_.no_resize
         ),
     )
 
@@ -456,7 +458,7 @@ def render(app_window):
             ]
     for tile_num, patch in enumerate(displayed_patches):
         imgui.push_id(tile_num)
-        render_tile(app_window, patch)
+        render_tile(app_window, patch, len(displayed_patches))
         imgui.pop_id()
 
     app_window.viewport_selection_set = False

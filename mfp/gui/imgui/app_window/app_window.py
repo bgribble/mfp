@@ -73,6 +73,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.console_panel_height = self.INIT_CONSOLE_PANEL_HEIGHT
         self.console_panel_height_set = False
 
+        self.top_panel_id = None   # container for canvas and info
+
         self.canvas_panel_id = None
         self.canvas_panel_width = self.INIT_WIDTH - self.INIT_INFO_PANEL_WIDTH
         self.canvas_panel_height = self.INIT_HEIGHT - self.INIT_CONSOLE_PANEL_HEIGHT
@@ -421,14 +423,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             )
             imgui.internal.dock_builder_set_node_size(dockspace_id, imgui.get_window_size())
 
-            _, self.console_panel_id, self.canvas_panel_id = (
+            _, self.console_panel_id, self.top_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
                     dockspace_id, imgui.Dir_.down, 0.25
                 )
             )
             _, self.info_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    self.canvas_panel_id, imgui.Dir_.right, 0.25
+                    self.top_panel_id, imgui.Dir_.right, 0.25
                 )
             )
 
@@ -436,9 +438,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 imgui.internal.DockNodeFlagsPrivate_.no_close_button
                 | imgui.internal.DockNodeFlagsPrivate_.no_window_menu_button
                 | imgui.internal.DockNodeFlagsPrivate_.no_tab_bar
+                | imgui.internal.DockNodeFlagsPrivate_.no_tab_bar
+                | imgui.internal.DockNodeFlagsPrivate_.no_resize_y
+                | imgui.internal.DockNodeFlagsPrivate_.no_resize_x
             )
-
-            for node_id in [self.info_panel_id, self.console_panel_id, self.canvas_panel_id]:
+            for node_id in [
+                self.info_panel_id, self.console_panel_id, self.canvas_panel_id,
+                self.top_panel_id
+            ]:
                 node = imgui.internal.dock_builder_get_node(node_id)
                 node.local_flags = node_flags
 
@@ -448,21 +455,28 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             imgui.internal.dock_builder_finish(dockspace_id)
 
         console_node = imgui.internal.dock_builder_get_node(self.console_panel_id)
+        top_node = imgui.internal.dock_builder_get_node(self.top_panel_id)
+        canvas_node = imgui.internal.dock_builder_get_node(self.canvas_panel_id)
+        info_node = imgui.internal.dock_builder_get_node(self.info_panel_id)
+
         if self.console_panel_height_set:
-            imgui.internal.dock_builder_set_node_size(
-                console_node.id_,
-                (self.window_width, self.console_panel_height)
-            )
+            delta_h = self.console_panel_height - console_node.size[1]
+
+            canvas_node.size_ref.y = int(canvas_node.size[1] - delta_h)
+            info_node.size_ref.y = int(info_node.size[1] - delta_h)
+            top_node.size_ref.y = int(top_node.size[1] - delta_h)
+            console_node.size_ref.y = int(self.console_panel_height)
+            #console_node.pos[1] = int(console_node.pos[1] - delta_h)
+
+            self.canvas_panel_height = canvas_node.size[1]
             self.console_panel_height_set = False
         else:
             console_size = console_node.size
             self.console_panel_height = console_size[1]
 
-        info_node = imgui.internal.dock_builder_get_node(self.info_panel_id)
         info_size = info_node.size
         self.info_panel_width = info_size[0]
 
-        canvas_node = imgui.internal.dock_builder_get_node(self.canvas_panel_id)
         canvas_size = canvas_node.size
         self.canvas_panel_width = canvas_size[0]
         self.canvas_panel_height = canvas_size[1]
@@ -805,7 +819,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.buffer_editor.focus()
 
-        if not self.buffer_editor.working_patch_id:
+        if self.buffer_info and not self.buffer_editor.working_patch_id:
             await self.buffer_editor.init_working_patch()
 
     async def stop_buffer_editor(self):
@@ -823,7 +837,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if zone_name == self.zone_selected:
             return
 
-        old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, self.input_mgr.minor_modes)
+        old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, list(self.input_mgr.minor_modes))
         old_zone = self.zone_selected
 
         self.zone_selected = zone_name
@@ -836,7 +850,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         save_old = True
         if old_zone in ('info',):
             save_old = False
-
         if zone_name in self.zone_modes:
             new_global, new_major, new_minor = self.zone_modes.get(zone_name)
             new_mode = True
@@ -850,9 +863,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             new_major = ConsoleMajorMode(self)
             new_mode = True
         elif zone_name == "cmdline":
-            new_minor = [self.cmd_manager.mode]
+            new_minor = (self.cmd_manager.mode, )
             new_mode = True
-
+        elif zone_name == "console drag":
+            from mfp.gui.modes.resize_modes import ConsoleResizeMode
+            new_minor = (ConsoleResizeMode(self),)
+            new_mode = True
         if new_mode:
             if save_old:
                 self.zone_modes[old_zone] = old_modes

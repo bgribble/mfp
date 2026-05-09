@@ -380,6 +380,10 @@ class BufferEditor:
 
         source_info = self.working_source_info or self.buffer_source_info
         binfo = self.working_buf_info or self.buffer_info
+
+        if not binfo:
+            return
+
         fname = binfo.file_name or 'No file'
 
         channel_ampls = [0] * (4 * self.buffer_info.channels)

@@ -387,6 +387,9 @@ class MFPCommand:
         from .mfp_app import MFPApp
         from .dsp_object import DSPObject
         patch = MFPApp().recall(patch_id)
+        if not MFPApp().rpc_host:
+            return 0
+
         dsp_factory = await MFPApp().rpc_host.require(
             DSPObject, host_id=patch.context.node_id
         )

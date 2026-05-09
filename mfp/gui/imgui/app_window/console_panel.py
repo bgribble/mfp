@@ -4,7 +4,7 @@ from datetime import datetime
 from imgui_bundle import imgui
 
 from mfp.gui.modes.console_mode import ConsoleMode
-
+from mfp import log
 
 def filter_logs(filter_text, raw_log):
     filtered = []
@@ -29,6 +29,21 @@ def render(app_window):
             | imgui.WindowFlags_.no_bring_to_front_on_focus
         ),
     )
+
+    ##############################
+    ## resize grab bar
+    imgui.begin_group()
+    imgui.dummy((app_window.window_width / 2 - 20, app_window.menu_height))
+    imgui.same_line()
+    imgui.text("...")
+    imgui.same_line()
+    imgui.dummy((app_window.window_width / 2 - 20, app_window.menu_height))
+    imgui.end_group()
+    if imgui.is_item_hovered():
+        app_window.zone_hovered("console drag")
+
+    ##############################
+    ## console tab bar
     if imgui.begin_tab_bar("console_tab_bar", imgui.TabBarFlags_.none):
         if imgui.begin_tab_item("Log")[0]:
             log_text = app_window.log_text
@@ -66,7 +81,7 @@ def render(app_window):
             imgui.input_text_multiline(
                 'log_output_text',
                 log_text,
-                (app_window.window_width, app_window.console_panel_height - 2*app_window.menu_height),
+                (app_window.window_width, app_window.console_panel_height - 3*app_window.menu_height),
                 imgui.InputTextFlags_.read_only
             )
 
@@ -104,13 +119,13 @@ def render(app_window):
             tabflags = 0
 
         if imgui.begin_tab_item("Console", None, tabflags)[0]:
-            if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-                app_window.zone_hovered("console")
-
             app_window.console_manager.render(
                 app_window.window_width,
-                app_window.console_panel_height - app_window.menu_height
+                app_window.console_panel_height - 2*app_window.menu_height
             )
+            if imgui.is_item_hovered():
+                app_window.zone_hovered("console")
+
             imgui.end_tab_item()
 
         if app_window.buffer_editor is not None:
@@ -121,9 +136,9 @@ def render(app_window):
 
             if imgui.begin_tab_item("Buffer Edit", None, tabflags)[0]:
                 app_window.buffer_editor_shown = True
-                if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-                    app_window.zone_hovered("bufedit")
                 bufedit_keep_going = app_window.buffer_editor.render()
+                if imgui.is_item_hovered():
+                    app_window.zone_hovered("bufedit")
                 if not bufedit_keep_going:
                     app_window.buffer_editor = None
                 imgui.end_tab_item()

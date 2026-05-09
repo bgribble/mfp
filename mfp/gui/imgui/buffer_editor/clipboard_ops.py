@@ -15,7 +15,7 @@ from .buffer_editor import BufferEditor
 
 @extends(BufferEditor)
 async def clipboard_copy(self):
-    if self.implot_selection is None:
+    if not self.buffer_data or self.implot_selection is None:
         return
 
     clip_start = int(self.implot_selection.x.min * self.buffer_info.rate)
@@ -32,6 +32,9 @@ async def clipboard_copy(self):
 
 @extends(BufferEditor)
 async def clipboard_cut(self):
+    if not self.buffer_data:
+        return
+
     await self.clipboard_copy()
 
     self.buffer_data = [
@@ -69,7 +72,7 @@ async def clipboard_cut(self):
 
 @extends(BufferEditor)
 async def clipboard_clear(self):
-    if not self.implot_selection:
+    if not self.buffer_data or not self.implot_selection:
         return
 
     section_start = int(self.implot_selection.x.min * self.buffer_info.rate)
@@ -84,7 +87,7 @@ async def clipboard_clear(self):
 
 @extends(BufferEditor)
 async def clipboard_delete(self):
-    if not self.implot_selection:
+    if not self.buffer_data or not self.implot_selection:
         return
 
     section_start = int(self.implot_selection.x.min * self.buffer_info.rate)
@@ -125,7 +128,7 @@ async def clipboard_delete(self):
 
 @extends(BufferEditor)
 async def clipboard_paste(self):
-    if not self.clipboard_data:
+    if not self.buffer_data or not self.clipboard_data:
         return
 
     clip_size = len(self.clipboard_data[0])
