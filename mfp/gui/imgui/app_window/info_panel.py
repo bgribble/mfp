@@ -214,7 +214,7 @@ def render_param(
     app_window, param_name, param_type, param_value, target=None, readonly=False, override=None
 ):
     item_spacing = 12
-
+    char_size = 8
     imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 4.0))
 
     # parameter name, except for property lists which each have their own name
@@ -313,6 +313,7 @@ def render_param(
                 if none_val:
                     show_input = False
             if show_input:
+                imgui.set_next_item_width(char_size * 20)
                 changed, newval = imgui.input_int(
                     f"##{param_name}",
                     int(param_value),
@@ -350,6 +351,7 @@ def render_param(
                     show_input = False
             if show_input:
                 imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 6.0))
+                imgui.set_next_item_width(char_size * 20)
                 changed, newval = imgui.input_double(
                     f"##{param_name}",
                     float(param_value or 0),
@@ -379,6 +381,7 @@ def render_param(
             ]
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
             imgui.begin_group()
+            imgui.set_next_item_width(80 * app_window.imgui_global_scale)
             txt_changed, txt_newval = imgui.input_text(
                 f"##{param_name}_txt",
                 str(param_value),

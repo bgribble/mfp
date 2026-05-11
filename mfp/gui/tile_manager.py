@@ -13,13 +13,13 @@ class Tile:
     title: str
     tile_id: int
     page_id: int
-    origin_x: float = 0
+    origin_x: float = 0        # positioh of tile in tile manager
     origin_y: float = 0
-    width: float = 0
+    width: float = 0           # size of tile in screen pix
     height: float = 0
     frame_offset_x: float = 0
     frame_offset_y: float = 0
-    view_x: float = 0
+    view_x: float = 0          # origin of upper-left corner of tile in patch coords
     view_y: float = 0
     view_zoom: float = 1.0
     neighbors: dict = field(default_factory=dict)
@@ -73,6 +73,9 @@ class TileManager:
         """
         resize the entire tile manager space, just scaling all the tiles
         """
+        if new_width == self.total_width and new_height == self.total_height:
+            return
+
         width_scale = new_width / self.total_width
         height_scale = new_height / self.total_height
 

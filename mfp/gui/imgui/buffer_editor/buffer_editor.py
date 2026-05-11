@@ -831,6 +831,8 @@ class BufferEditor:
             elif self.implot_playhead >= self.implot_selection.x.max:
                 self.implot_playhead = self.implot_selection.x.max
                 buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
+            await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+            await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
         if self.implot_playhead_start_time:
             self.implot_playhead_start_time = datetime.now()
@@ -838,8 +840,6 @@ class BufferEditor:
 
         self.buffer_set_selection()
 
-        await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
-        await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
     async def playhead_loop_selection(self):
         from mfp.gui_main import MFPGUI

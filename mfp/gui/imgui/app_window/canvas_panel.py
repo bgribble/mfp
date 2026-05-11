@@ -294,7 +294,7 @@ def render_tile(app_window, patch, num_patches):
     ))
 
     need_navigate = False
-
+    need_reset = False
     if app_window.viewport_zoom_set or app_window.viewport_pos_set:
         need_navigate = True
 
@@ -363,8 +363,11 @@ def render_tile(app_window, patch, num_patches):
 
         if tile.view_x != viewport_x or tile.view_y != viewport_y:
             if not app_window.viewport_drag_active:
-                tile.view_x = viewport_x
-                tile.view_y = viewport_y
+                if app_window.canvas_resize_in_progress:
+                    need_reset = True
+                else:
+                    tile.view_x = viewport_x
+                    tile.view_y = viewport_y
 
     #############################
     # creation of links (by click-drag)
@@ -421,6 +424,7 @@ def render_tile(app_window, patch, num_patches):
     TextWidget.scale_factor = 1.0
 
     imgui.end()
+    return need_reset
 
 
 def render(app_window):
@@ -456,14 +460,18 @@ def render(app_window):
                 p for p in app_window.patches
                 if p.display_info.page_id == app_window.canvas_tile_page
             ]
+    need_reset = False
     for tile_num, patch in enumerate(displayed_patches):
         imgui.push_id(tile_num)
-        render_tile(app_window, patch, len(displayed_patches))
+        need_reset = need_reset or render_tile(app_window, patch, len(displayed_patches))
         imgui.pop_id()
 
     app_window.viewport_selection_set = False
     app_window.viewport_zoom_set = False
-    app_window.viewport_pos_set = False
+    if need_reset:
+        app_window.viewport_pos_set = True
+    else:
+        app_window.viewport_pos_set = False
 
     imgui.end()
 

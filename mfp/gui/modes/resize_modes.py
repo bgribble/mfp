@@ -32,10 +32,16 @@ class ConsoleResizeMode (InputMode):
             keysym="M1-MOTION"
         )
 
+        cls.bind(
+            "console-resize-finish", lambda mode: mode.resize_finish(), helptext="Finish resize",
+            keysym="M1UP"
+        )
+
     def resize_start(self):
         self.pointer_x = self.manager.pointer_ev_x
         self.pointer_y = self.manager.pointer_ev_y
         self.console_panel_height = self.window.console_panel_height
+        self.window.canvas_resize_in_progress = True
         return True
 
     def resize_motion(self):
@@ -45,6 +51,13 @@ class ConsoleResizeMode (InputMode):
         self.window.console_panel_height_set = True
         return True
 
+    def resize_finish(self):
+        self.window.canvas_resize_in_progress = False
+        return True
+
+    def disable(self):
+        self.window.canvas_resize_in_progress = False
+        return super().disable()
 
 class InfoResizeMode (InputMode):
     def __init__(self, window):
@@ -68,11 +81,16 @@ class InfoResizeMode (InputMode):
             "info-resize-motion", lambda mode: mode.resize_motion(), helptext="Drag resize handle",
             keysym="M1-MOTION"
         )
+        cls.bind(
+            "info-resize-finish", lambda mode: mode.resize_finish(), helptext="Finish resize",
+            keysym="M1UP"
+        )
 
     def resize_start(self):
         self.pointer_x = self.manager.pointer_ev_x
         self.pointer_y = self.manager.pointer_ev_y
         self.info_panel_width = self.window.info_panel_width
+        self.window.canvas_resize_in_progress = True
         return True
 
     def resize_motion(self):
@@ -81,3 +99,11 @@ class InfoResizeMode (InputMode):
         self.window.info_panel_width = self.info_panel_width - px
         self.window.info_panel_width_set = True
         return True
+
+    def resize_finish(self):
+        self.window.canvas_resize_in_progress = False
+        return True
+
+    def disable(self):
+        self.window.canvas_resize_in_progress = False
+        return super().disable()
