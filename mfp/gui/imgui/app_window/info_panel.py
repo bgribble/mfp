@@ -8,6 +8,7 @@ from datetime import datetime
 from imgui_bundle import imgui, imgui_color_text_edit as ed
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui import image_utils
 from mfp.gui.colordb import RGBAColor
 from mfp.gui.base_element import BaseElement, PROPERTY_ATTRS
 from mfp.gui.param_info import (
@@ -94,23 +95,58 @@ def render(app_window):
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
             | imgui.WindowFlags_.no_title_bar
+            | imgui.WindowFlags_.no_scrollbar
             | imgui.WindowFlags_.no_bring_to_front_on_focus
         ),
     )
-    if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.zone_hovered("info")
 
+    ##############################
+    ## resize grab bar
+    dots = image_utils.load_texture_from_file("icons/dots-vert.png")
+    grab_size = 8 * app_window.imgui_global_scale
+    imgui.push_style_color(imgui.Col_.child_bg, imgui.IM_COL32(120, 120, 120, 255))
+    imgui.push_style_var(imgui.StyleVar_.window_padding, (0, 0))
+    imgui.push_style_var(imgui.StyleVar_.window_border_size, 0)
+
+    imgui.begin_child(
+        "info_drag_bar",
+        (grab_size, app_window.canvas_panel_height),
+        window_flags=imgui.WindowFlags_.no_scrollbar
+    )
+    
+    imgui.set_cursor_pos(((grab_size-5)/2.0,app_window.canvas_panel_height / 2.0))
+    imgui.image(imgui.ImTextureRef(dots[0]), (5, 25))
+    imgui.end_child()
+    if imgui.is_item_hovered():
+        app_window.zone_hovered("info drag")
+    
+    imgui.pop_style_color()
+
+    imgui.set_cursor_pos((grab_size, 0))
+    imgui.same_line()
+    imgui.begin_child("info_content_panel")
     if imgui.begin_tab_bar("inspector_tab_bar", imgui.TabBarFlags_.none):
+        if imgui.is_item_hovered():
+            app_window.zone_hovered("info")
         if imgui.begin_tab_item("Patch")[0]:
+            imgui.begin_child("patch_scroller", (0,0))
             render_patch_tab(app_window)
+            imgui.end_child()
+            if imgui.is_item_hovered():
+                app_window.zone_hovered("info")
             imgui.end_tab_item()
 
         # always show info about selection
         if imgui.begin_tab_item("Object")[0]:
+            imgui.begin_child("object_scroller", (0,0))
+            if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+                app_window.zone_hovered("info")
             render_object_tab(app_window)
+            imgui.end_child()
             imgui.end_tab_item()
 
         # specific info about this type of object
+
         if len(app_window.selected) == 1:
             param_list = [
                 pname
@@ -119,13 +155,21 @@ def render(app_window):
             ]
 
             if len(param_list) > 0 and imgui.begin_tab_item("Params")[0]:
+                imgui.begin_child("params_scroller", (0,0))
+                if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+                    app_window.zone_hovered("info")
                 render_params_tab(app_window, param_list)
+                imgui.end_child()
                 imgui.end_tab_item()
 
         # show style for global (no selection) or single selection
         if len(app_window.selected) <= 1:
             if imgui.begin_tab_item("Style")[0]:
+                imgui.begin_child("style_scroller", (0,0))
+                if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+                    app_window.zone_hovered("info")
                 render_style_tab(app_window)
+                imgui.end_child()
                 imgui.end_tab_item()
 
         # show bindings and activity for exactly one selection
@@ -140,12 +184,24 @@ def render(app_window):
                 MFPGUI().async_task(sel.tooltip_update())
 
             if imgui.begin_tab_item("Bindings")[0]:
+                imgui.begin_child("bindings_scroller", (0,0))
+                if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+                    app_window.zone_hovered("info")
                 render_bindings_tab(app_window)
+                imgui.end_child()
                 imgui.end_tab_item()
             if imgui.begin_tab_item("Activity")[0]:
+                imgui.begin_child("activity_scroller", (0,0))
+                if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
+                    app_window.zone_hovered("info")
                 render_activity_tab(app_window)
+                imgui.end_child()
                 imgui.end_tab_item()
         imgui.end_tab_bar()
+    imgui.end_child()
+    if imgui.is_item_hovered():
+        app_window.zone_hovered("info")
+    imgui.pop_style_var(2)
     imgui.end()
 
 
@@ -392,7 +448,7 @@ def render_param(
 
                         if del_clicked:
                             changed = True
-                        else: 
+                        else:
                             new_item = (
                                 display_newval if display_changed else display,
                                 val_newval if val_changed else value
@@ -739,6 +795,7 @@ def render_params_tab(app_window, param_list):
 
 
 def render_style_tab(app_window):
+    cp = imgui.get_cursor_pos()[0]
     if imgui.begin_tab_bar("styles_tab_bar", imgui.TabBarFlags_.none):
         style = None
         style_changed = False
@@ -754,7 +811,9 @@ def render_style_tab(app_window):
             override_params = list(style.keys())
 
             # the Element tab is the only on where params can be edited
+            imgui.set_cursor_pos_x(0)
             if imgui.begin_tab_item("Element")[0]:
+                imgui.set_cursor_pos_x(cp)
                 imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
                 imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()
@@ -770,7 +829,9 @@ def render_style_tab(app_window):
                 imgui.end_tab_item()
 
             # defaults for this type of element
+            imgui.set_cursor_pos_x(0)
             if imgui.begin_tab_item("Type")[0]:
+                imgui.set_cursor_pos_x(cp)
                 imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
                 imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()
@@ -793,7 +854,9 @@ def render_style_tab(app_window):
                 imgui.end_tab_item()
 
             # style shared by all element types
+            imgui.set_cursor_pos_x(0)
             if imgui.begin_tab_item("Base")[0]:
+                imgui.set_cursor_pos_x(cp)
                 imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
                 imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()
@@ -816,7 +879,9 @@ def render_style_tab(app_window):
                 imgui.end_group()
                 imgui.end_tab_item()
 
+        imgui.set_cursor_pos_x(0)
         if imgui.begin_tab_item("Global")[0]:
+            imgui.set_cursor_pos_x(cp)
             imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
             imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
             imgui.same_line()
@@ -838,8 +903,10 @@ def render_style_tab(app_window):
             imgui.end_group()
             imgui.end_tab_item()
 
+        imgui.set_cursor_pos_x(0)
         if len(app_window.selected) == 1:
             if imgui.begin_tab_item("Computed")[0]:
+                imgui.set_cursor_pos_x(cp)
                 imgui.dummy(app_window.scaled(1, TAB_PADDING_Y))
                 imgui.dummy(app_window.scaled(TAB_PADDING_X, 1))
                 imgui.same_line()

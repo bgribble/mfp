@@ -67,6 +67,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.info_panel_id = None
         self.info_panel_visible = True
         self.info_panel_width = self.INIT_INFO_PANEL_WIDTH
+        self.info_panel_width_set = False
 
         self.console_panel_id = None
         self.console_panel_visible = True
@@ -466,7 +467,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             info_node.size_ref.y = int(info_node.size[1] - delta_h)
             top_node.size_ref.y = int(top_node.size[1] - delta_h)
             console_node.size_ref.y = int(self.console_panel_height)
-            #console_node.pos[1] = int(console_node.pos[1] - delta_h)
 
             self.canvas_panel_height = canvas_node.size[1]
             self.console_panel_height_set = False
@@ -474,8 +474,16 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             console_size = console_node.size
             self.console_panel_height = console_size[1]
 
-        info_size = info_node.size
-        self.info_panel_width = info_size[0]
+        if self.info_panel_width_set:
+            delta_w = self.info_panel_width - info_node.size[0]
+            canvas_node.size_ref.x = int(canvas_node.size[0] - delta_w)
+            info_node.size_ref.x = int(info_node.size[0] + delta_w)
+
+            self.canvas_panel_width = canvas_node.size[0]
+            self.info_panel_width_set = False
+        else:
+            info_size = info_node.size
+            self.info_panel_width = info_size[0]
 
         canvas_size = canvas_node.size
         self.canvas_panel_width = canvas_size[0]
@@ -868,6 +876,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         elif zone_name == "console drag":
             from mfp.gui.modes.resize_modes import ConsoleResizeMode
             new_minor = (ConsoleResizeMode(self),)
+            new_mode = True
+        elif zone_name == "info drag":
+            from mfp.gui.modes.resize_modes import InfoResizeMode
+            new_minor = (InfoResizeMode(self),)
             new_mode = True
         if new_mode:
             if save_old:

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from imgui_bundle import imgui
 
+from mfp.gui import image_utils
 from mfp.gui.modes.console_mode import ConsoleMode
 from mfp import log
 
@@ -30,15 +31,28 @@ def render(app_window):
         ),
     )
 
+    dots = image_utils.load_texture_from_file("icons/dots-horiz.png")
+
     ##############################
     ## resize grab bar
-    imgui.begin_group()
-    imgui.dummy((app_window.window_width / 2 - 20, app_window.menu_height))
+    grab_size = 8 * app_window.imgui_global_scale
+    imgui.push_style_color(imgui.Col_.child_bg, imgui.IM_COL32(120, 120, 120, 255))
+    imgui.set_next_window_size((app_window.window_width, grab_size))
+    imgui.push_style_var(imgui.StyleVar_.window_padding, (0, 0))
+    imgui.push_style_var(imgui.StyleVar_.window_border_size, 0)
+    imgui.begin_child(
+        "console_drag_bar",
+        window_flags=imgui.WindowFlags_.no_scrollbar
+    )
+    imgui.dummy((app_window.window_width, (grab_size - 5)/2 ))
+    imgui.dummy((app_window.window_width / 2, grab_size))
     imgui.same_line()
-    imgui.text("...")
+    imgui.image(imgui.ImTextureRef(dots[0]), (25, 5))
     imgui.same_line()
-    imgui.dummy((app_window.window_width / 2 - 20, app_window.menu_height))
-    imgui.end_group()
+    imgui.dummy((app_window.window_width / 2, grab_size))
+    imgui.end_child()
+    imgui.pop_style_var(2)
+    imgui.pop_style_color()
     if imgui.is_item_hovered():
         app_window.zone_hovered("console drag")
 
@@ -81,7 +95,7 @@ def render(app_window):
             imgui.input_text_multiline(
                 'log_output_text',
                 log_text,
-                (app_window.window_width, app_window.console_panel_height - 3*app_window.menu_height),
+                (app_window.window_width, app_window.console_panel_height - grab_size - 5 - 2*app_window.menu_height),
                 imgui.InputTextFlags_.read_only
             )
 
@@ -121,7 +135,7 @@ def render(app_window):
         if imgui.begin_tab_item("Console", None, tabflags)[0]:
             app_window.console_manager.render(
                 app_window.window_width,
-                app_window.console_panel_height - 2*app_window.menu_height
+                app_window.console_panel_height - grab_size - 4 - app_window.menu_height
             )
             if imgui.is_item_hovered():
                 app_window.zone_hovered("console")
