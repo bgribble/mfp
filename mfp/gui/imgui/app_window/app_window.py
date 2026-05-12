@@ -822,8 +822,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         self.zone_select("bufedit")
         self.console_panel_visible = True
-        if self.console_panel_height < 3*self.INIT_CONSOLE_PANEL_HEIGHT:
-            self.console_panel_height = 3*self.INIT_CONSOLE_PANEL_HEIGHT
+        if self.console_panel_height < 2.5*self.INIT_CONSOLE_PANEL_HEIGHT:
+            self.console_panel_height = 2.5*self.INIT_CONSOLE_PANEL_HEIGHT
             self.console_panel_height_set = True
 
         self.buffer_editor.focus()

@@ -98,6 +98,7 @@ def buffer_compute_peaks(self):
         x_min=0, x_max=total_time, y_min=-1, y_max=1
     )
     self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+    self.implot_limits_counter = 5
     self.buffer_peaks["1"] = (
         padded,
         np.arange(0, total_time, sample_time, dtype=np.float32)
@@ -129,13 +130,12 @@ def buffer_compute_peaks(self):
 
 
 @extends(BufferEditor)
-def get_peak_scale(self):
+def get_peak_scale(self, plot_limits):
     """
     called within a begin_plot()
     """
-    limits = implot.get_plot_limits()
     compress = self.buffer_info.rate * (
-        (max(limits.x.max, 1.0) - limits.x.min)
+        (max(plot_limits.x.max, 1.0) - plot_limits.x.min)
         / self.app_window.canvas_panel_width
     )
 

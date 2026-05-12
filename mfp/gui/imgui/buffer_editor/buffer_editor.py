@@ -37,6 +37,7 @@ class BufferEditor:
         self.implot_selection = None         # global selection range
         self.implot_limits = None            # global plot limits
         self.implot_limits_need_set = [None]
+        self.implot_limits_counter = 0
         self.implot_playhead = 0
         self.implot_playhead_needs_set = False
         self.implot_playhead_start_time = None
@@ -417,7 +418,7 @@ class BufferEditor:
                 playhead_offset = (
                     datetime.now() - self.implot_playhead_start_time
                 ).total_seconds()
-                if self.implot_playhead_looping:
+                if self.implot_playhead_looping and self.implot_selection:
                     raw_offset = self.implot_playhead_start_pos + playhead_offset
                     if raw_offset < self.implot_selection.x.min:
                         self.implot_playhead = self.implot_selection.x.min
@@ -440,6 +441,9 @@ class BufferEditor:
                     self.implot_playhead_looping = False
 
             options_changed = False
+            limits_changed = False
+            limit_delay_frames = 2
+
             for channel in range(num_channels + 1):
                 channel_tool_width = 100
 
@@ -480,6 +484,7 @@ class BufferEditor:
 
                     imgui.end_group()
                     imgui.same_line()
+
                     # meters
                     imgui.dummy([10, 1])
                     imgui.same_line()
@@ -506,6 +511,8 @@ class BufferEditor:
                     imgui.dummy([spacer, 1])
                     imgui.same_line()
                     imgui.pop_font()
+
+                # the plot itself
                 if implot.begin_plot(
                     "##buf_edit_plot",
                     [-1, height],
@@ -519,11 +526,18 @@ class BufferEditor:
                         implot.ImAxis_.y1.value, -1, 1, implot.Cond_.always.value
                     )
 
-                    if not self.implot_limits:
-                        self.implot_limits = implot.get_plot_limits()
+                    # set up plot limits if not already set
+                    if channel == 0:
+                        if not self.implot_limits:
+                            self.implot_limits = implot.Rect(
+                                x_min=0, x_max=1, y_min=-1, y_max=1
+                            )
+                            self.implot_limits_need_set = [True] * (num_channels + 1)
+                        elif self.implot_limits_counter > 0:
+                            self.implot_limits_counter -= 1
 
-                    # this is to reset limits after the boxselect adjusts zoom
-                    if self.implot_limits_need_set[channel]:
+                    # this is to reset limits after new file or change in view
+                    if self.implot_limits_need_set[channel] or self.implot_limits_counter > 0:
                         implot.setup_axis_limits(
                             implot.ImAxis_.x1.value,
                             self.implot_limits.x.min,
@@ -532,8 +546,31 @@ class BufferEditor:
                         )
                         self.implot_limits_need_set[channel] = False
 
+                    # catch changes done by implot when scroll-zooming
                     chan_sel = implot.get_plot_selection()
                     chan_limits = implot.get_plot_limits()
+
+                    if chan_sel.x.min not in (0, chan_sel.x.max):
+                        self.implot_selection = chan_sel
+                        self.channel_selections[channel] = chan_sel
+                        self.channel_selections_active[channel] = True
+                        MFPGUI().async_task(
+                            self.playhead_update_selection()
+                        )
+
+                    if (
+                        not self.implot_limits_need_set[channel]
+                        and (
+                            chan_limits.x.min != self.implot_limits.x.min
+                            or chan_limits.x.max != self.implot_limits.x.max
+                        )
+                    ):
+                        if (
+                            self.implot_limits_counter <= 0
+                            and not limits_changed
+                        ):
+                            limits_changed = chan_limits
+
                     if self.implot_playhead_needs_set:
                         pointer = implot.get_plot_mouse_pos()
                         if -1 <= pointer[1] <= 1:
@@ -542,22 +579,14 @@ class BufferEditor:
                     if chan_sel.x.min == 0 and chan_sel.x.max == 0:
                         if self.channel_selections_active[channel]:
                             self.implot_limits_need_set[channel] = True
+                            limits_changed = self.implot_limits
+                            limit_delay_frames = 1
                             self.channel_selections_active[channel] = False
-                    if (
-                        not self.implot_limits_need_set[channel]
-                        and (
-                            chan_limits.x.min != self.implot_limits.x.min
-                            or chan_limits.x.max != self.implot_limits.x.max
-                        )
-                    ):
-                        self.implot_limits = chan_limits
-                        self.implot_limits_need_set = [True] * (num_channels + 1)
-                        self.implot_limits_need_set[channel] = False
 
                     if channel > 0:
                         # use the right subsampled data
                         if peak_scale is None:
-                            peak_scale = self.get_peak_scale()
+                            peak_scale = self.get_peak_scale(self.implot_limits)
                             peaks = self.buffer_peaks[peak_scale]
                         y_values = peaks[0][channel - 1]
                         x_values = peaks[1]
@@ -583,20 +612,20 @@ class BufferEditor:
                     # playhead
                     implot.drag_line_x(0, self.implot_playhead, [1, 1, 1, 1])
 
-                    if chan_sel.x.min not in (0, chan_sel.x.max):
-                        self.implot_selection = chan_sel
-                        self.channel_selections[channel] = chan_sel
-                        self.channel_selections_active[channel] = True
-                        MFPGUI().async_task(
-                            self.playhead_update_selection()
-                        )
                     implot.end_plot()
                     if imgui.is_item_hovered():
                         plot_hovered = True
 
                 imgui.pop_id()
+
             if self.implot_playhead_needs_set:
                 self.implot_playhead_needs_set = False
+
+            if limits_changed:
+                self.implot_limits_need_set = [True] * (num_channels + 1)
+                self.implot_limits = limits_changed
+                log.debug(f"Setting counter to {limit_delay_frames}")
+                self.implot_limits_counter = limit_delay_frames
 
             if options_changed:
                 MFPGUI().async_task(self.channel_options_update())
