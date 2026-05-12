@@ -23,8 +23,8 @@ def render_bufedit_menu(app_window):
 
         add_menu_items(app_window, by_menu.get("BufEdit", {}))
 
+        MFPGUI().async_task(app_window.update_buffer_info())
         if app_window.buffer_info is None:
-            MFPGUI().async_task(app_window.update_buffer_info())
             app_window.buffer_info = []
 
         if app_window.buffer_selected is None and len(app_window.buffer_info):
@@ -35,7 +35,7 @@ def render_bufedit_menu(app_window):
         imgui.dummy(app_window.scaled(1, 2))
 
         for ind, buffer_info in enumerate(app_window.buffer_info):
-            if buffer_info.get('proc_name') in ("source_buffer", "sink_buffer"):
+            if buffer_info.get('proc_name') in ("source_buffer", "sink_buffer", "ampl_buffer"):
                 continue
 
             imgui.push_id(str(id(buffer_info)))
