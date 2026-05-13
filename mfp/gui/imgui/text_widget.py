@@ -316,34 +316,38 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             md_text,
             flags=re.MULTILINE
         )
+
         # add a newline before a block quote
         md_text = re.sub(
-            '^([^>][^\n]*?)\n> ',
-            '\\1\n\n> ',
-            md_text,
-            flags=re.MULTILINE
-        )
-        # add linebreaks between lines
-        md_text = re.sub(
-            '^(> [^\n]*?)(?<!<br>)\n> ',
-            '\\1<br>\n> ',
-            md_text,
-            flags=re.MULTILINE
-        )
-        # twice because sequential lines will overlap, and sub only gets non-overlapping
-        md_text = re.sub(
-            '^(> [^\n]*?)(?<!<br>)\n> ',
-            '\\1<br>\n> ',
+            '^([^>][^\n]*?)\n(?=> )',
+            '\\1\n',
             md_text,
             flags=re.MULTILINE
         )
 
         # single newlines with non-newline after are part of the
         # preceding paragraph, so replace newline with space -- unless it's
-        # part of a table (starts with |)
+        # part of a table (starts with |) or a list (starts with *)
         md_text = re.sub(
-            '([^\n])\n([^>|\n])',
-            r'\1 \2',
+            '^([^>|*][^\n]*)\n(?=[^*>|\n])',
+            r'\1 ',
+            md_text,
+            flags=re.MULTILINE
+        )
+
+        # add linebreaks between lines in a block quote
+        md_text = re.sub(
+            '^(> [^\n]*?)(?<!<br>)(?=\n)',
+            '\\1 <br>',
+            md_text,
+            flags=re.MULTILINE
+        )
+
+        # paragraphs (two newlines in a row) need a <br> to give them
+        # appropriate visual spacing
+        md_text = re.sub(
+            '^([^>|*][^\n]*)(?<!<br>)\n\n',
+            '\\1\n<br>\n\n',
             md_text,
             flags=re.MULTILINE
         )
@@ -529,7 +533,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 self.transform_out = md_text
             #imgui.dummy((1, 3))
             if self.markdown_text or self.text:
+                imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 2))
                 markdown.render(md_text)
+                imgui.pop_style_var()
 
             if self.editable:
                 txt_x, txt_y = imgui.get_item_rect_min()
