@@ -494,8 +494,8 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
         )
         draw_list.path_stroke(
             ColorDB().backend.im_col32(color),
-            imgui.ImDrawFlags_.closed,
-            1.0
+            flags=imgui.ImDrawFlags_.closed,
+            thickness=1.0
         )
 
         # the tasty filling
@@ -510,8 +510,8 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
 
         draw_list.path_stroke(
             ColorDB().backend.im_col32(color),
-            0,
-            (outer_radius - inner_radius) * 0.95
+            flags=0,
+            thickness=(outer_radius - inner_radius) * 0.95
         )
 
         # draw the scale if required

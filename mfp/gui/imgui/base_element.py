@@ -286,8 +286,8 @@ class ImguiBaseElementImpl(BaseElementImpl):
             draw_list.add_polyline(
                 points,
                 ColorDB().backend.im_col32(pcolor),
-                imgui.ImDrawFlags_.closed,
-                1.0,
+                flags=imgui.ImDrawFlags_.closed,
+                thickness=1.0,
             )
         else:
             draw_list.add_convex_poly_filled(
