@@ -32,8 +32,11 @@ process_ampl(mfp_processor * proc)
     mfp_sample * rms_buffer = pdata->rms_buffer->data + pdata->rms_pointer;
     mfp_sample * rms_bufend = pdata->rms_buffer->data + pdata->rms_buffer->blocksize;
     mfp_sample sample;
-    double peak_slope = 1000.0/((double)pdata->peak_decay_ms *
-                                (double)(proc->context->samplerate));
+    double peak_slope = (
+        1000.0 / (
+            MAX((double)pdata->peak_decay_ms * (double)(proc->context->samplerate), 0.0001)
+        )
+    );
     double peak = pdata->last_peak;
     double rms_accum = pdata->rms_accum;
     double sqr_sample;
