@@ -305,4 +305,7 @@ async def buffer_import(self, filename):
 
 @extends(BufferEditor)
 async def buffer_export(self, filename):
-    pass
+    await MFPGUI().mfp.eval_and_send(
+        self.working_sink_id, 0,
+        f"MethodCall('export', {filename!r}, {self.buffer_info.channels})"
+    )

@@ -129,7 +129,8 @@ class MFPCommand:
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            await obj.send(obj.parse_obj(message), port)
+            msg = obj.parse_obj(message)
+            await obj.send(msg, port)
         return True
 
     @noresp
@@ -387,7 +388,7 @@ class MFPCommand:
         from .mfp_app import MFPApp
         from .dsp_object import DSPObject
         patch = MFPApp().recall(patch_id)
-        if not MFPApp().rpc_host:
+        if not patch or not MFPApp().rpc_host:
             return 0
 
         dsp_factory = await MFPApp().rpc_host.require(

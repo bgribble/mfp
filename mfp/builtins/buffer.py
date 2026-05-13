@@ -18,7 +18,7 @@ from mfp import log
 from mfp.processor import Processor
 from ..mfp_app import MFPApp
 from ..buffer_info import BufferInfo
-
+from ..method import MethodCall
 
 class Buffer(Processor):
 
@@ -144,6 +144,47 @@ class Buffer(Processor):
             region_start=0, region_end=self.file_len
         )
 
+    async def _file_export(self, filename, channels):
+        ready = asyncio.Event()
+        loop = asyncio.get_event_loop()
+
+        def _export_helper():
+            import soundfile as sf
+            mfp_samplerate = MFPApp().samplerate
+
+            if self.shm_obj is None:
+                self.shm_obj = SharedMemory(self.buf_id)
+
+            log.debug(f"[buffer] Exporting {channels} channels at {mfp_samplerate} hz to file '{filename}'")
+
+            export_file = None
+            try:
+                export_file = sf.SoundFile(
+                    filename,
+                    mode="w",
+                    samplerate=mfp_samplerate,
+                    channels=channels,
+                )
+            except Exception as e:
+                log.error(f"[export] {e}")
+                return
+
+            if export_file:
+                os.lseek(self.shm_obj.fd, 0, os.SEEK_SET)
+                data = os.read(self.shm_obj.fd, self.size * channels * self.FLOAT_SIZE)
+
+                try:
+                    export_file.buffer_write(data, 'float32')
+                except Exception as e:
+                    log.error(f"[export] {e}")
+
+            loop.call_soon_threadsafe(ready.set)
+
+        thread = Thread(target=_export_helper)
+        thread.start()
+        await ready.wait()
+        thread.join()
+
     def _transfer_file_data(self):
         if self.shm_obj is None:
             self.shm_obj = SharedMemory(self.buf_id)
@@ -254,6 +295,8 @@ class Buffer(Processor):
         elif isinstance(incoming, str):
             self.file_name = incoming
             await self._init_file_read()
+        elif isinstance(incoming, MethodCall):
+            self.method(incoming, 0)
         elif isinstance(incoming, dict):
             if "gui_notify" in incoming:
                 self.gui_notify = incoming.pop("gui_notify")
@@ -267,6 +310,15 @@ class Buffer(Processor):
                 setattr(self, k, v)
                 prms[k] = v
             await self.dsp_obj.setparams(**prms)
+
+    async def export(self, filename=None, channels=None):
+        if filename is None:
+            filename = self.file_name or (self.name + ".wav")
+        if channels is None:
+            channels = self.channels
+
+        await self._file_export(filename, channels)
+        self.file_name = filename
 
     def slice(self, start, end, channel=0):
         """

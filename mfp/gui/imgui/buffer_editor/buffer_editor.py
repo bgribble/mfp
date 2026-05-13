@@ -624,7 +624,6 @@ class BufferEditor:
             if limits_changed:
                 self.implot_limits_need_set = [True] * (num_channels + 1)
                 self.implot_limits = limits_changed
-                log.debug(f"Setting counter to {limit_delay_frames}")
                 self.implot_limits_counter = limit_delay_frames
 
             if options_changed:
