@@ -36,13 +36,20 @@ process_ampl(mfp_processor * proc)
                                 (double)(proc->context->samplerate));
     double peak = pdata->last_peak;
     double rms_accum = pdata->rms_accum;
-    double rms_scale = 1.0 / (pdata->rms_buffer->blocksize);
     double sqr_sample;
     int scount;
 
-    if ((in_sample == NULL) || (rms_sample == NULL) || (peak_sample == NULL)) {
+    if (
+        (in_sample == NULL)
+        || (rms_sample == NULL)
+        || (peak_sample == NULL)
+        || (pdata->rms_buffer == NULL)
+        || (pdata->rms_buffer->blocksize == 0)
+    ) {
         return 0;
     }
+
+    double rms_scale = 1.0 / (pdata->rms_buffer->blocksize);
 
     for(scount = 0; scount < proc->context->blocksize; scount++) {
         sample = *in_sample++;

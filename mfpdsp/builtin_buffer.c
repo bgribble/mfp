@@ -585,7 +585,7 @@ process(mfp_processor * proc)
         /* for XFADE, mix in the same size chunk from alsewhere in the buffer */
         if (section_state == BUF_XFADE && d->trig_xfade) {
             /* linear ramp down on old audio, we are just trying to prevent clicks */
-            double ramp_step = 1.0 / (double)(d->trig_xfade);
+            double ramp_step = 1.0 / MAX((double)(d->trig_xfade), 0.001);
             double ramp_start = 1.0 - (ramp_step * d->trig_xfade_samples);
             /* loop over channels */
             for(int channel=0; channel < d->chan_count; channel++) {

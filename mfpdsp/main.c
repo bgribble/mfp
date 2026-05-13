@@ -103,6 +103,10 @@ main(int argc, char ** argv)
         mfp_log_error("mfpdsp: ERROR: could not install SIGSEGV handler, exiting\n");
         return -1;
     }
+    if (sigaction(SIGFPE, &sa, NULL) == -1) {
+        mfp_log_error("mfpdsp: ERROR: could not install SIGFPE handler, exiting\n");
+        return -1;
+    }
     if (sigaction(SIGBUS, &sa, NULL) == -1) {
         mfp_log_error("mfpdsp: ERROR: could not install SIGBUS handler, exiting\n");
         return -1;
