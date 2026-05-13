@@ -68,7 +68,7 @@ def render_selection_box(app_window, pane_origin, canvas_origin, tile):
     draw_list.add_rect(
         pmin, pmax,
         ColorDB().backend.im_col32(outline_color),
-        0, 0, 1.0
+        rounding=0, flags=0, thickness=1.0
     )
     draw_list.pop_clip_rect()
 

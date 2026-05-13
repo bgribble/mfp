@@ -21,7 +21,7 @@ class MFPCommand:
         patch = MFPApp().patches.get(patch_name)
         scope = patch.scopes.get(scope_name) or patch.default_scope
 
-        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, {})
+        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, params or {})
         if obj is None:
             log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name} {params}")
             return None

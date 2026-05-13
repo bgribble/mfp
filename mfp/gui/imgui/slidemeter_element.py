@@ -231,7 +231,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         draw_list.add_rect(
             c_tl, c_br,
             ColorDB().backend.im_col32(color),
-            border_round
+            rounding=border_round
         )
 
         # draw the scale if required
