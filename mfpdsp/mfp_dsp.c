@@ -17,6 +17,8 @@ int mfp_max_blocksize = 32768;
 float mfp_in_latency = 0.0;
 float mfp_out_latency = 0.0;
 
+char last_processor_started[64];
+
 #define ARRAY_LEN(arry, eltsize) (sizeof(arry) / eltsize)
 
 void
@@ -305,6 +307,7 @@ mfp_dsp_run(mfp_context * ctxt)
     /* the proclist is already scheduled, so iterating in order is OK */
     for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
         if ((*p)->context == ctxt) {
+            snprintf(last_processor_started, 63, "%s (id=%d)", (*p)->typeinfo->name, (*p)->rpc_id);
             mfp_proc_process(*p);
         }
     }

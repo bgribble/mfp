@@ -159,6 +159,10 @@ static int block_num = 0;
 
 static double
 residue(double x, double y) {
+    if (y == 0) {
+        return 0;
+    }
+
     double m = fmod(x, y);
     if (m < 0) {
         return m + y;
@@ -577,7 +581,10 @@ process(mfp_processor * proc)
             }
 
             /* now advance d->buf_read_pos and d->buf_write_pos */
-            int buf_remainder = (d->buf_read_pos - d->region_start + section_size) % (region_end - d->region_start);
+            int buf_remainder = 0;
+            if (region_end - d->region_start != 0) {
+                buf_remainder = (d->buf_read_pos - d->region_start + section_size) % (region_end - d->region_start);
+            }
             d->buf_read_pos = d->region_start + buf_remainder;
             d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
         }
@@ -863,7 +870,7 @@ config(mfp_processor * proc)
     }
 
     if (recenable_ptr != NULL) {
-        int prev_enabled = d->rec_enabled; 
+        int prev_enabled = d->rec_enabled;
         d->rec_enabled = (int)(*(double *)recenable_ptr);
         if(prev_enabled && !d->rec_enabled && bufmode_ptr != NULL) {
             if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOPSET) || (d->buf_mode == REC_LOOP)) {

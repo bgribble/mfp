@@ -11,6 +11,8 @@
 
 #include "mfp_dsp.h"
 
+extern char last_processor_started[];
+
 static void
 sigsegv_handler(int sig, siginfo_t *si, void *unused)
 {
@@ -18,7 +20,7 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
     char ** strings;
     int nptrs, j;
 
-    mfp_log_error("Fatal signal %d in C code, backend is dying", sig);
+    mfp_log_debug("Fatal signal %d, recent processor '%s', backend is dying\n", sig, last_processor_started);
     nptrs = backtrace(buffer, 100);
     strings = backtrace_symbols(buffer, nptrs);
 

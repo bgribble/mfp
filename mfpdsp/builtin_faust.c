@@ -401,8 +401,22 @@ config_faust_param(gpointer key, gpointer value, gpointer user_data) {
     gpointer conf_value = g_hash_table_lookup(proc->params, key);
 
     if (prm != NULL && conf_value != NULL) {
-        double delta = fabs(*(double *)conf_value - (double)(prm->prm_init));
-        *(prm->prm_zoneptr) = (FAUSTFLOAT)(*(double *)conf_value);
+        double sent_value = *(double *)conf_value;
+        double current_value = *(double *)(prm->prm_zoneptr);
+        double init_value = (double)(prm->prm_init);
+        double delta = fabs(sent_value - init_value);
+
+        double new_value = MAX(
+            MIN(sent_value, (double)(prm->prm_max)),
+            (double)(prm->prm_min)
+        );
+        if (new_value != sent_value) {
+            mfp_log_debug(
+                "[faust] param %s - %f out of range (%f, %f)",
+                (char *)key, sent_value, prm->prm_min, prm->prm_max
+            );
+        }
+        *(prm->prm_zoneptr) = (FAUSTFLOAT)(new_value);
 
         // on next block, reset to init value
         if (prm->prm_reset && (delta > 0.001)) {
@@ -434,7 +448,6 @@ config(mfp_processor * proc)
             d->faust_code = g_strdup((char *)code);
         }
         start_recompile_thread(proc);
-
     }
     else {
         g_hash_table_foreach(d->faust_params, config_faust_param, (gpointer)proc);
