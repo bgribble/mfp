@@ -79,10 +79,11 @@ class BufferEditMode (InputMode):
             keysym="o", menupath="BufEdit > Effects > Fade out"
         )
         cls.bind(
-            "buffer-edit-custom-effect", cls.effect_custom, helptext="Apply custom effect",
-            keysym="f", menupath="BufEdit > Effects > |Custom"
-        )
+            "buffer-edit-effect-complim", lambda m: m.apply_effect("fx.comp~"),
+            helptext="Apply compressor/limiter effect",
+            keysym="c", menupath="BufEdit > Effects > Comp/limiter"
 
+        )
         #####################
         # Transport submenu
         cls.bind(

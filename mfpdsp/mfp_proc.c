@@ -447,7 +447,7 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 
     /* find the connection(s) between the specified ports */
     xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
-    
+
     if (xlets != NULL) {
         for(c=0; c < xlets->len; c++) {
             conn = g_array_index(xlets, mfp_connection *, c);
