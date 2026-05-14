@@ -45,6 +45,9 @@ class ConsoleResizeMode (InputMode):
         return True
 
     def resize_motion(self):
+        if not self.window.canvas_resize_in_progress:
+            return False
+
         px = self.manager.pointer_ev_x - self.pointer_x
         py = self.manager.pointer_ev_y - self.pointer_y
         self.window.console_panel_height = self.console_panel_height - py
@@ -52,6 +55,9 @@ class ConsoleResizeMode (InputMode):
         return True
 
     def resize_finish(self):
+        if not self.window.canvas_resize_in_progress:
+            return False
+
         self.window.canvas_resize_in_progress = False
         return True
 
@@ -94,6 +100,9 @@ class InfoResizeMode (InputMode):
         return True
 
     def resize_motion(self):
+        if not self.window.canvas_resize_in_progress:
+            return False
+
         px = self.manager.pointer_ev_x - self.pointer_x
         py = self.manager.pointer_ev_y - self.pointer_y
         self.window.info_panel_width = self.info_panel_width - px
@@ -101,6 +110,9 @@ class InfoResizeMode (InputMode):
         return True
 
     def resize_finish(self):
+        if not self.window.canvas_resize_in_progress:
+            return False
+
         self.window.canvas_resize_in_progress = False
         return True
 

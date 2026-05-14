@@ -447,43 +447,46 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
 
     /* find the connection(s) between the specified ports */
     xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
-
-    for(c=0; c < xlets->len; c++) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if ((conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
-            conn->dest_proc = NULL;
-            found_out++;
+    
+    if (xlets != NULL) {
+        for(c=0; c < xlets->len; c++) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if (conn && (conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
+                conn->dest_proc = NULL;
+                found_out++;
+            }
         }
-    }
 
-    /* delete connection from src */
-    for(c=xlets->len-1; c >= 0; c--) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if(conn->dest_proc == NULL) {
-            g_array_remove_index(xlets, c);
-            g_free(conn);
+        /* delete connection from src */
+        for(c=xlets->len-1; c >= 0; c--) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if(conn && conn->dest_proc == NULL) {
+                g_array_remove_index(xlets, c);
+                g_free(conn);
+            }
         }
     }
 
     /* delete connection and object from dest */
     xlets = g_array_index(target->inlet_conn, GArray *, targ_inlet);
 
-    for(c=0; c < xlets->len; c++) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if ((conn->dest_proc == self) && (conn->dest_port == my_outlet)) {
-            conn->dest_proc = NULL;
-            found_in++;
+    if (xlets != NULL) {
+        for(c=0; c < xlets->len; c++) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if (conn && (conn->dest_proc == self) && (conn->dest_port == my_outlet)) {
+                conn->dest_proc = NULL;
+                found_in++;
+            }
+        }
+
+        for(c=xlets->len-1; c >= 0; c--) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if(conn && conn->dest_proc == NULL) {
+                g_array_remove_index(xlets, c);
+                g_free(conn);
+            }
         }
     }
-
-    for(c=xlets->len-1; c >= 0; c--) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if(conn->dest_proc == NULL) {
-            g_array_remove_index(xlets, c);
-            g_free(conn);
-        }
-    }
-
 
     self->context->needs_reschedule = 1;
     return 0;

@@ -431,6 +431,9 @@ class MFPApp (Singleton, SignalMixin):
 
         # if the init_type is enclosed in {}, evaluate it as an expression
         load_type = init_type
+        if not init_type:
+            return None
+
         if init_type[0] == '{' and init_type[-1] == '}':
             load_type = patch.parse_obj(init_type[1:-1], **defs)
 

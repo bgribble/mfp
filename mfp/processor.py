@@ -1263,8 +1263,9 @@ class Processor:
         from .mfp_app import MFPApp
         prms = self.save()
 
+        # FIXME -- shouldn't need to pass all GUI params as bindings
         newobj = await MFPApp().create(
-            prms.get("type"), prms.get("initargs"), patch, scope, name
+            prms.get("type"), prms.get("initargs"), patch, scope, name, prms
         )
         newobj.load(prms)
         return newobj
