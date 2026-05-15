@@ -148,22 +148,22 @@ class BufferEditMode (InputMode):
             keysym="M1UP"
         )
         cls.bind(
-            "playhead-backward", lambda mode: mode.playhead_move(-1.0), 
+            "playhead-backward", lambda mode: mode.playhead_move(-1.0),
             helptext="Move playhead backward",
             keysym="LEFT"
         )
         cls.bind(
-            "playhead-backward-fast", lambda mode: mode.playhead_move(-5.0), 
+            "playhead-backward-fast", lambda mode: mode.playhead_move(-5.0),
             helptext="Move playhead backward quickly",
             keysym="C-LEFT"
         )
         cls.bind(
-            "playhead-forward", lambda mode: mode.playhead_move(1.0), 
+            "playhead-forward", lambda mode: mode.playhead_move(1.0),
             helptext="Move playhead forward",
             keysym="RIGHT"
         )
         cls.bind(
-            "playhead-forward-fast", lambda mode: mode.playhead_move(5.0), 
+            "playhead-forward-fast", lambda mode: mode.playhead_move(5.0),
             helptext="Move playhead forward quickly",
             keysym="C-RIGHT"
         )

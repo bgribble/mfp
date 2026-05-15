@@ -669,7 +669,7 @@ class Processor:
                     await self.disconnect(outport, tobj, tport)
 
                 outport += 1
-            self.connections_out = []
+            self.connections_out = [[] for r in range(len(self.outlets))]
 
         if hasattr(self, "connections_in"):
             inport = 0
@@ -678,7 +678,7 @@ class Processor:
                 for tobj, tport in to_delete:
                     await tobj.disconnect(tport, self, inport)
                 inport += 1
-            self.connections_in = []
+            self.connections_in = [[] for r in range(len(self.inlets))]
 
         if hasattr(self, "midi_learn_cbid") and self.midi_learn_cbid is not None:
             MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
@@ -769,8 +769,9 @@ class Processor:
                                 lambda args: Processor.connect(*args), 20,
                                 [self, outlet, target, inlet, show_gui]
                             )
-                            log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
-                                        % (target.name, target.obj_id))
+                            log.warning(
+                                f"'{target.name}' (obj_id {target.obj_id}) inlet {inlet} is not DSP, waiting"
+                            )
                             return True
                         log.warning(
                             "Error: Can't connect DSP out %s of '%s' to non-DSP in %s of '%s'"
@@ -1265,7 +1266,7 @@ class Processor:
 
         # FIXME -- shouldn't need to pass all GUI params as bindings
         newobj = await MFPApp().create(
-            prms.get("type"), prms.get("initargs"), patch, scope, name, prms
+            prms.get("type"), prms.get("initargs"), patch, scope, name, prms.get('gui_params')
         )
         newobj.load(prms)
         return newobj

@@ -418,6 +418,7 @@ class MFPApp (Singleton, SignalMixin):
 
         # try to compile code to get extra defs
         defs = {}
+
         if params and "code" in params:
             code = params.get("code")
             if code and code.get("lang") == "python":

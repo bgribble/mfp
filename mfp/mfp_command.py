@@ -73,7 +73,11 @@ class MFPCommand:
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            await obj.send((resp_type, json.loads(resp_value)), -1)
+            try:
+                parsed_val = json.loads(resp_value)
+                await obj.send((resp_type, parsed_val), -1)
+            except Exception as e:
+                log.error(f"[dsp_response] Sending to obj {obj.name} (id={obj_id}) type={resp_type} value='{resp_value}'... error {e}")
 
     @noresp
     async def send_bang(self, obj_id, port):

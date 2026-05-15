@@ -24,6 +24,9 @@ LIBFAUST_API char* CprintSignal(Signal sig, bool shared, int max_size);
 
 #include "mfp_dsp.h"
 
+
+pthread_mutex_t faust_compile_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 typedef struct {
     char * faust_code;
     llvm_dsp_factory * faust_factory;
@@ -113,7 +116,7 @@ process(mfp_processor * proc)
         mfp_dsp_send_response_int(proc, RESP_COMPILED, 1);
     }
 
-    if ((proc == NULL) || (d->faust_dsp == NULL)){
+    if ((proc == NULL) || (d->faust_dsp == NULL)) {
         return 0;
     }
 
@@ -315,12 +318,16 @@ faust_config(mfp_processor * proc) {
     FAUSTFLOAT * faust_buffers;
 
     if (d->faust_code && strlen(d->faust_code) >= 2) {
+
+        pthread_mutex_lock(&faust_compile_mutex);
+
         faust_factory = createCDSPFactoryFromString(
             "mfp_faust", d->faust_code, 0, NULL, "", error_msg, -1
         );
 
         if (!faust_factory) {
             mfp_log_debug("[faust~] Cannot create JIT factory : %s\n", error_msg);
+            pthread_mutex_unlock(&faust_compile_mutex);
             return -1;
         }
         else {
@@ -359,6 +366,7 @@ faust_config(mfp_processor * proc) {
         d->next_faust_inbufs = faust_inbufs;
         d->next_faust_outbufs = faust_outbufs;
         d->next_faust_buffers = faust_buffers;
+        pthread_mutex_unlock(&faust_compile_mutex);
     }
     return 0;
 }
