@@ -188,7 +188,6 @@ class Processor:
             self.presets[preset_id] = state
         else:
             state = self.presets.get(preset_id)
-            log.debug(f"[preset] {self.name} loading preset {preset_id}, got {state}")
             if state:
                 self.restore_state(state)
 
@@ -1292,7 +1291,7 @@ class Processor:
         oinfo['name'] = self.name
         oinfo['do_onload'] = self.do_onload
         oinfo['gui_params'] = {}
-        oinfo['presets'] = self.presets
+        oinfo['presets'] = {k: v for k, v in self.presets.items()}
         oinfo['properties'] = self.properties
         oinfo['midi_filters'] = self.midi_filters
         oinfo['midi_mode'] = self.midi_mode
@@ -1347,7 +1346,9 @@ class Processor:
 
         self.do_onload = prms.get('do_onload', False)
         self.properties = prms.get('properties', {})
-        self.presets = prms.get('presets', {})
+
+        if "presets" in prms and prms["presets"]:
+            self.presets = prms["presets"]
 
         # compatibility with older style Interface layer patches
         if (
