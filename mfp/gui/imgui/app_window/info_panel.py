@@ -113,13 +113,13 @@ def render(app_window):
         (grab_size, app_window.canvas_panel_height),
         window_flags=imgui.WindowFlags_.no_scrollbar
     )
-    
+
     imgui.set_cursor_pos(((grab_size-5)/2.0,app_window.canvas_panel_height / 2.0))
     imgui.image(imgui.ImTextureRef(dots[0]), (5, 25))
     imgui.end_child()
     if imgui.is_item_hovered():
         app_window.zone_hovered("info drag")
-    
+
     imgui.pop_style_color()
 
     imgui.set_cursor_pos((grab_size, 0))

@@ -36,6 +36,7 @@ class TextElement (BaseElement):
         'max_width': ParamInfo(label="Max width", param_type=float, show=True),
         'value': ParamInfo(label="Text value", param_type=str, show=False),
         'default': ParamInfo(label="Default value", param_type=str, show=False),
+        'save_in_preset': ParamInfo(label="Save in preset", param_type=bool, show=True),
     }
 
     store_attrs = {
@@ -53,6 +54,7 @@ class TextElement (BaseElement):
         self.clickchange = False
         self.default = ''
         self.max_width = 600
+        self.save_in_preset = False
 
         self.param_list.extend([*self.extra_params])
 

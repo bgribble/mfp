@@ -129,13 +129,16 @@ class Patch(Processor):
     def save_state(self):
         state = {}
         for obj_id, obj in self.objects.items():
-            state[obj.name] = obj.save_state()
+            obj_state = obj.save_state()
+            if obj_state:
+                state[obj.name] = obj.save_state()
         return state
 
     def restore_state(self, state):
         for obj_id, obj in self.objects.items():
             ostate = state.get(obj.name, {})
-            obj.restore_state(ostate)
+            if ostate:
+                obj.restore_state(ostate)
         return None
 
     #############################

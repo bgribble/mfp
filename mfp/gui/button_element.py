@@ -7,8 +7,9 @@ Copyright (c) 2012 Bill Gribble <grib@billgribble.com>
 '''
 
 from abc import ABCMeta, abstractmethod
-from flopsy import saga
+from flopsy import saga, mutates
 
+from mfp import log
 from mfp.utils import catchall
 from .text_widget import TextWidget
 from .backend_interfaces import BackendInterface
@@ -48,18 +49,23 @@ class ButtonElement (BaseElement):
         'porthole-border': 2,
         'padding': dict(top=0, bottom=0, left=0, right=0),
     }
+
     extra_params = {
         'label_text': ParamInfo(label="Button label", param_type=str, show=True),
+        'save_in_preset': ParamInfo(label="Save in preset", param_type=bool, show=True),
+        'message': ParamInfo(label="Message on click", param_type=str, show=True),
     }
     store_attrs = {
         **BaseElement.store_attrs, **extra_params
     }
+    dddebug = True
 
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 
         self.indicator = False
         self.message = None
+        self.value = None
 
         padding = self.get_style('padding') or {}
         self.label = TextWidget.build(self)
@@ -70,8 +76,7 @@ class ButtonElement (BaseElement):
         self.label.set_position(padding.get('left', 0), padding.get('top', 0))
 
         self.label_text = ''
-        self.param_list.append('label_text')
-
+        self.save_in_preset = False
         self.extra_action = None
 
         # request update when value changes
@@ -101,6 +106,13 @@ class ButtonElement (BaseElement):
                 nheight/2.0-label_halfheight-2
             )
 
+    @saga('message', on_init=True)
+    async def message_changed(self, action, state_diff, previous):
+        if "message" in state_diff:
+            MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 1, self.message))
+            self.send_params()
+        yield None
+
     @saga("label_text")
     async def label_text_changed(self, action, state_diff, previous):
         if self.label_text:
@@ -125,11 +137,14 @@ class ButtonElement (BaseElement):
             await self.center_label()
         self.redraw()
 
+    @mutates("message", "label_text")
     async def configure(self, params):
         set_text = False
-        if "value" in params:
+        if "value" in params and "message" not in params:
             self.message = params.get("value")
-            set_text = True
+
+        if "message" in params:
+            self.message = params.get("message")
 
         if "label_text" in params:
             self.label_text = params.get("label_text", '')
@@ -177,33 +192,18 @@ class ButtonElement (BaseElement):
 class BangButtonElement (ButtonElement):
     display_type = "button"
 
-    extra_params = {
-        'message': ParamInfo(label="Message on click", param_type=str, show=True),
-    }
-    store_attrs = {
-        **ButtonElement.store_attrs,
-        **extra_params
-    }
-
     def __init__(self, window, x, y):
-        super().__init__(window, x, y)
         self.message = Bang
+        super().__init__(window, x, y)
 
     @classmethod
     def get_backend(cls, backend_name):
         return BangButtonElementImpl.get_backend(backend_name)
 
-    @saga('message')
-    def message_changed(self, action, state_diff, previous):
-        if "message" in state_diff and self.message == Bang:
-            MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 1))
-
     async def clicked(self):
         if self.obj_id is not None:
-            if self.message == Bang:
-                MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 0))
-            else:
-                MFPGUI().async_task(MFPGUI().mfp.send(self.obj_id, 0, self.message))
+            MFPGUI().async_task(MFPGUI().mfp.send_bang(self.obj_id, 0))
+
         self.indicator = True
         self.redraw()
 
@@ -214,11 +214,6 @@ class BangButtonElement (ButtonElement):
         self.redraw()
 
         return False
-
-    async def configure(self, params):
-        if "message" in params:
-            self.message = params.get("message")
-        await super().configure(params)
 
 
 class ToggleButtonElement (ButtonElement):
@@ -261,6 +256,7 @@ class ToggleButtonElement (ButtonElement):
         self.redraw()
         return False
 
+    @mutates("on_message", "off_message", "send_on_click", "message", "value")
     async def configure(self, params):
         await super().configure(params)
 

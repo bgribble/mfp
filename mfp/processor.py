@@ -188,6 +188,7 @@ class Processor:
             self.presets[preset_id] = state
         else:
             state = self.presets.get(preset_id)
+            log.debug(f"[preset] {self.name} loading preset {preset_id}, got {state}")
             if state:
                 self.restore_state(state)
 
@@ -625,10 +626,16 @@ class Processor:
         self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 
     def dsp_inlet(self, inlet):
-        return (self.dsp_obj, self.dsp_inlets.index(inlet))
+        try:
+            return (self.dsp_obj, self.dsp_inlets.index(inlet))
+        except ValueError:
+            return (None, None)
 
     def dsp_outlet(self, outlet):
-        return (self.dsp_obj, self.dsp_outlets.index(outlet))
+        try:
+            return (self.dsp_obj, self.dsp_outlets.index(outlet))
+        except ValueError:
+            return (None, None)
 
     async def dsp_reset(self):
         await self.dsp_obj.reset()
