@@ -93,7 +93,7 @@ def render(app_window):
             )
 
             imgui.input_text_multiline(
-                'log_output_text',
+                '##log_output_text',
                 log_text,
                 (app_window.window_width, app_window.console_panel_height - grab_size - 5 - 2*app_window.menu_height),
                 imgui.InputTextFlags_.read_only
