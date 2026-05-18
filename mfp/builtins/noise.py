@@ -13,7 +13,7 @@ class Noise(Processor):
     doc_tooltip_obj = "Generate white noise"
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
-        Processor.__init__(self, 0, 1, init_type, init_args, patch, scope, name, defs)
+        Processor.__init__(self, 1, 1, init_type, init_args, patch, scope, name, defs)
 
         self.dsp_outlets = [0]
 
