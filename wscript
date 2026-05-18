@@ -393,7 +393,7 @@ def configure(ctxt):
     ctxt.find_program("cmake")
 
     pip_libs = [
-        "posix_ipc", "simplejson", "numpy",
+        "posix_ipc", "simplejson", "numpy", "resampy",
         "pynose", "yappi", "cython", "pyliblo3",
         "soundfile", "samplerate", "alsa-midi",
         # my other libs

@@ -232,7 +232,8 @@ async def buffer_reshape(self, buffer_proc_id, **params):
     await MFPGUI().mfp.send(
         buffer_proc_id, 0, params
     )
-    await asyncio.wait_for(event.wait(), 1)
+    if len(new_buf) == 0:
+        await asyncio.wait_for(event.wait(), 1)
 
     self.app_window.signal_unlisten(handler_id)
 
@@ -244,14 +245,14 @@ async def buffer_reshape(self, buffer_proc_id, **params):
 @extends(BufferEditor)
 async def buffer_apply(self):
     # transfer working buffer to origin buffer
-    bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
+    bufsize =int(len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0))
     buf_info = await self.buffer_reshape(
         self.buffer_source_info.get('proc_id'),
         channels=self.buffer_info.channels,
         size=bufsize,
         region_start=0,
         region_end=len(self.buffer_data[0]),
-        file_name=self.working_buf_info.filename
+        file_name=self.working_buf_info.file_name
     )
 
     buf_id = buf_info.buf_id
@@ -277,7 +278,7 @@ async def buffer_import(self, filename):
         new_size = self.buffer_selected.size / (self.buffer_info.rate / 1000.0)
         working_buf = await self.buffer_reshape(
             self.working_source_id,
-            channels=new_chan, 
+            channels=new_chan,
             size=new_size,
             file_name=filename,
         )
@@ -288,7 +289,7 @@ async def buffer_import(self, filename):
         await self.buffer_reshape(
             self.working_sink_id,
             buf_id=self.working_buf_id,
-            channels=new_chan, 
+            channels=new_chan,
             size=new_size,
             file_name=filename,
         )

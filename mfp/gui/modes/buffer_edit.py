@@ -38,6 +38,11 @@ class BufferEditMode (InputMode):
             keysym="C-v", menupath="BufEdit > Paste"
         )
         cls.bind(
+            "buffer-edit-paste-stretch", cls.paste_to_fit,
+            helptext="Paste from clipboard, stretched to fit selection",
+            keysym="C-f", menupath="BufEdit > Paste to fit"
+        )
+        cls.bind(
             "buffer-edit-clear", cls.clear, helptext="Clear selection",
             keysym="C-k", menupath="BufEdit > Clear"
         )
@@ -82,8 +87,13 @@ class BufferEditMode (InputMode):
             "buffer-edit-effect-complim", lambda m: m.apply_effect("fx.comp~"),
             helptext="Apply compressor/limiter effect",
             keysym="c", menupath="BufEdit > Effects > Comp/limiter"
-
         )
+        cls.bind(
+            "buffer-edit-effect-pitch", lambda m: m.apply_effect("fx.pitch~"),
+            helptext="Change pitch without time stretch",
+            keysym="p", menupath="BufEdit > Effects > Pitch change..."
+        )
+
         #####################
         # Transport submenu
         cls.bind(
@@ -299,6 +309,10 @@ class BufferEditMode (InputMode):
 
     async def paste(self):
         await self.editor.clipboard_paste()
+        return True
+
+    async def paste_to_fit(self):
+        await self.editor.clipboard_paste_to_fit()
         return True
 
     async def clear(self):

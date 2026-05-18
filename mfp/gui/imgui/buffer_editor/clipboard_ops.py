@@ -188,3 +188,34 @@ async def clipboard_paste(self):
 
     self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
     self.buffer_compute_peaks()
+
+
+@extends(BufferEditor)
+async def clipboard_paste_to_fit(self):
+    import resampy
+
+    if not self.buffer_data or self.implot_selection is None:
+        return
+
+    sel_start = max(0, int(self.implot_selection.x.min * self.buffer_info.rate))
+    sel_size = min(
+        int((self.implot_selection.x.max - self.implot_selection.x.min) * self.buffer_info.rate),
+        self.buffer_info.size - sel_start
+    )
+    sel_data = [
+        chan[sel_start:sel_start+sel_size]
+        for chan in self.buffer_data
+    ]
+
+    log.debug(f"[stretch] resampling from {self.clipboard_size} to {sel_size}")
+    new_data = [
+        resampy.resample(chan_data, self.clipboard_size, sel_size)
+        for chan_data in self.clipboard_data
+    ]
+    log.debug(f"[stretch] resampled size={len(new_data[0])}")
+
+    for chan_num, chan in enumerate(self.buffer_data):
+        chan[sel_start:sel_start+sel_size] = new_data[chan_num]
+
+    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
+    self.buffer_compute_peaks()
