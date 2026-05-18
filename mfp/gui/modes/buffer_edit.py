@@ -91,7 +91,7 @@ class BufferEditMode (InputMode):
         cls.bind(
             "buffer-edit-effect-pitch", lambda m: m.apply_effect("fx.pitch~"),
             helptext="Change pitch without time stretch",
-            keysym="p", menupath="BufEdit > Effects > Pitch change..."
+            keysym="p", menupath="BufEdit > Effects > Pitch change"
         )
 
         #####################
