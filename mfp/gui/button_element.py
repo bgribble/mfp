@@ -266,8 +266,12 @@ class ToggleButtonElement (ButtonElement):
             self.off_message = params.get("off_message")
         if "send_on_click" in params:
             self.send_on_click = params.get("send_on_click")
+        if "message" in params:
+            self.message = params.get("message")
+        if "value" in params:
+            self.message = params.get("value")
         if "value" in params or "message" in params:
-            self.indicator = self.message == self.on_message
+            self.indicator = (self.message == self.on_message)
 
     async def create(self, init_type, init_args):
         await super().create(init_type, init_args)
