@@ -846,7 +846,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if zone_name == self.zone_selected:
             return
 
-        old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, list(self.input_mgr.minor_modes))
+        old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, [m for m in self.input_mgr.minor_modes])
         old_zone = self.zone_selected
 
         self.zone_selected = zone_name
@@ -859,6 +859,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         save_old = True
         if old_zone in ('info',):
             save_old = False
+
         if zone_name in self.zone_modes:
             new_global, new_major, new_minor = self.zone_modes.get(zone_name)
             new_mode = True
@@ -882,9 +883,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             from mfp.gui.modes.resize_modes import InfoResizeMode
             new_minor = (InfoResizeMode(self),)
             new_mode = True
+
         if new_mode:
             if save_old:
                 self.zone_modes[old_zone] = old_modes
+
             for mode in old_modes[2]:
                 self.input_mgr.disable_minor_mode(mode)
 
@@ -893,7 +896,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             if new_major:
                 self.input_mgr.set_major_mode(new_major)
             for mode in new_minor:
-                self.input_mgr.enable_minor_mode(mode)
+                if not self.input_mgr.mode_enabled(type(mode)):
+                    self.input_mgr.enable_minor_mode(mode)
 
     #####################
     # log output
