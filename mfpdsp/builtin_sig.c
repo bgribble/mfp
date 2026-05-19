@@ -53,13 +53,13 @@ destroy(mfp_processor * proc)
 }
 
 static int
-config(mfp_processor * proc) 
-{
+config(mfp_processor * proc)  {
     builtin_sig_data * d = (builtin_sig_data *)(proc->data);
     gpointer val_ptr = g_hash_table_lookup(proc->params, "value");
 
     if(val_ptr != NULL) {
-        d->sample = *(double *)val_ptr;
+        double newval = *(double *)val_ptr;
+        d->sample = newval;
     }
 
     return 1;

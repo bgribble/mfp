@@ -439,6 +439,7 @@ class BufferEditor:
                 if self.implot_playhead > self.implot_total_time:
                     self.implot_playhead_start_time = None
                     self.implot_playhead_looping = False
+                    MFPGUI().async_task(self.playhead_pause())
 
             options_changed = False
             limits_changed = False
@@ -969,6 +970,7 @@ class BufferEditor:
             ):
                 await MFPGUI().mfp.send(gain_id, 1, 1)
             else:
+                log.debug(f"[options] sending gain 0 to {gain_id}")
                 await MFPGUI().mfp.send(gain_id, 1, 0)
 
 

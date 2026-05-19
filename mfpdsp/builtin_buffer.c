@@ -35,6 +35,7 @@ typedef struct {
 typedef struct {
     buf_info buf_active;
     buf_info buf_to_alloc;
+    int buf_alloc_waiting;
 
     mfp_sample * buf_base;
     int chan_count;
@@ -660,7 +661,6 @@ process(mfp_processor * proc)
 
     d->buf_state = section_state;
     block_num ++;
-
     return 0;
 }
 
@@ -685,7 +685,6 @@ destroy(mfp_processor * proc)
     proc->data = NULL;
 
     return;
-
 }
 
 static void
@@ -716,8 +715,10 @@ shared_buffer_alloc(buf_info * buf)
     }
     buf->buf_size = size;
     buf->buf_ptr = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
-    if (buf->buf_ptr == NULL) {
-        mfp_log_debug("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
+    if (buf->buf_ptr == MAP_FAILED) {
+        mfp_log_error("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
+        mfp_log_error("size=%d fd=%d", size, buf->shm_fd);
+        buf->buf_ptr = NULL;
     }
 }
 
@@ -753,6 +754,7 @@ config(mfp_processor * proc)
 {
     gpointer size_ptr = g_hash_table_lookup(proc->params, "size");
     gpointer channels_ptr = g_hash_table_lookup(proc->params, "channels");
+    gpointer realloc_ptr = g_hash_table_lookup(proc->params, "realloc");
 
     gpointer recenable_ptr = g_hash_table_lookup(proc->params, "rec_enabled");
     gpointer recchan_ptr = g_hash_table_lookup(proc->params, "rec_channels");
@@ -782,7 +784,7 @@ config(mfp_processor * proc)
     int new_size = d->chan_size;
     int new_channels = d->chan_count;
     char * new_buf_id = NULL;
-
+    int realloc_req = 0;
     int config_handled = 1;
 
     if(size_ptr != NULL) {
@@ -792,23 +794,30 @@ config(mfp_processor * proc)
         new_channels = (int)(*(double *)channels_ptr);
     }
     if (bufid_ptr != NULL) {
-        new_buf_id = g_strdup((char *)bufid_ptr);
+        new_buf_id = (char *)bufid_ptr;
     }
-
-    if ((new_buf_id != NULL) || (new_size != d->chan_size) || (new_channels != d->chan_count)) {
-        int need_more_buffers = (
-            (new_channels > d->chan_count) || (new_size > d->chan_size)
-        );
-
+    if (realloc_ptr != NULL) {
+        realloc_req = (int)(*(double *)realloc_ptr);
+    }
+    if (d->buf_alloc_waiting) {
         if(d->buf_to_alloc.buf_ready == ALLOC_READY) {
+            int need_more_buffers = (
+                (d->buf_to_alloc.buf_chancount > d->chan_count) || (d->buf_to_alloc.buf_chansize > d->chan_size)
+            );
             buffer_activate(d);
             d->region_start = 0;
             d->region_end = 0;
             d->buf_read_pos = 0;
             d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
+            d->buf_alloc_waiting = 0;
 
             if (need_more_buffers) {
-                mfp_proc_realloc_buffers(proc, d->chan_count, d->chan_count, proc->context->blocksize);
+                mfp_proc_realloc_buffers(
+                    proc,
+                    d->buf_to_alloc.buf_chancount,
+                    d->buf_to_alloc.buf_chancount,
+                    proc->context->blocksize
+                );
             }
             if (d->buf_active.buf_type == BUFTYPE_SHARED) {
                 mfp_dsp_send_response_str(proc, RESP_BUFID, d->buf_active.shm_id);
@@ -818,26 +827,31 @@ config(mfp_processor * proc)
                 mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
             }
         }
-        else if (d->buf_to_alloc.buf_ready == ALLOC_IDLE) {
+        else {
+            /* still working */
+            config_handled = 0;
+        }
+    }
+    else if (realloc_req > 0) {
+        if (d->buf_to_alloc.buf_ready == ALLOC_IDLE) {
             d->buf_to_alloc.shm_fd = -1;
             d->buf_to_alloc.shm_id[0] = 0;
             d->buf_to_alloc.buf_type = d->buf_active.buf_type;
             d->buf_to_alloc.buf_ptr = NULL;
             d->buf_to_alloc.buf_chancount = new_channels ? new_channels : d->chan_count;
             d->buf_to_alloc.buf_chansize = new_size;
-
+            d->buf_alloc_waiting = 1;
             if (new_buf_id != NULL) {
                 strncpy(d->buf_to_alloc.shm_id, new_buf_id, 64);
-                g_free(new_buf_id);
                 g_hash_table_remove(proc->params, "buf_id");
             }
             mfp_alloc_allocate(proc, &d->buf_to_alloc, &(d->buf_to_alloc.buf_ready));
             config_handled = 0;
         }
         else {
-            /* still working */
-            config_handled = 0;
+            mfp_log_debug("[buffer] WARNING: Buffer realloc requested while allocation in process");
         }
+        g_hash_table_remove(proc->params, "realloc");
     }
 
     if (bufmode_ptr != NULL) {
@@ -964,6 +978,7 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "rec_latency_comp", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "realloc", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_overdub", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_enabled", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_channels", (gpointer)PARAMTYPE_FLT);

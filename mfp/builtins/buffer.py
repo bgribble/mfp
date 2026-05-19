@@ -96,6 +96,8 @@ class Buffer(Processor):
 
     async def setup(self, **kwargs):
         await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
+        if "size" in self.init_kwargs or "channels" in self.init_kwargs: 
+            self.init_kwargs["realloc"] = 1
         await self.dsp_setparams(**self.init_kwargs)
 
     def offset(self, channel, start):
@@ -137,7 +139,8 @@ class Buffer(Processor):
             self.buffer_ready = False
             await self.dsp_setparams(
                 channels=self.file_channels,
-                size=self.file_len
+                size=self.file_len,
+                realloc=1
             )
 
         await self.dsp_setparams(
@@ -309,6 +312,8 @@ class Buffer(Processor):
                     v = v*MFPApp().samplerate/1000.0
                 setattr(self, k, v)
                 prms[k] = v
+            if "size" in prms or "channels" in prms:
+                prms["realloc"] = 1
             await self.dsp_obj.setparams(**prms)
 
     async def export(self, filename=None, channels=None):
