@@ -579,6 +579,9 @@ class GlobalMode (InputMode):
         px = self.manager.pointer_x
         py = self.manager.pointer_y
 
+        evx = self.manager.pointer_ev_x
+        evy = self.manager.pointer_ev_y
+
         if self.window.backend_name == "imgui":
             from imgui_bundle import imgui_node_editor as nedit
             if (
@@ -590,6 +593,21 @@ class GlobalMode (InputMode):
             ):
                 return False
             self.window.imgui_tile_selected = True
+
+        # select the patch/tile that the click was in
+        click_tile = self.window.canvas_tile_manager.tile_at_point(evx, evy)
+        click_patch = None
+        if click_tile:
+            try:
+                click_patch = next(
+                    patch for patch in self.window.patches
+                    if patch.display_info.tile_id == click_tile.tile_id
+                )
+            except StopIteration:
+                pass
+
+        if click_patch:
+            self.window.layer_select(click_patch.selected_layer or click_patch.layers[0])
 
         if select_mode is None:
             if self.manager.pointer_obj is not None:

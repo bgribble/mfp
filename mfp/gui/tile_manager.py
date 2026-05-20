@@ -69,6 +69,17 @@ class TileManager:
 
         return self.alloc_tile(**kwargs)
 
+    def tile_at_point(self, x, y):
+        for tile in self.tiles:
+            if (
+                (x > tile.origin_x)
+                and (x <= tile.origin_x + tile.width)
+                and (y > tile.origin_y)
+                and (y <= tile.origin_y + tile.height)
+            ):
+                return tile
+        return None
+
     def resize(self, new_width, new_height):
         """
         resize the entire tile manager space, just scaling all the tiles
