@@ -53,11 +53,11 @@ class ImguiConnectionElementImpl(ConnectionElementImpl, ImguiBaseElementImpl, Co
 
         complete_color = self.get_color('link-color')
         snoop_color = self.get_color('link-color:snoop')
-        dashed_color = (1, 1, 1, 0.5)
+        dashed_color = self.get_color('link-color:dashed')
 
         if self.dashed:
-            thickness = 1
-            color = dashed_color
+            thickness = 1 
+            color = dashed_color.to_rgbaf()
             nedit.push_style_var(nedit.StyleVar.flow_marker_distance, 30)
             nedit.push_style_var(nedit.StyleVar.flow_speed, 25)
             nedit.push_style_var(nedit.StyleVar.flow_duration, 0.1)

@@ -14,7 +14,6 @@ from ..slidemeter_element import (
     BarMeterElementImpl,
     DialElement,
     DialElementImpl,
-    #SlideMeterElement,
 )
 from .base_element import ImguiBaseElementImpl
 
@@ -222,15 +221,17 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
         imgui.dummy([total_width, 1])
         imgui.dummy([1, total_height-1])
 
-        color = self.get_color(f'stroke-color')
+        fill_color = self.get_color('meter-color')
+        stroke_color = self.get_color('stroke-color')
+
         draw_list.add_rect_filled(
             p_tl, p_br,
-            ColorDB().backend.im_col32(color),
+            ColorDB().backend.im_col32(fill_color),
             border_round
         )
         draw_list.add_rect(
             c_tl, c_br,
-            ColorDB().backend.im_col32(color),
+            ColorDB().backend.im_col32(stroke_color),
             rounding=border_round
         )
 
@@ -266,7 +267,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                     draw_list.add_line(
                         (tick_x - self.TICK_LEN, tick_y),
                         (tick_x, tick_y),
-                        ColorDB().backend.im_col32(color),
+                        ColorDB().backend.im_col32(stroke_color),
                         1.5
                     )
                     if self.scale_position == self.LEFT:
@@ -278,7 +279,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                         imgui.get_font(),
                         font_size,
                         [text_x, text_y],
-                        ColorDB().backend.im_col32(color),
+                        ColorDB().backend.im_col32(stroke_color),
                         self.scale_format(tick)
                     )
 
@@ -297,7 +298,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                     draw_list.add_line(
                         (tick_x, tick_y - self.TICK_LEN),
                         (tick_x, tick_y),
-                        ColorDB().backend.im_col32(color),
+                        ColorDB().backend.im_col32(stroke_color),
                         1.5
                     )
 
@@ -311,7 +312,7 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
                             imgui.get_font(),
                             font_size,
                             [text_x, text_y],
-                            ColorDB().backend.im_col32(color),
+                            ColorDB().backend.im_col32(stroke_color),
                             self.scale_format(tick)
                         )
 
@@ -465,7 +466,9 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
         imgui.dummy([self.width, 1])
         imgui.dummy([1, self.height-1])
 
-        color = self.get_color('stroke-color')
+        fill_color = self.get_color('meter-color')
+        stroke_color = self.get_color('stroke-color')
+
         outer_radius = self.dial_radius
         inner_radius = self.dial_radius / 4
         theta_range = 2 * math.pi - (self.THETA_MIN - self.THETA_MAX)
@@ -493,7 +496,7 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
             35
         )
         draw_list.path_stroke(
-            ColorDB().backend.im_col32(color),
+            ColorDB().backend.im_col32(stroke_color),
             flags=imgui.ImDrawFlags_.closed,
             thickness=1.0
         )
@@ -509,7 +512,7 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
         )
 
         draw_list.path_stroke(
-            ColorDB().backend.im_col32(color),
+            ColorDB().backend.im_col32(fill_color),
             flags=0,
             thickness=(outer_radius - inner_radius) * 0.95
         )
@@ -530,7 +533,7 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
                 draw_list.add_line(
                     (tick_x0 + self.position_x, tick_y0 + self.position_y),
                     (tick_x1 + self.position_x, tick_y1 + self.position_y),
-                    ColorDB().backend.im_col32(color),
+                    ColorDB().backend.im_col32(stroke_color),
                     1.0
                 )
 
@@ -545,7 +548,7 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
                     imgui.get_font(),
                     font_size,
                     (txt_x + self.position_x, txt_y + self.position_y),
-                    ColorDB().backend.im_col32(color),
+                    ColorDB().backend.im_col32(stroke_color),
                     label
                 )
 

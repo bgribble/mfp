@@ -26,7 +26,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         super().__init__(window, x, y)
         self.node_id = None
         self.min_width = self.width = 20
-        self.min_height = self.height = 16
+        self.min_height = self.height = 21
         self.position_set = False
 
     def update_export_size(self):
@@ -115,7 +115,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
             min_w = max(self.min_width, self.export_w)
         else:
             min_w = self.min_width
-        min_w = max(min_w, port_alloc_w)
+            min_w = max(min_w, port_alloc_w)
 
         if self.export_h is not None:
             min_h = max(self.min_height, self.export_h + label_h)
@@ -125,8 +125,8 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         if label_w < min_w:
             imgui.same_line()
             imgui.dummy([min_w - label_w - 2, 1])
-        if label_h < min_h:
-            imgui.dummy([1, min_h - label_h - 2])
+        if (label_h + 4) <= min_h:
+            imgui.dummy([1, min_h - (label_h + 2)])
         imgui.end_group()
 
         # connections

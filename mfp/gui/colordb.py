@@ -119,3 +119,7 @@ class ColorDB (Singleton):
 
     def insert(self, name, color):
         self.named_colors[name] = color
+
+    def install_theme(self, theme):
+        for name, rgba in theme.items():
+            self.insert(name, self.find(*rgba))

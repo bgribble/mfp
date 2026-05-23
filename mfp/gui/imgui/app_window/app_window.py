@@ -15,6 +15,7 @@ import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.colordb import ColorDB
 from mfp.gui.event import EnterEvent, LeaveEvent
 from mfp.gui.app_window import AppWindow, AppWindowImpl
 from mfp.gui.tile_manager import TileManager, Tile
@@ -324,10 +325,17 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # global style setup
-        imgui.style_colors_classic()
+        if MFPGUI().theme.get("imgui_theme") == "light":
+            imgui.style_colors_light()
+        elif MFPGUI().theme.get("imgui_theme") == "dark":
+            imgui.style_colors_dark()
+        else:
+            imgui.style_colors_classic()
 
-        nedit.push_style_color(nedit.StyleColor.flow_marker, (1, 1, 1, 0.2))
-        nedit.push_style_color(nedit.StyleColor.flow, (1, 1, 1, 0.5))
+        flow_color = ColorDB().find("default-link-color-dashed")
+        nedit.push_style_color(nedit.StyleColor.flow, flow_color.to_rgbaf())
+        flow_color.alpha = 0x50
+        nedit.push_style_color(nedit.StyleColor.flow_marker, flow_color.to_rgbaf())
 
         ########################################
         # menu bar

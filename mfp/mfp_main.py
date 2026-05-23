@@ -56,7 +56,6 @@ def version():
 
 
 def add_evaluator_defaults():
-
     # default names known to the evaluator
     Evaluator.bind_global("math", math)
     Evaluator.bind_global("random", random)

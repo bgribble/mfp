@@ -57,7 +57,7 @@ class MessageElement (BaseElement):
         # configure label
         self.label = TextWidget.build(self)
         self.label.set_position(self.label_off_x, self.label_off_y)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-color:reverse'))
         self.label.set_font_name(self.get_fontspec())
         self.label.set_reactive(False)
 
@@ -80,7 +80,7 @@ class MessageElement (BaseElement):
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-color:reverse'))
         yield None
 
     async def update(self):
@@ -136,13 +136,13 @@ class MessageElement (BaseElement):
     def select(self):
         BaseElement.select(self)
         if self.label:
-            self.label.set_color(self.get_color('text-color'))
+            self.label.set_color(self.get_color('text-color:reverse'))
         self.redraw()
 
     def unselect(self):
         BaseElement.unselect(self)
         if self.label:
-            self.label.set_color(self.get_color('text-color'))
+            self.label.set_color(self.get_color('text-color:reverse'))
         self.redraw()
 
     async def make_edit_mode(self):

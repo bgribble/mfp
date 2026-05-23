@@ -8,6 +8,7 @@ from datetime import datetime
 from imgui_bundle import implot, imgui
 import numpy as np
 from mfp import log
+from mfp.gui.colordb import ColorDB
 
 
 def fmt_time(ttime):
@@ -137,13 +138,13 @@ class BufferEditor:
         imgui.set_cursor_pos(padding)
 
         imgui.push_style_color(
-            imgui.Col_.button, [0.75, 0.75, 0.75, 1]
+            imgui.Col_.button, ColorDB().find('default-button-color').to_rgbaf()
         )
         imgui.push_style_color(
-            imgui.Col_.button_hovered, [0.9, 0.9, 0.9, 1]
+            imgui.Col_.button_hovered, ColorDB().find('default-button-color-highlight').to_rgbaf()
         )
         imgui.push_style_color(
-            imgui.Col_.button_active, [1, 1, 1, 1]
+            imgui.Col_.button_active, ColorDB().find('default-button-color-clicked').to_rgbaf()
         )
 
         #######################
@@ -157,17 +158,20 @@ class BufferEditor:
 
         if self.implot_playhead_start_time:
             imgui.push_style_color(
-                imgui.Col_.button, [0.6, 0.75, 0.6, 1]
+                imgui.Col_.button, ColorDB().find('play-button-color').to_rgbaf()
             )
             imgui.push_style_color(
-                imgui.Col_.button_hovered, [0.7, 0.9, 0.7, 1]
+                imgui.Col_.button_hovered, ColorDB().find('play-button-color-highlight').to_rgbaf()
+            )
+            imgui.push_style_color(
+                imgui.Col_.button_active, ColorDB().find('play-button-color-clicked').to_rgbaf()
             )
         if imgui.image_button(
             "##play_btn", imgui.ImTextureRef(play_tex[0]), [button_size, button_size]
         ):
             MFPGUI().async_task(self.playhead_start())
         if self.implot_playhead_start_time:
-            imgui.pop_style_color(2)
+            imgui.pop_style_color(3)
 
         imgui.same_line()
 
@@ -190,27 +194,33 @@ class BufferEditor:
 
         imgui.same_line()
 
+        now = datetime.now()
+        toggle = int(now.timestamp()*2) % 2
         if self.rec_enabled:
             if self.rec_recording:
                 imgui.push_style_color(
-                    imgui.Col_.button, [0.9, 0.5, 0.5, 1]
+                    imgui.Col_.button, ColorDB().find('rec-button-color').to_rgbaf()
                 )
                 imgui.push_style_color(
-                    imgui.Col_.button_hovered, [1.0, 0.6, 0.6, 1]
+                    imgui.Col_.button_hovered, ColorDB().find('rec-button-color-highlight').to_rgbaf()
                 )
-            else:
+            elif toggle:
                 imgui.push_style_color(
-                    imgui.Col_.button, [0.7, 0.5, 0.5, 1]
+                    imgui.Col_.button, ColorDB().find('rec-button-color').to_rgbaf()
                 )
                 imgui.push_style_color(
-                    imgui.Col_.button_hovered, [0.8, 0.6, 0.6, 1]
+                    imgui.Col_.button_hovered, ColorDB().find('rec-button-color-highlight').to_rgbaf()
                 )
+        imgui.push_style_color(
+            imgui.Col_.button_active, ColorDB().find('rec-button-color-clicked').to_rgbaf()
+        )
         if imgui.image_button(
             "##record_btn", imgui.ImTextureRef(record_tex[0]), [button_size, button_size]
         ):
             MFPGUI().async_task(self.playhead_toggle_record())
 
-        if self.rec_enabled:
+        imgui.pop_style_color()
+        if self.rec_enabled and (self.rec_recording or toggle):
             imgui.pop_style_color(2)
         imgui.same_line()
 
@@ -474,6 +484,10 @@ class BufferEditor:
 
                     # config buttons
                     imgui.begin_group()
+                    imgui.push_style_color(
+                        imgui.Col_.frame_bg, ColorDB().find("default-canvas-color").to_rgbaf()
+                    )
+                    imgui.push_style_var(imgui.StyleVar_.item_spacing, [0, 1])
                     for option in ("mute", "solo", "rec"):
                         changed, checked = imgui.checkbox(
                             option.upper(),
@@ -483,6 +497,8 @@ class BufferEditor:
                             self.channel_options[channel - 1][option] = checked
                             options_changed = True
 
+                    imgui.pop_style_var()
+                    imgui.pop_style_color()
                     imgui.end_group()
                     imgui.same_line()
 
@@ -654,23 +670,28 @@ class BufferEditor:
         rms_fraction = (rms_db - meter_min) / (meter_max - meter_min)
         peak_fraction = (peak_db - meter_min) / (meter_max - meter_min)
 
+        draw_list.add_rect_filled(
+            top_left, bottom_right,
+            ColorDB().backend.im_col32(ColorDB().find('default-fill-color-selected')),
+            rounding=2,
+        )
         draw_list.add_rect(
             top_left, bottom_right,
-            imgui.IM_COL32(128, 128, 255, 255),
+            ColorDB().backend.im_col32(ColorDB().find('default-stroke-color')),
             rounding=2,
             thickness=2,
         )
         draw_list.add_rect_filled(
             [top_left[0], bottom_right[1] - height * rms_fraction],
             bottom_right,
-            imgui.IM_COL32(255, 255, 255, 255),
+            ColorDB().backend.im_col32(ColorDB().find('meter-color-rms')),
             rounding=2,
         )
 
         draw_list.add_rect_filled(
             [top_left[0], bottom_right[1] - height * peak_fraction - 2],
             [bottom_right[0], bottom_right[1] - height*peak_fraction + 2],
-            imgui.IM_COL32(255, 0, 0, 255),
+            ColorDB().backend.im_col32(ColorDB().find('meter-color-peak')),
             rounding=2,
         )
 
@@ -970,7 +991,6 @@ class BufferEditor:
             ):
                 await MFPGUI().mfp.send(gain_id, 1, 1)
             else:
-                log.debug(f"[options] sending gain 0 to {gain_id}")
                 await MFPGUI().mfp.send(gain_id, 1, 0)
 
 

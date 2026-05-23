@@ -25,6 +25,7 @@ from mfp.interpreter import InterpreterResponse
 from .singleton import Singleton
 from .mfp_command import MFPCommand
 from .gui_command import GUICommand
+from .gui_themes import theme_dusk, theme_dark, theme_light
 
 backend_name = None
 
@@ -39,6 +40,14 @@ class MFPGUI (Singleton):
         self.debug = False
         self.async_task = AsyncTaskManager()
         self.backend_name = None
+        self.theme = None
+        self.style_vars = {}
+        self.style_colors = {}
+        self.appwin = None
+
+    def install_theme(self, theme):
+        self.theme = theme
+        ColorDB().install_theme(theme.get("colors"))
 
         self.style_vars = {
             'autoplace-dx': ParamInfo(label="X offset for autoplace", param_type=float),
@@ -61,6 +70,7 @@ class MFPGUI (Singleton):
             'link-color': ParamInfo(label="Connection color", param_type=RGBAColor),
             'link-color:selected': ParamInfo(label="Connection color (selected)", param_type=RGBAColor),
             'link-color:snoop': ParamInfo(label="Connection color (snoop mode)", param_type=RGBAColor),
+            'link-color:dashed': ParamInfo(label="Connection color (incomplete)", param_type=RGBAColor),
             'meter-color': ParamInfo(label="Meter bar color", param_type=RGBAColor),
             'padding': ParamInfo(label="Element padding", param_type=dict),
             'porthole-border': ParamInfo(label="Inlet/outlet padding", param_type=float),
@@ -80,23 +90,27 @@ class MFPGUI (Singleton):
             'stroke-color:': ParamInfo(label="Element outline color (hover)", param_type=RGBAColor),
             'text-color': ParamInfo(label="Text color", param_type=RGBAColor),
             'text-color:selected': ParamInfo(label="Text color (selected)", param_type=RGBAColor),
+            'text-color:reverse': ParamInfo(label="Text color (light on dark)", param_type=RGBAColor),
             'text-color:lit': ParamInfo(label="Text color (lit indicator)", param_type=RGBAColor),
+            'text-color:emph': ParamInfo(label="Text color (emphasized)", param_type=RGBAColor),
             'text-color:match': ParamInfo(label="Text color (search match)", param_type=RGBAColor),
             'text-cursor-color': ParamInfo(label="Text cursor color", param_type=RGBAColor),
         }
 
         self.style_defaults = {
             'canvas-color': ColorDB().find('default-canvas-color'),
+            'canvas-color:selected': ColorDB().find('default-canvas-color-selected'),
             'fill-color': ColorDB().find('default-fill-color'),
             'fill-color:selected': ColorDB().find('default-fill-color-selected'),
             'fill-color:lit': ColorDB().find('default-alt-fill-color'),
             'fill-color:debug': ColorDB().find('default-fill-color-debug'),
-            'font-face': 'Cantarell,Sans',
+            'font-face': 'Roboto',
             'font-size': 16,
             'grid-color:edit': ColorDB().find('default-grid-color'),
             'grid-color:operate': ColorDB().find('default-operate-grid-color'),
             'link-color': ColorDB().find('default-link-color'),
             'link-color:selected': ColorDB().find('default-link-color-selected'),
+            'link-color:dashed': ColorDB().find('default-link-color-dashed'),
             'link-color:snoop': ColorDB().find('default-link-color-snoop'),
             'porthole-color': ColorDB().find('default-stroke-color'),
             'porthole-color:selected': ColorDB().find('default-stroke-color-selected'),
@@ -107,12 +121,13 @@ class MFPGUI (Singleton):
             'stroke-color:hover': ColorDB().find('default-stroke-color-hover'),
             'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
             'text-color': ColorDB().find('default-text-color'),
+            'text-color:reverse': ColorDB().find('default-light-text-color'),
             'text-color:selected': ColorDB().find('default-text-color-selected'),
             'text-color:lit': ColorDB().find('default-alt-text-color'),
+            'text-color:emph': ColorDB().find('default-emph-text-color'),
             'text-color:match': ColorDB().find('default-match-text-color'),
             'text-cursor-color': ColorDB().find('default-text-cursor-color'),
         }
-        self.appwin = None
 
     def remember(self, obj):
         self.objects[obj.obj_id] = obj
@@ -132,138 +147,6 @@ class MFPGUI (Singleton):
         if self.appwin:
             self.appwin.quit()
             self.appwin = None
-
-
-def setup_default_colors_dark():
-    from .gui.colordb import ColorDB
-    # canvas background and grid
-    ColorDB().insert('default-canvas-color',
-                     ColorDB().find(0x5b, 0x5b, 0x5b, 0xff))
-    ColorDB().insert('default-grid-color',
-                     ColorDB().find(0x75, 0x75, 0x75, 0xff))
-    ColorDB().insert('default-operate-grid-color',
-                     ColorDB().find(0x75, 0x75, 0x75, 0x60))
-
-    # elements
-    ColorDB().insert('default-stroke-color',
-                     ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
-    ColorDB().insert('default-stroke-color-selected',
-                     ColorDB().find(0xdd, 0xdd, 0xdd, 0xff))
-    ColorDB().insert('default-selbox-stroke-color',
-                     ColorDB().find(0x33, 0xcc, 0xff, 0xff))
-    ColorDB().insert('default-selbox-fill-color',
-                     ColorDB().find(0x33, 0xcc, 0xff, 0x20))
-    ColorDB().insert('default-link-color',
-                     ColorDB().find(0xaa, 0xaa, 0xaa, 0xff))
-    ColorDB().insert('default-link-color-selected',
-                     ColorDB().find(0xdd, 0xdd, 0xdd, 0xff))
-    ColorDB().insert('default-link-color-snoop',
-                     ColorDB().find(0xaa, 0xff, 0xaa, 0xff))
-    ColorDB().insert('default-stroke-color-hover',
-                     ColorDB().find(0x99, 0x99, 0x99, 0x0d))
-    ColorDB().insert('default-stroke-color-debug',
-                     ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
-    ColorDB().insert('default-fill-color',
-                     ColorDB().find(0x1f, 0x1f, 0x1f, 0xff))
-    ColorDB().insert('default-fill-color-selected',
-                     ColorDB().find(0x2f, 0x2f, 0x2f, 0xff))
-    ColorDB().insert('default-fill-color-debug',
-                     ColorDB().find(0x2f, 0x4f, 0x2f, 0xff))
-    ColorDB().insert('default-alt-fill-color',
-                     ColorDB().find(0x7d, 0x7d, 0x7d, 0xff))
-    ColorDB().insert('default-text-color',
-                     ColorDB().find(0xde, 0xde, 0xde, 0xff))
-    ColorDB().insert('default-alt-text-color',
-                     ColorDB().find(0x1f, 0x1f, 0x1f, 0xff))
-    ColorDB().insert('default-light-text-color',
-                     ColorDB().find(0xf7, 0xf9, 0xf9, 0xff))
-    ColorDB().insert('default-match-text-color',
-                     ColorDB().find(0xaa, 0xff, 0xaa, 0xff))
-    ColorDB().insert('default-text-color-selected',
-                     ColorDB().find(0xde, 0xde, 0xde, 0xff))
-    ColorDB().insert('default-edit-badge-color',
-                     ColorDB().find(0x74, 0x4b, 0x94, 0xff))
-    ColorDB().insert('default-learn-badge-color',
-                     ColorDB().find(0x19, 0xff, 0x90, 0xff))
-    ColorDB().insert('default-error-badge-color',
-                     ColorDB().find(0xb7, 0x21, 0x21, 0xff))
-    ColorDB().insert('default-text-cursor-color',
-                     ColorDB().find(0xff, 0xff, 0xff, 0x40))
-    ColorDB().insert('default-data-color-0',
-                     ColorDB().find(0x88, 0x52, 0x7f, 0xff))
-    ColorDB().insert('default-data-color-1',
-                     ColorDB().find(0x4c, 0x60, 0x85, 0xff))
-    ColorDB().insert('default-data-color-2',
-                     ColorDB().find(0x39, 0xa0, 0xed, 0xff))
-    ColorDB().insert('default-data-color-3',
-                     ColorDB().find(0x36, 0xf1, 0xcd, 0xff))
-    ColorDB().insert('default-data-color-4',
-                     ColorDB().find(0x13, 0xc4, 0xa3, 0xff))
-    ColorDB().insert('default-data-color-5',
-                     ColorDB().find(0xd3, 0x61, 0x35, 0xff))
-    ColorDB().insert('default-cursor-color',
-                     ColorDB().find(0xff, 0xff, 0xff, 0x70))
-    ColorDB().insert('transparent',
-                     ColorDB().find(0x00, 0x00, 0x00, 0x00))
-
-
-def setup_default_colors_light():
-    from .gui.colordb import ColorDB
-    ColorDB().insert('default-canvas-color',
-                     ColorDB().find(0xf7, 0xf9, 0xf9, 0))
-    ColorDB().insert('default-cursor-color',
-                     ColorDB().find(0xff, 0xff, 0xff, 0x70))
-    ColorDB().insert('default-grid-color',
-                     ColorDB().find(0xd0, 0xd0, 0xd0, 0xff))
-    ColorDB().insert('default-stroke-color',
-                     ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
-    ColorDB().insert('default-stroke-color-selected',
-                     ColorDB().find(0x00, 0x7f, 0xff, 0xff))
-    ColorDB().insert('default-stroke-color-hover',
-                     ColorDB().find(0x00, 0x20, 0x40, 0x0d))
-    ColorDB().insert('default-stroke-color-debug',
-                     ColorDB().find(0x3f, 0xbf, 0x7f, 0xff))
-    ColorDB().insert('default-link-color',
-                     ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
-    ColorDB().insert('default-link-color-selected',
-                     ColorDB().find(0x00, 0x7f, 0xff, 0xff))
-    ColorDB().insert('default-fill-color',
-                     ColorDB().find(0xd4, 0xdc, 0xff, 0xff))
-    ColorDB().insert('default-fill-color-selected',
-                     ColorDB().find(0xe4, 0xec, 0xff, 0xff))
-    ColorDB().insert('default-fill-color-debug',
-                     ColorDB().find(0xcd, 0xf8, 0xec, 0xff))
-    ColorDB().insert('default-alt-fill-color',
-                     ColorDB().find(0x7d, 0x83, 0xff, 0xff))
-    ColorDB().insert('default-text-color',
-                     ColorDB().find(0x1f, 0x30, 0x2e, 0xff))
-    ColorDB().insert('default-light-text-color',
-                     ColorDB().find(0xf7, 0xf9, 0xf9, 0xff))
-    ColorDB().insert('default-text-color-selected',
-                     ColorDB().find(0x00, 0x7f, 0xff, 0xff))
-    ColorDB().insert('default-edit-badge-color',
-                     ColorDB().find(0x74, 0x4b, 0x94, 0xff))
-    ColorDB().insert('default-learn-badge-color',
-                     ColorDB().find(0x19, 0xff, 0x90, 0xff))
-    ColorDB().insert('default-error-badge-color',
-                     ColorDB().find(0xb7, 0x21, 0x21, 0xff))
-    ColorDB().insert('default-text-cursor-color',
-                     ColorDB().find(0x0, 0x0, 0x0, 0x40))
-    ColorDB().insert('default-data-color-0',
-                     ColorDB().find(0x88, 0x52, 0x7f, 0xff))
-    ColorDB().insert('default-data-color-1',
-                     ColorDB().find(0x4c, 0x60, 0x85, 0xff))
-    ColorDB().insert('default-data-color-2',
-                     ColorDB().find(0x39, 0xa0, 0xed, 0xff))
-    ColorDB().insert('default-data-color-3',
-                     ColorDB().find(0x36, 0xf1, 0xcd, 0xff))
-    ColorDB().insert('default-data-color-4',
-                     ColorDB().find(0x13, 0xc4, 0xa3, 0xff))
-    ColorDB().insert('default-data-color-5',
-                     ColorDB().find(0xd3, 0x61, 0x35, 0xff))
-    ColorDB().insert('transparent',
-                     ColorDB().find(0x00, 0x00, 0x00, 0x00))
-
 
 async def main(cmdline):
     from mfp.gui import modes
@@ -315,15 +198,17 @@ async def main(cmdline):
     ColorDB.backend_name = backend
 
     if backend == "imgui":
-        setup_default_colors_dark()
+        theme = theme_dusk
     else:
-        setup_default_colors_light()
+        theme = theme_light
 
     gui = MFPGUI()
     gui.mfp = mfp_connection
     gui.debug = debug
     gui.backend_name = backend
     gui.searchpath = searchpath
+
+    gui.install_theme(theme)
 
     gui.appwin = AppWindow.build(imgui_global_scale=init_mag)
 

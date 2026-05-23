@@ -31,7 +31,7 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
         super().__init__(window, x, y)
         self.node_id = None
         self.min_width = self.width = 25
-        self.min_height = self.height = 16
+        self.min_height = self.height = 20
         self.click_triggered = 0
 
     @mutates('position_x', 'position_y', 'width', 'height')
@@ -90,9 +90,11 @@ class ImguiMessageElementImpl(MessageElementImpl, ImguiBaseElementImpl, MessageE
 
         # node content: just the label
         imgui.begin_group()
+        imgui.dummy([1, 2])
         self.label.render(highlight=self.highlight_text)
 
         content_w, content_h = imgui.get_item_rect_size()
+        content_h += 2
 
         if content_w < self.min_width:
             imgui.same_line()

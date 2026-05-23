@@ -15,6 +15,7 @@ from posix_ipc import SharedMemory
 from imgui_bundle import imgui_node_editor as nedit, ImVec4, implot, imgui
 from mfp.gui_main import MFPGUI
 from mfp import log
+from mfp.gui.colordb import ColorDB
 from mfp.gui.modes.table_control import TableControlMode
 from .base_element import ImguiBaseElementImpl
 from ..plot_element import (
@@ -99,6 +100,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         self.last_message = None
         self.last_bounds = None
         self.last_bounds_cache = None
+        self.label.set_color(self.get_color("text-color:reverse"))
 
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)
@@ -118,6 +120,20 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             self.y_min = y_min
         if y_max is not None and y_max != self.y_max:
             self.y_max = y_max
+
+    def get_plot_spec(self, curve):
+        default_col = implot.AUTO_COL
+        spec = implot.Spec()
+        col = self.curve_color.get(curve)
+        colval = implot.AUTO_COL
+        if col:
+            colval = col.to_rgbaf()
+        spec.marker_line_color = colval
+        spec.marker_fill_color = colval
+        spec.line_color = colval
+        spec.fill_color = colval
+
+        return spec
 
     @mutates('position_x', 'position_y', 'width', 'height')
     def render(self):
@@ -318,12 +334,13 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
     def render_scope(self, x_min, y_min, x_max, y_max):
         for curve, curve_data in enumerate(self.buffer_data):
             title = self.curve_label.get(curve, f"Curve {curve}")
+            spec = self.get_plot_spec(curve)
             implot.plot_line(
                 title,
                 curve_data,
                 xscale=1000/self.samplerate,
                 xstart=0,
-                flags=0
+                spec=spec
             )
 
     def render_histo(self, x_min, y_min, x_max, y_max):
@@ -339,17 +356,10 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             for p in data
         ]
         title = self.curve_label.get(0, f"Curve {0}")
-        color = self.curve_color.get(0, None)
-        if color:
-            implot.push_style_color(implot.Col_.marker_fill, color.to_rgbaf())
-            implot.push_style_color(implot.Col_.marker_outline, color.to_rgbaf())
-            implot.push_style_color(implot.Col_.line, color.to_rgbaf())
-
+        spec = self.get_plot_spec(0)
         implot.plot_histogram(
-            title, np.array(bin_data)
+            title, np.array(bin_data), spec=spec
         )
-        if color:
-            implot.pop_style_color(3)
         return
 
     def render_bars(self, x_min, y_min, x_max, y_max):
@@ -367,16 +377,9 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             x_data = np.array([float(p[1][0]) for p in data])
             y_data = np.array([float(p[1][1]) for p in data])
             title = self.curve_label.get(0, f"Curve {0}")
-            color = self.curve_color.get(0, None)
-            if color:
-                implot.push_style_color(implot.Col_.marker_fill, color.to_rgbaf())
-                implot.push_style_color(implot.Col_.marker_outline, color.to_rgbaf())
-                implot.push_style_color(implot.Col_.line, color.to_rgbaf())
             implot.plot_bars(
-                title, x_data, y_data, 0.9,
+                title, x_data, y_data, 0.9, spec=self.get_plot_spec(0)
             )
-            if color:
-                implot.pop_style_color(3)
             return
 
         # multiple sets of bars
@@ -415,15 +418,11 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
 
     def render_scatter(self, x_min, y_min, x_max, y_max):
         for curve, points in self.message_data.items():
+            spec = self.get_plot_spec(curve)
             mark_name = self.mark_type.get(curve, None)
             mark = None
             if mark_name and hasattr(implot.Marker_, mark_name):
                 mark = getattr(implot.Marker_, mark_name)
-            color = self.curve_color.get(curve, None)
-            if color:
-                implot.push_style_color(implot.Col_.marker_fill, color.to_rgbaf())
-                implot.push_style_color(implot.Col_.marker_outline, color.to_rgbaf())
-                implot.push_style_color(implot.Col_.line, color.to_rgbaf())
 
             time_adjusted = [
                 p[1]
@@ -448,10 +447,8 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
                 implot.set_next_marker_style(mark)
 
             implot.plot_scatter(
-                title, np.array(x_data), np.array(y_data)
+                title, np.array(x_data), np.array(y_data), spec=spec
             )
-            if color:
-                implot.pop_style_color(3)
 
     def draw_ports(self):
         super().draw_ports()

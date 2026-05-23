@@ -82,6 +82,7 @@ def render_tile(app_window, patch, num_patches):
     canvas_pane_origin = (1, app_window.menu_height + 1)
 
     tile = patch.display_info
+    tile_selected = False
 
     imgui.set_next_window_size((tile.width, tile.height))
     imgui.set_next_window_pos((
@@ -133,6 +134,7 @@ def render_tile(app_window, patch, num_patches):
 
     # handle tile resize
     if app_window.selected_patch == patch:
+        tile_selected = True
         actual_w, actual_h = imgui.get_window_size()
         if abs(actual_w - tile.width) > ALLOWED_DELTA_PIX or abs(actual_h - tile.height) > ALLOWED_DELTA_PIX:
             actual_x, actual_y = imgui.get_window_pos()
@@ -154,7 +156,7 @@ def render_tile(app_window, patch, num_patches):
 
     nedit.push_style_color(
         nedit.StyleColor.bg,
-        app_window.get_color('canvas-color').to_rgbaf()
+        app_window.get_color(f"canvas-color{':selected' if tile_selected else ''}").to_rgbaf()
     )
     nedit.push_style_color(
         nedit.StyleColor.node_border,

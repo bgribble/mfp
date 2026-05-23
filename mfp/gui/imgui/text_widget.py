@@ -78,7 +78,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.position_set = False
         self.font_width = 6
         self.font_height = 11
-        self.font_color = None
+        self.font_color = self.container.get_color("text-color")
         self.multiline = False
 
         self.selection_start = 0
@@ -151,7 +151,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         font_size = font_size / TextWidget.scale_factor
         font_changed = False
-        color = None
+        color = ColorDB().backend.im_col32(cls.imgui_currently_rendering.font_color)
 
         # classes possible:
         # size-*, bold, italic, bolditalic, tt, color-rrggbbaa
