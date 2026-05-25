@@ -68,6 +68,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
             self.get_color('fill-color').to_rgbaf()
         )
         stroke_color = self.get_color('stroke-color')
+        fill_color = self.get_color('fill-color:lit')
 
         nedit.push_style_color(
             nedit.StyleColor.node_border,
@@ -110,7 +111,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
                     self.position_x + self.width - inset_size - border_width,
                     self.position_y + self.height - inset_size - border_width
                 ],
-                ColorDB().backend.im_col32(stroke_color),
+                ColorDB().backend.im_col32(fill_color),
                 rounding=corner,
                 flags=0,
             )
