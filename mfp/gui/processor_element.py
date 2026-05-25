@@ -58,7 +58,7 @@ class ProcessorElement (BaseElement):
         # display elements
         self.label = TextWidget.get_backend(MFPGUI().backend_name)(self)
         self.label.set_position(self.label_off_x, self.label_off_y)
-        self.label.set_color(self.get_color('text-color:reverse'))
+        self.label.set_color(self.get_color('text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.signal_listen('text-changed', self.label_changed_cb)
         self.label.set_reactive(False)
@@ -86,7 +86,7 @@ class ProcessorElement (BaseElement):
         self.obj_state = self.OBJ_HALFCREATED
         if not self.show_label:
             self.label.show()
-        if self.obj_type: 
+        if self.obj_type:
             self.set_label_text(markup=False)
         await self.update()
 
@@ -157,15 +157,18 @@ class ProcessorElement (BaseElement):
         type_color = self.get_color("text-color:emph")
         if self.obj_args is None:
             if markup:
-                self.label.set_markup(f"<div class='tt color-{type_color}'>{self.obj_type}</div>")
+                self.label.set_markup(
+                    f"<div class='tt color-{type_color}'>{self.obj_type}</div>"
+                )
             else:
                 self.label.set_text(f"{self.obj_type}")
         else:
             if markup:
-                self.label.set_markup(f"<div class='tt'><div class='color-{type_color}'>{self.obj_type}</div> {self.obj_args}</div>")
+                self.label.set_markup(
+                    f"<div class='tt'><div class='color-{type_color}'>{self.obj_type}</div> {self.obj_args}</div>"
+                )
             else:
                 self.label.set_text(f"{self.obj_type} {self.obj_args}")
-
 
     @mutates('panel_mode')
     async def configure(self, params):

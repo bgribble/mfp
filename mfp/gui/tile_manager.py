@@ -69,10 +69,11 @@ class TileManager:
 
         return self.alloc_tile(**kwargs)
 
-    def tile_at_point(self, x, y):
+    def tile_at_point(self, x, y, page):
         for tile in self.tiles:
             if (
-                (x > tile.origin_x)
+                tile.page_id == page
+                and (x > tile.origin_x)
                 and (x <= tile.origin_x + tile.width)
                 and (y > tile.origin_y)
                 and (y <= tile.origin_y + tile.height)

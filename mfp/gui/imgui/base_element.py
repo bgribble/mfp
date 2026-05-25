@@ -274,6 +274,7 @@ class ImguiBaseElementImpl(BaseElementImpl):
         pw = self.get_style('porthole-width')
         ph = self.get_style('porthole-height')
         pcolor = self.get_color('porthole-color')
+        ccolor = self.get_color('canvas-color')
 
         points = semicircle_points(
             px,
@@ -283,6 +284,10 @@ class ImguiBaseElementImpl(BaseElementImpl):
             1 if out_port else -1
         )
         if dsp_port:
+            draw_list.add_convex_poly_filled(
+                points,
+                ColorDB().backend.im_col32(ccolor)
+            )
             draw_list.add_polyline(
                 points,
                 ColorDB().backend.im_col32(pcolor),

@@ -487,7 +487,7 @@ class BufferEditor:
                     imgui.push_style_color(
                         imgui.Col_.frame_bg, ColorDB().find("default-canvas-color").to_rgbaf()
                     )
-                    imgui.push_style_var(imgui.StyleVar_.item_spacing, [0, 1])
+                    imgui.push_style_var(imgui.StyleVar_.item_spacing, [0, 2])
                     for option in ("mute", "solo", "rec"):
                         changed, checked = imgui.checkbox(
                             option.upper(),

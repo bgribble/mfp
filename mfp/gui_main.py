@@ -95,6 +95,8 @@ class MFPGUI (Singleton):
             'text-color:emph': ParamInfo(label="Text color (emphasized)", param_type=RGBAColor),
             'text-color:match': ParamInfo(label="Text color (search match)", param_type=RGBAColor),
             'text-cursor-color': ParamInfo(label="Text cursor color", param_type=RGBAColor),
+            'text-element-text-color': ParamInfo(label="Text color", param_type=RGBAColor),
+            'text-element-text-color:selected': ParamInfo(label="Text color (selected)", param_type=RGBAColor),
         }
 
         self.style_defaults = {
@@ -121,7 +123,9 @@ class MFPGUI (Singleton):
             'stroke-color:hover': ColorDB().find('default-stroke-color-hover'),
             'stroke-color:debug': ColorDB().find('default-stroke-color-debug'),
             'text-color': ColorDB().find('default-text-color'),
-            'text-color:reverse': ColorDB().find('default-light-text-color'),
+            'text-element-text-color': ColorDB().find('default-text-element-text-color'),
+            'text-element-text-color:selected': ColorDB().find('default-text-element-text-color-selected'),
+            'text-color:reverse': ColorDB().find('default-reverse-text-color'),
             'text-color:selected': ColorDB().find('default-text-color-selected'),
             'text-color:lit': ColorDB().find('default-alt-text-color'),
             'text-color:emph': ColorDB().find('default-emph-text-color'),

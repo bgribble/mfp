@@ -59,7 +59,7 @@ class EnumElement (BaseElement):
         self.label = TextWidget.build(self)
         self.label.set_position(4, 1)
         self.label.set_font_name(self.get_fontspec())
-        self.label.set_color(self.get_color('text-color:reverse'))
+        self.label.set_color(self.get_color('text-color'))
         self.label.signal_listen('text-changed', self.text_changed_cb)
         self.label.set_text(self.format_value(self.value))
 
@@ -86,7 +86,7 @@ class EnumElement (BaseElement):
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
-        self.label.set_color(self.get_color('text-color:reverse'))
+        self.label.set_color(self.get_color('text-color'))
         yield None
 
     def format_update(self):
@@ -211,12 +211,12 @@ class EnumElement (BaseElement):
 
     def select(self):
         BaseElement.select(self)
-        self.label.set_color(self.get_color('text-color:reverse'))
+        self.label.set_color(self.get_color('text-color'))
         self.redraw()
 
     def unselect(self):
         BaseElement.unselect(self)
-        self.label.set_color(self.get_color('text-color:reverse'))
+        self.label.set_color(self.get_color('text-color'))
         self.redraw()
 
     async def make_edit_mode(self):

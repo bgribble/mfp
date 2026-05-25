@@ -86,7 +86,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         self.cursor_pos = 0
         self.cursor_visible = False
-        self.cursor_color = ColorDB().find('default-cursor-color')
+        self.cursor_color = ColorDB().find('default-text-cursor-color')
 
         self.visible = True
         self.use_markup = False
@@ -138,7 +138,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             "size-x-large": 24.0 / TextWidget.scale_factor,
             "size-xx-large": 28.0 / TextWidget.scale_factor,
         }
-
+        text_widget = cls.imgui_currently_rendering
         font_key_stack = cls.imgui_currently_rendering.font_key_stack
         if not font_key_stack:
             font_key_stack.append((
@@ -151,7 +151,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         font_size = font_size / TextWidget.scale_factor
         font_changed = False
-        color = ColorDB().backend.im_col32(cls.imgui_currently_rendering.font_color)
+        color = ColorDB().backend.im_col32(text_widget.font_color)
 
         # classes possible:
         # size-*, bold, italic, bolditalic, tt, color-rrggbbaa
@@ -208,6 +208,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 if new_font:
                     imgui.push_font(new_font, font_size)
             if color:
+                w = cls.imgui_currently_rendering
                 imgui.push_style_color(imgui.Col_.text, color)
         else:
             if font_changed:
@@ -531,7 +532,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
                 md_text = '\n'.join(transformed_blocks)
                 self.transform_out = md_text
-            #imgui.dummy((1, 3))
+
             if self.markdown_text or self.text:
                 imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 2))
                 markdown.render(md_text)

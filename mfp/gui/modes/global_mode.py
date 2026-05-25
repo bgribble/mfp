@@ -595,7 +595,9 @@ class GlobalMode (InputMode):
             self.window.imgui_tile_selected = True
 
         # select the patch/tile that the click was in
-        click_tile = self.window.canvas_tile_manager.tile_at_point(evx, evy)
+        click_tile = self.window.canvas_tile_manager.tile_at_point(
+            evx, evy, self.window.canvas_tile_page
+        )
         click_patch = None
         if click_tile:
             try:

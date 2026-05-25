@@ -6,7 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from mfp import log
 from flopsy import mutates
-
+from mfp.gui.colordb import ColorDB
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from .base_element import ImguiBaseElementImpl
 from ..processor_element import (
@@ -103,11 +103,16 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         imgui.begin_group()
         label_w = 0
         label_h = 0
+        label_space = 0
         if self.show_label or not self.children:
             self.label.render(highlight=self.highlight_text)
+            label_w, label_h = imgui.get_item_rect_size()
+            label_space = label_h + 4
         else:
-            imgui.dummy([2, 2])
-        label_w, label_h = imgui.get_item_rect_size()
+            imgui.dummy([1, 1])
+            label_w = 1
+            label_h = 1
+            label_space = 1
 
         port_alloc_w = self.port_alloc()
 
@@ -118,15 +123,28 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
             min_w = max(min_w, port_alloc_w)
 
         if self.export_h is not None:
-            min_h = max(self.min_height, self.export_h + label_h)
+            min_h = max(self.min_height, self.export_h + label_space)
         else:
             min_h = self.min_height
 
         if label_w < min_w:
             imgui.same_line()
-            imgui.dummy([min_w - label_w - 2, 1])
+            imgui.dummy([min_w - label_w, 1])
         if (label_h + 4) <= min_h:
-            imgui.dummy([1, min_h - (label_h + 2)])
+            imgui.dummy([1, min_h - (label_space - 2)])
+            if self.children:
+                # if there will be children here, color it like the canvas
+                dl = imgui.get_window_draw_list()
+                child_start = imgui.get_item_rect_min()
+                child_end = imgui.get_item_rect_max()
+                vspace = 0
+                if label_h > 1:
+                    vspace = 2
+                dl.add_rect_filled(
+                    [child_start[0] - 2, child_start[1] + vspace],
+                    [child_end[0] + max(min_w, label_w) + 1, child_end[1]],
+                    ColorDB().backend.im_col32(self.get_color("canvas-color"))
+                )
         imgui.end_group()
 
         # connections

@@ -100,7 +100,7 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
         self.last_message = None
         self.last_bounds = None
         self.last_bounds_cache = None
-        self.label.set_color(self.get_color("text-color:reverse"))
+        self.label.set_color(self.get_color("text-color"))
 
     async def set_size(self, width, height, **kwargs):
         await super().set_size(width, height, **kwargs)

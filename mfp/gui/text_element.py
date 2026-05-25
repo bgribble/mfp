@@ -66,7 +66,7 @@ class TextElement (BaseElement):
         self._all_styles = self.combine_styles()
 
         self.label = TextWidget.build(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.set_position(3, 3)
 
@@ -90,7 +90,7 @@ class TextElement (BaseElement):
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         yield None
 
     async def update(self):
@@ -107,7 +107,7 @@ class TextElement (BaseElement):
         elif new_text != self.value and not aborted:
             self.value = new_text
             if widget:
-                # just setting text, don't be aggressive about shrinking 
+                # just setting text, don't be aggressive about shrinking
                 self.width = 1.5*widget.width
                 self.height = 1.5*widget.height
             self.set_text()
@@ -141,13 +141,13 @@ class TextElement (BaseElement):
 
     def select(self, *args):
         BaseElement.select(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.redraw()
         self.draw_ports()
 
     def unselect(self, *args):
         BaseElement.unselect(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.redraw()
         self.hide_ports()
 
