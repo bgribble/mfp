@@ -203,7 +203,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                     new_font_key, None
                 )
                 font_key_stack.append(
-                    (new_font_key if new_font else None, font_size)
+                    (new_font_key if new_font else None, font_size * TextWidget.scale_factor)
                 )
                 if new_font:
                     imgui.push_font(new_font, font_size)
