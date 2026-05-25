@@ -220,10 +220,15 @@ class ImguiSlideMeterElementImpl(ImguiBaseElementImpl):
 
         imgui.dummy([total_width, 1])
         imgui.dummy([1, total_height-1])
-
+        canvas_color = self.get_color("canvas-color")
         fill_color = self.get_color('meter-color')
         stroke_color = self.get_color('stroke-color')
 
+        draw_list.add_rect_filled(
+            c_tl, c_br,
+            ColorDB().backend.im_col32(canvas_color),
+            rounding=border_round
+        )
         draw_list.add_rect_filled(
             p_tl, p_br,
             ColorDB().backend.im_col32(fill_color),
@@ -468,11 +473,29 @@ class ImguiDialElementImpl(DialElementImpl, ImguiSlideMeterElementImpl, DialElem
 
         fill_color = self.get_color('meter-color')
         stroke_color = self.get_color('stroke-color')
+        canvas_color = self.get_color('canvas-color')
 
         outer_radius = self.dial_radius
         inner_radius = self.dial_radius / 4
         theta_range = 2 * math.pi - (self.THETA_MIN - self.THETA_MAX)
 
+        # opaque background
+        draw_list.path_arc_to(
+            [self.position_x + self.width / 2,
+             self.position_y + self.height / 2],
+            (outer_radius + inner_radius) / 2,
+            self.THETA_MIN,
+            self.THETA_MIN + theta_range,
+            35
+        )
+
+        draw_list.path_stroke(
+            ColorDB().backend.im_col32(canvas_color),
+            flags=0,
+            thickness=(outer_radius - inner_radius) * 0.95
+        )
+
+        # outline
         draw_list.path_arc_to(
             [self.position_x + self.width / 2,
              self.position_y + self.height / 2],
