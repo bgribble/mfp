@@ -328,7 +328,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         # single newlines with non-newline after are part of the
         # preceding paragraph, so replace newline with space -- unless it's
-        # part of a table (starts with |) or a list (starts with *)
+        # part of a table (starts with |) blockquote (>) or a list (starts with *)
         md_text = re.sub(
             '^([^>|*][^\n]*)\n(?=[^*>|\n])',
             r'\1 ',
@@ -336,10 +336,9 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
             flags=re.MULTILINE
         )
 
-        # add linebreaks between lines in a block quote
+        # remove spaces at start of blockquote lines
         md_text = re.sub(
-            '^(> [^\n]*?)(?<!<br>)(?=\n)',
-            '\\1 <br>',
+            '^> ', '>',
             md_text,
             flags=re.MULTILINE
         )
@@ -347,8 +346,22 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         # paragraphs (two newlines in a row) need a <br> to give them
         # appropriate visual spacing
         md_text = re.sub(
-            '^([^>|*][^\n]*)(?<!<br>)\n\n',
+            '^([^>|*][^\n]*?)(?<!<br>)\n *\n',
             '\\1\n<br>\n\n',
+            md_text,
+            flags=re.MULTILINE
+        )
+        md_text = re.sub(
+            '^([^>|*][^\n]*?)(?<!<br>)\n *\n',
+            '\\1\n<br>\n\n',
+            md_text,
+            flags=re.MULTILINE
+        )
+
+        # linebreak after last line of block quote
+        md_text = re.sub(
+            '^(>[^\n]*?)(?<!<br>)\n\n',
+            '\\1\n\n<br>\n\n',
             md_text,
             flags=re.MULTILINE
         )
