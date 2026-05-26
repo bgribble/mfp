@@ -116,6 +116,21 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
                 flags=0,
             )
         else:
+            draw_list.add_rect_filled(
+                [
+                    self.position_x + inset_size + border_width,
+                    self.position_y + inset_size + border_width
+                ],
+                [
+                    self.position_x + self.width - inset_size - border_width,
+                    self.position_y + self.height - inset_size - border_width
+                ],
+                ColorDB().backend.im_col32(
+                    ColorDB().find(0xff, 0xff, 0xff, 0x70)
+                ),
+                rounding=corner,
+                flags=0,
+            )
             draw_list.add_rect(
                 [
                     self.position_x + inset_size,
@@ -125,7 +140,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
                     self.position_x + self.width - inset_size,
                     self.position_y + self.height - inset_size
                 ],
-                ColorDB().backend.im_col32(stroke_color),
+                ColorDB().backend.im_col32(fill_color),
                 rounding=corner,
                 flags=0,
                 thickness=border_width

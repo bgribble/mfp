@@ -4,16 +4,17 @@ canvas_panel -- render the 'imgui node editor' canvas pane
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 import math
+from datetime import datetime
 
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from mfp import log
 from mfp.gui_main import MFPGUI
-from mfp.gui.colordb import ColorDB
 from mfp.gui.base_element import BaseElement
+from mfp.gui.colordb import ColorDB
 from mfp.gui.text_widget import TextWidget
 from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.modes.patch_edit import PatchEditMode
-from mfp.gui.modes.global_mode import GlobalMode
+
 from . import menu_bar
 
 ALLOWED_DELTA_PIX = 0.1
@@ -191,7 +192,6 @@ def render_tile(app_window, patch, num_patches):
             app_window.get_color('grid-color:operate').to_rgbaf()
         )
 
-    #imgui.get_style().font_scale_main = 1.0
     TextWidget.scale_factor = app_window.imgui_global_scale
 
     nedit.begin("canvas_editor", (0.0, 0.0))
@@ -429,6 +429,15 @@ def render_tile(app_window, patch, num_patches):
     return need_reset
 
 
+def brighten(color, fraction):
+    return ColorDB().find(
+        min(255, max(0, color.red + (255 - color.red) * fraction)),
+        min(255, max(0, color.green + (255 - color.green) * fraction)),
+        min(255, max(0, color.blue + (255 - color.blue) * fraction)),
+        color.alpha
+    )
+
+
 def render(app_window):
     imgui.begin(
         "canvas",
@@ -440,6 +449,19 @@ def render(app_window):
             | imgui.WindowFlags_.no_resize
         ),
     )
+
+    selected_stroke = None
+    selected_elements = [e for e in app_window.selected]
+
+    if selected_elements:
+        fr = 0.5 * math.sin((datetime.now().microsecond/1000000) * 2 * math.pi)
+        selected_stroke = app_window.get_color("stroke-color:selected")
+        brighter = brighten(selected_stroke, fr)
+        BaseElement.style_defaults["stroke-color:selected"] = brighter
+        BaseElement.style_defaults["porthole-color:selected"] = brighter
+        for sel in selected_elements:
+            sel._all_styles = sel.combine_styles()
+        app_window.imgui_prevent_idle = 10
 
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
         app_window.zone_hovered("canvas")
@@ -478,6 +500,12 @@ def render(app_window):
     imgui.end()
 
     app_window.imgui_selection_started = False
+
+    if selected_stroke:
+        BaseElement.style_defaults["stroke-color:selected"] = selected_stroke
+        BaseElement.style_defaults["porthole-color:selected"] = selected_stroke
+        for sel in selected_elements:
+            sel._all_styles = sel.combine_styles()
 
     # nothing in here can make us exit
     return True

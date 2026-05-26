@@ -612,10 +612,14 @@ class BufferEditor:
                         implot.plot_line("Buffer edit", x_values, y_values)
 
                     # if we have a selection, show it as a drag rect
+                    drag_color = [*self.app_window.get_color("selbox-fill-color").to_rgbaf()]
+                    drag_color[3] = 1
+
                     if not self.channel_selections_active[channel] and self.implot_selection:
                         ss = self.implot_selection
                         rect = implot.drag_rect(
-                            0, ss.x.min, 1, ss.x.max, -1, [0, 1, 0, 1]
+                            0, ss.x.min, 1, ss.x.max, -1,
+                            drag_color
                         )
                         if rect[1] != ss.x.min or rect[3] != ss.x.max:
                             ss.x.min = rect[1]
@@ -627,7 +631,11 @@ class BufferEditor:
                             )
 
                     # playhead
-                    implot.drag_line_x(0, self.implot_playhead, [1, 1, 1, 1])
+                    implot.drag_line_x(
+                        0,
+                        self.implot_playhead,
+                        drag_color
+                    )
 
                     implot.end_plot()
                     if imgui.is_item_hovered():
