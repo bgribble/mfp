@@ -16,6 +16,9 @@ from .buffer_editor import BufferEditor
 async def fx_open_patch(self, fxname):
     from mfp.gui_main import MFPGUI
 
+    # close the previous patch
+    await self.fx_close_patch()
+
     # create new patch wrapping the specified effect
     self.fx_patch_id = await MFPGUI().mfp.open_file(
         "bufedit.fx~.mfp",

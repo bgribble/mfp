@@ -46,7 +46,7 @@ class ViaElement (BaseElement):
         self.label.set_position(0, self.LABEL_Y)
 
         # configure label
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.signal_listen('text-changed', self.text_changed_cb)
 
@@ -87,7 +87,7 @@ class ViaElement (BaseElement):
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         yield None
 
     async def label_edit_start(self, *args):
@@ -120,12 +120,12 @@ class ViaElement (BaseElement):
 
     def select(self):
         BaseElement.select(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.redraw()
 
     def unselect(self):
         BaseElement.unselect(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.redraw()
 
     async def make_edit_mode(self):
