@@ -75,6 +75,7 @@ theme_dusk = {
         'rec-button-color': dusk_red,
         'rec-button-color-highlight': brt(dusk_red, 1.2),
         'rec-button-color-clicked': brt(dusk_red, 0.9),
+        'zone-drag-color': dusk_gray_2,
     }
 }
 

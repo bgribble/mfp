@@ -8,7 +8,7 @@ import json
 from carp.service import apiclass, noresp
 
 from mfp import log
-from .bang import Bang
+from .bang import Bang, Unbound
 from .patch import Patch
 from .method import MethodCall
 from .processor import Processor
@@ -417,8 +417,9 @@ class MFPCommand:
         from .mfp_app import MFPApp
         patch = MFPApp().recall(patch_id)
         obj = patch.resolve(name, scope)
-        if obj:
+        if obj is not Unbound:
             return obj.obj_id
+        return obj
 
     @noresp
     def quit(self):

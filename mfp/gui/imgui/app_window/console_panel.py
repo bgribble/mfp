@@ -4,6 +4,7 @@ from datetime import datetime
 from imgui_bundle import imgui
 
 from mfp.gui import image_utils
+from mfp.gui.colordb import ColorDB
 from mfp.gui.modes.console_mode import ConsoleMode
 from mfp import log
 
@@ -36,7 +37,10 @@ def render(app_window):
     ##############################
     ## resize grab bar
     grab_size = 8 * app_window.imgui_global_scale
-    imgui.push_style_color(imgui.Col_.child_bg, imgui.IM_COL32(120, 120, 120, 255))
+    imgui.push_style_color(
+        imgui.Col_.child_bg,
+        ColorDB().backend.im_col32(ColorDB().find("zone-drag-color"))
+    )
     imgui.set_next_window_size((app_window.window_width, grab_size))
     imgui.push_style_var(imgui.StyleVar_.window_padding, (0, 0))
     imgui.push_style_var(imgui.StyleVar_.window_border_size, 0)

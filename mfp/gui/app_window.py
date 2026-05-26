@@ -227,6 +227,8 @@ class AppWindow (SignalMixin):
         self.initialize()
 
         self.cmd_input = TextWidget.build(self)
+        self.cmd_input.set_color(self.get_color('text-element-text-color'))
+
         self.cmd_manager = Prompter(
             self, self.cmd_input,
             completions=InputMode._bindings_by_label.keys()

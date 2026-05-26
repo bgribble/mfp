@@ -275,7 +275,7 @@ def render_tile(app_window, patch, num_patches):
             app_window,
             canvas_pane_origin,
             canvas_origin,
-            tile
+            tile,
         )
 
     #############################

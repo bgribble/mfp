@@ -56,6 +56,15 @@ async def fx_open_patch(self, fxname):
         element_id = await MFPGUI().mfp.resolve(element, self.fx_patch_id)
         self.fx_patch_elements[element] = MFPGUI().objects.get(element_id)
 
+    # find the "fx enable" sig~ so we can bypass FX per channel
+    self.fx_patch_channel_enable = []
+    for channel in range(self.buffer_info.channels):
+        scope = "channel"
+        if channel > 0:
+            scope = f"channel_{channel+1:03d}"
+        element_id = await MFPGUI().mfp.resolve("fx_enable", self.fx_patch_id, scope)
+        self.fx_patch_channel_enable.append(element_id)
+
     # if there's a selection, default to "Selection only"
     if self.implot_selection:
         sel_toggle = self.fx_patch_elements.get('selection_toggle')

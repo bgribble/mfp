@@ -9,7 +9,7 @@ from imgui_bundle import imgui, imgui_color_text_edit as ed
 from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui import image_utils
-from mfp.gui.colordb import RGBAColor
+from mfp.gui.colordb import ColorDB, RGBAColor
 from mfp.gui.base_element import BaseElement, PROPERTY_ATTRS
 from mfp.gui.param_info import (
     ParamInfo,
@@ -104,7 +104,10 @@ def render(app_window):
     ## resize grab bar
     dots = image_utils.load_texture_from_file("icons/dots-vert.png")
     grab_size = 8 * app_window.imgui_global_scale
-    imgui.push_style_color(imgui.Col_.child_bg, imgui.IM_COL32(120, 120, 120, 255))
+    imgui.push_style_color(
+        imgui.Col_.child_bg,
+        ColorDB().backend.im_col32(ColorDB().find("zone-drag-color"))
+    )
     imgui.push_style_var(imgui.StyleVar_.window_padding, (0, 0))
     imgui.push_style_var(imgui.StyleVar_.window_border_size, 0)
 

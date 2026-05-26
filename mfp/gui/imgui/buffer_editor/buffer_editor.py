@@ -72,6 +72,7 @@ class BufferEditor:
 
         self.fx_patch_id = None
         self.fx_patch_elements = {}
+        self.fx_patch_channel_enable = []
 
         self.channel_selections = [None]          # per-channel select box state (transient)
         self.channel_selections_active = [False]  # per-channel select box activity
@@ -458,9 +459,6 @@ class BufferEditor:
             for channel in range(num_channels + 1):
                 channel_tool_width = 100
 
-                while len(self.channel_options) < channel:
-                    self.channel_options.append(dict())
-
                 imgui.push_id(str(channel))
                 if channel == 0:
                     height = line_height * 4
@@ -488,7 +486,7 @@ class BufferEditor:
                         imgui.Col_.frame_bg, ColorDB().find("default-canvas-color").to_rgbaf()
                     )
                     imgui.push_style_var(imgui.StyleVar_.item_spacing, [0, 2])
-                    for option in ("mute", "solo", "rec"):
+                    for option in ("mute", "solo", "rec", "fx"):
                         changed, checked = imgui.checkbox(
                             option.upper(),
                             self.channel_options[channel - 1].get(option, False)
@@ -991,6 +989,8 @@ class BufferEditor:
         for channel, copt in enumerate(self.channel_options):
             mute = copt.get("mute", False)
             solo = copt.get("solo", False)
+            fx = copt.get("fx", True)
+
             gain_id = self.working_mon_gain[channel]
 
             if (
@@ -1000,6 +1000,14 @@ class BufferEditor:
                 await MFPGUI().mfp.send(gain_id, 1, 1)
             else:
                 await MFPGUI().mfp.send(gain_id, 1, 0)
+
+            # crossfader to bypass wet FX chain for this channel
+            if len(self.fx_patch_channel_enable) > channel:
+                fx_id = self.fx_patch_channel_enable[channel]
+                if fx and fx_id:
+                    await MFPGUI().mfp.send(fx_id, 0, 1)
+                else:
+                    await MFPGUI().mfp.send(fx_id, 0, 0)
 
 
 from . import buffer_ops
