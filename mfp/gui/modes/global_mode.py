@@ -588,6 +588,7 @@ class GlobalMode (InputMode):
                 self.window.zone_selected != "canvas"
                 or self.window.main_menu_open
                 or self.window.context_menu_open
+                or self.window.tile_resize_in_progress
                 or self.window.inspector
                 or nedit.get_hovered_pin().id()
             ):
@@ -651,6 +652,9 @@ class GlobalMode (InputMode):
 
     async def selbox_motion(self, select_mode):
         if not (self.selbox_started or self.selection_drag_started):
+            return False
+
+        if self.window.tile_resize_in_progress:
             return False
 
         px = self.manager.pointer_x

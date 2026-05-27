@@ -81,6 +81,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.canvas_panel_width = self.INIT_WIDTH - self.INIT_INFO_PANEL_WIDTH
         self.canvas_panel_height = self.INIT_HEIGHT - self.INIT_CONSOLE_PANEL_HEIGHT
         self.canvas_resize_in_progress = False
+        self.tile_resize_in_progress = 0
 
         self.canvas_tile_page = 0
         self.canvas_tile_manager = TileManager(

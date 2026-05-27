@@ -139,12 +139,15 @@ def render_tile(app_window, patch, num_patches):
         actual_w, actual_h = imgui.get_window_size()
         if abs(actual_w - tile.width) > ALLOWED_DELTA_PIX or abs(actual_h - tile.height) > ALLOWED_DELTA_PIX:
             actual_x, actual_y = imgui.get_window_pos()
+            app_window.tile_resize_in_progress = 3
             app_window.canvas_tile_manager.resize_tile(
                 tile,
                 actual_w, actual_h,
                 actual_x - canvas_pane_origin[0],
                 actual_y - canvas_pane_origin[1]
             )
+        else:
+            app_window.tile_resize_in_progress = max(0, app_window.tile_resize_in_progress - 1)
 
     # canvas_origin is the screen offset of the upper-left of the canvas
     # relative to the tile (accounting for the tile title bar)
