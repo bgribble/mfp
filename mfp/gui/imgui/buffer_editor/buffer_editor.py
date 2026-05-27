@@ -986,7 +986,7 @@ class BufferEditor:
             if solo:
                 solo_channels = True
 
-        for channel, copt in enumerate(self.channel_options):
+        for channel, copt in enumerate(self.channel_options[:-1]):
             mute = copt.get("mute", False)
             solo = copt.get("solo", False)
             fx = copt.get("fx", True)
