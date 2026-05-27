@@ -8,9 +8,9 @@ glfw==2.8.0
 imgui-bundle==1.92.801
 munch==4.0.0
 numpy==2.2.4
-pillow==11.1.0
+pillow==12.2.0
 posix_ipc==1.1.1
-protobuf==6.30.1
+protobuf==6.33.5
 pycparser==2.22
 pydantic==2.10.6
 pydantic_core==2.27.2
@@ -20,7 +20,7 @@ PyOpenGL==3.1.9
 PySDL2==0.9.17
 python-dateutil==2.9.0.post0
 samplerate==0.2.1
-setuptools==77.0.1
+setuptools==78.1.1
 simplejson==3.20.1
 six==1.17.0
 soundfile==0.13.1
