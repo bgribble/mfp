@@ -6,6 +6,7 @@ A patch element corresponding to a signal or control processor
 '''
 
 from abc import ABCMeta, abstractmethod
+import re
 
 from flopsy import saga, mutates
 
@@ -30,7 +31,7 @@ class ProcessorElement (BaseElement):
     proc_type = None
 
     extra_params = {
-        'show_label': ParamInfo(label="Show label", param_type=bool),
+        'show_label': ParamInfo(label="Show label", param_type=bool, show=True),
         'export_x': ParamInfo(label="Exported interface X", param_type=float),
         'export_y': ParamInfo(label="Exported interface Y", param_type=float),
         'export_w': ParamInfo(label="Exported interface width", param_type=float),
@@ -52,6 +53,7 @@ class ProcessorElement (BaseElement):
         super().__init__(window, x, y)
 
         self.show_label = params.get("show_label", True)
+        self.panel_mode = params.get("panel_mode", False)
 
         # display elements
         self.label = TextWidget.get_backend(MFPGUI().backend_name)(self)
@@ -62,7 +64,7 @@ class ProcessorElement (BaseElement):
         self.label.set_reactive(False)
         self.label_text = None
 
-        if not self.show_label:
+        if not self.show_label and self.children:
             self.label.hide()
 
         self.export_x = None
@@ -70,7 +72,6 @@ class ProcessorElement (BaseElement):
         self.export_w = None
         self.export_h = None
         self.export_created = False
-        self.panel_mode = False
 
         self.obj_state = self.OBJ_HALFCREATED
 
@@ -85,15 +86,17 @@ class ProcessorElement (BaseElement):
         self.obj_state = self.OBJ_HALFCREATED
         if not self.show_label:
             self.label.show()
+        if self.obj_type:
+            self.set_label_text(markup=False)
         await self.update()
 
     @saga('obj_type', 'obj_args', 'code')
     async def recreate_element(self, action, state_diff, previous):
         # don't recreate if this is the initial creation
         if "code" not in state_diff:
-            if "obj_state" in state_diff and state_diff['obj_state'][0] == None:
+            if "obj_state" in state_diff and state_diff['obj_state'][0] is None:
                 return
-            if "obj_id" in state_diff and state_diff['obj_id'][0] == None:
+            if "obj_id" in state_diff and state_diff['obj_id'][0] is None:
                 return
 
         if self.obj_type:
@@ -102,25 +105,47 @@ class ProcessorElement (BaseElement):
                 None, f"{self.obj_type}{args}"
             )
 
+    @saga('show_label')
+    async def change_label_offset(self, action, state_diff, previous):
+        if "show_label" not in state_diff:
+            return
+        for child in self.children:
+            if self.show_label:
+                child.export_offset_y += 18
+                await child.move(child.position_x, child.position_y + 18)
+            else:
+                child.export_offset_y -= 18
+                await child.move(child.position_x, child.position_y - 18)
+
     async def label_edit_finish(self, widget, text=None, aborted=False):
         if text is not None and not aborted:
-            parts = text.split(' ', 1)
-            obj_type = parts[0]
-            if len(parts) > 1:
-                obj_args = parts[1]
-            else:
-                obj_args = None
+            obj_type = None
+            obj_args = None
+            # special form to eval for processor name
+            if text[0] == "{":
+                matches = re.search(
+                    "^({.*})( (.*))?$", text
+                )
+                if matches:
+                    obj_type = matches.group(1)
+                    obj_args = matches.group(3)
+
+            if not obj_type:
+                parts = text.split(' ', 1)
+                obj_type = parts[0]
+                if len(parts) > 1:
+                    obj_args = parts[1]
+                else:
+                    obj_args = None
 
             await self.create(obj_type, obj_args)
 
-            # obj_args may get forcibly changed on create
-            if self.obj_args and (len(parts) < 2 or self.obj_args != parts[1]):
-                self.label.set_text(self.obj_type + ' ' + self.obj_args)
+            self.set_label_text()
 
         if self.obj_id is not None and self.obj_state != self.OBJ_COMPLETE:
             self.obj_state = self.OBJ_COMPLETE
 
-        if not self.show_label:
+        if not self.show_label and self.children:
             self.label.hide()
 
         await self.update()
@@ -128,12 +153,25 @@ class ProcessorElement (BaseElement):
     async def make_edit_mode(self):
         return LabelEditMode(self.app_window, self, self.label)
 
+    def set_label_text(self, markup=True):
+        type_color = self.get_color("text-color:emph")
+        if self.obj_args is None:
+            if markup:
+                self.label.set_markup(
+                    f"<div class='tt color-{type_color}'>{self.obj_type}</div>"
+                )
+            else:
+                self.label.set_text(f"{self.obj_type}")
+        else:
+            if markup:
+                self.label.set_markup(
+                    f"<div class='tt'><div class='color-{type_color}'>{self.obj_type}</div> {self.obj_args}</div>"
+                )
+            else:
+                self.label.set_text(f"{self.obj_type} {self.obj_args}")
+
     @mutates('panel_mode')
     async def configure(self, params):
-        if self.obj_args is None:
-            self.label.set_text("%s" % (self.obj_type,))
-        else:
-            self.label.set_text("%s %s" % (self.obj_type, self.obj_args))
         need_update = False
 
         labelheight = 20
@@ -142,10 +180,12 @@ class ProcessorElement (BaseElement):
             self.show_label = params.get("show_label")
             if oldval ^ self.show_label:
                 need_update = True
-                if self.show_label:
+                if self.show_label or not self.children:
                     self.label.show()
                 else:
                     self.label.hide()
+
+        self.set_label_text()
 
         self.export_x = params.get("export_x")
         self.export_y = params.get("export_y")

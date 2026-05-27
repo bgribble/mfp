@@ -128,7 +128,6 @@ class ImguiSDL2Renderer:
                 "[sdl2] Error: Unable to set VSync! SDL Error: " + SDL_GetError().decode("utf-8")
             )
             return None, None
-        mfplog.debug(f"[sdl2] Created window={window} context={gl_context}")
         return window, gl_context
 
     def swap_window(self):
@@ -144,7 +143,7 @@ class ImguiSDL2Renderer:
         width = ctypes.c_int()
         height = ctypes.c_int()
         events_processed = False
-        unhandled_windows = ["info", "editor"]
+        unhandled_windows = ["info"]
 
         while SDL_PollEvent(ctypes.byref(event)) != 0:
             events_processed = True
@@ -167,7 +166,7 @@ class ImguiSDL2Renderer:
                     keyval=None,
                     unicode=event.text.text.decode('utf-8')
                 )
-                if self.app_window.selected_window not in unhandled_windows:
+                if self.app_window.zone_selected not in unhandled_windows:
                     MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
                 dead_keys = [
@@ -187,7 +186,7 @@ class ImguiSDL2Renderer:
                         )
                         break
                 if ev:
-                    if self.app_window.selected_window not in unhandled_windows:
+                    if self.app_window.zone_selected not in unhandled_windows:
                         MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
                     skip_event = True
 

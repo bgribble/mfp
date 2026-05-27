@@ -56,7 +56,6 @@ def version():
 
 
 def add_evaluator_defaults():
-
     # default names known to the evaluator
     Evaluator.bind_global("math", math)
     Evaluator.bind_global("random", random)
@@ -214,7 +213,8 @@ async def main():
     app.no_dsp = args.get("no_dsp") or help_only
     app.gui_backend = args.get("gui_backend")
     app.no_default = args.get("no_default")
-    app.no_restart = args.get("no_restart")
+    # app.no_restart = args.get("no_restart")
+    app.no_restart = True
     app.no_onload = args.get("no_onload")
     app.dsp_inputs = args.get("inputs")
     app.dsp_outputs = args.get("outputs")

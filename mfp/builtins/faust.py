@@ -10,7 +10,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from mfp.processor import Processor
 from ..mfp_app import MFPApp
-from .. import Bang, Uninit
+from .. import Uninit
 from mfp import log
 
 
@@ -22,7 +22,7 @@ class Faust(Processor):
     RESP_PARAM = 0
     RESP_DSP_INLETS = 1
     RESP_DSP_OUTLETS = 2
-    RESP_COMPILED =3
+    RESP_COMPILED = 3
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name, defs)
@@ -122,10 +122,9 @@ class Faust(Processor):
 
     def set_channel_tooltips(self):
         self.doc_tooltip_inlet = [
-            "Control messages",
             *[
                 f"Signal input {n}"
-                for n in range(1, self.faust_dsp_inlets)
+                for n in range(self.faust_dsp_inlets)
             ],
             *[
                 f"{p} input"
@@ -139,8 +138,7 @@ class Faust(Processor):
             ]
         ]
 
-
-    def dsp_response(self, resp_id, resp_value):
+    async def dsp_response(self, resp_id, resp_value):
         io_conf = False
         if resp_id == self.RESP_DSP_INLETS:
             self.faust_dsp_inlets = resp_value
@@ -155,7 +153,7 @@ class Faust(Processor):
                 self.faust_params.append(resp_value)
 
         if io_conf and "inlets" in self.faust_initialized and "outlets" in self.faust_initialized:
-            inlets = self.faust_dsp_inlets + len(self.faust_params) + 1
+            inlets = self.faust_dsp_inlets + len(self.faust_params)
             prev_inlets = len(self.inlets)
             if (
                 len(self.dsp_inlets) != self.faust_dsp_inlets
@@ -180,7 +178,7 @@ class Faust(Processor):
         for inlet_num, value in enumerate(self.inlets):
             if value != Uninit:
                 if inlet_num >= self.faust_dsp_inlets:
-                    param = self.faust_params[inlet_num - self.faust_dsp_inlets - 1]
+                    param = self.faust_params[inlet_num - self.faust_dsp_inlets]
                     await self.dsp_setparam(param, value)
         self.inlets = [Uninit] * len(self.inlets)
 

@@ -26,6 +26,7 @@ class Var (Processor):
     doc_help_patch = "var.help.mfp"
 
     do_onload = False
+    save_in_preset = True
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         self.gui_type = init_type
@@ -42,10 +43,12 @@ class Var (Processor):
             self.value = kwargs
 
     def save_state(self):
-        return dict(value=self.value)
+        if self.save_in_preset:
+            return dict(value=self.value)
+        return {}
 
     def restore_state(self, state):
-        if "value" in state:
+        if "value" in state and self.value != state["value"]:
             self.value = state["value"]
             if self.init_type == "text":
                 self.value = str(self.value)
@@ -60,6 +63,12 @@ class Var (Processor):
             if self.init_type != "message":
                 MFPApp().async_task(self.send(Bang))
         return None
+
+    def set_gui_params(self, params):
+        super().set_gui_params(params)
+
+        if "save_in_preset" in params:
+            self.save_in_preset = params["save_in_preset"]
 
     async def onload(self, phase):
         if phase == 1 and self.value is not Uninit:
@@ -224,6 +233,10 @@ class Enum (Var):
 class SlideMeter (Var):
     doc_tooltip_obj = "Display/control a number with a slider"
     do_onload = True
+
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        Var.__init__(self, init_type, init_args, patch, scope, name, defs)
+        self.hot_inlets = (0, 1)
 
     def save(self):
         base_dict = super().save()

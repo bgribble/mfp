@@ -33,8 +33,8 @@ class SlideMeterElement (BaseElement):
         'bar_height': ParamInfo(label="Meter height", param_type=float, show=True),
         'show_scale': ParamInfo(label="Show scale", param_type=bool, show=True),
         'scale_type': ParamInfo(
-            label="Scale type", 
-            param_type=str, 
+            label="Scale type",
+            param_type=str,
             choices=lambda _: [
                 ("Linear", "linear"),
                 ("Log", "log"),
@@ -49,9 +49,9 @@ class SlideMeterElement (BaseElement):
             show=True
         ),
         'orientation': ParamInfo(
-            label="Orientation", 
+            label="Orientation",
             choices=lambda _: [("Vertical", "vertical"), ("Horizontal", "horizontal")],
-            param_type=str, 
+            param_type=str,
             show=True
         ),
         'zeropoint': ParamInfo(label="Zero point", param_type=float, show=True),
@@ -238,6 +238,10 @@ class SlideMeterElement (BaseElement):
         await self.update()
         self.send_params()
 
+    @mutates(
+        "orientation", "zeropoint", "scale_type", "scale_position",
+        "min_value", "max_value"
+    )
     async def configure(self, params):
         changes = False
 
@@ -260,15 +264,15 @@ class SlideMeterElement (BaseElement):
             self.zeropoint = v
             changes = True
 
-        v = params.get("scale")
+        v = params.get("scale_type")
         if v == "linear" and not isinstance(self.scale, ticks.LinearScale):
             self.scale_type = v
             self.scale = ticks.LinearScale(self.min_value, self.max_value)
             self.scale_ticks = None
             changes = True
-        elif v in ("log", "log10", "decade") and not isinstance(self.scale, ticks.LogScale):
+        elif v in ("log", "log10", "decade") and not isinstance(self.scale, ticks.DecadeScale):
             self.scale_type = v
-            self.scale = ticks.LogScale(self.min_value, self.max_value)
+            self.scale = ticks.DecadeScale(self.min_value, self.max_value)
             self.scale_ticks = None
             changes = True
         elif v == 'audio' and not isinstance(self.scale, ticks.AudioScale):
@@ -285,7 +289,7 @@ class SlideMeterElement (BaseElement):
             self.scale_position = self.LEFT
             changes = True
 
-        for p in ("show_scale", "slider_enable", "scale_ticks", "bar_width", "bar_height"):
+        for p in ("show_scale", "slider_enable", "scale_type", "scale_ticks", "bar_width", "bar_height"):
             v = params.get(p)
             if v is not None and hasattr(self, p):
                 changes = True
@@ -320,10 +324,6 @@ class SlideMeterElement (BaseElement):
             if self.value != v:
                 changes = True
                 self.value = v
-
-        dr = params.get("dial_radius")
-        if dr is not None:
-            self.dial_radius = dr
 
         await super().configure(params)
         if changes:
@@ -450,6 +450,13 @@ class DialElement(SlideMeterElement):
                 2*self.dial_radius + 2.0,
                 2*self.dial_radius + 2.0
             )
+
+    @mutates("dial_radius")
+    async def configure(self, params):
+        dr = params.get("dial_radius")
+        if dr is not None:
+            self.dial_radius = dr
+        await super().configure(params)
 
     async def make_edit_mode(self):
         if self.obj_id is None:

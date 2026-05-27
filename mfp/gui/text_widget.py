@@ -17,9 +17,11 @@ class TextWidget(SignalMixin):
     Uses simple markup to style text, just using Pango for
     the Clutter backend and emulating it in others
     """
+
+    scale_factor = 1.0
+
     def __init__(self):
         super().__init__()
-
         self.editable = False
 
     def set_editable(self, val):

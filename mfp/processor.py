@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 import inspect
+import asyncio
 
 from .dsp_object import DSPObject
 from .method import MethodCall
@@ -66,6 +67,9 @@ class Processor:
     hot_inlets = [0]
     do_onload = True
     clear_outlets = True
+
+    clone_connect_inbound = True
+    clone_connect_outbound = True
 
     paused = False
 
@@ -167,7 +171,7 @@ class Processor:
         # override in Processor subclass
         pass
 
-    def dsp_response(self, resp_id, resp_value):
+    async def dsp_response(self, resp_id, resp_value):
         # override in Processor subclass
         pass
 
@@ -186,6 +190,12 @@ class Processor:
             state = self.presets.get(preset_id)
             if state:
                 self.restore_state(state)
+
+    def load_type(self):
+        ltype = self.init_type
+        if self.init_type[0] == '{' and self.init_type[-1] == '}':
+            ltype = self.patch.parse_obj(self.init_type[1:-1])
+        return ltype
 
     def save_state(self):
         return {}
@@ -242,6 +252,8 @@ class Processor:
         if self.doc_help_patch:
             info['help_patch'] = self.doc_help_patch
 
+        info['name'] = self.name
+        info['scope'] = self.scope.name
         info['messages_in'] = self.count_in
         info['messages_out'] = self.count_out
         info['trigger_count'] = self.count_trigger
@@ -594,6 +606,7 @@ class Processor:
 
     async def dsp_init(self, proc_name, **params):
         from .mfp_app import MFPApp
+
         if self.patch.context:
             DSPObjectFactory = await MFPApp().rpc_host.require(
                 DSPObject, host_id=self.patch.context.node_id
@@ -612,10 +625,16 @@ class Processor:
         self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
 
     def dsp_inlet(self, inlet):
-        return (self.dsp_obj, self.dsp_inlets.index(inlet))
+        try:
+            return (self.dsp_obj, self.dsp_inlets.index(inlet))
+        except ValueError:
+            return (None, None)
 
     def dsp_outlet(self, outlet):
-        return (self.dsp_obj, self.dsp_outlets.index(outlet))
+        try:
+            return (self.dsp_obj, self.dsp_outlets.index(outlet))
+        except ValueError:
+            return (None, None)
 
     async def dsp_reset(self):
         await self.dsp_obj.reset()
@@ -656,6 +675,7 @@ class Processor:
                     await self.disconnect(outport, tobj, tport)
 
                 outport += 1
+            self.connections_out = [[] for r in range(len(self.outlets))]
 
         if hasattr(self, "connections_in"):
             inport = 0
@@ -664,6 +684,7 @@ class Processor:
                 for tobj, tport in to_delete:
                     await tobj.disconnect(tport, self, inport)
                 inport += 1
+            self.connections_in = [[] for r in range(len(self.inlets))]
 
         if hasattr(self, "midi_learn_cbid") and self.midi_learn_cbid is not None:
             MFPApp().midi_mgr.unregister(self.midi_learn_cbid)
@@ -715,6 +736,10 @@ class Processor:
         from .mfp_app import MFPApp
         from .patch import Patch
 
+        async def reconnect(*args):
+            await asyncio.sleep(0.1)
+            return await Processor.connect(*args)
+
         # make sure this is a possibility
         if not isinstance(target, Processor):
             log.warning("Error: Can't connect '%s' (obj_id %d) to %s inlet %d"
@@ -729,7 +754,7 @@ class Processor:
         if inlet > len(target.inlets):
             if isinstance(target, Patch):
                 Patch.task_nibbler.add_task(
-                    lambda args: Processor.connect(*args), 20,
+                    lambda args: reconnect(*args), 0,
                     [self, outlet, target, inlet, show_gui]
                 )
                 log.warning("'%s' (obj_id %d) doesn't have enough inlets (%s/%s), waiting"
@@ -750,8 +775,9 @@ class Processor:
                                 lambda args: Processor.connect(*args), 20,
                                 [self, outlet, target, inlet, show_gui]
                             )
-                            log.warning("'%s' (obj_id %d) inlet is not DSP, waiting"
-                                        % (target.name, target.obj_id))
+                            log.warning(
+                                f"'{target.name}' (obj_id {target.obj_id}) inlet {inlet} is not DSP, waiting"
+                            )
                             return True
                         log.warning(
                             "Error: Can't connect DSP out %s of '%s' to non-DSP in %s of '%s'"
@@ -782,6 +808,7 @@ class Processor:
             existing.append((self, outlet))
         if (
             self.gui_created
+            and target.gui_created
             and show_gui
             and self.display_type not in (
                 "hidden", "sendvia", "sendsignalvia"
@@ -795,6 +822,7 @@ class Processor:
         return True
 
     async def disconnect(self, outlet, target, inlet):
+        from .mfp_app import MFPApp
         # is this a DSP connection?
         if outlet in self.dsp_outlets:
             out_obj, out_outlet = self.dsp_outlet(outlet)
@@ -814,6 +842,18 @@ class Processor:
         existing = target.connections_in[inlet]
         if (self, outlet) in existing:
             existing.remove((self, outlet))
+        if (
+            self.gui_created
+            and target.gui_created
+            and target.display_type not in (
+                "hidden", "sendvia", "sendsignalvia"
+            ) and self.display_type not in (
+                "hidden", "recvvia", "recvsignalvia"
+            )
+        ):
+            MFPApp().async_task(
+                MFPApp().gui_command.disconnect(self.obj_id, outlet, target.obj_id, inlet)
+            )
         return True
 
     def add_output(self, outlet_num, value):
@@ -877,7 +917,8 @@ class Processor:
         if self.paused:
             return []
 
-        debug = self.step_debug_manager().enabled
+        debugger = self.step_debug_manager()
+        debug = debugger and debugger.enabled
         debug_tasks = []
         send_tasks = []
 
@@ -924,7 +965,8 @@ class Processor:
                 await self._send__activate(value, inlet)
 
             # step mode could be activated or deactivated in activate
-            debug = self.step_debug_manager().enabled
+            debugger = self.step_debug_manager()
+            debug = debugger and debugger.enabled
             if debug:
                 debug_tasks.append((
                     self._send__propagate(),
@@ -935,7 +977,8 @@ class Processor:
                 send_tasks = await self._send__propagate()
 
         # step mode could be activated or deactivated in activate
-        debug = self.step_debug_manager().enabled
+        debugger = self.step_debug_manager()
+        debug = debugger and debugger.enabled
         if debug:
             if step_execute:
                 self.step_debug_manager().prepend_tasks(debug_tasks)
@@ -951,7 +994,7 @@ class Processor:
             self.outlets = [Uninit] * len(self.outlets)
 
         if inlet == -1:
-            self.dsp_response(value[0], value[1])
+            await self.dsp_response(value[0], value[1])
         elif isinstance(value, MethodCall):
             await self.method(value, inlet)
         elif isinstance(value, AsyncOutput):
@@ -975,6 +1018,8 @@ class Processor:
         output_pairs = list(zip(self.connections_out, self.outlets))
         work = []
 
+        debugger = self.step_debug_manager()
+
         for outlet_num, output_val in [(i, output_pairs[i]) for i in self.outlet_order]:
             conns, val = output_val
 
@@ -990,7 +1035,7 @@ class Processor:
                 self.count_out += 1
                 for target, tinlet in conns:
                     if target is not None:
-                        if self.step_debug_manager().enabled:
+                        if debugger and debugger.enabled:
                             work.append((
                                 self._send__propagate_value(target, val, tinlet),
                                 f"Send output to {target.name} inlet {tinlet}",
@@ -1011,7 +1056,7 @@ class Processor:
                     else:
                         log.warning("Bad output connection: obj_id=%s" % self.obj_id)
 
-        if self.step_debug_manager().enabled and work:
+        if debugger and debugger.enabled and work:
             self.step_debug_manager().prepend_tasks(work)
             return []
 
@@ -1140,13 +1185,16 @@ class Processor:
 
         if kwargs.get('is_export'):
             if self.patch:
+                frame_xoff = 2
+                frame_yoff = 20
+                if not self.patch.gui_params.get("show_label"):
+                    frame_yoff = 2
+
                 xoff = (
-                    self.patch.gui_params.get('export_frame_xoff', 2)
-                    - (self.patch.gui_params.get('export_x') or 0)
+                    frame_xoff - (self.patch.gui_params.get('export_x') or 0)
                 )
                 yoff = (
-                    self.gui_params.get('export_frame_yoff', 20)
-                    - (self.patch.gui_params.get('export_y') or 0)
+                    frame_yoff - (self.patch.gui_params.get('export_y') or 0)
                 )
             else:
                 xoff = 2
@@ -1222,8 +1270,9 @@ class Processor:
         from .mfp_app import MFPApp
         prms = self.save()
 
+        # FIXME -- shouldn't need to pass all GUI params as bindings
         newobj = await MFPApp().create(
-            prms.get("type"), prms.get("initargs"), patch, scope, name
+            prms.get("type"), prms.get("initargs"), patch, scope, name, prms.get('gui_params')
         )
         newobj.load(prms)
         return newobj
@@ -1238,15 +1287,19 @@ class Processor:
         '''
 
         oinfo = {}
-        oinfo['type'] = self.init_type
         oinfo['initargs'] = self.init_args
         oinfo['name'] = self.name
         oinfo['do_onload'] = self.do_onload
         oinfo['gui_params'] = {}
-        oinfo['presets'] = self.presets
+        oinfo['presets'] = {k: v for k, v in self.presets.items()}
         oinfo['properties'] = self.properties
         oinfo['midi_filters'] = self.midi_filters
         oinfo['midi_mode'] = self.midi_mode
+
+        if self.gui_params.get("obj_type"):
+            oinfo['type'] = self.gui_params["obj_type"]
+        else:
+            oinfo['type'] = self.init_type
 
         nonstd_osc = []
         for o in self.osc_methods:
@@ -1293,7 +1346,9 @@ class Processor:
 
         self.do_onload = prms.get('do_onload', False)
         self.properties = prms.get('properties', {})
-        self.presets = prms.get('presets', {})
+
+        if "presets" in prms and prms["presets"]:
+            self.presets = prms["presets"]
 
         # compatibility with older style Interface layer patches
         if (

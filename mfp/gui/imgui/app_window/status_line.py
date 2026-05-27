@@ -24,11 +24,7 @@ def render(app_window):
 
     if app_window.cmd_prompt:
         if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-            app_window.selected_window = "canvas"
-            if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
-                app_window.input_mgr.global_mode = GlobalMode(app_window)
-                app_window.input_mgr.major_mode.enable()
-                app_window.input_mgr.enable_minor_mode(app_window.cmd_manager.mode)
+            app_window.zone_hovered("cmdline")
 
         imgui.push_style_var(imgui.StyleVar_.item_spacing, (0.0, 3.0))
         imgui.text(app_window.cmd_prompt)
@@ -65,6 +61,7 @@ def render(app_window):
 
     if (
         app_window.cmd_hud_text
+        and not app_window.freewheel_in_progress
         and app_window.cmd_hud_expiry
         and app_window.cmd_hud_expiry > datetime.now()
     ):
@@ -83,7 +80,7 @@ def render(app_window):
                 f"{mode_label}{' > ' if minor else ''}{minor}"
             )
             imgui.same_line()
-            imgui.text(f" ({app_window.selected_window})")
+            imgui.text(f" ({app_window.zone_selected})")
             imgui.same_line()
 
         elapsed = (app_window.frame_timestamps[-1] - app_window.frame_timestamps[0]).total_seconds()
@@ -98,14 +95,18 @@ def render(app_window):
             latency_out = dsp_info.get("latency_out")
             channels_in = dsp_info.get("channels_in")
             channels_out = dsp_info.get("channels_out")
-            dsp_text = f"DSP: {srate},io={channels_in}/{channels_out}"
+            freewheel = ""
+            if app_window.freewheel_in_progress:
+                freewheel = ' (freewheel)'
+            load = f" {app_window.dsp_load:>2.1f}%"
+            dsp_text = f"DSP: {srate},io={channels_in}/{channels_out}{freewheel}{load} "
 
         right_corner_text = ' '.join([
             fps_text, dsp_text
         ])
         cur = imgui.get_cursor_pos()
         imgui.set_cursor_pos((
-            app_window.window_width - app_window.scaled(len(right_corner_text) * CHAR_PIXELS + 32),
+            app_window.window_width - (imgui.calc_text_size(right_corner_text)[0] + 16),
             cur[1]
         ))
         imgui.text(right_corner_text)

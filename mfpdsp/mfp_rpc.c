@@ -421,6 +421,26 @@ dispatch_methodcall(
         rd.param_value = (gpointer)(message);
         mfp_dsp_push_request(rd);
     }
+    else if (!strcmp(service_name, "DSPObject.freewheel")) {
+        const int patch_id = args->items[0]->_int;
+        const int context_id = args->items[1]->_int;
+        const int64_t frames = args->items[2]->_int;
+
+        rd.reqtype = REQTYPE_FREEWHEEL;
+        rd.src_proc = patch_id;
+        rd.context_id = context_id;
+        rd.param_value = (gpointer)(frames);
+
+        mfp_dsp_push_request(rd);
+    }
+    else if (!strcmp(service_name, "DSPObject.dsp_load")) {
+        const int patch_id = args->items[0]->_int;
+        const int context_id = args->items[1]->_int;
+        rd.reqtype = REQTYPE_USAGE;
+        rd.src_proc = patch_id;
+        rd.context_id = context_id;
+        mfp_dsp_push_request(rd);
+    }
     else {
         mfp_log_debug("[method] unhandled method '%s'", service_name);
     }

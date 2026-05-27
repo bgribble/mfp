@@ -331,6 +331,7 @@ class TaskNibbler:
                 except Exception as e:
                     log.debug("[TaskNibbler] Exception while running", unit)
                     log.debug_traceback(e)
+                    break
 
                 if not done and retry_count:
                     if isinstance(retry_count, (int, float)):
@@ -339,7 +340,8 @@ class TaskNibbler:
                         else:
                             log.warning("[TaskNibbler] ran out of retries for", unit, data)
                             retry_count = False
-                    retry.append((unit, retry_count, data))
+                    if retry_count:
+                        retry.append((unit, retry_count, data))
 
             if retry:
                 self.failed.append((retry, datetime.utcnow()))

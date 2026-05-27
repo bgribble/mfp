@@ -56,6 +56,10 @@ mfp_block_init(mfp_block * block, mfp_sample * data, int blocksize, int allocsiz
 void
 mfp_block_free(mfp_block * in)
 {
+    if (in == NULL || in->data == NULL) {
+        mfp_log_debug("mfp_block_free: in=%p\n", in);
+        return;
+    }
     free(in->data);
     in->data = NULL;
     in->blocksize = 0;

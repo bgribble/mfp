@@ -106,7 +106,7 @@ config(mfp_processor * proc)
 static mfp_procinfo *
 init_builtin_noop_wrapper(void) {
     mfp_procinfo * p = g_malloc0(sizeof(mfp_procinfo));
-    p->is_generator = 1;
+    p->is_generator = GENERATOR_NEVER;
     p->process = process;
     p->init = init;
     p->destroy = destroy;

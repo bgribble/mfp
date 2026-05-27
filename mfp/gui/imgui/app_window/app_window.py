@@ -15,6 +15,7 @@ import OpenGL.GL as gl
 
 from mfp import log
 from mfp.gui_main import MFPGUI
+from mfp.gui.colordb import ColorDB
 from mfp.gui.event import EnterEvent, LeaveEvent
 from mfp.gui.app_window import AppWindow, AppWindowImpl
 from mfp.gui.tile_manager import TileManager, Tile
@@ -43,8 +44,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     INIT_WIDTH = 1200
     INIT_HEIGHT = 900
 
-    INIT_INFO_PANEL_WIDTH = 350
-    INIT_CONSOLE_PANEL_HEIGHT = 150
+    INIT_INFO_PANEL_WIDTH = 200
+    INIT_CONSOLE_PANEL_HEIGHT = 180
     INIT_MENU_HEIGHT = 21
 
     def __init__(self, *args, **kwargs):
@@ -67,14 +68,20 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.info_panel_id = None
         self.info_panel_visible = True
         self.info_panel_width = self.INIT_INFO_PANEL_WIDTH
+        self.info_panel_width_set = False
 
         self.console_panel_id = None
         self.console_panel_visible = True
         self.console_panel_height = self.INIT_CONSOLE_PANEL_HEIGHT
+        self.console_panel_height_set = False
+
+        self.top_panel_id = None   # container for canvas and info
 
         self.canvas_panel_id = None
         self.canvas_panel_width = self.INIT_WIDTH - self.INIT_INFO_PANEL_WIDTH
         self.canvas_panel_height = self.INIT_HEIGHT - self.INIT_CONSOLE_PANEL_HEIGHT
+        self.canvas_resize_in_progress = False
+        self.tile_resize_in_progress = 0
 
         self.canvas_tile_page = 0
         self.canvas_tile_manager = TileManager(
@@ -94,8 +101,18 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.frame_timestamps = []
         self.viewport_box_node = None
 
-        self.selected_window = "canvas"
+        self.zone_selected = "canvas"
+        self.zone_current_hover = None
+        self.zone_inhibit = None
+        self.zone_modes = {}
+
         self.inspector = None
+
+        self.buffer_editor = None
+        self.buffer_editor_shown = False
+        self.buffer_editor_previous_mode = None
+        self.buffer_info = []
+        self.buffer_selected = None
 
         self.log_text = ""
         self.log_text_timestamp = None
@@ -105,6 +122,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.log_filter_timestamp = None
 
         super().__init__(*args, **kwargs)
+
+        self.info_panel_width *= self.imgui_global_scale
+        self.console_panel_height *= self.imgui_global_scale
+        self.canvas_panel_width *= self.imgui_global_scale
+        self.canvas_panel_height *= self.imgui_global_scale
 
         self.signal_listen("motion-event", self.handle_motion, prepend=True)
         self.signal_listen("toggle-console", self.handle_toggle_console)
@@ -116,15 +138,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         """
         prev_pointer_obj = event.target
         new_pointer_obj = prev_pointer_obj
-        if event.y < self.menu_height and self.selected_window != "menu":
-            self.selected_window = "menu"
+        if event.y < self.menu_height and self.zone_selected != "menu":
+            self.zone_hovered("menu")
             new_pointer_obj = None
 
-        if self.console_panel_visible:
-            if event.y >= self.window_height - self.console_panel_height:
-                if prev_pointer_obj != self.console_manager:
-                    new_pointer_obj = self.console_manager
-                    self.selected_window = "console"
         if not new_pointer_obj and self.info_panel_visible:
             if event.y > self.menu_height and event.x < self.canvas_panel_width:
                 new_pointer_obj = self
@@ -170,7 +187,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         md_options.callbacks.on_html_div = ImguiTextWidgetImpl.markdown_div_callback
         md_options.callbacks.on_image = ImguiTextWidgetImpl.image_callback
         md_options.callbacks.on_open_link = ImguiTextWidgetImpl.url_callback
-        md_options.font_options.regular_size = 16
+        md_options.font_options.regular_size = 16 / self.imgui_global_scale
+
         # md_options.font_options.size_diff_between_levels = 4
         # md_options.font_options.max_header_level = 5
         markdown.initialize_markdown(md_options)
@@ -189,6 +207,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         nedit.set_current_editor(nedit_editor)
 
         gl.glClearColor(1.0, 1.0, 1.0, 1)
+
+        vp = imgui.get_main_viewport()
+        vp.framebuffer_scale = (2*self.imgui_global_scale, 2*self.imgui_global_scale)
+        imgui.get_style().font_scale_main = self.imgui_global_scale
+        imgui.get_style().scale_all_sizes(self.imgui_global_scale)
+
+        last_scale = self.imgui_global_scale
+        last_net_scale = self.imgui_global_scale
 
         sync_time = None
         while (
@@ -221,6 +247,13 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
             if not keep_going:
                 continue
+
+            # reset if scale changes
+            if self.imgui_global_scale != last_scale:
+                vp = imgui.get_main_viewport()
+                vp.framebuffer_scale = (2*self.imgui_global_scale, 2*self.imgui_global_scale)
+                imgui.get_style().font_scale_main = self.imgui_global_scale
+                last_scale = self.imgui_global_scale
 
             # start processing for this frame
             imgui.new_frame()
@@ -259,6 +292,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         for p in self.patches:
             if hasattr(p, 'nedit_editor'):
                 nedit.destroy_editor(p.nedit_editor)
+
         self.imgui_renderer.shutdown()
         self.imgui_impl.shutdown()
         await self.signal_emit("quit")
@@ -266,8 +300,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # backend control
     def initialize(self):
-        self.window_width = self.INIT_WIDTH
-        self.window_height = self.INIT_HEIGHT
+        self.window_width = int(self.INIT_WIDTH * self.imgui_global_scale)
+        self.window_height = int(self.INIT_HEIGHT * self.imgui_global_scale)
         self.icon_path = sys.exec_prefix + '/share/mfp/icons/'
         self.keys_pressed = set()
         self.buttons_pressed = set()
@@ -287,20 +321,22 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     #####################
     # renderer
     def render(self):
-
         self.imgui_prevent_idle = max(0, self.imgui_prevent_idle - 1)
         keep_going = True
 
         ########################################
         # global style setup
-        imgui.style_colors_classic()
+        if MFPGUI().theme.get("imgui_theme") == "light":
+            imgui.style_colors_light()
+        elif MFPGUI().theme.get("imgui_theme") == "dark":
+            imgui.style_colors_dark()
+        else:
+            imgui.style_colors_classic()
 
-        nedit.push_style_color(nedit.StyleColor.flow_marker, (1, 1, 1, 0.2))
-        nedit.push_style_color(nedit.StyleColor.flow, (1, 1, 1, 0.5))
-
-        vp = imgui.get_main_viewport()
-        vp.framebuffer_scale = (2*self.imgui_global_scale, 2*self.imgui_global_scale)
-        imgui.get_style().font_scale_main = self.imgui_global_scale
+        flow_color = ColorDB().find("default-link-color-dashed")
+        nedit.push_style_color(nedit.StyleColor.flow, flow_color.to_rgbaf())
+        flow_color.alpha = 0x50
+        nedit.push_style_color(nedit.StyleColor.flow_marker, flow_color.to_rgbaf())
 
         ########################################
         # menu bar
@@ -398,14 +434,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             )
             imgui.internal.dock_builder_set_node_size(dockspace_id, imgui.get_window_size())
 
-            _, self.console_panel_id, self.canvas_panel_id = (
+            _, self.console_panel_id, self.top_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    dockspace_id, imgui.Dir_.down, 0.20
+                    dockspace_id, imgui.Dir_.down, 0.25
                 )
             )
             _, self.info_panel_id, self.canvas_panel_id = (
                 imgui.internal.dock_builder_split_node_py(
-                    self.canvas_panel_id, imgui.Dir_.right, 0.30
+                    self.top_panel_id, imgui.Dir_.right, 0.25
                 )
             )
 
@@ -413,9 +449,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 imgui.internal.DockNodeFlagsPrivate_.no_close_button
                 | imgui.internal.DockNodeFlagsPrivate_.no_window_menu_button
                 | imgui.internal.DockNodeFlagsPrivate_.no_tab_bar
+                | imgui.internal.DockNodeFlagsPrivate_.no_tab_bar
+                | imgui.internal.DockNodeFlagsPrivate_.no_resize_y
+                | imgui.internal.DockNodeFlagsPrivate_.no_resize_x
             )
-
-            for node_id in [self.info_panel_id, self.console_panel_id, self.canvas_panel_id]:
+            for node_id in [
+                self.info_panel_id, self.console_panel_id, self.canvas_panel_id,
+                self.top_panel_id
+            ]:
                 node = imgui.internal.dock_builder_get_node(node_id)
                 node.local_flags = node_flags
 
@@ -425,14 +466,35 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             imgui.internal.dock_builder_finish(dockspace_id)
 
         console_node = imgui.internal.dock_builder_get_node(self.console_panel_id)
-        console_size = console_node.size
-        self.console_panel_height = console_size[1]
-
-        info_node = imgui.internal.dock_builder_get_node(self.info_panel_id)
-        info_size = info_node.size
-        self.info_panel_width = info_size[0]
-
+        top_node = imgui.internal.dock_builder_get_node(self.top_panel_id)
         canvas_node = imgui.internal.dock_builder_get_node(self.canvas_panel_id)
+        info_node = imgui.internal.dock_builder_get_node(self.info_panel_id)
+
+        if self.console_panel_height_set:
+            delta_h = self.console_panel_height - console_node.size[1]
+
+            canvas_node.size_ref.y = int(canvas_node.size[1] - delta_h)
+            info_node.size_ref.y = int(info_node.size[1] - delta_h)
+            top_node.size_ref.y = int(top_node.size[1] - delta_h)
+            console_node.size_ref.y = int(self.console_panel_height)
+
+            self.canvas_panel_height = canvas_node.size[1]
+            self.console_panel_height_set = False
+        else:
+            console_size = console_node.size
+            self.console_panel_height = console_size[1]
+
+        if self.info_panel_width_set:
+            delta_w = self.info_panel_width - info_node.size[0]
+            canvas_node.size_ref.x = int(canvas_node.size[0] - delta_w)
+            info_node.size_ref.x = int(info_node.size[0] + delta_w)
+
+            self.canvas_panel_width = canvas_node.size[0]
+            self.info_panel_width_set = False
+        else:
+            info_size = info_node.size
+            self.info_panel_width = info_size[0]
+
         canvas_size = canvas_node.size
         self.canvas_panel_width = canvas_size[0]
         self.canvas_panel_height = canvas_size[1]
@@ -460,6 +522,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         ########################################
         # bottom panel (console and log)
+        self.buffer_editor_shown = False
         if self.console_panel_visible:
             console_panel.render(self)
 
@@ -499,7 +562,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # clean up any weirdness from first frame
         if self.frame_count == 0:
-            self.selected_window = "canvas"
+            self.zone_selected = "canvas"
 
         self.frame_count += 1
         self.frame_timestamps.append(datetime.now())
@@ -522,6 +585,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     def ready(self):
         pass
+
+    async def quit(self, *rest):
+        if self.buffer_editor:
+            await self.buffer_editor.close()
+            self.buffer_editor = None
+        return await super().quit(*rest)
 
     #####################
     # coordinate transforms and zoom
@@ -738,6 +807,105 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         return False
 
+    #####################
+    # buffer editor
+    async def update_buffer_info(self):
+        buffer_info = await MFPGUI().mfp.get_buffer_info()
+        self.buffer_info = [
+            b for b in buffer_info
+            if b.get("proc_name") not in ("source_buffer", "sink_buffer")
+        ]
+        return buffer_info
+
+    async def start_buffer_editor(self):
+        from mfp.gui.imgui.buffer_editor import BufferEditor
+        from mfp.gui.modes.buffer_edit import BufferEditMode
+
+        await self.update_buffer_info()
+        self.buffer_editor = BufferEditor(self)
+        if self.buffer_info:
+            self.buffer_editor.buffer_source_info = self.buffer_info[0]
+            self.buffer_editor.buffer_info = self.buffer_info[0].get('buf_info')
+            self.buffer_editor.buffer_grab()
+
+        self.zone_select("bufedit")
+        self.console_panel_visible = True
+        if self.console_panel_height < 2.5*self.INIT_CONSOLE_PANEL_HEIGHT:
+            self.console_panel_height = 2.5*self.INIT_CONSOLE_PANEL_HEIGHT
+            self.console_panel_height_set = True
+
+        self.buffer_editor.focus()
+
+        if self.buffer_info and not self.buffer_editor.working_patch_id:
+            await self.buffer_editor.init_working_patch()
+
+    async def stop_buffer_editor(self):
+        await self.buffer_editor.close()
+        self.buffer_editor = None
+
+    #####################
+    # zome management
+    def zone_hovered(self, zone_name):
+        self.zone_current_hover = zone_name
+        if self.zone_inhibit != zone_name and self.zone_selected != zone_name:
+            self.zone_select(zone_name)
+
+    def zone_select(self, zone_name):
+        if zone_name == self.zone_selected:
+            return
+
+        old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, [m for m in self.input_mgr.minor_modes])
+        old_zone = self.zone_selected
+
+        self.zone_selected = zone_name
+
+        new_mode = False
+        new_global = self.input_mgr.global_mode
+        new_major = None
+        new_minor = []
+
+        save_old = True
+        if old_zone in ('info',):
+            save_old = False
+
+        if zone_name in self.zone_modes:
+            new_global, new_major, new_minor = self.zone_modes.get(zone_name)
+            new_mode = True
+        elif zone_name == "bufedit":
+            from mfp.gui.modes.buffer_edit import BufferEditMode
+            new_major = BufferEditMode(self)
+            new_mode = True
+        elif zone_name == "console":
+            from mfp.gui.modes.console_mode import ConsoleMode, ConsoleMajorMode
+            new_global = ConsoleMode(self)
+            new_major = ConsoleMajorMode(self)
+            new_mode = True
+        elif zone_name == "cmdline":
+            new_minor = (self.cmd_manager.mode, )
+            new_mode = True
+        elif zone_name == "console drag":
+            from mfp.gui.modes.resize_modes import ConsoleResizeMode
+            new_minor = (ConsoleResizeMode(self),)
+            new_mode = True
+        elif zone_name == "info drag":
+            from mfp.gui.modes.resize_modes import InfoResizeMode
+            new_minor = (InfoResizeMode(self),)
+            new_mode = True
+
+        if new_mode:
+            if save_old:
+                self.zone_modes[old_zone] = old_modes
+
+            for mode in old_modes[2]:
+                self.input_mgr.disable_minor_mode(mode)
+
+            if new_global:
+                self.input_mgr.global_mode = new_global
+            if new_major:
+                self.input_mgr.set_major_mode(new_major)
+            for mode in new_minor:
+                if not self.input_mgr.mode_enabled(type(mode)):
+                    self.input_mgr.enable_minor_mode(mode)
 
     #####################
     # log output

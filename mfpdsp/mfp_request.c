@@ -143,6 +143,23 @@ mfp_dsp_handle_requests(mfp_context * context)
             context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cmd->context_id));
             context->msg_handler(context, cmd->dest_port, (int64_t)(cmd->param_value));
             break;
+
+        case REQTYPE_FREEWHEEL:
+            /* set the number of blocks to freewheel */
+            context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cmd->context_id));
+            context->freewheel_frames =  (int64_t)(cmd->param_value);
+            context->freewheel_listener_id =  (int64_t)(cmd->src_proc);
+            break;
+
+        case REQTYPE_USAGE:
+            context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cmd->context_id));
+            
+            double dsp_load = 0;
+            for (int i=0; i < CTXT_HISTORY_SIZE; i++) {
+                dsp_load += context->dsp_usage_history[i];
+            }
+            mfp_dsp_send_patch_response_float(cmd->src_proc, RESP_DSP_LOAD, dsp_load / CTXT_HISTORY_SIZE);
+            break;
         }
         context->incoming_queue_read = (context->incoming_queue_read + 1) % REQ_BUFSIZE;
     }
@@ -190,6 +207,18 @@ mfp_dsp_send_response_float(mfp_processor * proc, int msg_type, double response)
     char tbuf[MFP_MAX_MSGSIZE];
     snprintf(tbuf, MFP_MAX_MSGSIZE, "%f", response);
     mfp_api_dsp_response(proc->rpc_id, tbuf, msg_type, msgbuf, &msglen);
+    mfp_comm_submit_buffer(msgbuf, msglen);
+}
+
+
+void
+mfp_dsp_send_patch_response_float(int patch_id, int msg_type, double response)
+{
+    char * msgbuf = mfp_comm_get_buffer();
+    int msglen = 0;
+    char tbuf[MFP_MAX_MSGSIZE];
+    snprintf(tbuf, MFP_MAX_MSGSIZE, "%f", response);
+    mfp_api_dsp_response(patch_id, tbuf, msg_type, msgbuf, &msglen);
     mfp_comm_submit_buffer(msgbuf, msglen);
 }
 

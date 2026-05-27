@@ -104,3 +104,13 @@ mfp_context_default_io(mfp_context * context, int patch_id)
     }
 }
 
+
+void
+mfp_context_update_usage(mfp_context * context, struct timeval * start, struct timeval * end) {
+    double elapsed_usec = (
+        (end->tv_sec - start->tv_sec) * 1e6
+        + (end->tv_usec - start->tv_usec)
+    );
+    double block_usec = context->blocksize * 1e6 / context->samplerate;
+    context->dsp_usage_history[context->proc_count % CTXT_HISTORY_SIZE] = 100 * (elapsed_usec / block_usec);
+}

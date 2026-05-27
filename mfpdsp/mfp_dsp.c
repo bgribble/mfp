@@ -8,14 +8,16 @@
 #include <execinfo.h>
 #include <glib.h>
 #include <pthread.h>
-
 #include <time.h>
+#include <sys/time.h>
 
 int mfp_initialized = 0;
 int mfp_max_blocksize = 32768;
 
 float mfp_in_latency = 0.0;
 float mfp_out_latency = 0.0;
+
+char last_processor_started[64];
 
 #define ARRAY_LEN(arry, eltsize) (sizeof(arry) / eltsize)
 
@@ -280,6 +282,9 @@ mfp_dsp_run(mfp_context * ctxt)
     mfp_sample * buf;
     int chan;
     int chancount = mfp_num_output_buffers(ctxt);
+    struct timeval start, end;
+
+    gettimeofday(&start, NULL);
 
     /* handle any messages for this context */
     mfp_dsp_handle_requests(ctxt);
@@ -302,10 +307,14 @@ mfp_dsp_run(mfp_context * ctxt)
     /* the proclist is already scheduled, so iterating in order is OK */
     for(p = (mfp_processor **)(mfp_proc_list->data); *p != NULL; p++) {
         if ((*p)->context == ctxt) {
+            snprintf(last_processor_started, 63, "%s (id=%d)", (*p)->typeinfo->name, (*p)->rpc_id);
             mfp_proc_process(*p);
         }
     }
     ctxt->proc_count ++;
+
+    gettimeofday(&end, NULL);
+    mfp_context_update_usage(ctxt, &start, &end);
 }
 
 void

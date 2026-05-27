@@ -99,14 +99,14 @@ class Evaluator (object):
                         [
                             "MethodCall(", '"', methname, '",'
                         ]
-                        + [t[1] for t in tokens[2:]] + [")"]
+                        + [' '.join(t[1] for t in tokens[2:])] + [")"]
                     )
                 else:
                     str2eval = ''.join(
                         [
                             "MethodCall(", '"', methname, '",'
                         ]
-                        + [t[1] for t in tokens[3:]]
+                        + [' '.join(t[1] for t in tokens[3:])]
                     )
 
         if collect:

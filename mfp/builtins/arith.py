@@ -15,7 +15,12 @@ class ArithProcessor(Processor):
     doc_tooltip_outlet = ["Output signal"]
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
-        self.arith_op = init_type
+        op_type = init_type
+
+        if init_type[0] == '{' and init_type[-1] == '}':
+            op_type = patch.parse_obj(init_type[1:-1])
+
+        self.arith_op = op_type
 
         Processor.__init__(self, 2, 1, init_type, init_args, patch, scope, name, defs)
 

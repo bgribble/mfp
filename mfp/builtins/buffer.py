@@ -18,9 +18,11 @@ from mfp import log
 from mfp.processor import Processor
 from ..mfp_app import MFPApp
 from ..buffer_info import BufferInfo
-
+from ..method import MethodCall
 
 class Buffer(Processor):
+
+    registry = {}
 
     RESP_TRIGGERED = 0
     RESP_BUFID = 1
@@ -48,6 +50,7 @@ class Buffer(Processor):
 
         self.init_size = 0
         self.init_channels = 1
+        self.gui_notify = False
 
         if len(self.init_args):
             self.init_size = self.init_args[0] * MFPApp().samplerate/1000.0
@@ -55,6 +58,10 @@ class Buffer(Processor):
             self.init_channels = self.init_args[1]
         if "channels" in self.init_kwargs:
             self.init_channels = self.init_kwargs.pop("channels")
+        if "buf_id" in self.init_kwargs:
+            self.buf_id = self.init_kwargs.get("buf_id")
+        if "gui_notify" in self.init_kwargs:
+            self.gui_notify = self.init_kwargs.pop("gui_notify")
 
         # convert can be 'best', 'medium' or 'fastest'
         # there is about a 8-10x runtime difference between best and fastest
@@ -89,6 +96,8 @@ class Buffer(Processor):
 
     async def setup(self, **kwargs):
         await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
+        if "size" in self.init_kwargs or "channels" in self.init_kwargs: 
+            self.init_kwargs["realloc"] = 1
         await self.dsp_setparams(**self.init_kwargs)
 
     def offset(self, channel, start):
@@ -130,12 +139,54 @@ class Buffer(Processor):
             self.buffer_ready = False
             await self.dsp_setparams(
                 channels=self.file_channels,
-                size=self.file_len
+                size=self.file_len,
+                realloc=1
             )
 
         await self.dsp_setparams(
             region_start=0, region_end=self.file_len
         )
+
+    async def _file_export(self, filename, channels):
+        ready = asyncio.Event()
+        loop = asyncio.get_event_loop()
+
+        def _export_helper():
+            import soundfile as sf
+            mfp_samplerate = MFPApp().samplerate
+
+            if self.shm_obj is None:
+                self.shm_obj = SharedMemory(self.buf_id)
+
+            log.debug(f"[buffer] Exporting {channels} channels at {mfp_samplerate} hz to file '{filename}'")
+
+            export_file = None
+            try:
+                export_file = sf.SoundFile(
+                    filename,
+                    mode="w",
+                    samplerate=mfp_samplerate,
+                    channels=channels,
+                )
+            except Exception as e:
+                log.error(f"[export] {e}")
+                return
+
+            if export_file:
+                os.lseek(self.shm_obj.fd, 0, os.SEEK_SET)
+                data = os.read(self.shm_obj.fd, self.size * channels * self.FLOAT_SIZE)
+
+                try:
+                    export_file.buffer_write(data, 'float32')
+                except Exception as e:
+                    log.error(f"[export] {e}")
+
+            loop.call_soon_threadsafe(ready.set)
+
+        thread = Thread(target=_export_helper)
+        thread.start()
+        await ready.wait()
+        thread.join()
 
     def _transfer_file_data(self):
         if self.shm_obj is None:
@@ -166,7 +217,7 @@ class Buffer(Processor):
             *Buffer.doc_tooltip_outlet[-2:]
         ]
 
-    def dsp_response(self, resp_id, resp_value):
+    async def dsp_response(self, resp_id, resp_value):
         need_resize = False
         if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
             self.outlets[-1] = resp_value
@@ -174,7 +225,12 @@ class Buffer(Processor):
             if self.shm_obj:
                 self.shm_obj.close_fd()
                 self.shm_obj = None
+            if self.obj_id in Buffer.registry:
+                del Buffer.registry[self.obj_id]
+
             self.buf_id = resp_value
+            Buffer.registry[self.obj_id] = self
+
         elif resp_id == self.RESP_BUFSIZE:
             self.size = resp_value
         elif resp_id == self.RESP_BUFCHAN:
@@ -188,27 +244,48 @@ class Buffer(Processor):
             self.buf_offset = resp_value
         elif resp_id == self.RESP_BUFRDY:
             self.buffer_ready = True
-            self.outlets[-1] = BufferInfo(
+            buffer_data = dict(
                 buf_id=self.buf_id,
                 size=self.size,
                 channels=self.channels,
                 rate=self.rate,
-                offset=self.buf_offset
+                offset=self.buf_offset,
+                file_name=self.file_name
             )
+            self.outlets[-1] = BufferInfo(**buffer_data)
             if self.file_ready:
                 self.file_ready = False
                 self._transfer_file_data()
+            if self.gui_notify and MFPApp().gui_command:
+                MFPApp().async_task(
+                    MFPApp().gui_command.signal_emit("buffer_ready", buffer_data)
+                )
 
         if need_resize:
-            # FIXME -- message connections to last ports
+            last_port_conns = [
+                [c for c in outport]
+                for outport in self.connections_out[-2:]
+            ]
+            for outport in (-2, -1):
+                for c in last_port_conns[outport]:
+                    await self.disconnect(len(self.outlets) + outport, *c)
+
             self.dsp_inlets = list(range(self.channels))
             self.dsp_outlets = list(range(self.channels))
             self.resize(self.channels, self.channels + 2)
             self.conf(dsp_inlets=self.dsp_inlets, dsp_outlets=self.dsp_outlets)
             self.set_channel_tooltips()
 
+            for outport in (-2, -1):
+                for c in last_port_conns[outport]:
+                    await self.connect(len(self.outlets) + outport, *c)
         if self.outlets[-1] == Uninit:
             self.outlets[-1] = (resp_id, resp_value)
+
+    async def delete(self):
+        if self.obj_id and self.obj_id in Buffer.registry:
+            del Buffer.registry[self.obj_id]
+        return await super().delete()
 
     async def trigger(self):
         incoming = self.inlets[0]
@@ -221,14 +298,32 @@ class Buffer(Processor):
         elif isinstance(incoming, str):
             self.file_name = incoming
             await self._init_file_read()
+        elif isinstance(incoming, MethodCall):
+            self.method(incoming, 0)
         elif isinstance(incoming, dict):
+            if "gui_notify" in incoming:
+                self.gui_notify = incoming.pop("gui_notify")
+            if "file_name" in incoming:
+                self.file_name = incoming.pop("file_name")
+
             prms = {}
             for k, v in incoming.items():
                 if k == "size":
                     v = v*MFPApp().samplerate/1000.0
                 setattr(self, k, v)
                 prms[k] = v
+            if "size" in prms or "channels" in prms:
+                prms["realloc"] = 1
             await self.dsp_obj.setparams(**prms)
+
+    async def export(self, filename=None, channels=None):
+        if filename is None:
+            filename = self.file_name or (self.name + ".wav")
+        if channels is None:
+            channels = self.channels
+
+        await self._file_export(filename, channels)
+        self.file_name = filename
 
     def slice(self, start, end, channel=0):
         """
@@ -266,7 +361,6 @@ class Buffer(Processor):
             rate=self.rate,
             offset=self.buf_offset
         )
-
 
 def register():
     MFPApp().register("buffer~", Buffer)

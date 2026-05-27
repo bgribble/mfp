@@ -1,4 +1,5 @@
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
@@ -19,6 +20,8 @@ typedef struct {
 } builtin_arith_data;
 
 
+#define DENOM_THRESH .000000001
+
 static void
 iterate_div(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1, 
             mfp_sample const_in_0, mfp_sample const_in_1, mfp_sample * outbuf)
@@ -27,15 +30,25 @@ iterate_div(mfp_processor * proc, mfp_sample * in_0, mfp_sample * in_1,
     int in_0_present=((in_0 == NULL) ? 0 : 1);
     int in_1_present=((in_1 == NULL) ? 0 : 1);
 
+    double denom;
+
     /* iterate */ 
     if (in_0_present && in_1_present) {
         for(scount=0; scount < proc->context->blocksize; scount++) {
-            *outbuf++ =  *in_0++ / *in_1++;
+            denom = *in_1++;
+            if (fabs(denom) < DENOM_THRESH) {
+                denom = (denom >= 0 ? DENOM_THRESH : -DENOM_THRESH);
+            }
+            *outbuf++ =  *in_0++ / denom;
+
         }
     }
     else if (in_1_present) {
         for(scount=0; scount < proc->context->blocksize; scount++) {
-            *outbuf++ =  const_in_0 / *in_1++;
+            if (fabs(denom) < DENOM_THRESH) {
+                denom = (denom >= 0 ? DENOM_THRESH : -DENOM_THRESH);
+            }
+            *outbuf++ =  const_in_0 / denom;
         }
     }
     else if (in_0_present) {

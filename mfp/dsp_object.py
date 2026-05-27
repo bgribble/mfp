@@ -69,5 +69,13 @@ class DSPObject:
         pass
 
     @classmethod
+    def freewheel(cls, patch_id, context_id, freewheel_frames):
+        pass
+
+    @classmethod
+    def dsp_load(cls, patch_id, context_id):
+        pass
+
+    @classmethod
     def context_msg(cls, context_id, port, message):
         pass

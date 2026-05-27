@@ -202,6 +202,9 @@ class InputManager:
         self.global_mode.bind(key, action, helptext)
 
     def set_major_mode(self, mode):
+        for minor in self.minor_modes:
+            minor.disable()
+        self.minor_modes = []
         if isinstance(self.major_mode, InputMode):
             self.major_mode.disable()
         self.major_mode = mode

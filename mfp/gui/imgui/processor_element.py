@@ -6,8 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 from mfp import log
 from flopsy import mutates
-
-from mfp.gui_main import MFPGUI
+from mfp.gui.colordb import ColorDB
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from .base_element import ImguiBaseElementImpl
 from ..processor_element import (
@@ -27,7 +26,7 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         super().__init__(window, x, y)
         self.node_id = None
         self.min_width = self.width = 20
-        self.min_height = self.height = 16
+        self.min_height = self.height = 21
         self.position_set = False
 
     def update_export_size(self):
@@ -53,7 +52,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
         if min_y is not None and max_y is not None:
             export_h = max_y - min_y
             self.export_h = export_h
-
 
     @mutates('position_x', 'position_y', 'width', 'height', 'export_w', 'export_h')
     def render(self):
@@ -103,28 +101,50 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         # node content: just the label
         imgui.begin_group()
-        self.label.render(highlight=self.highlight_text)
+        label_w = 0
+        label_h = 0
+        label_space = 0
+        if self.show_label or not self.children:
+            self.label.render(highlight=self.highlight_text)
+            label_w, label_h = imgui.get_item_rect_size()
+            label_space = label_h + 4
+        else:
+            imgui.dummy([1, 1])
+            label_w = 1
+            label_h = 1
+            label_space = 1
 
-        # if there are child elements, save room
-        content_w, content_h = imgui.get_item_rect_size()
         port_alloc_w = self.port_alloc()
 
         if self.export_w is not None:
-            min_w = max(self.min_width, self.export_w + 3)
+            min_w = max(self.min_width, self.export_w)
         else:
             min_w = self.min_width
-        min_w = max(min_w, port_alloc_w)
+            min_w = max(min_w, port_alloc_w)
 
         if self.export_h is not None:
-            min_h = max(self.min_height, self.export_h + 18)
+            min_h = max(self.min_height, self.export_h + label_space)
         else:
             min_h = self.min_height
 
-        if content_w < min_w:
+        if label_w < min_w:
             imgui.same_line()
-            imgui.dummy([min_w - content_w, 1])
-        if content_h < min_h:
-            imgui.dummy([1, min_h - content_h ])
+            imgui.dummy([min_w - label_w, 1])
+        if (label_h + 4) <= min_h:
+            imgui.dummy([1, min_h - (label_space - 2)])
+            if self.children:
+                # if there will be children here, color it like the canvas
+                dl = imgui.get_window_draw_list()
+                child_start = imgui.get_item_rect_min()
+                child_end = imgui.get_item_rect_max()
+                vspace = 0
+                if label_h > 1:
+                    vspace = 2
+                dl.add_rect_filled(
+                    [child_start[0] - 2, child_start[1] + vspace],
+                    [child_end[0] + max(min_w, label_w) + 1, child_end[1]],
+                    ColorDB().backend.im_col32(self.get_color("canvas-color"))
+                )
         imgui.end_group()
 
         # connections
@@ -146,7 +166,6 @@ class ImguiProcessorElementImpl(ProcessorElementImpl, ImguiBaseElementImpl, Proc
 
         if self.export_w is not None:
             self.update_export_size()
-
         # render
         ##########################
 

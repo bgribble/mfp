@@ -33,6 +33,7 @@ def add_menu_items(app_window, itemdict):
             imgui.dummy(app_window.scaled(1, 1))
             imgui.same_line()
             if imgui.begin_menu(itemname):
+                imgui.dummy(app_window.scaled(100, 1))
                 add_menu_items(app_window, value)
                 imgui.end_menu()
         else:
@@ -61,7 +62,7 @@ def add_menu_items(app_window, itemdict):
             imgui.dummy(app_window.scaled(1, 1))
             imgui.same_line()
             item_selected, item_toggled = imgui.menu_item(
-                itemname,
+                itemname + '  ',
                 '' if keysym.startswith('__') else keysym,
                 toggle_state, value.enabled
             )
@@ -85,6 +86,7 @@ def add_menu_items(app_window, itemdict):
         imgui.separator()
         imgui.dummy(app_window.scaled(1, 2))
         add_menu_items(app_window, sep_items)
+
 
 def prune_paths(pathdict):
     new_pathdict = {}

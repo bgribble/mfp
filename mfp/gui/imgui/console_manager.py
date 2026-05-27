@@ -52,7 +52,7 @@ class ImguiConsoleManagerImpl(ConsoleManager, ConsoleManagerImpl):
             return 0
 
         imgui.input_text_multiline(
-            'console_input_text',
+            '##console_input_text',
             buffer_text + current_line,
             (width, height),
             imgui.InputTextFlags_.read_only | imgui.InputTextFlags_.callback_always,

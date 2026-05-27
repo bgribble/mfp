@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 '''
-p_line.py:  Builtin line/ramp generator
+line.py:  Builtin line/ramp generator
 
-Copyright (c) 2011 Bill Gribble <grib@billgribble.com>
+Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
 from mfp.processor import Processor
@@ -29,6 +29,17 @@ class Line(Processor):
         await self.dsp_init("line~", segments=self.init_segments)
 
     async def trigger(self):
+        """
+        messages received trigger the changes of output by segments
+
+        * a number as input instantly sets the value to the given position
+        in the current set of segments
+        * an iterable of segments updates the segment list and starts it
+        * each segment is interpreted to have 3 fields in this order:
+            - delay (ms) until start of ramp (optional, defaults to 0)
+            - target value
+            - time (ms) of ramp
+        """
         if self.inlets[0] is not None:
             if isinstance(self.inlets[0], (float, int)):
                 pos = float(self.inlets[0])

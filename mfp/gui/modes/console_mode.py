@@ -67,3 +67,12 @@ class ConsoleMode (InputMode):
             "default", lambda mode, keysym: mode.console.handle_insert_text(keysym),
             "Insert text", None,
         )
+
+class ConsoleMajorMode(InputMode):
+    def __init__(self, window):
+        self.manager = window.input_mgr
+        self.console = window.console_manager
+        self.window = window
+
+        InputMode.__init__(self, "Python code", "Python")
+

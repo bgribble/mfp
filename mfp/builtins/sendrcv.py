@@ -19,6 +19,7 @@ class Send (Processor):
     doc_tooltip_obj = "Send messages to a named receiver (create with 'send via' GUI object)"
     doc_tooltip_inlet = ["Message to send", "Update receiver (default: initarg 0)"]
 
+    clone_connect_outbound = False
     bus_type = "bus"
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
@@ -38,8 +39,6 @@ class Send (Processor):
             self.dest_inlet = initargs[1]
         if len(initargs):
             self.dest_name = initargs[0]
-
-        self.gui_params["label_text"] = self._mkdispname()
 
     def _mkdispname(self):
         nm = self.dest_name
@@ -63,10 +62,19 @@ class Send (Processor):
     def load(self, params):
         Processor.load(self, params)
         gp = params.get('gui_params', {})
-        self.gui_params['label_text'] = gp.get("label_text") or self.dest_name
+        self.gui_params['label_text'] = gp.get("label_text") or self._mkdispname()
 
     def save(self):
         prms = Processor.save(self)
+        gui_prms = prms.get("gui_params", {})
+        if gui_prms and "label_text" in gui_prms:
+            label = gui_prms.get("label_text")
+            port = 0
+            name = label
+            if "/" in label:
+                name, port = label.split("/", 1)
+            prms["initargs"] = f"\'{name}\', {port}"
+
         conns = prms['connections']
         if conns and self.dest_obj:
             pruned = []
@@ -148,8 +156,7 @@ class Send (Processor):
             ):
                 await self.connect(0, self.dest_obj, self.dest_inlet, False)
 
-        self.init_args = '"%s",%s' % (self.dest_name, self.dest_inlet)
-        self.conf(label_text=self._mkdispname())
+        #self.init_args = '"%s", %s' % (self.dest_name, self.dest_inlet)
 
         if self.inlets[0] is not Uninit:
             await self.trigger()
@@ -163,7 +170,8 @@ class Send (Processor):
                 (name, port) = self.inlets[1]
             else:
                 name = self.inlets[1]
-
+            if isinstance(port, str):
+                port = self.parse_obj(port)
             await self._connect(name, port)
             self.inlets[1] = Uninit
 
@@ -267,6 +275,8 @@ class SignalBus (Processor):
 class Recv (Processor):
     display_type = "recvvia"
 
+    clone_connect_inbound = False
+
     doc_tooltip_obj = "Receive messages to the specified name"
     doc_tooltip_inlet = ["Passthru input"]
     doc_tooltip_outlet = ["Passthru output"]
@@ -280,7 +290,6 @@ class Recv (Processor):
         self.src_name_provided = False
         self.src_obj = None
         self.src_outlet = 0
-
         if len(initargs) > 1:
             self.src_outlet = initargs[1]
 
@@ -289,8 +298,6 @@ class Recv (Processor):
             self.src_name = initargs[0]
         else:
             self.src_name = self.name
-
-        self.gui_params["label_text"] = self._mkdispname()
 
         # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
@@ -319,12 +326,24 @@ class Recv (Processor):
         gp = params.get('gui_params', {})
         self.gui_params['label_text'] = gp.get("label_text") or self._mkdispname()
 
+    def save(self):
+        prms = Processor.save(self)
+        gui_prms = prms.get("gui_params", {})
+        if gui_prms and "label_text" in gui_prms:
+            label = gui_prms.get("label_text")
+            port = 0
+            name = label
+            if "/" in label:
+                name, port = label.split("/", 1)
+            prms["initargs"] = f"\'{name}\', {port}"
+        return prms
+
     async def _wait_connect(self):
         async def recv_recheck():
             return await self._connect(self.src_name, self.src_outlet, False)
 
         conn = None
-        while conn is None:
+        while not conn:
             await asyncio.sleep(0.1)
             conn = await recv_recheck()
 
@@ -346,16 +365,18 @@ class Recv (Processor):
                 (name, port) = self.inlets[1]
             else:
                 name = self.inlets[1]
+            self.inlets[1] = Uninit
+
+            if isinstance(port, str):
+                port = self.parse_obj(port)
 
             if name != self.src_name or port != self.src_outlet:
                 if self.src_obj:
                     self.src_obj = None
-                self.init_args = '"%s",%s' % (name, port)
+                self.init_args = '"%s", %s' % (name, port)
                 self.src_name = name
                 self.src_outlet = port
-                self.conf(label_text=self._mkdispname())
                 await self._connect(self.src_name, self.src_outlet)
-            self.inlets[1] = Uninit
 
         if self.src_name and self.src_obj is None:
             await self._connect(self.src_name, self.src_outlet)
@@ -393,8 +414,6 @@ class RecvSignal (Recv):
         else:
             self.src_name = self.name
 
-        self.gui_params["label_text"] = self._mkdispname()
-
         # needed so that name changes happen timely
         self.hot_inlets = [0, 1]
 
@@ -403,12 +422,14 @@ class RecvSignal (Recv):
 
     async def setup(self, **kwargs):
         await self.dsp_init("noop~")
-        if self.init_connect:
+
+    async def onload(self, phase):
+        if phase == 1 and self.init_connect:
             await self._connect(self.src_name, self.src_outlet)
 
     async def _connect(self, src_name, src_outlet, wait=True):
         src_obj = MFPApp().resolve(src_name, self, True)
-        if src_obj and src_obj.dsp_obj and self.dsp_obj:
+        if src_obj and self.dsp_obj:
             self.src_obj = src_obj
             await self.src_obj.connect(self.src_outlet, self, 0, False)
             return True

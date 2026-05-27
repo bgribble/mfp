@@ -65,7 +65,8 @@ class SingleSelectionEditMode (InputMode):
         cls.extend_mode(SelectionEditMode)
 
     async def edit_selected(self):
-        await self.window.selected[0].begin_edit()
+        if self.window.selected:
+            await self.window.selected[0].begin_edit()
 
     def connect_fwd(self):
         if self.window.selected:

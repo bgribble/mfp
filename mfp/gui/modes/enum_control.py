@@ -40,22 +40,22 @@ class EnumEditMode (InputMode):
         cls.extend_mode(LabelEditMode)
 
     async def set_upper(self):
-        def cb(value):
+        async def cb(value):
             if value.lower() == "none":
                 value = None
             else:
                 value = float(value)
-            self.enum.set_bounds(self.enum.min_value, value)
+            await self.enum.set_bounds(self.enum.min_value, value)
         await self.window.cmd_get_input("Number upper bound: ", cb)
         return True
 
     async def set_lower(self):
-        def cb(value):
+        async def cb(value):
             if value.lower() == "none":
                 value = None
             else:
                 value = float(value)
-            self.enum.set_bounds(value, self.enum.max_value)
+            await self.enum.set_bounds(value, self.enum.max_value)
         await self.window.cmd_get_input("Number lower bound: ", cb)
         return True
 

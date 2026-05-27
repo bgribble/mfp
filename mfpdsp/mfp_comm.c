@@ -134,7 +134,7 @@ mfp_comm_send_buffer(char * msg, int msglen)
 {
     char pbuff[11];
     if (msg == NULL) {
-        mfp_log_warning("mfp_comm_send_buffer: NULL buffer, skipping");
+        mfp_log_warning("mfp_comm_send_buffer: NULL buffer, len says %d, skipping", msglen);
         return 0;
     }
     snprintf(pbuff, 10, "% 8d", msglen);

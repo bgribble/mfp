@@ -36,6 +36,7 @@ class TextElement (BaseElement):
         'max_width': ParamInfo(label="Max width", param_type=float, show=True),
         'value': ParamInfo(label="Text value", param_type=str, show=False),
         'default': ParamInfo(label="Default value", param_type=str, show=False),
+        'save_in_preset': ParamInfo(label="Save in preset", param_type=bool, show=True),
     }
 
     store_attrs = {
@@ -53,6 +54,7 @@ class TextElement (BaseElement):
         self.clickchange = False
         self.default = ''
         self.max_width = 600
+        self.save_in_preset = False
 
         self.param_list.extend([*self.extra_params])
 
@@ -64,7 +66,7 @@ class TextElement (BaseElement):
         self._all_styles = self.combine_styles()
 
         self.label = TextWidget.build(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.label.set_font_name(self.get_fontspec())
         self.label.set_position(3, 3)
 
@@ -88,7 +90,7 @@ class TextElement (BaseElement):
     @saga('style')
     async def update_all_styles(self, action, state_diff, previous):
         self._all_styles = self.combine_styles()
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         yield None
 
     async def update(self):
@@ -105,8 +107,9 @@ class TextElement (BaseElement):
         elif new_text != self.value and not aborted:
             self.value = new_text
             if widget:
-                self.width = widget.width
-                self.height = widget.height
+                # just setting text, don't be aggressive about shrinking
+                self.width = 1.5*widget.width
+                self.height = 1.5*widget.height
             self.set_text()
             await MFPGUI().mfp.send(self.obj_id, 0, self.value)
         await self.update()
@@ -138,13 +141,13 @@ class TextElement (BaseElement):
 
     def select(self, *args):
         BaseElement.select(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.redraw()
         self.draw_ports()
 
     def unselect(self, *args):
         BaseElement.unselect(self)
-        self.label.set_color(self.get_color('text-color'))
+        self.label.set_color(self.get_color('text-element-text-color'))
         self.redraw()
         self.hide_ports()
 

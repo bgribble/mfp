@@ -35,6 +35,7 @@ typedef struct {
 typedef struct {
     buf_info buf_active;
     buf_info buf_to_alloc;
+    int buf_alloc_waiting;
 
     mfp_sample * buf_base;
     int chan_count;
@@ -42,6 +43,7 @@ typedef struct {
 
     /* trigger settings (for TRIG_THRESH, TRIG_EXT modes */
     int trig_message;
+    int trig_pos_set;
     int trig_triggered_samples;
     int trig_xfade_samples;
     int trig_channel;
@@ -53,6 +55,7 @@ typedef struct {
     /* record settings */
     int play_channels;
     int rec_channels;
+    int monitor_channels;
     int rec_enabled;
     int rec_latency_comp;
     int rec_overdub;
@@ -84,20 +87,11 @@ typedef struct {
 #define PLAY_BANG 5        /* play buffer once */
 #define PLAY_LOOP 6        /* loop over region */
 #define PLAY_TRIG_THRESH 7 /* When trig_channel crosses trig_thresh, play buffer to end */
+#define REC_CONTINUOUS 8   /* continuously record to buffer */
 
 /* trig_op values */
 #define TRIG_GT 0
 #define TRIG_LT 1
-
-/* response types */
-#define RESP_TRIGGERED 0
-#define RESP_BUFID 1
-#define RESP_BUFSIZE 2
-#define RESP_BUFCHAN 3
-#define RESP_RATE 4
-#define RESP_OFFSET 5
-#define RESP_BUFRDY 6
-#define RESP_LOOPSTART 7
 
 /* buf_state values */
 #define BUF_IDLE 0
@@ -133,18 +127,20 @@ init(mfp_processor * proc)
 
     d->trig_triggered_samples = 0;
     d->trig_xfade_samples = 0;
+    d->trig_pos_set = 0;
     d->trig_message = 0;
     d->trig_channel = 0;
     d->trig_debounce = 20;
     d->trig_xfade = 20;
     d->trig_op = TRIG_GT;
-    d->trig_thresh = 0.0;
+    d->trig_thresh = 0.1;
 
     d->rec_enabled = 0;
     d->rec_channels = 0;
     d->rec_latency_comp = 0;
     d->rec_overdub = 0;
     d->play_channels = 0;
+    d->monitor_channels = 0;
 
     d->buf_read_pos = 0;
     d->buf_write_pos = 0;
@@ -164,6 +160,10 @@ static int block_num = 0;
 
 static double
 residue(double x, double y) {
+    if (y == 0) {
+        return 0;
+    }
+
     double m = fmod(x, y);
     if (m < 0) {
         return m + y;
@@ -194,7 +194,6 @@ process(mfp_processor * proc)
     int tocopy=0;
     mfp_block * trig_block = NULL;
     mfp_sample * outptr, * inptr, * trigptr;
-    int buf_triggerable = 0;
     int inpos, outpos;
     int loopstart=0;
 
@@ -206,20 +205,6 @@ process(mfp_processor * proc)
 
     if (d->buf_base == NULL) {
         return 0;
-    }
-
-    /* buf_mode will only change in config(), so it's constant
-     * for this block */
-    if (
-        d->buf_mode == REC_TRIG_EXT
-        || d->buf_mode == REC_LOOP
-        || d->buf_mode == REC_LOOPSET
-        || (d->buf_mode == REC_TRIG_THRESH)
-        || (d->buf_mode == PLAY_BANG)
-        || (d->buf_mode == PLAY_LOOP)
-        || (d->buf_mode == PLAY_TRIG_THRESH)
-    ) {
-        buf_triggerable = 1;
     }
 
     /* find the block for the trigger channel, if any */
@@ -257,11 +242,11 @@ process(mfp_processor * proc)
     }
 
     /* outer loop: repeat 2 phases:
-     * 1. Look at the trigger channel to find the end of the current
+     * 1. Look at the trigger source (channel or message) to find the end of the current
      *    state block
      * 2. Iterate over channels to process between start and end-of-state */
     total_to_proc = proc->inlet_buf[0]->blocksize;
-    while (buf_triggerable && (section_start < total_to_proc)) {
+    while (section_start < total_to_proc) {
         section_size = 0;
 
         /* phase 1 -- find how far the current triggering section runs */
@@ -270,8 +255,8 @@ process(mfp_processor * proc)
         int region_set = (d->region_start != 0) || (d->region_end != 0);
         int overdub = d->rec_overdub;
 
-        if (!region_end) {
-            region_end = d->buf_active.buf_size - 1;
+        if (!region_set && !region_end) {
+            region_end = d->chan_size;
         }
 
         if (trig_block) {
@@ -296,10 +281,15 @@ process(mfp_processor * proc)
                         }
                         else if (d->buf_mode == REC_LOOPSET) {
                             next_state = BUF_TRIGGERED;
-                            d->region_start = 0;
-                            d->region_end = 0;
-                            d->buf_read_pos = 0;
-                            d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
+                            if (!d->trig_pos_set) {
+                                d->region_start = 0;
+                                d->region_end = 0;
+                                d->buf_read_pos = 0;
+                                d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
+                            }
+                            else {
+                                d->trig_pos_set = 0;
+                            }
                             loopstart = 1;
                         }
                         break;
@@ -327,10 +317,10 @@ process(mfp_processor * proc)
                         if (d->buf_mode == REC_LOOPSET) {
                             d->region_end ++;
                         }
-                        else if ((d->buf_mode == REC_LOOP) && (d->buf_read_pos + section_size >= region_end)) {
+                        else if ((d->buf_mode == REC_LOOP) && (d->buf_read_pos + section_size > region_end)) {
                             /* do nothing */
                         }
-                        else if (d->buf_read_pos + section_size >= region_end) {
+                        else if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if (d->trig_triggered_samples >= d->trig_debounce) {
@@ -340,7 +330,7 @@ process(mfp_processor * proc)
                         break;
 
                     case BUF_DEBOUNCED:
-                        if (d->buf_read_pos + section_size >= region_end) {
+                        if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if((d->trig_op == TRIG_GT) && (*trigptr <= d->trig_thresh)) {
@@ -357,7 +347,7 @@ process(mfp_processor * proc)
                         break;
 
                     case BUF_PRE_RETRIGGERED:
-                        if (d->buf_read_pos + section_size >= region_end) {
+                        if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if((d->trig_op == TRIG_GT) && (*trigptr > d->trig_thresh)) {
@@ -373,7 +363,7 @@ process(mfp_processor * proc)
                         break;
 
                     case BUF_XFADE:
-                        if (d->buf_read_pos + section_size >= region_end) {
+                        if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if (d->trig_xfade_samples >= d->trig_xfade) {
@@ -407,17 +397,20 @@ process(mfp_processor * proc)
                 case BUF_IDLE:
                     if (d->trig_message) {
                         next_state = BUF_TRIGGERED;
-                        d->buf_read_pos = MAX(0, d->region_start);
-                        d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
+                        if (!d->trig_pos_set) {
+                            d->buf_read_pos = MAX(0, d->region_start);
+                            d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
+                        }
+                        else {
+                            d->trig_pos_set = 0;
+                        }
                         section_size = 0;
                     }
                     else if (d->buf_mode == REC_LOOP) {
-                        next_state = BUF_TRIGGERED;
-                        section_size = 0;
+                        next_state = BUF_IDLE;
                     }
                     else if (d->buf_mode == PLAY_LOOP) {
-                        next_state = BUF_TRIGGERED;
-                        section_size = 0;
+                        next_state = BUF_IDLE;
                     }
                     else if (d->buf_mode == REC_LOOPSET) {
                         next_state = BUF_TRIGGERED;
@@ -426,6 +419,10 @@ process(mfp_processor * proc)
                         d->buf_read_pos = 0;
                         d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
                         loopstart = 1;
+                        section_size = 0;
+                    }
+                    else if (d->buf_mode == REC_CONTINUOUS) {
+                        next_state = BUF_TRIGGERED;
                         section_size = 0;
                     }
                     break;
@@ -448,21 +445,25 @@ process(mfp_processor * proc)
                          * or the mode is changed */
                         section_size = MIN(
                             section_size,
-                            d->buf_active.buf_size - d->buf_read_pos
+                            d->chan_size - d->buf_read_pos
                         );
                         d->trig_triggered_samples += section_size;
                         d->region_end += section_size;
                     }
-                    else if ((d->buf_mode == REC_LOOP) || (d->buf_mode == PLAY_LOOP)) {
+                    else if (
+                        (d->buf_mode == REC_LOOP)
+                        || (d->buf_mode == PLAY_LOOP)
+                        || (d->buf_mode == REC_CONTINUOUS)
+                    ) {
                         /* start and end should be set, so just stay
                          * in this mode. wraparound happens later. */
                         d->trig_triggered_samples += section_size;
                     }
-                    else if ((d->buf_read_pos + section_size >= MIN(region_end, d->buf_active.buf_size))) {
+                    else if ((d->buf_read_pos + section_size >= MIN(region_end, d->chan_size))) {
                         /* "roll to end and stop" modes running into end */
                         section_size = MIN(
                             section_size,
-                            MIN(region_end, d->buf_active.buf_size) - d->buf_read_pos
+                            MIN(region_end, d->chan_size) - d->buf_read_pos
                         );
                         d->trig_triggered_samples += section_size;
                         next_state = BUF_IDLE;
@@ -503,7 +504,7 @@ process(mfp_processor * proc)
             (section_state == BUF_IDLE)
             || (section_state == BUF_PRETRIGGERED)
         ) {
-            /* ??? */
+            /* do nothing, just move on to next iteration */
         }
         else if (
             (section_state == BUF_TRIGGERED)
@@ -519,20 +520,23 @@ process(mfp_processor * proc)
                     ((region_end > d->region_start) ? (region_end - d->buf_read_pos) : d->chan_size)
                 )
             );
-
             /* loop over channels */
             for(int channel=0; channel < d->chan_count; channel++) {
                 /* if channel is in play set, copy data from buffer to outbuf */
                 if((1 << channel) & d->play_channels) {
                     outptr = proc->outlet_buf[channel]->data;
-                    inptr = (float *)(d->buf_base) + (channel*d->chan_size);
+                    inptr = (mfp_sample *)(d->buf_base) + (channel*d->chan_size);
                     inpos = d->buf_read_pos;
                     for(outpos = section_start; outpos < section_start + section_size; outpos++) {
                         if (inpos < (d->buf_read_pos + buf_fence)) {
                             // normal condition -- playing a region
                             outptr[outpos] = inptr[inpos++];
                         }
-                        else if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOP)) {
+                        else if (
+                            (d->buf_mode == PLAY_LOOP)
+                            || (d->buf_mode == REC_LOOP)
+                            || (d->buf_mode == REC_CONTINUOUS)
+                        ) {
                             // wraparound -- reset inptr to start of region
                             if (d->region_start > region_end) {
                                 inpos = 0;
@@ -552,10 +556,11 @@ process(mfp_processor * proc)
                 /* if channel is in record set, copy data from inbuf to buffer */
                 if(d->rec_enabled && ((1 << channel) & d->rec_channels)) {
                     /* either copy or accumulate into buffer */
-                    outptr = (float *)d->buf_base + (channel*d->chan_size);
+                    outptr = (mfp_sample *)d->buf_base + (channel*d->chan_size);
                     outpos = d->buf_write_pos;
                     inptr = proc->inlet_buf[channel]->data;
                     for (inpos = section_start; inpos < section_start + section_size; inpos++) {
+                        /* handle wraparound in buffer */
                         if (outpos < (d->buf_write_pos + buf_fence)) {
                             // do nothing
                         }
@@ -565,6 +570,7 @@ process(mfp_processor * proc)
                         else {
                             outpos = d->region_start;
                         }
+
                         if (overdub) {
                             outptr[outpos++] += inptr[inpos];
                         }
@@ -573,11 +579,13 @@ process(mfp_processor * proc)
                         }
                     }
                 }
-
             }
 
             /* now advance d->buf_read_pos and d->buf_write_pos */
-            int buf_remainder = (d->buf_read_pos + section_size) % (region_end - d->region_start);
+            int buf_remainder = 0;
+            if (region_end - d->region_start != 0) {
+                buf_remainder = (d->buf_read_pos - d->region_start + section_size) % (region_end - d->region_start);
+            }
             d->buf_read_pos = d->region_start + buf_remainder;
             d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
         }
@@ -585,7 +593,7 @@ process(mfp_processor * proc)
         /* for XFADE, mix in the same size chunk from alsewhere in the buffer */
         if (section_state == BUF_XFADE && d->trig_xfade) {
             /* linear ramp down on old audio, we are just trying to prevent clicks */
-            double ramp_step = 1.0 / (double)(d->trig_xfade);
+            double ramp_step = 1.0 / MAX((double)(d->trig_xfade), 0.001);
             double ramp_start = 1.0 - (ramp_step * d->trig_xfade_samples);
             /* loop over channels */
             for(int channel=0; channel < d->chan_count; channel++) {
@@ -593,7 +601,7 @@ process(mfp_processor * proc)
                 if((1 << channel) & d->play_channels) {
                     double ramp_gain = ramp_start;
                     outptr = proc->outlet_buf[channel]->data;
-                    inptr = (float *)(d->buf_base) + (channel*d->chan_size);
+                    inptr = (mfp_sample *)(d->buf_base) + (channel*d->chan_size);
                     inpos = d->buf_xfade_pos;
                     for(outpos = section_start; outpos < section_start + section_size; outpos++) {
                         if ((inpos <= region_end) || (d->buf_mode == PLAY_BANG)) {
@@ -637,16 +645,22 @@ process(mfp_processor * proc)
                     mfp_dsp_send_response_bool(proc, RESP_TRIGGERED, 0);
                 }
             }
-
         }
 
         section_state = next_state;
         section_start = section_start + section_size;
     }
 
+    /* monitor_channels just blow away output by overwriting it with the input */
+    for(int channel=0; channel < d->chan_count; channel++) {
+        /* if channel is in monitor set, copy data from inbuf to outbuf */
+        if((1 << channel) & d->monitor_channels) {
+            mfp_block_copy(proc->inlet_buf[channel], proc->outlet_buf[channel]);
+        }
+    }
+
     d->buf_state = section_state;
     block_num ++;
-
     return 0;
 }
 
@@ -671,7 +685,6 @@ destroy(mfp_processor * proc)
     proc->data = NULL;
 
     return;
-
 }
 
 static void
@@ -683,8 +696,10 @@ shared_buffer_alloc(buf_info * buf)
 
     gettimeofday(&tv, NULL);
 
-    snprintf(buf->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d",
-             pid, (int)tv.tv_sec, (int)tv.tv_usec);
+    if (buf->shm_id[0] == 0) {
+        snprintf(buf->shm_id, 64, "/mfp_buffer_%05d_%06d_%06d",
+                 pid, (int)tv.tv_sec, (int)tv.tv_usec);
+    }
 
     buf->shm_fd = shm_open(buf->shm_id, O_RDWR|O_CREAT, S_IRWXU);
     if (buf->shm_fd < 0) {
@@ -694,24 +709,27 @@ shared_buffer_alloc(buf_info * buf)
         munmap(buf->buf_ptr, buf->buf_size);
         buf->buf_ptr = NULL;
     }
-    ftruncate(buf->shm_fd, size);
+    int tval = ftruncate(buf->shm_fd, size);
+    if (tval < 0) {
+        mfp_log_warning("[alloc] ftruncate error '%s'", strerror(errno));
+    }
     buf->buf_size = size;
-    buf->buf_ptr = mmap(NULL,  size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
-    if (buf->buf_ptr == NULL) {
-        mfp_log_debug("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
+    buf->buf_ptr = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, buf->shm_fd, 0);
+    if (buf->buf_ptr == MAP_FAILED) {
+        mfp_log_error("mmap() failed... %d (%s)\n", buf->shm_fd, strerror(errno));
+        mfp_log_error("size=%d fd=%d", size, buf->shm_fd);
+        buf->buf_ptr = NULL;
     }
 }
 
 static void
 buffer_activate(builtin_buffer_data * d)
 {
-
     d->buf_to_alloc.buf_ready = ALLOC_IDLE;
     memcpy(&(d->buf_active), &(d->buf_to_alloc), sizeof(buf_info));
     d->chan_count = d->buf_active.buf_chancount;
     d->chan_size = d->buf_active.buf_chansize;
     d->buf_base = d->buf_active.buf_ptr;
-
 }
 
 static void
@@ -736,6 +754,7 @@ config(mfp_processor * proc)
 {
     gpointer size_ptr = g_hash_table_lookup(proc->params, "size");
     gpointer channels_ptr = g_hash_table_lookup(proc->params, "channels");
+    gpointer realloc_ptr = g_hash_table_lookup(proc->params, "realloc");
 
     gpointer recenable_ptr = g_hash_table_lookup(proc->params, "rec_enabled");
     gpointer recchan_ptr = g_hash_table_lookup(proc->params, "rec_channels");
@@ -747,10 +766,13 @@ config(mfp_processor * proc)
     gpointer trigthresh_ptr = g_hash_table_lookup(proc->params, "trig_thresh");
     gpointer trigdebounce_ptr = g_hash_table_lookup(proc->params, "trig_debounce");
 
+    gpointer bufid_ptr = g_hash_table_lookup(proc->params, "buf_id");
     gpointer bufmode_ptr = g_hash_table_lookup(proc->params, "buf_mode");
     gpointer bufstate_ptr = g_hash_table_lookup(proc->params, "buf_state");
     gpointer bufpos_ptr = g_hash_table_lookup(proc->params, "buf_pos");
+
     gpointer playchan_ptr = g_hash_table_lookup(proc->params, "play_channels");
+    gpointer monchan_ptr = g_hash_table_lookup(proc->params, "monitor_channels");
 
     gpointer regionstart_ptr = g_hash_table_lookup(proc->params, "region_start");
     gpointer regionend_ptr = g_hash_table_lookup(proc->params, "region_end");
@@ -761,7 +783,8 @@ config(mfp_processor * proc)
 
     int new_size = d->chan_size;
     int new_channels = d->chan_count;
-
+    char * new_buf_id = NULL;
+    int realloc_req = 0;
     int config_handled = 1;
 
     if(size_ptr != NULL) {
@@ -770,48 +793,70 @@ config(mfp_processor * proc)
     if(channels_ptr != NULL) {
         new_channels = (int)(*(double *)channels_ptr);
     }
-
-    if ((new_size != d->chan_size) || (new_channels != d->chan_count)) {
-        int need_more_buffers = (
-            new_channels > d->chan_count || new_size > d->chan_size
-        );
+    if (bufid_ptr != NULL) {
+        new_buf_id = (char *)bufid_ptr;
+    }
+    if (realloc_ptr != NULL) {
+        realloc_req = (int)(*(double *)realloc_ptr);
+    }
+    if (d->buf_alloc_waiting) {
         if(d->buf_to_alloc.buf_ready == ALLOC_READY) {
+            int need_more_buffers = (
+                (d->buf_to_alloc.buf_chancount > d->chan_count) || (d->buf_to_alloc.buf_chansize > d->chan_size)
+            );
             buffer_activate(d);
             d->region_start = 0;
             d->region_end = 0;
             d->buf_read_pos = 0;
             d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
+            d->buf_alloc_waiting = 0;
 
             if (need_more_buffers) {
-                mfp_proc_realloc_buffers(proc, d->chan_count, d->chan_count, proc->context->blocksize);
+                mfp_proc_realloc_buffers(
+                    proc,
+                    d->buf_to_alloc.buf_chancount,
+                    d->buf_to_alloc.buf_chancount,
+                    proc->context->blocksize
+                );
             }
             if (d->buf_active.buf_type == BUFTYPE_SHARED) {
                 mfp_dsp_send_response_str(proc, RESP_BUFID, d->buf_active.shm_id);
-                mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->buf_active.buf_chansize);
-                mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->buf_active.buf_chancount);
+                mfp_dsp_send_response_int(proc, RESP_BUFSIZE, d->chan_size);
+                mfp_dsp_send_response_int(proc, RESP_BUFCHAN, d->chan_count);
                 mfp_dsp_send_response_int(proc, RESP_RATE, proc->context->samplerate);
                 mfp_dsp_send_response_bool(proc, RESP_BUFRDY, 1);
             }
-        }
-        else if (d->buf_to_alloc.buf_ready == ALLOC_IDLE) {
-            d->buf_to_alloc.shm_fd = -1;
-            d->buf_to_alloc.shm_id[0] = 0;
-            d->buf_to_alloc.buf_type = d->buf_active.buf_type;
-            d->buf_to_alloc.buf_ptr = NULL;
-            d->buf_to_alloc.buf_chancount = new_channels;
-            d->buf_to_alloc.buf_chansize = new_size;
-
-            mfp_alloc_allocate(proc, &d->buf_to_alloc, &(d->buf_to_alloc.buf_ready));
-            config_handled = 0;
         }
         else {
             /* still working */
             config_handled = 0;
         }
     }
+    else if (realloc_req > 0) {
+        if (d->buf_to_alloc.buf_ready == ALLOC_IDLE) {
+            d->buf_to_alloc.shm_fd = -1;
+            d->buf_to_alloc.shm_id[0] = 0;
+            d->buf_to_alloc.buf_type = d->buf_active.buf_type;
+            d->buf_to_alloc.buf_ptr = NULL;
+            d->buf_to_alloc.buf_chancount = new_channels ? new_channels : d->chan_count;
+            d->buf_to_alloc.buf_chansize = new_size;
+            d->buf_alloc_waiting = 1;
+            if (new_buf_id != NULL) {
+                strncpy(d->buf_to_alloc.shm_id, new_buf_id, 64);
+                g_hash_table_remove(proc->params, "buf_id");
+            }
+            mfp_alloc_allocate(proc, &d->buf_to_alloc, &(d->buf_to_alloc.buf_ready));
+            config_handled = 0;
+        }
+        else {
+            mfp_log_debug("[buffer] WARNING: Buffer realloc requested while allocation in process");
+        }
+        g_hash_table_remove(proc->params, "realloc");
+    }
 
     if (bufmode_ptr != NULL) {
-        d->buf_mode = *(double *)bufmode_ptr;
+        d->buf_mode = (int)(*(double *)bufmode_ptr);
+        g_hash_table_remove(proc->params, "buf_mode");
     }
 
     if (bufstate_ptr != NULL) {
@@ -824,7 +869,6 @@ config(mfp_processor * proc)
             d->buf_state_start_pos = 0;
         }
         g_hash_table_remove(proc->params, "buf_state");
-        g_free(bufstate_ptr);
     }
 
     if (reccomp_ptr) {
@@ -836,11 +880,13 @@ config(mfp_processor * proc)
         d->buf_read_pos = (int)(*(double *)bufpos_ptr);
         d->buf_write_pos = calc_write_pos(d, d->buf_read_pos);
         g_hash_table_remove(proc->params, "buf_pos");
+        d->trig_pos_set = 1;
     }
 
     if (recenable_ptr != NULL) {
+        int prev_enabled = d->rec_enabled;
         d->rec_enabled = (int)(*(double *)recenable_ptr);
-        if(!d->rec_enabled) {
+        if(prev_enabled && !d->rec_enabled && bufmode_ptr != NULL) {
             if ((d->buf_mode == PLAY_LOOP) || (d->buf_mode == REC_LOOPSET) || (d->buf_mode == REC_LOOP)) {
                 d->buf_mode = PLAY_LOOP;
                 d->trig_message = 0;
@@ -891,6 +937,10 @@ config(mfp_processor * proc)
         d->play_channels = (int)(*(double *)playchan_ptr);
     }
 
+    if (monchan_ptr != NULL) {
+        d->monitor_channels = (int)(*(double *)monchan_ptr);
+    }
+
     if (clearchan_ptr != NULL) {
         int channel;
         int clear_channels = (int)(*(double *)clearchan_ptr);
@@ -928,6 +978,7 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "rec_latency_comp", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "size", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "realloc", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_overdub", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_enabled", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "rec_channels", (gpointer)PARAMTYPE_FLT);
@@ -941,9 +992,9 @@ init_builtin_buffer(void) {
     g_hash_table_insert(p->params, "region_end", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "play_channels", (gpointer)PARAMTYPE_FLT);
     g_hash_table_insert(p->params, "clear_channels", (gpointer)PARAMTYPE_FLT);
+    g_hash_table_insert(p->params, "monitor_channels", (gpointer)PARAMTYPE_FLT);
+
 
 
     return p;
 }
-
-

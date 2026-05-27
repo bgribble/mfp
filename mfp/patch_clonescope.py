@@ -117,27 +117,29 @@ async def clonescope(self, scopename, num_copies, **kwargs):
                 continue
             newobj = obj_copied[name]
 
-            for port_num, port_conn in enumerate(srcobj.connections_in):
-                for tobj, tport in port_conn:
-                    tobj_newid = obj_idmap.get(tobj.obj_id)
-                    if not tobj_newid:
-                        if tobj.scope != scope:
-                            tobj_newid = tobj
-                        else:
-                            continue
-                    if (newobj, port_num) not in tobj_newid.connections_out[tport]:
-                        await tobj_newid.connect(tport, newobj, port_num)
+            if srcobj.clone_connect_inbound:
+                for port_num, port_conn in enumerate(srcobj.connections_in):
+                    for tobj, tport in port_conn:
+                        tobj_newid = obj_idmap.get(tobj.obj_id)
+                        if not tobj_newid:
+                            if tobj.scope != scope:
+                                tobj_newid = tobj
+                            else:
+                                continue
+                        if (newobj, port_num) not in tobj_newid.connections_out[tport]:
+                            await tobj_newid.connect(tport, newobj, port_num)
 
-            for port_num, port_conn in enumerate(srcobj.connections_out):
-                for tobj, tport in port_conn:
-                    tobj_newid = obj_idmap.get(tobj.obj_id)
-                    if not tobj_newid:
-                        if tobj.scope != scope:
-                            tobj_newid = tobj
-                        else:
-                            continue
-                    if (tobj_newid, tport) not in newobj.connections_out[port_num]:
-                        await newobj.connect(port_num, tobj_newid, tport)
+            if srcobj.clone_connect_outbound:
+                for port_num, port_conn in enumerate(srcobj.connections_out):
+                    for tobj, tport in port_conn:
+                        tobj_newid = obj_idmap.get(tobj.obj_id)
+                        if not tobj_newid:
+                            if tobj.scope != scope:
+                                tobj_newid = tobj
+                            else:
+                                continue
+                        if (tobj_newid, tport) not in newobj.connections_out[port_num]:
+                            await newobj.connect(port_num, tobj_newid, tport)
 
     for name, srcobj in ui_items.items():
         # kludge -- change labels in the UI template objects

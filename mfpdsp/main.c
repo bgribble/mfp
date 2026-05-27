@@ -11,6 +11,8 @@
 
 #include "mfp_dsp.h"
 
+extern char last_processor_started[];
+
 static void
 sigsegv_handler(int sig, siginfo_t *si, void *unused)
 {
@@ -18,7 +20,7 @@ sigsegv_handler(int sig, siginfo_t *si, void *unused)
     char ** strings;
     int nptrs, j;
 
-    mfp_log_error("Fatal signal %d in C code, backend is dying", sig);
+    mfp_log_debug("Fatal signal %d, recent processor '%s', backend is dying\n", sig, last_processor_started);
     nptrs = backtrace(buffer, 100);
     strings = backtrace_symbols(buffer, nptrs);
 
@@ -103,6 +105,10 @@ main(int argc, char ** argv)
         mfp_log_error("mfpdsp: ERROR: could not install SIGSEGV handler, exiting\n");
         return -1;
     }
+    if (sigaction(SIGFPE, &sa, NULL) == -1) {
+        mfp_log_error("mfpdsp: ERROR: could not install SIGFPE handler, exiting\n");
+        return -1;
+    }
     if (sigaction(SIGBUS, &sa, NULL) == -1) {
         mfp_log_error("mfpdsp: ERROR: could not install SIGBUS handler, exiting\n");
         return -1;
@@ -111,9 +117,12 @@ main(int argc, char ** argv)
     /* set up global state */
     mfp_init_all(sockname);
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
+    mfp_log_debug("mfp_jack_startup returned\n");
 
     /* start up */
     mfp_context_init(ctxt);
+
+    mfp_log_debug("mfp_context_init returned\n");
 
     /* wait for termination */
     mfp_comm_io_wait();

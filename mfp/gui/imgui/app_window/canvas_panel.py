@@ -4,15 +4,17 @@ canvas_panel -- render the 'imgui node editor' canvas pane
 Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 import math
+from datetime import datetime
 
 from imgui_bundle import imgui, imgui_node_editor as nedit, ImVec4
 from mfp import log
 from mfp.gui_main import MFPGUI
-from mfp.gui.colordb import ColorDB
 from mfp.gui.base_element import BaseElement
+from mfp.gui.colordb import ColorDB
+from mfp.gui.text_widget import TextWidget
 from mfp.gui.connection_element import ConnectionElement
 from mfp.gui.modes.patch_edit import PatchEditMode
-from mfp.gui.modes.global_mode import GlobalMode
+
 from . import menu_bar
 
 ALLOWED_DELTA_PIX = 0.1
@@ -67,12 +69,12 @@ def render_selection_box(app_window, pane_origin, canvas_origin, tile):
     draw_list.add_rect(
         pmin, pmax,
         ColorDB().backend.im_col32(outline_color),
-        0, 0, 1.0
+        rounding=0, flags=0, thickness=1.0
     )
     draw_list.pop_clip_rect()
 
 
-def render_tile(app_window, patch):
+def render_tile(app_window, patch, num_patches):
     """
     render a patch tile
     """
@@ -81,6 +83,7 @@ def render_tile(app_window, patch):
     canvas_pane_origin = (1, app_window.menu_height + 1)
 
     tile = patch.display_info
+    tile_selected = False
 
     imgui.set_next_window_size((tile.width, tile.height))
     imgui.set_next_window_pos((
@@ -106,11 +109,12 @@ def render_tile(app_window, patch):
             app_window.selected_layer = patch.selected_layer
 
     if (
-        app_window.selected_window == "canvas"
+        app_window.zone_selected == "canvas"
         and app_window.selected_patch == patch
         and not app_window.cmd_input_filename
         and not app_window.context_menu_open
         and not app_window.inspector
+        and not app_window.buffer_editor
     ):
         imgui.set_next_window_focus()
 
@@ -119,32 +123,31 @@ def render_tile(app_window, patch):
         flags=(
             imgui.WindowFlags_.no_collapse
             | imgui.WindowFlags_.no_move
+            | (imgui.WindowFlags_.no_resize if num_patches == 1 else 0)
         ),
     )
 
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.selected_window = "canvas"
-        if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
-            app_window.input_mgr.global_mode = GlobalMode(app_window)
-            app_window.input_mgr.major_mode.enable()
-        if app_window.imgui_tile_selected:
-            app_window.layer_select(patch.selected_layer)
-            app_window.imgui_tile_selected = False
+        app_window.zone_hovered("canvas")
 
     # get_cursor_pos appears to be relative to the origin of the current window
     cursor_pos = imgui.get_cursor_pos()
 
     # handle tile resize
     if app_window.selected_patch == patch:
+        tile_selected = True
         actual_w, actual_h = imgui.get_window_size()
         if abs(actual_w - tile.width) > ALLOWED_DELTA_PIX or abs(actual_h - tile.height) > ALLOWED_DELTA_PIX:
             actual_x, actual_y = imgui.get_window_pos()
+            app_window.tile_resize_in_progress = 3
             app_window.canvas_tile_manager.resize_tile(
                 tile,
                 actual_w, actual_h,
                 actual_x - canvas_pane_origin[0],
                 actual_y - canvas_pane_origin[1]
             )
+        else:
+            app_window.tile_resize_in_progress = max(0, app_window.tile_resize_in_progress - 1)
 
     # canvas_origin is the screen offset of the upper-left of the canvas
     # relative to the tile (accounting for the tile title bar)
@@ -157,7 +160,7 @@ def render_tile(app_window, patch):
 
     nedit.push_style_color(
         nedit.StyleColor.bg,
-        app_window.get_color('canvas-color').to_rgbaf()
+        app_window.get_color(f"canvas-color{':selected' if tile_selected else ''}").to_rgbaf()
     )
     nedit.push_style_color(
         nedit.StyleColor.node_border,
@@ -192,7 +195,8 @@ def render_tile(app_window, patch):
             app_window.get_color('grid-color:operate').to_rgbaf()
         )
 
-    imgui.get_style().font_scale_main = 1.0
+    TextWidget.scale_factor = app_window.imgui_global_scale
+
     nedit.begin("canvas_editor", (0.0, 0.0))
     conf = nedit.get_config()
 
@@ -274,7 +278,7 @@ def render_tile(app_window, patch):
             app_window,
             canvas_pane_origin,
             canvas_origin,
-            tile
+            tile,
         )
 
     #############################
@@ -295,7 +299,7 @@ def render_tile(app_window, patch):
     ))
 
     need_navigate = False
-
+    need_reset = False
     if app_window.viewport_zoom_set or app_window.viewport_pos_set:
         need_navigate = True
 
@@ -364,8 +368,11 @@ def render_tile(app_window, patch):
 
         if tile.view_x != viewport_x or tile.view_y != viewport_y:
             if not app_window.viewport_drag_active:
-                tile.view_x = viewport_x
-                tile.view_y = viewport_y
+                if app_window.canvas_resize_in_progress:
+                    need_reset = True
+                else:
+                    tile.view_x = viewport_x
+                    tile.view_y = viewport_y
 
     #############################
     # creation of links (by click-drag)
@@ -418,9 +425,20 @@ def render_tile(app_window, patch):
 
     nedit.end()  # node_editor
     nedit.pop_style_color(5)
-    imgui.get_style().font_scale_main = app_window.imgui_global_scale
+    #imgui.get_style().font_scale_main = app_window.imgui_global_scale
+    TextWidget.scale_factor = 1.0
 
     imgui.end()
+    return need_reset
+
+
+def brighten(color, fraction):
+    return ColorDB().find(
+        min(255, max(0, color.red + (255 - color.red) * fraction)),
+        min(255, max(0, color.green + (255 - color.green) * fraction)),
+        min(255, max(0, color.blue + (255 - color.blue) * fraction)),
+        color.alpha
+    )
 
 
 def render(app_window):
@@ -431,14 +449,25 @@ def render(app_window):
             | imgui.WindowFlags_.no_move
             | imgui.WindowFlags_.no_title_bar
             | imgui.WindowFlags_.no_bring_to_front_on_focus
+            | imgui.WindowFlags_.no_resize
         ),
     )
 
+    selected_stroke = None
+    selected_elements = [e for e in app_window.selected]
+
+    if selected_elements:
+        fr = 0.5 * math.sin((datetime.now().microsecond/1000000) * 2 * math.pi)
+        selected_stroke = app_window.get_color("stroke-color:selected")
+        brighter = brighten(selected_stroke, fr)
+        BaseElement.style_defaults["stroke-color:selected"] = brighter
+        BaseElement.style_defaults["porthole-color:selected"] = brighter
+        for sel in selected_elements:
+            sel._all_styles = sel.combine_styles()
+        app_window.imgui_prevent_idle = 10
+
     if imgui.is_window_hovered(imgui.FocusedFlags_.child_windows):
-        app_window.selected_window = "canvas"
-        if not isinstance(app_window.input_mgr.global_mode, GlobalMode):
-            app_window.input_mgr.global_mode = GlobalMode(app_window)
-            app_window.input_mgr.major_mode.enable()
+        app_window.zone_hovered("canvas")
 
     displayed_patches = [
         p for p in app_window.patches
@@ -458,18 +487,28 @@ def render(app_window):
                 p for p in app_window.patches
                 if p.display_info.page_id == app_window.canvas_tile_page
             ]
+    need_reset = False
     for tile_num, patch in enumerate(displayed_patches):
         imgui.push_id(tile_num)
-        render_tile(app_window, patch)
+        need_reset = need_reset or render_tile(app_window, patch, len(displayed_patches))
         imgui.pop_id()
 
     app_window.viewport_selection_set = False
     app_window.viewport_zoom_set = False
-    app_window.viewport_pos_set = False
+    if need_reset:
+        app_window.viewport_pos_set = True
+    else:
+        app_window.viewport_pos_set = False
 
     imgui.end()
 
     app_window.imgui_selection_started = False
+
+    if selected_stroke:
+        BaseElement.style_defaults["stroke-color:selected"] = selected_stroke
+        BaseElement.style_defaults["porthole-color:selected"] = selected_stroke
+        for sel in selected_elements:
+            sel._all_styles = sel.combine_styles()
 
     # nothing in here can make us exit
     return True

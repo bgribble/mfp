@@ -110,6 +110,9 @@ mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int
     GArray * prev_inlets = p->inlet_conn;
     GArray * prev_outlets = p->outlet_conn;
 
+    /* free the input/output buffers */
+    mfp_proc_free_buffers(p);
+
     /* create inlet and outlet processor pointer arrays */
     p->inlet_conn = g_array_sized_new(TRUE, TRUE, sizeof(GArray *), num_inlets);
 
@@ -124,7 +127,7 @@ mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int
         }
     }
 
-    /* free remaining ovld connections that got lost in the resize */
+    /* free remaining old connections that got lost in the resize */
     if (prev_num_inlets > num_inlets) {
         for (count=prev_num_inlets; count < num_inlets; count++) {
             g_array_free(g_array_index(p->inlet_conn, GArray *, count), true);
@@ -152,9 +155,6 @@ mfp_proc_realloc_buffers(mfp_processor * p, int num_inlets, int num_outlets, int
         }
     }
     g_array_free(prev_outlets, true);
-
-    /* free the input/output buffers */
-    mfp_proc_free_buffers(p);
 
     /* create input and output buffers (will be reallocated if blocksize changes */
     p->inlet_buf = g_malloc0(num_inlets * sizeof(mfp_block *));
@@ -448,42 +448,45 @@ mfp_proc_disconnect(mfp_processor * self, int my_outlet,
     /* find the connection(s) between the specified ports */
     xlets = g_array_index(self->outlet_conn, GArray *, my_outlet);
 
-    for(c=0; c < xlets->len; c++) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if ((conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
-            conn->dest_proc = NULL;
-            found_out++;
+    if (xlets != NULL) {
+        for(c=0; c < xlets->len; c++) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if (conn && (conn->dest_proc == target) && (conn->dest_port == targ_inlet)) {
+                conn->dest_proc = NULL;
+                found_out++;
+            }
         }
-    }
 
-    /* delete connection from src */
-    for(c=xlets->len-1; c >= 0; c--) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if(conn->dest_proc == NULL) {
-            g_array_remove_index(xlets, c);
-            g_free(conn);
+        /* delete connection from src */
+        for(c=xlets->len-1; c >= 0; c--) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if(conn && conn->dest_proc == NULL) {
+                g_array_remove_index(xlets, c);
+                g_free(conn);
+            }
         }
     }
 
     /* delete connection and object from dest */
     xlets = g_array_index(target->inlet_conn, GArray *, targ_inlet);
 
-    for(c=0; c < xlets->len; c++) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if ((conn->dest_proc == self) && (conn->dest_port == my_outlet)) {
-            conn->dest_proc = NULL;
-            found_in++;
+    if (xlets != NULL) {
+        for(c=0; c < xlets->len; c++) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if (conn && (conn->dest_proc == self) && (conn->dest_port == my_outlet)) {
+                conn->dest_proc = NULL;
+                found_in++;
+            }
+        }
+
+        for(c=xlets->len-1; c >= 0; c--) {
+            conn = g_array_index(xlets, mfp_connection *, c);
+            if(conn && conn->dest_proc == NULL) {
+                g_array_remove_index(xlets, c);
+                g_free(conn);
+            }
         }
     }
-
-    for(c=xlets->len-1; c >= 0; c--) {
-        conn = g_array_index(xlets, mfp_connection *, c);
-        if(conn->dest_proc == NULL) {
-            g_array_remove_index(xlets, c);
-            g_free(conn);
-        }
-    }
-
 
     self->context->needs_reschedule = 1;
     return 0;

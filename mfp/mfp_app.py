@@ -351,13 +351,13 @@ class MFPApp (Singleton, SignalMixin):
                 await p.delete()
             log.debug("Finished cleaning up patches")
 
-    async def open_file(self, file_name, context=None, show_gui=True, **kwargs):
+    async def open_file(self, file_name, initargs="", context=None, show_gui=True, **kwargs):
         from datetime import datetime
 
         starttime = datetime.now()
         patch = None
         factory = None
-        name = 'default'
+        name = kwargs.get('patch_name', 'default')
 
         if file_name is not None:
             loadpath = os.path.dirname(file_name)
@@ -380,12 +380,12 @@ class MFPApp (Singleton, SignalMixin):
                 factory = None
 
             if factory:
-                patch = factory(name, "", None, self.app_scope, name, context)
+                patch = factory(name, initargs, None, self.app_scope, name, context)
                 if inspect.isawaitable(patch):
                     patch = await patch
 
         if patch is None:
-            patch = Patch(name, '', None, self.app_scope, name, context)
+            patch = Patch(name, initargs, None, self.app_scope, name, context)
             patch.gui_params['layers'] = [('Layer 0', '__patch__')]
 
         if not self.no_dsp and not self.no_gui:
@@ -418,6 +418,7 @@ class MFPApp (Singleton, SignalMixin):
 
         # try to compile code to get extra defs
         defs = {}
+
         if params and "code" in params:
             code = params.get("code")
             if code and code.get("lang") == "python":
@@ -429,12 +430,20 @@ class MFPApp (Singleton, SignalMixin):
                 else:
                     create_params["code"] = dict(body=codestr, lang="python")
 
+        # if the init_type is enclosed in {}, evaluate it as an expression
+        load_type = init_type
+        if not init_type:
+            return None
+
+        if init_type[0] == '{' and init_type[-1] == '}':
+            load_type = patch.parse_obj(init_type[1:-1], **defs)
+
         # first try: is a factory registered?
-        ctor = self.registry.get(init_type)
+        ctor = self.registry.get(load_type)
 
         # second try: is there a .mfp patch file in the search path?
         if ctor is None:
-            filename = init_type + ".mfp"
+            filename = load_type + ".mfp"
             filepath = utils.find_file_in_path(filename, self.searchpath)
 
             if filepath:
@@ -445,7 +454,7 @@ class MFPApp (Singleton, SignalMixin):
         # third try: can we autowrap a python function?
         if ctor is None:
             try:
-                thunk = patch.parse_obj(init_type, **defs)
+                thunk = patch.parse_obj(load_type, **defs)
                 if callable(thunk):
                     ctor = builtins.pyfunc.PyAutoWrap
             except Exception as e:

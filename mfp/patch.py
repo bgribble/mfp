@@ -25,6 +25,9 @@ class Patch(Processor):
     display_type = "patch"
     default_context = None
 
+    RESP_FREEWHEEL = 8
+    RESP_DSP_LOAD = 9
+
     task_nibbler = None
 
     def __init__(self, init_type, init_args, patch, scope, name, context=None):
@@ -56,6 +59,7 @@ class Patch(Processor):
         self.step_debugger = StepDebugger()
 
         self.init_bindings()
+        self.parsed_initargs = None
         self.parsed_initargs, self.parsed_kwargs = self.parse_args(init_args)
 
         self.gui_params['layers'] = []
@@ -125,13 +129,16 @@ class Patch(Processor):
     def save_state(self):
         state = {}
         for obj_id, obj in self.objects.items():
-            state[obj.name] = obj.save_state()
+            obj_state = obj.save_state()
+            if obj_state:
+                state[obj.name] = obj.save_state()
         return state
 
     def restore_state(self, state):
         for obj_id, obj in self.objects.items():
             ostate = state.get(obj.name, {})
-            obj.restore_state(ostate)
+            if ostate:
+                obj.restore_state(ostate)
         return None
 
     #############################
@@ -288,6 +295,19 @@ class Patch(Processor):
 
             self.add_output(o, outval)
             self.outlet_objects[o].outlets[0] = Uninit
+
+    async def dsp_response(self, resp_id, resp_value):
+        from .mfp_app import MFPApp
+        if resp_id == self.RESP_FREEWHEEL:
+            if MFPApp().gui_command:
+                MFPApp().async_task(
+                    MFPApp().gui_command.signal_emit("freewheel", resp_value)
+                )
+        elif resp_id == self.RESP_DSP_LOAD:
+            if MFPApp().gui_command:
+                MFPApp().async_task(
+                    MFPApp().gui_command.signal_emit("dsp_load", resp_value)
+                )
 
     async def method(self, message, inlet=0):
         if len(self.dispatch_objects):
@@ -461,7 +481,8 @@ class Patch(Processor):
                 for srcport, connections in enumerate(obj.connections_out):
                     for dstobj, dstport in connections:
                         if (
-                            obj.display_type not in (
+                            dstobj.gui_created
+                            and obj.display_type not in (
                                 "hidden", "sendvia", "sendsignalvia"
                             )
                             and dstobj.display_type not in (
@@ -644,13 +665,12 @@ class Patch(Processor):
 
     async def delete(self):
         from .mfp_app import MFPApp
+
+        if self.gui_created:
+            await self.delete_gui()
+
         if self.name in MFPApp().patches and MFPApp().patches[self.name] == self:
             del MFPApp().patches[self.name]
-
-        # first pass: everything but inlets/outlets
-        to_delete = self.objects.values()
-        for obj in list(to_delete):
-            await obj.delete()
 
         if self.step_debugger:
             self.step_debugger.disable()
@@ -658,8 +678,11 @@ class Patch(Processor):
 
         await Processor.delete(self)
 
-        if self.gui_created:
-            await self.delete_gui()
+        # delete all the child objects
+        to_delete = self.objects.values()
+        for obj in list(to_delete):
+            await obj.delete()
+
 
 # load extension methods
 from . import patch_json  # noqa

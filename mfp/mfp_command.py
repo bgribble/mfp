@@ -8,7 +8,7 @@ import json
 from carp.service import apiclass, noresp
 
 from mfp import log
-from .bang import Bang
+from .bang import Bang, Unbound
 from .patch import Patch
 from .method import MethodCall
 from .processor import Processor
@@ -21,15 +21,20 @@ class MFPCommand:
         patch = MFPApp().patches.get(patch_name)
         scope = patch.scopes.get(scope_name) or patch.default_scope
 
-        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, params)
+        obj = await MFPApp().create(objtype, initargs, patch, scope, obj_name, params or {})
         if obj is None:
             log.warning(f"Failed to create object {objtype} {initargs} {patch} {scope} {obj_name} {params}")
             return None
         elif isinstance(obj, dict):
             log.warning(f"Error in creating {objtype} {obj}")
             return obj
+
+        new_params = {
+            **(params or {}), **obj.gui_params
+        }
+        obj.set_gui_params(new_params)
         create_params = {
-            **obj.gui_params,
+            **new_params,
             'properties': obj.properties
         }
         return create_params
@@ -48,6 +53,8 @@ class MFPCommand:
         obj_2 = MFPApp().recall(obj_2_id)
         if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
             return obj_1.connect(obj_1_port, obj_2, obj_2_port)
+        else:
+            log.debug(f"[connect] can't connect {obj_1} {obj_1_id}:{obj_1_port} --> {obj_2} {obj_2_id}:{obj_2_port}")
         return None
 
     def disconnect(self, obj_1_id, obj_1_port, obj_2_id, obj_2_port):
@@ -57,6 +64,8 @@ class MFPCommand:
 
         if isinstance(obj_1, Processor) and isinstance(obj_2, Processor):
             return obj_1.disconnect(obj_1_port, obj_2, obj_2_port)
+        else:
+            log.debug(f"[disconnect] can't disconnect {obj_1} {obj_1_id}:{obj_1_port} --> {obj_2} {obj_2_id}:{obj_2_port}")
         return None
 
     @noresp
@@ -64,7 +73,11 @@ class MFPCommand:
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            await obj.send((resp_type, json.loads(resp_value)), -1)
+            try:
+                parsed_val = json.loads(resp_value)
+                await obj.send((resp_type, parsed_val), -1)
+            except Exception as e:
+                log.error(f"[dsp_response] Sending to obj {obj.name} (id={obj_id}) type={resp_type} value='{resp_value}'... error {e}")
 
     @noresp
     async def send_bang(self, obj_id, port):
@@ -120,7 +133,8 @@ class MFPCommand:
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
         if isinstance(obj, Processor):
-            await obj.send(obj.parse_obj(message), port)
+            msg = obj.parse_obj(message)
+            await obj.send(msg, port)
         return True
 
     @noresp
@@ -167,6 +181,28 @@ class MFPCommand:
                         dsp_outlets=obj.dsp_outlets)
         return {}
 
+    def get_connections(self, obj_id):
+        from .mfp_app import MFPApp
+        obj = MFPApp().recall(obj_id)
+
+        cin = {}
+        cout = {}
+
+        for portnum, connections in enumerate(obj.connections_in):
+            conns = []
+            for src_obj, src_port in connections:
+                is_dsp = src_port in src_obj.dsp_outlets
+                conns.append((src_obj.obj_id, src_port, is_dsp))
+            cin[portnum] = conns
+
+        for portnum, connections in enumerate(obj.connections_out):
+            conns = []
+            for src_obj, src_port in connections:
+                is_dsp = portnum in obj.dsp_outlets
+                conns.append((src_obj.obj_id, src_port, is_dsp))
+            cout[portnum] = conns
+        return [cin, cout]
+
     def get_tooltip(self, obj_id, direction=None, portno=None, details=False):
         from .mfp_app import MFPApp
         obj = MFPApp().recall(obj_id)
@@ -182,6 +218,25 @@ class MFPCommand:
             return obj.tooltip_info(direction, portno, details)
         else:
             return ''
+
+    def get_buffer_info(self):
+        from mfp.builtins.buffer import Buffer
+        from mfp.buffer_info import BufferInfo
+        response = []
+        for shm_id, buf in Buffer.registry.items():
+            response.append(dict(
+                proc_name=buf.name,
+                proc_id=buf.obj_id,
+                buf_info=BufferInfo(
+                    buf_id=buf.buf_id,
+                    size=buf.size,
+                    channels=buf.channels,
+                    offset=buf.buf_offset,
+                    rate=buf.rate,
+                    file_name=buf.file_name,
+                )
+            ))
+        return response
 
     @noresp
     def log_write(self, msg):
@@ -230,7 +285,6 @@ class MFPCommand:
             scope = obj.patch.add_scope(scope_name)
         obj.assign(obj.patch, scope, obj.name)
 
-    @noresp
     async def open_file(self, file_name, context=None, **kwargs):
         from .mfp_app import MFPApp
         patch = await MFPApp().open_file(file_name, **kwargs)
@@ -324,6 +378,29 @@ class MFPCommand:
             await MFPApp().finish_soon()
             return None
 
+    async def freewheel(self, patch_id, num_frames):
+        from .mfp_app import MFPApp
+        from .dsp_object import DSPObject
+        patch = MFPApp().recall(patch_id)
+        dsp_factory = await MFPApp().rpc_host.require(
+            DSPObject, host_id=patch.context.node_id
+        )
+        context_id = patch.context.context_id
+        await dsp_factory.freewheel(patch_id, context_id, num_frames)
+
+    async def dsp_load(self, patch_id):
+        from .mfp_app import MFPApp
+        from .dsp_object import DSPObject
+        patch = MFPApp().recall(patch_id)
+        if not patch or not MFPApp().rpc_host:
+            return 0
+
+        dsp_factory = await MFPApp().rpc_host.require(
+            DSPObject, host_id=patch.context.node_id
+        )
+        context_id = patch.context.context_id
+        return await dsp_factory.dsp_load(patch_id, context_id)
+
     def open_patches(self):
         from .mfp_app import MFPApp
         return [p.obj_id for p in MFPApp().patches.values()]
@@ -336,11 +413,18 @@ class MFPCommand:
             return False
         return await patch.has_unsaved_changes()
 
+    def resolve(self, name, patch_id, scope=None):
+        from .mfp_app import MFPApp
+        patch = MFPApp().recall(patch_id)
+        obj = patch.resolve(name, scope)
+        if obj is not Unbound:
+            return obj.obj_id
+        return obj
+
     @noresp
     def quit(self):
         from .mfp_app import MFPApp
         MFPApp().async_task(MFPApp().finish())
-        return None
 
     def toggle_pause(self):
         from .mfp_app import MFPApp

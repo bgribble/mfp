@@ -28,7 +28,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
     backend_name = "imgui"
 
     style_defaults = {
-        'padding': dict(left=8, top=6, right=8, bottom=6)
+        'padding': dict(left=8, top=10, right=8, bottom=6)
     }
 
     def __init__(self, window, x, y):
@@ -68,6 +68,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
             self.get_color('fill-color').to_rgbaf()
         )
         stroke_color = self.get_color('stroke-color')
+        fill_color = self.get_color('fill-color:lit')
 
         nedit.push_style_color(
             nedit.StyleColor.node_border,
@@ -110,11 +111,26 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
                     self.position_x + self.width - inset_size - border_width,
                     self.position_y + self.height - inset_size - border_width
                 ],
-                ColorDB().backend.im_col32(stroke_color),
+                ColorDB().backend.im_col32(fill_color),
                 rounding=corner,
                 flags=0,
             )
         else:
+            draw_list.add_rect_filled(
+                [
+                    self.position_x + inset_size + border_width,
+                    self.position_y + inset_size + border_width
+                ],
+                [
+                    self.position_x + self.width - inset_size - border_width,
+                    self.position_y + self.height - inset_size - border_width
+                ],
+                ColorDB().backend.im_col32(
+                    ColorDB().find(0xff, 0xff, 0xff, 0x50)
+                ),
+                rounding=corner,
+                flags=0,
+            )
             draw_list.add_rect(
                 [
                     self.position_x + inset_size,
@@ -124,7 +140,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
                     self.position_x + self.width - inset_size,
                     self.position_y + self.height - inset_size
                 ],
-                ColorDB().backend.im_col32(stroke_color),
+                ColorDB().backend.im_col32(fill_color),
                 rounding=corner,
                 flags=0,
                 thickness=border_width

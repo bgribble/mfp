@@ -226,6 +226,12 @@ async def json_unpack_objects(self, data, scope):
     for oid in idlist:
         prms = data.get('objects')[oid]
 
+        if not prms:
+            skipped_objects += 1
+            error = f"No parameters for object '{oid}'"
+            self.error(error)
+            continue
+
         otype = prms.get('type')
         oargs = prms.get('initargs')
         oname = prms.get('name')

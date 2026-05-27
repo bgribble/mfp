@@ -15,6 +15,7 @@ from .text_widget import TextWidget
 from .base_element import BaseElement
 from .connection_element import ConnectionElement
 from .backend_interfaces import BackendInterface
+from .param_info import ParamInfo
 from .modes.label_edit import LabelEditMode
 from .modes.transient import TransientMessageEditMode
 from .modes.clickable import ClickableControlMode
@@ -31,6 +32,13 @@ class MessageElement (BaseElement):
     proc_type = "message"
     help_patch = "message.help.mfp"
 
+    extra_params = {
+        'save_in_preset': ParamInfo(label="Save in preset", param_type=bool, show=True),
+    }
+    store_attrs = {
+        **BaseElement.store_attrs, **extra_params
+    }
+
     label_off_x = 4
     label_off_y = 1
 
@@ -42,6 +50,7 @@ class MessageElement (BaseElement):
         self.message_text = None
         self.clickstate = False
         self.update_required = True
+        self.save_in_preset = False
 
         self.obj_state = self.OBJ_HALFCREATED
 

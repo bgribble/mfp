@@ -4,7 +4,7 @@ app_window.py
 The main MFP window and associated code
 '''
 
-
+import asyncio
 from abc import ABC, abstractmethod
 from mfp import log
 
@@ -173,7 +173,7 @@ class AppWindowImpl(BackendInterface, ABC):
 
 
 class AppWindow (SignalMixin):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
 
         # self.objects is BaseElement instances representing the
@@ -184,15 +184,17 @@ class AppWindow (SignalMixin):
 
         self.selected_patch = None
         self.selected_layer = None
-        self.selected_window = "canvas"
+        self.zone_selected = "canvas"
 
         self.selected = []
 
         self.load_in_progress = 0
         self.quit_in_progress = False
         self.close_in_progress = False
+        self.freewheel_in_progress = False
         self.last_activity_time = None
         self.dsp_info = {}
+        self.dsp_load = 0.0
 
         # dumb colors
         self.color_unselected = self.get_color('stroke-color')
@@ -214,6 +216,10 @@ class AppWindow (SignalMixin):
         self.cmd_input = None
         self.cmd_input_filename = False
 
+        for k, v in kwargs.items():
+            if hasattr(self, k):
+                setattr(self, k, v)
+
         # set up key and mouse handling
         self.input_mgr = InputManager(self)
         self.init_input()
@@ -221,14 +227,21 @@ class AppWindow (SignalMixin):
         self.initialize()
 
         self.cmd_input = TextWidget.build(self)
+        self.cmd_input.set_color(self.get_color('text-element-text-color'))
+
         self.cmd_manager = Prompter(
             self, self.cmd_input,
             completions=InputMode._bindings_by_label.keys()
         )
 
+        # buffer editor
+        self.buffer_editor = None
+
         # Python REPL
         self.console_manager = ConsoleManager.build("MFP interactive console", self)
         self.console_manager.start()
+
+        self.init_loadmeter()
 
     @classmethod
     def get_backend(cls, backend_name):
@@ -250,6 +263,15 @@ class AppWindow (SignalMixin):
             log.debug_traceback(e)
             return False
 
+    def init_loadmeter(self):
+        async def loadmeter():
+            while not self.quit_in_progress:
+                if self.selected_patch:
+                    await MFPGUI().mfp.dsp_load(self.selected_patch.obj_id)
+                await asyncio.sleep(0.5)
+                
+        MFPGUI().async_task(loadmeter())
+
     def init_input(self):
         # set initial major mode
         self.input_mgr.global_mode = GlobalMode(self)
@@ -267,6 +289,14 @@ class AppWindow (SignalMixin):
         self.signal_listen('enter-event', self.input_handler)
         self.signal_listen('leave-event', self.input_handler)
         self.signal_listen('quit', self.quit)
+        self.signal_listen('freewheel', self.freewheel_handler)
+        self.signal_listen('dsp_load', self.dsp_load_handler)
+
+    def freewheel_handler(self, target, signal, status):
+        self.freewheel_in_progress = status
+
+    def dsp_load_handler(self, target, signal, value):
+        self.dsp_load = value
 
     def get_color(self, colorspec):
         from mfp.gui_main import MFPGUI
@@ -306,6 +336,8 @@ class AppWindow (SignalMixin):
 
         if obj == self.console_manager:
             return True
+        if obj == self.buffer_editor:
+            return True
         if self.selected_layer:
             patch = self.selected_layer.patch
         if patch and patch.panel_mode:
@@ -332,10 +364,12 @@ class AppWindow (SignalMixin):
     async def control_major_mode(self):
         for o in self.selected:
             await o.end_edit()
-            o.begin_control()
 
         if isinstance(self.input_mgr.major_mode, PatchEditMode):
             self.input_mgr.set_major_mode(PatchControlMode(self))
+
+        for o in self.selected:
+            o.begin_control()
         return True
 
     def register(self, element):

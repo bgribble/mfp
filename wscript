@@ -393,7 +393,7 @@ def configure(ctxt):
     ctxt.find_program("cmake")
 
     pip_libs = [
-        "posix_ipc", "simplejson", "numpy",
+        "posix_ipc", "simplejson", "numpy", "resampy",
         "pynose", "yappi", "cython", "pyliblo3",
         "soundfile", "samplerate", "alsa-midi",
         # my other libs
@@ -608,9 +608,15 @@ def build(bld):
                 ("mfp.svg", "share/mfp/icons/hicolor/scalable/actions/"),
                 ("mfp.png", "share/mfp/icons/hicolor/96x96/actions/"),
                 ("help/*.mfp", "share/mfp/patches/help/"),
+                ("bufedit/*.mfp", "share/mfp/patches/bufedit/"),
             ],
         ),
-        source=["mfp.svg", "mfp.png", bld.path.ant_glob("help/*.mfp")],
+        source=[
+            "mfp.svg",
+            "mfp.png",
+            bld.path.ant_glob("help/*.mfp"),
+            bld.path.ant_glob("bufedit/*.mfp")
+        ],
         target="static.tar.gz"
     )
 
