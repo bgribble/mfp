@@ -142,6 +142,8 @@ def order_for_selection(objects):
 
     def add_conns(obj):
         for conn in obj.connections_out:
+            if conn.dashed:
+                continue
             if conn.obj_2 not in ordered_list:
                 ordered_list.append(conn.obj_2)
                 try:
@@ -163,8 +165,9 @@ def order_for_selection(objects):
                 corner_obj = obj
                 corner_dist = obj_dist
                 corner_index = idx
-        ordered_list.append(corner_obj)
-        remaining_list[corner_index:corner_index+1] = []
+        if corner_obj:
+            ordered_list.append(corner_obj)
+            remaining_list[corner_index:corner_index+1] = []
 
         # recursively add connections
         add_conns(corner_obj)

@@ -586,7 +586,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         pass
 
     async def quit(self, *rest):
-        log.debug("quit: in imgui window quit")
         if self.buffer_editor:
             await self.buffer_editor.close()
             self.buffer_editor = None

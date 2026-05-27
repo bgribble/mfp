@@ -126,7 +126,7 @@ class ImguiButtonElementImpl(ButtonElementImpl, ImguiBaseElementImpl, ButtonElem
                     self.position_y + self.height - inset_size - border_width
                 ],
                 ColorDB().backend.im_col32(
-                    ColorDB().find(0xff, 0xff, 0xff, 0x70)
+                    ColorDB().find(0xff, 0xff, 0xff, 0x50)
                 ),
                 rounding=corner,
                 flags=0,
