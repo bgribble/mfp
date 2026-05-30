@@ -89,6 +89,7 @@ class ProcessorElement (BaseElement):
         if self.obj_type:
             self.set_label_text(markup=False)
         await self.update()
+        return self.label.text
 
     @saga('obj_type', 'obj_args', 'code')
     async def recreate_element(self, action, state_diff, previous):

@@ -650,27 +650,33 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         return self.text
 
     def set_text(self, text, notify=True):
-        if self.text != text and notify:
+        text_changed = (text == self.text)
+        previous = text
+        self.text = text
+        self.markdown_text = None
+        self.use_markup = False
+        if text_changed and notify:
             MFPGUI().async_task(self.signal_emit(
                 'text-changed',
+                previous,
                 self.text,
-                text,
-                imgui.calc_text_size(self.text),
-                imgui.calc_text_size(text)
+                imgui.calc_text_size(previous) if previous else 0,
+                imgui.calc_text_size(self.text) if self.text else 0
             ))
-        self.text = text
 
     def set_markup(self, text, notify=True):
-        if self.markdown_text != text and notify:
-            MFPGUI().async_task(self.signal_emit(
-                'text-changed',
-                self.text,
-                text,
-                imgui.calc_text_size(self.markdown_text),
-                imgui.calc_text_size(text)
-            ))
+        text_changed = (text == self.markdown_text)
+        previous = self.markdown_text
         self.markdown_text = text
         self.use_markup = True
+        if text_changed and notify:
+            MFPGUI().async_task(self.signal_emit(
+                'text-changed',
+                previous,
+                self.markdown_text,
+                imgui.calc_text_size(previous) if previous else 0,
+                imgui.calc_text_size(self.markdown_text) if self.markdown_text else 0
+            ))
 
     def set_reactive(self, is_reactive):
         pass
