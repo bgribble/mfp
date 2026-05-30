@@ -5,6 +5,7 @@ selection.py: Minor mode with active selection
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
 
+from mfp import log
 from ..input_mode import InputMode
 from .connection import ConnectionMode
 
@@ -42,6 +43,13 @@ class SingleSelectionEditMode (InputMode):
     def __init__(self, window):
         self.manager = window.input_mgr
         self.window = window
+
+        self.resize_start_x = None
+        self.resize_start_y = None
+        self.resize_start_w = None
+        self.resize_start_h = None
+        self.resize_target = None
+
         InputMode.__init__(self, "Single selection")
 
         self.affinity = -10
@@ -62,11 +70,77 @@ class SingleSelectionEditMode (InputMode):
             "connect-to", cls.connect_rev, "Connect to element", "C",
             menupath="Context > |Connect to element"
         )
+        cls.bind(
+            "resize-start", cls.resize_start, helptext="Start element resize box",
+            keysym="M1DOWN"
+        )
+        cls.bind(
+            "resize-motion", cls.resize_motion, helptext="Drag to resize",
+            keysym="M1-MOTION"
+        )
+        cls.bind(
+            "resize-end", cls.resize_end, helptext="End resize",
+            keysym="M1UP"
+        )
         cls.extend_mode(SelectionEditMode)
 
-    async def edit_selected(self):
+    def edit_selected(self):
+        from mfp.gui_main import MFPGUI
         if self.window.selected:
-            await self.window.selected[0].begin_edit()
+            MFPGUI().async_task(self.window.selected[0].begin_edit())
+            return True
+        return False
+
+    def resize_start(self):
+        if not self.window.selected:
+            return False
+
+        # is pointer in resize grabber?
+        if not self.window.selected[0].edit_mode:
+            return False
+
+        self.resize_target = self.window.selected[0]
+        self.resize_start_x = self.window.input_mgr.pointer_x
+        self.resize_start_y = self.window.input_mgr.pointer_y
+        self.resize_start_w = max(self.resize_target.min_width, self.resize_target.width)
+        self.resize_start_h = max(self.resize_target.min_height, self.resize_target.height)
+        return True
+
+    def resize_motion(self):
+        from mfp.gui_main import MFPGUI
+
+        if (
+            not self.resize_target
+            or not self.window.selected
+            or self.window.selected[0] != self.resize_target
+        ):
+            self.resize_target = None
+            return False
+
+        dx = self.window.input_mgr.pointer_x - self.resize_start_x
+        dy = self.window.input_mgr.pointer_y - self.resize_start_y
+        MFPGUI().async_task(self.resize_drag(dx, dy))
+        return True
+
+    def resize_end(self):
+        if self.resize_target:
+            self.resize_target = None
+            return True
+        return False
+
+    async def resize_drag(self, dw, dh):
+        await self.resize_target.dispatch(
+            self.resize_target.action(
+                self.resize_target.SET_MIN_WIDTH,
+                value=self.resize_start_w + dw,
+            ),
+        )
+        await self.resize_target.dispatch(
+            self.resize_target.action(
+                self.resize_target.SET_MIN_HEIGHT,
+                value=self.resize_start_h + dh,
+            ),
+        )
 
     def connect_fwd(self):
         if self.window.selected:
