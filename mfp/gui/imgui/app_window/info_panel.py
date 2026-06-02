@@ -10,9 +10,10 @@ from mfp import log
 from mfp.gui_main import MFPGUI
 from mfp.gui import image_utils
 from mfp.gui.colordb import ColorDB, RGBAColor
-from mfp.gui.base_element import BaseElement, PROPERTY_ATTRS
+from mfp.gui.base_element import BaseElement
 from mfp.gui.param_info import (
     ParamInfo,
+    BitArray,
     ListOfInt,
     ListOfPairs,
     DictOfRGBAColor,
@@ -233,11 +234,17 @@ def render_param(
         if readonly or param_type.editable is False:
             imgui.begin_disabled()
 
-        if callable(param_type.choices) and target:
-            choices = {
-                c[0]: c[1]
-                for c in param_type.choices(target)
-            }
+        if param_type.choices and target:
+            if callable(param_type.choices):
+                choices = {
+                    c[0]: c[1]
+                    for c in param_type.choices(target)
+                }
+            else:
+                choices = {
+                    c[0]: c[1] for c in param_type.choices
+                }
+
             current_choice = next((c for c in choices.items() if c[1] == param_value), None)
             if not current_choice:
                 current_choice = (choices[0], choices[choices[0]])
@@ -246,12 +253,9 @@ def render_param(
             imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (3, 3))
             if imgui.begin_popup("##param_choices_popup"):
-                mouse_pos = imgui.get_mouse_pos_on_opening_current_popup()
-                cursor_pos = (mouse_pos[0] + 8, mouse_pos[1] + 8)
-                imgui.set_cursor_screen_pos(cursor_pos)
                 for choice_label, choice_value in choices.items():
                     item_selected, _ = imgui.menu_item(
-                        choice_label, '', False, True
+                        choice_label, '', choice_label == current_choice[0], True
                     )
                     if item_selected and choice_label != current_choice[0]:
                         changed = True
@@ -273,6 +277,24 @@ def render_param(
                     newval = ast.literal_eval(newval)
                 except Exception:
                     log.warning(f"Unable to parse value for parameter {param_type.label}")
+            imgui.pop_style_var()
+
+        elif param_type.param_type is BitArray:
+            imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, 1))
+            value, num_bits = param_value
+            newval_combined = 0
+            changed_combined = False
+            for bit in range(num_bits):
+                changed, newval = imgui.checkbox(
+                    f"{bit}##{param_name}{bit}",
+                    bool(value & 0x1)
+                )
+                newval_combined += int(newval) << bit
+                value = value >> 1
+                if changed:
+                    changed_combined = True
+            changed = changed_combined
+            newval = (newval_combined, num_bits)
             imgui.pop_style_var()
 
         elif param_type.param_type is str:
@@ -563,7 +585,7 @@ def render_param(
             imgui.push_id(param_name)
             if param_value and len(param_value) > 0:
                 for prop_name, prop_value in param_value.items():
-                    pinfo = PROPERTY_ATTRS.get(prop_name)
+                    pinfo = target.property_defs.get(prop_name)
                     new_pval = prop_value
                     if pinfo:
                         new_pval = render_param(
@@ -634,7 +656,7 @@ def render_param(
         )
         imgui.pop_style_var()
         if param_name not in logged_errors:
-            log.warning(f"[render] Error in param {param_name}: {type(e)} {e}")
+            log.warning(f"[render] Error in param {param_name}: {type(e)} {e}, value={param_value}")
             logged_errors.add(param_name)
 
     imgui.pop_id()

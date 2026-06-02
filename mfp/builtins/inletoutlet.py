@@ -17,6 +17,17 @@ class Inlet(Processor):
     doc_tooltip_hot = "Message input to patch (hot)"
 
     do_onload = False
+    property_defs = {
+        'lv2_description': ParamInfo(label="Description", param_type=str, show=True),
+        'lv2_type': ParamInfo(
+            label="(lv2) Port type",
+            choices=[('MIDI', 'midi'), ('Control', 'control')],
+            param_type=str, show=True
+        ),
+        'lv2_default_val': ParamInfo(label="(lv2) Default value [control ports]", param_type=float, show=True),
+        'lv2_minimum_val': ParamInfo(label="(lv2) Minimum value [control ports]", param_type=float, show=True),
+        'lv2_maximum_val': ParamInfo(label="(lv2) Maximum value [control ports]", param_type=float, show=True),
+    }
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         extra=defs or {}
@@ -81,6 +92,9 @@ class Inlet(Processor):
 class SignalInlet(Inlet):
     doc_tooltip_obj = "Signal input to patch"
 
+    property_defs = {
+        'lv2_description': ParamInfo(label="Description", param_type=str, show=True),
+    }
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         Inlet.__init__(self, init_type, init_args, patch, scope, name, defs)
         self.dsp_outlets = [0]
@@ -97,6 +111,15 @@ class Outlet(Processor):
     doc_tooltip_obj = "Message output from patch"
     do_onload = False
     clear_outlets = False
+
+    property_defs = {
+        'lv2_description': ParamInfo(label="Description", param_type=str, show=True),
+        'lv2_type': ParamInfo(
+            label="(lv2) Port type",
+            choices=[('MIDI', 'midi'), ('Control', 'control')],
+            param_type=str, show=True
+        ),
+    }
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         extra=defs or {}
@@ -138,6 +161,10 @@ class Outlet(Processor):
 
 class SignalOutlet(Outlet):
     doc_tooltip_obj = "Signal output from patch"
+
+    property_defs = {
+        'lv2_description': ParamInfo(label="Description", param_type=str, show=True),
+    }
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         Outlet.__init__(self, init_type, init_args, patch, scope, name, defs)

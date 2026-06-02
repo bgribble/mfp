@@ -10,8 +10,7 @@ from abc import ABCMeta, abstractmethod
 from flopsy import Action, Store, mutates, reducer, saga
 from mfp.gui_main import MFPGUI
 from mfp import log
-from .colordb import ColorDB, RGBAColor
-from .backend_interfaces import BackendInterface
+from .colordb import ColorDB
 from .param_info import ParamInfo, ListOfInt, CodeBlock, DictOfProperty
 from .layer import Layer
 
@@ -97,28 +96,6 @@ BASE_STORE_ATTRS = {
     'properties': ParamInfo(label="Properties", param_type=DictOfProperty, show=True),
 }
 
-# these are params that may appear within 'properties' and get
-# their own editors. It's awkward to have type-specific info here
-# and in the Processor definition but I can't see a way around it
-PROPERTY_ATTRS = {
-    'lv2_description': ParamInfo(
-        label="Description", param_type=str, show=True
-    ),
-    'lv2_type': ParamInfo(
-        label="(lv2) Port type",
-        choices=lambda o: [('MIDI', 'midi'), ('Control', 'control')],
-        param_type=str, show=True
-    ),
-    'lv2_default_val': ParamInfo(
-        label="(lv2) Default value [control ports]", param_type=float, show=True
-    ),
-    'lv2_minimum_val': ParamInfo(
-        label="(lv2) Minimum value [control ports]", param_type=float, show=True
-    ),
-    'lv2_maximum_val': ParamInfo(
-        label="(lv2) Maximum value [control ports]", param_type=float, show=True
-    ),
-}
 
 class BaseElement (Store):
     '''
@@ -184,7 +161,9 @@ class BaseElement (Store):
         BaseElement.style_defaults.update({
             'badge-edit-color': ColorDB().find('default-edit-badge-color'),
             'badge-learn-color': ColorDB().find('default-learn-badge-color'),
-            'badge-error-color': ColorDB().find('default-error-badge-color')
+            'badge-error-color': ColorDB().find('default-error-badge-color'),
+            'badge-play-color': ColorDB().find('default-play-badge-color'),
+            'badge-record-color': ColorDB().find('default-record-badge-color'),
         })
 
         # UI state
@@ -207,6 +186,7 @@ class BaseElement (Store):
         self.edit_mode = None
         self.control_mode = None
         self.properties = {}
+        self._property_defs = None
         self.style = {}
         self._all_styles = self.combine_styles()
 
@@ -243,6 +223,17 @@ class BaseElement (Store):
     @property
     def name(self):
         return self.obj_name
+
+    @property
+    def property_defs(self):
+        async def assign_defs():
+            self._property_defs = await MFPGUI().mfp.get_property_defs(self.obj_id)
+
+        if self._property_defs is None:
+            self._property_defs = {}
+            MFPGUI().async_task(assign_defs())
+
+        return self._property_defs
 
     def get_size(self):
         return (self.width, self.height)

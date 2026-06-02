@@ -68,6 +68,8 @@ class Processor:
     do_onload = True
     clear_outlets = True
 
+    property_defs = {}  # type-specific ParamInfo for UI editing
+
     clone_connect_inbound = True
     clone_connect_outbound = True
 
@@ -1049,6 +1051,7 @@ class Processor:
                             and tinlet == self.snoop_inlet
                             and outlet_num == self.snoop_outlet
                         ):
+                            log.debug(f"[create] properties={params.get('properties')}")
                             from .mfp_app import MFPApp
                             MFPApp().async_task(
                                 MFPApp().gui_command.hud_write(f"[snoop] {str(val)}")

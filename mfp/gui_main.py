@@ -55,6 +55,8 @@ class MFPGUI (Singleton):
             'badge-edit-color': ParamInfo(label="Badge color (edit)", param_type=RGBAColor),
             'badge-error-color': ParamInfo(label="Badge color (error)", param_type=RGBAColor),
             'badge-learn-color': ParamInfo(label="Badge color (learn)", param_type=RGBAColor),
+            'badge-play-color': ParamInfo(label="Badge color (play)", param_type=RGBAColor),
+            'badge-record-color': ParamInfo(label="Badge color (record)", param_type=RGBAColor),
             'badge-size': ParamInfo(label="Badge size", param_type=float),
             'border': ParamInfo(label="Draw border", param_type=bool),
             'canvas-color': ParamInfo(label="Canvas background color", param_type=RGBAColor),

@@ -32,11 +32,11 @@ class MFPCommand:
         new_params = {
             **(params or {}), **obj.gui_params
         }
-        obj.set_gui_params(new_params)
         create_params = {
             **new_params,
             'properties': obj.properties
         }
+        obj.set_gui_params(create_params)
         return create_params
 
     async def create_export_gui(self, obj_id):
@@ -237,6 +237,11 @@ class MFPCommand:
                 )
             ))
         return response
+
+    def get_property_defs(self, obj_id):
+        from .mfp_app import MFPApp
+        obj = MFPApp().recall(obj_id)
+        return obj.property_defs
 
     @noresp
     def log_write(self, msg):

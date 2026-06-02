@@ -1,50 +1,63 @@
 """
 Helper class for representing parameter and style variables
 """
-from dataclasses import dataclass, field, _MISSING_TYPE
-from typing import Optional
 
+from carp.serializer import Serializable
+from mfp import log
 
-@dataclass(slots=True, kw_only=True)
-class ParamInfo:
-    label: str
-    editable: Optional[bool] = True
-    show: Optional[bool] = False
-    null: Optional[bool] = False
-    tooltip: Optional[str] = ""
-    choices: Optional[callable] = None
-    param_type: Optional[type] = str
-    extra_args: Optional[dict] = field(default_factory=dict)
-
+class ParamInfo(Serializable):
     def __init__(self, *args, **kwargs):
-        extra_kws = [k for k in kwargs if k not in self.__slots__]
-        extra_args = {
-            k: kwargs.pop(k)
-            for k in extra_kws
+        self.label = kwargs.pop("label", "")
+        self.editable = kwargs.pop("editable", True)
+        self.show = kwargs.pop("show", False)
+        self.null = kwargs.pop("null", False)
+        self.tooltip = kwargs.pop("tooltip", "")
+        self.choices = kwargs.pop("choices", None)
+        self.param_type = kwargs.pop("param_type", str)
+        self.extra_args = kwargs
+
+        super().__init__()
+
+    def to_dict(self):
+        props = {
+            s: getattr(self, s) for s in [
+                "label", "editable", "show", "null", "tooltip", "choices", "extra_args"
+            ]
         }
-        for name, info in self.__dataclass_fields__.items():
-            if name in kwargs:
-                setattr(self, name, kwargs[name])
-            elif not isinstance(info.default, _MISSING_TYPE):
-                setattr(self, name, info.default)
-            elif not isinstance(info.default_factory, _MISSING_TYPE):
-                setattr(self, name, info.default_factory())
-        self.extra_args = extra_args
+        props["param_type"] = self.param_type.__name__
+        if callable(self.choices):
+            log.error(f"Choices cannot be callable in a Property: {self}")
+        return props
+
+    @classmethod
+    def from_dict(cls, values):
+        if "param_type" in values:
+            values["param_type"] = eval(values["param_type"])
+        obj = cls(**values)
+        return obj
+
+class BitArray (tuple):
+    pass
 
 class PyLiteral (str):
     pass
 
+
 class ListOfInt(list):
     pass
+
 
 class ListOfPairs(list):
     pass
 
+
 class DictOfRGBAColor(dict):
     pass
 
+
 class DictOfProperty(dict):
     pass
+
 
 class CodeBlock (str):
     pass

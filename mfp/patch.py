@@ -15,6 +15,7 @@ from .scope import LexicalScope
 from .bang import Uninit, Unbound
 from .utils import TaskNibbler
 from .step_debugger import StepDebugger
+from mfp.gui.param_info import ParamInfo
 
 from mfp import log
 
@@ -29,6 +30,10 @@ class Patch(Processor):
     RESP_DSP_LOAD = 9
 
     task_nibbler = None
+
+    property_defs = {
+        'lv2_description': ParamInfo(label="Description", param_type=str, show=True),
+    }
 
     def __init__(self, init_type, init_args, patch, scope, name, context=None):
         Processor.__init__(self, 1, 0, init_type, init_args, patch, scope, name)

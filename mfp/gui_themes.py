@@ -56,6 +56,8 @@ theme_dusk = {
         'default-edit-badge-color': (0x74, 0x4b, 0x94, 0xff),
         'default-learn-badge-color': (0x19, 0xff, 0x90, 0xff),
         'default-error-badge-color': (0xb7, 0x21, 0x21, 0xff),
+        'default-play-badge-color': dusk_grue,
+        'default-record-badge-color': dusk_red,
         'default-data-color-0': (0x88, 0x52, 0x7f, 0xff),
         'default-data-color-1': (0x4c, 0x60, 0x85, 0xff),
         'default-data-color-2': (0x39, 0xa0, 0xed, 0xff),

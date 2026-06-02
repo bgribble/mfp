@@ -396,6 +396,16 @@ class ImguiBaseElementImpl(BaseElementImpl):
         else:
             self.badge_current = None
 
+        if not tagged and "transport" in self.tags:
+            if self.tags["transport"] == "play":
+                self.badge_current = ("P", self.get_color('badge-play-color'))
+                tagged = True
+            elif self.tags["transport"] == "rec":
+                self.badge_current = ("R", self.get_color('badge-record-color'))
+                tagged = True
+            else:
+                self.badge_current = None
+
         if not tagged and "midi" in self.tags:
             if self.tags["midi"] == "learning":
                 self.badge_current = ("M", self.get_color('badge-learn-color'))

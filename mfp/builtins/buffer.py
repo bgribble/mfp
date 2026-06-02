@@ -15,13 +15,16 @@ import numpy
 from mfp import Bang, Uninit
 from mfp import log
 
+from mfp.gui.param_info import ParamInfo, BitArray
 from mfp.processor import Processor
 from ..mfp_app import MFPApp
 from ..buffer_info import BufferInfo
 from ..method import MethodCall
 
+
 class Buffer(Processor):
 
+    # cache of open shared memory segments
     registry = {}
 
     RESP_TRIGGERED = 0
@@ -33,6 +36,18 @@ class Buffer(Processor):
     RESP_BUFRDY = 6
     RESP_LOOPSTART = 7
 
+    MODES = [
+        ["Play to end", 5],
+        ["Play, using existing loop points", 6],
+        ["Play, triggered by specified channel", 7],
+        ["Record to end", 0],
+        ["Record, setting loop points", 1],
+        ["Record, using existing loop points", 2],
+        ["Record, triggered by specified channel", 3],
+        ["Record, triggered by last channel", 4],
+        ["Record continuously", 8],
+    ]
+
     FLOAT_SIZE = 4
 
     doc_help_patch = "buffer~.help.mfp"
@@ -43,6 +58,31 @@ class Buffer(Processor):
         "Array output (for @slice)",
         "BufferInfo and status output"
     ]
+
+    property_defs = {
+        'buf_mode': ParamInfo(
+            label="Buffer mode", param_type=int, show=True, choices=MODES
+        ),
+        'buf_state': ParamInfo(
+            label="Buffer state", param_type=int,
+            choices=[["Running", 1], ["Stopped", 0]]
+        ),
+        'channels': ParamInfo(
+            label="Number of channels", param_type=int,
+        ),
+        'rec_enabled': ParamInfo(
+            label="Record enable", param_type=bool,
+        ),
+        'play_channels': ParamInfo(
+            label="Channel playback enable", param_type=BitArray,
+        ),
+        'rec_channels': ParamInfo(
+            label="Channel record enable", param_type=BitArray,
+        ),
+        'monitor_channels': ParamInfo(
+            label="Channel input monitor", param_type=BitArray,
+        ),
+    }
 
     def __init__(self, init_type, init_args, patch, scope, name, defs=None):
         extra=defs or {}
@@ -58,6 +98,7 @@ class Buffer(Processor):
             self.init_channels = self.init_args[1]
         if "channels" in self.init_kwargs:
             self.init_channels = self.init_kwargs.pop("channels")
+
         if "buf_id" in self.init_kwargs:
             self.buf_id = self.init_kwargs.get("buf_id")
         if "gui_notify" in self.init_kwargs:
@@ -89,6 +130,16 @@ class Buffer(Processor):
         self.file_data = None
         self.file_ready = False
 
+        self.properties = {
+            'buf_state': 0,
+            'buf_mode': 0,
+            'rec_enabled': 0,
+            'channels': 0,
+            'play_channels': (0, 0),
+            'rec_channels': (0, 0),
+            'monitor_channels': (0, 0),
+        }
+
         self.dsp_inlets = list(range(self.init_channels))
         self.dsp_outlets = list(range(self.init_channels))
 
@@ -96,7 +147,7 @@ class Buffer(Processor):
 
     async def setup(self, **kwargs):
         await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
-        if "size" in self.init_kwargs or "channels" in self.init_kwargs: 
+        if "size" in self.init_kwargs or "channels" in self.init_kwargs:
             self.init_kwargs["realloc"] = 1
         await self.dsp_setparams(**self.init_kwargs)
 
@@ -146,6 +197,39 @@ class Buffer(Processor):
         await self.dsp_setparams(
             region_start=0, region_end=self.file_len
         )
+
+    async def dsp_setparams(self, do_update=True, **params):
+        prop_update = False
+        for prop in (
+            "buf_mode", "buf_state", "rec_enabled", "channels",
+        ):
+            if prop in params:
+                self.properties[prop] = params[prop]
+                prop_update = True
+
+        for prop in ("play_channels", "rec_channels", "monitor_channels"):
+            if prop in params:
+                channels = self.properties.get("channels")
+                if not channels:
+                    continue
+                self.properties[prop] = (params[prop], channels)
+                prop_update = True
+
+        if "buf_mode" in self.properties and "buf_state" in self.properties:
+            rec_enabled = self.properties.get("rec_enabled", False)
+            buf_mode = self.properties.get("buf_mode")
+            buf_state = self.properties.get("buf_state")
+            if not buf_state:
+                self.set_tag("transport", "stop")
+            elif not rec_enabled:
+                self.set_tag("transport", "play")
+            elif buf_mode in [0, 1, 2, 3, 4, 8]:
+                self.set_tag("transport", "rec")
+
+        if prop_update and do_update:
+            self.conf(properties=self.properties)
+
+        return await super().dsp_setparams(**params)
 
     async def _file_export(self, filename, channels):
         ready = asyncio.Event()
@@ -217,10 +301,38 @@ class Buffer(Processor):
             *Buffer.doc_tooltip_outlet[-2:]
         ]
 
+    def set_gui_params(self, params):
+        old_props = self.properties
+        new_props = { k: v for k, v in params.get("properties").items()}
+        super().set_gui_params(params)
+
+        if new_props != old_props:
+            for prop in ("play_channels", "rec_channels", "monitor_channels"):
+                if prop in new_props:
+                    new_props[prop] = new_props[prop][0]
+
+            MFPApp().async_task(self.dsp_setparams(do_update=False, **new_props))
+
+    def _reset_channel_props(self, channels):
+        self.properties["channels"] = channels
+        if "play_channels" in self.properties:
+            oldval = self.properties["play_channels"]
+            self.properties["play_channels"] = (oldval[0], channels)
+        if "rec_channels" in self.properties:
+            oldval = self.properties["rec_channels"]
+            self.properties["rec_channels"] = (oldval[0], channels)
+        if "monitor_channels" in self.properties:
+            oldval = self.properties["monitor_channels"]
+            self.properties["monitor_channels"] = (oldval[0], channels)
+
     async def dsp_response(self, resp_id, resp_value):
         need_resize = False
+        need_props = False
         if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
             self.outlets[-1] = resp_value
+            self.properties["buf_state"] = resp_value
+            self.set_tag("play", bool(resp_value))
+            need_props = True
         elif resp_id == self.RESP_BUFID:
             if self.shm_obj:
                 self.shm_obj.close_fd()
@@ -230,13 +342,14 @@ class Buffer(Processor):
 
             self.buf_id = resp_value
             Buffer.registry[self.obj_id] = self
-
         elif resp_id == self.RESP_BUFSIZE:
             self.size = resp_value
         elif resp_id == self.RESP_BUFCHAN:
             if self.channels != resp_value:
                 need_resize = True
             self.channels = resp_value
+            self._reset_channel_props(self.channels)
+            need_props = True
             self.set_channel_tooltips()
         elif resp_id == self.RESP_RATE:
             self.rate = resp_value
@@ -279,6 +392,9 @@ class Buffer(Processor):
             for outport in (-2, -1):
                 for c in last_port_conns[outport]:
                     await self.connect(len(self.outlets) + outport, *c)
+        if need_props:
+            self.conf(properties=self.properties)
+
         if self.outlets[-1] == Uninit:
             self.outlets[-1] = (resp_id, resp_value)
 
@@ -290,11 +406,11 @@ class Buffer(Processor):
     async def trigger(self):
         incoming = self.inlets[0]
         if incoming is Bang:
-            await self.dsp_obj.setparam("trig_trigger", 1)
+            await self.dsp_setparam("trig_trigger", 1)
         elif incoming is True:
-            await self.dsp_obj.setparam("rec_enabled", 1)
+            await self.dsp_setparam("rec_enabled", 1)
         elif incoming is False:
-            await self.dsp_obj.setparam("rec_enabled", 0)
+            await self.dsp_setparam("rec_enabled", 0)
         elif isinstance(incoming, str):
             self.file_name = incoming
             await self._init_file_read()
@@ -314,7 +430,7 @@ class Buffer(Processor):
                 prms[k] = v
             if "size" in prms or "channels" in prms:
                 prms["realloc"] = 1
-            await self.dsp_obj.setparams(**prms)
+            await self.dsp_setparams(**prms)
 
     async def export(self, filename=None, channels=None):
         if filename is None:
