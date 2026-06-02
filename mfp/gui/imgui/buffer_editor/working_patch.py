@@ -109,10 +109,10 @@ async def init_working_patch(self):
     await wait_for_buffer("sink_buffer")
 
     self.working_aud0_info = await MFPGUI().mfp.create(
-        "out~", "0", self.working_patch_info.get("name"), None, "audition 0"
+        "aud~", "0", self.working_patch_info.get("name"), None, "audition 0"
     )
     self.working_aud1_info = await MFPGUI().mfp.create(
-        "out~", "1", self.working_patch_info.get("name"), None, "audition 1"
+        "aud~", "1", self.working_patch_info.get("name"), None, "audition 1"
     )
 
     # create a sig~ as a shared sync trigger

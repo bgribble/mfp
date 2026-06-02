@@ -7,7 +7,8 @@ Copyright (c) 2010 Bill Gribble <grib@billgribble.com>
 
 from ..processor import Processor
 from ..mfp_app import MFPApp
-from ..bang import Uninit 
+from ..bang import Uninit
+
 
 class AudioOut(Processor):
     doc_tooltip_obj = "Output to JACK port"
@@ -33,6 +34,22 @@ class AudioOut(Processor):
         if self.inlets[1] is not Uninit:
             channel = int(self.inlets[1])
             await self.dsp_setparam("channel", channel)
+
+
+class AuditionOut (AudioOut):
+    doc_tooltip_obj = "Output to JACK auditioner port"
+    channel_map = []
+
+    def __init__(self, init_type, init_args, patch, scope, name, defs=None):
+        super().__init__(init_type, init_args, patch, scope, name, defs)
+        if AuditionOut.channel_map:
+            self.channel = AuditionOut.channel_map[self.channel % len(AuditionOut.channel_map)]
+
+    async def dsp_setparam(self, key, value):
+        if key == "channel" and AuditionOut.channel_map:
+            value = AuditionOut.channel_map[value % len(AuditionOut.channel_map)]
+
+        super().dsp_setparam(key, value)
 
 
 class AudioIn(Processor):
@@ -63,3 +80,4 @@ class AudioIn(Processor):
 def register():
     MFPApp().register("in~", AudioIn)
     MFPApp().register("out~", AudioOut)
+    MFPApp().register("aud~", AuditionOut)

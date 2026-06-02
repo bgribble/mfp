@@ -153,6 +153,8 @@ async def main():
                         help="Number of JACK audio input ports")
     parser.add_argument("-o", "--outputs", default=2, type=int,
                         help="Number of JACK audio output ports")
+    parser.add_argument("-A", "--audition-outputs", default="0,1", type=str,
+                        help="Comma-separated list of ports to use for auditioner (default: 0,1)")
     parser.add_argument("--midi-ins", default=1, type=int,
                         help="Number of MIDI input ports")
     parser.add_argument("--midi-outs", default=1, type=int,
@@ -270,6 +272,20 @@ async def main():
     if app.no_default:
         log.debug("Not creating default patch")
 
+    if args.get("audition_outputs"):
+        try:
+            comma_sep = args.get("audition_outputs")
+            ports_as_strings = [
+                s.strip() for s in comma_sep.split(",")
+            ]
+            ports_as_ints = [
+                int(s) for s in ports_as_strings
+            ]
+            from mfp.builtins.audio import AuditionOut
+            AuditionOut.channel_map = ports_as_ints
+        except Exception:
+            log.debug(f"Exception processing --audition-outputs param {args.get('audition_outputs')}, skipping")
+
     # launch processes and threads
     import signal
     signal.signal(signal.SIGTERM, exit_sighandler)
@@ -337,7 +353,6 @@ async def main():
         await app.finish()
     elif args.get("help_bindings"):
         from mfp.gui.input_mode import InputMode
-        from mfp.gui import modes
         log.log_debug = None
         log.log_file = None
         await app.open_file(None)
