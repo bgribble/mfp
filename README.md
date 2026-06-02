@@ -47,6 +47,14 @@ I'm working on documentation but there are some really neat
 features that aren't yet documented so here's just a quick
 preview. These are all in the `master` branch.
 
+* **Sample/waveform editor for buffer~.** C-b now opens a new
+  mini-app in the Log/Console zone. It's a basic wave editor that
+  operates on any open `[buffer~]` objects. You can
+  cut/copy/paste, audition, loop, record, trim, import/export audio
+  files, apply effects (limited to gain, fade in/out, and
+  comp/limiter ATM but you can also edit the effects live -- they
+  are MFP patches). Peep the hamburger menu on the upper right
+  corner. 
 * **Persistent live coding in Python.** Every processor now has a
   "Custom code" parameter accessible through the Params tab of
   the Info panel (right side). Click the Edit button, enter
@@ -64,16 +72,15 @@ preview. These are all in the `master` branch.
   `file_name=` keyword arg with a filename, a `code=` keyword arg
   with a (very short) literal Faust program in a string, or edit
   the "Custom code". Create a variable in the custom code called
-  `faust_code` and assign it a Faust program in a string. You can use a
-  triple-quote multiline string, or something like
+  `faust_code` and assign it a Faust program in a string. You can
+  use a triple-quote multiline string, or something like
   `faust_code=open("mycode.faust").read()`
 * **Snooping on connections.** Select a connection and type `$`.
-  Now you are in snoop mode, indicated by a highlight color on the
-  connection, and messages passing through the
-  connection are briefly displayed in the command line area (very
-  bottom of the MFP window). `$` again to toggle the mode off.
-  This currently only works for "message" (not audio)
-  connections.
+  Now you are in snoop mode, indicated by a highlight color on
+  the connection, and messages passing through the connection are
+  briefly displayed in the command line area (very bottom of the
+  MFP window). `$` again to toggle the mode off. This currently
+  only works for "message" (not audio) connections.
 * **Messages to this patch.** I mostly made this for the
   documentation, to allow a relatively clean "Go to page" action.
   If you create a message with the `%` key, it will always send
@@ -81,9 +88,10 @@ preview. These are all in the `master` branch.
   any connections. A message like `@show "Layer 1"` will send the
   `@show` method call, which will change the patch's display to
   the named layer.
-* **Interactive search.** The `/` key starts an interactive search which
-  highlights matching text. C-RET to cycle the selection between
-  matching items, or C-A-RET to select all matching.
+* **Interactive search.** The `/` key starts an interactive
+  search which highlights matching text. C-RET to cycle the
+  selection between matching items, or C-A-RET to select all
+  matching.
 
 ### BUILDING
 
