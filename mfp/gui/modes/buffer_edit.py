@@ -4,6 +4,8 @@ buffer_edit.py: BufferEdit major mode
 
 Copyright (c) Bill Gribble <grib@billgribble.com>
 '''
+import numpy as np
+
 from mfp import log
 from mfp.gui_main import MFPGUI
 from ..input_mode import InputMode
@@ -49,6 +51,10 @@ class BufferEditMode (InputMode):
         cls.bind(
             "buffer-edit-delete", cls.delete, helptext="Delete selection",
             keysym="DEL", menupath="BufEdit > Delete"
+        )
+        cls.bind(
+            "buffer-edit-insert-silence", cls.insert_silence, helptext="Insert silence at playhead",
+            keysym="S", menupath="BufEdit > Insert silence..."
         )
 
         #####################
@@ -274,6 +280,22 @@ class BufferEditMode (InputMode):
     async def playhead_loop_selection(self):
         await self.editor.playhead_loop_selection()
         return True
+
+    async def insert_silence(self, duration=None):
+        async def cb(dur):
+            if dur:
+                await self.editor.playhead_insert_data(
+                    np.zeros(int(int(dur) * self.editor.buffer_info.rate / 1000))
+                )
+            else:
+                self.window.hud_write("Canceled")
+
+        if duration is None:
+            await self.window.cmd_get_input(
+                "Silence duration (mS): ", cb, "0"
+            )
+        else:
+            await cb(duration)
 
     async def select_silence(self, threshold=None):
         async def cb(thresh):

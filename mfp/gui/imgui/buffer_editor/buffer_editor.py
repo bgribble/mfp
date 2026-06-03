@@ -9,6 +9,7 @@ from imgui_bundle import implot, imgui
 import numpy as np
 from mfp import log
 from mfp.gui.colordb import ColorDB
+from posix_ipc import SharedMemory
 
 
 def fmt_time(ttime):
@@ -960,6 +961,42 @@ class BufferEditor:
             pos_rev / self.buffer_info.rate,
             pos_fwd / self.buffer_info.rate
         )
+
+    async def playhead_insert_data(self, data):
+        if not len(self.buffer_data) or data is None or not len(data):
+            return
+
+        sel_start = int(self.implot_playhead * self.buffer_info.rate)
+
+        self.buffer_data = [
+            np.insert(chan, sel_start, data)
+            for chan in self.buffer_data
+        ]
+
+        bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
+
+        # source buffer "owns" the reshape
+        working_buf = await self.buffer_reshape(
+            self.working_source_id,
+            size=bufsize,
+            channels=len(self.buffer_data) + 2
+        )
+        self.working_buf_id = working_buf.buf_id
+        self.working_buf_obj = SharedMemory(self.working_buf_id)
+        self.working_buf_info = working_buf
+
+        # sink buffer just needs to point to the new segment and
+        # adjust internal buffers
+        if working_buf:
+            await self.buffer_reshape(
+                self.working_sink_id,
+                buf_id=working_buf.buf_id,
+                size=bufsize,
+                channels=working_buf.channels
+            )
+
+        self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
+        self.buffer_compute_peaks()
 
     def channel_options_rec_mask(self):
         mask = 0
