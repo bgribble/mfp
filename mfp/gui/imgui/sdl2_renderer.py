@@ -170,6 +170,7 @@ class ImguiSDL2Renderer:
                     MFPGUI().async_task(self.app_window.signal_emit("key-press-event", ev))
             elif event.type == SDL_KEYDOWN:
                 dead_keys = [
+                    (25, KMOD_ALT, "v"),
                     (SDL_SCANCODE_INSERT, KMOD_ALT, "v"),
                     (SDL_SCANCODE_1, KMOD_CTRL, "1"),
                     (SDL_SCANCODE_9, KMOD_CTRL, "9"),

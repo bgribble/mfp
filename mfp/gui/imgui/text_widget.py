@@ -660,8 +660,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 'text-changed',
                 previous,
                 self.text,
-                imgui.calc_text_size(previous) if previous else 0,
-                imgui.calc_text_size(self.text) if self.text else 0
+                imgui.calc_text_size(previous) if previous else (0, 0),
+                imgui.calc_text_size(self.text) if self.text else (0, 0),
             ))
 
     def set_markup(self, text, notify=True):
@@ -674,8 +674,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 'text-changed',
                 previous,
                 self.markdown_text,
-                imgui.calc_text_size(previous) if previous else 0,
-                imgui.calc_text_size(self.markdown_text) if self.markdown_text else 0
+                imgui.calc_text_size(previous) if previous else (0, 0),
+                imgui.calc_text_size(self.markdown_text) if self.markdown_text else (0, 0),
             ))
 
     def set_reactive(self, is_reactive):
