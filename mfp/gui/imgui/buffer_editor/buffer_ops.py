@@ -130,6 +130,48 @@ def buffer_compute_peaks(self):
 
 
 @extends(BufferEditor)
+async def buffer_trim_to_selection(self):
+    if not self.buffer_data:
+        return
+
+    clip_start = int(self.implot_selection.x.min * self.buffer_info.rate)
+    clip_size = int((self.implot_selection.x.max - self.implot_selection.x.min) * self.buffer_info.rate)
+
+    self.buffer_data = [
+        np.delete(
+            np.delete(chan, np.s_[:clip_start]),
+            np.s_[clip_size:]
+        )
+        for chan in self.buffer_data
+    ]
+
+    bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
+
+    # source buffer "owns" the reshape
+    working_buf = await self.buffer_reshape(
+        self.working_source_id,
+        size=bufsize,
+        channels=len(self.buffer_data) + 2
+    )
+    self.working_buf_id = working_buf.buf_id
+    self.working_buf_obj = SharedMemory(self.working_buf_id)
+    self.working_buf_info = working_buf
+
+    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
+
+    # sink buffer just needs to point to the new segment and
+    # adjust internal buffers
+    if working_buf:
+        await self.buffer_reshape(
+            self.working_sink_id,
+            buf_id=working_buf.buf_id,
+            size=bufsize,
+            channels=working_buf.channels
+        )
+    await self.playhead_set_selection(0, bufsize)
+    self.buffer_compute_peaks()
+
+@extends(BufferEditor)
 def get_peak_scale(self, plot_limits):
     """
     called within a begin_plot()

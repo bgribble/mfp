@@ -53,6 +53,10 @@ class BufferEditMode (InputMode):
             keysym="DEL", menupath="BufEdit > Delete"
         )
         cls.bind(
+            "buffer-edit-trim-to-selection", cls.trim, helptext="Trim to selection",
+            keysym="DEL", menupath="BufEdit > Trim to selection"
+        )
+        cls.bind(
             "buffer-edit-insert-silence", cls.insert_silence, helptext="Insert silence at playhead",
             keysym="S", menupath="BufEdit > Insert silence..."
         )
@@ -64,8 +68,8 @@ class BufferEditMode (InputMode):
             keysym="C-a", menupath="BufEdit > Select > Select all"
         )
         cls.bind(
-            "buffer-edit-select-none", cls.select_none, helptext="Clear selection",
-            keysym="C-A", menupath="BufEdit > Select > Clear selection"
+            "buffer-edit-select-none", cls.select_none, helptext="Unselect all",
+            keysym="C-A", menupath="BufEdit > Select > Unselect all"
         )
         cls.bind(
             "buffer-edit-select-silence", cls.select_silence, helptext="Select silence at playhead",
@@ -319,6 +323,10 @@ class BufferEditMode (InputMode):
 
     def select_none(self):
         self.editor.implot_selection = None
+        return True
+
+    async def trim(self):
+        await self.editor.buffer_trim_to_selection()
         return True
 
     async def cut(self):
