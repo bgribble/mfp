@@ -70,8 +70,8 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
 
         self.width = width
         self.height = height
-        self.plot_width = width
-        self.plot_height = height
+        self.plot_width = width - self.WIDTH_PAD
+        self.plot_height = height - self.LABEL_SPACE - self.HEIGHT_PAD
         self.min_width = width
         self.min_height = height
 
@@ -177,6 +177,9 @@ class ImguiPlotElementImpl(PlotElementImpl, ImguiBaseElementImpl, PlotElement):
             nedit.set_node_z_position(self.node_id, self.position_z)
 
         self.render_sync_with_imgui()
+
+        self.plot_width = self.width - 1.5*self.WIDTH_PAD
+        self.plot_height = self.height - 0.5*self.HEIGHT_PAD - self.LABEL_SPACE
 
         nedit.begin_node(self.node_id)
 
