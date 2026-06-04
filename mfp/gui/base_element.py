@@ -92,8 +92,8 @@ BASE_STORE_ATTRS = {
     'export_offset_x': ParamInfo(label="Export offset X", param_type=float),
     'export_offset_y': ParamInfo(label="Export offset Y", param_type=float),
     'debug': ParamInfo(label="Enable debugging", param_type=bool),
-    'code': ParamInfo(label="Custom code", param_type=CodeBlock, show=True),
     'properties': ParamInfo(label="Properties", param_type=DictOfProperty, show=True),
+    'code': ParamInfo(label="Custom code", param_type=CodeBlock, show=True),
 }
 
 

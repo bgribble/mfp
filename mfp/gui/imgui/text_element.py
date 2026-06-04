@@ -71,7 +71,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
             total = parent.export_w + 2
             # available = total - (self.position_x - parent.position_x)
             available = self.width
-            padding = 8 
+            padding = 8
         elif self.edit_mode and self.edit_mode.enabled:
             total = tile.width / tile.view_zoom
             available = total - (self.position_x - tile.view_x)

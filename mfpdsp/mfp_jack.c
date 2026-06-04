@@ -164,7 +164,6 @@ mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
         ctxt->activated = 1;
     }
 
-    mfp_log_debug("jack_activate returned\n");
     return ctxt;
 
 }

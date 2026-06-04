@@ -117,12 +117,9 @@ main(int argc, char ** argv)
     /* set up global state */
     mfp_init_all(sockname);
     ctxt = mfp_jack_startup("mfpdsp", num_inputs, num_outputs);
-    mfp_log_debug("mfp_jack_startup returned\n");
 
     /* start up */
     mfp_context_init(ctxt);
-
-    mfp_log_debug("mfp_context_init returned\n");
 
     /* wait for termination */
     mfp_comm_io_wait();

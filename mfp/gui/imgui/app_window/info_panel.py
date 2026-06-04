@@ -296,6 +296,7 @@ def render_param(
             changed = changed_combined
             newval = (newval_combined, num_bits)
             imgui.pop_style_var()
+            imgui.dummy([1, 1])
 
         elif param_type.param_type is str:
             imgui.push_style_var(imgui.StyleVar_.item_spacing, (4.0, item_spacing))
