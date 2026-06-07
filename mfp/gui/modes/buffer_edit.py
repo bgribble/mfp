@@ -103,6 +103,12 @@ class BufferEditMode (InputMode):
             helptext="Change pitch without time stretch",
             keysym="p", menupath="BufEdit > Effects > Pitch change"
         )
+        cls.bind(
+            "buffer-edit-effect-3band", lambda m: m.apply_effect("fx.3band~"),
+            helptext="3-band EQ",
+            keysym="3", menupath="BufEdit > Effects > 3-band EQ"
+        )
+
 
         #####################
         # Transport submenu

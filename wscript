@@ -403,6 +403,7 @@ def configure(ctxt):
 
     pkgconf_libs = [
         "glib-2.0", "json-glib-1.0", "serd-0", "jack", "liblo", "lv2", "libprotobuf-c",
+        "zstd",
     ]
     uselibs = []
 
