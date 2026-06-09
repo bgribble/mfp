@@ -91,29 +91,33 @@ process(mfp_processor * proc)
 
     /* to make sure compile output is synced with the execution loop, */
     /* update the processor state here */
-    if (d->compile_thread && d->compile_thread_finished) {
-        faust_cleanup_dsp(proc);
+    if (d->compile_thread && (d->compile_thread_finished != 0)) {
         pthread_join(d->compile_thread, NULL);
+        int compile_exit = d->compile_thread_finished;
         d->compile_thread = (pthread_t)0;
         d->compile_thread_finished = 0;
 
-        d->faust_dsp = d->next_faust_dsp;
-        d->faust_factory = d->next_faust_factory;
-        d->faust_inbufs = d->next_faust_inbufs;
-        d->faust_outbufs = d->next_faust_outbufs;
-        d->faust_buffers = d->next_faust_buffers;
-        if (d->faust_dsp) {
-            d->sig_inputs = getNumInputsCDSPInstance(d->faust_dsp);
-            d->sig_outputs = getNumOutputsCDSPInstance(d->faust_dsp);
-        }
-        else {
-            d->sig_inputs = 0;
-            d->sig_outputs = 0;
-        }
+        if (compile_exit > 0) {
+            faust_cleanup_dsp(proc);
 
-        /* reconfigure buffers in the processor object */
-        mfp_proc_realloc_buffers(proc, d->sig_inputs, d->sig_outputs, proc->context->blocksize);
-        mfp_dsp_send_response_int(proc, RESP_COMPILED, 1);
+            d->faust_dsp = d->next_faust_dsp;
+            d->faust_factory = d->next_faust_factory;
+            d->faust_inbufs = d->next_faust_inbufs;
+            d->faust_outbufs = d->next_faust_outbufs;
+            d->faust_buffers = d->next_faust_buffers;
+            if (d->faust_dsp) {
+                d->sig_inputs = getNumInputsCDSPInstance(d->faust_dsp);
+                d->sig_outputs = getNumOutputsCDSPInstance(d->faust_dsp);
+            }
+            else {
+                d->sig_inputs = 0;
+                d->sig_outputs = 0;
+            }
+
+            /* reconfigure buffers in the processor object */
+            mfp_proc_realloc_buffers(proc, d->sig_inputs, d->sig_outputs, proc->context->blocksize);
+            mfp_dsp_send_response_int(proc, RESP_COMPILED, 1);
+        }
     }
 
     if ((proc == NULL) || (d->faust_dsp == NULL)) {
@@ -326,7 +330,8 @@ faust_config(mfp_processor * proc) {
         );
 
         if (!faust_factory) {
-            mfp_log_debug("[faust~] Cannot create JIT factory : %s\n", error_msg);
+            mfp_log_debug("[faust~] Compilation error in Faust code\n");
+            mfp_log_debug("[faust~] %s\n", error_msg);
             pthread_mutex_unlock(&faust_compile_mutex);
             return -1;
         }
@@ -368,7 +373,7 @@ faust_config(mfp_processor * proc) {
         d->next_faust_buffers = faust_buffers;
         pthread_mutex_unlock(&faust_compile_mutex);
     }
-    return 0;
+    return 1;
 }
 
 
@@ -376,8 +381,7 @@ static void *
 faust_recompile_thread(void * data) {
     mfp_processor * proc = (mfp_processor *)data;
     builtin_faust_data * d = (builtin_faust_data *)(proc->data);
-    faust_config(proc);
-    d->compile_thread_finished = 1;
+    d->compile_thread_finished = faust_config(proc);
     pthread_exit(NULL);
     return NULL;
 }
