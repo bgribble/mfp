@@ -19,6 +19,8 @@ from ..text_element import (
 class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
     backend_name = "imgui"
 
+    MIN_WIDTH_THRESH = 40
+
     def __init__(self, window, x, y):
         super().__init__(window, x, y)
 
@@ -76,6 +78,8 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
             total = tile.width / tile.view_zoom
             available = total - (self.position_x - tile.view_x)
             padding = 10 / tile.view_zoom
+            if self.min_width > self.MIN_WIDTH_THRESH:
+                available = self.min_width + padding
         else:
             available = min(max(self.width, self.min_width), self.max_width)
             padding = 8
