@@ -1,0 +1,1441 @@
+{
+    "gui_params": {
+        "display_type": "patch",
+        "export_h": 89.0,
+        "export_w": 158.0,
+        "export_x": 34.0,
+        "export_y": 25.0,
+        "height": 116.0,
+        "layers": [
+            [
+                "EQ",
+                "__patch__"
+            ],
+            [
+                "Presets",
+                "__patch__"
+            ]
+        ],
+        "name": "fx.1band~",
+        "panel_mode": false,
+        "width": 162.0
+    },
+    "hot_inlets": [
+        0
+    ],
+    "objects": {
+        "1": {
+            "connections": [
+                [
+                    [
+                        12,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "bar_height": 100,
+                "bar_width": 24,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "dial_radius": 24,
+                "display_type": "dial",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 50,
+                "is_export": false,
+                "layername": "EQ",
+                "max_value": 15000.0,
+                "min_height": 15,
+                "min_value": 20.0,
+                "min_width": 15,
+                "no_export": false,
+                "obj_args": "0.0",
+                "obj_name": "dial_001",
+                "obj_state": 3,
+                "obj_type": "slidemeter",
+                "orientation": "vertical",
+                "panel_enable": true,
+                "panel_x": 34.0,
+                "panel_y": 46.0,
+                "panel_z": 0,
+                "patch_x": 390.0,
+                "patch_y": 109.0,
+                "patch_z": 0,
+                "position_x": 390.0,
+                "position_y": 109.0,
+                "position_z": 0,
+                "properties": {},
+                "scale_position": "left",
+                "scale_type": "linear",
+                "scope": "__patch__",
+                "show_scale": false,
+                "style": {},
+                "update_required": true,
+                "width": 50,
+                "zeropoint": null
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "dial_001",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "slidemeter",
+            "value": 500
+        },
+        "10": {
+            "connections": [
+                []
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "display_type": "sendvia",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 30.0,
+                "is_export": false,
+                "label_text": "patch",
+                "layername": "EQ",
+                "min_height": 0,
+                "min_width": 0,
+                "no_export": false,
+                "obj_args": "'patch', 0",
+                "obj_name": "sendvia_001",
+                "obj_state": 3,
+                "obj_type": "send",
+                "panel_enable": false,
+                "panel_x": 566.0,
+                "panel_y": 391.0,
+                "panel_z": 0,
+                "patch_x": 566.0,
+                "patch_y": 391.0,
+                "patch_z": 0,
+                "position_x": 566.0,
+                "position_y": 391.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "style": {},
+                "update_required": false,
+                "width": 44.0
+            },
+            "initargs": "'patch', 0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "sendvia_001",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "send"
+        },
+        "11": {
+            "connections": [
+                [
+                    [
+                        10,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "display_type": "message",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 20,
+                "is_export": false,
+                "layername": "EQ",
+                "min_height": 16,
+                "min_width": 25,
+                "no_export": false,
+                "obj_args": "@clonescope(\"channel\", patch.args(0) or 0)",
+                "obj_name": "message_002",
+                "obj_state": 3,
+                "obj_type": "message",
+                "panel_enable": false,
+                "panel_x": 577.0,
+                "panel_y": 347.0,
+                "panel_z": 0,
+                "patch_x": 577.0,
+                "patch_y": 347.0,
+                "patch_z": 0,
+                "position_x": 577.0,
+                "position_y": 347.0,
+                "position_z": 0,
+                "properties": {},
+                "save_in_preset": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 25
+            },
+            "initargs": "@clonescope(\"channel\", patch.args(0) or 0)",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "message_002",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "message"
+        },
+        "12": {
+            "connections": [
+                [
+                    [
+                        1,
+                        1
+                    ],
+                    [
+                        18,
+                        1
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "digits": 0,
+                "display_type": "enum",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layername": "EQ",
+                "max_value": null,
+                "min_height": 12,
+                "min_value": null,
+                "min_width": 24,
+                "no_export": false,
+                "obj_args": "0.0",
+                "obj_name": "enum_001",
+                "obj_state": 3,
+                "obj_type": "enum",
+                "panel_enable": true,
+                "panel_x": 39.0,
+                "panel_y": 100.0,
+                "panel_z": 0,
+                "patch_x": 395.0,
+                "patch_y": 173.0,
+                "patch_z": 0,
+                "position_x": 395.0,
+                "position_y": 173.0,
+                "position_z": 0,
+                "properties": {},
+                "scientific": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 24
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "enum_001",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "enum",
+            "value": 500
+        },
+        "13": {
+            "connections": [
+                [
+                    [
+                        2,
+                        1
+                    ],
+                    [
+                        18,
+                        2
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "digits": 0,
+                "display_type": "enum",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layername": "EQ",
+                "max_value": null,
+                "min_height": 12,
+                "min_value": null,
+                "min_width": 24,
+                "no_export": false,
+                "obj_args": "0.0",
+                "obj_name": "enum_002",
+                "obj_state": 3,
+                "obj_type": "enum",
+                "panel_enable": true,
+                "panel_x": 89.0,
+                "panel_y": 100.0,
+                "panel_z": 0,
+                "patch_x": 460.0,
+                "patch_y": 173.0,
+                "patch_z": 0,
+                "position_x": 460.0,
+                "position_y": 173.0,
+                "position_z": 0,
+                "properties": {},
+                "scientific": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 24
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "enum_002",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "enum",
+            "value": 0.0
+        },
+        "14": {
+            "connections": [
+                [
+                    [
+                        3,
+                        1
+                    ],
+                    [
+                        18,
+                        3
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "digits": 3,
+                "display_type": "enum",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 12,
+                "is_export": false,
+                "layername": "EQ",
+                "max_value": null,
+                "min_height": 12,
+                "min_value": null,
+                "min_width": 32.0,
+                "no_export": false,
+                "obj_args": "0.0",
+                "obj_name": "enum_003",
+                "obj_state": 3,
+                "obj_type": "enum",
+                "panel_enable": true,
+                "panel_x": 142.0,
+                "panel_y": 100.0,
+                "panel_z": 0,
+                "patch_x": 523.0,
+                "patch_y": 173.0,
+                "patch_z": 0,
+                "position_x": 523.0,
+                "position_y": 173.0,
+                "position_z": 0,
+                "properties": {},
+                "scientific": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "width": 24
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "enum_003",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "enum",
+            "value": 0.707
+        },
+        "15": {
+            "connections": [
+                [
+                    [
+                        18,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "code": null,
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "EQ",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 15,
+                        "obj_2": 18,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 320.0,
+                        "panel_y": 47.0,
+                        "panel_z": 0,
+                        "patch_x": 320.0,
+                        "patch_y": 47.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 320.0,
+                        "position_y": 47.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
+                "is_export": false,
+                "layername": "EQ",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "scope.clonenum + 1",
+                "obj_name": "processor_007",
+                "obj_state": 3,
+                "obj_type": "inlet~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 320.0,
+                "panel_y": 47.0,
+                "panel_z": 0,
+                "patch_x": 320.0,
+                "patch_y": 47.0,
+                "patch_z": 0,
+                "position_x": 320.0,
+                "position_y": 47.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "channel",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 199.0
+            },
+            "initargs": "scope.clonenum + 1",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_007",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "inlet~"
+        },
+        "16": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 20.0,
+                "is_export": false,
+                "layername": "EQ",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "scope.clonenum",
+                "obj_name": "processor_003",
+                "obj_state": 3,
+                "obj_type": "outlet~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 320.0,
+                "panel_y": 416.0,
+                "panel_z": 0,
+                "patch_x": 320.0,
+                "patch_y": 416.0,
+                "patch_z": 0,
+                "position_x": 320.0,
+                "position_y": 416.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "channel",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 176.0
+            },
+            "initargs": "scope.clonenum",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_003",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "outlet~"
+        },
+        "17": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 56.0,
+                "is_export": false,
+                "layername": "EQ",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_007",
+                "obj_state": 3,
+                "obj_type": "text",
+                "panel_enable": false,
+                "panel_x": 26.0,
+                "panel_y": 88.0,
+                "panel_z": 0,
+                "patch_x": 26.0,
+                "patch_y": 88.0,
+                "patch_z": 0,
+                "position_x": 26.0,
+                "position_y": 88.0,
+                "position_z": 0,
+                "properties": {},
+                "save_in_preset": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "<div class=\"size-x-large\">fx.1band~</div>\n\nParametric one-band",
+                "width": 135.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_007",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "text",
+            "value": "<div class=\"size-x-large\">fx.1band~</div>\n\nParametric one-band"
+        },
+        "18": {
+            "connections": [
+                [
+                    [
+                        16,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "faust_dsp_inlets": 1,
+            "faust_dsp_outlets": 1,
+            "faust_params": [
+                "Freq",
+                "Gain (dB)",
+                "Resonance"
+            ],
+            "gui_params": {
+                "code": {
+                    "body": "faust_code = \"\"\"\nimport(\"stdfaust.lib\");\n\ngain = hslider(\"Gain (dB)\", 0, -20, 20, 0.1);\nfreq = hslider(\"Freq\", 500, 20, 15000, 0.1);\nres = hslider(\"Resonance\", 0.707, 0, 3, 0.1);\n\nprocess = fi.peak_eq_cq(gain, freq, res);\n\"\"\"",
+                    "lang": "python"
+                },
+                "connection_info": [
+                    {
+                        "code": null,
+                        "connection_info": [],
+                        "dashed": false,
+                        "debug": false,
+                        "display_type": "connection",
+                        "dsp_inlets": [],
+                        "dsp_outlets": [],
+                        "export_offset_x": 0,
+                        "export_offset_y": 0,
+                        "height": null,
+                        "is_export": false,
+                        "layername": "EQ",
+                        "min_height": 0,
+                        "min_width": 0,
+                        "no_export": false,
+                        "num_inlets": 1,
+                        "num_outlets": 0,
+                        "obj_1": 18,
+                        "obj_2": 16,
+                        "obj_args": null,
+                        "obj_id": null,
+                        "obj_name": null,
+                        "obj_state": 3,
+                        "obj_type": null,
+                        "panel_enable": false,
+                        "panel_x": 320.0,
+                        "panel_y": 241.0,
+                        "panel_z": 0,
+                        "patch_x": 320.0,
+                        "patch_y": 241.0,
+                        "patch_z": 0,
+                        "port_1": 0,
+                        "port_2": 0,
+                        "position_x": 320.0,
+                        "position_y": 241.0,
+                        "position_z": 0,
+                        "properties": {},
+                        "rotation": 0.0,
+                        "scope": null,
+                        "snoop": false,
+                        "style": {},
+                        "update_required": false,
+                        "width": null
+                    }
+                ],
+                "debug": false,
+                "display_type": "processor",
+                "dsp_inlets": [
+                    0
+                ],
+                "dsp_outlets": [
+                    0
+                ],
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 23.0,
+                "is_export": false,
+                "layername": "EQ",
+                "min_height": 21,
+                "min_width": 20,
+                "no_export": false,
+                "num_inlets": 4,
+                "num_outlets": 1,
+                "obj_args": null,
+                "obj_name": "processor_018",
+                "obj_state": 3,
+                "obj_type": "faust~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 320.0,
+                "panel_y": 241.0,
+                "panel_z": 0,
+                "patch_x": 320.0,
+                "patch_y": 241.0,
+                "patch_z": 0,
+                "position_x": 320.0,
+                "position_y": 241.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "channel",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 54.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_018",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "faust~"
+        },
+        "2": {
+            "connections": [
+                [
+                    [
+                        13,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "bar_height": 100,
+                "bar_width": 24,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "dial_radius": 24,
+                "display_type": "dial",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 50,
+                "is_export": false,
+                "layername": "EQ",
+                "max_value": 20.0,
+                "min_height": 15,
+                "min_value": -20.0,
+                "min_width": 15,
+                "no_export": false,
+                "obj_args": "0.0",
+                "obj_name": "dial_002",
+                "obj_state": 3,
+                "obj_type": "slidemeter",
+                "orientation": "vertical",
+                "panel_enable": true,
+                "panel_x": 87.0,
+                "panel_y": 47.0,
+                "panel_z": 0,
+                "patch_x": 458.0,
+                "patch_y": 109.0,
+                "patch_z": 0,
+                "position_x": 458.0,
+                "position_y": 109.0,
+                "position_z": 0,
+                "properties": {},
+                "scale_position": "left",
+                "scale_type": "linear",
+                "scope": "__patch__",
+                "show_scale": false,
+                "style": {},
+                "update_required": true,
+                "width": 50,
+                "zeropoint": null
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "dial_002",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "slidemeter",
+            "value": 0.0
+        },
+        "3": {
+            "connections": [
+                [
+                    [
+                        14,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "bar_height": 100,
+                "bar_width": 24,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "dial_radius": 24,
+                "display_type": "dial",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 50,
+                "is_export": false,
+                "layername": "EQ",
+                "max_value": 3.0,
+                "min_height": 15,
+                "min_value": 0.0,
+                "min_width": 15,
+                "no_export": false,
+                "obj_args": "0.0",
+                "obj_name": "dial_003",
+                "obj_state": 3,
+                "obj_type": "slidemeter",
+                "orientation": "vertical",
+                "panel_enable": true,
+                "panel_x": 140.0,
+                "panel_y": 47.0,
+                "panel_z": 0,
+                "patch_x": 524.0,
+                "patch_y": 110.0,
+                "patch_z": 0,
+                "position_x": 524.0,
+                "position_y": 110.0,
+                "position_z": 0,
+                "properties": {},
+                "scale_position": "left",
+                "scale_type": "linear",
+                "scope": "__patch__",
+                "show_scale": false,
+                "style": {},
+                "update_required": true,
+                "width": 50,
+                "zeropoint": null
+            },
+            "initargs": "0.0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "dial_003",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "slidemeter",
+            "value": 0.707
+        },
+        "4": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layername": "EQ",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_001",
+                "obj_state": 3,
+                "obj_type": "text",
+                "panel_enable": true,
+                "panel_x": 43.0,
+                "panel_y": 25.0,
+                "panel_z": 0,
+                "patch_x": 398.0,
+                "patch_y": 86.0,
+                "patch_z": 0,
+                "position_x": 398.0,
+                "position_y": 86.0,
+                "position_z": 0,
+                "properties": {},
+                "save_in_preset": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "freq",
+                "width": 33.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_001",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "text",
+            "value": "freq"
+        },
+        "5": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layername": "EQ",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_002",
+                "obj_state": 3,
+                "obj_type": "text",
+                "panel_enable": true,
+                "panel_x": 93.0,
+                "panel_y": 25.0,
+                "panel_z": 0,
+                "patch_x": 463.0,
+                "patch_y": 86.0,
+                "patch_z": 0,
+                "position_x": 463.0,
+                "position_y": 86.0,
+                "position_z": 0,
+                "properties": {},
+                "save_in_preset": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "gain",
+                "width": 34.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_002",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "text",
+            "value": "gain"
+        },
+        "6": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layername": "EQ",
+                "max_width": 600,
+                "min_height": 12,
+                "min_width": 12,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_003",
+                "obj_state": 3,
+                "obj_type": "text",
+                "panel_enable": true,
+                "panel_x": 155.0,
+                "panel_y": 25.0,
+                "panel_z": 0,
+                "patch_x": 538.0,
+                "patch_y": 88.0,
+                "patch_z": 0,
+                "position_x": 538.0,
+                "position_y": 88.0,
+                "position_z": 0,
+                "properties": {},
+                "save_in_preset": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Q",
+                "width": 18.0
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_003",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "text",
+            "value": "Q"
+        },
+        "7": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "clickchange": false,
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "default": "",
+                "display_type": "text",
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "height": 24.0,
+                "is_export": false,
+                "layername": "EQ",
+                "max_width": 600,
+                "min_height": -4.5951772928237915,
+                "min_width": 648.7920490503311,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "text_005",
+                "obj_state": 3,
+                "obj_type": "text",
+                "panel_enable": false,
+                "panel_x": 30.0,
+                "panel_y": 162.0,
+                "panel_z": 0,
+                "patch_x": 30.0,
+                "patch_y": 162.0,
+                "patch_z": 0,
+                "position_x": 30.0,
+                "position_y": 162.0,
+                "position_z": 0,
+                "properties": {},
+                "save_in_preset": false,
+                "scope": "__patch__",
+                "style": {},
+                "update_required": true,
+                "value": "Uses Faust's builtin filters to make a basic parametric 1-band EQ",
+                "width": 648.7920490503311
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "text_005",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "text",
+            "value": "Uses Faust's builtin filters to make a basic parametric 1-band EQ"
+        },
+        "8": {
+            "connections": [
+                []
+            ],
+            "do_onload": false,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 21,
+                "is_export": false,
+                "layername": "EQ",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": "0",
+                "obj_name": "processor_008",
+                "obj_state": 3,
+                "obj_type": "inlet~",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 191.0,
+                "panel_y": 44.0,
+                "panel_z": 0,
+                "patch_x": 191.0,
+                "patch_y": 44.0,
+                "patch_z": 0,
+                "position_x": 191.0,
+                "position_y": 44.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": "0",
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_008",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "inlet~"
+        },
+        "9": {
+            "connections": [
+                [
+                    [
+                        11,
+                        0
+                    ]
+                ]
+            ],
+            "do_onload": true,
+            "gui_params": {
+                "code": null,
+                "connection_info": [],
+                "debug": false,
+                "display_type": "processor",
+                "export_h": null,
+                "export_offset_x": 0,
+                "export_offset_y": 0,
+                "export_w": null,
+                "export_x": null,
+                "export_y": null,
+                "height": 21,
+                "is_export": false,
+                "layername": "EQ",
+                "min_height": 16,
+                "min_width": 20,
+                "no_export": false,
+                "obj_args": null,
+                "obj_name": "processor_011",
+                "obj_state": 3,
+                "obj_type": "loadbang",
+                "panel_enable": false,
+                "panel_mode": false,
+                "panel_x": 582.0,
+                "panel_y": 301.0,
+                "panel_z": 0,
+                "patch_x": 582.0,
+                "patch_y": 301.0,
+                "patch_z": 0,
+                "position_x": 582.0,
+                "position_y": 301.0,
+                "position_z": 0,
+                "properties": {},
+                "scope": "__patch__",
+                "show_label": true,
+                "style": {},
+                "update_required": false,
+                "width": 20
+            },
+            "initargs": null,
+            "midi_filters": null,
+            "midi_mode": null,
+            "name": "processor_011",
+            "osc_methods": [],
+            "presets": {},
+            "properties": {},
+            "type": "loadbang"
+        }
+    },
+    "presets": {
+        "brt comp": {
+            "button_001": {},
+            "button_002": {},
+            "button_003": {},
+            "button_004": {},
+            "dial_001": {
+                "value": -12
+            },
+            "dial_002": {
+                "value": 8
+            },
+            "dial_003": {
+                "value": 50
+            },
+            "dial_004": {
+                "value": 100
+            },
+            "dial_005": {
+                "value": 0.0
+            },
+            "enum_001": {
+                "value": -12
+            },
+            "enum_002": {
+                "value": 8
+            },
+            "enum_003": {
+                "value": 50
+            },
+            "enum_004": {
+                "value": 100
+            },
+            "enum_005": {
+                "value": 0.0
+            },
+            "message_002": {},
+            "processor_002": {},
+            "processor_003": {},
+            "processor_004": {},
+            "processor_005": {},
+            "processor_006": {},
+            "processor_007": {},
+            "processor_008": {},
+            "processor_009": {},
+            "processor_010": {},
+            "processor_011": {},
+            "processor_012": {},
+            "processor_013": {},
+            "processor_014": {},
+            "processor_015": {},
+            "processor_017": {},
+            "sendvia_001": {},
+            "sendvia_002": {},
+            "slidemeter_001": {
+                "value": -1000
+            },
+            "text_001": {},
+            "text_002": {},
+            "text_003": {},
+            "text_004": {},
+            "text_005": {},
+            "text_006": {},
+            "text_007": {}
+        },
+        "hard limit": {
+            "button_001": {},
+            "button_002": {},
+            "button_003": {},
+            "button_004": {},
+            "dial_001": {
+                "value": -6
+            },
+            "dial_002": {
+                "value": 20
+            },
+            "dial_003": {
+                "value": 1
+            },
+            "dial_004": {
+                "value": 50
+            },
+            "dial_005": {
+                "value": 0.0
+            },
+            "enum_001": {
+                "value": -6
+            },
+            "enum_002": {
+                "value": 20
+            },
+            "enum_003": {
+                "value": 1
+            },
+            "enum_004": {
+                "value": 50
+            },
+            "enum_005": {
+                "value": 0.0
+            },
+            "message_002": {},
+            "processor_002": {},
+            "processor_003": {},
+            "processor_004": {},
+            "processor_005": {},
+            "processor_006": {},
+            "processor_007": {},
+            "processor_008": {},
+            "processor_009": {},
+            "processor_010": {},
+            "processor_011": {},
+            "processor_012": {},
+            "processor_013": {},
+            "processor_014": {},
+            "processor_015": {},
+            "processor_017": {},
+            "sendvia_001": {},
+            "sendvia_002": {},
+            "slidemeter_001": {
+                "value": -1000
+            },
+            "text_001": {},
+            "text_002": {},
+            "text_003": {},
+            "text_004": {},
+            "text_005": {},
+            "text_006": {},
+            "text_007": {}
+        },
+        "pgm comp": {
+            "button_001": {},
+            "button_002": {},
+            "button_003": {},
+            "button_004": {},
+            "dial_001": {
+                "value": -12
+            },
+            "dial_002": {
+                "value": 4
+            },
+            "dial_003": {
+                "value": 30
+            },
+            "dial_004": {
+                "value": 100
+            },
+            "dial_005": {
+                "value": 0.0
+            },
+            "enum_001": {
+                "value": -12
+            },
+            "enum_002": {
+                "value": 4
+            },
+            "enum_003": {
+                "value": 30
+            },
+            "enum_004": {
+                "value": 100
+            },
+            "enum_005": {
+                "value": 0.0
+            },
+            "message_002": {},
+            "processor_002": {},
+            "processor_003": {},
+            "processor_004": {},
+            "processor_005": {},
+            "processor_006": {},
+            "processor_007": {},
+            "processor_008": {},
+            "processor_009": {},
+            "processor_010": {},
+            "processor_011": {},
+            "processor_012": {},
+            "processor_013": {},
+            "processor_014": {},
+            "processor_015": {},
+            "processor_017": {},
+            "sendvia_001": {},
+            "sendvia_002": {},
+            "slidemeter_001": {
+                "value": -1000
+            },
+            "text_001": {},
+            "text_002": {},
+            "text_003": {},
+            "text_004": {},
+            "text_005": {},
+            "text_006": {},
+            "text_007": {}
+        },
+        "soft limit": {
+            "button_001": {},
+            "button_002": {},
+            "button_003": {},
+            "button_004": {},
+            "dial_001": {
+                "value": -12
+            },
+            "dial_002": {
+                "value": 12
+            },
+            "dial_003": {
+                "value": 1
+            },
+            "dial_004": {
+                "value": 100
+            },
+            "dial_005": {
+                "value": 0.0
+            },
+            "enum_001": {
+                "value": -12
+            },
+            "enum_002": {
+                "value": 12
+            },
+            "enum_003": {
+                "value": 1
+            },
+            "enum_004": {
+                "value": 100
+            },
+            "enum_005": {
+                "value": 0.0
+            },
+            "message_002": {},
+            "processor_002": {},
+            "processor_003": {},
+            "processor_004": {},
+            "processor_005": {},
+            "processor_006": {},
+            "processor_007": {},
+            "processor_008": {},
+            "processor_009": {},
+            "processor_010": {},
+            "processor_011": {},
+            "processor_012": {},
+            "processor_013": {},
+            "processor_014": {},
+            "processor_015": {},
+            "processor_017": {},
+            "sendvia_001": {},
+            "sendvia_002": {},
+            "slidemeter_001": {
+                "value": -1000
+            },
+            "text_001": {},
+            "text_002": {},
+            "text_003": {},
+            "text_004": {},
+            "text_005": {},
+            "text_006": {},
+            "text_007": {}
+        }
+    },
+    "scopes": {
+        "__patch__": {
+            "dial_001": 1,
+            "dial_002": 2,
+            "dial_003": 3,
+            "enum_001": 12,
+            "enum_002": 13,
+            "enum_003": 14,
+            "message_002": 11,
+            "patch": 0,
+            "processor_008": 8,
+            "processor_011": 9,
+            "self": 0,
+            "sendvia_001": 10,
+            "text_001": 4,
+            "text_002": 5,
+            "text_003": 6,
+            "text_005": 7,
+            "text_007": 17
+        },
+        "channel": {
+            "processor_003": 16,
+            "processor_007": 15,
+            "processor_018": 18
+        }
+    },
+    "type": "fx.1band~"
+}
