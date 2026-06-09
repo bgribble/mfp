@@ -21,8 +21,8 @@ python: MFP requires Python 3.x at this time.
 waf: MFP uses 'waf', which you can think of as a replacement for
 autotools and make.  You do not need to install waf; the correct
 version is supplied in the MFP source tree.  That's the way waf
-is designed to work  More information can be found at
-https://code.google.com/p/waf/.  MFP's "Makefile" or
+is designed to work. More information can be found at
+https://code.google.com/p/waf/. MFP's "Makefile" or
 "configure.in" equivalent is the file "wscript", which is a plain
 Python file.  The entry points used by waf are the functions
 "configure" and "build", defined near the bottom of the file.
@@ -84,16 +84,25 @@ development headers and pkg-config files installed:
  * llvm           (LLVM, for Faust live compilation and linking)
  * libpolly       (LLVM helper library needed for Faust+LLVM)
 
-You'll get errors in the "./waf configure" process if these aren't installed.
+You'll get errors in the "./waf configure" process if these aren't installed. The
+Github CI build installs the needed packages like so:
 
-Python runtime dependencies will be installed automatically.
+```
+sudo apt install gcc-14 libglib2.0-dev cmake libserd-dev \
+libjson-glib-dev libprotobuf-c-dev libjack-jackd2-dev liblo-dev \
+lv2-dev libasound2-dev ladspa-sdk faust faust-common libfaust2t64 llvm-dev \
+libllvmlibc-19-dev libpolly-18-dev libzstd-dev
+```
 
-Note that the Python language bindings for Gtk+/GLib and Clutter libraries
-CANNOT be automatically installed by this build process.  You need to
-install your OS package manager's package for the "GIR" (GObject
-Introspection Repository) data for Clutter, Glib, Gtk+, Gdk,
-GtkClutter, and Pango, and the Python infrastructure to use that data.
-In Debian, these are packaged as:
+Python runtime dependencies will be installed automatically from `pypi`.
+
+Note that the Python language bindings for Gtk+/GLib and Clutter
+libraries CANNOT be automatically installed by this build
+process.  If you need to build the deprecated Clutter UI, you
+will need to install your OS package manager's package for the
+"GIR" (GObject Introspection Repository) data for Clutter, Glib,
+Gtk+, Gdk, GtkClutter, and Pango, and the Python infrastructure
+to use that data. In Debian, these are packaged as:
 
     gir1.2-clutter-1.0
     gir1.2-gtkclutter-1.0
