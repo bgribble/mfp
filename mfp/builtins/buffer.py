@@ -119,7 +119,7 @@ class Buffer(Processor):
         self.buf_offset = 0
         self.buf_ready = False
 
-        self.channels = 0
+        self.channels = self.init_channels
         self.size = 0
         self.rate = MFPApp().samplerate
         self.shm_obj = None
@@ -134,7 +134,7 @@ class Buffer(Processor):
             'buf_state': 0,
             'buf_mode': 0,
             'rec_enabled': 0,
-            'channels': 0,
+            'channels': 1,
             'play_channels': (0, 0),
             'rec_channels': (0, 0),
             'monitor_channels': (0, 0),
