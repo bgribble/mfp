@@ -98,7 +98,6 @@ class Buffer(Processor):
             self.init_channels = self.init_args[1]
         if "channels" in self.init_kwargs:
             self.init_channels = self.init_kwargs.pop("channels")
-
         if "buf_id" in self.init_kwargs:
             self.buf_id = self.init_kwargs.get("buf_id")
         if "gui_notify" in self.init_kwargs:
@@ -146,10 +145,18 @@ class Buffer(Processor):
         self.set_channel_tooltips()
 
     async def setup(self, **kwargs):
-        await self.dsp_init("buffer~", size=self.init_size, channels=self.init_channels)
-        if "size" in self.init_kwargs or "channels" in self.init_kwargs:
-            self.init_kwargs["realloc"] = 1
-        await self.dsp_setparams(**self.init_kwargs)
+        await self.dsp_init("buffer~")
+
+        dsp_args = dict(size=self.init_size, channels=self.init_channels, realloc=1)
+        dsp_args.update(self.init_kwargs)
+
+        if "size" in self.init_kwargs:
+            dsp_args["size"] = self.init_kwargs["size"] * self.rate / 1000
+        if "size_frames" in self.init_kwargs:
+            dsp_args["size"] = self.init_kwargs["size_frames"]
+            del dsp_args["size_frames"]
+
+        await self.dsp_setparams(**dsp_args)
 
     def offset(self, channel, start):
         return (channel * self.size + start) * self.FLOAT_SIZE
@@ -424,8 +431,14 @@ class Buffer(Processor):
 
             prms = {}
             for k, v in incoming.items():
+                # init kwargs and messages from the patch specify size in milliseconds
+                # dsp_setparams parameter specifies size in frames
+                # if you need to specify a frame size from the patch,
+                # pass it as size_frames
                 if k == "size":
                     v = v*MFPApp().samplerate/1000.0
+                if k == "size_frames":
+                    k = "size"
                 setattr(self, k, v)
                 prms[k] = v
             if "size" in prms or "channels" in prms:

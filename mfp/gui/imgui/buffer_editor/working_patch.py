@@ -63,7 +63,7 @@ async def init_working_patch(self):
         buf_mode=7,
         channels=self.buffer_info.channels + 3,
         trig_chan=self.buffer_info.channels,
-        size=self.buffer_info.size,
+        size_frames=self.buffer_info.size,
         gui_notify=True,
     )
 
@@ -95,7 +95,7 @@ async def init_working_patch(self):
 
     buffer_params["buf_id"] = source_buf.buf_id
     buffer_params["channels"] = source_buf.channels + 1
-    buffer_params["size"] = source_buf.size
+    buffer_params["size_frames"] = source_buf.size
     buffer_params["monitor_channels"] = audio_channels
 
     self.working_sink_info = await MFPGUI().mfp.create(
@@ -130,7 +130,7 @@ async def init_working_patch(self):
     buffer_params = dict(
         buf_mode=8,
         channels=4*self.buffer_info.channels,
-        size=1,
+        size_frames=1,
         rec_channels=ampl_channels,
         rec_enabled=1,
     )
