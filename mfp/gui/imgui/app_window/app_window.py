@@ -64,6 +64,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.menu_height = self.INIT_MENU_HEIGHT
         self.context_menu_open = False
         self.main_menu_open = False
+        self.bufedit_menu_open = False
 
         self.info_panel_id = None
         self.info_panel_visible = True

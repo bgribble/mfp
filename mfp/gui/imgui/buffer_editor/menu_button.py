@@ -19,6 +19,7 @@ def render_bufedit_menu(app_window):
     imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
     imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 3))
     if imgui.begin_popup("##bufedit_popup"):
+        app_window.bufedit_menu_open = True
         imgui.begin_group()
 
         add_menu_items(app_window, by_menu.get("BufEdit", {}))
@@ -38,14 +39,15 @@ def render_bufedit_menu(app_window):
             if buffer_info.get('proc_name') in ("source_buffer", "sink_buffer", "ampl_buffer"):
                 continue
 
-            imgui.push_id(str(id(buffer_info)))
+            imgui.push_id(f"{buffer_info.get('proc_name')}:{buffer_info.get('proc_id')}")
             imgui.dummy(app_window.scaled(1, 1))
             imgui.same_line()
             display_name = f"{buffer_info.get('proc_name')} ({buffer_info.get('buf_info').file_name or 'No file'})"
             buffer_selected, _ = imgui.menu_item(
                 display_name,
                 '',
-                app_window.buffer_selected == buffer_info
+                app_window.buffer_selected.get("proc_name") == buffer_info.get("proc_name"),
+                True
             )
             if buffer_selected:
                 app_window.buffer_selected = buffer_info
@@ -67,6 +69,7 @@ def render_bufedit_menu(app_window):
         imgui.end_popup()
         imgui.pop_style_var(2)
     else:
+        app_window.bufedit_menu_open = False
         imgui.pop_style_var(2)
     return quit_selected
 

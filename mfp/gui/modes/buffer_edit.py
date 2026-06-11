@@ -200,7 +200,7 @@ class BufferEditMode (InputMode):
 
     def click_start(self, *args):
         from imgui_bundle import imgui
-        if not self.editor or not self.editor.implot_plot_hovered:
+        if self.window.bufedit_menu_open or not self.editor or not self.editor.implot_plot_hovered:
             self.mouse_down_pos = None
             return False
 
@@ -210,7 +210,7 @@ class BufferEditMode (InputMode):
 
     def click_end(self, *args):
         from imgui_bundle import imgui
-        if not self.editor or not self.editor.implot_plot_hovered:
+        if self.window.bufedit_menu_open or not self.editor or not self.editor.implot_plot_hovered:
             return False
 
         pos = imgui.get_mouse_pos()

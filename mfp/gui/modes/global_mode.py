@@ -575,18 +575,13 @@ class GlobalMode (InputMode):
         self.window.viewport_drag_active = False
         return True
 
-    async def selbox_start(self, select_mode):
-        px = self.manager.pointer_x
-        py = self.manager.pointer_y
-
-        evx = self.manager.pointer_ev_x
-        evy = self.manager.pointer_ev_y
-
+    def selbox_start(self, select_mode):
         if self.window.backend_name == "imgui":
             from imgui_bundle import imgui_node_editor as nedit
             if (
                 self.window.zone_selected != "canvas"
                 or self.window.main_menu_open
+                or self.window.bufedit_menu_open
                 or self.window.context_menu_open
                 or self.window.tile_resize_in_progress
                 or self.window.inspector
@@ -594,6 +589,15 @@ class GlobalMode (InputMode):
             ):
                 return False
             self.window.imgui_tile_selected = True
+
+        return self.selbox_start_async(select_mode)
+
+    async def selbox_start_async(self, select_mode):
+        px = self.manager.pointer_x
+        py = self.manager.pointer_y
+
+        evx = self.manager.pointer_ev_x
+        evy = self.manager.pointer_ev_y
 
         # select the patch/tile that the click was in
         click_tile = self.window.canvas_tile_manager.tile_at_point(
@@ -754,7 +758,12 @@ class GlobalMode (InputMode):
             src_obj.obj_id, src_port, dest_obj.obj_id, dest_port
         )
 
-    async def selbox_end(self, select_mode=None):
+    def selbox_end(self, select_mode=None):
+        if not self.selection_drag_started:
+            return False
+        return self.selbox_end_async(select_mode)
+
+    async def selbox_end_async(self, select_mode=None):
         from ..connection_element import ConnectionElement
         if self.selection_drag_started:
             if (

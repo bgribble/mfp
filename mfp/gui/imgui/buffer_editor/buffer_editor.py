@@ -406,7 +406,10 @@ class BufferEditor:
                 self.working_ampl_buf_obj.fd,
                 int(self.working_ampl_buf_info.channels * self.FLOAT_SIZE)
             )
-            channel_ampls = [float(f) for f in np.fromstring(slc, dtype=np.float32)]
+            for ind, ampl in enumerate(np.fromstring(slc, dtype=np.float32)):
+                if ind >= len(channel_ampls):
+                    continue
+                channel_ampls[ind] = float(ampl)
 
         frames = binfo.size
         ttime = frames / self.buffer_info.rate
