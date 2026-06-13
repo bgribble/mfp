@@ -203,6 +203,14 @@ class ImguiBaseElementImpl(BaseElementImpl):
             MFPGUI().async_task(
                 self.app_window.signal_emit("enter-event", EnterEvent(target=self))
             )
+            if self.app_window.dnd_pending_filename:
+                MFPGUI().async_task(
+                    MFPGUI().mfp.send(
+                        self.obj_id, 0, self.app_window.dnd_pending_filename
+                    )
+                )
+                self.app_window.dnd_pending_filename = None
+
         if not hovered and self.hovered_state:
             self.hovered_state = False
             MFPGUI().async_task(

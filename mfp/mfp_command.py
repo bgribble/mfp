@@ -314,6 +314,14 @@ class MFPCommand:
         else:
             await patch.delete_gui()
 
+    async def signal_emit(self, signal_name, obj_id, *args):
+        from .mfp_app import MFPApp
+        if obj_id is None:
+            await MFPApp().signal_emit(signal_name, *args)
+        else:
+            target = MFPApp().objects.get(obj_id)
+            await target.signal_emit(signal_name, *args)
+
     @noresp
     async def save_lv2(self, patch_name, plugin_name):
         from .mfp_app import MFPApp

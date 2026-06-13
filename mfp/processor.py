@@ -157,6 +157,8 @@ class Processor:
             name = self.display_type
         self.assign(patch, scope, name)
 
+        super().__init__()
+
     async def setup(self, **kwargs):
         # Override in Processor subclass
         pass

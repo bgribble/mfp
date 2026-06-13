@@ -115,6 +115,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.buffer_info = []
         self.buffer_selected = None
 
+        # drag and drop (populated by the SDL2 backend)
+        # it takes a couple of frames for the DND event to be processed enough to
+        # figure out which object it's being dropped on to
+        self.dnd_pending_filename = None
+        self.dnd_pending_frames = 0
+
         self.log_text = ""
         self.log_text_timestamp = None
         self.log_scroll_follow = True
@@ -151,6 +157,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 await self.signal_emit("leave-event", LeaveEvent(target=prev_pointer_obj))
             if new_pointer_obj != self:
                 await self.signal_emit("enter-event", EnterEvent(target=new_pointer_obj))
+
         return False
 
     async def handle_toggle_console(self, *rest):
@@ -324,6 +331,12 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     def render(self):
         self.imgui_prevent_idle = max(0, self.imgui_prevent_idle - 1)
         keep_going = True
+
+        if self.dnd_pending_filename:
+            if self.zone_selected == "bufedit":
+                MFPGUI().async_task(self.buffer_editor.buffer_import(self.dnd_pending_filename))
+                self.dnd_pending_filename = None
+                self.dnd_pending_frames = 0
 
         ########################################
         # global style setup
@@ -560,6 +573,14 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
         # process input state and convert to events
         imgui_process_inputs(self)
+
+        if self.dnd_pending_filename:
+            log.debug(f"[render] dnd filename still pending {self.dnd_pending_filename}")
+            log.debug(f"[render] zone is {self.zone_selected}")
+            self.dnd_pending_frames -= 1
+            if self.dnd_pending_frames <= 0:
+                self.dnd_pending_filename = None
+                self.dnd_pending_frames = 0
 
         # clean up any weirdness from first frame
         if self.frame_count == 0:

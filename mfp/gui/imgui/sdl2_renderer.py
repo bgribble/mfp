@@ -145,6 +145,8 @@ class ImguiSDL2Renderer:
         events_processed = False
         unhandled_windows = ["info"]
 
+        dnd_event_pending = None
+
         while SDL_PollEvent(ctypes.byref(event)) != 0:
             events_processed = True
             SDL_GetWindowSize(self.window, width, height)
@@ -213,6 +215,11 @@ class ImguiSDL2Renderer:
                     y=event.motion.y
                 )
                 MFPGUI().async_task(self.app_window.signal_emit("motion-event", ev))
+
+            elif event.type == SDL_DROPFILE:
+                payload = event.drop.file
+                self.app_window.dnd_pending_filename = payload.decode()
+                self.app_window.dnd_pending_frames = 3
 
             if not skip_event:
                 self.renderer.process_event(event)

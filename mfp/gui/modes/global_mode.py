@@ -759,49 +759,48 @@ class GlobalMode (InputMode):
         )
 
     def selbox_end(self, select_mode=None):
-        if not self.selection_drag_started:
+        if not self.selbox_started and not self.selection_drag_started:
             return False
         return self.selbox_end_async(select_mode)
 
     async def selbox_end_async(self, select_mode=None):
         from ..connection_element import ConnectionElement
-        if self.selection_drag_started:
-            if (
-                select_mode == "insert"
-                and len(self.window.selected) == 1
-                and self.window.selected[0].num_outlets > 0
-                and self.window.selected[0].editable
-                and not isinstance(self.window.selected[0], ConnectionElement)
-            ):
-                selected = self.window.selected[0]
-                overlapped = self.window.find_contained(
-                    selected.position_x, selected.position_y,
-                    selected.position_x + selected.width,
-                    selected.position_y + selected.height
+        if (
+            select_mode == "insert"
+            and len(self.window.selected) == 1
+            and self.window.selected[0].num_outlets > 0
+            and self.window.selected[0].editable
+            and not isinstance(self.window.selected[0], ConnectionElement)
+        ):
+            selected = self.window.selected[0]
+            overlapped = self.window.find_contained(
+                selected.position_x, selected.position_y,
+                selected.position_x + selected.width,
+                selected.position_y + selected.height
+            )
+            overlapped_connections = [
+                o for o in overlapped
+                if (
+                    isinstance(o, ConnectionElement)
+                    and o.obj_state == ConnectionElement.OBJ_COMPLETE
+                    and o not in selected.connections_in
+                    and o not in selected.connections_out
                 )
-                overlapped_connections = [
-                    o for o in overlapped
-                    if (
-                        isinstance(o, ConnectionElement)
-                        and o.obj_state == ConnectionElement.OBJ_COMPLETE
-                        and o not in selected.connections_in
-                        and o not in selected.connections_out
-                    )
-                ]
-                if len(overlapped_connections) == 1:
-                    conn = overlapped_connections[0]
-                    source_obj = conn.obj_1
-                    source_port = conn.port_1
-                    dest_obj = conn.obj_2
-                    dest_port = conn.port_2
-                    await conn.delete()
-                    await self._connect(source_obj, source_port, selected, 0)
-                    await self._connect(selected, 0, dest_obj, dest_port)
+            ]
+            if len(overlapped_connections) == 1:
+                conn = overlapped_connections[0]
+                source_obj = conn.obj_1
+                source_port = conn.port_1
+                dest_obj = conn.obj_2
+                dest_port = conn.port_2
+                await conn.delete()
+                await self._connect(source_obj, source_port, selected, 0)
+                await self._connect(selected, 0, dest_obj, dest_port)
 
-            for obj in self.window.selected:
-                if obj.editable and obj.display_type != 'connection':
-                    await obj.drag_end()
-                obj.send_params()
+        for obj in self.window.selected:
+            if obj.editable and obj.display_type != 'connection':
+                await obj.drag_end()
+            obj.send_params()
 
         self.selbox_started = False
         self.selection_drag_started = False
