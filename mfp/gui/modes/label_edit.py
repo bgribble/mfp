@@ -533,30 +533,30 @@ class LabelEditMode (InputMode):
         if self.undo_pos == -1:
             self.undo_stack.append((self.text, self.editpos))
             self.undo_pos = -2
+
         if self.undo_pos > (-len(self.undo_stack)):
             self.text, self.editpos = self.undo_stack[self.undo_pos]
             self.undo_pos = max(-len(self.undo_stack), self.undo_pos - 1)
-            self.update_label(raw=True)
-
+            self.update_label(raw=True, notify=False)
         return True
 
     def redo_edit(self):
-        if self.undo_pos < -1:
+        if self.undo_pos < -2:
             self.undo_pos += 1
-            self.text, self.editpos = self.undo_stack[self.undo_pos]
-            self.update_label(raw=True)
+            self.text, self.editpos = self.undo_stack[self.undo_pos+1]
+            self.update_label(raw=True, notify=False)
         return True
 
     def update_cursor(self):
         self.widget.grab_focus()
         self.widget.set_cursor_position(self.editpos)
 
-    def update_label(self, raw=True):
+    def update_label(self, raw=True, notify=True):
         if raw or self.markup is False:
-            self.widget.set_text(self.text)
+            self.widget.set_text(self.text, notify=notify)
             self.widget.set_use_markup(False)
         else:
-            self.widget.set_markup(self.text)
+            self.widget.set_markup(self.text, notify=notify)
         self.update_cursor()
         self.completions_cache = []
         return True

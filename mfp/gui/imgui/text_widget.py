@@ -650,8 +650,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         return self.text
 
     def set_text(self, text, notify=True):
-        text_changed = (text == self.text)
-        previous = text
+        text_changed = (text != self.text)
+        previous = self.text
         self.text = text
         self.markdown_text = None
         self.use_markup = False
