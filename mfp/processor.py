@@ -632,6 +632,7 @@ class Processor:
         try:
             return (self.dsp_obj, self.dsp_inlets.index(inlet))
         except ValueError:
+            log.debug(f"[dsp_inlet] state={self.status} inlets={self.dsp_inlets}")
             return (None, None)
 
     def dsp_outlet(self, outlet):
@@ -836,7 +837,8 @@ class Processor:
                 await out_obj.disconnect(out_outlet, in_obj._id, in_inlet)
             else:
                 log.warning("disconnect having trouble,",
-                            self, self.name, self.scope, outlet, target, inlet, in_obj,
+                            self, self.name, self.scope, outlet,
+                            target, target.name, inlet, in_obj,
                             out_obj)
 
         existing = self.connections_out[outlet]
@@ -1053,7 +1055,6 @@ class Processor:
                             and tinlet == self.snoop_inlet
                             and outlet_num == self.snoop_outlet
                         ):
-                            log.debug(f"[create] properties={params.get('properties')}")
                             from .mfp_app import MFPApp
                             MFPApp().async_task(
                                 MFPApp().gui_command.hud_write(f"[snoop] {str(val)}")

@@ -117,7 +117,7 @@ async def init_working_patch(self):
 
     # create a sig~ as a shared sync trigger
     self.working_trigger_info = await MFPGUI().mfp.create(
-        "sig~", "0", self.working_patch_info.get("name"), None, "buffer trigger"
+        "sig~", "0", self.working_patch_info.get("name"), None, "buffer_trigger"
     )
     self.working_trigger_id = self.working_trigger_info.get("obj_id")
 

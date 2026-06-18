@@ -323,8 +323,13 @@ async def buffer_import(self, filename):
         self.working_buf_id = bufdata.get("buf_id")
         self.working_buf_obj = SharedMemory(self.working_buf_id)
         self.buffer_grab(self.working_buf_obj, self.buffer_selected)
+
+        # buffer_data only should include the audio data
+        self.buffer_data = self.buffer_data[:-3]
+
         self.app_window.signal_unlisten(handler_id[0])
-        new_chan = self.buffer_selected.channels + 2
+
+        new_chan = self.buffer_selected.channels
         new_size = self.buffer_selected.size / (self.buffer_info.rate / 1000.0)
         working_buf = await self.buffer_reshape(
             self.working_source_id,
@@ -348,8 +353,11 @@ async def buffer_import(self, filename):
         return False
 
     handler_id.append(self.app_window.signal_listen("buffer_ready", buf_ready))
-    await MFPGUI().mfp.send(
-        self.working_source_id, 0, filename
+
+    # working buffer has 3 extra channels plus the audio data
+    await MFPGUI().mfp.eval_and_send(
+        self.working_source_id, 0,
+        f"MethodCall('import_file', {filename!r}, 3)"
     )
     await asyncio.wait_for(event.wait(), 5)
 
@@ -358,5 +366,5 @@ async def buffer_import(self, filename):
 async def buffer_export(self, filename):
     await MFPGUI().mfp.eval_and_send(
         self.working_sink_id, 0,
-        f"MethodCall('export', {filename!r}, {self.buffer_info.channels})"
+        f"MethodCall('export_file', {filename!r}, {self.buffer_info.channels})"
     )

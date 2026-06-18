@@ -161,7 +161,7 @@ class Buffer(Processor):
     def offset(self, channel, start):
         return (channel * self.size + start) * self.FLOAT_SIZE
 
-    async def _init_file_read(self):
+    async def _init_file_read(self, extra_channels=0):
         ready = asyncio.Event()
         loop = asyncio.get_event_loop()
 
@@ -190,13 +190,18 @@ class Buffer(Processor):
         await ready.wait()
         thread.join()
 
-        if self.channels == self.file_channels and self.size >= self.file_len:
+        # if the buffer is already the right shape, just load the data
+        if self.channels == (self.file_channels + extra_channels) and (self.size >= self.file_len):
             self.file_ready = False
             self._transfer_file_data()
+
+        # otherwise, request a shape change and wait for the
+        # buffer to emit a BufferInfo. Data transfer will be done
+        # in the trigger method.
         else:
             self.buffer_ready = False
             await self.dsp_setparams(
-                channels=self.file_channels,
+                channels=self.file_channels + extra_channels,
                 size=self.file_len,
                 realloc=1
             )
@@ -445,7 +450,11 @@ class Buffer(Processor):
                 prms["realloc"] = 1
             await self.dsp_setparams(**prms)
 
-    async def export(self, filename=None, channels=None):
+    async def import_file(self, filename, extra_channels=0):
+        self.file_name = filename
+        await self._init_file_read(extra_channels=extra_channels)
+
+    async def export_file(self, filename=None, channels=None):
         if filename is None:
             filename = self.file_name or (self.name + ".wav")
         if channels is None:

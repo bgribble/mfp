@@ -505,14 +505,22 @@ class BufferEditor:
                     imgui.same_line()
 
                     # meters
+                    in_rms = in_peak = out_rms = out_peak = 0
+                    achan = 4*(channel-1)
+
+                    if len(channel_ampls) > achan + 3:
+                        in_rms = channel_ampls[achan]
+                        in_peak = channel_ampls[achan+1]
+                        out_rms = channel_ampls[achan+2]
+                        out_peak = channel_ampls[achan+3]
+
                     imgui.dummy([10, 1])
                     imgui.same_line()
                     imgui.begin_group()
-                    achan = 4*(channel-1)
                     imgui.text("I")
                     th = imgui.get_item_rect_size()[1]
                     self.render_meter_bar(
-                        height - th - 10, channel_ampls[achan], channel_ampls[achan+1]
+                        height - th - 10, in_rms, in_peak,
                     )
                     imgui.end_group()
                     imgui.same_line()
@@ -521,7 +529,7 @@ class BufferEditor:
                     imgui.begin_group()
                     imgui.text("O")
                     self.render_meter_bar(
-                        height - th - 10, channel_ampls[achan + 2], channel_ampls[achan + 3]
+                        height - th - 10, out_rms, out_peak
                     )
                     imgui.end_group()
                     imgui.end_group()

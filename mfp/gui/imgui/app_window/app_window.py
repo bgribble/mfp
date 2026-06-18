@@ -575,8 +575,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui_process_inputs(self)
 
         if self.dnd_pending_filename:
-            log.debug(f"[render] dnd filename still pending {self.dnd_pending_filename}")
-            log.debug(f"[render] zone is {self.zone_selected}")
             self.dnd_pending_frames -= 1
             if self.dnd_pending_frames <= 0:
                 self.dnd_pending_filename = None
