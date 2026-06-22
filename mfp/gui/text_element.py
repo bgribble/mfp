@@ -55,7 +55,7 @@ class TextElement (BaseElement):
         self.default = ''
         self.max_width = 600
         self.save_in_preset = False
-
+        self.dnd_drop_port = 1
         self.param_list.extend([*self.extra_params])
 
         # these can't be initialized until there's a backend

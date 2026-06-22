@@ -51,6 +51,7 @@ def render_bufedit_menu(app_window):
             )
             if buffer_selected:
                 app_window.buffer_selected = buffer_info
+                app_window.buffer_editor.implot_selection = None
                 app_window.buffer_editor.buffer_source_info = buffer_info
                 app_window.buffer_editor.buffer_info = buffer_info.get('buf_info')
                 # update data in chart

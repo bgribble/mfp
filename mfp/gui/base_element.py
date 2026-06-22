@@ -145,7 +145,7 @@ class BaseElement (Store):
         self.is_export = False
         self.param_list = [a for a in self.store_attrs]
         self.code = None
-
+        self.dnd_drop_port = 0
         self.app_window = window
 
         # container is either a layer or another BaseElement (graph-on-parent)

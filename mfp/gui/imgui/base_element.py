@@ -59,7 +59,6 @@ class ImguiBaseElementImpl(BaseElementImpl):
         self.export_position_init = True
         self.export_container_x = None
         self.export_container_y = None
-
         self.hovered_state = False
         self.child_elements = []
 
@@ -206,8 +205,9 @@ class ImguiBaseElementImpl(BaseElementImpl):
             if self.app_window.dnd_pending_filename:
                 MFPGUI().async_task(
                     MFPGUI().mfp.send(
-                        self.obj_id, 0, self.app_window.dnd_pending_filename
+                        self.obj_id, self.dnd_drop_port, self.app_window.dnd_pending_filename
                     )
+
                 )
                 self.app_window.dnd_pending_filename = None
 

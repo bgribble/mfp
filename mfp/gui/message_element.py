@@ -52,6 +52,8 @@ class MessageElement (BaseElement):
         self.update_required = True
         self.save_in_preset = False
 
+        self.dnd_drop_port = 1
+
         self.obj_state = self.OBJ_HALFCREATED
 
         # configure label

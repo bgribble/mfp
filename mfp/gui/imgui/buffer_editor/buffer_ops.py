@@ -287,7 +287,7 @@ async def buffer_reshape(self, buffer_proc_id, **params):
 @extends(BufferEditor)
 async def buffer_apply(self):
     # transfer working buffer to origin buffer
-    bufsize = int(len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0))
+    bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
 
     if len(self.buffer_data[0]) != self.buffer_info.size:
         buf_info = await self.buffer_reshape(

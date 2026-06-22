@@ -216,7 +216,7 @@ class ImguiSDL2Renderer:
                 )
                 MFPGUI().async_task(self.app_window.signal_emit("motion-event", ev))
 
-            elif event.type == SDL_DROPFILE:
+            elif event.type in (SDL_DROPFILE, SDL_DROPTEXT):
                 payload = event.drop.file
                 self.app_window.dnd_pending_filename = payload.decode()
                 self.app_window.dnd_pending_frames = 3

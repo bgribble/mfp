@@ -100,6 +100,7 @@ class SlideMeterElement (BaseElement):
         self.scale_font_size = 7
         self.orientation = SlideMeterElement.VERTICAL
         self.zeropoint = None
+        self.dnd_drop_port = 1
 
         # value to emit when at bottom of scale, useful for dB scales
         self.slider_zero = None
