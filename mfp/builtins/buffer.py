@@ -450,6 +450,30 @@ class Buffer(Processor):
                 prms["realloc"] = 1
             await self.dsp_setparams(**prms)
 
+    ################################
+    # API for @method calls
+    ################################
+
+    async def play(self):
+        """
+        @play sets all channels playable and triggers.
+        """
+        chan_mask = 0
+        for _ in range(self.channels):
+            chan_mask = (chan_mask << 1) + 1
+        await self.dsp_setparams(
+            play_channels=chan_mask,
+            trig_trigger=1
+        )
+
+    async def stop(self):
+        """
+        @stop will stop buffer play/record without changing other state
+        """
+        await self.dsp_setparams(
+            buf_state=0
+        )
+
     async def import_file(self, filename, extra_channels=0):
         self.file_name = filename
         await self._init_file_read(extra_channels=extra_channels)
@@ -470,15 +494,8 @@ class Buffer(Processor):
         if self.shm_obj is None:
             self.shm_obj = SharedMemory(self.buf_id)
 
-        if start < 0:
-            start = 0
-        if start >= self.size:
-            start = self.size-1
-        if end < 0:
-            end = 0
-
-        if end >= self.size:
-            end = self.size-1
+        start = max(0, min(start, self.size-1))
+        end = max(0, min(end, self.size-1))
 
         try:
             os.lseek(self.shm_obj.fd, self.offset(channel, start), os.SEEK_SET)
@@ -489,7 +506,6 @@ class Buffer(Processor):
             tb = traceback.format_exc()
             log.debug("buffer~: slice error '%s" % e)
             self.error(tb)
-            return None
 
     def bufinfo(self):
         self.outlets[-1] = BufferInfo(
