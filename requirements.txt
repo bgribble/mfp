@@ -12,9 +12,9 @@ pillow==12.2.0
 posix_ipc==1.1.1
 protobuf==6.33.5
 pycparser==2.22
-pydantic==2.10.6
-pydantic_core==2.27.2
-pyliblo3==0.16.3
+pydantic==2.13.4
+pydantic_core==2.46.4
+pyliblo3==0.16.4
 pynose==1.5.4
 PyOpenGL==3.1.9
 PySDL2==0.9.17
@@ -24,5 +24,5 @@ setuptools==78.1.1
 simplejson==3.20.1
 six==1.17.0
 soundfile==0.13.1
-typing_extensions==4.12.2
-yappi==1.6.10
+typing_extensions==4.14.1
+yappi==1.7.6

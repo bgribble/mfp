@@ -8,6 +8,7 @@ from datetime import datetime
 from imgui_bundle import implot, imgui
 import numpy as np
 from mfp import log
+from mfp.gui import image_utils
 from mfp.gui.colordb import ColorDB
 from posix_ipc import SharedMemory
 
@@ -30,7 +31,12 @@ def unfmt_time(strtime):
 
 class BufferEditor:
     FLOAT_SIZE = 4
-
+    SIZE_IN_LINES = {
+        'small': 4,
+        'normal': 6,
+        'large': 10,
+        'x-large': 16,
+    }
     def __init__(self, app_window):
         self.app_window = app_window
         self.needs_focus = False
@@ -376,6 +382,7 @@ class BufferEditor:
     # plots
     def render_channels(self, toolbar_height):
         from mfp.gui_main import MFPGUI
+        from . import menu_button
         implot.set_current_context(self.implot_context)
         plot_hovered = False
 
@@ -398,6 +405,7 @@ class BufferEditor:
             return
 
         fname = binfo.file_name or 'No file'
+        dots = image_utils.load_texture_from_file("icons/dots-horiz.png")
 
         channel_ampls = [0] * (4 * self.buffer_info.channels)
         if self.working_ampl_buf_obj:
@@ -470,7 +478,9 @@ class BufferEditor:
                     x_axis_flags = implot.AxisFlags_.no_label
                     y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
                 else:
-                    height = line_height * 6
+                    chan_size = self.channel_options[channel - 1].get("size", "normal")
+                    chan_size_lines = self.SIZE_IN_LINES.get(chan_size, 6)
+                    height = line_height * chan_size_lines
                     plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
                     x_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
                     y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
@@ -504,7 +514,7 @@ class BufferEditor:
                     imgui.end_group()
                     imgui.same_line()
 
-                    # meters
+                    # channel menu and meters
                     in_rms = in_peak = out_rms = out_peak = 0
                     achan = 4*(channel-1)
 
@@ -516,9 +526,25 @@ class BufferEditor:
 
                     imgui.dummy([10, 1])
                     imgui.same_line()
+
                     imgui.begin_group()
-                    imgui.text("I")
+
+                    # channel menu
+                    imgui.dummy([1, 3])
+                    imgui.push_style_var(imgui.StyleVar_.frame_padding, [4, 6])
+                    imgui.push_style_var(imgui.StyleVar_.frame_rounding, 4)
+                    if imgui.image_button(
+                        "##channel_menubutton", imgui.ImTextureRef(dots[0]),
+                        [15, 3]
+                    ):
+                        imgui.open_popup("##bufedit_channel_popup")
+
+                    menu_button.render_channel_menu(self.app_window, channel-1)
                     th = imgui.get_item_rect_size()[1]
+                    imgui.pop_style_var(2)
+                    imgui.dummy([1, 3])
+
+                    imgui.begin_group()
                     self.render_meter_bar(
                         height - th - 10, in_rms, in_peak,
                     )
@@ -526,11 +552,12 @@ class BufferEditor:
                     imgui.same_line()
                     imgui.dummy([3, 1])
                     imgui.same_line()
+
                     imgui.begin_group()
-                    imgui.text("O")
                     self.render_meter_bar(
                         height - th - 10, out_rms, out_peak
                     )
+                    imgui.end_group()
                     imgui.end_group()
                     imgui.end_group()
                     spacer = channel_tool_width - imgui.get_item_rect_size()[0]

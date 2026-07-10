@@ -9,6 +9,38 @@ from mfp import log
 from imgui_bundle import imgui
 from ..app_window.menu_bar import add_menu_items, load_menupaths
 
+def render_channel_menu(app_window, channel):
+    imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
+    imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 3))
+    if imgui.begin_popup("##bufedit_channel_popup"):
+        selected, val = imgui.menu_item(
+            "Show spectrogram",
+            '',
+            "spectrogram" in app_window.buffer_editor.channel_options[channel],
+            True
+        )
+        if selected:
+            if val:
+                app_window.buffer_editor.channel_options[channel]["spectrogram"] = True
+            else:
+                del app_window.buffer_editor.channel_options[channel]["spectrogram"]
+
+            log.debug(f"[channel] channel {channel} --> {(selected, val)}")
+
+        imgui.separator()
+
+        for size in ("small", "normal", "large", "x-large"):
+            selected, _ = imgui.menu_item(
+                size.capitalize(),
+                '',
+                app_window.buffer_editor.channel_options[channel].get("size", "normal") == size,
+                True
+            )
+            if selected:
+                app_window.buffer_editor.channel_options[channel]["size"] = size
+
+        imgui.end_popup()
+    imgui.pop_style_var(2)
 
 def render_bufedit_menu(app_window):
     from mfp.gui_main import MFPGUI
