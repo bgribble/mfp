@@ -12,6 +12,7 @@ from mfp.gui import image_utils
 from mfp.gui.colordb import ColorDB
 from posix_ipc import SharedMemory
 
+NUM_TIME_BINS = 128
 
 def fmt_time(ttime):
     minutes = int(ttime // 60)
@@ -28,8 +29,50 @@ def unfmt_time(strtime):
     except Exception:
         return None
 
+def nearest_power_of_2(val):
+    return 2**(int(math.log2(val)))
+
+def compute_spectrogram(signal, nperseg=512, noverlap=256):
+    # 1. Create a Hann window to reduce spectral leakage
+    window = np.hanning(nperseg)
+
+    # 2. Calculate the step (hop) size between consecutive windows
+    hop_size = nperseg - noverlap
+
+    # 3. Determine the total number of time segments
+    num_segments = (len(signal) - nperseg) // hop_size + 1
+
+    # 4. Initialize an empty list to hold the FFT data
+    spectrogram_cols = []
+
+    for i in range(num_segments):
+        # Extract the current segment frame
+        start = i * hop_size
+        end = start + nperseg
+        segment = signal[start:end]
+
+        # Apply the window function to the segment
+        windowed_segment = segment * window
+
+        # Compute the Real FFT (only returns positive frequencies)
+        fft_result = np.fft.rfft(windowed_segment)
+
+        # Calculate the magnitude spectrum
+        magnitude = np.log(np.real(np.abs(fft_result)))
+        spectrogram_cols.append(magnitude)
+
+    # 5. Stack columns vertically and transpose so time is on X-axis and frequency on Y-axis
+    # Columns become rows: shape will be (frequency_bins, time_segments)
+    if spectrogram_cols:
+        return np.flipud(np.column_stack(spectrogram_cols))
+
+    return []
+
 
 class BufferEditor:
+    """
+    """
+
     FLOAT_SIZE = 4
     SIZE_IN_LINES = {
         'small': 4,
@@ -37,6 +80,7 @@ class BufferEditor:
         'large': 10,
         'x-large': 16,
     }
+
     def __init__(self, app_window):
         self.app_window = app_window
         self.needs_focus = False
@@ -87,6 +131,8 @@ class BufferEditor:
         self.rec_enabled = 0
         self.rec_recording = False
         self.rec_recording_updated = None
+
+        self.spectral_data_cache = {}
 
         self.clipboard_data = None
         self.clipboard_size = None
@@ -386,6 +432,8 @@ class BufferEditor:
         implot.set_current_context(self.implot_context)
         plot_hovered = False
 
+        plot_width = None
+        plot_height = None
         num_channels = len(self.buffer_data or [])
         peak_scale = None
         peaks = None
@@ -544,9 +592,10 @@ class BufferEditor:
                     imgui.pop_style_var(2)
                     imgui.dummy([1, 3])
 
+                    # meters
                     imgui.begin_group()
                     self.render_meter_bar(
-                        height - th - 10, in_rms, in_peak,
+                        min(height, 6 * line_height) - th - 10, in_rms, in_peak,
                     )
                     imgui.end_group()
                     imgui.same_line()
@@ -555,7 +604,7 @@ class BufferEditor:
 
                     imgui.begin_group()
                     self.render_meter_bar(
-                        height - th - 10, out_rms, out_peak
+                        min(height, 6 * line_height) - th - 10, out_rms, out_peak
                     )
                     imgui.end_group()
                     imgui.end_group()
@@ -567,6 +616,7 @@ class BufferEditor:
                     imgui.pop_font()
 
                 # the plot itself
+                imgui.begin_group()
                 if implot.begin_plot(
                     "##buf_edit_plot",
                     [-1, height],
@@ -675,9 +725,49 @@ class BufferEditor:
                     )
 
                     implot.end_plot()
+                    plot_width, plot_height = imgui.get_item_rect_size()
+
                     if imgui.is_item_hovered():
                         plot_hovered = True
 
+                show_spectrogram = channel > 0 and self.channel_options[channel-1].get("spectrogram")
+                if show_spectrogram and implot.begin_plot(
+                    "##buf_edit_spectrogram",
+                    [-1, height],
+                    flags=implot.Flags_.no_legend | implot.Flags_.no_mouse_text
+                ):
+                    axes_flags = (
+                        implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
+                        | implot.AxisFlags_.lock | implot.AxisFlags_.no_grid_lines
+                        | implot.AxisFlags_.no_tick_marks
+                    )
+
+                    implot.setup_axes(
+                        '', '',
+                        x_flags=axes_flags, y_flags=axes_flags
+                    )
+                    implot.setup_axes_limits(0, 1, 0, 1)
+
+                    if plot_height:
+                        spectrogram_data = self.get_spectral_data(
+                            channel-1, self.implot_limits.x.min, self.implot_limits.x.max,
+                            plot_width, plot_height,
+                        )
+                        rows, cols = spectrogram_data.shape
+                        implot.push_colormap(implot.Colormap_.viridis)
+                        implot.plot_heatmap(
+                            "##chan_spectrogram",
+                            spectrogram_data,
+                            label_fmt='',
+                            scale_min=0.0, scale_max=1.0,
+                            bounds_min=implot.Point(0, 0), bounds_max=implot.Point(1, 1),
+                            spec=implot.Spec(flags=0)
+                        )
+                        implot.pop_colormap()
+                    implot.end_plot()
+                    if imgui.is_item_hovered():
+                        plot_hovered = True
+                imgui.end_group()
                 imgui.pop_id()
 
             if self.implot_playhead_needs_set:
@@ -1083,6 +1173,38 @@ class BufferEditor:
                     await MFPGUI().mfp.send(fx_id, 0, 1)
                 else:
                     await MFPGUI().mfp.send(fx_id, 0, 0)
+
+    def get_spectral_data(self, channel, x_min, x_max, plot_w, plot_h):
+        x_min = int((x_min or 0) * self.buffer_info.rate)
+        x_max = int((x_max * self.buffer_info.rate) if x_max else len(self.buffer_data[0]))
+
+        time_bin_size = 0
+        if plot_w:
+            time_bin_size = nearest_power_of_2((x_max - x_min) / (plot_w / 2))
+
+        freq_bin_count = time_bin_size // 2
+        freq_bin_count = nearest_power_of_2(min(freq_bin_count, int(plot_h // 2)))
+
+        key = (channel, x_min, x_max, time_bin_size, freq_bin_count)
+        if key in self.spectral_data_cache:
+            return self.spectral_data_cache[key]
+
+        spectral_data = compute_spectrogram(
+            self.buffer_data[channel][x_min:x_max],
+            time_bin_size, time_bin_size // 2
+        )
+        log.debug(f"computed spectral data for {key} shape is {spectral_data.shape}")
+        log.debug(f"freq_bin_count={freq_bin_count} time_bin_size={time_bin_size}")
+        spectral_rows, spectral_cols = spectral_data.shape
+        group_size = (spectral_rows // 2) // freq_bin_count
+        reshaped = spectral_data[spectral_rows // 2 + 1:].reshape(
+            freq_bin_count, group_size,
+            spectral_cols, 1
+        )
+        summed = reshaped.sum(axis=(1, 3)) / group_size
+        log.debug(f"reshaped spectral data for {key} shape is {summed.shape}")
+        self.spectral_data_cache[key] = summed
+        return summed
 
 
 from . import buffer_ops
