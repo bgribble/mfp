@@ -760,7 +760,7 @@ class BufferEditor:
                             spectrogram_data,
                             label_fmt='',
                             scale_min=0.0, scale_max=1.0,
-                            bounds_min=implot.Point(0, 0), bounds_max=implot.Point(1, 1),
+                            bounds_min=implot.Point(0,0), bounds_max=implot.Point(1,1),
                             spec=implot.Spec(flags=0)
                         )
                         implot.pop_colormap()
@@ -1181,9 +1181,10 @@ class BufferEditor:
         time_bin_size = 0
         if plot_w:
             time_bin_size = nearest_power_of_2((x_max - x_min) / (plot_w / 2))
+            time_bin_overlap = time_bin_size // 2
+            time_bin_size = max(time_bin_size, 256)
 
-        freq_bin_count = time_bin_size // 2
-        freq_bin_count = nearest_power_of_2(min(freq_bin_count, int(plot_h // 2)))
+        freq_bin_count = nearest_power_of_2(min(time_bin_size // 2, int(plot_h // 2)))
 
         key = (channel, x_min, x_max, time_bin_size, freq_bin_count)
         if key in self.spectral_data_cache:
@@ -1191,17 +1192,16 @@ class BufferEditor:
 
         spectral_data = compute_spectrogram(
             self.buffer_data[channel][x_min:x_max],
-            time_bin_size, time_bin_size // 2
+            time_bin_size, time_bin_overlap
         )
-        log.debug(f"computed spectral data for {key} shape is {spectral_data.shape}")
-        log.debug(f"freq_bin_count={freq_bin_count} time_bin_size={time_bin_size}")
         spectral_rows, spectral_cols = spectral_data.shape
-        group_size = (spectral_rows // 2) // freq_bin_count
+        group_size = max(1, (spectral_rows // 2) // freq_bin_count)
         reshaped = spectral_data[spectral_rows // 2 + 1:].reshape(
             freq_bin_count, group_size,
             spectral_cols, 1
         )
         summed = reshaped.sum(axis=(1, 3)) / group_size
+
         log.debug(f"reshaped spectral data for {key} shape is {summed.shape}")
         self.spectral_data_cache[key] = summed
         return summed
