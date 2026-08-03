@@ -49,7 +49,7 @@ def compute_spectrogram(signal, nperseg=512, noverlap=256):
 
 
 @extends(BufferEditor)
-def get_spectral_data(self, channel, x_min, x_max, plot_w, plot_h):
+def get_spectrogram_data(self, channel, x_min, x_max, plot_w, plot_h):
     x_min = int((x_min or 0) * self.buffer_info.rate)
     x_max = int((x_max * self.buffer_info.rate) if x_max else len(self.buffer_data[0]))
 
@@ -70,7 +70,7 @@ def get_spectral_data(self, channel, x_min, x_max, plot_w, plot_h):
         self.buffer_data[channel][x_min:x_max],
         time_bin_size, time_bin_overlap
     )
-    if not spectral_data:
+    if spectral_data is None:
         return None
 
     spectral_rows, spectral_cols = spectral_data.shape
