@@ -19,7 +19,7 @@ def compute_spectrogram(signal, nperseg=512, noverlap=256):
     hop_size = nperseg - noverlap
 
     # 3. Determine the total number of time segments
-    num_segments = (len(signal) - nperseg) // hop_size + 1
+    num_segments = int((len(signal) - nperseg) // hop_size + 1)
 
     # 4. Initialize an empty list to hold the FFT data
     spectrogram_cols = []
@@ -37,7 +37,7 @@ def compute_spectrogram(signal, nperseg=512, noverlap=256):
         fft_result = np.fft.rfft(windowed_segment)
 
         # Calculate the magnitude spectrum
-        magnitude = np.log(np.real(np.abs(fft_result)))
+        magnitude = np.real(np.abs(fft_result))
         spectrogram_cols.append(magnitude)
 
     # 5. Stack columns vertically and transpose so time is on X-axis and frequency on Y-axis
@@ -71,15 +71,16 @@ def get_spectrogram_data(self, channel, x_min, x_max, plot_w, plot_h):
         time_bin_size, time_bin_overlap
     )
     if spectral_data is None:
+        log.debug(f"[spec] no spectral data for {x_min} {x_max} {plot_w} {plot_h}")
         return None
 
     spectral_rows, spectral_cols = spectral_data.shape
-    group_size = max(1, (spectral_rows // 2) // freq_bin_count)
-    reshaped = spectral_data[spectral_rows // 2 + 1:].reshape(
+    group_size = max(1, spectral_rows // freq_bin_count)
+    reshaped = spectral_data[1:].reshape(
         freq_bin_count, group_size,
         spectral_cols, 1
     )
-    summed = reshaped.sum(axis=(1, 3)) / group_size
+    summed = 20 * np.log10(reshaped.sum(axis=(1, 3)) / group_size + 1e-10)
 
     self.spectral_data_cache[key] = summed
     return summed

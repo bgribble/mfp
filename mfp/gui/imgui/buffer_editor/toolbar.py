@@ -5,7 +5,6 @@ Toolbar render method for buffer editor
 from datetime import datetime
 from imgui_bundle import imgui
 
-from mfp import log
 from mfp.utils import extends
 from mfp.gui import image_utils
 from mfp.gui.colordb import ColorDB
@@ -129,6 +128,7 @@ def render_toolbar(self):
 
     now = datetime.now()
     toggle = int(now.timestamp()*2) % 2
+
     if self.rec_enabled:
         if self.rec_recording:
             imgui.push_style_color(
@@ -144,6 +144,7 @@ def render_toolbar(self):
             imgui.push_style_color(
                 imgui.Col_.button_hovered, ColorDB().find('rec-button-color-highlight').to_rgbaf()
             )
+
     imgui.push_style_color(
         imgui.Col_.button_active, ColorDB().find('rec-button-color-clicked').to_rgbaf()
     )
@@ -174,7 +175,6 @@ def render_toolbar(self):
 
     #######################
     # zoom
-
     if imgui.image_button(
         "##zoom_in_btn", imgui.ImTextureRef(zoom_in_tex[0]), [button_size, button_size]
     ):
@@ -219,7 +219,6 @@ def render_toolbar(self):
 
     #######################
     # playhead and selection info
-
     imgui.begin_group()
     imgui.dummy((0.1, 0.125 * line_height))
     imgui.text("Pos:")
@@ -285,7 +284,6 @@ def render_toolbar(self):
 
     #######################
     # menu on far right
-
     imgui.dummy((
         imgui.get_window_width() - imgui.get_cursor_pos()[0] - 2*button_size,
         button_size

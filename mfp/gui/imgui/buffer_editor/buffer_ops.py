@@ -38,7 +38,11 @@ def buffer_grab(self, shm_obj=None, buffer_info=None):
     self.buffer_data = []
     self.channel_selections = [None] * (buffer_info.channels + 1)
     self.channel_selections_active = [False] * (buffer_info.channels + 1)
-    self.channel_options = [dict(fx=True) for _ in range(buffer_info.channels + 1)]
+    if len(self.channel_options) < buffer_info.channels:
+        self.channel_options = (
+            self.channel_options 
+            + [dict(fx=True) for _ in range(buffer_info.channels - len(self.channel_options))]
+        )
     self.implot_limits = None
     self.implot_limits_need_set = [None] * (buffer_info.channels + 1)
 

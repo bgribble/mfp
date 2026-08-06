@@ -25,8 +25,6 @@ def render_channel_menu(app_window, channel):
             else:
                 del app_window.buffer_editor.channel_options[channel]["spectrogram"]
 
-            log.debug(f"[channel] channel {channel} --> {(selected, val)}")
-
         imgui.separator()
 
         for size in ("small", "normal", "large", "x-large"):
