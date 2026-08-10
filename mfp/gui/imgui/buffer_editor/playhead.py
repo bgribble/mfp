@@ -84,7 +84,6 @@ async def playhead_pause(self, new_pos=None):
     await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
     await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
-    log.debug(f"[pause] pausing, options={self.channel_options}")
     if self.rec_recording:
         need_update = 0
         now = datetime.now()
@@ -106,7 +105,6 @@ async def playhead_pause(self, new_pos=None):
     if new_pos is not None:
         await self.playhead_move(new_pos)
 
-    log.debug(f"[pause] done pausing, options={self.channel_options}")
 
 @extends(BufferEditor)
 async def playhead_set_selection(self, sel_start, sel_end):
