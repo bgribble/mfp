@@ -272,8 +272,16 @@ class Buffer(Processor):
                 os.lseek(self.shm_obj.fd, 0, os.SEEK_SET)
                 data = os.read(self.shm_obj.fd, self.size * channels * self.FLOAT_SIZE)
 
+                # shm data is in column-major order, transpose before exporting
+                c_data = (
+                    numpy.fromstring(data, dtype=numpy.float32)
+                    .reshape((channels, self.size))
+                    .transpose()
+                )
+                c_data = numpy.ascontiguousarray(c_data)
+
                 try:
-                    export_file.buffer_write(data, 'float32')
+                    export_file.buffer_write(c_data, 'float32')
                 except Exception as e:
                     log.error(f"[export] {e}")
 

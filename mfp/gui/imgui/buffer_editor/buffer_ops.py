@@ -6,6 +6,7 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import asyncio
 import os
+from datetime import datetime
 import numpy as np
 from posix_ipc import SharedMemory
 from imgui_bundle import implot
@@ -56,6 +57,7 @@ def buffer_grab(self, shm_obj=None, buffer_info=None):
         import traceback
         traceback.print_exc()
         return None
+    self.buffer_data_last_update = datetime.now()
     self.buffer_compute_peaks()
 
 

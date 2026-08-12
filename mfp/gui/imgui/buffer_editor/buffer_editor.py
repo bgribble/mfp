@@ -50,6 +50,7 @@ class BufferEditor:
         self.buffer_source_info = None
         self.buffer_info = None
         self.buffer_data = None
+        self.buffer_data_last_update = None
         self.buffer_peaks = {}
 
         self.working_patch_id = None
@@ -287,11 +288,8 @@ class BufferEditor:
 
                 # the plot itself
                 imgui.begin_group()
-                if implot.begin_plot(
-                    "##buf_edit_plot",
-                    [-1, height],
-                    flags=plot_flags
-                ):
+
+                if implot.begin_plot("##buf_edit_plot", [-1, height], flags=plot_flags):
                     implot.setup_axes(
                         '', '',
                         x_flags=x_axis_flags, y_flags=y_axis_flags
@@ -374,25 +372,17 @@ class BufferEditor:
 
                     if not self.channel_selections_active[channel] and self.implot_selection:
                         ss = self.implot_selection
-                        rect = implot.drag_rect(
-                            0, ss.x.min, 1, ss.x.max, -1,
-                            drag_color
-                        )
+                        rect = implot.drag_rect(0, ss.x.min, 1, ss.x.max, -1, drag_color)
+
                         if rect[1] != ss.x.min or rect[3] != ss.x.max:
                             ss.x.min = rect[1]
                             ss.x.max = rect[3]
                             self.channel_selections[channel] = ss
                             self.implot_selection = ss
-                            MFPGUI().async_task(
-                                self.playhead_update_selection()
-                            )
+                            MFPGUI().async_task(self.playhead_update_selection())
 
                     # playhead
-                    implot.drag_line_x(
-                        0,
-                        self.implot_playhead,
-                        drag_color
-                    )
+                    implot.drag_line_x(0, self.implot_playhead, drag_color)
 
                     implot.end_plot()
                     plot_width, plot_height = imgui.get_item_rect_size()
@@ -552,6 +542,12 @@ class BufferEditor:
             self.app_window.imgui_prevent_idle = 1
 
         imgui.end()
+
+        # grab new data once per second
+        if self.rec_recording:
+            now = datetime.now()
+            if (now - self.buffer_data_last_update).total_seconds() > 1:
+                self.buffer_grab(self.working_buf_obj)
 
         imgui.pop_style_var(3)
 

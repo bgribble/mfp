@@ -96,7 +96,6 @@ async def playhead_pause(self, new_pos=None):
         if need_update:
             self.rec_recording_updated = now
             self.buffer_grab(self.working_buf_obj)
-            self.buffer_compute_peaks()
 
     self.implot_playhead_start_time = None
     self.implot_playhead_looping = False
