@@ -66,12 +66,27 @@ def get_spectrogram_data(self, channel, x_min, x_max, plot_w, plot_h):
     if key in self.spectral_data_cache:
         return self.spectral_data_cache[key]
 
+    # if x_min/x_max are outside the data bounds, create a zero-padded
+    # array of the right size for the spectrogram
+    if x_min >= 0 and x_max < len(self.buffer_data[channel]):
+        audio_data = self.buffer_data[channel][x_min:x_max]
+    else:
+        # zero-filled array of the right size
+        audio_data = np.zeros(x_max - x_min, dtype=np.float32)
+        data_start = max(x_min, 0)
+        dest_start = data_start - x_min
+        data_end = min(x_max, len(self.buffer_data[channel]))
+        dest_end = dest_start + (data_end - data_start)
+
+        # copy valid data where it exists
+        audio_data[dest_start:dest_end] = self.buffer_data[channel][data_start:data_end]
+
     spectral_data = compute_spectrogram(
-        self.buffer_data[channel][x_min:x_max],
-        time_bin_size, time_bin_overlap
+        audio_data, time_bin_size, time_bin_overlap
     )
+
     if spectral_data is None:
-        log.debug(f"[spec] no spectral data for {x_min} {x_max} {plot_w} {plot_h}")
+        log.debug(f"[spec] error computing spectral data for {x_min} {x_max} {plot_w} {plot_h}")
         return None
 
     spectral_rows, spectral_cols = spectral_data.shape

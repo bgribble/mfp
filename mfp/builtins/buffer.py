@@ -254,7 +254,7 @@ class Buffer(Processor):
             if self.shm_obj is None:
                 self.shm_obj = SharedMemory(self.buf_id)
 
-            log.debug(f"[buffer] Exporting {channels} channels at {mfp_samplerate} hz to file '{filename}'")
+            log.debug(f"[export] Exporting {channels} channels at {mfp_samplerate} hz to file '{filename}'")
 
             export_file = None
             try:

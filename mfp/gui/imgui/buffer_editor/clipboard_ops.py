@@ -32,7 +32,7 @@ async def clipboard_copy(self):
 
 @extends(BufferEditor)
 async def clipboard_cut(self):
-    if not self.buffer_data:
+    if not self.buffer_data or not self.clipboard_pos:
         return
 
     await self.clipboard_copy()
