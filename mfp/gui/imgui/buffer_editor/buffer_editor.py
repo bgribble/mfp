@@ -524,6 +524,7 @@ class BufferEditor:
                 | imgui.WindowFlags_.no_resize
                 | imgui.WindowFlags_.no_saved_settings
                 | imgui.WindowFlags_.no_move
+                | imgui.WindowFlags_.no_bring_to_front_on_focus
             )
         )
 
