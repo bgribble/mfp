@@ -911,6 +911,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             from mfp.gui.modes.resize_modes import InfoResizeMode
             new_minor = (InfoResizeMode(self),)
             new_mode = True
+        elif zone_name == "menu":
+            new_global, new_major, new_minor = self.zone_modes.get("canvas")
+            new_mode = True
 
         if new_mode:
             if save_old:
