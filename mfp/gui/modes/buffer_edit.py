@@ -155,6 +155,10 @@ class BufferEditMode (InputMode):
         #####################
         # File operations
         cls.bind(
+            "buffer-edit-reload", cls.buffer_reload, helptext="Reload from current buffer",
+            keysym="C-r", menupath="BufEdit > |Reload from buffer"
+        )
+        cls.bind(
             "buffer-edit-apply", cls.buffer_apply, helptext="Save changes to buffer",
             keysym="C-s", menupath="BufEdit > |Save changes to buffer"
         )
@@ -225,6 +229,25 @@ class BufferEditMode (InputMode):
         lim = self.editor.implot_limits
         delta_one_x = (lim.x.max - lim.x.min) / 1000.0
         await self.editor.playhead_move(self.editor.implot_playhead + amount * delta_one_x)
+
+    async def buffer_reload(self):
+        old_info = self.editor.buffer_source_info
+        old_name = old_info.get("proc_name")
+
+        await self.window.update_buffer_info()
+
+        try:
+            new_info = next(i for i in self.window.buffer_info if i.get('proc_name') == old_name)
+        except:
+            log.debug(f"[reload] can't find new buffer info for {old_info} in {self.window.buffer_info}")
+            return
+
+        self.editor.buffer_source_info = new_info
+        self.editor.buffer_info = new_info.get('buf_info')
+        self.editor.shm_obj = None
+        self.editor.buffer_grab()
+        await self.editor.init_working_patch()
+        return True
 
     async def buffer_apply(self):
         await self.editor.buffer_apply()
