@@ -86,7 +86,10 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         self.cursor_pos = 0
         self.cursor_visible = False
-        self.cursor_color = ColorDB().find('default-text-cursor-color')
+        self.cursor_color = (
+            self.container.get_color("cursor-color")
+            or ColorDB().find('default-cursor-color')
+        )
 
         self.visible = True
         self.use_markup = False

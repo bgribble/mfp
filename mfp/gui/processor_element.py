@@ -11,6 +11,7 @@ import re
 from flopsy import saga, mutates
 
 from mfp import log
+from .colordb import ColorDB
 from .text_widget import TextWidget
 from .modes.label_edit import LabelEditMode
 from ..gui_main import MFPGUI
@@ -54,6 +55,12 @@ class ProcessorElement (BaseElement):
 
         self.show_label = params.get("show_label", True)
         self.panel_mode = params.get("panel_mode", False)
+
+        # these can't be initialized until there's a backend
+        type(self).style_defaults.update({
+            'cursor-color': ColorDB().find('default-cursor-color'),
+        })
+        self._all_styles = self.combine_styles()
 
         # display elements
         self.label = TextWidget.get_backend(MFPGUI().backend_name)(self)

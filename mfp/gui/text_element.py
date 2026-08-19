@@ -60,6 +60,7 @@ class TextElement (BaseElement):
 
         # these can't be initialized until there's a backend
         type(self).style_defaults.update({
+            'cursor-color': ColorDB().find('default-text-cursor-color'),
             'fill-color': ColorDB().find('transparent'),
             'fill-color:selected': ColorDB().find('transparent'),
         })
