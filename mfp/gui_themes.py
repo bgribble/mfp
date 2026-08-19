@@ -64,7 +64,7 @@ theme_dusk = {
         'default-data-color-3': (0x36, 0xf1, 0xcd, 0xff),
         'default-data-color-4': (0x13, 0xc4, 0xa3, 0xff),
         'default-data-color-5': (0xd3, 0x61, 0x35, 0xff),
-        'default-cursor-color': trn(dusk_gray_1, 0x30),
+        'default-cursor-color': (0xff, 0xff, 0xff, 0x50),
         'transparent': (0x00, 0x00, 0x00, 0x00),
         'meter-color-rms': dusk_teal,
         'meter-color-peak': dusk_gold,
