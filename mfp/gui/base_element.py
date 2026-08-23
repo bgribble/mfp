@@ -164,6 +164,7 @@ class BaseElement (Store):
             'badge-error-color': ColorDB().find('default-error-badge-color'),
             'badge-play-color': ColorDB().find('default-play-badge-color'),
             'badge-record-color': ColorDB().find('default-record-badge-color'),
+            'cursor-color': ColorDB().find('default-cursor-color'),
         })
 
         # UI state
