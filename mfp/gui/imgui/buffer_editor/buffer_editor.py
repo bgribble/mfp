@@ -18,6 +18,8 @@ class BufferEditor:
     """
     Visual editor for buffer~ contents as audio waveforms
     """
+    SECONDS = "seconds"
+    BEATS = "beats"
 
     FLOAT_SIZE = 4
     SIZE_IN_LINES = {
@@ -52,6 +54,8 @@ class BufferEditor:
         self.buffer_data = None
         self.buffer_data_last_update = None
         self.buffer_peaks = {}
+        self.buffer_units = self.SECONDS
+        self.buffer_bpm = 60
 
         self.working_patch_id = None
         self.working_patch_info = None
@@ -93,6 +97,35 @@ class BufferEditor:
 
     def set_playhead_at_pointer(self):
         self.implot_playhead_needs_set = True
+
+    def set_buffer_bpm(self, bpm):
+        if not bpm:
+            return
+
+        if self.buffer_units == self.BEATS:
+            ratio = bpm / self.buffer_bpm
+            if self.implot_selection:
+                self.implot_selection.x.min *= ratio
+                self.implot_selection.x.max *= ratio
+            if self.implot_limits:
+                self.implot_limits.x.min *= ratio
+                self.implot_limits.x.max *= ratio
+            if self.implot_playhead:
+                self.implot_playhead *= ratio
+
+        self.buffer_bpm = bpm
+
+    def position_to_sample(self, position):
+        if self.buffer_units == self.BEATS:
+            return (60 * position / self.buffer_bpm) * self.buffer_info.rate
+        else:
+            return position * self.buffer_info.rate
+
+    def sample_to_position(self, sample):
+        if self.buffer_units == self.BEATS:
+            return (sample / self.buffer_info.rate) * (self.buffer_bpm / 60)
+        else:
+            return sample / self.buffer_info.rate
 
     ########################################
     # plots
@@ -297,6 +330,10 @@ class BufferEditor:
                     implot.setup_axis_limits(
                         implot.ImAxis_.y1.value, -1, 1, implot.Cond_.always.value
                     )
+                    if self.buffer_units == self.BEATS:
+                        x_scale = self.buffer_bpm / 60
+                    else:
+                        x_scale = 1
 
                     # set up plot limits if not already set
                     if channel == 0:
@@ -361,7 +398,8 @@ class BufferEditor:
                             peak_scale = self.get_peak_scale(self.implot_limits)
                             peaks = self.buffer_peaks[peak_scale]
                         y_values = peaks[0][channel - 1]
-                        x_values = peaks[1]
+
+                        x_values = peaks[1] * x_scale
 
                         # the actual line!
                         implot.plot_line("Buffer edit", x_values, y_values)

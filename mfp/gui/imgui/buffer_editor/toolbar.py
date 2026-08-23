@@ -2,29 +2,45 @@
 Toolbar render method for buffer editor
 """
 
+import locale
 from datetime import datetime
 from imgui_bundle import imgui
 
+from mfp import log
 from mfp.utils import extends
 from mfp.gui import image_utils
 from mfp.gui.colordb import ColorDB
 from .buffer_editor import BufferEditor
 
+locale.setlocale(locale.LC_NUMERIC, "")
 
-def fmt_time(ttime):
-    minutes = int(ttime // 60)
-    seconds = int(ttime - 60*minutes)
-    sfrac = int(1000 * (ttime % 1.0))
-    return f"{minutes:02d}:{seconds:02d}.{sfrac:03d}"
+# Retrieve the specific locale conventions
+conv = locale.localeconv()
+decimal_separator = conv["decimal_point"]
+
+def fmt_time(ttime, units):
+    if units == BufferEditor.SECONDS:
+        minutes = int(ttime // 60)
+        seconds = int(ttime - 60*minutes)
+        sfrac = int(1000 * (ttime % 1.0))
+        return f"{minutes:02d}:{seconds:02d}{decimal_separator}{sfrac:03d}"
+    else:
+        return f"{ttime:03.3f}"
 
 
-def unfmt_time(strtime):
-    import re
-    matches = re.match(r"^([0-9]+):([0-9.]+)$", strtime)
-    try:
-        return 60 * float(matches.group(1)) + float(matches.group(2))
-    except Exception:
-        return None
+def unfmt_time(strtime, units):
+    import re, locale
+    if units == BufferEditor.SECONDS:
+        matches = re.match(r"^([0-9]+):([0-9.,]+)$", strtime)
+        try:
+            return 60 * float(matches.group(1)) + float(matches.group(2))
+        except Exception:
+            return None
+    else:
+        try:
+            return locale.atof(strtime)
+        except Exception:
+            return None
 
 
 @extends(BufferEditor)
@@ -220,6 +236,26 @@ def render_toolbar(self):
     #######################
     # playhead and selection info
     imgui.begin_group()
+    imgui.push_font(self.app_window.imgui_default_font, 11)
+    imgui.push_style_var(imgui.StyleVar_.frame_padding, (1, 1))
+    imgui.push_style_var(imgui.StyleVar_.item_inner_spacing, (1, 1))
+
+    units_changed = False
+    if imgui.radio_button("SEC", self.buffer_units == self.SECONDS):
+        if self.buffer_units != self.SECONDS:
+            units_changed = True
+        self.buffer_units = self.SECONDS
+    if imgui.radio_button("BEAT", self.buffer_units == self.BEATS):
+        if self.buffer_units != self.BEATS:
+            units_changed = True
+        self.buffer_units = self.BEATS
+
+    imgui.pop_style_var(2)
+    imgui.pop_font()
+    imgui.end_group()
+    imgui.same_line()
+
+    imgui.begin_group()
     imgui.dummy((0.1, 0.125 * line_height))
     imgui.text("Pos:")
     imgui.end_group()
@@ -227,12 +263,12 @@ def render_toolbar(self):
     imgui.push_font(self.app_window.imgui_default_font, 18)
     imgui.push_style_var(imgui.StyleVar_.window_border_size, 1)
     imgui.set_next_item_width(6 * line_height)
-    orig_ph = fmt_time(self.implot_playhead or 0)
+    orig_ph = fmt_time(self.implot_playhead or 0, self.buffer_units)
     ph_changed, new_ph = imgui.input_text(
         "##playhead_pos", orig_ph
     )
     if ph_changed:
-        new_time = unfmt_time(new_ph)
+        new_time = unfmt_time(new_ph, self.buffer_units)
         if new_time is not None:
             MFPGUI().async_task(self.playhead_move(new_time))
     imgui.pop_style_var()
@@ -253,10 +289,10 @@ def render_toolbar(self):
     imgui.set_next_item_width(6 * line_height)
     ss_changed, ss_new = imgui.input_text(
         "##selection_start_pos",
-        fmt_time(self.implot_selection.x.min if self.implot_selection else 0)
+        fmt_time(self.implot_selection.x.min if self.implot_selection else 0, self.buffer_units)
     )
     if ss_changed:
-        new_time = unfmt_time(ss_new)
+        new_time = unfmt_time(ss_new, self.buffer_units)
         if new_time is not None:
             MFPGUI().async_task(
                 self.playhead_set_selection(new_time, None)
@@ -267,20 +303,37 @@ def render_toolbar(self):
     imgui.set_next_item_width(6 * line_height)
     se_changed, se_new = imgui.input_text(
         "##selection_end_pos",
-        fmt_time(self.implot_selection.x.max if self.implot_selection else 0)
+        fmt_time(self.implot_selection.x.max if self.implot_selection else 0, self.buffer_units)
     )
     if se_changed:
-        new_time = unfmt_time(se_new)
+        new_time = unfmt_time(se_new, self.buffer_units)
         if new_time is not None:
             MFPGUI().async_task(
                 self.playhead_set_selection(None, new_time)
             )
+    if not self.implot_selection:
+        imgui.end_disabled()
+
+    imgui.same_line()
+    imgui.text("BPM:")
+    imgui.same_line()
+    imgui.set_next_item_width(6 * line_height)
+    bpm_changed, bpm_new = imgui.input_text(
+        "##bpm",
+        fmt_time(self.buffer_bpm, self.BEATS)
+    )
+    if bpm_changed:
+        new_bpm = unfmt_time(bpm_new, self.BEATS)
+        if new_bpm is not None:
+            self.set_buffer_bpm(new_bpm)
+
+    if units_changed or bpm_changed:
+        num_channels = len(self.buffer_data or [])
+        self.implot_limits_need_set = [True] * (num_channels + 1)
+
     imgui.pop_style_var()
     imgui.pop_font()
     imgui.same_line()
-
-    if not self.implot_selection:
-        imgui.end_disabled()
 
     #######################
     # menu on far right

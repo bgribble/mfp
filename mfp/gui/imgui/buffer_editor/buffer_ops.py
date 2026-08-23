@@ -41,7 +41,7 @@ def buffer_grab(self, shm_obj=None, buffer_info=None):
     self.channel_selections_active = [False] * (buffer_info.channels + 1)
     if len(self.channel_options) < buffer_info.channels:
         self.channel_options = (
-            self.channel_options 
+            self.channel_options
             + [dict(fx=True) for _ in range(buffer_info.channels - len(self.channel_options))]
         )
     self.implot_limits = None
@@ -140,8 +140,8 @@ async def buffer_trim_to_selection(self):
     if not self.buffer_data:
         return
 
-    clip_start = int(self.implot_selection.x.min * self.buffer_info.rate)
-    clip_size = int((self.implot_selection.x.max - self.implot_selection.x.min) * self.buffer_info.rate)
+    clip_start = int(self.position_to_sample(self.implot_selection.x.min))
+    clip_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
 
     self.buffer_data = [
         np.delete(
@@ -176,6 +176,7 @@ async def buffer_trim_to_selection(self):
         )
     await self.playhead_set_selection(0, bufsize)
     self.buffer_compute_peaks()
+
 
 @extends(BufferEditor)
 def get_peak_scale(self, plot_limits):
@@ -218,10 +219,10 @@ def buffer_set_selection(self):
     )
     # input level signal
     startpos = int(
-        (self.implot_selection.x.min - (preroll / 1000.0)) * self.buffer_info.rate
+        self.position_to_sample(self.implot_selection.x.min - (preroll / 1000.0))
     )
     endpos = int(
-        (self.implot_selection.x.max + (preroll / 1000.0)) * self.buffer_info.rate
+        self.position_to_sample(self.implot_selection.x.max + (preroll / 1000.0))
     )
 
     startpos = max(0, startpos)
@@ -235,13 +236,13 @@ def buffer_set_selection(self):
     )
 
     # crossfade signal
-    inramp_start = int(self.implot_selection.x.min * self.buffer_info.rate)
-    outramp_end = int(self.implot_selection.x.max * self.buffer_info.rate)
+    inramp_start = int(self.position_to_sample(self.implot_selection.x.min))
+    outramp_end = int(self.position_to_sample(self.implot_selection.x.max))
 
     ramp_len = max(
         0,
         min(
-            int((xfade / 1000) * self.buffer_info.rate),
+            int(self.position_to_sample(xfade / 1000)),
             int((outramp_end - inramp_start) / 2)
         )
     )

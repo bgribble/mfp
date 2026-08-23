@@ -50,8 +50,8 @@ def compute_spectrogram(signal, nperseg=512, noverlap=256):
 
 @extends(BufferEditor)
 def get_spectrogram_data(self, channel, x_min, x_max, plot_w, plot_h):
-    x_min = int((x_min or 0) * self.buffer_info.rate)
-    x_max = int((x_max * self.buffer_info.rate) if x_max else len(self.buffer_data[0]))
+    x_min = int(self.position_to_sample(x_min or 0))
+    x_max = int(self.position_to_sample(x_max * self.buffer_info.rate) if x_max else len(self.buffer_data[0]))
 
     time_bin_size = 0
     time_bin_overlap = 0

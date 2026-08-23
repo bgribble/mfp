@@ -18,8 +18,8 @@ async def clipboard_copy(self):
     if not self.buffer_data or self.implot_selection is None:
         return
 
-    clip_start = int(self.implot_selection.x.min * self.buffer_info.rate)
-    clip_size = int((self.implot_selection.x.max - self.implot_selection.x.min) * self.buffer_info.rate)
+    clip_start = int(self.position_to_sample(self.implot_selection.x.min))
+    clip_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
     clip_data = [
         chan[clip_start:clip_start+clip_size]
         for chan in self.buffer_data
@@ -75,8 +75,8 @@ async def clipboard_clear(self):
     if not self.buffer_data or not self.implot_selection:
         return
 
-    section_start = int(self.implot_selection.x.min * self.buffer_info.rate)
-    section_end = int(self.implot_selection.x.max * self.buffer_info.rate)
+    section_start = int(self.position_to_sample(self.implot_selection.x.min))
+    section_end = int(self.position_to_sample(self.implot_selection.x.max))
 
     for chan in self.buffer_data:
         chan[section_start:section_end] = np.zeros(section_end-section_start, dtype=np.float32)
@@ -90,8 +90,8 @@ async def clipboard_delete(self):
     if not self.buffer_data or not self.implot_selection:
         return
 
-    section_start = int(self.implot_selection.x.min * self.buffer_info.rate)
-    section_end = int(self.implot_selection.x.max * self.buffer_info.rate)
+    section_start = int(self.position_to_sample(self.implot_selection.x.min))
+    section_end = int(self.position_to_sample(self.implot_selection.x.max))
 
     self.buffer_data = [
         np.delete(chan, np.s_[section_start:section_end])
@@ -134,12 +134,12 @@ async def clipboard_paste(self):
     clip_size = len(self.clipboard_data[0])
 
     if self.implot_selection is None:
-        sel_start = int(self.implot_playhead * self.buffer_info.rate)
+        sel_start = int(self.position_to_sample(self.implot_playhead))
         sel_size = 0
         sel_data = []
     else:
-        sel_start = int(self.implot_selection.x.min * self.buffer_info.rate)
-        sel_size = int((self.implot_selection.x.max - self.implot_selection.x.min) * self.buffer_info.rate)
+        sel_start = int(self.position_to_sample(self.implot_selection.x.min))
+        sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
         sel_data = [
             chan[sel_start:sel_start+sel_size]
             for chan in self.buffer_data
@@ -197,9 +197,9 @@ async def clipboard_paste_to_fit(self):
     if not self.buffer_data or self.implot_selection is None:
         return
 
-    sel_start = max(0, int(self.implot_selection.x.min * self.buffer_info.rate))
+    sel_start = max(0, int(self.position_to_sample(self.implot_selection.x.min)))
     sel_size = min(
-        int((self.implot_selection.x.max - self.implot_selection.x.min) * self.buffer_info.rate),
+        int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min)),
         self.buffer_info.size - sel_start
     )
     sel_data = [

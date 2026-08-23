@@ -106,12 +106,12 @@ class BufferEditMode (InputMode):
         cls.bind(
             "buffer-edit-effect-3band", lambda m: m.apply_effect("fx.3band~"),
             helptext="3-band EQ",
-            keysym="3", menupath="BufEdit > Effects > 3-band EQ"
+            keysym="q", menupath="BufEdit > Effects > 3-band EQ"
         )
         cls.bind(
             "buffer-edit-effect-1band", lambda m: m.apply_effect("fx.1band~"),
             helptext="1-band parametric EQ",
-            keysym="1", menupath="BufEdit > Effects > 1-band para EQ"
+            keysym="p", menupath="BufEdit > Effects > 1-band para EQ"
         )
 
         #####################

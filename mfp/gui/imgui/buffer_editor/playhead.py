@@ -19,7 +19,7 @@ from .buffer_editor import BufferEditor
 @extends(BufferEditor)
 async def playhead_start(self):
     from mfp.gui_main import MFPGUI
-    pos_samples = self.implot_playhead * self.buffer_info.rate
+    pos_samples = self.position_to_sample(self.implot_playhead)
     rec_channels = self.channel_options_rec_mask()
 
     buffer_params = dict(
@@ -59,7 +59,7 @@ async def playhead_start(self):
 async def playhead_move(self, new_pos):
     from mfp.gui_main import MFPGUI
     self.implot_playhead = new_pos
-    pos_samples = self.implot_playhead * self.buffer_info.rate
+    pos_samples = self.position_to_sample(self.implot_playhead)
 
     buffer_params = dict(
         buf_pos=pos_samples
@@ -122,8 +122,8 @@ async def playhead_set_selection(self, sel_start, sel_end):
 @extends(BufferEditor)
 async def playhead_update_selection(self):
     from mfp.gui_main import MFPGUI
-    start_samples = self.implot_selection.x.min * self.buffer_info.rate
-    end_samples = self.implot_selection.x.max * self.buffer_info.rate
+    start_samples = self.position_to_sample(self.implot_selection.x.min)
+    end_samples = self.position_to_sample(self.implot_selection.x.max)
     buffer_params = dict(
         region_start=start_samples,
         region_end=end_samples
@@ -131,10 +131,10 @@ async def playhead_update_selection(self):
     if self.implot_playhead_looping:
         if self.implot_playhead < self.implot_selection.x.min:
             self.implot_playhead = self.implot_selection.x.min
-            buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
+            buffer_params['buf_pos'] = self.position_to_sample(self.implot_playhead)
         elif self.implot_playhead >= self.implot_selection.x.max:
             self.implot_playhead = self.implot_selection.x.max
-            buffer_params['buf_pos'] = self.implot_playhead * self.buffer_info.rate
+            buffer_params['buf_pos'] = self.position_to_sample(self.implot_playhead)
         await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
         await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
@@ -148,8 +148,8 @@ async def playhead_update_selection(self):
 @extends(BufferEditor)
 async def playhead_loop_selection(self):
     from mfp.gui_main import MFPGUI
-    start_samples = self.implot_selection.x.min * self.buffer_info.rate
-    end_samples = self.implot_selection.x.max * self.buffer_info.rate
+    start_samples = self.position_to_sample(self.implot_selection.x.min)
+    end_samples = self.position_to_sample(self.implot_selection.x.max)
     self.implot_playhead = self.implot_selection.x.min
     self.implot_playhead_looping = True
 
@@ -199,7 +199,7 @@ async def playhead_select_silence(self, thresh_db):
         absmax = max(absmax, 1e-6)
         return 20 * math.log10(absmax)
 
-    ph = int(self.implot_playhead * self.buffer_info.rate)
+    ph = int(self.position_to_sample(self.implot_playhead))
 
     pos_fwd = ph
     while pos_fwd < self.buffer_info.size and level(pos_fwd) <= thresh_db:
@@ -210,8 +210,8 @@ async def playhead_select_silence(self, thresh_db):
         pos_rev -= 1
 
     await self.playhead_set_selection(
-        pos_rev / self.buffer_info.rate,
-        pos_fwd / self.buffer_info.rate
+        self.sample_to_position(pos_rev),
+        self.sample_to_position(pos_fwd)
     )
 
 
@@ -220,7 +220,7 @@ async def playhead_insert_data(self, data):
     if not len(self.buffer_data) or data is None or not len(data):
         return
 
-    sel_start = int(self.implot_playhead * self.buffer_info.rate)
+    sel_start = int(self.position_to_sample(self.implot_playhead))
 
     self.buffer_data = [
         np.insert(chan, sel_start, data)
