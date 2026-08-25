@@ -19,21 +19,24 @@ conv = locale.localeconv()
 decimal_separator = conv["decimal_point"]
 
 def fmt_time(ttime, units):
+    sgn = "-" if ttime < 0 else ""
+    ttime = abs(ttime)
     if units == BufferEditor.SECONDS:
         minutes = int(ttime // 60)
         seconds = int(ttime - 60*minutes)
         sfrac = int(1000 * (ttime % 1.0))
-        return f"{minutes:02d}:{seconds:02d}{decimal_separator}{sfrac:03d}"
+        return f"{sgn}{minutes:02d}:{seconds:02d}{decimal_separator}{sfrac:03d}"
     else:
-        return f"{ttime:03.3f}"
+        return f"{sgn}{ttime:03.3f}"
 
 
 def unfmt_time(strtime, units):
     import re, locale
     if units == BufferEditor.SECONDS:
-        matches = re.match(r"^([0-9]+):([0-9.,]+)$", strtime)
+        matches = re.match(r"^(-)?([0-9]+):([0-9.,]+)$", strtime)
         try:
-            return 60 * float(matches.group(1)) + float(matches.group(2))
+            sgn = -1 if matches.group(1) == "-" else 1
+            return sgn * 60 * float(matches.group(2)) + float(matches.group(3))
         except Exception:
             return None
     else:

@@ -56,6 +56,7 @@ class BufferEditor:
         self.buffer_peaks = {}
         self.buffer_units = self.SECONDS
         self.buffer_bpm = 60
+        self.buffer_origin = 0
 
         self.working_patch_id = None
         self.working_patch_info = None
@@ -110,10 +111,26 @@ class BufferEditor:
             if self.implot_limits:
                 self.implot_limits.x.min *= ratio
                 self.implot_limits.x.max *= ratio
+                self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
             if self.implot_playhead:
                 self.implot_playhead *= ratio
 
         self.buffer_bpm = bpm
+
+    def set_buffer_origin(self, origin):
+        new_origin = origin + self.buffer_origin
+        delta = new_origin - self.buffer_origin
+        if self.implot_selection:
+            self.implot_selection.x.min -= delta
+            self.implot_selection.x.max -= delta
+        if self.implot_limits:
+            self.implot_limits.x.min -= delta
+            self.implot_limits.x.max -= delta
+            self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+        if self.implot_playhead:
+            self.implot_playhead = 0
+
+        self.buffer_origin = new_origin
 
     def position_to_sample(self, position):
         if self.buffer_units == self.BEATS:
@@ -213,7 +230,6 @@ class BufferEditor:
                 if self.implot_playhead > self.implot_total_time:
                     self.implot_playhead_start_time = None
                     self.implot_playhead_looping = False
-                    log.debug(f"[play] Stopping at end of buffer, options={self.channel_options}")
                     MFPGUI().async_task(self.playhead_pause())
 
             options_changed = False
@@ -334,6 +350,7 @@ class BufferEditor:
                         x_scale = self.buffer_bpm / 60
                     else:
                         x_scale = 1
+                    x_offset = self.buffer_origin
 
                     # set up plot limits if not already set
                     if channel == 0:
@@ -399,7 +416,7 @@ class BufferEditor:
                             peaks = self.buffer_peaks[peak_scale]
                         y_values = peaks[0][channel - 1]
 
-                        x_values = peaks[1] * x_scale
+                        x_values = peaks[1] * x_scale - x_offset
 
                         # the actual line!
                         implot.plot_line("Buffer edit", x_values, y_values)

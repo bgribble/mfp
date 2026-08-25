@@ -106,12 +106,12 @@ class BufferEditMode (InputMode):
         cls.bind(
             "buffer-edit-effect-3band", lambda m: m.apply_effect("fx.3band~"),
             helptext="3-band EQ",
-            keysym="q", menupath="BufEdit > Effects > 3-band EQ"
+            keysym="e", menupath="BufEdit > Effects > 3-band EQ"
         )
         cls.bind(
             "buffer-edit-effect-1band", lambda m: m.apply_effect("fx.1band~"),
             helptext="1-band parametric EQ",
-            keysym="p", menupath="BufEdit > Effects > 1-band para EQ"
+            keysym="q", menupath="BufEdit > Effects > 1-band para EQ"
         )
 
         #####################
@@ -131,6 +131,10 @@ class BufferEditMode (InputMode):
         cls.bind(
             "buffer-edit-xport-loop", cls.playhead_loop_selection, helptext="Loop selection",
             keysym="L", menupath="BufEdit > Transport > Loop selection"
+        )
+        cls.bind(
+            "buffer-edit-xport-reset", cls.reset_origin_to_playhead, helptext="Reset 0 to playhead",
+            keysym="z", menupath="BufEdit > Transport > Set 0 to playhead"
         )
 
         #####################
@@ -316,6 +320,10 @@ class BufferEditMode (InputMode):
 
     async def playhead_loop_selection(self):
         await self.editor.playhead_loop_selection()
+        return True
+
+    async def reset_origin_to_playhead(self):
+        self.editor.set_buffer_origin(self.editor.implot_playhead)
         return True
 
     async def insert_silence(self, duration=None):
