@@ -750,3 +750,4 @@ from . import fx_patch
 from . import spectrogram
 from . import toolbar
 from . import playhead
+from . import analyze

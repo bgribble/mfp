@@ -162,6 +162,17 @@ class BufferEditMode (InputMode):
         )
 
         #####################
+        # Analyze menu
+        cls.bind(
+            "buffer-edit-analyze-loudness", cls.analyze_loudness, helptext="Detect selection loudness",
+            keysym="A-l", menupath="BufEdit > Analyze > Loudness"
+        )
+        cls.bind(
+            "buffer-edit-analyze-bpm", cls.analyze_bpm, helptext="Detect selection BPM",
+            keysym="A-b", menupath="BufEdit > Analyze > BPM"
+        )
+
+        #####################
         # File operations
         cls.bind(
             "buffer-edit-reload", cls.buffer_reload, helptext="Reload from current buffer",
@@ -219,7 +230,6 @@ class BufferEditMode (InputMode):
 
         self.mouse_down_pos = imgui.get_mouse_pos()
         return True
-
 
     def click_end(self, *args):
         from imgui_bundle import imgui
@@ -421,3 +431,19 @@ class BufferEditMode (InputMode):
         else:
             await cb(filename)
         return True
+
+    async def analyze_loudness(self):
+        loudness_info = await self.editor.analyze_loudness()
+        message = []
+        for key, value in loudness_info.items():
+            message.append(f"{key}: {value:.3f} dB")
+        log.info(f"[loudness] {', '.join(message)}")
+        self.window.hud_write(', '.join(message))
+
+    async def analyze_bpm(self):
+        bpm = await self.editor.analyze_bpm()
+        if bpm:
+            self.window.hud_write(f"Tempo: {bpm:.3f}")
+        else:
+            self.window.hud_write("Cannot determine BPM")
+
