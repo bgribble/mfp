@@ -114,6 +114,8 @@ class BufferEditor:
                 self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
             if self.implot_playhead:
                 self.implot_playhead *= ratio
+            if self.implot_total_time:
+                self.implot_total_time *= ratio
 
         self.buffer_bpm = bpm
 
@@ -132,21 +134,72 @@ class BufferEditor:
 
         self.buffer_origin = new_origin
 
-    def position_to_sample(self, position):
-        position = position + self.buffer_origin
+    def set_buffer_units(self, units):
+        if units == self.buffer_units:
+            return
+
+        origin = self.sample_to_position(
+            self.position_to_sample(0),
+            units=units, origin=0
+        )
+
+        if self.implot_selection:
+            self.implot_selection.x.min = self.sample_to_position(
+                self.position_to_sample(self.implot_selection.x.min),
+                units=units, origin=origin
+            )
+            self.implot_selection.x.max = self.sample_to_position(
+                self.position_to_sample(self.implot_selection.x.max),
+                units=units, origin=origin
+            )
+        if self.implot_limits:
+            self.implot_limits.x.min = self.sample_to_position(
+                self.position_to_sample(self.implot_limits.x.min),
+                units=units, origin=origin
+            )
+            self.implot_limits.x.max = self.sample_to_position(
+                self.position_to_sample(self.implot_limits.x.max),
+                units=units, origin=origin
+            )
+            self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+        if self.implot_playhead:
+            self.implot_playhead = self.sample_to_position(
+                self.position_to_sample(self.implot_playhead),
+                units=units, origin=origin
+            )
+
+        if self.implot_total_time:
+            self.implot_total_time = self.sample_to_position(
+                self.position_to_sample(self.implot_total_time),
+                units=units, origin=origin
+            )
+        self.buffer_units = units
+        self.buffer_origin = origin
+
+    def position_to_sample(self, position, units=None, origin=None):
+        if units is None:
+            units = self.buffer_units
+        if origin is None:
+            origin = self.buffer_origin
+        position = position + origin
         max_position = len(self.buffer_data[0])
 
-        if self.buffer_units == self.BEATS:
+        if units == self.BEATS:
             sample_pos = (60 * position / self.buffer_bpm) * self.buffer_info.rate
         else:
             sample_pos = position * self.buffer_info.rate
         return max(0, min(max_position, sample_pos))
 
-    def sample_to_position(self, sample):
-        if self.buffer_units == self.BEATS:
-            return (sample / self.buffer_info.rate) * (self.buffer_bpm / 60) - self.buffer_origin
+    def sample_to_position(self, sample, units=None, origin=None):
+        if units is None:
+            units = self.buffer_units
+        if origin is None:
+            origin = self.buffer_origin
+
+        if units == self.BEATS:
+            return (sample / self.buffer_info.rate) * (self.buffer_bpm / 60) - origin
         else:
-            return sample / self.buffer_info.rate - self.buffer_origin
+            return sample / self.buffer_info.rate - origin
 
     ########################################
     # plots
@@ -210,9 +263,11 @@ class BufferEditor:
             implot.push_style_var(implot.StyleVar_.plot_padding, (2, 0))
 
             if self.implot_playhead_start_time and not self.implot_playhead_needs_set:
-                playhead_offset = (
+                playhead_offset_samples = (
                     datetime.now() - self.implot_playhead_start_time
-                ).total_seconds()
+                ).total_seconds() * self.buffer_info.rate
+                playhead_offset = self.sample_to_position(playhead_offset_samples, origin=0)
+
                 if self.implot_playhead_looping and self.implot_selection:
                     raw_offset = self.implot_playhead_start_pos + playhead_offset
                     if raw_offset < self.implot_selection.x.min:

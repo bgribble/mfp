@@ -247,11 +247,11 @@ def render_toolbar(self):
     if imgui.radio_button("SEC", self.buffer_units == self.SECONDS):
         if self.buffer_units != self.SECONDS:
             units_changed = True
-        self.buffer_units = self.SECONDS
+            self.set_buffer_units(self.SECONDS)
     if imgui.radio_button("BEAT", self.buffer_units == self.BEATS):
         if self.buffer_units != self.BEATS:
             units_changed = True
-        self.buffer_units = self.BEATS
+            self.set_buffer_units(self.BEATS)
 
     imgui.pop_style_var(2)
     imgui.pop_font()

@@ -29,7 +29,7 @@ async def playhead_start(self):
         monitor_channels=rec_channels,
         buf_pos=pos_samples,
         region_start=pos_samples,
-        region_end=self.implot_total_time * self.buffer_info.rate
+        region_end=self.position_to_sample(self.implot_total_time)
     )
     await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 

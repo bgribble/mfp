@@ -97,7 +97,7 @@ def buffer_compute_peaks(self):
         np.pad(chan, (0, padding), mode='constant')
         for chan in self.buffer_data
     ]
-    total_time = len(padded[0]) / self.buffer_info.rate
+    total_time = self.sample_to_position(len(padded[0]), origin=0)
     sample_time = 1/self.buffer_info.rate
     self.implot_total_time = total_time
     self.implot_limits = implot.Rect(
