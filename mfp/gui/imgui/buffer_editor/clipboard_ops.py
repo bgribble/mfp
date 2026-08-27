@@ -12,6 +12,12 @@ from mfp.utils import extends
 from mfp.buffer_info import BufferInfo
 from .buffer_editor import BufferEditor
 
+def is_zero(buf):
+    ZERO = 0.0001
+    for sample in buf:
+        if abs(sample) > ZERO:
+            return False
+    return True
 
 @extends(BufferEditor)
 async def clipboard_copy(self):
@@ -21,7 +27,7 @@ async def clipboard_copy(self):
     clip_start = int(self.position_to_sample(self.implot_selection.x.min))
     clip_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
     clip_data = [
-        chan[clip_start:clip_start+clip_size]
+        chan[clip_start:clip_start+clip_size].copy()
         for chan in self.buffer_data
     ]
 
@@ -136,14 +142,9 @@ async def clipboard_paste(self):
     if self.implot_selection is None:
         sel_start = int(self.position_to_sample(self.implot_playhead))
         sel_size = 0
-        sel_data = []
     else:
         sel_start = int(self.position_to_sample(self.implot_selection.x.min))
         sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
-        sel_data = [
-            chan[sel_start:sel_start+sel_size]
-            for chan in self.buffer_data
-        ]
 
     delta_len = clip_size - sel_size
 
@@ -191,7 +192,7 @@ async def clipboard_paste(self):
 
 
 @extends(BufferEditor)
-async def clipboard_paste_to_fit(self):
+async def clipboard_paste_to_fit__resample(self):
     import resampy
 
     if not self.buffer_data or self.implot_selection is None:
@@ -199,23 +200,48 @@ async def clipboard_paste_to_fit(self):
 
     sel_start = max(0, int(self.position_to_sample(self.implot_selection.x.min)))
     sel_size = min(
-        int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min)),
+        int(self.position_to_sample(self.implot_selection.x.max) - sel_start),
         self.buffer_info.size - sel_start
     )
-    sel_data = [
-        chan[sel_start:sel_start+sel_size]
-        for chan in self.buffer_data
-    ]
 
-    log.debug(f"[stretch] resampling from {self.clipboard_size} to {sel_size}")
     new_data = [
-        resampy.resample(chan_data, self.clipboard_size, sel_size)
+        resampy.resample(chan_data, 48000, 48000 * (sel_size / self.clipboard_size))
         for chan_data in self.clipboard_data
     ]
-    log.debug(f"[stretch] resampled size={len(new_data[0])}")
+
+    new_buffer = []
+    for chan_num, chan in enumerate(self.buffer_data):
+        chan[sel_start:sel_start+sel_size] = np.zeros(sel_size, dtype=np.float32)
+        chan[sel_start:sel_start+len(new_data[chan_num])] = new_data[chan_num]
+        new_buffer.append(chan)
+
+    self.buffer_data = new_buffer
+    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
+    self.buffer_compute_peaks()
+
+
+@extends(BufferEditor)
+async def clipboard_paste_to_fit__stretch(self):
+    import paulstretch
+
+    if not self.buffer_data or self.implot_selection is None:
+        return
+
+    sel_start = int(self.position_to_sample(self.implot_selection.x.min))
+    sel_size = min(
+        int(self.position_to_sample(self.implot_selection.x.max) - sel_start),
+        self.buffer_info.size - sel_start
+    )
+
+    new_data = [
+        paulstretch.stretch(chan_data, stretch_factor=sel_size / self.clipboard_size)
+        for chan_data in self.clipboard_data
+    ]
+    new_data_len = min(len(new_data[0]), self.buffer_info.size - sel_start)
 
     for chan_num, chan in enumerate(self.buffer_data):
-        chan[sel_start:sel_start+sel_size] = new_data[chan_num]
+        chan[sel_start:sel_start+sel_size] = np.zeros(sel_size, dtype=np.float32)
+        chan[sel_start:sel_start+new_data_len] = new_data[chan_num][:new_data_len].squeeze()
 
     self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
     self.buffer_compute_peaks()

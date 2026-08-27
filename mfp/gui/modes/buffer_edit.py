@@ -37,12 +37,17 @@ class BufferEditMode (InputMode):
         )
         cls.bind(
             "buffer-edit-paste", cls.paste, helptext="Paste selection from clipboard",
-            keysym="C-v", menupath="BufEdit > Paste"
+            keysym="C-v", menupath="BufEdit > Paste > Paste"
         )
         cls.bind(
-            "buffer-edit-paste-stretch", cls.paste_to_fit,
-            helptext="Paste from clipboard, stretched to fit selection",
-            keysym="C-f", menupath="BufEdit > Paste to fit"
+            "buffer-edit-paste-resample", cls.paste_to_fit__resample,
+            helptext="Paste from clipboard, resampled to fit selection",
+            keysym="A-v", menupath="BufEdit > Paste > Paste to fit (resample)"
+        )
+        cls.bind(
+            "buffer-edit-paste-stretch", cls.paste_to_fit__stretch,
+            helptext="Paste from clipboard, stretched with Paulstretch to fit selection",
+            keysym="A-V", menupath="BufEdit > Paste > Paste to fit (stretch)"
         )
         cls.bind(
             "buffer-edit-clear", cls.clear, helptext="Clear selection",
@@ -382,8 +387,12 @@ class BufferEditMode (InputMode):
         await self.editor.clipboard_paste()
         return True
 
-    async def paste_to_fit(self):
-        await self.editor.clipboard_paste_to_fit()
+    async def paste_to_fit__resample(self):
+        await self.editor.clipboard_paste_to_fit__resample()
+        return True
+
+    async def paste_to_fit__stretch(self):
+        await self.editor.clipboard_paste_to_fit__stretch()
         return True
 
     async def clear(self):

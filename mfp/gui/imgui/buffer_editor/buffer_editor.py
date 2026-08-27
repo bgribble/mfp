@@ -133,16 +133,20 @@ class BufferEditor:
         self.buffer_origin = new_origin
 
     def position_to_sample(self, position):
+        position = position + self.buffer_origin
+        max_position = len(self.buffer_data[0])
+
         if self.buffer_units == self.BEATS:
-            return (60 * position / self.buffer_bpm) * self.buffer_info.rate
+            sample_pos = (60 * position / self.buffer_bpm) * self.buffer_info.rate
         else:
-            return position * self.buffer_info.rate
+            sample_pos = position * self.buffer_info.rate
+        return max(0, min(max_position, sample_pos))
 
     def sample_to_position(self, sample):
         if self.buffer_units == self.BEATS:
-            return (sample / self.buffer_info.rate) * (self.buffer_bpm / 60)
+            return (sample / self.buffer_info.rate) * (self.buffer_bpm / 60) - self.buffer_origin
         else:
-            return sample / self.buffer_info.rate
+            return sample / self.buffer_info.rate - self.buffer_origin
 
     ########################################
     # plots
