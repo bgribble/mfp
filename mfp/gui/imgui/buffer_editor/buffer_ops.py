@@ -37,6 +37,8 @@ def buffer_grab(self, shm_obj=None, buffer_info=None):
         shm_obj = self.shm_obj
 
     self.buffer_data = []
+    self.spectral_data_cache = {}
+
     self.channel_selections = [None] * (buffer_info.channels + 1)
     self.channel_selections_active = [False] * (buffer_info.channels + 1)
     if len(self.channel_options) < buffer_info.channels:
@@ -92,6 +94,8 @@ def buffer_sync_channel(self, channel, from_obj, from_info, to_obj, to_info, dat
 @extends(BufferEditor)
 def buffer_compute_peaks(self):
     self.buffer_peaks = {}
+    self.spectral_data_cache = {}
+
     padding = 10 - len(self.buffer_data[0]) % 10
     padded = [
         np.pad(chan, (0, padding), mode='constant')
