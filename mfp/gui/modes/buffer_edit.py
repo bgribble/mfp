@@ -438,12 +438,17 @@ class BufferEditMode (InputMode):
         for key, value in loudness_info.items():
             message.append(f"{key}: {value:.3f} dB")
         log.info(f"[loudness] {', '.join(message)}")
-        self.window.hud_write(', '.join(message))
+        self.window.hud_write(', '.join(message), display_time=15)
 
     async def analyze_bpm(self):
+        self.window.hud_write("Analyzing...")
         bpm = await self.editor.analyze_bpm()
-        if bpm:
-            self.window.hud_write(f"Tempo: {bpm:.3f}")
+        if bpm is not None:
+            words = []
+            for chan, value in enumerate(bpm):
+                chan_bpm = value[0]
+                words.append(f"ch {chan + 1}: {chan_bpm:.3f} bpm")
+            self.window.hud_write(f"Tempo: {', '.join(words)}", display_time=15)
         else:
             self.window.hud_write("Cannot determine BPM")
 
