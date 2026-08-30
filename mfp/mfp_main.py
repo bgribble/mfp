@@ -44,6 +44,8 @@ To report bugs or download source:
 
 Copyright (c) 2009-2025 Bill Gribble <grib@billgribble.com>
 
+MFP uses icons from Fontaudio, Copyright (c) 2019 Michelangelo Nottoli
+
 MFP is free software, and you are welcome to redistribute it
 under certain conditions.  See the file COPYING for details.
 """
@@ -189,7 +191,6 @@ async def main():
                         help="Path to create Unix-domain socket for RPC")
     parser.add_argument("-d", "--debug", action="store_true",
                         help="Enable debugging behaviors")
-
     # batch mode options
     parser.add_argument("-b", "--batch", action="store_true",
                         help="Run in batch mode")
