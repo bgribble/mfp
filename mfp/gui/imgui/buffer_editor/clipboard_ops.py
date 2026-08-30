@@ -192,6 +192,84 @@ async def clipboard_paste(self):
 
 
 @extends(BufferEditor)
+async def clipboard_paste__mixing(self):
+    """
+    Paste clipboard into buffer at selection or playhead.
+    - Replace selection if it exists
+    - If clipboard is larger than selection, mix tail of clipboard into buffer
+    - If pasted clip overflows buffer, expand buffer
+    """
+    if not self.buffer_data or not self.clipboard_data:
+        return
+
+    clip_size = len(self.clipboard_data[0])
+
+    if self.implot_selection is None:
+        sel_start = int(self.position_to_sample(self.implot_playhead))
+        sel_size = 0
+    else:
+        sel_start = int(self.position_to_sample(self.implot_selection.x.min))
+        sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
+
+    delta_len = sel_start + clip_size - len(self.buffer_data[0])
+
+    # make room at end if needed
+    if delta_len > 0:
+        self.buffer_data = [
+            np.append(chan, np.zeros(delta_len))
+            for chan in self.buffer_data
+        ]
+
+    # copy the selection portion
+    clip_consumed = 0
+    if self.implot_selection is not None:
+        clip_consumed = min(clip_size, sel_size)
+        sel_end = sel_start + clip_consumed
+        for chan_num, chan in enumerate(self.buffer_data):
+            chan[sel_start:sel_start + sel_size] = 0
+            chan[sel_start:sel_end] = self.clipboard_data[chan_num][:min(clip_size, sel_size)]
+
+    # the overlap or extended region (non-selected)
+    dest_begin = sel_start + clip_consumed
+    dest_end = sel_start + clip_size
+    src_begin = clip_consumed
+    src_end = clip_size
+
+    for chan_num, chan in enumerate(self.buffer_data):
+        chan[dest_begin:dest_end] += self.clipboard_data[chan_num][src_begin:src_end]
+
+    # resize the buffer object if needed
+    if delta_len > 0:
+        bufsize_ms = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
+
+        # source buffer "owns" the reshape
+        working_buf = await self.buffer_reshape(
+            self.working_source_id,
+            size=bufsize_ms,
+            channels=len(self.buffer_data) + 2
+        )
+        self.working_buf_id = working_buf.buf_id
+        self.working_buf_obj = SharedMemory(self.working_buf_id)
+        self.working_buf_info = working_buf
+
+        # sink buffer just needs to point to the new segment and
+        # adjust internal buffers
+        if working_buf:
+            await self.buffer_reshape(
+                self.working_sink_id,
+                buf_id=working_buf.buf_id,
+                size=bufsize_ms,
+                channels=working_buf.channels
+            )
+
+        self.implot_selection = None
+
+    # sync data back to working buffer
+    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
+    self.buffer_compute_peaks()
+
+
+@extends(BufferEditor)
 async def clipboard_paste_to_fit__resample(self):
     import resampy
 

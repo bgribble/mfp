@@ -50,6 +50,11 @@ class BufferEditMode (InputMode):
             keysym="A-V", menupath="BufEdit > Paste > Paste to fit (stretch)"
         )
         cls.bind(
+            "buffer-edit-paste-mixing", cls.paste__mixing,
+            helptext="Paste from clipboard, adding to existing",
+            keysym="C-V", menupath="BufEdit > Paste > Paste into (mixing)"
+        )
+        cls.bind(
             "buffer-edit-clear", cls.clear, helptext="Clear selection",
             keysym="C-k", menupath="BufEdit > Clear"
         )
@@ -395,6 +400,10 @@ class BufferEditMode (InputMode):
 
     async def paste(self):
         await self.editor.clipboard_paste()
+        return True
+
+    async def paste__mixing(self):
+        await self.editor.clipboard_paste__mixing()
         return True
 
     async def paste_to_fit__resample(self):
