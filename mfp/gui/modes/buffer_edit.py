@@ -64,7 +64,7 @@ class BufferEditMode (InputMode):
         )
         cls.bind(
             "buffer-edit-trim-to-selection", cls.trim, helptext="Trim to selection",
-            keysym="DEL", menupath="BufEdit > Trim to selection"
+            keysym="C-t", menupath="BufEdit > Trim to selection"
         )
         cls.bind(
             "buffer-edit-insert-silence", cls.insert_silence, helptext="Insert silence at playhead",
@@ -457,6 +457,7 @@ class BufferEditMode (InputMode):
             for chan, value in enumerate(bpm):
                 chan_bpm = value[0]
                 words.append(f"ch {chan + 1}: {chan_bpm:.3f} bpm")
+            log.info(f"[tempo] {', '.join(words)}")
             self.window.hud_write(f"Tempo: {', '.join(words)}", display_time=15)
         else:
             self.window.hud_write("Cannot determine BPM")

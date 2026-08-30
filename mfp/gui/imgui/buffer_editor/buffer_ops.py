@@ -141,17 +141,18 @@ def buffer_compute_peaks(self):
 
 @extends(BufferEditor)
 async def buffer_trim_to_selection(self):
-    if not self.buffer_data:
+    if not self.buffer_data or not self.implot_selection:
         return
 
-    clip_start = int(self.position_to_sample(self.implot_selection.x.min))
-    clip_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
+    playhead_pos = int(self.position_to_sample(self.implot_playhead))
+    sel_start = int(self.position_to_sample(self.implot_selection.x.min))
+    sel_size = int(self.position_to_sample(self.implot_selection.x.max) - self.position_to_sample(self.implot_selection.x.min))
 
     self.buffer_data = [
         np.delete(
-            np.delete(chan, np.s_[:clip_start]),
-            np.s_[clip_size:]
-        )
+            np.delete(chan, np.s_[:sel_start]),
+            np.s_[sel_size:]
+        ).copy()
         for chan in self.buffer_data
     ]
 
@@ -167,8 +168,6 @@ async def buffer_trim_to_selection(self):
     self.working_buf_obj = SharedMemory(self.working_buf_id)
     self.working_buf_info = working_buf
 
-    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
-
     # sink buffer just needs to point to the new segment and
     # adjust internal buffers
     if working_buf:
@@ -178,8 +177,15 @@ async def buffer_trim_to_selection(self):
             size=bufsize,
             channels=working_buf.channels
         )
-    await self.playhead_set_selection(0, bufsize)
+
+    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
     self.buffer_compute_peaks()
+
+    self.buffer_origin = 0
+    await self.playhead_move(0)
+    await self.playhead_set_selection(
+        self.sample_to_position(0), self.sample_to_position(len(self.buffer_data[0]))
+    )
 
 
 @extends(BufferEditor)
