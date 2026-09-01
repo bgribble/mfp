@@ -46,8 +46,7 @@ async def playhead_start(self):
     buffer_params["monitor_channels"] = 0xff
 
     await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
-
-    await asyncio.sleep(0.2)
+    await asyncio.sleep(0.1)
     await MFPGUI().mfp.send(self.working_trigger_id, 0, 1)
 
     self.implot_playhead_start_time = datetime.now()
@@ -150,25 +149,32 @@ async def playhead_loop_selection(self):
     from mfp.gui_main import MFPGUI
     start_samples = self.position_to_sample(self.implot_selection.x.min)
     end_samples = self.position_to_sample(self.implot_selection.x.max)
-    self.implot_playhead = self.implot_selection.x.min
-    self.implot_playhead_looping = True
 
     buffer_params = dict(
         buf_mode=6,
         play_channels=0xff,
         rec_channels=0,
-        buf_pos=start_samples,
+        monitor_channels=0,
         region_start=start_samples,
         region_end=end_samples
     )
 
-    await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
-    await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
-    await MFPGUI().mfp.send_bang(self.working_sink_id, 0)
-    await MFPGUI().mfp.send_bang(self.working_source_id, 0)
+    if not self.implot_playhead_start_time:
+        self.implot_playhead_start_time = datetime.now()
+        self.implot_playhead = self.implot_selection.x.min
+        self.implot_playhead_start_pos = self.implot_selection.x.min
+        buffer_params["buf_pos"] = start_samples
 
-    self.implot_playhead_start_time = datetime.now()
-    self.implot_playhead_start_pos = self.implot_playhead
+    await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
+
+    buffer_params["monitor_channels"] = 0xff
+
+    await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
+    await asyncio.sleep(0.1)
+    await MFPGUI().mfp.send(self.working_trigger_id, 0, 1)
+
+    self.implot_playhead_looping = True
+    self.rec_recording = False
 
 
 @extends(BufferEditor)

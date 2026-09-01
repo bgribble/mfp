@@ -212,6 +212,7 @@ process(mfp_processor * proc)
         (d->buf_mode == REC_TRIG_EXT)
         || (d->buf_mode == REC_TRIG_THRESH)
         || (d->buf_mode == PLAY_TRIG_THRESH)
+        || (d->buf_mode == PLAY_LOOP)
     ) {
         /* trig_block is the data we will be looking at to find a trigger condition */
         switch (d->buf_mode) {
@@ -226,6 +227,7 @@ process(mfp_processor * proc)
             /* this one looks at any specified channel for the trigger */
             case REC_TRIG_THRESH:
             case PLAY_TRIG_THRESH:
+            case PLAY_LOOP:
                 if(d->trig_channel > (proc->inlet_conn->len-1)) {
                     return -1;
                 }
@@ -317,8 +319,11 @@ process(mfp_processor * proc)
                         if (d->buf_mode == REC_LOOPSET) {
                             d->region_end ++;
                         }
-                        else if ((d->buf_mode == REC_LOOP) && (d->buf_read_pos + section_size > region_end)) {
-                            /* do nothing */
+                        else if (
+                            ((d->buf_mode == REC_LOOP) || (d->buf_mode == PLAY_LOOP))
+                            && (d->buf_read_pos + section_size > region_end)
+                        ) {
+                            /* do nothing, state will be changed later */
                         }
                         else if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
@@ -330,7 +335,17 @@ process(mfp_processor * proc)
                         break;
 
                     case BUF_DEBOUNCED:
-                        if (d->buf_read_pos + section_size > region_end) {
+                        /* idle when end of region or end of buffer is reached */
+                        if (d->buf_mode == REC_LOOPSET) {
+                            d->region_end ++;
+                        }
+                        else if (
+                            ((d->buf_mode == REC_LOOP) || (d->buf_mode == PLAY_LOOP))
+                            && (d->buf_read_pos + section_size > region_end)
+                        ) {
+                            d->trig_triggered_samples ++;
+                        }
+                        else if (d->buf_read_pos + section_size > region_end) {
                             next_state = BUF_IDLE;
                         }
                         else if((d->trig_op == TRIG_GT) && (*trigptr <= d->trig_thresh)) {
