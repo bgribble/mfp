@@ -278,9 +278,6 @@ def render_toolbar(self):
     imgui.pop_font()
     imgui.same_line()
 
-    if not self.implot_selection:
-        imgui.begin_disabled()
-
     imgui.begin_group()
     imgui.dummy((0.1, 0.125 * line_height))
     imgui.text("Sel:")
@@ -314,8 +311,6 @@ def render_toolbar(self):
             MFPGUI().async_task(
                 self.playhead_set_selection(None, new_time)
             )
-    if not self.implot_selection:
-        imgui.end_disabled()
 
     imgui.same_line()
     imgui.text("BPM:")
