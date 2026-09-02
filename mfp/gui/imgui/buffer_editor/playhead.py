@@ -27,10 +27,13 @@ async def playhead_start(self):
         play_channels=0xff,
         rec_channels=0,
         monitor_channels=rec_channels,
-        buf_pos=pos_samples,
-        region_start=pos_samples,
         region_end=self.position_to_sample(self.implot_total_time)
     )
+
+    if self.implot_playhead_start_time is None:
+        buffer_params["buf_pos"] = pos_samples
+        buffer_params["region_start"] = pos_samples
+
     await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
 
     if self.rec_enabled:
@@ -79,9 +82,9 @@ async def playhead_pause(self, new_pos=None):
         buf_state=0,
     )
 
-    await MFPGUI().mfp.send(self.working_trigger_id, 0, 0)
     await MFPGUI().mfp.send(self.working_sink_id, 0, buffer_params)
     await MFPGUI().mfp.send(self.working_source_id, 0, buffer_params)
+    await MFPGUI().mfp.send(self.working_trigger_id, 0, 0)
 
     if self.rec_recording:
         need_update = 0
@@ -159,7 +162,7 @@ async def playhead_loop_selection(self):
         region_end=end_samples
     )
 
-    if not self.implot_playhead_start_time:
+    if self.implot_playhead_start_time is None:
         self.implot_playhead_start_time = datetime.now()
         self.implot_playhead = self.implot_selection.x.min
         self.implot_playhead_start_pos = self.implot_selection.x.min
