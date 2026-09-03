@@ -144,7 +144,6 @@ async def buffer_trim_to_selection(self):
     if not self.buffer_data or not self.implot_selection:
         return
 
-    playhead_pos = int(self.position_to_sample(self.implot_playhead))
     sel_start = int(self.position_to_sample(self.implot_selection.x.min))
     sel_size = int(self.position_to_sample(self.implot_selection.x.max) - self.position_to_sample(self.implot_selection.x.min))
 
@@ -186,6 +185,75 @@ async def buffer_trim_to_selection(self):
     await self.playhead_set_selection(
         self.sample_to_position(0), self.sample_to_position(len(self.buffer_data[0]))
     )
+
+
+@extends(BufferEditor)
+async def buffer_change_tempo(self, ratio, method):
+    import resampy
+    import paulstretch
+
+    if not self.buffer_data:
+        return
+
+    if self.implot_selection is None:
+        sel_start = 0
+        sel_size = len(self.buffer_data[0])
+    else:
+        sel_start = int(self.position_to_sample(self.implot_selection.x.min))
+        sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
+
+    log.debug(f"[tempo] ratio={ratio} method={method} sel_start={sel_start} sel_size={sel_size}")
+
+    orig_data = [
+        chan[sel_start:sel_start+sel_size].copy()
+        for chan in self.buffer_data
+    ]
+
+    if method == "resample":
+        new_data = [
+            resampy.resample(chan, 48000, 48000 * ratio)
+            for chan in orig_data
+        ]
+
+    elif method == "stretch":
+        new_data = [
+            paulstretch.stretch(chan, stretch_factor=ratio).squeeze()
+            for chan in orig_data
+        ]
+
+    self.buffer_data = [
+        np.insert(np.delete(orig, np.s_[sel_start:sel_start+sel_size]), sel_start, new)
+        for orig, new in zip(self.buffer_data, new_data)
+    ]
+
+    bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
+
+    # source buffer "owns" the reshape
+    working_buf = await self.buffer_reshape(
+        self.working_source_id,
+        size=bufsize,
+        channels=len(self.buffer_data) + 2
+    )
+    self.working_buf_id = working_buf.buf_id
+    self.working_buf_obj = SharedMemory(self.working_buf_id)
+    self.working_buf_info = working_buf
+
+    # sink buffer just needs to point to the new segment and
+    # adjust internal buffers
+    if working_buf:
+        await self.buffer_reshape(
+            self.working_sink_id,
+            buf_id=working_buf.buf_id,
+            size=bufsize,
+            channels=working_buf.channels
+        )
+
+    await self.playhead_set_selection(
+        self.sample_to_position(sel_start), self.sample_to_position(sel_start + len(new_data[0]))
+    )
+
+    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
+    self.buffer_compute_peaks()
 
 
 @extends(BufferEditor)

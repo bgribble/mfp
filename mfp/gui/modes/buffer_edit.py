@@ -70,6 +70,10 @@ class BufferEditMode (InputMode):
             "buffer-edit-insert-silence", cls.insert_silence, helptext="Insert silence at playhead",
             keysym="S", menupath="BufEdit > Insert silence..."
         )
+        cls.bind(
+            "buffer-edit-adjust-bpm", cls.adjust_bpm, helptext="Adjust tempo of selection or buffer",
+            keysym="B", menupath="BufEdit > Adjust BPM..."
+        )
 
         #####################
         # Select submenu
@@ -346,6 +350,46 @@ class BufferEditMode (InputMode):
         self.editor.set_buffer_origin(self.editor.implot_playhead)
         return True
 
+    async def adjust_bpm(self, from_bpm=None, to_bpm=None):
+        params = dict(from_bpm=self.editor.buffer_bpm)
+        async def method_cb(method_value):
+            log.debug(f"adjust: method_value={method_value}")
+            if method_value:
+                params["method"] = str(method_value).lower()[0]
+                self.window.hud_write(f"Adjusting BPM {params}")
+                await self.editor.buffer_change_tempo(
+                    params["from_bpm"] / params["to_bpm"],
+                    "resample" if params["method"] == "r" else "stretch"
+                )
+            else:
+                self.window.hud_write("Canceled")
+
+        async def to_cb(to_value):
+            if to_value:
+                params["to_bpm"] = float(to_value)
+                await self.window.cmd_get_input(
+                    "Resample (r) or stretch (s): ", method_cb, "s"
+                )
+            else:
+                self.window.hud_write("Canceled")
+
+        async def from_cb(from_value):
+            if from_value:
+                params["from_bpm"] = float(from_value)
+                await self.window.cmd_get_input(
+                    "Adjust tempo to (bpm):", to_cb, str(from_value)
+                )
+            else:
+                self.window.hud_write("Canceled")
+
+        if from_bpm is None:
+            await self.window.cmd_get_input(
+                "Adjust tempo from (bpm):", from_cb, str(self.editor.buffer_bpm)
+            )
+        else:
+            await from_cb(from_bpm)
+        return True
+
     async def insert_silence(self, duration=None):
         async def cb(dur):
             if dur:
@@ -361,6 +405,7 @@ class BufferEditMode (InputMode):
             )
         else:
             await cb(duration)
+        return True
 
     async def select_silence(self, threshold=None):
         async def cb(thresh):
@@ -375,6 +420,7 @@ class BufferEditMode (InputMode):
             )
         else:
             await cb(threshold)
+        return True
 
     async def select_all(self):
         await self.editor.playhead_set_selection(
